@@ -117,6 +117,18 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
     }
 
+    Void test_substitute() {
+
+        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        RealExpression expr = -u1*x*y+2*(x+u2);
+
+        List<Assignment<RealVariable,RealExpression>> subs={{u1,u1+1},{u2,u1*x}};
+
+        RealExpression substitution = substitute(expr,subs);
+
+        ARIADNE_TEST_ASSERT(identical(substitution,-(u1+1)*x*y+2*(x+u1*x)));
+    }
+
     Void test_scalar_properties()
     {
         RealVariable x("x"), y("y");
@@ -208,6 +220,7 @@ class TestExpression {
         test_assignment();
         test_parameters();
         test_simplify();
+        test_substitute();
         test_scalar_properties();
         test_vector_properties();
         test_function();

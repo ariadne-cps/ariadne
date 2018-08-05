@@ -57,7 +57,7 @@ FloatDPError get_r(InputApproximationKind approx_kind) {
     case InputApproximationKind::PIECEWISE:
         return FloatDPError(1.3645_upper);
     default:
-        ARIADNE_FAIL_MSG("A value of 'r' exists only for the AFFINE, SINUSOIDAL and PIECEWISE approximations\n");
+        ARIADNE_FAIL_MSG("A value of 'r' does not exist for kind " << approx_kind << "\n");
     }
 }
 
@@ -740,11 +740,11 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
         picardPhi[i].add_error(e);
     }
 
-    /*
-    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
+
+/*    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
     auto fgws = construct_f_plus_gw_squared(f,g,w);
-    auto BVh =_approximation->build_flow_domain(cast_exact_box(B), h, V);
+    auto BVh =_approximation->build_flow_domain(cast_exact_box(B), V, h);
 
     auto squaredSeriesPhi = integrator.flow_step(fgws,DVh,h,BVh);
 
@@ -762,8 +762,8 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     } else {
         ARIADNE_LOG(2,"Series flow function chosen\n");
         return seriesPhi;
-    }
-    */
+    }*/
+
     return picardPhi;
 }
 

@@ -48,10 +48,22 @@ struct ScheduledApproximationComparator
     }
 };
 
+FloatDPError get_r(InputApproximationKind approx_kind) {
+    switch (approx_kind) {
+    case InputApproximationKind::AFFINE:
+        return FloatDPError(5.0/3u);
+    case InputApproximationKind::SINUSOIDAL:
+        return FloatDPError(5.0/4u);
+    case InputApproximationKind::PIECEWISE:
+        return FloatDPError(1.3645_upper);
+    default:
+        ARIADNE_FAIL_MSG("A value of 'r' exists only for the AFFINE, SINUSOIDAL and PIECEWISE approximations\n");
+    }
+}
+
 Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<ExactIntervalType>& bx) {
     return apply(f,Box<UpperIntervalType>(bx));
 }
-
 
 FloatDP volume(Vector<ApproximateIntervalType> const& box) {
     FloatDP result = 1.0;
@@ -92,8 +104,16 @@ ValidatedVectorFunction construct_function_affine_in_input(ValidatedVectorFuncti
                                                            Vector<ValidatedVectorFunction> const &g,
                                                            Vector<ValidatedScalarFunction> const &u);
 
+Norms::Norms(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda)
+ : K(K), Kp(Kp), L(L), Lp(Lp), H(H), Hp(Hp), expLambda(expLambda) { }
 
 Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError>
+Norms::values() const {
+    return std::tie(this->K,this->Kp,this->L,this->Lp,this->H,this->Hp,this->expLambda);
+}
+
+
+Norms
 compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
     DoublePrecision pr;
@@ -149,127 +169,89 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
 
     FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
 
-    return std::tie(K,Kp,L,Lp,H,Hp,expLambda);
+    return Norms(K,Kp,L,Lp,H,Hp,expLambda);
 }
 
 
-ErrorType InclusionErrorProcessor::get_for(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+ErrorType ApproximationErrorProcessor::get_for(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
 
-    FloatDPError K, Kp, L, Lp, H, Hp, expLambda;
-
-    std::tie(K,Kp,L,Lp,H,Hp,expLambda) = compute_norms(_f,_g,_V,h,B);
+    Norms norms = compute_norms(_f,_g,_V,h,B);
 
     if (inputs_are_additive(_g,B))
-        Kp=mag(norm(_V));
+        norms.Kp=mag(norm(_V));
 
-    return compute_error(K,Kp,L,Lp,H,Hp,expLambda,h);
+    return compute_error(norms,h);
 }
 
 
-ErrorType ZeroErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = Kp*expLambda*h;
-    FloatDPError result2 = (K*2u+Kp)*h;
+ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
+    return (n.Kp*(n.H*(n.K+r*n.Kp)+n.L*n.L)*n.expLambda + (n.K+n.Kp)*n.H*n.Kp/2u)/cast_positive(1u-h*n.L/2u)*(r+1u)*pow(h,3u)/4u;
+}
+
+ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
+    return ((r+1u)*n.Kp*((n.Hp*2u*r+n.H)*(n.K+r*n.Kp)+n.L*n.L+(n.L*3u*r+n.Lp*r*r*2u)*n.Lp)*n.expLambda + (r+1u)/6u*(n.K+n.Kp)*((r+1u)*((n.H*n.Kp+n.L*n.Lp)*3u +(n.Hp*n.K+n.L*n.Lp)*4u) + (n.Hp*n.Kp+n.Lp*n.Lp)*8u*(r*r+1u)))/cast_positive(1u-h*n.L/2u-h*n.Lp*r)*pow(h,3u)/4u;
+}
+
+ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
+    return ((r*r+1u)*n.Lp*n.Kp + (r+1u)*h*n.Kp*((n.Hp*2u*r + n.H)*(n.K+r*n.Kp)+n.L*n.L+(n.L*3u*r+n.Lp*r*r*2u)*n.Lp)*n.expLambda + (r+1u)/6u*h*(n.K+n.Kp)*((n.H*n.Kp+n.L*n.Lp)*3u+(n.Hp*n.K+n.L*n.Lp)*4u))/cast_positive(1u-h*n.L/2u-h*n.Lp*r)*pow(h,2u)/4u;
+}
+
+ErrorType ZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    FloatDPError result1 = n.Kp*n.expLambda*h;
+    FloatDPError result2 = (n.K*2u+n.Kp)*h;
     return min(result1,result2);
 }
 
-
-ErrorType AdditiveZeroErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = Kp*expLambda*h;
-    FloatDPError result2 = (K*2u+Kp)*h;
+ErrorType AdditiveZeroErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    FloatDPError result1 = n.Kp*n.expLambda*h;
+    FloatDPError result2 = (n.K*2u+n.Kp)*h;
     return min(result1,result2);
 }
 
-
-ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result = (pow(h,2u)*(Kp*Lp*expLambda*2u + Lp*(K+Kp)/3u + Kp*L/2u)+ pow(h,3u)*Kp*(L*Lp + L*L + H*(K+Kp))/2u*expLambda)/cast_positive(1u-(h*L/2u));
+ErrorType AdditiveConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    FloatDPError result = pow(h,2u)*(n.Kp*n.L*n.expLambda);
     return result;
 }
 
-
-ErrorType AdditiveConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-    FloatDPError result = pow(h,2u)*(Kp*L*expLambda);
+ErrorType ConstantErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    FloatDPError result = (pow(h,2u)*(n.Kp*n.Lp*n.expLambda*2u + n.Lp*(n.K+n.Kp)/3u + n.Kp*n.L/2u)+ pow(h,3u)*n.Kp*(n.L*n.Lp + n.L*n.L + n.H*(n.K+n.Kp))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
     return result;
 }
 
-
-ErrorType PiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/4u);
-    FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
-
-    return result;
+ErrorType AdditiveAffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_additive_error(n,h,get_r(_kind));
 }
 
-
-ErrorType SingleInputPiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/4u);
-    FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
-
-    return result;
+ErrorType SingleInputAffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_singleinput_error(n,h,get_r(_kind));
 }
 
-
-ErrorType AdditivePiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/4u);
-    FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
-
-    return result;
+ErrorType AffineErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_generic_error(n,h,get_r(_kind));
 }
 
-
-ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/3u);
-    FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
-
-    return result;
+ErrorType AdditiveSinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_additive_error(n,h,get_r(_kind));
 }
 
-
-ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/3u);
-    FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
-
-    return result;
+ErrorType SingleInputSinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_singleinput_error(n,h,get_r(_kind));
 }
 
-
-ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(5.0/3u);
-    FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
-
-    return result;
+ErrorType SinusoidalErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_generic_error(n,h,get_r(_kind));
 }
 
-
-ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(1.3645_upper);
-    FloatDPError result = ((r*r+1u)*Lp*Kp + (r+1u)*h*Kp*((Hp*2u*r + H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*h*(K+Kp)*((H*Kp+L*Lp)*3u+(Hp*K+L*Lp)*4u))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,2u)/4u;
-
-    return result;
+ErrorType AdditivePiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_additive_error(n,h,get_r(_kind));
 }
 
-
-ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(1.3645_upper);
-    FloatDPError result = ((r+1u)*Kp*((Hp*2u*r+H)*(K+r*Kp)+L*L+(L*3u*r+Lp*r*r*2u)*Lp)*expLambda + (r+1u)/6u*(K+Kp)*((r+1u)*((H*Kp+L*Lp)*3u +(Hp*K+L*Lp)*4u) + (Hp*Kp+Lp*Lp)*8u*(r*r+1u)))/cast_positive(1u-h*L/2u-h*Lp*r)*pow(h,3u)/4u;
-
-    return result;
+ErrorType SingleInputPiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_singleinput_error(n,h,get_r(_kind));
 }
 
-
-ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
-
-    FloatDPError r(1.3645_upper);
-    FloatDPError result = (Kp*(H*(K+r*Kp)+L*L)*expLambda + (K+Kp)*H*Kp/2u)/cast_positive(1u-h*L/2u)*(r+1u)*pow(h,3u)/4u;
-
-    return result;
+ErrorType PiecewiseErrorProcessor::compute_error(Norms const& n, PositiveFloatDPValue const& h) const {
+    return twoparam_generic_error(n,h,get_r(_kind));
 }
 
 

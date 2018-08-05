@@ -153,23 +153,18 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
 }
 
 
-InclusionErrorProcessor::InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : _f(f), _g(g), _V(V), _h(h), _B(B) { }
-
-ErrorType InclusionErrorProcessor::process() const {
+ErrorType InclusionErrorProcessor::get_for(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
 
     FloatDPError K, Kp, L, Lp, H, Hp, expLambda;
 
-    std::tie(K,Kp,L,Lp,H,Hp,expLambda) = compute_norms(_f,_g,_V,_h,_B);
+    std::tie(K,Kp,L,Lp,H,Hp,expLambda) = compute_norms(_f,_g,_V,h,B);
 
-    if (inputs_are_additive(_g,_B))
+    if (inputs_are_additive(_g,B))
         Kp=mag(norm(_V));
 
-    return compute_error(K,Kp,L,Lp,H,Hp,expLambda,_h);
+    return compute_error(K,Kp,L,Lp,H,Hp,expLambda,h);
 }
 
-ZeroErrorProcessor::ZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 ErrorType ZeroErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
     FloatDPError result1 = Kp*expLambda*h;
@@ -177,8 +172,6 @@ ErrorType ZeroErrorProcessor::compute_error(FloatDPError const& K,FloatDPError c
     return min(result1,result2);
 }
 
-AdditiveZeroErrorProcessor::AdditiveZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-: InclusionErrorProcessor(f,g,V,h,B) {}
 
 ErrorType AdditiveZeroErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
     FloatDPError result1 = Kp*expLambda*h;
@@ -186,26 +179,17 @@ ErrorType AdditiveZeroErrorProcessor::compute_error(FloatDPError const& K,FloatD
     return min(result1,result2);
 }
 
-ConstantErrorProcessor::ConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 ErrorType ConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
     FloatDPError result = (pow(h,2u)*(Kp*Lp*expLambda*2u + Lp*(K+Kp)/3u + Kp*L/2u)+ pow(h,3u)*Kp*(L*Lp + L*L + H*(K+Kp))/2u*expLambda)/cast_positive(1u-(h*L/2u));
     return result;
 }
 
-AdditiveConstantErrorProcessor::AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : InclusionErrorProcessor(f,g,V,h,B) {}
-
 
 ErrorType AdditiveConstantErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
     FloatDPError result = pow(h,2u)*(Kp*L*expLambda);
     return result;
 }
-
-
-PiecewiseErrorProcessor::PiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 
 ErrorType PiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
@@ -215,9 +199,6 @@ ErrorType PiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPEr
 
     return result;
 }
-
-SingleInputPiecewiseErrorProcessor::SingleInputPiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 
 ErrorType SingleInputPiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
@@ -229,10 +210,6 @@ ErrorType SingleInputPiecewiseErrorProcessor::compute_error(FloatDPError const& 
 }
 
 
-AdditivePiecewiseErrorProcessor::AdditivePiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
-
-
 ErrorType AdditivePiecewiseErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     FloatDPError r(5.0/4u);
@@ -242,10 +219,6 @@ ErrorType AdditivePiecewiseErrorProcessor::compute_error(FloatDPError const& K,F
 }
 
 
-AffineErrorProcessor::AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : InclusionErrorProcessor(f,g,V,h,B) {}
-
-
 ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     FloatDPError r(5.0/3u);
@@ -253,9 +226,6 @@ ErrorType AffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError
 
     return result;
 }
-
-SingleInputAffineErrorProcessor::SingleInputAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-    : InclusionErrorProcessor(f,g,V,h,B) {}
 
 
 ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
@@ -267,10 +237,6 @@ ErrorType SingleInputAffineErrorProcessor::compute_error(FloatDPError const& K,F
 }
 
 
-AdditiveAffineErrorProcessor::AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
-
-
 ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
     FloatDPError r(5.0/3u);
@@ -278,10 +244,6 @@ ErrorType AdditiveAffineErrorProcessor::compute_error(FloatDPError const& K,Floa
 
     return result;
 }
-
-
-SinusoidalErrorProcessor::SinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 
 ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
@@ -292,9 +254,6 @@ ErrorType SinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPE
     return result;
 }
 
-SingleInputSinusoidalErrorProcessor::SingleInputSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
-
 
 ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
 
@@ -303,10 +262,6 @@ ErrorType SingleInputSinusoidalErrorProcessor::compute_error(FloatDPError const&
 
     return result;
 }
-
-
-AdditiveSinusoidalErrorProcessor::AdditiveSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B)
-        : InclusionErrorProcessor(f,g,V,h,B) {}
 
 
 ErrorType AdditiveSinusoidalErrorProcessor::compute_error(FloatDPError const& K,FloatDPError const& Kp,FloatDPError const& L,FloatDPError const& Lp,FloatDPError const& H,FloatDPError const& Hp,FloatDPError const& expLambda,PositiveFloatDPValue const& h) const {
@@ -830,48 +785,13 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     return picardPhi;
 }
 
-
-ErrorType ZeroInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
+ErrorType InputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(_g, B))
-        return AdditiveZeroErrorProcessor(_f,_g,_V,h,B).process();
-    else
-        return ZeroErrorProcessor(_f,_g,_V,h,B).process();
-}
-
-
-ErrorType ConstantInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g, B))
-        return AdditiveConstantErrorProcessor(_f,_g,_V,h,B).process();
-    else
-        return ConstantErrorProcessor(_f,_g,_V,h,B).process();
-}
-
-ErrorType PiecewiseInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g, B))
-        return AdditivePiecewiseErrorProcessor(_f,_g,_V,h,B).process();
+        return _additive_processor->get_for(h,B);
     else if (_g.size() == 1)
-        return SingleInputPiecewiseErrorProcessor(_f,_g,_V,h,B).process();
+        return _single_input_processor->get_for(h,B);
     else
-        return PiecewiseErrorProcessor(_f,_g,_V,h,B).process();
-}
-
-ErrorType AffineInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g, B))
-        return AdditiveAffineErrorProcessor(_f,_g,_V,h,B).process();
-    else if (_g.size() == 1)
-        return SingleInputAffineErrorProcessor(_f,_g,_V,h,B).process();
-    else
-        return AffineErrorProcessor(_f,_g,_V,h,B).process();
-}
-
-
-ErrorType SinusoidalInputApproximation::compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g, B))
-        return AdditiveSinusoidalErrorProcessor(_f,_g,_V,h,B).process();
-    else if (_g.size() == 1)
-        return SingleInputSinusoidalErrorProcessor(_f,_g,_V,h,B).process();
-    else
-        return SinusoidalErrorProcessor(_f,_g,_V,h,B).process();
+        return _generic_processor->get_for(h,B);
 }
 
 

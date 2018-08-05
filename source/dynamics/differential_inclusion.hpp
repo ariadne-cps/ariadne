@@ -111,105 +111,103 @@ Tuple<FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPError,FloatDPEr
 
 class InclusionErrorProcessor {
   public:
-    InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
-    ErrorType process() const;
+    InclusionErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : _f(f), _g(g), _V(V) { }
+    ErrorType get_for(PositiveFloatDPValue const& h, UpperBoxType const& B) const;
   protected:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const = 0;
   private:
     ValidatedVectorFunction const& _f;
     Vector<ValidatedVectorFunction> const& _g;
     BoxDomainType const& _V;
-    PositiveFloatDPValue const& _h;
-    UpperBoxType const& _B;
 };
 
 class ZeroErrorProcessor : public InclusionErrorProcessor {
 public:
-    ZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    ZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class AdditiveZeroErrorProcessor : public InclusionErrorProcessor {
 public:
-    AdditiveZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    AdditiveZeroErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class ConstantErrorProcessor : public InclusionErrorProcessor {
 public:
-    ConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    ConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class AdditiveConstantErrorProcessor : public InclusionErrorProcessor {
 public:
-    AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
-public:
-    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
-};
-
-class PiecewiseErrorProcessor : public InclusionErrorProcessor {
-public:
-    PiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
-public:
-    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
-};
-
-class AdditivePiecewiseErrorProcessor : public InclusionErrorProcessor {
-public:
-    AdditivePiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
-public:
-    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
-};
-
-class SingleInputPiecewiseErrorProcessor : public InclusionErrorProcessor {
-public:
-    SingleInputPiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class AffineErrorProcessor : public InclusionErrorProcessor {
 public:
-    AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class AdditiveAffineErrorProcessor : public InclusionErrorProcessor {
   public:
-    AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    AdditiveAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
   public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class SingleInputAffineErrorProcessor : public InclusionErrorProcessor {
 public:
-    SingleInputAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    SingleInputAffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class SinusoidalErrorProcessor : public InclusionErrorProcessor {
 public:
-    SinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    SinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class AdditiveSinusoidalErrorProcessor : public InclusionErrorProcessor {
 public:
-    AdditiveSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    AdditiveSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
 
 class SingleInputSinusoidalErrorProcessor : public InclusionErrorProcessor {
 public:
-    SingleInputSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B);
+    SingleInputSinusoidalErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+};
+
+class PiecewiseErrorProcessor : public InclusionErrorProcessor {
+public:
+    PiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+};
+
+class AdditivePiecewiseErrorProcessor : public InclusionErrorProcessor {
+public:
+    AdditivePiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
+public:
+    virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
+};
+
+class SingleInputPiecewiseErrorProcessor : public InclusionErrorProcessor {
+public:
+    SingleInputPiecewiseErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : InclusionErrorProcessor(f,g,V) { }
 public:
     virtual ErrorType compute_error(FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,FloatDPError const&,PositiveFloatDPValue const&) const override;
 };
@@ -244,6 +242,9 @@ class InputApproximation {
     Vector<ValidatedVectorFunction> const& _g;
     BoxDomainType const& _V;
     SweeperDP _sweeper;
+    SharedPointer<InclusionErrorProcessor> _additive_processor;
+    SharedPointer<InclusionErrorProcessor> _single_input_processor;
+    SharedPointer<InclusionErrorProcessor> _generic_processor;
     InputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V,
                        SweeperDP sweeper, InputApproximationKind kind, Nat num_params_per_input) :
         _f(f), _g(g), _V(V), _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
@@ -252,7 +253,7 @@ class InputApproximation {
     Nat _num_params_per_input;
   public:
     InputApproximationKind getKind() const { return _kind; }
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
+    ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const;
     BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
@@ -260,45 +261,60 @@ class InputApproximation {
 class ZeroInputApproximation : public InputApproximation {
 public:
     ZeroInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::ZERO,0u) {  }
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::ZERO,0u) {
+        _additive_processor.reset(new AdditiveZeroErrorProcessor(_f,_g,_V));
+        _single_input_processor.reset(new ZeroErrorProcessor(_f,_g,_V));
+        _generic_processor.reset(new ZeroErrorProcessor(_f,_g,_V));
+    }
 protected:
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class ConstantInputApproximation : public InputApproximation {
 public:
     ConstantInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {  }
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {
+        _additive_processor.reset(new AdditiveConstantErrorProcessor(_f,_g,_V));
+        _single_input_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
+        _generic_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
+    }
 protected:
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class AffineInputApproximation : public InputApproximation {
 public:
     AffineInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::AFFINE,2u) {  }
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::AFFINE,2u) {
+        _additive_processor.reset(new AdditiveAffineErrorProcessor(_f,_g,_V));
+        _single_input_processor.reset(new SingleInputAffineErrorProcessor(_f,_g,_V));
+        _generic_processor.reset(new AffineErrorProcessor(_f,_g,_V));
+    }
 protected:
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class SinusoidalInputApproximation : public InputApproximation {
 public:
     SinusoidalInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::SINUSOIDAL,2u) {  }
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::SINUSOIDAL,2u) {
+        _additive_processor.reset(new AdditiveSinusoidalErrorProcessor(_f,_g,_V));
+        _single_input_processor.reset(new SingleInputSinusoidalErrorProcessor(_f,_g,_V));
+        _generic_processor.reset(new SinusoidalErrorProcessor(_f,_g,_V));
+    }
 protected:
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
 class PiecewiseInputApproximation : public InputApproximation {
 public:
     PiecewiseInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::PIECEWISE,2u) {  }
+            : InputApproximation(f,g,V,sweeper,InputApproximationKind::PIECEWISE,2u) {
+        _additive_processor.reset(new AdditivePiecewiseErrorProcessor(_f,_g,_V));
+        _single_input_processor.reset(new SingleInputPiecewiseErrorProcessor(_f,_g,_V));
+        _generic_processor.reset(new PiecewiseErrorProcessor(_f,_g,_V));
+    }
 public:
-    virtual ErrorType compute_error(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
     Vector<ValidatedScalarFunction> build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
     Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;

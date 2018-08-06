@@ -223,34 +223,24 @@ ErrorType noparam_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeTyp
     return (n.Kj[j]*2u+n.pKj[j])*h;
 }
 
-ErrorType oneparam_additive_error(Norms const& n, PositiveFloatDPValue const& h) {
-    return pow(h,2u)*(n.pK*n.L*n.expLambda);
+ErrorType oneparam_error(Norms const& n, PositiveFloatDPValue const& h) {
+    return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda);
 }
 
-ErrorType oneparam_generic_error(Norms const& n, PositiveFloatDPValue const& h) {
-    return (pow(h,2u)*(n.pK*n.pL*n.expLambda*2u + n.pL*(n.K+n.pK)/3u + n.pK*n.L/2u)+ pow(h,3u)*n.pK*(n.L*n.pL + n.L*n.L + n.H*(n.K+n.pK))/2u*n.expLambda)/cast_positive(1u-(h*n.L/2u));
-}
-
-ErrorType oneparam_generic_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    ErrorType first_term = n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u;
-    ErrorType second_term = (n.Lj[j]+n.pLj[j])*2u*n.pK;
-    //auto third_term = cast_positive(n.L*n.expL*h+1u-n.expL);
-    auto third_term = cast_positive(1u-n.expL/*+n.L*n.expL*h*/);
-    auto fourth_term = cast_positive(pow(n.L,2u));
-    //ErrorType fifth_term = second_term/fourth_term;
-    return first_term;
+ErrorType oneparam_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u)));
 }
 
 ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return (n.pK*(n.H*(n.K+r*n.pK)+n.L*n.L)*n.expLambda + (n.K+n.pK)*n.H*n.pK/2u)/cast_positive(1u-h*n.L/2u)*(r+1u)*pow(h,3u)/4u;
+    return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u;
 }
 
 ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*(n.K+n.pK)*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))/cast_positive(1u-h*n.L/2u-h*n.pL*r)*pow(h,3u)/4u;
+    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r);
 }
 
 ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
+    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
 }
 
 Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
@@ -272,17 +262,13 @@ Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFlo
     }
 }
 
-Vector<ErrorType> AdditiveConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),oneparam_additive_error(n,h));
-}
-
 Vector<ErrorType> ConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = oneparam_generic_error(n,h);
+    FloatDPError result1 = oneparam_error(n,h);
 
     if (_enable_componentwise_error) {
         Vector<FloatDPError> result(n.dimension(),result1);
         for (auto j: range(n.dimension())) {
-            result[j] = min(result[j],oneparam_generic_error_j(n,h,j));
+            result[j] = min(result[j],oneparam_error_j(n,h,j));
         }
         return result;
     } else {

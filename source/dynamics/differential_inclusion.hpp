@@ -178,12 +178,6 @@ public:
     virtual Vector<ErrorType> compute_errors(Norms const&, PositiveFloatDPValue const&) const override;
 };
 
-class AdditiveConstantErrorProcessor : public ApproximationErrorProcessor {
-public:
-    AdditiveConstantErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : ApproximationErrorProcessor(f,g,V,InputApproximationKind::CONSTANT) { }
-    virtual Vector<ErrorType> compute_errors(Norms const&, PositiveFloatDPValue const&) const override;
-};
-
 class AffineErrorProcessor : public ApproximationErrorProcessor {
 public:
     AffineErrorProcessor(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V) : ApproximationErrorProcessor(f,g,V,InputApproximationKind::AFFINE) { }
@@ -276,7 +270,7 @@ class ConstantInputApproximation : public InputApproximation {
 public:
     ConstantInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
             : InputApproximation(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {
-        _additive_processor.reset(new AdditiveConstantErrorProcessor(_f,_g,_V));
+        _additive_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
     }

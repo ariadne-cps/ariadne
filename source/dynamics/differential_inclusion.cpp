@@ -65,6 +65,21 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
+Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<InputApproximationKind,SizeType>& approximation_global_frequencies) {
+
+    SizeType total_steps(0);
+    for (auto entry: approximation_global_frequencies) {
+        total_steps += entry.second;
+    }
+
+    Map<InputApproximationKind,FloatDP> result;
+    for (auto entry: approximation_global_frequencies) {
+        result[entry.first] = 1.0/total_steps*entry.second;
+    }
+
+    return result;
+}
+
 FloatDP volume(Vector<ApproximateIntervalType> const& box) {
     FloatDP result = 1.0;
     for (auto i: range(box.size())) {
@@ -219,7 +234,7 @@ ErrorType noparam_error_option3(Norms const& n, PositiveFloatDPValue const& h) {
     return n.pK*n.expL*h;
 }
 
-ErrorType noparam_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType noparam_component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return (n.Kj[j]*2u+n.pKj[j])*h;
 }
 
@@ -227,8 +242,12 @@ ErrorType oneparam_error(Norms const& n, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda);
 }
 
-ErrorType oneparam_error_j(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType oneparam_component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u)));
+}
+
+ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
+    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
 }
 
 ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
@@ -239,41 +258,39 @@ ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const&
     return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r);
 }
 
-ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
-}
+
 
 Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     FloatDPError result1 = noparam_error_option1(n,h);
     FloatDPError result2 = noparam_error_option2(n,h);
 
+    Vector<FloatDPError> result(n.dimension(),min(result1,result2));
+
     if (_enable_componentwise_error) {
         FloatDPError result3 = noparam_error_option3(n,h);
-
-        Vector<FloatDPError> result(n.dimension(),result1);
         for (auto j: range(n.dimension())) {
-            result[j] = min(result[j],result2);
             result[j] = min(result[j],result3);
-            result[j] = min(result[j],noparam_error_j(n,h,j));
+            result[j] = min(result[j],noparam_component_error(n,h,j));
         }
-        return result;
-    } else {
-        return Vector<FloatDPError>(n.dimension(),min(result1,result2));
     }
+    return result;
 }
 
 Vector<ErrorType> ConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     FloatDPError result1 = oneparam_error(n,h);
 
+    Vector<FloatDPError> result(n.dimension(),result1);
+
     if (_enable_componentwise_error) {
-        Vector<FloatDPError> result(n.dimension(),result1);
         for (auto j: range(n.dimension())) {
-            result[j] = min(result[j],oneparam_error_j(n,h,j));
+            result[j] = min(result[j],oneparam_component_error(n,h,j));
         }
-        return result;
-    } else {
-        return Vector<FloatDPError>(n.dimension(),result1);
     }
+    return result;
+}
+
+Vector<ErrorType> AffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
 Vector<ErrorType> AdditiveAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
@@ -284,7 +301,7 @@ Vector<ErrorType> SingleInputAffineErrorProcessor::compute_errors(Norms const& n
     return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
 }
 
-Vector<ErrorType> AffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+Vector<ErrorType> SinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
@@ -296,7 +313,7 @@ Vector<ErrorType> SingleInputSinusoidalErrorProcessor::compute_errors(Norms cons
     return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
 }
 
-Vector<ErrorType> SinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
+Vector<ErrorType> PiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
@@ -306,10 +323,6 @@ Vector<ErrorType> AdditivePiecewiseErrorProcessor::compute_errors(Norms const& n
 
 Vector<ErrorType> SingleInputPiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> PiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
 }
 
 
@@ -542,7 +555,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             if (best->getKind() == appro->getKind())
                 delays[appro] = 0;
             else
-                delays[appro]++;
+                delays[appro] = delays[appro]++;
 
             Nat offset = 1<<delays[appro];
             schedule.push_back(ScheduledApproximation(step+offset,appro));
@@ -599,7 +612,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
     }
 
-    ARIADNE_LOG(1,"frequencies="<<approximation_global_frequencies<<"\n");
+    ARIADNE_LOG(1,"approximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
 
     return result;
 }

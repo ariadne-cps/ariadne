@@ -89,28 +89,28 @@ class TestInclusionIntegrator {
 
         for (auto approx: range(0,5)) {
 
-            List<SharedPointer<InputApproximation>> approximations;
+            List<SharedPointer<InputApproximator>> approximations;
 
             SizeType ppi = 0;
             switch (approx) {
                 case 0:
-                    approximations.append(SharedPointer<InputApproximation>(new ZeroInputApproximation(f,g,V,sweeper)));
+                    approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
                     ppi = 0;
                     break;
                 case 1:
-                    approximations.append(SharedPointer<InputApproximation>(new ConstantInputApproximation(f,g,V,sweeper)));
+                    approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f,g,V,sweeper)));
                     ppi = 1;
                     break;
                 case 2:
-                    approximations.append(SharedPointer<InputApproximation>(new AffineInputApproximation(f,g,V,sweeper)));
+                    approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 case 3:
-                    approximations.append(SharedPointer<InputApproximation>(new SinusoidalInputApproximation(f,g,V,sweeper)));
+                    approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 case 4:
-                    approximations.append(SharedPointer<InputApproximation>(new PiecewiseInputApproximation(f,g,V,sweeper)));
+                    approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
                     ppi = 2;
                     break;
                 default:
@@ -208,12 +208,12 @@ class TestInclusionIntegrator {
         FloatDPUpperBound noise_ratio(1.0);
         BoxDomainType V=cast_exact_box(UpperIntervalType(-noise_ratio,+noise_ratio)*noise_levels);
 
-        List<SharedPointer<InputApproximation>> approximations;
-        approximations.append(SharedPointer<InputApproximation>(new PiecewiseInputApproximation(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximation>(new SinusoidalInputApproximation(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximation>(new AffineInputApproximation(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximation>(new ConstantInputApproximation(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximation>(new ZeroInputApproximation(f,g,V,sweeper)));
+        List<SharedPointer<InputApproximator>> approximations;
+        approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 0;

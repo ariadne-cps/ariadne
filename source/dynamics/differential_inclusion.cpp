@@ -32,9 +32,9 @@ namespace Ariadne {
 struct ScheduledApproximation
 {
     SizeType step;
-    SharedPointer<InputApproximation> approximation;
+    SharedPointer<InputApproximator> approximation;
 
-    ScheduledApproximation(SizeType step, SharedPointer<InputApproximation> approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximation(SizeType step, SharedPointer<InputApproximator> approximation) : step(step), approximation(approximation) {}
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
@@ -345,7 +345,7 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximator>> approximations, SweeperDP sweeper, StepSize step_size)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
@@ -360,7 +360,6 @@ static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
-    // Ensure all arguments have the correct size;
     auto n=X0.size();
     auto m=V.size();
     auto freq=this->_number_of_steps_between_simplifications;
@@ -389,7 +388,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     auto step = 0;
 
     List<ScheduledApproximation> schedule;
-    Map<SharedPointer<InputApproximation>,Nat> delays;
+    Map<SharedPointer<InputApproximator>,Nat> delays;
     for (auto appro: _approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
         delays[appro] = 0;
@@ -398,7 +397,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     while (possibly(t<FloatDPBounds(tmax,pr))) {
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<SharedPointer<InputApproximation>> approximations_to_use;
+        List<SharedPointer<InputApproximator>> approximations_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -434,7 +433,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InputApproximation> best;
+        SharedPointer<InputApproximator> best;
         FloatDP best_volume(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
@@ -460,7 +459,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
                 current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {
-                PiecewiseInputApproximation& approx = dynamic_cast<PiecewiseInputApproximation&>(*this->_approximation);
+                PiecewiseInputApproximator& approx = dynamic_cast<PiecewiseInputApproximator&>(*this->_approximation);
 
                 auto n=D.size();
                 auto m=V.size();
@@ -477,7 +476,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
                 auto fgw1 = construct_function_affine_in_input(f, g, w1);
 
-                ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
+                ARIADNE_LOG(6,"fgw:" << fgw1 << "\n");
 
                 auto x0f1=ValidatedVectorTaylorFunctionModelDP::projection(FD1,state_variables,swp);
                 auto af1=ValidatedVectorTaylorFunctionModelDP::projection(FD1,range(n,fgw1.argument_size()),swp);
@@ -507,7 +506,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
                 auto fgw2 = construct_function_affine_in_input(f, g, w2);
 
-                ARIADNE_LOG(2,"fgw:" << fgw1 << "\n");
+                ARIADNE_LOG(6,"fgw:" << fgw1 << "\n");
 
                 auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(FD2,state_variables,swp);
                 auto af2=ValidatedVectorTaylorFunctionModelDP::projection(FD2,range(n,fgw2.argument_size()),swp);
@@ -794,7 +793,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
 
     auto fgw = construct_function_affine_in_input(f, g, w);
 
-    ARIADNE_LOG(2,"fgw:" << fgw << "\n");
+    ARIADNE_LOG(6,"fgw:" << fgw << "\n");
 
     auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(DVh,state_variables,swp);
     auto af=ValidatedVectorTaylorFunctionModelDP::projection(DVh,range(n,fgw.argument_size()),swp);
@@ -839,7 +838,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     return picardPhi;
 }
 
-Vector<ErrorType> InputApproximation::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
+Vector<ErrorType> InputApproximator::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(_g))
         return _additive_processor->process(h,B);
     else if (_g.size() == 1)
@@ -849,7 +848,7 @@ Vector<ErrorType> InputApproximation::compute_errors(PositiveFloatDPValue h, Upp
 }
 
 
-BoxDomainType InputApproximation::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
+BoxDomainType InputApproximator::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto result = D;
 
     for (Nat i : range(this->_num_params_per_input))
@@ -858,7 +857,7 @@ BoxDomainType InputApproximation::build_flow_domain(BoxDomainType D, BoxDomainTy
     return product(result,IntervalDomainType(-h,+h));
 }
 
-Vector<ValidatedScalarFunction> ZeroInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ZeroInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -868,7 +867,7 @@ Vector<ValidatedScalarFunction> ZeroInputApproximation::build_w_functions(BoxDom
 }
 
 
-Vector<ValidatedScalarFunction> ConstantInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> ConstantInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     for (auto i : range(0,m))
@@ -878,7 +877,7 @@ Vector<ValidatedScalarFunction> ConstantInputApproximation::build_w_functions(Bo
 }
 
 
-Vector<ValidatedScalarFunction> AffineInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> AffineInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
@@ -899,7 +898,7 @@ Vector<ValidatedScalarFunction> AffineInputApproximation::build_w_functions(BoxD
 }
 
 
-Vector<ValidatedScalarFunction> SinusoidalInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> SinusoidalInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     auto result = Vector<ValidatedScalarFunction>(m);
 
@@ -923,13 +922,13 @@ Vector<ValidatedScalarFunction> SinusoidalInputApproximation::build_w_functions(
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
 
     return build_firsthalf_approximating_function(DVh,n,m);
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximator::build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
@@ -946,7 +945,7 @@ Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_firsthalf_app
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseInputApproximation::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
+Vector<ValidatedScalarFunction> PiecewiseInputApproximator::build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
 
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);

@@ -64,23 +64,12 @@ enum class InputApproximationKind { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWIS
 
 std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind) {
     switch (kind) {
-        case InputApproximationKind::ZERO:
-            os << "ZERO";
-            break;
-        case InputApproximationKind::CONSTANT:
-            os << "CONSTANT";
-            break;
-        case InputApproximationKind::AFFINE:
-            os << "AFFINE";
-            break;
-        case InputApproximationKind::SINUSOIDAL:
-            os << "SINUSOIDAL";
-            break;
-        case InputApproximationKind::PIECEWISE:
-            os << "PIECEWISE";
-            break;
+        case InputApproximationKind::ZERO: os << "ZERO"; break;
+        case InputApproximationKind::CONSTANT: os << "CONSTANT"; break;
+        case InputApproximationKind::AFFINE: os << "AFFINE"; break;
+        case InputApproximationKind::SINUSOIDAL: os << "SINUSOIDAL"; break;
+        case InputApproximationKind::PIECEWISE: os << "PIECEWISE"; break;
     }
-
     return os;
 }
 
@@ -103,11 +92,6 @@ template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 co
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return join(join(f1,f2),f3,fs...); }
 
-BoxDomainType error_domain(SizeType n, FloatDPError e) {
-    FloatDPValue const& v=cast_exact(e);
-    return BoxDomainType(n,IntervalDomainType(-v,+v));
-}
-
 //! \brief The function dexp(x)=(exp(x)-1)/x.
 //! Note that the function is positive and monotone increasing.
 template<class F> PositiveUpperBound<F> dexp(UpperBound<F> const& x) {
@@ -119,7 +103,6 @@ template<class F> PositiveLowerBound<F> dexp(LowerBound<F> const& x) {
     if(x.raw()>=0) { return cast_positive(exp(x)-1)/cast_positive(cast_exact(x)); }
     else { return cast_positive(cast_exact(1-exp(x)))/cast_positive(-x); }
 }
-
 
 template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
@@ -159,7 +142,7 @@ class ApproximationErrorProcessor {
   protected:
     virtual Vector<ErrorType> compute_errors(Norms const&, PositiveFloatDPValue const&) const = 0;
     InputApproximationKind _kind;
-    Boolean _enable_componentwise_error;
+    Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
     ValidatedVectorFunction const& _f;
     Vector<ValidatedVectorFunction> const& _g;
@@ -232,7 +215,7 @@ public:
     virtual Vector<ErrorType> compute_errors(Norms const&, PositiveFloatDPValue const&) const override;
 };
 
-class InputApproximation {
+class InputApproximator {
   protected:
     ValidatedVectorFunction const& _f;
     Vector<ValidatedVectorFunction> const& _g;
@@ -241,7 +224,7 @@ class InputApproximation {
     SharedPointer<ApproximationErrorProcessor> _additive_processor;
     SharedPointer<ApproximationErrorProcessor> _single_input_processor;
     SharedPointer<ApproximationErrorProcessor> _generic_processor;
-    InputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V,
+    InputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V,
                        SweeperDP sweeper, InputApproximationKind kind, Nat num_params_per_input) :
         _f(f), _g(g), _V(V), _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
   private:
@@ -254,10 +237,10 @@ class InputApproximation {
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
-class ZeroInputApproximation : public InputApproximation {
+class ZeroInputApproximator : public InputApproximator {
 public:
-    ZeroInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::ZERO,0u) {
+    ZeroInputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximator(f,g,V,sweeper,InputApproximationKind::ZERO,0u) {
         _additive_processor.reset(new ZeroErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new ZeroErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new ZeroErrorProcessor(_f,_g,_V));
@@ -266,10 +249,10 @@ protected:
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class ConstantInputApproximation : public InputApproximation {
+class ConstantInputApproximator : public InputApproximator {
 public:
-    ConstantInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {
+    ConstantInputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximator(f,g,V,sweeper,InputApproximationKind::CONSTANT,1u) {
         _additive_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new ConstantErrorProcessor(_f,_g,_V));
@@ -278,10 +261,10 @@ protected:
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class AffineInputApproximation : public InputApproximation {
+class AffineInputApproximator : public InputApproximator {
 public:
-    AffineInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::AFFINE,2u) {
+    AffineInputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximator(f,g,V,sweeper,InputApproximationKind::AFFINE,2u) {
         _additive_processor.reset(new AdditiveAffineErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new SingleInputAffineErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new AffineErrorProcessor(_f,_g,_V));
@@ -290,10 +273,10 @@ protected:
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class SinusoidalInputApproximation : public InputApproximation {
+class SinusoidalInputApproximator : public InputApproximator {
 public:
-    SinusoidalInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::SINUSOIDAL,2u) {
+    SinusoidalInputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximator(f,g,V,sweeper,InputApproximationKind::SINUSOIDAL,2u) {
         _additive_processor.reset(new AdditiveSinusoidalErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new SingleInputSinusoidalErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new SinusoidalErrorProcessor(_f,_g,_V));
@@ -302,10 +285,10 @@ protected:
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class PiecewiseInputApproximation : public InputApproximation {
+class PiecewiseInputApproximator : public InputApproximator {
 public:
-    PiecewiseInputApproximation(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
-            : InputApproximation(f,g,V,sweeper,InputApproximationKind::PIECEWISE,2u) {
+    PiecewiseInputApproximator(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, const BoxDomainType& V, SweeperDP sweeper)
+            : InputApproximator(f,g,V,sweeper,InputApproximationKind::PIECEWISE,2u) {
         _additive_processor.reset(new AdditivePiecewiseErrorProcessor(_f,_g,_V));
         _single_input_processor.reset(new SingleInputPiecewiseErrorProcessor(_f,_g,_V));
         _generic_processor.reset(new PiecewiseErrorProcessor(_f,_g,_V));
@@ -347,16 +330,16 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<SharedPointer<InputApproximation>> _approximations;
-    SharedPointer<InputApproximation> _approximation;
+    List<SharedPointer<InputApproximator>> _approximations;
+    SharedPointer<InputApproximator> _approximation;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     FloatDP _step_size;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<SharedPointer<InputApproximation>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
+    InclusionIntegrator(List<SharedPointer<InputApproximator>> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<SharedPointer<InputApproximator>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegrator(approximations, sweeper,step_size) {
         this->set(attributes...);
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

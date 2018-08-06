@@ -771,8 +771,8 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
         picardPhi[i].add_error(e[i]);
     }
 
-
-/*    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
+    /*
+    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
     auto fgws = construct_f_plus_gw_squared(f,g,w);
     auto BVh =_approximation->build_flow_domain(cast_exact_box(B), V, h);
@@ -783,7 +783,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     auto seriesPhi=ValidatedVectorTaylorFunctionModelDP(n,squaredSeriesPhi.domain(),swp);
     for (auto i : state_variables) {
         seriesPhi[i] = tsquaredSeriesPhi[i];
-        seriesPhi[i].add_error(e);
+        seriesPhi[i].add_error(e[i]);
     }
 
     if (volume(picardPhi.range()) < volume(seriesPhi.range())) {
@@ -793,7 +793,8 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     } else {
         ARIADNE_LOG(2,"Series flow function chosen\n");
         return seriesPhi;
-    }*/
+    }
+    */
 
     return picardPhi;
 }

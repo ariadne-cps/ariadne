@@ -115,6 +115,7 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::GT:   return "gt"; break;
         case OperatorCode::LT:   return "lt"; break;
         case OperatorCode::SUBS:   return "subs"; break;
+        case OperatorCode::HLF:  return "hlf"; break;
         default: return "UNKNOWN";
     }
 }

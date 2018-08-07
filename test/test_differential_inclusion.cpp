@@ -199,27 +199,92 @@ class TestInclusionIntegrator {
 
     Void run_test(String name, const DottedRealAssignments& dynamics,
                   const RealVariablesBox& inputs, const RealVariablesBox& initial,
-                  ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, RealVector noise_levels,
+                  ValidatedVectorFunction const& f_old, Vector<ValidatedVectorFunction> const& g_old, RealVector noise_levels,
                   RealBox real_starting_set, Real evolution_time, double step) const {
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
         FloatDPUpperBound noise_ratio(1.0);
-        BoxDomainType V=cast_exact_box(UpperIntervalType(-noise_ratio,+noise_ratio)*noise_levels);
+        BoxDomainType V_old=cast_exact_box(UpperIntervalType(-noise_ratio,+noise_ratio)*noise_levels);
+
+        auto transformations = centered_variables_transformation(inputs);
+
+        DottedRealAssignments substituted_dynamics;
+        for (auto dyn : dynamics) {
+            substituted_dynamics.push_back(DottedRealAssignment(dyn.left_hand_side(),substitute(dyn.right_hand_side(),transformations.first)));
+        }
+
+        std::cout << substituted_dynamics << std::endl;
+        std::cout << transformations.second << std::endl;
+
+        RealSpace inp_spc(List<RealVariable>(inputs.variables()));
+        Vector<IntervalDomainType> input_ivls(inputs.variables().size());
+        auto euclidean_set = transformations.second.euclidean_set(inp_spc);
+        for (auto i : range(inputs.variables().size())) {
+            input_ivls[i] = IntervalDomainType(euclidean_set[i].lower().get_d(),euclidean_set[i].upper().get_d());
+        }
+        BoxDomainType V(input_ivls);
+
+        std::cout << V << std::endl;
+
+        Map<RealVariable,Map<RealVariable,RealExpression>> gs;
+        for (auto in : inputs.variables()) {
+            Map<RealVariable,RealExpression> g;
+            for (auto dyn : substituted_dynamics) {
+                g[dyn.left_hand_side().base()] = simplify(derivative(dyn.right_hand_side(),in));
+            }
+            gs[in] = g;
+        }
+
+        std::cout << gs << std::endl;
+
+        Map<RealVariable,RealExpression> f_expr;
+        RealAssignments subs;
+        for (auto in : inputs.variables()) {
+            subs.push_back(RealAssignment(in,RealExpression::constant(0)));
+        }
+        for (auto dyn : substituted_dynamics) {
+            f_expr[dyn.left_hand_side().base()] = simplify(substitute(dyn.right_hand_side(),subs));
+        }
+
+        std::cout << f_expr << std::endl;
+
+        RealSpace var_spc(left_hand_sides(substituted_dynamics));
+
+        Vector<RealExpression> f_dyn(var_spc.dimension());
+        for (auto var : var_spc.indices()) {
+            f_dyn[var.second] = f_expr[var.first];
+        }
+        ValidatedVectorFunction f = make_function(var_spc,f_dyn);
+
+        std::cout << f << std::endl;
+
+        Vector<ValidatedVectorFunction> g(gs.size());
+
+        SizeType i = 0;
+        for (auto in : inputs.variables()) {
+            Vector<RealExpression> g_dyn(var_spc.dimension());
+            for (auto var : var_spc.indices()) {
+                g_dyn[var.second] = gs[in][var.first];
+            }
+            g[i++] = ValidatedVectorFunction(make_function(var_spc,g_dyn));
+        }
+
+        std::cout << g << std::endl;
 
         List<SharedPointer<InputApproximator>> approximations;
-        approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f_old,g_old,V_old,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f_old,g_old,V_old,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f_old,g_old,V_old,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f_old,g_old,V_old,sweeper)));
+        approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f_old,g_old,V_old,sweeper)));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
-        integrator.verbosity = 0;
+        integrator.verbosity = 2;
 
-        //this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,real_starting_set,evolution_time);
-        this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,real_starting_set,evolution_time,step,freq);
+        this->run_single_test(name,integrator,dynamics,inputs,initial,f_old,g_old,V_old,real_starting_set,evolution_time);
+        //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,real_starting_set,evolution_time,step,freq);
     }
 
   public:
@@ -244,6 +309,8 @@ class TestInclusionIntegrator {
 
     void test_van_der_pol() const;
     void test_clock() const;
+
+    void test_dynamics_conversion() const;
 };
 
 
@@ -386,7 +453,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
 
     RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
     DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
-    RealVariablesBox inputs={-0.9998_dec<=v0<=1.0002_dec,-0.9998_dec<=k1<=1.0002_dec,-0.99981_dec<=k2<=1.00021_dec};
+    RealVariablesBox inputs={0.9998_dec<=v0<=1.0002_dec,0.9998_dec<=k1<=1.0002_dec,0.99981_dec<=k2<=1.00021_dec};
 
     Real e=1/100_q;
     Real x0_i(2.0);
@@ -462,6 +529,12 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 
     RealVariablesBox initial={{1.2_dec-e<=x<=1.2_dec+e},{1.1_dec-e<=y<=1.1_dec+e}};
 
+    /*
+    RealSpace var_spc(left_hand_sides(dynamics));
+    RealSpace inp_spc(List<RealVariable>(inputs.variables()));
+    RealSpace spc = var_spc.adjoin(inp_spc);
+    auto func = make_function(spc, Vector<RealExpression>(right_hand_sides(dynamics)));*/
+
     Real evolution_time=100/10_q;
 
     this->run_test("lotka-volterra",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
@@ -470,7 +543,7 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
 void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
     double step=1.0/20;
 
-    RealVector noise_levels={1/10000_q,1/10000_q};
+    RealVector noise_levels={0/10000_q,0/10000_q};
 
     auto v = ValidatedVectorFunction::identity(2u);
     auto one = ValidatedScalarFunction::constant(2u,1_z);
@@ -489,7 +562,7 @@ void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
 
     RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=x<=1+e}};
 
-    Real evolution_time=400/10_q;
+    Real evolution_time=150/10_q;
 
     this->run_test("fitzhugh-nagumo",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
@@ -682,12 +755,6 @@ void TestInclusionIntegrator::test_jerk16() const {
 
     Real evolution_time=100/10_q;
 
-    /*
-    RealSpace var_spc(left_hand_sides(dynamics));
-    RealSpace inp_spc(List<RealVariable>(inputs.variables()));
-    RealSpace spc = var_spc.adjoin(inp_spc);
-    auto func = make_function(spc, Vector<RealExpression>(right_hand_sides(dynamics)));*/
-
     this->run_test("jerk16",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
@@ -816,26 +883,39 @@ void TestInclusionIntegrator::test_clock() const {
     this->run_test("clock",dynamics,inputs,initial,f,g,noise_levels,starting_set,evolution_time,step);
 }
 
+void TestInclusionIntegrator::test_dynamics_conversion() const {
+/*
+    RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
+    DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
+    RealVariablesBox inputs={0.9998_dec<=v0<=1.0002_dec,0.9998_dec<=k1<=1.0002_dec,0.99981_dec<=k2<=1.00021_dec};
+    */
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=x*-0.018_dec+y*-0.066_dec + u1*(1/600_q*x+1/15_q*y)+u2,
+                                         dot(y)=x*0.071_dec+y*-0.00853_dec+u1*(-1/14_q*x-20/7_q*y)};
+    RealVariablesBox inputs={-2/1000_q<=u1<=2/1000_q,4/15_q<=u2<=6/15_q};
+}
+
 void TestInclusionIntegrator::test() const {
 
     //ARIADNE_TEST_CALL(test_wiggins_18_7_3());
     //ARIADNE_TEST_CALL(test_order7());
     //ARIADNE_TEST_CALL(test_3dsphere());
     //ARIADNE_TEST_CALL(test_vinograd());
-    ARIADNE_TEST_CALL(test_higgins_selkov());
-    ARIADNE_TEST_CALL(test_reactor());
+    //ARIADNE_TEST_CALL(test_higgins_selkov());
+    /*ARIADNE_TEST_CALL(test_reactor());
     ARIADNE_TEST_CALL(test_lotka_volterra());
-    ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_jet_engine());*/
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
-    ARIADNE_TEST_CALL(test_pi_controller());
+    //ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jerk21());
-    ARIADNE_TEST_CALL(test_lorenz());
+    /*ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
     ARIADNE_TEST_CALL(test_jerk16());
     ARIADNE_TEST_CALL(test_DCDC());
-    ARIADNE_TEST_CALL(test_harmonic());
+    ARIADNE_TEST_CALL(test_harmonic());*/
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
+    //ARIADNE_TEST_CALL(test_dynamics_conversion());
 }
 
 int main() {

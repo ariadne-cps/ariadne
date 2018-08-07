@@ -73,6 +73,9 @@ std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind)
     return os;
 }
 
+Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds);
+Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs);
+
 Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 

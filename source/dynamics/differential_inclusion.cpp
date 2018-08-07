@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential_inclusion.cpp
  *
- *  Copyright  2008-17  Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-18  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 
@@ -47,6 +47,21 @@ struct ScheduledApproximationComparator
         return (sa1.step > sa2.step);
     }
 };
+
+Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds) {
+    return Pair<RealAssignment,RealInterval>(RealAssignment(v,v+bounds.midpoint()),RealInterval(bounds.lower()-bounds.midpoint(),bounds.upper()-bounds.midpoint()));
+}
+
+Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs) {
+    RealAssignments assignments;
+    List<RealVariableInterval> new_bounds;
+    for (auto entry : inputs.bounds()) {
+        auto tr = centered_variable_transformation(entry.first,entry.second);
+        assignments.push_back(tr.first);
+        new_bounds.push_back(RealVariableInterval(entry.first,tr.second));
+    }
+    return Pair<RealAssignments,RealVariablesBox>(assignments,new_bounds);
+}
 
 FloatDPError get_r(InputApproximationKind approx_kind) {
     switch (approx_kind) {

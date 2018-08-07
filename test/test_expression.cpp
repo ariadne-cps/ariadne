@@ -109,6 +109,14 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
+    Void test_derivative() {
+        RealVariable x("x"), y("y");
+        RealExpression expr = 2*x+y;
+        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
+        RealExpression expr2 = pow(x,3);
+        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr2,x)),3*pow(x,2)));
+    }
+
     Void test_simplify() {
 
         RealVariable x("x"), y("y"), u("u");
@@ -120,13 +128,13 @@ class TestExpression {
     Void test_substitute() {
 
         RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-        RealExpression expr = -u1*x*y+2*(x+u2);
+        RealExpression expr = -u1*x*y+2*pow(x+u2,2);
 
         List<Assignment<RealVariable,RealExpression>> subs={{u1,u1+1},{u2,u1*x}};
 
         RealExpression substitution = substitute(expr,subs);
 
-        ARIADNE_TEST_ASSERT(identical(substitution,-(u1+1)*x*y+2*(x+u1*x)));
+        ARIADNE_TEST_ASSERT(identical(substitution,-(u1+1)*x*y+2*pow(x+u1*x,2)));
     }
 
     Void test_scalar_properties()
@@ -134,6 +142,8 @@ class TestExpression {
         RealVariable x("x"), y("y");
         Real c(3);
         ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
+        ARIADNE_TEST_ASSERT(is_constant_in(pow(y,2),{x}));
+        ARIADNE_TEST_ASSERT(not is_constant_in(pow(x,2),{x}));
         ARIADNE_TEST_ASSERT(not is_constant_in(3*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in(0*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*c)-2*sin(c)*cos(c))*y,{y}));
@@ -219,6 +229,7 @@ class TestExpression {
         test_variables();
         test_assignment();
         test_parameters();
+        test_derivative();
         test_simplify();
         test_substitute();
         test_scalar_properties();

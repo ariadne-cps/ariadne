@@ -569,7 +569,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             if (best->getKind() == appro->getKind())
                 delays[appro] = 0;
             else
-                delays[appro] = delays[appro]++;
+                delays[appro]++;
 
             Nat offset = 1<<delays[appro];
             schedule.push_back(ScheduledApproximation(step+offset,appro));

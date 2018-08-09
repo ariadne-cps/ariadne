@@ -86,16 +86,21 @@ class Decimal
     friend Comparison cmp(Decimal const& d1, Decimal const& d2);
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
+    //! \brief Construct from an integer literal.
+    friend Decimal operator"" _decimal (unsigned long long int n);
     //! \brief Construct from a floating-point literal.
     friend Decimal operator"" _decimal (long double dbl);
-    friend Decimal operator"" _dec (long double dbl);
+    //! \brief Construct from a string literal.
+    friend Decimal operator"" _decimal (const char* str, std::size_t);
 
     void canonicalize();
 };
 Decimal operator"" _dec (unsigned long long int n);
 Decimal operator"" _dec (long double dbl);
+Decimal operator"" _dec (const char* str, std::size_t);
 Decimal operator"" _decimal (unsigned long long int n);
 Decimal operator"" _decimal (long double dbl);
+Decimal operator"" _decimal (const char* str, std::size_t);
 
 
 } // namespace Ariadne

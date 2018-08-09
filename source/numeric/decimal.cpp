@@ -82,6 +82,16 @@ Decimal operator"" _dec(unsigned long long int n)
     return operator"" _decimal(n);
 }
 
+Decimal operator"" _decimal(const char* s, std::size_t)
+{
+    return Decimal(String(s));
+}
+
+Decimal operator"" _dec(const char* s, std::size_t n)
+{
+    return operator"" _decimal(s,n);
+}
+
 Decimal operator+(Decimal const& d)
 {
     return Decimal(d._p,d._q);
@@ -237,6 +247,8 @@ Decimal::Decimal(String const& str)
     this->_p *= s;
 
 }
+
+template<> String class_name<Decimal>() { return "Decimal"; }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer p=abs(d._p);

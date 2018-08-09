@@ -186,6 +186,8 @@ class Natural : public Positive<Integer> {
     friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
 };
 
+inline Natural cast_positive(Integer const& z) { return Natural(z); }
+
 } // namespace Ariadne
 
 #endif

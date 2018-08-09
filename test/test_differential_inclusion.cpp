@@ -207,16 +207,8 @@ class TestInclusionIntegrator {
             substituted_dynamics.push_back(DottedRealAssignment(dyn.left_hand_side(),substitute(dyn.right_hand_side(),transformations.first)));
         }
 
-        std::cout << substituted_dynamics << std::endl;
-        std::cout << transformations.second << std::endl;
-
         BoxDomainType V = bounds_to_domain(transformations.second);
-
-        std::cout << V << std::endl;
-
         BoxDomainType X0 = bounds_to_domain(initial);
-
-        std::cout << X0 << std::endl;
 
         Map<RealVariable,Map<RealVariable,RealExpression>> gs;
         for (auto in : inputs.variables()) {
@@ -227,8 +219,6 @@ class TestInclusionIntegrator {
             gs[in] = g;
         }
 
-        std::cout << gs << std::endl;
-
         Map<RealVariable,RealExpression> f_expr;
         RealAssignments subs;
         for (auto in : inputs.variables()) {
@@ -238,8 +228,6 @@ class TestInclusionIntegrator {
             f_expr[dyn.left_hand_side().base()] = simplify(substitute(dyn.right_hand_side(),subs));
         }
 
-        std::cout << f_expr << std::endl;
-
         RealSpace var_spc(left_hand_sides(substituted_dynamics));
 
         Vector<RealExpression> f_dyn(var_spc.dimension());
@@ -247,8 +235,6 @@ class TestInclusionIntegrator {
             f_dyn[var.second] = f_expr[var.first];
         }
         ValidatedVectorFunction f = make_function(var_spc,f_dyn);
-
-        std::cout << f << std::endl;
 
         Vector<ValidatedVectorFunction> g(gs.size());
 
@@ -261,8 +247,6 @@ class TestInclusionIntegrator {
             g[i++] = ValidatedVectorFunction(make_function(var_spc,g_dyn));
         }
 
-        std::cout << g << std::endl;
-
         List<SharedPointer<InputApproximator>> approximations;
         approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
         approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
@@ -271,7 +255,7 @@ class TestInclusionIntegrator {
         approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
-        integrator.verbosity = 1;
+        integrator.verbosity = 0;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
         //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);

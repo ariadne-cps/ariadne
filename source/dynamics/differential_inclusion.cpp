@@ -49,14 +49,12 @@ struct ScheduledApproximationComparator
 };
 
 BoxDomainType bounds_to_domain(RealVariablesBox const& var_bounds) {
-    auto vars = List<RealVariable>(var_bounds.variables());
-    RealSpace spc(vars);
-    Vector<IntervalDomainType> result(vars.size());
-    auto euclidean_set = var_bounds.euclidean_set(spc);
-    for (auto i : range(vars.size())) {
-        result[i] = IntervalDomainType(euclidean_set[i].lower().get_d(),euclidean_set[i].upper().get_d());
+    auto vars = var_bounds.variables();
+    List<IntervalDomainType> result;
+    for (auto v : vars) {
+        result.push_back(IntervalDomainType(var_bounds[v].lower().get_d(),var_bounds[v].upper().get_d()));
     }
-    return BoxDomainType(result);
+    return Vector<IntervalDomainType>(result);
 }
 
 Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds) {

@@ -122,9 +122,14 @@ lu_inverse(const Matrix<X>& M)
     return B;
 }
 
+template<class X> Matrix<Bounds<X>> dd_solve_bounds(const Matrix<Bounds<X>>& A, const Matrix<Bounds<X>>& B);
+template<class X> Matrix<Bounds<X>> gs_solve_bounds(const Matrix<Bounds<X>>& A, const Matrix<Bounds<X>>& B);
+
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
-template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
-template<class X> Matrix<X> dd_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B) {
+    return gs_solve_bounds(A,B); }
+template<class X> Matrix<X> dd_solve(const Matrix<X>& A, const Matrix<X>& B) {
+    return gs_solve_bounds(A,B); }
 
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
     return lu_inverse(A)*B;
@@ -132,35 +137,34 @@ template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
 
 template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b) {
     return lu_inverse(A)*b;
-
 }
 
 // Find a starting solution for a diagonally dominant system
-template<> Matrix<FloatDPBounds> dd_solve(const Matrix<FloatDPBounds>& A, const Matrix<FloatDPBounds>& B)
+template<class X> Matrix<Bounds<X>> dd_solve_bounds(const Matrix<Bounds<X>>& A, const Matrix<Bounds<X>>& B)
 {
     const SizeType n=B.row_size();
     const SizeType m=B.column_size();
 
     //Compute an upper bound for 1/(|aii|-sum|aij|) using outward rounding
-    Vector<FloatDPUpperBound> c(n,FloatDPUpperBound(0u));
+    Vector<UpperBound<X>> c(n,UpperBound<X>(0u));
     for(SizeType i=0; i!=n; ++i) {
-        FloatDPLowerBound rci=mig(A[i][i]);
+        LowerBound<X> rci=mig(A[i][i]);
         for(SizeType j=0; j!=n; ++j) {
             if(j!=i) {
                 rci=rci-mag(A[i][j] );
             }
         }
         if(possibly(rci<=0)) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<FloatDPBounds> A, Matrix<FloatDPBounds> B)",
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Bounds<X>> A, Matrix<Bounds<X>> B)",
                           "Matrix A="<<A<<" is not diagonally-dominant.");
         }
         c[i]=rec(cast_positive(rci));
     }
 
     // Compute initial solution
-    Matrix<FloatDPBounds> R(n,m);
+    Matrix<Bounds<X>> R(n,m);
     for(SizeType i=0; i!=n; ++i) {
-        FloatDPBounds ci(-c[i],+c[i]);
+        Bounds<X> ci(-c[i],+c[i]);
         for(SizeType j=0; j!=m; ++j) {
             R[i][j]=B[i][j]*ci;
         }
@@ -170,13 +174,13 @@ template<> Matrix<FloatDPBounds> dd_solve(const Matrix<FloatDPBounds>& A, const 
 }
 
 
-template<> Void gs_step(const Matrix<FloatDPBounds>& A, const Vector<FloatDPBounds>& b, Vector<FloatDPBounds>& x)
+template<class X> Void gs_step(const Matrix<Bounds<X>>& A, const Vector<Bounds<X>>& b, Vector<Bounds<X>>& x)
 {
     // Perform Gauss-Seidel iteration
     const SizeType n=x.size();
     for(SizeType i=0; i!=n; ++i) {
         // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-        FloatDPBounds ri=b[i];
+        Bounds<X> ri=b[i];
         for(SizeType k=0; k!=n; ++k) {
             if(k!=i) {
                 ri-=A[i][k]*x[k];
@@ -189,7 +193,7 @@ template<> Void gs_step(const Matrix<FloatDPBounds>& A, const Vector<FloatDPBoun
     }
 }
 
-template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const Matrix<FloatDPBounds>& B)
+template<class X> Matrix<Bounds<X>> gs_solve_bounds(const Matrix<Bounds<X>>& A, const Matrix<Bounds<X>>& B)
 {
     ARIADNE_ASSERT(A.row_size()==A.column_size());
     ARIADNE_ASSERT(B.row_size()==A.column_size());
@@ -197,14 +201,14 @@ template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const 
     const SizeType m=B.column_size();
 
     // Precondition A and B
-    Matrix<FloatDPApproximation> mA(A);
+    Matrix<Approximation<X>> mA(A);
 
-    Matrix<FloatDPValue> J=cast_exact(inverse(mA));
-    Matrix<FloatDPBounds> JA=J*A;
-    Matrix<FloatDPBounds> JB=J*B;
+    Matrix<Value<X>> J=cast_exact(inverse(mA));
+    Matrix<Bounds<X>> JA=J*A;
+    Matrix<Bounds<X>> JB=J*B;
 
-    //Matrix<FloatDPBounds> R=dd_solve(JA,JB);
-    Matrix<FloatDPBounds> R=lu_solve(A,B);
+    //Matrix<Bounds<X>> R=dd_solve(JA,JB);
+    Matrix<Bounds<X>> R=lu_solve(A,B);
     //std::cerr<<"R="<<R<<"\n";
 
     // Perform Gauss-Seidel iteration
@@ -213,7 +217,7 @@ template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const 
         for(SizeType i=0; i!=n; ++i) {
             for(SizeType j=0; j!=m; ++j) {
                 // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                FloatDPBounds Rij=JB[i][j];
+                Bounds<X> Rij=JB[i][j];
                 for(SizeType k=0; k!=n; ++k) {
                     if(k!=i) {
                         Rij-=JA[i][k]*R[k][j];
@@ -223,8 +227,8 @@ template<> Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>& A, const 
                     Rij/=JA[i][i];
                     R[i][j]=refinement(R[i][j],Rij);
                 }
-                // FIXME: Use FloatDPInterval or FloatDP here?
-                //R[i][j]=FloatDPInterval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
+                // FIXME: Use FloatBounds or Float here?
+                //R[i][j]=FloatBounds(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
             }
         }
         ++step;
@@ -829,6 +833,11 @@ template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
     return std::move(R);
 }
 
+
+template<class X> Matrix<Value<X>> cast_exact(Matrix<Approximation<X>> const& A) {
+    return reinterpret_cast<Matrix<Value<X>> const&>(A);
+}
+
 template<class AX> Matrix<decltype(cast_exact(declval<AX>()))> cast_exact(Matrix<AX> const& A) {
     typedef decltype(cast_exact(declval<AX>())) EX;
     return reinterpret_cast<Matrix<EX> const&>(A);
@@ -872,10 +881,18 @@ template class Matrix<FloatMPValue>;
 template Matrix<FloatMPApproximation> inverse(const Matrix<FloatMPApproximation>&);
 template Vector<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
 template Matrix<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Matrix<FloatMPApproximation>&);
+template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
+template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> orthogonal_decomposition(Matrix<FloatMPApproximation> const&);
+template Vector<FloatMPApproximation> row_norms(Matrix<FloatMPApproximation> const&);
 
 template Matrix<FloatMPBounds> inverse(const Matrix<FloatMPBounds>&);
 template Vector<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
+template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
+template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
+template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
+template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
+template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposition(Matrix<FloatMPBounds> const&);
 
 template class Matrix<Real>;
 
@@ -883,6 +900,7 @@ template PositiveFloatDPUpperBound sup_norm(const Matrix<FloatDPBounds>& A);
 template FloatDPUpperBound log_norm(const Matrix<FloatDPBounds>& A);
 
 template Matrix<FloatDPValue>const& cast_exact(const Matrix<FloatDPApproximation>& mx);
+template Matrix<FloatMPValue>const& cast_exact(const Matrix<FloatMPApproximation>& mx);
 
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

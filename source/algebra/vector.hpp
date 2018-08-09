@@ -354,48 +354,27 @@ template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator
 
 struct ProvideVectorOperations {
     template<class X> friend Vector<X> operator+(Vector<X> const& v) {
-        Vector<decltype(+declval<X>())> r(v.size(),+v.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=+v[i]; }
-        return std::move(r);
-    }
+        return Vector<X>( v.size(), [&v](auto i){return +v[i];} ); }
 
     template<class X> friend Vector<NegationType<X>> operator-(Vector<X> const& v) {
-        Vector<decltype(-declval<X>())> r(v.size(),-v.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=-v[i]; }
-        return std::move(r);
-    }
+        return Vector<NegationType<X>>( v.size(), [&v](auto i){return -v[i];} ); }
 
     template<class X1, class X2> friend Vector<SumType<X1,X2>> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size(),v1.zero_element()+v2.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]+v2[i]; }
-        return std::move(r);
-    }
+        return Vector<SumType<X1,X2>>( v1.size(), [&v1,&v2](auto i){return v1[i]+v2[i];} ); }
 
     template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size(),v1.zero_element()-v2.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]-v2[i]; }
-        return std::move(r);
-    }
+        return Vector<DifferenceType<X1,X2>>( v1.size(), [&v1,&v2](auto i){return v1[i]-v2[i];} ); }
 
-    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(X1 const& x1, Vector<X2> const& v2) {
-        Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size(),x1*v2.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=x1*v2[i]; }
-        return std::move(r);
-    }
+    template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2) {
+        return Vector<ProductType<Scalar<X1>,X2>>( v2.size(), [&x1,&v2](auto i){return x1*v2[i];} ); }
 
     template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2) {
-        Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size(),v1.zero_element()*x2);
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]*x2; }
-        return std::move(r);
-    }
+        return Vector<ProductType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](auto i){return v1[i]*x2;} ); }
 
     template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2) {
-        Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size(),v1.zero_element()/x2);
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
-        return std::move(r);
-    }
+        return Vector<QuotientType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](auto i){return v1[i]/x2;} ); }
 
     template<class X1,class X2> friend Vector<InplaceSumType<X1,X2>>& operator+=(Vector<X1>& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
@@ -441,7 +420,7 @@ struct ProvideVectorOperations {
     }
 
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Vector<X1>& v1, const Vector<X2>& v2) {
-        decltype(v1[0]==v2[0]) r=true;
+        decltype(v1[0]==v2[0]) r(true);
         for(SizeType i=0; i!=v1.size(); ++i) {
             r = r && (v1[i]==v2[i]);
         }
@@ -449,7 +428,7 @@ struct ProvideVectorOperations {
     }
 
     template<class X1, class X2> friend decltype(declval<X1>()!=declval<X2>()) operator!=(const Vector<X1>& v1, const Vector<X2>& v2) {
-        decltype(v1[0]!=v2[0]) r=false;
+        decltype(v1[0]!=v2[0]) r(false);
         for(SizeType i=0; i!=v1.size(); ++i) {
             r = r || (v1[i]!=v2[i]);
         }
@@ -564,6 +543,14 @@ template<class V> using ScalarType = typename V::ScalarType;
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 {
+
+    Array<X> ra(v1.size()+v2.size(),Uninitialised());
+    X* rp=ra.begin();
+    for(X const* vp=v1.array().begin(); vp!=v1.array().end(); ++rp, ++vp) { new (rp) X(*vp); }
+    for(X const* vp=v2.array().begin(); vp!=v2.array().end(); ++rp, ++vp) { new (rp) X(*vp); }
+    assert(rp==ra.end());
+    return Vector<X>(std::move(ra));
+
     if(v1.size()==0) { return v2; }
     if(v2.size()==0) { return v1; }
     SizeType n1=v1.size();
@@ -623,7 +610,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X
 }
 
 
-template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v) {
+template<class X> inline decltype(error(declval<X>())) sup_error(const Vector<X>& v) {
     decltype(error(declval<X>())) r=error(v.zero_element());
     for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,error(v[i]));
@@ -631,12 +618,8 @@ template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v)
     return r;
 }
 
-template<class X> inline decltype(error(declval<X>())) sup_error(const Vector<X>& v) {
-    decltype(error(declval<X>())) r=error(v.zero_element());
-    for(SizeType i=0; i!=v.size(); ++i) {
-        r=max(r,error(v[i]));
-    }
-    return r;
+template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v) {
+    return sup_error(v);
 }
 
 

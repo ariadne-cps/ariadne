@@ -39,6 +39,8 @@
 #include "paradigm.hpp"
 #include "logical.hpp"
 #include "integer.hpp"
+#include "dyadic.hpp"
+#include "decimal.hpp"
 #include "rational.hpp"
 #include "real.hpp"
 #include "floatdp.hpp"

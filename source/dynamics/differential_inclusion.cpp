@@ -60,7 +60,8 @@ BoxDomainType bounds_to_domain(RealVariablesBox const& var_bounds) {
 }
 
 Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds) {
-    return Pair<RealAssignment,RealInterval>(RealAssignment(v,v+bounds.midpoint()),RealInterval(bounds.lower()-bounds.midpoint(),bounds.upper()-bounds.midpoint()));
+    if (same(bounds.lower(),-bounds.upper())) return Pair<RealAssignment,RealInterval>(RealAssignment(v,v),bounds);
+    else return Pair<RealAssignment,RealInterval>(RealAssignment(v,v+bounds.midpoint()),RealInterval(bounds.lower()-bounds.midpoint(),bounds.upper()-bounds.midpoint()));
 }
 
 Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs) {

@@ -271,7 +271,7 @@ class TestInclusionIntegrator {
         approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
-        integrator.verbosity = 0;
+        integrator.verbosity = 1;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
         //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);
@@ -516,10 +516,10 @@ void TestInclusionIntegrator::test_jerk16() const {
 
 void TestInclusionIntegrator::test_DCDC() const {
     Real k0(0.002987);
-    Real fp0(-0.018);//(-11+k0)/600
-    Real fp1(-0.066); //(k0-1)/15
-    Real fq0(0.071);//(1-k0)/14
-    Real fq1(-0.00853);//-k0*20/7
+    Real fp0 = -11+k0/600;
+    Real fp1 = k0-1/15_q;
+    Real fq0 = 1-k0/14;
+    Real fq1 = -k0*20/7_q;
     Real gp0 = 1/600_q;
     Real gp1 = 1/15_q;
     Real gq0 = -1/14_q;

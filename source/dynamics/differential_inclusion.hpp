@@ -73,6 +73,7 @@ std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind)
     return os;
 }
 
+BoxDomainType bounds_to_domain(RealVariablesBox const& var_box);
 Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds);
 Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs);
 
@@ -85,6 +86,7 @@ Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
     return refines(v1,static_cast<Vector<UpperIntervalType>const&>(bx2)); }
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
+
 
 Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B);
 

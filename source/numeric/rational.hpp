@@ -87,6 +87,14 @@ class Rational
     Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
 
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real atan(Real const&);
+
     friend Sign sgn(Rational const& q);
 
     friend Comparison cmp(Rational const& q1, Rational const& q2);

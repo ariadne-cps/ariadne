@@ -107,8 +107,19 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve a number.
     friend Dyadic hlf(Dyadic const&);
+
     friend Rational rec(Rational const&);
     friend Rational div(Rational const&, Rational const&);
+    friend Rational operator/(Rational const&, Rational const&);
+
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real atan(Real const&);
+
     friend Sign sgn(Dyadic const&);
     friend Integer round(Dyadic const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.

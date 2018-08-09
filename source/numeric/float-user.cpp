@@ -56,6 +56,9 @@ template<class F> Nat Value<F>::output_places = 16;
 
 const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
 
+OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
+    return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
+
 FloatError<DoublePrecision> operator"" _error(long double lx) {
     double x=lx;
     assert(x==lx);

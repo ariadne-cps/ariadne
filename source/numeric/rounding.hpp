@@ -29,6 +29,7 @@
 #ifndef ARIADNE_ROUNDING_HPP
 #define ARIADNE_ROUNDING_HPP
 
+#include <iosfwd>
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
@@ -250,6 +251,8 @@ struct RoundApproximately {
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
 };
 
+using OutputStream = std::ostream;
+
 //! \brief General rounding mode class. \ingroup NumericModule
 class Rounding {
     BuiltinRoundingModeType _rbp; MPFRRoundingModeType _rmp;
@@ -260,8 +263,7 @@ class Rounding {
     Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { }
     operator BuiltinRoundingModeType() const { return _rbp; }
     operator MPFRRoundingModeType() const { return _rmp; }
-    friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
-        return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
+    friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd);
 };
 
 

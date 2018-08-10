@@ -234,7 +234,7 @@ class TestInclusionIntegrator {
         approximations.append(InputApproximation::CONSTANT);
         approximations.append(InputApproximation::ZERO);
 
-        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
+        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = 1;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
@@ -382,11 +382,11 @@ void TestInclusionIntegrator::test_van_der_pol() const {
 
 void TestInclusionIntegrator::test_clock() const {
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    DottedRealAssignments dynamics={dot(x)=1+u1,dot(y)=1+u2};
-    RealVariablesBox inputs={-1/16_q<=u1<=1/16_q,-1/16_q<=u2<=1/16_q};
+    DottedRealAssignments dynamics={dot(x)=u1,dot(y)=u2};
+    RealVariablesBox inputs={0.95_dec<=u1<=1.05_dec,0.95_dec<=u2<=1.05_dec};
 
     Real e=1/128_q;
-    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
+    RealVariablesBox initial={{x==0},{y==0}};
 
     auto evolution_time=5;
     double step=1.0/256;

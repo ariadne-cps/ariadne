@@ -893,7 +893,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     return picardPhi;
 }
 
-Vector<ErrorType> InputApproximator::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
+Vector<ErrorType> InputApproximatorBase::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
     if (inputs_are_additive(_g))
         return _additive_processor->process(h,B);
     else if (_g.size() == 1)
@@ -903,7 +903,7 @@ Vector<ErrorType> InputApproximator::compute_errors(PositiveFloatDPValue h, Uppe
 }
 
 
-BoxDomainType InputApproximator::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
+BoxDomainType InputApproximatorBase::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto result = D;
 
     for (Nat i : range(this->_num_params_per_input))

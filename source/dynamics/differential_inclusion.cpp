@@ -48,6 +48,15 @@ struct ScheduledApproximationComparator
     }
 };
 
+char activity_symbol(SizeType step) {
+    switch (step % 4) {
+    case 0: return '\\';
+    case 1: return '|';
+    case 2: return '/';
+    default: return '-';
+    }
+}
+
 BoxDomainType bounds_to_domain(RealVariablesBox const& var_bounds) {
     auto vars = var_bounds.variables();
     List<IntervalDomainType> result;
@@ -418,6 +427,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     }
 
     while (possibly(t<FloatDPBounds(tmax,pr))) {
+
+        if (verbosity == 1)
+            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(round(100*t.get_d()/tmax.get_d())) << "%" << std::flush;
+
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
         List<SharedPointer<InputApproximator>> approximations_to_use;
@@ -634,7 +647,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
     }
 
-    ARIADNE_LOG(1,"approximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
+    ARIADNE_LOG(1,"\napproximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
 
     return result;
 }

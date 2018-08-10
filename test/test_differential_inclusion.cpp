@@ -235,7 +235,7 @@ class TestInclusionIntegrator {
         approximations.append(InputApproximation::ZERO);
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
-        integrator.verbosity = 1;
+        integrator.verbosity = 8;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
         //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);

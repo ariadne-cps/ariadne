@@ -140,12 +140,12 @@ std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
     return os;
 }
 
-class InputApproximatorBase;
+class InputApproximator;
 class InputApproximatorInterface;
 
 class InputApproximatorFactory {
 public:
-    SharedPointer<InputApproximatorInterface> create(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximation kind, SweeperDP sweeper) const;
+    InputApproximator create(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximation kind, SweeperDP sweeper) const;
 };
 
 class ApproximationErrorProcessor {
@@ -258,9 +258,13 @@ class InputApproximatorBase : public InputApproximatorInterface {
 };
 
 class InputApproximator : public InputApproximatorInterface {
+    friend class InputApproximatorFactory;
   private:
-    SharedPointer<InputApproximatorInterface> const& _impl;
+    SharedPointer<InputApproximatorInterface> _impl;
     InputApproximator(SharedPointer<InputApproximatorInterface> const& impl) : _impl(impl) { }
+  public:
+    InputApproximator(InputApproximator const& other) : _impl(other._impl) { }
+    InputApproximator& operator=(InputApproximator const& other) { _impl = other._impl; return *this; }
   public:
     virtual InputApproximation kind() const override { return _impl->kind(); }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
@@ -363,7 +367,7 @@ class InclusionIntegratorInterface {
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
     List<InputApproximation> _approximations;
-    SharedPointer<InputApproximatorInterface> _approximator;
+    SharedPointer<InputApproximator> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     FloatDP _step_size;

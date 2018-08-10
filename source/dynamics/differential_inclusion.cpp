@@ -32,13 +32,13 @@ namespace Ariadne {
 struct ScheduledApproximation
 {
     SizeType step;
-    SharedPointer<InputApproximatorInterface> approximation;
+    InputApproximator approximation;
 
-    ScheduledApproximation(SizeType step, SharedPointer<InputApproximatorInterface> approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximation(SizeType step, InputApproximator approximation) : step(step), approximation(approximation) {}
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
-    return os << "(" << sa.step << ":" << sa.approximation->kind() << ")"; }
+    return os << "(" << sa.step << ":" << sa.approximation.kind() << ")"; }
 
 struct ScheduledApproximationComparator
 {
@@ -245,15 +245,15 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
-SharedPointer<InputApproximatorInterface>
+InputApproximator
 InputApproximatorFactory::create(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximation kind, SweeperDP sweeper) const {
 
     switch(kind) {
-    case InputApproximation::ZERO : return SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(f,g,V,sweeper));
-    case InputApproximation::CONSTANT : return SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(f,g,V,sweeper));
-    case InputApproximation::AFFINE : return SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(f,g,V,sweeper));
-    case InputApproximation::SINUSOIDAL: return SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(f,g,V,sweeper));
-    case InputApproximation::PIECEWISE : return SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(f,g,V,sweeper));
+    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(f,g,V,sweeper)));
+    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(f,g,V,sweeper)));
+    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(f,g,V,sweeper)));
+    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(f,g,V,sweeper)));
+    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(f,g,V,sweeper)));
     }
 }
 
@@ -434,14 +434,14 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     List<ScheduledApproximation> schedule;
     Map<InputApproximation,Nat> delays;
 
-    List<SharedPointer<InputApproximatorInterface>> approximations;
+    List<InputApproximator> approximations;
     InputApproximatorFactory factory;
     for (auto appro : _approximations)
         approximations.append(factory.create(f,g,V,appro,_sweeper));
 
     for (auto appro: approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
-        delays[appro->kind()] = 0;
+        delays[appro.kind()] = 0;
     }
 
     while (possibly(t<FloatDPBounds(tmax,pr))) {
@@ -451,7 +451,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<SharedPointer<InputApproximatorInterface>> approximations_to_use;
+        List<InputApproximator> approximations_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -487,14 +487,14 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InputApproximatorInterface> best;
+        SharedPointer<InputApproximator> best;
         FloatDP best_volume(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
 
         SizeType i = 0;
         for (auto i : range(approximations_to_use.size())) {
-            this->_approximator = approximations_to_use.at(i);
+            this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximations_to_use.at(i)));
             ARIADNE_LOG(4,"checking approximation "<<this->_approximator->kind()<<"\n");
 
             ValidatedVectorFunctionModelDP current_reach_function;
@@ -605,12 +605,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             ARIADNE_LOG(3,"chosen approximation: " << best->kind() << "\n");
 
         for (auto appro : approximations_to_use) {
-            if (best->kind() == appro->kind())
-                delays[appro->kind()] = 0;
+            if (best->kind() == appro.kind())
+                delays[appro.kind()] = 0;
             else
-                delays[appro->kind()]++;
+                delays[appro.kind()]++;
 
-            Nat offset = 1<<delays[appro->kind()];
+            Nat offset = 1<<delays[appro.kind()];
             schedule.push_back(ScheduledApproximation(step+offset,appro));
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());

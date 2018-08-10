@@ -88,28 +88,29 @@ class TestInclusionIntegrator {
 
         for (auto approx: range(0,5)) {
 
-            List<SharedPointer<InputApproximator>> approximations;
+            List<SharedPointer<InputApproximatorInterface>> approximations;
+            InputApproximatorFactory factory;
 
             SizeType ppi = 0;
             switch (approx) {
                 case 0:
-                    approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
+                    approximations.append(factory.create(f,g,V,InputApproximation::ZERO,sweeper));
                     ppi = 0;
                     break;
                 case 1:
-                    approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f,g,V,sweeper)));
+                    approximations.append(factory.create(f,g,V,InputApproximation::CONSTANT,sweeper));
                     ppi = 1;
                     break;
                 case 2:
-                    approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f,g,V,sweeper)));
+                    approximations.append(factory.create(f,g,V,InputApproximation::AFFINE,sweeper));
                     ppi = 2;
                     break;
                 case 3:
-                    approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
+                    approximations.append(factory.create(f,g,V,InputApproximation::SINUSOIDAL,sweeper));
                     ppi = 2;
                     break;
                 case 4:
-                    approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
+                    approximations.append(factory.create(f,g,V,InputApproximation::PIECEWISE,sweeper));
                     ppi = 2;
                     break;
                 default:
@@ -247,15 +248,16 @@ class TestInclusionIntegrator {
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
-        List<SharedPointer<InputApproximator>> approximations;
-        approximations.append(SharedPointer<InputApproximator>(new PiecewiseInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new SinusoidalInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new AffineInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new ConstantInputApproximator(f,g,V,sweeper)));
-        approximations.append(SharedPointer<InputApproximator>(new ZeroInputApproximator(f,g,V,sweeper)));
+        List<SharedPointer<InputApproximatorInterface>> approximations;
+        InputApproximatorFactory factory;
+        approximations.append(factory.create(f,g,V,InputApproximation::PIECEWISE,sweeper));
+        approximations.append(factory.create(f,g,V,InputApproximation::SINUSOIDAL,sweeper));
+        approximations.append(factory.create(f,g,V,InputApproximation::AFFINE,sweeper));
+        approximations.append(factory.create(f,g,V,InputApproximation::CONSTANT,sweeper));
+        approximations.append(factory.create(f,g,V,InputApproximation::ZERO,sweeper));
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
-        integrator.verbosity = 0;
+        integrator.verbosity = 1;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
         //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);
@@ -599,15 +601,15 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_clock());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_reactor());
-    /*ARIADNE_TEST_CALL(test_lotka_volterra());
-    ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_lotka_volterra());
+    /*ARIADNE_TEST_CALL(test_jet_engine());
     ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jerk21());
     ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
     ARIADNE_TEST_CALL(test_jerk16());
-    ARIADNE_TEST_CALL(test_DCDC());*/
-    ARIADNE_TEST_CALL(test_harmonic());
+    ARIADNE_TEST_CALL(test_DCDC());
+    ARIADNE_TEST_CALL(test_harmonic());*/
 }
 
 int main() {

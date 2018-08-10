@@ -32,9 +32,9 @@ namespace Ariadne {
 struct ScheduledApproximation
 {
     SizeType step;
-    SharedPointer<InputApproximator> approximation;
+    SharedPointer<InputApproximatorInterface> approximation;
 
-    ScheduledApproximation(SizeType step, SharedPointer<InputApproximator> approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximation(SizeType step, SharedPointer<InputApproximatorInterface> approximation) : step(step), approximation(approximation) {}
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
@@ -82,13 +82,13 @@ Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVar
     return Pair<RealAssignments,RealVariablesBox>(assignments,new_bounds);
 }
 
-FloatDPError get_r(InputApproximationKind approx_kind) {
+FloatDPError get_r(InputApproximation approx_kind) {
     switch (approx_kind) {
-    case InputApproximationKind::AFFINE:
+    case InputApproximation::AFFINE:
         return FloatDPError(5.0/3u);
-    case InputApproximationKind::SINUSOIDAL:
+    case InputApproximation::SINUSOIDAL:
         return FloatDPError(5.0/4u);
-    case InputApproximationKind::PIECEWISE:
+    case InputApproximation::PIECEWISE:
         return FloatDPError(1.3645_upper);
     default:
         ARIADNE_FAIL_MSG("A value of 'r' does not exist for kind " << approx_kind << "\n");
@@ -99,14 +99,14 @@ Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<Exa
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<InputApproximationKind,SizeType>& approximation_global_frequencies) {
+Map<InputApproximation,FloatDP> convert_to_percentages(const Map<InputApproximation,SizeType>& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InputApproximationKind,FloatDP> result;
+    Map<InputApproximation,FloatDP> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1.0/total_steps*entry.second;
     }
@@ -245,6 +245,18 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     return Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
+SharedPointer<InputApproximatorInterface>
+InputApproximatorFactory::create(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximation kind, SweeperDP sweeper) const {
+
+    switch(kind) {
+    case InputApproximation::ZERO : return SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(f,g,V,sweeper));
+    case InputApproximation::CONSTANT : return SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(f,g,V,sweeper));
+    case InputApproximation::AFFINE : return SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(f,g,V,sweeper));
+    case InputApproximation::SINUSOIDAL: return SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(f,g,V,sweeper));
+    case InputApproximation::PIECEWISE : return SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(f,g,V,sweeper));
+    }
+}
+
 
 Vector<ErrorType> ApproximationErrorProcessor::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
 
@@ -377,7 +389,7 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximator>> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximatorInterface>> approximations, SweeperDP sweeper, StepSize step_size)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
@@ -409,7 +421,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
-    Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
     for (auto appro: _approximations) {
         approximation_global_frequencies[appro->getKind()] = 0;
         approximation_local_frequencies[appro->getKind()] = 0;
@@ -420,7 +432,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     auto step = 0;
 
     List<ScheduledApproximation> schedule;
-    Map<SharedPointer<InputApproximator>,Nat> delays;
+    Map<SharedPointer<InputApproximatorInterface>,Nat> delays;
     for (auto appro: _approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
         delays[appro] = 0;
@@ -433,7 +445,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<SharedPointer<InputApproximator>> approximations_to_use;
+        List<SharedPointer<InputApproximatorInterface>> approximations_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -469,7 +481,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         ValidatedVectorFunctionModelDP reach_function;
         ValidatedVectorFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InputApproximator> best;
+        SharedPointer<InputApproximatorInterface> best;
         FloatDP best_volume(0);
 
         ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
@@ -482,7 +494,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             ValidatedVectorFunctionModelDP current_reach_function;
             ValidatedVectorFunctionModelDP current_evolve_function;
 
-            if (this->_approximation->getKind() != InputApproximationKind::PIECEWISE) {
+            if (this->_approximation->getKind() != InputApproximation::PIECEWISE) {
 
                 auto Phi = this->compute_flow_function(dynamics,inputs,initial,f,g,V,D,h,B);
 
@@ -612,10 +624,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             for (auto appro: approximation_local_frequencies) {
                 SizeType ppi;
                 switch (appro.first) {
-                    case InputApproximationKind::ZERO:
+                    case InputApproximation::ZERO:
                         ppi = 0;
                         break;
-                    case InputApproximationKind::CONSTANT:
+                    case InputApproximation::CONSTANT:
                         ppi = 1;
                         break;
                     default:

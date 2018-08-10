@@ -506,6 +506,12 @@ intersection(const EffectiveBoxType& bx,const ConstraintSet& cs)
 }
 
 BoundedConstraintSet
+intersection(const BoundedConstraintSet& bcs1,const BoundedConstraintSet& bcs2)
+{
+    return BoundedConstraintSet(intersection(bcs1.constraint_bounds(),bcs2.constraint_bounds()),catenate(bcs1.constraints(),bcs2.constraints()));
+}
+
+BoundedConstraintSet
 intersection(const BoundedConstraintSet& bcs,const EffectiveBoxType& bx)
 {
     return BoundedConstraintSet(intersection(bcs.constraint_bounds(),bx),bcs.constraints());

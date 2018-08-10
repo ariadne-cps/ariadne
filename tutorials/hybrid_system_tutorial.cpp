@@ -35,6 +35,7 @@
 namespace Ariadne {
 namespace HeatingSystemTutorial {
 
+using std::cout; using std::endl; using std::flush;
 using namespace Ariadne;
 
 template<class T> void write(const char* filename, const T& t) {

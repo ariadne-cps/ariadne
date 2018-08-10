@@ -24,6 +24,7 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 
+using std::cout; using std::endl; using std::flush;
 using namespace Ariadne;
 
 

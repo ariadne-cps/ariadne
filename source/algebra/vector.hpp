@@ -125,6 +125,14 @@ struct DeclareVectorOperations {
     template<class X1, class X2> friend Vector<InplaceDifferenceType<X1,X2>>& operator-=(Vector<X1>& v1, const Vector<X2>& v2);
     template<class X1, class X2> friend Vector<InplaceProductType<X1,X2>>& operator*=(Vector<X1>& v1, X2 const& x2);
     template<class X1, class X2> friend Vector<InplaceQuotientType<X1,X2>>& operator/=(Vector<X1>& v1, X2 const& x2);
+    template<class X> friend Vector<X> nul(Vector<X> const& v);
+    template<class X> friend Vector<X> pos(Vector<X> const& v);
+    template<class X> friend Vector<NegationType<X>> neg(Vector<X> const& v);
+    template<class X1, class X2> friend Vector<SumType<X1,X2>> add(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> sub(Vector<X1> const& v1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> mul(X1 const& x1, Vector<X2> const& v2);
+    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> mul(Vector<X1> const& v1, X2 const& x2);
+    template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> div(Vector<X1> const& v1, X2 const& x2);
     template<class X> friend decltype(abs(declval<X>())) norm(Vector<X> const& v);
     template<class X> friend decltype(mag(declval<X>())) sup_norm(Vector<X> const& v);
     template<class X> friend decltype(sqrt(sqr(declval<X>()))) two_norm(Vector<X> const& v);
@@ -297,6 +305,15 @@ class Vector
     //! \brief %Scalar division.
     friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())>(const Vector<X1>& v, const X2& s);
 
+    friend template<class X> Vector<X> nul(Vector<X> const& v);
+    friend template<class X> decltype(auto) pos(Vector<X> const& v) { return +v; }
+    friend template<class X> decltype(auto) neg(Vector<X> const& v) { return -v; }
+    friend template<class X1, class X2> decltype(auto) add(Vector<X1> const& v1, Vector<X2> const& v2) { return v1+v2; }
+    friend template<class X1, class X2> decltype(auto) sub(Vector<X1> const& v1, Vector<X2> const& v2) { return v1-v2; }
+    friend template<class X1, class X2> decltype(auto) mul(X1 const& s1, Vector<X2> const& v2) { return s1*v2; }
+    friend template<class X1, class X2> decltype(auto) mul(Vector<X1> const& v1, X2 const& s2) { return v1*s2; }
+    friend template<class X1, class X2> decltype(auto) div(Vector<X1> const& v1, X2 const& s2) { return v1/s2; }
+
     //! \brief The supremum norm.
     friend template<class X> X norm(const Vector<X>& v);
     //! \brief The inner product.
@@ -402,6 +419,15 @@ struct ProvideVectorOperations {
     template<class X1,class X2> friend Vector<InplaceQuotientType<X1,X2>>& operator/=(Vector<X1>& v1, X2 const& s2) {
         for(SizeType i=0; i!=v1.size(); ++i) { v1[i]/=s2; } return v1;
     }
+
+    template<class X> friend Vector<X> nul(Vector<X> const& v) { return Vector<X>(v.size(),v.zero_element()); }
+    template<class X> friend Vector<X> pos(Vector<X> const& v) { return +v; }
+    template<class X> friend Vector<NegationType<X>> neg(Vector<X> const& v) { return -v; }
+    template<class X1, class X2> friend Vector<SumType<X1,X2>> add(Vector<X1> const& v1, Vector<X2> const& v2) { return v1+v2; }
+    template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> sub(Vector<X1> const& v1, Vector<X2> const& v2) { return v1-v2; }
+    template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> mul(X1 const& s1, Vector<X2> const& v2) { return s1*v2; }
+    template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> mul(Vector<X1> const& v1, X2 const& s2) { return v1*s2; }
+    template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> div(Vector<X1> const& v1, X2 const& s2) { return v1/s2; }
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());

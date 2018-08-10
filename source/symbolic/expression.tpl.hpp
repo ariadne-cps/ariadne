@@ -13,7 +13,7 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOperatorCode::OR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
@@ -37,6 +37,9 @@
 #include "function/formula.hpp"
 
 namespace Ariadne {
+
+#warning
+Vector<Real> mul(Vector<Real> const&, Real const&);
 
 using Eq = Equal;
 using Neq = Unequal;
@@ -74,6 +77,12 @@ template<> struct OperatorTypedef<Boolean(Boolean,Boolean)> { typedef BinaryLogi
 template<> struct OperatorTypedef<Kleenean(Kleenean)> { typedef UnaryLogicalOperator Type; };
 template<> struct OperatorTypedef<Kleenean(Kleenean,Kleenean)> { typedef BinaryLogicalOperator Type; };
 
+template<> struct OperatorTypedef<RealVector(RealVector)> { typedef OperatorVariant<Nul,Pos,Neg> Type; };
+template<> struct OperatorTypedef<RealVector(RealVector,RealVector)> { typedef OperatorVariant<Add,Sub> Type; };
+template<> struct OperatorTypedef<RealVector(Real,RealVector)> { typedef OperatorVariant<Mul> Type; };
+template<> struct OperatorTypedef<RealVector(RealVector,Real)> { typedef OperatorVariant<Mul,Div> Type; };
+template<> struct OperatorTypedef<Real(RealVector,SizeType)> { typedef OperatorVariant<Get> Type; };
+
 template<class SIG> struct SymbolicTypedef;
 template<class SIG> using SymbolicType = typename SymbolicTypedef<SIG>::Type;
 
@@ -83,6 +92,11 @@ template<class R, class A1, class A2> struct SymbolicTypedef<R(A1,A2)> {
     typedef Symbolic<OperatorType<R(A1,A2)>,Expression<A1>,Expression<A2>> Type; };
 template<class R, class... AS> struct SymbolicTypedef<R(AS...)> {
     typedef Symbolic<OperatorType<R(AS...)>,Expression<AS>...> Type; };
+
+template<> struct SymbolicTypedef<Real(Real,Integer)> {
+    typedef Symbolic<OperatorType<Real(Real,Integer)>,Expression<Real>,Int> Type; };
+template<> struct SymbolicTypedef<Real(RealVector,SizeType)> {
+    typedef Symbolic<OperatorType<Real(RealVector,SizeType)>,Expression<RealVector>,SizeType> Type; };
 
 
 template<class T> struct ExpressionVariantTypedef;
@@ -100,7 +114,18 @@ template<> struct ExpressionVariantTypedef<Integer> {
 template<> struct ExpressionVariantTypedef<Real> {
     typedef Variant< Constant<Real>, Variable<Real>,
                      SymbolicType<Real(Real)>, SymbolicType<Real(Real,Real)>,
-                     Symbolic<OperatorType<Real(Real,Integer)>,Expression<Real>,Int> > Type;
+                     SymbolicType<Real(Real,Integer)>,
+                     //Symbolic<OperatorType<Real(Real,Integer)>,
+                     //Symbolic<OperatorType<Real(RealVector,SizeType)>,RealVector,SizeType>,
+                     SymbolicType<Real(RealVector,SizeType)> > Type;
+};
+
+template<> struct ExpressionVariantTypedef<RealVector> {
+    typedef Variant< Constant<RealVector>, Variable<RealVector>,
+                     //Variables<Real>,
+                     Vector<Expression<Real>>,
+                     SymbolicType<RealVector(RealVector)>, SymbolicType<RealVector(RealVector,RealVector)>,
+                     SymbolicType<RealVector(Real,RealVector)>,SymbolicType<RealVector(RealVector,Real)> > Type;
 };
 
 template<> struct ExpressionVariantTypedef<Boolean> {
@@ -151,11 +176,12 @@ template<class T> using VariableExpressionNode = Variable<T>;
 template<class R, class A=R> using UnaryExpressionNode = Symbolic<OperatorType<R(A)>,Expression<A>>;
 template<class R, class A1=R, class A2=A1> using BinaryExpressionNode = Symbolic<OperatorType<R(A1,A2)>,Expression<A1>,Expression<A2>>;
 template<class R, class A=R, class N=Int> using GradedExpressionNode = Symbolic<OperatorType<R(A,N)>,Expression<A>,N>;
+template<class R> using IndexExpressionNode = Symbolic<OperatorVariant<Get>,Vector<R>,SizeType>;
 
 
 template<class T> Expression<T>::Expression() : Expression(T()) { }
 template<class T> Expression<T>::Expression(const T& c) : Expression(Constant<T>(c)) { }
-template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new ExpressionNode<T>(c)) { }
+template<class T> Expression<T>::Expression(const Constant<T>& c) : _root(new ExpressionNode<T>(c)) { }
 template<class T> Expression<T>::Expression(const Variable<T>& v) : _root(new ExpressionNode<T>(v)) { }
 
 template<> Expression<String>::Expression(const String& c): _root(new ExpressionNode<String>(Constant<String>(c))) { }
@@ -208,12 +234,27 @@ template<class T> OutputStream& OperatorExpressionWriter::_write(OutputStream& o
     e.node_ref().accept([this,&os](auto expr){OperatorSymbolicWriter(*this)._write(os,expr);}); return os;
 }
 
+#warning
+inline Expression<Vector<Real>> make_expression(const Constant<Vector<Real>>& c);
+inline Expression<Vector<Real>> make_expression(const Vector<Real>& c);
+
 template<class R> inline
 Expression<R> make_expression(const Constant<R>& c) {
     return Expression<R>(std::make_shared<NamedConstantExpressionNode<R>>(c)); }
 template<class R> inline
 Expression<R> make_expression(const R& c) {
     return Expression<R>(std::make_shared<ExpressionNode<R>>(ConstantExpressionNode<R>(Constant<R>(c)))); }
+
+#warning
+/*
+template<class T> inline
+Expression<T> make_expression(Get op, const Expression<Vector<T>>& ve, SizeType i) {
+    return Expression<T>(std::make_shared<ExpressionNode<T>>(IndexExpressionNode<T>(op,ve,i))); }
+template<class T> inline
+Expression<T> make_expression(OperatorVariant<Get> op, const Expression<Vector<T>>& ve, SizeType i) {
+    return Expression<T>(std::make_shared<ExpressionNode<T>>(IndexExpressionNode<T>(op,ve,i))); }
+*/
+
 template<class R, class A> inline
 Expression<R> make_expression(OperatorType<R(A)> op, const Expression<A>& e) {
     return Expression<R>(std::make_shared<ExpressionNode<R>>(UnaryExpressionNode<R,A>(op,e))); }
@@ -223,6 +264,10 @@ Expression<R> make_expression(OperatorType<R(A,N)> op, const Expression<A>& e, N
 template<class R, class A1, class A2> inline
 Expression<R> make_expression(OperatorType<R(A1,A2)> op, const Expression<A1>& e1, Expression<A2> e2) {
     return Expression<R>(std::make_shared<ExpressionNode<R>>(BinaryExpressionNode<R,A1,A2>(op,e1,e2))); }
+
+template<class N> inline
+Expression<Real> make_expression(OperatorType<Real(Vector<Real>,N)> op, const Expression<Vector<Real>>& e, N n) {
+    return Expression<Real>(std::make_shared<ExpressionNode<Real>>(IndexExpressionNode<Real>(op,e,n))); }
 
 template<class R, class OP, class A> inline
 Expression<R> make_expression(OP op, const Expression<A> e) {
@@ -286,8 +331,11 @@ template<class X, class Y, class OP, class E> Expression<X> _substitute(const Sy
     return e._op(substitute(e._arg,v,s)); }
 template<class X, class Y, class OP, class E1, class E2> Expression<X> _substitute(const Symbolic<OP,E1,E2>& e, const Variable<Y>& v, const Expression<Y>& s) {
     return e._op(substitute(e._arg1,v,s),substitute(e._arg2,v,s)); }
-template<class X, class Y, class OP, class E> Expression<X> _substitute(const Symbolic<OP,E,Int>& e, const Variable<Y>& v, const Expression<Y>& s) {
+template<class X, class Y, class OP, class E, class N> requires AGraded<OP> Expression<X> _substitute(const Symbolic<OP,E,N>& e, const Variable<Y>& v, const Expression<Y>& s) {
     return e._op(substitute(e._arg,v,s),e._num); }
+#warning
+template<class X, class Y, class OP, class E, class I> requires AGetter<OP> Expression<X> _substitute(const Symbolic<OP,E,I>& e, const Variable<Y>& v, const Expression<Y>& s) {
+    return e._op(substitute(e._vec,v,s),e._ind); }
 }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& s) {
@@ -322,6 +370,9 @@ template<class X, class Y> Vector<Expression<X>> substitute(const Vector<Express
 
 inline Bool same(Kleenean k1, Kleenean k2) { return definitely(k1==k2); }
 
+#warning
+template<class T> inline Bool same(Vector<T> v1, Vector<T> v2);
+template<class T> inline Bool identical(Vector<T> v1, Vector<T> v2);
 
 
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2)
@@ -353,6 +404,24 @@ template<class E> inline E _simplify_node(const UnaryExpressionNode<Kleenean,Rea
 template<class E> inline E _simplify_node(const BinaryExpressionNode<Kleenean,Real,Real>& e) {
     return make_expression<Kleenean>(e.op(),simplify(e.arg1()),simplify(e.arg2()));
 }
+#warning
+template<class E> inline E _simplify_node(const SymbolicType<Real(RealVector,SizeType)>& e) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+//template<class E> inline E _simplify_node(const Symbolic<OperatorType<Kleenear(Real,Real)>,Expression<Real>,Expression<Real>>;& e) {
+//    return make_expression<Kleenean>(e.op(),simplify(e.arg1()),simplify(e.arg2()));
+//}
+//template<class R, class A=R> using UnaryExpressionNode = Symbolic<OperatorType<R(A)>,Expression<A>>;
+//template<class R, class A1=R, class A2=A1> using BinaryExpressionNode = Symbolic<OperatorType<R(A1,A2)>,Expression<A1>,Expression<A2>>;
+//template<class R, class A=R, class N=Int> using GradedExpressionNode = Symbolic<OperatorType<R(A,N)>,Expression<A>,N>;
+
+
+//template<class E> inline E _simplify_node(const Symbolic<GradedElementaryOperator,Symbolic<Get,RealVector,SizeType>,RealExpression,Int>& e) {
+//    return e; }
+#warning
+//template<class E> inline E _simplify_node(const GradedExpressionNode<Real,RealVector,SizeType>& e) {
+//    return e;
+//}
 
 Expression<Real> _simplify(const Expression<Real>& e) {
     // Need to dispatch here to allow use of specialisation for UnaryExpressionNode<T>, which correctly handles constants
@@ -370,6 +439,8 @@ template<class X> Expression<X> simplify(const Expression<X>& e) {
 }
 
 
+template<class T> Bool _before(Vector<T> const& c1, Vector<T> const& c2);
+template<class T> Bool _before(Constant<Vector<T>> const& c1, Constant<Vector<T>> const& c2);
 
 template<class T> Bool _before(Constant<T> const& c1, Constant<T> const& c2) {
     return decide(c1<c2); }
@@ -388,6 +459,11 @@ template<class OP, class A> Bool _before(Symbolic<OP,A,Int> const& s1, Symbolic<
         if (s1.num() == s2.num()) { return before(s1.arg(),s2.arg()); }
         else { return s1.num() < s2.num(); }
     } else { return s1.op().code() < s2.op().code(); } }
+template<class OP, class V, class I> requires AGetter<OP> Bool _before(Symbolic<OP,V,I> const& s1, Symbolic<OP,V,I> const& s2) {
+    if (s1.op().code() == s2.op().code()) {
+        if (s1.ind() == s2.ind()) { return before(s1.vec(),s2.vec()); }
+        else { return s1.ind() < s2.ind(); }
+    } else { return s1.op().code() < s2.op().code(); } }
 
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) {
     if (e1.node_ref().index() == e2.node_ref().index()) {
@@ -402,6 +478,10 @@ struct ExpressionComparator {
 };
 
 template<class T, class CMP=ExpressionComparator> using ExpressionSet = std::set<Expression<T>,CMP>;
+
+template<class T> Expression<Vector<T>> eliminate_common_vector_subexpressions(const Expression<Vector<T>>& e) {
+    return e;
+}
 
 template<class T> class CommonSubroutineEliminator {
     ExpressionSet<T> _cache;
@@ -438,6 +518,15 @@ template<class T> class CommonSubroutineEliminator {
             _cache.insert(new_e); return new_e;
         }
     }
+    Expression<T> operator()(const Symbolic<OperatorVariant<Get>,Expression<RealVector>,SizeType>& s, const Expression<T>& e) {
+        auto new_vec = eliminate_common_vector_subexpressions(s.vec());
+        if(new_vec.node_raw_ptr() == s.vec().node_raw_ptr()) {
+            _cache.insert(e); return e;
+        } else {
+            Expression<T> new_e=make_expression<T>(s.op(),new_vec,s.ind());
+            _cache.insert(new_e); return new_e;
+        }
+    }
 };
 template<class T> Expression<T> CommonSubroutineEliminator<T>::eliminate_common_subexpressions(const Expression<T>& e) {
     auto iter=this->_cache.find(e);
@@ -463,18 +552,23 @@ struct ExpressionPtrComparator {
     template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return a1.node_raw_ptr() < a2.node_raw_ptr(); }
 };
 
-
+#warning Should count nodes of expressions of different types
 template<class T, class CMP, Bool distinct> class NodeCounter {
-    ExpressionSet<T,CMP> cache; SizeType count;
+    ExpressionSet<T,CMP> cache; ExpressionSet<Vector<T>,CMP> vcache; SizeType count;
   public:
-    NodeCounter() : cache(), count(0u) { }
+    NodeCounter() : cache(), vcache(), count(0u) { }
     SizeType count_nodes (Expression<T> const& e);
+    SizeType count_nodes (Expression<Vector<T>> const& ve);
   private: public:
     Void operator() (ConstantExpressionNode<T> const& e) { }
     Void operator() (VariableExpressionNode<T> const& e) { }
     Void operator() (BinaryExpressionNode<T> const& e) { this->count_nodes(e.arg1()); this->count_nodes(e.arg2()); }
     Void operator() (UnaryExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
     Void operator() (GradedExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
+    Void operator() (IndexExpressionNode<T> const& e) { this->count_nodes(e.vec()); }
+    Void operator() (BinaryExpressionNode<Vector<T>> const& e) { this->count_nodes(e.arg1()); this->count_nodes(e.arg2()); }
+#warning
+    template<class S> Void operator() (S const& e) { }
 };
 
 template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::count_nodes(Expression<T> const& e) -> SizeType {
@@ -486,6 +580,17 @@ template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::co
     }
     return count;
 }
+
+template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::count_nodes(Expression<Vector<T>> const& ve) -> SizeType {
+    auto iter=vcache.find(ve);
+    if (!distinct || iter==vcache.end()) {
+        vcache.insert(ve);
+        ve.node_ref().accept(*this);
+        count++;
+    }
+    return count;
+}
+
 
 
 template<class T> SizeType count_nodes(Expression<T> const& e) {

@@ -51,7 +51,7 @@ class UntypedVariable;
 class ExtendedUntypedVariable;
 
 
-enum class VariableType : char { BOOLEAN, KLEENEAN, ENUMERATED, STRING, INTEGER, REAL };
+enum class VariableType : char { BOOLEAN, KLEENEAN, ENUMERATED, STRING, INTEGER, REAL, REAL_VECTOR, REAL_MATRIX };
 
 template<class T> inline VariableType variable_type() { ARIADNE_FAIL_MSG("Unknown variable type"); }
 template<> inline constexpr VariableType variable_type<Boolean>() { return VariableType::BOOLEAN; }
@@ -59,6 +59,8 @@ template<> inline constexpr VariableType variable_type<Kleenean>() { return Vari
 template<> inline constexpr VariableType variable_type<String>() { return VariableType::STRING; }
 template<> inline constexpr VariableType variable_type<Integer>() { return VariableType::INTEGER; }
 template<> inline constexpr VariableType variable_type<Real>() { return VariableType::REAL; }
+template<> inline constexpr VariableType variable_type<RealVector>() { return VariableType::REAL_VECTOR; }
+template<> inline constexpr VariableType variable_type<RealMatrix>() { return VariableType::REAL_MATRIX; }
 
 inline String class_name(const VariableType& tp) {
     switch(tp) {
@@ -68,6 +70,8 @@ inline String class_name(const VariableType& tp) {
         case VariableType::STRING: return "String";
         case VariableType::INTEGER: return "Integer";
         case VariableType::REAL: return "Real";
+        case VariableType::REAL_VECTOR: return "RealVector";
+        case VariableType::REAL_MATRIX: return "RealMatrix";
         default:
             ARIADNE_FAIL_MSG("Unhandled VariableType for output stream");
     }

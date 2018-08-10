@@ -43,6 +43,8 @@
 #include "symbolic/templates.tpl.hpp"
 #include "expression.tpl.hpp"
 
+#warning expression.decl.hpp line 150 commented-out code
+
 namespace Ariadne {
 
 template<> Expression<Real>::operator ElementaryAlgebra<Real>() const {
@@ -206,6 +208,41 @@ Expression<Real> min(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> abs(Expression<Real> const& e) {
     return make_expression<Real>(Abs(),e); }
 
+Expression<RealVector> operator+(Expression<RealVector> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Add(),e1,e2); }
+Expression<RealVector> operator-(Expression<RealVector> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Sub(),e1,e2); }
+Expression<RealVector> operator*(Expression<Real> const& e1, Expression<RealVector> const& e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator*(Expression<RealVector> const& e1, Expression<Real> const& e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator/(Expression<RealVector> const& e1, Expression<Real> const& e2) {
+    return make_expression<RealVector>(Div(),e1,e2); }
+
+#warning
+Expression<RealVector>::Expression(RealVector v)
+    : _root(new ExpressionNode<T>(Constant<T>(v))) { }
+Expression<RealVector>::Expression(Vector<Expression<Real>> ve)
+    : _root(std::make_shared<ExpressionNode<T>>(ve)) { }
+Expression<RealVector>::Expression(RealVariables vars)
+    : Expression(Vector<Expression<Real>>(vars)) { }
+Expression<RealVector>::Expression(InitializerList<Expression<Real>> vars)
+    : Expression(Vector<Expression<Real>>(vars)) { }
+Expression<Real> Expression<RealVector>::get(SizeType i) const {
+    return make_expression<Real>(OperatorType<Real(RealVector,SizeType)>(Get()),*this,i); }
+//    return Expression<Real>(std::make_shared(new ExpressionNode<Real>(Get(),*this,i))); }
+//    ARIADNE_NOT_IMPLEMENTED; }
+Expression<RealVector> operator+(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Add(),e1,e2); }
+Expression<RealVector> operator-(Expression<RealVector> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Sub(),e1,e2); }
+Expression<RealVector> operator*(Expression<Real> e1, Expression<RealVector> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator*(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Mul(),e1,e2); }
+Expression<RealVector> operator/(Expression<RealVector> e1, Expression<Real> e2) {
+    return make_expression<RealVector>(Div(),e1,e2); }
+
 template String evaluate(const Expression<String>& e, const Valuation<String>& x);
 template Integer evaluate(const Expression<Integer>& e, const Valuation<Integer>& x);
 template Real evaluate(const Expression<Real>& e, const Valuation<Real>& x);
@@ -332,6 +369,8 @@ inline Bool is_additive_in(RVcr v, RVcr var) { return true; }
 template<class OP> inline Bool is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
 template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
 template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in(e._op,e._arg1,e._arg2,var); }
+#warning
+template<class OP> inline Bool is_additive_in(Symbolic<OP,Expression<RealVector>,SizeType> const&, RVcr var) { return false; }
 }
 
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& var) {
@@ -436,6 +475,10 @@ template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Binar
 template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
     return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
 
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const SymbolicType<Real(RealVector,SizeType)>& e, const SPC& spc, CACHE& cache) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
     const ExpressionNode<Real>* eptr=&e.node_ref();
@@ -531,5 +574,8 @@ template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expres
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<Integer> const& e) const;
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<String> const& e) const;
 template OutputStream& OperatorExpressionWriter::_write(OutputStream& os, Expression<Boolean> const& e) const;
+
+template<> String class_name<RealVariables>() { return "RealVariables"; }
+template<> String class_name<Expression<RealVector>>() { return "Expression<Vector<Real>>"; }
 
 } // namespace Ariadne

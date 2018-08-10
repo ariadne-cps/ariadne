@@ -142,7 +142,66 @@ class Expression
     SharedPointer<const ExpressionNode<T>> _root;
 };
 
-//!@{
+template<class T> Bool same(Expression<T> const& e1, Expression<T> const& e2) { return identical(e1,e2); }
+
+template<>
+class Expression<Vector<Real>>
+    : public DeclareExpressionOperations<Real>
+{
+    typedef Vector<Real> T;
+  public:
+    // Use template formulation to avoid ambiguity treating Expression(0) as a pointer construction.
+    template<ConvertibleTo<SharedPointer<const ExpressionNode<T>>> P>
+        explicit Expression(P const& eptr) : _root(eptr) { }
+  public:
+    Expression(InitializerList<Expression<Real>>);
+    Expression(Vector<Real>);
+    Expression(Variables<Real>);
+    Expression(Vector<Expression<Real>>);
+    Operator op() const;
+    Expression<Real> get(SizeType i) const;
+    Void set(SizeType i, Expression<Real>);
+    Expression<Real> operator[](SizeType i) const { return this->get(i); }
+    friend Expression<Vector<Real>> operator+(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> operator-(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> operator*(Expression<Real>, Expression<Vector<Real>>);
+    friend Expression<Vector<Real>> operator*(Expression<Vector<Real>>, Expression<Real>);
+    friend Expression<Vector<Real>> operator/(Expression<Vector<Real>>, Expression<Real>);
+    friend Expression<Vector<Real>> join(Expression<Vector<Real>>, Expression<Vector<Real>>);
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, Expression<Vector<Real>> const& e) { return e._write(os); }
+  public:
+    SharedPointer<const ExpressionNode<T>> node_ptr() const { return _root; }
+    const ExpressionNode<T>* node_raw_ptr() const { return _root.operator->(); }
+    const ExpressionNode<T>& node_ref() const { return _root.operator*(); }
+  private:
+    OutputStream& _write(OutputStream& os) const;
+  private:
+    SharedPointer<const ExpressionNode<Vector<Real>>> _root;
+};
+
+template<>
+class Expression<Matrix<Real>>
+    : public DeclareExpressionOperations<Real>
+{
+    typedef Matrix<Real> T;
+  public:
+    Expression(Matrix<Real>);
+    Expression(Matrix<Expression<Real>>);
+    Expression<Real> get(SizeType i) const;
+    Void set(SizeType i, Expression<Real>);
+    friend Expression<Matrix<Real>> operator+(Expression<Matrix<Real>>, Expression<Matrix<Real>>);
+    friend Expression<Matrix<Real>> operator-(Expression<Matrix<Real>>, Expression<Matrix<Real>>);
+    friend Expression<Matrix<Real>> operator*(Expression<Matrix<Real>>, Expression<Matrix<Real>>);
+    friend Expression<Matrix<Real>> operator*(Expression<Matrix<Real>>, Expression<Scalar<Real>>);
+    friend Expression<Vector<Real>> operator*(Expression<Matrix<Real>>, Expression<Vector<Real>>);
+  private:
+    SharedPointer<const ExpressionNode<Matrix<Real>>> _root;
+};
+
+
+
+//@{
 //! \name Evaluation and related operations.
 //! \related Expression
 

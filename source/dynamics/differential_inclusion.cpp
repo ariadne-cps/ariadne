@@ -52,7 +52,7 @@ BoxDomainType bounds_to_domain(RealVariablesBox const& var_bounds) {
     auto vars = var_bounds.variables();
     List<IntervalDomainType> result;
     for (auto v : vars) {
-        result.push_back(IntervalDomainType(var_bounds[v].lower().get_d(),var_bounds[v].upper().get_d()));
+        result.push_back(cast_exact(widen(IntervalDomainType(var_bounds[v].lower().get_d(),var_bounds[v].upper().get_d()))));
     }
     return Vector<IntervalDomainType>(result);
 }
@@ -282,8 +282,6 @@ ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h,
 ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
     return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r);
 }
-
-
 
 Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
     FloatDPError result1 = noparam_error_option1(n,h);
@@ -859,6 +857,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
         return seriesPhi;
     }
     */
+
 
     return picardPhi;
 }

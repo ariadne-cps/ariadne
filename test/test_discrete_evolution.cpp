@@ -56,14 +56,12 @@ class TestMapEvolver
 
 Int main()
 {
-    TestMapEvolver().test();
+    ARIADNE_TEST_CALL(TestMapEvolver().test());
     return ARIADNE_TEST_FAILURES;
 }
 
 Void TestMapEvolver::test() const
 {
-    cout << __PRETTY_FUNCTION__ << endl;
-
     DoublePrecision pr;
 
     typedef Enclosure EnclosureType;
@@ -73,7 +71,7 @@ Void TestMapEvolver::test() const
     initial_box[0]=ExactIntervalType(1.01,1.03);
     initial_box[1]=ExactIntervalType(0.51,0.53);
 
-    cout << "initial_box=" << initial_box << endl;
+    ARIADNE_TEST_PRINT(initial_box);
 
     // Set up the map field
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
@@ -84,9 +82,9 @@ Void TestMapEvolver::test() const
         EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
         henon = { a-x*x+b*y, x };
     }
-    cout << "henon_function=" << henon << endl;
+    ARIADNE_TEST_PRINT(henon);
 
-    //VectorUserFunction evaluation sanity check
+    // Function evaluation sanity check
     Vector<ApproximateNumericType> p={{a,b},pr};
     Vector<ApproximateNumericType> x={{0.5,0.25},pr};
     Vector<ApproximateNumericType> hx={p[0]-x[0]*x[0]+x[1]*p[1], x[0]};
@@ -95,15 +93,16 @@ Void TestMapEvolver::test() const
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
 
 
-    //VectorUserFunction evaluation sanity check
-    cout << "apply(henon," << initial_box << ") " << flush; cout << " = " << apply(henon,initial_box) << endl;
-    cout << "jacobian_range(henon," << initial_box << ") = " << jacobian_range(henon,initial_box) << endl;
+    // Function evaluation sanity check
+    ARIADNE_TEST_PRINT(initial_box);
+    ARIADNE_TEST_PRINT(image(initial_box,henon));
+    ARIADNE_TEST_PRINT(jacobian_range(henon,initial_box));
 
 
 
     // Over-approximate the initial set by a grid cell
     EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10)));
-    cout << "initial_set=" << initial_set << endl << endl << endl;
+    ARIADNE_TEST_PRINT(initial_set);
 
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);
@@ -117,9 +116,9 @@ Void TestMapEvolver::test() const
     ListSet<EnclosureType> evolve_set,reach_set;
     //evolve_set = evolver.evolve(initial_set,time);
     reach_set = evolver.reach(initial_set,time);
-    cout << "initial_bounding_box=" << initial_set.bounding_box() << endl;
+    ARIADNE_TEST_PRINT(initial_set.bounding_box());
     //cout << "evolve_bounding_boxes=" << evolve_set.bounding_boxes() << endl;
-    cout << "reach_bounding_boxes=" << reach_set.bounding_boxes() << endl;
+    ARIADNE_TEST_PRINT(reach_set.bounding_boxes());
 
     // Print the intial, evolve and reach sets
     Figure fig;

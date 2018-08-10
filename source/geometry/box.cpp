@@ -149,7 +149,7 @@ FloatDPLowerBox under_approximation(const RealBox& rbx) {
     return bx;
 }
 
-FloatDPUpperBox over_approximation(const RealBox& rbx) {
+FloatDPUpperBox over_approximation(const Box& rbx) {
     FloatDPUpperBox bx(rbx.size(),FloatDPUpperInterval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);

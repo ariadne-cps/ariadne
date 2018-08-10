@@ -105,6 +105,10 @@ class Box
     template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
         Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
 
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
+        explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.

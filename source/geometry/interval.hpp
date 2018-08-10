@@ -93,6 +93,12 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
 
 template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
+template<class T, class U> struct IsConstructibleGivenDefaultPrecision {
+    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),declval<TT>().precision()))> static std::true_type test(int);
+    template<class TT, class UU> static std::false_type test(...);
+    static const bool value = decltype(test<T,U>(1))::value;
+};
+
 //! \ingroup GeometryModule
 //! \brief Intervals with upper endoint of type \a U.
 //! \details
@@ -169,6 +175,9 @@ template<class U> class Interval
     //! \brief Construct from an interval of a different type using the given precision.
     template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
         explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
+        explicit Interval(Interval<UU> const& x) : Interval(x,PrecisionType<U>()) { }
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.

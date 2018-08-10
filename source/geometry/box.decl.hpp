@@ -31,6 +31,7 @@ namespace Ariadne {
 template<class IVL> class Box;
 template<class IVL> class VariablesBox;
 
+typedef Box<DyadicInterval> DyadicBox;
 typedef Box<RationalInterval> RationalBox;
 typedef Box<RealInterval> RealBox;
 

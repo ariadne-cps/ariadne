@@ -9,6 +9,7 @@ obj/
 .settings
 .idea
 
+source/config.hpp
 source/*/Makefile
 test/Makefile
 wrap/Makefile

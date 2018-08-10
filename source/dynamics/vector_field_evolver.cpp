@@ -197,9 +197,6 @@ _evolution(EnclosureListType& final_sets,
                         <<" c="<<current_set_model.centre() << "\n");
 
     }
-
-    std::cout << "W_F = " << final_sets[0].bounding_box()[0].upper()  - final_sets[0].bounding_box()[0].lower() + final_sets[0].bounding_box()[1].upper() - final_sets[0].bounding_box()[1].lower() << std::endl;
-
 }
 
 

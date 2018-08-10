@@ -75,13 +75,10 @@ class TestDifferential {
     TestDifferential()
         : x1(2,4), x2(2,4), x3(1,4)
     {
-        double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         c1=3.0;
-        x1=DifferentialType(2,4,a1,pr);
-        x2=DifferentialType(2,4,a2,pr);
-        x3=DifferentialType(1,4,a3,pr);
+        x1=DifferentialType(2,4,{{{0,0},2.0},{{1,0},1.0},{{2,0},0.5}},pr);
+        x2=DifferentialType(2,4,{{{0,0},3.0},{{1,0},1.0},{{2,0},0.25}},pr);
+        x3=DifferentialType(1,4,{{{0,0},2.0},{{1,0},1.0},{{2,0},0.125}},pr);
 
         ARIADNE_TEST_PRINT(x1);
         ARIADNE_TEST_PRINT(x2);
@@ -132,14 +129,10 @@ class TestDifferential {
     }
 
     Void test_mul() {
-        double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
-        double a2[6]={ 2.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
-        double a1m2[6]={ 2.0, 7.0, 11.0, 21.0, 40.0, 40.0 };
-        double acm2[6]={ 10.0, 15.0, 25.0, 35.0, 55.0, 65.0 };
-        DifferentialType x1(2,2,a1);
-        DifferentialType x2(2,2,a2);
-        DifferentialType x1mx2(2,2,a1m2);
-        DifferentialType cmx2(2,2,acm2);
+        DifferentialType x1(2,2,{{{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}},pr);
+        DifferentialType x2(2,2,{{{0,0},2.0}, {{1,0},3.0}, {{0,1},5.0}, {{2,0},7.0}, {{1,1},11.0}, {{0,2},13.0}},pr);
+        DifferentialType x1mx2(2,2,{{{0,0},2.0}, {{1,0},7.0}, {{0,1},11.0}, {{2,0},21.0}, {{1,1},40.0}, {{0,2},40.0}},pr);
+        DifferentialType cmx2(2,2,{{{0,0},10.0}, {{1,0},15.0}, {{0,1},25.0}, {{2,0},35.0}, {{1,1},55.0}, {{0,2},65.0}},pr);
         X c={5,pr};
         ARIADNE_TEST_EQUAL(x1*x2,x1mx2);
         ARIADNE_TEST_EQUAL(c*x2,cmx2);
@@ -149,8 +142,7 @@ class TestDifferential {
     Void test_div() {
         ARIADNE_TEST_CALL(test_rec());
 
-        double a2[6]={ 4.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
-        DifferentialType x2(2,2,a2);
+        DifferentialType x2(2,2,{{{0,0},4.0}, {{1,0},3.0}, {{0,1},5.0}, {{2,0},7.0}, {{1,1},11.0}, {{0,2},13.0}},pr);
 
         ARIADNE_TEST_PRINT(x1);
         ARIADNE_TEST_PRINT(x2);
@@ -176,8 +168,7 @@ class TestDifferential {
     }
 
     Void test_rec() {
-        double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
-        ARIADNE_TEST_CONSTRUCT(DifferentialType,x1,(2,2,a1));
+        ARIADNE_TEST_CONSTRUCT(DifferentialType,x1,(2,2,{{{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}},pr));
         ARIADNE_TEST_PRINT(Series<X>(Rec(),2*x1.value()));
         auto drec=UnivariateDifferential<X>(Rec(),x1.degree(),x1.value());
         ARIADNE_TEST_PRINT(drec);
@@ -196,14 +187,11 @@ class TestDifferential {
 
     Void test_compose() {
         //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double ax[10] = { 3.0,  1.0, 2.0,  1.0, 0.5, 2.0,  0.0, 0.0, 0.0, 0.0 };
-        double ay[4] = { 1.0, 2.0, -3.0, 5.0 };
-        double ayx[10] = { 1.0,  2.0, 4.0,  -1.0, -11.0, -8.0,  -1.0, 15.0, 42.0, 16.0 };
-        double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
-        ARIADNE_TEST_CONSTRUCT(DifferentialType,x,(2,3,ax));
-        ARIADNE_TEST_CONSTRUCT(SeriesType,y,(3,ay));
-        ARIADNE_TEST_CONSTRUCT(SeriesType,id,(3,aid));
-        ARIADNE_TEST_EQUAL(compose(y,x),DifferentialType(2,3,ayx));
+        ARIADNE_TEST_CONSTRUCT(DifferentialType,x,(2,3,{{{0,0},3.0},{{1,0},1.0},{{0,1},2.0},{{2,0},1.0},{{1,1},0.5},{{0,2},2.0}},pr));
+        ARIADNE_TEST_CONSTRUCT(SeriesType,y,(3,{1.0,2.0,-3.0,5.0},pr));
+        ARIADNE_TEST_CONSTRUCT(SeriesType,id,(3,{3.0,1.0,0.0},pr));
+        ARIADNE_TEST_CONSTRUCT(DifferentialType,r,(2,3,{{{0,0},1.},{{1,0},2},{{0,1},4},{{2,0},-1},{{1,1},-11},{{0,2},-8},{{3,0},-1},{{2,1},15},{{1,2},42},{{0,3},16}},pr));
+        ARIADNE_TEST_EQUAL(compose(y,x),r);
         ARIADNE_TEST_EQUAL(compose(id,x),x);
     }
 
@@ -256,12 +244,9 @@ class TestDifferentialVector {
     TestDifferentialVector()
         : x1(1,2,4), x2(1,2,4), x3(1,1,4)
     {
-        double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        x1=DifferentialVectorType(1,2,4,a1);
-        x2=DifferentialVectorType(1,2,4,a2);
-        x3=DifferentialVectorType(1,1,4,a3);
+        x1=DifferentialVectorType(1,2,4,{{ {{0,0},2.0},{{1,0},1.0},{{2,0},0.5} }},pr);
+        x2=DifferentialVectorType(1,2,4,{{ {{0,0},3.0},{{1,0},1.0},{{2,0},0.25} }},pr);
+        x3=DifferentialVectorType(1,2,4,{{ {{0,0},2.0},{{1,0},1.0},{{2,0},0.125} }},pr);
 
         ARIADNE_TEST_CALL(test_degree());
         ARIADNE_TEST_CALL(test_add());
@@ -321,12 +306,9 @@ class TestDifferentialVector {
     }
 
     Void test_differentiate() {
-        double ax[]={ 2,12,7,33,24,13 };
-        DifferentialType x(2,2,ax);
-        double ay[]={ 1,2,3,6,7,9,11,12,13,14 };
-        DifferentialType y(2,3,ay);
-        double az[]={ 0, 1.0,0.0, 1.0,3.0,0.0, 2.0,3.5,9.0,0.0, 2.75,4.0,6.5,14.0,0.0 };
-        DifferentialType z(2,4,az);
+        DifferentialType x(2,2,{{{0,0},2.0}, {{1,0},12.0}, {{0,1},7.0}, {{2,0},33.0}, {{1,1},24.0}, {{0,2},13.0}},pr);
+        DifferentialType y(2,3,{{{0,0},1.0}, {{1,0},2}, {{0,1},3}, {{2,0},6}, {{1,1},7}, {{0,2},9},{{3,0},11},{{2,1},12},{{1,2},13},{{0,3},14}},pr);
+        DifferentialType z(2,4,{ {{1,0},1.0}, {{2,0},1},{{1,1},3}, {{3,0},2.0},{{2,1},3.5},{{1,2},9.0}, {{4,0},2.75},{{3,1},4.0},{{2,2},6.5},{{1,3},14.0} },pr);
         ARIADNE_TEST_EQUAL(derivative(y,0),x);
         ARIADNE_TEST_EQUAL(antiderivative(y,0),z);
         ARIADNE_TEST_PRINT(y);
@@ -337,15 +319,10 @@ class TestDifferentialVector {
     }
 
     Void test_compose() {
-        //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
-        double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
-        double az[10] = { 1.0, -1.0,0.0, 0.5,-0.125,-0.25, -0.25,0.125,0.25,0.0 };
-        double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
-        DifferentialVectorType x(1,2,3,ax);
-        DifferentialType y(1,3,ay);
-        DifferentialType z(2,3,az);
-        DifferentialVectorType id(1,1,3,aid);
+        DifferentialVectorType x(1,2,3,{ {{{0,0},3.0}, {{1,0},1.0}, {{1,1},0.125}, {{0,2},0.25}} },pr);
+        DifferentialType y(1,3,{{{0},1.0},{{1},-1.0},{{2},0.5},{{3},-0.25}},pr);
+        DifferentialType z(2,3,{{{0,0},1.0},{{1,0},-1.0},{{2,0},0.5},{{1,1},-0.125},{{0,2},-0.25},{{3,0},-0.25},{{2,1},0.125},{{1,2},0.25}},pr);
+        DifferentialVectorType id(1,1,3,{ {{{0},3.0},{{1},1.0}} },pr);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_PRINT(y);
         ARIADNE_TEST_PRINT(z);
@@ -395,8 +372,7 @@ class TestDifferentialVector {
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
         Vector<FloatDPApproximation> p(2); p[0]=1.5; p[1]=0.375;
-        double ahxp[12]={ 1.5, 0.0, -0.375, -1.0, 0.0, 0.0,   0.0, 1.0, 0.0, 0.0, 0.0, 0.0 };
-        DifferentialVectorType hxp(2,2,2,ahxp);
+        DifferentialVectorType hxp(2,2,2,{ {{{0,0},1.5}, {{0,1},-0.375}, {{2,0},-1.0}}, {{{1,0},1.0}} },pr);
         ARIADNE_TEST_EQUAL(henon(x,p),hxp);
     }
 };

@@ -99,45 +99,74 @@ template<class X> Differential<X> Differential<X>::variable(SizeType as, DegreeT
     return r;
 }
 
+template<class X> Differential<X> Differential<X>::affine(SizeType as, DegreeType deg, const X& x, const Covector<X>& g) {
+    ARIADNE_ASSERT_MSG(as==g.size(), "g.size()="<<g.size()<<" must equal as="<<as);
+    Differential<X> r(as,deg);
+    MultiIndex a(as);
+    r._expansion.append(a,x);
+    for (SizeType j=0; j!=as; ++j) {
+        a[j]=1;
+        r._expansion.append(a,g[j]);
+        a[j]=0;
+    }
+    return r;
+}
+
+template<class X> Differential<X> Differential<X>::affine(DegreeType deg, const X& x, const Covector<X>& g) {
+    return affine(g.size(),deg,x,g);
+}
 
 
 template<class X> Vector<Differential<X>> Differential<X>::constants(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& c) {
     ARIADNE_ASSERT(c.size()==rs);
-    Vector<Differential<X>> result(rs,Differential(as,deg));
-    for(SizeType i=0; i!=rs; ++i) { result[i]=c[i]; }
-    return result;
+    return constants(as,deg,c);
 }
-
 
 template<class X> Vector<Differential<X>> Differential<X>::variables(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& x) {
     ARIADNE_ASSERT(x.size()==rs);  ARIADNE_ASSERT(as==x.size());
     return variables(deg,x);
 }
 
-
-template<class X> Vector<Differential<X>> Differential<X>::variables(DegreeType deg, const Vector<X>& x) {
-    X zero=x.zero_element();
-    Vector<Differential<X>> result(x.size(),Differential<X>(x.size(),deg,zero));
-    X& one=zero; one=1;
-    MultiIndex a(x.size());
-    for(SizeType i=0; i!=x.size(); ++i) {
-        result[i]._expansion.append(a,x[i]);
-        a[i]=1; result[i]._expansion.append(a,one); a[i]=0;
-    }
-    return result;
+template<class X> Vector<Differential<X>> Differential<X>::constants(SizeType as, DegreeType deg, const Vector<X>& c) {
+    Vector<Differential<X>> r(c.size(),Differential(as,deg));
+    for(SizeType i=0; i!=c.size(); ++i) { r[i]=c[i]; }
+    return r;
 }
 
-//template<class X> UnivariateDifferential<X> Differential<X>::identity(DegreeType deg, const X& x) {
-//    return UnivariateDifferential<X>::variable(deg,x);
-//}
+template<class X> Vector<Differential<X>> Differential<X>::variables(DegreeType deg, const Vector<X>& v) {
+    X zero=v.zero_element();
+    Vector<Differential<X>> r(v.size(),Differential<X>(v.size(),deg,zero));
+    X& one=zero; one=1;
+    MultiIndex a(v.size());
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r[i]._expansion.append(a,v[i]);
+        a[i]=1; r[i]._expansion.append(a,one); a[i]=0;
+    }
+    return r;
+}
+
+template<class X> Vector<Differential<X>> Differential<X>::affine(DegreeType deg, const Vector<X>& v, const Matrix<X>& G) {
+    X zero=v.zero_element();
+    Vector<Differential<X>> r(v.size(),Differential<X>(v.size(),deg,zero));
+    MultiIndex a(r.argument_size());
+    for(SizeType i=0; i!=r.size(); ++i) {
+        r[i]._expansion.append(a,v[i]);
+        for(SizeType j=0; j!=r.argument_size(); ++j) {
+            const X& gij=G[i][j];
+            if(decide(gij!=0)) { a[i]=1; r[i]._expansion.append(a,gij); a[i]=0; }
+        }
+    }
+    return r;
+}
+
 
 template<class X> Differential<X> Differential<X>::identity(DegreeType deg, const X& x) {
-    return Differential<X>::variable(1u,deg,x,0u);
+    return variable(1u,deg,x,0u);
+}
+template<class X> Vector<Differential<X>> Differential<X>::identity(DegreeType deg, const Vector<X>& x) {
+    return variables(deg,x);
 }
 
-template<class X> Vector<Differential<X>> Differential<X>::identity(DegreeType deg, const Vector<X>& x) {
-    return Differential<X>::variables(deg,x);
-}
 
 template<class X> EqualityType<X> Differential<X>::operator==(const Differential<X>& other) const {
     Differential<X> const& self=*this;
@@ -655,34 +684,18 @@ template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differentia
     : _chars(sd), _ary(rs,sd) {
 }
 
-template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differential<X>* p)
-    : _chars(), _ary(p,p+rs)
-{
-    ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics<X>(p[0]);
-}
-
 template<class X> Vector<Differential<X>>::Vector(InitializerList<Differential<X>> const& lst)
     : _chars(), _ary(lst)
 {
     ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }
 
-template<class X>
-Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d,
-                                  const Vector<X>& v, const Matrix<X>& A)
-    :  _chars(as,d), _ary(rs,Differential<X>(as,d))
+template<class X> Vector<Differential<X>>::Vector(Array<Differential<X>> ary)
+    : _chars(), _ary(std::move(ary))
 {
-    ARIADNE_ASSERT(rs==v.size());
-    ARIADNE_ASSERT(rs==A.row_size());
-    ARIADNE_ASSERT(as==A.column_size());
-    for(SizeType i=0; i!=this->result_size(); ++i) {
-        (*this)[i]=v[i];
-        for(SizeType j=0; j!=this->argument_size(); ++j) {
-            const X& x=A[i][j];
-            if(decide(x!=0)) { (*this)[i][j]=x; }
-        }
-    }
+    ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }
+
 
 
 template<class X> Vector<X> Vector<Differential<X>>::value() const {
@@ -717,35 +730,6 @@ template<class X> Void Vector<Differential<X>>::set_degree(DegreeType deg) {
     for(SizeType i=0; i!=this->size(); ++i) {
         (*this)[i].set_degree(deg);
     }
-}
-
-
-template<class X> Vector<Differential<X>> Vector<Differential<X>>::constant(SizeType rs, SizeType as, DegreeType d, const Vector<X>& c) {
-    ARIADNE_ASSERT(c.size()==rs);
-    Vector< Differential<X> > result(rs,as,d);
-    for(SizeType i=0; i!=rs; ++i) { result[i]=c[i]; }
-    return result;
-}
-
-template<class X> Vector<Differential<X>> Vector<Differential<X>>::variable(SizeType rs, SizeType as, DegreeType d, const Vector<X>& x) {
-    ARIADNE_ASSERT(x.size()==rs);
-    Vector< Differential<X> > result(rs,as,d);
-    for(SizeType i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
-    return result;
-}
-
-template<class X> Vector<Differential<X>> Vector<Differential<X>>::affine(SizeType rs, SizeType as, DegreeType d, const Vector<X>& b, const Matrix<X>& A) {
-    ARIADNE_ASSERT(b.size()==rs);
-    ARIADNE_ASSERT(A.row_size()==rs);
-    ARIADNE_ASSERT(A.column_size()==as);
-    Vector< Differential<X> > result(rs,as,d);
-    for(SizeType i=0; i!=rs; ++i) {
-        result[i]=b[i];
-        for(SizeType j=0; j!=as; ++j) {
-            result[i][j]=A[i][j];
-        }
-    }
-    return result;
 }
 
 

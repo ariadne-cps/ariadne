@@ -39,6 +39,11 @@ template<class T> class Vector;
 
 class Identifier;
 
+template<class T> class Vector;
+template<class T> class Matrix;
+using RealVector = Vector<Real>;
+using RealMatrix = Matrix<Real>;
+
 template<class T> class Constant;
 template<class T> class Variable;
 template<class T> class Variables;
@@ -74,6 +79,7 @@ using RealVariable = Variable<Real>; //!< <p/>
 //! \relates Variables
 //! \name Type synonyms
 using RealVariables = Variables<Real>; //!< <p/>
+using RealVectorVariable = Variable<RealVector>; //!< <p/>
 //!@}
 
 //!@{
@@ -107,6 +113,9 @@ using IntegerExpression = Expression<Integer>; //!< <p/>
 using RealExpression = Expression<Real>; //!< <p/>
 using RealExpressions = List<Expression<Real>>; //!< <p/>
 using RealExpressionVector = Vector<Expression<Real>>; //!< <p/>
+using RealVectorExpression = Expression<RealVector>;
+using RealMatrixExpression = Expression<RealMatrix>;
+
 
 using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
 using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
@@ -143,8 +152,6 @@ using IntegerValuation = Valuation<Integer>; //!< <p/>
 
 class DiscreteValuation;
 template<class X> class ContinuousValuation;
-
-
 
 
 template<class UB> class Interval;

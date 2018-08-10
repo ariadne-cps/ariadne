@@ -271,10 +271,13 @@ class TestInclusionIntegrator {
     void test_3dsphere() const;
     void test_vinograd() const;
     void test_laub_loomis() const;
+    void test_fitzhugh_nagumo() const;
+    void test_van_der_pol() const;
+    void test_clock() const;
+
     void test_higgins_selkov() const;
     void test_reactor() const;
     void test_lotka_volterra() const;
-    void test_fitzhugh_nagumo() const;
     void test_jet_engine() const;
     void test_pi_controller() const;
     void test_jerk21() const;
@@ -283,11 +286,6 @@ class TestInclusionIntegrator {
     void test_jerk16() const;
     void test_DCDC() const;
     void test_harmonic() const;
-
-    void test_van_der_pol() const;
-    void test_clock() const;
-
-    void test_dynamics_conversion() const;
 };
 
 
@@ -376,6 +374,48 @@ void TestInclusionIntegrator::test_laub_loomis() const {
     this->run_test("laub-loomis",dynamics,inputs,initial,evolution_time,step);
 }
 
+void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=x-pow(x,3)-y+u1,dot(y)=x+u2-0.8_dec*y};
+    RealVariablesBox inputs={0.874_dec<=u1<=0.876_dec,0.699_dec<=u2<=0.701_dec};
+
+    Real e=1/100_q;
+    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=x<=1+e}};
+
+    Real evolution_time=10;
+    double step=1.0/20;
+
+    this->run_test("fitzhugh-nagumo",dynamics,inputs,initial,evolution_time,step);
+}
+
+void TestInclusionIntegrator::test_van_der_pol() const {
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=y+u1,dot(y)=-x+y*(1-pow(x,2))+u2};
+    RealVariablesBox inputs={-1/20_q<=u1<=1/20_q,-1/10000_q<=u2<=1/10000_q};
+
+    Real e=1/1024_q;
+    RealVariablesBox initial={{1.21_dec-e<=x<=1.21_dec+e},{2.01_dec-e<=y<=2.01_dec+e}};
+
+    Real evolution_time=24/4_q;
+    double step=1.0/8;
+
+    this->run_test("vanderpol",dynamics,inputs,initial,evolution_time,step);
+}
+
+void TestInclusionIntegrator::test_clock() const {
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=1+u1,dot(y)=1+u2};
+    RealVariablesBox inputs={-1/16_q<=u1<=1/16_q,-1/16_q<=u2<=1/16_q};
+
+    Real e=1/128_q;
+    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
+
+    auto evolution_time=5;
+    double step=1.0/256;
+
+    this->run_test("clock",dynamics,inputs,initial,evolution_time,step);
+}
+
 void TestInclusionIntegrator::test_higgins_selkov() const {
     RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
     DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
@@ -421,19 +461,6 @@ void TestInclusionIntegrator::test_lotka_volterra() const {
     this->run_test("lotka-volterra",dynamics,inputs,initial,evolution_time,step);
 }
 
-void TestInclusionIntegrator::test_fitzhugh_nagumo() const {
-    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    DottedRealAssignments dynamics={dot(x)=x-pow(x,3)-y+u1,dot(y)=x+u2-0.8_dec*y};
-    RealVariablesBox inputs={0.874_dec<=u1<=0.876_dec,0.699_dec<=u2<=0.701_dec};
-
-    Real e=1/100_q;
-    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=x<=1+e}};
-
-    Real evolution_time=10;
-    double step=1.0/20;
-
-    this->run_test("fitzhugh-nagumo",dynamics,inputs,initial,evolution_time,step);
-}
 
 void TestInclusionIntegrator::test_jet_engine() const {
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
@@ -524,9 +551,9 @@ void TestInclusionIntegrator::test_jerk16() const {
 
 void TestInclusionIntegrator::test_DCDC() const {
     Real k0(0.002987);
-    Real fp0 = -11+k0/600;
-    Real fp1 = k0-1/15_q;
-    Real fq0 = 1-k0/14;
+    Real fp0 = (-11+k0)/600;
+    Real fp1 = (k0-1)/15_q;
+    Real fq0 = (1-k0)/14;
     Real fq1 = -k0*20/7_q;
     Real gp0 = 1/600_q;
     Real gp1 = 1/15_q;
@@ -534,8 +561,8 @@ void TestInclusionIntegrator::test_DCDC() const {
     Real gq1 = -20/7_q;
 
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    DottedRealAssignments dynamics={dot(x)=x*-0.018_dec+y*-0.066_dec + u1*(1/600_q*x+1/15_q*y)+u2,
-    									 dot(y)=x*0.071_dec+y*-0.00853_dec+u1*(-1/14_q*x-20/7_q*y)};
+    DottedRealAssignments dynamics={dot(x)=x*fp0+y*fp1+u1*(gp0*x+gp1*y)+u2,
+    							    dot(y)=x*fq0+y*fq1+u1*(gq0*x+gq1*y)};
     RealVariablesBox inputs={-2/1000_q<=u1<=2/1000_q,4/15_q<=u2<=6/15_q};
 
     RealVariablesBox initial={{x==1},{y==5}};
@@ -560,34 +587,6 @@ void TestInclusionIntegrator::test_harmonic() const {
     this->run_test("harmonic",dynamics,inputs,initial,evolution_time,step);
 }
 
-void TestInclusionIntegrator::test_van_der_pol() const {
-    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    DottedRealAssignments dynamics={dot(x)=y+u1,dot(y)=-x+y*(1-pow(x,2))+u2};
-    RealVariablesBox inputs={-1/20_q<=u1<=1/20_q,-1/10000_q<=u2<=1/10000_q};
-
-    Real e=1/1024_q;
-    RealVariablesBox initial={{1.21_dec-e<=x<=1.21_dec+e},{2.01_dec-e<=y<=2.01_dec+e}};
-
-    Real evolution_time=24/4_q;
-    double step=1.0/8;
-
-    this->run_test("vanderpol",dynamics,inputs,initial,evolution_time,step);
-}
-
-void TestInclusionIntegrator::test_clock() const {
-    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
-    DottedRealAssignments dynamics={dot(x)=1+u1,dot(y)=1+u2};
-    RealVariablesBox inputs={-1/16_q<=u1<=1/16_q,-1/16_q<=u2<=1/16_q};
-
-    Real e=1/128_q;
-    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
-
-    auto evolution_time=5;
-    double step=1.0/256;
-
-    this->run_test("clock",dynamics,inputs,initial,evolution_time,step);
-}
-
 
 void TestInclusionIntegrator::test() const {
 
@@ -601,15 +600,15 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_clock());
     //ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_reactor());
-    ARIADNE_TEST_CALL(test_lotka_volterra());
+    //ARIADNE_TEST_CALL(test_lotka_volterra());
     /*ARIADNE_TEST_CALL(test_jet_engine());
     ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jerk21());
     ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());
+    ARIADNE_TEST_CALL(test_jerk16());*/
     ARIADNE_TEST_CALL(test_DCDC());
-    ARIADNE_TEST_CALL(test_harmonic());*/
+    //ARIADNE_TEST_CALL(test_harmonic());
 }
 
 int main() {

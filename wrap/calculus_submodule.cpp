@@ -48,7 +48,10 @@ namespace Ariadne {
 //Vector<ValidatedNumericType> evaluate(const ValidatedVectorFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 
 ValidatedScalarFunctionModelDP partial_evaluate(const ValidatedScalarFunctionModelDP&, SizeType, const ValidatedNumericType&);
-ValidatedVectorFunctionModelDP partial_evaluate(const ValidatedVectorFunctionModelDP& f, SizeType j, const ValidatedNumericType& c);
+ValidatedVectorFunctionModelDP partial_evaluate(const ValidatedVectorFunctionModelDP&, SizeType, const ValidatedNumericType&);
+
+//ValidatedScalarFunctionModelDP antiderivative(const ValidatedScalarFunctionModelDP&, SizeType, ValidatedNumericType);
+//ValidatedVectorFunctionModelDP antiderivative(const ValidatedVectorFunctionModelDP&, SizeType, ValidatedNumericType);
 
 ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
 ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&);
@@ -188,6 +191,12 @@ template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Exp
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPBounds> >&);
 template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatDPValue> >&);
 
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,RawFloatMP> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPApproximation> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPBounds> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<MultiIndex,FloatMPValue> >&);
+
+
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     const Vector<X>& vec=repr.reference();
     os << "[";
@@ -282,11 +291,10 @@ Void export_expansion()
 
 Void export_sweeper()
 {
-    class_<Sweeper<FloatDP>> sweeper_class("SweeperDP", init<Sweeper<FloatDP>>());
-    def("ThresholdSweeperDP", &make_threshold_sweeper );
-    def("GradedSweeperDP", &make_graded_sweeper );
+    class_<Sweeper<FloatDP>> sweeper_class("Sweeper", init<Sweeper<FloatDP>>());
+    def("ThresholdSweeper", &make_threshold_sweeper );
+    def("GradedSweeper", &make_graded_sweeper );
     sweeper_class.def(self_ns::str(self));
-
 }
 
 /*
@@ -441,11 +449,11 @@ Void export_approximate_taylor_model()
 
 */
 
-/*
+
 
 Void export_scalar_function_model()
 {
-    class_<ValidatedScalarFunctionModelDP> scalar_function_model_class("ValidatedScalarFunctionModelDP",init<ValidatedScalarFunctionModelDP>());
+    class_<ValidatedScalarFunctionModelDP> scalar_function_model_class("ValidatedScalarFunctionModel",init<ValidatedScalarFunctionModelDP>());
     scalar_function_model_class.def(init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_function_model_class.def("argument_size", &ValidatedScalarFunctionModelDP::argument_size);
     scalar_function_model_class.def("domain", &ValidatedScalarFunctionModelDP::domain);
@@ -466,24 +474,25 @@ Void export_scalar_function_model()
     scalar_function_model_class.def(ValidatedNumericType()-self);
     scalar_function_model_class.def(ValidatedNumericType()*self);
     scalar_function_model_class.def(ValidatedNumericType()/self);
-    scalar_function_model_class.def("__str__", &_cstr_<ValidatedScalarFunctionModelDP>);
-    scalar_function_model_class.def("__repr__", &_crepr_<ValidatedScalarFunctionModelDP>);
+    scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarFunctionModelDP>);
+    scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarFunctionModelDP>);
     //scalar_function_model_class.def("__repr__",&__repr__<ValidatedScalarFunctionModelDP>);
 
     def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
-    def("partial_evaluate", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
+//    def("partial_evaluate", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
 
     def("compose", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&)) &compose);
     def("compose", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&)) &compose);
 
     def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModelDP&)) &unrestrict);
 
+    def("antiderivative", &_antiderivative_<ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType>);
 
 }
 
 Void export_vector_function_model()
 {
-    class_<ValidatedVectorFunctionModelDP> vector_function_model_class("ValidatedVectorFunctionModelDP",init<ValidatedVectorFunctionModelDP>());
+    class_<ValidatedVectorFunctionModelDP> vector_function_model_class("ValidatedVectorFunctionModel",init<ValidatedVectorFunctionModelDP>());
     vector_function_model_class.def(init<ValidatedVectorTaylorFunctionModelDP>());
     vector_function_model_class.def("result_size", &ValidatedVectorFunctionModelDP::result_size);
     vector_function_model_class.def("argument_size", &ValidatedVectorFunctionModelDP::argument_size);
@@ -495,12 +504,17 @@ Void export_vector_function_model()
     vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunctionModelDP>);
     //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunction>);
     vector_function_model_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorFunctionModelDP::operator());
+    vector_function_model_class.def(-self);
+    vector_function_model_class.def(self+self);
+    vector_function_model_class.def(self-self);
+    vector_function_model_class.def(ValidatedNumericType()*self);
     vector_function_model_class.def(self*ValidatedNumericType());
-    vector_function_model_class.def("__str__", &_cstr_<ValidatedVectorFunctionModelDP>);
-    vector_function_model_class.def("__repr__", &_crepr_<ValidatedVectorFunctionModelDP>);
+    vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorFunctionModelDP>);
+    vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorFunctionModelDP>);
     //export_vector_function_model.def("__repr__",&__repr__<ValidatedVectorFunctionModelDP>);
 
-    def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
+
+//    def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
 
     def("compose", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &compose);
     def("compose", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunction&,const ValidatedVectorFunctionModelDP&)) &compose);
@@ -512,10 +526,13 @@ Void export_vector_function_model()
     def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedScalarFunctionModelDP&)) &join);
     def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &join);
 
+    def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
+    def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
+
     to_python< List<ValidatedVectorFunctionModelDP> >();
 }
 
-*/
+
 
 Void export_scalar_taylor_function()
 {
@@ -526,10 +543,10 @@ Void export_scalar_taylor_function()
     typedef typename F::NumericType X;
     typedef Vector<X> VX;
     typedef SizeType I;
-    typedef ValidatedNumericType Y;
+    typedef typename X::GenericType Y;
     typedef Vector<Y> VY;
 
-    class_<ValidatedScalarTaylorFunctionModelDP> scalar_taylor_function_class("ValidatedScalarTaylorFunctionModelDP",init<ValidatedScalarTaylorFunctionModelDP>());
+    class_<ValidatedScalarTaylorFunctionModelDP> scalar_taylor_function_class("ValidatedScalarTaylorFunctionModel",init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(init<ExactBoxType,ValidatedTaylorModelDP>());
     scalar_taylor_function_class.def(init< ExactBoxType,SweeperDP >());
     scalar_taylor_function_class.def(init< ExactBoxType, const EffectiveScalarFunction&,SweeperDP >());
@@ -554,6 +571,18 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self-self);
     scalar_taylor_function_class.def(self*self);
     scalar_taylor_function_class.def(self/self);
+    scalar_taylor_function_class.def(self+X());
+    scalar_taylor_function_class.def(self-X());
+    scalar_taylor_function_class.def(self*X());
+    scalar_taylor_function_class.def(self/X());
+    scalar_taylor_function_class.def(X()+self);
+    scalar_taylor_function_class.def(X()-self);
+    scalar_taylor_function_class.def(X()*self);
+    scalar_taylor_function_class.def(X()/self);
+    scalar_taylor_function_class.def(self+=X());
+    scalar_taylor_function_class.def(self-=X());
+    scalar_taylor_function_class.def(self*=X());
+    scalar_taylor_function_class.def(self/=X());
     scalar_taylor_function_class.def(self+Y());
     scalar_taylor_function_class.def(self-Y());
     scalar_taylor_function_class.def(self*Y());
@@ -605,6 +634,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.staticmethod("coordinate");
 
     def("restriction",&_restriction_<F,D>);
+    def("join",&_join_<F,F>);
 //    def("extension",&_extension_<F,D>);
     def("embed",&_embed_<D,F,D>);
     def("split",&_split_<F,I>);
@@ -630,7 +660,7 @@ Void export_scalar_taylor_function()
 
 Void export_vector_taylor_function()
 {
-/*
+
     typedef SizeType I;
     typedef ValidatedScalarFunction SFN;
     typedef ValidatedVectorFunction VFN;
@@ -641,7 +671,7 @@ Void export_vector_taylor_function()
     typedef typename VF::NumericType X;
     typedef Vector<X> VX;
 
-    class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class("ValidatedVectorTaylorFunctionModelDP", init<ValidatedVectorTaylorFunctionModelDP>());
+    class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class("ValidatedVectorTaylorFunctionModel", init<ValidatedVectorTaylorFunctionModelDP>());
     vector_taylor_function_class.def( init< SizeType, ExactBoxType, SweeperDP >());
     vector_taylor_function_class.def( init< ExactBoxType,const EffectiveVectorFunction&,SweeperDP >());
     vector_taylor_function_class.def(init< ExactBoxType, Vector< Expansion<MultiIndex,FloatDPValue> >, Vector<FloatDPError>, SweeperDP >());
@@ -700,7 +730,7 @@ Void export_vector_taylor_function()
     def("refines", &_refines_<VF,VF>);
 
     def("join", &_join_<VF,VF>); def("join", &_join_<VF,SF>); def("join", &_join_<SF,VF>); // def("join", &_join_<SF,SF>);
-    def("combine", &_combine_<VF,VF>); def("combine", &_combine_<VF,SF>); def("combine", &_combine_<SF,VF>); //def("combine", &_combine_<SF,SF>);
+    def("combine", &_combine_<VF,VF>); def("combine", &_combine_<VF,SF>); def("combine", &_combine_<SF,VF>); def("combine", &_combine_<SF,SF>);
     def("embed", &_embed_<VF,Di>); def("embed", &_embed_<VF,D>); def("embed", &_embed_<D,VF>); def("embed", &_embed_<D,VF,D>);
 
     def("restriction", &_restriction_<VF,D>); def("restriction", &_restriction_<VF,I,Di>);
@@ -721,7 +751,7 @@ Void export_vector_taylor_function()
 //    def("evaluate",(Vector<FloatDPApproximation>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorTaylorFunctionModelDP::evaluate);
 
     from_python<ValidatedVectorTaylorFunctionModelDP>();
-*/
+
 
 }
 
@@ -731,8 +761,8 @@ Void calculus_submodule()
     export_sweeper();
 //    export_approximate_taylor_model();
 //    export_validated_taylor_model();
-//    export_scalar_function_model();
-//    export_vector_function_model();
+    export_scalar_function_model();
+    export_vector_function_model();
     export_scalar_taylor_function();
     export_vector_taylor_function();
 }

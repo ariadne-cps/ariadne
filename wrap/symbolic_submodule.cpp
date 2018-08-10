@@ -43,6 +43,27 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Variable<T>>& repr) {
+    Variable<T> const& var=repr.reference();
+    return os << class_name<T>() << "Variable(\"" << var.name() << "\")";
+}
+template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Expression<T>>& repr) {
+    Expression<T> const& expr=repr.reference();
+    return os << class_name<T>() << "Expression(" << expr << ")";
+}
+
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Map<Variable<Y>,Expression<Y>>& a) {
+    List<Assignment<Variable<Y>,Expression<Y>>> lst_a;
+    for(auto key_val : a) { lst_a.append(let(key_val.first)=key_val.second); }
+    return substitute(e,lst_a);
+}
+
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Map<Variable<Y>,Y>& a) {
+    List<Assignment<Variable<Y>,Expression<Y>>> lst_a;
+    for(auto key_val : a) { lst_a.append(let(key_val.first)=Expression<Y>(key_val.second)); }
+    return substitute(e,lst_a);
+}
+
 
 template<class T>
 struct from_python< Space<T> > {
@@ -123,16 +144,7 @@ RealVariableInterval operator|(RealVariable v, RealInterval ivl) {
     return RealVariableInterval(ivl.lower(),v,ivl.upper());
 }
 
-void foo() {
-    Real a(1);
-    RealVariable x("x");
-//    decltype(x*x) re1=nullptr;
-//    decltype(x*x<=a) re2=nullptr;
-//    decltype(a<=x*x) re3=nullptr;
-//    decltype(x*x==a) re4=nullptr;
-//    decltype(a<=x*x<=a) re5=nullptr;
-}
-
+void foo(Map<int,double>const&) { }
 } // namespace Ariadne
 
 
@@ -146,6 +158,8 @@ Void export_formula()
     implicitly_convertible<Integer,IntegerExpression>();
     implicitly_convertible<IntegerVariable,IntegerExpression>();
 
+    // FIXME: Allowing this conversion over-eagerly prevent Real in RealVector([...])
+    // implicitly_convertible<Real,RealExpression>();
     implicitly_convertible<RealVariable,RealExpression>();
 
     to_python< List<RealExpression> >();
@@ -160,10 +174,12 @@ Void export_formula()
     class_<StringVariable> string_variable_class("StringVariable", init<StringType>());
     string_variable_class.def("__eq__", &__eq__<Expression<Boolean>,StringVariable,StringType>);
     string_variable_class.def("__ne__", &__ne__<Expression<Boolean>,StringVariable,StringType>);
-    string_variable_class.def(self_ns::str(self));
+    string_variable_class.def("__str__", &__cstr__<StringVariable>);
+    string_variable_class.def("__repr__", &__repr__<StringVariable>);
 
     class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
-    string_expression_class.def(self_ns::str(self));
+    string_expression_class.def("__str__", &__cstr__<StringExpression>);
+    string_expression_class.def("__repr__", &__repr__<StringExpression>);
 
     class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
     string_next_variable_class.def("__lshift__", (PrimedStringAssignment(PrimedStringVariable::*)(const StringExpression&)const) &PrimedStringVariable::operator=);
@@ -188,7 +204,8 @@ Void export_formula()
     integer_variable_class.def("__ge__", &__ge__<DiscretePredicate,IntegerVariable,IntegerExpression>);
     integer_variable_class.def("__lt__", &__lt__<DiscretePredicate,IntegerVariable,IntegerExpression>);
     integer_variable_class.def("__gt__", &__gt__<DiscretePredicate,IntegerVariable,IntegerExpression>);
-    integer_variable_class.def(self_ns::str(self));
+    integer_variable_class.def("__str__", &__cstr__<IntegerVariable>);
+    integer_variable_class.def("__repr__", &__repr__<IntegerVariable>);
 
     class_<PrimedIntegerVariable> integer_next_variable_class("PrimedIntegerVariable", no_init);
     integer_next_variable_class.def("__lshift__", (PrimedIntegerAssignment(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
@@ -212,6 +229,8 @@ Void export_formula()
     integer_expression_class.def("__lt__", &__lt__<DiscretePredicate,IntegerExpression,IntegerExpression>);
     integer_expression_class.def("__gt__", &__gt__<DiscretePredicate,IntegerExpression,IntegerExpression>);
     integer_expression_class.def(self_ns::str(self));
+    integer_expression_class.def("__str__", &__cstr__<IntegerExpression>);
+    integer_expression_class.def("__repr__", &__repr__<IntegerExpression>);
 
 
     class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
@@ -240,7 +259,8 @@ Void export_formula()
     real_variable_class.def("__lt__", &__lt__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__gt__", &__gt__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__lshift__", (RealAssignment(LetRealVariable::*)(const RealExpression&)const) &LetRealVariable::operator=);
-    real_variable_class.def(self_ns::str(self));
+    real_variable_class.def("__str__", &__cstr__<RealVariable>);
+    real_variable_class.def("__repr__", &__repr__<RealVariable>);
 
     class_<RealVariables> real_variables_class("RealVariables", init<StringType,SizeType>());
     real_variables_class.def("__getitem__", &__getitem__<RealVariables,SizeType,RealVariable>);
@@ -268,7 +288,9 @@ Void export_formula()
     from_python<RealSpace>();
 
     class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
-    real_expression_class.def("simplify", (RealExpression(*)(const RealExpression&)) &simplify);
+    real_expression_class.def(init<Real>());
+    real_expression_class.def(init<RealVariable>());
+    def("simplify", (RealExpression(*)(const RealExpression&)) &simplify);
     real_expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
     real_expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
     real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
@@ -284,7 +306,8 @@ Void export_formula()
     real_expression_class.def("__lt__", &__lt__<ContinuousPredicate,RealExpression,RealExpression>);
     real_expression_class.def("__gt__", &__gt__<ContinuousPredicate,RealExpression,RealExpression>);
     //real_expression_class.def("__cmp__", &__cmp__<ContinuousPredicate,RealExpression,RealExpression>);
-    real_expression_class.def(self_ns::str(self));
+    real_expression_class.def("__str__", &__cstr__<RealExpression>);
+    real_expression_class.def("__repr__", &__repr__<RealExpression>);
 
     real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,Real>);
     real_expression_class.def("__sub__", &__sub__<RealExpression,RealExpression,Real>);
@@ -322,6 +345,16 @@ Void export_formula()
     integer_assignment_class.def(self_ns::str(self));
     class_<PrimedIntegerAssignment> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
     primed_integer_assignment_class.def(self_ns::str(self));
+
+    from_python<Pair<RealVariable,RealExpression>>();
+    from_python<Map<RealVariable,RealExpression>>();
+
+    from_python<Pair<RealVariable,Real>>();
+    from_python<Map<RealVariable,Real>>();
+
+//    def("substitute",(RealExpression(*)(RealExpression const&, const List<Assignment<RealVariable,RealExpression>>&)) &substitute);
+    def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,RealExpression>&)) &substitute);
+    def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,Real>&)) &substitute);
 
     to_python< List<KleeneanExpression> >();
 

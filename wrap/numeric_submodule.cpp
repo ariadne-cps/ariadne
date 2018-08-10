@@ -91,6 +91,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPUpp
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveFloatDPUpperBound>& repr) {
     return os << "FloatDPError("<<repr.reference().raw()<<")"; }
 
+Dyadic cast_exact(double d) { return Dyadic(ExactDouble(d)); }
+
 template<class OP> struct PythonOperator { };
 PythonOperator<Pos> pos(boost::python::self_ns::self_t) { return PythonOperator<Pos>(); }
 PythonOperator<Neg> neg(boost::python::self_ns::self_t) { return PythonOperator<Neg>(); }
@@ -115,7 +117,7 @@ template<class L> decltype(auto) operator|(L const& l1, L const& l2) { return l1
 template<class L> decltype(auto) operator~(L const& l) { return not l; }
 
 
-template<class OP, class T> auto py_apply(T const& t) -> decltype(OP()(t)){ OP op; return op(t); }
+template<class OP, class... TS> auto py_apply(TS const& ... ts) -> decltype(OP()(ts...)){ OP op; return op(ts...); }
 
 template<class... T> struct Tag { };
 
@@ -248,6 +250,7 @@ void export_integer()
 
 void export_dyadic()
 {
+
     class_<Dyadic> dyadic_class("Dyadic");
     dyadic_class.def(init<Int,Nat>());
 //    dyadic_class.def(init<Integer,Natural>());
@@ -268,6 +271,8 @@ void export_dyadic()
 
     implicitly_convertible<int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
+
+    def("cast_exact",(Dyadic(*)(double)) &cast_exact);
 }
 
 void export_rational()
@@ -298,7 +303,8 @@ void export_rational()
 void export_decimal()
 {
     class_<Decimal> decimal_class("Decimal", init<Decimal>());
-    decimal_class.def(init<String>());
+    decimal_class.def(init<StringType>());
+    decimal_class.def(init<double>());
     decimal_class.def(self_ns::str(self));
     decimal_class.def(self_ns::repr(self));
     implicitly_convertible<Decimal,Rational>();
@@ -334,6 +340,15 @@ void export_real()
     real_class.def("get_d", &Real::get_d);
 
     implicitly_convertible<Rational,Real>();
+
+
+    class_<ValidatedReal> validated_real_class("ValidatedReal",init<DyadicBounds>());
+    validated_real_class.def("get", (DyadicBounds(ValidatedReal::*)()const) &ValidatedReal::get);
+    validated_real_class.def("get", (FloatDPBounds(ValidatedReal::*)(DoublePrecision)const) &ValidatedReal::get);
+    validated_real_class.def("get", (FloatMPBounds(ValidatedReal::*)(MultiplePrecision)const) &ValidatedReal::get);
+
+    validated_real_class.def(self_ns::str(self));
+    validated_real_class.def(self_ns::repr(self));
 }
 
 
@@ -441,6 +456,18 @@ void export_numbers()
 }
 
 
+
+
+void export_dyadic_bounds()
+{
+    class_<DyadicBounds> dyadic_bounds_class("DyadicBounds",init<DyadicBounds>());
+    dyadic_bounds_class.def(init<Dyadic,Dyadic>());
+
+    dyadic_bounds_class.def(self_ns::str(self));
+    dyadic_bounds_class.def(self_ns::repr(self));
+
+}
+
 template<class R, class A> decltype(auto) _nul_rnd_(R r, A const& a) { return nul(r,a); }
 template<class R, class A> decltype(auto) _pos_rnd_(R r, A const& a) { return pos(r,a); }
 template<class R, class A> decltype(auto) _neg_rnd_(R r, A const& a) { return neg(r,a); }
@@ -523,6 +550,7 @@ template<class PR> void export_float_value()
     float_value_class.def(init<int>());
     float_value_class.def(init<double>());
     float_value_class.def(init<Integer,PR>());
+    float_value_class.def(init<Dyadic,PR>());
     float_value_class.def(init<FloatValue<PR>>());
 
     float_value_class.def(pos(self));
@@ -655,6 +683,7 @@ template<class PR> void export_float_bounds()
     float_bounds_class.def(self_ns::str(self));
     float_bounds_class.def(self_ns::repr(self));
 
+    implicitly_convertible<FloatValue<PR>,FloatBounds<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
 
     float_bounds_class.def("set_output_places",&FloatBounds<PR>::set_output_places).staticmethod("set_output_places");
@@ -879,6 +908,8 @@ numeric_submodule()
     export_user_floats<DoublePrecision>();
     export_user_floats<MultiplePrecision>();
     export_float_ball<MultiplePrecision,DoublePrecision>();
+
+    export_dyadic_bounds();
 
     export_numbers();
     export_real();

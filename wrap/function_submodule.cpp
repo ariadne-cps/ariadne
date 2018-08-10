@@ -114,7 +114,9 @@ struct from_python<EffectiveVectorFunction>
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
-        EffectiveVectorFunction res(len(lst),0);
+        assert(len(lst)!=0);
+        EffectiveScalarFunction sf0 = boost::python::extract<EffectiveScalarFunction>(lst[0]);
+        EffectiveVectorFunction res(len(lst),sf0.argument_size());
         for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,boost::python::extract<EffectiveScalarFunction>(lst[i])); }
         new (storage) EffectiveVectorFunction(res);
         data->convertible = storage;

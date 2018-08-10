@@ -231,6 +231,7 @@ ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
 BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
 BoundedConstraintSet intersection(const RealBox& bx, const ConstraintSet& cs);
 
+BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
 BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
 BoundedConstraintSet intersection(const ConstraintSet& cs1, const BoundedConstraintSet& bcs2);
 BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
@@ -284,6 +285,7 @@ typedef LogicalType<ExactTag> ExactLogicalType;
 
 
 template<class IVL> Void export_interval(std::string name) {
+    using UB = typename IVL::UpperBoundType;
     typedef IVL IntervalType;
     typedef typename IntervalType::LowerBoundType LowerBoundType;
     typedef typename IntervalType::UpperBoundType UpperBoundType;
@@ -299,6 +301,11 @@ template<class IVL> Void export_interval(std::string name) {
     //interval_class.def(init<MidpointType>());
     interval_class.def(init<LowerBoundType,UpperBoundType>());
 
+    // FIXME: Only export this if constructor exists
+//    if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value and not IsConstructible<UB,Dyadic>::value) {
+        interval_class.def(init<Interval<Dyadic>>());
+//    }
+
     interval_class.def(self == self);
     interval_class.def(self != self);
     interval_class.def("lower", &IntervalType::lower, return_value_policy<copy_const_reference>());
@@ -309,6 +316,7 @@ template<class IVL> Void export_interval(std::string name) {
     interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def(boost::python::self_ns::str(self));
+    interval_class.def(boost::python::self_ns::repr(self));
 
     //from_python_list<IntervalType>();
     //from_python_str<ExactIntervalType>();
@@ -329,17 +337,17 @@ Void export_intervals() {
     export_interval<ExactIntervalType>("ExactInterval");
     export_interval<UpperIntervalType>("UpperInterval");
     export_interval<ApproximateIntervalType>("ApproximateInterval");
+    export_interval<DyadicInterval>("DyadicInterval");
     export_interval<RealInterval>("RealInterval");
 }
 
 template<class BX> Void export_box(std::string name)
 {
-    typedef typename BX::IntervalType IVL;
+    using IVL = typename BX::IntervalType;
+    using UB = typename IVL::UpperBoundType;
     typedef  IVL IntervalType;
     typedef Vector<IVL> IntervalVectorType;
     //class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
-
-    typedef typename IVL::UpperBoundType UB;
 
     typedef decltype(disjoint(declval<BX>(),declval<BX>())) DisjointType;
     typedef decltype(subset(declval<BX>(),declval<BX>())) SubsetType;
@@ -350,6 +358,12 @@ template<class BX> Void export_box(std::string name)
 
 //    class_<ExactBoxType,bases<CompactSetInterface,OpenSetInterface,Vector<ExactIntervalType>,DrawableInterface > >
     class_<BX,bases< > > box_class(name.c_str(),init<BX>());
+    if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value and not IsConstructible<UB,Dyadic>::value) {
+        box_class.def(init<Box<Interval<Dyadic>>>());
+    }
+
+    static_assert(IsConstructibleGivenDefaultPrecision<FloatDPValue,Dyadic>::value and not IsConstructible<FloatDPValue,Dyadic>::value);
+
     box_class.def(init<DimensionType>());
     box_class.def(init< Vector<IVL> >());
     //box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
@@ -378,8 +392,16 @@ template<class BX> Void export_box(std::string name)
     to_python< Pair<BX,BX> >();
 }
 
+template<> Void export_box<DyadicBox>(std::string name)
+{
+    using BX=DyadicBox;
+    class_<BX,bases< > > box_class(name.c_str(),init<BX>());
+    from_python<BX>();
+}
+
 Void export_boxes() {
     export_box<RealBox>("RealBox");
+    export_box<DyadicBox>("DyadicBox");
     export_box<ExactBoxType>("ExactBox");
     export_box<UpperBoxType>("UpperBox");
     export_box<ApproximateBoxType>("ApproximateBox");
@@ -477,7 +499,6 @@ Void export_affine_set()
     def("image", (ValidatedAffineConstrainedImageSet(*)(ValidatedAffineConstrainedImageSet,ValidatedVectorFunction const&)) &image);
 }
 
-
 Void export_constraint_set()
 {
     from_python< List<EffectiveConstraint> >();
@@ -485,14 +506,26 @@ Void export_constraint_set()
     class_<ConstraintSet,bases<RegularSetInterface,OpenSetInterface> >
         constraint_set_class("ConstraintSet",init<ConstraintSet>());
     constraint_set_class.def(init< List<EffectiveConstraint> >());
+    constraint_set_class.def("dimension", &ConstraintSet::dimension);
     constraint_set_class.def(self_ns::str(self));
 
     class_<BoundedConstraintSet,bases<DrawableInterface> >
         bounded_constraint_set_class("BoundedConstraintSet",init<BoundedConstraintSet>());
     bounded_constraint_set_class.def(init< RealBox, List<EffectiveConstraint> >());
+    bounded_constraint_set_class.def("dimension", &BoundedConstraintSet::dimension);
     bounded_constraint_set_class.def(self_ns::str(self));
 
-    def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const RealBox&)) &intersection);
+    def("intersection", &_intersection_<ConstraintSet,ConstraintSet>);
+    def("intersection", &_intersection_<ConstraintSet,RealBox>);
+    def("intersection", &_intersection_<RealBox,ConstraintSet>);
+
+    def("intersection", &_intersection_<BoundedConstraintSet,BoundedConstraintSet>);
+    def("intersection", &_intersection_<BoundedConstraintSet,RealBox>);
+    def("intersection", &_intersection_<RealBox,BoundedConstraintSet>);
+    def("intersection", &_intersection_<ConstraintSet,BoundedConstraintSet>);
+    def("intersection", &_intersection_<BoundedConstraintSet,ConstraintSet>);
+
+    def("image", &_image_<BoundedConstraintSet,EffectiveVectorFunction>);
 
 }
 
@@ -501,33 +534,38 @@ Void export_constrained_image_set()
 {
     from_python< List<ValidatedConstraint> >();
 
-    class_<ValidatedConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
-        constrained_image_set_class("ValidatedConstrainedImageSet",init<ValidatedConstrainedImageSet>());
-    constrained_image_set_class.def(init<ExactBoxType>());
-    constrained_image_set_class.def(init<ExactBoxType,EffectiveVectorFunction>());
-    constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction>());
-    constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction,List<ValidatedConstraint> >());
-    constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunctionModelDP>());
-    constrained_image_set_class.def("domain", &ValidatedConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
-    constrained_image_set_class.def("function", &ValidatedConstrainedImageSet::function,return_value_policy<copy_const_reference>());
-    constrained_image_set_class.def("constraint", &ValidatedConstrainedImageSet::constraint);
-    constrained_image_set_class.def("number_of_parameters", &ValidatedConstrainedImageSet::number_of_parameters);
-    constrained_image_set_class.def("number_of_constraints", &ValidatedConstrainedImageSet::number_of_constraints);
-    constrained_image_set_class.def("apply", &ValidatedConstrainedImageSet::apply);
-    constrained_image_set_class.def("new_space_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
-    constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
-    //constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
-    constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
-    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
-    constrained_image_set_class.def("adjoin_outer_approximation_to", &ValidatedConstrainedImageSet::adjoin_outer_approximation_to);
-    constrained_image_set_class.def("bounding_box", &ValidatedConstrainedImageSet::bounding_box);
-    constrained_image_set_class.def("inside", &ValidatedConstrainedImageSet::inside);
-    constrained_image_set_class.def("separated", &ValidatedConstrainedImageSet::separated);
-    constrained_image_set_class.def("overlaps", &ValidatedConstrainedImageSet::overlaps);
-    constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)()const) &ValidatedConstrainedImageSet::split);
-    constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)(Nat)const) &ValidatedConstrainedImageSet::split);
+    class_<ConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
+        constrained_image_set_class("ConstrainedImageSet",init<ConstrainedImageSet>());
+    constrained_image_set_class.def("dimension", &ConstrainedImageSet::dimension);
     constrained_image_set_class.def(self_ns::str(self));
-    constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
+
+    class_<ValidatedConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
+        validated_constrained_image_set_class("ValidatedConstrainedImageSet",init<ValidatedConstrainedImageSet>());
+    validated_constrained_image_set_class.def(init<ExactBoxType>());
+    validated_constrained_image_set_class.def(init<ExactBoxType,EffectiveVectorFunction>());
+    validated_constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction>());
+    validated_constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunction,List<ValidatedConstraint> >());
+    validated_constrained_image_set_class.def(init<ExactBoxType,ValidatedVectorFunctionModelDP>());
+    validated_constrained_image_set_class.def("domain", &ValidatedConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
+    validated_constrained_image_set_class.def("function", &ValidatedConstrainedImageSet::function,return_value_policy<copy_const_reference>());
+    validated_constrained_image_set_class.def("constraint", &ValidatedConstrainedImageSet::constraint);
+    validated_constrained_image_set_class.def("number_of_parameters", &ValidatedConstrainedImageSet::number_of_parameters);
+    validated_constrained_image_set_class.def("number_of_constraints", &ValidatedConstrainedImageSet::number_of_constraints);
+    validated_constrained_image_set_class.def("apply", &ValidatedConstrainedImageSet::apply);
+    validated_constrained_image_set_class.def("new_space_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
+    validated_constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
+    //constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
+    validated_constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
+    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
+    validated_constrained_image_set_class.def("adjoin_outer_approximation_to", &ValidatedConstrainedImageSet::adjoin_outer_approximation_to);
+    validated_constrained_image_set_class.def("bounding_box", &ValidatedConstrainedImageSet::bounding_box);
+    validated_constrained_image_set_class.def("inside", &ValidatedConstrainedImageSet::inside);
+    validated_constrained_image_set_class.def("separated", &ValidatedConstrainedImageSet::separated);
+    validated_constrained_image_set_class.def("overlaps", &ValidatedConstrainedImageSet::overlaps);
+    validated_constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)()const) &ValidatedConstrainedImageSet::split);
+    validated_constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)(Nat)const) &ValidatedConstrainedImageSet::split);
+    validated_constrained_image_set_class.def(self_ns::str(self));
+    validated_constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
 
 //    def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactBoxType&)) &product);
 }

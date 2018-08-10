@@ -157,6 +157,8 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
     return os << repr.reference(); }
 template<class PR> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatValue<PR>>& repr) {
     return os << repr.reference(); }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr) {
+    return os << repr.reference(); }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     Vector<X> const& v=repr.reference();
@@ -245,7 +247,6 @@ template<class X> Void export_vector()
     export_vector_arithmetic<X,X>(vector_class);
 }
 
-
 template<> Void export_vector<FloatDPValue>()
 {
     typedef FloatDPValue X;
@@ -276,10 +277,10 @@ template<> Void export_vector<FloatMPBounds>()
     typedef FloatMPBounds X;
     class_< Vector<X> > vector_class(python_name<X>("Vector").c_str(),init< Vector<X> >());
     vector_class.def(init<Vector<ValidatedNumber>,MultiplePrecision>());
+    export_vector_conversion<FloatMPValue,FloatMPBounds>(vector_class);
     export_vector_class<X>(vector_class);
     export_vector_arithmetic<X,X>(vector_class);
     def("norm",&__norm__<Vector<X>>);
-    //export_vector_conversion<FloatMPValue,FloatMPBounds>(vector_class);
 }
 
 template<> Void export_vector<FloatDPApproximation>()
@@ -291,6 +292,7 @@ template<> Void export_vector<FloatDPApproximation>()
     export_vector_arithmetic<X,X>(vector_class);
     def("norm",&__norm__<Vector<X>>);
     //export_vector_conversion<FloatDPBounds,FloatDPApproximation>(vector_class);
+    vector_class.def(init< Vector<FloatDPBounds> >());
 }
 
 template<> Void export_vector<FloatMPApproximation>()
@@ -302,7 +304,7 @@ template<> Void export_vector<FloatMPApproximation>()
     export_vector_arithmetic<X,X>(vector_class);
     def("norm",&__norm__<Vector<X>>);
     //export_vector_conversion<FloatMPBounds,FloatMPApproximation>(vector_class);
-
+    vector_class.def(init< Vector<FloatMPBounds> >());
 }
 
 
@@ -415,12 +417,13 @@ template<> Void export_matrix<FloatMPValue>()
     export_matrix_class<X>(matrix_class);
 }
 
-template<> Void export_matrix<FloatDPBounds>()
+template<class PR> Void export_float_bounds_matrix()
 {
-    typedef FloatDPBounds X;
+    typedef FloatBounds<PR> X;
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix").c_str(),init<Matrix<X>>());
+    matrix_class.def(init<Matrix<Rational>, PR>());
     export_matrix_class<X>(matrix_class);
-    export_matrix_conversion<FloatDPValue,FloatDPBounds>(matrix_class);
+    export_matrix_conversion<FloatValue<PR>,FloatBounds<PR>>(matrix_class);
     export_matrix_arithmetic<X,X>(matrix_class);
     export_matrix_operations<X>(matrix_class);
     def("gs_inverse", (Matrix<X>(*)(const Matrix<X>&)) &gs_inverse);
@@ -435,12 +438,16 @@ template<> Void export_matrix<FloatDPBounds>()
     //implicitly_convertible< Matrix<FloatDPApproximation>, Matrix<FloatDPBounds> >();
 }
 
-template<> Void export_matrix<FloatDPApproximation>()
+template<> Void export_matrix<FloatBounds<DP>>() { export_float_bounds_matrix<DP>(); }
+template<> Void export_matrix<FloatBounds<MP>>() { export_float_bounds_matrix<MP>(); }
+
+template<class PR> Void export_float_approximation_matrix()
 {
-    typedef FloatDPApproximation X;
+    typedef FloatApproximation<PR> X;
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix").c_str(),init<Matrix<X>>());
     export_matrix_class<X>(matrix_class);
-    export_matrix_conversion<FloatDPBounds,FloatDPApproximation>(matrix_class);
+    matrix_class.def(init<Matrix<Rational>, PR>());
+    export_matrix_conversion<FloatBounds<PR>,FloatApproximation<PR>>(matrix_class);
     export_matrix_arithmetic<X,X>(matrix_class);
     export_matrix_operations<X>(matrix_class);
 
@@ -450,6 +457,9 @@ template<> Void export_matrix<FloatDPApproximation>()
 
 //    to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
+
+template<> Void export_matrix<FloatApproximation<DP>>() { export_float_approximation_matrix<DP>(); }
+template<> Void export_matrix<FloatApproximation<MP>>() { export_float_approximation_matrix<MP>(); }
 
 
 template<class X> Void export_diagonal_matrix()
@@ -523,6 +533,11 @@ Void linear_algebra_submodule() {
     export_pivot_matrix();
     export_diagonal_matrix<FloatDPApproximation>();
 
+    export_vector<Real>();
+
     export_vector<Rational>();
     export_matrix<Rational>();
+
+    implicitly_convertible<Vector<Real>,Vector<ApproximateNumber>>();
+    implicitly_convertible<Vector<Real>,Vector<ValidatedNumber>>();
 }

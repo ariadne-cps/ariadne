@@ -230,7 +230,7 @@ public:
 
 class InputApproximatorInterface {
   public:
-    virtual InputApproximation getKind() const = 0;
+    virtual InputApproximation kind() const = 0;
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const = 0;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
@@ -252,7 +252,7 @@ class InputApproximator : public InputApproximatorInterface {
     InputApproximation _kind;
     Nat _num_params_per_input;
   public:
-    virtual InputApproximation getKind() const override { return _kind; }
+    virtual InputApproximation kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
 };
@@ -351,16 +351,16 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<SharedPointer<InputApproximatorInterface>> _approximations;
-    SharedPointer<InputApproximatorInterface> _approximation;
+    List<InputApproximation> _approximations;
+    SharedPointer<InputApproximatorInterface> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     FloatDP _step_size;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<SharedPointer<InputApproximatorInterface>> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<SharedPointer<InputApproximatorInterface>> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
+    InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
         : InclusionIntegrator(approximations, sweeper,step_size) {
         this->set(attributes...);
         _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

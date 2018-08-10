@@ -38,7 +38,7 @@ struct ScheduledApproximation
 };
 
 OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
-    return os << "(" << sa.step << ":" << sa.approximation->getKind() << ")"; }
+    return os << "(" << sa.step << ":" << sa.approximation->kind() << ")"; }
 
 struct ScheduledApproximationComparator
 {
@@ -389,7 +389,7 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<SharedPointer<InputApproximatorInterface>> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size)
@@ -423,8 +423,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
     Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
     for (auto appro: _approximations) {
-        approximation_global_frequencies[appro->getKind()] = 0;
-        approximation_local_frequencies[appro->getKind()] = 0;
+        approximation_global_frequencies[appro] = 0;
+        approximation_local_frequencies[appro] = 0;
     }
 
     List<ValidatedVectorFunctionModelDP> result;
@@ -432,10 +432,16 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
     auto step = 0;
 
     List<ScheduledApproximation> schedule;
-    Map<SharedPointer<InputApproximatorInterface>,Nat> delays;
-    for (auto appro: _approximations) {
+    Map<InputApproximation,Nat> delays;
+
+    List<SharedPointer<InputApproximatorInterface>> approximations;
+    InputApproximatorFactory factory;
+    for (auto appro : _approximations)
+        approximations.append(factory.create(f,g,V,appro,_sweeper));
+
+    for (auto appro: approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
-        delays[appro] = 0;
+        delays[appro->kind()] = 0;
     }
 
     while (possibly(t<FloatDPBounds(tmax,pr))) {
@@ -488,13 +494,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
 
         SizeType i = 0;
         for (auto i : range(approximations_to_use.size())) {
-            this->_approximation = approximations_to_use.at(i);
-            ARIADNE_LOG(4,"checking approximation "<<this->_approximation->getKind()<<"\n");
+            this->_approximator = approximations_to_use.at(i);
+            ARIADNE_LOG(4,"checking approximation "<<this->_approximator->kind()<<"\n");
 
             ValidatedVectorFunctionModelDP current_reach_function;
             ValidatedVectorFunctionModelDP current_evolve_function;
 
-            if (this->_approximation->getKind() != InputApproximation::PIECEWISE) {
+            if (this->_approximator->kind() != InputApproximation::PIECEWISE) {
 
                 auto Phi = this->compute_flow_function(dynamics,inputs,initial,f,g,V,D,h,B);
 
@@ -507,7 +513,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
                 current_evolve_function=partial_evaluate(current_reach_function,current_reach_function.argument_size()-1,new_t);
                 ARIADNE_LOG(5,"current_evolve_function="<<current_evolve_function<<"\n");
             } else {
-                PiecewiseInputApproximator& approx = dynamic_cast<PiecewiseInputApproximator&>(*this->_approximation);
+                PiecewiseInputApproximator& approx = dynamic_cast<PiecewiseInputApproximator&>(*this->_approximator);
 
                 auto n=D.size();
                 auto m=V.size();
@@ -581,13 +587,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             if (i == 0) {
                 best_reach_function = current_reach_function;
                 best_evolve_function = current_evolve_function;
-                best = this->_approximation;
+                best = this->_approximator;
                 best_volume = volume(best_evolve_function.range());
             } else {
                 FloatDP current_volume = volume(current_evolve_function.range());
                 if (current_volume < best_volume) {
-                    best = this->_approximation;
-                    ARIADNE_LOG(5,"best approximation: " << best->getKind() << "\n");
+                    best = this->_approximator;
+                    ARIADNE_LOG(5,"best approximation: " << best->kind() << "\n");
                     best_reach_function = current_reach_function;
                     best_evolve_function = current_evolve_function;
                     best_volume = current_volume;
@@ -596,23 +602,23 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
         }
 
         if (approximations_to_use.size() > 1)
-            ARIADNE_LOG(3,"chosen approximation: " << best->getKind() << "\n");
+            ARIADNE_LOG(3,"chosen approximation: " << best->kind() << "\n");
 
         for (auto appro : approximations_to_use) {
-            if (best->getKind() == appro->getKind())
-                delays[appro] = 0;
+            if (best->kind() == appro->kind())
+                delays[appro->kind()] = 0;
             else
-                delays[appro]++;
+                delays[appro->kind()]++;
 
-            Nat offset = 1<<delays[appro];
+            Nat offset = 1<<delays[appro->kind()];
             schedule.push_back(ScheduledApproximation(step+offset,appro));
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());
 
         ARIADNE_LOG(3,"updated schedule: " << schedule << "\n");
 
-        approximation_global_frequencies[best->getKind()] += 1;
-        approximation_local_frequencies[best->getKind()] += 1;
+        approximation_global_frequencies[best->kind()] += 1;
+        approximation_local_frequencies[best->kind()] += 1;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -644,7 +650,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<Dotted
             this->_reconditioner->simplify(evolve_function);
             ARIADNE_LOG(5,"simplified_evolve_function="<<evolve_function<<"\n");
             for (auto appro: _approximations) {
-                approximation_local_frequencies[appro->getKind()] = 0;
+                approximation_local_frequencies[appro] = 0;
             }
         }
 
@@ -831,11 +837,11 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     auto number_of_states = n;
     auto number_of_inputs = m;
     auto state_variables = range(0,n);
-    auto e=_approximation->compute_errors(h,B);
+    auto e=_approximator->compute_errors(h,B);
     ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
     auto swp=this->_sweeper;
-    auto DVh =_approximation->build_flow_domain(D,V,h);
-    auto w = _approximation->build_w_functions(DVh, number_of_states, number_of_inputs);
+    auto DVh =_approximator->build_flow_domain(D,V,h);
+    auto w = _approximator->build_w_functions(DVh, number_of_states, number_of_inputs);
     ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
     ARIADNE_LOG(6,"w:"<<w<<"\n");
 
@@ -862,7 +868,7 @@ compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVari
     TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
 
     auto fgws = construct_f_plus_gw_squared(f,g,w);
-    auto BVh =_approximation->build_flow_domain(cast_exact_box(B), V, h);
+    auto BVh =_approximator->build_flow_domain(cast_exact_box(B), V, h);
 
     auto squaredSeriesPhi = integrator.flow_step(fgws,DVh,h,BVh);
 

@@ -88,43 +88,22 @@ class TestInclusionIntegrator {
 
         for (auto approx: range(0,5)) {
 
-            List<SharedPointer<InputApproximatorInterface>> approximations;
-            InputApproximatorFactory factory;
+            List<InputApproximation> approximations;
 
             SizeType ppi = 0;
             switch (approx) {
-                case 0:
-                    approximations.append(factory.create(f,g,V,InputApproximation::ZERO,sweeper));
-                    ppi = 0;
-                    break;
-                case 1:
-                    approximations.append(factory.create(f,g,V,InputApproximation::CONSTANT,sweeper));
-                    ppi = 1;
-                    break;
-                case 2:
-                    approximations.append(factory.create(f,g,V,InputApproximation::AFFINE,sweeper));
-                    ppi = 2;
-                    break;
-                case 3:
-                    approximations.append(factory.create(f,g,V,InputApproximation::SINUSOIDAL,sweeper));
-                    ppi = 2;
-                    break;
-                case 4:
-                    approximations.append(factory.create(f,g,V,InputApproximation::PIECEWISE,sweeper));
-                    ppi = 2;
-                    break;
-                default:
-                    break;
+                case 0: approximations.append(InputApproximation::ZERO); break;
+                case 1: approximations.append(InputApproximation::CONSTANT); break;
+                case 2: approximations.append(InputApproximation::AFFINE); break;
+                case 3: approximations.append(InputApproximation::AFFINE); break;
+                case 4: approximations.append(InputApproximation::PIECEWISE); break;
+                default: break;
             }
 
-            auto n = f.result_size();
-            auto m = V.size();
-            double rho = 6.0;
-            SizeType base = 1000;
-            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=base);
+            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=10000);
             integrator.verbosity = 0;
 
-            std::cout << approximations.at(0)->getKind() << std::endl;
+            std::cout << approximations.at(0) << std::endl;
 
             tms start_time, end_time;
             times(&start_time);
@@ -248,13 +227,12 @@ class TestInclusionIntegrator {
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
-        List<SharedPointer<InputApproximatorInterface>> approximations;
-        InputApproximatorFactory factory;
-        approximations.append(factory.create(f,g,V,InputApproximation::PIECEWISE,sweeper));
-        approximations.append(factory.create(f,g,V,InputApproximation::SINUSOIDAL,sweeper));
-        approximations.append(factory.create(f,g,V,InputApproximation::AFFINE,sweeper));
-        approximations.append(factory.create(f,g,V,InputApproximation::CONSTANT,sweeper));
-        approximations.append(factory.create(f,g,V,InputApproximation::ZERO,sweeper));
+        List<InputApproximation> approximations;
+        approximations.append(InputApproximation::PIECEWISE);
+        approximations.append(InputApproximation::SINUSOIDAL);
+        approximations.append(InputApproximation::AFFINE);
+        approximations.append(InputApproximation::CONSTANT);
+        approximations.append(InputApproximation::ZERO);
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=20000);
         integrator.verbosity = 1;

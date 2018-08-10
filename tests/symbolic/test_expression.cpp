@@ -394,6 +394,49 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(not is_polynomial_in({x/y,sqr(y)},{x,y}))
     }
 
+    Void test_vector_expression()
+    {
+        ARIADNE_TEST_SAME_TYPE(RealVariables,Variables<Real>);
+        ARIADNE_TEST_SAME_TYPE(RealVectorExpression,Expression<RealVector>);
+        RealVector cs={-2,3,-5};
+        RealVariables xs("x",3);
+        RealVectorVariable vv("v",3);
+        ARIADNE_TEST_CONSTRUCT(RealVectorExpression,vce,(cs));
+        ARIADNE_TEST_CONSTRUCT(RealVectorExpression,vexs,(xs));
+        ARIADNE_TEST_CONSTRUCT(RealVectorExpression,evv,(vv));
+        ARIADNE_TEST_CONSTRUCT(RealVectorExpression,vle,({xs[0],cs[1],xs[2]+cs[2]}));
+        ARIADNE_TEST_EQUALS(vce.size(),cs.size());
+        ARIADNE_TEST_EQUALS(vexs.size(),xs.size());
+        ARIADNE_TEST_EQUALS(evv.size(),3u);
+        ARIADNE_TEST_EQUALS(vle.size(),3u);
+        ARIADNE_TEST_EQUALS((vce+evv).size(),vce.size());
+        RealVectorExpression vee=Vector<RealExpression>({xs[0],xs[1],xs[2]});
+        RealVectorExpression vex=xs;
+        RealVectorExpression vyce({cs[0],y,cs[2]});
+        RealValuation val({xs[0]=7, xs[1]=11, xs[2]=13});
+        RealVector vec({val[xs[0]], val[xs[1]], val[xs[2]]});
+        RealValuation valv({vv[0]=7, vv[1]=11, vv[2]=13});
+        RealVector vecv({valv[vv[0]], valv[vv[1]], valv[vv[2]]});
+        ARIADNE_TEST_EQUAL(evaluate(vce,val),cs);
+        ARIADNE_TEST_PRINT(evaluate(vex,val));
+        ARIADNE_TEST_EQUAL(evaluate(vex,val),vec);
+        ARIADNE_TEST_EQUAL(evaluate(vex+vce,val)[0],val[xs[0]]+cs[0]);
+        ARIADNE_TEST_EQUAL(evaluate(vex+vce,val),evaluate(vex,val)+cs);
+        ARIADNE_TEST_PRINT((vex+vce)/vex[1]);
+        ARIADNE_TEST_PRINT(evaluate((vex+vce)/vex[1],val));
+        ARIADNE_TEST_PRINT(simplify(((vex+vce)/vex[1])[2]));
+        ARIADNE_TEST_SAME(simplify(((vex+vce)/vex[1])[2]),(xs[2]+cs[2])/xs[1]);
+
+        ARIADNE_TEST_SAME(simplify((vex+vce)[0]),xs[0]+cs[0])
+        ARIADNE_TEST_SAME(simplify((vex+vce)[1]),xs[1]+cs[1])
+        ARIADNE_TEST_SAME(simplify((vex-vce)[0]),xs[0]-cs[0])
+        ARIADNE_TEST_SAME(simplify((vex*y)[1]),xs[1]*y)
+        ARIADNE_TEST_SAME(simplify((y*(vex-vce))[0]),y*(xs[0]-cs[0]))
+        ARIADNE_TEST_SAME(simplify(((vex-vce)*y)[0]),(xs[0]-cs[0])*y)
+        ARIADNE_TEST_SAME(simplify(((vex-vce)/y)[0]),(xs[0]-cs[0])/y)
+
+    }
+
     Void test_function()
     {
         // Test to ensure that constants are handled correctly.
@@ -461,6 +504,7 @@ class TestExpression {
         ARIADNE_TEST_CALL(test_is_affine_in());
         ARIADNE_TEST_CALL(test_is_polynomial_in());
         ARIADNE_TEST_CALL(test_function());
+        ARIADNE_TEST_CALL(test_vector_expression());
     }
 
 };

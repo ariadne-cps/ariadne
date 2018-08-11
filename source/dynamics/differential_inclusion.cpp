@@ -717,7 +717,7 @@ ValidatedVectorFunction construct_function_affine_in_input(ValidatedVectorFuncti
     auto n = f.result_size();
     auto m = g.size();
     auto p = u[0].argument_size();
-    auto infinity_box = cast_singleton(ExactBoxType(p,ExactIntervalType(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity())));
+    auto infinity_box = cast_singleton(ExactBoxType(p,ExactIntervalType(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity())));
 
     auto coordinates = ValidatedVectorFunction::coordinates(p);
 

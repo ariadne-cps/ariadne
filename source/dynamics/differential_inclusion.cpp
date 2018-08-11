@@ -401,7 +401,7 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
     ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
 
     auto n=X0.size();

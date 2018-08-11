@@ -75,67 +75,29 @@ using namespace Ariadne;
 class TestInclusionIntegrator {
 
 
-    Void run_battery_each_approximation(String name, const DottedRealAssignments& dynamics,
-                                        const RealVariablesBox& inputs, const RealVariablesBox& initial,
-                                        ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g,
-                                        BoxDomainType V,
-                                        BoxDomainType X0, Real evolution_time, double step, SizeType freq) const
+    Void run_each_approximation(String name, ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g, BoxDomainType V,
+                                BoxDomainType X0, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) const
     {
-        typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
-        PrecisionType prec;
-
-        auto sweeper = make_threshold_sweeper(1e-8);
-
-        for (auto approx: range(0,5)) {
-
-            List<InputApproximation> approximations;
-
-            SizeType ppi = 0;
-            switch (approx) {
-                case 0: approximations.append(InputApproximation::ZERO); break;
-                case 1: approximations.append(InputApproximation::CONSTANT); break;
-                case 2: approximations.append(InputApproximation::AFFINE); break;
-                case 3: approximations.append(InputApproximation::AFFINE); break;
-                case 4: approximations.append(InputApproximation::PIECEWISE); break;
-                default: break;
-            }
-
-            auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step, number_of_steps_between_simplifications=freq, number_of_variables_to_keep=10000);
-            integrator.verbosity = 0;
-
+        for (auto i: range(5)) {
+            List<InputApproximation> singleapproximation = {approximations.at(i)};
             std::cout << approximations.at(0) << std::endl;
-
-            tms start_time, end_time;
-            times(&start_time);
-
-            List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,V,X0,evolution_time);
-
-            times(&end_time);
-            clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-            clock_t const hz = sysconf(_SC_CLK_TCK);
-
-            List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
-            ValidatedVectorFunctionModelType evolve_function = partial_evaluate(flow_functions.back(),flow_functions.back().argument_size()-1,NumericType(evolution_time,prec));
-            ValidatedConstrainedImageSet evolve_set = range(evolve_function);
-
-            std::cout << "score " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+            run_single_test(name,f,g,V,X0,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
         }
     }
 
-    Void run_single_test(String name, InclusionIntegratorInterface& integrator, const DottedRealAssignments& dynamics,
-                         const RealVariablesBox& inputs, const RealVariablesBox& initial,
-                         ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V,
-                         BoxDomainType X0, Real evolution_time) const
+    Void run_single_test(String name, ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType V,
+                         BoxDomainType X0, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) const
     {
         typedef typename ValidatedVectorFunctionModelType::NumericType NumericType; typedef typename NumericType::PrecisionType PrecisionType;
         PrecisionType prec;
 
-        std::cout << "flowing..." << std::endl;
+        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
+        integrator.verbosity = verbosity;
 
         tms start_time, end_time;
         times(&start_time);
 
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(dynamics,inputs,initial,f,g,V,X0,evolution_time);
+        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(f,g,V,X0,evolution_time);
 
         times(&end_time);
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
@@ -226,19 +188,17 @@ class TestInclusionIntegrator {
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
+        int verbosity = 0;
 
         List<InputApproximation> approximations;
-        approximations.append(InputApproximation::PIECEWISE);
-        approximations.append(InputApproximation::SINUSOIDAL);
-        approximations.append(InputApproximation::AFFINE);
-        approximations.append(InputApproximation::CONSTANT);
         approximations.append(InputApproximation::ZERO);
+        approximations.append(InputApproximation::CONSTANT);
+        approximations.append(InputApproximation::AFFINE);
+        approximations.append(InputApproximation::SINUSOIDAL);
+        approximations.append(InputApproximation::PIECEWISE);
 
-        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
-        integrator.verbosity = 1;
-
-        this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
-        //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);
+        this->run_single_test(name,f,g,V,X0,evolution_time,step,approximations,sweeper,freq,verbosity);
+        //this->run_each_approximation(name,f,g,V,X0,evolution_time,step,approximations,sweeper,freq,verbosity);
     }
 
   public:

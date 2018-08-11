@@ -56,6 +56,58 @@ FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
     return 1.0/pow(volume(bbx).get_d(),1.0/bbx.size());
 }
 
+Tuple<ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType,BoxDomainType>
+convert_to_functions(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial) {
+    auto transformations = centered_variables_transformation(inputs);
+
+    DottedRealAssignments substituted_dynamics;
+    for (auto dyn : dynamics) {
+        substituted_dynamics.push_back(DottedRealAssignment(dyn.left_hand_side(),substitute(dyn.right_hand_side(),transformations.first)));
+    }
+
+    BoxDomainType V = bounds_to_domain(transformations.second);
+    BoxDomainType X0 = bounds_to_domain(initial);
+
+    Map<RealVariable,Map<RealVariable,RealExpression>> gs;
+    for (auto in : inputs.variables()) {
+        Map<RealVariable,RealExpression> g;
+        for (auto dyn : substituted_dynamics) {
+            g[dyn.left_hand_side().base()] = simplify(derivative(dyn.right_hand_side(),in));
+        }
+        gs[in] = g;
+    }
+
+    Map<RealVariable,RealExpression> f_expr;
+    RealAssignments subs;
+    for (auto in : inputs.variables()) {
+        subs.push_back(RealAssignment(in,RealExpression::constant(0)));
+    }
+    for (auto dyn : substituted_dynamics) {
+        f_expr[dyn.left_hand_side().base()] = simplify(substitute(dyn.right_hand_side(),subs));
+    }
+
+    RealSpace var_spc(left_hand_sides(substituted_dynamics));
+
+    Vector<RealExpression> f_dyn(var_spc.dimension());
+    for (auto var : var_spc.indices()) {
+        f_dyn[var.second] = f_expr[var.first];
+    }
+    ValidatedVectorFunction f = make_function(var_spc,f_dyn);
+
+    Vector<ValidatedVectorFunction> g(gs.size());
+
+    SizeType i = 0;
+    for (auto in : inputs.variables()) {
+        Vector<RealExpression> g_dyn(var_spc.dimension());
+        for (auto var : var_spc.indices()) {
+            g_dyn[var.second] = gs[in][var.first];
+        }
+        g[i++] = ValidatedVectorFunction(make_function(var_spc,g_dyn));
+    }
+
+    return make_tuple(f,g,V,X0);
+}
+
 ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }
 GradedSweeperDP make_graded_sweeper(SizeType deg) { return GradedSweeperDP(DoublePrecision(),deg); }
 GradedThresholdSweeperDP make_graded_threshold_sweeper(SizeType deg, double thr) { return GradedThresholdSweeperDP(DoublePrecision(),deg, thr); }
@@ -139,52 +191,10 @@ class TestInclusionIntegrator {
     Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
                   const RealVariablesBox& initial, Real evolution_time, double step) const {
 
-        auto transformations = centered_variables_transformation(inputs);
-
-        DottedRealAssignments substituted_dynamics;
-        for (auto dyn : dynamics) {
-            substituted_dynamics.push_back(DottedRealAssignment(dyn.left_hand_side(),substitute(dyn.right_hand_side(),transformations.first)));
-        }
-
-        BoxDomainType V = bounds_to_domain(transformations.second);
-        BoxDomainType X0 = bounds_to_domain(initial);
-
-        Map<RealVariable,Map<RealVariable,RealExpression>> gs;
-        for (auto in : inputs.variables()) {
-            Map<RealVariable,RealExpression> g;
-            for (auto dyn : substituted_dynamics) {
-                g[dyn.left_hand_side().base()] = simplify(derivative(dyn.right_hand_side(),in));
-            }
-            gs[in] = g;
-        }
-
-        Map<RealVariable,RealExpression> f_expr;
-        RealAssignments subs;
-        for (auto in : inputs.variables()) {
-            subs.push_back(RealAssignment(in,RealExpression::constant(0)));
-        }
-        for (auto dyn : substituted_dynamics) {
-            f_expr[dyn.left_hand_side().base()] = simplify(substitute(dyn.right_hand_side(),subs));
-        }
-
-        RealSpace var_spc(left_hand_sides(substituted_dynamics));
-
-        Vector<RealExpression> f_dyn(var_spc.dimension());
-        for (auto var : var_spc.indices()) {
-            f_dyn[var.second] = f_expr[var.first];
-        }
-        ValidatedVectorFunction f = make_function(var_spc,f_dyn);
-
-        Vector<ValidatedVectorFunction> g(gs.size());
-
-        SizeType i = 0;
-        for (auto in : inputs.variables()) {
-            Vector<RealExpression> g_dyn(var_spc.dimension());
-            for (auto var : var_spc.indices()) {
-                g_dyn[var.second] = gs[in][var.first];
-            }
-            g[i++] = ValidatedVectorFunction(make_function(var_spc,g_dyn));
-        }
+        ValidatedVectorFunction f;
+        Vector<ValidatedVectorFunction> g;
+        BoxDomainType V, X0;
+        std::tie(f,g,V,X0) = convert_to_functions(dynamics,inputs,initial);
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);

@@ -29,6 +29,57 @@ namespace Ariadne {
 
 #define ARIADNE_LOG_PRINT(level, expr) { ARIADNE_LOG(level,#expr << "=" << (expr) << "\n"); }
 
+Tuple<ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs) {
+
+    auto transformations = centered_variables_transformation(inputs);
+
+    DottedRealAssignments substituted_dynamics;
+    for (auto dyn : dynamics) {
+        substituted_dynamics.push_back(DottedRealAssignment(dyn.left_hand_side(),substitute(dyn.right_hand_side(),transformations.first)));
+    }
+
+    BoxDomainType V = bounds_to_domain(transformations.second);
+
+    Map<RealVariable,Map<RealVariable,RealExpression>> gs;
+    for (auto in : inputs.variables()) {
+        Map<RealVariable,RealExpression> g;
+        for (auto dyn : substituted_dynamics) {
+            g[dyn.left_hand_side().base()] = simplify(derivative(dyn.right_hand_side(),in));
+        }
+        gs[in] = g;
+    }
+
+    Map<RealVariable,RealExpression> f_expr;
+    RealAssignments subs;
+    for (auto in : inputs.variables()) {
+        subs.push_back(RealAssignment(in,RealExpression::constant(0)));
+    }
+    for (auto dyn : substituted_dynamics) {
+        f_expr[dyn.left_hand_side().base()] = simplify(substitute(dyn.right_hand_side(),subs));
+    }
+
+    RealSpace var_spc(left_hand_sides(substituted_dynamics));
+
+    Vector<RealExpression> f_dyn(var_spc.dimension());
+    for (auto var : var_spc.indices()) {
+        f_dyn[var.second] = f_expr[var.first];
+    }
+    ValidatedVectorFunction f = make_function(var_spc,f_dyn);
+
+    Vector<ValidatedVectorFunction> g(gs.size());
+
+    SizeType i = 0;
+    for (auto in : inputs.variables()) {
+        Vector<RealExpression> g_dyn(var_spc.dimension());
+        for (auto var : var_spc.indices()) {
+            g_dyn[var.second] = gs[in][var.first];
+        }
+        g[i++] = ValidatedVectorFunction(make_function(var_spc,g_dyn));
+    }
+
+    return make_tuple(f,g,V);
+}
+
 struct ScheduledApproximation
 {
     SizeType step;
@@ -169,17 +220,17 @@ Norms::values() const {
 
 
 Norms
-compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, PositiveFloatDPValue const& h, UpperBoxType const& B) {
+compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
-    auto n = f.result_size();
-    auto m = g.size();
+    auto n = di.f.result_size();
+    auto m = di.g.size();
     DoublePrecision pr;
     FloatDPError ze(pr);
     FloatDPError K=ze, pK=ze, L=ze, pL=ze, H=ze, pH=ze;
     Vector<FloatDPError> Kj(n), pKj(n), Lj(n), pLj(n), Hj(n), pHj(n);
     FloatDPUpperBound Lambda=ze;
 
-    auto Df=f.differential(cast_singleton(B),2);
+    auto Df=di.f.differential(cast_singleton(B),2);
     for (auto j : range(n)) {
         auto Df_j=Df[j].expansion();
         FloatDPError K_j=ze, L_j=ze, H_j=ze; FloatDPUpperBound Lambda_j=ze;
@@ -206,8 +257,8 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     Matrix<FloatDPError> pK_matrix(m,n), pL_matrix(m,n), pH_matrix(m,n);
 
     for (auto i : range(m)) {
-        auto Dg_i=g[i].differential(cast_singleton(B),2);
-        FloatDPError Vi(abs(V[i]).upper());
+        auto Dg_i=di.g[i].differential(cast_singleton(B),2);
+        FloatDPError Vi(abs(di.V[i]).upper());
         FloatDPError pK_i=ze, pL_i=ze, pH_i=ze;
         for (auto j : range(n)) {
             auto Dg_ij=Dg_i[j].expansion();
@@ -234,7 +285,7 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
     for (auto j : range(n)) {
         pKj[j] = ze; pLj[j] = ze; pHj[j] = ze;
         for (auto i : range(m)) {
-            FloatDPError Vi(abs(V[i]).upper());
+            FloatDPError Vi(abs(di.V[i]).upper());
             pKj[j] += Vi*pK_matrix[i][j]; pLj[j] += Vi*pL_matrix[i][j]; pHj[j] += Vi*pH_matrix[i][j];
         }
     }
@@ -246,24 +297,24 @@ compute_norms(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> 
 }
 
 InputApproximator
-InputApproximatorFactory::create(ValidatedVectorFunction const& f, Vector<ValidatedVectorFunction> const& g, BoxDomainType const& V, InputApproximation kind, SweeperDP sweeper) const {
+InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const {
 
     switch(kind) {
-    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(f,g,V,sweeper)));
-    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(f,g,V,sweeper)));
-    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(f,g,V,sweeper)));
-    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(f,g,V,sweeper)));
-    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(f,g,V,sweeper)));
+    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(di,sweeper)));
+    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(di,sweeper)));
+    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(di,sweeper)));
+    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(di,sweeper)));
+    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(di,sweeper)));
     }
 }
 
 
 Vector<ErrorType> ApproximationErrorProcessor::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
 
-    Norms norms = compute_norms(_f,_g,_V,h,B);
+    Norms norms = compute_norms(_di,h,B);
 
-    if (inputs_are_additive(_g))
-        norms.pK=mag(norm(_V));
+    if (inputs_are_additive(_di.g))
+        norms.pK=mag(norm(_di.V));
 
     return compute_errors(norms,h);
 }
@@ -401,8 +452,14 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
-List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real tmax) {
-    ARIADNE_LOG(1,"\nf:"<<f<<"\ng:"<<g<<"\nV:"<<V<<"\nX0:"<<X0<<"\ntmax:"<<tmax<<"\n");
+List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
+    ARIADNE_LOG(1,"\n"<<ivp<<"\n");
+
+    const DifferentialInclusion& di = ivp.di;
+    const ValidatedVectorFunction& f = di.f;
+    const Vector<ValidatedVectorFunction>& g = di.g;
+    const BoxDomainType& V = di.V;
+    const BoxDomainType& X0 = ivp.X0;
 
     auto n=X0.size();
     auto m=V.size();
@@ -437,7 +494,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
     List<InputApproximator> approximations;
     InputApproximatorFactory factory;
     for (auto appro : _approximations)
-        approximations.append(factory.create(f,g,V,appro,_sweeper));
+        approximations.append(factory.create(di,appro,_sweeper));
 
     for (auto appro: approximations) {
         schedule.push_back(ScheduledApproximation(SizeType(step),appro));
@@ -497,7 +554,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
             this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximations_to_use.at(i)));
             ARIADNE_LOG(4,"checking approximation "<<this->_approximator->kind()<<"\n");
 
-            auto current_reach=reach(f,g,V,D,evolve_function,B,t,h);
+            auto current_reach=reach(di,D,evolve_function,B,t,h);
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
 
             if (i == 0) {
@@ -587,10 +644,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(ValidatedVectorFu
 }
 
 ValidatedVectorFunctionModelType
-InclusionIntegrator::reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const {
+InclusionIntegrator::reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const {
 
-    auto n = f.result_size();
-    auto m = g.size();
+    auto n = di.f.result_size();
+    auto m = di.g.size();
     PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
     ValidatedVectorFunctionModelType result;
@@ -598,11 +655,11 @@ InclusionIntegrator::reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunc
     if (this->_approximator->kind() != InputApproximation::PIECEWISE) {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DVh = this->_approximator->build_flow_domain(D,V,h);
+        auto DVh = this->_approximator->build_flow_domain(D,di.V,h);
         ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
         auto w = this->_approximator->build_w_functions(DVh, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
-        auto dyn_vf = construct_function_affine_in_input(f, g, w);
+        auto dyn_vf = construct_function_affine_in_input(di.f, di.g, w);
         ARIADNE_LOG(6,"dyn VF:"<<dyn_vf<<"\n");
         auto phi = this->compute_flow_function(dyn_vf,DVh,B);
         phi = add_errors(phi,e);
@@ -610,11 +667,11 @@ InclusionIntegrator::reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunc
     } else {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DVh_hlf = this->_approximator->build_flow_domain(D,V,hlf(h));
+        auto DVh_hlf = this->_approximator->build_flow_domain(D,di.V,hlf(h));
         ARIADNE_LOG(6,"DVh_hlf:"<<DVh_hlf<<"\n");
         auto w_hlf = this->_approximator->build_w_functions(DVh_hlf, n, m);
         ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
-        auto dyn_vf_hlf = construct_function_affine_in_input(f, g, w_hlf);
+        auto dyn_vf_hlf = construct_function_affine_in_input(di.f, di.g, w_hlf);
         ARIADNE_LOG(6,"dyn_vf_hlf:" << dyn_vf_hlf << "\n");
         auto phi_hlf = this->compute_flow_function(dyn_vf_hlf,DVh_hlf,B);
         PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
@@ -623,10 +680,10 @@ InclusionIntegrator::reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunc
 
         auto D_int = cast_exact_box(intermediate_evolve.range());
 
-        auto DVh=this->_approximator->build_flow_domain(D_int,V,hlf(h));
+        auto DVh=this->_approximator->build_flow_domain(D_int,di.V,hlf(h));
         auto w =this->_approximator->build_secondhalf_w_functions(DVh, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
-        auto dyn_vf = construct_function_affine_in_input(f, g, w);
+        auto dyn_vf = construct_function_affine_in_input(di.f, di.g, w);
         ARIADNE_LOG(6,"dyn VF:"<<dyn_vf<<"\n");
         auto phi = this->compute_flow_function(dyn_vf,DVh,B);
         phi = add_errors(phi,e);
@@ -851,9 +908,9 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
 }
 
 Vector<ErrorType> InputApproximatorBase::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_g))
+    if (inputs_are_additive(_di.g))
         return _additive_processor->process(h,B);
-    else if (_g.size() == 1)
+    else if (_di.g.size() == 1)
         return _single_input_processor->process(h,B);
     else
         return _generic_processor->process(h,B);

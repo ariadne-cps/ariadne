@@ -74,6 +74,7 @@ Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
+ValidatedVectorFunctionModelDP add_errors(ValidatedVectorFunctionModelDP phi, Vector<ErrorType> const& e);
 
 Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g, UpperBoxType const &B);
 
@@ -270,6 +271,7 @@ class InputApproximator : public InputApproximatorInterface {
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
+    Vector<ValidatedScalarFunction> build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
 class ZeroInputApproximator : public InputApproximatorBase {
@@ -331,8 +333,8 @@ protected:
     }
 public:
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-    Vector<ValidatedScalarFunction> build_firsthalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
-    Vector<ValidatedScalarFunction> build_secondhalf_approximating_function(BoxDomainType DVh, SizeType n, SizeType m) const;
+    Vector<ValidatedScalarFunction> build_firsthalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
+    Vector<ValidatedScalarFunction> build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
 class Reconditioner {
@@ -357,11 +359,8 @@ public:
 class InclusionIntegratorInterface {
   public:
     virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) = 0;
-
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const = 0;
-    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f,
-                                                                   Vector<ValidatedVectorFunction> g, BoxDomainType V,
-                                                                   BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const = 0;
+    virtual ValidatedVectorFunctionModelType reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
 };
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
@@ -388,12 +387,11 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     virtual List<ValidatedVectorFunctionModelType> flow(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType X0, Real T) override;
 
     virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
-
-    virtual ValidatedVectorFunctionModelType compute_flow_function(const List<DottedRealAssignment>& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, ValidatedVectorFunction f,
-                                                                   Vector<ValidatedVectorFunction> g, BoxDomainType V,
-                                                                   BoxDomainType D, ExactTimeStepType h, UpperBoxType B) const override;
+    virtual ValidatedVectorFunctionModelType reach(ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g, BoxDomainType V, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
+    ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;
     ValidatedVectorFunctionModelDP build_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorFunctionModelDP evaluate_evolve_function(ValidatedVectorFunctionModelDP reach_function, PositiveFloatDPValue t) const;
     ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
 };
 

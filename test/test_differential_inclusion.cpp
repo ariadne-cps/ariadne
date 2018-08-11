@@ -235,7 +235,7 @@ class TestInclusionIntegrator {
         approximations.append(InputApproximation::ZERO);
 
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
-        integrator.verbosity = 8;
+        integrator.verbosity = 1;
 
         this->run_single_test(name,integrator,dynamics,inputs,initial,f,g,V,X0,evolution_time);
         //this->run_battery_each_approximation(name,dynamics,inputs,initial,f,g,V,X0,evolution_time,step,freq);
@@ -579,14 +579,14 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_higgins_selkov());
     //ARIADNE_TEST_CALL(test_reactor());
     //ARIADNE_TEST_CALL(test_lotka_volterra());
-    /*ARIADNE_TEST_CALL(test_jet_engine());
+    ARIADNE_TEST_CALL(test_jet_engine());
     ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jerk21());
     ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());*/
+    ARIADNE_TEST_CALL(test_jerk16());
     ARIADNE_TEST_CALL(test_DCDC());
-    //ARIADNE_TEST_CALL(test_harmonic());
+    ARIADNE_TEST_CALL(test_harmonic());
 }
 
 int main() {

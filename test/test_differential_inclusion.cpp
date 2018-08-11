@@ -47,10 +47,6 @@ template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& l
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }
 
-ValidatedConstrainedImageSet range(ValidatedVectorFunctionModelType const& fm) {
-    return ValidatedConstrainedImageSet(fm.domain(),fm);
-}
-
 FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
     auto bbx = evolve_set.bounding_box();
     return 1.0/pow(volume(bbx).get_d(),1.0/bbx.size());
@@ -130,9 +126,9 @@ class TestInclusionIntegrator {
     Void run_each_approximation(String name, ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g, BoxDomainType V,
                                 BoxDomainType X0, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) const
     {
-        for (auto i: range(5)) {
-            List<InputApproximation> singleapproximation = {approximations.at(i)};
-            std::cout << approximations.at(0) << std::endl;
+        for (auto appro: approximations) {
+            List<InputApproximation> singleapproximation = {appro};
+            std::cout << appro << std::endl;
             run_single_test(name,f,g,V,X0,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
         }
     }
@@ -155,10 +151,10 @@ class TestInclusionIntegrator {
         clock_t ticks = end_time.tms_utime - start_time.tms_utime;
         clock_t const hz = sysconf(_SC_CLK_TCK);
 
-        List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return range(fm);},flow_functions);
+        List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
         auto final_set = flow_functions.back();
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
-        ValidatedConstrainedImageSet evolve_set = range(evolve_function);
+        auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
         std::cout << "score: " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
 /*
@@ -546,9 +542,9 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
-    //ARIADNE_TEST_CALL(test_higgins_selkov());
-    //ARIADNE_TEST_CALL(test_reactor());
-    //ARIADNE_TEST_CALL(test_lotka_volterra());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_reactor());
+    ARIADNE_TEST_CALL(test_lotka_volterra());
     ARIADNE_TEST_CALL(test_jet_engine());
     ARIADNE_TEST_CALL(test_pi_controller());
     ARIADNE_TEST_CALL(test_jerk21());

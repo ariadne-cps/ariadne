@@ -296,15 +296,30 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
     return Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
+template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(Norms const& n, PositiveFloatDPValue const& h) const {
+    Vector<ErrorType> result(n.dimension(),error<A,R>(n,h));
+    if (_enable_componentwise_error)
+        for (auto j: range(n.dimension()))
+            result[j] = min(result[j],component_error<A,R>(n,h,j));
+    return result;
+}
+
+template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    Norms norms = compute_norms(_di,h,B);
+    if (inputs_are_additive(_di.g))
+        norms.pK=mag(norm(_di.V));
+    return process(norms,h);
+}
+
 InputApproximator
 InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const {
 
     switch(kind) {
-    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ZeroInputApproximator(di,sweeper)));
-    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new ConstantInputApproximator(di,sweeper)));
-    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new AffineInputApproximator(di,sweeper)));
-    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new SinusoidalInputApproximator(di,sweeper)));
-    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new PiecewiseInputApproximator(di,sweeper)));
+    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
+    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
+    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
+    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
+    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
     }
 }
 
@@ -568,13 +583,27 @@ InclusionIntegrator::reach(DifferentialInclusion const& di, BoxDomainType D, Val
         auto D_int = cast_exact_box(intermediate_evolve.range());
 
         auto DVh=this->_approximator->build_flow_domain(D_int,di.V,hlf(h));
-        auto w =this->_approximator->build_secondhalf_w_functions(DVh, n, m);
+        auto w = build_secondhalf_piecewise_w_functions(DVh, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto dyn_vf = construct_function_affine_in_input(di.f, di.g, w);
         ARIADNE_LOG(6,"dyn VF:"<<dyn_vf<<"\n");
         auto phi = this->compute_flow_function(dyn_vf,DVh,B);
         phi = add_errors(phi,e);
-        result=build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, m, intermediate_t, new_t);
+        result = build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, m, intermediate_t, new_t);
+    }
+    return result;
+}
+
+Vector<ValidatedScalarFunction> InclusionIntegrator::build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
+    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
+
+    auto result = Vector<ValidatedScalarFunction>(m);
+    for (auto i : range(m)) {
+        auto Vi = ExactNumber(DVh[n+i].upper());
+        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
+        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
+        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
@@ -794,119 +823,80 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
     return picardPhi;
 }
 
-
-BoxDomainType InputApproximatorBase::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
+template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto result = D;
-
     for (Nat i : range(this->_num_params_per_input))
         result = product(result,V);
-
     return product(result,IntervalDomainType(-h,+h));
 }
 
-Vector<ValidatedScalarFunction> InputApproximator::build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    assert(kind() != InputApproximation::PIECEWISE);
-    PiecewiseInputApproximator& approx = dynamic_cast<PiecewiseInputApproximator&>(*this->_impl);
-    return approx.build_secondhalf_w_functions(DVh,n,m);
-}
-
-Vector<ValidatedScalarFunction> ZeroInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
-
     for (auto i : range(0,m))
         result[i] = ValidatedScalarFunction::zero(n+1);
-
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> ConstantInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarFunction>(m);
-
     for (auto i : range(0,m))
         result[i] = ValidatedScalarFunction::coordinate(n+m+1,n+i);
-
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> AffineInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto result = Vector<ValidatedScalarFunction>(m);
-
+template<> Vector<ValidatedScalarFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
     auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
     auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
-
     auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
 
+    auto result = Vector<ValidatedScalarFunction>(m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h);
     }
-
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> SinusoidalInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-
-    auto result = Vector<ValidatedScalarFunction>(m);
-
+template<> Vector<ValidatedScalarFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
-    auto three = ValidatedScalarFunction::constant(n+2*m+1,3_z);
-    auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
-
-    auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
     auto pgamma = ValidatedScalarFunction::constant(n+2*m+1,1.1464_dec);
     auto gamma = ValidatedScalarFunction::constant(n+2*m+1,4.162586_dec);
+    auto t = ValidatedScalarFunction::coordinate(n+2*m+1,n+2*m);
+    auto h = ValidatedScalarFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
 
+    auto result = Vector<ValidatedScalarFunction>(m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h));
     }
-
     return result;
 }
 
 
-Vector<ValidatedScalarFunction> PiecewiseInputApproximator::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto result = Vector<ValidatedScalarFunction>(m);
-
+template<> Vector<ValidatedScalarFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarFunction::zero(n+2*m+1);
     auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
 
+    auto result = Vector<ValidatedScalarFunction>(m);
     for (auto i : range(m)) {
         auto Vi = ExactNumber(DVh[n+i].upper());
         auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
         auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
         result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
-    
     return result;
 }
 
-
-Vector<ValidatedScalarFunction> PiecewiseInputApproximator::build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto result = Vector<ValidatedScalarFunction>(m);
-
-    auto zero = ValidatedScalarFunction::zero(n+2*m+1);
-    auto one = ValidatedScalarFunction::constant(n+2*m+1,1_z);
-
-    for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+i].upper());
-        auto p0 = ValidatedScalarFunction::coordinate(n+2*m+1,n+i);
-        auto p1 = ValidatedScalarFunction::coordinate(n+2*m+1,n+m+i);
-        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
-    }
-    
-    return result;
-}
 
 LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep)
     : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep) {

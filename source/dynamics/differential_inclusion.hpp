@@ -199,6 +199,20 @@ template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); 
 template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
 template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
 
+template<class A> InputApproximation approximation_kind();
+template<> InputApproximation approximation_kind<ZeroApproximation>() { return InputApproximation::ZERO; }
+template<> InputApproximation approximation_kind<ConstantApproximation>() { return InputApproximation::CONSTANT; }
+template<> InputApproximation approximation_kind<AffineApproximation>() { return InputApproximation::AFFINE; }
+template<> InputApproximation approximation_kind<SinusoidalApproximation>() { return InputApproximation::SINUSOIDAL; }
+template<> InputApproximation approximation_kind<PiecewiseApproximation>() { return InputApproximation::PIECEWISE; }
+
+template<class A> Nat num_params_per_input();
+template<> Nat num_params_per_input<ZeroApproximation>() { return 0u; }
+template<> Nat num_params_per_input<ConstantApproximation>() { return 1u; }
+template<> Nat num_params_per_input<AffineApproximation>() { return 2u; }
+template<> Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
+template<> Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
+
 enum class InputsRoles { AFFINE, SINGULAR, ADDITIVE};
 
 class InputsRole {
@@ -283,13 +297,13 @@ public:
     InputApproximator create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const;
 };
 
-class ApproximationErrorProcessorInterface {
+template<class A> class ApproximationErrorProcessorInterface {
 public:
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const = 0;
 };
 
 template<class A, class R>
-class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface {
+class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A> {
   public:
     ApproximationErrorProcessor(DifferentialInclusion const& di) : _di(di), _enable_componentwise_error(false) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
@@ -300,24 +314,9 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface 
     DifferentialInclusion const& _di;
 };
 
-template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(Norms const& n, PositiveFloatDPValue const& h) const {
-    Vector<ErrorType> result(n.dimension(),error<A,R>(n,h));
-    if (_enable_componentwise_error)
-        for (auto j: range(n.dimension()))
-            result[j] = min(result[j],component_error<A,R>(n,h,j));
-    return result;
-}
-
-template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
-    Norms norms = compute_norms(_di,h,B);
-    if (inputs_are_additive(_di.g))
-        norms.pK=mag(norm(_di.V));
-    return process(norms,h);
-}
-
 template<class A>
 class ApproximationErrorProcessorFactory {
-    typedef ApproximationErrorProcessorInterface Processor;
+    typedef ApproximationErrorProcessorInterface<A> Processor;
 public:
     SharedPointer<Processor> create(DifferentialInclusion const& di) const {
         if (inputs_are_additive(di.g)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(di));
@@ -334,22 +333,6 @@ class InputApproximatorInterface {
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
-class InputApproximatorBase : public InputApproximatorInterface {
-  protected:
-    DifferentialInclusion const& _di;
-    SweeperDP _sweeper;
-    SharedPointer<ApproximationErrorProcessorInterface> _processor;
-    InputApproximatorBase(DifferentialInclusion const& di, SharedPointer<ApproximationErrorProcessorInterface> const& processor,
-                       SweeperDP sweeper, InputApproximation kind, Nat num_params_per_input) :
-        _di(di), _processor(processor), _sweeper(sweeper), _kind(kind), _num_params_per_input(num_params_per_input) { }
-  private:
-    InputApproximation _kind;
-    Nat _num_params_per_input;
-  public:
-    virtual InputApproximation kind() const override { return _kind; }
-    virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
-};
 
 class InputApproximator : public InputApproximatorInterface {
     friend class InputApproximatorFactory;
@@ -364,51 +347,28 @@ class InputApproximator : public InputApproximatorInterface {
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
-    Vector<ValidatedScalarFunction> build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
-class ZeroInputApproximator : public InputApproximatorBase {
+
+template<class A>
+class InputApproximatorBase : public InputApproximatorInterface {
     friend class InputApproximatorFactory;
-protected:
-    ZeroInputApproximator(DifferentialInclusion const& di, SweeperDP sweeper)
-            : InputApproximatorBase(di,ApproximationErrorProcessorFactory<ZeroApproximation>().create(di),sweeper,InputApproximation::ZERO,0u) { }
+  protected:
+    DifferentialInclusion const& _di;
+    SweeperDP _sweeper;
+    SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
+    InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
+        _di(di), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _sweeper(sweeper), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
+  private:
+    InputApproximation _kind;
+    Nat _num_params_per_input;
+  public:
+    virtual InputApproximation kind() const override { return _kind; }
+    virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
 };
 
-class ConstantInputApproximator : public InputApproximatorBase {
-    friend class InputApproximatorFactory;
-protected:
-    ConstantInputApproximator(DifferentialInclusion const& di, SweeperDP sweeper)
-            : InputApproximatorBase(di,ApproximationErrorProcessorFactory<ConstantApproximation>().create(di),sweeper,InputApproximation::CONSTANT,1u) { }
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-};
-
-class AffineInputApproximator : public InputApproximatorBase {
-    friend class InputApproximatorFactory;
-protected:
-    AffineInputApproximator(DifferentialInclusion const& di, SweeperDP sweeper)
-            : InputApproximatorBase(di,ApproximationErrorProcessorFactory<AffineApproximation>().create(di),sweeper,InputApproximation::AFFINE,2u) { }
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-};
-
-class SinusoidalInputApproximator : public InputApproximatorBase {
-    friend class InputApproximatorFactory;
-protected:
-    SinusoidalInputApproximator(DifferentialInclusion const& di, SweeperDP sweeper)
-            : InputApproximatorBase(di,ApproximationErrorProcessorFactory<SinusoidalApproximation>().create(di),sweeper,InputApproximation::SINUSOIDAL,2u) { }
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-};
-
-class PiecewiseInputApproximator : public InputApproximatorBase {
-    friend class InputApproximatorFactory;
-protected:
-    PiecewiseInputApproximator(DifferentialInclusion const& di, SweeperDP sweeper)
-            : InputApproximatorBase(di,ApproximationErrorProcessorFactory<PiecewiseApproximation>().create(di),sweeper,InputApproximation::PIECEWISE,2u) { }
-    virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
-    Vector<ValidatedScalarFunction> build_firsthalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
-public:
-    Vector<ValidatedScalarFunction> build_secondhalf_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
-};
 
 class Reconditioner {
   public:
@@ -466,6 +426,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorFunctionModelDP build_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     ValidatedVectorFunctionModelDP evaluate_evolve_function(ValidatedVectorFunctionModelDP reach_function, PositiveFloatDPValue t) const;
     ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    Vector<ValidatedScalarFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
 

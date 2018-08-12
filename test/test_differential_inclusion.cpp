@@ -102,7 +102,7 @@ class TestInclusionIntegrator {
         ValidatedVectorFunctionModelType evolve_function = partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
         auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
-        std::cout << "score: " << score(evolve_set) << ", " << ticks / hz << "." << ticks % hz << "s" << std::endl;
+        std::cout << "score: " << score(evolve_set) << ", time: " << ticks / hz << "." << ticks % hz << " s" << std::endl;
 /*
         std::cout << "plotting..." << std::endl;
         Box<FloatDPUpperInterval> graphics_box(f.result_size());

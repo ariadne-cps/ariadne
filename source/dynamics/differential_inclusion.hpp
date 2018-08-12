@@ -269,11 +269,11 @@ template<> ErrorType error<SingularInput>(Norms const& n, PositiveFloatDPValue c
 template<> ErrorType error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
 template<> ErrorType component_error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return ErrorType(0u); }
+    return (pow(h,2u)*(pow(r,2u)+1u)*n.pK*n.pLj[j]/2u + pow(h,3u)*(n.K+n.pK)*(r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) + n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)+(n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)+2u-h*n.L*2u))-2u))/cast_positive(cast_exact(pow(n.L,3u))))/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
 template<> ErrorType component_error<SingularInput>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return ErrorType(0u); }
+    return (pow(h,3u)*(n.K+n.pK)/24u*((r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u)+ (n.pHj[j]*n.pK+n.pL+n.pLj[j])*(pow(r,2u)+1u)*8u) + n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)+(n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)+2u-h*n.L*2u))-2u))/cast_positive(cast_exact(pow(n.L,3u))))/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
 template<> ErrorType component_error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return ErrorType(0u); }
+    return (n.Hj[j]*(n.K+n.pK)/2u+(n.Lj[j]*n.L+n.Hj[j]*(n.K+r*n.pK))*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)/cast_positive(cast_exact(pow(n.L*h,3u)*2u)))*n.pK*pow(h,3u)/4u*(r+1u)/cast_positive(+1u-h*n.Lj[j]/2u); }
 
 class InputApproximator;
 class InputApproximatorInterface;

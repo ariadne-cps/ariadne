@@ -308,119 +308,6 @@ InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproxima
     }
 }
 
-
-Vector<ErrorType> ApproximationErrorProcessor::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
-
-    Norms norms = compute_norms(_di,h,B);
-
-    if (inputs_are_additive(_di.g))
-        norms.pK=mag(norm(_di.V));
-
-    return compute_errors(norms,h);
-}
-
-ErrorType noparam_error_option1(Norms const& n, PositiveFloatDPValue const& h) {
-    return n.pK*n.expLambda*h;
-}
-
-ErrorType noparam_error_option2(Norms const& n, PositiveFloatDPValue const& h) {
-    return (n.K*2u+n.pK)*h;
-}
-
-ErrorType noparam_error_option3(Norms const& n, PositiveFloatDPValue const& h) {
-    return n.pK*n.expL*h;
-}
-
-ErrorType noparam_component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return (n.Kj[j]*2u+n.pKj[j])*h;
-}
-
-ErrorType oneparam_error(Norms const& n, PositiveFloatDPValue const& h) {
-    return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda);
-}
-
-ErrorType oneparam_component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u)));
-}
-
-ErrorType twoparam_generic_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u;
-}
-
-ErrorType twoparam_additive_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u;
-}
-
-ErrorType twoparam_singleinput_error(Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r) {
-    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r);
-}
-
-Vector<ErrorType> ZeroErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = noparam_error_option1(n,h);
-    FloatDPError result2 = noparam_error_option2(n,h);
-
-    Vector<FloatDPError> result(n.dimension(),min(result1,result2));
-
-    if (_enable_componentwise_error) {
-        FloatDPError result3 = noparam_error_option3(n,h);
-        for (auto j: range(n.dimension())) {
-            result[j] = min(result[j],result3);
-            result[j] = min(result[j],noparam_component_error(n,h,j));
-        }
-    }
-    return result;
-}
-
-Vector<ErrorType> ConstantErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    FloatDPError result1 = oneparam_error(n,h);
-
-    Vector<FloatDPError> result(n.dimension(),result1);
-
-    if (_enable_componentwise_error) {
-        for (auto j: range(n.dimension())) {
-            result[j] = min(result[j],oneparam_component_error(n,h,j));
-        }
-    }
-    return result;
-}
-
-Vector<ErrorType> AffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> AdditiveAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> SingleInputAffineErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> SinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> AdditiveSinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> SingleInputSinusoidalErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> PiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_generic_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> AdditivePiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_additive_error(n,h,get_r(_kind)));
-}
-
-Vector<ErrorType> SingleInputPiecewiseErrorProcessor::compute_errors(Norms const& n, PositiveFloatDPValue const& h) const {
-    return Vector<ErrorType>(n.dimension(),twoparam_singleinput_error(n,h,get_r(_kind)));
-}
-
-
 ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFunctionModelDP phi,
                                                      ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
                                                      ValidatedVectorTaylorFunctionModelDP wf) {
@@ -905,15 +792,6 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
 
 
     return picardPhi;
-}
-
-Vector<ErrorType> InputApproximatorBase::compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const {
-    if (inputs_are_additive(_di.g))
-        return _additive_processor->process(h,B);
-    else if (_di.g.size() == 1)
-        return _single_input_processor->process(h,B);
-    else
-        return _generic_processor->process(h,B);
 }
 
 

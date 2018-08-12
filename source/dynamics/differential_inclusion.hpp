@@ -167,29 +167,29 @@ std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
     return os;
 }
 
-class ParametricInputAppro {
+class ParametricInputApproximation {
 protected:
-    ParametricInputAppro(InputApproximation kind) : _kind(kind) { }
+    ParametricInputApproximation(InputApproximation kind) : _kind(kind) { }
 public:
     InputApproximation kind() { return _kind; }
 private:
     InputApproximation _kind;
 };
 
-class ZeroApproximation : public ParametricInputAppro {
-public: ZeroApproximation() : ParametricInputAppro(InputApproximation::ZERO) { }
+class ZeroApproximation : public ParametricInputApproximation {
+public: ZeroApproximation() : ParametricInputApproximation(InputApproximation::ZERO) { }
 };
-class ConstantApproximation : public ParametricInputAppro {
-public: ConstantApproximation() : ParametricInputAppro(InputApproximation::CONSTANT) { }
+class ConstantApproximation : public ParametricInputApproximation {
+public: ConstantApproximation() : ParametricInputApproximation(InputApproximation::CONSTANT) { }
 };
-class AffineApproximation : public ParametricInputAppro {
-public: AffineApproximation() : ParametricInputAppro(InputApproximation::AFFINE) { }
+class AffineApproximation : public ParametricInputApproximation {
+public: AffineApproximation() : ParametricInputApproximation(InputApproximation::AFFINE) { }
 };
-class SinusoidalApproximation : public ParametricInputAppro {
-public: SinusoidalApproximation() : ParametricInputAppro(InputApproximation::SINUSOIDAL) { }
+class SinusoidalApproximation : public ParametricInputApproximation {
+public: SinusoidalApproximation() : ParametricInputApproximation(InputApproximation::SINUSOIDAL) { }
 };
-class PiecewiseApproximation : public ParametricInputAppro {
-public: PiecewiseApproximation() : ParametricInputAppro(InputApproximation::PIECEWISE) { }
+class PiecewiseApproximation : public ParametricInputApproximation {
+public: PiecewiseApproximation() : ParametricInputApproximation(InputApproximation::PIECEWISE) { }
 };
 
 template<class A> ErrorType r_value();

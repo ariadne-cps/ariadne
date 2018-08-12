@@ -340,7 +340,7 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
-    ARIADNE_LOG(1,"\n"<<ivp<<"\n");
+    ARIADNE_LOG(2,"\n"<<ivp<<"\n");
 
     const DifferentialInclusion& di = ivp.di;
     const ValidatedVectorFunction& f = di.f;
@@ -391,9 +391,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     while (possibly(t<FloatDPBounds(tmax,pr))) {
 
         if (verbosity == 1)
-            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(round(100*t.get_d()/tmax.get_d())) << "%" << std::flush;
+            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
 
-        ARIADNE_LOG(2,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
+        ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
         List<InputApproximator> approximations_to_use;
         while (!schedule.empty()) {
@@ -410,7 +410,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
             hsug=cast_positive(cast_exact((tmax-t).upper()));
         }
 
-        ARIADNE_LOG(3,"n. of parameters="<<evolve_function.argument_size()<<"\n");
+        ARIADNE_LOG(4,"n. of parameters="<<evolve_function.argument_size()<<"\n");
 
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
@@ -425,7 +425,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         ValidatedVectorFunction fgv = construct_function_affine_in_input(f, g, v);
 
         std::tie(h,B)=this->flow_bounds(fgv,V,D,hsug);
-        ARIADNE_LOG(2,"flow bounds = "<<B<<" (using h = " << h << ")\n");
+        ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
 
@@ -434,12 +434,12 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         SharedPointer<InputApproximator> best;
         FloatDP best_volume(0);
 
-        ARIADNE_LOG(3,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
+        ARIADNE_LOG(4,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
 
         SizeType i = 0;
         for (auto i : range(approximations_to_use.size())) {
             this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximations_to_use.at(i)));
-            ARIADNE_LOG(4,"checking approximation "<<this->_approximator->kind()<<"\n");
+            ARIADNE_LOG(5,"checking approximation "<<this->_approximator->kind()<<"\n");
 
             auto current_reach=reach(di,D,evolve_function,B,t,h);
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
@@ -453,7 +453,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
                 FloatDP current_volume = volume(current_evolve.range());
                 if (current_volume < best_volume) {
                     best = this->_approximator;
-                    ARIADNE_LOG(5,"best approximation: " << best->kind() << "\n");
+                    ARIADNE_LOG(6,"best approximation: " << best->kind() << "\n");
                     best_reach_function = current_reach;
                     best_evolve_function = current_evolve;
                     best_volume = current_volume;
@@ -462,7 +462,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         }
 
         if (approximations_to_use.size() > 1)
-            ARIADNE_LOG(3,"chosen approximation: " << best->kind() << "\n");
+            ARIADNE_LOG(4,"chosen approximation: " << best->kind() << "\n");
 
         for (auto appro : approximations_to_use) {
             if (best->kind() == appro.kind())
@@ -475,7 +475,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());
 
-        ARIADNE_LOG(3,"updated schedule: " << schedule << "\n");
+        ARIADNE_LOG(4,"updated schedule: " << schedule << "\n");
 
         approximation_global_frequencies[best->kind()] += 1;
         approximation_local_frequencies[best->kind()] += 1;
@@ -505,10 +505,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
             LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
 
             Nat num_variables_to_keep(base);
-            ARIADNE_LOG(4,"simplifying to "<<num_variables_to_keep<<" variables\n");
+            ARIADNE_LOG(5,"simplifying to "<<num_variables_to_keep<<" variables\n");
             lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
             this->_reconditioner->simplify(evolve_function);
-            ARIADNE_LOG(5,"simplified_evolve_function="<<evolve_function<<"\n");
+            ARIADNE_LOG(6,"simplified_evolve_function="<<evolve_function<<"\n");
             for (auto appro: _approximations) {
                 approximation_local_frequencies[appro] = 0;
             }
@@ -516,7 +516,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
         evolve_function = this->_reconditioner->expand_errors(evolve_function);
 
-        ARIADNE_LOG(2,"evolve bounds="<<evolve_function.range()<<"\n");
+        ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
 
         step+=1;
 
@@ -525,7 +525,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
     }
 
-    ARIADNE_LOG(1,"\napproximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
+    ARIADNE_LOG(2,"\napproximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
 
     return result;
 }

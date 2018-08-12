@@ -210,14 +210,14 @@ private:
     InputsRoles _kind;
 };
 
-class GenericInputsRole : public InputsRole {
-public: GenericInputsRole() : InputsRole(InputsRoles::AFFINE) { }
+class AffineInputs : public InputsRole {
+public: AffineInputs() : InputsRole(InputsRoles::AFFINE) { }
 };
-class SingularInputsRole : public InputsRole {
-public: SingularInputsRole() : InputsRole(InputsRoles::SINGULAR) { }
+class SingularInput : public InputsRole {
+public: SingularInput() : InputsRole(InputsRoles::SINGULAR) { }
 };
-class AdditiveInputsRole : public InputsRole {
-public: AdditiveInputsRole() : InputsRole(InputsRoles::ADDITIVE) { }
+class AdditiveInputs : public InputsRole {
+public: AdditiveInputs() : InputsRole(InputsRoles::ADDITIVE) { }
 };
 
 std::ostream& operator << (std::ostream& os, const InputsRoles& kind) {
@@ -236,43 +236,43 @@ template<class A, class R> ErrorType error(Norms const& n, PositiveFloatDPValue 
 template<class A, class R> ErrorType component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return component_error<R>(n,h,r_value<A>(),j); }
 
-template<> ErrorType error<ZeroApproximation,GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
+template<> ErrorType error<ZeroApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h,(n.K*2u+n.pK)*h); }
-template<> ErrorType error<ZeroApproximation,AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ZeroApproximation,GenericInputsRole>(n,h); }
-template<> ErrorType error<ZeroApproximation,SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ZeroApproximation,GenericInputsRole>(n,h); }
-template<> ErrorType component_error<ZeroApproximation,GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+template<> ErrorType error<ZeroApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+    return error<ZeroApproximation,AffineInputs>(n,h); }
+template<> ErrorType error<ZeroApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
+    return error<ZeroApproximation,AffineInputs>(n,h); }
+template<> ErrorType component_error<ZeroApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return min(n.pK*n.expL*h,(n.Kj[j]*2u+n.pKj[j])*h); }
-template<> ErrorType component_error<ZeroApproximation,AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ZeroApproximation,GenericInputsRole>(n,h,j); }
-template<> ErrorType component_error<ZeroApproximation,SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ZeroApproximation,GenericInputsRole>(n,h,j); }
+template<> ErrorType component_error<ZeroApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return component_error<ZeroApproximation,AffineInputs>(n,h,j); }
+template<> ErrorType component_error<ZeroApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return component_error<ZeroApproximation,AffineInputs>(n,h,j); }
 
-template<> ErrorType error<ConstantApproximation,GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
+template<> ErrorType error<ConstantApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
-template<> ErrorType error<ConstantApproximation,SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ConstantApproximation,GenericInputsRole>(n,h); }
-template<> ErrorType error<ConstantApproximation,AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ConstantApproximation,GenericInputsRole>(n,h); }
-template<> ErrorType component_error<ConstantApproximation,GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+template<> ErrorType error<ConstantApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
+    return error<ConstantApproximation,AffineInputs>(n,h); }
+template<> ErrorType error<ConstantApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+    return error<ConstantApproximation,AffineInputs>(n,h); }
+template<> ErrorType component_error<ConstantApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
-template<> ErrorType component_error<ConstantApproximation,SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ConstantApproximation,GenericInputsRole>(n,h,j); }
-template<> ErrorType component_error<ConstantApproximation,AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ConstantApproximation,GenericInputsRole>(n,h,j); }
+template<> ErrorType component_error<ConstantApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return component_error<ConstantApproximation,AffineInputs>(n,h,j); }
+template<> ErrorType component_error<ConstantApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+    return component_error<ConstantApproximation,AffineInputs>(n,h,j); }
 
-template<> ErrorType error<GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
-template<> ErrorType error<SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType error<SingularInput>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
-template<> ErrorType error<AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
-template<> ErrorType component_error<GenericInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
+template<> ErrorType component_error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
     return ErrorType(0u); }
-template<> ErrorType component_error<SingularInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
+template<> ErrorType component_error<SingularInput>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
     return ErrorType(0u); }
-template<> ErrorType component_error<AdditiveInputsRole>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
+template<> ErrorType component_error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
     return ErrorType(0u); }
 
 class InputApproximator;
@@ -320,9 +320,9 @@ class ApproximationErrorProcessorFactory {
     typedef ApproximationErrorProcessorInterface Processor;
 public:
     SharedPointer<Processor> create(DifferentialInclusion const& di) const {
-        if (inputs_are_additive(di.g)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputsRole>(di));
-        else if (di.g.size() == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInputsRole>(di));
-        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,GenericInputsRole>(di));
+        if (inputs_are_additive(di.g)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(di));
+        else if (di.g.size() == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(di));
+        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(di));
     }
 };
 

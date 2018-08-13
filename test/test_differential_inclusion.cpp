@@ -35,7 +35,7 @@
 #include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field.hpp"
 
-#include "test/test.hpp"
+#include "test.hpp"
 #include <sys/times.h>
 #include <sys/resource.h>
 #include <unistd.h>

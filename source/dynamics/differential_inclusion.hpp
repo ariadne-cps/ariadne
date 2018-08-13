@@ -35,7 +35,7 @@
 #include "../function/domain.hpp"
 #include "../function/function_model.hpp"
 #include "../function/formula.hpp"
-#include "../expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 
 namespace Ariadne {
 

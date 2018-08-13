@@ -86,9 +86,6 @@ class TestDirectedFloats
     typedef PositiveFloatLowerBound<PR> PositiveFloatLowerBoundType;
     typedef PositiveFloatUpperBound<PR> PositiveFloatUpperBoundType;
 
-    typedef PositiveFloatLowerBound<PR> PositiveFloatLowerBoundType;
-    typedef PositiveFloatUpperBound<PR> PositiveFloatUpperBoundType;
-
   private:
     PR precision;
   public:

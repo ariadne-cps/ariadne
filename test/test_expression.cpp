@@ -245,7 +245,6 @@ class TestExpression {
         test_substitute();
         test_scalar_properties();
         test_vector_properties();
-        test_properties();
         test_function();
     }
 

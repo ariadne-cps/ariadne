@@ -180,18 +180,10 @@ template<class P> class Number
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     // Construct from a type which is convertible to another Number type.
+    // TODO: Decide conversion properties from concrete type to Number<P>
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
                       DisableIf<IsConvertible<X,Real>> =dummy,
-                      EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy,
-                      DisableIf<IsConvertible<X,FloatDPApproximation>> =dummy,
-                      DisableIf<IsConvertible<X,FloatMPApproximation>> =dummy>
-        Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
-
-    // Construct from a type which is convertible to another Number type.
-    template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
-                      DisableIf<IsConvertible<X,Real>> =dummy,
-                      EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy,
-                      EnableIf<Or<IsConvertible<X,FloatDPApproximation>,IsConvertible<X,FloatMPApproximation>>> =dummy>
+                      EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> =dummy>
         explicit Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
     //! \brief Get the value of the number as a double-precision floating-point type

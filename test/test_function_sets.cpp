@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 #include "function/function.hpp"
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"

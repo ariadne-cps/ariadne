@@ -1,5 +1,5 @@
 /***************************************************************************
- *            identifier.hpp
+ *            utility/functional.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,31 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
-/*! \file identifier.hpp
- *  \brief Strings used as names for constants and variables.
+/*! \file utility/functional.hpp
+ *  \brief Classes for functional-style operations.
  */
 
-#ifndef ARIADNE_IDENTIFIER_HPP
-#define ARIADNE_IDENTIFIER_HPP
+#ifndef ARIADNE_FUNCTIONAL_PROGRAMMING_HPP
+#define ARIADNE_FUNCTIONAL_PROGRAMMING_HPP
 
-#include "utility/string.hpp"
+#include <cassert>
+
+#include "metaprogramming.hpp"
 
 namespace Ariadne {
 
-//! \ingroup ExpressionModule
-//! \brief A class representing the name of a variable.
-//! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
-//! \sa Variable
-class Identifier : public String
-{
-  public:
-    Identifier() : String() { }
-    Identifier(const char* cstr) : String(cstr) { }
-    //! \brief Construct an identifier from a standard string.
-    Identifier(const std::string& str) : String(str) { }
-};
+template<class T> class List;
+
+template<class F, class T> List<ResultOf<F(T)>> elementwise(F const& f, List<T> const& l) {
+    typedef ResultOf<F(T)> R;
+    List<R> r; r.reserve(l.size());
+    for(SizeType i=0; i!=l.size(); ++i) { r.append(f(l[i])); }
+    return r;
+}
+
+template<class F, class T1, class T2> List<ResultOf<F(T1,T2)>> elementwise(F const& f, List<T1> const& l1, List<T2> const& l2) {
+    typedef ResultOf<F(T1,T2)> R;
+    assert(l1.size()==l2.size());
+    List<R> r; r.reserve(l1.size());
+    for(SizeType i=0; i!=l1.size(); ++i) { r.append(f(l1[i],l2[i])); }
+    return r;
+}
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_IDENTIFIER_HPP */
+#endif

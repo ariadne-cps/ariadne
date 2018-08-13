@@ -30,14 +30,14 @@
 #ifndef ARIADNE_RATIONAL_HPP
 #define ARIADNE_RATIONAL_HPP
 
-#include "external/gmp.hpp"
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "utility/string.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../external/gmp.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
 
@@ -86,6 +86,16 @@ class Rational
     Integer numerator() const;
     Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
+
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real atan(Real const&);
+
+    friend Sign sgn(Rational const& q);
 
     friend Comparison cmp(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);

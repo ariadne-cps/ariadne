@@ -24,9 +24,9 @@
 #include <fstream>
 #include <iostream>
 
-#include "config.h"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
+#include "config.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_time.hpp"

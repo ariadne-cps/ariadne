@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_USER_HPP
 #define ARIADNE_FLOAT_USER_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"

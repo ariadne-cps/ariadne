@@ -49,6 +49,7 @@ template<class T> inline String to_str(T const& t) {
     return to_string(t); }
 
 template<class T> String class_name();
+template<> inline String class_name<String>() { return "String"; }
 
 } // namespace Ariadne
 

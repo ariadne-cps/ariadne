@@ -21,14 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "geometry/interval.hpp"
+#include "../numeric/numeric.hpp"
+#include "../geometry/interval.hpp"
 
-#include "algebra/differential.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/univariate_differential.hpp"
+#include "../algebra/fixed_differential.hpp"
+#include "../algebra/fixed_univariate_differential.hpp"
 
 #include "operations.hpp"
 
 #include "differential.tpl.hpp"
+#include "univariate_differential.tpl.hpp"
 
 namespace Ariadne {
 

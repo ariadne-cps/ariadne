@@ -25,6 +25,7 @@
 #include "ariadne.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {

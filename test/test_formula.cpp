@@ -28,7 +28,7 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "function/formula.hpp"
 #include "numeric/numeric.hpp"

@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/tuple.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/diagonal_matrix.hpp"
-#include "function/affine.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../utility/tuple.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/diagonal_matrix.hpp"
+#include "../function/affine.hpp"
+#include "../solvers/linear_programming.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
 
 static const int verbosity=0;
 

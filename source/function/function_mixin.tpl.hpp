@@ -20,18 +20,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #ifndef ARIADNE_FUNCTION_MIXIN_TCC
 #define ARIADNE_FUNCTION_MIXIN_TCC
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/differential.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "algebra/algebra.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "function/function_mixin.hpp"
+#include "../function/function_mixin.hpp"
 
 namespace Ariadne {
 
@@ -44,11 +44,13 @@ FunctionMixin<F,Void,D,C>::_base_evaluate(const ElementType<D,X>& x) const -> El
     static_cast<const F*>(this)->_compute(r,x); return std::move(r);
 }
 
+/*
 template<class F, class D> template<class X> auto
 FunctionMixin<F,Void,D,IntervalDomainType>::_base_evaluate(const ElementType<D,X>& x) const -> X {
-    ElementType<C,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
+    ElementType<IntervalDomainType,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
     static_cast<const F*>(this)->_compute(r,x); return std::move(r);
 }
+*/
 
 template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
     return new F(static_cast<const F&>(*this)); }

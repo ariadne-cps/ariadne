@@ -29,18 +29,21 @@
 #define ARIADNE_SCALED_FUNCTION_PATCH_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
-#include "utility/exceptions.hpp"
-#include "utility/declarations.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "function/taylor_model.hpp"
+#include "../utility/container.hpp"
+#include "../utility/exceptions.hpp"
+#include "../utility/declarations.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "algebra/operations.hpp"
-#include "function/function_interface.hpp"
-#include "function/function_mixin.hpp"
-#include "function/function_model.hpp"
-#include "function/function_model_mixin.hpp"
+#include "../algebra/operations.hpp"
+#include "../function/function_interface.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/function_model.hpp"
+#include "../function/function_model_mixin.hpp"
+
+// FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 
@@ -52,8 +55,8 @@ template<class T> using GenericType = typename T::GenericType;
 
 template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
 template<class M> using VectorFunctionType = typename M::VectorFunctionType;
-template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,PrecisionType<M>,ErrorPrecisionType<M>>;
-template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,PrecisionType<M>,ErrorPrecisionType<M>>;
+template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
+template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
 
 template<class M> class ScaledFunctionPatch;
 template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
@@ -96,6 +99,15 @@ template<class R, class F, class X> class CanCall {
 template<class M> class ScaledFunctionPatchFactory;
 template<class M> class ScaledFunctionPatchCreator;
 
+template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
+    typedef typename M::NumericType NumericType;
+  public:
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
+    template<class OP> static ScaledFunctionPatch<M> apply(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
+    static ScaledFunctionPatch<M> apply(Pow op, ScaledFunctionPatch<M> const& f, Int n);
+};
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ValidatedScalarTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -119,17 +131,19 @@ template<class M> class ScaledFunctionPatchCreator;
  * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class M> class ScaledFunctionPatch
-    : public ScalarFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
-    , public DispatchSymbolicAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
+    : public ScalarFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, BoxDomainType, typename M::PrecisionType, typename M::ErrorPrecisionType>
+    , public DispatchTranscendentalAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
     , public ProvideConcreteGenericArithmeticOperators<ScaledFunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
+    typedef BoxDomainType D;
+    typedef IntervalDomainType C;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
   public:
-    typedef BoxDomainType DomainType;
+    typedef D DomainType;
     typedef M ModelType;
     typedef typename ModelType::CodomainType CodomainType;
     typedef typename ModelType::RangeType RangeType;
@@ -161,8 +175,8 @@ template<class M> class ScaledFunctionPatch
     //! \brief Construct a ScaledFunctionPatch<M> over the domain \a d, based on the scaled model \a m.
     explicit ScaledFunctionPatch(const DomainType& d, const ModelType& m);
 
-    explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp);
-    explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp);
+    explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp);
+    explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp);
 
     explicit ScaledFunctionPatch(const ScalarFunctionModelType<M>& f);
     ScaledFunctionPatch& operator=(const ScalarFunctionModelType<M>& f);
@@ -329,17 +343,11 @@ template<class M> class ScaledFunctionPatch
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class ScalarFunctionMixin<ScaledFunctionPatch<M>, P>;
-    friend class ScalarFunctionModelMixin<ScaledFunctionPatch<M>, P>;
+    friend class FunctionMixin<ScaledFunctionPatch<M>, P, D,C>;
+    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, D, C, PR>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
-  public:
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
-    template<class OP> static ScaledFunctionPatch<M> _create(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
-    static ScaledFunctionPatch<M> _create(Pow op, ScaledFunctionPatch<M> const& f, Int n);
   private:
     ScaledFunctionPatch<M>* _derivative(SizeType j) const;
     ScaledFunctionPatch<M>* _clone() const;
@@ -445,19 +453,19 @@ template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<
 }
 
 
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
     assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {
     return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),c2));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& f2) {
+template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, typename M::NumericType const& c1, ScaledFunctionPatch<M> const& f2) {
     return ScaledFunctionPatch<M>(f2.domain(),op(c1,f2.model()));
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_create(Pow op, ScaledFunctionPatch<M> const& f, Int n) {
+template<class M> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(Pow op, ScaledFunctionPatch<M> const& f, Int n) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model(),n));
 }
 
@@ -505,15 +513,16 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
  *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModelDP.
  */
 template<class M> class VectorScaledFunctionPatch
-    : public VectorFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>
+    : public VectorFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,BoxDomainType,typename M::PrecisionType,typename M::ErrorPrecisionType>
 {
     friend class VectorScaledFunctionPatchElementReference<M>;
+    typedef BoxDomainType D;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
   public:
-    typedef BoxDomainType DomainType;
+    typedef D DomainType;
     typedef M ModelType;
     typedef Box<typename ModelType::CodomainType> CodomainType;
     typedef Box<typename ModelType::RangeType> RangeType;
@@ -546,24 +555,24 @@ template<class M> class VectorScaledFunctionPatch
 
     //! \brief Construct from a domain and the expansion.
    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                const Vector<Expansion<FloatValue<PR>>>& expansion,
+                                const Vector<Expansion<MultiIndex,FloatValue<PR>>>& expansion,
                                 PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
     VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const Vector<Expansion<FloatValue<PR>>>& expansion,
+                                 const Vector<Expansion<MultiIndex,FloatValue<PR>>>& expansion,
                                  const Vector<FloatError<PR>>& error,
                                  PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
     VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                const Vector<Expansion<RawFloat<PR>>>& expansion,
+                                const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
                                 const Vector<RawFloat<PR>>& error,
                                 PropertiesType properties);
 
     //! \brief Construct from a domain, and expansion and errors.
     VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
-                                 const Vector<Expansion<RawFloat<PR>>>& expansion,
+                                 const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
                                  PropertiesType properties);
 
     //! \brief Construct from a domain and the models.
@@ -611,7 +620,7 @@ template<class M> class VectorScaledFunctionPatch
     const Vector<ModelType>& models() const;
     Vector<ModelType>& models();
     //! \brief The data used to define the centre of the Taylor models.
-    const Vector<Expansion<FloatValue<PR>>> expansions() const;
+    const Vector<Expansion<MultiIndex,FloatValue<PR>>> expansions() const;
 
     //! \brief The \a i<sup>th</sup> Taylor model used to define the function.
     const ModelType& model(SizeType i) const;
@@ -897,7 +906,7 @@ template<class M> class VectorScaledFunctionPatch
     friend VectorScaledFunctionPatch<M> compose(const VectorFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
     }
-    friend VectorScaledFunctionPatch<M> compose(const VectorFunctionModel<P,PR,PRE>& g, const VectorScaledFunctionPatch<M>& f) {
+    friend VectorScaledFunctionPatch<M> compose(const VectorFunctionModel<P,D,PR,PRE>& g, const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
@@ -1086,9 +1095,9 @@ template<class M> Bool check(const Vector<ScaledFunctionPatch<M>>& tv)
     return true;
 }
 
-template<class M> Vector<Expansion<typename M::CoefficientType>> expansion(const Vector<ScaledFunctionPatch<M>>& x)
+template<class M> Vector<Expansion<MultiIndex,typename M::CoefficientType>> expansion(const Vector<ScaledFunctionPatch<M>>& x)
 {
-    Vector< Expansion<typename M::CoefficientType> > r(x.size());
+    Vector< Expansion<MultiIndex,typename M::CoefficientType> > r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=x[i].expansion();
     }
@@ -1125,7 +1134,7 @@ template<class M> Vector<typename M::RangeType> ranges(const Vector<ScaledFuncti
 #endif // ARIADNE_UNDEF
 
 template<class M> class VectorScaledFunctionPatchElementReference
-    : public DispatchSymbolicAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
+    : public DispatchTranscendentalAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
     , public ProvideConcreteGenericArithmeticOperators<ScaledFunctionPatch<M>, ScalarFunction<typename M::Paradigm>>
     , public DispatchConcreteGenericAlgebraNumberOperations<ScaledFunctionPatch<M>,NumericType<M>,Number<typename M::Paradigm>>
 {
@@ -1167,6 +1176,9 @@ template<class M> class VectorScaledFunctionPatchElementReference
 template<class M> class ScaledFunctionPatchFactory
     : public FunctionModelFactoryMixin<ScaledFunctionPatchFactory<M>, ValidatedTag, typename M::PrecisionType, typename M::ErrorPrecisionType>
 {
+    typedef BoxDomainType D;
+    typedef IntervalDomainType SD;
+
     typedef typename M::Paradigm P;
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
@@ -1181,12 +1193,12 @@ template<class M> class ScaledFunctionPatchFactory
     PropertiesType properties() const { return this->_properties; }
 
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
-    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P>& function) const;
-    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P>& function) const;
+    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,D>& function) const;
+    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,D>& function) const;
 
     ScaledFunctionPatch<M> create_zero(const DomainType& domain) const;
     ScaledFunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;
-    ScalarFunctionModel<P,PR,PRE> create_constant(const BoxDomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
+    ScalarFunctionModel<P,D,PR,PRE> create_constant(const BoxDomainType& domain, const CanonicalNumericType<P,PR,PRE>& value) const {
         return create_constant(domain,Number<P>(value)); };
     ScaledFunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;
     VectorScaledFunctionPatch<M> create_zeros(SizeType result_size, const DomainType& domain) const;

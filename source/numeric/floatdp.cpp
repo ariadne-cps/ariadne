@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
+#include "../utility/standard.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -30,13 +30,13 @@
 
 
 
-#include "config.h"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/rounding.hpp"
+#include "../utility/macros.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/rounding.hpp"
 
 #if defined ARIADNE_C99_ROUNDING
     #warning "Using standard fenv.hpp C header file for setting the rounding mode."
@@ -58,8 +58,8 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "numeric/floatdp.hpp"
-#include "numeric/floatmp.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../numeric/floatmp.hpp"
 
 
 namespace Ariadne {

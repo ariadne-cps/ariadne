@@ -28,13 +28,13 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "utility/logging.hpp"
-#include "utility/container.hpp"
+#include "../utility/logging.hpp"
+#include "../utility/container.hpp"
 
-#include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "function/constraint.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../function/constraint.hpp"
 
 namespace Ariadne {
 

@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/float.hpp"
+#include "../utility/macros.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/float.hpp"
 
 namespace Ariadne {
 
@@ -80,6 +80,16 @@ Decimal operator"" _decimal(unsigned long long int n)
 Decimal operator"" _dec(unsigned long long int n)
 {
     return operator"" _decimal(n);
+}
+
+Decimal operator"" _decimal(const char* s, std::size_t)
+{
+    return Decimal(String(s));
+}
+
+Decimal operator"" _dec(const char* s, std::size_t n)
+{
+    return operator"" _decimal(s,n);
 }
 
 Decimal operator+(Decimal const& d)
@@ -237,6 +247,8 @@ Decimal::Decimal(String const& str)
     this->_p *= s;
 
 }
+
+template<> String class_name<Decimal>() { return "Decimal"; }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer p=abs(d._p);

@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
+#include "../config.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/float-user.hpp"
+#include "../numeric/float-user.hpp"
 
-#include "numeric/integer.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/real.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/real.hpp"
 
-#include "numeric/number_wrapper.hpp"
+#include "../numeric/number_wrapper.hpp"
 
 namespace Ariadne {
 
@@ -41,6 +41,9 @@ template<class FE, class FLT, DisableIf<IsSame<FE,FLT>> =dummy> inline FE _make_
     typename FE::PrecisionType pre; return FE(Dyadic(x),upward,pre); }
 template<class FE, class FLT, EnableIf<IsSame<FE,FLT>> =dummy> inline FE _make_error(FLT const& x) {
     return x; }
+
+template<class FE, class FLT, class PRE> inline FE _make_error(FLT const& x, PRE pre) {
+    return FE(Dyadic(x),upward,pre); }
 
 FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
@@ -52,6 +55,9 @@ template<class F> Nat Bounds<F>::output_places=8;
 template<class F> Nat Value<F>::output_places = 16;
 
 const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
+
+OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
+    return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
 
 FloatError<DoublePrecision> operator"" _error(long double lx) {
     double x=lx;
@@ -198,8 +204,31 @@ template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr)
     : Ball(y.get(MetricTag(),pr)) {
 }
 
+template<class F, class FE> Ball<F,FE>::Ball(Bounds<F> const& x, PRE pre)
+    : _v(x.value_raw()) , _e(_make_error<FE>(x.error_raw(),pre)) {
+}
+
+
+
+template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre)
+    : Ball(r.get(pr),pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre)
+    : _v(F(q,to_nearest,pr)), _e(abs(Rational(_v)-q),upward,pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre)
+    : Ball(y.get(MetricTag(),pr,pre)) {
+}
+
 template<class F, class FE> Ball<F,FE> Ball<F,FE>::create(ValidatedNumber const& y) const {
     return Ball<F,FE>(y,this->precision());
+}
+
+template<class F, class FE> Ball<F,FE>& Ball<F,FE>::operator=(ValidatedNumber const& y)
+{
+    return *this = Ball(y,this->precision(),this->error_precision());
 }
 
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const {
@@ -2067,10 +2096,6 @@ Bool same(FloatDPValue const& x1, FloatDPValue const& x2) { return Operations<Fl
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
-
-
-
-
 PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
@@ -2082,7 +2107,6 @@ FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
 
 
 FloatDPValue midpoint(FloatDPBounds const& x) { return x.value(); }
-
 
 template<> String class_name<FloatDPApproximation>() { return "FloatDPApproximation"; }
 template<> String class_name<FloatDPLowerBound>() { return "FloatDPLowerBound"; }

@@ -117,12 +117,12 @@ elseif(NOT Boost_FOUND)
     message(WARNING "Unable to find Boost Serialization component.")
 endif()
 
-configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/config.h)
+configure_file (${PROJECT_SOURCE_DIR}/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 #Non-portable fix to avoid user header directories being searched for by system headers
 #add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/source)
+include_directories(${PROJECT_SOURCE_DIR}/source)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
@@ -133,6 +133,14 @@ add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(python)
 add_subdirectory(examples)
+add_subdirectory(tutorials)
+
+add_library(ariadne-core SHARED
+    $<TARGET_OBJECTS:ariadne-utility>
+    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-algebra>
+    source/geometry/interval.cpp
+)
 
 add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-utility>
@@ -142,14 +150,14 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-geometry>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
-    $<TARGET_OBJECTS:ariadne-expression>
+    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
 )
 
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
-    $<TARGET_OBJECTS:ariadne-expression>
+    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
@@ -161,9 +169,11 @@ add_library(ariadne SHARED
 
 target_link_libraries(ariadne dl)
 target_link_libraries(ariadne-kernel dl)
+target_link_libraries(ariadne-core dl)
 
 target_link_libraries(ariadne gmp mpfr)
 target_link_libraries(ariadne-kernel gmp mpfr)
+target_link_libraries(ariadne-core gmp mpfr)
 
 if(Boost_SERIALIZATION_FOUND)
     target_link_libraries(ariadne boost_system boost_serialization)
@@ -191,3 +201,10 @@ target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python mpfr g
 #add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
 #set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
 #target_link_libraries (pyariadne-algebra ariadne boost_python)
+
+install (TARGETS ariadne DESTINATION lib)
+install (DIRECTORY source/ DESTINATION include/ariadne
+            FILES_MATCHING PATTERN "*.hpp"
+            PATTERN "source/prototyping" EXCLUDE
+            PATTERN "source/experimental" EXCLUDE)
+

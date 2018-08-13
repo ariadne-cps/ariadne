@@ -34,6 +34,7 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 #include "algebra/multi_index.hpp"
 #include "function/taylor_model.hpp"
 #include "algebra/differential.hpp"
@@ -45,10 +46,10 @@
 #include "function/procedure.hpp"
 #include "function/function.hpp"
 #include "function/function_mixin.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
-#include "expression/assignment.hpp"
-#include "expression/function_expression.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/space.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/function_expression.hpp"
 #include "solvers/constraint_solver.hpp"
 
 #include "function/function_mixin.tpl.hpp"
@@ -113,7 +114,9 @@ struct from_python<EffectiveVectorFunction>
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
-        EffectiveVectorFunction res(len(lst),0);
+        assert(len(lst)!=0);
+        EffectiveScalarFunction sf0 = boost::python::extract<EffectiveScalarFunction>(lst[0]);
+        EffectiveVectorFunction res(len(lst),sf0.argument_size());
         for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,boost::python::extract<EffectiveScalarFunction>(lst[i])); }
         new (storage) EffectiveVectorFunction(res);
         data->convertible = storage;
@@ -235,7 +238,7 @@ typedef Vector<ValidatedTaylorModelDP> TMV;
 typedef ValidatedVectorTaylorFunctionModelDP TFM;
 typedef ValidatedTaylorModelDP TM;
 
-template<class X> using Monomial = ExpansionValue<X>;
+template<class X> using Monomial = ExpansionValue<MultiIndex,X>;
 
 
 
@@ -258,9 +261,9 @@ Void export_multi_index()
 template<class X>
 Void export_monomial()
 {
-    class_< ExpansionValue<X> > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
-    monomial_class.def("key",(const MultiIndex&(ExpansionValue<X>::*)()const)&ExpansionValue<X>::key,return_value_policy<copy_const_reference>());
-    monomial_class.def("data",(const X&(ExpansionValue<X>::*)()const) &ExpansionValue<X>::data,return_value_policy<copy_const_reference>());
+    class_< ExpansionValue<MultiIndex,X> > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
+    monomial_class.def("key",(const MultiIndex&(ExpansionValue<MultiIndex,X>::*)()const)&ExpansionValue<MultiIndex,X>::key,return_value_policy<copy_const_reference>());
+    monomial_class.def("data",(const X&(ExpansionValue<MultiIndex,X>::*)()const) &ExpansionValue<MultiIndex,X>::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
 }
 
@@ -329,26 +332,40 @@ template<class A, class F> void def_differential(class_<F>& f) {
 
 template<class F, class T> using ArgumentType = typename F::template Argument<T>;
 
-template<class F> Void export_function_evaluation(class_<F>& function_class)
-{
+template<class F> Void export_function_evaluation(class_<F>& function_class, ApproximateTag) {
     def_call<ArgumentType<F,FloatDPApproximation>>(function_class);
     def_call<ArgumentType<F,FloatMPApproximation>>(function_class);
-    def_call<ArgumentType<F,FloatDPBounds>>(function_class);
-    def_call<ArgumentType<F,FloatMPBounds>>(function_class);
     def_call<ArgumentType<F,Differential<FloatDPApproximation>>>(function_class);
     def_call<ArgumentType<F,Differential<FloatMPApproximation>>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatDPBounds>>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatMPBounds>>>(function_class);
 
     def_evaluate<ArgumentType<F,FloatDPApproximation>>(function_class);
     def_evaluate<ArgumentType<F,FloatMPApproximation>>(function_class);
-    def_evaluate<ArgumentType<F,FloatDPBounds>>(function_class);
-    def_evaluate<ArgumentType<F,FloatMPBounds>>(function_class);
 
     def_differential<ArgumentType<F,FloatDPApproximation>>(function_class);
     def_differential<ArgumentType<F,FloatMPApproximation>>(function_class);
+}
+
+template<class F> Void export_function_evaluation(class_<F>& function_class, ValidatedTag) {
+    export_function_evaluation(function_class,ApproximateTag());
+    def_call<ArgumentType<F,FloatDPBounds>>(function_class);
+    def_call<ArgumentType<F,FloatMPBounds>>(function_class);
+    def_call<ArgumentType<F,Differential<FloatDPBounds>>>(function_class);
+    def_call<ArgumentType<F,Differential<FloatMPBounds>>>(function_class);
+    def_evaluate<ArgumentType<F,FloatDPBounds>>(function_class);
+    def_evaluate<ArgumentType<F,FloatMPBounds>>(function_class);
     def_differential<ArgumentType<F,FloatDPBounds>>(function_class);
     def_differential<ArgumentType<F,FloatMPBounds>>(function_class);
+}
+
+template<class F> Void export_function_evaluation(class_<F>& function_class, EffectiveTag) {
+    export_function_evaluation(function_class,ValidatedTag());
+}
+
+template<class F> Void export_function_evaluation(class_<F>& function_class)
+{
+    export_function_evaluation(function_class, Paradigm<F>());
+}
+
 
 /*
     function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarFunction<P>::*)(const Argument<FloatDPApproximation>&)const)&ScalarFunction<P>::gradient );
@@ -356,7 +373,7 @@ template<class F> Void export_function_evaluation(class_<F>& function_class)
     function_class.def("differential", (Differential<FloatDPApproximation>(ScalarFunction<P>::*)(const Argument<FloatDPApproximation>&,DegreeType)const) &ScalarFunction<P>::differential);
     function_class.def("differential", (Differential<FloatDPBounds>(ScalarFunction<P>::*)(const Argument<FloatDPBounds>&,DegreeType)const) &ScalarFunction<P>::differential);
 */
-}
+
 
 template<class P> Void export_scalar_function_evaluation(class_<ScalarFunction<P>>& scalar_function_class) {
     using F=ScalarFunction<P>;
@@ -365,6 +382,14 @@ template<class P> Void export_scalar_function_evaluation(class_<ScalarFunction<P
     def_gradient<ArgumentType<F,FloatMPApproximation>>(scalar_function_class);
     def_gradient<ArgumentType<F,FloatDPBounds>>(scalar_function_class);
     def_gradient<ArgumentType<F,FloatMPBounds>>(scalar_function_class);
+}
+
+template<> Void export_scalar_function_evaluation<ApproximateTag>(class_<ScalarFunction<ApproximateTag>>& scalar_function_class) {
+    using P=ApproximateTag;
+    using F=ScalarFunction<P>;
+    export_function_evaluation(scalar_function_class);
+    def_gradient<ArgumentType<F,FloatDPApproximation>>(scalar_function_class);
+    def_gradient<ArgumentType<F,FloatMPApproximation>>(scalar_function_class);
 }
 
 Void export_function_evaluation(class_<ScalarFunction<ApproximateTag>>& scalar_function_class)
@@ -444,14 +469,15 @@ template<class P> Void export_vector_function()
     vector_function_class.def("argument_size", &VectorFunction<P>::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction<P>::get);
     vector_function_class.def("__setitem__", &VectorFunction<P>::set);
-    vector_function_class.def("__call__", (Vector<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const)&VectorFunction<P>::operator() );
-    vector_function_class.def("__call__", (Vector<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const)&VectorFunction<P>::operator() );
-    vector_function_class.def("__call__", (Vector<Differential<FloatDPBounds>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPBounds>>&)const)&VectorFunction<P>::evaluate );
-    vector_function_class.def("__call__", (Vector<Differential<FloatDPApproximation>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPApproximation>>&)const)&VectorFunction<P>::evaluate );
-    vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
-    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);
-    vector_function_class.def("differential", (Vector<Differential<FloatDPBounds> >(VectorFunction<P>::*)(const Vector<FloatDPBounds>&,DegreeType)const) &VectorFunction<P>::differential);
-    vector_function_class.def("differential", (Vector<Differential<FloatDPApproximation> >(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&,DegreeType)const) &VectorFunction<P>::differential);
+    export_vector_function_evaluation(vector_function_class);
+//    vector_function_class.def("__call__", (Vector<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const)&VectorFunction<P>::operator() );
+//    vector_function_class.def("__call__", (Vector<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const)&VectorFunction<P>::operator() );
+//    vector_function_class.def("__call__", (Vector<Differential<FloatDPBounds>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPBounds>>&)const)&VectorFunction<P>::evaluate );
+//    vector_function_class.def("__call__", (Vector<Differential<FloatDPApproximation>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPApproximation>>&)const)&VectorFunction<P>::evaluate );
+//    vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
+//    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);
+//    vector_function_class.def("differential", (Vector<Differential<FloatDPBounds> >(VectorFunction<P>::*)(const Vector<FloatDPBounds>&,DegreeType)const) &VectorFunction<P>::differential);
+//    vector_function_class.def("differential", (Vector<Differential<FloatDPApproximation> >(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&,DegreeType)const) &VectorFunction<P>::differential);
     vector_function_class.def("__str__", &__cstr__<VectorFunction<P>>);
     vector_function_class.def("__repr__", &__crepr__<VectorFunction<P>>);
 
@@ -459,7 +485,7 @@ template<class P> Void export_vector_function()
     vector_function_class.staticmethod("identity");
 
     def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
-    def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+//    def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
 
     def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
     def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);
@@ -472,17 +498,33 @@ template<class P> Void export_vector_function()
     export_vector_function_evaluation(vector_function_class);
 }
 
+template<class Y, class X> Void export_procedure() {
+    typedef Paradigm<Y> P;
+    class_<Procedure<Y>> procedure_class((class_name<P>()+"Procedure").c_str());
+    procedure_class.def("__str__", &__cstr__<Procedure<Y>>);
+    def("make_procedure", (Procedure<Y>(*)(ScalarFunction<P> const&)) &make_procedure);
+    def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
+    def("gradient", (Covector<X>(*)(Procedure<Y> const&, Vector<X> const&)) &gradient);
+    def("hessian", (X(*)(Procedure<Y> const&, Vector<X> const&, Vector<X> const&)) &hessian);
+}
+
 Void export_scalar_functions() {
+    export_scalar_function<ApproximateTag>();
     export_scalar_function<ValidatedTag>();
     export_scalar_function<EffectiveTag>();
     implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ValidatedTag>>();
+    implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ApproximateTag>>();
+    implicitly_convertible<ScalarFunction<ValidatedTag>,ScalarFunction<ApproximateTag>>();
     def("lie_derivative", (ScalarFunction<EffectiveTag>(*)(const ScalarFunction<EffectiveTag>&,const VectorFunction<EffectiveTag>&)) &lie_derivative);
 };
 
 Void export_vector_functions() {
+    export_vector_function<ApproximateTag>();
     export_vector_function<ValidatedTag>();
     export_vector_function<EffectiveTag>();
     implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
+    implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ApproximateTag>>();
+    implicitly_convertible<VectorFunction<ValidatedTag>,VectorFunction<ApproximateTag>>();
     from_python<VectorFunction<EffectiveTag>>();
 };
 
@@ -509,6 +551,10 @@ Void function_submodule() {
     export_univariate_function();
     export_scalar_functions();
     export_vector_functions();
+
+    export_procedure<ApproximateNumber, FloatDPApproximation>();
+    export_procedure<ValidatedNumber, FloatDPBounds>();
+
 
     //export_scalar_python_function();
     //export_vector_python_function();

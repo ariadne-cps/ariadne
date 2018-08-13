@@ -21,23 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/function_model.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/function_model.hpp"
 
-#include "solvers/solver.hpp"
+#include "../solvers/solver.hpp"
 
-#include "utility/logging.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
+#include "../utility/logging.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+
+#include "../algebra/expansion.inl.hpp"
+
+#include "../algebra/evaluate.hpp"
+#include "../algebra/evaluate.tpl.hpp"
 
 namespace Ariadne {
 
@@ -96,12 +101,12 @@ jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
     for(Nat i=0; i!=rs; ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(Nat k=0; k!=rs; ++k) {
-                const Nat c=iter->key()[has+k];
+                const Nat c=iter->index()[has+k];
                 if(c>0) {
-                    const FloatDPValue& x=iter->data();
-                    if(iter->key().degree()==1) { J[i][k]+=x; }
+                    ConstReferenceType<FloatDPValue> x=iter->coefficient();
+                    if(iter->index().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
-                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
+                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->index()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
                 }
             }
         }

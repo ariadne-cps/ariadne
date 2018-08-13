@@ -27,9 +27,9 @@
 
 
 
-#include "utility/stdlib.hpp"
-#include "utility/macros.hpp"
-#include "utility/typedefs.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/typedefs.hpp"
 
 #include "rational.hpp"
 #include "logical.hpp"
@@ -315,6 +315,10 @@ Boolean eq(Rational const& q1, Rational const& q2) {
 
 Boolean lt(Rational const& q1, Rational const& q2) {
     return mpq_cmp(q1._mpq,q2._mpq)<0;
+}
+
+Sign sgn(Rational const& q) {
+    return sgn(q.get_num());
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {

@@ -32,7 +32,7 @@ void calculus_submodule();
 void geometry_submodule();
 void solver_submodule();
 void storage_submodule();
-void expression_submodule();
+void symbolic_submodule();
 void system_submodule();
 void evolution_submodule();
 void graphics_submodule();
@@ -48,7 +48,7 @@ BOOST_PYTHON_MODULE(ariadne)
     geometry_submodule();
     solver_submodule();
     storage_submodule();
-    expression_submodule();
+    symbolic_submodule();
     system_submodule();
     evolution_submodule();
     graphics_submodule();

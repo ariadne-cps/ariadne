@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "numeric/numeric.hpp"
-#include "function/function.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/cairo.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../numeric/numeric.hpp"
+#include "../function/function.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../output/geometry2d.hpp"
+#include "../output/graphics.hpp"
+#include "../output/cairo.hpp"
 
 #ifdef HAVE_GTK_H
 #include <gtk/gtk.h>

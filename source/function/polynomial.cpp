@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.h"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/polynomial.hpp"
-#include "function/polynomial.tpl.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/polynomial.tpl.hpp"
 
 namespace Ariadne {
 
@@ -43,7 +43,7 @@ template class AlgebraOperations<Polynomial<FloatDPBounds>>;
 template<> Void Polynomial<FloatDPValue>::cleanup() { }
 
 template Polynomial<FloatDPValue>::Polynomial(SizeType);
-template Expansion<FloatDPValue>& Polynomial<FloatDPValue>::expansion();
+template Expansion<MultiIndex,FloatDPValue>& Polynomial<FloatDPValue>::expansion();
 template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&) const;
 template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<String> const&) const;
 

@@ -21,29 +21,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/constraint.hpp"
-#include "geometry/enclosure.hpp"
-#include "dynamics/orbit.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/constraint.hpp"
+#include "../geometry/enclosure.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "solvers/integrator.hpp"
+#include "../solvers/integrator.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "dynamics/vector_field.hpp"
-#include "dynamics/vector_field_evolver.hpp"
+#include "../dynamics/vector_field.hpp"
+#include "../dynamics/vector_field_evolver.hpp"
 
-#include "expression/space.hpp"
-#include "expression/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../symbolic/assignment.hpp"
 
 namespace {
 

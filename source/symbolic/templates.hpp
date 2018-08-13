@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression/templates.hpp
+ *            symbolic/templates.hpp
  *
  *  Copyright 2013-17  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file expression/templates.hpp
+/*! \file symbolic/templates.hpp
  *  \brief
  */
 
@@ -30,7 +30,7 @@
 #ifndef ARIADNE_EXPRESSION_TEMPLATES_HPP
 #define ARIADNE_EXPRESSION_TEMPLATES_HPP
 
-#include "numeric/operators.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

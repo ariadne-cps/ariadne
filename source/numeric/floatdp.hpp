@@ -33,12 +33,12 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "utility/declarations.hpp"
-#include "numeric/operators.hpp"
-#include "numeric/rounding.hpp"
-#include "numeric/sign.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../utility/declarations.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/rounding.hpp"
+#include "../numeric/sign.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
 
@@ -197,10 +197,10 @@ class FloatDP {
     friend FloatDP& idiv(RoundingModeType rnd, FloatDP& x1, FloatDP x2);
 
     // Explcitly rounded operations
-    friend FloatDP nul(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP pos(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP neg(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP hlf(RoundingModeType rnd, FloatDP const& x);
+    friend FloatDP nul(RoundingModeType rnd, FloatDP x);
+    friend FloatDP pos(RoundingModeType rnd, FloatDP x);
+    friend FloatDP neg(RoundingModeType rnd, FloatDP x);
+    friend FloatDP hlf(RoundingModeType rnd, FloatDP x);
     friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2);
     friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2);
     friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2);
@@ -273,6 +273,10 @@ class FloatDP {
         FloatDP r=op(x,n); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
+    friend FloatDP nul(RoundingModeType rnd, FloatDP x) { return apply(Nul(),rnd,x); }
+    friend FloatDP pos(RoundingModeType rnd, FloatDP x) { return apply(Pos(),rnd,x); }
+    friend FloatDP neg(RoundingModeType rnd, FloatDP x) { return apply(Neg(),rnd,x); }
+    friend FloatDP hlf(RoundingModeType rnd, FloatDP x) { return apply(Hlf(),rnd,x); }
     friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
     friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
     friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }

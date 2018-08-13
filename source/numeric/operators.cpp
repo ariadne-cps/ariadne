@@ -21,13 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
+namespace Ariadne {
+double add(double,double);
+double sub(double,double);
+double mul(double,double);
+double div(double,double);
+}
 
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/real.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/standard.hpp"
+
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/real.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -278,8 +285,6 @@ template<> Integer compute(OperatorCode op, const Integer& z, Int n) {
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument and a builtin.");
     }
 }
-
-
 
 } // namespace Ariadne
 

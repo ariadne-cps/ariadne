@@ -23,19 +23,19 @@
 
 #include <map>
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "config.h"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
 
-#include "utility/stlio.hpp"
-#include "expression/expression.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_system.hpp"
-#include "geometry/grid.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/expression.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_system.hpp"
+#include "../geometry/grid.hpp"
 
 namespace Ariadne {
 

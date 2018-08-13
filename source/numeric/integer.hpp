@@ -30,16 +30,16 @@
 #ifndef ARIADNE_INTEGER_HPP
 #define ARIADNE_INTEGER_HPP
 
-#include "external/gmp.hpp"
+#include "../external/gmp.hpp"
 
 #include <cassert>
 
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "numeric/sign.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/sign.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
 
 namespace Ariadne {
 
@@ -137,6 +137,8 @@ class Integer
     friend Integer rem(Integer const& z1, Integer const& z2);
     friend Integer operator%(Integer const& z1, Integer const& z2);
 
+    friend Sign sgn(Integer const& z);
+
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
 /*
@@ -183,6 +185,8 @@ class Natural : public Positive<Integer> {
     friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }
     friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
 };
+
+inline Natural cast_positive(Integer const& z) { return Natural(z); }
 
 } // namespace Ariadne
 

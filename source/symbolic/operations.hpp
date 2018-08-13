@@ -114,6 +114,10 @@ template<> struct DeclareExpressionOperations<Integer>  {
     friend Expression<Integer> operator-(Expression<Integer> const& e1, Expression<Integer> const& e2);
     //! \related Expression \brief %Integer multiplication expression.
     friend Expression<Integer> operator*(Expression<Integer> const& e1, Expression<Integer> const& e2);
+
+    friend Expression<Integer>& operator+=(Expression<Integer>& e1, Expression<Integer> const& e2);
+    friend Expression<Integer>& operator-=(Expression<Integer>& e1, Expression<Integer> const& e2);
+    friend Expression<Integer>& operator*=(Expression<Integer>& e1, Expression<Integer> const& e2);
 };
 
 template<> struct DeclareExpressionOperations<Real> {
@@ -145,6 +149,10 @@ template<> struct DeclareExpressionOperations<Real> {
     //! \related Expression \brief %Real division expression.
     friend Expression<Real> operator/(Expression<Real> const& e1, Expression<Real> const& e2);
 
+    friend Expression<Real>& operator+=(Expression<Real>& e1, Expression<Real> const& e2);
+    friend Expression<Real>& operator-=(Expression<Real>& e1, Expression<Real> const& e2);
+    friend Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2);
+    friend Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2);
 
     //! \related Expression \brief %Real unary plus expression.
     //! Equivalent to +\a e.

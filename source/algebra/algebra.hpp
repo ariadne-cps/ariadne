@@ -29,10 +29,10 @@
 
 #include <iosfwd>
 #include <iostream>
-#include "numeric/numeric.hpp"
-#include "utility/pointer.hpp"
-#include "numeric/operators.hpp"
-#include "algebra/algebra_interface.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/pointer.hpp"
+#include "../numeric/operators.hpp"
+#include "../algebra/algebra_interface.hpp"
 
 namespace Ariadne {
 

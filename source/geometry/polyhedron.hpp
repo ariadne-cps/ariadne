@@ -31,13 +31,13 @@
 #include <iosfwd>
 #include <vector>
 
-#include "utility/tribool.hpp"
+#include "../utility/tribool.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/set_interface.hpp"
-#include "geometry/function_set.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../geometry/function_set.hpp"
 
 namespace Ariadne {
 

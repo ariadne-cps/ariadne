@@ -29,17 +29,17 @@
 #define ARIADNE_ENCLOSURE_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "geometry/set_interface.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/drawer_interface.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer_interface.hpp"
 
-#include "function/function_model.hpp"
+#include "../function/function_model.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/paver.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/paver.hpp"
 
 #ifndef ARIADNE_TAYLOR_SET_HPP
 

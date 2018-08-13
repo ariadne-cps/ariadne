@@ -28,13 +28,13 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "utility/container.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/floatdp.hpp"
-#include "geometry/interval.hpp"
-#include "geometry/point.hpp"
-#include "geometry/set_interface.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../geometry/interval.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/set_interface.hpp"
 
 #include "box.decl.hpp"
 
@@ -104,6 +104,10 @@ class Box
 
     template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
         Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
+        explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
@@ -196,6 +200,8 @@ template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
+
+template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s1, S2 const& s2, S3 const& s3) { return product(product(s1,s2),s3); }
 
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }

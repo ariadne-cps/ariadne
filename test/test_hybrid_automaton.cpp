@@ -24,11 +24,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "config.h"
+#include "config.hpp"
 #include "test.hpp"
 
-#include "expression/expression.hpp"
-#include "expression/valuation.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/valuation.hpp"
 #include "hybrid/hybrid_automata.hpp"
 
 using namespace Ariadne;

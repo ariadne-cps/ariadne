@@ -29,8 +29,8 @@
 #define ARIADNE_DISCRETE_LOCATION_HPP
 
 #include <string>
-#include "utility/container.hpp"
-#include "expression/valuation.hpp"
+#include "../utility/container.hpp"
+#include "../symbolic/valuation.hpp"
 
 namespace Ariadne {
 

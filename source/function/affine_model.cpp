@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.h"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
-#include "algebra/algebra.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/taylor_model.hpp"
-#include "function/affine_model.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/affine_model.hpp"
 
-#include "function/affine.hpp"
-#include "function/taylor_function.hpp"
-#include "algebra/vector.hpp"
+#include "../function/affine.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "function/affine_model.tpl.hpp"
+#include "../algebra/expansion.inl.hpp"
+#include "../function/affine_model.tpl.hpp"
 
 
 namespace Ariadne {
@@ -46,11 +46,11 @@ template class AffineModel<ApproximateTag,FloatMP>;
 template class AffineModel<ValidatedTag,FloatDP>;
 template class AffineModel<ValidatedTag,FloatMP>;
 
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>,FloatDPBounds>;
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>,FloatMPBounds>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>>;
+template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>>;
 
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds>;
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>,FloatMPBounds>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>>;
+template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>>;
 
 template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, DoublePrecision);
 

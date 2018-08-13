@@ -22,23 +22,23 @@
  */
 
 #include <typeinfo>
-#include "config.h"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
-#include "geometry/grid_set.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_evolver.hpp"
-#include "dynamics/orbit.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_evolver.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
+#include "../solvers/integrator.hpp"
+#include "../solvers/solver.hpp"
 
-#include "hybrid/hybrid_evolver.hpp"
+#include "../hybrid/hybrid_evolver.hpp"
 
 namespace {
 

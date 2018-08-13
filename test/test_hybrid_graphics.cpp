@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "config.hpp"
 #include "test.hpp"
 
 #include "numeric/logical.hpp"
 #include "numeric/real.hpp"
-#include "expression/variables.hpp"
-#include "expression/assignment.hpp"
+#include "symbolic/variables.hpp"
+#include "symbolic/assignment.hpp"
 
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_set.hpp"

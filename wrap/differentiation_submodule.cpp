@@ -32,6 +32,10 @@
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"
 #include "algebra/differential.hpp"
+#include "algebra/univariate_differential.hpp"
+#include "algebra/fixed_differential.hpp"
+#include "algebra/fixed_univariate_differential.hpp"
+#include "algebra/expansion.inl.hpp"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -48,18 +52,18 @@ inline auto operator> (FloatDPBounds x, Int n) -> decltype(x> FloatDPValue(n)) {
 inline auto operator*=(FloatDPApproximation x, Int n) -> decltype(x*=FloatDPApproximation(n)) { return x*=FloatDPApproximation(n); }
 
 template<class X>
-struct to_python_dict< Ariadne::Expansion<X>  > {
-    to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_dict< Ariadne::Expansion<X> > >(); }
-    static PyObject* convert(const Ariadne::Expansion<X>& e) {
+struct to_python_dict< Ariadne::Expansion<MultiIndex,X>  > {
+    to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<MultiIndex,X>, to_python_dict< Ariadne::Expansion<MultiIndex,X> > >(); }
+    static PyObject* convert(const Ariadne::Expansion<MultiIndex,X>& e) {
         Nat n=e.argument_size();
         boost::python::dict res;
         boost::python::list lst;
         for(Nat i=0; i!=n; ++i) { lst.append(0); }
         Ariadne::MultiIndex a;
         X c;
-        for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->key();
-            c=iter->data();
+        for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+            a=iter->index();
+            c=iter->coefficient();
             for(Nat i=0; i!=a.size(); ++i) { Int ai=a[i]; lst[i]=ai; }
             boost::python::tuple tup(lst);
             //res[tup]=boost::python::object(c);
@@ -71,9 +75,9 @@ struct to_python_dict< Ariadne::Expansion<X>  > {
 };
 
 template<class X>
-struct to_python_list< Ariadne::Expansion<X>  > {
-    to_python_list() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_list< Ariadne::Expansion<X> > >(); }
-    static PyObject* convert(const Ariadne::Expansion<X>& e) {
+struct to_python_list< Ariadne::Expansion<MultiIndex,X>  > {
+    to_python_list() { boost::python::to_python_converter< Ariadne::Expansion<MultiIndex,X>, to_python_list< Ariadne::Expansion<MultiIndex,X> > >(); }
+    static PyObject* convert(const Ariadne::Expansion<MultiIndex,X>& e) {
         Nat n=e.argument_size();
         boost::python::list res;
         boost::python::list alst;
@@ -82,9 +86,9 @@ struct to_python_list< Ariadne::Expansion<X>  > {
         boost::python::list pr; pr.append(0); pr.append(0);
         Ariadne::MultiIndex a;
         X c;
-        for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->key();
-            c=iter->data();
+        for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+            a=iter->index();
+            c=iter->coefficient();
             for(Nat i=0; i!=n; ++i) { Int ai=a[i]; alst[i]=ai; }
             pr[0]=boost::python::tuple(alst);
             pr[1]=boost::python::object(c);
@@ -116,17 +120,17 @@ struct to_python_list< Ariadne::Expansion<X>  > {
 
 template<class DIFF>
 DIFF*
-make_differential(const Nat& as, const Nat& d, const boost::python::object& obj)
+make_dense_differential(const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
     DIFF* result=new DIFF(as,d);
-    Array<X> data;
-    read_array(data,obj);
+    Array<X> coefficient;
+    read_array(coefficient,obj);
     std::cerr<<"polynomial_data_size("<<as<<","<<d<<")="<<compute_polynomial_data_size(1u,as,d)<<"\n";
-    std::cerr<<"data="<<data<<"\n";
-    assert(data.size()==compute_polynomial_data_size(1u,as,d));
+    std::cerr<<"coefficient="<<coefficient<<"\n";
+    assert(coefficient.size()==compute_polynomial_data_size(1u,as,d));
     MultiIndex i(as);
-    const X* ptr=data.begin();
+    const X* ptr=coefficient.begin();
     while(i.degree()<=d) {
         //result[i]=*ptr; ++i; ++ptr;
         result->expansion().append(i,*ptr); ++i; ++ptr;
@@ -139,7 +143,7 @@ DIFF*
 make_sparse_differential(const boost::python::object& obj,const Nat& d)
 {
     typedef typename DIFF::ValueType X;
-    Expansion<X> expansion = boost::python::extract< Expansion<X> >(obj);
+    Expansion<MultiIndex,X> expansion = boost::python::extract< Expansion<MultiIndex,X> >(obj);
     DIFF* result=new DIFF(expansion,d);
     return result;
 }
@@ -162,11 +166,27 @@ Vector<DIFF>*
 make_differential_vector(const Nat& rs, const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
-    Array<X> data;
-    read_array(data,obj);
-    ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
-    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d,data.begin()));
+    boost::python::list lst=boost::python::extract<boost::python::list>(obj);
+    Array<X> coefficient;
+    read_array(coefficient,obj);
+    ARIADNE_ASSERT(coefficient.size()==compute_polynomial_data_size(rs,as,d));
+    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d));
+    for(SizeType i=0; i!=rs; ++i) {
+        DIFF* ri = make_sparse_differential<DIFF>(lst[i],d);
+        (*result)[i]=*ri;
+        delete ri;
+    }
     return result;
+}
+
+template<class PR> Differential<FloatBounds<PR>> make_differential_variable(SizeType n, DegreeType d, Real r, SizeType i, PR pr) {
+    return Differential<FloatBounds<PR>>::variable(n,d,FloatBounds<PR>(r,pr),i);
+}
+template<class PR> Differential<FloatBounds<PR>> make_differential_variable(SizeType n, DegreeType d, ValidatedReal r, SizeType i, PR pr) {
+    return Differential<FloatBounds<PR>>::variable(n,d,FloatBounds<PR>(r,pr),i);
+}
+template<class X, class Y, class PR> Vector<Differential<X>> make_variables(DegreeType d, Vector<Y> vy, PR pr) {
+    return Differential<X>::variables(d,Vector<X>(vy,pr));
 }
 
 
@@ -185,35 +205,36 @@ Void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 namespace Ariadne {
 
-template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<X> >& repr);
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<MultiIndex,X> >& repr);
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Differential<X> >& repr) {
     const Differential<X>& diff=repr.reference();
-    os << python_name<X>("Differential") << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
-    //os << python_name<X>("Differential") << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
+    os << python_name<X>("Differential").c_str() << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
+    //os << python_name<X>("Differential").c_str() << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
     return os;
 }
 
 }
 
 
+template<class D> using ValueType = decltype(declval<D>().value());
+template<class D> using GradientType = decltype(declval<D>().gradient());
+template<class D> using HessianType = decltype(declval<D>().hessian());
 
 template<class DIFF>
-Void export_differential(const char* name)
+Void export_differential(const String& name)
 {
     typedef typename DIFF::ValueType X;
+    typedef typename X::GenericType Y;
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
     typedef Vector<D> DV;
 
-
-    class_<D> differential_class(name, init<D>() );
-    //differential_class.def("__init__", make_constructor(&make_differential<D>) );
+    class_<D> differential_class(name.c_str(), init<D>() );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
-    //differential_class.def( init< D >());
-    differential_class.def( init< Nat, Nat >());
-    differential_class.def( init< Expansion<X>, Nat >());
+    differential_class.def( init< SizeType, DegreeType >());
+    differential_class.def( init< Expansion<MultiIndex,X>, DegreeType >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -228,25 +249,32 @@ Void export_differential(const char* name)
     differential_class.def(X()+self);
     differential_class.def(X()-self);
     differential_class.def(X()*self);
+    differential_class.def(self+Y());
+    differential_class.def(self-Y());
+    differential_class.def(self*Y());
+    differential_class.def(self/Y());
+    differential_class.def(Y()+self);
+    differential_class.def(Y()-self);
+    differential_class.def(Y()*self);
     differential_class.def(self+=self);
     differential_class.def(self-=self);
-    //differential_class.def(self*=self);
     differential_class.def(self+=X());
     differential_class.def(self-=X());
     differential_class.def(self*=X());
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
-    //differential_class.def("__repr__", (StringType(*)(const D&)) &__repr__);
     differential_class.def("__repr__", &__repr__<D>);
 
-    differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
-    differential_class.def("gradient",(Covector<X>(D::*)()const)&D::gradient);
-    differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
-    differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
+    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value, return_value_policy<copy_const_reference>());
+    differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
+    differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
+    differential_class.def("expansion", (Expansion<MultiIndex,X>const&(D::*)()const)&D::expansion, return_value_policy<copy_const_reference>());
 
     differential_class.def("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
     differential_class.def("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);
+    differential_class.def("constants",(Vector<D>(*)(SizeType, DegreeType, const Vector<X>&))&D::constants);
     differential_class.def("variables",(Vector<D>(*)(DegreeType, const Vector<X>&))&D::variables);
+
 
     differential_class.staticmethod("constant");
     differential_class.staticmethod("variable");
@@ -255,23 +283,22 @@ Void export_differential(const char* name)
     def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
     def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
-    typedef AlgebraOperations<D> Operations;
-    def("pos",&Operations::_pos);
-    def("neg",&Operations::_neg);
-    def("rec",&Operations::_rec);
-///    def("pow",&Operations::_pow);
-    def("sqrt",&Operations::_sqrt);
-    def("exp",&Operations::_exp);
-    def("log",&Operations::_log);
-    def("sin",&Operations::_sin);
-    def("cos",&Operations::_cos);
-    def("tan",&Operations::_tan);
-    def("atan",&Operations::_atan);
+    def("neg",&_neg_<D>);
+    def("sqr",&_sqr_<D>);
+    def("rec",&_rec_<D>);
+    def("pow",&_pow_<D,Int>);
+    def("sqrt",&_sqrt_<D>);
+    def("exp",&_exp_<D>);
+    def("log",&_log_<D>);
+    def("sin",&_sin_<D>);
+    def("cos",&_cos_<D>);
+    def("tan",&_tan_<D>);
+    def("atan",&_atan_<D>);
 }
 
 template<class DIFF>
 Void
-export_differential_vector(const char* name)
+export_differential_vector(const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
@@ -279,7 +306,7 @@ export_differential_vector(const char* name)
     typedef DIFF D;
     typedef Vector<D> DV;
 
-    class_<DV> differential_vector_class(name, init<DV>());
+    class_<DV> differential_vector_class(name.c_str(), init<DV>());
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< Nat, Nat, Nat >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);
@@ -299,28 +326,41 @@ export_differential_vector(const char* name)
     differential_vector_class.def("value", &DV::value);
     differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def(self_ns::str(self));
+    differential_vector_class.def(self_ns::repr(self));
 
     def("compose",(D(*)(const D&,const DV&))&D::_compose);
     def("compose",(DV(*)(const DV&,const DV&))&DV::_compose);
 
+    def("solve",(DV(*)(const DV&,const V&))&DV::_solve);
+    def("flow",(DV(*)(const DV&,const V&))&DV::_flow);
+
     //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template Void export_differential< Differential<FloatDPApproximation> >(const char*);
-template Void export_differential< Differential<FloatDPBounds> >(const char*);
+template Void export_differential< Differential<FloatDPApproximation> >(const String&);
+template Void export_differential< Differential<FloatDPBounds> >(const String&);
 
-template Void export_differential_vector< Differential<FloatDPApproximation> >(const char*);
-template Void export_differential_vector< Differential<FloatDPBounds> >(const char*);
+template Void export_differential_vector< Differential<FloatDPApproximation> >(const String&);
+template Void export_differential_vector< Differential<FloatDPBounds> >(const String&);
 
 Void differentiation_submodule()
 {
-    to_python_dict < Expansion<FloatDPApproximation> >();
-    to_python_dict < Expansion<FloatDPBounds> >();
+    to_python_dict < Expansion<MultiIndex,FloatDPApproximation> >();
+    to_python_dict < Expansion<MultiIndex,FloatDPBounds> >();
 
     export_differential< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("Differential"));
     export_differential< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("Differential"));
-
     export_differential_vector< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("DifferentialVector"));
     export_differential_vector< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("DifferentialVector"));
+
+    export_differential< Differential<FloatMPApproximation> >(python_name<FloatMPApproximation>("Differential"));
+    export_differential< Differential<FloatMPBounds> >(python_name<FloatMPBounds>("Differential"));
+    export_differential_vector< Differential<FloatMPApproximation> >(python_name<FloatMPApproximation>("DifferentialVector"));
+    export_differential_vector< Differential<FloatMPBounds> >(python_name<FloatMPBounds>("DifferentialVector"));
+
+    def("differential_variables", (Vector<Differential<FloatDPBounds>>(*)(DegreeType, Vector<Real>, DoublePrecision)) &make_variables<FloatDPBounds>);
+    def("differential_variables", (Vector<Differential<FloatMPBounds>>(*)(DegreeType, Vector<Real>, MultiplePrecision)) &make_variables<FloatMPBounds>);
+
+
 }
 

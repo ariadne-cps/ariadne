@@ -21,54 +21,56 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "function/constraint.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "geometry/enclosure.hpp"
+#include "../function/constraint.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../geometry/enclosure.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
 
-#include "function/function_model.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/paver.hpp"
+#include "../geometry/grid_set.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/space.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/space.hpp"
+
+#include "../algebra/expansion.inl.hpp"
 
 
 namespace Ariadne {
@@ -194,13 +196,13 @@ Void Enclosure::_solve_zero_constraints() {
         MultiIndex r(k);
         // Try linear approach in last coefficient
         for(ValidatedTaylorModelDP::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
-            if(tmiter->key()[k]==0) {
-                assign_all_but_last(r,tmiter->key());
-                zeroth_order.expansion().append(r,tmiter->data());
-            } else if(tmiter->key()[k]==1) {
+            if(tmiter->index()[k]==0) {
+                assign_all_but_last(r,tmiter->index());
+                zeroth_order.expansion().append(r,tmiter->coefficient());
+            } else if(tmiter->index()[k]==1) {
                 is_zeroth_order=false;
-                assign_all_but_last(r,tmiter->key());
-                first_order.expansion().append(r,tmiter->data());
+                assign_all_but_last(r,tmiter->index());
+                first_order.expansion().append(r,tmiter->coefficient());
             } else {
                 is_first_order=false; break;
             }
@@ -1122,14 +1124,14 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,FloatDPValue());
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->data());
+        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
     FloatDPError& error=*error_ptr;
     error += tm.error();
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        MultiIndex const& xa=iter->key();
-        FloatDPValue const& xv=iter->data();
+        ConstReferenceType<MultiIndex> xa=iter->index();
+        ConstReferenceType<FloatDPValue> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1177,8 +1179,8 @@ Enclosure::kuhn_recondition()
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-                if(iter->key()[j]!=0) {
-                    dependencies[i][j]+=abs(iter->data()).raw();
+                if(iter->index()[j]!=0) {
+                    dependencies[i][j]+=abs(iter->coefficient()).raw();
                 }
             }
         }
@@ -1392,11 +1394,11 @@ struct ValidatedAffineModel {
 ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
     ValidatedAffineModel result(0.0,Vector<FloatDPValue>(tm.argument_size(),0.0),tm.error());
     for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
-        else if(iter->key().degree()==0) {result. _c=iter->data(); }
+        if(iter->index().degree()>=2) { result._e+=abs(iter->coefficient()); }
+        else if(iter->index().degree()==0) {result. _c=iter->coefficient(); }
         else {
             for(Nat j=0; j!=tm.argument_size(); ++j) {
-                if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
+                if(iter->index()[j]!=0) { result._g[j]=iter->coefficient(); break; }
             }
         }
     }

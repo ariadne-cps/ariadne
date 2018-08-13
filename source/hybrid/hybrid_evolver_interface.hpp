@@ -28,15 +28,15 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "dynamics/evolver_interface.hpp"
+#include "../dynamics/evolver_interface.hpp"
 
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
 namespace Ariadne {
 

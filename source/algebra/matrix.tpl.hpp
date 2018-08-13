@@ -21,9 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/vector.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
+
+template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, Uninitialised)
+    : _zero(0), _rs(m), _cs(n), _ary(m*n,Uninitialised()) {
+}
 
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
     : _zero(0), _rs(m), _cs(n), _ary(p,p+m*n) {

@@ -29,7 +29,7 @@
 #include <stdexcept>
 #include <fenv.h>
 
-#include "config.h"
+#include "config.hpp"
 #include "numeric/rounding.hpp"
 #include "numeric/float.hpp"
 #include "numeric/numeric.hpp"

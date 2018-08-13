@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "output/graphics.hpp"
+#include "../output/graphics.hpp"
 
-#include "config.h"
+#include "../config.hpp"
 
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>

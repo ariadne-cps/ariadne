@@ -38,7 +38,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
@@ -50,8 +50,8 @@ namespace Ariadne {
 
 class Real;
 
-template<class X> inline const char* python_name(const char* name) {
-    return (StringType(class_name<X>())+name).c_str(); }
+template<class X> inline std::string python_name(const std::string& name) {
+    return class_name<X>()+name; }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;
@@ -79,6 +79,22 @@ struct to_python< std::pair<T1,T2> > {
         return boost::python::incref(boost::python::tuple(result).ptr());
     }
     static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
+};
+
+
+template<class T1, class T2>
+struct from_python< Ariadne::Pair<T1,T2> > {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Pair<T1,T2> >()); }
+    static Void* convertible(PyObject* obj_ptr) {
+        if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        boost::python::tuple tup = boost::python::extract<boost::python::tuple>(obj_ptr);
+        assert(len(tup)==2); T1 t1=boost::python::extract<T1>(tup[0]); T2 t2=boost::python::extract<T2>(tup[1]); Pair<T1,T2> pr(t1,t2);
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Pair<T1,T2> >*)data)->storage.bytes;
+        new (storage) Pair<T1,T2>(pr);
+        data->convertible = storage;
+    }
 };
 
 
@@ -135,6 +151,22 @@ struct to_python<std::map<K,V> > {
         return boost::python::incref(boost::python::dict(result).ptr());
     }
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
+};
+
+template<class K, class V>
+struct from_python< Ariadne::Map<K,V> > {
+    from_python() {
+        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Map<K,V> >()); }
+    static Void* convertible(PyObject* obj_ptr) {
+        if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
+        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
+        boost::python::list lst = dct.items();
+        Ariadne::Map<K,V> m; for(Nat i=0; i!=len(lst); ++i) { std::pair<K,V> item=boost::python::extract<std::pair<K,V>>(lst[i]); m.insert(item); }
+        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Ariadne::Map<K,V> >*)data)->storage.bytes;
+        new (storage) Ariadne::Map<K,V>(m);
+        data->convertible = storage;
+    }
 };
 
 
@@ -406,41 +438,61 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
-template<class A> auto _neg_(const A& a) -> decltype(neg(a)) { return neg(a); }
-template<class A> auto _rec_(const A& a) -> decltype(rec(a)) { return rec(a); }
-template<class A> auto _sqr_(const A& a) -> decltype(sqr(a)) { return sqr(a); }
-template<class A, class N> auto _pow_(const A& a, N n) -> decltype(pow(a,n)) { return pow(a,n); }
-template<class A> auto _sqrt_(const A& a) -> decltype(sqrt(a)) { return sqrt(a); }
-template<class A> auto _exp_(const A& a) -> decltype(exp(a)) { return exp(a); }
-template<class A> auto _log_(const A& a) -> decltype(log(a)) { return log(a); }
-template<class A> auto _sin_(const A& a) -> decltype(sin(a)) { return sin(a); }
-template<class A> auto _cos_(const A& a) -> decltype(cos(a)) { return cos(a); }
-template<class A> auto _tan_(const A& a) -> decltype(tan(a)) { return tan(a); }
-template<class A> auto _atan_(const A& a) -> decltype(atan(a)) { return atan(a); }
-template<class A1, class A2> auto _max_(const A1& a1, const A2& a2) -> decltype(max(a1,a2)) { return max(a1,a2); }
-template<class A1, class A2> auto _min_(const A1& a1, const A2& a2) -> decltype(min(a1,a2)) { return min(a1,a2); }
-template<class A> auto _abs_(const A& a) -> decltype(abs(a)) { return abs(a); }
+template<class... AS> decltype(auto) _nul_(AS const& ... as) { return nul(as...); }
+template<class... AS> decltype(auto) _pos_(AS const& ... as) { return pos(as...); }
+template<class... AS> decltype(auto) _neg_(AS const& ... as) { return neg(as...); }
+template<class... AS> decltype(auto) _hlf_(AS const& ... as) { return hlf(as...); }
+template<class... AS> decltype(auto) _rec_(AS const& ... as) { return rec(as...); }
+template<class... AS> decltype(auto) _sqr_(AS const& ... as) { return sqr(as...); }
+template<class... AS> decltype(auto) _pow_(AS const& ... as) { return pow(as...); }
+template<class... AS> decltype(auto) _sqrt_(AS const& ... as) { return sqrt(as...); }
+template<class... AS> decltype(auto) _exp_(AS const& ... as) { return exp(as...); }
+template<class... AS> decltype(auto) _log_(AS const& ... as) { return log(as...); }
+template<class... AS> decltype(auto) _sin_(AS const& ... as) { return sin(as...); }
+template<class... AS> decltype(auto) _cos_(AS const& ... as) { return cos(as...); }
+template<class... AS> decltype(auto) _tan_(AS const& ... as) { return tan(as...); }
+template<class... AS> decltype(auto) _atan_(AS const& ... as) { return atan(as...); }
+template<class... AS> decltype(auto) _max_(AS const& ... as) { return max(as...); }
+template<class... AS> decltype(auto) _min_(AS const& ... as) { return min(as...); }
+template<class... AS> decltype(auto) _abs_(AS const& ... as) { return abs(as...); }
 
-template<class... AS> inline auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
-template<class... AS> inline auto _partial_evaluate_(AS... as) -> decltype(partial_evaluate(as...)) { return partial_evaluate(as...); }
-template<class... AS> inline auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
-template<class... AS> inline auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
-template<class... AS> inline auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
+template<class... AS> inline decltype(auto) _evaluate_(AS... as) { return evaluate(as...); }
+template<class... AS> inline decltype(auto) _partial_evaluate_(AS... as) { return partial_evaluate(as...); }
+template<class... AS> inline decltype(auto) _unchecked_evaluate_(AS... as) { return unchecked_evaluate(as...); }
+template<class... AS> inline decltype(auto) _compose_(AS... as) { return compose(as...); }
+template<class... AS> inline decltype(auto) _unchecked_compose_(AS... as) { return unchecked_compose(as...); }
 
-template<class... AS> inline auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
-template<class... AS> inline auto _combine_(AS... as) -> decltype(combine(as...)) { return combine(as...); }
+template<class... AS> inline decltype(auto) _join_(AS... as) { return join(as...); }
+template<class... AS> inline decltype(auto) _combine_(AS... as) { return combine(as...); }
 
-template<class... AS> inline auto _midpoint_(AS... as) -> decltype(midpoint(as...)) { return midpoint(as...); }
-template<class... AS> inline auto _embed_(AS... as) -> decltype(embed(as...)) { return embed(as...); }
-template<class... AS> inline auto _extension_(AS... as) -> decltype(extension(as...)) { return extension(as...); }
-template<class... AS> inline auto _restriction_(AS... as) -> decltype(restriction(as...)) { return restriction(as...); }
-    template<class... AS> inline auto _split_(AS... as) -> decltype(split(as...)) { return split(as...); }
-template<class... AS> inline auto _derivative_(AS... as) -> decltype(derivative(as...)) { return derivative(as...); }
-template<class... AS> inline auto _antiderivative_(AS... as) -> decltype(antiderivative(as...)) { return antiderivative(as...); }
+template<class... AS> inline decltype(auto) _midpoint_(AS... as) { return midpoint(as...); }
+template<class... AS> inline decltype(auto) _embed_(AS... as) { return embed(as...); }
+template<class... AS> inline decltype(auto) _extension_(AS... as) { return extension(as...); }
+template<class... AS> inline decltype(auto) _restriction_(AS... as) { return restriction(as...); }
+template<class... AS> inline decltype(auto) _split_(AS... as) { return split(as...); }
+template<class... AS> inline decltype(auto) _derivative_(AS... as) { return derivative(as...); }
+template<class... AS> inline decltype(auto) _antiderivative_(AS... as) { return antiderivative(as...); }
 
-template<class... AS> inline auto _refinement_(AS... as) -> decltype(refinement(as...)) { return refinement(as...); }
-template<class... AS> inline auto _refines_(AS... as) -> decltype(refines(as...)) { return refines(as...); }
-template<class... AS> inline auto _inconsistent_(AS... as) -> decltype(inconsistent(as...)) { return inconsistent(as...); }
+template<class... AS> inline decltype(auto) _refinement_(AS... as) { return refinement(as...); }
+template<class... AS> inline decltype(auto) _refines_(AS... as) { return refines(as...); }
+template<class... AS> inline decltype(auto) _inconsistent_(AS... as) { return inconsistent(as...); }
+
+template<class... AS> decltype(auto) _widen_(AS const& ... as) { return widen(as...); }
+
+template<class... AS> decltype(auto) _contains_(AS const& ... as) { return contains(as...); }
+template<class... AS> decltype(auto) _intersection_(AS const& ... as) { return intersection(as...); }
+template<class... AS> decltype(auto) _disjoint_(AS const& ... as) { return disjoint(as...); }
+template<class... AS> decltype(auto) _subset_(AS const& ... as) { return subset(as...); }
+template<class... AS> decltype(auto) _product_(AS const& ... as) { return product(as...); }
+template<class... AS> decltype(auto) _hull_(AS const& ... as) { return hull(as...); }
+template<class... AS> decltype(auto) _separated_(AS const& ... as) { return separated(as...); }
+template<class... AS> decltype(auto) _overlap_(AS const& ... as) { return overlap(as...); }
+template<class... AS> decltype(auto) _covers_(AS const& ... as) { return covers(as...); }
+template<class... AS> decltype(auto) _inside_(AS const& ... as) { return inside(as...); }
+
+template<class... AS> decltype(auto) _image_(AS const& ... as) { return image(as...); }
+template<class... AS> decltype(auto) _preimage_(AS const& ... as) { return preimage(as...); }
+
 
 template<class T> StringType __cstr__(const T& t) {
     StringStream ss; ss << t; return ss.str(); }

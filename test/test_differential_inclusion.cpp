@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_differential_inclusion.cpp
  *
- *  Copyright  2008-17  Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-18 Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 
@@ -32,7 +32,7 @@
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
-#include "expression/expression_set.hpp"
+#include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field.hpp"
 
 #include "test/test.hpp"

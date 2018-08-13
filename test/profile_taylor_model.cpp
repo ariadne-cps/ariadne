@@ -32,7 +32,7 @@ using StringType;
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
-#include "config.h"
+#include "config.hpp"
 #include "function/taylor_model.hpp"
 using namespace Ariadne;
 

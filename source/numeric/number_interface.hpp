@@ -30,8 +30,8 @@
 #ifndef ARIADNE_NUMBER_INTERFACE
 #define ARIADNE_NUMBER_INTERFACE
 
-#include "utility/clonable.hpp"
-#include "utility/writable.hpp"
+#include "../utility/clonable.hpp"
+#include "../utility/writable.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -50,8 +50,8 @@ template<class X> class NumberWrapper;
 
 class NumberInterface
     : public std::enable_shared_from_this<NumberInterface>
-    , public virtual WritableInterface
-    , public virtual ClonableInterface
+    , public WritableInterface
+    , public ClonableInterface
 {
     template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
@@ -91,17 +91,23 @@ class NumberInterface
 
     virtual Rational _get_q() const = 0;
 
-    virtual FloatDPBall _get(MetricTag, DoublePrecision) const = 0;
+    virtual FloatDPBall _get(MetricTag, DoublePrecision, DoublePrecision) const = 0;
     virtual FloatDPBounds _get(BoundedTag, DoublePrecision) const = 0;
     virtual FloatDPUpperBound _get(UpperTag, DoublePrecision) const = 0;
     virtual FloatDPLowerBound _get(LowerTag, DoublePrecision) const = 0;
     virtual FloatDPApproximation _get(ApproximateTag, DoublePrecision) const = 0;
 
-    virtual FloatMPBall _get(MetricTag, MultiplePrecision) const = 0;
+    virtual FloatMPDPBall _get(MetricTag, MultiplePrecision, DoublePrecision) const = 0;
+
+    virtual FloatMPBall _get(MetricTag, MultiplePrecision, MultiplePrecision) const = 0;
     virtual FloatMPBounds _get(BoundedTag, MultiplePrecision) const = 0;
     virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision) const = 0;
     virtual FloatMPLowerBound _get(LowerTag, MultiplePrecision) const = 0;
     virtual FloatMPApproximation _get(ApproximateTag, MultiplePrecision) const = 0;
+
+    // FIXME: Only used in templates; should not really be needed
+    FloatDPBall _get(MetricTag p, DoublePrecision pr) const;
+    FloatMPBall _get(MetricTag p, MultiplePrecision pr) const;
 
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;

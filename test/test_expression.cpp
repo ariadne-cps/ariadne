@@ -23,18 +23,20 @@
 
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 #include "utility/container.hpp"
 #include "utility/stlio.hpp"
 #include "numeric/numeric.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/valuation.hpp"
-#include "expression/space.hpp"
+#include "symbolic/expression.hpp"
+#include "symbolic/assignment.hpp"
+#include "symbolic/valuation.hpp"
+#include "symbolic/space.hpp"
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/taylor_model.hpp"
+
+#include "algebra/matrix.tpl.hpp"
 
 #include "test.hpp"
 
@@ -56,6 +58,14 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(a==RealVariable("a"));
         ARIADNE_TEST_ASSERT(a==RealVariable(a));
         ARIADNE_TEST_ASSERT(a!=RealVariable("b"));
+    }
+
+    Void test_expression() {
+        // Regression test for constructing Expression from 0 without being an ambiguous nullptr;
+        ARIADNE_TEST_CONSTRUCT(IntegerExpression,ze,(0));
+        ARIADNE_TEST_CONSTRUCT(RealExpression,re,(0));
+        RealExpression(0);
+        RealExpression(nullptr);
     }
 
     Void test_assignment() {
@@ -227,6 +237,7 @@ class TestExpression {
 
     Void test() {
         test_variables();
+        test_expression();
         test_assignment();
         test_parameters();
         test_derivative();
@@ -234,8 +245,10 @@ class TestExpression {
         test_substitute();
         test_scalar_properties();
         test_vector_properties();
+        test_properties();
         test_function();
     }
+
 };
 
 

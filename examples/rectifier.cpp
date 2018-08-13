@@ -6,6 +6,7 @@
 #include "ariadne.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 /// Function for plotting the orbit and reachability set
 template<class SET> Void plot(const char* filename, const Int& xaxis, const Int& yaxis, const Int& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const Int& MAX_GRID_DEPTH) {

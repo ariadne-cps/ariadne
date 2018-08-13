@@ -33,26 +33,26 @@
 
 #include <memory>
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "utility/declarations.hpp"
-#include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/curve.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/container.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../geometry/curve.hpp"
 
-#include "expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
-#include "hybrid/hybrid_expression_set.hpp"
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_grid.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../hybrid/hybrid_expression_set.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_grid.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
 
-#include "hybrid/hybrid_graphics_interface.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 

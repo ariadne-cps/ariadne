@@ -28,16 +28,16 @@
 #ifndef ARIADNE_GRAPHICS_HPP
 #define ARIADNE_GRAPHICS_HPP
 
-#include "config.h"
+#include "../config.hpp"
 
 #include <iosfwd>
 #include <string>
 #include <vector>
 
-#include "utility/typedefs.hpp"
-#include "utility/declarations.hpp"
-#include "output/colour.hpp"
-#include "output/graphics_interface.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/declarations.hpp"
+#include "../output/colour.hpp"
+#include "../output/graphics_interface.hpp"
 
 typedef unsigned int Nat;
 

@@ -35,6 +35,9 @@ namespace Ariadne {
 
 /************ TwoExp ***************************************************/
 
+class Integer;
+class Dyadic;
+
 //! \ingroup NumericModule
 //! \brief A class representing a number of the form  \c 2<sup>\it n</sup> for some \it n.
 //! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
@@ -47,24 +50,26 @@ class TwoExp {
     FloatDP get_raw(DoublePrecision pr) const;
     FloatMP get_raw(MultiplePrecision pr) const;
     double get_d() const { return std::pow(2.0,this->_n); }
+    friend TwoExp rec(TwoExp w) { return TwoExp(-w._n); }
     friend Dyadic operator+(TwoExp);
     friend Dyadic operator-(TwoExp);
+    friend Dyadic operator*(Integer, TwoExp);
+    friend Dyadic operator/(Integer, TwoExp);
+    friend OutputStream& operator<<(OutputStream& os, TwoExp);
 };
-inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
-struct Two : public std::integral_constant<uint,2u> {
+//! \ingroup NumericModule
+//! \brief The integer constant 2. Only used for creating dyadic numbers.
+//! Not a subtype of std::integral_constant<uint,2u> to avoid conversion to builtin integers yielding e.g. 1/two=0.
+struct Two
+  : public std::integral_constant<uint,2u>
+{
+    friend TwoExp operator^(Two, Nat m) { return TwoExp(m); }
     friend TwoExp operator^(Two, Int n) { return TwoExp(n); }
+    friend TwoExp pow(Two, int n) { return TwoExp(n); }
 };
 static const Two two = Two();
-
-/*
-inline FloatDP TwoExp::get_raw(DoublePrecision pr) const {
-    return FloatDP(this->get_d());
-}
-inline FloatMP TwoExp::get_raw(MultiplePrecision pr) const {
-    return FloatMP(this->get_d(),pr);
-}
-*/
+static const Two _2 = Two();
 
 } // namespace Ariadne
 

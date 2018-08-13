@@ -28,17 +28,17 @@
 #ifndef ARIADNE_SWEEPER_HPP
 #define ARIADNE_SWEEPER_HPP
 
-#include "utility/macros.hpp"
-#include "utility/attribute.hpp"
-#include "numeric/float.decl.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/attribute.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
 
 namespace Ariadne {
 
 template<class F> class Sweeper;
 template<class F> class SweeperBase;
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 
 template<class F> class SweeperInterface {
     friend class Sweeper<F>;
@@ -48,14 +48,14 @@ template<class F> class SweeperInterface {
   public:
     inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_discard(a,x.raw()); }
     inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_discard(a,x.raw()); }
-    inline Void sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
-    inline Void sweep(Expansion<FloatApproximation<PR>>& p) const { this->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
+    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_sweep(p); }
     inline PR precision() const { return this->_precision(); }
   private:
     virtual SweeperInterface* _clone() const = 0;
     virtual PR _precision() const = 0;
-    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
-    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const = 0;
     virtual Bool _discard(const MultiIndex& a, const F& x) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
@@ -87,9 +87,9 @@ template<class F> class Sweeper {
     inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_ptr->_discard(a,x.raw()); }
     inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_ptr->_discard(a,x.raw()); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
-    inline Void sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
+    inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
-    inline Void sweep(Expansion<FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;
@@ -99,8 +99,8 @@ template<class F> class SweeperBase
     : public virtual SweeperInterface<F>
 {
     typedef typename F::PrecisionType PR;
-    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const override;
-    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
 };
 
 
@@ -156,8 +156,8 @@ template<class F> class TrivialSweeper : public SweeperMixin<TrivialSweeper<F>,F
     inline PR precision() const { return _coefficient_precision; }
     inline Bool discard(const MultiIndex& a, const F& x) const { return false; }
   private:
-    virtual Void _sweep(Expansion<FloatValue<PR>>& p, FloatError<PR>& e) const final { }
-    virtual Void _sweep(Expansion<FloatApproximation<PR>>& p) const final { }
+    virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const final { }
+    virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const final { }
     virtual Void _write(OutputStream& os) const { os << "TrivialSweeper"; }
 };
 

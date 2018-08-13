@@ -30,9 +30,9 @@
 
 #include <stdexcept>
 
-#include "utility/metaprogramming.hpp"
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 namespace Ariadne {
 
@@ -57,6 +57,12 @@ template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 
 template<class X> using PropertiesType = typename X::PropertiesType;
 template<class X> using GenericType = typename X::GenericType;
+
+template<class X> struct IsConcrete : Has<GenericType,X> { };
+
+template<class X> struct IsScalar;
+template<class X> struct IsConcreteScalar : And<Has<GenericType,X>,IsScalar<X>> { };
+template<class X> struct IsGenericScalar : And<Not<Has<GenericType,X>>,IsScalar<X>> { };
 
 
 typedef uint Nat;
@@ -117,8 +123,12 @@ using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic val
 using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. \ingroup NumericModule
 
 template<class P> using PositiveNumber = Positive<Number<P>>;
+
+using PositiveExactNumber=PositiveNumber<ExactTag>; //!< Alias for generic positive validated upper numbers. \ingroup NumericModule
 using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< Alias for generic positive validated upper numbers. \ingroup NumericModule
 using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< Alias for generic positive validated lower numbers. \ingroup NumericModule
+
+using ValidatedErrorNumber = PositiveValidatedUpperNumber;
 
 } // namespace Ariadne
 

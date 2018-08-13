@@ -28,7 +28,7 @@
 #ifndef ARIADNE_CIF_HYBRID_AUTOMATON_HPP
 #define ARIADNE_CIF_HYBRID_AUTOMATON_HPP
 
-#include "hybrid/hybrid_automata.hpp"
+#include "../hybrid/hybrid_automata.hpp"
 
 
 namespace Ariadne {

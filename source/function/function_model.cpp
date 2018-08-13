@@ -21,22 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/function_model.hpp"
-#include "function/function_model.tpl.hpp"
-#include "function/taylor_model.hpp"
+#include "../function/function_model.hpp"
+#include "../function/function_model.tpl.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "algebra/algebra.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 
 template class FunctionModelFactoryInterface<ValidatedTag,DoublePrecision,DoublePrecision>;
 template class FunctionModelFactoryInterface<ValidatedTag,MultiplePrecision,MultiplePrecision>;
 
-template class ScalarFunctionModel<ValidatedTag,DoublePrecision>;
-template class ScalarFunctionModel<ValidatedTag,MultiplePrecision>;
-template class VectorFunctionModel<ValidatedTag,DoublePrecision>;
-template class VectorFunctionModel<ValidatedTag,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,IntervalDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,IntervalDomainType,BoxDomainType,MultiplePrecision>;
+
+template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,IntervalDomainType,MultiplePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,DoublePrecision>;
+template class FunctionModel<ValidatedTag,BoxDomainType,BoxDomainType,MultiplePrecision>;
 
 } // namespace Ariadne

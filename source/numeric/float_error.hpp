@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_ERROR_HPP
 #define ARIADNE_FLOAT_ERROR_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -54,6 +54,7 @@ template<class F> class Error
   private: public:
     F _e;
   public:
+    typedef PositiveValidatedUpperNumber GenericType;
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
@@ -71,7 +72,10 @@ template<class F> class Error
     explicit Error<F>(const TwoExp& t, PR pr) : Error<F>(UpperBound<F>(t,pr)) { }
     Error<F>(PositiveValue<F> const& x) : _e(x._v) { }
     Error<F>& operator=(Nat m) { reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }
+    Error<F>& operator=(ValidatedErrorNumber y) { return *this=cast_positive(y.get(this->precision())); }
+    operator ValidatedErrorNumber() const;
   public:
+    ValidatedErrorNumber generic() const { return this->operator ValidatedErrorNumber(); }
     PrecisionType precision() const { return _e.precision(); }
     PropertiesType properties() const { return _e.precision(); }
     F const& raw() const { return _e; }

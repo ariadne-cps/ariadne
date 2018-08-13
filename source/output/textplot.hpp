@@ -34,8 +34,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "output/graphics_interface.hpp"
-#include "output/colour.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/colour.hpp"
 
 namespace Ariadne {
 

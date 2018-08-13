@@ -24,7 +24,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 #include "utility/tuple.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

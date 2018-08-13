@@ -29,9 +29,9 @@
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
 
 #include <cassert>
-#include "function/function.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 

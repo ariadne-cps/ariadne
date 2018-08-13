@@ -25,31 +25,33 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <limits>
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/diagonal_matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/diagonal_matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
 
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/solver.hpp"
-#include "algebra/multi_index-noaliasing.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/solver.hpp"
+#include "../algebra/multi_index-noaliasing.hpp"
+#include "../solvers/constraint_solver.hpp"
+
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -285,10 +287,10 @@ template<class Vec, class Diff> Void set_gradient(Vec& g, const Diff& D) {
     typedef typename Diff::ValueType X;
     Nat i=0;
     typename Diff::ConstIterator iter=D.begin();
-    if(iter!=D.end() && iter->key().degree()==0) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()<=2) {
-        while(iter->key()[i]==0) { ++i; }
-        g[i]=iter->data();
+    if(iter!=D.end() && iter->index().degree()==0) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()<=2) {
+        while(iter->index()[i]==0) { ++i; }
+        g[i]=iter->coefficient();
         ++iter;
     }
 }
@@ -305,10 +307,10 @@ template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
     typedef typename Diff::ValueType X;
     Nat i=0; Nat j=1;
     typename Diff::ConstIterator iter=D.begin();
-    while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()<=2) {
-        const MultiIndex& a=iter->key();
-        const X& c=iter->data();
+    while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()<=2) {
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -319,10 +321,10 @@ template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
 template<class Mx, class S, class Diff> Void add_hessian(Mx& H, const S& s, const Diff& D) {
     typedef typename Diff::ValueType X;
     typename Diff::ConstIterator iter=D.begin();
-    while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()==2) {
-        const MultiIndex& a=iter->key();
-        const X& c=iter->data();
+    while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()==2) {
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         Nat i=0;
         while(a[i]==0) { ++i; }
         if(a[i]==2) { H[i][i]+=s*c; }

@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
+#include "../function/functional.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
 
-#include "config.h"
+#include "../config.hpp"
 
 #include <cassert>
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
 
-#include "geometry/curve.hpp"
+#include "../geometry/curve.hpp"
 
 
 namespace Ariadne {

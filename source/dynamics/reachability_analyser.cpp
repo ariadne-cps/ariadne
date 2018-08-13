@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <string>
 #include <sstream>
@@ -34,32 +34,32 @@
 #include <valarray>
 
 
-#include "utility/exceptions.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_set.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
-#include "geometry/function_set.hpp"
+#include "../solvers/integrator.hpp"
+#include "../solvers/solver.hpp"
+#include "../geometry/function_set.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "../dynamics/vector_field.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser.hpp"
+#include "../dynamics/orbit.hpp"
+#include "../dynamics/vector_field_evolver.hpp"
+#include "../dynamics/reachability_analyser.hpp"
 
-#include "utility/logging.hpp"
-#include "output/graphics.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../utility/logging.hpp"
+#include "../output/graphics.hpp"
+#include "../solvers/linear_programming.hpp"
 
-#include "dynamics/reachability_analyser.tpl.hpp"
+#include "../dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
 

@@ -32,8 +32,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "utility/declarations.hpp"
-#include "utility/logging.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/logging.hpp"
 
 namespace Ariadne {
 template<class T> class Set;

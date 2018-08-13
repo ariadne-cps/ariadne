@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "geometry/paver.hpp"
+#include "../geometry/paver.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/procedure.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/paving_interface.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "algebra/algebra.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/procedure.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -50,11 +50,6 @@ Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& funct
 }
 
 namespace {
-
-ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
-    Formula<ValidatedNumber> e=f(Formula<ValidatedNumber>::identity(f.argument_size()));
-    return Procedure<ValidatedNumber>(e);
-}
 
 UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
     UpperIntervalType r=make_interval(mul(x[0],z[0]));

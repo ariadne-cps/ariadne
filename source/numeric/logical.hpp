@@ -27,9 +27,9 @@
 #ifndef ARIADNE_LOGICAL_HPP
 #define ARIADNE_LOGICAL_HPP
 
-#include "utility/stdlib.hpp"
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "logical.decl.hpp"
 
@@ -58,6 +58,9 @@ class Effort {
     //! \brief Convert to a raw positive integer.
     operator Nat() const { return _m; }
     Nat work() const { return _m; }
+    Effort& operator++() { ++_m; return *this; }
+    Effort& operator+=(Nat m) { _m+=m; return *this; }
+    Effort& operator*=(Nat m) { _m*=m; return *this; }
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 
@@ -531,6 +534,27 @@ inline ValidatedUpperKleenean UpperKleenean::check(Effort e) const {
     return ValidatedUpperKleenean(this->repr().check(e)); }
 inline ApproximateKleenean NaiveKleenean::check(Effort e) const {
     return ApproximateKleenean(this->repr().check(e)); }
+
+
+class NondeterministicBoolean {
+    LowerKleenean _pt; LowerKleenean _pf; Bool _r;
+  public:
+    NondeterministicBoolean(LowerKleenean pt, LowerKleenean pf) : _pt(pt), _pf(pf), _r(_choose(pt,pf)) { }
+    operator bool() const { return _r; }
+  private:
+    static Bool _choose(LowerKleenean pt, LowerKleenean pf);
+};
+inline NondeterministicBoolean choose(LowerKleenean pt, LowerKleenean pf) {
+    return NondeterministicBoolean(pt,pf);
+}
+
+template<class P, class T> class Case {
+    P _p; T _t;
+  public:
+    Case(P p, T t) : _p(p), _t(t) { }
+    P condition() const { return _p; }
+    T term() const { return _t; }
+};
 
 }
 

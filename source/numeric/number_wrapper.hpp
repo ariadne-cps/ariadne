@@ -30,8 +30,8 @@
 #ifndef ARIADNE_NUMBER_WRAPPER_HPP
 #define ARIADNE_NUMBER_WRAPPER_HPP
 
-#include "utility/module.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "number_interface.hpp"
 
@@ -41,8 +41,8 @@
 #include "floatmp.hpp"
 #include "float-user.hpp"
 
-#include "expression/templates.hpp"
-#include "numeric/operators.hpp"
+#include "../symbolic/templates.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -100,8 +100,10 @@ template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
     Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
     Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
-    return nullptr;
+    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
+    ARIADNE_THROW(std::runtime_error,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 };
+
 
 template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
@@ -233,7 +235,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual Rational _get_q() const override {
         return this->_get_as<Rational>(); }
 
-    virtual FloatDPBall _get(MetricTag,DoublePrecision pr) const override {
+    virtual FloatDPBall _get(MetricTag,DoublePrecision pr,DoublePrecision pre) const override {
         return this->_get_as<FloatDPBall>(pr); }
     virtual FloatDPBounds _get(BoundedTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPBounds>(pr); }
@@ -243,8 +245,10 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         return this->_get_as<FloatDPLowerBound>(pr); }
     virtual FloatDPApproximation _get(ApproximateTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPApproximation>(pr); }
-    virtual FloatMPBall _get(MetricTag, MultiplePrecision pr) const override {
-        return this->_get_as<FloatMPBall>(pr); }
+    virtual FloatMPDPBall _get(MetricTag,MultiplePrecision pr, DoublePrecision pre) const override {
+        return this->_get_as<FloatMPDPBall>(pr,pre); }
+    virtual FloatMPBall _get(MetricTag, MultiplePrecision pr, MultiplePrecision pre) const override {
+        return this->_get_as<FloatMPBall>(pr,pre); }
     virtual FloatMPBounds _get(BoundedTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPBounds>(pr); }
     virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision pr) const override {
@@ -267,6 +271,10 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         inline R _get_as(PR pr) const { return R(_cast(*this),pr); }
     template<class R, class PR, DisableIf<IsConstructible<R,X,PR>> = dummy>
         inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << "\n"; throw ParadigmError(); }
+    template<class R, class PR, class PRE, EnableIf<IsConstructible<R,X,PR,PRE>> = dummy>
+        inline R _get_as(PR pr, PRE pre) const { return R(_cast(*this),pr,pre); }
+    template<class R, class PR, class PRE, DisableIf<IsConstructible<R,X,PR,PRE>> = dummy>
+        inline R _get_as(PR pr, PRE pre) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << " and error precision " << pre << "\n"; throw ParadigmError(); }
 };
 
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };

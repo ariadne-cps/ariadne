@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "numeric/float.hpp"
-#include "numeric/rational.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/rational.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
 
-#include "function/c1_taylor_function.hpp"
+#include "../function/c1_taylor_function.hpp"
 
 #define VOLATILE ;
 
@@ -406,14 +406,14 @@ C1TaylorFunction& C1TaylorFunction::operator=(NumericType ic) {
 
 C1TaylorFunction& operator+=(C1TaylorFunction& f, FloatDP ec) {
     const FloatDP& c=ec;
-    if(f._expansion.empty() || (--f._expansion.end())->key().degree()!=0) {
+    if(f._expansion.empty() || (--f._expansion.end())->index().degree()!=0) {
         f._expansion.append(MultiIndex(f.argument_size()),c);
         return f;
     }
     //ARIADNE_DEBUG_ASSERT(f._expansion.back().key().degree()==0);
     FloatDP::set_rounding_upward();
     //FloatDP& fv=f._expansion.back().data();
-    FloatDP& fv=(--f._expansion.end())->data();
+    ReferenceType<FloatDP> fv=(--f._expansion.end())->coefficient();
     FloatDP& fze=f._zero_error;
     FloatDP& fe=f._uniform_error;
     FloatDP::set_rounding_upward();
@@ -442,11 +442,11 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
         fde[j]*=ac;
     }
 
-    for(Expansion<FloatDP>::Iterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
-        const MultiIndex& a=iter->key();
-        FloatDP& fv=iter->data();
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ReferenceType<FloatDP> fv=iter->coefficient();
         VOLATILE FloatDP fvu=fv*c;
         VOLATILE FloatDP mfvl=(-fv)*c;
         const FloatDP e=(fvu+mfvl)/2;
@@ -458,10 +458,10 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, FloatDP ec) {
     }
 
     FloatDP::set_rounding_to_nearest();
-    for(Expansion<FloatDP>::Iterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
-        FloatDP& fv=iter->data();
+        ReferenceType<FloatDP> fv=iter->coefficient();
         fv*=c;
     }
 
@@ -478,14 +478,14 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0._expansion.clear();
     f0._expansion.reserve(f1._expansion.number_of_nonzeros()+f2._expansion.number_of_nonzeros());
 
-    Expansion<FloatDP>::ConstIterator i1=f1._expansion.begin();
-    Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i1=f1._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
-        if(i1->key()==i2->key()) {
-            const MultiIndex& a = i1->key();
+        if(i1->index()==i2->index()) {
+            ConstReferenceType<MultiIndex> a = i1->index();
             FloatDP::set_rounding_upward();
-            VOLATILE FloatDP fvu=i1->data()+i2->data();
-            VOLATILE FloatDP mfvl=(-i1->data())-i2->data();
+            VOLATILE FloatDP fvu=i1->coefficient()+i2->coefficient();
+            VOLATILE FloatDP mfvl=(-i1->coefficient())-i2->coefficient();
             const FloatDP e=(fvu+mfvl)/2;
             if(a.degree()==0) {
                 f0._zero_error+=e;
@@ -495,23 +495,23 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
                 f0._derivative_errors[j]+=a[j]*e;
             }
             FloatDP::set_rounding_to_nearest();
-            f0._expansion.append(a,i1->data()+i2->data());
+            f0._expansion.append(a,i1->coefficient()+i2->coefficient());
             ++i1;
             ++i2;
-        } else if(reverse_lexicographic_less(i1->key(),i2->key())) {
-            f0._expansion.append(i1->key(),i1->data());
+        } else if(reverse_lexicographic_less(i1->index(),i2->index())) {
+            f0._expansion.append(i1->index(),i1->coefficient());
             ++i1;
         } else {
-            f0._expansion.append(i2->key(),i2->data());
+            f0._expansion.append(i2->index(),i2->coefficient());
             ++i2;
         }
     }
     while(i1!=f1._expansion.end()) {
-        f0._expansion.append(i1->key(),i1->data());
+        f0._expansion.append(i1->index(),i1->coefficient());
         ++i1;
     }
     while(i2!=f2._expansion.end()) {
-        f0._expansion.append(i2->key(),i2->data());
+        f0._expansion.append(i2->index(),i2->coefficient());
         ++i2;
     }
 
@@ -534,14 +534,14 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
     MultiIndex a(n);
     f0.clear();
 
-    Expansion<FloatDP>::ConstIterator i1=f1._expansion.begin();
-    Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i1=f1._expansion.begin();
+    Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
-        if(i1->key()==i2->key()+a3) {
-            const MultiIndex& a = i1->key();
+        if(i1->index()==i2->index()+a3) {
+            ConstReferenceType<MultiIndex> a = i1->index();
             FloatDP::set_rounding_upward();
-            VOLATILE FloatDP fvu=i1->data()+i2->data()*c3;
-            VOLATILE FloatDP mfvl=(-i1->data())+i2->data()*(-c3);
+            VOLATILE FloatDP fvu=i1->coefficient()+i2->coefficient()*c3;
+            VOLATILE FloatDP mfvl=(-i1->coefficient())+i2->coefficient()*(-c3);
             const FloatDP e=(fvu+mfvl)/2;
             if(a.degree()==0) {
                 f0._zero_error+=e;
@@ -551,17 +551,17 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
                 f0._derivative_errors[j]+=a[j]*e;
             }
             FloatDP::set_rounding_to_nearest();
-            f0._expansion.append(a,i1->data()+i2->data()*c3);
+            f0._expansion.append(a,i1->coefficient()+i2->coefficient()*c3);
             ++i1;
             ++i2;
-        } else if(reverse_lexicographic_less(i1->key(),i2->key()+a3)) {
-            f0._expansion.append(i1->key(),i1->data());
+        } else if(reverse_lexicographic_less(i1->index(),i2->index()+a3)) {
+            f0._expansion.append(i1->index(),i1->coefficient());
             ++i1;
         } else {
-            a=i2->key()+a3;
+            a=i2->index()+a3;
             FloatDP::set_rounding_upward();
-            VOLATILE FloatDP fvu=i2->data()*c3;
-            VOLATILE FloatDP mfvl=i2->data()*(-c3);
+            VOLATILE FloatDP fvu=i2->coefficient()*c3;
+            VOLATILE FloatDP mfvl=i2->coefficient()*(-c3);
             const FloatDP e=(fvu+mfvl)/2;
             if(a.degree()==0) {
                 f0._zero_error+=e;
@@ -571,18 +571,18 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
                 f0._derivative_errors[j]+=(uchar)a[j]*e;
             }
             FloatDP::set_rounding_to_nearest();
-            f0._expansion.append(a,i2->data()*c3);
+            f0._expansion.append(a,i2->coefficient()*c3);
             ++i2;
         }
     }
     while(i1!=f1._expansion.end()) {
-        f0._expansion.append(i1->key(),i1->data());
+        f0._expansion.append(i1->index(),i1->coefficient());
         ++i1;
     }
     while(i2!=f2._expansion.end()) {
         FloatDP::set_rounding_upward();
-        VOLATILE FloatDP fvu=i2->data()*c3;
-        VOLATILE FloatDP mfvl=i2->data()*(-c3);
+        VOLATILE FloatDP fvu=i2->coefficient()*c3;
+        VOLATILE FloatDP mfvl=i2->coefficient()*(-c3);
         const FloatDP e=(fvu+mfvl)/2;
         if(a.degree()==0) {
             f0._zero_error+=e;
@@ -592,7 +592,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
             f0._derivative_errors[j]+=(uchar)a[j]*e;
         }
         FloatDP::set_rounding_to_nearest();
-        f0._expansion.append(i2->key()+a3,i2->data()*c3);
+        f0._expansion.append(i2->index()+a3,i2->coefficient()*c3);
         ++i2;
     }
 
@@ -613,17 +613,17 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0b.clear();
     C1TaylorFunction* ftp=&f0a;
     C1TaylorFunction* frp=&f0b;
-    for(Expansion<FloatDP>::ConstIterator i2=f2._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator i2=f2._expansion.begin();
         i2!=f2._expansion.end(); ++i2)
     {
-        fma(*frp,*ftp,f1,i2->data(),i2->key());
+        fma(*frp,*ftp,f1,i2->coefficient(),i2->index());
         std::swap(ftp,frp);
     }
     return *frp;
 }
 
 UpperIntervalType evaluate(C1TaylorFunction f, Vector<UpperIntervalType> x) {
-    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<FloatDPValue>const&>(f._expansion),x);
+    UpperIntervalType r=horner_evaluate(reinterpret_cast<Expansion<MultiIndex,FloatDPValue>const&>(f._expansion),x);
     r += UpperIntervalType(-f._uniform_error,+f._uniform_error);
     return r;
 }
@@ -649,7 +649,7 @@ C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
 }
 
 C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g) {
-    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<FloatDPValue>const&>(f._expansion),g);
+    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<MultiIndex,FloatDPValue>const&>(f._expansion),g);
     std::cerr<<"intermediate="<<r<<"\n";
     r._uniform_error += f._uniform_error;
     r._zero_error += f._zero_error;
@@ -663,18 +663,18 @@ template<class T> struct ListForm {
 };
 template<class T> ListForm<T> list_form(const T& t) { return ListForm<T>(t); }
 
-OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<FloatDP>>& lfe) {
-    const Expansion<FloatDP>& e=lfe.value;
+OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<MultiIndex,FloatDP>>& lfe) {
+    const Expansion<MultiIndex,FloatDP>& e=lfe.value;
     os << "{ ";
-    for(Expansion<FloatDP>::ConstIterator iter=e.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
         if(iter!=e.begin()) { os << ", "; }
-        for(Nat i=0; i!=iter->key().size(); ++i) {
-            os << Nat(iter->key()[i]);
-            if(i+1!=iter->key().size()) { os << ","; }
+        for(Nat i=0; i!=iter->index().size(); ++i) {
+            os << Nat(iter->index()[i]);
+            if(i+1!=iter->index().size()) { os << ","; }
         }
-        os << ":" << iter->data();
+        os << ":" << iter->coefficient();
     }
     return os << " }";
 }
@@ -687,7 +687,7 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {
        << ")";
     return os;
 
-    for(Expansion<FloatDP>::ConstIterator iter=f._expansion.begin();
+    for(Expansion<MultiIndex,FloatDP>::ConstIterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         os << *iter;

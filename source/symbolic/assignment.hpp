@@ -34,16 +34,17 @@
 #include <string>
 
 
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "utility/string.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
+#include "../utility/functional.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/string.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
 
 namespace Ariadne {
 
@@ -52,28 +53,6 @@ class StateSpace;
 class Identifier;
 typedef Set<UntypedVariable> VariableSet;
 typedef Set<Variable<Real>> RealVariableSet;
-
-
-template<class F, class T> List<ResultOf<F(T)>> zip(F const& f, List<T> const& l) {
-    typedef ResultOf<F(T)> R;
-    List<R> r; r.reserve(l.size());
-    for(SizeType i=0; i!=l.size(); ++i) { r.append(f(l[i])); }
-    return r;
-}
-
-template<class F, class T1, class T2> List<ResultOf<F(T1,T2)>> zip(F const& f, List<T1> const& l1, List<T2> const& l2) {
-    typedef ResultOf<F(T1,T2)> R;
-    assert(l1.size()==l2.size());
-    List<R> r; r.reserve(l1.size());
-    for(SizeType i=0; i!=l1.size(); ++i) { r.append(f(l1[i],l2[i])); }
-    return r;
-}
-
-
-
-
-
-
 
 
 //! \ingroup ExpressionModule
@@ -100,10 +79,10 @@ template<class LHS, class RHS> typename LHS::BaseType left_hand_side(const Assig
     return assignment.lhs.base();
 }
 template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
-    return zip([](Assignment<LHS,RHS>const&a){return a.lhs.base();},assignments);
+    return elementwise([](Assignment<LHS,RHS>const&a){return a.lhs.base();},assignments);
 }
 template<class LHS, class RHS> List<RHS> right_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
-    return zip([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
+    return elementwise([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
 }
 
 
@@ -151,23 +130,22 @@ template<class T> inline Assignment<DottedVariable<T>,Expression<T>>
 DottedVariable<T>::operator=(const T& cnst) const {
     return this->operator=(Expression<T>(cnst)); }
 
-
 template<class T> inline List<Assignment<Variable<T>,Expression<T>>> LetVariables<T>::operator=(const List<Expression<T>>& rhs) {
-    return zip([](Variable<T>const&l,Expression<T>const&r){return let(l)=r;},this->_lhs,rhs);
+    return elementwise([](Variable<T>const&l,Expression<T>const&r){return let(l)=r;},this->_lhs,rhs);
 }
 
 template<class T> inline List<Assignment<PrimedVariable<T>,Expression<T>>> PrimedVariables<T>::operator=(const List<Expression<T>>& rhs) {
-    return zip([](Variable<T>const&l,Expression<T>const&r){return prime(l)=r;},this->_lhs,rhs);
+    return elementwise([](Variable<T>const&l,Expression<T>const&r){return prime(l)=r;},this->_lhs,rhs);
 }
 
 template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> DottedVariables<T>::operator=(const List<Expression<T>>& rhs) {
-    return zip([](Variable<T>const&l,Expression<T>const&r){return dot(l)=r;},this->_lhs,rhs);
+    return elementwise([](Variable<T>const&l,Expression<T>const&r){return dot(l)=r;},this->_lhs,rhs);
 }
 
 
 } // namespace Ariadne
 
-#include "expression/valuation.hpp"
+#include "../symbolic/valuation.hpp"
 namespace Ariadne {
 template<class T> inline Assignment<Variable<T>,T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

@@ -31,10 +31,10 @@
 #include <iostream>
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
 
-#include "expression/variables.hpp"
+#include "../symbolic/variables.hpp"
 
 namespace Ariadne {
 

@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/taylor_model.hpp"
-#include "function/affine_model.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/affine_model.hpp"
 
-#include "function/affine.hpp"
-#include "function/taylor_function.hpp"
-#include "algebra/vector.hpp"
+#include "../function/affine.hpp"
+#include "../function/taylor_function.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -53,7 +53,7 @@ FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
 template<class X> decltype(auto) values(Vector<X> const& v) {
     //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
-    return transform_vector(v,[&](X const& x){return x.value();});
+    return elementwise([&](X const& x){return x.value();},v);
 }
 
 /*
@@ -72,7 +72,7 @@ Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
 }
 
 Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
-    return transform_vector(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
+    return elementwise(bx,[&](Interval<UpperBound<FloatMP>> const& ivl){return cast_singleton(ivl);});
 }
 */
 
@@ -87,7 +87,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     typedef typename AffineModelType::NumericType NumericType;
     typedef typename AffineModelType::CoefficientType CoefficientType;
 
-    AffineModelType _neg(const AffineModelType& a) {
+    static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -99,7 +99,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Add, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -112,7 +112,7 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Mul, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -125,17 +125,17 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
         r._c=CoefficientType(c.raw() + a.value().raw());
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a, const NumericType& c) {
-        return _add(c,a);
+    static AffineModelType apply(Add, const AffineModelType& a, const NumericType& c) {
+        return apply(Add(), c,a);
     }
 
-    AffineModelType _mul(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Mul, const NumericType& c, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -147,8 +147,8 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a, const NumericType& c) {
-        return _mul(c,a);
+    static AffineModelType apply(Mul, const AffineModelType& a, const NumericType& c) {
+        return apply(Mul(), c,a);
     }
 };
 
@@ -160,7 +160,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     typedef typename AffineModelType::CoefficientType CoefficientType;
     typedef typename AffineModelType::ErrorType ErrorType;
 
-    AffineModelType _neg(const AffineModelType& a) {
+    static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
         AffineModelType r(n,a.precision());
         r=CoefficientType( -a.value().raw() );
@@ -172,7 +172,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Add, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -203,7 +203,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a1, const AffineModelType& a2) {
+    static AffineModelType apply(Mul, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
@@ -247,7 +247,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
         F cm=c.value().raw();
         r.set_value( CoefficientType( cm + a.value().raw() ) );
@@ -265,11 +265,11 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _add(const AffineModelType& a, const NumericType& c) {
-        return _add(c,a);
+    static AffineModelType apply(Add, const AffineModelType& a, const NumericType& c) {
+        return apply(Add(), c,a);
     }
 
-    AffineModelType _mul(const NumericType& c, const AffineModelType& a) {
+    static AffineModelType apply(Mul, const NumericType& c, const AffineModelType& a) {
         SizeType n=a.argument_size();
         PrecisionType prec=a.precision();
 
@@ -306,8 +306,8 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         return r;
     }
 
-    AffineModelType _mul(const AffineModelType& a, const NumericType& c) {
-        return _mul(c,a);
+    static AffineModelType apply(Mul, const AffineModelType& a, const NumericType& c) {
+        return apply(Mul(), c,a);
     }
 };
 
@@ -339,17 +339,17 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
     typename F::RoundingModeType rnd=F::get_rounding_mode();
     F::set_rounding_upward();
     for(auto iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
-        if(iter->key().degree()>=2) {
-            affine_model.set_error(mag(iter->data())+affine_model.error());
-        } else if(iter->key().degree()==1) {
+        if(iter->index().degree()>=2) {
+            affine_model.set_error(mag(iter->coefficient())+affine_model.error());
+        } else if(iter->index().degree()==1) {
             for(SizeType i=0; i!=taylor_model.argument_size(); ++i) {
-                if(iter->key()[i]==1) {
-                    affine_model.set_gradient(i,iter->data());
+                if(iter->index()[i]==1) {
+                    affine_model.set_gradient(i,iter->coefficient());
                     break;
                 }
             }
         } else {
-            affine_model.set_value(iter->data());
+            affine_model.set_value(iter->coefficient());
         }
     }
     affine_model.set_error(taylor_model.error()+affine_model.error());

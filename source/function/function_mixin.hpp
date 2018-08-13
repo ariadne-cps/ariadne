@@ -24,7 +24,7 @@
 #ifndef ARIADNE_FUNCTION_MIXIN_HPP
 #define ARIADNE_FUNCTION_MIXIN_HPP
 
-#include "function/function_interface.hpp"
+#include "../function/function_interface.hpp"
 
 // Adaptors for classes to conform to the Function interface.
 
@@ -58,36 +58,21 @@ template<class F, class D, class C>
 class FunctionMixin<F,Void,D,C>
     : public virtual FunctionInterface<Void,D,C>
 {
+  public:
     typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
     typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
+    typedef typename FunctionInterface<Void,D,C>::ArgumentSizeType ArgumentSizeType;
+    typedef typename FunctionInterface<Void,D,C>::ResultSizeType ResultSizeType;
   protected:
     FunctionMixin() { }
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
   public:
+//    virtual DomainType const domain() const override = 0;
+//    virtual CodomainType const codomain() const override = 0;
     virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
-    virtual SizeType argument_size() const override { return this->domain().dimension(); }
-    virtual SizeType result_size() const override { return this->codomain().dimension(); }
-
-    virtual OutputStream& write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
-};
-
-template<class F, class D>
-class FunctionMixin<F,Void,D,IntervalDomainType>
-    : public virtual FunctionInterface<Void,D,IntervalDomainType>
-{
-    typedef IntervalDomainType C;
-    typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
-    typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
-  protected:
-    FunctionMixin() { }
-    template<class X> X _base_evaluate(const ElementType<D,X>& x) const;
-  public:
-    virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
-    virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
-    virtual SizeType argument_size() const override { return this->domain().dimension(); }
-    virtual SizeType result_size() const override { return 1u; }
+    virtual ArgumentSizeType argument_size() const override { return this->domain().dimension(); }
+    virtual ResultSizeType result_size() const override { return this->codomain().dimension(); }
 
     virtual OutputStream& write(OutputStream& os) const override = 0;
     virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }

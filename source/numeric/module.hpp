@@ -30,7 +30,7 @@
 #ifndef ARIADNE_NUMERIC_MODULE_HPP
 #define ARIADNE_NUMERIC_MODULE_HPP
 
-#include "utility/module.hpp"
+#include "../utility/module.hpp"
 
 #include "logical.decl.hpp"
 #include "number.decl.hpp"
@@ -39,6 +39,8 @@
 #include "paradigm.hpp"
 #include "logical.hpp"
 #include "integer.hpp"
+#include "dyadic.hpp"
+#include "decimal.hpp"
 #include "rational.hpp"
 #include "real.hpp"
 #include "floatdp.hpp"

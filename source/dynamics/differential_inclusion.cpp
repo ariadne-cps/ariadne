@@ -22,8 +22,9 @@
  */
 
 #include "differential_inclusion.hpp"
-#include "function/taylor_function.hpp"
-#include "solvers/integrator.hpp"
+#include "../function/taylor_function.hpp"
+#include "../solvers/integrator.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -986,8 +987,8 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
         auto p=tf[i].model().expansion();
 
         for (auto ac : p) {
-            MultiIndex const& a=ac.index();
-            FloatDPValue& c=ac.coefficient();
+            ConstReferenceType<MultiIndex> a=ac.index();
+            ReferenceType<FloatDPValue> c=ac.coefficient();
             for (auto j : range(m)) {
                 if (a[j]!=0) {
                     C[j][i] += mag(c);
@@ -1073,7 +1074,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
 
 /*
 
-#include "geometry/zonotope.hpp"
+#include "../geometry/zonotope.hpp"
 
 namespace Ariadne {
 

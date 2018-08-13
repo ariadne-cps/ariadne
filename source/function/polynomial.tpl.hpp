@@ -21,7 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/evaluate.hpp"
+#include "../algebra/evaluate.tpl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -95,9 +96,9 @@ template<class X> X& Polynomial<X>::operator[](const MultiIndex& a) { return thi
 
 template<class X> const X& Polynomial<X>::operator[](const MultiIndex& a) const { return this->_expansion.get(a); }
 
-template<class X> const Expansion<X>& Polynomial<X>::expansion() const { return this->_expansion; }
+template<class X> const Expansion<MultiIndex,X>& Polynomial<X>::expansion() const { return this->_expansion; }
 
-template<class X> Expansion<X>& Polynomial<X>::expansion() { return this->_expansion; }
+template<class X> Expansion<MultiIndex,X>& Polynomial<X>::expansion() { return this->_expansion; }
 
 
 
@@ -131,8 +132,8 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::differentiate(SizeType j) {
     for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        MultiIndex& a=iter->key();
-        X& c=iter->data();
+        ReferenceType<MultiIndex> a=iter->index();
+        ReferenceType<X> c=iter->coefficient();
         c*=static_cast<Nat>(a[j]);
         if(a[j]!=0u) { ++a[j]; }
     }
@@ -143,8 +144,8 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::antidifferentiate(SizeType j) {
     for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        MultiIndex& a=iter->key();
-        X& c=iter->data();
+        ReferenceType<MultiIndex> a=iter->index();
+        ReferenceType<X> c=iter->coefficient();
         ++a[j];
         c/=static_cast<Nat>(a[j]);
     }
@@ -155,8 +156,8 @@ template<class X>
 Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
     Polynomial<X> r(this->argument_size());
     for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter->key().degree()<=d && decide(iter->data()!=X(0))) {
-            r._append(iter->key(),iter->data());
+        if(iter->index().degree()<=d && decide(iter->coefficient()!=X(0))) {
+            r._append(iter->index(),iter->coefficient());
         }
     }
     this->_expansion.swap(r._expansion);
@@ -170,14 +171,14 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
     while(next!=last) {
         if(curr!=next) { *curr=*next; }
         ++next;
-        while(next!=last && curr->key()==next->key()) {
-            if(curr->key()==next->key()) {
-                curr->data()=op(curr->data(),next->data());
+        while(next!=last && curr->index()==next->index()) {
+            if(curr->index()==next->index()) {
+                curr->coefficient()=op(curr->coefficient(),next->coefficient());
                 ++next;
             }
         }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for ValidatedKleenean results
-        if(definitely(curr->data()==0)) { }
+        // Removes zero entries; the code below is preferred to the case "curr->coefficient()!=0" for ValidatedKleenean results
+        if(definitely(curr->coefficient()==0)) { }
         else { ++curr; }
     }
     return curr;
@@ -201,129 +202,129 @@ Void Polynomial<X>::check() const
 
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_neg(const Polynomial<X>& p) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Neg, const Polynomial<X>& p) {
     Polynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        r[iter->key()]-=iter->data();
+        r[iter->index()]-=iter->coefficient();
     }
     return r;
 }
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(Polynomial<X> p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, Polynomial<X> p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_iadd(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Add, Polynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const X& c) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
         for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-            iter->data()*=c;
+            iter->coefficient()*=c;
         }
     }
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const X& c) {
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
         for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-            iter->data()*=c;
+            iter->coefficient()*=c;
         }
     }
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_add(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
-        if (iter1->key()==iter2->key()) {
-            r._expansion.append(iter1->key(),iter1->data()+iter2->data());
+        if (iter1->index()==iter2->index()) {
+            r._expansion.append(iter1->index(),iter1->coefficient()+iter2->coefficient());
            ++iter1; ++iter2;
-         } else if (less(iter1->key(),iter2->key())) {
-            r._expansion.append(iter1->key(),iter1->data());
+         } else if (less(iter1->index(),iter2->index())) {
+            r._expansion.append(iter1->index(),iter1->coefficient());
             ++iter1;
-        } else { //  (greater(iter1->key(),iter2->key()))
-            r._expansion.append(iter2->key(),iter2->data());
+        } else { //  (greater(iter1->index(),iter2->index()))
+            r._expansion.append(iter2->index(),iter2->coefficient());
             ++iter2;
         }
     }
     while (iter1!=p1.end()) {
-        r._expansion.append(iter1->key(),iter1->data());
+        r._expansion.append(iter1->index(),iter1->coefficient());
         ++iter1;
     }
     while (iter2!=p2.end()) {
-            r._expansion.append(iter2->key(),iter2->data());
+            r._expansion.append(iter2->index(),iter2->coefficient());
             ++iter2;
     }
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_sub(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<X>::IndexComparisonType less;
     Polynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
-        if (iter1->key()==iter2->key()) {
-            r._expansion.append(iter1->key(),iter1->data()-iter2->data());
+        if (iter1->index()==iter2->index()) {
+            r._expansion.append(iter1->index(),iter1->coefficient()-iter2->coefficient());
            ++iter1; ++iter2;
-         } else if (less(iter1->key(),iter2->key())) {
-            r._expansion.append(iter1->key(),iter1->data());
+         } else if (less(iter1->index(),iter2->index())) {
+            r._expansion.append(iter1->index(),iter1->coefficient());
             ++iter1;
-        } else { //  (greater(iter1->key(),iter2->key()))
-            r._expansion.append(iter2->key(),-iter2->data());
+        } else { //  (greater(iter1->index(),iter2->index()))
+            r._expansion.append(iter2->index(),-iter2->coefficient());
             ++iter2;
         }
     }
     while (iter1!=p1.end()) {
-        r._expansion.append(iter1->key(),iter1->data());
+        r._expansion.append(iter1->index(),iter1->coefficient());
         ++iter1;
     }
     while (iter2!=p2.end()) {
-            r._expansion.append(iter2->key(),-iter2->data());
+            r._expansion.append(iter2->index(),-iter2->coefficient());
             ++iter2;
     }
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1.argument_size());
     for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
         for(auto iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
-            MultiIndex a=iter1->key()+iter2->key();
-            r[a]+=iter1->data()*iter2->data();
+            MultiIndex a=iter1->index()+iter2->index();
+            r[a]+=iter1->coefficient()*iter2->coefficient();
         }
     }
     return r;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::_mul(Polynomial<X> p, const Monomial<X>& m) {
-    if(is_null(m.data())) { p.clear(); }
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const Monomial<X>& m) {
+    if(is_null(m.coefficient())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        iter->key()+=m.key();
-        iter->data()*=m.data();
+        iter->index()+=m.index();
+        iter->coefficient()*=m.coefficient();
     }
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
-    if(is_null(m.data())) { p.clear(); }
+template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const Monomial<X>& m) {
+    if(is_null(m.coefficient())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        iter->key()+=m.key();
-        iter->data()*=m.data();
+        iter->index()+=m.index();
+        iter->coefficient()*=m.coefficient();
     }
     return p;
 }
@@ -349,10 +350,10 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
     MultiIndex ra(r.argument_size());
     if(is_null(c)) {
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
+            ConstReferenceType<MultiIndex> xa=xiter->index();
             MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
-                const X& xv=xiter->data();
+                ConstReferenceType<X> xv=xiter->coefficient();
                 for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
                 for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
                 r.expansion().append(ra,xv);
@@ -363,8 +364,8 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
         Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
-            const X& xv=xiter->data();
+            ConstReferenceType<MultiIndex> xa=xiter->index();
+            ConstReferenceType<X> xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
@@ -388,8 +389,8 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
         }
 
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            const MultiIndex& xa=xiter->key();
-            const X& xv=xiter->data();
+            ConstReferenceType<MultiIndex> xa=xiter->index();
+            ConstReferenceType<X> xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
@@ -420,9 +421,9 @@ OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
     os << "{";
     for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         os << (iter==p.begin() ? "" : ",");
-        for(SizeType i=0; i!=iter->key().size(); ++i) {
-            os << (i==0?" ":",") << Int(iter->key()[i]); }
-        os << ":" << iter->data(); }
+        for(SizeType i=0; i!=iter->index().size(); ++i) {
+            os << (i==0?" ":",") << Int(iter->index()[i]); }
+        os << ":" << iter->coefficient(); }
     return os << " }";
 }
 */
@@ -445,8 +446,8 @@ OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argume
     Bool first_term=true;
     Bool identically_zero=true;
     for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        MultiIndex a=iter->key();
-        X v=iter->data();
+        MultiIndex a=iter->index();
+        X v=iter->coefficient();
         if(decide(v!=0)) {
             identically_zero=false;
             Bool first_factor=true;

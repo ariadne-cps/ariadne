@@ -29,6 +29,7 @@
 #include "hybrid/hybrid_graphics.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {

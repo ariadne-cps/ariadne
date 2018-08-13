@@ -30,19 +30,19 @@
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/declarations.hpp"
-#include "utility/array.hpp"
-#include "utility/pointer.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/sweeper.hpp"
-#include "algebra/operations.hpp"
-#include "algebra/evaluate.hpp"
-#include "function/domain.hpp"
-#include "function/scaling.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/array.hpp"
+#include "../utility/pointer.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/sweeper.hpp"
+#include "../algebra/operations.hpp"
+#include "../algebra/evaluate.hpp"
+#include "../function/domain.hpp"
+#include "../function/scaling.hpp"
 
 namespace Ariadne {
 
@@ -65,19 +65,26 @@ class IntersectionException : public std::runtime_error {
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
+template<class P, class F> struct ModelNumericTypedef;
+template<class F> struct ModelNumericTypedef<ValidatedTag,F> { typedef FloatBounds<typename F::PrecisionType> Type; };
+template<class F> struct ModelNumericTypedef<ApproximateTag,F> { typedef FloatApproximation<typename F::PrecisionType> Type; };
+template<class P, class F> using ModelNumericType = typename ModelNumericTypedef<P,F>::Type;
 
-template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAlgebraOperations<TaylorModel<P,F>> {
-    typedef typename TaylorModel<P,F>::NumericType X;
-    static TaylorModel<P,F> _pos(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _neg(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _sub(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _min(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _max(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _abs(TaylorModel<P,F> const& dx);
+template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
+    : NormedAlgebraOperations<TaylorModel<P,F>>
+{
+    typedef ModelNumericType<P,F> X;
+    using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
+    static TaylorModel<P,F> apply(Pos,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Neg,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Sub,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Min,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Max,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 
 
@@ -103,7 +110,7 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatError<PRE> ErrorType;
     typedef FloatError<PR> NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
     typedef Sweeper<F> SweeperType;
 
     typedef IntervalDomainType CodomainType;
@@ -146,9 +153,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
     TaylorModel<ValidatedTag,F>(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedTag,F>(const Expansion<double>& f, const double& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<RawFloatType>& f, const RawFloatType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<ValidatedTag,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -507,7 +514,7 @@ class TaylorModel<ApproximateTag,F>
     typedef FloatApproximation<PR> CoefficientType;
     typedef FloatApproximation<PR> ErrorType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
 
     typedef IntervalDomainType CodomainType;
     typedef Interval<FloatApproximation<PR>> RangeType;

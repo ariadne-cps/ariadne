@@ -21,26 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/paver.hpp"
-#include "algebra/algebra.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../geometry/paver.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/expansion.inl.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
 namespace Ariadne {
 
@@ -82,10 +83,10 @@ Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionM
     for(Nat i=0; i!=m; ++i) {
         const ValidatedTaylorModelDP& tm=g.model(i);
         for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
                 }
             }
         }
@@ -116,10 +117,10 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=iter->data().radius().raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=iter->coefficient().radius().raw(); }
                 }
             }
         }
@@ -151,10 +152,10 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
                 }
             }
         }
@@ -505,6 +506,12 @@ intersection(const EffectiveBoxType& bx,const ConstraintSet& cs)
 }
 
 BoundedConstraintSet
+intersection(const BoundedConstraintSet& bcs1,const BoundedConstraintSet& bcs2)
+{
+    return BoundedConstraintSet(intersection(bcs1.constraint_bounds(),bcs2.constraint_bounds()),catenate(bcs1.constraints(),bcs2.constraints()));
+}
+
+BoundedConstraintSet
 intersection(const BoundedConstraintSet& bcs,const EffectiveBoxType& bx)
 {
     return BoundedConstraintSet(intersection(bcs.constraint_bounds(),bx),bcs.constraints());
@@ -761,10 +768,10 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, con
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->coefficient()); }
                 }
             }
         }
@@ -796,10 +803,10 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, co
     for(Nat i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
+            a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
         }
@@ -1319,9 +1326,10 @@ OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& s
 }
 
 
-
-
-
-
+template<> String class_name<EffectiveConstraintSet>() { return "EffectiveConstraintSet"; }
+template<> String class_name<EffectiveBoundedConstraintSet>() { return "EffectiveBoundedConstraintSet"; }
+template<> String class_name<EffectiveConstrainedImageSet>() { return "EffectiveConstrainedImageSet"; }
+template<> String class_name<ValidatedConstrainedImageSet>() { return "ValidatedConstrainedImageSet"; }
+template<> String class_name<ValidatedAffineConstrainedImageSet>() { return "ValidatedAffineConstrainedImageSet"; }
 
 } // namespace Ariadne;

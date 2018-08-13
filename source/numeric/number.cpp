@@ -27,8 +27,8 @@
 
 
 
-#include "utility/module.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "number.hpp"
 #include "logical.hpp"
@@ -74,6 +74,20 @@ Dyadic::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Dyad
 Rational::operator ExactNumber() const { return ExactNumber(new NumberWrapper<Rational>(*this)); }
 Real::operator EffectiveNumber() const { return EffectiveNumber(new NumberWrapper<Real>(*this)); }
 
+FloatDPBall NumberInterface::_get(MetricTag p, DoublePrecision pr) const { return this->_get(p,pr,pr); }
+FloatMPBall NumberInterface::_get(MetricTag p, MultiplePrecision pr) const { return this->_get(p,pr,pr); }
+
+//template<class X> struct DispatchingTraits<Value<X>> { typedef Aware<Value<X>,Integer,Dyadic> AwareOfTypes; };
+template<class F> struct DispatchingTraits<Value<F>> {
+    typedef Aware<Dyadic,Integer> AwareOfTypes; };
+template<class F> struct DispatchingTraits<Bounds<F>> {
+    typedef Aware<Value<F>,Bounds<F>,Integer,Dyadic,Rational> AwareOfTypes; };
+template<class F> struct DispatchingTraits<Approximation<F>> {
+    typedef Aware<Value<F>,Bounds<F>,Approximation<F>,Integer,Dyadic,Rational> AwareOfTypes; };
+
+template<class F, class FE> struct DispatchingTraits<Ball<F,FE>> {
+    typedef Aware<Ball<F,FE>,Value<F>,Bounds<F>,Approximation<F>,Integer,Dyadic,Rational> AwareOfTypes; };
+
 template class NumberWrapper<FloatDPApproximation>;
 //template class NumberWrapper<FloatDPLowerBound>;
 //template class NumberWrapper<FloatDPUpperBound>;
@@ -87,6 +101,11 @@ template<> FloatDPApproximation::operator ApproximateNumber() const { return App
 template<> FloatDPBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBounds>(*this)); }
 template<> FloatDPBall::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBall>(*this)); }
 template<> FloatDPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatDPValue>(*this)); }
+
+//template<> FloatDPError::operator ValidatedErrorNumber() const { return ValidatedErrorNumber(new NumberWrapper<FloatDPError>(*this)); }
+//template<> FloatMPError::operator ValidatedErrorNumber() const { return ValidatedErrorNumber(new NumberWrapper<FloatMPError>(*this)); }
+template<> FloatDPError::operator ValidatedErrorNumber() const { return ValidatedErrorNumber(new NumberWrapper<FloatDPValue>(cast_exact(*this))); }
+template<> FloatMPError::operator ValidatedErrorNumber() const { return ValidatedErrorNumber(new NumberWrapper<FloatMPValue>(cast_exact(*this))); }
 
 template class NumberWrapper<FloatMPApproximation>;
 //template class NumberWrapper<FloatMPLowerBound>;
@@ -103,5 +122,11 @@ template<> FloatMPBall::operator ValidatedNumber() const { return ValidatedNumbe
 template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new NumberWrapper<FloatMPValue>(*this)); }
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
+
+Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
+    return y1.get(dp).raw() <= y2.get(dp).raw(); }
+
+Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y) {
+    return y; }
 
 } // namespace Ariadne

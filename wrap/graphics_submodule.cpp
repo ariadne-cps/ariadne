@@ -24,7 +24,7 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include "config.h"
+#include "config.hpp"
 
 #include <boost/python.hpp>
 
@@ -32,7 +32,7 @@
 #include "output/graphics.hpp"
 #include "output/geometry2d.hpp"
 #include "geometry/point.hpp"
-#include "geometry/box.hpp"
+    #include "geometry/box.hpp"
 #include "function/function.hpp"
 
 using namespace boost::python;
@@ -42,6 +42,8 @@ using namespace Ariadne;
 
 Void export_figure()
 {
+    class_<PlanarProjectionMap>("PlanarProjectionMap",init<Nat,Nat,Nat>());
+
     return_value_policy<reference_existing_object> ref_existing;
 
     class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);

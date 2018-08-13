@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "config.h"
+#include "../config.hpp"
 
 #include <utility>
 
-#include "dynamics/orbit.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/point.hpp"
-#include "geometry/curve.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/curve.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_set.hpp"
 
 namespace Ariadne {
 

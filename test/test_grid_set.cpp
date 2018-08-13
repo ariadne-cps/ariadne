@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
+#include "config.hpp"
 #include "utility/stlio.hpp"
 
 #include "utility/macros.hpp"

@@ -26,19 +26,19 @@
 #define ARIADNE_BINARY_TREE_HPP
 
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "utility/stlio.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../utility/stlio.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_set.hpp"
 
-#include "geometry/set_interface.hpp"
+#include "../geometry/set_interface.hpp"
 
 
 namespace Ariadne {

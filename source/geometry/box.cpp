@@ -27,16 +27,16 @@
 
 
 
-#include "numeric/module.hpp"
-#include "function/function.hpp"
-#include "function/taylor_model.hpp"
+#include "../numeric/module.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_model.hpp"
 
 #include "box.hpp"
 #include "box.tpl.hpp"
 
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
-#include "algebra/algebra.hpp"
+#include "../algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -149,7 +149,7 @@ FloatDPLowerBox under_approximation(const RealBox& rbx) {
     return bx;
 }
 
-FloatDPUpperBox over_approximation(const RealBox& rbx) {
+FloatDPUpperBox over_approximation(const Box& rbx) {
     FloatDPUpperBox bx(rbx.size(),FloatDPUpperInterval(-inf,+inf));
     for(SizeType i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);

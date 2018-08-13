@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/algebra.hpp"
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "function/constraint.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/algebra.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_set.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../function/constraint.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/solver.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/solver.hpp"
 
 namespace Ariadne {
 
@@ -92,7 +92,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 {
 
     static const FloatDPValue XSIGMA=0.125_exact;
-    static const FloatDPValue TERR=-1.0_exact*two_exp(-10);
+    static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
     static const FloatDP inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");

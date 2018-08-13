@@ -22,11 +22,13 @@
  */
 
 #include <iostream>
-#include "config.h"
+#include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/multi_index.hpp"
+#include "algebra/expansion.hpp"
+#include "algebra/expansion.inl.hpp"
 #include "algebra/algebra.hpp"
 #include "function/polynomial.hpp"
 
@@ -220,17 +222,17 @@ Void TestPolynomial::test_indexing()
     ARIADNE_TEST_PRINT(p.expansion());
 
     Polynomial<FloatDP>::ConstIterator iter=p.begin();
-    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,0,0}));
-    ARIADNE_TEST_EQUALS(iter->data(),7.0);
+    ARIADNE_TEST_EQUALS(iter->index(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUALS(iter->coefficient(),7.0);
     ++iter;
-    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,1,0}));
-    ARIADNE_TEST_EQUALS(iter->data(),2.0);
+    ARIADNE_TEST_EQUALS(iter->index(),MultiIndex({0,1,0}));
+    ARIADNE_TEST_EQUALS(iter->coefficient(),2.0);
     ++iter;
-    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,0,1}));
-    ARIADNE_TEST_EQUALS(iter->data(),3.0);
+    ARIADNE_TEST_EQUALS(iter->index(),MultiIndex({0,0,1}));
+    ARIADNE_TEST_EQUALS(iter->coefficient(),3.0);
     ++iter;
-    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({2,1,0}));
-    ARIADNE_TEST_EQUALS(iter->data(),5.0);
+    ARIADNE_TEST_EQUALS(iter->index(),MultiIndex({2,1,0}));
+    ARIADNE_TEST_EQUALS(iter->coefficient(),5.0);
 }
 
 Void TestPolynomial::test_arithmetic()
@@ -278,8 +280,8 @@ Void TestPolynomial::test_find()
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_PRINT(p.find(a)-p.begin());
     ARIADNE_TEST_COMPARE(p.find(a),!=,p.end());
-    ARIADNE_TEST_EQUAL(p.find(a)->key(),a);
-    ARIADNE_TEST_EQUAL(p.find(a)->data(),5.0);
+    ARIADNE_TEST_EQUAL(p.find(a)->index(),a);
+    ARIADNE_TEST_EQUAL(p.find(a)->coefficient(),5.0);
     a[1]=1;
     ARIADNE_TEST_EQUAL(p.find(a),p.end());
 }

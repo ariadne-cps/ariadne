@@ -33,19 +33,19 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.hpp"
-#include "utility/declarations.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/logical.decl.hpp"
-#include "numeric/number.decl.hpp"
+#include "../numeric/logical.decl.hpp"
+#include "../numeric/number.decl.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/constant.hpp"
-#include "expression/variables.hpp"
-#include "expression/valuation.hpp"
-#include "expression/operations.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/constant.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/valuation.hpp"
+#include "../symbolic/operations.hpp"
 
 namespace Ariadne {
 
@@ -76,7 +76,9 @@ class Expression
     typedef Constant<T> ConstantType;
     typedef Variable<T> VariableType;
   public:
-    explicit Expression(SharedPointer<const ExpressionNode<T>> const& eptr) : _root(eptr) { }
+    // Use template formulation to avoid ambiguity treating Expression(0) as a pointer construction.
+    template<class P, EnableIf<IsConvertible<P,SharedPointer<const ExpressionNode<T>>>> =dummy>
+        explicit Expression(P const& eptr) : _root(eptr) { }
   public:
     //! \brief Default expression is a constant with value \c 0.
     Expression();
@@ -181,7 +183,6 @@ Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>
 
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
-
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);

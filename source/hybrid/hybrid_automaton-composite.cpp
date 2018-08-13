@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/space.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 

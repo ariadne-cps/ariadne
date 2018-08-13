@@ -123,6 +123,8 @@ Void export_solver()
 
 Void export_integrator()
 {
+    to_python<Pair<FloatDPValue,UpperBoxType>>();
+
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
     integrator_wrapper_class.def("flow_bounds",(Pair<FloatDPValue,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const RawFloatDP&)const)&IntegratorInterface::flow_bounds);
     integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, RawFloatDP&)const)&IntegratorInterface::flow_step);

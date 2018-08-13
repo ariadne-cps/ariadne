@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_OPERATIONS_HPP
 #define ARIADNE_FLOAT_OPERATIONS_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -111,15 +111,15 @@ template<class PX> struct DispatchPositiveFloatOperations
 };
 
 
-template<class PR, class P1, class P2> using FloatWeakerType = Float<Weaker<P1,P2>,PR>;
+template<class PR, class P1, class P2> using FloatWeakerType = FloatType<Weaker<P1,P2>,PR>;
 
-template<class PR, class P> using NegatedFloatType = Float<Negated<P>,PR>;
-template<class PR, class P> using FloatNegateType = Float<Negated<P>,PR>;
+template<class PR, class P> using NegatedFloatType = FloatType<Negated<P>,PR>;
+template<class PR, class P> using FloatNegateType = FloatType<Negated<P>,PR>;
 
-template<class PR, class P1, class P2> using FloatSumType = Float<Widen<Weaker<P1,P2>>,PR>;
-template<class PR, class P1, class P2> using FloatDifferenceType = Float<Widen<Weaker<P1,Negated<P2>>>,PR>;
-template<class PR, class P1, class P2> using FloatProductType = Float<Widen<Weaker<P1,P2>>,PR>;
-template<class PR, class P1, class P2> using FloatQuotientType = Float<Widen<Weaker<P1,Inverted<P2>>>,PR>;
+template<class PR, class P1, class P2> using FloatSumType = FloatType<Widen<Weaker<P1,P2>>,PR>;
+template<class PR, class P1, class P2> using FloatDifferenceType = FloatType<Widen<Weaker<P1,Negated<P2>>>,PR>;
+template<class PR, class P1, class P2> using FloatProductType = FloatType<Widen<Weaker<P1,P2>>,PR>;
+template<class PR, class P1, class P2> using FloatQuotientType = FloatType<Widen<Weaker<P1,Inverted<P2>>>,PR>;
 
 template<class PR, class P1, class P2> using FloatEqualsType = LogicalType<Equality<Weaker<P1,Negated<P2>>>>;
 template<class PR, class P1, class P2> using FloatLessType = LogicalType<Generic<Weaker<P1,Negated<P2>>>>;

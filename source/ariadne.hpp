@@ -33,16 +33,10 @@ namespace Ariadne {
 }
 
 #include <cstdlib>
-
 #include <iostream>
 #include <iomanip>
-#include <fstream>
 
-using std::cin; using std::cout; using std::cerr; using std::clog;
-using std::endl; using std::flush;
-using std::ofstream; using std::ifstream;
-
-#include "config.h"
+#include "config.hpp"
 
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"

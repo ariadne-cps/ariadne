@@ -28,8 +28,8 @@
 #ifndef ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
 #define ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
 
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 

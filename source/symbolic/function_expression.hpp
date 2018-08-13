@@ -28,14 +28,14 @@
 #ifndef ARIADNE_FUNCTION_EXPRESSION_HPP
 #define ARIADNE_FUNCTION_EXPRESSION_HPP
 
-#include "expression/expression.hpp"
-#include "expression/expression_set.hpp"
-#include "expression/space.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../symbolic/space.hpp"
 
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/function_model.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/function_model.hpp"
+#include "../function/taylor_function.hpp"
 
 namespace Ariadne {
 
@@ -104,8 +104,8 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
     r.expansion().reserve(x.number_of_nonzeros());
     MultiIndex ra(r.argument_size());
     for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        MultiIndex const& xa=xiter->key();
-        auto const& xc=xiter->data();
+        ConstReferenceType<MultiIndex> xa=xiter->index();
+        ConstReferenceType<Value<F>> xc=xiter->coefficient();
         for(SizeType i=0; i!=r.argument_size(); ++i) {
             ra[i]=xa[prj.index(i)];
         }

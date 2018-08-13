@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "output/drawer.hpp"
+#include "../output/drawer.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/logging.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_set.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
 

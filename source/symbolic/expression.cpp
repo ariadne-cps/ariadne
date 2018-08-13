@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "numeric/operators.tpl.hpp"
+#include "../numeric/operators.tpl.hpp"
 
-#include "algebra/algebra.hpp"
-#include "algebra/algebra_wrapper.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/algebra_wrapper.hpp"
 
-#include "expression/constant.hpp"
-#include "expression/variables.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
-#include "expression/valuation.hpp"
+#include "../symbolic/constant.hpp"
+#include "../symbolic/variables.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../symbolic/valuation.hpp"
 
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 
@@ -338,7 +338,12 @@ Expression<Integer> operator-(Expression<Integer> const& e1, Expression<Integer>
 Expression<Integer> operator*(Expression<Integer> const& e1, Expression<Integer> const& e2) {
     return make_expression<Integer>(Mul(),e1,e2); }
 
-
+Expression<Integer>& operator+=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1+e2; }
+Expression<Integer>& operator-=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1-e2; }
+Expression<Integer>& operator*=(Expression<Integer>& e1, Expression<Integer> const& e2) {
+    return e1=e1*e2; }
 
 Expression<Kleenean> sgn(Expression<Real> const& e) {
     return make_expression<Kleenean>(Sgn(),e); }
@@ -369,6 +374,15 @@ Expression<Real> operator*(Expression<Real> const& e1, Expression<Real> const& e
     return make_expression<Real>(Mul(),e1,e2); }
 Expression<Real> operator/(Expression<Real> const& e1, Expression<Real> const& e2) {
     return make_expression<Real>(Div(),e1,e2); }
+
+Expression<Real>& operator+=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1+e2; }
+Expression<Real>& operator-=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1-e2; }
+Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1*e2; }
+Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2) {
+    return e1=e1/e2; }
 
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
@@ -754,7 +768,6 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
     }
 }
 
-
 Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
     // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
     // with a constant value of 1
@@ -851,6 +864,7 @@ Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 {
+    /*
     switch(e.op()) {
         case OperatorCode::CNST:
             return Expression<Real>::constant(0);
@@ -882,7 +896,13 @@ Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
         case OperatorCode::COS:
             return -derivative(e.arg(),v) * sin(e.arg());
         case OperatorCode::TAN:
-            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));
+            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));*/
+    switch(e.kind()) {
+        case OperatorKind::NULLARY: return Expression<Real>::constant(0);
+        case OperatorKind::VARIABLE: return Expression<Real>::constant(e.var()==v.name()?1:0);
+        case OperatorKind::UNARY: return derivative(e.op(),e.arg(),derivative(e.arg(),v));
+        case OperatorKind::BINARY: return derivative(e.op(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
+        case OperatorKind::GRADED: return derivative(e.op(), e.arg(), derivative(e.arg(),v), e.num());
         default:
             ARIADNE_THROW(std::runtime_error,"derivative(Expression<Real> e, Variable<Real> v)",
                           "Cannot compute derivative of "<<e<<"\n");
@@ -995,6 +1015,5 @@ Formula<Real> make_formula(const EffectiveScalarFunction& f);
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s) {
     return make_expression(make_formula(f),s); }
-
 
 } // namespace Ariadne

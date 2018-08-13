@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include "config.h"
+#include "config.hpp"
 #include "function/function.hpp"
 #include "geometry/box.hpp"
 #include "geometry/grid_set.hpp"

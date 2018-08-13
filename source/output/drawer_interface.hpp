@@ -29,7 +29,7 @@
 #define ARIADNE_DRAWER_INTERFACE_HPP
 
 #include <iosfwd>
-#include "utility/writable.hpp"
+#include "../utility/writable.hpp"
 
 namespace Ariadne {
 

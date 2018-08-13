@@ -29,11 +29,11 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "hybrid/hybrid_set_interface.hpp"
-#include "dynamics/evolver_interface.hpp"
-#include "dynamics/reachability_analyser_interface.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../dynamics/evolver_interface.hpp"
+#include "../dynamics/reachability_analyser_interface.hpp"
 
-#include "utility/logging.hpp"
+#include "../utility/logging.hpp"
 
 namespace Ariadne {
 

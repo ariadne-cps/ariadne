@@ -32,7 +32,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/string.hpp>
 
-#include "config.h"
+#include "config.hpp"
 #include "utility/macros.hpp"
 #include "output/serialization.hpp"
 #include "utility/array.hpp"

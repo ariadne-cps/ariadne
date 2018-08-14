@@ -407,8 +407,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
     List<ValidatedVectorFunctionModelDP> result;
 
-    return result;
-
     auto step = 0;
 
     List<ScheduledApproximation> schedule;

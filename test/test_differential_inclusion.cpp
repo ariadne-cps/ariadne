@@ -424,8 +424,8 @@ void TestInclusionIntegrator::test_rossler() const {
 
 void TestInclusionIntegrator::test_jerk16() const {
     RealVariable x("x"), y("y"), z("z"), u("u");
-    DottedRealAssignments dynamics={dot(x)=y,dot(y)=z,dot(z)=-y+pow(x,2)-u};
-    RealVariablesBox inputs={0.029_dec<=u<=0.031_dec};
+    DottedRealAssignments dynamics={dot(x)=y,dot(y)=z,dot(z)=-y+pow(x,2)+u};
+    RealVariablesBox inputs={-0.031_dec<=u<=-0.029_dec};
 
     Real e=1/1024_q;
     RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e},{-e<=z<=e}};
@@ -485,7 +485,7 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
-    ARIADNE_TEST_CALL(test_higgins_selkov());
+    /*ARIADNE_TEST_CALL(test_higgins_selkov());
     ARIADNE_TEST_CALL(test_reactor());
     ARIADNE_TEST_CALL(test_lotka_volterra());
     ARIADNE_TEST_CALL(test_jet_engine());
@@ -493,7 +493,7 @@ void TestInclusionIntegrator::test() const {
     ARIADNE_TEST_CALL(test_jerk21());
     ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());
+    ARIADNE_TEST_CALL(test_jerk16());*/
     ARIADNE_TEST_CALL(test_DCDC());
     ARIADNE_TEST_CALL(test_harmonic());
 }

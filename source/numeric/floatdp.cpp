@@ -718,7 +718,7 @@ FloatDP FloatDP::pi(RoundingModeType rnd, DoublePrecision pr) {
         case FloatDP::ROUND_UPWARD: return _pi_up;
         case FloatDP::ROUND_DOWNWARD: return _pi_down;
         case FloatDP::ROUND_TO_NEAREST: return _pi_near;
-        default: assert(false);
+        default: assert(false); return _pi_near;
     }
 }
 

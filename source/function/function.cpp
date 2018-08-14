@@ -64,11 +64,11 @@ template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_con
 //------------------------ Formula Function ----------------------------------//
 
 template<class P, class Y> ScalarFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Scalar<Formula<Y>> const& e) {
-    assert(false);
+    assert(false); return ScalarFunction<P,IntervalDomainType>(nullptr);
 }
 
 template<class P, class Y> VectorFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Vector<Formula<Y>> const& e) {
-    assert(false);
+    assert(false); return VectorFunction<P,IntervalDomainType>(nullptr);
 }
 
 template<class P, class Y> ScalarFunction<P,BoxDomainType> make_formula_function(BoxDomainType dom, Scalar<Formula<Y>> const& e) {

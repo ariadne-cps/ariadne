@@ -199,9 +199,9 @@ add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<T
 set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric")
 target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} boost_python mpfr gmp)
 
-#add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
-#set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
-#target_link_libraries (pyariadne-algebra ariadne boost_python)
+add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
+set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra")
+target_link_libraries (pyariadne-algebra ${PYTHON_LIBRARIES} boost_python ariadne)
 
 install (TARGETS ariadne DESTINATION lib)
 install (DIRECTORY source/ DESTINATION include/ariadne

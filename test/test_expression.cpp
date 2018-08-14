@@ -149,10 +149,10 @@ class TestExpression {
 
     Void test_scalar_properties()
     {
-        RealVariable x("x"), y("y");
+        RealVariable x("x"), y("y"), u("u");
         Real c(3);
         ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
-        ARIADNE_TEST_ASSERT(is_constant_in(pow(y,2),{x}));
+        ARIADNE_TEST_ASSERT(is_constant_in(pow(x,2),{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in(pow(x,2),{x}));
         ARIADNE_TEST_ASSERT(not is_constant_in(3*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in(0*y,{y}));
@@ -160,10 +160,15 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*x)-2*sin(x)*cos(x))*y,{y}));
         ARIADNE_TEST_ASSERT(is_constant_in(simplify(0*y),{y}));
 
+        ARIADNE_TEST_ASSERT(is_affine_in(sqr(x),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3)+y,{y}));
         ARIADNE_TEST_ASSERT(is_affine_in(2+3*x-5*y-x,{x,y}));
         ARIADNE_TEST_ASSERT(is_affine_in(3*y,{x,y}));
         ARIADNE_TEST_ASSERT(is_affine_in(x*y,{x}));
         ARIADNE_TEST_ASSERT(is_affine_in(3*x/y,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(pow(x,3),{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(sqr(x),{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x*y,{x,y}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));

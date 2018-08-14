@@ -764,7 +764,8 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
         case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
         case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
         case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
-        default: return false;
+        case OperatorCode::POW: case OperatorCode::SQR: return is_constant_in(e.arg(),vs);
+        default: ARIADNE_FAIL_MSG("Not currently supporting code "<<e.op()<<" for evaluation of affinity in given variables\n");
     }
 }
 

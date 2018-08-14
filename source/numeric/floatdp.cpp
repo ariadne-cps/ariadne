@@ -37,27 +37,6 @@
 #include "../numeric/decimal.hpp"
 #include "../numeric/rational.hpp"
 #include "../numeric/rounding.hpp"
-
-#if defined ARIADNE_C99_ROUNDING
-    #warning "Using standard fenv.hpp C header file for setting the rounding mode."
-#elif defined ARIADNE_BOOST_ROUNDING
-    #if defined BOOST_NUMERIC_INTERVAL_DETAIL_C99_ROUNDING_CONTROL_HPP
-        #warning "Using Boost interval library standard fenv.hpp C header for setting the rounding mode."
-    #else
-        #warning "Using Boost interval library hardware rounding for setting the rounding mode."
-    #endif
-#elif defined ARIADNE_GCC_ROUNDING
-    #warning "Using ordinary GCC inline assembler for setting the rounding mode."
-#elif defined ARIADNE_EGCC_ROUNDING
-    #warning "Using extended GCC inline assembler for setting the rounding mode."
-#elif defined ARIADNE_SSE_ROUNDING
-    #warning "Using SSE <xmmintrin.h> header file for setting the rounding mode."
-#elif defined ARIADNE_MSVC_ROUNDING
-    #warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
-#else
-    #warning "No rounding mode defined."
-#endif
-
 #include "../numeric/floatdp.hpp"
 #include "../numeric/floatmp.hpp"
 

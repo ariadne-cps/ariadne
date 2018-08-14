@@ -7,6 +7,7 @@ set(UNIT_TESTS_NUMERIC
     test_number
     test_float
     test_validated_float
+    test_rounding
 )
 
 set(UNIT_TESTS_ALGEBRA

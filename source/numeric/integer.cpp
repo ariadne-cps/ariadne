@@ -349,6 +349,7 @@ OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
         case Comparison::LESS: os << "LESS";  break;
         case Comparison::EQUAL: os << "EQUAL";  break;
         case Comparison::GREATER: os << "GREATER";  break;
+        case Comparison::INCOMPARABLE: os << "INCOMPARABLE"; break;
     }
     return os;
 }

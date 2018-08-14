@@ -55,6 +55,7 @@ class TestRational
 
 void TestRational::test()
 {
+    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
@@ -67,14 +68,15 @@ void TestRational::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
     Rational q;
 
-    q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z); q=Rational(z);
+    q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z);
     q=m; q=lm; q=n; q=ln; q=z; q=q;
 
     q=+q; q=-q;
-    q=q+q; q=q-q; q=q*q; q=q/q;
+
+    q=q/q; q=q+q; q=q-q; q=q*q;
 
     q=q+n; q=q-n; q=q*n; q=q/n;
-    q=n+q; q=n-q; q=n*q; q=n/q;
+    q=n-q; q=n*q; q=n+q; q=n/q;
     q=q+z; q=q-z; q=q*z; q=q/z;
     q=z+q; q=z-q; q=z*q; q=z/q;
 
@@ -83,13 +85,36 @@ void TestRational::test_concept() {
 
     q=1.5_q; q=-1.3_q;
 
-    q==q; q!=q; q<=q; q>=q; q<q; q>q;
-    q==n; q!=n; q<=n; q>=n; q<n; q>n;
-    n==q; n!=q; n<=q; n>=q; n<q; n>q;
-    q==z; q!=z; q<=z; q>=z; q<z; q>z;
-    z==q; z!=q; z<=q; z>=q; z<q; z>q;
-
-//    z+1.0;
+    ARIADNE_TEST_ASSERT(q==q);
+    ARIADNE_TEST_ASSERT(not(q!=q));
+    ARIADNE_TEST_ASSERT(q<=q);
+    ARIADNE_TEST_ASSERT(q>=q);
+    ARIADNE_TEST_ASSERT(not(q<q));
+    ARIADNE_TEST_ASSERT(not(q>q));
+    ARIADNE_TEST_ASSERT(not(q==n));
+    ARIADNE_TEST_ASSERT(q!=n);
+    ARIADNE_TEST_ASSERT(not(q<=n));
+    ARIADNE_TEST_ASSERT(q>=n);
+    ARIADNE_TEST_ASSERT(not(q<n));
+    ARIADNE_TEST_ASSERT(q>n);
+    ARIADNE_TEST_ASSERT(not(n==q));
+    ARIADNE_TEST_ASSERT(n!=q);
+    ARIADNE_TEST_ASSERT(n<=q);
+    ARIADNE_TEST_ASSERT(not(n>=q));
+    ARIADNE_TEST_ASSERT(n<q);
+    ARIADNE_TEST_ASSERT(not(n>q));
+    ARIADNE_TEST_ASSERT(not(q==z));
+    ARIADNE_TEST_ASSERT(q!=z);
+    ARIADNE_TEST_ASSERT(not(q<=z));
+    ARIADNE_TEST_ASSERT(q>=z);
+    ARIADNE_TEST_ASSERT(not(q<z));
+    ARIADNE_TEST_ASSERT(q>z);
+    ARIADNE_TEST_ASSERT(not(z==q));
+    ARIADNE_TEST_ASSERT(z!=q);
+    ARIADNE_TEST_ASSERT(z<=q);
+    ARIADNE_TEST_ASSERT(not(z>=q));
+    ARIADNE_TEST_ASSERT(z<q);
+    ARIADNE_TEST_ASSERT(not(z>q));
 }
 
 void TestRational::test_literal() {

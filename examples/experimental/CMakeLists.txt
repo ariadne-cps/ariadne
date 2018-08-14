@@ -1,11 +1,14 @@
 set(EXPERIMENTAL_EXAMPLES
 	circle
+	harmonic-oscillator
 	exponential
 	laser
 	bouncing-walls
 	vanderpol
 	vanderpol-vectorfield
-	harmonic_inclusion
+	lotka-volterra
+	higgins-selkov
+	laub-loomis
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

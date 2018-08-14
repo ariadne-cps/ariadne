@@ -30,6 +30,8 @@
 #ifndef ARIADNE_REAL_HPP
 #define ARIADNE_REAL_HPP
 
+#include <functional>
+
 #include "../utility/typedefs.hpp"
 #include "../utility/pointer.hpp"
 

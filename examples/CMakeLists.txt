@@ -18,4 +18,5 @@ add_custom_target(examples-experimental)
 
 add_subdirectory(watertank)
 add_subdirectory(twowatertanks)
+add_subdirectory(threewatertanks)
 add_subdirectory(experimental)

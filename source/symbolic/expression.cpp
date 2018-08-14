@@ -223,10 +223,8 @@ template<> inline OutputStream& _write_comparison(OutputStream& os, const Expres
 template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
     const Expression<T>& f=*this;
     switch(f.op()) {
-        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case OperatorCode::CNST:
             os << f.val(); return os;
-            //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
         case OperatorCode::VAR:
             return os << f.var();
         case OperatorCode::ADD:
@@ -541,6 +539,7 @@ template<class X, class I, class Y> Expression<X> substitute(const Expression<X>
         case OperatorKind::UNARY: return make_expression<X>(e.op(),substitute(e.arg(),v,s));
         case OperatorKind::NULLARY: return make_expression<X>(e.val());
         case OperatorKind::VARIABLE: return _substitute_variable(e.var(),v,e,s);
+        case OperatorKind::GRADED: return make_expression<X>(e.op(),substitute(e.arg(),v,s),e.num());
         default: ARIADNE_FAIL_MSG("Cannot substitute "<<s<<" for a named variable "<<v<<" in an unknown expression "<<e<<"\n");
     }
 }
@@ -600,6 +599,21 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
         }
     }
 
+    if(e.kind() == OperatorKind::GRADED) {
+        Expression<R> sarg=simplify(e.arg());
+        Expression<R> one(static_cast<R>(1));
+        switch(e.op()) {
+            case OperatorCode::POW:
+                switch (e.num()) {
+                case 0: return one;
+                case 1: return sarg;
+                default: return make_expression<R>(OperatorCode::POW,sarg,e.num());
+                }
+            default:
+                return make_expression<R>(e.op(),sarg,e.num());
+        }
+    }
+
     if(e.kind() != OperatorKind::BINARY) { return e; }
 
     Expression<R> sarg1=simplify(e.arg1());
@@ -616,8 +630,8 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
             if(identical(sarg1,zero)) { return -sarg2; }
             break;
         case OperatorCode::MUL:
-            if(identical(sarg1,zero)) { return sarg1; }
-            if(identical(sarg2,zero)) { return sarg2; }
+            if(identical(sarg1,zero)) { return zero; }
+            if(identical(sarg2,zero)) { return zero; }
             if(identical(sarg1,one)) { return sarg2; }
             if(identical(sarg2,one)) { return sarg1; }
             break;
@@ -628,8 +642,7 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
         default:
             break;
     }
-    return e;
-
+    return make_expression<R>(e.op(),sarg1,sarg2);
 }
 
 template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
@@ -737,9 +750,9 @@ Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
     switch(e.kind()) {
         case OperatorKind::VARIABLE: return not vs.contains(Variable<Real>(e.var()));
         case OperatorKind::NULLARY: return true;
-        case OperatorKind::UNARY: case OperatorKind::SCALAR: return is_constant_in(e.arg(),vs);
+        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(e.arg(),vs);
         case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
-        default: assert(false);
+        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant on "<<vs<<"\n");
     }
 }
 
@@ -751,10 +764,52 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
         case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
         case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
         case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
-        default: return false;
+        case OperatorCode::POW: case OperatorCode::SQR: return is_constant_in(e.arg(),vs);
+        default: ARIADNE_FAIL_MSG("Not currently supporting code "<<e.op()<<" for evaluation of affinity in given variables\n");
     }
 }
 
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs) {
+    for (auto i : range(e.size()))
+        if (not is_affine_in(e[i],vs)) return false;
+    return true;
+}
+
+Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
+    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
+    // with a constant value of 1
+    // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
+    // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
+
+    auto one = Expression<Real>::constant(1);
+    auto zero = Expression<Real>::constant(0);
+
+    for (auto v : vs) {
+        Bool already_found = false;
+        Bool already_found_one = false;
+        for (auto i : range(ev.size())) {
+            const Expression<Real>& e = ev[i];
+            auto der = simplify(derivative(e, v));
+            if (not identical(der,zero)) {
+                if (already_found) {
+                    return false;
+                } else {
+                    already_found = true;
+                    if (identical(der,one)) {
+                        if (already_found_one) {
+                            return false;
+                        } else {
+                            already_found_one = true;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
 
 
 template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e2)
@@ -768,6 +823,8 @@ template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e
             return same(e1.val(),e2.val());
         case OperatorKind::UNARY:
             return identical(e1.arg(),e2.arg());
+        case OperatorKind::GRADED:
+            return identical(e1.arg(),e2.arg()) && e1.num() == e2.num();
         case OperatorKind::BINARY:
             return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
         default:
@@ -814,6 +871,39 @@ Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
 
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 {
+    /*
+    switch(e.op()) {
+        case OperatorCode::CNST:
+            return Expression<Real>::constant(0);
+        case OperatorCode::VAR:
+            if(e.var()==v.name()) { return Expression<Real>::constant(1); }
+            else { return Expression<Real>::constant(0); }
+        case OperatorCode::ADD:
+            return derivative(e.arg1(),v)+derivative(e.arg2(),v);
+        case OperatorCode::SUB:
+            return derivative(e.arg1(),v)-derivative(e.arg2(),v);
+        case OperatorCode::MUL:
+            return e.arg1()*derivative(e.arg2(),v)+derivative(e.arg1(),v)*e.arg2();
+        case OperatorCode::DIV:
+            return derivative(e.arg1() * rec(e.arg2()),v);
+        case OperatorCode::NEG:
+            return  - derivative(e.arg(),v);
+        case OperatorCode::REC:
+            return  - derivative(e.arg(),v) * rec(sqr(e.arg()));
+        case OperatorCode::SQR:
+            return static_cast<Real>(2) * derivative(e.arg(),v) * e.arg();
+        case OperatorCode::POW:
+            return Expression<Real>::constant(e.num())*make_expression<Real>(OperatorCode::POW,e.arg(),e.num()-1)*derivative(e.arg(),v);
+        case OperatorCode::EXP:
+            return derivative(e.arg(),v) * e.arg();
+        case OperatorCode::LOG:
+            return derivative(e.arg(),v) * rec(e.arg());
+        case OperatorCode::SIN:
+            return derivative(e.arg(),v) * cos(e.arg());
+        case OperatorCode::COS:
+            return -derivative(e.arg(),v) * sin(e.arg());
+        case OperatorCode::TAN:
+            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));*/
     switch(e.kind()) {
         case OperatorKind::NULLARY: return Expression<Real>::constant(0);
         case OperatorKind::VARIABLE: return Expression<Real>::constant(e.var()==v.name()?1:0);

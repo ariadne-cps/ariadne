@@ -119,25 +119,74 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
-    Void test_properties()
-    {
+    Void test_derivative() {
         RealVariable x("x"), y("y");
+        RealExpression expr = 2*x+y;
+        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
+        RealExpression expr2 = pow(x,3);
+        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr2,x)),3*pow(x,2)));
+    }
+
+    Void test_simplify() {
+
+        RealVariable x("x"), y("y"), u("u");
+        RealExpression expr = -u*x*y+2*x;
+        RealExpression simplification = simplify(derivative(expr,x));
+        ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+    }
+
+    Void test_substitute() {
+
+        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        RealExpression expr = -u1*x*y+2*pow(x+u2,2);
+
+        List<Assignment<RealVariable,RealExpression>> subs={{u1,u1+1},{u2,u1*x}};
+
+        RealExpression substitution = substitute(expr,subs);
+
+        ARIADNE_TEST_ASSERT(identical(substitution,-(u1+1)*x*y+2*pow(x+u1*x,2)));
+    }
+
+    Void test_scalar_properties()
+    {
+        RealVariable x("x"), y("y"), u("u");
         Real c(3);
         ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
+        ARIADNE_TEST_ASSERT(is_constant_in(pow(x,2),{y}));
+        ARIADNE_TEST_ASSERT(not is_constant_in(pow(x,2),{x}));
         ARIADNE_TEST_ASSERT(not is_constant_in(3*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in(0*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*c)-2*sin(c)*cos(c))*y,{y}));
         ARIADNE_TEST_ASSERT(not is_constant_in((sin(2*x)-2*sin(x)*cos(x))*y,{y}));
         ARIADNE_TEST_ASSERT(is_constant_in(simplify(0*y),{y}));
 
+        ARIADNE_TEST_ASSERT(is_affine_in(sqr(x),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3),{y}));
+        ARIADNE_TEST_ASSERT(is_affine_in(pow(x,3)+y,{y}));
         ARIADNE_TEST_ASSERT(is_affine_in(2+3*x-5*y-x,{x,y}));
         ARIADNE_TEST_ASSERT(is_affine_in(3*y,{x,y}));
         ARIADNE_TEST_ASSERT(is_affine_in(x*y,{x}));
         ARIADNE_TEST_ASSERT(is_affine_in(3*x/y,{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(pow(x,3),{x}));
+        ARIADNE_TEST_ASSERT(not is_affine_in(sqr(x),{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x*y,{x,y}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x*x,{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(0*x*x,{x}));
         ARIADNE_TEST_ASSERT(not is_affine_in(x/y,{y}));
+    }
+
+    Void test_vector_properties()
+    {
+        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y+u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u2,y+u1}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y}),{u1}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x,y+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x,y+2*u1}),{u1}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+2*u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x*u1,y+u2}),{u1,u2}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+sqr(u2)}),{u1,u2}));
     }
 
     Void test_function()
@@ -196,7 +245,11 @@ class TestExpression {
         test_expression();
         test_assignment();
         test_parameters();
-        test_properties();
+        test_derivative();
+        test_simplify();
+        test_substitute();
+        test_scalar_properties();
+        test_vector_properties();
         test_function();
     }
 

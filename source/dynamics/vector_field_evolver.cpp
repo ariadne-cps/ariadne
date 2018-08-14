@@ -197,7 +197,6 @@ _evolution(EnclosureListType& final_sets,
                         <<" c="<<current_set_model.centre() << "\n");
 
     }
-
 }
 
 

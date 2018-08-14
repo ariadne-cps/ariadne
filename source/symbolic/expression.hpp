@@ -178,10 +178,13 @@ template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Express
 Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
 //! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
 Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically additive in the variables \a vs.
+Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
-
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);

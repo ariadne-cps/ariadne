@@ -123,6 +123,7 @@ using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic val
 using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. \ingroup NumericModule
 
 template<class P> using PositiveNumber = Positive<Number<P>>;
+
 using PositiveExactNumber=PositiveNumber<ExactTag>; //!< Alias for generic positive validated upper numbers. \ingroup NumericModule
 using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< Alias for generic positive validated upper numbers. \ingroup NumericModule
 using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< Alias for generic positive validated lower numbers. \ingroup NumericModule

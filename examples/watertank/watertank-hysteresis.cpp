@@ -24,7 +24,8 @@
 #include <cstdarg>
 #include "ariadne.hpp"
 #include "tank.hpp"
-#include "valve-hysteresis-urgent.hpp"
+#include "valve-noalgebraic-hysteresis.hpp"
+#include "controller-hysteresis-permissive.hpp"
 
 using namespace Ariadne;
 using std::cout; using std::endl;
@@ -39,14 +40,17 @@ Int main(Int argc, const char* argv[])
     RealVariable height("height");
 
     StringVariable valve("valve");
-    StringConstant opening("opening");
+    StringVariable controller("controller");
+
     StringConstant opened("opened");
-    StringConstant closing("closing");
-    StringConstant closed("closed");
+    StringConstant opening("opening");
+    StringConstant idle("idle");
+    StringConstant rising("rising");
 
     HybridAutomaton tank_automaton = getTank();
     HybridAutomaton valve_automaton = getValve();
-    CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
+    HybridAutomaton controller_automaton = getController();
+    CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton,controller_automaton});
 
     cout << watertank_system << endl;
     // Compute the system evolution
@@ -57,7 +61,7 @@ Int main(Int argc, const char* argv[])
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05);
-    evolver.configuration().set_maximum_step_size(0.25);
+    evolver.configuration().set_maximum_step_size(0.6);
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -65,15 +69,18 @@ Int main(Int argc, const char* argv[])
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
-    Real a_max(1.0/32);
-    
-    HybridSet initial_set({valve|opening},{0<=height<=0.5_decimal,0<=aperture<=a_max});
-    HybridTime evolution_time(80.0,4);
+
+    //HybridSet initial_set({valve|idle,controller|rising},{height==7,aperture==1});
+
+    //HybridSet initial_set({valve|opening,controller|rising},{height==5.5_dec,aperture==0.4_dec});
+    //HybridSet initial_set({valve|opened,controller|rising},{height==7});
+    HybridSet initial_set({valve|opened,controller|rising},{height==7,aperture==1});
+    HybridTime evolution_time(30.0,5);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... "<<std::flush;
-    Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
+    Axes2d time_height_axes(0<=TimeVariable()<=30,-0.1<=height<=9.1);
     plot("watertank-orbit",time_height_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
     plot("watertank-height_aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
@@ -104,7 +111,7 @@ Int main(Int argc, const char* argv[])
     std::cout << "Plotting reachable sets... " << std::flush;
     plot("watertank-upper-reach", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
 */
-    /*
+
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_auxiliary_space());
     HybridGridTreeSet hgts(grid);
@@ -117,5 +124,5 @@ Int main(Int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     plot("watertank-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
-    */
+
 }

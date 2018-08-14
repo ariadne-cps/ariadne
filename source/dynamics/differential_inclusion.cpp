@@ -33,7 +33,7 @@ namespace Ariadne {
 
 DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs)
     : _dynamics(dynamics), _inputs(inputs) {
-    ARIADNE_ASSERT_MSG(is_affine_in(Vector<RealExpression>(right_hand_sides(dynamics)),inputs.variables()),"The dynamics must be input-affine.\n");
+    ARIADNE_ASSERT_MSG(is_affine_in(Vector<RealExpression>(right_hand_sides(dynamics)),inputs.variables()),"The dynamics " << dynamics << " must be input-affine.\n");
     std::tie(_F,_f_component,_g_components,_V) = expression_to_function(dynamics,inputs);
     _is_input_additive = is_additive_in(Vector<RealExpression>(right_hand_sides(dynamics)),inputs.variables());
     _has_singular_input = (inputs.variables().size() == 1);
@@ -42,6 +42,8 @@ DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynami
 std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di) {
     os << "DI: dynamics: " << di.dynamics() << "\n    inputs: " << /*di.inputs() << */ "\n";
     os << "    (F: " << di.F() << "\n     f_component: " << di.f_component() << "\n     g_components: " << di.g_components() << "\n     V: " << di.V() << ")\n";
+    os << "    " << (di.is_input_additive() ? "input-additive" : "input-affine")
+       << ", " << (di.has_singular_input() ? "single input" : "multiple inputs") << "\n";
     return os;
 }
 
@@ -404,6 +406,8 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     }
 
     List<ValidatedVectorFunctionModelDP> result;
+
+    return result;
 
     auto step = 0;
 

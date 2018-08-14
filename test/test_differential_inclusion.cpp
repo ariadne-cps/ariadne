@@ -49,7 +49,7 @@ template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& l
 
 FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
     auto bbx = evolve_set.bounding_box();
-    return 1.0/pow(volume(bbx).get_d(),1.0/bbx.size());
+    return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }
 
 ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }

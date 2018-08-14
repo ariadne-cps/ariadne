@@ -283,12 +283,12 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
     return Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
-template<> ErrorType error<ZeroApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+template<> ErrorType worstcase_error<ZeroApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h,(n.K*2u+n.pK)*h); }
-template<> ErrorType error<ZeroApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ZeroApproximation,AffineInputs>(n,h); }
-template<> ErrorType error<ZeroApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ZeroApproximation,AffineInputs>(n,h); }
+template<> ErrorType worstcase_error<ZeroApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+    return worstcase_error<ZeroApproximation,AffineInputs>(n,h); }
+template<> ErrorType worstcase_error<ZeroApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
+    return worstcase_error<ZeroApproximation,AffineInputs>(n,h); }
 template<> ErrorType component_error<ZeroApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return min(n.pK*n.expL*h,(n.Kj[j]*2u+n.pKj[j])*h); }
 template<> ErrorType component_error<ZeroApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
@@ -296,12 +296,12 @@ template<> ErrorType component_error<ZeroApproximation,AdditiveInputs>(Norms con
 template<> ErrorType component_error<ZeroApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return component_error<ZeroApproximation,AffineInputs>(n,h,j); }
 
-template<> ErrorType error<ConstantApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+template<> ErrorType worstcase_error<ConstantApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
-template<> ErrorType error<ConstantApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ConstantApproximation,AffineInputs>(n,h); }
-template<> ErrorType error<ConstantApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
-    return error<ConstantApproximation,AffineInputs>(n,h); }
+template<> ErrorType worstcase_error<ConstantApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h) {
+    return worstcase_error<ConstantApproximation,AffineInputs>(n,h); }
+template<> ErrorType worstcase_error<ConstantApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h) {
+    return worstcase_error<ConstantApproximation,AffineInputs>(n,h); }
 template<> ErrorType component_error<ConstantApproximation,AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
 template<> ErrorType component_error<ConstantApproximation,SingularInput>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
@@ -309,11 +309,11 @@ template<> ErrorType component_error<ConstantApproximation,SingularInput>(Norms 
 template<> ErrorType component_error<ConstantApproximation,AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return component_error<ConstantApproximation,AffineInputs>(n,h,j); }
 
-template<> ErrorType error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType worstcase_error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
-template<> ErrorType error<SingularInput>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType worstcase_error<SingularInput>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
-template<> ErrorType error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+template<> ErrorType worstcase_error<AdditiveInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
 template<> ErrorType component_error<AffineInputs>(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
     return (pow(h,2u)*(pow(r,2u)+1u)*n.pK*n.pLj[j]/2u + pow(h,3u)*(n.K+n.pK)*(r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) + n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)+(n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)+2u-h*n.L*2u))-2u))/cast_positive(cast_exact(pow(n.L,3u))))/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
@@ -324,10 +324,13 @@ template<> ErrorType component_error<AdditiveInputs>(Norms const& n, PositiveFlo
 
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(Norms const& n, PositiveFloatDPValue const& h) const {
-    Vector<ErrorType> result(n.dimension(),error<A,R>(n,h));
-    if (_enable_componentwise_error)
+
+    Vector<ErrorType> result(n.dimension(),worstcase_error<A,R>(n,h));
+    
+    if (_enable_componentwise_error) {
         for (auto j: range(n.dimension()))
             result[j] = min(result[j],component_error<A,R>(n,h,j));
+    }
     return result;
 }
 
@@ -425,7 +428,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     while (possibly(t<FloatDPBounds(tmax,pr))) {
 
         if (verbosity == 1)
-            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
+            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
 
         ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 

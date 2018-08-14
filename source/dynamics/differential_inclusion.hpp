@@ -257,9 +257,9 @@ std::ostream& operator << (std::ostream& os, const InputsRoles& kind) {
     return os;
 }
 
-template<class R> ErrorType error(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
+template<class R> ErrorType worstcase_error(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
 template<class R> ErrorType component_error(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
-template<class A, class R> ErrorType error(Norms const& n, PositiveFloatDPValue const& h) { return error<R>(n,h,r_value<A>()); }
+template<class A, class R> ErrorType worstcase_error(Norms const& n, PositiveFloatDPValue const& h) { return worstcase_error<R>(n,h,r_value<A>()); }
 template<class A, class R> ErrorType component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return component_error<R>(n,h,r_value<A>(),j); }
 
 
@@ -287,6 +287,7 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
     Vector<ErrorType> process(Norms const& n, PositiveFloatDPValue const& h) const;
     DifferentialInclusion const& _di;
 };
+
 
 template<class A>
 class ApproximationErrorProcessorFactory {

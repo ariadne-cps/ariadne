@@ -768,6 +768,12 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
     }
 }
 
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs) {
+    for (auto i : range(e.size()))
+        if (not is_affine_in(e[i],vs)) return false;
+    return true;
+}
+
 Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
     // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
     // with a constant value of 1

@@ -62,7 +62,7 @@ using ExactTimeStepType = PositiveFloatDPValue;
 
 Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds);
 Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs);
-Tuple<ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
+Tuple<ValidatedVectorFunction,ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
 BoxDomainType bounds_to_domain(RealVariablesBox const& var_box);
 
 Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
@@ -77,9 +77,7 @@ Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
 ValidatedVectorFunctionModelDP add_errors(ValidatedVectorFunctionModelDP phi, Vector<ErrorType> const& e);
 
-Boolean inputs_are_additive(Vector<ValidatedVectorFunction> const &g);
-
-ValidatedVectorFunction construct_f_plus_gu(ValidatedVectorFunction const &f, Vector<ValidatedVectorFunction> const &g);
+ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<ValidatedScalarFunction> const& w);
 
 template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return combine(combine(f1,f2),f3,fs...); }
@@ -102,31 +100,47 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
-struct DifferentialInclusion {
-public:
+class DifferentialInclusion {
     friend class DifferentialInclusionIVP;
-    const ValidatedVectorFunction f;
-    const Vector<ValidatedVectorFunction> g;
-    const BoxDomainType V;
 private:
-    DifferentialInclusion(Tuple<ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType> const& components) : f(std::get<0>(components)), g(std::get<1>(components)), V(std::get<2>(components)) { }
+    DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
+    DottedRealAssignments _dynamics;
+    RealVariablesBox _inputs;
+    ValidatedVectorFunction _F;
+    ValidatedVectorFunction _f_component;
+    Vector<ValidatedVectorFunction> _g_components;
+    BoxDomainType _V;
+    Bool _is_input_additive;
+    Bool _has_singular_input;
+public:
+    DottedRealAssignments const& dynamics() const { return _dynamics; }
+    RealVariablesBox const& inputs() const { return _inputs; }
+    ValidatedVectorFunction const& F() const { return _F; }
+    ValidatedVectorFunction const& f_component() const { return _f_component; }
+    Vector<ValidatedVectorFunction> const& g_components() const { return _g_components; }
+    BoxDomainType const& V() const { return _V; }
+    Bool is_input_additive() const { return _is_input_additive; }
+    Bool has_singular_input() const { return _has_singular_input; }
+    SizeType num_variables() const { return _F.result_size(); }
+    SizeType num_inputs() const { return _V.size(); }
 };
 
-struct DifferentialInclusionIVP {
-public:
-    const DifferentialInclusion di;
-    const BoxDomainType X0;
+std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di);
+
+class DifferentialInclusionIVP {
 private:
-    DifferentialInclusionIVP(DifferentialInclusion const& di, BoxDomainType const& X0) : di(di), X0(X0) { }
+    DifferentialInclusion _di;
+    RealVariablesBox _initial;
+    BoxDomainType _X0;
 public:
     DifferentialInclusionIVP(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial)
-        : di(DifferentialInclusion(expression_to_function(dynamics,inputs))), X0(bounds_to_domain(initial)) { }
+        : _di(DifferentialInclusion(dynamics,inputs)), _initial(initial), _X0(bounds_to_domain(initial)) { }
+    BoxDomainType const& X0() const { return _X0; }
+    DifferentialInclusion const& di() const { return _di; }
+    RealVariablesBox const& initial() const { return _initial; }
 };
 
-std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp) {
-    os << "IVP: \nf: " << ivp.di.f << "\ng: " << ivp.di.g << "\nV: " << ivp.di.V << "\nX0: " << ivp.X0 << "\n";
-    return os;
-}
+std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp);
 
 struct Norms {
     FloatDPError K;
@@ -279,8 +293,8 @@ class ApproximationErrorProcessorFactory {
     typedef ApproximationErrorProcessorInterface<A> Processor;
 public:
     SharedPointer<Processor> create(DifferentialInclusion const& di) const {
-        if (inputs_are_additive(di.g)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(di));
-        else if (di.g.size() == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(di));
+        if (di.is_input_additive()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(di));
+        else if (di.has_singular_input()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(di));
         else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(di));
     }
 };

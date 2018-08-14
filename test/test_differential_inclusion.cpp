@@ -137,7 +137,7 @@ class TestInclusionIntegrator {
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
-        int verbosity = 0;
+        int verbosity = 1;
 
         List<InputApproximation> approximations;
         approximations.append(InputApproximation::ZERO);
@@ -485,7 +485,7 @@ void TestInclusionIntegrator::test() const {
     //ARIADNE_TEST_CALL(test_fitzhugh_nagumo());
     //ARIADNE_TEST_CALL(test_van_der_pol());
     //ARIADNE_TEST_CALL(test_clock());
-    /*ARIADNE_TEST_CALL(test_higgins_selkov());
+    ARIADNE_TEST_CALL(test_higgins_selkov());
     ARIADNE_TEST_CALL(test_reactor());
     ARIADNE_TEST_CALL(test_lotka_volterra());
     ARIADNE_TEST_CALL(test_jet_engine());
@@ -493,7 +493,7 @@ void TestInclusionIntegrator::test() const {
     ARIADNE_TEST_CALL(test_jerk21());
     ARIADNE_TEST_CALL(test_lorenz());
     ARIADNE_TEST_CALL(test_rossler());
-    ARIADNE_TEST_CALL(test_jerk16());*/
+    ARIADNE_TEST_CALL(test_jerk16());
     ARIADNE_TEST_CALL(test_DCDC());
     ARIADNE_TEST_CALL(test_harmonic());
 }

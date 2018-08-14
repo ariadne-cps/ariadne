@@ -230,7 +230,7 @@ class HybridAutomatonInterface {
     virtual RealSpace continuous_auxiliary_space(DiscreteLocation location) const = 0;
 
     //! \brief The continuous state space in the \a location.
-    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); }
+    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); return List<RealExpression>(); }
 
 
     //@}

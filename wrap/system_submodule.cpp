@@ -46,9 +46,9 @@ namespace Ariadne {
 
 template<class T> Nat __hash__(const T&);
 template<> Nat __hash__<DiscreteEvent>(const DiscreteEvent& e) {
-    return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
+    return reinterpret_cast<const unsigned short&>(e.name().c_str()[0]); }
 template<> Nat __hash__<DiscreteLocation>(const DiscreteLocation& q) {
-    return reinterpret_cast<const ushort&>(to_string(q).c_str()[0]); }
+    return reinterpret_cast<const unsigned short&>(to_string(q).c_str()[0]); }
 
 template<>
 struct from_python< Set<DiscreteEvent> > {

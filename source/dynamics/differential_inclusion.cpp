@@ -350,6 +350,8 @@ InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproxima
     case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
     case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
     case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
+    default:
+        ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
     }
 }
 

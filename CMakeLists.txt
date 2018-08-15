@@ -1,13 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (Ariadne)
 
-if(POLICY CMP0045)
-  cmake_policy(SET CMP0045 OLD)
-endif()
-if(POLICY CMP0058)
-  cmake_policy(SET CMP0058 NEW)
-endif()
-
 # enable dashboard scripting
 enable_testing()
 include(CTest)

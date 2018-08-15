@@ -44,7 +44,7 @@ target_link_libraries (pyariadne ariadne ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBR
 
 add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
 set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
-target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${MPFR_LIBRARIES} gmp)
+target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${MPFR_LIBRARIES} ${GMP_LIBRARIES})
 
 add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
 set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")

@@ -1,35 +1,72 @@
-# Copyright (c) 2008-2010 Kent State University
-# Copyright (c) 2011-2012 Texas A&M University
+# Try to find the MPFR library
+# See http://www.mpfr.org/
 #
-# This file is distributed under the MIT License. See the accompanying file
-# LICENSE.txt or http://www.opensource.org/licenses/mit-license.php for terms
-# and conditions.
+# This module supports requiring a minimum version, e.g. you can do
+#   find_package(MPFR 2.3.0)
+# to require version 2.3.0 to newer of MPFR.
+#
+# Once done this will define
+#
+#  MPFR_FOUND - system has MPFR lib with correct version
+#  MPFR_INCLUDES - the MPFR include directory
+#  MPFR_LIBRARIES - the MPFR library
+#  MPFR_VERSION - MPFR version
 
-# FIXME: How do I find the version of MPFR that I want to use?
-# What versions are available?
+# Copyright (c) 2006, 2007 Montel Laurent, <montel@kde.org>
+# Copyright (c) 2008, 2009 Gael Guennebaud, <g.gael@free.fr>
+# Copyright (c) 2010 Jitse Niesen, <jitse@maths.leeds.ac.uk>
+# Copyright (c) 2015 Jack Poulson, <jack.poulson@gmail.com>
+# Redistribution and use is allowed according to the terms of the BSD license.
 
-# NOTE: MPFR prefix is understood to be the path to the root of the MPFR
-# installation library.
-set(MPFR_PREFIX "" CACHE PATH "The path to the previx of an MPFR installation")
+find_path(MPFR_INCLUDES NAMES mpfr.h PATHS $ENV{GMPDIR} $ENV{MPFRDIR}
+  ${INCLUDE_INSTALL_DIR})
 
-find_path(MPFR_INCLUDE_DIR mpfr.h
-PATHS ${MPFR_PREFIX}/include /usr/include /usr/local/include)
-
-find_library(MPFR_LIBRARY NAMES mpfr
-PATHS ${MPFR_PREFIX}/lib /usr/lib /usr/local/lib)
-
-if(MPFR_INCLUDE_DIR AND MPFR_LIBRARY)
-get_filename_component(MPFR_LIBRARY_DIR ${MPFR_LIBRARY} PATH)
-set(MPFR_FOUND TRUE)
+# Set MPFR_FIND_VERSION to 1.0.0 if no minimum version is specified
+if(NOT MPFR_FIND_VERSION)
+  if(NOT MPFR_FIND_VERSION_MAJOR)
+    set(MPFR_FIND_VERSION_MAJOR 1)
+  endif()
+  if(NOT MPFR_FIND_VERSION_MINOR)
+    set(MPFR_FIND_VERSION_MINOR 0)
+  endif()
+  if(NOT MPFR_FIND_VERSION_PATCH)
+    set(MPFR_FIND_VERSION_PATCH 0)
+  endif()
+  set(MPFR_FIND_VERSION
+    "${MPFR_FIND_VERSION_MAJOR}.${MPFR_FIND_VERSION_MINOR}.${MPFR_FIND_VERSION_PATCH}")
 endif()
 
+if(MPFR_INCLUDES)
+  # Query MPFR_VERSION
+  file(READ "${MPFR_INCLUDES}/mpfr.h" _mpfr_version_header)
 
-if(MPFR_FOUND)
-if(NOT MPFR_FIND_QUIETLY)
-MESSAGE(STATUS "Found MPFR: ${MPFR_LIBRARY}")
+  string(REGEX MATCH "define[ \t]+MPFR_VERSION_MAJOR[ \t]+([0-9]+)"
+    _mpfr_major_version_match "${_mpfr_version_header}")
+  set(MPFR_MAJOR_VERSION "${CMAKE_MATCH_1}")
+  string(REGEX MATCH "define[ \t]+MPFR_VERSION_MINOR[ \t]+([0-9]+)"
+    _mpfr_minor_version_match "${_mpfr_version_header}")
+  set(MPFR_MINOR_VERSION "${CMAKE_MATCH_1}")
+  string(REGEX MATCH "define[ \t]+MPFR_VERSION_PATCHLEVEL[ \t]+([0-9]+)"
+    _mpfr_patchlevel_version_match "${_mpfr_version_header}")
+  set(MPFR_PATCHLEVEL_VERSION "${CMAKE_MATCH_1}")
+
+  set(MPFR_VERSION
+    ${MPFR_MAJOR_VERSION}.${MPFR_MINOR_VERSION}.${MPFR_PATCHLEVEL_VERSION})
+
+  # Check whether found version exceeds minimum required
+  if(${MPFR_VERSION} VERSION_LESS ${MPFR_FIND_VERSION})
+    set(MPFR_VERSION_OK FALSE)
+    message(STATUS "MPFR version ${MPFR_VERSION} found in ${MPFR_INCLUDES}, "
+                   "but at least version ${MPFR_FIND_VERSION} is required")
+  else()
+    set(MPFR_VERSION_OK TRUE)
+  endif()
 endif()
-elseif(MPFR_FOUND)
-if(MPFR_FIND_REQUIRED)
-message(FATAL_ERROR "Could not find MPFR")
-endif()
-endif()
+
+find_library(MPFR_LIBRARIES mpfr
+  PATHS $ENV{GMPDIR} $ENV{MPFRDIR} ${LIB_INSTALL_DIR})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(MPFR DEFAULT_MSG
+                                  MPFR_INCLUDES MPFR_LIBRARIES MPFR_VERSION_OK)
+mark_as_advanced(MPFR_INCLUDES MPFR_LIBRARIES)

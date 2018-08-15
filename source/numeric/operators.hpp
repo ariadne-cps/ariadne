@@ -396,7 +396,7 @@ struct Min : OperatorObject<Min> {
 };
 
 struct Abs : OperatorObject<Abs> {
-    static constexpr OperatorCode code() { return OperatorCode::MAX; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
+    static constexpr OperatorCode code() { return OperatorCode::ABS; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A> auto operator()(A&& a) const -> decltype(abs(a)) { return abs(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return a>=0 ? a : -a; }
 };

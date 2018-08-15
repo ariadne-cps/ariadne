@@ -826,7 +826,13 @@ template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e
         case OperatorKind::GRADED:
             return identical(e1.arg(),e2.arg()) && e1.num() == e2.num();
         case OperatorKind::BINARY:
-            return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
+            switch(e1.op()) {
+            case OperatorCode::MUL: case OperatorCode::ADD:
+                return (identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2())) ||
+                       (identical(e1.arg1(),e2.arg2()) && identical(e1.arg2(),e2.arg1()));
+            default:
+                return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
+            }
         default:
             return false;
     }

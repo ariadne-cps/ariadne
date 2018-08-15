@@ -114,7 +114,7 @@ endif()
 
 find_package(PythonLibs 2.4)
 find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python)
-find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python3)
+find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python27)
 if(PYTHONLIBS_FOUND AND (Boost_PYTHON_FOUND OR Boost_PYTHON27_FOUND))
     set(USE_PYTHON ON)
     set(BOOST_PYTHON_LIBRARIES "${Boost_LIBRARIES}") 

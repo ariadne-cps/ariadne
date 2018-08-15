@@ -5,8 +5,8 @@ project (Ariadne)
 enable_testing()
 include(CTest)
 
-set(Ariadne_VERSION_MAJOR 0)
-set(Ariadne_VERSION_MINOR 5)
+set(Ariadne_VERSION_MAJOR 2)
+set(Ariadne_VERSION_MINOR 0)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
   message(WARNING "Intel compiler not supported.")

@@ -35,4 +35,17 @@ add_library(pyariadne-src OBJECT
 )
 
 cotire(pyariadne-numeric-src)
+cotire(pyariadne-algebra-src)
 cotire(pyariadne-src)
+
+add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
+target_link_libraries (pyariadne ariadne ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
+
+add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
+set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
+target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} mpfr gmp)
+
+add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
+set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
+target_link_libraries (pyariadne-algebra ariadne ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})

@@ -138,6 +138,11 @@ add_subdirectory(test)
 add_subdirectory(examples)
 add_subdirectory(tutorials)
 
+if(USE_PYTHON)
+    add_subdirectory(wrap)
+    add_subdirectory(python)
+endif()
+
 add_library(ariadne-core SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
@@ -189,23 +194,6 @@ endif()
 if(CAIRO_FOUND)
     target_link_libraries(ariadne cairo)
     target_link_libraries(ariadne-kernel cairo)
-endif()
-
-if(USE_PYTHON)
-    add_subdirectory(wrap)
-    add_subdirectory(python)
-
-    add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
-    set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
-    target_link_libraries (pyariadne ariadne ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
-
-    add_library(pyariadne-numeric SHARED $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
-    set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
-    target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} mpfr gmp)
-
-    add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
-    set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
-    target_link_libraries (pyariadne-algebra ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ariadne)
 endif()
 
 install (TARGETS ariadne DESTINATION lib)

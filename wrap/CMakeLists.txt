@@ -1,17 +1,5 @@
-find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS python)
 
-find_package(PythonLibs 2.4)
-
-if(PYTHONLIBS_FOUND)
-  message("Found Python headers")
-  message("  PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
-  message("  PYTHON_LIBRARY_DIRS: ${PYTHON_LIBRARY_DIRS}")
-  message("  PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
-  include_directories(${PYTHON_INCLUDE_DIRS})
-else()
-  message(WARNING "Unable to find Python headers. You will not be able to use the Python interface.")
-endif()
-
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 add_library(pyariadne-numeric-src OBJECT
     numeric_module.cpp

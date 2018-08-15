@@ -699,7 +699,7 @@ template<class M> class VectorScaledFunctionPatch
     Void _compute_jacobian() const;
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
-    Void _resize(SizeType rs, SizeType as, ushort d, ushort s);
+    Void _resize(SizeType rs, SizeType as, unsigned short d, unsigned short s);
     virtual ScalarScaledFunctionPatch<M>* _get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
     virtual VectorScaledFunctionPatch<M>* _clone() const;
     virtual VectorScaledFunctionPatch<M>* _create() const;

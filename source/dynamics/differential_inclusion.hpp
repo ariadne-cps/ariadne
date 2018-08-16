@@ -101,9 +101,7 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
 }
 
 class DifferentialInclusion {
-    friend class DifferentialInclusionIVP;
 private:
-    DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
     DottedRealAssignments _dynamics;
     RealVariablesBox _inputs;
     ValidatedVectorFunction _F;
@@ -113,6 +111,7 @@ private:
     Bool _is_input_additive;
     Bool _has_singular_input;
 public:
+    DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
     DottedRealAssignments const& dynamics() const { return _dynamics; }
     RealVariablesBox const& inputs() const { return _inputs; }
     ValidatedVectorFunction const& F() const { return _F; }

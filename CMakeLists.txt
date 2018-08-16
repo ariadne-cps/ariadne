@@ -19,7 +19,9 @@ set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_CXX_FLAGS "-O1")
+endif()
 
 # add support for precompiled headers and single compilation unit
 include(cotire)

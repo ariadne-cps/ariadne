@@ -1,3 +1,6 @@
+enable_testing()
+include(CTest)
+
 set(UNIT_TESTS_NUMERIC
     test_logical
     test_integer

@@ -1,10 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (Ariadne)
 
-# enable dashboard scripting
-enable_testing()
-include(CTest)
-
 set(Ariadne_VERSION_MAJOR 2)
 set(Ariadne_VERSION_MINOR 0)
 
@@ -66,7 +62,6 @@ endif()
 
 find_package(Cairo)
 if(CAIRO_FOUND)
-    message("Found drawing package Cairo")
     set(HAVE_CAIRO_H ON)
     include_directories( ${CAIRO_INCLUDE_DIRS})
 else()
@@ -75,7 +70,6 @@ endif()
 
 find_package(GTK2)
 if(GTK2_FOUND)
-    message("Found GTK2")
     set(HAVE_GTK2_H ON)
     include_directories( ${GTK2_INCLUDE_DIRS})
     link_directories( ${GTK2_LIBRARY_DIRS})
@@ -87,7 +81,6 @@ set(Boost_REQUIRED_VERSION 1.36.0)
 find_package(Boost ${Boost_REQUIRED_VERSION})
 
 if(Boost_FOUND)
-    message("Found Boost")
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
     set(Boost_USE_STATIC_LIBS OFF)

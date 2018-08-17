@@ -44,6 +44,9 @@ template<class T> struct PointerTypedef { typedef T* Type; };
 template<class T> using PointerType = typename PointerTypedef<T>::Type;
 template<class T> using ConstPointerType = typename PointerTypedef<const T>::Type;
 
+template<> struct ReferenceTypedef<MultiIndex> { typedef MultiIndexReference Type; };
+template<> struct ReferenceTypedef<const MultiIndex> { typedef MultiIndexConstReference Type; };
+
 template<> struct PointerTypedef<MultiIndex> { typedef MultiIndexPointer Type; };
 template<> struct PointerTypedef<const MultiIndex> { typedef MultiIndexConstPointer Type; };
 

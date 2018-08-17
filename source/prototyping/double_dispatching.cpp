@@ -3,6 +3,8 @@
 #include <tuple>
 #include <iostream>
 
+#if defined HAVE_GMPXX_H
+
 #include <gmpxx.h>
 
 namespace Ariadne {
@@ -226,3 +228,5 @@ int main() {
     PRINT(mul(yw,yw));
 
 }
+
+#endif

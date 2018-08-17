@@ -46,6 +46,7 @@ template<class F> class SweeperInterface {
   protected:
     typedef typename F::PrecisionType PR;
   public:
+    virtual ~SweeperInterface<F>() { }
     inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_discard(a,x.raw()); }
     inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_discard(a,x.raw()); }
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }

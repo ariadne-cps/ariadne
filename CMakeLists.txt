@@ -106,7 +106,7 @@ elseif(NOT(Boost_PYTHON_FOUND OR Boost_PYTHON27_FOUND))
     message(WARNING "Unable to find any Boost Python component: cannot use Python bindings.")
 endif()
 
-configure_file (${PROJECT_SOURCE_DIR}/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
+configure_file (${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 

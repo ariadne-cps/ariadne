@@ -16,7 +16,4 @@
 #cmakedefine HAVE_CAIRO_H
 #cmakedefine HAVE_GTK2_H
 
-#cmakedefine HAVE_LIBBOOST_SERIALIZATION_HPP
-#cmakedefine ARIADNE_ENABLE_SERIALIZATION
-
 #endif /* ARIADNE_CONFIG_HPP */

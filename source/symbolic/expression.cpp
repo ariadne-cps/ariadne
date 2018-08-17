@@ -924,27 +924,6 @@ Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 
 
 
-SizeType dimension(const Space<Real>& spc)
-{
-    return spc.size();
-}
-
-Space<Real> real_space(const List<Identifier>& vars)
-{
-    return Space<Real>(vars);
-}
-
-List<Identifier> variable_names(const List<Variable<Real>>& vars)
-{
-    List<Identifier> nms; nms.reserve(vars.size()); for(SizeType i=0; i!=vars.size(); ++i) { nms.append(vars[i].name()); } return nms;
-}
-
-List<Identifier> variable_names(const Space<Real>& spc)
-{
-    return spc.variable_names();
-}
-
-
 const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
     typedef EffectiveNumber Y;

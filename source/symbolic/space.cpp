@@ -30,12 +30,13 @@
 #include <iosfwd>
 #include <iostream>
 
+#include "space.hpp"
+
 #include "../utility/macros.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/container.hpp"
 
 #include "../symbolic/variables.hpp"
-#include "space.hpp"
 
 namespace Ariadne {
 
@@ -139,12 +140,7 @@ template<class T> Space<T>& Space<T>::append(const VariableType& v) {
     _variables.push_back(v.name()); return *this;
 }
 
-template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc) { return os << spc.variables(); }
-
-template<class T> Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
-    Space<T> r(spc1); r.adjoin(spc2); return r; }
-template<class T> Space<T> join(const Space<T>& spc1, const Variable<T>& var2) {
-    Space<T> r(spc1); r.append(var2); return r; }
+template class Space<Real>;
 
 template<class T> Variable<T> variable(const Identifier& s) { return Variable<T>(s); }
 template<class T> Space<T> variables(const List<Identifier>& s) { return Space<T>(s); }
@@ -168,6 +164,5 @@ List<Identifier> variable_names(const Space<Real>& spc)
 {
     return spc.variable_names();
 }
-
 
 } // namespace Ariadne

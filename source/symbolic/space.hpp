@@ -99,12 +99,12 @@ template<class T> class Space
     List<Identifier> _variables;
 };
 
-template class Space<Real>;
+template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc) { return os << spc.variables(); }
 
-template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc);
-
-template<class T> Space<T> join(const Space<T>& spc1, const Space<T>& spc2);
-template<class T> Space<T> join(const Space<T>& spc1, const Variable<T>& var2);
+template<class T> Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
+    Space<T> r(spc1); r.adjoin(spc2); return r; }
+template<class T> Space<T> join(const Space<T>& spc1, const Variable<T>& var2) {
+    Space<T> r(spc1); r.append(var2); return r; }
 
 // Compiled conversion operators to allow conversion between expression and function.
 SizeType dimension(const Space<Real>& spc);

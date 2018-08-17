@@ -68,10 +68,6 @@ namespace Ariadne {
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "output/serialization.hpp"
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
 #include "output/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 

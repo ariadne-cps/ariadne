@@ -46,15 +46,23 @@ check_include_file("dlfcn.h" HAVE_DLFCN_H)
 check_include_file("execinfo.h" HAVE_EXECINFO_H)
 check_include_file_cxx("cxxabi.h" HAVE_CXXABI_H)
 if((${HAVE_DLFCN_H}) AND (${HAVE_EXECINFO_H}) AND (${HAVE_CXXABI_H}))
-    set(ARIADNE_ENABLE_STACK_TRACE TRUE)
+    set(ARIADNE_ENABLE_STACK_TRACE ON)
 endif()
 
 find_package(GMP)
 if(GMP_FOUND)
-    include_directories(${GMP_INCLUDE_DIRS})
+    include_directories(${GMP_INCLUDES})
 else()
     message(FATAL_ERROR "Unable to find GMP.")
 endif()
+
+find_package(GMPXX)
+if(GMPXX_FOUND)
+    set(HAVE_GMPXX_H ON)
+    include_directories(${GMPXX_INCLUDE_DIR})
+else()
+    message(WARNING "Unable to find GMPXX. Related functionality will be disabled.")
+endif()    
 
 find_package(MPFR)
 if(MPFR_FOUND)
@@ -146,12 +154,12 @@ add_library(ariadne-kernel SHARED
 add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-utility>
     $<TARGET_OBJECTS:ariadne-numeric>
-    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-algebra>
     $<TARGET_OBJECTS:ariadne-function>
     $<TARGET_OBJECTS:ariadne-geometry>
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
+    $<TARGET_OBJECTS:ariadne-symbolic>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
@@ -163,6 +171,10 @@ target_link_libraries(ariadne-core dl)
 target_link_libraries(ariadne ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+
+if(GMPXX_FOUND)
+    target_link_libraries(ariadne ${GMPXX_LIBRARIES})
+endif()
 
 if(GTK2_FOUND)
     target_link_libraries(ariadne ${GTK2_LIBRARIES})

@@ -207,6 +207,8 @@ template<> class FunctionFactoryInterface<ValidatedTag>
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
         return factory.write(os); }
+  public:
+    virtual ~FunctionFactoryInterface<ValidatedTag>() { };
 };
 
 

@@ -10,6 +10,9 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
+enable_testing()
+include(CTest)
+
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

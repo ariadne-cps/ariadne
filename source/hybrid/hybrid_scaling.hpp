@@ -48,6 +48,7 @@ class HybridScalingInterface
 {
   public:
     //!
+    virtual ~HybridScalingInterface() { }
     virtual HybridScalingInterface* clone() const = 0;
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual Void write(OutputStream& os) const = 0;

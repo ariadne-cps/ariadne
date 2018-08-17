@@ -49,13 +49,6 @@ TwoExp Accuracy::error() const {
     return TwoExp(-(Int)this->bits());
 }
 
-template<> Ball<FloatDP>::Ball(Real const& r, DoublePrecision pr) : Ball(r.get(pr)) { }
-template<> Bounds<FloatDP>::Bounds(Real const& r, DoublePrecision pr) : Bounds<FloatDP>(r.get(pr)) { }
-template<> UpperBound<FloatDP>::UpperBound(Real const& r, DoublePrecision pr) : UpperBound<FloatDP>(r.upper().get(pr)) { }
-template<> LowerBound<FloatDP>::LowerBound(Real const& r, DoublePrecision pr) : LowerBound<FloatDP>(r.lower().get(pr)) { }
-template<> Approximation<FloatDP>::Approximation(Real const& r, DoublePrecision pr) : Approximation<FloatDP>(r.get(pr)) { }
-
-
 template<class X> struct ValidatedRealWrapper;
 
 template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInterface, public DyadicBounds {

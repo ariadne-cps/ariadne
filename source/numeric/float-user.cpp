@@ -231,10 +231,11 @@ template<class F, class FE> Ball<F,FE>& Ball<F,FE>::operator=(ValidatedNumber co
     return *this = Ball(y,this->precision(),this->error_precision());
 }
 
+/*
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this));
 }
-
+*/
 
 template<class F> Bounds<F>::Bounds(ExactDouble d, PR pr)
     : _l(d.get_d(),downward,pr),_u(d.get_d(),upward,pr) {

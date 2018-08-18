@@ -161,11 +161,11 @@ template<class F> Value<F>& Value<F>::operator=(Dyadic const& w) {
 template<class F> auto Value<F>::create(ValidatedNumber const& y) const -> Ball<F> {
     return Ball<F>(y,this->precision());
 }
-
+/*
 template<class F> Value<F>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<Value<F>>(*this));
 }
-
+*/
 template<class F, class FE> Ball<F,FE>::Ball(ExactDouble d, PR pr)
     : _v(d.get_d(),to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
 }
@@ -301,11 +301,11 @@ template<class F> Bounds<F> Bounds<F>::create(ValidatedNumber const& y) const {
 template<class F> Bounds<F>& Bounds<F>::operator=(ValidatedNumber const& y) {
     return *this = Bounds<F>(y,this->precision());
 }
-
+/*
 template<class F> Bounds<F>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<Bounds<F>>(*this));
 }
-
+*/
 template<class F> UpperBound<F>::UpperBound(ExactDouble d, PR pr)
     : _u(d.get_d(),upward,pr) {
 }
@@ -456,11 +456,11 @@ template<class F> Approximation<F>& Approximation<F>::operator=(ApproximateNumbe
 template<class F> Approximation<F> Approximation<F>::create(ApproximateNumber const& y) const {
     return Approximation<F>(y,this->precision());
 }
-
+/*
 template<class F> Approximation<F>::operator ApproximateNumber() const {
     return ApproximateNumber(new NumberWrapper<Approximation<F>>(*this));
 }
-
+*/
 
 
 

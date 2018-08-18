@@ -248,6 +248,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType a
 }
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(SizeType as, SizeType j) {
+    ARIADNE_ASSERT(j<as);
     return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::coordinate(j)));
 }
 

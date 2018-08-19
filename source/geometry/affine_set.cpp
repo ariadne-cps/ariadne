@@ -491,6 +491,10 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     // Check for disjointness using linear program
     ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
+    if (definitely(not feasible)) {
+        return;
+    }
+
     Bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
         done=lpsolver.lpstep(lp.c,lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x);

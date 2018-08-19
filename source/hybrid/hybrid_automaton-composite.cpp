@@ -83,18 +83,6 @@ class CompositeHybridSpace
 
 namespace {
 
-List<DottedRealVariable> dot(const List<RealVariable>& v) {
-    List<DottedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
-    return result;
-}
-
-List<PrimedRealVariable> next(const List<RealVariable>& v) {
-    List<PrimedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(next(v[i])); }
-    return result;
-}
-
 Identifier name_composition(const List<HybridAutomaton>& components)
 {
     List<HybridAutomaton>::ConstIterator comp_it = components.begin();

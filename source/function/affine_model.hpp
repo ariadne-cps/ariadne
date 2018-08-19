@@ -139,7 +139,7 @@ class AffineModel<ValidatedTag,F>
 {
     typedef ValidatedTag P;
     typedef typename F::PrecisionType PR;
-    friend class AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBounds<PR>>;
+    friend struct AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBounds<PR>>;
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;

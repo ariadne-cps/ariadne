@@ -53,8 +53,6 @@
 
 namespace Ariadne {
 
-static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
-
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>>;
 

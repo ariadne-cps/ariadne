@@ -277,7 +277,6 @@ class TestAffineSet
 
     Void test_uniform_error() {
         FloatDPValue e=0.25_ex;
-        ExactIntervalType I = ExactIntervalType(-1,+1);
         ValidatedNumericType E = ValidatedNumericType(-e,+e);
         D = ExactBoxType::unit_box(2);
         x = Affine<ValidatedNumericType>::variables(2);

@@ -126,7 +126,7 @@ Void MultiIndexList::clear() {
     _size=0u; }
 
 Bool operator==(const MultiIndexList& lst1, const MultiIndexList& lst2) {
-    if(lst1._size!=lst2._size or lst2._argument_size != lst2._argument_size) { return false; }
+    if(lst1._size!=lst2._size or lst1._argument_size != lst2._argument_size) { return false; }
     for(SizeType i=0; i!=lst1._size; ++i) { if(lst1[i]!=lst2[i]) { return false; } } return true; }
 
 OutputStream& operator<<(OutputStream& os, MultiIndexList const& lst) {

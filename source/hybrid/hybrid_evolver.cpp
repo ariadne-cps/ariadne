@@ -923,8 +923,8 @@ _apply_guard_step(HybridEnclosure& set,
             if(possibly(flow_derivative_range.lower()<=0)) {
                 jump_set.new_activation(event,flow_derivative_function);
             }
-            // Filter through to URGENT
             if(definitely(jump_set.is_empty())) { return; }
+            [[fallthrough]];
         }
         case URGENT:
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");

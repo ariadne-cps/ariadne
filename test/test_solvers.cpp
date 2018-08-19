@@ -134,7 +134,7 @@ class TestSolver
             ARIADNE_TEST_NOTIFY(solver_class_name<<" silently returns partially defined vector implicit function.");
         }
         catch(const SolverException& e) {
-            ARIADNE_TEST_THROWS(solver->implicit(f,p,r),e);
+            ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
             ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined vector implicit function.");
         }
 
@@ -181,7 +181,7 @@ class TestSolver
             ARIADNE_TEST_NOTIFY(solver_class_name<<" silently returns partially defined scalar implicit function.");
         }
         catch(const SolverException& e) {
-            ARIADNE_TEST_THROWS(solver->implicit(g,p,r),e);
+            ARIADNE_TEST_THROWS(solver->implicit(g,p,r),SolverException);
             ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined scalar implicit function.");
         }
 

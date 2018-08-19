@@ -948,7 +948,6 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Ident
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
     typedef EffectiveNumber Y;
-    typedef Identifier I;
     switch(e.kind()) {
         case OperatorKind::GRADED: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
         case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));

@@ -286,7 +286,8 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
     Vector<ErrorType> process(Norms const& n, PositiveFloatDPValue const& h) const;
-
+  public:
+    virtual ~ApproximationErrorProcessor() { }
 };
 
 
@@ -323,6 +324,7 @@ class InputApproximator : public InputApproximatorInterface {
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
+    virtual ~InputApproximator() { }
 };
 
 
@@ -343,6 +345,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
+    virtual ~InputApproximatorBase() { }
 };
 
 
@@ -362,6 +365,7 @@ public:
     void set_number_of_variables_to_keep(Nat number_of_variables_to_keep) { _number_of_variables_to_keep = number_of_variables_to_keep; }
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType f) const override;
     virtual Void simplify(ValidatedVectorFunctionModelType& f) const override;
+    virtual ~LohnerReconditioner() { }
 };
 
 

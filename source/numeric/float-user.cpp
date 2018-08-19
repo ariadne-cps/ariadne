@@ -870,7 +870,6 @@ template<class F> struct Operations<Bounds<F>> {
             return Bounds<F>(rec(down,x._u),rec(up,x._l));
         } else {
             F inf=F::inf(x.precision());
-            F rl=-inf; F ru=+inf;
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
             return Bounds<F>(-inf,+inf);
         }
@@ -888,7 +887,6 @@ template<class F> struct Operations<Bounds<F>> {
         const F& x1l=x1._l; const F& x1u=x1._u;
         const F& x2l=x2._l; const F& x2u=x2._u;
         F rl,ru;
-        typename F::RoundingModeType rnd=F::get_rounding_mode();
         if(x1l>=0) {
             if(x2l>=0) {
                 rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);

@@ -284,7 +284,6 @@ template<class X> Vector< Differential<X> > second_derivative(const ValidatedVec
 }
 
 template<class Vec, class Diff> Void set_gradient(Vec& g, const Diff& D) {
-    typedef typename Diff::ValueType X;
     Nat i=0;
     typename Diff::ConstIterator iter=D.begin();
     if(iter!=D.end() && iter->index().degree()==0) { ++iter; }
@@ -1854,14 +1853,10 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, Exac
     FloatApproximationVector dl=lower_bounds(D);
     FloatApproximationVector du=upper_bounds(D);
 
-    ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::feasibility_step(D,g,C,x,y,w)\n");
+    ARIADNE_LOG(4,"PenaltyFunctionOptimiser::feasibility_step(D,g,C,x,y,w)\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<"\n");
     ARIADNE_LOG(5,"  dl ="<<dl<<", du="<<du<<"\n  cl ="<<cl<<",  cu ="<<cu<<"\n");
     ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<"\n");
-
-    static const double gamma=1.0/1024;
-    static const double sigma=1.0/8;
-    static const double scale=0.75;
 
     ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
     ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);

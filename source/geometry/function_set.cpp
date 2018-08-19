@@ -45,8 +45,6 @@
 
 namespace Ariadne {
 
-static const Nat verbosity = 0u;
-
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
 enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to draw a set.
@@ -908,7 +906,6 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
 
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
-    DoublePrecision prec;
     ExactBoxType result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=over_approximating_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
@@ -967,7 +964,6 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
     DoublePrecision prec;
 
     Vector<ExactIntervalType> domain = this->domain();
@@ -1267,7 +1263,6 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     ARIADNE_ASSERT(set1.number_of_constraints()==set2.number_of_constraints());
 
     const Nat np = set1.number_of_parameters();
-    const Nat nc = set1.number_of_parameters();
 
     const ExactBoxType& domain1 = set1.domain();
     const ExactBoxType& domain2 = set2.domain();

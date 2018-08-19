@@ -302,7 +302,7 @@ double sin_rnd(double x) {
     case +1: { w = +y - 1*half_pi_opp; w=-w; s=pos_cos_rnd_series(w); break; }
     case +2: { w = -y + 1*half_pi_rnd; w=-w; s=pos_cos_rnd_series(w); break; }
     case +3: { w = -y + 2*half_pi_rnd; w=+w; s=pos_sin_rnd_series(w); break; }
-    default: { assert(false); }
+    default: { s=0; assert(false); }
     }
 
     return s;
@@ -382,6 +382,7 @@ double cos_rnd(double x) {
         w=sub_opp(pi_opp,y);
         c=neg_cos_rnd_series(w);
     } else {
+        w=0;c=0;
         assert(false);
     }
 

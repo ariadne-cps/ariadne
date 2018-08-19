@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-template<class A, class X=typename A::NumericType> class AlgebraOperations;
+template<class A, class X=typename A::NumericType> struct AlgebraOperations;
 
 template<class A> class GradedAlgebraOperations {
     typedef typename A::NumericType X;

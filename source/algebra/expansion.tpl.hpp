@@ -51,7 +51,7 @@ template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as)
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
-    : _zero_coefficient(z), _indices(0u,I(as)), _coefficients(0,z)
+    : _indices(0u,I(as)), _coefficients(0,z), _zero_coefficient(z)
 {
     _indices.reserve(cap); _coefficients.reserve(cap);
 }
@@ -92,7 +92,7 @@ namespace std {
 */
 
 template<class I, class X> Expansion<I,X>::Expansion(const Expansion<I,X>& e)
-    : _zero_coefficient(e._zero_coefficient), _indices(e._indices), _coefficients(e._coefficients)
+    : _indices(e._indices), _coefficients(e._coefficients), _zero_coefficient(e._zero_coefficient)
 {
     this->_indices.reserve(e._indices.capacity());
     this->_coefficients.reserve(e._coefficients.capacity());
@@ -112,24 +112,24 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expan
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(Expansion<I,X>&& e)
-    : _zero_coefficient(std::move(e._zero_coefficient)), _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients))
+    : _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients)), _zero_coefficient(std::move(e._zero_coefficient))
 {
 }
 
 template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(Expansion<I,X>&& e)
 {
     if(this!=&e) {
-        _zero_coefficient=std::move(e._zero_coefficient);
         _indices=std::move(e._indices);
         _coefficients=std::move(e._coefficients);
+        _zero_coefficient=std::move(e._zero_coefficient);
     }
     return *this;
 }
 
 template<class I, class X> Void Expansion<I,X>::swap(Expansion<I,X>& other) {
-    std::swap(this->_zero_coefficient,other._zero_coefficient);
     std::swap(this->_indices,other._indices);
     std::swap(this->_coefficients,other._coefficients);
+    std::swap(this->_zero_coefficient,other._zero_coefficient);
 }
 
 template<class I, class X> SizeType Expansion<I,X>::number_of_terms() const {

@@ -1050,13 +1050,13 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     }
 
     // Recompute B and x if it appears that there are problems with numerical degeneracy
-    Bool possible_degeneracy=false;
+    /*Bool possible_degeneracy=false;
     for(Nat i=0; i!=m; ++i) {
         if(decide(xl[p[i]]>x[p[i]] || x[p[i]]>xu[p[i]])) {
             possible_degeneracy=true;
             break;
         }
-    }
+    }*/
     B=compute_B<X>(A,p);
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
     for(Nat i=0; i!=m; ++i) {

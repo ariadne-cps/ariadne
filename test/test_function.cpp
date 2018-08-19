@@ -45,7 +45,6 @@ using namespace Ariadne;
 
 class TestFunction
 {
-    DoublePrecision pr;
   public:
     Void test();
   private:
@@ -94,8 +93,6 @@ Void TestFunction::test_concept()
 
 Void TestFunction::test_scalar_univariate_function()
 {
-    SizeOne one;
-
     ARIADNE_TEST_CONSTRUCT(FloatDPApproximation,p,({3.0_approx}));
 
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarUnivariateFunction,o,constant(1));

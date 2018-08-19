@@ -59,10 +59,7 @@ void TestCrossingsIssue::test_crossings()
     evolver.configuration().set_maximum_enclosure_radius(0.5);
     evolver.configuration().set_maximum_step_size(0.0001);
 
-    // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     HybridSet initial_set({automaton|far},{x==0});
 
@@ -77,7 +74,7 @@ void TestCrossingsIssue::test_crossings()
     HybridBoxSet guard_set(automaton|far,{t.in(0,2*max_t),x.in(M-L,M+L)});
     plot("crossings_issue",Axes2d(0.0,t,1.1*max_t.get_d(), 0.0,x,1.1*max_x.get_d()), Colour(1.0,0.5,0.0), guard_set, Colour(0.0,0.5,1.0), orbit);
 */
-    bool has_crossed = true;
+
     for (auto enclosure : orbit.final()) {
     	ARIADNE_TEST_ASSERT(enclosure.previous_events().size() == 2);
     }

@@ -76,8 +76,10 @@ class TestConstrainedImageSet
         ExactBoxType bx(cast_exact_box(set.bounding_box()));
         LowerKleenean overlaps = set.overlaps(bx);
         ValidatedLowerKleenean check_overlaps=overlaps.check(Effort::get_default());
+        ARIADNE_TEST_ASSERT(definitely(not check_overlaps));
         LowerKleenean separated = set.separated(bx);
         ValidatedLowerKleenean check_separated=separated.check(Effort::get_default());
+        ARIADNE_TEST_ASSERT(definitely(check_separated));
     }
 
     Void test_geometry() {

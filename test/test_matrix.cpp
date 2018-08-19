@@ -128,7 +128,6 @@ TestMatrix::test_misc()
     Array<FloatDPApproximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
     Array<FloatDPBounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
     FloatDPApproximation* Aptr=Aary.begin();
-    FloatDPBounds* iAptr=iAary.begin();
 
     Matrix<FloatDPApproximation> A0;
     ARIADNE_TEST_PRINT(A0);
@@ -161,7 +160,6 @@ TestMatrix::test_misc()
     A1=Matrix<FloatDPApproximation>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
-    typedef FloatApproximationMatrix MatrixType;
     ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr));
     ARIADNE_TEST_EQUALS(-FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{-1.,-2.},{-3.,-4.}},pr));
     ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)+FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{6.,9.},{11.,10.}},pr));

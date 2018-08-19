@@ -129,7 +129,6 @@ Void
 TestVector::test_misc()
 {
     DoublePrecision pr;
-    Int n=3;
     Array<FloatDPApproximation> vary={{-4.0,3.0,1.0},dp};
     FloatDPApproximation x={1.5,dp};
 

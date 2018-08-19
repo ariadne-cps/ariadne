@@ -314,7 +314,6 @@ class TestAffineSet
     Void test_draw() {
         ExactFloatVector2d offsets{0.0,0.0}; // Offsets
         ExactFloatVector& o=offsets;
-        double& ox=(double&)offsets[0]; double& oy=(double&)offsets[1];
         Polytope2d expected_set(1,0.0,0.0);
         Vector< Affine<ValidatedNumericType> > a;
         Vector<ExactIntervalType> dom;

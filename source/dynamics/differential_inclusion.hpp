@@ -280,11 +280,13 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
   public:
     ApproximationErrorProcessor(DifferentialInclusion const& di) : _di(di), _enable_componentwise_error(false) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
+  private:
+    DifferentialInclusion const& _di;
   protected:
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
     Vector<ErrorType> process(Norms const& n, PositiveFloatDPValue const& h) const;
-    DifferentialInclusion const& _di;
+
 };
 
 
@@ -332,7 +334,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
     SweeperDP _sweeper;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
     InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
-        _di(di), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _sweeper(sweeper), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
+        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
     InputApproximation _kind;
     Nat _num_params_per_input;

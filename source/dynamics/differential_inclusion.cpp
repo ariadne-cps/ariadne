@@ -455,7 +455,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         UpperBoxType B;
         PositiveFloatDPValue h;
 
-        std::tie(h,B)=this->flow_bounds(di.F(),V,D,hsug);
+        std::tie(h,B)=this->flow_bounds(F,V,D,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -467,7 +467,6 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
         ARIADNE_LOG(4,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
 
-        SizeType i = 0;
         for (auto i : range(approximations_to_use.size())) {
             this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximations_to_use.at(i)));
             ARIADNE_LOG(5,"checking approximation "<<this->_approximator->kind()<<"\n");
@@ -730,7 +729,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
         h=hlf(h);
     }
 
-    for(auto i : range(4)) {
+    for(Nat i=0; i<4; ++i) {
         B=D+IntervalDomainType(0,h)*apply(f,BV);
         BV = product(B,UpperBoxType(V));
     }
@@ -750,7 +749,7 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
     auto picardPhi=ValidatedVectorTaylorFunctionModelDP(n,domain,swp);
     picardPhi=picardPhi+cast_singleton(B);
 
-    for (auto i : range(NUMBER_OF_PICARD_ITERATES)) {
+    for(Nat i=0; i<NUMBER_OF_PICARD_ITERATES; ++i) {
         auto dyn_of_phi = compose(dyn,join(picardPhi,af));
         picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.argument_size()-1)+x0f;
     }
@@ -778,7 +777,7 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
 
 template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto result = D;
-    for (Nat i : range(this->_num_params_per_input))
+    for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return product(result,IntervalDomainType(-h,+h));
 }

@@ -482,9 +482,9 @@ OutputStream& Expansion<I,X>::write(OutputStream& os, const Array<String>& varia
             os << " ";
             if(decide(v>=0) && !first_term) { os<<"+"; }
             first_term=false;
-            bool first_factor=true;
+            //bool first_factor=true;
             if(decide(v<0)) { os<<"-"; }
-            if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); first_factor=false; }
+            if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); /*first_factor=false;*/ }
 /*
             for(SizeType j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {

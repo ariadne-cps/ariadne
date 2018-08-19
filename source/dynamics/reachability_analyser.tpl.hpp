@@ -648,7 +648,6 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
     Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");

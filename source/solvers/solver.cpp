@@ -48,13 +48,7 @@ namespace Ariadne {
 
 namespace {
 
-Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModelDP>& f) {
-    Vector<UpperIntervalType> r(f.size()); for(Nat i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
-}
-
-Vector<ValidatedTaylorModelDP>& clobber(Vector<ValidatedTaylorModelDP>& h) {
-    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
-
+/*
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumericType>
 jacobian2(const Vector<ValidatedTaylorModelDP>& f, const Vector<ValidatedNumericType>& x)
@@ -113,7 +107,7 @@ jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
     }
     return J;
 }
-
+*/
 
 
 } // namespace

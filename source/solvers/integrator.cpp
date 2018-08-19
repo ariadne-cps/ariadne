@@ -205,7 +205,7 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
             try {
                 step_function=this->flow_step(vf,dx,h,bx);
                 flow_successfully_computed=true;
-            } catch(FlowTimeStepException e) {
+            } catch(const FlowTimeStepException& e) {
                 h=hlf(h);
             }
         }
@@ -264,7 +264,7 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType&
     while(true) {
         try {
             return this->flow_step(vf,dx,h,bx);
-        } catch(FlowTimeStepException e) {
+        } catch(const FlowTimeStepException& e) {
             h=hlf(h);
         }
     }

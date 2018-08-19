@@ -67,7 +67,7 @@ class AffineModel<ApproximateTag,F>
 {
     typedef ApproximateTag P;
     typedef typename F::PrecisionType PR;
-    friend class AlgebraOperations<AffineModel<ApproximateTag,F>,FloatApproximation<PR>>;
+    friend struct AlgebraOperations<AffineModel<ApproximateTag,F>,FloatApproximation<PR>>;
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;

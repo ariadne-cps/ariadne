@@ -46,11 +46,11 @@ template class AffineModel<ApproximateTag,FloatMP>;
 template class AffineModel<ValidatedTag,FloatDP>;
 template class AffineModel<ValidatedTag,FloatMP>;
 
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatDP>>;
-template class AlgebraOperations<AffineModel<ApproximateTag,FloatMP>>;
+template struct AlgebraOperations<AffineModel<ApproximateTag,FloatDP>>;
+template struct AlgebraOperations<AffineModel<ApproximateTag,FloatMP>>;
 
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatDP>>;
-template class AlgebraOperations<AffineModel<ValidatedTag,FloatMP>>;
+template struct AlgebraOperations<AffineModel<ValidatedTag,FloatDP>>;
+template struct AlgebraOperations<AffineModel<ValidatedTag,FloatMP>>;
 
 template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, DoublePrecision);
 

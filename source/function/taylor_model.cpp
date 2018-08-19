@@ -33,20 +33,20 @@ template class SweeperBase<FloatDP>;
 template class SweeperBase<FloatMP>;
 
 template class TaylorModel<ValidatedTag,FloatDP>;
-template class AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;
 
 template class TaylorModel<ApproximateTag,FloatDP>;
-template class AlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
+template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatDP>>;
 
 
 template class TaylorModel<ValidatedTag,FloatMP>;
-template class AlgebraOperations<TaylorModel<ValidatedTag,FloatMP>>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatMP>>;
 
 template class TaylorModel<ApproximateTag,FloatMP>;
-template class AlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
+template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 
 } // namespace Ariadne

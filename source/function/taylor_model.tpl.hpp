@@ -747,7 +747,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::ifma(const TaylorModel<Valid
     ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
-template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
+template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
     : NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>
 {
     typedef TaylorModel<ValidatedTag,F> ModelType;
@@ -1884,7 +1884,7 @@ template<class F> Void TaylorModel<ApproximateTag,F>::ifma(const TaylorModel<App
 }
 
 
-template<class F> class AlgebraOperations<TaylorModel<ApproximateTag,F>>
+template<class F> struct AlgebraOperations<TaylorModel<ApproximateTag,F>>
     : NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>
 {
     typedef typename F::PrecisionType PR;

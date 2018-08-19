@@ -35,10 +35,10 @@ template class Polynomial<FloatDPApproximation>;
 template class Polynomial<FloatDPBounds>;
 template class Polynomial<UpperIntervalType>;
 
-template class AlgebraOperations<Polynomial<FloatDP>>;
-template class AlgebraOperations<Polynomial<FloatDPApproximation>>;
-template class AlgebraOperations<Polynomial<FloatDPBounds>>;
-// template class AlgebraOperations<Polynomial<UpperIntervalType>>;
+template struct AlgebraOperations<Polynomial<FloatDP>>;
+template struct AlgebraOperations<Polynomial<FloatDPApproximation>>;
+template struct AlgebraOperations<Polynomial<FloatDPBounds>>;
+// template struct AlgebraOperations<Polynomial<UpperIntervalType>>;
 
 template<> Void Polynomial<FloatDPValue>::cleanup() { }
 
@@ -50,8 +50,8 @@ template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<Stri
 
 template class Polynomial<FloatMPApproximation>;
 template class Polynomial<FloatMPBounds>;
-template class AlgebraOperations<Polynomial<FloatMPApproximation>>;
-template class AlgebraOperations<Polynomial<FloatMPBounds>>;
+template struct AlgebraOperations<Polynomial<FloatMPApproximation>>;
+template struct AlgebraOperations<Polynomial<FloatMPBounds>>;
 
 } //namespace Ariadne
 

@@ -957,13 +957,13 @@ template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Cos op, F 
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
 
-template class AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
-template class AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
-template class AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
+template struct AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
+template struct AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
+template struct AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
 
-template class AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
-template class AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
-template class AlgebraOperations<ScalarUnivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
 
 
 } // namespace Ariadne

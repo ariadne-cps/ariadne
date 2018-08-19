@@ -54,9 +54,9 @@ namespace Ariadne {
 template<SizeType AS, SizeType PS=0u, DegreeType SM=255u>
 struct ScalarFunctionData
 {
-    static const SizeType argument_size() { return AS; }
-    static const SizeType parameter_size() { return PS; }
-    static const DegreeType smoothness() { return SM; }
+    static SizeType argument_size() { return AS; }
+    static SizeType parameter_size() { return PS; }
+    static DegreeType smoothness() { return SM; }
 };
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
@@ -121,13 +121,13 @@ class VectorFunctionData
 {
   public:
     //!
-    static const SizeType result_size() { return RS; }
+    static SizeType result_size() { return RS; }
     //!
-    static const SizeType argument_size() { return AS; }
+    static SizeType argument_size() { return AS; }
     //!
-    static const SizeType parameter_size() { return PS; }
+    static SizeType parameter_size() { return PS; }
     //!
-    static const DegreeType smoothness() { return SM; }
+    static DegreeType smoothness() { return SM; }
 };
 
 

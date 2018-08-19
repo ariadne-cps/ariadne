@@ -57,17 +57,6 @@ UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) 
     return r;
 }
 
-UpperIntervalType emulrng(const RawFloatVector& x, const RawFloatVector& z) {
-    return emulrng(reinterpret_cast<ExactFloatVector const&>(x),reinterpret_cast<ExactFloatVector const&>(z));
-}
-
-PositiveFloatDPUpperBound total_widths(const UpperBoxType& bx) {
-    PositiveFloatDPUpperBound res=bx.zero_element().width();
-    for(Nat i=0; i!=bx.size(); ++i) {
-        res+=(bx[i].width());
-    }
-    return res;
-}
 
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res=bx.zero_element().width();
@@ -94,9 +83,6 @@ PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vec
     return res/bx.size();
 }
 
-FloatDP maximum_scaled_width(const UpperBoxType& bx, const Vector<FloatDP>& sf) {
-    return maximum_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDPValue>const&>(sf)).raw();
-}
 
 FloatDP average_scaled_width(const UpperBoxType& bx, const Vector<FloatDP>& sf) {
     return average_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDPValue>const&>(sf)).raw();

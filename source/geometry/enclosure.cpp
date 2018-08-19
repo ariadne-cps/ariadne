@@ -906,7 +906,6 @@ Enclosure::split_first_order() const
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat imax=nonlinearities.row_size();
     Nat jmax_in_row_imax=nonlinearities.column_size();
     FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
@@ -921,7 +920,6 @@ Enclosure::split_first_order() const
             }
         }
         if(row_sum>max_row_sum) {
-            imax=i;
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }

@@ -1190,12 +1190,12 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     double udbl=u.get_d();
     if(ldbl==0.0 && udbl==0.0) { return os << "0.0[:]"; }
     int errplc=FloatError<MultiplePrecision>::output_places;
-    int bndplc=FloatBounds<MultiplePrecision>::output_places;
+    //int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
     int log10wdth=log10floor(sub(to_nearest,u,l));
     int log10mag=log10floor(max(-ldbl,udbl));
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
-    int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
+    //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects
     int dgts=max(min(dgtswdth,dgtsprec),1);
     DecimalPlaces plcs{dgts};

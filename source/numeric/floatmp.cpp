@@ -415,7 +415,6 @@ String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
 }
 
 String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
-    static const double log2ten = 3.3219280948873621817;
     int zdgts = std::max(log10floor(x),0)+1;
     int fdgts = plcs;
     return print(x._mpfr,zdgts,fdgts,rnd);

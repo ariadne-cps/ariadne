@@ -57,14 +57,10 @@ Void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
 
 Void set_default_rounding() { _set_rounding_upward(); }
 
-
-static const double _quarter_pi_up=0.78539816339744839;
-static const double _half_pi_up=1.5707963267948968;
 static const double _pi_up=3.1415926535897936;
 static const double _pi_down=3.1415926535897931;
 
 static const double _quarter_pi_approx=0.78539816339744828;
-static const double _half_pi_approx=1.5707963267948966;
 static const double _pi_approx=3.1415926535897931;
 static const double _two_pi_approx=6.2831853071795862;
 static const double _sqrt2_approx=0.70710678118654757;
@@ -82,15 +78,6 @@ static inline double next_opp(double x) {
     volatile double y=-x; y=y+1e-300; y=y-1e-300; return -y;
 }
 
-
-static inline char rounding_mode_char()
-{
-    if((get_rounding_mode() & 3072) == 0000) { return 'n'; }
-    if((get_rounding_mode() & 3072) == 1024) { return 'd'; }
-    if((get_rounding_mode() & 3072) == 2048) { return 'u'; }
-    if((get_rounding_mode() & 3072) == 3072) { return 'z'; }
-    return '?';
-}
 
 static inline double horner_rnd(Int n, double x, const long long int* c)
 {

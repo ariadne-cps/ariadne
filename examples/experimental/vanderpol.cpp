@@ -46,8 +46,6 @@ int main()
 
     cout << "Automaton = " << vanderpol << endl << endl;
 
-    typedef GeneralHybridEvolver::EnclosureType EnclosureType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     /// Create a HybridEvolver object

@@ -45,8 +45,6 @@ int main(int argc, char* argv[])
     std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType EnclosureType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     HybridSet initial_set(automaton|work,{1<=x<=1});

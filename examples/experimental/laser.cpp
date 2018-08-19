@@ -47,9 +47,7 @@ int main(int argc, char* argv[])
     std::cout << evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
 	AtomicDiscreteLocation scanning("scanning");
 	AtomicDiscreteLocation far("far");

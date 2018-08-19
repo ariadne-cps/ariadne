@@ -59,9 +59,7 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(0.25);
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
     Real a_max(0.0);

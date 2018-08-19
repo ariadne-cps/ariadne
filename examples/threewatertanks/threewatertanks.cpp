@@ -88,9 +88,7 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(0.1);
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
     HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},

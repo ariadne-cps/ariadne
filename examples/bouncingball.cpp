@@ -75,8 +75,6 @@ Int main(Int argc, const char* argv[])
     std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
-    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
     Real e(1.0/16);

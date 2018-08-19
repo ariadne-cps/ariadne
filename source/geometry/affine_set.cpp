@@ -286,7 +286,7 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
         //feasible=SimplexSolver<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
-    catch(DegenerateFeasibilityProblemException e) {
+    catch(const DegenerateFeasibilityProblemException& e) {
         feasible=indeterminate;
     }
     return !feasible;
@@ -852,7 +852,7 @@ Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
     try {
         boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
         ARIADNE_LOG(3,"boundary="<<boundary<<"\n");
-    } catch(std::runtime_error& e) {
+    } catch(const std::runtime_error& e) {
         throw e;
     }
 

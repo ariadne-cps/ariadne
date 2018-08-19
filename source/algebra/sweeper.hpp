@@ -208,7 +208,7 @@ template<class F> class GradedThresholdSweeper : public SweeperMixin<GradedThres
     F _sweep_threshold;
 public:
     GradedThresholdSweeper(PR precision, DegreeType degree, F sweep_threshold)
-            : _coefficient_precision(precision), _degree(degree), _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0); }
+            : _coefficient_precision(precision), _sweep_threshold(sweep_threshold), _degree(degree) { ARIADNE_ASSERT(sweep_threshold>=0); }
     DegreeType degree() const { return this->_degree; }
     inline F sweep_threshold() const { return _sweep_threshold; }
     inline PR precision() const { return _coefficient_precision; }

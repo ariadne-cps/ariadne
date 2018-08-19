@@ -13,13 +13,16 @@ endif()
 enable_testing()
 include(CTest)
 
-set(BUILD_SHARED_LIBS ON)
-set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MACOSX_RPATH 1)
+set(BUILD_SHARED_LIBS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_CXX_FLAGS "-O1")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  add_definitions(-Wno-non-template-friend)
 endif()
 
 # add support for precompiled headers and single compilation unit
@@ -117,10 +120,6 @@ endif()
 configure_file (${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  add_definitions(-Wno-non-template-friend)
-endif()
 
 add_subdirectory(source)
 add_subdirectory(test)

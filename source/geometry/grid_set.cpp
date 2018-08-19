@@ -1132,7 +1132,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
     //01. Allocate the Array of size _theGrid.dimensions() in which we will store
     //    the position in the path theBaseCellWord, for each dimension, from which on
     //    we need to inverse the path to get the proper neighboring cell.
-    Int invert_position[ num_dimensions ];
+    Vector<Int> invert_position(num_dimensions);
     const Int NO_INVERSE_POSITION = theBaseCellWord.size();
     //Initialize the Array with NO_INVERSE_POSITION to make sure that the inversion positions
     //for the dimensions that are not set to one in cellPosition will be undefined. Also,

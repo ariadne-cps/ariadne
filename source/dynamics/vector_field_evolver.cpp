@@ -82,7 +82,6 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -142,11 +141,6 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            Bool reach) const
 {
-    typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModelDP FunctionModelType;
-    typedef ValidatedVectorFunctionModelDP FlowModelType;
-
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     List< TimedEnclosureType > working_sets;
@@ -215,8 +209,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModelDP MapModelType;
     typedef ValidatedVectorFunctionModelDP FlowModelType;
     typedef Enclosure EnclosureType;
 

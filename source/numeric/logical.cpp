@@ -174,20 +174,4 @@ template<> String class_name<ValidatedLowerKleenean>() { return "ValidatedLowerK
 template<> String class_name<ValidatedUpperKleenean>() { return "ValidatedUpperKleenean"; }
 template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenean"; }
 
-void try_logical() {
-    Kleenean k(true);
-    Effort e(3);
-    Sierpinskian s(true);
-    Boolean b(true);
-    k=b and s;
-    k=k and b;
-    k=k and s;
-    k=s and not s;
-    ValidatedKleenean vk=k.check(e);
-    vk && vk;
-    ValidatedLowerKleenean vlk = vk;
-    vlk || vk;
-    ValidatedUpperKleenean vuk = !vlk;
-}
-
 } // namespace Ariadne

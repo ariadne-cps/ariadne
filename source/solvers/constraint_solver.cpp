@@ -460,24 +460,6 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFun
 }
 
 
-
-namespace {
-
-Void compute_monotonicity(UpperBoxType& domain, const EffectiveConstraint& constraint) {
-/*
-    static const Nat n = domain.size();
-
-    // Compute monotone formulae
-    Array<Sign> monotonicity(n);
-    Covector<ExactIntervalType> grad=constraint.function().gradient(domain);
-    for(Nat j=0; j!=n; ++j) {
-        monotonicity[j]=sign(grad[j]);
-    }
-*/
-}
-} // namespace
-
-
 Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const
 {
     return d.split();

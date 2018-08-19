@@ -65,7 +65,6 @@ Sign sign(const ExactIntervalType& ivl) {
 
 
 OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    static const FloatDP inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }

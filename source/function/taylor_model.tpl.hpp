@@ -79,14 +79,6 @@ Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, Do
 Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
-Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) { return ivl; }
-Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
-    Dyadic l(ivl.lower().raw()); Dyadic u(ivl.upper().raw());
-    return Interval<FloatDPUpperBound>(FloatDPLowerBound(l,pr),FloatDPUpperBound(u,pr)); }
-
-FloatDP const& convert_float(FloatDP const& flt, DoublePrecision) { return flt; }
-FloatMP convert_float(FloatDP const& flt, MultiplePrecision pr) { return FloatMP(flt.get_d(),pr); }
-
 Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
     return cast_exact(ivl); }
 Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
@@ -94,11 +86,6 @@ Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const&
     return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
 
 inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
-    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
-    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
-    return r;
-}
 
 } // namespace
 
@@ -607,7 +594,6 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
     VOLATILE FloatDP u,ml,myv;
-    FloatError<PR> te=nul(r.error()); // Twice the maximum accumulated error
     FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
     ValidatedApproximation<F> clmu=c;
 
@@ -919,7 +905,6 @@ template<class F> auto TaylorModel<ValidatedTag,F>::range() const -> RangeType {
 
 
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) const -> RangeType {
-    SizeType as=this->argument_size();
     FloatBounds<PR> g(0,0);
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         ConstReferenceType<MultiIndex> a=iter->index();
@@ -934,7 +919,6 @@ template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) c
 }
 
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Covector<RangeType> {
-    SizeType as=this->argument_size();
     Covector<FloatBounds<PR>> g(this->argument_size(),FloatBounds<PR>(0,0));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         ConstReferenceType<MultiIndex> a=iter->index();
@@ -1724,7 +1708,6 @@ template<class F> Matrix<UpperIntervalType>
 jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeType>& p) {
     typedef typename F::PrecisionType PR;
     SizeType rs=f.size();
-    SizeType as=f.zero_element().argument_size();
     SizeType ps=p.size();
     Matrix<FloatBounds<PR>> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {

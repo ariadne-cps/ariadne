@@ -35,8 +35,6 @@
 #include "../utility/macros.hpp"
 #include "../utility/logging.hpp"
 
-static const int verbosity=0;
-
 namespace Ariadne {
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
@@ -169,7 +167,6 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
 
     FloatDPValue zero;
 
-    const Nat m=A.row_size();
     const Nat n=A.column_size();
 
     // x should be an approximate solution to Ax=b

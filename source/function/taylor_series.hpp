@@ -86,8 +86,6 @@ TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomai
 inline
 Void TaylorSeries<FloatDPBounds>::sweep(FloatDPValue threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
-        FloatDPValue ei=_expansion[i];
-        PositiveFloatDPUpperBound pei=mag(ei);
         if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);
             _expansion[i]=0;

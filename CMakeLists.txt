@@ -148,7 +148,6 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>
-    $<TARGET_OBJECTS:ariadne-dynamics>
 )
 
 add_library(ariadne SHARED

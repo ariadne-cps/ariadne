@@ -81,8 +81,12 @@ foreach(TEST ${UNIT_TESTS_FUNCTION} ${UNIT_TESTS_GEOMETRY})
     target_link_libraries(${TEST} ariadne-kernel)
 endforeach()
 
-foreach(TEST ${UNIT_TESTS_SOLVERS} ${UNIT_TESTS_DYNAMICS} ${UNIT_TESTS_OUTPUT})
+foreach(TEST ${UNIT_TESTS_SOLVERS} ${UNIT_TESTS_OUTPUT})
     target_link_libraries(${TEST} ariadne-kernel)
+endforeach()
+
+foreach(TEST ${UNIT_TESTS_DYNAMICS} )
+    target_link_libraries(${TEST} ariadne)
 endforeach()
 
 foreach(TEST ${UNIT_TESTS_HYBRID})

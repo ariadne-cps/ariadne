@@ -116,7 +116,6 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
 }
 
 template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f, Projection const& prj) {
-    SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);
 
@@ -137,7 +136,6 @@ template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(Sca
     if(fpp) {
         return compose(ValidatedScalarTaylorFunctionModelDP(fpp),prj);
     }
-    SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);
     Vector<ScalarFunctionModel<P,PR,PRE>> id=f.create_coordinates(dom);
@@ -151,7 +149,6 @@ template<class P> ScalarFunction<P,BoxDomainType> compose(ScalarFunction<P,BoxDo
     if(fmp) {
         return compose(ScalarFunctionModelDP<P>(fmp),prj);
     }
-    SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);
     Vector<ScalarFunction<P,BoxDomainType>> id(ScalarFunction<P,BoxDomainType>::coordinates(dom));
@@ -160,7 +157,6 @@ template<class P> ScalarFunction<P,BoxDomainType> compose(ScalarFunction<P,BoxDo
 }
 
 template<class P> ScalarFunction<P,EuclideanDomain> compose(ScalarFunction<P,EuclideanDomain> const& f, Projection const& prj) {
-    SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);
     Vector<ScalarFunction<P,EuclideanDomain>> id(ScalarFunction<P,EuclideanDomain>::coordinates(dom));
@@ -169,7 +165,6 @@ template<class P> ScalarFunction<P,EuclideanDomain> compose(ScalarFunction<P,Euc
 }
 
 RealScalarFunction compose(RealScalarFunction const& f, Projection const& prj) {
-    SizeType as=prj.argument_size();
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);
     Vector<RealScalarFunction> id(RealScalarFunction::coordinates(dom));

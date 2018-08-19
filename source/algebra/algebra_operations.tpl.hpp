@@ -371,7 +371,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
     auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
-    auto rng=avg.pm(rad);
     Int n=integer_cast<Int>( round(avg/pi) );
 
     // Range reduce; use sin(x)=sin(x-2*n*pi)=sin((2*n+1)*pi-x)

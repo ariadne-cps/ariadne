@@ -412,7 +412,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
     List<ValidatedVectorFunctionModelDP> result;
 
-    auto step = 0;
+    SizeType step = 0;
 
     List<ScheduledApproximation> schedule;
     Map<InputApproximation,Nat> delays;

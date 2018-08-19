@@ -82,13 +82,9 @@ template<class P, class Y> VectorFunction<P,BoxDomainType> make_formula_function
 //------------------------ Function ----------------------------------//
 
 namespace {
-OutputStream& operator<<(OutputStream& os, SizeOne so) { return os << "1u"; }
-OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; }
-OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
 
 template<class D, class DD> D make_domain(DD dom);
 template<> IntervalDomainType make_domain<IntervalDomainType,BoxDomainType>(BoxDomainType dom) { throw std::runtime_error(""); }
-template<> BoxDomainType make_domain<BoxDomainType,IntervalDomainType>(IntervalDomainType dom) { throw std::runtime_error(""); }
 template<> IntervalDomainType make_domain<IntervalDomainType,IntervalDomainType>(IntervalDomainType dom) { return dom; }
 template<> BoxDomainType make_domain<BoxDomainType,BoxDomainType>(BoxDomainType dom) { return dom; }
 

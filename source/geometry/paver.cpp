@@ -388,7 +388,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
             break;
         }
         catch(const std::runtime_error& e) {
-            ARIADNE_ERROR(""<<e.what()<<"\n");
+            ARIADNE_FAIL_MSG(""<<e.what()<<"\n");
             break;
         }
         ARIADNE_LOG(6,", x="<<ax<<", y="<<ay<<", z="<<az<<"\n");

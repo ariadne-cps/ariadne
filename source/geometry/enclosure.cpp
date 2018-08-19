@@ -75,8 +75,6 @@
 
 namespace Ariadne {
 
-static const Nat verbosity = 0u;
-
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 typedef Vector<FloatDP> RawFloatVector;
@@ -93,14 +91,9 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl)
 
 namespace {
 
-ExactIntervalType cast_exact_interval(const Real& r) {
-    DoublePrecision pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
-}
-
 ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
     Vector<ErrorNumericType> errs(bx.dimension());
-    DoublePrecision dp;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
         make_lpair(dom[i],errs[i])=make_domain(bx[i]);
@@ -114,10 +107,6 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
     return res;
 };
 
-// TODO: Make more efficient
-inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
-}
 } // namespace
 
 Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
@@ -182,6 +171,12 @@ Enclosure::set_drawer(Drawer const& drawer) {
 }
 
 /*
+
+// TODO: Make more efficient
+inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
+    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+}
+
 // FIXME: What if solving for constraint leaves domain?
 Void Enclosure::_solve_zero_constraints() {
     this->_check();
@@ -324,7 +319,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
     : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
@@ -353,7 +347,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
 {
     ARIADNE_ASSERT_MSG(domain.size()==state_function.argument_size(),"domain="<<domain<<", state_function="<<state_function);
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {

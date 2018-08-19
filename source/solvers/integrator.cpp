@@ -105,7 +105,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     // TODO: Better estimates of constants
     const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
     const FloatDPValue MULTIPLIER=1.125_exact;
-    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
     const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
     const Nat EXPANSION_STEPS=4;
     const Nat REDUCTION_STEPS=8;
@@ -113,7 +112,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
 
     Vector<FloatDPBounds> const& dx=cast_singleton(domx);
 
-    //Vector<ValidatedNumericType> delta=(dx-midpoint(domx))*BOX_RADIUS_WIDENING;
     Vector<UpperIntervalType> delta=(domx-midpoint(domx))*BOX_RADIUS_WIDENING;
 
     // Compute the Lipschitz constant over the initial box
@@ -133,7 +131,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     Bool success=false;
     while(!success) {
         ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        //bx=domx+INITIAL_MULTIPLIER*ih*evaluate(vf,domx)+delta;
         bx=domx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
         for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
             df=apply(vf,bx);

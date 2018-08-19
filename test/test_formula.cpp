@@ -42,7 +42,7 @@ typedef Formula<ApproximateNumber> ApproximateFormula;
 
 class TestFormula
 {
-    //static ApproximateFormula o;;
+    //static ApproximateFormula o;
     //static ApproximateFormula x;
     //static ApproximateFormula y;
   public:

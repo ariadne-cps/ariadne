@@ -411,7 +411,7 @@ TestFloat<PR>::test_stream()
         }
     }
     catch(std::exception& e) {
-        cerr << e.what() << endl;;
+        cerr << e.what() << endl;
     }
 
     try {

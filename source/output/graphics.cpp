@@ -424,7 +424,7 @@ CairoCanvas::CairoCanvas(const ImageSize2d& size)
     : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
     const Int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;
 
     cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);

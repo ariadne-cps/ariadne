@@ -182,7 +182,7 @@ OperatorKind kind(OperatorCode op) {
         case OperatorCode::EQ: case OperatorCode::NEQ: case OperatorCode::LEQ: case OperatorCode::GEQ: case OperatorCode::LT: case OperatorCode::GT:
             return OperatorKind::COMPARISON;
         default:
-            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");;
+            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");
     }
 }
 

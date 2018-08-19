@@ -527,9 +527,9 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_join(f2)); }
 
     friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2)); };;
+        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2)); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(f2); };;
+        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(f2); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
         return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2))); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {

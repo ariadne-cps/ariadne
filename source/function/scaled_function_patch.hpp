@@ -946,7 +946,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend NormType norm(const VectorScaledFunctionPatch<M>& f) {
-        NormType res=norm(f.zero_element());;
+        NormType res=norm(f.zero_element());
         for(SizeType i=1; i!=f.result_size(); ++i) {
             res=max(res,norm(f[i]));
         }

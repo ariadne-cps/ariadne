@@ -397,7 +397,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     //   D = 1/( Zu/(Xu-X) + Zl/(X-Xl) )
     DiagonalMatrix<FloatDP> D(erec(ediv(zu,xu-x)+ediv(zl,x-xl)));
     Vector<FloatDP> ryz = ry - ediv(rzl,Vector<FloatDP>(x-xl)) + ediv(rzu,Vector<FloatDP>(xu-x));
-    S=adat(A,D.diagonal());;
+    S=adat(A,D.diagonal());
     ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<inverse(S)<<"\n");
 
     // dzl = (rzl - Zl dx) / (X-Xl)

@@ -52,7 +52,7 @@ template<class X> decltype(auto) mag(Covector<X> const& u) { return norm(transpo
 
 class TestProcedure
 {
-    //static ApproximateFormula o;;
+    //static ApproximateFormula o;
     //static ApproximateFormula x;
     //static ApproximateFormula y;
     DoublePrecision pr;

@@ -2562,7 +2562,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
         try {
             this->feasibility_step(d,g,c,x,y,z,t);
         }
-        catch(SingularMatrixException) {
+        catch(const SingularMatrixException& e) {
             return indeterminate;
         }
         if(t.lower()>t.upper()) {

@@ -410,7 +410,7 @@ TestFloat<PR>::test_stream()
             ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.375e1");
         }
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         cerr << e.what() << endl;
     }
 
@@ -421,7 +421,7 @@ TestFloat<PR>::test_stream()
             ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.35e1");
         }
     }
-    catch(std::exception& e) {
+    catch(const std::exception& e) {
         cerr << e.what() << endl;
     }
 

@@ -133,7 +133,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     for(Nat n=0; n!=subdomains.size(); ++n) {
         try {
             set.restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
-        } catch(std::runtime_error& e) {
+        } catch(const std::runtime_error& e) {
             ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set<<"\n");
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }

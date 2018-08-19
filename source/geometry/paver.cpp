@@ -384,10 +384,10 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         try {
             optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
         }
-        catch(NearBoundaryOfFeasibleDomainException e) {
+        catch(const NearBoundaryOfFeasibleDomainException& e) {
             break;
         }
-        catch(std::runtime_error e) {
+        catch(const std::runtime_error& e) {
             ARIADNE_ERROR(""<<e.what()<<"\n");
             break;
         }

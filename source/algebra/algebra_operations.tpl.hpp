@@ -257,7 +257,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
 
 template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
 {
-    typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -322,8 +321,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
 template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 {
-    typedef typename A::NumericType X;
-
     auto avg=x.average();
     auto rad=x.radius();
     auto tol = cast_exact(x.tolerance());

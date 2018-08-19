@@ -61,7 +61,6 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -111,8 +110,6 @@ _evolution(EnclosureListType& final_sets,
            Bool reach) const
 {
     verbosity=0;
-
-    typedef EffectiveVectorFunction FunctionType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 

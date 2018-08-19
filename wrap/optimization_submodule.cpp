@@ -72,8 +72,6 @@ Void export_internal_array(const char* name)
 
 Void export_variable_type()
 {
-    typedef Array<Slackness> SlacknessArray;
-
     enum_<Slackness> variable_enum("Slackness");
     variable_enum.value("BASIS", BASIS);
     variable_enum.value("LOWER", LOWER);

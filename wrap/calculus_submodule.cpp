@@ -538,7 +538,6 @@ Void export_scalar_taylor_function()
 {
     typedef ValidatedScalarTaylorFunctionModelDP F;
     typedef ValidatedVectorTaylorFunctionModelDP VF;
-    typedef ValidatedTaylorModelDP M;
     typedef typename F::DomainType D;
     typedef typename F::NumericType X;
     typedef Vector<X> VX;

@@ -156,7 +156,6 @@ template<class T, class B = boost::python::bases<> > class class_ : public boost
         this->def(sin(self)); this->def(cos(self)); this->def(tan(self)); this->def(atan(self));
     }
     void define_monotonic_functions() {
-        typedef decltype(-declval<T>()) NT;
         using boost::python::def;
         this->def(pos(self)); this->def(neg(self));
         this->def(sqrt(self)); this->def(exp(self)); this->def(log(self)); this->def(atan(self));
@@ -167,7 +166,7 @@ template<class T, class B = boost::python::bases<> > class class_ : public boost
         this->def(self<=self); this->def(self>=self); this->def(self<self); this->def(self>self);
     }
     void define_self_logical() {
-        T const* self_ptr=nullptr; T const& self=*self_ptr;
+        //T const* self_ptr=nullptr; T const& self=*self_ptr;
         //using boost::python::self_ns::self;
         this->def("__and__", (T(*)(T const&, T const&)) &operator&);
         //self & self); this->def(self | self); this->def(~self);
@@ -199,7 +198,6 @@ template<class P> void export_effective_logical(std::string name)
 
 template<class P> void export_logical(std::string name)
 {
-    typedef decltype(~declval<LogicalType<P>>()) NotType;
     OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
     class_<LogicalType<P>> logical_class(name,init<bool>());
     logical_class.def(init<LogicalType<P>>());
@@ -503,7 +501,6 @@ template<class PR> void export_raw_float()
 
     FloatMP const& arg_type(FloatMP);
     FloatDP arg_type(FloatDP);
-    typedef decltype(arg_type(declval<F>())) Fcr;
 
     class_<F> raw_float_class("Float"+class_tag<PR>());
     raw_float_class.def(init<double,PR>());

@@ -382,7 +382,6 @@ Void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 template<class X>
 Void export_matrix_operations(class_<Matrix<X> >& matrix_class)
 {
-    typedef decltype(abs(declval<X>()+declval<X>())) NormType;
     def("norm",(UniformNormType<X>(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 

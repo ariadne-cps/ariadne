@@ -52,7 +52,6 @@ Void export_orbit(const char* name)
 template<class Ev, class Init>
 Void export_evolver(const char* name)
 {
-    typedef typename Ev::SystemType Sys;
     typedef typename Ev::EnclosureType ES;
     typedef typename Ev::TerminationType Tm;
     typedef typename Ev::OrbitType Orb;

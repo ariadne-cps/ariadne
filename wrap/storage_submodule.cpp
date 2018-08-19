@@ -84,15 +84,8 @@ PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubset& gts) {
 
 
 
-
-
-
-
 Void export_grid()
 {
-    typedef Vector<FloatDP> RVector;
-    typedef Vector<ExactIntervalType> IVector;
-
     class_< Grid > grid_class("Grid",no_init);
     grid_class.def(init<Nat>());
     grid_class.def(init<Nat,FloatDP>());
@@ -106,7 +99,6 @@ Void export_grid()
 
 Void export_grid_cell()
 {
-
     class_<GridCell> grid_cell_class("GridCell",no_init);
     grid_cell_class.def("dimension", &GridCell::dimension);
     grid_cell_class.def("depth", &GridCell::depth);

@@ -226,10 +226,7 @@ Void export_differential(const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef typename X::GenericType Y;
-    typedef Vector<X> V;
-    typedef Series<X> S;
     typedef DIFF D;
-    typedef Vector<D> DV;
 
     class_<D> differential_class(name.c_str(), init<D>() );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
@@ -302,7 +299,6 @@ export_differential_vector(const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
-    typedef Series<X> S;
     typedef DIFF D;
     typedef Vector<D> DV;
 

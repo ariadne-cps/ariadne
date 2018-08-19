@@ -285,7 +285,6 @@ typedef LogicalType<ExactTag> ExactLogicalType;
 
 
 template<class IVL> Void export_interval(std::string name) {
-    using UB = typename IVL::UpperBoundType;
     typedef IVL IntervalType;
     typedef typename IntervalType::LowerBoundType LowerBoundType;
     typedef typename IntervalType::UpperBoundType UpperBoundType;
@@ -345,8 +344,6 @@ template<class BX> Void export_box(std::string name)
 {
     using IVL = typename BX::IntervalType;
     using UB = typename IVL::UpperBoundType;
-    typedef  IVL IntervalType;
-    typedef Vector<IVL> IntervalVectorType;
     //class_<Vector<ExactIntervalType>> interval_vector_class("ExactIntervalVectorType");
 
     typedef decltype(disjoint(declval<BX>(),declval<BX>())) DisjointType;

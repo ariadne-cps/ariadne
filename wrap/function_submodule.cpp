@@ -460,7 +460,6 @@ template<class P> Void export_scalar_function()
 
 template<class P> Void export_vector_function()
 {
-    typedef VectorFunction<P> VF;
     class_<VectorFunction<P>>
         vector_function_class((class_name<P>()+"VectorFunction").c_str(), init<VectorFunction<P>>());
     vector_function_class.def(init<Nat,Nat>());

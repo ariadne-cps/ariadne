@@ -123,8 +123,6 @@ TestMatrix::test_project()
 Void
 TestMatrix::test_misc()
 {
-    FloatDPApproximation x={2.25,pr};
-    FloatDPBounds ix={1.5_exact,2.25_exact};
     Array<FloatDPApproximation> Aary={{-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0},pr};
     Array<FloatDPBounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
     FloatDPApproximation* Aptr=Aary.begin();

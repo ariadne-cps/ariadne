@@ -93,7 +93,7 @@ Void TestContinuousEvolution::test() const
     typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
-    Real time(3.0_dec);
+    Real time(2.0_dec);
     double step_size(0.5);
     double enclosure_radius(0.25);
 
@@ -130,7 +130,7 @@ Void TestContinuousEvolution::test() const
     evolver.configuration().maximum_step_size(step_size);
 
     // Over-approximate the initial set by a grid cell
-    TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-10));
+    TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
     EnclosureType initial_set(initial_box,function_factory);
     ARIADNE_TEST_PRINT(initial_set);
 

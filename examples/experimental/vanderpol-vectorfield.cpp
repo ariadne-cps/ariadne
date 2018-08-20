@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol.cpp
+ *            vanderpol-vectorfield.cpp
  *
  *  Copyright  2017  Luca Geretti
  *

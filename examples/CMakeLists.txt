@@ -15,8 +15,10 @@ add_custom_target(examples)
 add_dependencies(examples ${EXAMPLES})
 
 add_custom_target(examples-experimental)
+add_custom_target(examples-noisy)
 
 add_subdirectory(watertank)
 add_subdirectory(twowatertanks)
 add_subdirectory(threewatertanks)
 add_subdirectory(experimental)
+add_subdirectory(noisy)

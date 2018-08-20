@@ -1,5 +1,5 @@
 /***************************************************************************
- *            laub-loomis.cpp
+ *            laub-loomis-nonoise.cpp
  *
  *  Copyright  2018  Luca Geretti
  *

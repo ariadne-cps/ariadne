@@ -1,5 +1,5 @@
 /***************************************************************************
- *            harmonic-oscillator.cpp
+ *            harmonic-oscillator-nonoise.cpp
  *
  *  Copyright  2018  Luca Geretti
  *

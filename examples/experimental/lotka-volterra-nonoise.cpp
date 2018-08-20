@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol.cpp
+ *            lotka-volterra-nonoise.cpp
  *
  *  Copyright  2017  Luca Geretti
  *

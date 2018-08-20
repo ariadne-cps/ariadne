@@ -1,14 +1,11 @@
 set(EXPERIMENTAL_EXAMPLES
-	circle
-	harmonic-oscillator
-	exponential
 	laser
-	bouncing-walls
-	vanderpol
 	vanderpol-vectorfield
-	lotka-volterra
-	higgins-selkov
-	laub-loomis
+	vanderpol-nonoise
+	harmonic-oscillator-nonoise
+	lotka-volterra-nonoise
+	higgins-selkov-nonoise
+	laub-loomis-nonoise
 )
 
 foreach(example ${EXPERIMENTAL_EXAMPLES})

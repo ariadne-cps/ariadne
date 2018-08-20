@@ -1,5 +1,5 @@
 /***************************************************************************
- *            higgins-selkov.cpp
+ *            higgins-selkov-nonoise.cpp
  *
  *  Copyright  2018  Luca Geretti
  *

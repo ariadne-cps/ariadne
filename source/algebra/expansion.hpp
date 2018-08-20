@@ -196,7 +196,7 @@ Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
 
 template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
 Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr)
-    : Expansion( ((ARIADNE_PRECONDITION(lst.size()!=0)),lst.begin()->first.size()), X(pr) )
+    : Expansion( (assert(lst.size()!=0),lst.begin()->first.size()), X(pr) )
 {
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)

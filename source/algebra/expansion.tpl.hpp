@@ -66,7 +66,7 @@ inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.
 inline SizeOne argument_size_of(UniformList<DegreeType> const& a) { return SizeOne(); }
 
 template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
-    : Expansion( ( (ARIADNE_PRECONDITION(lst.size()!=0)) , Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) ) )
+    : Expansion( ( assert(lst.size()!=0) , Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) ) )
 {
     I a(this->argument_size());
     X x;

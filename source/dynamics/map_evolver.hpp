@@ -137,6 +137,8 @@ class MapEvolverConfiguration : public ConfigurationInterface
     //! \brief Default constructor gives reasonable values.
     MapEvolverConfiguration();
 
+    virtual ~MapEvolverConfiguration() = default;
+
   private:
 
     //! \brief The maximum allowable radius of a basic set.

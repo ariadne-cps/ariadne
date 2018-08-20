@@ -149,6 +149,8 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
 
+    virtual ~VectorFieldEvolverConfiguration() = default;
+
   private:
 
     //! \brief The maximum allowable step size for integration.

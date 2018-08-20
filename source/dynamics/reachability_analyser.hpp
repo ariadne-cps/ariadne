@@ -209,6 +209,8 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     //! \brief Default constructor gives reasonable values.
     ReachabilityAnalyserConfiguration(ReachabilityAnalyser<SYS>& analyser);
 
+    virtual ~ReachabilityAnalyserConfiguration() = default;
+
   private:
 
     //! \brief Reference back to the main class, for consistency checking.

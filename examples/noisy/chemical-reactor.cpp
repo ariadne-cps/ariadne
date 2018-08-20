@@ -1,5 +1,5 @@
 /***************************************************************************
- *            higgins-selkov.hpp
+ *            chemical-reactor.cpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,22 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "ariadne.hpp"
+#include "chemical-reactor.hpp"
+#include "noisy-utilities.hpp"
 
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HS()
+int main()
 {
-    RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
-    DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
-    RealVariablesBox inputs={0.9998_dec<=v0<=1.0002_dec,0.9998_dec<=k1<=1.0002_dec,0.99981_dec<=k2<=1.00021_dec};
-
-    Real e=1/100_q;
-    RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
-
-    Real evolution_time=10;
-    double step=1.0/50;
-
-    return make_tuple("HS",dynamics,inputs,initial,evolution_time,step);
+    run_noisy_system(CR());
 }

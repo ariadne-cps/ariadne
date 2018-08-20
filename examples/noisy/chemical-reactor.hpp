@@ -1,5 +1,5 @@
 /***************************************************************************
- *            higgins-selkov.hpp
+ *            chemical-reactor.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -26,17 +26,20 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HS()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> CR()
 {
-    RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
-    DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
-    RealVariablesBox inputs={0.9998_dec<=v0<=1.0002_dec,0.9998_dec<=k1<=1.0002_dec,0.99981_dec<=k2<=1.00021_dec};
+    RealVariable xA("xA"), xB("xB"), xC("xC"), xD("xD"), u1("u1"), u2("u2"), u3("u3");
+    DottedRealAssignments dynamics={dot(xA)=-u3*xA*xB-0.4_dec*xA*xC+0.05_dec*u1-0.1_dec*xA,
+                                    dot(xB)=-u3*xA*xB+0.05_dec*u2-0.1_dec*xB,
+                                    dot(xC)=u3*xA*xB-0.4_dec*xA*xC-0.1_dec*xC,
+                                    dot(xD)=0.4_dec*xA*xC-0.1_dec*xD};
+    RealVariablesBox inputs={0.999_dec<=u1<=1.001_dec,0.899_dec<=u2<=0.901_dec,29.8_dec<=u3<=30.2_dec};
 
-    Real e=1/100_q;
-    RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
+    Real e=1/1000000_q;
+    RealVariablesBox initial={{0<=xA<=e},{0<=xB<=e},{0<=xC<=e},{0<=xD<=e}};
 
     Real evolution_time=10;
-    double step=1.0/50;
+    double step=1.0/16;
 
-    return make_tuple("HS",dynamics,inputs,initial,evolution_time,step);
+    return make_tuple("CR",dynamics,inputs,initial,evolution_time,step);
 }

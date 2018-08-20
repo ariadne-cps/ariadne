@@ -1,5 +1,5 @@
 /***************************************************************************
- *            higgins-selkov.hpp
+ *            lotka-volterra.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -26,17 +26,16 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HS()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> LV()
 {
-    RealVariable S("S"), P("P"), v0("v0"), k1("k1"), k2("k2");
-    DottedRealAssignments dynamics={dot(S)=v0-S*k1*pow(P,2),dot(P)=S*k1*pow(P,2)-k2*P};
-    RealVariablesBox inputs={0.9998_dec<=v0<=1.0002_dec,0.9998_dec<=k1<=1.0002_dec,0.99981_dec<=k2<=1.00021_dec};
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=u1*x*(1-y),dot(y)=u2*y*(x-1)};
+    RealVariablesBox inputs={2.99_dec<=u1<=3.01_dec,0.99_dec<=u2<=1.01_dec};
 
-    Real e=1/100_q;
-    RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
+    RealVariablesBox initial={{x==1.2_dec},{y==1.1_dec}};
 
     Real evolution_time=10;
     double step=1.0/50;
 
-    return make_tuple("HS",dynamics,inputs,initial,evolution_time,step);
+    return make_tuple("LV",dynamics,inputs,initial,evolution_time,step);
 }

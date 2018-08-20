@@ -29,6 +29,8 @@
 
 namespace Ariadne {
 
+typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
+
 template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& list) {
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }
@@ -95,7 +97,7 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
             char num_char[7] = "";
             if (f.result_size() > 2)
                 sprintf(num_char,"[%lu,%lu]",i,j);
-            fig.write(("test_differential_inclusion-"+name+num_char).c_str());
+            fig.write((name+num_char).c_str());
         }
     }
 */
@@ -131,7 +133,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     //run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
 }
 
-void run_noisy_system(Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> system) {
+void run_noisy_system(SystemType system) {
     run_noisy_system(std::get<0>(system),std::get<1>(system),std::get<2>(system),std::get<3>(system),std::get<4>(system),std::get<5>(system));
 }
 

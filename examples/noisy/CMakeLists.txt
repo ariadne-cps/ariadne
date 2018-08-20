@@ -1,5 +1,8 @@
 set(NOISY_EXAMPLES
 	higgins-selkov
+	chemical-reactor
+	lotka-volterra
+	noisy-benchmark
 )
 
 foreach(example ${NOISY_EXAMPLES})

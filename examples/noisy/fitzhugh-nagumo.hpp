@@ -33,7 +33,7 @@ Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double
     RealVariablesBox inputs={0.874_dec<=u1<=0.876_dec,0.699_dec<=u2<=0.701_dec};
 
     Real e=1/100_q;
-    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=x<=1+e}};
+    RealVariablesBox initial={{-1-e<=x<=-1+e},{1-e<=y<=1+e}};
 
     Real evolution_time=10;
     double step=1.0/20;

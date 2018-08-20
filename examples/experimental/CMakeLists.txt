@@ -13,4 +13,5 @@ foreach(example ${EXAMPLES_EXPERIMENTAL})
     target_link_libraries(${example} ariadne)
 endforeach()
 
+add_custom_target(examples-experimental)
 add_dependencies(examples-experimental ${EXAMPLES_EXPERIMENTAL})

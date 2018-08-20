@@ -21,4 +21,5 @@ foreach(example ${EXAMPLES_NOISY})
     target_link_libraries(${example} ariadne)
 endforeach()
 
+add_custom_target(examples-noisy)
 add_dependencies(examples-noisy ${EXAMPLES_NOISY})

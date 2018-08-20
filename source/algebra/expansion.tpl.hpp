@@ -64,10 +64,34 @@ inline SizeOne size_of(DegreeType const& a) { return SizeOne(); }
 
 inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
 inline SizeOne argument_size_of(UniformList<DegreeType> const& a) { return SizeOne(); }
-
+/*
 template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
-    : Expansion( ( assert(lst.size()!=0) , Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) ) )
+    : Expansion( Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) )
 {
+    I a(this->argument_size());
+    X x;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=iter->second;
+        if(decide(x!=0)) { this->append(a,x); }
+    }
+}
+*/
+
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(0)
+{
+    ARIADNE_PRECONDITION(lst.size()!=0);
+
+    _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
+    _coefficients = UniformList<X>(0,X());
+    _zero_coefficient = X();
+
+    SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
+    _indices.reserve(cap);
+    _coefficients.reserve(cap);
+
     I a(this->argument_size());
     X x;
     for(auto iter=lst.begin();

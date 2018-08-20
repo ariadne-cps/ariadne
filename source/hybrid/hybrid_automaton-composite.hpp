@@ -89,7 +89,7 @@ class CompositeHybridAutomaton
     CompositeHybridAutomaton* clone() const { return new CompositeHybridAutomaton(*this); }
 
     //! \brief Virtual destructor.
-    virtual ~CompositeHybridAutomaton();
+    virtual ~CompositeHybridAutomaton() = default;
 
     //@}
 

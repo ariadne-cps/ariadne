@@ -51,7 +51,7 @@ class IntegratorInterface
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~IntegratorInterface() { };
+    virtual ~IntegratorInterface() = default;
 
     //! \brief Make a dynamically-allocated copy.
     virtual IntegratorInterface* clone() const = 0;

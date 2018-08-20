@@ -71,7 +71,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     typedef SafetyCertificate<StateSpaceType> SafetyCertificateType;
   public:
     //! \brief Virtual destructor.
-    virtual ~ReachabilityAnalyserInterface() { }
+    virtual ~ReachabilityAnalyserInterface() = default;
 
     //! \name Get the system associated with the analyser.
     virtual const SystemType& system() const = 0;

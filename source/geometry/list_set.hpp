@@ -60,7 +60,7 @@ class ListSet
     typedef typename std::vector<BS>::iterator Iterator;
     typedef BS value_type;
 
-    virtual ~ListSet() { }
+    virtual ~ListSet() = default;
 
     ListSet() { };
     explicit ListSet(Nat d) { };

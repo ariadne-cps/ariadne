@@ -49,7 +49,7 @@ class SimulationToolboxInterface
     typedef VectorFunction VectorFieldType;
   public:
     //! \brief Virtual destructor.
-    virtual ~SimulationToolboxInterface() { }
+    virtual ~SimulationToolboxInterface() = default;
 
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is the point
     //! satisfies the constraint, \a false if the point does not satisfy the constraint, and

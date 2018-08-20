@@ -87,7 +87,7 @@ class SetInterfaceBase
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~SetInterfaceBase() { };
+    virtual ~SetInterfaceBase() = default;
     //! \brief Construct a dynamically-allocated copy.
     virtual SetInterfaceBase* clone() const = 0;
     //! \brief The dimension of the set.

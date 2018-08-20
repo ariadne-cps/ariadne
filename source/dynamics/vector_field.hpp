@@ -56,7 +56,7 @@ class VectorField
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
     VectorField(EffectiveVectorFunction const& function) : _function(function) { }
-    virtual ~VectorField() { }
+    virtual ~VectorField() = default;
     virtual VectorField* clone() const { return new VectorField(*this); }
     SizeType dimension() const { return _function.result_size(); }
     RealSpace state_space() const;

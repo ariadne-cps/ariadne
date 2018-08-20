@@ -236,10 +236,6 @@ HybridAutomaton::HybridAutomaton()
 }
 
 
-HybridAutomaton::~HybridAutomaton()
-{
-}
-
 HybridAutomaton::HybridAutomaton(Identifier name)
     : _name(name),_modes()
 {

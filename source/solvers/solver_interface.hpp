@@ -83,7 +83,7 @@ class SolverInterface
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~SolverInterface() { };
+    virtual ~SolverInterface() = default;
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.

@@ -159,7 +159,7 @@ class HybridAutomatonInterface {
 
   public:
     //! \brief Virtual destructor.
-    virtual ~HybridAutomatonInterface() { }
+    virtual ~HybridAutomatonInterface() = default;
 
     //! \brief Cloning operator.
     virtual HybridAutomatonInterface* clone() const = 0;

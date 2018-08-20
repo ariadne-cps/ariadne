@@ -57,7 +57,7 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
 class OptimiserInterface {
   public:
     //! \brief Virtual destructor.
-    virtual ~OptimiserInterface() { }
+    virtual ~OptimiserInterface() = default;
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
 

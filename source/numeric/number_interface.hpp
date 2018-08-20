@@ -56,7 +56,7 @@ class NumberInterface
     template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
   public:
-    virtual ~NumberInterface() { }
+    virtual ~NumberInterface() = default;
   public:
     virtual NumberInterface* _copy() const = 0;
     virtual NumberInterface* _move() = 0;

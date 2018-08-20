@@ -86,7 +86,7 @@ class FunctionInterface<Void,D,C>
     typedef ElementSizeType<CodomainType> ResultSizeType;
     typedef ElementIndexType<DomainType> ArgumentIndexType;
 
-    virtual ~FunctionInterface() { };
+    virtual ~FunctionInterface() = default;
     virtual ArgumentSizeType argument_size() const = 0;
     virtual ResultSizeType result_size() const = 0;
     virtual DomainType const domain() const = 0;
@@ -208,7 +208,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
         return factory.write(os); }
   public:
-    virtual ~FunctionFactoryInterface<ValidatedTag>() { };
+    virtual ~FunctionFactoryInterface<ValidatedTag>() = default;
 };
 
 

@@ -63,7 +63,7 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 //! \brief Base interface for plotting and drawing classes.
 class FigureInterface {
   public:
-    virtual ~FigureInterface() { };
+    virtual ~FigureInterface() = default;
     virtual FigureInterface& set_projection_map(const PlanarProjectionMap& prj) = 0;
     virtual FigureInterface& set_bounding_box(const ApproximateBoxType& bx) = 0;
     virtual FigureInterface& set_projection(Nat as, Nat ix, Nat iy) = 0;
@@ -93,7 +93,7 @@ Figure& operator<<(Figure& fig, const DrawableInterface& shape);
 class CanvasInterface {
   public:
     //! \brief Destructor
-    virtual ~CanvasInterface() { };
+    virtual ~CanvasInterface() = default;
 
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual Void finalise() = 0;
@@ -137,7 +137,7 @@ class CanvasInterface {
 class DrawableInterface {
   public:
     //! brief Virtual destructor.
-    virtual ~DrawableInterface() { }
+    virtual ~DrawableInterface() = default;
     //! brief Make a dynamically-allocated copy.
     virtual DrawableInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.

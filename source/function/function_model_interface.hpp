@@ -132,7 +132,7 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
   public:
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
-    virtual ~FunctionModelFactoryInterface<P,PR,PRE>() { }
+    virtual ~FunctionModelFactoryInterface<P,PR,PRE>() = default;
     virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) { factory._write(os); return os; }

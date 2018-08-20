@@ -237,10 +237,6 @@ HybridSystem::HybridSystem()
 {
 }
 
-HybridSystem::~HybridSystem()
-{
-}
-
 Void HybridSystem::disable_events(DiscretePredicate q, EventSet e) {
     this->_disabled_events.append(make_tuple(q,e)); }
 Void HybridSystem::nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v) {

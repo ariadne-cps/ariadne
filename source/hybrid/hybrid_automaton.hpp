@@ -278,7 +278,7 @@ class HybridAutomaton
     HybridAutomaton* clone() const { return new HybridAutomaton(*this); }
 
     //! \brief Destructor.
-    virtual ~HybridAutomaton();
+    virtual ~HybridAutomaton() = default;
     //@}
 
     //@{

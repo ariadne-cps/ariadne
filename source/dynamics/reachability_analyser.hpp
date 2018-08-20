@@ -103,7 +103,7 @@ template<class SYS> class ReachabilityAnalyser
     //! \name Constructors and destructors
 
     //! \brief Virtual destructor
-    virtual ~ReachabilityAnalyser();
+    virtual ~ReachabilityAnalyser() = default;
 
     //! \brief Construct from an evolver.
     ReachabilityAnalyser(

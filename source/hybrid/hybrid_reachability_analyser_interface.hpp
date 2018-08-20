@@ -60,7 +60,7 @@ class HybridReachabilityAnalyserInterface
     //@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor */
-    virtual ~HybridReachabilityAnalyserInterface() { }
+    virtual ~HybridReachabilityAnalyserInterface() = default;
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyserInterface* clone() const = 0;

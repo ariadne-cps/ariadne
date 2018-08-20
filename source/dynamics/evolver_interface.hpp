@@ -63,7 +63,7 @@ class EvolverInterface
     typedef ListSet<EnclosureType> EnclosureListType;
 
     //! \brief Virtual destructor.
-    virtual ~EvolverInterface() {};
+    virtual ~EvolverInterface() = default;
 
     //! \brief Cloning operator.
     virtual EvolverInterface<SystemType,EnclosureType,TerminationType>* clone() const = 0;

@@ -780,7 +780,7 @@ class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
 
     GeneralHybridEvolverConfiguration(GeneralHybridEvolver& evolver);
 
-    virtual ~GeneralHybridEvolverConfiguration() { }
+    virtual ~GeneralHybridEvolverConfiguration() = default;
 };
 
 //! \brief Factory for GeneralHybridEvolver objects.

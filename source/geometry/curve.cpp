@@ -42,11 +42,6 @@
 namespace Ariadne {
 
 
-Curve::~Curve()
-{
-}
-
-
 
 Curve::Curve(const Function<EffectiveTag,IntervalDomainType,BoxDomainType>& f)
     : _function(f)

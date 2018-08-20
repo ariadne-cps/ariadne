@@ -118,8 +118,6 @@ CompositeHybridAutomaton::CompositeHybridAutomaton(
 		const List<HybridAutomaton>& components)
     : _name(name),_components(components) { }
 
-CompositeHybridAutomaton::~CompositeHybridAutomaton() { }
-
 Nat
 CompositeHybridAutomaton::number_of_components() const
 {

@@ -49,7 +49,7 @@ class HybridGridTreeSet;
 class HybridSpaceInterface
 {
   public:
-    virtual ~HybridSpaceInterface() { }
+    virtual ~HybridSpaceInterface() = default;
     virtual Bool has_location(const DiscreteLocation& q) const  = 0;
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:

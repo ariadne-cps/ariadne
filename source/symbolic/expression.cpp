@@ -44,7 +44,7 @@ template<class T>
 struct ExpressionNode {
     mutable Nat count;
     Operator op;
-    virtual ~ExpressionNode();
+    virtual ~ExpressionNode() = default;
     explicit ExpressionNode(const Operator& o) : count(0u), op(o) { }
     explicit ExpressionNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
@@ -155,8 +155,6 @@ template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public U
     ScalarExpressionNode(const Operator& op, Expression<R> const& a, N n)
         : UnaryExpressionNode<R,A>(op,a), num(n) { }
 };
-
-template<class T> ExpressionNode<T>::~ExpressionNode() { }
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
     return os << (Void*)(e);

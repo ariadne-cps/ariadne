@@ -65,12 +65,6 @@ OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 template<> Nat integer_cast<Nat,Real>(Real const& r);
 
-template<class SYS>
-ReachabilityAnalyser<SYS>::
-~ReachabilityAnalyser()
-{
-}
-
 
 template<class SYS>
 ReachabilityAnalyser<SYS>::

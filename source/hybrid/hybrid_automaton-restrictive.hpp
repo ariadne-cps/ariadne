@@ -166,7 +166,7 @@ class HybridSystem
     HybridSystem();
 
     //! \brief  Destructor.
-    virtual ~HybridSystem();
+    virtual ~HybridSystem() = default;
     //! \brief Construct dynamically-allocated copy.
     virtual HybridSystem* clone() const;
 

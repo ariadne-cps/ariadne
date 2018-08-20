@@ -50,7 +50,7 @@ class IteratedMap
   public:
     IteratedMap(const EffectiveVectorFunction& f) : _function(f) { }
     virtual IteratedMap* clone() const { return new IteratedMap(*this); }
-    virtual ~IteratedMap() { }
+    virtual ~IteratedMap() = default;
     const EffectiveVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:

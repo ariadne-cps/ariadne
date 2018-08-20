@@ -13,7 +13,14 @@ set(EXAMPLES_NOISY
 	
 	noisy-benchmark
 	
-	
+	clock
+	vanderpol
+	fitzhugh-nagumo
+	laub-loomis
+	vinograd
+	sphere
+	order7
+	wiggins1873
 )
 
 foreach(example ${EXAMPLES_NOISY})

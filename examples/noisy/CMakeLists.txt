@@ -30,3 +30,4 @@ endforeach()
 
 add_custom_target(examples-noisy)
 add_dependencies(examples-noisy ${EXAMPLES_NOISY})
+add_dependencies(examples ${EXAMPLES_NOISY})

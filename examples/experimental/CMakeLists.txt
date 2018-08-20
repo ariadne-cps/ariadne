@@ -15,3 +15,4 @@ endforeach()
 
 add_custom_target(examples-experimental)
 add_dependencies(examples-experimental ${EXAMPLES_EXPERIMENTAL})
+add_dependencies(examples ${EXAMPLES_EXPERIMENTAL})

@@ -121,6 +121,8 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! \brief Default constructor gives reasonable values.
     ReachabilityAnalyserConfiguration(ReachabilityAnalyser<HybridAutomatonInterface>& analyser);
 
+    virtual ~ReachabilityAnalyserConfiguration() = default;
+
   private:
 
     //! \brief Reference back to the main class, for consistency checking.

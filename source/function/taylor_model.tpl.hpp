@@ -771,7 +771,7 @@ template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sort() {
     this->_expansion.sort();
     return *this;
-};
+}
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::unique()
 {

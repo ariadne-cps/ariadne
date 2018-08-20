@@ -161,9 +161,9 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Expres
 }
 
 
-template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { };
-template<class T> Expression<T>::Expression(const T& c): _root(new ConstantExpressionNode<T>(c)) { };
-template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { };
+template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { }
+template<class T> Expression<T>::Expression(const T& c): _root(new ConstantExpressionNode<T>(c)) { }
+template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { }
 template<class T> Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
 template<class T> Expression<T> Expression<T>::constant(const T& c) {
     return Expression<T>(SharedPointer<const ExpressionNode<T>>(new ConstantExpressionNode<T>(c))); }

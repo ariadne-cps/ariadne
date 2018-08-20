@@ -259,4 +259,4 @@ class TestExpression {
 Int main() {
     TestExpression().test();
     return ARIADNE_TEST_FAILURES;
-};
+}

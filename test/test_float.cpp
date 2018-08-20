@@ -384,7 +384,7 @@ TestFloat<PR>::test_conversion()
     ARIADNE_TEST_COMPARE(Rational(RawFloat<PR>(q,upward,precision)),>,q);
     ARIADNE_TEST_COMPARE(RawFloat<PR>(q,downward,precision),<,RawFloat<PR>(q,upward,precision));
 
-};
+}
 
 
 template<class PR> Void

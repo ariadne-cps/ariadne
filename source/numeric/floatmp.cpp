@@ -404,7 +404,7 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
     mpfr_snprintf(cstr,buf_size,fmt,rnd,x);
     cstr[1023]='\0';
     return String(cstr);
-};
+}
 
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
     static const double log2ten = 3.3219280948873621817;
@@ -418,7 +418,7 @@ String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     int zdgts = std::max(log10floor(x),0)+1;
     int fdgts = plcs;
     return print(x._mpfr,zdgts,fdgts,rnd);
-};
+}
 
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     return os << print(x,plcs,rnd);
@@ -459,13 +459,13 @@ InputStream& operator>>(InputStream& is, FloatMP& x) {
 
 FloatMP floor(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_floor(r._mpfr,x._mpfr); return r;
-};
+}
 FloatMP ceil(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_ceil(r._mpfr,x._mpfr); return r;
-};
+}
 FloatMP round(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_round(r._mpfr,x._mpfr); return r;
-};
+}
 
 FloatMP abs(FloatMP::RoundingModeType rnd, FloatMP const& x) {
     FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return r;

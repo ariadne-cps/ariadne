@@ -91,7 +91,7 @@ Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
 Void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
 //    ARIADNE_TEST_CALL(test_water_tank());
-};
+}
 
 Void TestHybridEvolution::test_bouncing_ball() const {
     HybridAutomaton bouncing_ball;

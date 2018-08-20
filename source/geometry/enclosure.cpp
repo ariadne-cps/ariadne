@@ -105,7 +105,7 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
     }
 
     return res;
-};
+}
 
 } // namespace
 
@@ -1282,7 +1282,7 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 
 Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat depth) const {
     GridDrawer(depth).draw(canvas,projection,this->state_time_auxiliary_set());
-};
+}
 
 
 

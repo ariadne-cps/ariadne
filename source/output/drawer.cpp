@@ -138,7 +138,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
-};
+}
 
 
 

@@ -69,44 +69,44 @@ LogicalHandle::LogicalHandle(LogicalValue l)
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator!(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle negation(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 
 LogicalValue operator==(LogicalValue l1, LogicalValue l2) {

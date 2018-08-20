@@ -286,7 +286,7 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
     ExactBoxType exbbx=reinterpret_cast<ExactBoxType const&>(bbx);  // FIXME: Should not need to convert to ExactBoxType here
     res.insert(loc,spc,exbbx);
     return res;
-};
+}
 
 OutputStream& HybridBoxSet::write(OutputStream& os) const {
     return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);

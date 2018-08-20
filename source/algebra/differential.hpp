@@ -359,10 +359,10 @@ class NonAssignableDifferential
 template<class X> class DifferentialCharacteristics {
     SizeType _argument_size; DegreeType _degree; X _zero_coefficient;
   public:
-    DifferentialCharacteristics() : _argument_size(0u), _degree(0u), _zero_coefficient(0) { };
-    DifferentialCharacteristics(SizeType as, DegreeType d) : _argument_size(as), _degree(d), _zero_coefficient(0) { };
-    template<class PR> DifferentialCharacteristics(SizeType as, DegreeType d, PR pr) : _argument_size(as), _degree(d), _zero_coefficient(pr) { };
-    DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { };
+    DifferentialCharacteristics() : _argument_size(0u), _degree(0u), _zero_coefficient(0) { }
+    DifferentialCharacteristics(SizeType as, DegreeType d) : _argument_size(as), _degree(d), _zero_coefficient(0) { }
+    template<class PR> DifferentialCharacteristics(SizeType as, DegreeType d, PR pr) : _argument_size(as), _degree(d), _zero_coefficient(pr) { }
+    DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { }
     SizeType argument_size() const { return this->_argument_size; }
     DegreeType degree() const { return this->_degree; }
     X zero_coefficient() const { return this->_zero_coefficient; }

@@ -280,8 +280,8 @@ class Real
     Real(std::uint64_t m, Void*);
 };
 
-template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
-template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
+template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { }
+template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { }
 
 Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
 Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);

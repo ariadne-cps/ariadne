@@ -54,17 +54,17 @@ template<class Op, class A1, class A2, class A3> struct ClosureExpression {
 template<class Op, class A> ClosureExpression<Op,A>
 make_expression(Op op, const A& a) {
     return ClosureExpression<Op,A>(a);
-};
+}
 
 template<class Op, class A1, class A2> ClosureExpression<Op,A1,A2>
 make_expression(Op op, const A1& a1, const A2& a2) {
     return ClosureExpression<Op,A1,A2>(a1,a2);
-};
+}
 
 template<class Op, class A1, class A2, class A3> ClosureExpression<Op,A1,A2,A3>
 make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
     return ClosureExpression<Op,A1,A2,A3>(a1,a2,a3);
-};
+}
 
 
 

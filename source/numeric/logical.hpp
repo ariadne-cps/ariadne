@@ -80,7 +80,7 @@ namespace Detail {
     };
     inline LogicalValue make_logical_value(bool b) { return b ? LogicalValue::TRUE : LogicalValue::FALSE; }
     inline Bool definitely(LogicalValue lv) { return lv==LogicalValue::TRUE; }
-    inline Bool probably(const LogicalValue& lv) { return lv>=LogicalValue::LIKELY; };
+    inline Bool probably(const LogicalValue& lv) { return lv>=LogicalValue::LIKELY; }
     inline Bool decide(LogicalValue lv) { return lv>=LogicalValue::LIKELY; }
     inline Bool possibly(LogicalValue lv) { return lv!=LogicalValue::FALSE; }
     inline Bool is_determinate(LogicalValue lv) { return lv==LogicalValue::TRUE or lv==LogicalValue::FALSE; }

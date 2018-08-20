@@ -143,11 +143,11 @@ void TestDyadic::test_arithmetic() {
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)+Dyadic(-5,3u),Dyadic(1,3u));
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)-Dyadic(-5,3u),Dyadic(11,3u));
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)*Dyadic(-5,3u),Dyadic(-15,5u));
-};
+}
 
 void TestDyadic::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(-4,3u),Dyadic(-1,2u));
-};
+}
 
 void TestDyadic::test_infinity() {
     double dblmax=std::numeric_limits<double>::max();
@@ -162,7 +162,7 @@ void TestDyadic::test_infinity() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,inf);
     ARIADNE_TEST_BINARY_PREDICATE(operator<=,inf,inf);
     ARIADNE_TEST_BINARY_PREDICATE(operator==,inf,inf);
-};
+}
 
 
 int main() {

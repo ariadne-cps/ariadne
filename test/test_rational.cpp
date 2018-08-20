@@ -140,7 +140,7 @@ void TestRational::test_arithmetic() {
     ARIADNE_TEST_EQUAL(Rational(-4,5)-Rational(-2,7),Rational(-18,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)*Rational(-2,7),Rational(-8,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)/Rational(-2,7),Rational(-14,5));
-};
+}
 
 void TestRational::test_comparisons() {
     ExactDouble inf=ExactDouble::infinity();
@@ -151,7 +151,7 @@ void TestRational::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-4,5),Rational(-2,7));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Rational(18,35));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+inf);
-};
+}
 
 void TestRational::test_decimal() {
     ARIADNE_TEST_CONSTRUCT(Decimal,d1,(23,1u));
@@ -174,7 +174,7 @@ void TestRational::test_decimal() {
     ARIADNE_TEST_EQUAL(Rational(d1-d2),Rational(d1)-Rational(d2));
     ARIADNE_TEST_EQUAL(Rational(d1*d2),Rational(d1)*Rational(d2));
     ARIADNE_TEST_EQUAL(d1/d2,Rational(d1)/Rational(d2));
-};
+}
 
 
 

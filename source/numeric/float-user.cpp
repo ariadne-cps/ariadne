@@ -113,7 +113,7 @@ template<class F> Value<F>::Value(TwoExp const& t, PR pr)
     : _v(t,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==Dyadic(t),"Number 2^"<<t.exponent()<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+}
 
 template<class F> Value<F>::Value(Integer const& z, PR pr)
     : _v(z,to_nearest,pr)
@@ -126,13 +126,13 @@ template<class F> Value<F>::Value(Dyadic const& w, PR pr)
     : _v(w,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+}
 
 template<class F> Value<F>::Value(Value<F> const& x, PR pr)
     : _v(x._v,to_nearest,pr)
 {
     ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValue "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+}
 
 /*
 template<class F> Value<F>::Value(Rational const& q, PR pr)
@@ -156,7 +156,7 @@ template<class F> Value<F>& Value<F>::operator=(Dyadic const& w) {
     _v=F(w,this->precision());
     ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision()<<"; nearest is "<<(*this));
     return *this;
-};
+}
 
 template<class F> auto Value<F>::create(ValidatedNumber const& y) const -> Ball<F> {
     return Ball<F>(y,this->precision());

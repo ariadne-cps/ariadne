@@ -660,15 +660,15 @@ Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {
 
 DimensionType HybridAutomaton::dimension(DiscreteLocation location) const {
     return this->mode(location)._dynamic.size();
-};
+}
 
 RealSpace HybridAutomaton::continuous_state_space(DiscreteLocation location) const {
     return RealSpace(left_hand_sides(this->mode(location)._dynamic));
-};
+}
 
 RealSpace HybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
     return RealSpace(left_hand_sides(this->mode(location)._sorted_auxiliary));
-};
+}
 
 EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const {
     return this->mode(location)._kinds[event];

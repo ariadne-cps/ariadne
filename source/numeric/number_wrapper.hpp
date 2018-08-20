@@ -102,7 +102,7 @@ template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface 
     Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
     String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
     ARIADNE_THROW(std::runtime_error,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
-};
+}
 
 
 template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {

@@ -410,7 +410,7 @@ struct Sgn : ComparisonObject<Sgn> {
 class UnaryOperator {
     OperatorCode _op;
   public:
-    template<class OP> UnaryOperator(OP op) : _op(op) { };
+    template<class OP> UnaryOperator(OP op) : _op(op) { }
     template<class X> X operator() (X const& x) { return compute(_op,x); }
     template<class X> X derivative(X const& x) { return derivative(_op,x); }
 };

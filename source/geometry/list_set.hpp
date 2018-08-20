@@ -70,7 +70,7 @@ class ListSet
     ListSet(const std::vector<BS>& lst) {
         this->_data.insert(this->end(),lst.begin(),lst.end()); }
     template<class Iter> ListSet(Iter first, Iter last) {
-        this->_data.insert(this->end(),first,last); };
+        this->_data.insert(this->end(),first,last); }
 
     ListSet<BS>* clone() const { return new ListSet<BS>(*this); }
 

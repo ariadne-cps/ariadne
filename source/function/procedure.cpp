@@ -58,7 +58,7 @@ inline
 Void restrict(UpperIntervalType& r, const UpperIntervalType& x) {
     r.set_lower(max(r.lower(),x.lower()));
     r.set_upper(min(r.upper(),x.upper()));
-};
+}
 
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactIntervalType codom)
 {

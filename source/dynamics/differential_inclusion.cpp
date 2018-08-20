@@ -222,7 +222,7 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
         auto Df_j=Df[j].expansion();
         FloatDPError K_j=ze, L_j=ze, H_j=ze; FloatDPUpperBound Lambda_j=ze;
         for (auto ac : Df_j) {
-            MultiIndex const& a=ac.index();
+            MultiIndexReference const& a=ac.index();
             FloatDPBounds const& c=ac.coefficient();
             if (a.degree()==0) {
                 K_j += mag(c);
@@ -251,7 +251,7 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
             auto Dg_ij=Dg_i[j].expansion();
             FloatDPError pK_ij=ze, pL_ij=ze, pH_ij=ze;
             for (auto ac : Dg_ij) {
-                MultiIndex const& a=ac.index();
+                MultiIndexReference const& a=ac.index();
                 FloatDPBounds const& c=ac.coefficient();
                 if (a.degree()==0) {
                     pK_ij += mag(c);

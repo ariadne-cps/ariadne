@@ -1,4 +1,4 @@
-set(NOISY_EXAMPLES
+set(EXAMPLES_NOISY
 	higgins-selkov
 	chemical-reactor
 	lotka-volterra
@@ -12,11 +12,13 @@ set(NOISY_EXAMPLES
 	harmonic-oscillator
 	
 	noisy-benchmark
+	
+	
 )
 
-foreach(example ${NOISY_EXAMPLES})
+foreach(example ${EXAMPLES_NOISY})
     add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} ariadne)
 endforeach()
 
-add_dependencies(examples-noisy ${NOISY_EXAMPLES})
+add_dependencies(examples-noisy ${EXAMPLES_NOISY})

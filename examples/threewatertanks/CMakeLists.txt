@@ -1,10 +1,10 @@
-set(THREEWATERTANKS_EXAMPLES
+set(EXAMPLES_THREEWATERTANKS
     threewatertanks
 )
 
-foreach(example ${THREEWATERTANKS_EXAMPLES})
+foreach(example ${EXAMPLES_THREEWATERTANKS})
     add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} ariadne)
 endforeach()
 
-add_dependencies(examples ${THREEWATERTANKS_EXAMPLES})
+add_dependencies(examples ${EXAMPLES_THREEWATERTANKS})

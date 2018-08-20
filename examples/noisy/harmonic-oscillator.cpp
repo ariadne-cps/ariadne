@@ -1,5 +1,5 @@
 /***************************************************************************
- *            noisy-benchmark.cpp
+ *            harmonic-oscillator.cpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,18 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "higgins-selkov.hpp"
-#include "chemical-reactor.hpp"
-#include "lotka-volterra.hpp"
-#include "jet-engine.hpp"
-#include "pi-controller.hpp"
-#include "jerk21.hpp"
-#include "lorenz-attractor.hpp"
-#include "rossler-attractor.hpp"
-#include "jerk16.hpp"
-#include "dc-dc.hpp"
 #include "harmonic-oscillator.hpp"
-
 #include "noisy-utilities.hpp"
 
 using namespace Ariadne;
@@ -40,10 +29,5 @@ using namespace Ariadne;
 
 int main()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
-
-    for (SystemType s : systems) {
-        std::cout << std::get<0>(s) << std::endl;
-        run_noisy_system(s);
-    }
+    run_noisy_system(HO());
 }

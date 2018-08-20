@@ -1,5 +1,5 @@
 /***************************************************************************
- *            noisy-benchmark.cpp
+ *            lorenz-attractor.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,29 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "higgins-selkov.hpp"
-#include "chemical-reactor.hpp"
-#include "lotka-volterra.hpp"
-#include "jet-engine.hpp"
-#include "pi-controller.hpp"
-#include "jerk21.hpp"
-#include "lorenz-attractor.hpp"
-#include "rossler-attractor.hpp"
-#include "jerk16.hpp"
-#include "dc-dc.hpp"
-#include "harmonic-oscillator.hpp"
-
-#include "noisy-utilities.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
 
-int main()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> LA()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    DottedRealAssignments dynamics={dot(x)=10*(y-x),
+                                         dot(y)=x*(28 - z) - y + x*u,
+                                         dot(z)=x*y - z*8/3_q};
+    RealVariablesBox inputs={-1/100_q<=u<=1/100_q};
 
-    for (SystemType s : systems) {
-        std::cout << std::get<0>(s) << std::endl;
-        run_noisy_system(s);
-    }
+    Real e=1/1024_q;
+    RealVariablesBox initial={{1-e<=x<=1+e},{1-e<=y<=1+e},{1-e<=z<=1+e}};
+
+    Real evolution_time=1;
+    double step=1.0/256;
+
+    return make_tuple("LA",dynamics,inputs,initial,evolution_time,step);
 }

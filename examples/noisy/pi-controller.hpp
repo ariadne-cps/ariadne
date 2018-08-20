@@ -1,5 +1,5 @@
 /***************************************************************************
- *            noisy-benchmark.cpp
+ *            pi-controller.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,29 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "higgins-selkov.hpp"
-#include "chemical-reactor.hpp"
-#include "lotka-volterra.hpp"
-#include "jet-engine.hpp"
-#include "pi-controller.hpp"
-#include "jerk21.hpp"
-#include "lorenz-attractor.hpp"
-#include "rossler-attractor.hpp"
-#include "jerk16.hpp"
-#include "dc-dc.hpp"
-#include "harmonic-oscillator.hpp"
-
-#include "noisy-utilities.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
 
-int main()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> PI()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
+    RealVariable v("v"), x("x"), u("u");
+    RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
+    DottedRealAssignments dynamics={dot(v)=dynv,dot(x)=-dynv + 3*(20-v) + u};
+    RealVariablesBox inputs={-1/10_q<=u<=1/10_q};
 
-    for (SystemType s : systems) {
-        std::cout << std::get<0>(s) << std::endl;
-        run_noisy_system(s);
-    }
+    Real e=1/1024_q;
+    RealVariablesBox initial={{5<=v<=10},{-e<=x<=+e}};
+
+    Real evolution_time=5;
+    double step=1.0/32;
+
+    return make_tuple("PI",dynamics,inputs,initial,evolution_time,step);
 }

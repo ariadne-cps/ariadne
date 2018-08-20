@@ -1,5 +1,5 @@
 /***************************************************************************
- *            noisy-benchmark.cpp
+ *            jerk16.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,29 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "higgins-selkov.hpp"
-#include "chemical-reactor.hpp"
-#include "lotka-volterra.hpp"
-#include "jet-engine.hpp"
-#include "pi-controller.hpp"
-#include "jerk21.hpp"
-#include "lorenz-attractor.hpp"
-#include "rossler-attractor.hpp"
-#include "jerk16.hpp"
-#include "dc-dc.hpp"
-#include "harmonic-oscillator.hpp"
-
-#include "noisy-utilities.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
 
-int main()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> J16()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
+    RealVariable x("x"), y("y"), z("z"), u("u");
+    DottedRealAssignments dynamics={dot(x)=y,dot(y)=z,dot(z)=-y+pow(x,2)+u};
+    RealVariablesBox inputs={-0.031_dec<=u<=-0.029_dec};
 
-    for (SystemType s : systems) {
-        std::cout << std::get<0>(s) << std::endl;
-        run_noisy_system(s);
-    }
+    Real e=1/1024_q;
+    RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e},{-e<=z<=e}};
+
+    Real evolution_time=10;
+    double step=1.0/16;
+
+    return make_tuple("J16",dynamics,inputs,initial,evolution_time,step);
 }

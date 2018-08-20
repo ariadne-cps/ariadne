@@ -1,5 +1,5 @@
 /***************************************************************************
- *            noisy-benchmark.cpp
+ *            jet-engine.hpp
  *
  *  Copyright  2008-18 Luca Geretti
  *
@@ -21,29 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "higgins-selkov.hpp"
-#include "chemical-reactor.hpp"
-#include "lotka-volterra.hpp"
-#include "jet-engine.hpp"
-#include "pi-controller.hpp"
-#include "jerk21.hpp"
-#include "lorenz-attractor.hpp"
-#include "rossler-attractor.hpp"
-#include "jerk16.hpp"
-#include "dc-dc.hpp"
-#include "harmonic-oscillator.hpp"
-
-#include "noisy-utilities.hpp"
+#include "ariadne.hpp"
 
 using namespace Ariadne;
 
 
-int main()
+Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> JE()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
+    RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+    DottedRealAssignments dynamics={dot(x)=-y-1.5_dec*pow(x,2)-0.5_dec*pow(x,3)-0.5_dec+u1,dot(y)=3*x-y+u2};
+    RealVariablesBox inputs={-5/1000_q<=u1<=5/1000_q,-5/1000_q<=u2<=5/1000_q};
 
-    for (SystemType s : systems) {
-        std::cout << std::get<0>(s) << std::endl;
-        run_noisy_system(s);
-    }
+    Real e1=5/100_q; Real e2=7/100_q;
+    RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
+
+    Real evolution_time=5;
+    double step=1.0/50;
+
+    return make_tuple("JE",dynamics,inputs,initial,evolution_time,step);
 }

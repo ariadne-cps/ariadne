@@ -141,7 +141,7 @@ public:
 
 std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp);
 
-struct Norms {
+struct C1Norms {
     FloatDPError K;
     Vector<FloatDPError> Kj;
     FloatDPError pK;
@@ -157,7 +157,7 @@ struct Norms {
     FloatDPError expLambda;
     FloatDPError expL;
 
-    Norms(FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,FloatDPError const&);
+    C1Norms(FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,FloatDPError const&);
     Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError> values() const;
 
     SizeType dimension() const { return _dimension; }
@@ -165,7 +165,15 @@ private:
     SizeType _dimension;
 };
 
-Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
+std::ostream& operator << (std::ostream& os, const C1Norms& n) {
+    os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", Kj'=" << n.Kj <<
+          ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", Lj'=" << n.Lj <<
+          ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", Hj'=" << n.Hj <<
+          ", expLambda=" << n.expLambda << ", expL=" << n.expL;
+    return os;
+}
+
+C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 enum class InputApproximation { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
@@ -256,10 +264,10 @@ std::ostream& operator << (std::ostream& os, const InputsRoles& kind) {
     return os;
 }
 
-template<class R> ErrorType worstcase_error(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
-template<class R> ErrorType component_error(Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
-template<class A, class R> ErrorType worstcase_error(Norms const& n, PositiveFloatDPValue const& h) { return worstcase_error<R>(n,h,r_value<A>()); }
-template<class A, class R> ErrorType component_error(Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return component_error<R>(n,h,r_value<A>(),j); }
+template<class R> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
+template<class R> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
+template<class A, class R> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return worstcase_error<R>(n,h,r_value<A>()); }
+template<class A, class R> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return component_error<R>(n,h,r_value<A>(),j); }
 
 
 class InputApproximator;
@@ -276,7 +284,7 @@ public:
 };
 
 template<class A, class R>
-class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A> {
+class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
     ApproximationErrorProcessor(DifferentialInclusion const& di) : _di(di), _enable_componentwise_error(false) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
@@ -285,7 +293,7 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
   protected:
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
-    Vector<ErrorType> process(Norms const& n, PositiveFloatDPValue const& h) const;
+    Vector<ErrorType> process(C1Norms const& n, PositiveFloatDPValue const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };

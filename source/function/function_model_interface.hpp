@@ -72,7 +72,7 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _embed(const DomainType& d1, const DomainType& d2) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _restriction(const DomainType& d) const = 0;
 
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _derivative(SizeType j) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _derivative(ElementIndexType<D> j) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j, CanonicalNumericType<P,PR,PRE> c) const = 0;
 

@@ -56,15 +56,13 @@ namespace Ariadne {
 
 OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
     switch (evt) {
-        case INITIAL: return os << "x";
-        case TEMPORAL: return os << "t";
-        //case CROSSING: return os << "t";
-        //case STEP: return os << "h";
-        case PARAMETER: return os << "a";
-        case INPUT: return os << "u";
-        case NOISE: return os << "v";
-        case ERROR: return os << "e";
-        case UNKNOWN: default: return os << "s";
+        case EnclosureVariableType::INITIAL: return os << "x";
+        case EnclosureVariableType::TEMPORAL: return os << "t";
+        case EnclosureVariableType::PARAMETER: return os << "a";
+        case EnclosureVariableType::INPUT: return os << "u";
+        case EnclosureVariableType::NOISE: return os << "v";
+        case EnclosureVariableType::ERROR: return os << "e";
+        case EnclosureVariableType::UNKNOWN: default: return os << "s";
     }
 }
 
@@ -112,7 +110,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
                                  const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _state_space(state_space.variables()), _set(),
-      _variables(state_space.dimension(),INITIAL)
+      _variables(state_space.dimension(),EnclosureVariableType::INITIAL)
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
     this->_set=Enclosure(euclidean_set,factory);
@@ -122,7 +120,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
                                  const RealBox& box, const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(location), _events(), _state_space(state_space.variables()), _set(box,factory),
-      _variables(box.dimension(),INITIAL)
+      _variables(box.dimension(),EnclosureVariableType::INITIAL)
 {
 }
 
@@ -139,12 +137,12 @@ HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const Validated
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
     : _location(location), _events(), _state_space(spc.variables()), _set(set),
-      _variables(set.state_dimension(),INITIAL)
+      _variables(set.state_dimension(),EnclosureVariableType::INITIAL)
 {
     if(_variables.size()<set.number_of_parameters()) {
-        _variables.append(TEMPORAL);
+        _variables.append(EnclosureVariableType::TEMPORAL);
         while(_variables.size()<set.number_of_parameters()) {
-            _variables.append(UNKNOWN);
+            _variables.append(EnclosureVariableType::UNKNOWN);
         }
     }
 }
@@ -543,7 +541,7 @@ HybridEnclosure::uniform_error_recondition()
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
     ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
-    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),ERROR));
+    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
     this->_check();
 }
 

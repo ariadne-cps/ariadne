@@ -70,7 +70,7 @@ template<class ES> class HybridListSet;
 class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
 
-enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
+enum class EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.

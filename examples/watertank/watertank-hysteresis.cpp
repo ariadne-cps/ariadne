@@ -74,7 +74,7 @@ Int main(Int argc, const char* argv[])
     //HybridSet initial_set({valve|opened,controller|rising},{height==7});
     HybridSet initial_set({valve|opened,controller|rising},{height==7,aperture==1});
     HybridTime evolution_time(30.0,5);
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... "<<std::flush;

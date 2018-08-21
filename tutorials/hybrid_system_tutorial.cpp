@@ -219,7 +219,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 
     // Compute a validated orbit.
     cout << "Computing orbit... \n" << flush;
-    Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     cout << "    done." << endl;
 
     // Write the validated orbit to standard output and plot.
@@ -235,7 +235,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     // Compute reachable and evolved sets
     cout << "Computing reach and evolve sets... \n" << flush;
     ListSet<HybridEnclosure> reach,evolve;
-    make_lpair(reach,evolve) = evolver.reach_evolve(initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    make_lpair(reach,evolve) = evolver.reach_evolve(initial_enclosure,evolution_time,Semantics::UPPER);
     cout << "    done." << endl;
 
     // Write the orbit to standard output and plot.

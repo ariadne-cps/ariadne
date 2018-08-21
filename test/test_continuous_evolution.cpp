@@ -134,7 +134,7 @@ Void TestContinuousEvolution::test() const
     EnclosureType initial_set(initial_box,function_factory);
     ARIADNE_TEST_PRINT(initial_set);
 
-    Semantics semantics=UPPER_SEMANTICS;
+    Semantics semantics=Semantics::UPPER;
 
     // Compute the reachable sets
     Orbit<EnclosureType> orbit = evolver.orbit(initial_set,time,semantics);
@@ -192,7 +192,7 @@ Void TestContinuousEvolution::failure_test() const
     EnclosureType initial_set(initial_box,function_factory);
     // cout << "initial_set=" << initial_set << endl << endl;
 
-    Semantics semantics=UPPER_SEMANTICS;
+    Semantics semantics=Semantics::UPPER;
 
     // Compute the reachable sets
     Orbit<EnclosureType> orbit = evolverone.orbit(initial_set,time,semantics);

@@ -67,7 +67,7 @@ void TestCrossingsIssue::test_crossings()
     HybridTime evolution_time(max_t,max_n);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 /*
     Real max_x = max_t * v;

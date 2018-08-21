@@ -109,7 +109,7 @@ Int main(Int argc, const char* argv[])
     HybridTime evolution_time(10.0,3);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;

@@ -164,7 +164,7 @@ Int main(Int argc, const char* argv[])
 
     cout << "\nComputing orbit using series integrator... \n" << flush;
     evolver.set_integrator(series_integrator);
-    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     cout << "    done." << endl;
 
     cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
@@ -183,7 +183,7 @@ Int main(Int argc, const char* argv[])
 
     cout << "\nComputing event-terminated orbit using series integrator... \n" << flush;
     evolver.set_integrator(series_integrator);
-    series_orbit = evolver.orbit(initial_enclosure,evolution_termination,UPPER_SEMANTICS);
+    series_orbit = evolver.orbit(initial_enclosure,evolution_termination,Semantics::UPPER);
     cout << "    done." << endl;
 
     cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";

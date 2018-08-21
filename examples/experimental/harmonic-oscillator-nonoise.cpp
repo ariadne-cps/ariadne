@@ -57,7 +57,7 @@ int main()
     Real evolution_time(2.0*3.141592);
 
     std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,UPPER_SEMANTICS);
+    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     plot("harmonic-oscillator",ApproximateBoxType({{-1.5,1.5}, {-1.5,1.5}}), Colour(1.0,0.75,0.5), orbit);

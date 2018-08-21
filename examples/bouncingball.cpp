@@ -82,7 +82,7 @@ Int main(Int argc, const char* argv[])
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing evolution... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
     std::cout << "done." << std::endl;
 
     plot("bouncingball-xv",Axes2d(-0.1,x,2.1, -10.1,v,10.1), Colour(0.0,0.5,1.0), orbit);

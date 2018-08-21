@@ -150,21 +150,21 @@ class HybridEvolverBase
     //@{
     //! \name Main evolution functions.
 
-    Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridBoxSet& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const HybridBoxSet& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
     //@}
 
     //@{
@@ -189,8 +189,8 @@ class HybridEvolverBase
     //! \param time The maximum time of evolution; either specifies the stopping time
     //!   or the maximum number of steps.
     //! \param semantics The semantics used for the solution trajectories.
-    //!   Either \a #LOWER_SEMANTICS, in which case trajectories terminate at
-    //!   discontinuities, or #UPPER_SEMANTICS, in which case all branches
+    //!   Either \a #Semantics::LOWER, in which case trajectories terminate at
+    //!   discontinuities, or #Semantics::UPPER, in which case all branches
     //!   are taken.
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
@@ -645,7 +645,7 @@ struct EvolutionData
     //! the result, but useful for plotting, especially for debugging.
     List<HybridEnclosure> intermediate_sets;
 
-    //! \brief The semantics used to compute the evolution. Defaults to UPPER_SEMANTICS.
+    //! \brief The semantics used to compute the evolution. Defaults to Semantics::UPPER.
     Semantics semantics;
 };
 

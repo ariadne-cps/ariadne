@@ -144,7 +144,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
         ARIADNE_LOG(7,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(7,"  adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {

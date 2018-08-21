@@ -57,7 +57,7 @@ int main()
     Real evolution_time(7.0);
 
     std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,UPPER_SEMANTICS);
+    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "plotting..." << std::endl;

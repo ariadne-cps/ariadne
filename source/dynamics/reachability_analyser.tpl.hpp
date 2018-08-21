@@ -144,7 +144,7 @@ _upper_reach(const PavingType& set,
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,UPPER_SEMANTICS);
+        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,Semantics::UPPER);
         for(auto enclosure : reach) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -166,7 +166,7 @@ _upper_evolve(const PavingType& set,
     for(auto cell : cells) {
         ARIADNE_LOG(5,"Evolving cell = "<<cell<<"\n");
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,UPPER_SEMANTICS);
+        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,Semantics::UPPER);
         for(auto enclosure : final) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -196,7 +196,7 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,Semantics::UPPER);
         ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(5,"  adjoining "<<reach_enclosures.size()<<" reach enclosures to grid... ");
         if(verbosity==1) {
@@ -245,7 +245,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"computing lower evolution.");
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,LOWER_SEMANTICS);
+        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(final_cells,grid_depth);
         }
@@ -275,7 +275,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"Computing lower reach set...");
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,LOWER_SEMANTICS);
+        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,grid_depth);
         }
@@ -309,7 +309,7 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,LOWER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach,grid_depth);
         }
@@ -365,7 +365,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
         make_lpair(reach_cells,evolve_cells) =
             _reach_evolve_resume(initial_enclosures,transient_time,
-                maximum_grid_depth,starting_enclosures,LOWER_SEMANTICS,*_evolver);
+                maximum_grid_depth,starting_enclosures,Semantics::LOWER,*_evolver);
 
         evolve_cells.restrict_to_height(maximum_grid_height);
         ARIADNE_LOG(3,"Completed restriction to height.");
@@ -382,7 +382,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
         PavingType new_reach_cells(grid);
         ListSet<EnclosureType> new_evolve_enclosures;
         make_lpair(new_reach_cells,evolve_cells) = _reach_evolve_resume(starting_enclosures,lock_to_grid_time,
-                maximum_grid_depth,new_evolve_enclosures,LOWER_SEMANTICS,*_evolver);
+                maximum_grid_depth,new_evolve_enclosures,Semantics::LOWER,*_evolver);
 
         ARIADNE_LOG(3,"Removing...\n");
         evolve_cells.remove(reach_cells);

@@ -116,7 +116,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
 
     this->_set_evolver(bouncing_ball);
 
-    Orbit<HybridEnclosure> orbit=evolver->orbit(initial,time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit=evolver->orbit(initial,time,Semantics::UPPER);
     ListSet<HybridEnclosure> const& orbit_final=orbit.final();
 
     //ARIADNE_TEST_PRINT(orbit);
@@ -200,7 +200,7 @@ Void TestHybridEvolution::test_water_tank() const {
     _set_evolver(watertank);
 
     evolver->configuration().set_maximum_step_size(1.0);
-    Orbit<HybridEnclosure> orbit = evolver->orbit(initial,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit = evolver->orbit(initial,evolution_time,Semantics::UPPER);
     if(orbit.final().size()!=1u) {
         ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");

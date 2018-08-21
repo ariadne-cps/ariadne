@@ -948,7 +948,7 @@ _apply_guard_step(HybridEnclosure& set,
                     jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     break;
                 case CrossingKind::DEGENERATE: // Just check positive derivative in this case; NOT EXACT
-                    if(semantics==UPPER_SEMANTICS) {
+                    if(semantics==Semantics::UPPER) {
                         jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                         jump_set.new_guard(event,transition_data.guard_function);
                         jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
@@ -1086,7 +1086,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 // We obtain an over-approximation by testing at finitely many time points
                 const Nat n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
                 switch(semantics) {
-                    case UPPER_SEMANTICS:
+                    case Semantics::UPPER:
                         for(Nat i=0; i!=n; ++i) {
                             FloatDPBounds alpha=FloatDPValue(i+1)/n;
                             ValidatedScalarFunctionModelDP intermediate_guard
@@ -1094,7 +1094,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                             set.new_parameter_constraint(event, intermediate_guard <= zero);
                         }
                         break;
-                    case LOWER_SEMANTICS:
+                    case Semantics::LOWER:
                         // Can't continue the evolution, so set a trivially-falsified constraint
                         set.new_parameter_constraint(event, this->function_factory().create_constant(set.parameter_domain(),1) <= zero);
                         break;
@@ -1236,7 +1236,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     // Handle a set that is too large, based on semantics
     if (possibly(starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius())) {
-        if (evolution_data.semantics == LOWER_SEMANTICS) {
+        if (evolution_data.semantics == Semantics::LOWER) {
             ARIADNE_LOG(1,"\r  too large, discarding\n");
             return;
         } else if (this->_configuration_ptr->enable_subdivisions()) {

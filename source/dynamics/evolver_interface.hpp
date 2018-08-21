@@ -37,9 +37,9 @@ template<class ES> class Orbit;
 
 //! \brief The semantics used to determine the trajectories of the system.
 //! \relates EvolverInterface
-enum Semantics {
-    LOWER_SEMANTICS, //!< Under-approximation with trajectories terminating at spacial discontinuities.
-    UPPER_SEMANTICS  //!< Over-approximations with all possibilities included as spacial discontinuities.
+enum class Semantics {
+    LOWER, //!< Under-approximation with trajectories terminating at spacial discontinuities.
+    UPPER  //!< Over-approximations with all possibilities included as spacial discontinuities.
 };
 
 

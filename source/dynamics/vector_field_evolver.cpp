@@ -164,7 +164,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound current_set_radius=current_set_model.bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
@@ -172,7 +172,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time
                          << " and set " << current_set_model << " due to maximum radius being exceeded.");
         } else {

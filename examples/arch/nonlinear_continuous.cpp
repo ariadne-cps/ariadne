@@ -151,15 +151,15 @@ void test() {
         std::cerr<<"initial_box="<<initial_box<<"\n";
         std::cerr<<"flow_bounds="<<flow_bounds<<"\n";
 
-        auto short_orbit=evolver.orbit(evolver.enclosure(initial_box_set),1.0_dec,UPPER_SEMANTICS);
+        auto short_orbit=evolver.orbit(evolver.enclosure(initial_box_set),1.0_dec,Semantics::UPPER);
         g.set_fill_colour(1.0,0.5,1.0); g.draw(short_orbit.reach());
         g.set_fill_colour(0.75,0,0.75); g.draw(short_orbit.initial()); g.draw(short_orbit.final());
 
     /*
-        auto short_orbit0=evolver.orbit(evolver.enclosure(initial_box_set),0.5_dec,UPPER_SEMANTICS);
+        auto short_orbit0=evolver.orbit(evolver.enclosure(initial_box_set),0.5_dec,Semantics::UPPER);
         Pair<Enclosure,Enclosure> intermediate_enclosures=short_orbit0.final()[0].split();
-        auto short_orbit1=evolver.orbit(intermediate_enclosures.first,0.5_dec,UPPER_SEMANTICS);
-        auto short_orbit2=evolver.orbit(intermediate_enclosures.second,0.5_dec,UPPER_SEMANTICS);
+        auto short_orbit1=evolver.orbit(intermediate_enclosures.first,0.5_dec,Semantics::UPPER);
+        auto short_orbit2=evolver.orbit(intermediate_enclosures.second,0.5_dec,Semantics::UPPER);
         g.set_fill_colour(1.0,0.5,1.0); g.draw(short_orbit0.reach());
         g.set_fill_colour(0.5,1.0,1.0); g.draw(short_orbit1.reach());
         g.set_fill_colour(1.0,1.0,0.5); g.draw(short_orbit2.reach());
@@ -179,7 +179,7 @@ void test() {
         }
     */
         cout << "initial_box_set=" << initial_box_set << "\n";
-        auto orbit=evolver.orbit(evolver.enclosure(initial_box_set),tmax,UPPER_SEMANTICS);
+        auto orbit=evolver.orbit(evolver.enclosure(initial_box_set),tmax,Semantics::UPPER);
 
         for (auto enclosure : orbit.reach()) { g.draw(enclosure.affine_over_approximation()); } g.write("dai-affine_orbit");
 
@@ -193,7 +193,7 @@ void test() {
     //    Enclosure intermediate_enclosure=orbit.final()[0];
     //    intermediate_enclosure.recondition();
     //    intermediate_enclosure = Enclosure(cast_exact_box(intermediate_enclosure.bounding_box()),factory);
-    //    auto orbit2=evolver.orbit(intermediate_enclosure,evolution_time,UPPER_SEMANTICS);
+    //    auto orbit2=evolver.orbit(intermediate_enclosure,evolution_time,Semantics::UPPER);
     }
 }
 

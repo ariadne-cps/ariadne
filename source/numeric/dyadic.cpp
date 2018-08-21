@@ -231,6 +231,11 @@ Dyadic hlf(Dyadic const& x) {
     return r;
 }
 
+Dyadic pow(Dyadic const& x, Int m) {
+    assert(m >= 0);
+    return pow(x,static_cast<Nat>(m));
+}
+
 Dyadic pow(Dyadic const& x, Nat m) {
     unsigned long int lm=m;
     Dyadic r;

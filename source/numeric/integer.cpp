@@ -26,7 +26,6 @@
  */
 
 
-
 #include "../utility/stdlib.hpp"
 
 #include "integer.hpp"

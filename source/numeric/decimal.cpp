@@ -56,7 +56,7 @@ Decimal::Decimal(Dyadic const& w)
 {
     assert(w.exponent()>=0);
     this->_p=w.mantissa();
-    this->_q=w.exponent();
+    this->_q=static_cast<Nat>(w.exponent());
     Integer five(5);
     this->_p *= pow(five,this->_q);
     this->canonicalize();
@@ -200,7 +200,7 @@ Decimal::Decimal(double x)
         this->_p *= pow(ten,Nat(exp));
         this->_q=0u;
     } else {
-        this->_q=-exp;
+        this->_q=static_cast<Nat>(-exp);
     }
 
     this->canonicalize();

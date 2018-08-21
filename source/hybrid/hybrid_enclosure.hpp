@@ -294,7 +294,7 @@ class HybridEnclosure
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Nat depth) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
@@ -385,7 +385,7 @@ inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>
     return os << hls._list;
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 
 
 } // namespace Ariadne

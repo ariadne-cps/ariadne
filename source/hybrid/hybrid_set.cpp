@@ -522,7 +522,7 @@ HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const Hybrid
     return res;
 }
 
-template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const {
+template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Nat depth) const {
     if(this->space()==paving.space(this->location())) {
         paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),depth);
     } else {
@@ -531,7 +531,7 @@ template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(Hybr
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Nat depth) const;
 
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
@@ -634,7 +634,7 @@ Void HybridGridTreeSet::restrict_to_height(Nat h) {
     }
 }
 
-Void HybridGridTreeSet::adjoin_inner_approximation(const HybridSetInterface& hset, const Int depth) {
+Void HybridGridTreeSet::adjoin_inner_approximation(const HybridSetInterface& hset, const Nat depth) {
     Set<DiscreteLocation> locations=hset.locations();
     for(auto location : locations) {
         RealSpace space = this->space(location);
@@ -642,7 +642,7 @@ Void HybridGridTreeSet::adjoin_inner_approximation(const HybridSetInterface& hse
     }
 }
 
-Void HybridGridTreeSet::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Int depth) {
+Void HybridGridTreeSet::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat depth) {
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
@@ -652,7 +652,7 @@ Void HybridGridTreeSet::adjoin_inner_approximation(const HybridExactBoxes& hbxs,
     }
 }
 
-Void HybridGridTreeSet::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Int height, const Int depth) {
+Void HybridGridTreeSet::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat height, const Nat depth) {
     Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
@@ -662,7 +662,7 @@ Void HybridGridTreeSet::adjoin_lower_approximation(const HybridOvertSetInterface
     }
 }
 
-Void HybridGridTreeSet::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Int depth) {
+Void HybridGridTreeSet::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat depth) {
     Set<DiscreteLocation> hlocs=hs.locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
@@ -672,7 +672,7 @@ Void HybridGridTreeSet::adjoin_outer_approximation(const HybridCompactSetInterfa
     }
 }
 
-Void HybridGridTreeSet::adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Int depth) {
+Void HybridGridTreeSet::adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat depth) {
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
@@ -716,7 +716,7 @@ HybridListSet<ExactBoxType> HybridGridTreeSet::boxes() const {
     return result;
 }
 
-Void HybridGridTreeSet::mince(Int depth) {
+Void HybridGridTreeSet::mince(Nat depth) {
     for(LocationsIterator _loc_iter=this->locations_begin();
         _loc_iter!=this->locations_end(); ++_loc_iter) {
         _loc_iter->second.mince(depth);

@@ -97,7 +97,7 @@ class HybridReachabilityAnalyser
                                     HybridGridTreeSet& evolve_cells,
                                     const HybridGridTreeSet& set,
                                     const HybridTerminationCriterion& termination,
-                                    const Int accuracy,
+                                    const Nat accuracy,
                                     const HybridEvolverInterface& evolver) const;
 
 };

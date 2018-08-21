@@ -235,7 +235,7 @@ class ConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     LowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
 
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
@@ -343,9 +343,9 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
+    GridTreeSet outer_approximation(const Grid& grid, Nat depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;

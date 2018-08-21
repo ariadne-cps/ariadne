@@ -60,7 +60,7 @@ OutputStream& GridDrawer::_write(OutputStream& os) const {
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
 
 
-Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Int splittings_remaining)
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining)
 {
     if(splittings_remaining==0) {
         set.affine_over_approximation().draw(cnvs,proj);

@@ -658,7 +658,7 @@ ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Eff
 
 
 Void
-ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ValidatedConstrainedImageSet set(over_approximation(this->domain()),this->function(),this->constraints());
     return set.adjoin_outer_approximation_to(paving,depth);
@@ -1164,14 +1164,14 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
 }
 
 
-GridTreeSet ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Int depth) const
+GridTreeSet ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
 {
     GridTreeSet paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }
 
-Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ValidatedConstrainedImageSet const& set=*this;
 

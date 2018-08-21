@@ -130,7 +130,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
                                                        HybridGridTreeSet& evolve_cells,
                                                        const HybridGridTreeSet& set,
                                                        const HybridTerminationCriterion& termination,
-                                                       const Int accuracy,
+                                                       const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");

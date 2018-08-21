@@ -606,7 +606,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     //lp.l[ne+nx+nc]=0;
     lp.l[ne+nx+nc]=-1;
     lp.u[ne+nx+nc]=inf;
-    lp.vt[ne+nx+nc]=LOWER;
+    lp.vt[ne+nx+nc]=Slackness::LOWER;
     lp.p[ne+nx+nc]=ne+nx+nc;
 
 
@@ -620,11 +620,11 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Take x and s variables to be basic, so the initial basis matrix is the
     // identity
     for(Nat i=0; i!=ne; ++i) {
-        lp.vt[i]=LOWER;
+        lp.vt[i]=Slackness::LOWER;
         lp.p[nx+nc+i]=i;
     }
     for(Nat i=0; i!=nx+nc; ++i) {
-        lp.vt[ne+i]=BASIS;
+        lp.vt[ne+i]=Slackness::BASIS;
         lp.p[i]=ne+i;
     }
     lp.B=Matrix<FloatDP>::identity(nx+nc);
@@ -784,7 +784,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
                 // Compute the direction the point in space moves for x[j] entering the basis
                 Vector<FloatDP> d(np,0.0); // The direction x moves in in changing the basis
-                d[j] = (vt[j]==LOWER ? +1 : -1);
+                d[j] = (vt[j]==Slackness::LOWER ? +1 : -1);
                 for(Nat i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
                 }
@@ -824,7 +824,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         }
 
         ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of ValidatedAffineConstrainedImageSet.");
-        ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
+        ARIADNE_DEBUG_ASSERT(vt[p[s]]!=Slackness::BASIS);
         ARIADNE_LOG(5,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];

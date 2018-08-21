@@ -73,9 +73,9 @@ Void export_internal_array(const char* name)
 Void export_variable_type()
 {
     enum_<Slackness> variable_enum("Slackness");
-    variable_enum.value("BASIS", BASIS);
-    variable_enum.value("LOWER", LOWER);
-    variable_enum.value("UPPER", UPPER);
+    variable_enum.value("BASIS", Slackness::BASIS);
+    variable_enum.value("LOWER", Slackness::LOWER);
+    variable_enum.value("UPPER", Slackness::UPPER);
 }
 
 Void export_constraint()

@@ -119,7 +119,7 @@ template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds T
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).
-enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
+enum class Slackness : std::int8_t { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
 //! \ingroup OptimisationModule

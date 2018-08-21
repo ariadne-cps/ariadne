@@ -1224,8 +1224,15 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
 Void
 ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    BoxDrawer().draw(cnvs,proj,*this);
-    //AffineDrawer(Depth(1)).draw(cnvs,proj,*this);
+    // TODO : seriously improve
+    switch (DRAWING_METHOD) {
+    case DrawingMethod::BOX : box_draw(cnvs,proj); break;
+    case DrawingMethod::AFFINE : affine_draw(cnvs,proj,1); break;
+    case DrawingMethod::GRID : grid_draw(cnvs,proj,3); break;
+    case DrawingMethod::CURVE :
+    default:
+        affine_draw(cnvs,proj,1);
+    }
 }
 
 Void

@@ -177,7 +177,7 @@ class GridTreeSubset
     //! Returns zero if the binary tree already has a sufficient number of subdivisions due to
     //! its root cell being smaller than the cells obtained when subdividing \a numSubdivInDim
     //! times in each dimension starting from the zero-cell level.
-    Int zero_cell_subdivisions_to_tree_subdivisions( const Nat numSubdivInDim, const Nat primaryCellHeight,
+    Nat zero_cell_subdivisions_to_tree_subdivisions( const Nat numSubdivInDim, const Nat primaryCellHeight,
                                                      const Nat primaryToRootCellPathLength ) const;
 
   public:

@@ -41,32 +41,9 @@
 #include "../geometry/box.hpp"
 #include "../geometry/paver.hpp"
 
-#ifndef ARIADNE_TAYLOR_SET_HPP
-
 namespace Ariadne {
 
 class ValidatedConstrainedImageSet;
-
-//! \related Enclosure \brief The possible types of method used to draw a nonlinear set.
-enum class DrawingMethod : std::uint8_t { CURVE, BOX, AFFINE, GRID };
-//! \related Enclosure \brief The type of method currently used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DrawingMethod DRAWING_METHOD;
-//! \related Enclosure \brief The accuracy used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern uint DRAWING_ACCURACY;
-
-//! \related Enclosure \brief The possible types of method used to discretise a nonlinear set.
-enum class DiscretisationMethod { SUBDIVISION, AFFINE, CONSTRAINT };
-//! \related Enclosure \brief The type of method currently used to discretise a nonlinear set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DiscretisationMethod DISCRETISATION_METHOD;
-
-} // namespace Ariadne
-
-#endif
-
-namespace Ariadne {
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;

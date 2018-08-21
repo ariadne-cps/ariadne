@@ -49,8 +49,8 @@ AtomicHybridAutomaton getController()
     controller.new_mode(rising,List<RealAssignment>());
     controller.new_mode(falling,List<RealAssignment>());
 
-    controller.new_transition(falling,e_can_open,rising,height<=hmin,urgent);
-    controller.new_transition(rising,e_can_close,falling,height>=hmax,urgent);
+    controller.new_transition(falling,e_can_open,rising,height<=hmin,EventKind::URGENT);
+    controller.new_transition(rising,e_can_close,falling,height>=hmax,EventKind::URGENT);
 
     return controller;
 }

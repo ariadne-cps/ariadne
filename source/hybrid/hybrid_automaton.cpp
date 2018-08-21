@@ -306,7 +306,7 @@ Void HybridAutomaton::_new_invariant(DiscreteLocation location, ContinuousPredic
                       "Constraint for event "<<event<<" is already defined in mode "<<mode);
     }
     mode._invariants.insert(event,invariant);
-    mode._kinds.insert(event,INVARIANT);
+    mode._kinds.insert(event,EventKind::INVARIANT);
 }
 
 Void HybridAutomaton::_new_guard(DiscreteLocation location, DiscreteEvent event, ContinuousPredicate guard, EventKind kind)

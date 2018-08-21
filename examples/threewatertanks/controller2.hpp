@@ -58,8 +58,8 @@ AtomicHybridAutomaton getController2()
     controller.new_invariant(falling,height>=hmin-delta,e_must_open);
     controller.new_invariant(rising,height<=hmax+delta,e_must_close);
 
-    controller.new_transition(falling,e_can_open,rising,height<=hmin+delta,permissive);
-    controller.new_transition(rising,e_can_close,falling,height>=hmax-delta,permissive);
+    controller.new_transition(falling,e_can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
+    controller.new_transition(rising,e_can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
 
     return controller;
 }

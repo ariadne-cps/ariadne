@@ -176,9 +176,9 @@ OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const& crossi
 // Test if an event 'blocks' continuous evolution.
 Bool is_blocking(EventKind evk) {
     switch(evk) {
-        case INVARIANT: case PROGRESS: case URGENT: case IMPACT:
+        case EventKind::INVARIANT: case EventKind::PROGRESS: case EventKind::URGENT: case EventKind::IMPACT:
             return true;
-        case PERMISSIVE:
+        case EventKind::PERMISSIVE:
             return false;
         default:
             ARIADNE_FAIL_MSG("EventKind "<<evk<<" not recognised by is_blocking(...) predicate.");
@@ -188,9 +188,9 @@ Bool is_blocking(EventKind evk) {
 // Test if an event 'activates' a discrete transition.
 Bool is_activating(EventKind evk) {
     switch(evk) {
-        case PERMISSIVE: case URGENT: case IMPACT:
+        case EventKind::PERMISSIVE: case EventKind::URGENT: case EventKind::IMPACT:
             return true;
-        case INVARIANT: case PROGRESS:
+        case EventKind::INVARIANT: case EventKind::PROGRESS:
             return false;
         default:
             ARIADNE_FAIL_MSG("EventKind "<<evk<<" not recognised by is_activating(...) predicate.");
@@ -519,7 +519,7 @@ _apply_invariants(HybridEnclosure& initial_set,
         DiscreteEvent event=transition_iter->first;
         ARIADNE_LOG(4,"event="<<event<<"\n");
         TransitionData const & transition=transition_iter->second;
-        if(transition.event_kind==INVARIANT) {
+        if(transition.event_kind==EventKind::INVARIANT) {
             if (possibly(initial_set.satisfies(transition.guard_function>=0))) {
                 invariant_set.new_invariant(event,transition.guard_function);
             }
@@ -557,9 +557,9 @@ _process_starting_events(EvolutionData& evolution_data,
         // FIXME: Need to consider impact which really can occur immediately due to mapping to boundary.
         // TODO: The condition for an impact to occur is $L_{f}g>0$.
         //       Since this is now available, we should implement this!
-        if(transition.event_kind!=INVARIANT && transition.event_kind!=IMPACT) {
+        if(transition.event_kind!=EventKind::INVARIANT && transition.event_kind!=EventKind::IMPACT) {
             if(possibly(initial_set.satisfies(transition.guard_function>=0))) {
-                if(transition.event_kind!=PROGRESS) {
+                if(transition.event_kind!=EventKind::PROGRESS) {
                     HybridEnclosure immediate_jump_set=invariant_set;
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.is_empty())) {
@@ -575,7 +575,7 @@ _process_starting_events(EvolutionData& evolution_data,
                         evolution_data.initial_sets.append(immediate_jump_set);
                     }
                 }
-                if(transition.event_kind!=PERMISSIVE) {
+                if(transition.event_kind!=EventKind::PERMISSIVE) {
                     flowable_set.new_invariant(event,transition.guard_function);
                 }
             }
@@ -910,13 +910,13 @@ _apply_guard_step(HybridEnclosure& set,
 
     ARIADNE_LOG(5,"transition_data.event_kind="<<transition_data.event_kind<<"\n");
     switch(transition_data.event_kind) {
-        case PERMISSIVE:
+        case EventKind::PERMISSIVE:
             // The continuous evolution is just the same as a reachability step,
             // so we need to embed the starting state and the step time function into one higher dimension.
             jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
             jump_set.new_activation(event,transition_data.guard_function);
             break;
-        case IMPACT: {
+        case EventKind::IMPACT: {
             EffectiveScalarFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
             UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
             ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n");
@@ -926,7 +926,7 @@ _apply_guard_step(HybridEnclosure& set,
             if(definitely(jump_set.is_empty())) { return; }
             [[fallthrough]];
         }
-        case URGENT:
+        case EventKind::URGENT:
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
@@ -1739,14 +1739,14 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             EventKind event_kind=transitions[event].event_kind;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
-            if(event_kind!=PERMISSIVE) {
+            if(event_kind!=EventKind::PERMISSIVE) {
                 evolve_set.new_invariant(event,transitions[event].guard_function);
             }
             // FIXME: When using permissive crossings, jumps in the step after the crossing time are lost.
             // A hack to fix this is to only creep on non-permissive events. Check that evolution is correct in this case.
             // FIXME: What should we do on increasing but non-transverse crossings?
             if((crossing_kind==CrossingKind::TRANSVERSE ) // || crossing_kind==CrossingKind::INCREASING)
-                    && event_kind!=PERMISSIVE)
+                    && event_kind!=EventKind::PERMISSIVE)
             {
                 ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
                 const ValidatedScalarFunctionModelDP& crossing_time=crossing_iter->second.crossing_time;
@@ -1865,7 +1865,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             EffectiveScalarFunction guard_function=transitions[event].guard_function;
             ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
-            if(event_kind!=PERMISSIVE) {
+            if(event_kind!=EventKind::PERMISSIVE) {
                 UpperIntervalType guard_range = compose(guard_function,flow).range();
                 ARIADNE_ASSERT(decide(guard_range.lower()<zero));
                 UpperIntervalType guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();

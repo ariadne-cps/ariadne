@@ -61,10 +61,10 @@ AtomicHybridAutomaton getValve()
     valve.new_mode(towards1,{dot(aperture1)=+1/T,dot(aperture2)=-1/T});
     valve.new_mode(towards2,{dot(aperture1)=-1/T,dot(aperture2)=+1/T});
 
-    valve.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin,urgent);
-    valve.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin,urgent);
-    valve.new_transition(towards1,finished_towards1,fully1,aperture1>=1,urgent);
-    valve.new_transition(towards2,finished_towards2,fully2,aperture2>=1,urgent);
+    valve.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin,EventKind::URGENT);
+    valve.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin,EventKind::URGENT);
+    valve.new_transition(towards1,finished_towards1,fully1,aperture1>=1,EventKind::URGENT);
+    valve.new_transition(towards2,finished_towards2,fully2,aperture2>=1,EventKind::URGENT);
 
     return valve;
 }

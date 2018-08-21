@@ -104,7 +104,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
 
     Real lambda(0.5);
     bouncing_ball.new_mode(q,{dot(x)=v,dot(v)=-one});
-    bouncing_ball.new_transition(q,e,q,{next(x)=x,next(v)=-lambda*v},x<=0,impact);
+    bouncing_ball.new_transition(q,e,q,{next(x)=x,next(v)=-lambda*v},x<=0,EventKind::IMPACT);
     ARIADNE_TEST_PRINT(bouncing_ball);
 
     double height=2.0;
@@ -183,10 +183,10 @@ Void TestHybridEvolution::test_water_tank() const {
     watertank.new_mode(opening,dot({height,aperture})={-lambda*height+rate*aperture,1/T});
     watertank.new_mode(closing,dot({height,aperture})={-lambda*height+rate*aperture,-1/T});
 
-    watertank.new_transition(closed,start_opening,opening,next({height,aperture})={height,aperture},height<=hmin,urgent);
-    watertank.new_transition(open,start_closing,closing,next({height,aperture})={height,aperture},height>=hmax,urgent);
-    watertank.new_transition(opening,finished_opening,open,next({height,aperture})={height,aperture},aperture>=1,urgent);
-    watertank.new_transition(closing,finished_closing,closed,next({height,aperture})={height,aperture},aperture<=0,urgent);
+    watertank.new_transition(closed,start_opening,opening,next({height,aperture})={height,aperture},height<=hmin,EventKind::URGENT);
+    watertank.new_transition(open,start_closing,closing,next({height,aperture})={height,aperture},height>=hmax,EventKind::URGENT);
+    watertank.new_transition(opening,finished_opening,open,next({height,aperture})={height,aperture},aperture>=1,EventKind::URGENT);
+    watertank.new_transition(closing,finished_closing,closed,next({height,aperture})={height,aperture},aperture<=0,EventKind::URGENT);
 
     ARIADNE_TEST_PRINT(watertank);
 

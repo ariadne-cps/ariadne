@@ -122,13 +122,13 @@ CompositeHybridAutomaton create_heating_system()
     heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
-    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, permissive );
-    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, urgent );
+    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
+    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, EventKind::URGENT );
 
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( {dot(C)=1.0_decimal} );
-    clock.new_transition( midnight, next(C)=0, C>=1, urgent );
+    clock.new_transition( midnight, next(C)=0, C>=1, EventKind::URGENT );
 
     CompositeHybridAutomaton heating_system({clock,heater});
     std::cout << "heating_system=" << heating_system << "\n" << "\n";

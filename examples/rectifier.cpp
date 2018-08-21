@@ -165,21 +165,21 @@ Int main(Int argc, const char* argv[])
     rectifier_automaton.new_mode(offon,dot(space)=offon_d);
     rectifier_automaton.new_mode(onon,dot(space)=onon_d);
     /// OffOff events
-    rectifier_automaton.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
-    rectifier_automaton.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,urgent);
+    rectifier_automaton.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,EventKind::URGENT);
     /// OnOff events
-    rectifier_automaton.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,urgent);
-    rectifier_automaton.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,urgent);
+    rectifier_automaton.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,EventKind::URGENT);
     /// OffOn events
-    rectifier_automaton.new_transition(offon,resettime,offon,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,urgent);
-    rectifier_automaton.new_transition(offon,jump3,onon,noop_r,offon_onon_g,urgent);
+    rectifier_automaton.new_transition(offon,resettime,offon,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offon,jump3,onon,noop_r,offon_onon_g,EventKind::URGENT);
     /// OnOn events
-    rectifier_automaton.new_transition(onon,resettime,onon,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,urgent);
-    rectifier_automaton.new_transition(onon,jump3,offon,noop_r,onon_offon_g,urgent);
+    rectifier_automaton.new_transition(onon,resettime,onon,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onon,jump3,offon,noop_r,onon_offon_g,EventKind::URGENT);
 
 
     /// Finished building the automaton

@@ -46,17 +46,11 @@ class DiscreteLocation;
 template<class T> class Space;
 typedef Space<Real> RealSpace;
 
-enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
+enum class EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;
 class HybridEnclosure;
-
-static const EventKind invariant = INVARIANT;
-static const EventKind progress = PROGRESS;
-static const EventKind permissive = PERMISSIVE;
-static const EventKind urgent = URGENT;
-static const EventKind impact = IMPACT;
 
 class SystemSpecificationError : public std::runtime_error {
   public:
@@ -251,11 +245,11 @@ inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface
 
 inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
     switch(evk) {
-        case INVARIANT: os<<"invariant"; break;
-        case PROGRESS: os<<"progress"; break;
-        case PERMISSIVE: os<<"permissive"; break;
-        case URGENT: os<<"urgent"; break;
-        case IMPACT: os<<"impact"; break;
+        case EventKind::INVARIANT: os<<"invariant"; break;
+        case EventKind::PROGRESS: os<<"progress"; break;
+        case EventKind::PERMISSIVE: os<<"permissive"; break;
+        case EventKind::URGENT: os<<"urgent"; break;
+        case EventKind::IMPACT: os<<"impact"; break;
     } return os;
 }
 

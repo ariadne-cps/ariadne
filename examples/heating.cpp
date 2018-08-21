@@ -100,15 +100,15 @@ Int main(Int argc, const char* argv[])
     heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
-    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, permissive );
+    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
     // Comment out above two lines and uncomment the line below to make the switch_on transition urgent
-    //heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, urgent );
-    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, urgent );
+    //heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::URGENT );
+    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, EventKind::URGENT );
 
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( {dot(C)=1} );
-    clock.new_transition( midnight, next(C)=0, C>=1, urgent );
+    clock.new_transition( midnight, next(C)=0, C>=1, EventKind::URGENT );
 
     CompositeHybridAutomaton heating_system({clock,heater});
     cout << "heating_system=" << heating_system << "\n" << "\n";

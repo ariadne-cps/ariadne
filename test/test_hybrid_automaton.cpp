@@ -488,16 +488,16 @@ TestHybridAutomaton::test_build_hybrid_system()
     valve_automaton.new_invariant({valve|closing},height>=hmin,start_opening);
     valve_automaton.new_invariant({valve|closing},alpha>=0,finished_closing);
 
-    valve_automaton.new_transition({valve|closed},start_opening,{valve|opening},{next(alpha)=alpha},height<=hmin,PERMISSIVE);
-    valve_automaton.new_transition({valve|closing},start_opening,{valve|opening},{next(alpha)=alpha},height<=hmin,PERMISSIVE);
-    valve_automaton.new_transition({valve|open},start_closing,{valve|closing},{next(alpha)=alpha},height>=hmax,PERMISSIVE);
-    valve_automaton.new_transition({valve|opening},start_closing,{valve|closing},{next(alpha)=alpha},height>=hmax,PERMISSIVE);
+    valve_automaton.new_transition({valve|closed},start_opening,{valve|opening},{next(alpha)=alpha},height<=hmin,EventKind::PERMISSIVE);
+    valve_automaton.new_transition({valve|closing},start_opening,{valve|opening},{next(alpha)=alpha},height<=hmin,EventKind::PERMISSIVE);
+    valve_automaton.new_transition({valve|open},start_closing,{valve|closing},{next(alpha)=alpha},height>=hmax,EventKind::PERMISSIVE);
+    valve_automaton.new_transition({valve|opening},start_closing,{valve|closing},{next(alpha)=alpha},height>=hmax,EventKind::PERMISSIVE);
 
     // Set the transitions for when the valve finished opening.
     // Since alpha is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_automaton.new_transition({valve|opening},finished_opening,{valve|open},alpha>=1,PERMISSIVE);
-    valve_automaton.new_transition({valve|closing},finished_closing,{valve|closed},alpha<=0,PERMISSIVE);
+    valve_automaton.new_transition({valve|opening},finished_opening,{valve|open},alpha>=1,EventKind::PERMISSIVE);
+    valve_automaton.new_transition({valve|closing},finished_closing,{valve|closed},alpha<=0,EventKind::PERMISSIVE);
 
     ARIADNE_TEST_PRINT(valve_automaton);
 
@@ -584,12 +584,12 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
     //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
-    valve_automaton.new_action({valve|open},height<=hmax,start_closing,height>=hmax-delta,PERMISSIVE);
-    valve_automaton.new_action({valve|opening},height<=hmax,start_closing,height>=hmax-delta,PERMISSIVE);
-    valve_automaton.new_action({valve|closed},height>=hmin,start_opening,height<=hmin+delta,PERMISSIVE);
-    valve_automaton.new_action({valve|opening},height>=hmin,start_closing,height<=hmin+delta,PERMISSIVE);
-    valve_automaton.new_action({valve|closing},finished_closing,alpha>=0,URGENT);
-    valve_automaton.new_action({valve|opening},finished_opening,alpha<=1,URGENT);
+    valve_automaton.new_action({valve|open},height<=hmax,start_closing,height>=hmax-delta,EventKind::PERMISSIVE);
+    valve_automaton.new_action({valve|opening},height<=hmax,start_closing,height>=hmax-delta,EventKind::PERMISSIVE);
+    valve_automaton.new_action({valve|closed},height>=hmin,start_opening,height<=hmin+delta,EventKind::PERMISSIVE);
+    valve_automaton.new_action({valve|opening},height>=hmin,start_closing,height<=hmin+delta,EventKind::PERMISSIVE);
+    valve_automaton.new_action({valve|closing},finished_closing,alpha>=0,EventKind::URGENT);
+    valve_automaton.new_action({valve|opening},finished_opening,alpha<=1,EventKind::URGENT);
 
     valve_automaton.new_update({valve|closed},start_opening,{valve|opening},{next(alpha)=alpha});
     valve_automaton.new_update({valve|closing},start_opening,{valve|opening},{next(alpha)=alpha});

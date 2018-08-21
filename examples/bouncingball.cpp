@@ -58,7 +58,7 @@ Int main(Int argc, const char* argv[])
 
     /// Build the automaton
     ball.new_mode(freefall,{dot(x)=v,dot(v)=-g});
-    ball.new_guard(freefall,bounce,x<=0,impact);
+    ball.new_guard(freefall,bounce,x<=0,EventKind::IMPACT);
     ball.new_update(freefall,bounce,freefall,{next(x)=x,next(v)=-a*v});
     /// Finished building the automaton
 

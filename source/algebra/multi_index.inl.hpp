@@ -128,8 +128,8 @@ inline Bool MultiIndexListIterator::operator==(MultiIndexListIterator const& oth
 inline Bool MultiIndexListIterator::operator!=(MultiIndexListIterator const& other) const { return this->_r._p!=other._r._p; }
 inline MultiIndexListIterator& MultiIndexListIterator::operator++() { return (*this)+=1; }
 inline MultiIndexListIterator& MultiIndexListIterator::operator--() { return (*this)+=(-1); }
-inline MultiIndexListIterator& MultiIndexListIterator::operator+=(PointerDifferenceType k) { _r._p+=_r._n*k; return *this; }
-inline MultiIndexListIterator MultiIndexListIterator::operator+(PointerDifferenceType k) const { return MultiIndexListIterator(_r._n,_r._p+_r._n*k); }
+inline MultiIndexListIterator& MultiIndexListIterator::operator+=(PointerDifferenceType k) { _r._p+=k*static_cast<PointerDifferenceType>(_r._n); return *this; }
+inline MultiIndexListIterator MultiIndexListIterator::operator+(PointerDifferenceType k) const { return MultiIndexListIterator(_r._n,_r._p+static_cast<PointerDifferenceType>(_r._n)*k); }
 inline MultiIndexReference MultiIndexListIterator::operator*() const { return _r; }
 inline MultiIndexPointer MultiIndexListIterator::operator->() const { return MultiIndexPointer(const_cast<MultiIndexReference*>(&_r)); }
 
@@ -141,8 +141,8 @@ inline Bool MultiIndexListConstIterator::operator==(MultiIndexListConstIterator 
 inline Bool MultiIndexListConstIterator::operator!=(MultiIndexListConstIterator const& other) const { return this->_r._p!=other._r._p; }
 inline MultiIndexListConstIterator& MultiIndexListConstIterator::operator++() { return (*this)+=1; }
 inline MultiIndexListConstIterator& MultiIndexListConstIterator::operator--() { return (*this)+=(-1); }
-inline MultiIndexListConstIterator& MultiIndexListConstIterator::operator+=(PointerDifferenceType k) { _r._p+=_r._n*k; return *this; }
-inline MultiIndexListConstIterator MultiIndexListConstIterator::operator+(PointerDifferenceType k) const { return MultiIndexListConstIterator(_r._n,_r._p+_r._n*k); }
+inline MultiIndexListConstIterator& MultiIndexListConstIterator::operator+=(PointerDifferenceType k) { _r._p+=static_cast<PointerDifferenceType>(_r._n)*k; return *this; }
+inline MultiIndexListConstIterator MultiIndexListConstIterator::operator+(PointerDifferenceType k) const { return MultiIndexListConstIterator(_r._n,_r._p+static_cast<PointerDifferenceType>(_r._n)*k); }
 inline MultiIndexConstReference MultiIndexListConstIterator::operator*() const { return _r; }
 inline MultiIndexConstPointer MultiIndexListConstIterator::operator->() const { return MultiIndexConstPointer(const_cast<MultiIndexConstReference*>(&_r)); }
 

@@ -1007,13 +1007,13 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 
 
-Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),depth);
 }
 
 
-GridTreeSet Enclosure::outer_approximation(const Grid& grid, Int depth) const
+GridTreeSet Enclosure::outer_approximation(const Grid& grid, Nat depth) const
 {
     GridTreeSet paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);

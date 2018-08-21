@@ -309,14 +309,14 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 
 
 GridTreeSet
-ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Int d) const {
+ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) const {
     GridTreeSet r(g);
     this->adjoin_outer_approximation_to(r,d);
     return r;
 }
 
 
-Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
 {
 
     // No need to check if cell is already part of the set
@@ -335,7 +335,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
         lp.u[i]=add(up,bx[i].upper().raw(),errors[i].raw());
     }
 
-    Int cell_tree_depth=(cell.depth()-cell.height());
+    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
@@ -443,7 +443,7 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
 
 Void
-ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
@@ -462,7 +462,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
 
 
 
-Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
 {
     SimplexSolver<FloatDP> lpsolver;
 
@@ -485,7 +485,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
         lp.u[i]=bx[i].upper().raw();
     }
 
-    Int cell_tree_depth=(cell.depth()-cell.height());
+    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
@@ -524,7 +524,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
 
 Void
-ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const {
+ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
     SimplexSolver<FloatDP> lpsolver;

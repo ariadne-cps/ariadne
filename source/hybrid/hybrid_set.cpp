@@ -85,7 +85,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
     } else {
-        (*this->_curves_ptr)[ht.discrete_time().get_si()].euclidean_set().insert(flt_time,hpt.point());
+        (*this->_curves_ptr)[static_cast<unsigned int>(ht.discrete_time().get_si())].euclidean_set().insert(flt_time,hpt.point());
     }
 }
 

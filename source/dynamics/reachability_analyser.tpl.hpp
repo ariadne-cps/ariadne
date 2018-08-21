@@ -90,7 +90,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
                      const TimeType& time,
-                     const Int accuracy,
+                     const Nat accuracy,
                      ListSet<EnclosureType>& evolve_enclosures,
                      Semantics semantics,
                      const EvolverType& evolver) const
@@ -133,7 +133,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_reach(const PavingType& set,
              const TimeType& time,
-             const Int accuracy,
+             const Nat accuracy,
              const EvolverType& evolver) const
     -> PavingType
 {
@@ -156,7 +156,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_evolve(const PavingType& set,
               const TimeType& time,
-              const Int accuracy,
+              const Nat accuracy,
               const EvolverType& evolver) const
     -> PavingType
 {
@@ -181,7 +181,7 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
                            PavingType& evolve_cells,
                            const PavingType& set,
                            const TimeType& time,
-                           const Int accuracy,
+                           const Nat accuracy,
                            const EvolverType& evolver) const
 {
     ARIADNE_LOG(4,"ReachabilityAnalyser<SYS>::_adjoin_upper_reach_evolve(...)\n");
@@ -233,8 +233,8 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     -> PavingType
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_evolve(...)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
     GridType grid=this->_configuration->grid();
     PavingType initial_cells(grid); PavingType final_cells(grid);
 
@@ -262,8 +262,8 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     -> SetApproximationType
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach(set,time)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
     const GridType& grid=this->_configuration->grid();
     PavingType initial_cells(grid); PavingType reach_cells(grid);
 
@@ -291,8 +291,8 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
     -> Pair<SetApproximationType,SetApproximationType>
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach_evolve(...)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
 
     const GridType& grid=this->_configuration->grid();
 
@@ -329,8 +329,8 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach(set)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Nat maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
@@ -418,7 +418,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::upper_evolve(...)\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
@@ -453,7 +453,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
@@ -505,7 +505,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
@@ -548,8 +548,8 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     ARIADNE_LOG(2,"ReachabilityAnalyser::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Nat maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
@@ -640,7 +640,7 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");

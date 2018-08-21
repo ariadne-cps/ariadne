@@ -176,15 +176,15 @@ template<class SYS> class ReachabilityAnalyser
   protected:
     // Helper functions for operators on lists of sets.
     Pair<PavingType,PavingType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
-            const TimeType& time, const Int accuracy, ListSet<EnclosureType>& evolve_enclosures,
+            const TimeType& time, const Nat accuracy, ListSet<EnclosureType>& evolve_enclosures,
             Semantics semantics, const EvolverType& evolver) const;
     PavingType _upper_reach(const PavingType& set, const TimeType& time,
-            const Int accuracy, const EvolverType& evolver) const;
+            const Nat accuracy, const EvolverType& evolver) const;
     PavingType _upper_evolve(const PavingType& set, const TimeType& time,
-            const Int accuracy, const EvolverType& evolver) const;
+            const Nat accuracy, const EvolverType& evolver) const;
     Void _adjoin_upper_reach_evolve(PavingType& reach_set, PavingType& final_set,
                                     const PavingType& set, const TimeType& time,
-                                    const Int accuracy, const EvolverType& evolver) const;
+                                    const Nat accuracy, const EvolverType& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
     Void _checked_restriction(PavingType& set, const PavingType& bounding) const;
 };
@@ -193,8 +193,6 @@ template<class SYS> class ReachabilityAnalyser
 //!    accuracy of discretised evolution methods and reachability analysis.
 template<class SYS> class ReachabilityAnalyserConfiguration : public ConfigurationInterface {
   public:
-    //! \brief The integer type.
-    typedef Int IntType;
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
 
@@ -249,14 +247,14 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    IntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_depth;
 
     //! \brief The maximum height used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    IntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_height;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
@@ -282,11 +280,11 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     const TimeType& lock_to_grid_time() const { return _lock_to_grid_time; }
     Void set_lock_to_grid_time(const TimeType value) { _lock_to_grid_time = TimeType(value); }
 
-    const IntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
+    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
 
-    const IntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
+    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
 
     const SharedPointer<BoundingDomainType>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     Void set_bounding_domain_ptr(SharedPointer<BoundingDomainType> bounding_domain_ptr) { _bounding_domain_ptr = bounding_domain_ptr; }

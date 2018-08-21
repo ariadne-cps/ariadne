@@ -108,8 +108,6 @@ class HybridReachabilityAnalyser
 template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : public ConfigurationInterface {
 
   public:
-    //! \brief The integer type.
-    typedef Int IntType;
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
     //! \brief The real type.
@@ -198,14 +196,14 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    IntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_depth;
 
     //! \brief The maximum height used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    IntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_height;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
@@ -244,11 +242,11 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     const Set<DiscreteEvent>& lock_to_grid_events() const { return _lock_to_grid_events; }
     Void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
 
-    const IntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
+    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
 
-    const IntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
+    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
 
     const std::shared_ptr<HybridExactBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.

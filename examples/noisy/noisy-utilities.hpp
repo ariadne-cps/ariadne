@@ -51,7 +51,7 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) {
+void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity, bool draw) {
 
     typedef typename ValidatedVectorFunctionModelType::NumericType NumericType;
     typedef typename NumericType::PrecisionType PrecisionType;
@@ -76,39 +76,40 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     std::cout << "score: " << score(evolve_set) << ", time: " << ticks / hz << "." << ticks % hz << " s" << std::endl;
-/*
-    std::cout << "plotting..." << std::endl;
-    Box<FloatDPUpperInterval> graphics_box(f.result_size());
-    for (auto set: reach_sets) {
-        graphics_box = hull(graphics_box,set.bounding_box());
-    }
-    for (SizeType i : range(0,f.result_size()-1)) {
-        for (SizeType j : range(i+1,f.result_size())) {
-            Figure fig=Figure();
-            fig.set_bounding_box(graphics_box);
-            fig.set_projection(f.result_size(),i,j);
-            fig.set_line_colour(0.0,0.0,0.0);
-            fig.set_line_style(false);
-            fig.set_fill_colour(0.5,0.5,0.5);
-            fig.draw(starting_set);
-            fig.set_fill_colour(1.0,0.75,0.5);
-            for (auto set : reverse(reach_sets)) { fig.draw(set); }
-            fig.draw(evolve_set);
-            char num_char[7] = "";
-            if (f.result_size() > 2)
-                sprintf(num_char,"[%lu,%lu]",i,j);
-            fig.write((name+num_char).c_str());
+
+    if (draw) {
+        std::cout << "plotting..." << std::endl;
+        auto n = ivp.di().num_variables();
+        Box<FloatDPUpperInterval> graphics_box(n);
+        for (auto set: reach_sets) {
+            graphics_box = hull(graphics_box,set.bounding_box());
+        }
+        for (SizeType i : range(0,n-1)) {
+            for (SizeType j : range(i+1,n)) {
+                Figure fig=Figure();
+                fig.set_bounding_box(graphics_box);
+                fig.set_projection(n,i,j);
+                fig.set_line_colour(0.0,0.0,0.0);
+                fig.set_line_style(false);
+                fig.set_fill_colour(0.5,0.5,0.5);
+                fig.draw(ivp.X0());
+                fig.set_fill_colour(1.0,0.75,0.5);
+                for (auto set : reverse(reach_sets)) { fig.draw(set); }
+                fig.draw(evolve_set);
+                char num_char[7] = "";
+                if (n > 2) sprintf(num_char,"[%lu,%lu]",i,j);
+                fig.write((name+num_char).c_str());
+            }
         }
     }
-*/
 }
 
-void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) {
+void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         std::cout << appro << std::endl;
-        run_single(name,ivp,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
+        run_single(name,ivp,evolution_time,step,singleapproximation,sweeper,freq,verbosity,draw);
     }
 }
 
@@ -121,6 +122,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
 
     int verbosity = 1;
+    bool draw = false;
+    DRAWING_METHOD = DrawingMethod::BOX;
 
     List<InputApproximation> approximations;
     approximations.append(InputApproximation::ZERO);
@@ -129,8 +132,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(InputApproximation::SINUSOIDAL);
     approximations.append(InputApproximation::PIECEWISE);
 
-    run_single(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
-    //run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
+    run_single(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity,draw);
+    //run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity,draw);
 }
 
 void run_noisy_system(SystemType system) {

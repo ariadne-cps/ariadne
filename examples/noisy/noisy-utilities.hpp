@@ -22,10 +22,7 @@
  */
 
 #include "ariadne.hpp"
-
-#include <sys/times.h>
-#include <sys/resource.h>
-#include <unistd.h>
+#include "utility/stopwatch.hpp"
 
 namespace Ariadne {
 
@@ -39,8 +36,6 @@ FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
     auto bbx = evolve_set.bounding_box();
     return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }
-
-ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }
 
 template<class C> struct Reverse {
     C const& _c;
@@ -61,21 +56,18 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
     integrator.verbosity = verbosity;
 
-    tms start_time, end_time;
-    times(&start_time);
+    StopWatch sw;
 
     List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(ivp,evolution_time);
 
-    times(&end_time);
-    clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-    clock_t hz = static_cast<unsigned long>(sysconf(_SC_CLK_TCK));
+    sw.click();
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
     ValidatedVectorFunctionModelType evolve_function = partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
-    std::cout << "score: " << score(evolve_set) << ", time: " << ticks / hz << "." << ticks % hz << " s" << std::endl;
+    std::cout << "score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s" << std::endl;
 
     if (draw) {
         std::cout << "plotting..." << std::endl;
@@ -119,7 +111,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     DifferentialInclusionIVP ivp(dynamics,inputs,initial);
 
     SizeType freq=12;
-    ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
+    ThresholdSweeperDP sweeper = ThresholdSweeperDP(DoublePrecision(),1e-8);
 
     int verbosity = 1;
     bool draw = false;

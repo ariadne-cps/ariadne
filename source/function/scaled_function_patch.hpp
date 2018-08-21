@@ -780,8 +780,7 @@ template<class M> class VectorScaledFunctionPatch
         return partial_restriction(tf,k,d);
     }
     friend Pair<VectorScaledFunctionPatch<M>,VectorScaledFunctionPatch<M>> split(const VectorScaledFunctionPatch<M>& tf, SizeType j) {
-        typedef M ModelType;
-        Pair<Vector<ModelType>,Vector<ModelType>> models=split(tf.models(),j);
+        Pair<Vector<M>,Vector<M>> models=split(tf.models(),j);
         Pair<BoxDomainType,BoxDomainType> subdomains=split(tf.domain(),j);
         return make_pair(VectorScaledFunctionPatch<M>(subdomains.first,models.first),
                         VectorScaledFunctionPatch<M>(subdomains.second,models.second));

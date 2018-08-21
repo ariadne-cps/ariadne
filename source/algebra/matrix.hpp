@@ -417,7 +417,7 @@ template<class M> struct MatrixRows {
     MatrixRowsColumn<M> operator[](SizeType j) { return MatrixRowsColumn<M>(_A,_is,j); }
     MatrixRange<M> operator[](Range js) { return MatrixRange<M>(_A,_is,js); }
     MatrixRows<M>& operator=(Matrix<ScalarType> const& B) {
-        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType pi=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(pi,j,B.get(i,j)); } } return *this; }
+        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType p_i=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(p_i,j,B.get(i,j)); } } return *this; }
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 

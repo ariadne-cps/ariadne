@@ -48,7 +48,7 @@ namespace Ariadne {
 class ValidatedConstrainedImageSet;
 
 //! \related Enclosure \brief The possible types of method used to draw a nonlinear set.
-enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
+enum class DrawingMethod : std::uint8_t { CURVE, BOX, AFFINE, GRID };
 //! \related Enclosure \brief The type of method currently used to draw a set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DrawingMethod DRAWING_METHOD;
@@ -57,7 +57,7 @@ extern DrawingMethod DRAWING_METHOD;
 extern uint DRAWING_ACCURACY;
 
 //! \related Enclosure \brief The possible types of method used to discretise a nonlinear set.
-enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
+enum class DiscretisationMethod { SUBDIVISION, AFFINE, CONSTRAINT };
 //! \related Enclosure \brief The type of method currently used to discretise a nonlinear set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DiscretisationMethod DISCRETISATION_METHOD;

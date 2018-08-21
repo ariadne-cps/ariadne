@@ -225,7 +225,7 @@ Int main(Int argc, const char* argv[])
 {
     Int evolver_verbosity=get_verbosity(argc,argv);
 
-    DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 1u;
+    DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 1u;
 
     TestHybridEvolution(evolver_verbosity).test();
     std::cerr<<"INCOMPLETE ";

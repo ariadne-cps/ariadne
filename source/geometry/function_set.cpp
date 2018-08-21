@@ -46,7 +46,7 @@
 namespace Ariadne {
 
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
-enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
+enum class DrawingMethod : std::uint8_t { CURVE, BOX, AFFINE, GRID };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to draw a set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DrawingMethod DRAWING_METHOD;
@@ -55,13 +55,13 @@ extern DrawingMethod DRAWING_METHOD;
 extern uint DRAWING_ACCURACY;
 
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to discretise a nonlinear set.
-enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
+enum class DiscretisationMethod : std::uint8_t { SUBDIVISION, AFFINE, CONSTRAINT };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DiscretisationMethod DISCRETISATION_METHOD;
 
-DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
-DiscretisationMethod DISCRETISATION_METHOD=SUBDIVISION_DISCRETISE;
+DrawingMethod DRAWING_METHOD=DrawingMethod::AFFINE;
+DiscretisationMethod DISCRETISATION_METHOD=DiscretisationMethod::SUBDIVISION;
 uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
@@ -1185,13 +1185,13 @@ Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
     ValidatedConstrainedImageSet const& set=*this;
 
     switch(DISCRETISATION_METHOD) {
-        case SUBDIVISION_DISCRETISE:
+        case DiscretisationMethod::SUBDIVISION:
             SubdivisionPaver().adjoin_outer_approximation(paving,set,depth);
             break;
-        case AFFINE_DISCRETISE:
+        case DiscretisationMethod::AFFINE:
             AffinePaver().adjoin_outer_approximation(paving,set,depth);
             break;
-        case CONSTRAINT_DISCRETISE:
+        case DiscretisationMethod::CONSTRAINT:
             ConstraintPaver().adjoin_outer_approximation(paving,set,depth);
             break;
         default:

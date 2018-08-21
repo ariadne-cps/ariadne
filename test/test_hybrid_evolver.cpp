@@ -119,7 +119,7 @@ TestHybridEvolver::TestHybridEvolver(
     , evolver_verbosity(ev_verbosity)
     , evolver_integrator(ev_integrator.clone())
 {
-    DRAWING_METHOD = AFFINE_DRAW;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
     DRAWING_ACCURACY = 1;
 }
 
@@ -921,7 +921,7 @@ Int main(Int argc, const char* argv[])
 {
     Int evolver_verbosity=get_verbosity(argc,argv);
 
-    DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 2u;
+    DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
 
     TaylorSeriesIntegrator evolver_integrator(1e-3);
     ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_verbosity,evolver_integrator).test_all());

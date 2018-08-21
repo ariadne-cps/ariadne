@@ -137,7 +137,7 @@ Int main(Int argc, const char* argv[])
 
 
     // Set colours for drawing
-    DRAWING_METHOD = AFFINE_DRAW;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
     DRAWING_ACCURACY += 1;
 
     Colour guard_colour(0.5,0.5,0.5);

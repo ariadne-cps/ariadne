@@ -111,7 +111,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     DifferentialInclusionIVP ivp(dynamics,inputs,initial);
 
     SizeType freq=12;
-    ThresholdSweeperDP sweeper = ThresholdSweeperDP(DoublePrecision(),1e-8);
+    ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
 
     int verbosity = 1;
     bool draw = false;

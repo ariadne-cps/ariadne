@@ -36,13 +36,6 @@
 
 #include "test.hpp"
 
-namespace Ariadne {
-
-
-ThresholdSweeperDP make_threshold_sweeper(double thr) { return ThresholdSweeperDP(DoublePrecision(),thr); }
-
-} // namespace Ariadne
-
 using namespace Ariadne;
 
 class TestInclusionIntegrator {
@@ -69,7 +62,7 @@ class TestInclusionIntegrator {
         DifferentialInclusionIVP ivp(dynamics,inputs,initial);
 
         SizeType freq=12;
-        ThresholdSweeperDP sweeper = make_threshold_sweeper(1e-8);
+        ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
         int verbosity = 0;
 
         List<InputApproximation> approximations;
@@ -79,7 +72,6 @@ class TestInclusionIntegrator {
         approximations.append(InputApproximation::SINUSOIDAL);
         approximations.append(InputApproximation::PIECEWISE);
 
-        //this->run_single_test(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
         this->run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
     }
 

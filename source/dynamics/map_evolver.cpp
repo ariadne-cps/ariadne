@@ -91,14 +91,6 @@ orbit(const EnclosureType& initial_set,
     return orbit;
 }
 
-
-
-
-enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
-enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
-
-
-
 Void
 MapEvolver::
 _evolution(EnclosureListType& final_sets,

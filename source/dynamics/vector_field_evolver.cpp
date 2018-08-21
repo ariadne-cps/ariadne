@@ -125,12 +125,6 @@ orbit(const EnclosureType& initial_set,
 
 
 
-
-enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
-enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
-
-
-
 Void
 VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets,

@@ -68,7 +68,7 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
 
     times(&end_time);
     clock_t ticks = end_time.tms_utime - start_time.tms_utime;
-    clock_t const hz = sysconf(_SC_CLK_TCK);
+    clock_t hz = static_cast<unsigned long>(sysconf(_SC_CLK_TCK));
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();

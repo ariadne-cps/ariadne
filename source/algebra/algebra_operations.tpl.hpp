@@ -328,7 +328,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
     while(decide(Dyadic(pow(two,sfp))<rad)) { ++sfp; }
-    Dyadic sf=pow(two,sfp);
+    Dyadic sf=pow(two,static_cast<int>(sfp));
     A y = (x-avg)/sf;
     auto yrad=rad*mag((avg-avg)+sf);
 

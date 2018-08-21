@@ -175,7 +175,7 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
     set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
-    set_outer_overspill_policy(ChainOverspillPolicy::OVERSPILL_ERROR);
+    set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 
 
@@ -219,9 +219,9 @@ HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGr
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy)
 {
     switch(policy) {
-        case ChainOverspillPolicy::OVERSPILL_IGNORE: os<<"ignore"; break;
-        case ChainOverspillPolicy::OVERSPILL_WARNING: os<<"warning"; break;
-        case ChainOverspillPolicy::OVERSPILL_ERROR: os<<"error"; break;
+        case ChainOverspillPolicy::IGNORE: os<<"ignore"; break;
+        case ChainOverspillPolicy::WARNING: os<<"warning"; break;
+        case ChainOverspillPolicy::ERROR: os<<"error"; break;
         default: abort();
     } return os;
 }

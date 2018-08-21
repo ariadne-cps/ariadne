@@ -60,7 +60,7 @@
 
 namespace Ariadne {
 
-enum class ChainOverspillPolicy : char { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
+enum class ChainOverspillPolicy : char { IGNORE, WARNING, ERROR };
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 template<> Nat integer_cast<Nat,Real>(Real const& r);
@@ -704,19 +704,19 @@ _checked_restriction(PavingType& set, const PavingType& bounding) const
     ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
     PavingType set_copy(set.grid());
 
-    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::IGNORE) {
         set_copy = set;
     }
     set.restrict_to_height(this->_configuration->maximum_grid_height());
     if (!bounding.is_empty()) set.restrict(bounding);
 
-    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::IGNORE) {
         set_copy.remove(set);
         if (!set_copy.is_empty()) {
-            if (policy == ChainOverspillPolicy::OVERSPILL_WARNING) {
+            if (policy == ChainOverspillPolicy::WARNING) {
                 ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is .");
             }
-            if (policy == ChainOverspillPolicy::OVERSPILL_ERROR) {
+            if (policy == ChainOverspillPolicy::ERROR) {
                 ARIADNE_THROW(OuterChainOverspill,"outer_chain_reach","The computed chain reach has been restricted.");
             }
         }
@@ -740,7 +740,7 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
     set_grid(Grid(_analyser.system().dimension()));
-    set_outer_overspill_policy(ChainOverspillPolicy::OVERSPILL_ERROR);
+    set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 
 

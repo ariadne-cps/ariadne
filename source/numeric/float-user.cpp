@@ -1187,7 +1187,7 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     double ldbl=l.get_d();
     double udbl=u.get_d();
     if(ldbl==0.0 && udbl==0.0) { return os << "0.0[:]"; }
-    int errplc=FloatError<MultiplePrecision>::output_places;
+    int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
     //int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
     int log10wdth=log10floor(sub(to_nearest,u,l));
@@ -1195,7 +1195,7 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
     //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects
-    int dgts=max(min(dgtswdth,dgtsprec),1);
+    Nat dgts=static_cast<Nat>(max(min(dgtswdth,dgtsprec),1));
     DecimalPlaces plcs{dgts};
     String lstr=print(l,plcs,MPFR_RNDD);
     String ustr=print(u,plcs,MPFR_RNDU);
@@ -1433,11 +1433,11 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     FloatMP const& e=x.error_raw();
     double edbl=e.get_d();
     // Compute the number of decimal places to be displayed
-    int errplc = FloatError<MultiplePrecision>::output_places;
+    int errplc = static_cast<int>(FloatError<MultiplePrecision>::output_places);
     int log10err = log10floor(edbl);
     int dgtserr = errplc-(log10err+1);
-    int dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
-    int dgts = std::max(std::min(dgtsval,dgtserr),errplc);
+    int dgtsval = static_cast<Nat>((x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten));
+    Nat dgts = static_cast<Nat>(std::max(std::min(dgtsval,dgtserr),errplc));
     if(edbl==0.0) { dgts = dgtsval; }
     DecimalPlaces plcs{dgts};
     // Get string version of mpfr values
@@ -1446,7 +1446,7 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
 
     // Find position of first significan digit of error
     auto vcstr=vstr.c_str(); auto ecstr=estr.c_str();
-    int cpl=0;
+    size_t cpl=0;
     if(edbl==0.0) {
         cpl=std::strlen(vcstr);
     } else if(edbl<1.0) {
@@ -1454,7 +1454,7 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
         const char* eptr = std::strchr(ecstr,'.');
         ++vptr; ++eptr;
         while((*eptr)=='0') { ++eptr; ++vptr; }
-        cpl = vptr-vcstr;
+        cpl = static_cast<size_t>(vptr-vcstr);
     }
 
     // Chop and catenate strings

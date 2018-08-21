@@ -416,7 +416,7 @@ String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
 
 String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     int zdgts = std::max(log10floor(x),0)+1;
-    int fdgts = plcs;
+    int fdgts = static_cast<int>(plcs);
     return print(x._mpfr,zdgts,fdgts,rnd);
 }
 

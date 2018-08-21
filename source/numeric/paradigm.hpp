@@ -28,6 +28,7 @@
 #ifndef ARIADNE_PARADIGM_HPP
 #define ARIADNE_PARADIGM_HPP
 
+#include <cstdint>
 #include "../utility/metaprogramming.hpp"
 
 namespace Ariadne {
@@ -36,7 +37,7 @@ typedef Void Void;
 
 class ParadigmError { };
 
-typedef unsigned short ParadigmCodeType;
+typedef std::uint16_t  ParadigmCodeType;
 
 enum class ParadigmCode : ParadigmCodeType {
     APPROXIMATE_FLAG=1,

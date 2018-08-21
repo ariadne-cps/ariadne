@@ -46,7 +46,7 @@ class DiscreteLocation;
 template<class T> class Space;
 typedef Space<Real> RealSpace;
 
-enum class EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
+enum class EventKind : std::uint8_t { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;

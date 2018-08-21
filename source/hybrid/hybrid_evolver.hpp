@@ -486,7 +486,7 @@ struct TransitionData
 
 //! \relates HybridEvolverBase
 //! \brief Information on how a flow tube crosses a hypersurface.
-enum class DirectionKind {
+enum class DirectionKind : std::uint8_t {
     POSITIVE, //!< The guard function is strictly positive on the flow range.
         //! The event occurs immediately (if urgent) or at any time (if permissive).
     NEGATIVE, //!< The guard function is strictly negative on the flow range. No event occurs.
@@ -509,7 +509,7 @@ enum class DirectionKind {
 //! also imply that the crossing information is too expensive or sensitive to
 //! compute.
 //! \relates HybridEvolverInterface \relates CrossingData
-enum class CrossingKind {
+enum class CrossingKind : std::uint8_t {
     DEGENERATE, //!< The crossing may be degenerate to second order.
     NEGATIVE, //!< The guard function is negative on the flow domain. No event occurs.
     POSITIVE, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
@@ -562,7 +562,7 @@ OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
 //! typically only defined over a singleton set of space and time.
 //! \relates TimingData
-enum class StepKind {
+enum class StepKind : std::uint8_t {
     CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     SPACE_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
@@ -588,7 +588,7 @@ OutputStream& operator<<(OutputStream& os, const StepKind& crk);
 //! Needed since the final time may be an arbitrary real number, at it may not be possible to determine
 //! whether a given enclosure is exactly at the final time or not
 //! \relates TimingData
-enum class FinishingKind {
+enum class FinishingKind : std::uint8_t {
     BEFORE_FINAL_TIME, //!< At the end of the step, the final time has definitely not been reached by any point.
     AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
     AFTER_FINAL_TIME, //!< At the end of the step, the final time has definitely been passed by every point. No more evolution is possible.

@@ -45,7 +45,6 @@ struct RawPtr { };
 
 struct RoundUpward; struct RoundDownward;
 
-//enum RoundingModeMP { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 typedef mpfr_rnd_t RoundingModeMP;
 
 class MultiplePrecision {

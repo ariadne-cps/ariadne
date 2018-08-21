@@ -93,7 +93,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     Real e=1/100_q;
     RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
-    Real evolution_time=1/20_q;
+    Real evolution_time=1/25_q;
     double step=1.0/50;
 
     this->run_test("higgins-selkov",dynamics,inputs,initial,evolution_time,step);
@@ -108,8 +108,8 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Real e1=5/100_q; Real e2=7/100_q;
     RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
 
-    Real evolution_time=1/20_q;
-    double step=1.0/50;
+    Real evolution_time=1/50_q;
+    double step=1.0/100;
 
     this->run_test("jet-engine",dynamics,inputs,initial,evolution_time,step);
 }
@@ -122,8 +122,8 @@ void TestInclusionIntegrator::test_rossler() const {
     Real e=1/1024_q;
     RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
 
-    Real evolution_time=1/40_q;
-    double step=1.0/128;
+    Real evolution_time=1/128_q;
+    double step=1.0/256;
 
     this->run_test("rossler",dynamics,inputs,initial,evolution_time,step);
 }

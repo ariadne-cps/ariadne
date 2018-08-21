@@ -57,7 +57,7 @@ template<class ES> class ListSet;
 template<class SYS> class ReachabilityAnalyserConfiguration;
 template<class SYS> class ReachabilityAnalyser;
 
-enum class ChainOverspillPolicy : char;
+enum class ChainOverspillPolicy : std::uint8_t { IGNORE, WARNING, ERROR };
 
 using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 

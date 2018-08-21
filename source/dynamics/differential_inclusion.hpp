@@ -175,7 +175,7 @@ std::ostream& operator << (std::ostream& os, const C1Norms& n) {
 
 C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
-enum class InputApproximation { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
+enum class InputApproximation : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
 std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
     switch (kind) {
@@ -234,7 +234,7 @@ template<> Nat num_params_per_input<AffineApproximation>() { return 2u; }
 template<> Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
 template<> Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
 
-enum class InputsRoles { AFFINE, SINGULAR, ADDITIVE};
+enum class InputsRoles : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
 
 class InputsRole {
 protected:

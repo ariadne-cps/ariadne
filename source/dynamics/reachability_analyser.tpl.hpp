@@ -60,7 +60,6 @@
 
 namespace Ariadne {
 
-enum class ChainOverspillPolicy : char { IGNORE, WARNING, ERROR };
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 template<> Nat integer_cast<Nat,Real>(Real const& r);

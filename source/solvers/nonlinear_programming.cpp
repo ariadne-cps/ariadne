@@ -452,17 +452,6 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-
-enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
-
-inline ConstraintKind constraint_kind(ExactIntervalType C) {
-    if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
-    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
-    else { return BOUNDED; }
-}
-
-
 ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
     for(Nat i=0; i!=bx.size(); ++i) {
         bx[i]=ExactIntervalType(bx[i].lower().raw()-e,bx[i].upper().raw()+e);

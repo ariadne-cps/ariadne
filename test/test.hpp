@@ -45,21 +45,6 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     os << r << std::flush; return (r==er);
 }
 
-inline unsigned int get_verbosity(int argc, const char* argv[]) {
-    if(argc>1) {
-        if(std::strcmp(argv[1],"-v")==0) {
-            if(argc>2) {
-                int val = std::atoi(argv[2]);
-                if (val < 0) std::cerr << "Verbosity should be a non-negative value.\n";
-                return static_cast<unsigned int>(val);
-            }
-        } else {
-            std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
-        }
-    }
-    return 0;
-}
-
 
 //This is the variable that stores counter for the number of test cases
 //The value is used and updated in the next two macro definitions

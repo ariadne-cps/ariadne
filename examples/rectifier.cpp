@@ -9,7 +9,7 @@ using namespace Ariadne;
 using std::cout; using std::endl; using std::flush;
 
 /// Function for plotting the orbit and reachability set
-template<class SET> Void plot(const char* filename, const Int& xaxis, const Int& yaxis, const Int& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const Int& MAX_GRID_DEPTH) {
+template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat& yaxis, const Nat& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -25,9 +25,9 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
-        Int numDivisions = MAX_GRID_DEPTH / numVariables;
+        Nat numDivisions = static_cast<Nat>(MAX_GRID_DEPTH) / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        FloatDP step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        FloatDP step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
         FloatDP pos_x = bbox[0].lower().raw();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
@@ -41,7 +41,7 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         }
 
         // Repeats for the rectangles in the y direction
-        FloatDP step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        FloatDP step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
         FloatDP pos_y = bbox[1].lower().raw();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
@@ -59,8 +59,7 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     Real amplitude(4.0);
     Real frequency(50.0);

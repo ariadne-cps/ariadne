@@ -38,8 +38,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     // Declare the shared system variables
     RealVariable aperture1("aperture1");

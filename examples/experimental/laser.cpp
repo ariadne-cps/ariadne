@@ -16,12 +16,9 @@
 
 using namespace Ariadne;
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
-    /// Constants
-    int VERBOSITY = 1;
-	if (argc > 1)
-		VERBOSITY = atoi(argv[1]);
+    Nat verbosity=get_verbosity(argc,argv);
 
     /// Build the Hybrid System
 
@@ -39,7 +36,7 @@ int main(int argc, char* argv[])
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(laser_system);
-    evolver.verbosity = VERBOSITY;
+    evolver.verbosity = verbosity;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);

@@ -29,8 +29,7 @@ using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 

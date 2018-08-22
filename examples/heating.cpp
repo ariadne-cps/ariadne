@@ -60,8 +60,7 @@ Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, c
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     // Create the system
     // Set the system dynamic parameters

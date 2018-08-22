@@ -1433,11 +1433,11 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     FloatMP const& e=x.error_raw();
     double edbl=e.get_d();
     // Compute the number of decimal places to be displayed
-    int errplc = static_cast<int>(FloatError<MultiplePrecision>::output_places);
-    int log10err = log10floor(edbl);
-    int dgtserr = errplc-(log10err+1);
-    int dgtsval = static_cast<Nat>((x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten));
-    Nat dgts = static_cast<Nat>(std::max(std::min(dgtsval,dgtserr),errplc));
+    Nat errplc = static_cast<Nat>(FloatError<MultiplePrecision>::output_places);
+    Nat log10err = static_cast<Nat>(log10floor(edbl));
+    Nat dgtserr = errplc-(log10err+1);
+    Nat dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
+    Nat dgts = std::max(std::min(dgtsval,dgtserr),errplc);
     if(edbl==0.0) { dgts = dgtsval; }
     DecimalPlaces plcs{dgts};
     // Get string version of mpfr values

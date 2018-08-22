@@ -793,7 +793,7 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order, Nat tempo
         }
         ++read_iter;
     }
-    x.expansion().resize(write_iter-x.begin());
+    x.expansion().resize(static_cast<SizeType>(write_iter-x.begin()));
 }
 
 template<class X> Void truncate(Vector< Differential<X> >& x, Nat spacial_order, Nat temporal_order) {

@@ -364,8 +364,8 @@ TestFloat<PR>::test_conversion()
     ARIADNE_TEST_ASSERT(RawFloat<PR>(n)==n);
     n=std::numeric_limits<Int>::max();
     ARIADNE_TEST_ASSERT(RawFloat<PR>(n)==n);
-    n=std::numeric_limits<Nat>::max();
-    ARIADNE_TEST_ASSERT(RawFloat<PR>(n)==n);
+    Nat nn = std::numeric_limits<Nat>::max();
+    ARIADNE_TEST_ASSERT(RawFloat<PR>(nn)==nn);
 
     // Convert to a rational
     ARIADNE_TEST_EQUAL(Rational(RawFloat<PR>(1.0)),Rational(1));

@@ -104,8 +104,8 @@ void TestInteger::test_literal() {
 void TestInteger::test_constructors() {
     int m=2147483647;
     unsigned int um=2147483647u;
-    unsigned long int ulm=m;
-    unsigned long long int ullm=m;
+    unsigned long int ulm=um;
+    unsigned long long int ullm=um;
     int n=-2147483647;
     long int ln=n;
     long long int lln=n;

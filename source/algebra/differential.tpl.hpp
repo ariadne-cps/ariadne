@@ -282,7 +282,7 @@ template<class X> Void Differential<X>::set_degree(DegreeType deg) {
     if(deg<this->_degree) {
         for(auto iter = this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
             if (iter->index().degree() > deg) {
-                this->_expansion.resize(iter-this->_expansion.begin());
+                this->_expansion.resize(static_cast<SizeType>(iter-this->_expansion.begin()));
                 break;
             }
         }

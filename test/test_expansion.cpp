@@ -217,9 +217,9 @@ template<class F> Void TestExpansion<F>::test_data_access()
     // Test Iterator difference
     ARIADNE_TEST_PRINT(e.begin());
     ARIADNE_TEST_PRINT(e.end());
-    ARIADNE_TEST_EQUAL(e.begin()+e.number_of_terms(),e.end());
-    ARIADNE_TEST_EQUAL(e.end()-e.number_of_terms(),e.begin());
-    ARIADNE_TEST_EQUAL(e.end()-e.begin(),PointerDifferenceType(e.number_of_terms()));
+    ARIADNE_TEST_EQUAL(e.begin()+static_cast<PointerDifferenceType>(e.number_of_terms()),e.end());
+    ARIADNE_TEST_EQUAL(e.end()-static_cast<PointerDifferenceType>(e.number_of_terms()),e.begin());
+    ARIADNE_TEST_EQUAL(e.end()-e.begin(),static_cast<PointerDifferenceType>(e.number_of_terms()));
 
     // Test derefencing of iterators
     ARIADNE_TEST_PRINT(e.begin());
@@ -437,7 +437,6 @@ template<class F> Void TestExpansion<F>::test_constructors()
     // Regression tests for higher-order expansions
     ARIADNE_TEST_CONSTRUCT(ExpansionType,ho1,({{{0,1,0,0,0},2.0}, {{0,1,0,0,1},3.0}, {{2,0,1,0,0},5.0}, {{0,0,0,0,0},7.0}},prec));
 }
-
 
 
 template<class F> Void TestExpansion<F>::test_find()

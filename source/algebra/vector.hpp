@@ -354,27 +354,27 @@ template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator
 
 struct ProvideVectorOperations {
     template<class X> friend Vector<X> operator+(Vector<X> const& v) {
-        return Vector<X>( v.size(), [&v](auto i){return +v[i];} ); }
+        return Vector<X>( v.size(), [&v](SizeType i){return +v[i];} ); }
 
     template<class X> friend Vector<NegationType<X>> operator-(Vector<X> const& v) {
-        return Vector<NegationType<X>>( v.size(), [&v](auto i){return -v[i];} ); }
+        return Vector<NegationType<X>>( v.size(), [&v](SizeType i){return -v[i];} ); }
 
     template<class X1, class X2> friend Vector<SumType<X1,X2>> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        return Vector<SumType<X1,X2>>( v1.size(), [&v1,&v2](auto i){return v1[i]+v2[i];} ); }
+        return Vector<SumType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]+v2[i];} ); }
 
     template<class X1, class X2> friend Vector<DifferenceType<X1,X2>> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        return Vector<DifferenceType<X1,X2>>( v1.size(), [&v1,&v2](auto i){return v1[i]-v2[i];} ); }
+        return Vector<DifferenceType<X1,X2>>( v1.size(), [&v1,&v2](SizeType i){return v1[i]-v2[i];} ); }
 
     template<class X1, class X2> friend Vector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Vector<X2> const& v2) {
-        return Vector<ProductType<Scalar<X1>,X2>>( v2.size(), [&x1,&v2](auto i){return x1*v2[i];} ); }
+        return Vector<ProductType<Scalar<X1>,X2>>( v2.size(), [&x1,&v2](SizeType i){return x1*v2[i];} ); }
 
     template<class X1, class X2> friend Vector<ProductType<X1,Scalar<X2>>> operator*(Vector<X1> const& v1, X2 const& x2) {
-        return Vector<ProductType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](auto i){return v1[i]*x2;} ); }
+        return Vector<ProductType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]*x2;} ); }
 
     template<class X1, class X2> friend Vector<QuotientType<X1,Scalar<X2>>> operator/(Vector<X1> const& v1, X2 const& x2) {
-        return Vector<QuotientType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](auto i){return v1[i]/x2;} ); }
+        return Vector<QuotientType<X1,Scalar<X2>>>( v1.size(), [&v1,&x2](SizeType i){return v1[i]/x2;} ); }
 
     template<class X1,class X2> friend Vector<InplaceSumType<X1,X2>>& operator+=(Vector<X1>& v1, Vector<X2> const& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());

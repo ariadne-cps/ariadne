@@ -36,7 +36,7 @@
 #include "../utility/macros.hpp"
 #include "../utility/logging.hpp"
 
-static const int verbosity=0;
+static const unsigned int verbosity=0;
 
 namespace Ariadne {
 

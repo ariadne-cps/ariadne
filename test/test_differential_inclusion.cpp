@@ -40,7 +40,7 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) const
+    Void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
@@ -49,7 +49,7 @@ class TestInclusionIntegrator {
         }
     }
 
-    Void run_single_test(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, int verbosity) const
+    Void run_single_test(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
@@ -63,7 +63,7 @@ class TestInclusionIntegrator {
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
-        int verbosity = 0;
+        unsigned int verbosity = 0;
 
         List<InputApproximation> approximations;
         approximations.append(InputApproximation::ZERO);

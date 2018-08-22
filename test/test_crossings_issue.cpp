@@ -7,14 +7,14 @@ using namespace Ariadne;
 class TestCrossingsIssue
 {
   public:
-	TestCrossingsIssue(int verbosity);
+	TestCrossingsIssue(unsigned int verbosity);
     void test();
   private:
-    int _verbosity;
+    unsigned int _verbosity;
     void test_crossings();
 };
 
-TestCrossingsIssue::TestCrossingsIssue(int verbosity) : _verbosity(verbosity) { }
+TestCrossingsIssue::TestCrossingsIssue(unsigned int verbosity) : _verbosity(verbosity) { }
 
 void TestCrossingsIssue::test()
 {

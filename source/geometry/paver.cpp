@@ -197,7 +197,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     }
 }
 
-int verbosity;
+unsigned int verbosity;
 
 namespace {
 

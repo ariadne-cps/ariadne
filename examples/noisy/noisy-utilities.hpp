@@ -113,7 +113,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     SizeType freq=12;
     ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
 
-    int verbosity = 1;
+    unsigned int verbosity = 1;
     bool draw = false;
     DRAWING_METHOD = DrawingMethod::BOX;
 

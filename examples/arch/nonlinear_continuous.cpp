@@ -25,7 +25,7 @@ using std::cout;
 
 using Axis = ApproximateDoubleVariableInterval;
 
-int verbosity;
+unsigned int verbosity;
 
 void verify_dai() {
     auto problem = make_dai_problem();

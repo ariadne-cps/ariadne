@@ -47,7 +47,7 @@ namespace Ariadne {
 struct Loggable {
   public:
     Loggable() : verbosity(0),charcode("") { }
-    mutable int verbosity;
+    mutable unsigned int verbosity;
   protected:
     mutable std::string charcode;
 };

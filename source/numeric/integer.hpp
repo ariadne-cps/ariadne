@@ -77,7 +77,7 @@ class Int64 {
     int64_t _n;
   public:
     Int64() : _n(0) { }
-    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int64(M m) : _n(m) { assert(_n>=0); assert((uint64_t)_n==m); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int64(M m) : _n(static_cast<int64_t>(m)) { assert(_n>=0); assert((uint64_t)_n==m); }
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
     int64_t get_si() const { return _n; }
 };

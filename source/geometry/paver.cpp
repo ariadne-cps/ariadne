@@ -101,7 +101,7 @@ Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const
 {
     Vector<FloatDPValue> max_errors(paving.dimension());
     for(Nat i=0; i!=max_errors.size(); ++i) {
-        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-depth);
+        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(depth));
     }
 
     this->adjoin_outer_approximation_recursion(paving,set,depth,max_errors);
@@ -495,7 +495,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const FloatDPValue XSIGMA = {TwoExp(-3),pr};
-    static const FloatDPValue  TERR = {TwoExp(-e-10),pr};
+    static const FloatDPValue  TERR = {TwoExp(-10),pr};
     static const FloatDPValue inf { Ariadne::inf };
 
     const Nat m=fg.argument_size();

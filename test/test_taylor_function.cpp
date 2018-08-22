@@ -130,7 +130,7 @@ Void TestScalarTaylorFunction::test_concept()
     tr+=t; tr-=t;
 
     tr=pos(tr); tr=neg(tr); tr=sqr(tr);
-    tr=rec(tr); tr=pow(tr,1u); tr=pow(tr,-1);
+    tr=rec(tr); tr=pow(tr,1); tr=pow(tr,-1);
     tr=exp(t); tr=log(t); tr=sqrt(t);
     tr=sin(t); tr=cos(t); tr=tan(t);
     //tr=asin(t); tr=acos(t); tr=atan(t);

@@ -302,7 +302,7 @@ class TestHybridReachabilityAnalyser
 
 Int main(Int argc, const char* argv[])
 {
-    Int analyser_verbosity=get_verbosity(argc,argv);
+    unsigned int analyser_verbosity=get_verbosity(argc,argv);
 
     TestHybridReachabilityAnalyser(analyser_verbosity).test();
     return ARIADNE_TEST_FAILURES;

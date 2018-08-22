@@ -45,11 +45,13 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     os << r << std::flush; return (r==er);
 }
 
-inline int get_verbosity(int argc, const char* argv[]) {
+inline unsigned int get_verbosity(int argc, const char* argv[]) {
     if(argc>1) {
         if(std::strcmp(argv[1],"-v")==0) {
             if(argc>2) {
-                return std::atoi(argv[2]);
+                int val = std::atoi(argv[2]);
+                if (val < 0) std::cerr << "Verbosity should be a non-negative value.\n";
+                return static_cast<unsigned int>(val);
             }
         } else {
             std::cerr << "Unrecognised command-line option \"" << argv[1] << "\"\n";
@@ -542,7 +544,7 @@ int test_case_counter = 0;
  */
 #define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \
     {                                                                   \
-        int elements_count = 0;                                         \
+        SizeType elements_count = 0;                                         \
         for (GridTreeSubset::ConstIterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
             if( elements_count < expected_number_elements ) {           \
                 ARIADNE_PRINT_TEST_COMMENT("The next Iterator node is: "); \

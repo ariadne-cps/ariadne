@@ -80,10 +80,9 @@ void TestCrossingsIssue::test_crossings()
     }
 }
 
-int main(int argc, char** argv) {
+int main(Int argc, const char* argv[]) {
 
-    Nat verbosity=0;
-    if(argc>1) { verbosity=atoi(argv[1]); }
+    auto verbosity=get_verbosity(argc,argv);
 
     TestCrossingsIssue(verbosity).test();
     return ARIADNE_TEST_FAILURES;

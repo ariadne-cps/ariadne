@@ -50,7 +50,7 @@
 using namespace Ariadne;
 using namespace std;
 
-Int evolver_verbosity=0;
+unsigned int evolver_verbosity=0;
 
 
 RealVariable x0("x0");
@@ -73,7 +73,7 @@ class TestHybridEvolver
 {
   private:
     string evolver_name;
-    Int evolver_verbosity;
+    unsigned int evolver_verbosity;
     std::shared_ptr<TaylorSeriesIntegrator> evolver_integrator;
     mutable std::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
@@ -81,7 +81,7 @@ class TestHybridEvolver
   public:
     TestHybridEvolver(
             const string evolver_name,
-            const Int evolver_verbosity,
+            const unsigned int evolver_verbosity,
             const TaylorSeriesIntegrator& evolver_integrator);
     Void test_all() const;
     Void test_flow() const;
@@ -113,7 +113,7 @@ class TestHybridEvolver
 
 TestHybridEvolver::TestHybridEvolver(
         const string ev_name,
-        const Int ev_verbosity,
+        const unsigned int ev_verbosity,
         const TaylorSeriesIntegrator& ev_integrator)
     : evolver_name(ev_name)
     , evolver_verbosity(ev_verbosity)
@@ -919,7 +919,7 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    Int evolver_verbosity=get_verbosity(argc,argv);
+    unsigned int evolver_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
 

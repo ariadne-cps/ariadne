@@ -210,7 +210,7 @@ Int main(Int argc, const char **argv) {
     std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
     return 0;
 */
-    Int verbosity=get_verbosity(argc,argv);
+    unsigned int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     interval_newton_solver.verbosity=verbosity;

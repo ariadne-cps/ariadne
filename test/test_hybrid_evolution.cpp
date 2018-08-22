@@ -47,8 +47,6 @@
 using namespace Ariadne;
 using namespace std;
 
-Int evolver_verbosity=0;
-
 
 EffectiveScalarFunction c=EffectiveScalarFunction::constant(2,1);
 EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
@@ -63,10 +61,10 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    Int verbosity;
+    unsigned int verbosity;
     mutable shared_ptr<HybridEvolverBase> evolver;
   public:
-    TestHybridEvolution(const Int verb);
+    TestHybridEvolution(const unsigned int verb);
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
@@ -75,7 +73,7 @@ class TestHybridEvolution
     Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const Int verb) : verbosity(verb) { }
+TestHybridEvolution::TestHybridEvolution(const unsigned int verbosity) : verbosity(verbosity) { }
 
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
@@ -223,11 +221,11 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    Int evolver_verbosity=get_verbosity(argc,argv);
+    auto verbosity = get_verbosity(argc,argv);
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 1u;
 
-    TestHybridEvolution(evolver_verbosity).test();
+    TestHybridEvolution(verbosity).test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

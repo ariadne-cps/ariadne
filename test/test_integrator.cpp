@@ -181,8 +181,8 @@ class TestIntegrator
     };
 };
 
-Int main(Int argc, const char **argv) {
-    Int verbosity=get_verbosity(argc,argv);
+Int main(Int argc, const char* argv[]) {
+    auto verbosity = get_verbosity(argc,argv);
 
     ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
     TaylorSeriesIntegrator taylor_series_integrator(

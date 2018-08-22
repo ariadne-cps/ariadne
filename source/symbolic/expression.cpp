@@ -86,7 +86,7 @@ template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
     virtual SymbolicAlgebraInterface<X>* _radd(X const& cnst) const { return _make(cnst + _cast(*this)); }
     virtual SymbolicAlgebraInterface<X>* _rsub(X const& cnst) const { return _make(cnst - _cast(*this)); }
     virtual SymbolicAlgebraInterface<X>* _rmul(X const& cnst) const { return _make(cnst * _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _pow(Nat m) const { return _make(pow(_cast(*this),m)); }
+    virtual SymbolicAlgebraInterface<X>* _pow(Nat m) const { return _make(pow(_cast(*this),static_cast<Int>(m))); }
     virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
     virtual Void _imul(const X& c) { (*this) = (*this) * c; }
     virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {

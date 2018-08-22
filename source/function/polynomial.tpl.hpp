@@ -190,7 +190,7 @@ Void Polynomial<X>::cleanup()
     Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
     self->_expansion.index_sort(IndexComparisonType());
     Iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
-    self->_expansion.resize(new_end-self->_expansion.begin());
+    self->_expansion.resize(static_cast<SizeType>(new_end-self->_expansion.begin()));
 }
 
 template<class X>

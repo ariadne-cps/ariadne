@@ -218,7 +218,7 @@ template<class I, class X> Void Expansion<I,X>::clear() {
 }
 
 template<class I, class X> Void Expansion<I,X>::remove_zeros() {
-    this->resize(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin());
+    this->resize(static_cast<SizeType>(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin()));
 }
 
 template<class X, class Y> struct CanInplaceAdd {
@@ -242,7 +242,7 @@ template<class I, class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_ter
         }
         ++curr;
     }
-    e.resize(curr-begin);
+    e.resize(static_cast<SizeType>(curr-begin));
 }
 
 template<class I, class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
@@ -314,9 +314,9 @@ template<class I, class X> Bool Expansion<I,X>::same_as(const Expansion<I,X>& ot
 
 template<class I, class X> auto Expansion<I,X>::insert(Iterator pos, const I& a, const X& c) -> Iterator {
     if(this->size()==this->capacity()) {
-        SizeType where=pos-this->begin();
+        SizeType where=static_cast<SizeType>(pos-this->begin());
         this->append(a,c);
-        pos=this->begin()+where;
+        pos=this->begin()+static_cast<std::ptrdiff_t>(where);
     } else {
         this->append(a,c);
     }

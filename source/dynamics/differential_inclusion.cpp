@@ -927,11 +927,14 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
     ARIADNE_LOG(6,"SortedCe:"<<SCe<<"\n");
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
-    int number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
-    ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
 
-    if (number_of_variables_to_remove <= 0)
+    if (m <= this->_number_of_variables_to_keep) {
+        ARIADNE_LOG(6, "Insufficient number of variables, not simplifying\n");
         return;
+    }
+
+    Nat number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
+    ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
 
     /*
     FloatDPError total_sum_SCe(0);
@@ -953,11 +956,11 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
     }
     */
 
-    for (int j : range(number_of_variables_to_remove)) {
+    for (auto j : range(number_of_variables_to_remove)) {
         remove_indices.append(SCe[j].index);
     }
 
-    for (int j : range(number_of_variables_to_remove,m)) {
+    for (auto j : range(number_of_variables_to_remove,m)) {
         keep_indices.append(SCe[j].index);
     }
 
@@ -966,7 +969,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorFunctionModelDP& f) const {
     ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");
     ARIADNE_LOG(6,"remove_indices:"<<remove_indices<<"\n");
 
-    for (int i : range(n)) {
+    for (auto i : range(n)) {
         ErrorType error = tf[i].error();
         for(SizeType k=0; k!=remove_indices.size(); ++k) {
             error += mag(C[remove_indices[k]][i]);

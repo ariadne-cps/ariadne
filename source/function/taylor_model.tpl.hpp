@@ -117,7 +117,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
     // ERROR: test/test_nonlinear_programming.cpp:57: calling test_equality_constrained_optimisation(): std::runtime_error in
     // source/solvers/nonlinear_programming.cpp:1063: step: Assertion `norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2' failed.
     F::set_rounding_to_nearest();
-    p.resize(curr-p.begin());
+    p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
 template<class F>
@@ -134,7 +134,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
         }
         ++adv;
     }
-    p.resize(curr-p.begin());
+    p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
@@ -792,7 +792,7 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
         ++current;
     }
     this->error()+=e;
-    this->_expansion.resize(current-this->begin());
+    this->_expansion.resize(static_cast<SizeType>(current-this->begin()));
 
     return *this;
 }
@@ -1238,7 +1238,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
         }
     }
 
-    r.expansion().resize(riter - r.begin());
+    r.expansion().resize(static_cast<SizeType>(riter - r.begin()));
 }
 
 

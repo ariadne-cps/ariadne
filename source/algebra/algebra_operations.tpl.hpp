@@ -239,7 +239,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>(Sqrt(),X(1));
-    Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
+    Nat d=static_cast<Nat>(integer_cast<Int>((log((1-eps)*tol)/log(eps)+1)));
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
     ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
@@ -327,7 +327,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(decide(Dyadic(pow(two,sfp))<rad)) { ++sfp; }
+    while(decide(Dyadic(pow(two,static_cast<int>(sfp)))<rad)) { ++sfp; }
     Dyadic sf=pow(two,static_cast<int>(sfp));
     A y = (x-avg)/sf;
     auto yrad=rad*mag((avg-avg)+sf);

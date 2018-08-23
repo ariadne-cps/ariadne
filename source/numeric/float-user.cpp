@@ -93,6 +93,7 @@ FloatLowerBound<DoublePrecision> operator"" _lower(long double lx) {
     static const double min = std::numeric_limits<double>::min();
     double x=lx;
     if(x>lx) { x-=min; }
+
     while (x>lx) { x-=std::abs(x)*eps; }
     return FloatLowerBound<DoublePrecision>(x);
 }
@@ -564,7 +565,7 @@ template<class F> struct Operations<Approximation<F>> {
         return Approximation<F>(div(near,x1._a,x2._a)); }
 
     static Approximation<F> _pow(Approximation<F> const& x, Nat m) {
-        return Approximation<F>(pow(approx,x._a,m)); }
+        return Approximation<F>(pow(approx,x._a,static_cast<Int>(m))); }
     static Approximation<F> _pow(Approximation<F> const& x, Int n) {
         return Approximation<F>(pow(approx,x._a,n)); }
 
@@ -645,7 +646,7 @@ template<class F> struct Operations<LowerBound<F>> {
 
     static LowerBound<F> _pow(LowerBound<F> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return LowerBound<F>(pow(down,x.raw(),m)); }
+        return LowerBound<F>(pow(down,x.raw(),static_cast<int>(m))); }
 
     static Approximation<F> _pow(LowerBound<F> const& x, Int n) {
         return pow(Approximation<F>(x),n); }
@@ -745,7 +746,7 @@ template<class F> struct Operations<UpperBound<F>> {
 
     static UpperBound<F> _pow(UpperBound<F> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return UpperBound<F>(pow(up,x._u,m)); }
+        return UpperBound<F>(pow(up,x._u,static_cast<Int>(m))); }
 
     static Approximation<F> _pow(UpperBound<F> const& x, Int n) {
         return pow(Approximation<F>(x),n); }
@@ -963,8 +964,8 @@ template<class F> struct Operations<Bounds<F>> {
     static Bounds<F> _pow(Bounds<F> const& x, Nat m) {
         Bounds<F> y = x;
         if(m%2==0) { y=abs(x); }
-        F rl=pow(down,y.lower_raw(),m);
-        F ru=pow(up,y.upper_raw(),m);
+        F rl=pow(down,y.lower_raw(),static_cast<Int>(m));
+        F ru=pow(up,y.upper_raw(),static_cast<Int>(m));
         return Bounds<F>(rl,ru);
     }
 
@@ -1768,7 +1769,7 @@ template<class F> struct Operations<PositiveUpperBound<F>> {
     }
 
     static PositiveUpperBound<F> _pow(PositiveUpperBound<F> const& x1, Nat m2) {
-        return PositiveUpperBound<F>(pow(up,x1._u,m2));
+        return PositiveUpperBound<F>(pow(up,x1._u,static_cast<Int>(m2)));
     }
 
     static UpperBound<F> _log(PositiveUpperBound<F> const& x) {
@@ -1841,7 +1842,7 @@ template<class F> struct Operations<PositiveLowerBound<F>> {
     }
 
     static PositiveLowerBound<F> _pow(PositiveLowerBound<F> const& x1, Nat m2) {
-        return PositiveLowerBound<F>(pow(down,x1._l,m2));
+        return PositiveLowerBound<F>(pow(down,x1._l,static_cast<Int>(m2)));
     }
 
     static LowerBound<F> _log(PositiveLowerBound<F> const& x) {
@@ -1896,7 +1897,7 @@ template<class F> struct Operations<PositiveBounds<F>> {
     static PositiveBounds<F> _div(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveBounds<F>(div(down,x1._l,x2._u),div(up,x1._u,x2._l)); }
     static PositiveBounds<F> _pow(PositiveBounds<F> const& x1, Nat m2) {
-        return PositiveBounds<F>(pow(down,x1._l,m2),pow(up,x1._u,m2)); }
+        return PositiveBounds<F>(pow(down,x1._l,static_cast<Int>(m2)),pow(up,x1._u,static_cast<Int>(m2))); }
     static PositiveBounds<F> _pow(PositiveBounds<F> const& x1, Int n2) {
         if(n2>=0) { return _pow(x1,Nat(n2)); } else { return _rec(_pow(x1,Nat(-n2))); } }
     static Bounds<F> _log(PositiveBounds<F> const& x) {

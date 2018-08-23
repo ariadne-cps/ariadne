@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 // (Placeholder constant required for compilation)
 static const std::string charcode="";

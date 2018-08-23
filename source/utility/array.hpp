@@ -33,6 +33,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
+#include <cassert>
 #include "metaprogramming.hpp"
 
 namespace Ariadne {

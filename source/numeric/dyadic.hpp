@@ -107,6 +107,9 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve a number.
     friend Dyadic hlf(Dyadic const&);
+    //| \brief Power of a number (m always positive).
+    friend Dyadic pow(Dyadic const& x, Int m);
+    friend Dyadic pow(Dyadic const& x, Nat m);
 
     friend Rational rec(Rational const&);
     friend Rational div(Rational const&, Rational const&);

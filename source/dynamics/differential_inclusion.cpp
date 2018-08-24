@@ -501,7 +501,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
             else
                 delays[appro.kind()]++;
 
-            Nat offset = 1<<delays[appro.kind()];
+            Nat offset = 1u<<delays[appro.kind()];
             schedule.push_back(ScheduledApproximation(step+offset,appro));
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());

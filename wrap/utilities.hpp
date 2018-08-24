@@ -301,7 +301,7 @@ struct from_python< Ariadne::Array<T> > {
         if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-        Array<T> a=Array<T>(len(lst)); for(Nat i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<T>(lst[i]); }
+        Array<T> a=Array<T>(static_cast<Nat>(len(lst))); for(Nat i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<T>(lst[i]); }
         Void* storage = ((boost::python::converter::rvalue_from_python_storage< Array<T> >*)data)->storage.bytes;
         new (storage) Array<T>(a);
         data->convertible = storage;

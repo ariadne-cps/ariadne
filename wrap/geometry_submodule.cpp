@@ -110,8 +110,8 @@ struct from_python<Box<IVL>> {
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         Void* storage = ((converter::rvalue_from_python_storage<IVL>*)data)->storage.bytes;
         boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        Box<IVL>* bx_ptr = new (storage) Box<IVL>(len(lst));
-        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[i]=boost::python::extract<IVL>(lst[i]); }
+        Box<IVL>* bx_ptr = new (storage) Box<IVL>(static_cast<SizeType>(len(lst)));
+        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[static_cast<SizeType>(i)]=boost::python::extract<IVL>(lst[i]); }
         data->convertible = storage;
     }
 };

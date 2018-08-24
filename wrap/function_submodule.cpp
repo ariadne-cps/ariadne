@@ -96,7 +96,7 @@ struct from_python< MultiIndex >
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
-        MultiIndex res(len(tup));
+        MultiIndex res(static_cast<SizeType>(len(tup)));
         for(Nat i=0; i!=res.size(); ++i) { res.set(i,boost::python::extract<Nat>(tup[i])); }
         new (storage) MultiIndex(res);
         data->convertible = storage;
@@ -116,7 +116,7 @@ struct from_python<EffectiveVectorFunction>
         Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
         assert(len(lst)!=0);
         EffectiveScalarFunction sf0 = boost::python::extract<EffectiveScalarFunction>(lst[0]);
-        EffectiveVectorFunction res(len(lst),sf0.argument_size());
+        EffectiveVectorFunction res(static_cast<SizeType>(len(lst)),sf0.argument_size());
         for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,boost::python::extract<EffectiveScalarFunction>(lst[i])); }
         new (storage) EffectiveVectorFunction(res);
         data->convertible = storage;
@@ -192,8 +192,8 @@ class VectorPythonFunction
     VectorPythonFunction(SizeType rs, SizeType as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(const object& pyf)
         : _name(),
-          _result_size(boost::python::extract<Int>(pyf.attr("result_size"))),
-          _argument_size(boost::python::extract<Int>(pyf.attr("argument_size"))),
+          _result_size(boost::python::extract<Nat>(pyf.attr("result_size"))),
+          _argument_size(boost::python::extract<Nat>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }

@@ -440,6 +440,7 @@ ValidatedLowerKleenean
 BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
+    if(this->codomain().dimension() == 0 && Ariadne::intersect(under_approximation(this->domain()),bx)) { return true; }
     ExactBoxType domain=under_approximation(this->domain());
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain);

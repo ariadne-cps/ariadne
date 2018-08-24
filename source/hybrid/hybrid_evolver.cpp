@@ -719,7 +719,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const std::runtime_error& e) {
-                ARIADNE_LOG(0,"Unexpected error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"Unexpected error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 ARIADNE_FAIL_MSG("ERROR!!");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
@@ -824,7 +824,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
                 catch(const std::runtime_error& e) {
-                    ARIADNE_LOG(0,"Unexpected error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                    ARIADNE_LOG(2,"Unexpected error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
             } else {

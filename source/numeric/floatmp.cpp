@@ -156,8 +156,8 @@ FloatMP::operator Rational() const {
     mpz_t num; mpz_init(num);
     mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
     mpq_t res; mpq_init(res); mpq_set_z(res,num);
-    if(exp>=0) { mpq_mul_2exp(res,res,exp); }
-    else { mpq_div_2exp(res,res,-exp); }
+    if(exp>=0) { mpq_mul_2exp(res,res,static_cast<mp_bitcnt_t>(exp)); }
+    else { mpq_div_2exp(res,res,static_cast<mp_bitcnt_t>(-exp)); }
     return Rational(res);
 }
 

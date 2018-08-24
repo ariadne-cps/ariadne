@@ -52,11 +52,11 @@ Integer pow(Integer const& z, Nat m);
 Rational operator/(Dyadic const& w1, Dyadic const& w2) { return Rational(w1) / Rational(w2); }
 Dyadic hlf(Dyadic const& w);
 
-DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal);
-//DECLARE_NUMERIC_OPERATIONS(FloatDPApproximation const&,FloatDPApproximation,PositiveFloatDPApproximation);
-//DECLARE_NUMERIC_OPERATIONS(FloatBall<PR>);
-//DECLARE_NUMERIC_OPERATIONS(FloatBounds<PR>);
-//DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>);
+DECLARE_NUMERIC_OPERATIONS(Real const&,Real,PositiveReal)
+//DECLARE_NUMERIC_OPERATIONS(FloatDPApproximation const&,FloatDPApproximation,PositiveFloatDPApproximation)
+//DECLARE_NUMERIC_OPERATIONS(FloatBall<PR>)
+//DECLARE_NUMERIC_OPERATIONS(FloatBounds<PR>)
+//DECLARE_NUMERIC_OPERATIONS(FloatApproximation<PR>)
 
 template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
@@ -194,7 +194,7 @@ template<class P> void export_effective_logical(std::string name)
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
     def("check", (CheckType(*)(LogicalType<P> const&,Effort)) &Ariadne::check<LogicalType<P>>);
-};
+}
 
 template<class P> void export_logical(std::string name)
 {
@@ -209,7 +209,7 @@ template<class P> void export_logical(std::string name)
     def("possibly", (bool(*)(LogicalType<P>)) &possibly);
     def("definitely", (bool(*)(LogicalType<P>)) &definitely);
 
-};
+}
 
 template<> void export_logical<ExactTag>(std::string name)
 {

@@ -48,7 +48,7 @@ X __vgetitem__(const Vector<X>& v, Int i)
 {
     if(i<0) { i+=v.size(); }
     ARIADNE_ASSERT_MSG(0<=i && Nat(i)<v.size(),"v="<<v<<" i="<<i);
-    return v[i];
+    return v[static_cast<Nat>(i)];
 }
 
 
@@ -58,7 +58,7 @@ Vector<X> __vgetslice__(const Vector<X>& v, Int start, Int stop)
     if(start<0) { start+=v.size(); }
     if(stop<0) { stop+=v.size(); }
     ARIADNE_ASSERT(0<=start && start<=stop && Nat(stop)<=v.size());
-    return project(v,range(start,stop));
+    return project(v,range(static_cast<Nat>(start),static_cast<Nat>(stop)));
 }
 
 
@@ -67,7 +67,7 @@ Void __vsetitem__(Vector<X>& v, Int i, const X& x)
 {
     if(i<0) { i+=v.size(); }
     ARIADNE_ASSERT(0<=i && Nat(i)<v.size());
-    v[i]=x;
+    v[static_cast<Nat>(i)]=x;
 }
 
 
@@ -111,7 +111,7 @@ struct from_python< Vector<X> >
     {
         list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
-        Vector<X> res(len(lst));
+        Vector<X> res(static_cast<SizeType>(len(lst)));
         for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
         new (storage) Vector<X>(res);
         data->convertible = storage;
@@ -134,7 +134,7 @@ struct from_python< Matrix<X> >
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
         list rows=boost::python::extract<list>(obj_ptr);
-        Matrix<X> res(len(rows),len(boost::python::extract<list>(rows[0])));
+        Matrix<X> res(static_cast<SizeType>(len(rows)),static_cast<SizeType>(len(boost::python::extract<list>(rows[0]))));
         for(Nat i=0; i!=res.row_size(); ++i) {
             list elmnts=boost::python::extract<list>(rows[i]);
             ARIADNE_ASSERT(Nat(len(elmnts))==res.column_size());

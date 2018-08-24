@@ -59,7 +59,7 @@ bin(uint8_t n, uint8_t k)
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
     for(uint8_t i=1; i<=k; ++i) {
-        r*=(n+1-i);
+        r*=(n+1u-i);
         r/=i;
     }
     return r;
@@ -168,7 +168,7 @@ Integer::Integer(Nat32 m) {
 
 Integer::Integer(Int32 n) {
     mpz_init(_mpz);
-    mpz_set_ui(_mpz,n.get_si());
+    mpz_set_ui(_mpz,static_cast<long unsigned int>(n.get_si()));
 }
 
 Integer::Integer(Nat64 m) {

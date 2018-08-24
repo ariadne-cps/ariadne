@@ -194,7 +194,7 @@ template<class C, class I, class X> inline
 X get_item(const C& c, const I& i) { return c[i]; }
 
 template<class C, class I, class J, class X> inline
-X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
+X matrix_get_item(const C& c, const I& i, const J& j) { return c[static_cast<SizeType>(i)][j]; }
 
 template<class C, class I, class X> inline
 Void set_item(C& c, const I& i, const X& x) { c[i]=x; }

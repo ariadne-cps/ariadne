@@ -988,8 +988,8 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
         FloatValue<PR> xmag=cast_exact(mag(xr));
         TaylorModel<ValidatedTag,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<FloatValue<PR>>(p[n-1]);
-        for(Nat i=0; i!=(n-1); ++i) {
+        r=static_cast<FloatValue<PR>>(p[n-1u]);
+        for(Nat i=0; i!=(n-1u); ++i) {
             Nat j=(n-2)-i;
             r=s*r+static_cast<FloatValue<PR>>(p[j]);
         }
@@ -1094,7 +1094,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     TaylorModel<ValidatedTag,F> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
     for(Nat i=0; i!=d; ++i) {
-        res=centre_series[d-i-1]+x*res;
+        res=centre_series[d-i-1u]+x*res;
         // Don't sweep here...
     }
     res+=FloatDPBounds(-truncation_error,+truncation_error);
@@ -1138,10 +1138,10 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embe
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_discard_variables(const TaylorModel<ValidatedTag,F>& tm, Array<SizeType> const& discarded_variables) {
     typedef typename F::PrecisionType PR;
-    for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
-        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
+    for(SizeType i=0; i!=discarded_variables.size()-1u; ++i) {
+        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i]);
     }
-    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
+    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1u]<tm.argument_size());
 
     const SizeType number_of_variables = tm.argument_size();
     const SizeType number_of_discarded_variables = discarded_variables.size();
@@ -1365,10 +1365,10 @@ template<class F> TaylorModel<ValidatedTag,F>
 TaylorModel<ValidatedTag,F>::_partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, NumericType c)
 {
     const SizeType as=x.argument_size();
-    Vector<TaylorModel<ValidatedTag,F>> y(as,TaylorModel<ValidatedTag,F>(as-1,x.sweeper()));
-    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1,i,x.sweeper()); }
-    y[k]=TaylorModel<ValidatedTag,F>::constant(as-1,c,x.sweeper());
-    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1,i-1,x.sweeper()); }
+    Vector<TaylorModel<ValidatedTag,F>> y(as,TaylorModel<ValidatedTag,F>(as-1u,x.sweeper()));
+    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i,x.sweeper()); }
+    y[k]=TaylorModel<ValidatedTag,F>::constant(as-1u,c,x.sweeper());
+    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i-1u,x.sweeper()); }
     return compose(x,y);
 }
 
@@ -1400,7 +1400,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // Replace x[k] with x[k]+tr
 
     // Split variables by degree in x[k]
-    Array<TaylorModel<ValidatedTag,F>> ary(deg+1,TaylorModel<ValidatedTag,F>(as,swp));
+    Array<TaylorModel<ValidatedTag,F>> ary(deg,TaylorModel<ValidatedTag,F>(as,swp));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
         ConstReferenceType<FloatValue<PR>> c=iter->coefficient();

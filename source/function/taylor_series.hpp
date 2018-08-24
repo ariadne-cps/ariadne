@@ -50,14 +50,14 @@ template<> class TaylorSeries<FloatDPBounds> {
     Array<FloatDPValue> _expansion;
     FloatDPError _error;
   public:
-    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
+    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u), _error(0u) { }
 
     TaylorSeries(const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
     template<class OP> TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree);
 
-    DegreeType degree() const { return _expansion.size()-1; }
+    DegreeType degree() const { return _expansion.size()-1u; }
     FloatDPValue const& operator[](DegreeType i) const { return _expansion[i]; }
     Array<FloatDPValue> expansion() const { return _expansion; }
     FloatDPError error() const { return _error; }
@@ -69,7 +69,7 @@ template<> class TaylorSeries<FloatDPBounds> {
 
 template<class OP> inline
 TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)
-    : _domain(domain), _expansion(degree+1), _error(0u)
+    : _domain(domain), _expansion(degree+1u), _error(0u)
 {
     Series<ValidatedNumericType> centre_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(centre));
     Series<ValidatedNumericType> range_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(cast_singleton(domain)));

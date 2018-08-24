@@ -89,7 +89,7 @@ struct from_python< Vector<X>> {
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
-        Vector<X> res(len(lst));
+        Vector<X> res(static_cast<SizeType>(len(lst)));
         for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
         new (storage) Vector<X>(res);
         data->convertible = storage;

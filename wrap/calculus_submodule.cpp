@@ -76,7 +76,7 @@ ValidatedVectorTaylorFunctionModelDP __getslice__(const ValidatedVectorTaylorFun
     if(stop<0) { stop+=tf.result_size(); }
     ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&SizeType(stop)<=tf.result_size(),
             "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
-    return ValidatedVectorTaylorFunctionModelDP(tf.domain(),Vector<ValidatedTaylorModelDP>(project(tf.models(),range(start,stop))));
+    return ValidatedVectorTaylorFunctionModelDP(tf.domain(),Vector<ValidatedTaylorModelDP>(project(tf.models(),range(static_cast<SizeType>(start),static_cast<SizeType>(stop)))));
 }
 
 
@@ -91,10 +91,10 @@ struct from_python<MultiIndex> {
         boost::python::extract<boost::python::tuple> xtup(obj_ptr);
         boost::python::extract<boost::python::list> xlst(obj_ptr);
         if(xlst.check()) {
-            MultiIndex a(len(xlst)); for(SizeType i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<SizeType>(xlst()[i]); }
+            MultiIndex a(static_cast<SizeType>(len(xlst))); for(SizeType i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<SizeType>(xlst()[i]); }
             new (storage) MultiIndex(a);
         } else {
-            MultiIndex a(len(xtup)); for(SizeType i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<SizeType>(xtup()[i]); }
+            MultiIndex a(static_cast<SizeType>(len(xtup))); for(SizeType i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<SizeType>(xtup()[i]); }
             new (storage) MultiIndex(a);
         }
         coefficient->convertible = storage;
@@ -118,7 +118,7 @@ struct from_python< Expansion<MultiIndex,T> > {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[0]);
             a=boost::python::extract<MultiIndex>(tup[0]);
             r=Expansion<MultiIndex,T>(a.size());
-            r.reserve(len(lst));
+            r.reserve(static_cast<SizeType>(len(lst)));
         }
         for(Int i=0; i!=len(lst); ++i) {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
@@ -141,7 +141,7 @@ struct from_python< Vector<X> >
     static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* coefficient) {
         list lst=boost::python::extract<list>(obj_ptr);
         Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) coefficient)->storage.bytes;
-        Array<X> ary(len(lst),Uninitialised());
+        Array<X> ary(static_cast<SizeType>(len(lst)),Uninitialised());
         for(SizeType i=0; i!=ary.size(); ++i) { new (&ary[i]) X(boost::python::extract<X>(lst[i])); }
         new (storage) Vector<X>(std::move(ary));
         coefficient->convertible = storage;
@@ -158,7 +158,7 @@ struct from_python<ValidatedVectorTaylorFunctionModelDP> {
     static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* coefficient) {
         Void* storage = ((boost::python::converter::rvalue_from_python_storage<ValidatedVectorTaylorFunctionModelDP>*)coefficient)->storage.bytes;
         list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        ValidatedVectorTaylorFunctionModelDP* tf_ptr = new (storage) ValidatedVectorTaylorFunctionModelDP(len(lst));
+        ValidatedVectorTaylorFunctionModelDP* tf_ptr = new (storage) ValidatedVectorTaylorFunctionModelDP(static_cast<SizeType>(len(lst)));
         for(SizeType i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,boost::python::extract<ValidatedScalarTaylorFunctionModelDP>(lst[i])); }
         coefficient->convertible = storage;
     }

@@ -41,7 +41,7 @@
 #include "dynamics/map.hpp"
 #include "dynamics/map_evolver.hpp"
 #include "output/graphics.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 #include "test.hpp"
 

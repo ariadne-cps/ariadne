@@ -40,7 +40,7 @@
 #include "../hybrid/hybrid_grid.hpp"
 #include "../hybrid/hybrid_set.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 
 namespace Ariadne {

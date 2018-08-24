@@ -32,7 +32,6 @@
 
 #include "stdlib.hpp"
 #include "macros.hpp"
-#include "logging.hpp"
 
 #include "typedefs.hpp"
 #include "string.hpp"

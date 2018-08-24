@@ -27,7 +27,7 @@
 #include "../output/drawer.hpp"
 
 #include "../utility/macros.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../geometry/grid_set.hpp"

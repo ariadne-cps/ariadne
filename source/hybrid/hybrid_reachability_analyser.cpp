@@ -57,7 +57,7 @@
 #include "../hybrid/hybrid_evolver.hpp"
 #include "../hybrid/hybrid_reachability_analyser.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../output/graphics.hpp"
 #include "../solvers/linear_programming.hpp"
 

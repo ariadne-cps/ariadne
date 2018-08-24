@@ -33,7 +33,7 @@
 #include <list>
 #include <iostream>
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/declarations.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/container.hpp"

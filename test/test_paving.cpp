@@ -30,7 +30,7 @@
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 #include "test.hpp"
 

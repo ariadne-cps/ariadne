@@ -34,7 +34,7 @@
 #include "../solvers/linear_programming.hpp"
 
 #include "../utility/macros.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 static const unsigned int verbosity=0;
 

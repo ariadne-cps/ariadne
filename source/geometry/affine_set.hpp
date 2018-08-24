@@ -34,7 +34,7 @@
 #include <iostream>
 
 #include "../utility/declarations.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/container.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../function/affine.hpp"

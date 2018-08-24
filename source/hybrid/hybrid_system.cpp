@@ -28,7 +28,7 @@
 #include "../config.hpp"
 
 #include "../utility/macros.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 #include "../utility/stlio.hpp"
 #include "../symbolic/expression.hpp"

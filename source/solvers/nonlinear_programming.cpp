@@ -31,7 +31,7 @@
 #include <limits>
 
 #include "../utility/macros.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/tuple.hpp"
 #include "../utility/tribool.hpp"
 #include "../numeric/numeric.hpp"

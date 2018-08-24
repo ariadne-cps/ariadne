@@ -42,7 +42,7 @@
 #include "../solvers/integrator_interface.hpp"
 #include "../dynamics/evolver_base.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 

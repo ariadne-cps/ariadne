@@ -45,7 +45,7 @@
 #include "../hybrid/hybrid_automaton_interface.hpp"
 #include "../hybrid/hybrid_evolver_interface.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 

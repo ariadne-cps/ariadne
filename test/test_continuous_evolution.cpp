@@ -40,7 +40,7 @@
 #include "dynamics/orbit.hpp"
 #include "output/graphics.hpp"
 #include "output/textplot.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 #include "function/user_function.hpp"
 

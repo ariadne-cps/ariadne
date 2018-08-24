@@ -28,7 +28,7 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../algebra/vector.hpp"
 #include "../algebra/matrix.hpp"
 #include "../numeric/numeric.hpp"

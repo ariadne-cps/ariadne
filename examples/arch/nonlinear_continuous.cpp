@@ -1,4 +1,4 @@
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 #include "nonlinear_continuous.hpp"
 #include "dynamics/reachability_analyser.hpp"
 

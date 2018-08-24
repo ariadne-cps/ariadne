@@ -27,7 +27,7 @@
 
 
 #include "../config.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 

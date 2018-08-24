@@ -28,7 +28,7 @@
 
 #include "../solvers/integrator.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/container.hpp"
 #include "../numeric/numeric.hpp"
 #include "../algebra/vector.hpp"

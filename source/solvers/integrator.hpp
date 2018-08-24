@@ -37,7 +37,7 @@
 
 #include "../utility/declarations.hpp"
 #include "../utility/attribute.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/pointer.hpp"
 #include "../function/affine.hpp"
 

@@ -40,7 +40,7 @@
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 
 #include "hybrid/hybrid_automaton-composite.hpp"

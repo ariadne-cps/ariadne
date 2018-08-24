@@ -30,7 +30,7 @@
 
 #include "../utility/declarations.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../numeric/numeric.hpp"
 #include "../utility/tuple.hpp"
 

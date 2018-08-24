@@ -37,7 +37,7 @@
 #include "../dynamics/vector_field_evolver.hpp"
 #include "../dynamics/reachability_analyser_interface.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 
 namespace Ariadne {

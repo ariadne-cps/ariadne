@@ -38,7 +38,7 @@
 
 #include "../utility/declarations.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 #include "../utility/container.hpp"
 #include "../symbolic/valuation.hpp"

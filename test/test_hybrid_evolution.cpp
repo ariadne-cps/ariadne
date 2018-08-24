@@ -40,7 +40,7 @@
 #include "output/graphics_interface.hpp"
 #include "output/graphics.hpp"
 #include "hybrid/hybrid_graphics.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 #include "test.hpp"
 

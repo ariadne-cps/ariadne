@@ -25,7 +25,7 @@
 #include "../config.hpp"
 
 #include "../utility/macros.hpp"
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../function/polynomial.hpp"
 #include "../function/function.hpp"
 #include "../function/taylor_function.hpp"

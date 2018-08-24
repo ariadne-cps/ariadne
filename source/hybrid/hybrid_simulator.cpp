@@ -41,7 +41,7 @@
 #include "../function/formula.hpp"
 #include "../function/taylor_model.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 #include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_orbit.hpp"

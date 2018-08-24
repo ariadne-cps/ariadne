@@ -34,7 +34,7 @@
 #include "../geometry/enclosure.hpp"
 #include "../dynamics/orbit.hpp"
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 
 #include "../dynamics/map.hpp"
 #include "../dynamics/map_evolver.hpp"

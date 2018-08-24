@@ -28,7 +28,7 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_HPP
 #define ARIADNE_HYBRID_SIMULATOR_HPP
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {

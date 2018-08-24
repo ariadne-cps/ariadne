@@ -28,7 +28,7 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_HPP
 #define ARIADNE_CONSTRAINT_SOLVER_HPP
 
-#include "../utility/logging.hpp"
+#include "../output/logging.hpp"
 #include "../utility/container.hpp"
 
 #include "../utility/declarations.hpp"

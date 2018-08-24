@@ -33,7 +33,7 @@
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "output/graphics.hpp"
-#include "utility/logging.hpp"
+#include "output/logging.hpp"
 
 #include "test.hpp"
 

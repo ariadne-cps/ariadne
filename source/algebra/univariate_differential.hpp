@@ -131,7 +131,7 @@ template<class X> inline const X UnivariateDifferential<X>::hessian() const { as
 
 template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
 UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<Dbl> lst, PR pr)
-    : _ary(d+1,X(0,pr))
+    : _ary(d+1u,X(0,pr))
 {
     auto iter=lst.begin();
     for(SizeType i=0; iter!=lst.end(); ++i, ++iter) { _ary[i]=X(*iter,pr); }
@@ -164,7 +164,7 @@ template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
         UnivariateDifferential<X> r(std::min(x1.degree(),x2.degree()),nul(x1[0]*x2[0]));
         for(DegreeType i1=0; i1<=r.degree(); ++i1) {
             for(DegreeType i2=0; i2<=r.degree()-i1; ++i2) {
-                r[i1+i2]+=x1[i1]*x2[i2];
+                r[static_cast<DegreeType>(i1+i2)]+=x1[i1]*x2[i2];
             }
         }
         return r;

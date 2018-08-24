@@ -244,7 +244,7 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     SizeType i=0; SizeType j=1;
     while(iter!=this->end() && iter->index().degree()<=2) {
         ConstReferenceType<MultiIndex> a=iter->index(); ConstReferenceType<X> c=iter->coefficient();
-        while(a[i]==0) { ++i; j=i+1; }
+        while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
         ++iter;
@@ -542,12 +542,12 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     Differential<X> one = zero.create_constant(X(1));
 
     // Use inefficient brute-force approach with lots of storage...
-    Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1,zero));
+    Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1u,zero));
     for(SizeType j=0; j!=ms; ++j) {
         val[j][0]=one;
         val[j][1]=a[j];
         for(SizeType k=2; k<=d; ++k) {
-            val[j][k]=val[j][k-1]*a[j];
+            val[j][k]=val[j][k-1u]*a[j];
         }
     }
 
@@ -620,7 +620,7 @@ template<class X>
 Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType i)
 {
     if(x.degree()==0) { return Differential<X>(x.argument_size(),0u); }
-    Differential<X> r(x.argument_size(), x.degree()-1);
+    Differential<X> r(x.argument_size(), x.degree()-1u);
     MultiIndex a(x.argument_size());
     for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         a=iter->index();
@@ -638,7 +638,7 @@ Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType 
 template<class X>
 Differential<X> Differential<X>::_antiderivative(const Differential<X>& x, SizeType i)
 {
-    Differential<X> r(x.argument_size(), x.degree()+1);
+    Differential<X> r(x.argument_size(), x.degree()+1u);
     MultiIndex a(x.argument_size());
     MultiIndex ra=MultiIndex(x.argument_size());
     MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
@@ -752,7 +752,7 @@ Vector<Differential<X>>::_derivative(const Vector<Differential<X>>& x, SizeType 
 template<class X>
 Vector<Differential<X>>
 Vector<Differential<X>>::_antiderivative(const Vector<Differential<X>>& x, SizeType k) {
-    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1));
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1u));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
     return r;
 }
@@ -764,8 +764,8 @@ template<class X>
 Vector<Differential<X>>
 Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
 {
-    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1);
-    Differential<X> t(df.argument_size(), df.degree()-1);
+    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1u);
+    Differential<X> t(df.argument_size(), df.degree()-1u);
     MultiIndex a(df.argument_size()); X c;
     for(SizeType i=0; i!=df.result_size(); ++i) {
         Expansion<MultiIndex,X> const& dfi_expansion = df[i].expansion();
@@ -829,7 +829,7 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
     const X z=df.zero_element().zero_coefficient();
     Vector<Differential<X>> dx0=Vector<Differential<X>>(n,n+1u,deg+1u,z);
     for(SizeType i=0; i!=n; ++i) {
-        dx0[i]=Differential<X>::variable(n+1,deg+1u,x0[i],i);
+        dx0[i]=Differential<X>::variable(n+1u,deg+1u,x0[i],i);
     }
     Vector<Differential<X>> dphi=Vector<Differential<X>>(n,n+1u,0u,z);
     // TODO: This iteration repeats computation of lower-degree terms, so could be made more efficient

@@ -35,13 +35,13 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential()
     : _ary(1u,X(0)) { }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d)
-    : _ary(d+1,X(0)) { }
+    : _ary(d+1u,X(0)) { }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, X const& c)
-    : _ary(d+1,nul(c)) { _ary[0]=c; }
+    : _ary(d+1u,nul(c)) { _ary[0]=c; }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<X> lst)
-    : _ary(d+1,X(0))
+    : _ary(d+1u,X(0))
 {
     ARIADNE_PRECONDITION(lst.size()==d+1u);
     std::copy(lst.begin(),lst.end(),_ary.begin());
@@ -106,7 +106,7 @@ UnivariateDifferential<X> UnivariateDifferential<X>::_compose(const UnivariateDi
     r[0]=x[d];
     for(DegreeType n=1; n<=d; ++n) {
         r=r*y;
-        r[0]+=x[d-n];
+        r[0]+=x[static_cast<SizeType>(d-n)];
     }
     const_cast<X&>(y[0])=y0;
     return r;
@@ -120,7 +120,7 @@ UnivariateDifferential<X>::_derivative(const UnivariateDifferential<X>& x)
     UnivariateDifferential<X> r(std::min(n,one)-one);
     if(n==0) { r[0]=x[0]*0; }
     for(DegreeType i=0; i<n; ++i) {
-        r[i]=(i+1)*x[i+1];
+        r[i]=(i+1u)*x[i+1u];
     }
     return r;
 }
@@ -130,9 +130,9 @@ UnivariateDifferential<X>
 UnivariateDifferential<X>::_antiderivative(const UnivariateDifferential<X>& x)
 {
     DegreeType n=x.degree();
-    UnivariateDifferential<X> r(n+1,Ariadne::create_zero(x[0]));
+    UnivariateDifferential<X> r(n+1u,Ariadne::create_zero(x[0]));
     for(DegreeType i=0; i<=n; ++i) {
-        r[i+1]=x[i]/(i+1);
+        r[i+1u]=x[i]/(i+1u);
     }
     return r;
 }
@@ -142,10 +142,10 @@ UnivariateDifferential<X>
 UnivariateDifferential<X>::_antiderivative(const UnivariateDifferential<X>& x, const X& c)
 {
     DegreeType n=x.degree();
-    UnivariateDifferential<X> r(n+1,Ariadne::create_zero(x[0]));
+    UnivariateDifferential<X> r(n+1u,Ariadne::create_zero(x[0]));
     r[0]=c;
     for(DegreeType i=0; i<=n; ++i) {
-        r[i+1]=x[i]/(i+1);
+        r[i+1u]=x[i]/(i+1u);
     }
     return r;
 }

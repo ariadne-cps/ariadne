@@ -1142,8 +1142,8 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
     //count the required number of iverse dimensions
     Nat inverseDimensionsNumericType = 0;
     for( Nat i = 0; i < num_dimensions; i++ ) {
-        invert_position[ i ] = NO_INVERSE_POSITION;
-        inverseDimensionsNumericType += cellPosition[i];
+        invert_position[i] = NO_INVERSE_POSITION;
+        inverseDimensionsNumericType = inverseDimensionsNumericType + cellPosition[i];
     }
 
     //02. Create the path to the neighboring cell and initialize it with the path to the base cell
@@ -1157,7 +1157,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
     if( inverseDimensionsNumericType > 0 ) {
         //If there is a need to do inverses, i.e. we are not adding the base cell itself
         Nat foundNumericTypeOfInverses = 0;
-        Nat position = theNeighborCellWord.size() - 1;
+        Nat position = theNeighborCellWord.size() - 1u;
         while(true) {
             //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
             Nat dimension = position % num_dimensions;
@@ -1172,7 +1172,7 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const Nat theHeigh
                     firstInversePosition = position;
                 }
                 //Incremenet the number of fount inverses and check if this is all we need, if yes then break
-                foundNumericTypeOfInverses += 1;
+                foundNumericTypeOfInverses++;
                 if( foundNumericTypeOfInverses == inverseDimensionsNumericType ) {
                     break;
                 }

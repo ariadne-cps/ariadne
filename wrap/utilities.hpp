@@ -354,14 +354,22 @@ struct from_python_tuple< Ariadne::Array<T> > {
 };
 
 
-
+class MultiIndex;
 
 
 template<class C, class I0, class I1, class S> inline
 S __getslice__(const C& c, const I0& i0, const I1& i1) { return project(c,range(i0,i1)); }
 
-template<class C, class I, class X> inline
-X __getitem__(const C& c, const I& i) { return c[i]; }
+template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
+X __getitem__(const C& c, const I& i) {
+    return c[static_cast<Nat>(i)];
+}
+
+template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
+X __getitem__(const C& c, const I& i) {
+    return c[i];
+}
+
 
 template<class C, class I, class X> inline
 Void __setitem__(C& c, const I& i, const X& x) { c[i]=x; }

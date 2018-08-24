@@ -190,13 +190,23 @@ template<class X, class Y, class PR> Vector<Differential<X>> make_variables(Degr
 }
 
 
-template<class C, class I, class X> inline
-X get_item(const C& c, const I& i) { return c[i]; }
+template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
+X get_item(const C& c, const I& i) {
+    return c[static_cast<Nat>(i)];
+}
+
+template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
+X get_item(const C& c, const I& i) {
+    return c[i];
+}
 
 template<class C, class I, class J, class X> inline
 X matrix_get_item(const C& c, const I& i, const J& j) { return c[static_cast<SizeType>(i)][j]; }
 
-template<class C, class I, class X> inline
+template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
+Void set_item(C& c, const I& i, const X& x) { c[static_cast<SizeType>(i)]=x; }
+
+template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
 Void set_item(C& c, const I& i, const X& x) { c[i]=x; }
 
 template<class C, class I, class J, class X> inline

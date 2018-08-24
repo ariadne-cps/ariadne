@@ -1139,7 +1139,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embe
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_discard_variables(const TaylorModel<ValidatedTag,F>& tm, Array<SizeType> const& discarded_variables) {
     typedef typename F::PrecisionType PR;
     for(SizeType i=0; i!=discarded_variables.size()-1u; ++i) {
-        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i]);
+        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1u]);
     }
     ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1u]<tm.argument_size());
 
@@ -1400,7 +1400,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // Replace x[k] with x[k]+tr
 
     // Split variables by degree in x[k]
-    Array<TaylorModel<ValidatedTag,F>> ary(deg,TaylorModel<ValidatedTag,F>(as,swp));
+    Array<TaylorModel<ValidatedTag,F>> ary(deg+1u,TaylorModel<ValidatedTag,F>(as,swp));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
         ConstReferenceType<FloatValue<PR>> c=iter->coefficient();

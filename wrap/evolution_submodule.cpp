@@ -24,8 +24,6 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include <boost/python.hpp>
-
 #include "dynamics/orbit.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 

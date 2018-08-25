@@ -24,8 +24,6 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include <boost/python.hpp>
-
 #include <iostream>
 #include <iomanip>
 

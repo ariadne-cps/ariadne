@@ -26,8 +26,6 @@
 
 #include "config.hpp"
 
-#include <boost/python.hpp>
-
 #include "output/graphics_interface.hpp"
 #include "output/graphics.hpp"
 #include "output/geometry2d.hpp"

@@ -28,17 +28,7 @@
 #ifndef ARIADNE_PYTHON_UTILITIES_HPP
 #define ARIADNE_PYTHON_UTILITIES_HPP
 
-#include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
-
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
-#include <sstream>
-#include <iostream>
-
-#include "config.hpp"
+#include "boost_python.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"

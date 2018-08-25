@@ -26,9 +26,6 @@
 
 #include "config.hpp"
 
-#include <boost/python.hpp>
-#include <boost/python/slice.hpp>
-
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/covector.hpp"

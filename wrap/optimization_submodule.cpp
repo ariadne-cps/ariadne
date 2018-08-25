@@ -26,8 +26,6 @@
 
 #include "config.hpp"
 
-#include <boost/python.hpp>
-
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

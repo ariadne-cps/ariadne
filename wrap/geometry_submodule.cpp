@@ -26,8 +26,6 @@
 
 #include "config.hpp"
 
-#include <boost/python.hpp>
-
 #include "geometry/geometry.hpp"
 #include "output/geometry2d.hpp"
 #include "geometry/point.hpp"

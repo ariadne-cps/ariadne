@@ -24,8 +24,6 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include <boost/python.hpp>
-
 #include "algebra/algebra.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"

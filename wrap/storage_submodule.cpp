@@ -25,8 +25,6 @@
 #include "boost_python.hpp"
 #include "utilities.hpp"
 
-#include <boost/python.hpp>
-
 #include "numeric/numeric.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/grid_set.hpp"

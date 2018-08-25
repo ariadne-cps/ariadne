@@ -29,11 +29,10 @@
 #include <string>
 using StringType;
 
-#include <boost/timer.hpp>
-#include <boost/progress.hpp>
-
 #include "config.hpp"
 #include "function/taylor_model.hpp"
+#include "utility/stopwatch.hpp"
+
 using namespace Ariadne;
 
 template<class A1>
@@ -158,15 +157,16 @@ Void profile(Nat ntries, const char* name, const T& run)
     typename T::result_type res=run();
     //std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
 
-    boost::timer tm;
+    StopWatch sw;
 
-    tm.restart();
     for(Nat i=0; i!=ntries; ++i) {
         res=run();
     }
 
-    double total_time = tm.elapsed();
-    double average_time_in_microseconds = 1000000*(total_time/ntries);
+    sw.click();
+
+    TimeUnit total_time = sw.elapsed();
+    double average_time_in_microseconds = total_time/ntries;
     FloatDP error = res.error();
     unsigned Int size = res.number_of_nonzeros();
 

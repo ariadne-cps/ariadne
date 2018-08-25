@@ -27,8 +27,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include <boost/timer.hpp>
-#include <boost/progress.hpp>
+#include "utility/stopwatch.hpp"
 
 #if defined HAVE_FENV_H && defined HAVE_GMPXX_H
 
@@ -228,7 +227,7 @@ Void profile_dot(Int n, Int nn) {
 
     double m=0,r=0,l=0,u=0;
 
-    boost::timer tm; double t=0;
+    StopWatch sw; double t=0;
 
     double ql=0; double qu=0;
     dot_lu_rat(ql,qu,n,x,y);
@@ -238,65 +237,70 @@ Void profile_dot(Int n, Int nn) {
     mpq_class qm=0;
     dot_md_rat(qm,n,x,y);
 
-    tm.restart();
     for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_std(l,u,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"lu_std: t="<<std::setprecision(5)<<t
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"lu_std: t(us)="<<std::setprecision(5)<<t
              <<std::setprecision(20)<<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_opp(l,u,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"lu_opp: t="<<std::setprecision(5)<<t<<std::setprecision(20)
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"lu_opp: t(us)="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_ivl(l,u,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"lu_ivl: t="<<std::setprecision(5)<<t<<std::setprecision(20)
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"lu_ivl: t(us)="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
 
 
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_std(m,r,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"mr_std: t(us)="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_mid(m,r,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"mr_mid: t="<<std::setprecision(5)<<t<<std::setprecision(20)
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"mr_mid: t(us)="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_csy(m,r,n,x,y);
     }
-    t=tm.elapsed();
-    std::cout<<"mr_csy: t="<<std::setprecision(5)<<t<<std::setprecision(20)
+    sw.click();
+    t=sw.elapsed();
+    std::cout<<"mr_csy: t(us)="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
 
@@ -320,30 +324,33 @@ Void profile_add(Int n, Int nn) {
 
     boost::timer tm; double t=0;
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_std(r,n,z,x,y);
     }
-    t=tm.elapsed();
+    sw.click();
+    t=sw.elapsed();
     std::cout<<"add_mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_buf(r,n,z,x,y);
     }
-    t=tm.elapsed();
+    sw.click();
+    t=sw.elapsed();
     std::cout<<"add_mr_buf: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_csy(r,n,z,x,y);
     }
-    t=tm.elapsed();
+    sw.click();
+    t=sw.elapsed();
     std::cout<<"add_mr_csy: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
 }
@@ -363,21 +370,23 @@ Void profile_add(Int n, Int nn) {
 
     boost::timer tm; double t=0;
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         r=0;
         scal_mr_std(r,n,z,x,c);
     }
-    t=tm.elapsed();
+    sw.click();
+    t=sw.elapsed();
     std::cout<<"scal_mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
 
-    tm.restart();
+    sw.reset();
     for(Int i=0; i!=nn; ++i) {
         r=0;
         scal_mr_csy(r,n,z,x,c);
     }
-    t=tm.elapsed();
+    sw.click();
+    t=sw.elapsed();
     std::cout<<"scal_mr_csy: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
 }

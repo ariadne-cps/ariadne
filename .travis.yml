@@ -50,8 +50,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask uninstall --force oclint; fi
   - eval "${MATRIX_EVAL}"
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      brew upgrade boost
-      brew install mpfr gmp gtk cairo 
+      brew upgrade boost;
+      brew install mpfr gmp gtk cairo; 
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
     

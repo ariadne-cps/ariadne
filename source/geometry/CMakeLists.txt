@@ -4,6 +4,7 @@ add_library(ariadne-geometry OBJECT
     box.cpp
     curve.cpp
     function_set.cpp
+    binary_tree.cpp
     grid_set.cpp
     affine_set.cpp
     enclosure.cpp

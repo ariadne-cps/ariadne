@@ -36,7 +36,7 @@
 #include "../utility/stlio.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 #include "../geometry/set_interface.hpp"
 

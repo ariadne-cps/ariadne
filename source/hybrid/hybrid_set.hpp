@@ -39,7 +39,7 @@
 #include "../utility/container.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/curve.hpp"
 
 #include "../symbolic/expression_set.hpp"

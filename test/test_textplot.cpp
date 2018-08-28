@@ -31,7 +31,7 @@
 #include "geometry/curve.hpp"
 #include "taylor_set.hpp"
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 
 #include "function/user_function.hpp"
 

@@ -37,7 +37,7 @@
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../geometry/paving_interface.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../algebra/algebra.hpp"
 

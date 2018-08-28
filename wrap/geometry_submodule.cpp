@@ -32,7 +32,7 @@
 #include "geometry/curve.hpp"
 #include "geometry/interval.hpp"
 #include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/affine_set.hpp"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_set.hpp
+ *            grid_paving.hpp
  *
  *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file grid_set.hpp
+/*! \file grid_paving.hpp
  *  \brief Grid paving is used to represent sets, based on integer and dyadic coordinate cells, of a grid.
  */
 

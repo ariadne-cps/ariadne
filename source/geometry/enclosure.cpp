@@ -53,7 +53,7 @@
 
 #include "../geometry/paving_interface.hpp"
 #include "../geometry/paver.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 #include "../solvers/constraint_solver.hpp"
 #include "../solvers/nonlinear_programming.hpp"

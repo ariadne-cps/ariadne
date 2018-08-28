@@ -30,7 +30,7 @@
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
 #include "hybrid/hybrid_automata.hpp"

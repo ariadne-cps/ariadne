@@ -33,7 +33,7 @@
 #include "../function/affine_model.hpp"
 
 #include "../geometry/box.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/affine_set.hpp"
 
 #include "../output/graphics_interface.hpp"

@@ -28,7 +28,7 @@
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
 #include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "geometry/affine_set.hpp"
 #include "geometry/function_set.hpp"
 #include "function/formula.hpp"

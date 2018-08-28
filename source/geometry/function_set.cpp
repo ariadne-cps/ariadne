@@ -35,7 +35,7 @@
 #include "../solvers/constraint_solver.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/paver.hpp"
 #include "../algebra/algebra.hpp"
 #include "../algebra/expansion.inl.hpp"

@@ -31,7 +31,7 @@
 #include "../algebra/vector.hpp"
 #include "../algebra/algebra.hpp"
 #include "../geometry/box.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../function/polynomial.hpp"
 #include "../function/function.hpp"
 #include "../function/formula.hpp"

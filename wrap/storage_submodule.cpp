@@ -27,7 +27,7 @@
 
 #include "numeric/numeric.hpp"
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "geometry/list_set.hpp"
 
 using namespace boost::python;

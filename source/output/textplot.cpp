@@ -36,7 +36,7 @@
 //#include "../geometry/polytope.hpp"
 //#include "../geometry/zonotope.hpp"
 #include "../output/textplot.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 namespace Ariadne {
 

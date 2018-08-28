@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_set.cpp
+ *            grid_paving.cpp
  *
  *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
  *
@@ -33,7 +33,7 @@
 #include "../utility/stlio.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/binary_tree.hpp"
 
 #include "../geometry/set_interface.hpp"

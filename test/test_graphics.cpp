@@ -30,7 +30,7 @@
 #include "geometry/box.hpp"
 #include "geometry/curve.hpp"
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 
 using namespace Ariadne;
 

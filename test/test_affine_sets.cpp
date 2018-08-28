@@ -26,9 +26,9 @@
 #include "config.hpp"
 #include "function/function.hpp"
 #include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
 #include "geometry/affine_set.hpp"
 #include "geometry/function_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "output/graphics.hpp"
 #include "output/geometry2d.hpp"
 

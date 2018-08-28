@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_grid_set.cpp
+ *            test_grid_paving.cpp
  *
  *
  *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
@@ -36,7 +36,7 @@
 #include "numeric/numeric.hpp"
 
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "geometry/binary_tree.hpp"
 #include "geometry/set_interface.hpp"
 

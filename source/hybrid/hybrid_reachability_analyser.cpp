@@ -43,7 +43,7 @@
 
 #include "../geometry/box.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 #include "../solvers/integrator.hpp"
 #include "../solvers/solver.hpp"

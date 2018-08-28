@@ -47,7 +47,7 @@ namespace Ariadne {
 
 #include "geometry/function_set.hpp"
 #include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"

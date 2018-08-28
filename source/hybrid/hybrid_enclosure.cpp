@@ -34,7 +34,7 @@
 #include "../function/polynomial.hpp"
 #include "../function/taylor_function.hpp"
 #include "../geometry/box.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_time.hpp"
 #include "../hybrid/discrete_event.hpp"

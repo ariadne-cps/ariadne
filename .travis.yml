@@ -53,7 +53,7 @@ before_install:
       brew upgrade boost;
       brew install mpfr gmp gtk cairo; 
     fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y python2.7-dev libboost-python-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
     
 script: 
   - mkdir build

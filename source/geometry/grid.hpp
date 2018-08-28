@@ -61,16 +61,16 @@ class Grid {
     //! Default constructor constructs a grid from a null pointer. Needed for some iterators.
     explicit Grid();
 
-    //! Construct from a dimension and a spacing in each direction.
+    //! Construct from a dimension.
     explicit Grid(Nat d);
 
     //! Construct from a dimension and a spacing in each direction.
     explicit Grid(Nat d, RawFloatDP l);
 
-    //! Construct from a vector of offsets.
+    //! Construct from a vector of lengths.
     explicit Grid(const Vector<RawFloatDP>& lengths);
 
-    //! Construct from a centre point and a vector of offsets.
+    //! Construct from a centre point and a vector of lengths.
     explicit Grid(const Vector<RawFloatDP>& origin, const Vector<RawFloatDP>& lengths);
 
     //! Copy constructor. Copies a reference to the grid data.

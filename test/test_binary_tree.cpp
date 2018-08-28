@@ -35,7 +35,6 @@
 #include "utility/tribool.hpp"
 #include "numeric/numeric.hpp"
 
-#include "geometry/function_set.hpp"
 #include "geometry/binary_tree.hpp"
 
 #include "test.hpp"

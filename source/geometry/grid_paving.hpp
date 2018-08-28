@@ -59,7 +59,6 @@
 namespace Ariadne {
 
 // Some type definitions
-typedef std::vector<Bool> BooleanArray;
 typedef Array<Int> IndexArray;
 typedef Array<SizeType> SizeArray;
 
@@ -77,18 +76,6 @@ class GridTreeConstIterator;
 
 // Declarations of classes in other files
 template<class BS> class ListSet;
-
-//! \brief The binary-tree node operation is not allowed on a non-leaf node.
-class NotALeafNodeException : public std::logic_error {
-  public:
-    NotALeafNodeException(const StringType& str) : std::logic_error(str) { }
-};
-
-//! \brief The binary-tree node operation is not allowed on a leaf node.
-class IsALeafNodeException : public std::logic_error {
-  public:
-    IsALeafNodeException(const StringType& str) : std::logic_error(str) { }
-};
 
 //! \brief The GridTreeCursor throws this exception if we try to go beyond the binary tree.
 class NotAllowedMoveException : public std::logic_error {

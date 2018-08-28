@@ -22,16 +22,15 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "../function/functional.hpp"
-#include "../config.hpp"
-
 #include <iostream>
 #include <iomanip>
 
+#include "../config.hpp"
+
+#include "../function/functional.hpp"
 #include "../utility/macros.hpp"
 #include "../utility/exceptions.hpp"
 #include "../utility/stlio.hpp"
-#include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
 #include "../geometry/binary_tree.hpp"
 

@@ -64,7 +64,7 @@ TestHybridSet::test_hybrid_grid_set()
     MonolithicHybridSpace hspc;
     DiscreteLocation loc;
     HybridGrid hg(hspc);
-    HybridGridTreeSet hgts(hg);
+    HybridGridTreePaving hgts(hg);
     Figure fig;
     hg.has_location(loc);
     g=hg[loc];

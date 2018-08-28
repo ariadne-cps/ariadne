@@ -44,7 +44,7 @@ class LocationException : public std::runtime_error {
     LocationException(const StringType& what) : std::runtime_error(what) { }
 };
 
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 class HybridSpaceInterface
 {
@@ -84,7 +84,7 @@ class HybridSpace
     //! \brief The interface satisified by located sets in the space.
     typedef HybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridGridTreePaving SetApproximationType;
   public:
     HybridSpace(const HybridSpaceInterface& hspc) : _ptr(hspc.clone()) { }
     HybridSpace(const HybridSpaceInterface* hspc_ptr) : _ptr(hspc_ptr) { }

@@ -111,7 +111,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_auxiliary_space());
-    HybridGridTreeSet hgts(grid);
+    HybridGridTreePaving hgts(grid);
 
     for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {

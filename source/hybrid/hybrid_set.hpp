@@ -113,7 +113,7 @@ class HybridBasicSet
     HybridUpperBoxes bounding_boxes() const;
 
     //! \brief Adjoin an outer approximation of the set to \a paving using a given \a depth of subdividing the paving cells.
-    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Nat depth) const;
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
 
     //! \brief Draw to a canvas. Only draws if the set of locations \a q is empty, or contains the set's actual location.
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const;
@@ -551,7 +551,7 @@ HybridSpaceSetConstIterator<DS,HBS>::increment()
 
 //! \ingroup HybridSetSubModule
 //! A set comprising a %GridTreeSet in each location.
-class HybridGridTreeSet
+class HybridGridTreePaving
     : public HybridDrawableInterface
 {
   public:
@@ -577,7 +577,7 @@ class HybridGridTreeSet
     ConstIterator end() const;
   public:
     //! Construct from a hybrid grid.
-    HybridGridTreeSet(const HybridGrid& hgrid) : _hgrid(hgrid), _map() { }
+    HybridGridTreePaving(const HybridGrid& hgrid) : _hgrid(hgrid), _map() { }
 
     //! The hybrid grid.
     HybridGrid grid() const { return this->_hgrid; }
@@ -608,9 +608,9 @@ class HybridGridTreeSet
 
     Void adjoin(const HybridGridCell& hgc);
     Void adjoin(const ListSet<HybridGridCell>& hgcls);
-    Void adjoin(const HybridGridTreeSet& hgts);
-    Void remove(const HybridGridTreeSet& hgts);
-    Void restrict(const HybridGridTreeSet& hgts);
+    Void adjoin(const HybridGridTreePaving& hgts);
+    Void remove(const HybridGridTreePaving& hgts);
+    Void restrict(const HybridGridTreePaving& hgts);
     Void restrict_to_height(Nat height);
     Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat depth);
     Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat depth);
@@ -627,10 +627,10 @@ class HybridGridTreeSet
     Void mince(Nat depth);
     Void recombine();
 
-    friend Bool subset(const HybridGridTreeSet& hgts1, const HybridGridTreeSet& hgts2);
+    friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
   public:
     //@{ \name HybridSetInterface methods
-    HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
+    HybridGridTreePaving* clone() const { return new HybridGridTreePaving(*this); }
     HybridSpace space() const { return this->grid().space(); }
     ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
     ValidatedLowerKleenean overlaps(const HybridExactBox& hbx) const;
@@ -641,17 +641,17 @@ class HybridGridTreeSet
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
     //@}
   public:
-    friend OutputStream& operator<<(OutputStream& os, const HybridGridTreeSet& hgts) {
+    friend OutputStream& operator<<(OutputStream& os, const HybridGridTreePaving& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }
   private:
     GridTreePaving& _provide_location(const DiscreteLocation& q);
 };
 
-template<class S> Void HybridGridTreeSet::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
+template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
     this->_provide_location(q).adjoin_outer_approximation(s); }
 
-inline HybridGridTreeSet inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat depth) {
-    HybridGridTreeSet paving(grid); paving.adjoin_inner_approximation(set,depth); return paving; }
+inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat depth) {
+    HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,depth); return paving; }
 
 } // namespace Ariadne
 

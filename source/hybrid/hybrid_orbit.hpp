@@ -56,7 +56,7 @@ class GridCell;
 class GridTreePaving;
 class HybridGrid;
 class HybridGridCell;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 class HybridTime;
 
 class DiscreteLocation;
@@ -90,17 +90,17 @@ class Orbit<HybridGridCell>
     struct Data;
   public:
     typedef HybridGridCell EnclosureType;
-    typedef HybridGridTreeSet EnclosureListType;
+    typedef HybridGridTreePaving EnclosureListType;
 
     Orbit(const HybridGrid&, const HybridGridCell&);
-    Orbit(const HybridGridTreeSet&);
-    Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
-          const HybridGridTreeSet&, const HybridGridTreeSet&);
+    Orbit(const HybridGridTreePaving&);
+    Orbit(const HybridGridTreePaving&, const HybridGridTreePaving&,
+          const HybridGridTreePaving&, const HybridGridTreePaving&);
     HybridGrid const& grid() const;
-    HybridGridTreeSet const& initial() const;
-    HybridGridTreeSet const& reach() const;
-    HybridGridTreeSet const& intermediate() const;
-    HybridGridTreeSet const& final() const;
+    HybridGridTreePaving const& initial() const;
+    HybridGridTreePaving const& reach() const;
+    HybridGridTreePaving const& intermediate() const;
+    HybridGridTreePaving const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

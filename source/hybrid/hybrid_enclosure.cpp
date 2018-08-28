@@ -642,7 +642,7 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
-Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Nat depth) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat depth) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
     GridTreePaving& paving = hgts[location];
@@ -660,8 +660,8 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Nat
     }
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat depth) {
-    HybridGridTreeSet result(g);
+HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat depth) {
+    HybridGridTreePaving result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
         result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
     }

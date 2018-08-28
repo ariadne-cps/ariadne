@@ -122,7 +122,7 @@ Int main(Int argc, char **argv)
     g.write("test_graphics-curve");
     g.clear();
 
-    GridTreeSet gts(2);
+    GridTreePaving gts(2);
     gts.adjoin_outer_approximation(bx1, 4);
     gts.adjoin_outer_approximation(bx2, 5);
     gts.adjoin_outer_approximation(bx3, 6);

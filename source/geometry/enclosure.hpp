@@ -266,7 +266,7 @@ class Enclosure
     Enclosure restriction(const ExactBoxType& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, Nat depth) const;
+    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving

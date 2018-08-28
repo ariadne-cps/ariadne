@@ -176,7 +176,7 @@ class TestAffineSet
             set.new_parameter_constraint(x[0]+x[1]<=-0.5_ex);
             ARIADNE_TEST_PRINT(set);
 
-            GridTreeSet paving = set.outer_approximation(Grid(2),4);
+            GridTreePaving paving = set.outer_approximation(Grid(2),4);
             paving.recombine();
             std::cout<<std::setprecision(17);
             ARIADNE_TEST_PRINT(paving);
@@ -221,7 +221,7 @@ class TestAffineSet
             set.new_parameter_constraint(-2.01_ex*x[0]-3.01_ex*x[1]-1.02_ex*x[2]<=3.01_ex);
 
             Grid grid(2);
-            GridTreeSet paving(grid);
+            GridTreePaving paving(grid);
             set.adjoin_outer_approximation_to(paving,3);
             paving.recombine();
 
@@ -241,7 +241,7 @@ class TestAffineSet
             set.new_parameter_constraint(0.0625_ex*x[0]+x[1]<=1.1875_ex);
             ARIADNE_TEST_PRINT(set);
 
-            GridTreeSet paving = set.outer_approximation(Grid(2),4);
+            GridTreePaving paving = set.outer_approximation(Grid(2),4);
             paving.recombine();
             std::cout<<std::setprecision(17);
             ARIADNE_TEST_PRINT(paving);
@@ -295,8 +295,8 @@ class TestAffineSet
         figure.write("test_affine_set-uniform_error");
 
         Grid g(2);
-        GridTreeSet paving1=outer_approximation(set1,g,4);
-        GridTreeSet paving2=outer_approximation(set2,g,4);
+        GridTreePaving paving1=outer_approximation(set1,g,4);
+        GridTreePaving paving2=outer_approximation(set2,g,4);
 
         figure.clear();
         figure.set_fill_colour(1,0,0);

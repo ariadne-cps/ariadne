@@ -308,9 +308,9 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 }
 
 
-GridTreeSet
+GridTreePaving
 ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) const {
-    GridTreeSet r(g);
+    GridTreePaving r(g);
     this->adjoin_outer_approximation_to(r,d);
     return r;
 }

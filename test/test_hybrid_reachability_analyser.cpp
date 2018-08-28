@@ -152,13 +152,13 @@ class TestHybridReachabilityAnalyser
         ExactBoxType bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
         HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
-        GridTreeSet& lower_reach=hybrid_lower_reach[loc];
+        GridTreePaving& lower_reach=hybrid_lower_reach[loc];
 
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
-        GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
+        GridTreePaving& lower_evolve=hybrid_lower_evolve[loc];
 
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
@@ -175,8 +175,8 @@ class TestHybridReachabilityAnalyser
 
         cout << "Computing timed reach-evolve set" << endl;
         Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreeSet& lower_reach=reach_evolve_set.first[loc];
-        GridTreeSet& lower_evolve=reach_evolve_set.second[loc];
+        GridTreePaving& lower_reach=reach_evolve_set.first[loc];
+        GridTreePaving& lower_evolve=reach_evolve_set.second[loc];
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 

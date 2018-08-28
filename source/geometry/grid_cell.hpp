@@ -308,7 +308,7 @@ class GridOpenCell: public GridAbstractCell {
     //! to which all the neighboring cell will be added, i.e. it is a return parameter.
     //! NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
     Void neighboring_cells( const Nat theHeight, const BinaryWord& theBaseCellWord,
-                            BinaryWord& cellPosition, GridTreeSet& theResultSet ) const;
+                            BinaryWord& cellPosition, GridTreePaving& theResultSet ) const;
 
     //! \brief This method allows to compute the neighboring (to the right) cell of
     //! the base cell given by \a theHeight and \a theBaseCellWord. Here \a cellPosition
@@ -330,7 +330,7 @@ class GridOpenCell: public GridAbstractCell {
     //! it covers the borders. All such open cells are added to the vector \a result. \a cellPosition
     //! is a technical parameter that has to be set to an empty word. Also, this method add the interior
     //! of theCell to the vector \a result.
-    static Void cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
+    static Void cover_cell_and_borders( const GridCell& theCell, const GridTreePaving& theSet,
                                         BinaryWord& cellPosition, std::vector<GridOpenCell>& result );
 
   public:
@@ -360,7 +360,7 @@ class GridOpenCell: public GridAbstractCell {
     Bool operator<(const GridOpenCell& otherCell) const;
 
     //! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
-    GridTreeSet closure() const;
+    GridTreePaving closure() const;
 
     //! \brief Computes the intersection of two GridOpenCell as a list of open cells whoes union
     //! gives the intersection. This is done becase the intersection can no always be represented

@@ -1013,9 +1013,9 @@ Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth
 }
 
 
-GridTreeSet Enclosure::outer_approximation(const Grid& grid, Nat depth) const
+GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat depth) const
 {
-    GridTreeSet paving(grid);
+    GridTreePaving paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }

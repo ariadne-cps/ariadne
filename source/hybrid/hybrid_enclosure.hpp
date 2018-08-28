@@ -54,7 +54,7 @@ template<class X> struct LinearProgram;
 
 class Enclosure;
 class Grid;
-class GridTreeSet;
+class GridTreePaving;
 class AffineSet;
 class DiscreteEvent;
 class Figure;

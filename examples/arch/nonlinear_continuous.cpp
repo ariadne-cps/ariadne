@@ -186,7 +186,7 @@ void test() {
         g.clear();
         for (auto enclosure : orbit.reach()) { g.draw(enclosure.affine_over_approximation()); } g.write("dai-affine_orbit");
 
-        GridTreeSet gts(2);
+        GridTreePaving gts(2);
         g.clear();
         for (auto enclosure : orbit.reach()) { enclosure.adjoin_outer_approximation_to(gts,3); } g.draw(gts); g.write("dai-grid_orbit");
 

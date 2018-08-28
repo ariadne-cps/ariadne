@@ -645,7 +645,7 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
 Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Nat depth) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    GridTreeSet& paving = hgts[location];
+    GridTreePaving& paving = hgts[location];
     RealSpace paving_space=hgts.space(location);
     RealSpace state_space=this->state_space();
     RealSpace auxiliary_space=this->auxiliary_space();

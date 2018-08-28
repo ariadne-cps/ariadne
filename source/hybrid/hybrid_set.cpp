@@ -683,11 +683,11 @@ Void HybridGridTreeSet::adjoin_outer_approximation(const HybridExactBoxes& hbxs,
 }
 
 
-GridTreeSet& HybridGridTreeSet::operator[](DiscreteLocation q) {
+GridTreePaving& HybridGridTreeSet::operator[](DiscreteLocation q) {
     return this->_provide_location(q);
 }
 
-const GridTreeSet& HybridGridTreeSet::operator[](DiscreteLocation q) const {
+const GridTreePaving& HybridGridTreeSet::operator[](DiscreteLocation q) const {
     ARIADNE_ASSERT_MSG(this->has_location(q),"q="<<q);
     return const_cast<HybridGridTreeSet*>(this)->_provide_location(q);
 }
@@ -796,10 +796,10 @@ Void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation
 }
 
 
-GridTreeSet& HybridGridTreeSet::_provide_location(const DiscreteLocation& q) {
-    std::map<DiscreteLocation,GridTreeSet>::iterator iter=this->_map.find(q);
+GridTreePaving& HybridGridTreeSet::_provide_location(const DiscreteLocation& q) {
+    std::map<DiscreteLocation,GridTreePaving>::iterator iter=this->_map.find(q);
     if(iter==this->_map.end()) {
-        this->_map.insert(std::make_pair(q,GridTreeSet(this->_hgrid[q])));
+        this->_map.insert(std::make_pair(q,GridTreePaving(this->_hgrid[q])));
         iter=this->_map.find(q);
     }
     return iter->second; }
@@ -824,6 +824,6 @@ template class HybridBoxes<ExactIntervalType>;
 template class HybridBox<RealInterval>;
 
 
-template class HybridSpaceSetConstIterator<GridTreeSet, HybridGridCell>;
+template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;
 
 } // namespace Ariadne

@@ -360,7 +360,7 @@ class ValidatedRegularLocatedSetInterface
 
 
 
-class GridTreeSet;
+class GridTreePaving;
 
 //! \brief A Euclidean space \f$\R^d\f$ of dimension \a d.
 class EuclideanSpace
@@ -385,7 +385,7 @@ class EuclideanSpace
     //! \brief The interface satisified by bounded regular sets.
     typedef RegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef GridTreeSet SetApproximationType;
+    typedef GridTreePaving SetApproximationType;
   public:
     EuclideanSpace(const SizeType& d) : _dimension(d) { }
     const SizeType& dimension() const { return this->_dimension; }

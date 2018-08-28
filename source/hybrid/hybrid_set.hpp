@@ -556,12 +556,12 @@ class HybridGridTreeSet
 {
   public:
     HybridGrid _hgrid;
-    Map<DiscreteLocation,GridTreeSet> _map;
+    Map<DiscreteLocation,GridTreePaving> _map;
   public:
     typedef HybridGrid GridType;
-    typedef Map<DiscreteLocation,GridTreeSet>::Iterator LocationsIterator;
-    typedef Map<DiscreteLocation,GridTreeSet>::ConstIterator LocationsConstIterator;
-    typedef HybridSpaceSetConstIterator<GridTreeSet,HybridGridCell> ConstIterator;
+    typedef Map<DiscreteLocation,GridTreePaving>::Iterator LocationsIterator;
+    typedef Map<DiscreteLocation,GridTreePaving>::ConstIterator LocationsConstIterator;
+    typedef HybridSpaceSetConstIterator<GridTreePaving,HybridGridCell> ConstIterator;
   public:
     //!
     LocationsIterator locations_begin() { return this->_map.begin(); }
@@ -589,9 +589,9 @@ class HybridGridTreeSet
     //! The continuous state space corresponding to location \a q.
     RealSpace space(DiscreteLocation q) const { return _hgrid.space(q); }
     //! The continuous state space corresponding to location \a q.
-    const GridTreeSet& euclidean_set(DiscreteLocation q) const { return _map[q]; }
+    const GridTreePaving& euclidean_set(DiscreteLocation q) const { return _map[q]; }
     //! The continuous state space corresponding to location \a q.
-    const GridTreeSet& euclidean_set(DiscreteLocation q, const RealSpace& s) const {
+    const GridTreePaving& euclidean_set(DiscreteLocation q, const RealSpace& s) const {
         ARIADNE_ASSERT_MSG(s==this->space(q),"Variable ordering in HybridGridTreeSet location "<<q<<" is "<<this->space(q)<<", "
                                              "which does not match requested ordering "<<q);
         return _map[q]; }
@@ -619,8 +619,8 @@ class HybridGridTreeSet
     Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat depth);
     template<class S> Void adjoin_outer_approximation(DiscreteLocation q, const S& s);
 
-    GridTreeSet& operator[](DiscreteLocation q);
-    const GridTreeSet& operator[](DiscreteLocation q) const ;
+    GridTreePaving& operator[](DiscreteLocation q);
+    const GridTreePaving& operator[](DiscreteLocation q) const ;
     Bool is_empty() const;
     SizeType size() const;
     HybridListSet<ExactBoxType> boxes() const;
@@ -644,7 +644,7 @@ class HybridGridTreeSet
     friend OutputStream& operator<<(OutputStream& os, const HybridGridTreeSet& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }
   private:
-    GridTreeSet& _provide_location(const DiscreteLocation& q);
+    GridTreePaving& _provide_location(const DiscreteLocation& q);
 };
 
 template<class S> Void HybridGridTreeSet::adjoin_outer_approximation(DiscreteLocation q, const S& s) {

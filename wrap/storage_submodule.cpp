@@ -49,9 +49,9 @@ class PyGridTreeSetConstIterator : public GridTreeConstIterator {
     const GridCell operator*() const { return this->GridTreeConstIterator::operator*(); }
 };
 
-PyGridTreeSetConstIterator py_cells_begin(const GridTreeSubset& gts) {
+PyGridTreeSetConstIterator py_cells_begin(const GridTreeSubpaving& gts) {
     return PyGridTreeSetConstIterator(gts.begin()); }
-PyGridTreeSetConstIterator py_cells_end(const GridTreeSubset& gts) {
+PyGridTreeSetConstIterator py_cells_end(const GridTreeSubpaving& gts) {
     return PyGridTreeSetConstIterator(gts.end()); }
 
 
@@ -72,12 +72,12 @@ class PyGridTreeSetBoxConstIterator
     PyGridTreeSetBoxConstIterator operator++(Int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
     Bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
   private:
-    GridTreeSet::ConstIterator _iter;
+    GridTreePaving::ConstIterator _iter;
 };
 
-PyGridTreeSetBoxConstIterator py_boxes_begin(const GridTreeSubset& gts) {
+PyGridTreeSetBoxConstIterator py_boxes_begin(const GridTreeSubpaving& gts) {
     return PyGridTreeSetBoxConstIterator(gts.begin()); }
-PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubset& gts) {
+PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubpaving& gts) {
     return PyGridTreeSetBoxConstIterator(gts.end()); }
 
 
@@ -113,44 +113,44 @@ Void export_grid_cell()
 
 Void export_grid_tree_set() {
 
-    class_<GridTreeSubset> grid_tree_subset_class("GridTreeSubset",no_init);
+    class_<GridTreeSubpaving> grid_tree_subset_class("GridTreeSubset",no_init);
 
-    class_<GridTreeSet, bases<GridTreeSubset,DrawableInterface> > grid_tree_set_class("GridTreeSet",init<GridTreeSet>());
+    class_<GridTreePaving, bases<GridTreeSubpaving,DrawableInterface> > grid_tree_set_class("GridTreeSet",init<GridTreePaving>());
     grid_tree_set_class.def(init<Nat>());
     grid_tree_set_class.def(init<Grid>());
-    grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);
-    grid_tree_set_class.def("is_empty", &GridTreeSet::is_empty);
-    grid_tree_set_class.def("size", &GridTreeSet::size);
-    grid_tree_set_class.def("dimension", &GridTreeSet::dimension);
-    grid_tree_set_class.def("clear", &GridTreeSet::clear);
-    grid_tree_set_class.def("mince", &GridTreeSet::mince);
-    grid_tree_set_class.def("recombine", &GridTreeSet::recombine);
-    grid_tree_set_class.def("grid", &GridTreeSet::grid,return_value_policy<copy_const_reference>());
-    grid_tree_set_class.def("measure", &GridTreeSet::measure);
-    grid_tree_set_class.def("adjoin", (Void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("adjoin", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("restrict", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
-    grid_tree_set_class.def("remove", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::remove));
-    grid_tree_set_class.def("adjoin_over_approximation", (Void(GridTreeSet::*)(const ExactBoxType&,const Nat)) &GridTreeSet::adjoin_over_approximation);
-    grid_tree_set_class.def("adjoin_outer_approximation", (Void(GridTreeSet::*)(const CompactSetInterface&,const Nat)) &GridTreeSet::adjoin_outer_approximation);
-    grid_tree_set_class.def("adjoin_inner_approximation", (Void(GridTreeSet::*)(const OpenSetInterface&,const Nat,const Nat)) &GridTreeSet::adjoin_inner_approximation);
-    grid_tree_set_class.def("__len__", &GridTreeSet::size);
+    grid_tree_set_class.def("bounding_box", &GridTreePaving::bounding_box);
+    grid_tree_set_class.def("is_empty", &GridTreePaving::is_empty);
+    grid_tree_set_class.def("size", &GridTreePaving::size);
+    grid_tree_set_class.def("dimension", &GridTreePaving::dimension);
+    grid_tree_set_class.def("clear", &GridTreePaving::clear);
+    grid_tree_set_class.def("mince", &GridTreePaving::mince);
+    grid_tree_set_class.def("recombine", &GridTreePaving::recombine);
+    grid_tree_set_class.def("grid", &GridTreePaving::grid,return_value_policy<copy_const_reference>());
+    grid_tree_set_class.def("measure", &GridTreePaving::measure);
+    grid_tree_set_class.def("adjoin", (Void(GridTreePaving::*)(const GridCell&))(&GridTreePaving::adjoin));
+    grid_tree_set_class.def("adjoin", (Void(GridTreePaving::*)(const GridTreeSubpaving&))(&GridTreePaving::adjoin));
+    grid_tree_set_class.def("restrict", (Void(GridTreePaving::*)(const GridTreeSubpaving&))(&GridTreePaving::restrict));
+    grid_tree_set_class.def("remove", (Void(GridTreePaving::*)(const GridTreeSubpaving&))(&GridTreePaving::remove));
+    grid_tree_set_class.def("adjoin_over_approximation", (Void(GridTreePaving::*)(const ExactBoxType&,const Nat)) &GridTreePaving::adjoin_over_approximation);
+    grid_tree_set_class.def("adjoin_outer_approximation", (Void(GridTreePaving::*)(const CompactSetInterface&,const Nat)) &GridTreePaving::adjoin_outer_approximation);
+    grid_tree_set_class.def("adjoin_inner_approximation", (Void(GridTreePaving::*)(const OpenSetInterface&,const Nat,const Nat)) &GridTreePaving::adjoin_inner_approximation);
+    grid_tree_set_class.def("__len__", &GridTreePaving::size);
     //grid_tree_set_class.def("__iter__", boost::python::Iterator<const GridTreeSet>());
     grid_tree_set_class.def("__iter__", range(&py_cells_begin,&py_cells_end));
     grid_tree_set_class.def("cells", range(&py_cells_begin,&py_cells_end));
     grid_tree_set_class.def("boxes", range(&py_boxes_begin,&py_boxes_end));
     grid_tree_set_class.def(self_ns::str(self));
 
-    def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
-    def("difference",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&difference));
-    def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
-    def("intersect",(Bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersect));
-    def("subset",(Bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
-    def("intersect",(Bool(*)(const GridCell&,const GridTreeSubset&))(&intersect));
-    def("subset",(Bool(*)(const GridCell&,const GridTreeSubset&))(&subset));
+    def("union",(GridTreePaving(*)(const GridTreeSubpaving&,const GridTreeSubpaving&))(&join));
+    def("difference",(GridTreePaving(*)(const GridTreeSubpaving&,const GridTreeSubpaving&))(&difference));
+    def("intersection",(GridTreePaving(*)(const GridTreeSubpaving&,const GridTreeSubpaving&))(&intersection));
+    def("intersect",(Bool(*)(const GridTreeSubpaving&,const GridTreeSubpaving&))(&intersect));
+    def("subset",(Bool(*)(const GridTreeSubpaving&,const GridTreeSubpaving&))(&subset));
+    def("intersect",(Bool(*)(const GridCell&,const GridTreeSubpaving&))(&intersect));
+    def("subset",(Bool(*)(const GridCell&,const GridTreeSubpaving&))(&subset));
 
-    def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const Nat)) &outer_approximation);
-    def("inner_approximation",(GridTreeSet(*)(const OpenSetInterface&,const Grid&,const Nat,const Nat)) &inner_approximation);
+    def("outer_approximation",(GridTreePaving(*)(const CompactSetInterface&,const Grid&,const Nat)) &outer_approximation);
+    def("inner_approximation",(GridTreePaving(*)(const OpenSetInterface&,const Grid&,const Nat,const Nat)) &inner_approximation);
 
 }
 

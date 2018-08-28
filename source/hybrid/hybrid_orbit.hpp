@@ -53,7 +53,7 @@ template<class X> class Point;
 typedef Point<ExactNumericType> ExactPoint;
 class Grid;
 class GridCell;
-class GridTreeSet;
+class GridTreePaving;
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;

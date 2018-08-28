@@ -54,14 +54,14 @@ Orbit<ExactPoint>::insert(FloatDPValue t, const ExactPoint& pt)
 
 struct Orbit<GridCell>::Data {
     Data(const Grid& grid) : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    GridTreeSet initial;
-    GridTreeSet reach;
-    GridTreeSet intermediate;
-    GridTreeSet final;
+    GridTreePaving initial;
+    GridTreePaving reach;
+    GridTreePaving intermediate;
+    GridTreePaving final;
 };
 
 Orbit<GridCell>::
-Orbit(const GridTreeSet& initial_set)
+Orbit(const GridTreePaving& initial_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
@@ -69,10 +69,10 @@ Orbit(const GridTreeSet& initial_set)
 
 
 Orbit<GridCell>::
-Orbit(const GridTreeSet& initial_set,
-      const GridTreeSet& reach_set,
-      const GridTreeSet& intermediate_set,
-      const GridTreeSet& final_set)
+Orbit(const GridTreePaving& initial_set,
+      const GridTreePaving& reach_set,
+      const GridTreePaving& intermediate_set,
+      const GridTreePaving& final_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
@@ -82,28 +82,28 @@ Orbit(const GridTreeSet& initial_set,
 }
 
 
-GridTreeSet const&
+GridTreePaving const&
 Orbit<GridCell>::
 initial() const
 {
     return this->_data->initial;
 }
 
-GridTreeSet const&
+GridTreePaving const&
 Orbit<GridCell>::
 reach() const
 {
     return this->_data->reach;
 }
 
-GridTreeSet const&
+GridTreePaving const&
 Orbit<GridCell>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-GridTreeSet const&
+GridTreePaving const&
 Orbit<GridCell>::
 final() const
 {

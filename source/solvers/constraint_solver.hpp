@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-class GridTreeSet;
+class GridTreePaving;
 
 template<class X, class R> class Constraint;
 

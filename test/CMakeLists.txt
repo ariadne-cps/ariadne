@@ -33,7 +33,8 @@ set(UNIT_TESTS_GEOMETRY
     test_box
     test_function_sets
     test_affine_sets
-    test_grid_set
+    test_grid_paving
+    test_paving
 )
 
 set(UNIT_TESTS_SOLVERS

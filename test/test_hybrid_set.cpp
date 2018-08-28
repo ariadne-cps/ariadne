@@ -60,7 +60,7 @@ TestHybridSet::test_hybrid_grid_set()
 {
     // Test compilation without correctness
     Grid g;
-    GridTreeSet gts;
+    GridTreePaving gts;
     MonolithicHybridSpace hspc;
     DiscreteLocation loc;
     HybridGrid hg(hspc);
@@ -70,7 +70,7 @@ TestHybridSet::test_hybrid_grid_set()
     g=hg[loc];
 
     hgts.has_location(loc);
-    GridTreeSet const& gtscr = hgts[loc];
+    GridTreePaving const& gtscr = hgts[loc];
     draw(fig,gtscr);
 }
 

@@ -205,7 +205,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     TimeVariable time;
 
     // Set the initial set.
-    Dyadic Tinit=17; Dyadic Cinit_max(1/two^10);
+    Dyadic Tinit=17; Dyadic Cinit_max(1,10u);
     HybridSet initial_set(heating|off, {T==Tinit,0<=C<=Cinit_max} );
     cout << "initial_set=" << initial_set << endl;
 

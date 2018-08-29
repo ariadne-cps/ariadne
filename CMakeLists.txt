@@ -123,7 +123,7 @@ configure_file (${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DI
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
 add_subdirectory(source)
-add_subdirectory(test)
+add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(tutorials)
 

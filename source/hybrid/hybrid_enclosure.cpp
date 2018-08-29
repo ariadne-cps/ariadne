@@ -36,6 +36,7 @@
 #include "../geometry/box.hpp"
 #include "../geometry/grid_paving.hpp"
 #include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 #include "../hybrid/hybrid_time.hpp"
 #include "../hybrid/discrete_event.hpp"
 #include "../hybrid/discrete_location.hpp"
@@ -47,7 +48,6 @@
 
 #include "../output/graphics_interface.hpp"
 #include "../hybrid/hybrid_enclosure.hpp"
-#include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_expression_set.hpp"
 
 

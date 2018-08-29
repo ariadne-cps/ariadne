@@ -39,6 +39,7 @@
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_grid.hpp"
 #include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 
 #include "../output/logging.hpp"
 

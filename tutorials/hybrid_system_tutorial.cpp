@@ -28,6 +28,7 @@
 
 #include "hybrid/hybrid_automaton-composite.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"

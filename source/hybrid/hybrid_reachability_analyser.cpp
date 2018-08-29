@@ -54,6 +54,7 @@
 #include "../hybrid/hybrid_space.hpp"
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 #include "../hybrid/hybrid_evolver.hpp"
 #include "../hybrid/hybrid_reachability_analyser.hpp"
 

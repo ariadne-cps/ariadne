@@ -33,6 +33,7 @@
 #include "geometry/grid_paving.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"

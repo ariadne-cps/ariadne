@@ -42,7 +42,6 @@
 #include "../hybrid/discrete_location.hpp"
 #include "../hybrid/discrete_event.hpp"
 #include "../hybrid/hybrid_graphics_interface.hpp"
-#include "../hybrid/hybrid_set.decl.hpp"
 
 #include "../geometry/box.hpp"
 #include "../geometry/enclosure.hpp"

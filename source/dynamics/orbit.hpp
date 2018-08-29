@@ -73,7 +73,7 @@ typedef Point<ExactNumericType> ExactPoint;
 class InterpolatedCurve;
 class Grid;
 class GridCell;
-class GridTreeSet;
+class GridTreePaving;
 
 
 template<>
@@ -93,17 +93,17 @@ class Orbit<GridCell>
     struct Data;
   public:
     typedef GridCell EnclosureType;
-    typedef GridTreeSet EnclosureListType;
+    typedef GridTreePaving EnclosureListType;
 
     Orbit(const Grid&, const GridCell&);
-    Orbit(const GridTreeSet&);
-    Orbit(const GridTreeSet&, const GridTreeSet&,
-          const GridTreeSet&, const GridTreeSet&);
+    Orbit(const GridTreePaving&);
+    Orbit(const GridTreePaving&, const GridTreePaving&,
+          const GridTreePaving&, const GridTreePaving&);
     Grid const& grid() const;
-    GridTreeSet const& initial() const;
-    GridTreeSet const& reach() const;
-    GridTreeSet const& intermediate() const;
-    GridTreeSet const& final() const;
+    GridTreePaving const& initial() const;
+    GridTreePaving const& reach() const;
+    GridTreePaving const& intermediate() const;
+    GridTreePaving const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

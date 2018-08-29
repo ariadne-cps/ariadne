@@ -26,25 +26,32 @@
 #define ARIADNE_BINARY_TREE_HPP
 
 
-#include "../function/functional.hpp"
-
 #include <iostream>
 #include <iomanip>
 
+#include "../function/functional.hpp"
 #include "../utility/macros.hpp"
 #include "../utility/exceptions.hpp"
 #include "../utility/stlio.hpp"
-#include "../geometry/function_set.hpp"
+#include "../utility/binary_word.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
-
-#include "../geometry/set_interface.hpp"
 
 
 namespace Ariadne {
 
-typedef SizeType SizeType;
+//! \brief The binary-tree node operation is not allowed on a non-leaf node.
+class NotALeafNodeException : public std::logic_error {
+  public:
+    NotALeafNodeException(const StringType& str) : std::logic_error(str) { }
+};
 
+//! \brief The binary-tree node operation is not allowed on a leaf node.
+class IsALeafNodeException : public std::logic_error {
+  public:
+    IsALeafNodeException(const StringType& str) : std::logic_error(str) { }
+};
+
+typedef std::vector<Bool> BooleanArray;
 
 //***************************************BinaryTreeNode************************************/
 

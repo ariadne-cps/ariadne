@@ -37,7 +37,7 @@
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../geometry/paving_interface.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../algebra/algebra.hpp"
 
@@ -628,7 +628,7 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactB
     //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
     //std::cerr<<"Measure of paving is "<<p.measure()<<"\n";
 
-    if(dynamic_cast<GridTreeSet*>(&p)) { dynamic_cast<GridTreeSet&>(p).recombine(); }
+    if(dynamic_cast<GridTreePaving*>(&p)) { dynamic_cast<GridTreePaving&>(p).recombine(); }
 }
 
 Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d, const ValidatedVectorFunction& f,

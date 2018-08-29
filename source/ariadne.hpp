@@ -47,7 +47,7 @@ namespace Ariadne {
 
 #include "geometry/function_set.hpp"
 #include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 
 #include "geometry/point.hpp"
 #include "geometry/box.hpp"
@@ -60,6 +60,7 @@ namespace Ariadne {
 #include "hybrid/discrete_location.hpp"
 #include "hybrid/discrete_event.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_orbit.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_automata.hpp"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_set.hpp
+ *            grid_paving.hpp
  *
  *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file grid_set.hpp
+/*! \file grid_paving.hpp
  *  \brief Grid paving is used to represent sets, based on integer and dyadic coordinate cells, of a grid.
  */
 
@@ -59,7 +59,6 @@
 namespace Ariadne {
 
 // Some type definitions
-typedef std::vector<Bool> BooleanArray;
 typedef Array<Int> IndexArray;
 typedef Array<SizeType> SizeArray;
 
@@ -69,26 +68,14 @@ class Grid;
 class GridAbstractCell;
 class GridCell;
 class GridOpenCell;
-class GridTreeSubset;
-class GridTreeSet;
+class GridTreeSubpaving;
+class GridTreePaving;
 
 class GridTreeCursor;
 class GridTreeConstIterator;
 
 // Declarations of classes in other files
 template<class BS> class ListSet;
-
-//! \brief The binary-tree node operation is not allowed on a non-leaf node.
-class NotALeafNodeException : public std::logic_error {
-  public:
-    NotALeafNodeException(const StringType& str) : std::logic_error(str) { }
-};
-
-//! \brief The binary-tree node operation is not allowed on a leaf node.
-class IsALeafNodeException : public std::logic_error {
-  public:
-    IsALeafNodeException(const StringType& str) : std::logic_error(str) { }
-};
 
 //! \brief The GridTreeCursor throws this exception if we try to go beyond the binary tree.
 class NotAllowedMoveException : public std::logic_error {
@@ -99,18 +86,18 @@ class NotAllowedMoveException : public std::logic_error {
 
 class BinaryTreeNode;
 
-Bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
-Bool intersect( const GridCell& theCell, const GridTreeSubset& theSet );
-Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-Bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+Bool subset( const GridCell& theCell, const GridTreeSubpaving& theSet );
+Bool intersect( const GridCell& theCell, const GridTreeSubpaving& theSet );
+Bool subset( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+GridTreePaving join( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+Bool intersect( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
 //! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
 //! this class is just a pointer to the node in the tree of some paving. This class is not
 //! responsible for deallocation of that original tree.
-class GridTreeSubset
+class GridTreeSubpaving
     : public virtual SubPavingInterface
     , public virtual DrawableInterface
 {
@@ -118,8 +105,8 @@ class GridTreeSubset
 
     friend class GridTreeCursor;
 
-    friend GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-    friend GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+    friend GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+    friend GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
     //! \brief The pointer to the root node of the subpaving tree.
     //! Note that, this is not necessarily the root node of the corresponding paving tree.
@@ -195,19 +182,19 @@ class GridTreeSubset
     //! (Remember that every GridTreeSubset is just a reference to a subtree of a GridTreeSet).
     //! \a theWord defines the path to the \a pRootTreeNode node from the primary root cell
     //! of the corresponding GridTreeSet.
-    GridTreeSubset( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode );
+    GridTreeSubpaving( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode );
 
     //! \brief A copy constructor that only copies the pointer to the root of the binary tree and the cell
-    GridTreeSubset( const GridTreeSubset &otherSubset);
+    GridTreeSubpaving( const GridTreeSubpaving &otherSubset);
 
     //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for DrawableInterface.
-    GridTreeSubset* clone() const;
+    GridTreeSubpaving* clone() const;
 
     //@}
 
     //! Virtual destructor. The destructor needs to be virtual since GridTreeSet is a subclass
     //! with different memory management.
-    virtual ~GridTreeSubset();
+    virtual ~GridTreeSubpaving();
 
     //@{
     //! \name Properties
@@ -234,7 +221,7 @@ class GridTreeSubset
     FloatDPApproximation measure() const;
 
     //! The a branch along the binary tree.
-    GridTreeSubset branch(Bool left_or_right) const;
+    GridTreeSubpaving branch(Bool left_or_right) const;
 
     //! \brief Returns the \a GridCell corresponding to the ROOT NODE of this \a GridTreeSubset
     //! WARNING: It is NOT the primary cell of the paving!
@@ -247,7 +234,7 @@ class GridTreeSubset
     //! the grida are equal and the binary trees are equal. Note that, only in case both
     //! GridTreeSubset objects are recombines, this method is guaranteed to tell you that
     //! the two GridTreeSubset represent equal sets.
-    Bool operator==(const GridTreeSubset& anotherGridTreeSubset) const;
+    Bool operator==(const GridTreeSubpaving& anotherGridTreeSubset) const;
 
     //@}
 
@@ -289,27 +276,27 @@ class GridTreeSubset
     //! \name Geometric Predicates
 
     //! \brief Tests if a cell is a subset of a set.
-    friend Bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
+    friend Bool subset( const GridCell& theCell, const GridTreeSubpaving& theSet );
 
     //! \brief Tests if a cell intersect (as an open set) a paving set.
-    friend Bool intersect( const GridCell& theCell, const GridTreeSubset& theSet );
+    friend Bool intersect( const GridCell& theCell, const GridTreeSubpaving& theSet );
 
     //! \brief Tests if a grid set \a theSet1 is a subset of \a theSet2.
-    friend Bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend Bool subset( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief Join (make union of) two grid paving sets.
-    friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving join( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief The intersection of two grid paving sets. Points only lying on the
     //! intersection of the boundaries of the two sets are not included in the result.
-    friend GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2)
-    friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief Tests if two grid paving sets intersect (as open sets)
     //! If at least one of the GridTreeSubsets represents an empty set, then the result is false.
-    friend Bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend Bool intersect( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief Tests if a grid set equals another paving.
     virtual Bool equals(const SubPavingInterface&) const;
@@ -364,7 +351,7 @@ class GridTreeSubset
     //! \name Conversions
 
     //! \brief An assignment operator that only copies the pointer to the root of the binary tree and the cell
-    GridTreeSubset& operator=( const GridTreeSubset &otherSubset);
+    GridTreeSubpaving& operator=( const GridTreeSubpaving &otherSubset);
 
     //! \brief Convert to a list of ordinary boxes, unrelated to the grid.
     operator ListSet<ExactBoxType>() const;
@@ -380,11 +367,11 @@ class GridTreeSubset
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream& os) const;
 
-    friend OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset);
+    friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
     //@}
 
   private:
-    virtual GridTreeSubset* _branch(Bool left_or_right) const;
+    virtual GridTreeSubpaving* _branch(Bool left_or_right) const;
     virtual ForwardConstantIteratorInterface<GridCell>* _begin() const;
     virtual ForwardConstantIteratorInterface<GridCell>* _end() const;
 
@@ -392,7 +379,7 @@ class GridTreeSubset
 
 //! \ingroup ListSetSubModule
 //! \ingroup StorageModule
-//! \brief The %GridTreeSet class represents a set of cells with mixed integer and dyadic coordinates.
+//! \brief The %GridTreePaving class represents a set of cells with mixed integer and dyadic coordinates.
 //! The cells can be enabled or disabled (on/off), indicating whether they belong to the paving or not.
 //! It is possible to have cells that are neither on nor off, indicating that they have enabled and
 //! disabled sub cells.
@@ -407,9 +394,9 @@ class GridTreeSubset
 //!   4. Cells [-1, -1]*[1, 0] and [-1, 0]*[1, 1] are rooted to [-1, -1]*[1, 1].
 //!
 //! \sa GridCell
-class GridTreeSet
+class GridTreePaving
     : public virtual PavingInterface
-    , public GridTreeSubset
+    , public GridTreeSubpaving
 {
 
   public:
@@ -482,12 +469,12 @@ class GridTreeSet
     //! \brief This method is uset to do restriction of this set to the set given by
     //! \a theOtherSubPaving Note that, here we require that the height of the primary
     //! root cell of this set is >= the height of the primary root cell of \a theOtherSubPaving.
-    Void restrict_to_lower( const GridTreeSubset& theOtherSubPaving );
+    Void restrict_to_lower( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief This method is uset to remove \a theOtherSubPaving from this set.
     //! Note that, here we require that the height of the primary root cell of
     //! this set is >= the height of the primary root cell of \a theOtherSubPaving.
-    Void remove_from_lower( const GridTreeSubset& theOtherSubPaving );
+    Void remove_from_lower( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief This method changes the primary cell of this GridTreeSet.
     //! We only can increase the height of the primary cell, this is why
@@ -500,47 +487,47 @@ class GridTreeSet
 
     //! \brief Create a %GridTreeSet based on zero dimensions.
     //! This constructor is needed to use the Boost Serialization library.
-    GridTreeSet( );
+    GridTreePaving( );
 
     //! \brief The new root node can only be constructed from the existing tree node.
     //! Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
     //! Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
     //! the height of the primary root cell corresponding to the \a pRootTreeNode node.
-    GridTreeSet( const Grid& theGrid, const Nat theHeight, BinaryTreeNode * pRootTreeNode );
+    GridTreePaving( const Grid& theGrid, const Nat theHeight, BinaryTreeNode * pRootTreeNode );
 
     //! \brief Construct a grid tree set from a single cell.
-    GridTreeSet( const GridCell & theGridCell );
+    GridTreePaving( const GridCell & theGridCell );
 
     //! \brief The copy constructor that actually copies all the data,
     //! including the paving tree. I.e. the new copy of the tree is created.
-    GridTreeSet( const GridTreeSet & theGridTreeSet );
+    GridTreePaving( const GridTreePaving & theGridTreeSet );
 
     //! A simple constructor that creates the [0, 1]*...*[0, 1] cell in the
     //! \a theDimension - dimensional space. Here we assume that we have a non scaling
     //! grid with no shift of the coordinates. I.e. Grid._data._origin = {0, ..., 0}
     //! and Grid._data._lengths = {1, ..., 1}. If enable == true then the cell is enabled
-    explicit GridTreeSet( const Nat theDimension, const Bool enable = false );
+    explicit GridTreePaving( const Nat theDimension, const Bool enable = false );
 
     //! \brief Construct an empty tree. The \a theBoundingBoxType is used to define the lattice
     //! block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
-    explicit GridTreeSet( const Grid& theGrid, const Bool enable = false  );
+    explicit GridTreePaving( const Grid& theGrid, const Bool enable = false  );
 
     //! \brief Construct an empty tree. The \a theLatticeBoxType is used to define the lattice
     //! block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
-    explicit GridTreeSet( const Grid& theGrid, const ExactBoxType & theLatticeBoxType );
+    explicit GridTreePaving( const Grid& theGrid, const ExactBoxType & theLatticeBoxType );
 
     //! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
     //! and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
     //! The primary cell, enclosing the given block of cells is computed automatically and the
     //! binary tree is rooted to that cell. The \a theEnabledCells Array defines the enabled/disabled
     //! 0-level cells of the block (lexicographic order).
-    explicit GridTreeSet( const Grid& theGrid, const IndexArray theLeftLowerPoint,
+    explicit GridTreePaving( const Grid& theGrid, const IndexArray theLeftLowerPoint,
                           const IndexArray theRightUpperPoint, const BooleanArray& theEnabledCells );
 
     //! \brief Creates a new paving from the user data. \a theTree is an Array representation of the binary
     //! tree structure, \a theEnabledCells tells whether a node is or is not a leaf, \a theHeight gives the
     //! height of the primary cell which is assumed to correspond to the root node of \a theTree.
-    explicit GridTreeSet( const Grid& theGrid, Nat theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
+    explicit GridTreePaving( const Grid& theGrid, Nat theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
     //@}
 
@@ -549,17 +536,17 @@ class GridTreeSet
 
     //! \brief The copy assignment operator, which copies all the data
     //! including the paving tree if necessary.
-    GridTreeSet& operator=( const GridTreeSet & theGridTreeSet );
+    GridTreePaving& operator=( const GridTreePaving & theGridTreeSet );
 
     //! \brief Return a new dynamically-allocated copy of the %GridTreeSet.
     //! In this case, all the data is copied.
-    GridTreeSet* clone() const;
+    GridTreePaving* clone() const;
 
     //@}
 
     //! \brief Destructor, removes all the dynamically allocated data, any
     //! GridTreeSubset referencing this %GridTreeSet becomes invalid.
-    virtual ~GridTreeSet();
+    virtual ~GridTreePaving();
 
 
 
@@ -579,13 +566,13 @@ class GridTreeSet
     Void remove( const GridCell& theCell );
 
     //! \brief Adjoin (make inplace union with) another grid paving set.
-    Void adjoin( const GridTreeSubset& theOtherSubPaving );
+    Void adjoin( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief Restrict to (make inplace intersection with) another grid paving set.
-    Void restrict( const GridTreeSubset& theOtherSubPaving );
+    Void restrict( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief Remove cells in another grid paving set.
-    Void remove( const GridTreeSubset& theOtherSubPaving );
+    Void remove( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief Adjoin (make inplace union with) an abstract paving set.
     Void adjoin( const SubPavingInterface& theOtherSubPaving );
@@ -608,14 +595,14 @@ class GridTreeSet
     //! \name Geometric Operations
 
     //! \brief Join (make union of) two grid paving sets.
-    friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving join( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief The intersection of two grid paving sets. Points only lying on the
     //! intersection of the boundaries of the two sets are not included in the result.
-    friend GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2)
-    friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+    friend GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
     //@}
 
@@ -685,22 +672,22 @@ class GridTreeSet
     //@{
     //! \name Input/output routines.
 
-    friend OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet);
+    friend OutputStream& operator<<(OutputStream& os, const GridTreePaving& theGridTreeSet);
     //@}
 
 };
 
-GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth);
-GridTreeSet outer_approximation(const ExactBoxType& theBoxType, const Nat depth);
-GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
-GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
-GridTreeSet outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
-GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
-GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
-GridTreeSet inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth);
+GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat depth);
+GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
+GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
-template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim);
+template<class BS> GridTreePaving outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim);
 
 
 //! \brief This class represents a cursor/Iterator that can be used to traverse a subtree.
@@ -718,7 +705,7 @@ class GridTreeCursor {
     Array<BinaryTreeNode*> _theStack;
 
     // The subpaving to cursor on
-    const GridTreeSubset * _pSubPaving;
+    const GridTreeSubpaving * _pSubPaving;
 
     GridCell _theCurrentGridCell;
 
@@ -743,7 +730,7 @@ class GridTreeCursor {
     GridTreeCursor();
 
     //! \brief The constructor that accepts the subpaving to cursor on
-    GridTreeCursor(const GridTreeSubset * pSubPaving);
+    GridTreeCursor(const GridTreeSubpaving * pSubPaving);
 
     //! \brief The simple copy constructor, this constructor copies the pointer to
     //! GridTreeSubset and thus the internal stack information remains valid.
@@ -811,11 +798,11 @@ class GridTreeCursor {
 
     //! \brief The dereferencing operator which returns a
     //! reference to the GridTreeSubset for the current node.
-    GridTreeSubset operator*();
+    GridTreeSubpaving operator*();
 
     //! \brief The dereferencing operator which returns a constant
     //! reference to the GridTreeSubset for the current node.
-    const GridTreeSubset operator*() const;
+    const GridTreeSubpaving operator*() const;
 };
 
 //! \brief This class allows to iterate through the enabled leaf nodes of GridTreeSubset.
@@ -876,7 +863,7 @@ class GridTreeConstIterator
     //! The paramerter \a firstLastNone indicatges whether we want to position the Iterator
     //! on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
     //! or we are constructing the "end Iterator" that does not point anywhere.
-    explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const ValidatedKleenean firstLastNone );
+    explicit GridTreeConstIterator( const GridTreeSubpaving * pSubPaving, const ValidatedKleenean firstLastNone );
 
     //! \brief The copy constructor that copies the current state by copying the
     //! underlying GridTreeCursor. The latter is copied by it's copy constructor.
@@ -931,9 +918,9 @@ inline GridTreeCursor const& GridTreeConstIterator::cursor() const {
 //**************************************FRIENDS OF GridTreeSet******************************************/
 
 template<class BS>
-GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim) {
+GridTreePaving outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const Nat numSubdivInDim) {
     ARIADNE_ASSERT_MSG( theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid );
-    GridTreeSet result( theGrid );
+    GridTreePaving result( theGrid );
     for(auto basicSet : theSet) {
         result.adjoin_outer_approximation( basicSet, numSubdivInDim );
     }

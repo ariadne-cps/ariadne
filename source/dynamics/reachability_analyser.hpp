@@ -30,7 +30,7 @@
 
 #include "../solvers/configuration_interface.hpp"
 #include "../geometry/set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/function_set.hpp"
 
 #include "../dynamics/orbit.hpp"
@@ -63,8 +63,8 @@ using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
     ValidatedSierpinskian is_safe;
-    GridTreeSet chain_reach_set;
-    GridTreeSet safe_set;
+    GridTreePaving chain_reach_set;
+    GridTreePaving safe_set;
 };
 
 //! \ingroup AnalysisModule

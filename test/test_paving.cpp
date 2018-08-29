@@ -26,7 +26,7 @@
 
 #include "config.hpp"
 #include "geometry/paving_interface.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "function/function.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
@@ -39,9 +39,8 @@ using namespace std;
 
 class TestPaving
 {
-    Int verbosity;
   public:
-    TestPaving(const Int verb);
+    TestPaving() = default;
   public:
     Void test() const;
     Void test_constructors() const;
@@ -50,8 +49,6 @@ class TestPaving
     Void test_geometry() const;
     Void test_approximation() const;
 };
-
-TestPaving::TestPaving(const Int verb) : verbosity(verb) { }
 
 Void TestPaving::test() const {
     ARIADNE_TEST_CALL(test_constructors());
@@ -63,7 +60,7 @@ Void TestPaving::test() const {
 
 Void TestPaving::test_constructors() const {
     Grid grid(2);
-    GridTreeSet grid_set(grid);
+    GridTreePaving grid_set(grid);
     PavingInterface& paving = grid_set;
 
     ARIADNE_TEST_PRINT(paving);
@@ -91,7 +88,7 @@ Void TestPaving::test_constructors() const {
 
 Void TestPaving::test_iterator() const {
     Grid grid(2);
-    GridTreeSet grid_set(grid);
+    GridTreePaving grid_set(grid);
     PavingInterface& paving = grid_set;
     Nat height = 1;
 
@@ -110,7 +107,7 @@ Void TestPaving::test_iterator() const {
 
 Void TestPaving::test_branch() const {
     Grid grid(2);
-    GridTreeSet grid_set(grid);
+    GridTreePaving grid_set(grid);
     PavingInterface& paving = grid_set;
     GridCell cell(grid,0,BinaryWord(""));
 
@@ -149,7 +146,7 @@ Void TestPaving::test_branch() const {
 
 Void TestPaving::test_geometry() const {
     Grid grid(2);
-    GridTreeSet grid_tree_set(grid);
+    GridTreePaving grid_tree_set(grid);
     Nat height(0);
 
     PavingHandle paving_handle1(grid_tree_set);
@@ -214,7 +211,7 @@ Void TestPaving::test_geometry() const {
 
 Void TestPaving::test_approximation() const {
     Grid grid(2);
-    GridTreeSet grid_set(grid);
+    GridTreePaving grid_set(grid);
     PavingInterface& paving = grid_set;
 
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
@@ -240,7 +237,7 @@ Void TestPaving::test_approximation() const {
                       "0010100101010001001101100101101110100101110101000010000"
                       "0001010010010101001010001010010010100100110101001101001"
                       "00101001010101101000000101001000100100000000000");
-    GridTreeSet expected_grid_set(grid,height,tree,leaves);
+    GridTreePaving expected_grid_set(grid,height,tree,leaves);
     PavingInterface& expected_paving = expected_grid_set;
 
     ARIADNE_TEST_BINARY_PREDICATE(subset,expected_paving,paving);
@@ -260,9 +257,7 @@ Void TestPaving::test_approximation() const {
 
 Int main(Int argc, const char* argv[])
 {
-    Int verbosity=get_verbosity(argc,argv);
-
-    TestPaving(verbosity).test();
+    TestPaving().test();
     return ARIADNE_TEST_FAILURES;
 }
 

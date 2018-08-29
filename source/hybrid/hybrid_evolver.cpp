@@ -29,7 +29,7 @@
 #include "../function/polynomial.hpp"
 #include "../function/function.hpp"
 #include "../function/function_model.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../hybrid/hybrid_time.hpp"
 #include "../hybrid/hybrid_automaton_interface.hpp"
 #include "../hybrid/hybrid_evolver.hpp"

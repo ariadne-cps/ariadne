@@ -31,6 +31,7 @@
 #include "function/function.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
+#include "geometry/affine_set.hpp"
 #include "solvers/integrator.hpp"
 #include "dynamics/orbit.hpp"
 #include "output/graphics_interface.hpp"
@@ -38,6 +39,7 @@
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "output/logging.hpp"
@@ -479,9 +481,6 @@ Void TestHybridEvolver::test_tangency() const {
          final_set_colour,orbit.final(),
          initial_set_colour,orbit.initial());
 }
-
-#include "geometry/affine_set.hpp"
-#include "hybrid/hybrid_set.hpp"
 
 Void TestHybridEvolver::test_simultaneous_events() const {
     HybridAutomaton automaton;

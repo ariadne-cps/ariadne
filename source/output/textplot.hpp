@@ -49,7 +49,7 @@ typedef Box<ExactIntervalType> ExactBoxType;
 class InterpolatedCurve;
 class Zonotope;
 class TaylorConstrainedImageSet;
-class GridTreeSubset;
+class GridTreeSubpaving;
 
 
 //! \brief Class for plotting sets as a list of points.
@@ -90,7 +90,7 @@ class TextPlot
     TextPlot& draw(const ExactBoxType&);
 //    TextPlot& draw(const Polytope&);
     TextPlot& draw(const InterpolatedCurve&);
-    TextPlot& draw(const GridTreeSubset&);
+    TextPlot& draw(const GridTreeSubpaving&);
     TextPlot& draw(const DrawableInterface&) override;
     Void close();
   private:

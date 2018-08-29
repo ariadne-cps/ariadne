@@ -38,7 +38,7 @@
 namespace Ariadne {
 
 class HybridAutomatonInterface;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */
@@ -54,7 +54,7 @@ class HybridReachabilityAnalyserInterface
     typedef HybridCompactSetInterface CompactSetInterfaceType;
     typedef HybridLocatedSetInterface LocatedSetInterfaceType;
     typedef HybridRegularSetInterface RegularSetInterfaceType;
-    typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridGridTreePaving SetApproximationType;
 
   public:
     //@{

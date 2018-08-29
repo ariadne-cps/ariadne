@@ -30,9 +30,10 @@
 #include "function/formula.hpp"
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "hybrid/hybrid_time.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_automata.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_reachability_analyser.hpp"
@@ -151,14 +152,14 @@ class TestHybridReachabilityAnalyser
         DiscreteLocation loc(1);
         ExactBoxType bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
-        HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
-        GridTreeSet& lower_reach=hybrid_lower_reach[loc];
+        HybridGridTreePaving hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
+        GridTreePaving& lower_reach=hybrid_lower_reach[loc];
 
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
-        GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
+        HybridGridTreePaving hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
+        GridTreePaving& lower_evolve=hybrid_lower_evolve[loc];
 
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
@@ -174,9 +175,9 @@ class TestHybridReachabilityAnalyser
         ExactBoxType bounding_box(2,bound);
 
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreeSet& lower_reach=reach_evolve_set.first[loc];
-        GridTreeSet& lower_evolve=reach_evolve_set.second[loc];
+        Pair<HybridGridTreePaving,HybridGridTreePaving> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
+        GridTreePaving& lower_reach=reach_evolve_set.first[loc];
+        GridTreePaving& lower_evolve=reach_evolve_set.second[loc];
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
@@ -191,13 +192,13 @@ class TestHybridReachabilityAnalyser
         DiscreteLocation loc(1);
         ExactBoxType bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
-        HybridGridTreeSet upper_reach_set=analyser.upper_reach(initial_set,reach_time);
+        HybridGridTreePaving upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         cout << "upper_reach_set="<<upper_reach_set<<std::endl;
 
         ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
+        HybridGridTreePaving upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
 
         ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
@@ -210,7 +211,7 @@ class TestHybridReachabilityAnalyser
         cout << "Computing timed reach-evolve set" << endl;
         DiscreteLocation loc(1);
         ExactBoxType bounding_box(2,bound);
-        Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
+        Pair<HybridGridTreePaving,HybridGridTreePaving> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
 
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
         ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
@@ -230,7 +231,7 @@ class TestHybridReachabilityAnalyser
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
-        HybridGridTreeSet lower_reach_set=analyser.lower_reach(initial_set);
+        HybridGridTreePaving lower_reach_set=analyser.lower_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
 
@@ -251,7 +252,7 @@ class TestHybridReachabilityAnalyser
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridExactBoxes>(new HybridExactBoxes(bounding_boxes)));
         cout << analyser.configuration();
 
-        HybridGridTreeSet outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+        HybridGridTreePaving outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
 

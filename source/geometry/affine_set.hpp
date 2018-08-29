@@ -130,7 +130,7 @@ class ValidatedAffineConstrainedImageSet
     friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Nat depth) const;
-    GridTreeSet outer_approximation(const Grid& g, Nat depth) const;
+    GridTreePaving outer_approximation(const Grid& g, Nat depth) const;
     Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
 
     List<Point2d> boundary(Nat xc, Nat yc) const;

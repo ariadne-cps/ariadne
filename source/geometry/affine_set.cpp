@@ -33,7 +33,7 @@
 #include "../function/affine_model.hpp"
 
 #include "../geometry/box.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/affine_set.hpp"
 
 #include "../output/graphics_interface.hpp"
@@ -308,9 +308,9 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 }
 
 
-GridTreeSet
+GridTreePaving
 ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) const {
-    GridTreeSet r(g);
+    GridTreePaving r(g);
     this->adjoin_outer_approximation_to(r,d);
     return r;
 }

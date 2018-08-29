@@ -42,7 +42,6 @@
 #include "../hybrid/discrete_location.hpp"
 #include "../hybrid/discrete_event.hpp"
 #include "../hybrid/hybrid_graphics_interface.hpp"
-#include "../hybrid/hybrid_set.decl.hpp"
 
 #include "../geometry/box.hpp"
 #include "../geometry/enclosure.hpp"
@@ -54,7 +53,7 @@ template<class X> struct LinearProgram;
 
 class Enclosure;
 class Grid;
-class GridTreeSet;
+class GridTreePaving;
 class AffineSet;
 class DiscreteEvent;
 class Figure;
@@ -294,7 +293,7 @@ class HybridEnclosure
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Nat depth) const;
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
@@ -339,7 +338,7 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnc
 
 
 class HybridGrid;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 template<>
 class ListSet<HybridEnclosure>
@@ -385,7 +384,7 @@ inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>
     return os << hls._list;
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
+HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 
 
 } // namespace Ariadne

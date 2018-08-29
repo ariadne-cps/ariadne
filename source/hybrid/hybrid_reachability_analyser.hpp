@@ -39,6 +39,7 @@
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_grid.hpp"
 #include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 
 #include "../output/logging.hpp"
 
@@ -52,8 +53,8 @@ class HybridAutomatonInterface;
 
 class HybridGrid;
 class HybridGridCell;
-class HybridGridTreeSet;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
+class HybridGridTreePaving;
 
 template<class ES> class HybridListSet;
 
@@ -63,8 +64,8 @@ class HybridAutomaton;
 
 template<> struct SafetyCertificate<HybridSpace> {
     ValidatedSierpinskian is_safe;
-    HybridGridTreeSet chain_reach_set;
-    HybridGridTreeSet safe_set;
+    HybridGridTreePaving chain_reach_set;
+    HybridGridTreePaving safe_set;
 };
 
 using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
@@ -93,9 +94,9 @@ class HybridReachabilityAnalyser
     //@}
 
   protected:
-    Void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
-                                    HybridGridTreeSet& evolve_cells,
-                                    const HybridGridTreeSet& set,
+    Void _adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
+                                    HybridGridTreePaving& evolve_cells,
+                                    const HybridGridTreePaving& set,
                                     const HybridTerminationCriterion& termination,
                                     const Nat accuracy,
                                     const HybridEvolverInterface& evolver) const;

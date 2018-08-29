@@ -523,14 +523,14 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Check the Iterator of the GridTreeSudset by iterating through all it's values and
+/*! \brief Check the Iterator of the GridTreeSubpaving by iterating through all it's values and
  * comparing them with the valus in the vector \a expected_result, the total number of iterated
  * elements should coincide with the value of \a expected_number_elements
  */
-#define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \
+#define ARIADNE_TEST_GRID_TREE_SUBPAVING_ITERATOR( expected_result, theGridTreeSubpaving, expected_number_elements ) \
     {                                                                   \
         SizeType elements_count = 0;                                         \
-        for (GridTreeSubset::ConstIterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
+        for (GridTreeSubpaving::ConstIterator it = theGridTreeSubpaving.begin(), end = theGridTreeSubpaving.end(); it != end; it++, elements_count++) { \
             if( elements_count < expected_number_elements ) {           \
                 ARIADNE_PRINT_TEST_COMMENT("The next Iterator node is: "); \
                 ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \

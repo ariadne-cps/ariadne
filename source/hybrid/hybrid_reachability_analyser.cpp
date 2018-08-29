@@ -43,7 +43,7 @@
 
 #include "../geometry/box.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 #include "../solvers/integrator.hpp"
 #include "../solvers/solver.hpp"
@@ -54,6 +54,7 @@
 #include "../hybrid/hybrid_space.hpp"
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 #include "../hybrid/hybrid_evolver.hpp"
 #include "../hybrid/hybrid_reachability_analyser.hpp"
 
@@ -126,16 +127,16 @@ clone() const
 
 
 Void
-HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
-                                                       HybridGridTreeSet& evolve_cells,
-                                                       const HybridGridTreeSet& set,
+HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
+                                                       HybridGridTreePaving& evolve_cells,
+                                                       const HybridGridTreePaving& set,
                                                        const HybridTerminationCriterion& termination,
                                                        const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    HybridGridTreeSet cells=set;
+    HybridGridTreePaving cells=set;
     cells.mince(accuracy);
 
     ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");

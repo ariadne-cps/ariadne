@@ -345,7 +345,7 @@ class ValidatedConstrainedImageSet
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, Nat depth) const;
+    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;

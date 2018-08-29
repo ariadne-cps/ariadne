@@ -41,7 +41,7 @@ namespace Ariadne {
 typedef OutputStream OutputStream;
 typedef Bool Bool;
 typedef Vector<FloatDPValue> ExactFloatVector;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 //! \ingroup HybridModule
 //! \brief A grid in a hybrid space

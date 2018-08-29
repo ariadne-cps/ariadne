@@ -36,7 +36,7 @@
 //#include "../geometry/polytope.hpp"
 //#include "../geometry/zonotope.hpp"
 #include "../output/textplot.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
 namespace Ariadne {
 
@@ -107,8 +107,8 @@ TextPlot& TextPlot::draw(const DrawableInterface& shape) {
 //        this->draw(dynamic_cast<const Polytope&>(shape));
     } else if(dynamic_cast<const InterpolatedCurve*>(&shape)) {
         this->draw(dynamic_cast<const InterpolatedCurve&>(shape));
-    } else if(dynamic_cast<const GridTreeSubset*>(&shape)) {
-        this->draw(dynamic_cast<const GridTreeSubset&>(shape));
+    } else if(dynamic_cast<const GridTreeSubpaving*>(&shape)) {
+        this->draw(dynamic_cast<const GridTreeSubpaving&>(shape));
     } else {
         ARIADNE_THROW(std::runtime_error,"TextPlot::draw(const DrawableInterface&)","Unrecognised shape "<<shape<<" "<<typeid(shape).name());
     }
@@ -149,8 +149,8 @@ TextPlot& TextPlot::draw(const InterpolatedCurve& c) {
     return *this;
 }
 
-TextPlot& TextPlot::draw(const GridTreeSubset& gts) {
-    for(GridTreeSubset::ConstIterator iter = gts.begin() ; iter != gts.end() ; ++iter) {
+TextPlot& TextPlot::draw(const GridTreeSubpaving& gts) {
+    for(GridTreeSubpaving::ConstIterator iter = gts.begin() ; iter != gts.end() ; ++iter) {
         this->draw(iter->box());
     }
     this->_fstream << std::endl;

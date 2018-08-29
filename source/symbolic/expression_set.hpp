@@ -267,7 +267,7 @@ class RealExpressionBoundedConstraintSet
 };
 
 
-//! \brief An box defining ranges for a collection of real variables.
+//! \brief A box defining ranges for a collection of real variables.
 template<class S> class ExpressionSet {
     RealSpace _spc;
     S _set;

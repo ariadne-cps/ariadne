@@ -28,7 +28,7 @@
 #include "function/taylor_model.hpp"
 #include "algebra/algebra.hpp"
 #include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
+#include "geometry/grid_paving.hpp"
 #include "geometry/affine_set.hpp"
 #include "geometry/function_set.hpp"
 #include "function/formula.hpp"
@@ -209,7 +209,7 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
-        GridTreeSet paving(2);
+        GridTreePaving paving(2);
         Nat depth=2;
         paving.adjoin_outer_approximation(set,depth);
         set.adjoin_outer_approximation_to(paving,depth);
@@ -278,7 +278,7 @@ class TestConstrainedImageSet
     Void test_draw(const StringType& str, const EffectiveConstrainedImageSet& set, Nat acc) {
         figure.clear();
         figure.set_bounding_box(ExactBoxType({{-2.75,+2.75},{-1.5,+2.0}}));
-        GridTreeSet paving(set.dimension());
+        GridTreePaving paving(set.dimension());
         set.adjoin_outer_approximation_to(paving,acc+1);
         figure.set_fill_opacity(1.0);
         figure.set_fill_colour(red);
@@ -304,7 +304,7 @@ class TestConstrainedImageSet
     Void test_draw2(const StringType& str, const EffectiveConstrainedImageSet& set, Nat acc) {
         figure.clear();
         figure.set_bounding_box(ExactBoxType{{-1.75,+1.75},{-1.5,+2.0}});
-        GridTreeSet paving(set.dimension());
+        GridTreePaving paving(set.dimension());
         set.adjoin_outer_approximation_to(paving,acc+3);
         figure.set_fill_opacity(1.0);
         figure.set_fill_colour(red);

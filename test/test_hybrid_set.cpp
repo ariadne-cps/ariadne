@@ -33,6 +33,7 @@
 
 #include "geometry/function_set.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "output/graphics.hpp"
 
 using namespace std;
@@ -44,33 +45,33 @@ class TestHybridSet {
     Void test();
   private:
     Void test_hybrid_list_set();
-    Void test_hybrid_grid_set();
+    Void test_hybrid_paving();
 };
 
 Void
 TestHybridSet::test()
 {
     ARIADNE_TEST_CALL(test_hybrid_list_set());
-    //ARIADNE_TEST_CALL(test_hybrid_grid_set());
+    //ARIADNE_TEST_CALL(test_hybrid_paving());
 }
 
 
 Void
-TestHybridSet::test_hybrid_grid_set()
+TestHybridSet::test_hybrid_paving()
 {
     // Test compilation without correctness
     Grid g;
-    GridTreeSet gts;
+    GridTreePaving gts;
     MonolithicHybridSpace hspc;
     DiscreteLocation loc;
     HybridGrid hg(hspc);
-    HybridGridTreeSet hgts(hg);
+    HybridGridTreePaving hgts(hg);
     Figure fig;
     hg.has_location(loc);
     g=hg[loc];
 
     hgts.has_location(loc);
-    GridTreeSet const& gtscr = hgts[loc];
+    GridTreePaving const& gtscr = hgts[loc];
     draw(fig,gtscr);
 }
 

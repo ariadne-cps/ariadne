@@ -35,7 +35,7 @@
 #include "../solvers/constraint_solver.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
-#include "../geometry/grid_set.hpp"
+#include "../geometry/grid_paving.hpp"
 #include "../geometry/paver.hpp"
 #include "../algebra/algebra.hpp"
 #include "../algebra/expansion.inl.hpp"
@@ -1165,9 +1165,9 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
 }
 
 
-GridTreeSet ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
+GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
 {
-    GridTreeSet paving(grid);
+    GridTreePaving paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }

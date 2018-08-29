@@ -1,3 +1,18 @@
+include(FindPythonInterp)
+
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pytest --version RESULT_VARIABLE PYTEST_result)
+if(${PYTEST_result} EQUAL 0)
+  set(PYTHON_TESTS ON)
+  message(STATUS "pytest package found, Python tests will be performed.")
+else()
+  message(WARNING "pytest package not available, will not perform Python tests.")
+endif()
+
+if(PYTHON_TESTS)
+    file(GLOB PYTHON_TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
+    file(COPY ${PYTHON_TEST_FILES} DESTINATION ${PROJECT_BINARY_DIR}/python)
+    add_test(NAME test_python COMMAND ${PYTHON_EXECUTABLE} -m pytest WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python)
+endif()
 
 include_directories(${PYTHON_INCLUDE_DIRS})
 
@@ -49,3 +64,5 @@ target_link_libraries (pyariadne-numeric ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBR
 add_library(pyariadne-algebra $<TARGET_OBJECTS:pyariadne-algebra-src>)
 set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
 target_link_libraries (pyariadne-algebra ariadne ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
+
+

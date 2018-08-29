@@ -128,7 +128,6 @@ add_subdirectory(examples)
 add_subdirectory(tutorials)
 
 if(USE_PYTHON)
-    add_subdirectory(wrap)
     add_subdirectory(python)
 endif()
 

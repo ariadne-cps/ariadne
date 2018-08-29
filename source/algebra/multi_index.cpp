@@ -91,6 +91,7 @@ MultiIndexList& MultiIndexList::operator=(MultiIndexList const& lst) {
 
 Void MultiIndexList::resize(SizeType new_size) {
     this->reserve(new_size);
+    if (new_size>_size) for(SizeType k=_size*_argument_size; k!=new_size*_argument_size; ++k) { _indices[k] = 0u; }
     _size=new_size;
 }
 

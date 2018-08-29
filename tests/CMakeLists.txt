@@ -99,3 +99,5 @@ add_custom_target(tests)
 add_dependencies(tests ${UNIT_TESTS})
 add_custom_target(tests-kernel)
 add_dependencies(tests-kernel ${UNIT_TESTS_KERNEL})
+
+file(COPY run_test.sh DESTINATION ${PROJECT_BINARY_DIR}/tests)

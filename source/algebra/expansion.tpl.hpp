@@ -118,8 +118,8 @@ namespace std {
 template<class I, class X> Expansion<I,X>::Expansion(const Expansion<I,X>& e)
     : _indices(e._indices), _coefficients(e._coefficients), _zero_coefficient(e._zero_coefficient)
 {
-    this->_indices.reserve(e._indices.capacity());
-    this->_coefficients.reserve(e._coefficients.capacity());
+    this->_indices.reserve(e.capacity());
+    this->_coefficients.reserve(e.capacity());
 }
 
 template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expansion<I,X>& e)
@@ -129,8 +129,8 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expan
         this->_indices = e._indices;
         this->_coefficients = e._coefficients;
         this->_zero_coefficient=e._zero_coefficient;
-        this->_indices.reserve(e._indices.capacity());
-        this->_coefficients.reserve(e._coefficients.capacity());
+        this->_indices.reserve(e.capacity());
+        this->_coefficients.reserve(e.capacity());
     }
     return *this;
 }
@@ -204,12 +204,6 @@ template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
 }
 
 template<class I, class X> SizeType Expansion<I,X>::capacity() const {
-    static bool warned = false;
-    if(not warned and this->_indices.capacity()!=this->_coefficients.capacity()) {
-        // ARIADNE_DEBUG_ASSERT(this->_indices.capacity()!=this->_coefficients.capacity());
-        std::cerr<<"WARNING: Expansion::_indices.capacity() may be different from Expansion::_coefficients.capacity()\n";
-        warned=true;
-    }
     return std::min(this->_indices.capacity(),this->_coefficients.capacity());
 }
 

@@ -27,16 +27,16 @@
 
 
 
-#include "utility/stdlib.hpp"
+#include "../utility/stdlib.hpp"
 
 #include "dyadic.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/twoexp.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/rational.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/twoexp.hpp"
+#include "../numeric/builtin.hpp"
+#include "../numeric/rational.hpp"
 
 #include <limits>
 
@@ -61,7 +61,7 @@ Dyadic::Dyadic(Integer const& p, Natural q) {
     ARIADNE_ASSERT(q.get_si()==q);
     mpf_init2(_mpf,maximum_precision);
     mpf_set_z(_mpf,p._mpz);
-    mpf_div_2exp(_mpf,_mpf,q.get_si());
+    mpf_div_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(q.get_si()));
     //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
 }
 
@@ -98,8 +98,8 @@ Dyadic::Dyadic(Integer const& z) {
 
 Dyadic::Dyadic(TwoExp const& w) : Dyadic(1u) {
     const int q=w.exponent();
-    if(q>=0) { mpf_mul_2exp(_mpf,_mpf,q); }
-    else { mpf_div_2exp(_mpf,_mpf,-q); }
+    if(q>=0) { mpf_mul_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(q)); }
+    else { mpf_div_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(-q)); }
 }
 
 Dyadic::Dyadic(const Dyadic& x) {
@@ -149,8 +149,8 @@ Dyadic operator-(TwoExp y) {
 Dyadic operator*(Integer z, TwoExp w) {
     Dyadic r(z);
     const int q=w.exponent();
-    if(q>=0) { mpf_mul_2exp(r._mpf,r._mpf,q); }
-    else { mpf_div_2exp(r._mpf,r._mpf,-q); }
+    if(q>=0) { mpf_mul_2exp(r._mpf,r._mpf,static_cast<mp_bitcnt_t>(q)); }
+    else { mpf_div_2exp(r._mpf,r._mpf,static_cast<mp_bitcnt_t>(-q)); }
     return r;
 }
 
@@ -229,6 +229,11 @@ Dyadic hlf(Dyadic const& x) {
     Dyadic r;
     mpf_div_2exp(r._mpf,x._mpf,1);
     return r;
+}
+
+Dyadic pow(Dyadic const& x, Int m) {
+    assert(m >= 0);
+    return pow(x,static_cast<Nat>(m));
 }
 
 Dyadic pow(Dyadic const& x, Nat m) {

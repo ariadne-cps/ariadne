@@ -16,12 +16,9 @@
 
 using namespace Ariadne;
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
-    /// Constants
-    int VERBOSITY = 1;
-	if (argc > 1)
-		VERBOSITY = atoi(argv[1]);
+    Nat verbosity=get_verbosity(argc,argv);
 
     /// Build the Hybrid System
 
@@ -39,7 +36,7 @@ int main(int argc, char* argv[])
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(laser_system);
-    evolver.verbosity = VERBOSITY;
+    evolver.verbosity = verbosity;
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
@@ -47,9 +44,7 @@ int main(int argc, char* argv[])
     std::cout << evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
 	AtomicDiscreteLocation scanning("scanning");
 	AtomicDiscreteLocation far("far");
@@ -64,7 +59,7 @@ int main(int argc, char* argv[])
 
     std::cout << "Computing orbit... " << std::flush;
 
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
 }

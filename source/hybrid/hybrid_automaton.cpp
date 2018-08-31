@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/space.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton.hpp"
+#include "../hybrid/hybrid_automaton.hpp"
 
 namespace Ariadne {
 
@@ -236,10 +236,6 @@ HybridAutomaton::HybridAutomaton()
 }
 
 
-HybridAutomaton::~HybridAutomaton()
-{
-}
-
 HybridAutomaton::HybridAutomaton(Identifier name)
     : _name(name),_modes()
 {
@@ -310,7 +306,7 @@ Void HybridAutomaton::_new_invariant(DiscreteLocation location, ContinuousPredic
                       "Constraint for event "<<event<<" is already defined in mode "<<mode);
     }
     mode._invariants.insert(event,invariant);
-    mode._kinds.insert(event,INVARIANT);
+    mode._kinds.insert(event,EventKind::INVARIANT);
 }
 
 Void HybridAutomaton::_new_guard(DiscreteLocation location, DiscreteEvent event, ContinuousPredicate guard, EventKind kind)
@@ -664,15 +660,15 @@ Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {
 
 DimensionType HybridAutomaton::dimension(DiscreteLocation location) const {
     return this->mode(location)._dynamic.size();
-};
+}
 
 RealSpace HybridAutomaton::continuous_state_space(DiscreteLocation location) const {
     return RealSpace(left_hand_sides(this->mode(location)._dynamic));
-};
+}
 
 RealSpace HybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
     return RealSpace(left_hand_sides(this->mode(location)._sorted_auxiliary));
-};
+}
 
 EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const {
     return this->mode(location)._kinds[event];

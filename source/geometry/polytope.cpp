@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/stlio.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "geometry/zonotope.hpp"
-#include "geometry/curve.hpp"
-#include "function/function.hpp"
+#include "../utility/stlio.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/zonotope.hpp"
+#include "../geometry/curve.hpp"
+#include "../function/function.hpp"
 
-#include "geometry/polytope.hpp"
+#include "../geometry/polytope.hpp"
 
 namespace Ariadne {
 

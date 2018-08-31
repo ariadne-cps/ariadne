@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_ERROR_HPP
 #define ARIADNE_FLOAT_ERROR_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -89,6 +89,8 @@ template<class F> class Error
     friend UpperBound<F> log2(Error<F> const& x) {
         return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }
 
+    friend Bounds<F> pm(Error<F> const& x) { return Bounds<F>(-x._e,+x._e); }
+    
     friend Bool same(Error<F> const& x1, Error<F> const& x2) { return x1._e==x2._e; }
     friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }
     friend Error<F> refinement(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }

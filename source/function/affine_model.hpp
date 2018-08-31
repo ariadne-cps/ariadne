@@ -32,15 +32,15 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/declarations.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/declarations.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/operations.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/operations.hpp"
 
 namespace Ariadne {
 
@@ -67,7 +67,7 @@ class AffineModel<ApproximateTag,F>
 {
     typedef ApproximateTag P;
     typedef typename F::PrecisionType PR;
-    friend class AlgebraOperations<AffineModel<ApproximateTag,F>,FloatApproximation<PR>>;
+    friend struct AlgebraOperations<AffineModel<ApproximateTag,F>,FloatApproximation<PR>>;
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;
@@ -139,7 +139,7 @@ class AffineModel<ValidatedTag,F>
 {
     typedef ValidatedTag P;
     typedef typename F::PrecisionType PR;
-    friend class AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBounds<PR>>;
+    friend struct AlgebraOperations<AffineModel<ValidatedTag,F>,FloatBounds<PR>>;
   public:
     typedef P Paradigm;
     typedef PR PrecisionType;

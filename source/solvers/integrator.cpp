@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "solvers/integrator.hpp"
+#include "../solvers/integrator.hpp"
 
-#include "utility/logging.hpp"
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/sweeper.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
-#include "function/formula.hpp"
-#include "function/taylor_model.hpp"
+#include "../output/logging.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/sweeper.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/formula.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "function/polynomial.hpp"
-#include "geometry/interval.hpp"
+#include "../function/polynomial.hpp"
+#include "../geometry/interval.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -105,7 +105,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     // TODO: Better estimates of constants
     const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
     const FloatDPValue MULTIPLIER=1.125_exact;
-    const FloatDPValue BOX_RADIUS_MULTIPLIER=1.25_exact;
     const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
     const Nat EXPANSION_STEPS=4;
     const Nat REDUCTION_STEPS=8;
@@ -113,7 +112,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
 
     Vector<FloatDPBounds> const& dx=cast_singleton(domx);
 
-    //Vector<ValidatedNumericType> delta=(dx-midpoint(domx))*BOX_RADIUS_WIDENING;
     Vector<UpperIntervalType> delta=(domx-midpoint(domx))*BOX_RADIUS_WIDENING;
 
     // Compute the Lipschitz constant over the initial box
@@ -133,7 +131,6 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxTyp
     Bool success=false;
     while(!success) {
         ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        //bx=domx+INITIAL_MULTIPLIER*ih*evaluate(vf,domx)+delta;
         bx=domx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
         for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
             df=apply(vf,bx);
@@ -208,7 +205,7 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBoxType& d
             try {
                 step_function=this->flow_step(vf,dx,h,bx);
                 flow_successfully_computed=true;
-            } catch(FlowTimeStepException e) {
+            } catch(const FlowTimeStepException& e) {
                 h=hlf(h);
             }
         }
@@ -267,7 +264,7 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const ExactBoxType&
     while(true) {
         try {
             return this->flow_step(vf,dx,h,bx);
-        } catch(FlowTimeStepException e) {
+        } catch(const FlowTimeStepException& e) {
             h=hlf(h);
         }
     }
@@ -330,9 +327,9 @@ Void TaylorPicardIntegrator::write(OutputStream& os) const {
 } // namespace Ariadne
 
 
-#include "algebra/graded.hpp"
-#include "function/procedure.hpp"
-#include "function/taylor_function.hpp"
+#include "../algebra/graded.hpp"
+#include "../function/procedure.hpp"
+#include "../function/taylor_function.hpp"
 namespace Ariadne {
 
 class FormulaFunction;
@@ -450,7 +447,7 @@ Void flow_iterate(const Vector<ValidatedProcedure>& p, FloatDPValue h,
 
 Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferential> const& dphia, Vector<GradedValidatedDifferential> const& dphib,
                                                Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphid,
-                                               Nat so, Nat to, Int verbosity=0)
+                                               Nat so, Nat to, Nat verbosity=0)
 {
     Nat nx=dphia.size();
     Vector<GradedValidatedDifferential> gdphi(nx,GradedValidatedDifferential(List<ValidatedDifferential>(to+1u,ValidatedDifferential(nx,so))));
@@ -488,7 +485,7 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const FloatDPValue& h, double swpt, Int verbosity=0) {
+ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const FloatDPValue& h, double swpt, Nat verbosity=0) {
     const Nat n=dphi.size();
     Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,swpt));
     ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
@@ -796,7 +793,7 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order, Nat tempo
         }
         ++read_iter;
     }
-    x.expansion().resize(write_iter-x.begin());
+    x.expansion().resize(static_cast<SizeType>(write_iter-x.begin()));
 }
 
 template<class X> Void truncate(Vector< Differential<X> >& x, Nat spacial_order, Nat temporal_order) {

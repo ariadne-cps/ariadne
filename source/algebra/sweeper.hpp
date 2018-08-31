@@ -28,11 +28,11 @@
 #ifndef ARIADNE_SWEEPER_HPP
 #define ARIADNE_SWEEPER_HPP
 
-#include "utility/macros.hpp"
-#include "utility/attribute.hpp"
-#include "numeric/float.decl.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/attribute.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
 
 namespace Ariadne {
 
@@ -46,6 +46,7 @@ template<class F> class SweeperInterface {
   protected:
     typedef typename F::PrecisionType PR;
   public:
+    virtual ~SweeperInterface<F>() = default;
     inline Bool discard(const MultiIndex& a, const FloatValue<PR>& x) const { return this->_discard(a,x.raw()); }
     inline Bool discard(const MultiIndex& a, const FloatApproximation<PR>& x) const { return this->_discard(a,x.raw()); }
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
@@ -197,6 +198,24 @@ template<class F> class GradedSweeper : public SweeperMixin<GradedSweeper<F>,F> 
   private:
     virtual Void _write(OutputStream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
   private:
+    DegreeType _degree;
+};
+
+//! \brief A sweeper class which discards terms whose total degree is above some threshold or whose absolute value is smaller than a threshold.
+template<class F> class GradedThresholdSweeper : public SweeperMixin<GradedThresholdSweeper<F>,F> {
+    typedef PrecisionType<F> PR;
+    PR _coefficient_precision;
+    F _sweep_threshold;
+public:
+    GradedThresholdSweeper(PR precision, DegreeType degree, F sweep_threshold)
+            : _coefficient_precision(precision), _sweep_threshold(sweep_threshold), _degree(degree) { ARIADNE_ASSERT(sweep_threshold>=0); }
+    DegreeType degree() const { return this->_degree; }
+    inline F sweep_threshold() const { return _sweep_threshold; }
+    inline PR precision() const { return _coefficient_precision; }
+    inline Bool discard(const MultiIndex& a, const F& x) const { return a.degree()>this->_degree || abs(x) < this->_sweep_threshold; }
+private:
+    virtual Void _write(OutputStream& os) const { os << "GradedThresholdSweeper( degree="<<this->_degree<<", sweep_threshold="<<this->_sweep_threshold<<" )"; }
+private:
     DegreeType _degree;
 };
 

@@ -25,9 +25,9 @@
  *  \brief
  */
 
-#include "utility/module.hpp"
-#include "numeric/operators.hpp"
-#include "expression/templates.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 #include "real.hpp"
@@ -48,13 +48,6 @@ namespace Ariadne {
 TwoExp Accuracy::error() const {
     return TwoExp(-(Int)this->bits());
 }
-
-template<> Ball<FloatDP>::Ball(Real const& r, DoublePrecision pr) : Ball(r.get(pr)) { }
-template<> Bounds<FloatDP>::Bounds(Real const& r, DoublePrecision pr) : Bounds<FloatDP>(r.get(pr)) { }
-template<> UpperBound<FloatDP>::UpperBound(Real const& r, DoublePrecision pr) : UpperBound<FloatDP>(r.upper().get(pr)) { }
-template<> LowerBound<FloatDP>::LowerBound(Real const& r, DoublePrecision pr) : LowerBound<FloatDP>(r.lower().get(pr)) { }
-template<> Approximation<FloatDP>::Approximation(Real const& r, DoublePrecision pr) : Approximation<FloatDP>(r.get(pr)) { }
-
 
 template<class X> struct ValidatedRealWrapper;
 
@@ -239,8 +232,8 @@ PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
 Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 
-Real limit(StrongCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
-Real limit(StrongCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
+Real limit(FastCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
+Real limit(FastCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
 
 Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2) {
     if (choose(c1.condition(),c2.condition())) { return c1.term(); } else { return c2.term(); } }

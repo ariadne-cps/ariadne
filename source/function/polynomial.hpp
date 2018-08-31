@@ -35,10 +35,10 @@
 #include <map>
 #include <algorithm>
 
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/operations.hpp"
-#include "algebra/differential.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/operations.hpp"
+#include "../algebra/differential.hpp"
 
 
 namespace Ariadne {
@@ -64,7 +64,7 @@ class Polynomial
     : public DispatchAlgebraOperations<Polynomial<X>,X>
 {
     template<class XX> friend class Polynomial;
-    friend class AlgebraOperations<Polynomial<X>,X>;
+    friend struct AlgebraOperations<Polynomial<X>,X>;
   public:
     typedef typename Expansion<MultiIndex,X>::ValueType ValueType;
     typedef typename Expansion<MultiIndex,X>::Reference Reference;

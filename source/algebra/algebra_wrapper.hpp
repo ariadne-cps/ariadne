@@ -28,9 +28,9 @@
 #ifndef ARIADNE_ALGEBRA_WRAPPER_HPP
 #define ARIADNE_ALGEBRA_WRAPPER_HPP
 
-#include "algebra/algebra_interface.hpp"
-#include "algebra/algebra_mixin.hpp"
-#include "numeric/operators.hpp"
+#include "../algebra/algebra_interface.hpp"
+#include "../algebra/algebra_mixin.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

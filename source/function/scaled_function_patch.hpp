@@ -29,21 +29,21 @@
 #define ARIADNE_SCALED_FUNCTION_PATCH_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
-#include "utility/exceptions.hpp"
-#include "utility/declarations.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "function/taylor_model.hpp"
+#include "../utility/container.hpp"
+#include "../utility/exceptions.hpp"
+#include "../utility/declarations.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "algebra/operations.hpp"
-#include "function/function_interface.hpp"
-#include "function/function_mixin.hpp"
-#include "function/function_model.hpp"
-#include "function/function_model_mixin.hpp"
+#include "../algebra/operations.hpp"
+#include "../function/function_interface.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/function_model.hpp"
+#include "../function/function_model_mixin.hpp"
 
 // FIXME: Added to prevent compilation error in Clang++-5.0. Should not be necessary.
-#include "function/formula.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 
@@ -699,7 +699,6 @@ template<class M> class VectorScaledFunctionPatch
     Void _compute_jacobian() const;
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
-    Void _resize(SizeType rs, SizeType as, ushort d, ushort s);
     virtual ScalarScaledFunctionPatch<M>* _get(SizeType i) const { return new ScaledFunctionPatch<M>(this->_domain,this->_models[i]); }
     virtual VectorScaledFunctionPatch<M>* _clone() const;
     virtual VectorScaledFunctionPatch<M>* _create() const;
@@ -781,8 +780,7 @@ template<class M> class VectorScaledFunctionPatch
         return partial_restriction(tf,k,d);
     }
     friend Pair<VectorScaledFunctionPatch<M>,VectorScaledFunctionPatch<M>> split(const VectorScaledFunctionPatch<M>& tf, SizeType j) {
-        typedef M ModelType;
-        Pair<Vector<ModelType>,Vector<ModelType>> models=split(tf.models(),j);
+        Pair<Vector<M>,Vector<M>> models=split(tf.models(),j);
         Pair<BoxDomainType,BoxDomainType> subdomains=split(tf.domain(),j);
         return make_pair(VectorScaledFunctionPatch<M>(subdomains.first,models.first),
                         VectorScaledFunctionPatch<M>(subdomains.second,models.second));
@@ -947,7 +945,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend NormType norm(const VectorScaledFunctionPatch<M>& f) {
-        NormType res=norm(f.zero_element());;
+        NormType res=norm(f.zero_element());
         for(SizeType i=1; i!=f.result_size(); ++i) {
             res=max(res,norm(f[i]));
         }
@@ -1153,6 +1151,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
     const ModelType& model() const { return this->_c->_models[this->_i]; }
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
+    Void add_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(this->_c->_models[this->_i].error()+e); }
     Void simplify() { this->_c->_models[this->_i].simplify(); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
     friend OutputStream& operator<<(OutputStream& os, const VectorScaledFunctionPatchElementReference<M>& f) { return os<<f.element(); }

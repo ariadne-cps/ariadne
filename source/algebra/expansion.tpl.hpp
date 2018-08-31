@@ -32,7 +32,7 @@
 
 #include "expansion.hpp"
 #include "expansion.inl.hpp"
-#include "numeric/logical.hpp"
+#include "../numeric/logical.hpp"
 
 namespace Ariadne {
 
@@ -51,7 +51,7 @@ template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as)
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
-    : _zero_coefficient(z), _indices(0u,I(as)), _coefficients(0,z)
+    : _indices(0u,I(as)), _coefficients(0,z), _zero_coefficient(z)
 {
     _indices.reserve(cap); _coefficients.reserve(cap);
 }
@@ -64,10 +64,34 @@ inline SizeOne size_of(DegreeType const& a) { return SizeOne(); }
 
 inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
 inline SizeOne argument_size_of(UniformList<DegreeType> const& a) { return SizeOne(); }
-
+/*
 template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
-    : Expansion( ( (ARIADNE_PRECONDITION(lst.size()!=0)) , Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) ) )
+    : Expansion( Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) )
 {
+    I a(this->argument_size());
+    X x;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=iter->second;
+        if(decide(x!=0)) { this->append(a,x); }
+    }
+}
+*/
+
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(0)
+{
+    ARIADNE_PRECONDITION(lst.size()!=0);
+
+    _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
+    _coefficients = UniformList<X>(0,X());
+    _zero_coefficient = X();
+
+    SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
+    _indices.reserve(cap);
+    _coefficients.reserve(cap);
+
     I a(this->argument_size());
     X x;
     for(auto iter=lst.begin();
@@ -92,10 +116,10 @@ namespace std {
 */
 
 template<class I, class X> Expansion<I,X>::Expansion(const Expansion<I,X>& e)
-    : _zero_coefficient(e._zero_coefficient), _indices(e._indices), _coefficients(e._coefficients)
+    : _indices(e._indices), _coefficients(e._coefficients), _zero_coefficient(e._zero_coefficient)
 {
-    this->_indices.reserve(e._indices.capacity());
-    this->_coefficients.reserve(e._coefficients.capacity());
+    this->_indices.reserve(e.capacity());
+    this->_coefficients.reserve(e.capacity());
 }
 
 template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expansion<I,X>& e)
@@ -105,31 +129,31 @@ template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(const Expan
         this->_indices = e._indices;
         this->_coefficients = e._coefficients;
         this->_zero_coefficient=e._zero_coefficient;
-        this->_indices.reserve(e._indices.capacity());
-        this->_coefficients.reserve(e._coefficients.capacity());
+        this->_indices.reserve(e.capacity());
+        this->_coefficients.reserve(e.capacity());
     }
     return *this;
 }
 
 template<class I, class X> Expansion<I,X>::Expansion(Expansion<I,X>&& e)
-    : _zero_coefficient(std::move(e._zero_coefficient)), _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients))
+    : _indices(std::move(e._indices)), _coefficients(std::move(e._coefficients)), _zero_coefficient(std::move(e._zero_coefficient))
 {
 }
 
 template<class I, class X> Expansion<I,X>& Expansion<I,X>::operator=(Expansion<I,X>&& e)
 {
     if(this!=&e) {
-        _zero_coefficient=std::move(e._zero_coefficient);
         _indices=std::move(e._indices);
         _coefficients=std::move(e._coefficients);
+        _zero_coefficient=std::move(e._zero_coefficient);
     }
     return *this;
 }
 
 template<class I, class X> Void Expansion<I,X>::swap(Expansion<I,X>& other) {
-    std::swap(this->_zero_coefficient,other._zero_coefficient);
     std::swap(this->_indices,other._indices);
     std::swap(this->_coefficients,other._coefficients);
+    std::swap(this->_zero_coefficient,other._zero_coefficient);
 }
 
 template<class I, class X> SizeType Expansion<I,X>::number_of_terms() const {
@@ -180,12 +204,6 @@ template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
 }
 
 template<class I, class X> SizeType Expansion<I,X>::capacity() const {
-    static bool warned = false;
-    if(not warned and this->_indices.capacity()!=this->_coefficients.capacity()) {
-        // ARIADNE_DEBUG_ASSERT(this->_indices.capacity()!=this->_coefficients.capacity());
-        std::cerr<<"WARNING: Expansion::_indices.capacity() may be different from Expansion::_coefficients.capacity()\n";
-        warned=true;
-    }
     return std::min(this->_indices.capacity(),this->_coefficients.capacity());
 }
 
@@ -194,7 +212,7 @@ template<class I, class X> Void Expansion<I,X>::clear() {
 }
 
 template<class I, class X> Void Expansion<I,X>::remove_zeros() {
-    this->resize(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin());
+    this->resize(static_cast<SizeType>(std::remove_if(this->begin(),this->end(),CoefficientIsZero())-this->begin()));
 }
 
 template<class X, class Y> struct CanInplaceAdd {
@@ -218,7 +236,7 @@ template<class I, class X, EnableIf<CanInplaceAdd<X,X>> =dummy> Void combine_ter
         }
         ++curr;
     }
-    e.resize(curr-begin);
+    e.resize(static_cast<SizeType>(curr-begin));
 }
 
 template<class I, class X, DisableIf<CanInplaceAdd<X,X>> =dummy> Void combine_terms(Expansion<I,X>& e) {
@@ -290,9 +308,9 @@ template<class I, class X> Bool Expansion<I,X>::same_as(const Expansion<I,X>& ot
 
 template<class I, class X> auto Expansion<I,X>::insert(Iterator pos, const I& a, const X& c) -> Iterator {
     if(this->size()==this->capacity()) {
-        SizeType where=pos-this->begin();
+        SizeType where=static_cast<SizeType>(pos-this->begin());
         this->append(a,c);
-        pos=this->begin()+where;
+        pos=this->begin()+static_cast<std::ptrdiff_t>(where);
     } else {
         this->append(a,c);
     }
@@ -482,9 +500,9 @@ OutputStream& Expansion<I,X>::write(OutputStream& os, const Array<String>& varia
             os << " ";
             if(decide(v>=0) && !first_term) { os<<"+"; }
             first_term=false;
-            bool first_factor=true;
+            //bool first_factor=true;
             if(decide(v<0)) { os<<"-"; }
-            if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); first_factor=false; }
+            if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); /*first_factor=false;*/ }
 /*
             for(SizeType j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {

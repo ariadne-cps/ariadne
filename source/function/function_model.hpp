@@ -32,19 +32,19 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function.decl.hpp"
-#include "function/function_model_interface.hpp"
+#include "../function/function.decl.hpp"
+#include "../function/function_model_interface.hpp"
 
-#include "numeric/operators.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/operations.hpp"
-#include "function/domain.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/operations.hpp"
+#include "../function/domain.hpp"
 
-#include "function/function_interface.hpp"
-#include "function/function_mixin.hpp"
-#include "function/function.hpp"
+#include "../function/function_interface.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/function.hpp"
 
 namespace Ariadne {
 
@@ -232,6 +232,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
         return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_antiderivative(j)); }
     friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, CanonicalNumericType<P,PR,PRE> c) {
         return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_antiderivative(j,c)); }
+    friend ScalarFunctionModel<P,D,PR,PRE> antiderivative(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+        return antiderivative(f,j,CanonicalNumericType<P,PR,PRE>(c,f.value().precision())); }
 
     friend ScalarFunctionModel<P,D,PR,PRE> embed(const DomainType& d1, const ScalarFunctionModel<P,D,PR,PRE>& f, const DomainType& d2) {
         return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_embed(d1,d2)); }
@@ -263,6 +265,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
 };
 
 template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>> {
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Nul, ScalarFunctionModel<P,D,PR,PRE> f) {
+        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return std::move(f); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Neg, ScalarFunctionModel<P,D,PR,PRE> f) {
         f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(-1)); return std::move(f); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
@@ -523,9 +527,9 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_join(f2)); }
 
     friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2)); };;
+        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2)); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const ScalarFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
-        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(f2); };;
+        return VectorFunctionModel<P,D,PR,PRE>(1,f1)._ptr->_combine(f2); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
         return VectorFunctionModel<P,D,PR,PRE>(f1._ptr->_combine(VectorFunctionModel<P,D,PR,PRE>(1,f2))); };
     friend VectorFunctionModel<P,D,PR,PRE> combine(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
@@ -545,6 +549,10 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         VectorFunctionModel<P,D,PR,PRE> r(f);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j,c); }
         return r;
+    }
+
+    friend VectorFunctionModel<P,D,PR,PRE> antiderivative(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+        return antiderivative(f,j,CanonicalNumericType<P,PR,PRE>(c,f[0].value().precision()));
     }
 
     friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {

@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/space.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 
@@ -83,18 +83,6 @@ class CompositeHybridSpace
 
 namespace {
 
-List<DottedRealVariable> dot(const List<RealVariable>& v) {
-    List<DottedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
-    return result;
-}
-
-List<PrimedRealVariable> next(const List<RealVariable>& v) {
-    List<PrimedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(next(v[i])); }
-    return result;
-}
-
 Identifier name_composition(const List<HybridAutomaton>& components)
 {
     List<HybridAutomaton>::ConstIterator comp_it = components.begin();
@@ -129,8 +117,6 @@ CompositeHybridAutomaton::CompositeHybridAutomaton(
 		Identifier name,
 		const List<HybridAutomaton>& components)
     : _name(name),_components(components) { }
-
-CompositeHybridAutomaton::~CompositeHybridAutomaton() { }
 
 Nat
 CompositeHybridAutomaton::number_of_components() const

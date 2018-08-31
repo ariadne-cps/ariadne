@@ -25,9 +25,9 @@
  *  \brief
  */
 
-#include "utility/stdlib.hpp"
-#include "utility/string.hpp"
-#include "expression/templates.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/string.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 
@@ -69,44 +69,44 @@ LogicalHandle::LogicalHandle(LogicalValue l)
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator!(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle negation(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 
 LogicalValue operator==(LogicalValue l1, LogicalValue l2) {
@@ -173,21 +173,5 @@ template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; 
 template<> String class_name<ValidatedLowerKleenean>() { return "ValidatedLowerKleenean"; }
 template<> String class_name<ValidatedUpperKleenean>() { return "ValidatedUpperKleenean"; }
 template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenean"; }
-
-void try_logical() {
-    Kleenean k(true);
-    Effort e(3);
-    Sierpinskian s(true);
-    Boolean b(true);
-    k=b and s;
-    k=k and b;
-    k=k and s;
-    k=s and not s;
-    ValidatedKleenean vk=k.check(e);
-    vk && vk;
-    ValidatedLowerKleenean vlk = vk;
-    vlk || vk;
-    ValidatedUpperKleenean vuk = !vlk;
-}
 
 } // namespace Ariadne

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_VALUE_HPP
 #define ARIADNE_FLOAT_VALUE_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -170,6 +170,11 @@ template<class F> class Positive<Value<F>> : public Value<F> {
     explicit Positive<Value<F>>(F const& x) : Value<F>(x) { }
     explicit Positive<Value<F>>(Value<F> const& x) : Value<F>(x) { }
   public:
+    friend PositiveBounds<F> operator+(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+        return cast_positive(static_cast<Value<F>const&>(v1)+static_cast<Value<F>const&>(v2)); }
+    friend PositiveBounds<F> operator*(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+        return cast_positive(static_cast<Value<F>const&>(v1)*static_cast<Value<F>const&>(v2)); }
+
     friend Positive<Value<F>> hlf(Positive<Value<F>> const&);
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
         return pow(Positive<Bounds<F>>(x),m); }

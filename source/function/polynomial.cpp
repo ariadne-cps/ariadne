@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.h"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/polynomial.hpp"
-#include "function/polynomial.tpl.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/polynomial.tpl.hpp"
 
 namespace Ariadne {
 
@@ -35,10 +35,10 @@ template class Polynomial<FloatDPApproximation>;
 template class Polynomial<FloatDPBounds>;
 template class Polynomial<UpperIntervalType>;
 
-template class AlgebraOperations<Polynomial<FloatDP>>;
-template class AlgebraOperations<Polynomial<FloatDPApproximation>>;
-template class AlgebraOperations<Polynomial<FloatDPBounds>>;
-// template class AlgebraOperations<Polynomial<UpperIntervalType>>;
+template struct AlgebraOperations<Polynomial<FloatDP>>;
+template struct AlgebraOperations<Polynomial<FloatDPApproximation>>;
+template struct AlgebraOperations<Polynomial<FloatDPBounds>>;
+// template struct AlgebraOperations<Polynomial<UpperIntervalType>>;
 
 template<> Void Polynomial<FloatDPValue>::cleanup() { }
 
@@ -50,8 +50,8 @@ template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<Stri
 
 template class Polynomial<FloatMPApproximation>;
 template class Polynomial<FloatMPBounds>;
-template class AlgebraOperations<Polynomial<FloatMPApproximation>>;
-template class AlgebraOperations<Polynomial<FloatMPBounds>>;
+template struct AlgebraOperations<Polynomial<FloatMPApproximation>>;
+template struct AlgebraOperations<Polynomial<FloatMPBounds>>;
 
 } //namespace Ariadne
 

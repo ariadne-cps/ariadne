@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_USER_HPP
 #define ARIADNE_FLOAT_USER_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -137,6 +137,8 @@ template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(c
 template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Error<F>>& t) {
     return reinterpret_cast<const T<Value<F>>&>(t); }
 
+template<class F> inline const Positive<Value<F>> cast_exact(const Positive<Bounds<F>>& t) {
+    return Positive<Value<F>>(cast_exact(static_cast<Bounds<F>const&>(t))); }
 
 inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }

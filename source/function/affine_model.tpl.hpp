@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/taylor_model.hpp"
-#include "function/affine_model.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/affine_model.hpp"
 
-#include "function/affine.hpp"
-#include "function/taylor_function.hpp"
-#include "algebra/vector.hpp"
+#include "../function/affine.hpp"
+#include "../function/taylor_function.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -195,7 +195,6 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         F  ru = ( a1.value().raw())+a2.value().raw();
         te += (ru+mrl);
 
-        F re=0.0;
         r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
 
         F::set_rounding_to_nearest();
@@ -316,7 +315,6 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
     : AffineModel(affine.argument_size(),affine.value().precision())
 {
     AffineModel<ValidatedTag,F>& affine_model=*this;
-    auto prec=affine.value().precision();
     affine_model = affine.value().value();
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
         affine_model[j] = affine[j].value();
@@ -451,7 +449,6 @@ template<class F> OutputStream& AffineModel<ValidatedTag,F>::_write(OutputStream
 
 template<class F> auto
 AffineModel<ApproximateTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
-    auto pr = g.zero_element().precision();
     auto c=values(g);
     auto b=f(c);
     auto A=f.gradient(c);
@@ -460,7 +457,6 @@ AffineModel<ApproximateTag,F>::_compose(const ScalarFunction<P>& f, Vector<Affin
 
 template<class F> auto
 AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
-    auto pr = g.zero_element().precision();
     auto c=values(g);
     auto b=f(c);
     auto A=f.jacobian(c);
@@ -469,7 +465,6 @@ AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<Affin
 
 template<class F> auto
 AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
-    auto pr = g.zero_element().precision();
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);
@@ -480,7 +475,6 @@ AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineM
 
 template<class F> auto
 AffineModel<ValidatedTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
-    auto pr = g.zero_element().precision();
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);

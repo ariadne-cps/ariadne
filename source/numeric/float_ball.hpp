@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_BALL_HPP
 #define ARIADNE_FLOAT_BALL_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -97,7 +97,7 @@ template<class F, class FE> class Ball
 
     Ball<F,FE>& operator=(const ValidatedNumber& y);
 
-    operator ValidatedNumber () const;
+    operator ValidatedNumber () const { return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this)); }
 
     Ball<F,FE> create(const ValidatedNumber& y) const;
 

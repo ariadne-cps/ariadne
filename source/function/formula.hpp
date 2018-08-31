@@ -35,16 +35,16 @@
 #include <string>
 
 
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
 
-#include "numeric/operators.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/operations.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/operations.hpp"
 
 namespace Ariadne {
 
@@ -108,7 +108,7 @@ class FormulaOperations {
     template<class Y, class R, EnableIf<IsConstructible<Y,R>> =dummy> friend Formula<Y>& operator/=(Formula<Y>& f, const R& c) { return f/=Y(c); }
 };
 
-template<class Y> class AlgebraOperations<Formula<Y>,Y> {
+template<class Y> struct AlgebraOperations<Formula<Y>,Y> {
   public:
     template<class OP> static Formula<Y> apply(OP op, Formula<Y> const& f) {
         return Formula<Y>::unary(op,f); }

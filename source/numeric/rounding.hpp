@@ -29,6 +29,7 @@
 #ifndef ARIADNE_ROUNDING_HPP
 #define ARIADNE_ROUNDING_HPP
 
+#include <iosfwd>
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
@@ -54,7 +55,7 @@
 
 namespace Ariadne {
 
-typedef unsigned short rounding_mode_t;
+typedef std::uint16_t rounding_mode_t;
 
 const rounding_mode_t ROUND_TO_NEAREST  = _MM_ROUND_NEAREST;
 const rounding_mode_t ROUND_DOWNWARD    = _MM_ROUND_DOWN;
@@ -224,34 +225,59 @@ typedef mpfr_rnd_t RoundingModeMP;
 typedef RoundingModeType BuiltinRoundingModeType;
 typedef RoundingModeMP MPFRRoundingModeType;
 
+//! \brief Tag class for downward rounding. Constants \ref downward, \ref down. \ingroup NumericModule
 struct RoundDownward {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_DOWNWARD; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDD; }
 };
+//! \brief Tag class for rounding to nearest. Constants \ref to_nearest, \ref near. \ingroup NumericModule
 struct RoundToNearest {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
 };
+//! \brief Tag class for upward rounding. Constants \ref upward, \ref up. \ingroup NumericModule
 struct RoundUpward {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_UPWARD; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDU; }
 };
+//! \brief Tag class for rounding towards zero. Constant \ref toward_zero. \ingroup NumericModule
 struct RoundTowardZero {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TOWARD_ZERO; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDZ; }
 };
+//! \brief Tag class for approximate rounding. Constants \ref approx. \ingroup NumericModule
+struct RoundApproximately {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
+};
 
-const RoundDownward downward = RoundDownward();
-const RoundToNearest to_nearest = RoundToNearest();
-const RoundUpward upward = RoundUpward();
-const RoundTowardZero toward_zero = RoundTowardZero();
+using OutputStream = std::ostream;
 
-const RoundDownward down = downward;
-const RoundToNearest near = to_nearest;
-const RoundUpward up = upward;
+//! \brief General rounding mode class. \ingroup NumericModule
+class Rounding {
+    BuiltinRoundingModeType _rbp; MPFRRoundingModeType _rmp;
+  public:
+    Rounding(BuiltinRoundingModeType rbp, MPFRRoundingModeType rmp) : _rbp(rbp), _rmp(rmp) { }
+    Rounding(RoundDownward) : Rounding(ROUND_DOWNWARD,MPFR_RNDD) { }
+    Rounding(RoundToNearest) : Rounding(ROUND_TO_NEAREST,MPFR_RNDN) { }
+    Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { }
+    operator BuiltinRoundingModeType() const { return _rbp; }
+    operator MPFRRoundingModeType() const { return _rmp; }
+    friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd);
+};
 
-using RoundApprox = RoundToNearest;
-const RoundApprox approx = to_nearest;
+
+const RoundDownward downward = RoundDownward(); //!< Round exact answer downward to a representable value. Synonymous with \ref down. \ingroup NumericModule
+const RoundToNearest to_nearest = RoundToNearest(); //!< Round exact answer to a nearest representable value. Synonymous with \ref near. \ingroup NumericModule
+const RoundUpward upward = RoundUpward(); //!< Round exact answer upward to a representable value. Synonymous with \ref up. \ingroup NumericModule
+const RoundTowardZero toward_zero = RoundTowardZero(); //!< Round exact answer to a representable value at least as close to zero. \ingroup NumericModule
+
+const RoundDownward down = downward; //!< Round exact answer downward to a representable value. Synonymous with \ref downward. \ingroup NumericModule
+const RoundToNearest near = to_nearest; //!< Round exact answer to a nearest representable value. Synonymous with \ref to_nearest. \ingroup NumericModule
+const RoundUpward up = upward; //!< Round exact answer upward to a representable value. Synonymous with \ref upward. \ingroup NumericModule
+const RoundApproximately approx = RoundApproximately(); //!< Round exact answer to some close representable value, which need not be the nearest. \ingroup NumericModule
+
+using RoundApprox = RoundApproximately;
 
 } // namespace Ariadne
 

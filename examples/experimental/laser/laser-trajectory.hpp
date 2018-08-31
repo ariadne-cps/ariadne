@@ -39,10 +39,10 @@ AtomicHybridAutomaton getLaserTrajectory()
 
 	automaton.new_mode(scanning, {dot(x)=vx,dot(vx)=0});
 
-	automaton.new_guard(scanning,switch_right,x<=0,impact);
+	automaton.new_guard(scanning,switch_right,x<=0,EventKind::IMPACT);
 	automaton.new_update(scanning,switch_right,scanning,{next(x)=0,next(vx)=velocity});
 
-	automaton.new_guard(scanning,switch_left,x>=width,impact);
+	automaton.new_guard(scanning,switch_left,x>=width,EventKind::IMPACT);
 	automaton.new_update(scanning,switch_left,scanning,{next(x)=width,next(vx)=-velocity});
 
 	return automaton;

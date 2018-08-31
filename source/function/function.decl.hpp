@@ -28,8 +28,8 @@
 #ifndef ARIADNE_FUNCTION_DECL_HPP
 #define ARIADNE_FUNCTION_DECL_HPP
 
-#include "geometry/interval.decl.hpp"
-#include "geometry/box.decl.hpp"
+#include "../geometry/interval.decl.hpp"
+#include "../geometry/box.decl.hpp"
 
 namespace Ariadne {
 
@@ -81,6 +81,12 @@ typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterfa
 typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
 typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
 
+using ValidatedScalarFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
+using ValidatedVectorFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
+using ValidatedUnivariateScalarFunctionPatch = Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
+using ValidatedUnivariateVectorFunctionPatch = Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
+using ValidatedMultivariateScalarFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
+using ValidatedMultivariateVectorFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
 
 
 // Function models declarations

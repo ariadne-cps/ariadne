@@ -34,16 +34,16 @@
 #include <set>
 #include <map>
 
-#include "utility/tuple.hpp"
-#include "function/function.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "expression/assignment.hpp"
-#include "expression/expression.hpp"
-#include "expression/valuation.hpp"
-#include "utility/logging.hpp"
+#include "../utility/tuple.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/valuation.hpp"
+#include "../output/logging.hpp"
 
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -166,7 +166,7 @@ class HybridSystem
     HybridSystem();
 
     //! \brief  Destructor.
-    virtual ~HybridSystem();
+    virtual ~HybridSystem() = default;
     //! \brief Construct dynamically-allocated copy.
     virtual HybridSystem* clone() const;
 

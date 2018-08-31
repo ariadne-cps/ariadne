@@ -28,8 +28,8 @@
 #ifndef ARIADNE_PAVER_INTERFACE_HPP
 #define ARIADNE_PAVER_INTERFACE_HPP
 
-#include "utility/declarations.hpp"
-#include "utility/writable.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/writable.hpp"
 
 namespace Ariadne {
 
@@ -42,7 +42,7 @@ class PaverInterface : public WritableInterface
   public:
     typedef ValidatedConstrainedImageSet SetType;
   public:
-    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Int depth) const = 0;
+    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Nat depth) const = 0;
 };
 
 } //namespace Ariadne

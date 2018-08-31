@@ -28,11 +28,11 @@
 #ifndef ARIADNE_NONLINEAR_PROGRAMMING_HPP
 #define ARIADNE_NONLINEAR_PROGRAMMING_HPP
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
-#include "utility/logging.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/tuple.hpp"
+#include "../output/logging.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/tuple.hpp"
 
 
 namespace Ariadne {
@@ -57,7 +57,7 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
 class OptimiserInterface {
   public:
     //! \brief Virtual destructor.
-    virtual ~OptimiserInterface() { }
+    virtual ~OptimiserInterface() = default;
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
 

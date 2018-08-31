@@ -31,7 +31,7 @@
 #include <string>
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -51,7 +51,7 @@ class IntegratorInterface
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~IntegratorInterface() { };
+    virtual ~IntegratorInterface() = default;
 
     //! \brief Make a dynamically-allocated copy.
     virtual IntegratorInterface* clone() const = 0;

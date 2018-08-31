@@ -21,28 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/algebra.hpp"
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "function/constraint.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/algebra.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../function/constraint.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/solver.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/solver.hpp"
 
 namespace Ariadne {
 
@@ -65,7 +65,6 @@ Sign sign(const ExactIntervalType& ivl) {
 
 
 OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    static const FloatDP inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }
@@ -458,24 +457,6 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFun
 
     return false;
 }
-
-
-
-namespace {
-
-Void compute_monotonicity(UpperBoxType& domain, const EffectiveConstraint& constraint) {
-/*
-    static const Nat n = domain.size();
-
-    // Compute monotone formulae
-    Array<Sign> monotonicity(n);
-    Covector<ExactIntervalType> grad=constraint.function().gradient(domain);
-    for(Nat j=0; j!=n; ++j) {
-        monotonicity[j]=sign(grad[j]);
-    }
-*/
-}
-} // namespace
 
 
 Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const

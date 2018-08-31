@@ -34,14 +34,14 @@
 #include <iostream>
 
 
-#include "utility/tuple.hpp"
+#include "../utility/tuple.hpp"
 
-#include "dynamics/map.hpp"
-#include "function/function_interface.hpp"
-#include "solvers/configuration_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "../dynamics/map.hpp"
+#include "../function/function_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
+#include "../dynamics/evolver_base.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -96,17 +96,17 @@ class MapEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true);
         return intermediate; }
@@ -136,6 +136,8 @@ class MapEvolverConfiguration : public ConfigurationInterface
 
     //! \brief Default constructor gives reasonable values.
     MapEvolverConfiguration();
+
+    virtual ~MapEvolverConfiguration() = default;
 
   private:
 

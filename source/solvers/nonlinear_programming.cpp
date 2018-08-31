@@ -25,33 +25,33 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <limits>
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/diagonal_matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/diagonal_matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
 
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/solver.hpp"
-#include "algebra/multi_index-noaliasing.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/solver.hpp"
+#include "../algebra/multi_index-noaliasing.hpp"
+#include "../solvers/constraint_solver.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -284,7 +284,6 @@ template<class X> Vector< Differential<X> > second_derivative(const ValidatedVec
 }
 
 template<class Vec, class Diff> Void set_gradient(Vec& g, const Diff& D) {
-    typedef typename Diff::ValueType X;
     Nat i=0;
     typename Diff::ConstIterator iter=D.begin();
     if(iter!=D.end() && iter->index().degree()==0) { ++iter; }
@@ -451,17 +450,6 @@ class ConstrainedFeasibilityMatrix {
     const Matrix<R>& H;
     Matrix<R> Sinv;
 };
-
-
-
-enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
-
-inline ConstraintKind constraint_kind(ExactIntervalType C) {
-    if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
-    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
-    else { return BOUNDED; }
-}
 
 
 ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
@@ -1854,14 +1842,10 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, Exac
     FloatApproximationVector dl=lower_bounds(D);
     FloatApproximationVector du=upper_bounds(D);
 
-    ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::feasibility_step(D,g,C,x,y,w)\n");
+    ARIADNE_LOG(4,"PenaltyFunctionOptimiser::feasibility_step(D,g,C,x,y,w)\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<"\n");
     ARIADNE_LOG(5,"  dl ="<<dl<<", du="<<du<<"\n  cl ="<<cl<<",  cu ="<<cu<<"\n");
     ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<"\n");
-
-    static const double gamma=1.0/1024;
-    static const double sigma=1.0/8;
-    static const double scale=0.75;
 
     ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
     ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);
@@ -2567,7 +2551,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
         try {
             this->feasibility_step(d,g,c,x,y,z,t);
         }
-        catch(SingularMatrixException) {
+        catch(const SingularMatrixException& e) {
             return indeterminate;
         }
         if(t.lower()>t.upper()) {

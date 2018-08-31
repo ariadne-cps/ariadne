@@ -31,10 +31,10 @@
 #include <iostream>
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
 
-#include "expression/variables.hpp"
+#include "../symbolic/variables.hpp"
 
 namespace Ariadne {
 
@@ -48,6 +48,7 @@ class HybridScalingInterface
 {
   public:
     //!
+    virtual ~HybridScalingInterface() = default;
     virtual HybridScalingInterface* clone() const = 0;
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual Void write(OutputStream& os) const = 0;

@@ -32,14 +32,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "solvers/integrator_interface.hpp"
-#include "function/function_interface.hpp"
+#include "../solvers/integrator_interface.hpp"
+#include "../function/function_interface.hpp"
 
-#include "utility/declarations.hpp"
-#include "utility/attribute.hpp"
-#include "utility/logging.hpp"
-#include "utility/pointer.hpp"
-#include "function/affine.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/attribute.hpp"
+#include "../output/logging.hpp"
+#include "../utility/pointer.hpp"
+#include "../function/affine.hpp"
 
 namespace Ariadne {
 
@@ -151,7 +151,7 @@ class TaylorPicardIntegrator
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
         : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*128)), _maximum_temporal_order(16) { }
+        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _maximum_temporal_order(12) { }
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,

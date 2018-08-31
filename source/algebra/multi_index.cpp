@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/stlio.hpp"
-#include "utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/container.hpp"
 #include "multi_index.hpp"
 
 namespace Ariadne {
@@ -91,6 +91,7 @@ MultiIndexList& MultiIndexList::operator=(MultiIndexList const& lst) {
 
 Void MultiIndexList::resize(SizeType new_size) {
     this->reserve(new_size);
+    if (new_size>_size) for(SizeType k=_size*_argument_size; k!=new_size*_argument_size; ++k) { _indices[k] = 0u; }
     _size=new_size;
 }
 
@@ -126,7 +127,7 @@ Void MultiIndexList::clear() {
     _size=0u; }
 
 Bool operator==(const MultiIndexList& lst1, const MultiIndexList& lst2) {
-    if(lst1._size!=lst2._size or lst2._argument_size != lst2._argument_size) { return false; }
+    if(lst1._size!=lst2._size or lst1._argument_size != lst2._argument_size) { return false; }
     for(SizeType i=0; i!=lst1._size; ++i) { if(lst1[i]!=lst2[i]) { return false; } } return true; }
 
 OutputStream& operator<<(OutputStream& os, MultiIndexList const& lst) {

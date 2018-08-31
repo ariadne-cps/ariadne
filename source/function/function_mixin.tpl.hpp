@@ -24,14 +24,14 @@
 #ifndef ARIADNE_FUNCTION_MIXIN_TCC
 #define ARIADNE_FUNCTION_MIXIN_TCC
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/differential.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "algebra/algebra.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "function/function_mixin.hpp"
+#include "../function/function_mixin.hpp"
 
 namespace Ariadne {
 

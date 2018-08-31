@@ -4,10 +4,12 @@ add_library(ariadne-geometry OBJECT
     box.cpp
     curve.cpp
     function_set.cpp
-    grid_set.cpp
+    binary_tree.cpp
+    grid.cpp
+    grid_paving.cpp
+    paver.cpp
     affine_set.cpp
     enclosure.cpp
-    paver.cpp
 )
 
 cotire(ariadne-geometry)

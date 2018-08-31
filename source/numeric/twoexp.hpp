@@ -64,7 +64,7 @@ class TwoExp {
 struct Two
   : public std::integral_constant<uint,2u>
 {
-    friend TwoExp operator^(Two, Nat m) { return TwoExp(m); }
+    friend TwoExp operator^(Two, Nat m) { return TwoExp(static_cast<Int>(m)); }
     friend TwoExp operator^(Two, Int n) { return TwoExp(n); }
     friend TwoExp pow(Two, int n) { return TwoExp(n); }
 };

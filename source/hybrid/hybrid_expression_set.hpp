@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.hpp
+ *            hybrid_expression_set.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file hybrid_set.hpp
- *  \brief Sets in hybrid spaces.
+/*! \file hybrid_expression_set.hpp
+ *  \brief Sets in hybrid spaces denoted by variables.
  */
 
 #ifndef ARIADNE_HYBRID_EXPRESSION_SET_HPP
@@ -31,25 +31,25 @@
 #include <map>
 #include <memory>
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "utility/declarations.hpp"
-#include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/curve.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/container.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../geometry/curve.hpp"
 
-#include "expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_grid.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_grid.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
 
-#include "hybrid/hybrid_graphics_interface.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 

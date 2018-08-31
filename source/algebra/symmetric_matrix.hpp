@@ -48,10 +48,7 @@ template<class X> class Matrix;
 
 class SingularMatrixException;
 
-class NonSymmetricMatrixException {
-  public:
-    template<class X> NonSymmetricMatrixException(Matrix<X>);
-};
+class NonSymmetricMatrixException { };
 
 
 //! \ingroup LinearAlgebraSubModule
@@ -162,7 +159,7 @@ template<class X> SymmetricMatrix<X>::SymmetricMatrix(Matrix<X> const& A)
     for(SizeType i=0; i!=n; ++i) {
         this->_ary[this->_fast_position(i,i)]=A[i][i];
         for(SizeType j=i+1; j!=n; ++j) {
-            if(decide(A[i][j]!=A[j][i])) { throw NonSymmetricMatrixException(A); }
+            if(decide(A[i][j]!=A[j][i])) { throw NonSymmetricMatrixException(); }
             this->_ary[this->_fast_position(i,j)]=A[i][j];
         }
     }

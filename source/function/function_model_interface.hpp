@@ -28,10 +28,10 @@
 #ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 #define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
-#include "function/function.decl.hpp"
-#include "function/function_interface.hpp"
+#include "../function/function.decl.hpp"
+#include "../function/function_interface.hpp"
 
-#include "numeric/operators.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -72,7 +72,7 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _embed(const DomainType& d1, const DomainType& d2) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _restriction(const DomainType& d) const = 0;
 
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _derivative(SizeType j) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _derivative(ElementIndexType<D> j) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j, CanonicalNumericType<P,PR,PRE> c) const = 0;
 
@@ -132,6 +132,7 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
   public:
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
+    virtual ~FunctionModelFactoryInterface<P,PR,PRE>() = default;
     virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) { factory._write(os); return os; }

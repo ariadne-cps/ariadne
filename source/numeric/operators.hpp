@@ -396,7 +396,7 @@ struct Min : OperatorObject<Min> {
 };
 
 struct Abs : OperatorObject<Abs> {
-    static constexpr OperatorCode code() { return OperatorCode::MAX; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
+    static constexpr OperatorCode code() { return OperatorCode::ABS; } static constexpr OperatorKind kind() { return OperatorKind::BINARY; }
     template<class A> auto operator()(A&& a) const -> decltype(abs(a)) { return abs(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return a>=0 ? a : -a; }
 };
@@ -410,7 +410,7 @@ struct Sgn : ComparisonObject<Sgn> {
 class UnaryOperator {
     OperatorCode _op;
   public:
-    template<class OP> UnaryOperator(OP op) : _op(op) { };
+    template<class OP> UnaryOperator(OP op) : _op(op) { }
     template<class X> X operator() (X const& x) { return compute(_op,x); }
     template<class X> X derivative(X const& x) { return derivative(_op,x); }
 };

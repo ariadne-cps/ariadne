@@ -28,9 +28,9 @@
 #ifndef ARIADNE_SERIES_HPP
 #define ARIADNE_SERIES_HPP
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/array.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

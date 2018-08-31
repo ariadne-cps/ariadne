@@ -30,8 +30,8 @@
 #ifndef ARIADNE_NUMBER_INTERFACE
 #define ARIADNE_NUMBER_INTERFACE
 
-#include "utility/clonable.hpp"
-#include "utility/writable.hpp"
+#include "../utility/clonable.hpp"
+#include "../utility/writable.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -56,7 +56,7 @@ class NumberInterface
     template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
   public:
-    virtual ~NumberInterface() { }
+    virtual ~NumberInterface() = default;
   public:
     virtual NumberInterface* _copy() const = 0;
     virtual NumberInterface* _move() = 0;

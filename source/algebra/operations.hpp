@@ -28,12 +28,12 @@
 #ifndef ARIADNE_ALGEBRA_OPERATIONS_HPP
 #define ARIADNE_ALGEBRA_OPERATIONS_HPP
 
-#include "numeric/operators.hpp"
-#include "numeric/arithmetic.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/arithmetic.hpp"
 
 namespace Ariadne {
 
-template<class A, class X=typename A::NumericType> class AlgebraOperations;
+template<class A, class X=typename A::NumericType> struct AlgebraOperations;
 
 template<class A> class GradedAlgebraOperations {
     typedef typename A::NumericType X;
@@ -225,7 +225,7 @@ template<class A, class X> struct DispatchAlgebraOperations
     friend A add(X const& x1, A const& a2) { return OperationsType::apply(Add(),a2,x1); }
     friend A sub(X const& x1, A const& a2) { return OperationsType::apply(Add(),neg(a2),x1); }
     friend A mul(X const& x1, A const& a2) { return OperationsType::apply(Mul(),a2,x1); }
-    friend A pow(A const& a, Nat m) { return OperationsType::apply(Pow(),a, m); }
+    friend A pow(A const& a, Nat m) { return GradedAlgebraOperations<A>::apply(Pow(),a, m); }
 };
 
 template<class A, class X> struct DispatchTranscendentalAlgebraOperations : DispatchAlgebraOperations<A,X> {

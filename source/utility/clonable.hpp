@@ -36,7 +36,7 @@ namespace Ariadne {
 
 class ClonableInterface {
   public:
-    virtual ~ClonableInterface() { }
+    virtual ~ClonableInterface() = default;
   protected:
     virtual ClonableInterface* _copy() const = 0;
     virtual ClonableInterface* _move() = 0;

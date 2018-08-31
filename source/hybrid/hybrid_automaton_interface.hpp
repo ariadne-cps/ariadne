@@ -29,9 +29,9 @@
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
 
 #include <cassert>
-#include "function/function.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 
@@ -46,17 +46,11 @@ class DiscreteLocation;
 template<class T> class Space;
 typedef Space<Real> RealSpace;
 
-enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
+enum class EventKind : std::uint8_t { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;
 class HybridEnclosure;
-
-static const EventKind invariant = INVARIANT;
-static const EventKind progress = PROGRESS;
-static const EventKind permissive = PERMISSIVE;
-static const EventKind urgent = URGENT;
-static const EventKind impact = IMPACT;
 
 class SystemSpecificationError : public std::runtime_error {
   public:
@@ -159,7 +153,7 @@ class HybridAutomatonInterface {
 
   public:
     //! \brief Virtual destructor.
-    virtual ~HybridAutomatonInterface() { }
+    virtual ~HybridAutomatonInterface() = default;
 
     //! \brief Cloning operator.
     virtual HybridAutomatonInterface* clone() const = 0;
@@ -230,7 +224,7 @@ class HybridAutomatonInterface {
     virtual RealSpace continuous_auxiliary_space(DiscreteLocation location) const = 0;
 
     //! \brief The continuous state space in the \a location.
-    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); }
+    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); return List<RealExpression>(); }
 
 
     //@}
@@ -251,11 +245,11 @@ inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface
 
 inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
     switch(evk) {
-        case INVARIANT: os<<"invariant"; break;
-        case PROGRESS: os<<"progress"; break;
-        case PERMISSIVE: os<<"permissive"; break;
-        case URGENT: os<<"urgent"; break;
-        case IMPACT: os<<"impact"; break;
+        case EventKind::INVARIANT: os<<"invariant"; break;
+        case EventKind::PROGRESS: os<<"progress"; break;
+        case EventKind::PERMISSIVE: os<<"permissive"; break;
+        case EventKind::URGENT: os<<"urgent"; break;
+        case EventKind::IMPACT: os<<"impact"; break;
     } return os;
 }
 

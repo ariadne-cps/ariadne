@@ -1,16 +1,18 @@
-set(EXPERIMENTAL_EXAMPLES
-	circle
-	exponential
+set(EXAMPLES_EXPERIMENTAL
 	laser
-	bouncing-walls
-	vanderpol
 	vanderpol-vectorfield
-	harmonic_inclusion
+	vanderpol-nonoise
+	harmonic-oscillator-nonoise
+	lotka-volterra-nonoise
+	higgins-selkov-nonoise
+	laub-loomis-nonoise
 )
 
-foreach(example ${EXPERIMENTAL_EXAMPLES})
+foreach(example ${EXAMPLES_EXPERIMENTAL})
     add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} ariadne)
 endforeach()
 
-add_dependencies(examples-experimental ${EXPERIMENTAL_EXAMPLES})
+add_custom_target(examples-experimental)
+add_dependencies(examples-experimental ${EXAMPLES_EXPERIMENTAL})
+add_dependencies(examples ${EXAMPLES_EXPERIMENTAL})

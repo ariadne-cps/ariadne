@@ -29,16 +29,16 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_HPP
 
 
-#include "hybrid/hybrid_set_interface.hpp"
-#include "dynamics/evolver_interface.hpp"
-#include "dynamics/reachability_analyser_interface.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../dynamics/evolver_interface.hpp"
+#include "../dynamics/reachability_analyser_interface.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
 class HybridAutomatonInterface;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */
@@ -54,13 +54,13 @@ class HybridReachabilityAnalyserInterface
     typedef HybridCompactSetInterface CompactSetInterfaceType;
     typedef HybridLocatedSetInterface LocatedSetInterfaceType;
     typedef HybridRegularSetInterface RegularSetInterfaceType;
-    typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridGridTreePaving SetApproximationType;
 
   public:
     //@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor */
-    virtual ~HybridReachabilityAnalyserInterface() { }
+    virtual ~HybridReachabilityAnalyserInterface() = default;
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyserInterface* clone() const = 0;

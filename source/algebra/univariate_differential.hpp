@@ -28,10 +28,10 @@
 #ifndef ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 #define ARIADNE_UNIVARIATE_DIFFERENTIAL_HPP
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "algebra/series.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../algebra/series.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -57,7 +57,8 @@ template<class X> class UnivariateDifferential
     explicit UnivariateDifferential(DegreeType d);
     explicit UnivariateDifferential(DegreeType d, const NumericType& c);
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
-    template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
+    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
+        explicit UnivariateDifferential(DegreeType deg, InitializerList<Dbl> lst, PR pr);
     UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
 
     template<class OP> UnivariateDifferential(OP op, DegreeType d, X const& c);
@@ -128,10 +129,12 @@ template<class X> inline const X& UnivariateDifferential<X>::gradient() const { 
 template<class X> inline const X& UnivariateDifferential<X>::half_hessian() const { assert(this->degree()>=2); return _ary[2]; }
 template<class X> inline const X UnivariateDifferential<X>::hessian() const { assert(this->degree()>=2); return _ary[2]*2; }
 
-template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, XX const* ptr)
-    : _ary(d+1,X(0))
+template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
+UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<Dbl> lst, PR pr)
+    : _ary(d+1u,X(0,pr))
 {
-    std::copy(ptr,ptr+d+1,_ary.begin());
+    auto iter=lst.begin();
+    for(SizeType i=0; iter!=lst.end(); ++i, ++iter) { _ary[i]=X(*iter,pr); }
 }
 
 
@@ -161,7 +164,7 @@ template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
         UnivariateDifferential<X> r(std::min(x1.degree(),x2.degree()),nul(x1[0]*x2[0]));
         for(DegreeType i1=0; i1<=r.degree(); ++i1) {
             for(DegreeType i2=0; i2<=r.degree()-i1; ++i2) {
-                r[i1+i2]+=x1[i1]*x2[i2];
+                r[static_cast<DegreeType>(i1+i2)]+=x1[i1]*x2[i2];
             }
         }
         return r;

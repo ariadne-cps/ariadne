@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
 #include <iostream>
 
-#include "solvers/runge_kutta_integrator.hpp"
+#include "../solvers/runge_kutta_integrator.hpp"
 
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 

@@ -28,15 +28,15 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "dynamics/evolver_interface.hpp"
+#include "../dynamics/evolver_interface.hpp"
 
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -92,7 +92,7 @@ class HybridEvolverInterface
     virtual Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const = 0;
+    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const = 0;
     //@}
 
     //@{

@@ -24,8 +24,8 @@
 #include "expansion.hpp"
 #include "expansion.tpl.hpp"
 
-#include "numeric/float.hpp"
-#include "geometry/interval.hpp"
+#include "../numeric/float.hpp"
+#include "../geometry/interval.hpp"
 
 
 namespace Ariadne {

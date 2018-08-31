@@ -28,19 +28,19 @@
 #ifndef ARIADNE_NUMERIC_HPP
 #define ARIADNE_NUMERIC_HPP
 
-#include "config.h"
+#include "../config.hpp"
 
-#include "utility/standard.hpp"
-#include "utility/declarations.hpp"
+#include "../utility/standard.hpp"
+#include "../utility/declarations.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/float.hpp"
-#include "numeric/real.hpp"
-#include "numeric/number.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/real.hpp"
+#include "../numeric/number.hpp"
 
 namespace Ariadne {
 

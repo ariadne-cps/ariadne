@@ -56,10 +56,10 @@ AtomicHybridAutomaton getValve()
     // Specify the differential equation for when the proportional control is in effect
     valve_automaton.new_mode(modulated,{let(aperture)=K*(Ref-height)});
 
-    valve_automaton.new_transition(modulated,finished_opening,closed,K*(Ref-height)<=0,urgent);
-    valve_automaton.new_transition(modulated,finished_closing,opened,K*(Ref-height)>=1,urgent);
-    valve_automaton.new_transition(opened,start_modulating,modulated,K*(Ref-height)<=1,urgent);
-    valve_automaton.new_transition(closed,start_modulating,modulated,K*(Ref-height)>=0,urgent);
+    valve_automaton.new_transition(modulated,finished_opening,closed,K*(Ref-height)<=0,EventKind::URGENT);
+    valve_automaton.new_transition(modulated,finished_closing,opened,K*(Ref-height)>=1,EventKind::URGENT);
+    valve_automaton.new_transition(opened,start_modulating,modulated,K*(Ref-height)<=1,EventKind::URGENT);
+    valve_automaton.new_transition(closed,start_modulating,modulated,K*(Ref-height)>=0,EventKind::URGENT);
 
     return valve_automaton;
 }

@@ -32,12 +32,12 @@
 
 #include "multi_index.hpp"
 
-#include "utility/typedefs.hpp"
-#include "utility/iterator.hpp"
-#include "utility/macros.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/iterator.hpp"
+#include "../utility/macros.hpp"
 
 
-#include "geometry/interval.hpp"
+#include "../geometry/interval.hpp"
 
 namespace Ariadne {
 
@@ -195,9 +195,18 @@ Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
 
 
 template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr)
-    : Expansion( ((ARIADNE_PRECONDITION(lst.size()!=0)),lst.begin()->first.size()), X(pr) )
+Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr) : Expansion(0)
 {
+    ARIADNE_PRECONDITION(lst.size()!=0);
+
+    _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
+    _coefficients = UniformList<X>(0,X(pr));
+    _zero_coefficient = X(pr);
+
+    SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
+    _indices.reserve(cap);
+    _coefficients.reserve(cap);
+
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {

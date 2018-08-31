@@ -179,6 +179,10 @@ template<class X> class Matrix
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>> =dummy>
         explicit Matrix(const M& A);
 
+    template<class M, class... PRS, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType,PRS...>>> =dummy>
+        explicit Matrix(const M& A, PRS... prs);
+
+
     template<class M> Matrix<X>& operator+=(const M& A);
     template<class M> Matrix<X>& operator-=(const M& A);
 
@@ -413,7 +417,7 @@ template<class M> struct MatrixRows {
     MatrixRowsColumn<M> operator[](SizeType j) { return MatrixRowsColumn<M>(_A,_is,j); }
     MatrixRange<M> operator[](Range js) { return MatrixRange<M>(_A,_is,js); }
     MatrixRows<M>& operator=(Matrix<ScalarType> const& B) {
-        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType pi=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(pi,j,B.get(i,j)); } } return *this; }
+        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType p_i=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(p_i,j,B.get(i,j)); } } return *this; }
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
@@ -566,10 +570,18 @@ template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvert
 template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>>>
 Matrix<X>::Matrix(const M& A) : Matrix(A.row_size(),A.column_size(),X(A.zero_element()))
 {
-    this->resize(A.row_size(),A.column_size());
     for(SizeType i=0; i!=this->row_size(); ++i) {
         for(SizeType j=0; j!=this->column_size(); ++j) {
             this->at(i,j)=X(A.get(i,j));
+        }
+    }
+}
+
+template<class X> template<class M, class... PRS, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType,PRS...>>>>
+Matrix<X>::Matrix(const M& A, PRS... prs) : Matrix(A.row_size(),A.column_size(),X(A.zero_element(),prs...)) {
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)=X(A.get(i,j),prs...);
         }
     }
 }
@@ -636,7 +648,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
         ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
         ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-        Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size());
+        Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()+A2.zero_element());
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]+A2[i][j];
@@ -648,7 +660,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
         ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
         ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-        Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size());
+        Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()-A2.zero_element());
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]-A2[i][j];
@@ -658,7 +670,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
-        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size());
+        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size(),s1*A2.zero_element());
         for(SizeType i=0; i!=A2.row_size(); ++i) {
             for(SizeType j=0; j!=A2.column_size(); ++j) {
                 R[i][j]=s1*A2[i][j];
@@ -668,7 +680,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size());
+        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()*s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]*s2;
@@ -678,7 +690,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size());
+        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()/s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]/s2;
@@ -763,7 +775,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2) {
         Matrix<X1> const& A1T=A1._AT;
         ARIADNE_PRECONDITION(A1T.row_size()==A2.row_size());
-        Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size());
+        Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size(),A1.zero_element()*A2.zero_element());
         for(SizeType i=0; i!=A1T.column_size(); ++i) {
             for(SizeType j=0; j!=A2.column_size(); ++j) {
                 for(SizeType k=0; k!=A1T.row_size(); ++k) {
@@ -777,7 +789,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> const& v2) {
         Matrix<X1> const& A1T=A1._AT;
         ARIADNE_PRECONDITION(A1T.row_size()==v2.size());
-        Vector<ArithmeticType<X1,X2>> v0(A1T.column_size());
+        Vector<ArithmeticType<X1,X2>> v0(A1T.column_size(),A1.zero_element()*v2.zero_element());
         for(SizeType i=0; i!=v0.size(); ++i) {
             for(SizeType j=0; j!=v2.size(); ++j) {
                 v0.at(i)+=A1T.at(j,i)*v2.at(j);

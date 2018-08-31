@@ -49,7 +49,7 @@ void verify_buck() {
 /*    cout << "\nComputing orbit...\n";
     Integer n=20; Real tmax=n*T;
     HybridTime evolution_time(tmax,2*n);
-    auto orbit=evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
     cout << "\nDrawing orbit...\n";
     plot("buck",{0<=V<=1,-1<=I<=1},Colour(.5,.0,.5),orbit.reach());

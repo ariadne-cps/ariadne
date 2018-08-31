@@ -30,15 +30,15 @@
 
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/tribool.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/set_interface.hpp"
+#include "../geometry/set_interface.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -88,7 +88,7 @@ class Zonotope
     //@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor. */
-    virtual ~Zonotope();
+    virtual ~Zonotope() = default;
     /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
     explicit Zonotope();
     /*! \brief Construct a zonotope of dimension \a d with no generators. */

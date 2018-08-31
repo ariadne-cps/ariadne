@@ -28,13 +28,13 @@ double mul(double,double);
 double div(double,double);
 }
 
-#include "utility/standard.hpp"
+#include "../utility/standard.hpp"
 
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/real.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/real.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -122,6 +122,7 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::GT:   return "gt"; break;
         case OperatorCode::LT:   return "lt"; break;
         case OperatorCode::SUBS:   return "subs"; break;
+        case OperatorCode::HLF:  return "hlf"; break;
         default: return "UNKNOWN";
     }
 }
@@ -181,7 +182,7 @@ OperatorKind kind(OperatorCode op) {
         case OperatorCode::EQ: case OperatorCode::NEQ: case OperatorCode::LEQ: case OperatorCode::GEQ: case OperatorCode::LT: case OperatorCode::GT:
             return OperatorKind::COMPARISON;
         default:
-            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");;
+            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");
     }
 }
 

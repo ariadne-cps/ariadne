@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "geometry/paver.hpp"
+#include "../geometry/paver.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/procedure.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/paving_interface.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "algebra/algebra.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/procedure.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../algebra/algebra.hpp"
 
 namespace Ariadne {
 
@@ -57,17 +57,6 @@ UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) 
     return r;
 }
 
-UpperIntervalType emulrng(const RawFloatVector& x, const RawFloatVector& z) {
-    return emulrng(reinterpret_cast<ExactFloatVector const&>(x),reinterpret_cast<ExactFloatVector const&>(z));
-}
-
-PositiveFloatDPUpperBound total_widths(const UpperBoxType& bx) {
-    PositiveFloatDPUpperBound res=bx.zero_element().width();
-    for(Nat i=0; i!=bx.size(); ++i) {
-        res+=(bx[i].width());
-    }
-    return res;
-}
 
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res=bx.zero_element().width();
@@ -94,9 +83,6 @@ PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vec
     return res/bx.size();
 }
 
-FloatDP maximum_scaled_width(const UpperBoxType& bx, const Vector<FloatDP>& sf) {
-    return maximum_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDPValue>const&>(sf)).raw();
-}
 
 FloatDP average_scaled_width(const UpperBoxType& bx, const Vector<FloatDP>& sf) {
     return average_scaled_width(bx,reinterpret_cast<Vector<PositiveFloatDPValue>const&>(sf)).raw();
@@ -111,17 +97,17 @@ OutputStream& ReducePaver::_write(OutputStream& os) const { return os << "Reduce
 OutputStream& ConstraintPaver::_write(OutputStream& os) const { return os << "ConstraintPaver()"; }
 OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os << "OptimalConstraintPaver()"; }
 
-Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const
+Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const
 {
     Vector<FloatDPValue> max_errors(paving.dimension());
     for(Nat i=0; i!=max_errors.size(); ++i) {
-        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-depth);
+        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(depth));
     }
 
     this->adjoin_outer_approximation_recursion(paving,set,depth,max_errors);
 }
 
-Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const Vector<FloatDPValue>& max_errors) const
+Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat depth, const Vector<FloatDPValue>& max_errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const ExactDouble RELATIVE_SMALLNESS=0.5_x;
@@ -159,7 +145,7 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
 
 Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
                                              const ValidatedConstrainedImageSet& set,
-                                             Int depth) const
+                                             Nat depth) const
 {
     const ExactBoxType& subdomain = set.reduced_domain();
     const ValidatedVectorFunction& function = set.function();
@@ -167,7 +153,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
 
     // Bound the maximum number of splittings allowed to draw a particular set.
     // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
-    static const Int MAXIMUM_DEPTH = 16;
+    static const Nat MAXIMUM_DEPTH = 16;
 
     // The basic approximation error when plotting with accuracy=0
     static const double BASIC_ERROR = 0.0625;
@@ -182,7 +168,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     List<ExactBoxType> splitdomains;
     unsplitdomains.append(subdomain);
     ExactBoxType splitdomain1,splitdomain2;
-    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
+    for(Nat i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
             Nat k; FloatDP err;
@@ -211,7 +197,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     }
 }
 
-int verbosity;
+unsigned int verbosity;
 
 namespace {
 
@@ -342,7 +328,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const ExactBoxType& d, const ValidatedVectorFunction& f,
-    const ValidatedVectorFunction& g, const ExactBoxType& c, const GridCell& b, ExactPoint x, ExactPoint y, Int e)
+    const ValidatedVectorFunction& g, const ExactBoxType& c, const GridCell& b, ExactPoint x, ExactPoint y, Nat e)
 {
     Nat verbosity=0;
 
@@ -398,11 +384,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         try {
             optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
         }
-        catch(NearBoundaryOfFeasibleDomainException e) {
+        catch(const NearBoundaryOfFeasibleDomainException& e) {
             break;
         }
-        catch(std::runtime_error e) {
-            ARIADNE_ERROR(""<<e.what()<<"\n");
+        catch(const std::runtime_error& e) {
+            ARIADNE_FAIL_MSG(""<<e.what()<<"\n");
             break;
         }
         ARIADNE_LOG(6,", x="<<ax<<", y="<<ay<<", z="<<az<<"\n");
@@ -489,7 +475,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(2," Intersection point: parameter="<<y<<"\n");
     }
 
-    if(b.tree_depth()>=e*Int(b.dimension())) {
+    if(b.tree_depth()>=Int(e*b.dimension())) {
         ARIADNE_LOG(2,"  Adjoining cell "<<b.box()<<"\n");
         r.adjoin(b);
     } else {
@@ -501,7 +487,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Int e)
+Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Nat e)
 {
     auto properties = fg.properties();
     auto pr = properties.precision();
@@ -509,7 +495,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const FloatDPValue XSIGMA = {TwoExp(-3),pr};
-    static const FloatDPValue  TERR = {TwoExp(-e-10),pr};
+    static const FloatDPValue  TERR = {TwoExp(-10),pr};
     static const FloatDPValue inf { Ariadne::inf };
 
     const Nat m=fg.argument_size();
@@ -589,7 +575,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
 
-    if(b.tree_depth()>=e*Int(b.dimension())) {
+    if(b.tree_depth()>=Int(e*b.dimension())) {
         ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
         r.adjoin(b);
     } else {
@@ -612,7 +598,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
 Void
 constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d, const ValidatedVectorFunction& f,
-                                      const ValidatedVectorFunction& g, const ExactBoxType& c, Int e)
+                                      const ValidatedVectorFunction& g, const ExactBoxType& c, Nat e)
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
@@ -629,7 +615,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
 
 Void
 procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d, const ValidatedVectorFunction& f,
-                                                const ValidatedVectorFunction& g, const ExactBoxType& c, Int e)
+                                                const ValidatedVectorFunction& g, const ExactBoxType& c, Nat e)
 {
     GridCell b=p.smallest_enclosing_primary_cell(cast_exact_box(apply(f,d)));
 
@@ -642,11 +628,11 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactB
     //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
     //std::cerr<<"Measure of paving is "<<p.measure()<<"\n";
 
-    if(dynamic_cast<GridTreeSet*>(&p)) { dynamic_cast<GridTreeSet&>(p).recombine(); }
+    if(dynamic_cast<GridTreePaving*>(&p)) { dynamic_cast<GridTreePaving&>(p).recombine(); }
 }
 
 Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d, const ValidatedVectorFunction& f,
-                                                   const ValidatedVectorFunction& g, const ExactBoxType& c, Int e)
+                                                   const ValidatedVectorFunction& g, const ExactBoxType& c, Nat e)
 {
     GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(g,d)),p.grid());
     ExactBoxType rc=intersection(cast_exact_box(apply(g,d)+UpperBoxType(g.result_size(),UpperIntervalType(-1,1))),c);
@@ -678,15 +664,15 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 } // namespace
 
 
-Void ReducePaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+Void ReducePaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
     return procedure_constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
 }
 
-Void ConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+Void ConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
     return constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
 }
 
-Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Int depth) const {
+Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
     return optimal_constraint_adjoin_outer_approximation(paving,set.reduced_domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
 }
 

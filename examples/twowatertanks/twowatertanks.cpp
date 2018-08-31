@@ -32,8 +32,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     // Declare the shared system variables
     RealVariable aperture1("aperture1");
@@ -63,14 +62,12 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(1.0);
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution... " << std::flush;
     HybridSet initial_set({valve|fully1},{height1==2,height2==4});
     HybridTime evolution_time(200.0,16);
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... "<<std::flush;

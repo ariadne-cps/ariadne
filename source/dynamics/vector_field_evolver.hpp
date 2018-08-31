@@ -34,15 +34,15 @@
 #include <iostream>
 
 
-#include "utility/tuple.hpp"
+#include "../utility/tuple.hpp"
 
-#include "dynamics/vector_field.hpp"
-#include "function/function_interface.hpp"
-#include "solvers/configuration_interface.hpp"
-#include "solvers/integrator_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "../dynamics/vector_field.hpp"
+#include "../function/function_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
+#include "../solvers/integrator_interface.hpp"
+#include "../dynamics/evolver_base.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -103,7 +103,7 @@ class VectorFieldEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
 
     using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
     using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
@@ -111,13 +111,13 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,false);
         return final; }
 
     //! \brief Compute an approximation to the reachable set under upper semantics.
     EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
         return reachable; }
     //@}
 
@@ -148,6 +148,8 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
+
+    virtual ~VectorFieldEvolverConfiguration() = default;
 
   private:
 

@@ -29,11 +29,11 @@
 #include "hybrid/hybrid_graphics.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
@@ -77,10 +77,10 @@ Int main(Int argc, const char* argv[])
 
     ball.new_mode(free_d);
 
-    ball.new_transition(b_yu,y_r,yu_g,impact); // Bounces on the upper boundary for y
-    ball.new_transition(b_xu,x_r,xu_g,impact); // Bounces on the upper boundary for x
-	ball.new_transition(b_yl,y_r,yl_g,impact); // Bounces on the lower boundary for y
-    ball.new_transition(b_xl,x_r,xl_g,impact); // Bounces on the lower boundary for x
+    ball.new_transition(b_yu,y_r,yu_g,EventKind::IMPACT); // Bounces on the upper boundary for y
+    ball.new_transition(b_xu,x_r,xu_g,EventKind::IMPACT); // Bounces on the upper boundary for x
+	ball.new_transition(b_yl,y_r,yl_g,EventKind::IMPACT); // Bounces on the lower boundary for y
+    ball.new_transition(b_xl,x_r,xl_g,EventKind::IMPACT); // Bounces on the lower boundary for x
 
     /// Finished building the automaton
 
@@ -108,7 +108,7 @@ Int main(Int argc, const char* argv[])
     HybridTime evolution_time(10.0,3);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;

@@ -21,32 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
 #include <iomanip>
 #include <limits>
 
-#include "numeric/rounding.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/series.hpp"
-#include "algebra/differential.hpp"
-#include "function/taylor_model.hpp"
-#include "function/taylor_series.hpp"
-#include "function/function.hpp"
-#include "utility/exceptions.hpp"
+#include "../numeric/rounding.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/series.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/taylor_series.hpp"
+#include "../function/function.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "algebra/expansion.inl.hpp"
-#include "algebra/evaluate.tpl.hpp"
-#include "algebra/algebra_operations.tpl.hpp"
+#include "../algebra/expansion.inl.hpp"
+#include "../algebra/evaluate.tpl.hpp"
+#include "../algebra/algebra_operations.tpl.hpp"
 
 #define VOLATILE ;
-#include "algebra/multi_index-noaliasing.hpp"
-#include "function/function_mixin.hpp"
-#include "algebra/vector.hpp"
+#include "../algebra/multi_index-noaliasing.hpp"
+#include "../function/function_mixin.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -79,14 +79,6 @@ Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, Do
 Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
 
-Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) { return ivl; }
-Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
-    Dyadic l(ivl.lower().raw()); Dyadic u(ivl.upper().raw());
-    return Interval<FloatDPUpperBound>(FloatDPLowerBound(l,pr),FloatDPUpperBound(u,pr)); }
-
-FloatDP const& convert_float(FloatDP const& flt, DoublePrecision) { return flt; }
-FloatMP convert_float(FloatDP const& flt, MultiplePrecision pr) { return FloatMP(flt.get_d(),pr); }
-
 Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
     return cast_exact(ivl); }
 Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
@@ -94,11 +86,6 @@ Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const&
     return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
 
 inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
-    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
-    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
-    return r;
-}
 
 } // namespace
 
@@ -130,7 +117,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
     // ERROR: test/test_nonlinear_programming.cpp:57: calling test_equality_constrained_optimisation(): std::runtime_error in
     // source/solvers/nonlinear_programming.cpp:1063: step: Assertion `norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2' failed.
     F::set_rounding_to_nearest();
-    p.resize(curr-p.begin());
+    p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
 template<class F>
@@ -147,7 +134,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
         }
         ++adv;
     }
-    p.resize(curr-p.begin());
+    p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
@@ -607,7 +594,6 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
     VOLATILE FloatDP u,ml,myv;
-    FloatError<PR> te=nul(r.error()); // Twice the maximum accumulated error
     FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
     ValidatedApproximation<F> clmu=c;
 
@@ -747,7 +733,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::ifma(const TaylorModel<Valid
     ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
-template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
+template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
     : NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>
 {
     typedef TaylorModel<ValidatedTag,F> ModelType;
@@ -785,7 +771,7 @@ template<class F> class AlgebraOperations<TaylorModel<ValidatedTag,F>>
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sort() {
     this->_expansion.sort();
     return *this;
-};
+}
 
 template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::unique()
 {
@@ -806,7 +792,7 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
         ++current;
     }
     this->error()+=e;
-    this->_expansion.resize(current-this->begin());
+    this->_expansion.resize(static_cast<SizeType>(current-this->begin()));
 
     return *this;
 }
@@ -919,7 +905,6 @@ template<class F> auto TaylorModel<ValidatedTag,F>::range() const -> RangeType {
 
 
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) const -> RangeType {
-    SizeType as=this->argument_size();
     FloatBounds<PR> g(0,0);
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         ConstReferenceType<MultiIndex> a=iter->index();
@@ -934,7 +919,6 @@ template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) c
 }
 
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Covector<RangeType> {
-    SizeType as=this->argument_size();
     Covector<FloatBounds<PR>> g(this->argument_size(),FloatBounds<PR>(0,0));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         ConstReferenceType<MultiIndex> a=iter->index();
@@ -1004,8 +988,8 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
         FloatValue<PR> xmag=cast_exact(mag(xr));
         TaylorModel<ValidatedTag,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<FloatValue<PR>>(p[n-1]);
-        for(Nat i=0; i!=(n-1); ++i) {
+        r=static_cast<FloatValue<PR>>(p[n-1u]);
+        for(Nat i=0; i!=(n-1u); ++i) {
             Nat j=(n-2)-i;
             r=s*r+static_cast<FloatValue<PR>>(p[j]);
         }
@@ -1110,7 +1094,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     TaylorModel<ValidatedTag,F> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
     for(Nat i=0; i!=d; ++i) {
-        res=centre_series[d-i-1]+x*res;
+        res=centre_series[d-i-1u]+x*res;
         // Don't sweep here...
     }
     res+=FloatDPBounds(-truncation_error,+truncation_error);
@@ -1154,10 +1138,10 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embe
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_discard_variables(const TaylorModel<ValidatedTag,F>& tm, Array<SizeType> const& discarded_variables) {
     typedef typename F::PrecisionType PR;
-    for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
-        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
+    for(SizeType i=0; i!=discarded_variables.size()-1u; ++i) {
+        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1u]);
     }
-    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
+    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1u]<tm.argument_size());
 
     const SizeType number_of_variables = tm.argument_size();
     const SizeType number_of_discarded_variables = discarded_variables.size();
@@ -1254,7 +1238,7 @@ template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
         }
     }
 
-    r.expansion().resize(riter - r.begin());
+    r.expansion().resize(static_cast<SizeType>(riter - r.begin()));
 }
 
 
@@ -1381,10 +1365,10 @@ template<class F> TaylorModel<ValidatedTag,F>
 TaylorModel<ValidatedTag,F>::_partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, NumericType c)
 {
     const SizeType as=x.argument_size();
-    Vector<TaylorModel<ValidatedTag,F>> y(as,TaylorModel<ValidatedTag,F>(as-1,x.sweeper()));
-    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1,i,x.sweeper()); }
-    y[k]=TaylorModel<ValidatedTag,F>::constant(as-1,c,x.sweeper());
-    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1,i-1,x.sweeper()); }
+    Vector<TaylorModel<ValidatedTag,F>> y(as,TaylorModel<ValidatedTag,F>(as-1u,x.sweeper()));
+    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i,x.sweeper()); }
+    y[k]=TaylorModel<ValidatedTag,F>::constant(as-1u,c,x.sweeper());
+    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i-1u,x.sweeper()); }
     return compose(x,y);
 }
 
@@ -1416,7 +1400,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // Replace x[k] with x[k]+tr
 
     // Split variables by degree in x[k]
-    Array<TaylorModel<ValidatedTag,F>> ary(deg+1,TaylorModel<ValidatedTag,F>(as,swp));
+    Array<TaylorModel<ValidatedTag,F>> ary(deg+1u,TaylorModel<ValidatedTag,F>(as,swp));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
         ConstReferenceType<FloatValue<PR>> c=iter->coefficient();
@@ -1724,7 +1708,6 @@ template<class F> Matrix<UpperIntervalType>
 jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeType>& p) {
     typedef typename F::PrecisionType PR;
     SizeType rs=f.size();
-    SizeType as=f.zero_element().argument_size();
     SizeType ps=p.size();
     Matrix<FloatBounds<PR>> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {
@@ -1884,7 +1867,7 @@ template<class F> Void TaylorModel<ApproximateTag,F>::ifma(const TaylorModel<App
 }
 
 
-template<class F> class AlgebraOperations<TaylorModel<ApproximateTag,F>>
+template<class F> struct AlgebraOperations<TaylorModel<ApproximateTag,F>>
     : NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>
 {
     typedef typename F::PrecisionType PR;

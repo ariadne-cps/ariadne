@@ -31,10 +31,10 @@
 
 #include <iostream>
 
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
 
-#include "numeric/operators.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -51,6 +51,7 @@ typedef Procedure<EffectiveNumber> EffectiveProcedure;
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
+/*
 struct ProcedureInstruction {
     explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o), arg(a) { }
     explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o), arg1(a1), arg2(a2) { }
@@ -60,6 +61,29 @@ struct ProcedureInstruction {
         struct { SizeType arg; Int np; };
         struct { SizeType arg1; SizeType arg2; };
     };
+};
+*/
+
+struct UnaryGradedArgs { SizeType arg; Int np; };
+struct BinaryArgs { SizeType arg1; SizeType arg2; };
+
+union UnionArgs {
+    UnaryGradedArgs ug;
+    BinaryArgs b;
+};
+
+struct ProcedureInstruction {
+    explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o) { args.ug.arg = a; }
+    explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o) { args.b.arg1 = a1; args.b.arg2 = a2; }
+    explicit ProcedureInstruction(OperatorCode o, SizeType a, Int n) : op(o) { args.ug.arg = a; args.ug.np = n; }
+    OperatorCode op;
+private:
+    UnionArgs args;
+public:
+    const SizeType& arg() const { return args.ug.arg; }
+    const SizeType& arg1() const { return args.b.arg1; }
+    const Int& np() const { return args.ug.np; }
+    const SizeType& arg2() const { return args.b.arg2; }
 };
 
 //! \brief An algorithmic procedure for computing a function.

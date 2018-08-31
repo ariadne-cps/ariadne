@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "../config.hpp"
 #include "stack_trace.hpp"
 
 #ifdef ARIADNE_ENABLE_STACK_TRACE
@@ -37,18 +37,15 @@ namespace Ariadne {
 
 void stack_trace() {
     static const unsigned int CALLSTACK_SIZE = 128;
-    static const unsigned int BACKTRACE_BUFFER_SIZE = 1024;
     int skip=0;
     void *callstack[CALLSTACK_SIZE];
     const int nMaxFrames = sizeof(callstack) / sizeof(callstack[0]);
-    char buffer[BACKTRACE_BUFFER_SIZE];
     int nFrames = backtrace(callstack, nMaxFrames);
     char **symbols = backtrace_symbols(callstack, nFrames);
     assert (symbols != nullptr);
     for (int i = skip; i < nFrames; i++) {
         Dl_info info;
         if (dladdr(callstack[i], &info)) {
-            const char* dli_sname = info.dli_sname;
             char* no_output_buffer = nullptr;
             size_t length;
             int status;

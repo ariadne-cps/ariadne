@@ -33,6 +33,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
+#include <cassert>
 #include "metaprogramming.hpp"
 
 namespace Ariadne {
@@ -97,7 +98,8 @@ class Array {
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator>
     Array(ForwardIterator first, ForwardIterator last)
-            : _size(std::distance(first,last)), _ptr(uninitialized_new(_size)) {
+            : _size(static_cast<SizeType>(std::distance(first,last))), _ptr(uninitialized_new(_size)) {
+        assert(std::distance(first,last) >= 0);
         this->_uninitialized_fill(first); }
 
     /*! \brief Conversion constructor. */

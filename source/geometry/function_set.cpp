@@ -21,49 +21,38 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/paver.hpp"
-#include "algebra/algebra.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../geometry/paver.hpp"
+#include "../algebra/algebra.hpp"
+#include "../algebra/expansion.inl.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
 namespace Ariadne {
 
-static const Nat verbosity = 0u;
-
-//! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
-enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
-//! \related TaylorConstrainedImageSet \brief The type of method currently used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DrawingMethod DRAWING_METHOD;
-//! \related TaylorConstrainedImageSet \brief The accuracy used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern uint DRAWING_ACCURACY;
-
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to discretise a nonlinear set.
-enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
+enum class DiscretisationMethod : std::uint8_t { SUBDIVISION, AFFINE, CONSTRAINT };
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DiscretisationMethod DISCRETISATION_METHOD;
 
-DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
-DiscretisationMethod DISCRETISATION_METHOD=SUBDIVISION_DISCRETISE;
+DrawingMethod DRAWING_METHOD=DrawingMethod::AFFINE;
+DiscretisationMethod DISCRETISATION_METHOD=DiscretisationMethod::SUBDIVISION;
 uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
@@ -192,10 +181,15 @@ Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFuncti
     return make_pair(jmax_in_row_imax,max_row_sum);
 }
 
+ApproximateNumber operator-(ValidatedUpperNumber const&, ValidatedUpperNumber const&);
+ApproximateNumber max(ValidatedLowerNumber const&, ValidatedUpperNumber const&);
 
-ExactIntervalType over_approximating_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
-    DoublePrecision prec;
-    return cast_exact_interval(UpperIntervalType(lb,ub,prec));
+Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
+    return Interval<ValidatedUpperNumber>(lb,ub);
+}
+
+ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl) {
+    return cast_exact_interval(UpperIntervalType(ivl,double_precision));
 }
 
 ExactBoxType under_approximation(const EffectiveBoxType& rbx) {
@@ -451,6 +445,7 @@ ValidatedLowerKleenean
 BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
+    if(this->codomain().dimension() == 0 && Ariadne::intersect(under_approximation(this->domain()),bx)) { return true; }
     ExactBoxType domain=under_approximation(this->domain());
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain);
@@ -503,6 +498,12 @@ BoundedConstraintSet
 intersection(const EffectiveBoxType& bx,const ConstraintSet& cs)
 {
     return intersection(cs,bx);
+}
+
+BoundedConstraintSet
+intersection(const BoundedConstraintSet& bcs1,const BoundedConstraintSet& bcs2)
+{
+    return BoundedConstraintSet(intersection(bcs1.constraint_bounds(),bcs2.constraint_bounds()),catenate(bcs1.constraints(),bcs2.constraints()));
 }
 
 BoundedConstraintSet
@@ -663,7 +664,7 @@ ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Eff
 
 
 Void
-ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ValidatedConstrainedImageSet set(over_approximation(this->domain()),this->function(),this->constraints());
     return set.adjoin_outer_approximation_to(paving,depth);
@@ -902,10 +903,9 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
 
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
-    DoublePrecision prec;
     ExactBoxType result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=over_approximating_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=over_approximation(make_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
     }
     return result;
 }
@@ -961,7 +961,6 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
     DoublePrecision prec;
 
     Vector<ExactIntervalType> domain = this->domain();
@@ -1171,25 +1170,25 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
 }
 
 
-GridTreeSet ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Int depth) const
+GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
 {
-    GridTreeSet paving(grid);
+    GridTreePaving paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }
 
-Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ValidatedConstrainedImageSet const& set=*this;
 
     switch(DISCRETISATION_METHOD) {
-        case SUBDIVISION_DISCRETISE:
+        case DiscretisationMethod::SUBDIVISION:
             SubdivisionPaver().adjoin_outer_approximation(paving,set,depth);
             break;
-        case AFFINE_DISCRETISE:
+        case DiscretisationMethod::AFFINE:
             AffinePaver().adjoin_outer_approximation(paving,set,depth);
             break;
-        case CONSTRAINT_DISCRETISE:
+        case DiscretisationMethod::CONSTRAINT:
             ConstraintPaver().adjoin_outer_approximation(paving,set,depth);
             break;
         default:
@@ -1231,7 +1230,15 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
 Void
 ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    AffineDrawer(Depth(1)).draw(cnvs,proj,*this);
+    // TODO : seriously improve
+    switch (DRAWING_METHOD) {
+    case DrawingMethod::BOX : box_draw(cnvs,proj); break;
+    case DrawingMethod::AFFINE : affine_draw(cnvs,proj,1); break;
+    case DrawingMethod::GRID : grid_draw(cnvs,proj,3); break;
+    case DrawingMethod::CURVE :
+    default:
+        affine_draw(cnvs,proj,1);
+    }
 }
 
 Void
@@ -1260,7 +1267,6 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     ARIADNE_ASSERT(set1.number_of_constraints()==set2.number_of_constraints());
 
     const Nat np = set1.number_of_parameters();
-    const Nat nc = set1.number_of_parameters();
 
     const ExactBoxType& domain1 = set1.domain();
     const ExactBoxType& domain2 = set2.domain();

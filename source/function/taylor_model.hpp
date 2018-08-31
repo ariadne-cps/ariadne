@@ -30,19 +30,19 @@
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/declarations.hpp"
-#include "utility/array.hpp"
-#include "utility/pointer.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/sweeper.hpp"
-#include "algebra/operations.hpp"
-#include "algebra/evaluate.hpp"
-#include "function/domain.hpp"
-#include "function/scaling.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/array.hpp"
+#include "../utility/pointer.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/sweeper.hpp"
+#include "../algebra/operations.hpp"
+#include "../algebra/evaluate.hpp"
+#include "../function/domain.hpp"
+#include "../function/scaling.hpp"
 
 namespace Ariadne {
 
@@ -738,7 +738,7 @@ template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<Ta
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }

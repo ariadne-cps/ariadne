@@ -34,15 +34,15 @@
 #include <set>
 #include <map>
 
-#include "function/function.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "expression/assignment.hpp"
-#include "expression/expression.hpp"
-#include "utility/logging.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression.hpp"
+#include "../output/logging.hpp"
 
-#include "hybrid/hybrid_automaton.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -89,7 +89,7 @@ class CompositeHybridAutomaton
     CompositeHybridAutomaton* clone() const { return new CompositeHybridAutomaton(*this); }
 
     //! \brief Virtual destructor.
-    virtual ~CompositeHybridAutomaton();
+    virtual ~CompositeHybridAutomaton() = default;
 
     //@}
 

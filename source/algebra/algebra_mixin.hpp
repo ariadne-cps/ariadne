@@ -28,8 +28,8 @@
 #ifndef ARIADNE_ALGEBRA_MIXIN_HPP
 #define ARIADNE_ALGEBRA_MIXIN_HPP
 
-#include "algebra/algebra_interface.hpp"
-#include "numeric/operators.hpp"
+#include "../algebra/algebra_interface.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 

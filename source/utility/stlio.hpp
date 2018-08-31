@@ -39,8 +39,8 @@
 #include <valarray>
 #include <set>
 #include <map>
-#include "utility/array.hpp"
-#include "utility/tuple.hpp"
+#include "../utility/array.hpp"
+#include "../utility/tuple.hpp"
 
 #include <memory>
 

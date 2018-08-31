@@ -37,9 +37,9 @@ template<class ES> class Orbit;
 
 //! \brief The semantics used to determine the trajectories of the system.
 //! \relates EvolverInterface
-enum Semantics {
-    LOWER_SEMANTICS, //!< Under-approximation with trajectories terminating at spacial discontinuities.
-    UPPER_SEMANTICS  //!< Over-approximations with all possibilities included as spacial discontinuities.
+enum class Semantics : std::uint8_t {
+    LOWER, //!< Under-approximation with trajectories terminating at spacial discontinuities.
+    UPPER  //!< Over-approximations with all possibilities included as spacial discontinuities.
 };
 
 
@@ -63,7 +63,7 @@ class EvolverInterface
     typedef ListSet<EnclosureType> EnclosureListType;
 
     //! \brief Virtual destructor.
-    virtual ~EvolverInterface() {};
+    virtual ~EvolverInterface() = default;
 
     //! \brief Cloning operator.
     virtual EvolverInterface<SystemType,EnclosureType,TerminationType>* clone() const = 0;

@@ -30,9 +30,9 @@
 
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -87,7 +87,7 @@ class SetInterfaceBase
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~SetInterfaceBase() { };
+    virtual ~SetInterfaceBase() = default;
     //! \brief Construct a dynamically-allocated copy.
     virtual SetInterfaceBase* clone() const = 0;
     //! \brief The dimension of the set.
@@ -360,7 +360,7 @@ class ValidatedRegularLocatedSetInterface
 
 
 
-class GridTreeSet;
+class GridTreePaving;
 
 //! \brief A Euclidean space \f$\R^d\f$ of dimension \a d.
 class EuclideanSpace
@@ -385,7 +385,7 @@ class EuclideanSpace
     //! \brief The interface satisified by bounded regular sets.
     typedef RegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef GridTreeSet SetApproximationType;
+    typedef GridTreePaving SetApproximationType;
   public:
     EuclideanSpace(const SizeType& d) : _dimension(d) { }
     const SizeType& dimension() const { return this->_dimension; }

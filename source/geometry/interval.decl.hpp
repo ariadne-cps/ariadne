@@ -24,13 +24,14 @@
 #ifndef ARIADNE_INTERVAL_DECL_HPP
 #define ARIADNE_INTERVAL_DECL_HPP
 
-#include "numeric/float.decl.hpp"
-#include "numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../numeric/number.decl.hpp"
 
 namespace Ariadne {
 
 template<class U> class Interval;
 template<class U> class VariableInterval;
+typedef Interval<Dyadic> DyadicInterval;
 typedef Interval<Rational> RationalInterval;
 typedef Interval<Real> RealInterval;
 

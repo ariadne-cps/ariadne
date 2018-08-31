@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
-#include "config.h"
+#include "../numeric/numeric.hpp"
+#include "../config.hpp"
 
 #include "algebra.hpp"
 #include "algebra_mixin.hpp"

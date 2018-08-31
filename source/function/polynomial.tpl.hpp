@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra/evaluate.tpl.hpp"
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/evaluate.tpl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -190,7 +190,7 @@ Void Polynomial<X>::cleanup()
     Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
     self->_expansion.index_sort(IndexComparisonType());
     Iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
-    self->_expansion.resize(new_end-self->_expansion.begin());
+    self->_expansion.resize(static_cast<SizeType>(new_end-self->_expansion.begin()));
 }
 
 template<class X>
@@ -346,7 +346,7 @@ template<class X>
 Polynomial<X>
 Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
 {
-    Polynomial<X> r(x.argument_size()-1);
+    Polynomial<X> r(x.argument_size()-1u);
     MultiIndex ra(r.argument_size());
     if(is_null(c)) {
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -355,20 +355,20 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             if(xak==0) {
                 ConstReferenceType<X> xv=xiter->coefficient();
                 for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+                for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
                 r.expansion().append(ra,xv);
             }
         }
     } else if(is_unit(c)) {
-        Polynomial<X> s(x.argument_size()-1);
-        Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+        Polynomial<X> s(x.argument_size()-1u);
+        Array< Polynomial<X> > p(x.degree()+1u,Polynomial<X>(x.argument_size()-1u));
 
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             ConstReferenceType<MultiIndex> xa=xiter->index();
             ConstReferenceType<X> xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
             assert(ra.degree()+xak==xa.degree());
             p[xak].expansion().append(ra,xv);
         }
@@ -378,10 +378,10 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             r+=p[i];
         }
     } else {
-        Polynomial<X> s(x.argument_size()-1);
-        Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
+        Polynomial<X> s(x.argument_size()-1u);
+        Array< Polynomial<X> > p(x.degree()+1u,Polynomial<X>(x.argument_size()-1u));
 
-        Array<X> cpowers(x.degree()+1);
+        Array<X> cpowers(x.degree()+1u);
         cpowers[0]=static_cast<X>(1); cpowers[1]=c;
         if(x.degree()>=2) { cpowers[2]=sqr(c); }
         for(Nat j=3; j<=x.degree(); ++j) {
@@ -393,7 +393,7 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             ConstReferenceType<X> xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
             assert(ra.degree()+xak==xa.degree());
             p[xak].expansion().append(ra,xv);
         }

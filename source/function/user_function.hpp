@@ -31,19 +31,19 @@
 #include <cstdarg>
 #include <iosfwd>
 
-#include "function/function_interface.hpp"
-#include "function/function_mixin.hpp"
+#include "../function/function_interface.hpp"
+#include "../function/function_mixin.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "function/taylor_model.hpp"
-#include "algebra/differential.hpp"
-#include "function/formula.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../function/taylor_model.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/formula.hpp"
 
 #include "function_mixin.hpp"
 
@@ -54,9 +54,9 @@ namespace Ariadne {
 template<SizeType AS, SizeType PS=0u, DegreeType SM=255u>
 struct ScalarFunctionData
 {
-    static const SizeType argument_size() { return AS; }
-    static const SizeType parameter_size() { return PS; }
-    static const DegreeType smoothness() { return SM; }
+    static SizeType argument_size() { return AS; }
+    static SizeType parameter_size() { return PS; }
+    static DegreeType smoothness() { return SM; }
 };
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
@@ -121,13 +121,13 @@ class VectorFunctionData
 {
   public:
     //!
-    static const SizeType result_size() { return RS; }
+    static SizeType result_size() { return RS; }
     //!
-    static const SizeType argument_size() { return AS; }
+    static SizeType argument_size() { return AS; }
     //!
-    static const SizeType parameter_size() { return PS; }
+    static SizeType parameter_size() { return PS; }
     //!
-    static const DegreeType smoothness() { return SM; }
+    static DegreeType smoothness() { return SM; }
 };
 
 

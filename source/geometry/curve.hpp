@@ -30,10 +30,10 @@
 
 #include <memory>
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "function/function.hpp"
-#include "output/graphics_interface.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../function/function.hpp"
+#include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -61,7 +61,7 @@ class CurveInterface
     typedef Vector<FloatDPApproximation> TangentVectorType;
   public:
     /*! \brief Destructor. */
-    virtual ~CurveInterface() { };
+    virtual ~CurveInterface() = default;
     /*! \brief Return a new dynamically-allocated copy of the curve. */
     virtual CurveInterface* clone() const = 0;
     /*! \brief The dimension of the space the curve lies in. */
@@ -95,7 +95,7 @@ class Curve
     typedef CurveInterface::TangentVectorType TangentVectorType;
   public:
     /*! \brief Destructor. */
-    virtual ~Curve();
+    virtual ~Curve() = default;
     /*! \brief Constructor. */
     Curve(const Function<EffectiveTag,IntervalDomainType,BoxDomainType>& f);
     /*! \brief Copy constructor. */

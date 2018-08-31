@@ -28,11 +28,11 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "utility/logging.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/tuple.hpp"
+#include "../output/logging.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/tuple.hpp"
 
 namespace Ariadne {
 
@@ -40,7 +40,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Affine;
 
-enum LinearProgramStatus { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
+enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
 
 class DegenerateFeasibilityProblemException : public std::runtime_error {
   public:
@@ -119,7 +119,7 @@ template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds T
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).
-enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
+enum class Slackness : std::int8_t { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
 //! \ingroup OptimisationModule

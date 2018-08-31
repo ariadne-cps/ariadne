@@ -30,13 +30,13 @@
 
 
 #include <vector>
-#include "utility/stlio.hpp"
-#include "utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/macros.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../hybrid/discrete_location.hpp"
 
-#include "geometry/box.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -60,7 +60,7 @@ class ListSet
     typedef typename std::vector<BS>::iterator Iterator;
     typedef BS value_type;
 
-    virtual ~ListSet() { }
+    virtual ~ListSet() = default;
 
     ListSet() { };
     explicit ListSet(Nat d) { };
@@ -70,7 +70,7 @@ class ListSet
     ListSet(const std::vector<BS>& lst) {
         this->_data.insert(this->end(),lst.begin(),lst.end()); }
     template<class Iter> ListSet(Iter first, Iter last) {
-        this->_data.insert(this->end(),first,last); };
+        this->_data.insert(this->end(),first,last); }
 
     ListSet<BS>* clone() const { return new ListSet<BS>(*this); }
 

@@ -21,61 +21,59 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "function/constraint.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "geometry/enclosure.hpp"
+#include "../function/constraint.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../geometry/enclosure.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
 
-#include "function/function_model.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/paver.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/space.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/space.hpp"
 
-#include "algebra/expansion.inl.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 
 namespace Ariadne {
-
-static const Nat verbosity = 0u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
@@ -93,14 +91,9 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl)
 
 namespace {
 
-ExactIntervalType cast_exact_interval(const Real& r) {
-    DoublePrecision pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
-}
-
 ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
     Vector<ErrorNumericType> errs(bx.dimension());
-    DoublePrecision dp;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
         make_lpair(dom[i],errs[i])=make_domain(bx[i]);
@@ -112,12 +105,8 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
     }
 
     return res;
-};
-
-// TODO: Make more efficient
-inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
 }
+
 } // namespace
 
 Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
@@ -182,6 +171,12 @@ Enclosure::set_drawer(Drawer const& drawer) {
 }
 
 /*
+
+// TODO: Make more efficient
+inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
+    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+}
+
 // FIXME: What if solving for constraint leaves domain?
 Void Enclosure::_solve_zero_constraints() {
     this->_check();
@@ -324,7 +319,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
     : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
@@ -353,7 +347,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
 {
     ARIADNE_ASSERT_MSG(domain.size()==state_function.argument_size(),"domain="<<domain<<", state_function="<<state_function);
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
@@ -547,8 +540,8 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModelDP phi)
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),FloatDPValue(h));
+    FloatDPValue h=phi.domain()[phi.result_size()].upper();
+    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),h);
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
 }
@@ -583,6 +576,13 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, V
     if(phi.domain()[phi.result_size()].lower()<time_domain.upper()) {
         this->new_negative_parameter_constraint(time_step_function-embed(elps,time_domain));
     }
+    this->_check();
+}
+
+Void Enclosure::new_state_time_bound(ValidatedScalarFunction gamma) {
+    ARIADNE_ASSERT(gamma.argument_size()==this->state_dimension());
+    this->_is_fully_reduced=false;
+    this->_constraints.append(compose(gamma,this->state_function())<=this->time_function());
     this->_check();
 }
 
@@ -913,7 +913,6 @@ Enclosure::split_first_order() const
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat imax=nonlinearities.row_size();
     Nat jmax_in_row_imax=nonlinearities.column_size();
     FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
@@ -928,7 +927,6 @@ Enclosure::split_first_order() const
             }
         }
         if(row_sum>max_row_sum) {
-            imax=i;
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -1016,15 +1014,15 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 
 
-Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),depth);
 }
 
 
-GridTreeSet Enclosure::outer_approximation(const Grid& grid, Int depth) const
+GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat depth) const
 {
-    GridTreeSet paving(grid);
+    GridTreePaving paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }
@@ -1291,7 +1289,7 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 
 Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat depth) const {
     GridDrawer(depth).draw(canvas,projection,this->state_time_auxiliary_set());
-};
+}
 
 
 

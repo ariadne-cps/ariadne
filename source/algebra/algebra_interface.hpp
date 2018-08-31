@@ -31,10 +31,10 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "utility/writable.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/pointer.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/writable.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/pointer.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -98,7 +98,7 @@ template<class X> class AlgebraInterface
     typedef X NumericType;
   public:
     //! \brief Virtual destructor.
-    virtual ~AlgebraInterface<X>() { }
+    virtual ~AlgebraInterface<X>() = default;
     //! \brief Create a dynamically-allocated copy.
     virtual AlgebraInterface<X>* _create_copy() const = 0;
     //! \brief Create the zero element in the same algebra as the current object.

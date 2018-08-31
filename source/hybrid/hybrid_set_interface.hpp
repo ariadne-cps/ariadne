@@ -33,13 +33,13 @@
 #include <map>
 
 
-#include "utility/tribool.hpp"
-#include "geometry/set_interface.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "expression/space.hpp"
-#include "geometry/set.hpp"
-#include "expression/expression_set.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
+#include "../utility/tribool.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../symbolic/space.hpp"
+#include "../geometry/set.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
 
 namespace Ariadne {
 
@@ -49,7 +49,7 @@ namespace Ariadne {
 class HybridSetInterfaceBase
 {
   public:
-    virtual ~HybridSetInterfaceBase() { }
+    virtual ~HybridSetInterfaceBase() = default;
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual Set<RealVariable> variables(DiscreteLocation) const = 0;
     inline SetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }

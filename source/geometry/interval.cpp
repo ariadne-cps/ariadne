@@ -22,7 +22,7 @@
  */
 
 #include "interval.hpp"
-#include "numeric/dyadic.hpp"
+#include "../numeric/dyadic.hpp"
 
 namespace Ariadne {
 

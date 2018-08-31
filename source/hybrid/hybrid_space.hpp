@@ -30,11 +30,11 @@
 
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/space.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/space.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
 
 
 namespace Ariadne {
@@ -44,11 +44,12 @@ class LocationException : public std::runtime_error {
     LocationException(const StringType& what) : std::runtime_error(what) { }
 };
 
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 class HybridSpaceInterface
 {
   public:
+    virtual ~HybridSpaceInterface() = default;
     virtual Bool has_location(const DiscreteLocation& q) const  = 0;
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
@@ -83,7 +84,7 @@ class HybridSpace
     //! \brief The interface satisified by located sets in the space.
     typedef HybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridGridTreePaving SetApproximationType;
   public:
     HybridSpace(const HybridSpaceInterface& hspc) : _ptr(hspc.clone()) { }
     HybridSpace(const HybridSpaceInterface* hspc_ptr) : _ptr(hspc_ptr) { }

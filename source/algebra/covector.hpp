@@ -30,9 +30,9 @@
 #ifndef ARIADNE_COVECTOR_HPP
 #define ARIADNE_COVECTOR_HPP
 
-#include "utility/metaprogramming.hpp"
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 

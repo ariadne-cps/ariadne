@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "output/drawer.hpp"
+#include "../output/drawer.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -60,7 +60,7 @@ OutputStream& GridDrawer::_write(OutputStream& os) const {
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
 
 
-Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Int splittings_remaining)
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining)
 {
     if(splittings_remaining==0) {
         set.affine_over_approximation().draw(cnvs,proj);
@@ -133,12 +133,12 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     for(Nat n=0; n!=subdomains.size(); ++n) {
         try {
             set.restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
-        } catch(std::runtime_error& e) {
+        } catch(const std::runtime_error& e) {
             ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set<<"\n");
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
-};
+}
 
 
 

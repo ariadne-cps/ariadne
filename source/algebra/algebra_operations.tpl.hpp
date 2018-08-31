@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/exceptions.hpp"
-#include "algebra/operations.hpp"
+#include "../utility/exceptions.hpp"
+#include "../algebra/operations.hpp"
 
-#include "algebra/series.hpp"
-#include "function/taylor_series.hpp"
+#include "../algebra/series.hpp"
+#include "../function/taylor_series.hpp"
 
 namespace Ariadne {
 
@@ -239,7 +239,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>(Sqrt(),X(1));
-    Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
+    Nat d=static_cast<Nat>(integer_cast<Int>((log((1-eps)*tol)/log(eps)+1)));
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
     ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
@@ -257,7 +257,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
 
 template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
 {
-    typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -322,16 +321,14 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
 template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 {
-    typedef typename A::NumericType X;
-
     auto avg=x.average();
     auto rad=x.radius();
     auto tol = cast_exact(x.tolerance());
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(decide(Dyadic(pow(two,sfp))<rad)) { ++sfp; }
-    Dyadic sf=pow(two,sfp);
+    while(decide(Dyadic(pow(two,static_cast<int>(sfp)))<rad)) { ++sfp; }
+    Dyadic sf=pow(two,static_cast<int>(sfp));
     A y = (x-avg)/sf;
     auto yrad=rad*mag((avg-avg)+sf);
 
@@ -374,7 +371,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
     auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
-    auto rng=avg.pm(rad);
     Int n=integer_cast<Int>( round(avg/pi) );
 
     // Range reduce; use sin(x)=sin(x-2*n*pi)=sin((2*n+1)*pi-x)

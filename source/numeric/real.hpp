@@ -30,28 +30,50 @@
 #ifndef ARIADNE_REAL_HPP
 #define ARIADNE_REAL_HPP
 
-#include "utility/typedefs.hpp"
-#include "utility/pointer.hpp"
+#include <functional>
 
-#include "numeric/logical.decl.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/pointer.hpp"
+
+#include "../numeric/logical.decl.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 #include "paradigm.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/sequence.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/sequence.hpp"
 
 namespace Ariadne {
+
+//! A group
+template<class G> class Group {
+  public:
+    G ineg() const; //!< \brief Inplace negation.
+    friend G add(G,G); //!< \brief Addition
+    friend G neg(G); //!< \brief Negation \relates Group
+    friend OutputStream& operator<<(OutputStream& os, Group<G> const&); //!< \brief Write.
+};
+
+//! Symmetries
+class Symmetry : public Group<Symmetry> {
+  public:
+    friend Symmetry sub(Symmetry,Symmetry); //!< \brief Subtraction
+};
 
 class Real;
 class LowerReal;
 class UpperReal;
+class NaiveReal;
 class PositiveReal;
 class PositiveLowerReal;
 class PositiveUpperReal;
+class PositiveNaiveReal;
 template<> struct IsNumericType<Real> : True { };
 
 class ValidatedReal;
+class ValidatedLowerReal;
+class ValidatedUpperReal;
+class ApproximateReal;
 
 //! \ingroup NumericModule
 //! \brief The accuracy of a computation of a value in a metric space. The result must be correct to within 2<sup>-acc</sup> bits.
@@ -69,7 +91,12 @@ extern const Real infinity;
 class RealInterface;
 
 //! \ingroup NumericModule
-//! \brief %Real numbers supporting elementary functions, comparisons and limits.
+//! \brief %Real number type \f$\R\f$ supporting elementary functions, comparisons and limits.
+//! Effectively computable real numbers can be computed to arbitrary given accuracy as a (dyadic) rational approximation;
+//! equivalently, as arbitrarily tight (dyadic) rational intervals.
+//! They can be given as fast-converging Cauchy sequence of (dyadic) rationals,
+//! or as a nested sequence of nested (dyadic) rational intervals whose intersection is the number itself.
+//! \sa LowerReal, UpperReal, NaiveReal
 class Real
     : public DeclareRealOperations<Real,PositiveReal>
     , public DeclareAnalyticFieldOperations<Real>
@@ -93,7 +120,7 @@ class Real
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
     explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
     //explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
-    //explicit Real(StrongCauchySequence<Dyadic> const&); //!< Construct from a strongly convergent sequence of dyadic numbers.
+    //explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \c |w_m-w_n|\leq2<sup>min(m,n)</sup>.
     //@}
 
     //@{
@@ -101,7 +128,7 @@ class Real
     explicit Real(double); //!< Unsafe construction from a double is DEPRECATED
 
 #ifdef DOXYGEN
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Real(N n); //!< Convert from a builtin integer (but not a float).
+    Real(Int n); //!< Convert from a builtin integer.
 #else
     template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Real(M m);
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Real(N n);
@@ -140,6 +167,20 @@ class Real
     //@}
 
     //@{
+    //! \name Standard arithmetic operators
+    friend Real operator+(Real const& r); //!< Unary plus.
+    friend Real operator-(Real const& r); //!< Unary minus.
+    friend Real operator+(Real const& r1, Real const& r2); //!< Plus.
+    friend Real operator-(Real const& r1, Real const& r2); //!< Minus.
+    friend Real operator*(Real const& r1, Real const& r2); //!< Times.
+    friend Real operator/(Real const& r1, Real const& r2); //!< Divides.
+    friend Real& operator+=(Real& r1, Real const& r2); //!< Inplace plus.
+    friend Real& operator-=(Real& r1, Real const& r2); //!< Inplace minus.
+    friend Real& operator*=(Real& r1, Real const& r2); //!< Inplace times.
+    friend Real& operator/=(Real& r1, Real const& r2); //!< Inplace divides.
+    //@}
+
+    //@{
     //! \name Named arithmetical functions
     friend Real pos(Real const& r); //!< Identity \a +r.
     friend Real neg(Real const& r); //!< Negative \a -r.
@@ -159,25 +200,10 @@ class Real
     friend Real sqrt(Real const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
     friend Real exp(Real const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
     friend Real log(Real const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
-    friend Real atan(Real const& r); //!< The arc-tangent of \a r.
     friend Real sin(Real const& r); //!< The sine of \a r.
     friend Real cos(Real const& r); //!< The cosine of \a r.
     friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
-    friend Real stan(Real const& r); //!< The arc-tangent of \a r.
-    //@}
-
-    //@{
-    //! \name Standard arithmetic operators
-    friend Real operator+(Real const& r); //!< Unary plus.
-    friend Real operator-(Real const& r); //!< Unary minus.
-    friend Real operator+(Real const& r1, Real const& r2); //!< Plus.
-    friend Real operator-(Real const& r1, Real const& r2); //!< Minus.
-    friend Real operator*(Real const& r1, Real const& r2); //!< Times.
-    friend Real operator/(Real const& r1, Real const& r2); //!< Divides.
-    friend Real& operator+=(Real& r1, Real const& r2); //!< Inplace plus.
-    friend Real& operator-=(Real& r1, Real const& r2); //!< Inplace minus.
-    friend Real& operator*=(Real& r1, Real const& r2); //!< Inplace times.
-    friend Real& operator/=(Real& r1, Real const& r2); //!< Inplace divides.
+    friend Real atan(Real const& r); //!< The arc-tangent of \a r.
     //@}
 
     //@{
@@ -205,22 +231,23 @@ class Real
     friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
     friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
     friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.
+
+    friend Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
+        //!< A nonextensional choice, between the value of any of the valid cases.
+    friend Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);
+        //!< A value equal to that of each of the valid cases.
     //@}
 
     //@{
     //! \name Limit operations.
     friend Real limit(ConvergentSequence<DyadicBounds> const& qbs);
         //!< Create a real number from a sequence of dyadic bounds whose width converges to 0.
-    friend Real limit(StrongCauchySequence<Dyadic> const& qs);
+    friend Real limit(FastCauchySequence<Dyadic> const& qs);
         //!< Create a real number from a sequence of dyadic numbers \em q<sub>n</sub> for which
         //!< <em>|q<sub>n<sub>1</sub></sub>-q<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
-    friend Real limit(StrongCauchySequence<Real> const& rs);
+    friend Real limit(FastCauchySequence<Real> const& rs);
         //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
         //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
-    friend Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
-        //!< A nonextensional choice, between the value of any of the valid cases.
-    friend Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);
-        //!< A value equal to that of each of the valid cases.
     //@}
 
 
@@ -253,17 +280,26 @@ class Real
     Real(std::uint64_t m, Void*);
 };
 
-template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };
-template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { };
+template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { }
+template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Real::Real(N n) : Real(std::int64_t(n),nullptr) { }
 
 Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2);
 Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2);
 
 //! \ingroup NumericModule
-//! \brief Computable lower real numbers defined by conversion to concrete floats.
+//! Lower real number type \f$\R_<\f$.
+//! An effectively computable <em>lower real</em> is a real number for which it is possible to compute arbitrarily accurate (dyadic) rational lower bounds;
+//! equivalently, a bounded increasing sequence of (dyadic) rationals converging to the number.
+//! However, the convergence rate is not known, and there may be arbitrarily large upward jumps in the sequence.
+//! \details Multiplication and division are unsupported, since given \f$x \geq \underline{x}\f$ and \f$y\geq\underline{y}\f$,
+//! we cannot deduce \f$x \times y\geq\underline{x}\times\underline{y}\f$ if the bounds are negative.
+//! However, multiplication and reciprocation of positive lower reals <em>is</em> supported.
+//!
+//! %Positive lower real numbers are a natural type for representing the measure of an open set,
+//! or the separation between two points in a metric space.
+//! \sa Real, UpperReal, NaiveReal
 class LowerReal
-    : public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
-    , public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>
+    : public DirectedAbelian<LowerReal,UpperReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;
@@ -277,32 +313,77 @@ class LowerReal
   public:
     FloatDPLowerBound operator() (DoublePrecision pr) const;
     FloatMPLowerBound operator() (MultiplePrecision pr) const;
-    FloatDPLowerBound get(DoublePrecision pr) const;
-    FloatMPLowerBound get(MultiplePrecision pr) const;
+
+    //@{
+    //! \name Computation of rigorous validated bounds on the number
+    FloatDPLowerBound get(DoublePrecision pr) const; //!< Get a lower bound using double-precision arithmetic.
+    FloatMPLowerBound get(MultiplePrecision pr) const; //!< Get a lower bound using multiple-precision floating-point arithmetic.
+    //@}
+
   public:
-    friend LowerReal max(LowerReal const&, LowerReal const&);
-    friend LowerReal min(LowerReal const&, LowerReal const&);
+    //@{
+    //! \name Lattice operations
+    friend PositiveNaiveReal abs(LowerReal const& r) = delete; //!< \em No absolute value operator!
+    friend LowerReal min(LowerReal const& r1, LowerReal const& r2); //!< The mimimum of \a r1 and \a r2.
+    friend LowerReal max(LowerReal const& r1, LowerReal const& r2); //!< The maximum of \a r1 and \a r2.
+    //@}
 
-    friend LowerReal neg(UpperReal const&);
-    friend UpperReal neg(LowerReal const&);
-    friend LowerReal add(LowerReal const&, LowerReal const&);
-    friend LowerReal sub(LowerReal const&, UpperReal const&);
-    friend UpperReal sub(UpperReal const&, LowerReal const&);
+    //@{
+    //! \name Named arithmetical functions
+    friend LowerReal pos(LowerReal const& r); //!< Identity \a +r.
+    friend UpperReal neg(LowerReal const& r); //!< Negative \a -r.
+    friend LowerReal neg(UpperReal const& r); //!< Negative \a -r.
+    friend LowerReal hlf(LowerReal const& r); //!< Half \a r÷2.
+    friend LowerReal add(LowerReal const& r1, LowerReal const& r2); //!< \brief Sum \a r1+r2.
+    friend LowerReal sub(LowerReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+    friend NaiveReal mul(LowerReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
+    //@}
 
-    friend PositiveLowerReal sqrt(PositiveLowerReal const&);
-    friend PositiveLowerReal exp(LowerReal const&);
-    friend LowerReal log(PositiveLowerReal const&);
-    friend LowerReal atan(LowerReal const&);
+    //@{
+    //! \name Named arithmetical functions on positive numbers
+    friend PositiveLowerReal add(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Addition \a r1+r2 preserves positivity.
+    friend PositiveLowerReal mul(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
+    friend PositiveLowerReal div(PositiveLowerReal const& r1, PositiveUpperReal const& r2); //!< Division \a r1÷r2 preserves positivity.
+    friend PositiveUpperReal div(PositiveUpperReal const& r1, PositiveLowerReal const& r2); //!< Division \a r1÷r2 preserves positivity.
+    friend PositiveLowerReal rec(PositiveUpperReal const& r); //!< Reciprocal \a 1/r preserves positivity.
+    friend PositiveUpperReal rec(PositiveLowerReal const& r); //!< Reciprocal \a 1/r preserves positivity.
+    //@}
 
-    friend PositiveLowerReal add(PositiveLowerReal const&, PositiveLowerReal const&);
-    friend PositiveLowerReal mul(PositiveLowerReal const&, PositiveLowerReal const&);
+    //@{
+    //! \name Algebraic and transcendental functions
+    friend PositiveLowerReal sqrt(PositiveLowerReal const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
+    friend PositiveLowerReal exp(LowerReal const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
+    friend LowerReal log(PositiveLowerReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
+    friend LowerReal atan(LowerReal const& r); //!< The arc-tangent of \a r.
+    friend PositiveLowerReal atan(PositiveLowerReal const& r); //!< Arc-tangent preserves positivity
+    //@}
+
+    //@{
+    //! \name Limit operations.
+    friend LowerReal limit(IncreasingSequence<Dyadic> const& qlbs);
+        //!< Create a real number from an increasing sequence of dyadic lower bounds.
+    //@}
+
+    //@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, LowerReal const& r); //< Write to an output stream.
+    //@}
 };
 
 //! \ingroup NumericModule
-//! \brief Computable lower real numbers defined by conversion to concrete floats.
+//! \brief Upper real number type \f$\R_>\f$.
+//! An effectively computable <em>upper real</em> is a real number for which it is possible to compute arbitrarily accurate (dyadic) rational upper bounds;
+//! equivalently, a bounded decreasing sequence of (dyadic) rationals converging to the number.
+//! However, the convergence rate is not known, and there may be arbitrarily large downward jumps in the sequence.
+//! \details Multiplication and division are unsupported, since given \f$x \leq \overline{x}\f$ and \f$y\leq\overline{y}\f$,
+//! we cannot deduce \f$x \times y\leq\overline{x}\times\overline{y}\f$.
+//! However, multiplication and reciprocation of positive upper reals <em>is</em> supported.
+//!
+//! %Positive upper real numbers are a natural type for representing upper bounds of a distance or norm,
+//! including the radius of a ball, or the measure of an closed set.
+//! \sa Real, LowerReal, NaiveReal
 class UpperReal
-    : public DirectedRing<UpperReal,LowerReal,PositiveUpperReal>
-    , public DirectedRing<LowerReal,UpperReal,PositiveLowerReal>
+    : public DirectedAbelian<UpperReal,LowerReal>
 {
   private: public:
     SharedPointer<Real::Interface> _ptr;
@@ -316,25 +397,189 @@ class UpperReal
   public:
     FloatDPUpperBound operator() (DoublePrecision pr) const;
     FloatMPUpperBound operator() (MultiplePrecision pr) const;
-    FloatDPUpperBound get(DoublePrecision pr) const;
-    FloatMPUpperBound get(MultiplePrecision pr) const;
+
+    //@{
+    //! \name Computation of rigorous validated upper bounds
+    FloatDPUpperBound get(DoublePrecision pr) const; //!< Get a lower bound using double-precision arithmetic.
+    FloatMPUpperBound get(MultiplePrecision pr) const; //!< Get a lower bound using multiple-precision floating-point arithmetic.
+    //@}
+
   public:
-    friend UpperReal max(UpperReal const&, UpperReal const&);
-    friend UpperReal min(UpperReal const&, UpperReal const&);
+    //@{
+    //! \name Lattice operations
+    friend PositiveNaiveReal abs(UpperReal const& r) = delete; //!< \em No absolute value operator!
+    friend UpperReal min(UpperReal const& r1, UpperReal const& r2); //!< The mimimum of \a r1 and \a r2.
+    friend UpperReal max(UpperReal const& r1, UpperReal const& r2); //!< The maximum of \a r1 and \a r2.
+    //@}
 
-    friend UpperReal neg(LowerReal const&);
-    friend LowerReal neg(UpperReal const&);
-    friend UpperReal add(UpperReal const&, UpperReal const&);
-    friend UpperReal sub(UpperReal const&, LowerReal const&);
-    friend LowerReal sub(LowerReal const&, UpperReal const&);
+    //@{
+    //! \name Named arithmetical functions
+    friend UpperReal pos(UpperReal const& r); //!< Identity \a +r.
+    friend LowerReal neg(UpperReal const& r); //!< Negative \a -r.
+    friend UpperReal neg(LowerReal const& r); //!< Negative \a -r.
+    friend UpperReal hlf(UpperReal const& r); //!< Half \a r÷2.
+    friend UpperReal add(UpperReal const& r1, UpperReal const& r2); //!< \brief Sum \a r1+r2.
+    friend UpperReal sub(UpperReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+    friend NaiveReal mul(UpperReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
+    //@}
 
-    friend PositiveUpperReal sqrt(PositiveUpperReal const&);
-    friend PositiveUpperReal exp(UpperReal const&);
-    friend UpperReal log(PositiveUpperReal const&);
-    friend UpperReal atan(UpperReal const&);
+    //@{
+    //! \name Named arithmetical functions on positive numbers
+    friend PositiveUpperReal add(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Addition \a r1+r2 preserves positivity.
+    friend PositiveUpperReal mul(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
+    friend PositiveUpperReal div(PositiveUpperReal const& r1, PositiveLowerReal const& r2); //!< Division \a r1÷r2 preserves positivity.
+    friend PositiveLowerReal div(PositiveLowerReal const& r1, PositiveUpperReal const& r2); //!< Division \a r1÷r2 preserves positivity.
+    friend PositiveUpperReal rec(PositiveLowerReal const& r); //!< Reciprocal \a 1/r preserves positivity.
+    friend PositiveLowerReal rec(PositiveUpperReal const& r); //!< Reciprocal \a 1/r preserves positivity.
+    //@}
 
-    friend PositiveUpperReal add(PositiveUpperReal const&, PositiveUpperReal const&);
-    friend PositiveUpperReal mul(PositiveUpperReal const&, PositiveUpperReal const&);
+    //@{
+    //! \name Algebraic and transcendental functions
+    friend PositiveUpperReal sqrt(PositiveUpperReal const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
+    friend PositiveUpperReal exp(UpperReal const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
+    friend UpperReal log(PositiveUpperReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
+    friend UpperReal atan(UpperReal const& r); //!< The arc-tangent of \a r.
+    friend PositiveUpperReal atan(PositiveUpperReal const& r); //!< Arc-tangent preserves positivity
+    //@}
+
+    //@{
+    //! \name Limit operations.
+    friend UpperReal limit(DecreasingSequence<Dyadic> const& qubs);
+        //!< Create a real number from an decreasing sequence of dyadic upper bounds.
+    //@}
+
+    //@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, UpperReal const& r); //< Write to an output stream.
+    //@}
+};
+
+//! \ingroup NumericModule
+//! \brief %Real number type defined as limits of convergent sequences of (dyadic) rationals, without bounds on the convergence rate.
+//! It is possible to compute arbitrarily accurate (dyadic) rational approximations, but the convergence rate is not known,
+//! so at no point in the the computation can anything concrete be deduced about the value of the number.
+//! \details In principle useless for rigorous computation, but quickly-computed approximations to real numbers may be useful for preconditioning rigorous algorithms.
+//! \sa Real, LowerReal, UpperReal
+class NaiveReal
+    : public DeclareRealOperations<NaiveReal,PositiveNaiveReal>
+    , public DeclareAnalyticFieldOperations<NaiveReal>
+    , public DeclareLatticeOperations<NaiveReal,PositiveNaiveReal>
+    , public DeclareComparisonOperations<NaiveReal,ApproximateKleenean>
+    , public DefineFieldOperators<NaiveReal>
+{
+  private: public:
+    using Interface = RealInterface;
+    using InterfaceType = RealInterface;
+  private: public:
+    SharedPointer<Interface> _ptr;
+  public:
+    typedef ApproximateTag Paradigm;
+    typedef NaiveReal NumericType;
+  public:
+    //@{
+    //! \name Constructors
+    NaiveReal(); //!< Default constructor yields the integer \c 0 as a real number.
+    explicit NaiveReal(SharedPointer<NaiveReal::InterfaceType>); //!< Construct from any class implementing the real number interface.
+    //explicit NaiveReal(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
+    //@}
+
+    //@{
+    //! \name Conversion operators
+    NaiveReal(Dbl d); //!< Construction from a builtin double-precision approximation.
+    NaiveReal(Integer const& n); //!< Construct from an integer.
+    NaiveReal(Dyadic const& d); //!< Construct from a dyadic number \a d=p/2<sup>q</sup> for integers \a p, \a q.
+    NaiveReal(Decimal const& d); //!< Construct from a decimal number, given by its decimal expansion.
+    NaiveReal(Rational const& q); //!< Construct from a rational number.
+
+    NaiveReal(Real const& r); //!< Construct from an (effective) real number.
+    NaiveReal(LowerReal const& lr); //!< Construct from a lower real number.
+    NaiveReal(UpperReal const& ur); //!< Construct from an upper real number.
+
+//    operator Number<Tag>() const; //!< Convert to an effective number for computations.
+    //@}
+
+    //@{
+    //! \name Computation of approximations to the number.
+/*
+    //! Compute an approximation with no guarantees on the error. The error converges to \a 0 as \a eff approaches infinity.
+    //! The time taken should be roughly polynomial in \a eff.
+    ApproximateReal compute(Effort eff) const;
+*/
+    //! Compute a concrete approximation using double-precision.
+    FloatDPApproximation get(DoublePrecision pr) const;
+    //! Compute a concrete approximation using the given precision.
+    FloatMPApproximation get(MultiplePrecision pr) const;
+    //@}
+
+    //@{
+    //! \name Standard arithmetic operators
+    friend NaiveReal operator+(NaiveReal const& r); //!< Unary plus.
+    friend NaiveReal operator-(NaiveReal const& r); //!< Unary minus.
+    friend NaiveReal operator+(NaiveReal const& r1, NaiveReal const& r2); //!< Plus.
+    friend NaiveReal operator-(NaiveReal const& r1, NaiveReal const& r2); //!< Minus.
+    friend NaiveReal operator*(NaiveReal const& r1, NaiveReal const& r2); //!< Times.
+    friend NaiveReal operator/(NaiveReal const& r1, NaiveReal const& r2); //!< Divides.
+    friend NaiveReal& operator+=(NaiveReal& r1, NaiveReal const& r2); //!< Inplace plus.
+    friend NaiveReal& operator-=(NaiveReal& r1, NaiveReal const& r2); //!< Inplace minus.
+    friend NaiveReal& operator*=(NaiveReal& r1, NaiveReal const& r2); //!< Inplace times.
+    friend NaiveReal& operator/=(NaiveReal& r1, NaiveReal const& r2); //!< Inplace divides.
+    //@}
+
+    //@{
+    //! \name Named arithmetical functions
+    friend NaiveReal pos(NaiveReal const& r); //!< Identity \a +r.
+    friend NaiveReal neg(NaiveReal const& r); //!< Negative \a -r.
+    friend NaiveReal hlf(NaiveReal const& r); //!< Half \a r÷2.
+    friend NaiveReal sqr(NaiveReal const& r); //!< Square \a r<sup>2</sup>.
+    friend NaiveReal rec(NaiveReal const& r); //!< Reciprocal \a 1/r.
+    friend NaiveReal add(NaiveReal const& r1, NaiveReal const& r2); //!< \brief Sum \a r1+r2.
+    friend NaiveReal sub(NaiveReal const& r1, NaiveReal const& r2); //!< \brief Difference \a r1-r2.
+    friend NaiveReal mul(NaiveReal const& r1, NaiveReal const& r2); //!< \brief Product \a r1×r2.
+    friend NaiveReal div(NaiveReal const& r1, NaiveReal const& r2); //!< \brief Quotient \a r1÷r2.
+    friend NaiveReal fma(NaiveReal const& r1, NaiveReal const& r2, NaiveReal const& r3); //!< \brief Fused multiply-and-add \a r1×r2+r3.
+    friend NaiveReal pow(NaiveReal const& r, Int n); //!< \brief Power \a r<sup>n</sup>.
+    //@}
+
+    //@{
+    //! \name Algebraic and transcendental functions
+    friend NaiveReal sqrt(NaiveReal const& r); //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
+    friend NaiveReal exp(NaiveReal const& r); //!< The natural exponent of \a r, \em e<sup>r</sup>.
+    friend NaiveReal log(NaiveReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
+    friend NaiveReal sin(NaiveReal const& r); //!< The sine of \a r.
+    friend NaiveReal cos(NaiveReal const& r); //!< The cosine of \a r.
+    friend NaiveReal tan(NaiveReal const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend NaiveReal atan(NaiveReal const& r); //!< The arc-tangent of \a r.
+    //@}
+
+    //@{
+    //! \name Lattice operations
+    friend PositiveNaiveReal abs(NaiveReal const&); //!< Absolute value \a |r|.
+    friend NaiveReal min(NaiveReal const& r1, NaiveReal const& r2); //!< The mimimum of \a r1 and \a r2.
+    friend NaiveReal max(NaiveReal const& r1, NaiveReal const& r2); //!< The maximum of \a r1 and \a r2.
+    //@}
+
+    //@{
+    //! Operations based on the metric structure.
+    friend PositiveNaiveReal dist(NaiveReal const& r1, NaiveReal const& r2);
+        //< The distance |\a r <sub>1</sub>-\a r <sub>2</sub>| between \a r<sub>1</sub> and \a r<sub>2</sub>.
+    //@}
+
+    //@{
+    //! \name Comparison operations and operators.
+    friend ApproximateKleenean leq(NaiveReal const& r1, NaiveReal const& r2);
+        //!< Returns \c likely if \a r1<r2, \c unlikely if \a r1\>r2, and \c indetermiate if \a r1==r2.
+    //@}
+
+    //@{
+    //! \name Limit operations.
+    friend NaiveReal limit(ConvergentSequence<Dyadic> const& qas);
+        //!< Create a real number from an converging sequence of dyadic approximants.
+    //@}
+
+    //@{
+    //! \name Input/output operations
+    friend OutputStream& operator<<(OutputStream& os, NaiveReal const& r); //< Write to an output stream.
+    //@}
 };
 
 //! \ingroup UserNumericTypeSubModule
@@ -362,7 +607,7 @@ class PositiveReal : public Real
 
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
-class PositiveLowerReal : public LowerReal
+class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowerReal,PositiveUpperReal>
 {
   public:
     using LowerReal::LowerReal;
@@ -380,7 +625,7 @@ class PositiveLowerReal : public LowerReal
 
 //! \ingroup UserNumericTypeSubModule
 //! \brief Computable lower real numbers defined by conversion to concrete floats.
-class PositiveUpperReal : public UpperReal
+class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUpperReal,PositiveLowerReal>
 {
   public:
     using UpperReal::UpperReal;

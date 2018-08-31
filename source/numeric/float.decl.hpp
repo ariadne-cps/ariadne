@@ -25,8 +25,8 @@
  *  \brief
  */
 
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 #ifndef ARIADNE_FLOAT_DECL_HPP
 #define ARIADNE_FLOAT_DECL_HPP
@@ -44,8 +44,8 @@ using MP = MultiplePrecision;
 
 template<class F> using PrecisionType = typename F::PrecisionType;
 
-struct DecimalPlaces { int _places; DecimalPlaces(int plc) : _places(plc) { } operator int() const { return _places; } };
-struct DecimalPrecision { uint _figures; operator uint() const { return _figures; } };
+struct DecimalPlaces { Nat _places; DecimalPlaces(Nat plc) : _places(plc) { } operator uint() const { return _places; } };
+struct DecimalPrecision { Nat _figures; operator uint() const { return _figures; } };
 
 template<class X> class Positive;
 

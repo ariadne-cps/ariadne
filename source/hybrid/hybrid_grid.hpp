@@ -30,18 +30,18 @@
 
 #include <iostream>
 
-#include "expression/space.hpp"
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_scaling.hpp"
+#include "../symbolic/space.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_scaling.hpp"
 
-#include "geometry/grid.hpp"
+#include "../geometry/grid.hpp"
 
 namespace Ariadne {
 
 typedef OutputStream OutputStream;
 typedef Bool Bool;
 typedef Vector<FloatDPValue> ExactFloatVector;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 //! \ingroup HybridModule
 //! \brief A grid in a hybrid space

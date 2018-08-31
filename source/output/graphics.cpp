@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "numeric/numeric.hpp"
-#include "function/function.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/cairo.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../numeric/numeric.hpp"
+#include "../function/function.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../output/geometry2d.hpp"
+#include "../output/graphics.hpp"
+#include "../output/cairo.hpp"
 
 #ifdef HAVE_GTK_H
 #include <gtk/gtk.h>
@@ -423,8 +423,8 @@ CairoCanvas::CairoCanvas(cairo_t *c)
 CairoCanvas::CairoCanvas(const ImageSize2d& size)
     : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
-    const Int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_width = static_cast<Int>(size.nx)+LEFT_MARGIN+RIGHT_MARGIN;
+    const Int canvas_height = static_cast<Int>(size.ny)+BOTTOM_MARGIN+TOP_MARGIN;
 
     cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -499,8 +499,8 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     cairo_t *cr=cairo_canvas.cr;
 
     const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
-    const Int drawing_width = drawing_size.nx;
-    const Int drawing_height = drawing_size.ny;
+    const Int drawing_width = static_cast<Int>(drawing_size.nx);
+    const Int drawing_height = static_cast<Int>(drawing_size.ny);
 
     //const Int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
     //const Int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
@@ -597,8 +597,8 @@ Void CairoCanvas::finalise()
     cairo_restore (cr);
 
     const ImageSize2d drawing_size = this->size_in_pixels();
-    const Int drawing_width = drawing_size.nx;
-    const Int drawing_height = drawing_size.ny;
+    const Int drawing_width = static_cast<Int>(drawing_size.nx);
+    const Int drawing_height = static_cast<Int>(drawing_size.ny);
 
     const Int left_margin = LEFT_MARGIN;
     const Int top_margin = TOP_MARGIN;

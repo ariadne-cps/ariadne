@@ -28,13 +28,13 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "utility/container.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/floatdp.hpp"
-#include "geometry/interval.hpp"
-#include "geometry/point.hpp"
-#include "geometry/set_interface.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../geometry/interval.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/set_interface.hpp"
 
 #include "box.decl.hpp"
 
@@ -104,6 +104,10 @@ class Box
 
     template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
         Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
+        explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);

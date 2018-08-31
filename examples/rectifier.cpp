@@ -6,9 +6,10 @@
 #include "ariadne.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 /// Function for plotting the orbit and reachability set
-template<class SET> Void plot(const char* filename, const Int& xaxis, const Int& yaxis, const Int& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const Int& MAX_GRID_DEPTH) {
+template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat& yaxis, const Nat& numVariables, const ExactBoxType& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -24,9 +25,9 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
-        Int numDivisions = MAX_GRID_DEPTH / numVariables;
+        Nat numDivisions = static_cast<Nat>(MAX_GRID_DEPTH) / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        FloatDP step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        FloatDP step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
         FloatDP pos_x = bbox[0].lower().raw();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
@@ -40,7 +41,7 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
         }
 
         // Repeats for the rectangles in the y direction
-        FloatDP step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        FloatDP step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
         FloatDP pos_y = bbox[1].lower().raw();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
@@ -58,8 +59,7 @@ template<class SET> Void plot(const char* filename, const Int& xaxis, const Int&
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     Real amplitude(4.0);
     Real frequency(50.0);
@@ -164,21 +164,21 @@ Int main(Int argc, const char* argv[])
     rectifier_automaton.new_mode(offon,dot(space)=offon_d);
     rectifier_automaton.new_mode(onon,dot(space)=onon_d);
     /// OffOff events
-    rectifier_automaton.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
-    rectifier_automaton.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,urgent);
+    rectifier_automaton.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offoff,jump2,offon,noop_r,offoff_offon_g,EventKind::URGENT);
     /// OnOff events
-    rectifier_automaton.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,urgent);
-    rectifier_automaton.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,urgent);
+    rectifier_automaton.new_transition(onoff,resettime,onoff,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onoff,jump1,offoff,noop_r,onoff_offoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onoff,jump3,onon,noop_r,onoff_onon_g,EventKind::URGENT);
     /// OffOn events
-    rectifier_automaton.new_transition(offon,resettime,offon,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,urgent);
-    rectifier_automaton.new_transition(offon,jump3,onon,noop_r,offon_onon_g,urgent);
+    rectifier_automaton.new_transition(offon,resettime,offon,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offon,jump1,offoff,noop_r,offon_offoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(offon,jump3,onon,noop_r,offon_onon_g,EventKind::URGENT);
     /// OnOn events
-    rectifier_automaton.new_transition(onon,resettime,onon,resettime_r,resettime_g,urgent);
-    rectifier_automaton.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,urgent);
-    rectifier_automaton.new_transition(onon,jump3,offon,noop_r,onon_offon_g,urgent);
+    rectifier_automaton.new_transition(onon,resettime,onon,resettime_r,resettime_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onon,jump2,onoff,noop_r,onon_onoff_g,EventKind::URGENT);
+    rectifier_automaton.new_transition(onon,jump3,offon,noop_r,onon_offon_g,EventKind::URGENT);
 
 
     /// Finished building the automaton
@@ -198,9 +198,7 @@ Int main(Int argc, const char* argv[])
     std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-    typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution..." << std::endl;
 
@@ -216,7 +214,7 @@ Int main(Int argc, const char* argv[])
 
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;

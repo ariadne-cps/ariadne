@@ -32,8 +32,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "utility/declarations.hpp"
-#include "utility/logging.hpp"
+#include "../utility/declarations.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 template<class T> class Set;
@@ -83,7 +83,7 @@ class SolverInterface
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~SolverInterface() { };
+    virtual ~SolverInterface() = default;
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.

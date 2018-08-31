@@ -24,24 +24,24 @@
 #ifndef FUNCTION_PATCH_TCC
 #define FUNCTION_PATCH_TCC
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "function/polynomial.hpp"
-#include "algebra/differential.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../function/polynomial.hpp"
+#include "../algebra/differential.hpp"
 
-#include "function/function.hpp"
-#include "function/function_mixin.hpp"
+#include "../function/function.hpp"
+#include "../function/function_mixin.hpp"
 
-#include "algebra/evaluate.hpp"
+#include "../algebra/evaluate.hpp"
 
 #define VOLATILE ;
 
@@ -53,7 +53,12 @@ Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, Do
 Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr);
 
 Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision);
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr);
+
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
+    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
+    return r;
+}
 
 } // namespace
 
@@ -460,6 +465,8 @@ template<class M> OutputStream& ScaledFunctionPatch<M>::repr(OutputStream& os) c
 }
 
 /*
+static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
+
 template<class M> OutputStream& operator<<(OutputStream& os, const Representation<ScaledFunctionPatch<M>>& frepr)
 {
     ScaledFunctionPatch<M> const& function=*frepr.pointer;
@@ -491,7 +498,6 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
 
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScaledFunctionPatch<M>>& frepr)
 {
-    typedef typename M::RawFloatType F;
     typedef typename M::PropertiesType Prp;
     ScaledFunctionPatch<M> const& f=*frepr.pointer;
     ScaledFunctionPatch<M> tf=f;

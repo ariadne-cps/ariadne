@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_BOUNDS_HPP
 #define ARIADNE_FLOAT_BOUNDS_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -189,6 +189,9 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
     Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
   public:
+    Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
+    Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }
+    Positive<UpperBound<F>> upper() const { return cast_positive(this->Bounds<F>::upper()); }
 };
 
 template<class F> inline PositiveBounds<F> cast_positive(Bounds<F> const& x) {

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FLOAT_APPROXIMATION_HPP
 #define ARIADNE_FLOAT_APPROXIMATION_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -110,10 +110,10 @@ template<class F> class Approximation
     friend Bool same(Approximation<F> const&, Approximation<F> const&);
     friend PositiveApproximation<F> mag(Approximation<F> const&);
   public:
+    static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }
     Approximation<F> pm(Approximation<F> _e) { return *this; }
-  private: public:
-    static Nat output_places;
+  public:
     RawType _a;
 };
 
@@ -143,6 +143,8 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
 template<class F> inline PositiveApproximation<F> cast_positive(Approximation<F> const& x) {
     return PositiveApproximation<F>(x); }
 
+extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatDP>::output_places;
+extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatMP>::output_places;
 
 }
 

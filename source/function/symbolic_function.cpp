@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "config.h"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/differential.hpp"
-#include "numeric/operators.hpp"
-#include "algebra/algebra.hpp"
-#include "function/formula.hpp"
-#include "function/function.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/differential.hpp"
+#include "../numeric/operators.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/formula.hpp"
+#include "../function/function.hpp"
 
-#include "function/symbolic_function.hpp"
+#include "../function/symbolic_function.hpp"
 
 
 namespace Ariadne {

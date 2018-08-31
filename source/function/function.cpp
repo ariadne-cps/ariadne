@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "numeric/operators.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/formula.hpp"
-#include "function/taylor_model.hpp"
+#include "../numeric/operators.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/formula.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "function/function.hpp"
+#include "../function/function.hpp"
 
-#include "function/function_mixin.hpp"
-#include "function/function_mixin.tpl.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/function_mixin.tpl.hpp"
 
-#include "function/function_model.hpp"
+#include "../function/function_model.hpp"
 
-#include "function/symbolic_function.hpp"
+#include "../function/symbolic_function.hpp"
 
-#include "expression/expression.hpp"
+#include "../symbolic/expression.hpp"
 
 
 namespace Ariadne {
@@ -64,11 +64,11 @@ template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_con
 //------------------------ Formula Function ----------------------------------//
 
 template<class P, class Y> ScalarFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Scalar<Formula<Y>> const& e) {
-    assert(false);
+    assert(false); return ScalarFunction<P,IntervalDomainType>(nullptr);
 }
 
 template<class P, class Y> VectorFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Vector<Formula<Y>> const& e) {
-    assert(false);
+    assert(false); return VectorFunction<P,IntervalDomainType>(nullptr);
 }
 
 template<class P, class Y> ScalarFunction<P,BoxDomainType> make_formula_function(BoxDomainType dom, Scalar<Formula<Y>> const& e) {
@@ -82,13 +82,9 @@ template<class P, class Y> VectorFunction<P,BoxDomainType> make_formula_function
 //------------------------ Function ----------------------------------//
 
 namespace {
-OutputStream& operator<<(OutputStream& os, SizeOne so) { return os << "1u"; }
-OutputStream& operator<<(OutputStream& os, RealDomain const& dom) { return os << "R"; }
-OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
 
 template<class D, class DD> D make_domain(DD dom);
 template<> IntervalDomainType make_domain<IntervalDomainType,BoxDomainType>(BoxDomainType dom) { throw std::runtime_error(""); }
-template<> BoxDomainType make_domain<BoxDomainType,IntervalDomainType>(IntervalDomainType dom) { throw std::runtime_error(""); }
 template<> IntervalDomainType make_domain<IntervalDomainType,IntervalDomainType>(IntervalDomainType dom) { return dom; }
 template<> BoxDomainType make_domain<BoxDomainType,BoxDomainType>(BoxDomainType dom) { return dom; }
 
@@ -248,6 +244,7 @@ template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType a
 }
 
 template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(SizeType as, SizeType j) {
+    ARIADNE_ASSERT(j<as);
     return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::coordinate(j)));
 }
 
@@ -956,13 +953,13 @@ template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Cos op, F 
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
 
-template class AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
-template class AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
-template class AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
+template struct AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
+template struct AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
+template struct AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
 
-template class AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
-template class AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
-template class AlgebraOperations<ScalarUnivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
+template struct AlgebraOperations<ScalarUnivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
 
 
 } // namespace Ariadne

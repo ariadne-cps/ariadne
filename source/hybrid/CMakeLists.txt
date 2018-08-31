@@ -1,6 +1,7 @@
 add_library(ariadne-hybrid OBJECT
     discrete_location.cpp
     hybrid_set.cpp
+    hybrid_paving.cpp
     hybrid_enclosure.cpp
     hybrid_automaton.cpp
     hybrid_automaton-composite.cpp

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_DYADIC_HPP
 #define ARIADNE_DYADIC_HPP
 
-#include "external/gmp.hpp"
+#include "../external/gmp.hpp"
 
 #include <iostream> // For std::floor std::ceil etc
 #include <iomanip> // For std::setprecision
@@ -36,9 +36,9 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "numeric/logical.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/arithmetic.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/arithmetic.hpp"
 
 namespace Ariadne {
 
@@ -107,8 +107,22 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve a number.
     friend Dyadic hlf(Dyadic const&);
+    //| \brief Power of a number (m always positive).
+    friend Dyadic pow(Dyadic const& x, Int m);
+    friend Dyadic pow(Dyadic const& x, Nat m);
+
     friend Rational rec(Rational const&);
     friend Rational div(Rational const&, Rational const&);
+    friend Rational operator/(Rational const&, Rational const&);
+
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real atan(Real const&);
+
     friend Sign sgn(Dyadic const&);
     friend Integer round(Dyadic const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.

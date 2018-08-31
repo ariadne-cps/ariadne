@@ -1282,10 +1282,10 @@ _evolution_step(EvolutionData& evolution_data,
     // Handle a set that is too large, based on semantics
     if (possibly(starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius())) {
         if (evolution_data.semantics == Semantics::LOWER) {
-            ARIADNE_LOG(1,"\r  too large, discarding\n");
+            ARIADNE_LOG(2,"\r  too large, discarding\n");
             return;
         } else if (this->_configuration_ptr->enable_subdivisions()) {
-            ARIADNE_LOG(1,"\r  too large, splitting\n");
+            ARIADNE_LOG(2,"\r  too large, splitting\n");
             List<HybridEnclosure> split_sets = starting_set.split();
             for(Nat i=0; i!=split_sets.size(); ++i) {
                 if(!definitely(split_sets[i].is_empty())) { evolution_data.working_sets.append(split_sets[i]); }

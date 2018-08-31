@@ -196,7 +196,9 @@ class HybridEnclosure
     friend HybridBasicSet<Enclosure> project(HybridEnclosure const&, RealSpace const& spc);
     //! \brief The continuous state set.
     HybridBasicSet<Enclosure> state_set() const;
-    //! \brief The continuous state set.
+    //! \brief The continuous state set including time.
+    HybridBasicSet<Enclosure> state_time_set() const;
+    //! \brief The continuous state set including auxiliary variables.
     HybridBasicSet<Enclosure> state_auxiliary_set() const;
     //! \brief The continuous enclosure.
     const ContinuousStateSetType& continuous_set() const;
@@ -261,6 +263,8 @@ class HybridEnclosure
     Void new_state_time_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     Void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
+    //! \brief Introduces the new constraint \f$t\leq\gamma(x)\f$.
+    Void new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
     Void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
@@ -300,6 +304,8 @@ class HybridEnclosure
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
 
+    //! \brief Reduce the size of the domain by constraint propagation, if possible.
+    Void reduce();
     //! \brief Simplifies the representation.
     Void recondition();
     //! \brief Simplifies the representation by changing all uniform errors into independent variables.
@@ -348,6 +354,8 @@ class ListSet<HybridEnclosure>
     typedef List<HybridEnclosure>::Iterator Iterator;
     typedef List<HybridEnclosure>::ConstIterator ConstIterator;
   public:
+    operator const List<HybridEnclosure>& () const { return _list; }
+    operator List<HybridEnclosure>& () { return _list; }
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
     ListSet(const List<HybridEnclosure>& hel) : _list(hel) { }
@@ -359,6 +367,12 @@ class ListSet<HybridEnclosure>
     SizeType size() const { return _list.size(); }
     const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
+    Void reduce() { for(auto& set : _list ) { set.reduce(); } }
+    Void clear() { this->_list.clear(); }
+    HybridEnclosure& front() { return this->_list.front(); }
+    const HybridEnclosure& front() const { return this->_list.front(); }
+    HybridEnclosure& back() { return this->_list.back(); }
+    const HybridEnclosure& back() const { return this->_list.back(); }
     Iterator begin() { return _list.begin(); }
     Iterator end() { return _list.end(); }
     ConstIterator begin() const { return _list.begin(); }
@@ -366,23 +380,14 @@ class ListSet<HybridEnclosure>
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
         for(Nat i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
-    friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls);
+    friend ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
+        ValidatedLowerKleenean result=true; for(auto iter=set.begin(); iter!=set.end(); ++iter) { result = result && inside(*iter,bx); } return result; }
+    friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
+        return os << hls._list; };
+    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
   private:
     List<HybridEnclosure> _list;
 };
-
-inline ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
-    ValidatedLowerKleenean result=true;
-    for(auto iter=set.begin(); iter!=set.end(); ++iter) {
-        result = result && inside(*iter,bx);
-    }
-    return result;
-}
-
-
-inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
-    return os << hls._list;
-}
 
 HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 

@@ -680,7 +680,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
-        ARIADNE_LOG(8,"event="<<event<<"\n");
+        ARIADNE_LOG(8,"\n\nevent="<<event<<"\n");
         EffectiveScalarFunction const& guard=guards[event];
         ARIADNE_LOG(8,"guard="<<guard<<"\n");
 
@@ -689,10 +689,10 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         ARIADNE_LOG(8,"guard_range="<<guard_range<<"\n");
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
-        EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
-        UpperIntervalType derivative_range=apply(derivative,flow_bounds);
-        ARIADNE_LOG(8,"derivative_range="<<derivative_range<<"\n");
-        if(definitely(derivative_range.lower()>zero)) {
+        EffectiveScalarFunction guard_derivative=lie_derivative(guard,dynamic);
+        UpperIntervalType guard_derivative_range=apply(guard_derivative,flow_bounds);
+        ARIADNE_LOG(8,"guard_derivative_range="<<guard_derivative_range<<"\n");
+        if(definitely(guard_derivative_range.lower()>zero)) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
             // There is at most one crossing with the guard, and the time of this
@@ -709,13 +709,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             catch(const UnknownSolutionException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(2,"ErrorTag in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const SolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(2,"ErrorTag in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
             catch(const std::runtime_error& e) {
@@ -723,8 +723,8 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 ARIADNE_FAIL_MSG("ERROR!!");
                 crossings[event]=CrossingData(CrossingKind::INCREASING);
             }
-        } else if(definitely(derivative_range.upper()<zero)) {
-            // If the derivative is strictly negative over the bounding box for the flow,
+        } else if(definitely(guard_derivative_range.upper()<zero)) {
+            // If the guard derivative is strictly negative over the bounding box for the flow,
             // then the guard function is strictly decreasing.
             // This means that the event is either initially active, or does not occur.
             // There is no need to compute a crossing time.
@@ -733,12 +733,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // If the derivative of the guard function along flow lines cannot be shown
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
-            ValidatedScalarFunction second_derivative=lie_derivative(derivative,dynamic);
-            UpperIntervalType second_derivative_bounds_range=apply(second_derivative,flow_bounds);
-            UpperIntervalType second_derivative_flow_range=compose(second_derivative,flow).range();
-            UpperIntervalType second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
-            ARIADNE_LOG(8,"second_derivative_range="<<second_derivative_range<<"\n");
-            if(definitely(second_derivative_range.lower()>zero)) {
+            ValidatedScalarFunction guard_second_derivative=lie_derivative(guard_derivative,dynamic);
+            UpperIntervalType guard_second_derivative_bounds_range=apply(guard_second_derivative,flow_bounds);
+            UpperIntervalType guard_second_derivative_flow_range=compose(guard_second_derivative,flow).range();
+            UpperIntervalType guard_second_derivative_range
+                =intersection(guard_second_derivative_bounds_range,guard_second_derivative_flow_range);
+            ARIADNE_LOG(8,"guard_second_derivative_range="<<guard_second_derivative_range<<"\n");
+            if(definitely(guard_second_derivative_range.lower()>zero)) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active
                 //   (ii) the event is never active, or
@@ -746,15 +747,15 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 //        due to a transverse crossing.
                 //   (iv) the initial state is on the boundary of the guard
                 //        set, possibly with the flow tangent to this set
-                // We cannot compute the crossing time, even in case (iii),
+                // It is hard compute the crossing time, even in case (iii),
                 // due to the singularity due to the tangency in (iv). However,
                 // we do know that in (iii), the event occurs when $t>0$ and
                 // $g(\phi(x_0,t))=0$. The crossing time is not computed.
                 crossings[event]=CrossingData(CrossingKind::CONVEX);
-            } else if(definitely(second_derivative_range.upper()<zero)) {
+            } else if(definitely(guard_second_derivative_range.upper()<zero)) {
                 // If the second derivative is negative, then the guard
                 // values $g(x(t))$ are concave along flow lines. There are
-                // four main cases:
+                // five main cases:
                 //   (i) The event is initially active.
                 //  (ii) The event is not initially active, but later becomes active.
                 // (iii) The event is never active, but would become active if
@@ -762,7 +763,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 //  (iv) The event is never active, and the maximum value of
                 //       the guard along the flow lines is zero.
                 // Additionally, there is the degenerate case
-                //   (v) At some point in the (forward) flow, the state touches
+                //  (vi) At some point in the (forward) flow, the state touches
                 //       the guard set at a point of tangency.
                 // Due to the presence of the tangency, the event time is
                 // not a smooth function of the initial state. Further, since
@@ -781,7 +782,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // sufficient condition for no crossing involving the critical
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
-                    ValidatedScalarFunctionModelDP critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
+                    ValidatedScalarFunctionModelDP critical_time=solver.implicit(compose(guard_derivative,flow),flow_spacial_domain,flow_time_domain);
                     UpperIntervalType critical_time_range=critical_time.range();
                     ARIADNE_LOG(8,"critical_time_range="<<critical_time_range<<"\n");
                     if(decide(critical_time.error()>1e-8)) {
@@ -789,27 +790,41 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
 
                     HybridEnclosure evolve_set_at_critical_time=initial_set;
                     evolve_set_at_critical_time.apply_space_evolve_step(flow,critical_time);
+                    ValidatedVectorFunctionModelDP identity = factory(critical_time).create_identity();
+                    //ValidatedVectorFunctionModelDP::identity(critical_time.domain(),critical_time.sweeper());
                     UpperIntervalType guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
                     ARIADNE_LOG(8,"guard_range_at_critical_time="<<guard_range_at_critical_time<<"\n");
                     if(definitely(guard_range_at_critical_time.upper()<0)) {
                         // No crossing
                         const_cast<Set<DiscreteEvent>&>(active_events).erase(event); // WARNING: Maybe removing event is unsafe
                     } else if(definitely(guard_range_at_critical_time.lower()>0)) {
+                        std::cerr<<"Guard range eventually positive\n";
                         // Transverse crossing
                         // FIXME: Find a more reliable way of solving the implicit equation for the crossing time
                         //   which takes into account the fact that the derivative over the domain goes negative
                         static const Rational INTERVAL_REDUCTION_FACTOR(15,16);
+                        ValidatedScalarFunctionModelDP reduced_critical_time=INTERVAL_REDUCTION_FACTOR * critical_time;
+                        HybridEnclosure evolve_set_at_reduced_critical_time=initial_set;
+                        evolve_set_at_reduced_critical_time.apply_space_evolve_step(flow,reduced_critical_time);
+                        HybridEnclosure evolve_set_at_upper_reduced_critical_time=initial_set; evolve_set_at_upper_reduced_critical_time.apply_fixed_evolve_step(flow,cast_exact(reduced_critical_time.range().upper()));
+                        ARIADNE_LOG(8,"guard_range_at_initial_time="<<initial_set.range_of(guard)<<"\n");
+                        ARIADNE_LOG(8,"guard_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard)<<"\n");
+                        ARIADNE_LOG(8,"guard_derivative_range_at_initial_time="<<initial_set.range_of(guard_derivative)<<"\n");
+                        ARIADNE_LOG(8,"guard_derivative_range_at_upper_reduced_critical_time="<<evolve_set_at_upper_reduced_critical_time.range_of(guard_derivative)<<"\n");
+                        ARIADNE_LOG(8,"guard_derivative_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard_derivative)<<"\n");
                         UpperIntervalType crossing_flow_time_range(0, critical_time_range.upper());
                         ARIADNE_LOG(8,"crossing_flow_time_range="<<crossing_flow_time_range<<"\n");
                         ExactIntervalType crossing_flow_time_domain = cast_exact_interval(INTERVAL_REDUCTION_FACTOR*UpperIntervalType(0, critical_time_range.upper()));
                         ARIADNE_LOG(8,"crossing_flow_time_domain="<<crossing_flow_time_domain<<"\n");
                         try {
+                            //KrawczykSolver solver=KrawczykSolver(1e-10,20);
+                            //solver.verbosity=9;//this->verbosity;
                             ValidatedScalarFunctionModelDP crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,crossing_flow_time_domain);
                             UpperIntervalType crossing_time_range=crossing_time.range();
                             ARIADNE_LOG(8,"crossing_time_range="<<crossing_time_range<<"\n");
                             crossings[event]=CrossingData(CrossingKind::TRANSVERSE,crossing_time);
                         } catch(const SolverException& e) {
-                            ARIADNE_LOG(2,"ErrorTag in computing crossing time over reduced time interval for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                            ARIADNE_LOG(2,"Error in computing crossing time over reduced time interval for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                             // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
                             crossings[event]=CrossingData(CrossingKind::GRAZING);
                             crossings[event].critical_time=critical_time;
@@ -820,7 +835,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     }
                 }
                 catch(const SolverException& e) {
-                    ARIADNE_LOG(2,"ErrorTag in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                    ARIADNE_LOG(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossings[event]=CrossingData(CrossingKind::CONCAVE);
                 }
                 catch(const std::runtime_error& e) {
@@ -899,6 +914,7 @@ _apply_guard_step(HybridEnclosure& set,
                   CrossingData const& crossing_data,
                   const Semantics semantics) const
 {
+    std::clog<<"\n";
     ARIADNE_LOG(4,"HybridEvolverBase::_apply_guard_step(...)\n");
     // Compute flow to guard set up to evolution time.
     HybridEnclosure& jump_set=set;
@@ -906,7 +922,7 @@ _apply_guard_step(HybridEnclosure& set,
     ValidatedVectorFunctionModelDP starting_state=set.state_function();
     ValidatedVectorFunctionModelDP reach_starting_state=embed(starting_state,timing_data.evolution_time_domain);
     ValidatedScalarFunctionModelDP reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
-    ValidatedScalarFunctionModelDP step_time;
+    ValidatedScalarFunctionModelDP step_time, step_critical_time;
 
     ARIADNE_LOG(5,"transition_data.event_kind="<<transition_data.event_kind<<"\n");
     switch(transition_data.event_kind) {
@@ -930,23 +946,44 @@ _apply_guard_step(HybridEnclosure& set,
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
+                    // The jump set is given by \f$\xi'(s)=\phi(\xi(s),\gamma(s)),\ \tau'(s)=\tau(s)+\gamma(s)\f$ where \f$\gamma(s)\f$ is the crossing time.
+                    ARIADNE_LOG(6,"crossing_time="<<crossing_data.crossing_time<<"\n");
                     step_time=unchecked_compose(crossing_data.crossing_time,starting_state);
                     // If the jump step might occur after the final evolution time, then introduce constraint that this does not happen
                     if(timing_data.step_kind!=StepKind::CONSTANT_EVOLUTION_TIME && possibly((step_time-timing_data.parameter_dependent_evolution_time).range().upper()>zero)) {
                         jump_set.new_parameter_constraint(step_event,step_time<=timing_data.parameter_dependent_evolution_time);
                     }
-
                     jump_set.apply_parameter_evolve_step(flow,unchecked_compose(crossing_data.crossing_time,starting_state));
                     break;
                 case CrossingKind::INCREASING: case CrossingKind::CONVEX:
+                    // The jump set is given by \f$\xi'(s,t)=\phi(\xi(s),t),\ \tau'(s)=\tau(s)+t\f$ where \f$t\in[0,h]\f$ and \f$g(\xi'(s,t))=0\f$.
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     break;
-                case CrossingKind::CONCAVE: case CrossingKind::GRAZING:
+                case CrossingKind::GRAZING:
+                    ARIADNE_LOG(6,"critical_time="<<crossing_data.critical_time<<"\n");
+                    // Fallthrough
+                case CrossingKind::CONCAVE:
+                    // The jump set is given by \f$\xi'(s,t)=\phi(\xi(s),t),\ \tau'(s)=\tau(s)+t\f$ where \f$t\in[0,h]\f$, \f$g(\xi'(s,t))=0\f$
+                    // and \f$L_f{g}(\xi'(s,t))>=0\f$ (equivalently, \f$t<=\gamma(\xi(s))\f$ where \f$\gamma(x)\f$ is the critical time
+                    // where \f$g(x(t))\f$ reaches a maximum.
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
                     jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     break;
+/*
+                case CrossingKind::GRAZING:
+                    ARIADNE_LOG(6,"critical_time="<<crossing_data.critical_time<<"\n");
+                    std::cerr<<"jump_set.domain()="<<jump_set.domain();
+                    IntervalDomainType evolution_time_domain=timing_data.evolution_time_domain;
+                    ValidatedScalarFunctionModelDP embedded_space_function=embed(set.space_function(),timing_data.evolution_time_domain);
+                    jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
+                    ValidatedScalarFunctionModelDP embedded_time_step_function=factory(embedded_space_function).create_coordinate(jump_set.number_of_parameters()-1u);
+                    jump_set.new_parameter_constraint(event,embedded_time_step_function<=compose(crossing_data.critical_time,embedded_space_function));
+                    jump_set.new_guard(event,transition_data.guard_function);
+                    jump_set.reduce(); // Reduce the size of the parameter domain to take guards into account
+                    break;
+*/
                 case CrossingKind::DEGENERATE: // Just check positive derivative in this case; NOT EXACT
                     if(semantics==Semantics::UPPER) {
                         jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
@@ -1886,7 +1923,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                         ARIADNE_LOG(9,"  sucessfully_computed_guard_creep_time="<<sucessfully_computed_guard_creep_time<<"\n");
                     }
                     catch(...) {
-                        ARIADNE_LOG(6,"  ErrorTag in computing guard creep time\n");
+                        ARIADNE_LOG(6,"  Error in computing guard creep time\n");
                     }
                     if(sucessfully_computed_guard_creep_time) {
                         spacial_evolution_time = spacial_evolution_time * (guard_creep_time/flow.step_size());

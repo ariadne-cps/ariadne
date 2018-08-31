@@ -540,8 +540,8 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModelDP phi)
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),FloatDPValue(h));
+    FloatDPValue h=phi.domain()[phi.result_size()].upper();
+    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),h);
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
 }
@@ -576,6 +576,13 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, V
     if(phi.domain()[phi.result_size()].lower()<time_domain.upper()) {
         this->new_negative_parameter_constraint(time_step_function-embed(elps,time_domain));
     }
+    this->_check();
+}
+
+Void Enclosure::new_state_time_bound(ValidatedScalarFunction gamma) {
+    ARIADNE_ASSERT(gamma.argument_size()==this->state_dimension());
+    this->_is_fully_reduced=false;
+    this->_constraints.append(compose(gamma,this->state_function())<=this->time_function());
     this->_check();
 }
 

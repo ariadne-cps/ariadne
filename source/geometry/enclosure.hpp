@@ -197,6 +197,8 @@ class Enclosure
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
     Void new_parameter_constraint(ValidatedConstraint c);
 
+    //! \brief Introduces the constraint \f$\tau(s)\leq\gamma(\xi(s))\f$.
+    Void new_state_time_bound(ValidatedScalarFunction gamma);
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
     Void new_positive_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.

@@ -326,10 +326,13 @@ Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType 
     this->_variables.append(vt);
 }
 
+Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma) {
+    this->_set.new_state_time_bound(gamma);
+}
+
 Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
-
 
 Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
@@ -466,6 +469,14 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
     return HybridBasicSet<Enclosure>(this->location(),this->state_space(),this->continuous_set());
 }
 
+HybridBasicSet<Enclosure> HybridEnclosure::state_time_set() const {
+    auto state_time_space=join(this->state_space(),TimeVariable());
+    auto state_time_function=join(this->state_function(),this->time_function());
+    Enclosure enclosure(this->parameter_domain(),state_time_function,this->time_function(),this->constraints(),this->function_factory());
+    HybridBasicSet<Enclosure> hset(this->location(),state_time_space,enclosure);
+    return hset;
+}
+
 HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
     auto state_auxiliary_space=join(this->state_space(),this->auxiliary_space());
     auto state_auxiliary_function=join(this->state_function(),this->auxiliary_function());
@@ -526,6 +537,12 @@ Void
 HybridEnclosure::restrict(const ExactBoxType& subdomain)
 {
     this->_set.restrict(subdomain);
+}
+
+Void
+HybridEnclosure::reduce()
+{
+    this->_set.reduce();
 }
 
 Void
@@ -595,6 +612,21 @@ Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>&
 }
 
 
+OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c) {
+    auto tcf = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModelDP>(c.function().managed_pointer());
+    if(tcf == nullptr) {
+        auto ecf = tcf->error();
+        const_cast<ScaledFunctionPatch<ValidatedTaylorModelDP>&>(*tcf).clobber();
+        auto pcf = Polynomial<FloatDPApproximation>(tcf->polynomial());
+        return os << c.lower_bound() << "<=" << pcf << "+/-" << ecf << "<=" << c.upper_bound();
+    }
+    return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
+}
+
+OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
+    os << "    \n[ "; for(SizeType i=0; i!=c.size(); ++i) { if (i!=0) { os << ",\n      "; } os << c[i]; } os << "]"; return os;
+}
+
 OutputStream& HybridEnclosure::write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
@@ -609,6 +641,7 @@ OutputStream& HybridEnclosure::write(OutputStream& os) const
               << ", state=" << this->_set.state_function()
               << ", constraints=" << this->_set.constraints()
               << ", time="<< this->_set.time_function()
+              << ", empty="<< this->_set.is_empty()
               << ")";
 }
 

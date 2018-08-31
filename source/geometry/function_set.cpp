@@ -181,10 +181,15 @@ Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFuncti
     return make_pair(jmax_in_row_imax,max_row_sum);
 }
 
+ApproximateNumber operator-(ValidatedUpperNumber const&, ValidatedUpperNumber const&);
+ApproximateNumber max(ValidatedLowerNumber const&, ValidatedUpperNumber const&);
 
-ExactIntervalType over_approximating_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
-    DoublePrecision prec;
-    return cast_exact_interval(UpperIntervalType(lb,ub,prec));
+Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub) {
+    return Interval<ValidatedUpperNumber>(lb,ub);
+}
+
+ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl) {
+    return cast_exact_interval(UpperIntervalType(ivl,double_precision));
 }
 
 ExactBoxType under_approximation(const EffectiveBoxType& rbx) {
@@ -900,7 +905,7 @@ ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
     ExactBoxType result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=over_approximating_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=over_approximation(make_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
     }
     return result;
 }

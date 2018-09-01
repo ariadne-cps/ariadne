@@ -221,6 +221,11 @@ double Figure::get_line_width() const
     return this->_data->properties.line_width;
 }
 
+double Figure::get_dot_radius() const
+{
+    return this->_data->properties.dot_radius;
+}
+
 Colour Figure::get_line_colour() const
 {
     return this->_data->properties.line_colour;
@@ -416,12 +421,12 @@ CairoCanvas::~CairoCanvas()
 }
 
 CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), dr(1.0), lc(0,0,0), fc(1,1,1, 1.0)
+    : cr(c), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
 }
 
 CairoCanvas::CairoCanvas(const ImageSize2d& size)
-    : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
+    : cr(0), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
     const Int canvas_width = static_cast<Int>(size.nx)+LEFT_MARGIN+RIGHT_MARGIN;
     const Int canvas_height = static_cast<Int>(size.ny)+BOTTOM_MARGIN+TOP_MARGIN;

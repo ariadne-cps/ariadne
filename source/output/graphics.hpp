@@ -65,9 +65,9 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
-    GraphicsProperties(Bool ls, double lw, Colour lc, Bool fs, Colour fc)
-        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
+    GraphicsProperties(Bool ls, double lw, double dr, Colour lc, Bool fs, Colour fc)
+        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
     double dot_radius;
     Bool line_style;
     double line_width;
@@ -116,6 +116,7 @@ class Figure
 
     Bool get_line_style() const;
     double get_line_width() const;
+    double get_dot_radius() const;
     Colour get_line_colour() const;
     Bool get_fill_style() const;
     double get_fill_opacity() const;

@@ -1,6 +1,6 @@
 set(TUTORIALS
     rigorous_numerics_tutorial
-    hybrid_system_tutorial
+    hybrid_evolution_tutorial
 )
 
 

@@ -163,17 +163,21 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
                      const List<ValidatedAffineModelConstraint>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
 {
+    ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
+    for (auto c : _constraint_models)
+        ARIADNE_ASSERT_MSG(_domain.dimension() == c.argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<c.argument_size()<<").");
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f,
                      const List<ValidatedAffineModelConstraint>& c)
-    : _domain(ExactBoxType::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
+    : ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(f[0].argument_size()),f,c)
 {
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f)
     : _domain(ExactBoxType::unit_box(f[0].argument_size())), _space_models(f)
 {
+    ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& h)

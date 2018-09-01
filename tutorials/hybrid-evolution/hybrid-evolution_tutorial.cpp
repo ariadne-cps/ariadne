@@ -110,14 +110,13 @@ CompositeHybridAutomaton create_heating_system()
     DiscreteEvent switch_off("switch_off");
     DiscreteEvent midnight("midnight");
 
-
     // Create the heater subsystem
-    HybridAutomaton heater;
+    HybridAutomaton heater("heater");
     heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
-    heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
     heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
     heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, EventKind::URGENT );
+    heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
 
     // Create the clock subsystem
     HybridAutomaton clock;
@@ -308,46 +307,6 @@ Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 */
 }
 
-
-
-/*
-Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
-{
-    // Define the initial set
-    HybridImageSet initial_set;
-    StringVariable heating("heating");
-    DiscreteLocation heating_off(heating|"off");
-    ExactBoxType initial_box({0.0<=C<=0.015625, 16.0<=T<=16.0625);
-    initial_set[heating_off]=initial_box;
-
-
-    // Compute the reach set for times between tlower and tupper.
-    // The intermediate set is stored to an archive file and used to build the initial set for the reach step
-    // Note that because of peculiarities in the Boost serialization library,
-    // the object to be serialized must be declared const.
-    FloatDP tlower=0.25; FloatDP tupper=0.75;
-    HybridTime transient_time(tlower,4);
-    HybridTime recurrent_time(tupper-tlower,16);
-
-    const HybridGridTreeSet upper_intermediate_set = analyser.upper_evolve(heating_system,initial_set,transient_time);
-    plot("tutorial-upper_intermediate.png",Axis2d(0.0,C,1.0, 14.0,T,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
-
-    std::ofstream output_file_stream("tutorial-transient.txt");
-    text_oarchive output_archive(output_file_stream);
-    output_archive << upper_intermediate_set;
-    output_file_stream.close();
-
-    HybridGridTreeSet rebuilt_upper_intermediate_set;
-
-    std::ifstream input_file_stream("tutorial-transient.txt");
-    text_iarchive input_archive(input_file_stream);
-    input_archive >> rebuilt_upper_intermediate_set;
-    input_file_stream.close();
-
-    HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
-    plot("tutorial-upper_recurrent.png",Axis2d(0.0,C,1.0, 14.0,T,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
-}
-*/
 
 } // namespace HeatingSystemTutorial
 } // namespace Ariadne

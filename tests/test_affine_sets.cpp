@@ -259,7 +259,6 @@ class TestAffineSet
 
     }
 
-
     Void test_empty() {
         D = ExactBoxType::unit_box(2);
         x = Affine<ValidatedNumericType>::variables(2);
@@ -273,6 +272,20 @@ class TestAffineSet
         figure.clear();
         figure.draw(set);
         figure.write("test_affine_set-empty");
+    }
+
+    Void test_invalid() {
+        {
+            D = ExactBoxType::unit_box(1);
+            x = Affine<ValidatedNumericType>::variables(2);
+            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex} ));
+        }
+        {
+            D = ExactBoxType::unit_box(2);
+            x = Affine<ValidatedNumericType>::variables(2);
+            auto a = Affine<ValidatedNumericType>::variables(1);
+            ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex}, {a[0]<=-0.25_ex} ));
+        }
     }
 
     Void test_uniform_error() {
@@ -475,6 +488,7 @@ class TestAffineSet
     Void test() {
         figure.set_bounding_box(ExactBoxType{{-4.0_ex,+4.0_ex},{-4.0_ex,+4.0_ex}});
         ARIADNE_TEST_CALL(test_empty());
+        ARIADNE_TEST_CALL(test_invalid());
         ARIADNE_TEST_CALL(test_pure_constraint());
         ARIADNE_TEST_CALL(test_constrained_image());
         ARIADNE_TEST_CALL(test_separated());

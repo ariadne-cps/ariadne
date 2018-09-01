@@ -371,6 +371,8 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional image set
+            a=Affine<ValidatedNumericType>::variables(1);
+            dom=ExactBoxType::unit_box(1);
             offsets=ExactFloatVector2d{4.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]});
             expected_set=Polytope2d(2, -0.5,-0.25, 0.5,0.25) + offsets;
@@ -389,6 +391,8 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional constraint set with one proper constraint on boundary
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{10.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_ex<=a[0], a[1]<=0.5_ex});
             expected_set=Polytope2d(2, +1.0,-1.0, +1.0,+0.5) + offsets;
@@ -397,6 +401,8 @@ class TestAffineSet
 
         {
             // Test draw of set with constraint a<=0 and a>=0
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_ex*a[1]<=0.75_ex,0.75_ex<=a[0]+0.5_ex*a[1]});
             expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
@@ -405,6 +411,8 @@ class TestAffineSet
 
         {
             // Test draw of set with constraint 0<=a<=0
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_ex<=a[0]+0.5_ex*a[1]<=0.75_ex});
             expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
@@ -413,6 +421,8 @@ class TestAffineSet
 
         {
             // Test draw of set with degenerate constraints at corner of box
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{1.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_ex*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
             expected_set=Polytope2d(4, -1.0,-1.0, +1.0,-1.0, +1.0,+1.0, -1.0,+1.0) + offsets;
@@ -421,6 +431,8 @@ class TestAffineSet
 
         {
             // Test draw of set with degenerate constraints near corner of box
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{4.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_ex*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
             expected_set=Polytope2d(6, -1.0,-1.0, +1.0,-1.0, +1.0,0.0, +0.667,+0.667, 0.0,+1.0, -1.0,+1.0) + offsets;
@@ -429,6 +441,8 @@ class TestAffineSet
 
         {
             // Test draw of set repeated constraints
+            a=Affine<ValidatedNumericType>::variables(2);
+            dom=ExactBoxType::unit_box(2);
             offsets=ExactFloatVector2d{7.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_ex*a[1]<=2.0_ex,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
             expected_set=Polytope2d(5, -1.0,-1.0, +1.0,-1.0, +1.0,0.5, 0.0,+1.0, -1.0,+1.0) + offsets;
@@ -447,6 +461,8 @@ class TestAffineSet
 
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
+            a=Affine<ValidatedNumericType>::variables(3);
+            dom=ExactBoxType::unit_box(3);
             offsets=ExactFloatVector2d{1.0,7.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_ex*a[0]+0.20_ex*a[1]+0.05_ex*a[2],o[1]-0.10_ex*a[0]+0.1_ex*a[1]+0.05_ex*a[2]},{a[1]-a[2]<=-0.25_ex,a[0]+a[1]+a[2]==0.5_ex});
             expected_set=Polytope2d(1, +0.0,0.0) + offsets; // Unknown

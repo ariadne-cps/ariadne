@@ -24,7 +24,7 @@
 
 //! \file hybrid_evolution_tutorial.cpp
 
-#include "ariadne.hpp"
+#include <ariadne.hpp>
 
 namespace Ariadne {
 namespace HeatingSystemTutorial {

@@ -21,17 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/module.hpp"
-#include "algebra/algebra.hpp"
-#include "algebra/matrix.hpp"
-#include "function/function.hpp"
-#include "function/taylor_function.hpp"
-#include "function/constraint.hpp"
-#include "function/formula.hpp"
-#include "geometry/function_set.hpp"
-#include "output/graphics.hpp"
-
-#include "symbolic/expression.hpp"
+#include <ariadne.hpp>
 
 #define print(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
 

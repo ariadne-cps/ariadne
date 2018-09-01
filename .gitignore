@@ -12,8 +12,6 @@ obj/
 .idea
 
 source/config.hpp
-source/*/Makefile
-test/Makefile
-wrap/Makefile
-examples/Makefile
-examples/*/Makefile
+
+python/tests/.pytest_cache
+python/tests/__pycache__

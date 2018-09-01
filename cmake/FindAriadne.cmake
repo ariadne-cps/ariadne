@@ -10,23 +10,14 @@
 #
 # Redistribution and use is allowed according to the terms of the GPLv2 license.
 
-if(ARIADNE_INCLUDE_DIRS AND ARIADNE_LIBRARIES)
-  message("Ariadne includes and libraries already identified.")
+find_library(ARIADNE_LIBRARY ariadne)
+set(ARIADNE_LIBRARIES "${ARIADNE_LIBRARY}")
 
-  set(ARIADNE_FOUND TRUE)
+find_path(ARIADNE_INCLUDE_DIR ariadne.hpp PATH_SUFFIXES ariadne)
+set(ARIADNE_INCLUDE_DIRS "${ARIADNE_INCLUDE_DIR}")
 
-else()
-
-    find_library(ARIADNE_LIBRARY ariadne)
-    set(ARIADNE_LIBRARIES "${ARIADNE_LIBRARY}")
-
-    find_path(ARIADNE_INCLUDE_DIR ariadne.hpp PATH_SUFFIXES ariadne)
-    set(ARIADNE_INCLUDE_DIRS "${ARIADNE_INCLUDE_DIR}")
-
-    include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(Ariadne DEFAULT_MSG ARIADNE_LIBRARIES ARIADNE_INCLUDE_DIRS)
-
-endif()
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Ariadne DEFAULT_MSG ARIADNE_LIBRARIES ARIADNE_INCLUDE_DIRS)
 
 mark_as_advanced(
   ARIADNE_INCLUDE_DIRS

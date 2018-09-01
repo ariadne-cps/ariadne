@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_system_tutorial.cpp
+ *            hybrid_evolution_tutorial.cpp
  *
  *  Copyright  2008-17  Pieter Collins
  *
@@ -22,16 +22,9 @@
  */
 
 
-//! \file hybrid_system_tutorial.cpp
+//! \file hybrid_evolution_tutorial.cpp
 
 #include "ariadne.hpp"
-
-#include "hybrid/hybrid_automaton-composite.hpp"
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_paving.hpp"
-#include "hybrid/hybrid_evolver.hpp"
-#include "hybrid/hybrid_simulator.hpp"
-#include "hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 namespace HeatingSystemTutorial {

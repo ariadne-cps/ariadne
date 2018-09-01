@@ -44,6 +44,7 @@ namespace Ariadne {
 
 #include "function/function.hpp"
 #include "function/taylor_model.hpp"
+#include "function/taylor_function.hpp"
 
 #include "geometry/function_set.hpp"
 #include "geometry/affine_set.hpp"

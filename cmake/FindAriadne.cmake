@@ -5,10 +5,21 @@
 #  ARIADNE_FOUND - system has Ariadne
 #  ARIADNE_INCLUDE_DIRS - the Ariadne include directories
 #  ARIADNE_LIBRARIES - Link these to use Ariadne
-#
-# Copyright (C) 2018, Luca Geretti <luca.geretti@univr.it>
-#
-# Redistribution and use is allowed according to the terms of the GPLv2 license.
+
+# This file is part of Ariadne.
+
+# Ariadne is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Ariadne is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
 
 find_library(ARIADNE_LIBRARY ariadne)
 set(ARIADNE_LIBRARIES "${ARIADNE_LIBRARY}")

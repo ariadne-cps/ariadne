@@ -284,27 +284,50 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
 }
 
 ErrorType zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return min(n.pK*n.expLambda*h,(n.K*2u+n.pK)*h); }
+    return min(n.pK*n.expLambda*h,
+               (n.K*2u+n.pK)*h); }
 ErrorType zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return min(n.pK*n.expL*h,(n.Kj[j]*2u+n.pKj[j])*h); }
+    return min(n.pK*n.expL*h,
+               (n.Kj[j]*2u+n.pKj[j])*h); }
 
 ErrorType oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
+    return pow(h,2u)*((n.K+n.pK)*n.pL/3u +
+                      n.pK*2u*(n.L+n.pL)*n.expLambda); }
 ErrorType oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
+    return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u +
+           ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
 
 template<> ErrorType twoparam_worstcase_error<AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
-template<> ErrorType twoparam_worstcase_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2)+(n.L*3u*r+pow(r,2)*2u*n.pL)*n.pL)*n.expLambda + (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) + (n.pH*n.pK+n.pL*n.pL)*8u*(r*r+1u)))*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
+    return ((r*r+1u)*n.pL*n.pK +
+            (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda +
+            (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u)
+           )/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
 template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return (n.H*(n.K+n.pK)/2u + (n.L*n.L+n.H*(n.K+r*n.pK))*n.expLambda)/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
+    return (n.H*(n.K+n.pK)/2u +
+            (pow(n.L,2u)+n.H*(n.K+r*n.pK))*n.expLambda
+           )/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
+template<> ErrorType twoparam_worstcase_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
+    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+pow(r,2u)*2u*n.pL)*n.pL)*n.expLambda +
+            (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) +
+                           (n.pH*n.pK+pow(n.pL,2u))*8u*(r*r+1u))
+           )*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
+
 template<> ErrorType twoparam_component_error<AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (pow(h,2u)*(pow(r,2u)+1u)*n.pK*n.pLj[j]/2u + pow(h,3u)*(n.K+n.pK)*(r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) + n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)+(n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)+2u-h*n.L*2u))-2u))/cast_positive(cast_exact(pow(n.L,3u))))/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
-template<> ErrorType twoparam_component_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (pow(h,3u)*(n.K+n.pK)/24u*((r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u)+ (n.pHj[j]*n.pK+n.pL+n.pLj[j])*(pow(r,2u)+1u)*8u) + n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)+(n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)+2u-h*n.L*2u))-2u))/cast_positive(cast_exact(pow(n.L,3u))))/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
+    return (pow(h,2u)*(pow(r,2u)+1u)*n.pK*n.pLj[j]/2u +
+            pow(h,3u)*(n.K+n.pK)*(r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
+            n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L,3u))) +
+                                                 (n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)+2u-h*n.L*2u)-2u)/pow(n.L,3u))))
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
 template<> ErrorType twoparam_component_error<AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (n.Hj[j]*(n.K+n.pK)/2u+(n.Lj[j]*n.L+n.Hj[j]*(n.K+r*n.pK))*cast_positive(n.expL*cast_positive(cast_exact(pow(h*n.L,2u)*3u+4u-h*n.L*5u))+h*n.L-4u)/cast_positive(cast_exact(pow(n.L*h,3u)*2u)))*n.pK*pow(h,3u)/4u*(r+1u)/cast_positive(+1u-h*n.Lj[j]/2u); }
+    return (n.Hj[j]*(n.K+n.pK)/2u +
+            (n.Lj[j]*n.L+n.Hj[j]*(n.K+r*n.pK))*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L*h,3u)))/2u
+           )*n.pK*pow(h,3u)/4u*(r+1u)/cast_positive(+1u-h*n.Lj[j]/2u); }
+template<> ErrorType twoparam_component_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
+    return (pow(h,3u)*(n.K+n.pK)/24u*((r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u) +
+                                      (n.pHj[j]*n.pK+n.pL+n.pLj[j])*(pow(r,2u)+1u)*8u) +
+            n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L,3u))) +
+                         (n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)+2u-h*n.L*2u)-2u)/pow(n.L,3u))))
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
 
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(C1Norms const& n, PositiveFloatDPValue const& h) const {

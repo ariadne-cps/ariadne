@@ -265,10 +265,12 @@ std::ostream& operator << (std::ostream& os, const InputsRoles& kind) {
     return os;
 }
 
-template<class R> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
-template<class R> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
-template<class A, class R> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return worstcase_error<R>(n,h,r_value<A>()); }
-template<class A, class R> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return component_error<R>(n,h,r_value<A>(),j); }
+template<class R> ErrorType twoparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
+template<class R> ErrorType twoparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
+template<class A, class R, EnableIf<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n,h,r_value<A>()); }
+template<class A, class R, EnableIf<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n,h,r_value<A>(),j); }
 
 
 class InputApproximator;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolution_tutorial.cpp
+ *            hybrid-evolution_tutorial.cpp
  *
  *  Copyright  2008-17  Pieter Collins
  *
@@ -22,7 +22,7 @@
  */
 
 
-//! \file hybrid_evolution_tutorial.cpp
+//! \file hybrid-evolution_tutorial.cpp
 
 #include <ariadne.hpp>
 
@@ -106,7 +106,8 @@ CompositeHybridAutomaton create_heating_system()
     StringConstant off("off");
 
     // Create the discrete events
-    DiscreteEvent switch_on("switch_on");
+    DiscreteEvent must_switch_on("must_switch_on");
+    DiscreteEvent can_switch_on("can_switch_on");
     DiscreteEvent switch_off("switch_off");
     DiscreteEvent midnight("midnight");
 
@@ -114,9 +115,9 @@ CompositeHybridAutomaton create_heating_system()
     HybridAutomaton heater("heater");
     heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
-    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
+    heater.new_transition( heating|off, can_switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
     heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, EventKind::URGENT );
-    heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
+    heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
 
     // Create the clock subsystem
     HybridAutomaton clock;

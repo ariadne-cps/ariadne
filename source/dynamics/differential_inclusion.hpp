@@ -221,19 +221,19 @@ template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); 
 template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
 template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
 
-template<class A> InputApproximation approximation_kind();
-template<> InputApproximation approximation_kind<ZeroApproximation>() { return InputApproximation::ZERO; }
-template<> InputApproximation approximation_kind<ConstantApproximation>() { return InputApproximation::CONSTANT; }
-template<> InputApproximation approximation_kind<AffineApproximation>() { return InputApproximation::AFFINE; }
-template<> InputApproximation approximation_kind<SinusoidalApproximation>() { return InputApproximation::SINUSOIDAL; }
-template<> InputApproximation approximation_kind<PiecewiseApproximation>() { return InputApproximation::PIECEWISE; }
+template<class A> constexpr InputApproximation approximation_kind();
+template<> constexpr InputApproximation approximation_kind<ZeroApproximation>() { return InputApproximation::ZERO; }
+template<> constexpr InputApproximation approximation_kind<ConstantApproximation>() { return InputApproximation::CONSTANT; }
+template<> constexpr InputApproximation approximation_kind<AffineApproximation>() { return InputApproximation::AFFINE; }
+template<> constexpr InputApproximation approximation_kind<SinusoidalApproximation>() { return InputApproximation::SINUSOIDAL; }
+template<> constexpr InputApproximation approximation_kind<PiecewiseApproximation>() { return InputApproximation::PIECEWISE; }
 
-template<class A> Nat num_params_per_input();
-template<> Nat num_params_per_input<ZeroApproximation>() { return 0u; }
-template<> Nat num_params_per_input<ConstantApproximation>() { return 1u; }
-template<> Nat num_params_per_input<AffineApproximation>() { return 2u; }
-template<> Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
-template<> Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
+template<class A> constexpr Nat num_params_per_input();
+template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
+template<> constexpr Nat num_params_per_input<ConstantApproximation>() { return 1u; }
+template<> constexpr Nat num_params_per_input<AffineApproximation>() { return 2u; }
+template<> constexpr Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
+template<> constexpr Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
 
 enum class InputsRoles : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
 
@@ -349,8 +349,8 @@ class InputApproximatorBase : public InputApproximatorInterface {
     InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
         _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
-    InputApproximation _kind;
-    Nat _num_params_per_input;
+    const InputApproximation _kind;
+    const Nat _num_params_per_input;
   public:
     virtual InputApproximation kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }

@@ -283,31 +283,15 @@ compute_norms(DifferentialInclusion const& di, PositiveFloatDPValue const& h, Up
     return C1Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
 }
 
-template<> ErrorType worstcase_error<ZeroApproximation,AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h) {
+ErrorType zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h,(n.K*2u+n.pK)*h); }
-template<> ErrorType worstcase_error<ZeroApproximation,AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return worstcase_error<ZeroApproximation,AffineInputs>(n,h); }
-template<> ErrorType worstcase_error<ZeroApproximation,SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return worstcase_error<ZeroApproximation,AffineInputs>(n,h); }
-template<> ErrorType component_error<ZeroApproximation,AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return min(n.pK*n.expL*h,(n.Kj[j]*2u+n.pKj[j])*h); }
-template<> ErrorType component_error<ZeroApproximation,AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ZeroApproximation,AffineInputs>(n,h,j); }
-template<> ErrorType component_error<ZeroApproximation,SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ZeroApproximation,AffineInputs>(n,h,j); }
 
-template<> ErrorType worstcase_error<ConstantApproximation,AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h) {
+ErrorType oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
-template<> ErrorType worstcase_error<ConstantApproximation,SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return worstcase_error<ConstantApproximation,AffineInputs>(n,h); }
-template<> ErrorType worstcase_error<ConstantApproximation,AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return worstcase_error<ConstantApproximation,AffineInputs>(n,h); }
-template<> ErrorType component_error<ConstantApproximation,AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
     return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u + ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
-template<> ErrorType component_error<ConstantApproximation,SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ConstantApproximation,AffineInputs>(n,h,j); }
-template<> ErrorType component_error<ConstantApproximation,AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return component_error<ConstantApproximation,AffineInputs>(n,h,j); }
 
 template<> ErrorType twoparam_worstcase_error<AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
     return ((r*r+1u)*n.pL*n.pK + (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+n.L*n.L+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda + (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u))/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }

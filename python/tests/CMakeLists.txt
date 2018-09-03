@@ -9,6 +9,19 @@ else()
 endif()
 
 if(PYTHON_TESTS)
-    add_test(NAME test_python COMMAND ${PYTHON_EXECUTABLE} -m pytest WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    SET_PROPERTY(TEST test_python PROPERTY ENV "PYTHONPATH=${PYTHONPATH}:${PROJECT_BINARY_DIR}/python" )
+
+    set(TESTS_PYTHON
+        import
+        numeric
+        linear_algebra
+        function
+        calculus
+        solvers
+    )
+
+    foreach(TESTNAME ${TESTS_PYTHON})
+        add_test(NAME test_python_${TESTNAME} COMMAND ${PYTHON_EXECUTABLE} -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/test_${TESTNAME}.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        set_property(TEST test_python_${TESTNAME} PROPERTY ENV "PYTHONPATH=${PYTHONPATH}:${PROJECT_BINARY_DIR}/python" )
+    endforeach()
+
 endif()

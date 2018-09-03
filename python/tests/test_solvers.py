@@ -35,8 +35,6 @@ solver.solve(fn,b)
 solver=KrawczykSolver(1e-8,12)
 solver.solve(fn,b)
 
-
-
 d=IntervalVector([[-1,+1],[-1,+1]])
 h=Float(0.25)
 

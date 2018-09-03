@@ -8,8 +8,9 @@ set(UNIT_TESTS
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
-    add_test(${TEST} ${TEST})
     target_link_libraries(${TEST} ariadne-kernel)
+    add_test(${TEST} ${TEST})    
+    set_property(TEST ${TEST} PROPERTY LABELS "function;primary;kernel")    
 endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})

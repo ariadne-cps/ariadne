@@ -6,8 +6,9 @@ set(UNIT_TESTS
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
-    add_test(${TEST} ${TEST})
     target_link_libraries(${TEST} ariadne)
+    add_test(${TEST} ${TEST})    
+    set_property(TEST ${TEST} PROPERTY LABELS "dynamics;primary")
 endforeach()
 
 add_dependencies(tests ${UNIT_TESTS})

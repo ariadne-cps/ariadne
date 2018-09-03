@@ -41,7 +41,7 @@ DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynami
 }
 
 std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di) {
-    os << "DI: dynamics: " << di.dynamics() << "\n    inputs: " << /*di.inputs() << */ "\n";
+    os << "DI: dynamics: " << di.dynamics() << "\n    inputs: " << di.inputs() << "\n";
     os << "    (F: " << di.F() << "\n     f_component: " << di.f_component() << "\n     g_components: " << di.g_components() << "\n     V: " << di.V() << ")\n";
     os << "    " << (di.is_input_additive() ? "input-additive" : "input-affine")
        << ", " << (di.has_singular_input() ? "single input" : "multiple inputs") << "\n";
@@ -49,7 +49,7 @@ std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di) {
 }
 
 std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp) {
-    os << ivp.di() << "Initial: " << /*ivp.initial() << */ "(X0: " << ivp.X0() << ")\n";
+    os << ivp.di() << "Initial: " << ivp.initial() << "(X0: " << ivp.X0() << ")\n";
     return os;
 }
 

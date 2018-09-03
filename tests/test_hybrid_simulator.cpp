@@ -37,7 +37,7 @@
 #include "output/graphics.hpp"
 #include "output/logging.hpp"
 
-#include "test.hpp"
+#include "../test.hpp"
 
 using namespace Ariadne;
 using namespace std;

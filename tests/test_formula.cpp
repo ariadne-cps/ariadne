@@ -34,7 +34,7 @@
 #include "function/formula.hpp"
 #include "numeric/numeric.hpp"
 
-#include "test.hpp"
+#include "../test.hpp"
 
 using namespace std;
 using namespace Ariadne;

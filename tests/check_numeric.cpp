@@ -43,7 +43,7 @@ Rational rec(Nat); Rational rec(Int); Dbl rec(Dbl);
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
 
-#include "test.hpp"
+#include "../test.hpp"
 #include "utility.hpp"
 #include "check_number.hpp"
 

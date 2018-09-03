@@ -26,7 +26,7 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "test.hpp"
+#include "../test.hpp"
 
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

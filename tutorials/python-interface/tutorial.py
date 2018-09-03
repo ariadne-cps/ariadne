@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# -*- coding: utf-8 -*-
+
 ##############################################################################
 #            tutorial.py
 #
@@ -19,7 +21,7 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+# along with Ariadne. If not, see <https://www.gnu.org/licenses/>.
 
 # Import all classes in the ariadne module
 from ariadne import *

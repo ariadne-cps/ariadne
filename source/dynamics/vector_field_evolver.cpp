@@ -205,7 +205,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 {
     typedef EffectiveVectorFunction FunctionType;
     typedef ValidatedVectorFunctionModelDP FlowModelType;
-    typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;

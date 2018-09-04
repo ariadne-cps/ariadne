@@ -1116,7 +1116,6 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embed_error(const TaylorModel<ValidatedTag,F>& tm) {
-    typedef typename F::PrecisionType PR;
     const SizeType as=tm.argument_size();
     TaylorModel<ValidatedTag,F> rtm(as+1u,tm.sweeper());
     MultiIndex ra(as+1u);
@@ -1138,7 +1137,6 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embe
 }
 
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_discard_variables(const TaylorModel<ValidatedTag,F>& tm, Array<SizeType> const& discarded_variables) {
-    typedef typename F::PrecisionType PR;
     for(SizeType i=0; i!=discarded_variables.size()-1u; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1u]);
     }
@@ -1194,7 +1192,6 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_disc
 template<class F> Void TaylorModel<ValidatedTag,F>::antidifferentiate(SizeType k) {
     TaylorModel<ValidatedTag,F>& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
-    typedef typename F::PrecisionType PR;
 
     FloatError<PR> e=nul(this->error());
     for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -1219,7 +1216,6 @@ template<class F> TaylorModel<ValidatedTag,F> antiderivative(const TaylorModel<V
 template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
     TaylorModel<ValidatedTag,F> const& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
-    typedef typename F::PrecisionType PR;
     // ARIADNE_PRECONDITION_MSG(x.error().raw()==0,x);
     this->clobber();
 

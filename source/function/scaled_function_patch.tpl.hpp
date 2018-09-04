@@ -969,9 +969,9 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
         ScaledFunctionPatch<M> fi=(*this)[i];
-        Polynomial<FloatBounds<PR>> pi=fi.polynomial();
-        Polynomial<FloatApproximation<PR>> api=pi;
-        os << api;
+        Polynomial<FloatBounds<PR>> p_fi=fi.polynomial();
+        Polynomial<FloatApproximation<PR>> ap_fi=p_fi;
+        os << ap_fi;
         if(fi.error().raw()>0.0) { os << "+/-" << fi.error(); }
     }
     os << "]";

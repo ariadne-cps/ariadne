@@ -17,3 +17,8 @@ endforeach()
 add_dependencies(tests-core ${UNIT_TESTS})
 add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+
+#add_library(check_algebra OBJECT check_algebra.cpp)
+#add_dependencies(tests-core check_algebra)
+#add_dependencies(tests-kernel check_algebra)
+#add_dependencies(tests check_algebra)

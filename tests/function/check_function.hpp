@@ -23,8 +23,8 @@
  */
 
 #include "../test.hpp"
-#include "test/utility.hpp"
-#include "test/check_algebra.hpp"
+#include "../utility.hpp"
+#include "../algebra/check_algebra.hpp"
 
 #include "numeric/operators.hpp"
 #include "function/function.hpp"

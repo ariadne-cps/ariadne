@@ -15,3 +15,7 @@ endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
+
+#add_library(check_function OBJECT check_function.cpp)
+#add_dependencies(tests-kernel check_function)
+#add_dependencies(tests check_function)

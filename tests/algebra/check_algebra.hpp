@@ -23,7 +23,7 @@
  */
 
 #include "../test.hpp"
-#include "test/utility.hpp"
+#include "../utility.hpp"
 #include "utility/metaprogramming.hpp"
 #include "numeric/operators.hpp"
 
@@ -116,7 +116,9 @@ template<class V> void CheckVectorConcept<V>::check_norm_concept() {
     ARIADNE_TEST_STATIC_ASSERT( HasNorm<V,MagType> );
 }
 
-
+namespace Ariadne {
+template<class X> String algebra_class_name() { return String("Algebra<") + class_name<X>() + ">"; }
+}
 
 
 template<class A> class CheckAlgebraConcept

@@ -72,20 +72,20 @@ lu_inverse(const Matrix<X>& M)
         }
 
         // Set pivot row
-        SizeType i=iamax;
-        p[k]=i;
+        SizeType q=iamax;
+        p[k]=q;
 
         // Swap rows of both A and B
         for(SizeType j=k; j!=n; ++j) {
             X tmp=A[k][j];
-            A[k][j]=A[i][j];
-            A[i][j]=tmp;
+            A[k][j]=A[q][j];
+            A[q][j]=tmp;
         }
 
         for(SizeType j=0; j!=n; ++j) {
             X tmp=B[k][j];
-            B[k][j]=B[i][j];
-            B[i][j]=tmp;
+            B[k][j]=B[q][j];
+            B[q][j]=tmp;
         }
 
         RealType r  = rec(A[k][k]);
@@ -337,9 +337,9 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
             R[k][j] *= s;
         }
         for(SizeType i=0; i!=k; ++i) {
-            X s=U[i][k];
+            X t=U[i][k];
             for(SizeType j=0; j!=m; ++j) {
-                R[i][j] -= s * R[k][j];
+                R[i][j] -= t * R[k][j];
             }
         }
     }
@@ -787,12 +787,12 @@ orthogonal_decomposition(const Matrix<X>& A)
         }
 
         X inner_product_sum=z;
-        for(SizeType j=c; j!=n; ++j) {
+        for(SizeType k=c; k!=n; ++k) {
             X inner_product=z;
             for(SizeType i=c; i!=m; ++i) {
-                inner_product += R[i][c]*R[i][j];
+                inner_product += R[i][c]*R[i][k];
             }
-            p[j]=inner_product / pivot_norm_square;
+            p[k]=inner_product / pivot_norm_square;
             inner_product_sum += inner_product;
         }
 
@@ -801,9 +801,9 @@ orthogonal_decomposition(const Matrix<X>& A)
             O[i][c]=scale_factor * R[i][c];
         }
 
-        for(SizeType j=c+1; j!=n; ++j) {
+        for(SizeType k=c+1; k!=n; ++k) {
             for(SizeType i=c; i!=m; ++i) {
-                R[i][j] -= R[c][j] * p[j];
+                R[i][k] -= R[c][k] * p[k];
             }
         }
         for(SizeType i=c; i!=m; ++i) {

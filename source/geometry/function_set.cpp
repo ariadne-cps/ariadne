@@ -582,9 +582,6 @@ ConstrainedImageSet::affine_approximation() const
     Vector<FloatDPValue> h=cast_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
-
-    Vector<FloatDPApproximation> a(this->number_of_parameters());
-    FloatDPApproximation b,l,u;
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {

@@ -185,7 +185,5 @@ endif()
 
 install (TARGETS ariadne DESTINATION lib)
 install (DIRECTORY source/ DESTINATION include/ariadne
-            FILES_MATCHING PATTERN "*.hpp"
-            PATTERN "source/prototyping" EXCLUDE
-            PATTERN "source/experimental" EXCLUDE)
+            FILES_MATCHING PATTERN "*.hpp")
 

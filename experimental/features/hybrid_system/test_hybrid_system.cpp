@@ -32,7 +32,7 @@
 #include "algebra/matrix.hpp"
 
 #include "function/function.hpp"
-#include "hybrid/hybrid_system.hpp"
+#include "hybrid_system.hpp"
 
 using namespace std;
 using namespace Ariadne;

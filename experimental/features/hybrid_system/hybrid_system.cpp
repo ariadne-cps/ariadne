@@ -35,7 +35,7 @@
 #include "../symbolic/expression.hpp"
 #include "../function/function.hpp"
 #include "../hybrid/hybrid_time.hpp"
-#include "../hybrid/hybrid_system.hpp"
+#include "hybrid_system.hpp"
 #include "../geometry/grid.hpp"
 
 namespace Ariadne {

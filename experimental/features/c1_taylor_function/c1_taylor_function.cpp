@@ -38,7 +38,7 @@
 #include "../algebra/multi_index.hpp"
 #include "../algebra/expansion.hpp"
 
-#include "../function/c1_taylor_function.hpp"
+#include "c1_taylor_function.hpp"
 
 #define VOLATILE ;
 

@@ -126,6 +126,7 @@ add_subdirectory(source)
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(tutorials)
+add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 if(USE_PYTHON)
     add_subdirectory(python)

@@ -787,7 +787,6 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
             // Test variable to enter basis; there are m to test, one for each dimension of the domain
             Nat j=p[k];
             if(j!=last_exiting_variable || true) {
-                Nat j=p[k];
                 Aj=column(A,j);
                 BAj=B*Aj;
 

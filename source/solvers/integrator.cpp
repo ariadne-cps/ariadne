@@ -822,9 +822,9 @@ ValidatedVectorFunctionModelDP
 AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dom, const FloatDPValue& h, const UpperBoxType& bbox) const
 {
     ARIADNE_LOG(3,"AffineIntegrator::flow_step(ValidatedVectorFunction f, ExactBoxType dom, FloatDP h, UpperBoxType bbox)\n");
-    Vector<ValidatedNumericType> mid = Vector<ValidatedNumericType>(midpoint(dom));
+    Vector<ValidatedNumericType> dmid = Vector<ValidatedNumericType>(midpoint(dom));
 
-    Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,mid);
+    Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,dmid);
     Vector<ValidatedDifferential> bdphi = this->flow_derivative(f,cast_singleton(bbox));
 
     ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
@@ -837,7 +837,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
 
     Vector<FloatDPError> rad(n+1,zero_err);
     for(Nat i=0; i!=n; ++i) {
-        rad[i] = cast_positive(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
+        rad[i] = cast_positive(max(dom[i].upper()-dmid[i].lower(),dmid[i].upper()-dom[i].lower()));
     }
     rad[n] = mag(h);
 

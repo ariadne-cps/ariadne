@@ -597,10 +597,10 @@ Void CairoCanvas::write(const char* filename) const {
 
 Void CairoCanvas::finalise()
 {
-    cairo_t *cr=this->cr;
+    cairo_t *crp=this->cr;
 
     // Restore canvas coordinates and unclipped state
-    cairo_restore (cr);
+    cairo_restore (crp);
 
     const ImageSize2d drawing_size = this->size_in_pixels();
     const Int drawing_width = static_cast<Int>(drawing_size.nx);
@@ -609,14 +609,14 @@ Void CairoCanvas::finalise()
     const Int left_margin = LEFT_MARGIN;
     const Int top_margin = TOP_MARGIN;
 
-    cairo_set_line_width (cr, 2.0);
-    cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-    cairo_move_to (cr, left_margin, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin);
-    cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, top_margin+drawing_height);
-    cairo_stroke (cr);
+    cairo_set_line_width (crp, 2.0);
+    cairo_set_source_rgb (crp, 0.0, 0.0, 0.0);
+    cairo_move_to (crp, left_margin, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin);
+    cairo_line_to (crp, left_margin, top_margin);
+    cairo_line_to (crp, left_margin, top_margin+drawing_height);
+    cairo_stroke (crp);
 }
 
 #endif

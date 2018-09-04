@@ -169,8 +169,8 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
     : _domain(d), _space_models(f), _constraint_models(c)
 {
     ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
-    for (auto c : _constraint_models)
-        ARIADNE_ASSERT_MSG(_domain.dimension() == c.argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<c.argument_size()<<").");
+    for (auto cons : _constraint_models)
+        ARIADNE_ASSERT_MSG(_domain.dimension() == cons.argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<cons.argument_size()<<").");
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f,

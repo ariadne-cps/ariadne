@@ -212,12 +212,12 @@ Decimal::Decimal(String const& str)
     // Parse string to ensure correctness
     Bool found_decimal_point=false;
     const char* c_ptr=str.c_str();
-    const char& c=*c_ptr;
+    const char& ch=*c_ptr;
 
     Int s = +1;
-    if(c=='-') {
+    if(ch=='-') {
         s = -1; ++c_ptr;
-    } else if (c=='+') {
+    } else if (ch=='+') {
         ++c_ptr;
     }
 

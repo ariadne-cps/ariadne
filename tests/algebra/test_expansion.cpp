@@ -121,7 +121,6 @@ template<class F> Void TestExpansion<F>::test_working()
 
 template<class F> Void TestExpansion<F>::test_concept()
 {
-    PR prec=zero.precision();
     F x(5,prec);
     SizeType as(3);
 

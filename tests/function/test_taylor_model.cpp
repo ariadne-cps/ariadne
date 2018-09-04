@@ -541,7 +541,6 @@ template<class F> Void TestTaylorModel<F>::test_recondition()
 
 
 Int main() {
-    DoublePrecision dp;
     ThresholdSweeper<FloatDP> sweeper_dp(dp,1e-8);
 //    TestTaylorModel<FloatDP>(sweeper_dp).test();
     MultiplePrecision mp(128);

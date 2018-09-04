@@ -239,7 +239,6 @@ Void TestPolynomial::test_indexing()
 
 Void TestPolynomial::test_arithmetic()
 {
-    typedef Polynomial<FloatDP> P;
     ARIADNE_TEST_EQUAL(P(3)+P(3),P(3));
     ARIADNE_TEST_EQUAL(P(3)+P({ {{2,1,0},2.0} }),P({ {{2,1,0},2.0} }));
     ARIADNE_TEST_EQUAL(P(3)+P({ {{2,1,0},2.0}, {{0,1,0},3.0}, {{1,1,0},5.0} }), P({ {{0,1,0},3.0}, {{1,1,0},5.0}, {{2,1,0},2.0} }));

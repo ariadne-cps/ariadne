@@ -2215,10 +2215,6 @@ Void test_cell_intersect_subset() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const Nat heightZero = 0;
-    const Nat heightOne = 1;
-    const Nat heightTwo = 2;
-
     BinaryWord tree = make_binary_word("1111001000100");
     BinaryWord leaves = make_binary_word("1001001");
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo
@@ -2337,11 +2333,6 @@ Void test_subset_intersect_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
-
-    const Nat heightZero = 0;
-    const Nat heightOne = 1;
-    const Nat heightTwo = 2;
-    const Nat heightThree = 3;
 
     BinaryWord tree = make_binary_word("1111001000100");
     BinaryWord leaves = make_binary_word("1001001");
@@ -2500,8 +2491,6 @@ Void test_subset_intersects_box() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const Nat heightTwo = 2;
-
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
     GridTreePaving theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
@@ -2571,8 +2560,6 @@ Void test_subset_subset_box(){
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
-
-    const Nat heightTwo = 2;
 
     //Create the set rooted to the primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
@@ -2688,8 +2675,6 @@ Void test_subset_subset_box(){
 Void test_subset_superset_box(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
-
-    const Nat heightTwo = 2;
 
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,2]x[1,2] U [1,2]x[2,3] U [2,3]x[1,2] U [2,3]x[2,3]

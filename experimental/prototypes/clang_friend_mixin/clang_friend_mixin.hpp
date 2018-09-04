@@ -1,5 +1,5 @@
-#include<type_traits>
-#include<iostream>
+#include <type_traits>
+#include <iostream>
 
 using Dummy=int; static const Dummy dummy=0;
 template<class P, class T=Dummy> using EnableIf = typename std::enable_if<P::value,T>::type;
@@ -85,9 +85,6 @@ template<class P> class Number {
 };
 using ApproximateNumber = Number<ApproximateTag>;
 using ValidatedNumber = Number<ValidatedTag>;
-
-class DoublePrecision { friend DoublePrecision max(DoublePrecision,DoublePrecision) { return dp; } };
-using DP=DoublePrecision;
 
 class RoundingMode {
   public:
@@ -240,6 +237,9 @@ template<class PR> struct IsConcreteNumber<FloatApproximation<PR>> : True { };
 template<class PR> struct IsConcreteNumber<FloatError<PR>> : True { };
 template<class X, class Y> struct AreConcreteGenericNumbers : False { };
 template<class X, class P> struct AreConcreteGenericNumbers<X,Number<P>> : IsConcreteNumber<X> { };
+
+class DoublePrecision { friend DoublePrecision max(DoublePrecision dp1,DoublePrecision dp2) { return dp1; } };
+using DP=DoublePrecision;
 
 /*
 template<class X, class Y, EnableIf<AreConcreteGenericNumbers<X,Y>> =dummy>

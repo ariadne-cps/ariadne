@@ -1,4 +1,4 @@
-#include "../../prototypes/clang_friend_mixin/clang_friend_mixin.hpp"
+#include "clang_friend_mixin.hpp"
 
 #define PRINT(expr) { std::cout << #expr << ": " << (expr) << std::endl; }
 

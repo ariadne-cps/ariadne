@@ -514,7 +514,7 @@ Void export_scalar_functions() {
     implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ApproximateTag>>();
     implicitly_convertible<ScalarFunction<ValidatedTag>,ScalarFunction<ApproximateTag>>();
     def("lie_derivative", (ScalarFunction<EffectiveTag>(*)(const ScalarFunction<EffectiveTag>&,const VectorFunction<EffectiveTag>&)) &lie_derivative);
-};
+}
 
 Void export_vector_functions() {
     export_vector_function<ApproximateTag>();
@@ -524,7 +524,7 @@ Void export_vector_functions() {
     implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ApproximateTag>>();
     implicitly_convertible<VectorFunction<ValidatedTag>,VectorFunction<ApproximateTag>>();
     from_python<VectorFunction<EffectiveTag>>();
-};
+}
 
 
 Void export_scalar_python_function()

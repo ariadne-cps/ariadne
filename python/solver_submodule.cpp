@@ -133,7 +133,7 @@ Void export_integrator()
 
 
     class_<TaylorPicardIntegrator > taylor_picard_integrator_class("TaylorPicardIntegrator",init<double>());
-    taylor_picard_integrator_class.def("flow_bounds",(Pair<FloatDP,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDP&)const)&TaylorPicardIntegrator::flow_bounds);
+    taylor_picard_integrator_class.def("flow_bounds",(Pair<FloatDPValue,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDP&)const)&TaylorPicardIntegrator::flow_bounds);
     taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloatDP&)const)&TaylorPicardIntegrator::flow_step);
     taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDPValue&,const UpperBoxType&)const)&TaylorPicardIntegrator::flow_step);
     taylor_picard_integrator_class.def("flow_to",(ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow_to);

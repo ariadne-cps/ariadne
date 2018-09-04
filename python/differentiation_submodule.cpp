@@ -191,7 +191,7 @@ template<class X, class Y, class PR> Vector<Differential<X>> make_variables(Degr
 
 template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
 X get_item(const C& c, const I& i) {
-    return c[static_cast<Nat>(i)];
+    return c[static_cast<SizeType>(i)];
 }
 
 template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
@@ -289,17 +289,19 @@ Void export_differential(const String& name)
     def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
     def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
-    def("neg",&_neg_<D>);
-    def("sqr",&_sqr_<D>);
-    def("rec",&_rec_<D>);
-    def("pow",&_pow_<D,Int>);
-    def("sqrt",&_sqrt_<D>);
-    def("exp",&_exp_<D>);
-    def("log",&_log_<D>);
-    def("sin",&_sin_<D>);
-    def("cos",&_cos_<D>);
-    def("tan",&_tan_<D>);
-    def("atan",&_atan_<D>);
+    typedef D(*UFn)(D const&);
+    
+    def("neg", (D(*)(D const&)) &_neg_<D>);
+    def("sqr", (UFn) &_sqr_<D>);
+    def("rec",(UFn) &_rec_<D>);
+    def("pow", (D(*)(D const&,Int const&)) &_pow_<D,Int>);
+    def("sqrt",(UFn) &_sqrt_<D>);
+    def("exp",(UFn) &_exp_<D>);
+    def("log",(UFn) &_log_<D>);
+    def("sin",(UFn) &_sin_<D>);
+    def("cos",(UFn) &_cos_<D>);
+    def("tan",(UFn) &_tan_<D>);
+    def("atan",(UFn) &_atan_<D>);
 }
 
 template<class DIFF>

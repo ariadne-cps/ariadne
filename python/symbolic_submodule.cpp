@@ -396,7 +396,7 @@ Void export_formula()
 
     implicitly_convertible<KleeneanVariable,ContinuousPredicate>();
 
-    def("sgn", (KleeneanExpression(*)(RealExpression)) &sgn);
+    def("sgn", (KleeneanExpression(*)(RealExpression const&)) &sgn);
 
 
 

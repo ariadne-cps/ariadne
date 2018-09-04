@@ -366,30 +366,7 @@ template<class... ARGS> Vector<RealVariable>::Vector(ARGS... args) { static_cast
 using namespace Ariadne;
 
 
-void test_function_expression() {
-    TimeVariable t;
-    RealVariables a("a",2);
-    RealVariable b("b");
-    RealVariables x("x",2);
-    RealVariable y("y");
-    RealVariable u("u");
-
-    auto f=make_function({a[0],a[1],x[0],x[1],t},x[0]*exp(-a[0]*t)+x[1]*exp(-a[1]*t));
-    ARIADNE_PRINT(f);
-
-    ARIADNE_PRINT((RealSpace{a[0],x[0],t}));
-    ARIADNE_PRINT((RealSpace{a,b,x,y,t}));
-    ARIADNE_PRINT(evaluate(f,{a[0],a[1],x[0],x[1],t}));
-    ARIADNE_PRINT(evaluate(f,{a,x,t}));
-
-    auto fb=make_function(RealSpace{a,b,x,y,t},evaluate(f,{a,x,t}));
-    ARIADNE_PRINT(fb);
-    std::cout<<std::endl;
-}
-
-
 int main() {
-    test_function_expression();
 
     TimeVariable t;
     RealVariable a("a");

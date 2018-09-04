@@ -481,7 +481,7 @@ Void export_affine_set()
     affine_set_class.def(init<Vector<ExactIntervalType>, Matrix<FloatDPValue>, Vector<FloatDPValue> >());
     affine_set_class.def(init<Matrix<FloatDPValue>, Vector<FloatDPValue> >());
     affine_set_class.def("new_parameter_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<FloatDPBounds>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ApproximateTag,FloatDP>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def("new_constraint", (Void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("is_bounded", &ValidatedAffineConstrainedImageSet::is_bounded);
     affine_set_class.def("is_empty", &ValidatedAffineConstrainedImageSet::is_empty);
@@ -496,7 +496,7 @@ Void export_affine_set()
 }
 
 Void export_constraint_set()
-{
+{    
     from_python< List<EffectiveConstraint> >();
 
     class_<ConstraintSet,bases<RegularSetInterface,OpenSetInterface> >
@@ -511,17 +511,17 @@ Void export_constraint_set()
     bounded_constraint_set_class.def("dimension", &BoundedConstraintSet::dimension);
     bounded_constraint_set_class.def(self_ns::str(self));
 
-    def("intersection", &_intersection_<ConstraintSet,ConstraintSet>);
-    def("intersection", &_intersection_<ConstraintSet,RealBox>);
-    def("intersection", &_intersection_<RealBox,ConstraintSet>);
+    def("intersection", (ConstraintSet(*)(ConstraintSet const&,ConstraintSet const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(ConstraintSet const&, RealBox const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(RealBox const&, ConstraintSet const&)) &_intersection_);
 
-    def("intersection", &_intersection_<BoundedConstraintSet,BoundedConstraintSet>);
-    def("intersection", &_intersection_<BoundedConstraintSet,RealBox>);
-    def("intersection", &_intersection_<RealBox,BoundedConstraintSet>);
-    def("intersection", &_intersection_<ConstraintSet,BoundedConstraintSet>);
-    def("intersection", &_intersection_<BoundedConstraintSet,ConstraintSet>);
+    def("intersection", (BoundedConstraintSet(*)(BoundedConstraintSet const&, BoundedConstraintSet const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(BoundedConstraintSet const&, RealBox const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(RealBox const&, BoundedConstraintSet const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(ConstraintSet const&, BoundedConstraintSet const&)) &_intersection_);
+    def("intersection", (BoundedConstraintSet(*)(BoundedConstraintSet const&, ConstraintSet const&)) &_intersection_);
 
-    def("image", &_image_<BoundedConstraintSet,EffectiveVectorFunction>);
+    def("image", (ConstrainedImageSet(*)(BoundedConstraintSet const&, EffectiveVectorFunction const&)) &_image_);
 
 }
 
@@ -548,8 +548,8 @@ Void export_constrained_image_set()
     validated_constrained_image_set_class.def("number_of_parameters", &ValidatedConstrainedImageSet::number_of_parameters);
     validated_constrained_image_set_class.def("number_of_constraints", &ValidatedConstrainedImageSet::number_of_constraints);
     validated_constrained_image_set_class.def("apply", &ValidatedConstrainedImageSet::apply);
-    validated_constrained_image_set_class.def("new_space_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
-    validated_constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const EffectiveConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
+    validated_constrained_image_set_class.def("new_space_constraint", (Void(ValidatedConstrainedImageSet::*)(const ValidatedConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
+    validated_constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const ValidatedConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
     //constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
     validated_constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
     	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);

@@ -44,7 +44,7 @@ template<class X1, class X2> ArithmeticType<X1,X2> dot(const Vector<X1>& v1, con
 template<class X>
 X __vgetitem__(const Vector<X>& v, Int i)
 {
-    if(i<0) { i+=v.size(); }
+    if(i<0) { i+=static_cast<Int>(v.size()); }
     ARIADNE_ASSERT_MSG(0<=i && Nat(i)<v.size(),"v="<<v<<" i="<<i);
     return v[static_cast<Nat>(i)];
 }
@@ -53,8 +53,8 @@ X __vgetitem__(const Vector<X>& v, Int i)
 template<class X>
 Vector<X> __vgetslice__(const Vector<X>& v, Int start, Int stop)
 {
-    if(start<0) { start+=v.size(); }
-    if(stop<0) { stop+=v.size(); }
+    if(start<0) { start+=static_cast<Int>(v.size()); }
+    if(stop<0) { stop+=static_cast<Int>(v.size()); }
     ARIADNE_ASSERT(0<=start && start<=stop && Nat(stop)<=v.size());
     return project(v,range(static_cast<Nat>(start),static_cast<Nat>(stop)));
 }
@@ -63,7 +63,7 @@ Vector<X> __vgetslice__(const Vector<X>& v, Int start, Int stop)
 template<class X>
 Void __vsetitem__(Vector<X>& v, Int i, const X& x)
 {
-    if(i<0) { i+=v.size(); }
+    if(i<0) { i+=static_cast<Int>(v.size()); }
     ARIADNE_ASSERT(0<=i && Nat(i)<v.size());
     v[static_cast<Nat>(i)]=x;
 }

@@ -193,7 +193,7 @@ template<class P> void export_effective_logical(std::string name)
     logical_class.define_self_logical();
     logical_class.def(self_ns::str(self));
     logical_class.def(self_ns::repr(self));
-    def("check", (CheckType(*)(LogicalType<P> const&,Effort)) &Ariadne::check<LogicalType<P>>);
+    def("check", (CheckType(*)(LogicalType<P> const&,Effort const&)) &Ariadne::check<LogicalType<P>>);
 }
 
 template<class P> void export_logical(std::string name)
@@ -321,6 +321,7 @@ void export_real()
     real_class.define_transcendental_functions();
     real_class.define_self_comparisons();
 
+    def("badsqrt", (Real(*)(Real const&)) &sqrt);
     def("sqrt", (Real(*)(Real const&)) &sqrt);
     def("exp", (Real(*)(Real const&)) &exp);
     def("log", (Real(*)(Real const&)) &log);
@@ -496,6 +497,8 @@ void export_rounding_mode() {
 template<class PR> void export_raw_float()
 {
     typedef RawFloat<PR> F;
+    typedef F const& Fcr;
+    
     typedef typename F::RoundingModeType RND;
     implicitly_convertible<Rounding,RND>();
 
@@ -509,35 +512,35 @@ template<class PR> void export_raw_float()
     raw_float_class.def(self_ns::str(self));
     raw_float_class.def(self_ns::repr(self));
 
-    def("nul", &_nul_<F>);
-    def("pos", &_pos_<F>);
-    def("neg", &_neg_<F>);
-    def("hlf", &_hlf_<F>);
+    def("nul", (F(*)(Fcr)) &_nul_);
+    def("pos", (F(*)(Fcr)) &_pos_);
+    def("neg", (F(*)(Fcr)) &_neg_);
+    def("hlf", (F(*)(Fcr)) &_hlf_);
 
-    def("nul", &_nul_rnd_<RND,F>);
-    def("pos", &_pos_rnd_<RND,F>);
-    def("neg", &_neg_rnd_<RND,F>);
-    def("hlf", &_hlf_rnd_<RND,F>);
-    def("sqr", &_sqr_rnd_<RND,F>);
-    def("rec", &_rec_rnd_<RND,F>);
-    def("add", &_add_rnd_<RND,F,F>);
-    def("sub", &_sub_rnd_<RND,F,F>);
-    def("mul", &_mul_rnd_<RND,F,F>);
-    def("div", &_div_rnd_<RND,F,F>);
-    def("fma", &_fma_rnd_<RND,F,F,F>);
-    def("pow", &_pow_rnd_<RND,F,Int>);
-    def("sqrt", &_sqrt_rnd_<RND,F>);
-    def("exp", &_exp_rnd_<RND,F>);
-    def("log", &_log_rnd_<RND,F>);
-    def("sin", &_sin_rnd_<RND,F>);
-    def("cos", &_cos_rnd_<RND,F>);
-    def("tan", &_tan_rnd_<RND,F>);
-    def("atan", &_atan_rnd_<RND,F>);
+//    def("nul", &_nul_rnd_<RND,F>);
+    def("nul", (F(*)(RND,Fcr)) &_nul_rnd_);
+    def("pos", (F(*)(RND,Fcr)) &_pos_rnd_);
+    def("neg", (F(*)(RND,Fcr)) _neg_rnd_);
+    def("hlf", (F(*)(RND,Fcr)) _hlf_rnd_);
+    def("sqr", (F(*)(RND,Fcr)) _sqr_rnd_);
+    def("rec", (F(*)(RND,Fcr)) _rec_rnd_);
+    def("add", (F(*)(RND,Fcr,Fcr)) _add_rnd_);
+    def("sub", (F(*)(RND,Fcr,Fcr)) _sub_rnd_);
+    def("mul", (F(*)(RND,Fcr,Fcr)) _mul_rnd_);
+    def("div", (F(*)(RND,Fcr,Fcr)) _div_rnd_);
+    def("fma", (F(*)(RND,Fcr,Fcr,Fcr)) _fma_rnd_);
+    def("pow", (F(*)(RND,Fcr,Int)) _pow_rnd_);
+    def("sqrt", (F(*)(RND,Fcr)) _sqrt_rnd_);
+    def("exp", (F(*)(RND,Fcr)) _exp_rnd_);
+    def("log", (F(*)(RND,Fcr)) _log_rnd_);
+    def("sin", (F(*)(RND,Fcr)) _sin_rnd_);
+    def("cos", (F(*)(RND,Fcr)) _cos_rnd_);
+    def("tan", (F(*)(RND,Fcr)) _tan_rnd_);
+    def("atan", (F(*)(RND,Fcr)) _atan_rnd_);
 
-    def("abs", &_abs_<F>);
-    def("max", &_min_<F,F>);
-    def("min", &_max_<F,F>);
-
+    def("abs", (F(*)(Fcr)) _abs_);
+    def("max", (F(*)(Fcr,Fcr)) _min_);
+    def("min", (F(*)(Fcr,Fcr)) _max_);
 }
 
 template<class PR> void export_float_value()
@@ -640,7 +643,7 @@ template<class PR, class PRE=PR> void export_float_ball()
 
     float_ball_class.def(self_ns::str(self));
     float_ball_class.def(self_ns::repr(self));
-};
+}
 
 
 

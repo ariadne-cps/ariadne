@@ -73,10 +73,11 @@ template<class P, class PR, class PRE> OutputStream& operator<<(OutputStream& os
 }
 
 ValidatedVectorTaylorFunctionModelDP __getslice__(const ValidatedVectorTaylorFunctionModelDP& tf, Int start, Int stop) {
-    if(start<0) { start+=tf.result_size(); }
-    if(stop<0) { stop+=tf.result_size(); }
-    ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&SizeType(stop)<=tf.result_size(),
-            "result_size="<<tf.result_size()<<", start="<<start<<", stop="<<stop);
+    Int rs = tf.result_size();
+    if(start<0) { start+=rs; }
+    if(stop<0) { stop+=rs; }
+    ARIADNE_ASSERT_MSG(0<=start&&start<=stop&&stop<=rs,
+            "result_size="<<rs<<", start="<<start<<", stop="<<stop);
     return ValidatedVectorTaylorFunctionModelDP(tf.domain(),Vector<ValidatedTaylorModelDP>(project(tf.models(),range(static_cast<SizeType>(start),static_cast<SizeType>(stop)))));
 }
 
@@ -487,7 +488,7 @@ Void export_scalar_function_model()
 
     def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModelDP&)) &unrestrict);
 
-    def("antiderivative", &_antiderivative_<ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType>);
+    def("antiderivative", (ValidatedScalarFunctionModelDP(*)(ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType)) &_antiderivative_<ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType>);
 
 }
 
@@ -527,8 +528,8 @@ Void export_vector_function_model()
     def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedScalarFunctionModelDP&)) &join);
     def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &join);
 
-    def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
-    def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
+    def("antiderivative", (ValidatedVectorFunctionModelDP(*)(ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType)) &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
+    def("antiderivative", (ValidatedVectorFunctionModelDP(*)(ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber)) &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
 
     to_python< List<ValidatedVectorFunctionModelDP> >();
 }
@@ -546,6 +547,8 @@ Void export_scalar_taylor_function()
     typedef typename X::GenericType Y;
     typedef Vector<Y> VY;
 
+    typedef F const& Fcr;
+    
     class_<ValidatedScalarTaylorFunctionModelDP> scalar_taylor_function_class("ValidatedScalarTaylorFunctionModel",init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(init<ExactBoxType,ValidatedTaylorModelDP>());
     scalar_taylor_function_class.def(init< ExactBoxType,SweeperDP >());
@@ -558,7 +561,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def("codomain", &F::codomain);
     scalar_taylor_function_class.def("range", &F::range);
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModelDP&(ValidatedScalarTaylorFunctionModelDP::*)()const)&ValidatedScalarTaylorFunctionModelDP::model, return_value_policy<copy_const_reference>());
-    scalar_taylor_function_class.def("polynomial", (Polynomial<ExactIntervalType>(ValidatedScalarTaylorFunctionModelDP::*)()const)&ValidatedScalarTaylorFunctionModelDP::polynomial);
+    scalar_taylor_function_class.def("polynomial", (Polynomial<ValidatedNumericType>(ValidatedScalarTaylorFunctionModelDP::*)()const)&ValidatedScalarTaylorFunctionModelDP::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ValidatedScalarTaylorFunctionModelDP::*)()const)&ValidatedScalarTaylorFunctionModelDP::number_of_nonzeros);
 //    scalar_taylor_function_class.def("set_sweeper", &ValidatedScalarTaylorFunctionModelDP::set_sweeper);
 //    scalar_taylor_function_class.def("sweeper", &ValidatedScalarTaylorFunctionModelDP::sweeper);
@@ -614,15 +617,15 @@ Void export_scalar_taylor_function()
     //scalar_taylor_function_class.def("__repr__",(StringType(*)(const ValidatedScalarTaylorFunctionModelDP&)) &__repr__);
     scalar_taylor_function_class.def("value", (const FloatDPValue&(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::value,return_value_policy<copy_const_reference>());
 //    scalar_taylor_function_class.def("sweep", (ValidatedScalarTaylorFunctionModelDP&(ValidatedScalarTaylorFunctionModelDP::*)())&ValidatedScalarTaylorFunctionModelDP::sweep,return_value_policy<reference_existing_object>());
-    scalar_taylor_function_class.def("clobber", (ValidatedScalarTaylorFunctionModelDP&(ValidatedScalarTaylorFunctionModelDP::*)()) &ValidatedScalarTaylorFunctionModelDP::clobber,return_value_policy<reference_existing_object>());
+    scalar_taylor_function_class.def("clobber", (Void(ValidatedScalarTaylorFunctionModelDP::*)()) &ValidatedScalarTaylorFunctionModelDP::clobber,return_value_policy<reference_existing_object>());
     scalar_taylor_function_class.def("set_properties",&ValidatedScalarTaylorFunctionModelDP::set_properties);
     scalar_taylor_function_class.def("properties",&ValidatedScalarTaylorFunctionModelDP::properties);
     scalar_taylor_function_class.def("__call__", (FloatDPApproximation(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedScalarTaylorFunctionModelDP::operator());
     scalar_taylor_function_class.def("__call__", (FloatDPBounds(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarTaylorFunctionModelDP::operator());
     scalar_taylor_function_class.def("gradient", (Covector<FloatDPBounds>(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarTaylorFunctionModelDP::gradient);
-    scalar_taylor_function_class.def("function", (EffectiveScalarFunction(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::function);
+    scalar_taylor_function_class.def("function", (ValidatedScalarFunction(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<FloatDPBounds>(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::polynomial);
-    scalar_taylor_function_class.def("restriction",&_restriction_<F,D>);
+    scalar_taylor_function_class.def("restriction", (F(*)(F,D)) &_restriction_<F,D>);
 //    scalar_taylor_function_class.def("extension",&_extension_<F,D>);
 
     scalar_taylor_function_class.def("zero",(ValidatedScalarTaylorFunctionModelDP(*)(const ExactBoxType&,SweeperDP))&ValidatedScalarTaylorFunctionModelDP::zero);
@@ -633,27 +636,28 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.staticmethod("constant");
     scalar_taylor_function_class.staticmethod("coordinate");
 
-    def("restriction",&_restriction_<F,D>);
-    def("join",&_join_<F,F>);
+    def("restriction", (F(*)(F,D)) &_restriction_<F,D>);
+    def("join",(VF(*)(F,F)) &_join_<F,F>);
 //    def("extension",&_extension_<F,D>);
-    def("embed",&_embed_<D,F,D>);
-    def("split",&_split_<F,I>);
-    def("evaluate",&_evaluate_<F,VX>);
-    def("evaluate",&_partial_evaluate_<F,I,X>);
-    def("midpoint",&_midpoint_<F>);
-    def("derivative",&_derivative_<F,I>);
-    def("antiderivative",&_antiderivative_<F,I>);
-    def("antiderivative",&_antiderivative_<F,I,X>);
+    def("embed",(F(*)(D,F,D)) &_embed_<D,F,D>);
+    def("split",(Pair<F,F>(*)(F,I)) &_split_<F,I>);
+    def("evaluate",(X(*)(F,VX)) &_evaluate_<F,VX>);
+    def("evaluate",(F(*)(F,I,X)) &_partial_evaluate_<F,I,X>);
+    def("midpoint",(F(*)(F)) &_midpoint_<F>);
+    def("derivative", (F(*)(F,I)) &_derivative_<F,I>);
+    def("antiderivative", (F(*)(F,I)) &_antiderivative_<F,I>);
+    def("antiderivative", (F(*)(F,I,X)) &_antiderivative_<F,I,X>);
 
-    def("inconsistent",&_inconsistent_<F,F>);
-    def("refines",&_refines_<F,F>);
-    def("refinement",&_refinement_<F,F>);
+    def("inconsistent", (Bool(*)(F,F)) &_inconsistent_<F,F>);
+    def("refines", (Bool(*)(F,F)) &_refines_<F,F>);
+    def("refinement", (F(*)(F,F)) &_refinement_<F,F>);
 
-    def("max",&_max_<F,F>); def("min",&_min_<F,F>); def("abs",&_abs_<F>);
+    def("max", (F(*)(Fcr,Fcr)) &_max_<F,F>); def("min", (F(*)(Fcr,Fcr)) &_min_<F,F>); def("abs", (F(*)(Fcr)) &_abs_<F>);
 
-    def("neg",&_neg_<F>); def("rec",&_rec_<F>); def("sqr",&_sqr_<F>); def("pow",&_pow_<F,Int>);
-    def("sqrt",&_sqrt_<F>); def("exp",&_exp_<F>); def("log",&_log_<F>); def("atan",&_atan_<F>);
-    def("sin",&_sin_<F>); def("cos",&_cos_<F>); def("tan",&_tan_<F>);
+    def("neg",(F(*)(Fcr))&_neg_<F>); def("rec",(F(*)(Fcr))&_rec_<F>); def("sqr",(F(*)(Fcr))&_sqr_<F>); 
+    def("pow",(F(*)(Fcr,Int const&))&_pow_<F,Int>);
+    def("sqrt",(F(*)(Fcr))&_sqrt_<F>); def("exp",(F(*)(Fcr))&_exp_<F>); def("log",(F(*)(Fcr))&_log_<F>); def("atan",(F(*)(Fcr))&_atan_<F>);
+    def("sin",(F(*)(Fcr))&_sin_<F>); def("cos",(F(*)(Fcr))&_cos_<F>); def("tan",(F(*)(Fcr))&_tan_<F>);
 
     to_python< Vector<ValidatedScalarTaylorFunctionModelDP> >();
 }
@@ -687,7 +691,7 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def("range", &ValidatedVectorTaylorFunctionModelDP::range);
     vector_taylor_function_class.def("errors", &ValidatedVectorTaylorFunctionModelDP::errors);
 //    vector_taylor_function_class.def("sweep", (ValidatedVectorTaylorFunctionModelDP&(ValidatedVectorTaylorFunctionModelDP::*)())&ValidatedVectorTaylorFunctionModelDP::sweep,return_value_policy<reference_existing_object>());
-    vector_taylor_function_class.def("clobber", (ValidatedVectorTaylorFunctionModelDP&(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber,return_value_policy<reference_existing_object>());
+    vector_taylor_function_class.def("clobber", (Void(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber);
     vector_taylor_function_class.def("set_properties",&ValidatedVectorTaylorFunctionModelDP::set_properties);
     vector_taylor_function_class.def("properties",&ValidatedVectorTaylorFunctionModelDP::properties);
 //    vector_taylor_function_class.def("sweep", (ValidatedVectorTaylorFunctionModelDP&(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::sweep, return_value_policy<reference_existing_object>());
@@ -711,12 +715,12 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def("__str__", &__cstr__<ValidatedVectorTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__repr__", &__crepr__<ValidatedVectorTaylorFunctionModelDP>);
-    vector_taylor_function_class.def("clobber", (ValidatedVectorTaylorFunctionModelDP&(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber,return_value_policy<reference_existing_object>());
+    vector_taylor_function_class.def("clobber", (Void(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber);
     vector_taylor_function_class.def("__call__", (Vector<FloatDPApproximation>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorTaylorFunctionModelDP::operator());
     vector_taylor_function_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::operator());
      //vector_taylor_function_class.def("jacobian", (Vector<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::jacobian);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<FloatDPBounds> >(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::polynomials);
-    vector_taylor_function_class.def("function", (EffectiveVectorFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
+    vector_taylor_function_class.def("function", (ValidatedVectorFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
 
 
     vector_taylor_function_class.def("constant",(ValidatedVectorTaylorFunctionModelDP(*)(const ExactBoxType&, const Vector<ValidatedNumericType>&,SweeperDP))&ValidatedVectorTaylorFunctionModelDP::constant);
@@ -725,28 +729,31 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.staticmethod("constant");
     vector_taylor_function_class.staticmethod("identity");
 
-    def("inconsistent", &_inconsistent_<VF,VF>);
-    def("refinement", &_refinement_<VF,VF>);
-    def("refines", &_refines_<VF,VF>);
+    def("inconsistent", (Bool(*)(VF,VF)) &_inconsistent_<VF,VF>);
+    def("refinement", (VF(*)(VF,VF)) &_refinement_<VF,VF>);
+    def("refines", (Bool(*)(VF,VF)) &_refines_<VF,VF>);
 
-    def("join", &_join_<VF,VF>); def("join", &_join_<VF,SF>); def("join", &_join_<SF,VF>); // def("join", &_join_<SF,SF>);
-    def("combine", &_combine_<VF,VF>); def("combine", &_combine_<VF,SF>); def("combine", &_combine_<SF,VF>); def("combine", &_combine_<SF,SF>);
-    def("embed", &_embed_<VF,Di>); def("embed", &_embed_<VF,D>); def("embed", &_embed_<D,VF>); def("embed", &_embed_<D,VF,D>);
+    def("join", (VF(*)(VF,VF)) &_join_<VF,VF>); def("join", (VF(*)(VF,SF)) &_join_<VF,SF>); 
+        def("join", (VF(*)(SF,VF)) &_join_<SF,VF>); // def("join", (VF(*)(SF,SF)) &_join_<SF,SF>);
+    def("combine", (VF(*)(VF,VF)) &_combine_<VF,VF>); def("combine", (VF(*)(VF,SF)) &_combine_<VF,SF>); 
+        def("combine", (VF(*)(SF,VF)) &_combine_<SF,VF>); def("combine", (VF(*)(SF,SF)) &_combine_<SF,SF>);
+    def("embed", (VF(*)(VF,Di)) &_embed_<VF,Di>); def("embed", (VF(*)(VF,D)) &_embed_<VF,D>); 
+        def("embed", (VF(*)(D,VF)) &_embed_<D,VF>); def("embed", (VF(*)(D,VF,D)) &_embed_<D,VF,D>);
 
-    def("restriction", &_restriction_<VF,D>); def("restriction", &_restriction_<VF,I,Di>);
+    def("restriction", (VF(*)(VF,D)) &_restriction_<VF,D>); def("restriction", (VF(*)(VF,I,Di)) &_restriction_<VF,I,Di>);
 //    def("split", &_split_<VF,I>);
 
-    def("evaluate", &_evaluate_<VF,VX>);
-    def("partial_evaluate", &_partial_evaluate_<VF,I,X>);
-    def("compose", &_compose_<VF,VF>);
-    def("compose", &_compose_<SF,VF>);
-    def("compose", &_compose_<SFN,VF>);
-    def("compose", &_compose_<VFN,VF>);
-    def("unchecked_compose", &_compose_<SF,VF>);
-    def("unchecked_compose", &_compose_<VF,VF>);
-    def("derivative", &_derivative_<VF,I>);
-    def("antiderivative", &_antiderivative_<VF,I>);
-    def("antiderivative", &_antiderivative_<VF,I,X>);
+    def("evaluate", (VX(*)(VF,VX)) &_evaluate_<VF,VX>);
+    def("partial_evaluate", (VF(*)(VF,I,X)) &_partial_evaluate_<VF,I,X>);
+    def("compose", (VF(*)(VF,VF)) &_compose_<VF,VF>);
+    def("compose", (SF(*)(SF,VF)) &_compose_<SF,VF>);
+    def("compose", (SF(*)(SFN,VF)) &_compose_<SFN,VF>);
+    def("compose", (VF(*)(VFN,VF)) &_compose_<VFN,VF>);
+    def("unchecked_compose", (SF(*)(SF,VF)) &_compose_<SF,VF>);
+    def("unchecked_compose", (VF(*)(VF,VF)) &_compose_<VF,VF>);
+    def("derivative", (VF(*)(VF,I)) &_derivative_<VF,I>);
+    def("antiderivative", (VF(*)(VF,I)) &_antiderivative_<VF,I>);
+    def("antiderivative", (VF(*)(VF,I,X)) &_antiderivative_<VF,I,X>);
 
 //    def("evaluate",(Vector<FloatDPApproximation>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorTaylorFunctionModelDP::evaluate);
 

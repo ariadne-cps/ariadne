@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 #include "utilities.hpp"
 
 #include "dynamics/orbit.hpp"
@@ -33,36 +33,36 @@
 #include "hybrid/hybrid_enclosure.hpp"
 #include "hybrid/hybrid_time.hpp"
 
-using namespace boost::python;
 using namespace Ariadne;
 
 
 template<class Orb>
-Void export_orbit(const char* name)
+Void export_orbit(pybind11::module& module, const char* name)
 {
-    class_<Orb> orbit_class(name,no_init);
-    orbit_class.def("reach", &Orb::reach,return_value_policy<copy_const_reference>());
-    orbit_class.def("evolve", &Orb::final,return_value_policy<copy_const_reference>());
-    orbit_class.def("final", &Orb::final,return_value_policy<copy_const_reference>());
-    orbit_class.def(self_ns::str(self));
+    pybind11::class_<Orb> orbit_class(module,name);
+    orbit_class.def("reach", &Orb::reach);
+    orbit_class.def("evolve", &Orb::final);
+    orbit_class.def("final", &Orb::final);
+    orbit_class.def("__str__", &__cstr__<Orb>);
 }
 
 
-template<class Ev, class Init>
-Void export_evolver(const char* name)
+template<class Ev, class Params>
+Void export_evolver(pybind11::module& module, const char* name)
 {
     typedef typename Ev::EnclosureType ES;
     typedef typename Ev::TerminationType Tm;
     typedef typename Ev::OrbitType Orb;
 
-    class_<Ev> evolver_class(name,Init());
+    pybind11::class_<Ev> evolver_class(module,name);
+    evolver_class.def(pybind11::init<Params>());
     evolver_class.def("orbit",(Orb(Ev::*)(const ES&,const Tm&,Semantics)const) &Ev::orbit);
-    evolver_class.def(self_ns::str(self));
+    evolver_class.def("__str__",&__cstr__<Ev>);
 }
 
-Void evolution_submodule()
+Void evolution_submodule(pybind11::module& module)
 {
-    export_orbit< Orbit<HybridEnclosure> >("HybridOrbit");
-    //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");
-    export_evolver<GeneralHybridEvolver, init<GeneralHybridEvolver::SystemType const&> >("GeneralHybridEvolver");
+    export_orbit< Orbit<HybridEnclosure> >(module, "HybridOrbit");
+    //export_evolver<VectorFieldEvolver, ContinuousEvolutionParameters>(module,"VectorFieldEvolver");
+    export_evolver<GeneralHybridEvolver, GeneralHybridEvolver::SystemType const&>(module,"GeneralHybridEvolver");
 }

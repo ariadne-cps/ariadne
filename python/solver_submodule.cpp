@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 #include "utilities.hpp"
 
 #include "algebra/algebra.hpp"
@@ -36,13 +36,14 @@
 #include "solvers/integrator.hpp"
 #include "solvers/runge_kutta_integrator.hpp"
 
-using namespace boost::python;
 using namespace Ariadne;
 
 namespace Ariadne {
 
 typedef Vector<ValidatedNumericType> ValidatedPointType;
 typedef Vector<ApproximateNumericType> ApproximatePointType;
+
+/*
 
 class SolverWrapper
   : public SolverInterface, public wrapper< SolverInterface >
@@ -101,45 +102,58 @@ class IntegratorWrapper
         this->get_override("write")(); }
 };
 
+*/
 
 } // namespace Ariadne
 
 
-Void export_solver()
+Void export_solver(pybind11::module& module)
 {
-    class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
+#warning Implement wrapper of virtual base
+/*
+    boost::python::class_<SolverWrapper, boost::noncopyable> solver_wrapper_class(module,"SolverInterface");
     solver_wrapper_class.def("solve",pure_virtual((Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve));
     solver_wrapper_class.def("implicit",pure_virtual((ValidatedVectorFunctionModelDP(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit));
     solver_wrapper_class.def("implicit",pure_virtual((ValidatedScalarFunctionModelDP(SolverInterface::*)(const ValidatedScalarFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit));
     solver_wrapper_class.def("solve_all",pure_virtual((Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve_all));
     //solver_wrapper_class.def(self_ns::str(self));
+*/
 
-    class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());
-    class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class("KrawczykSolver",init<double,unsigned int>());
+//    boost::python::class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class(module,"IntervalNewtonSolver",init<double,unsigned int>());
+//    boost::python::class_<KrawczykSolver, bases<SolverInterface> > krawczyk_solver_class(module,"KrawczykSolver",init<double,unsigned int>());
+
+    pybind11::class_<IntervalNewtonSolver> interval_newton_solver_class(module,"IntervalNewtonSolver");
+    interval_newton_solver_class.def(pybind11::init<double,unsigned int>());
+    pybind11::class_<KrawczykSolver> krawczyk_solver_class(module,"KrawczykSolver");
+    krawczyk_solver_class.def(pybind11::init<double,unsigned int>());
+
 }
 
 
 
-Void export_integrator()
+Void export_integrator(pybind11::module& module)
 {
-    to_python<Pair<FloatDPValue,UpperBoxType>>();
+//    to_python<Pair<FloatDPValue,UpperBoxType>>();
 
-    class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
+/*
+    boost::python::class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class(module,"IntegratorInterface");
     integrator_wrapper_class.def("flow_bounds",(Pair<FloatDPValue,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const RawFloatDP&)const)&IntegratorInterface::flow_bounds);
     integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, RawFloatDP&)const)&IntegratorInterface::flow_step);
     integrator_wrapper_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDPValue&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
     integrator_wrapper_class.def("flow_to",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
     integrator_wrapper_class.def("flow",(List<ValidatedVectorFunctionModelDP>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
+*/
 
-
-    class_<TaylorPicardIntegrator > taylor_picard_integrator_class("TaylorPicardIntegrator",init<double>());
+    pybind11::class_<TaylorPicardIntegrator > taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
+    taylor_picard_integrator_class.def(pybind11::init<double>());
     taylor_picard_integrator_class.def("flow_bounds",(Pair<FloatDPValue,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDP&)const)&TaylorPicardIntegrator::flow_bounds);
     taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,RawFloatDP&)const)&TaylorPicardIntegrator::flow_step);
     taylor_picard_integrator_class.def("flow_step", (ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDPValue&,const UpperBoxType&)const)&TaylorPicardIntegrator::flow_step);
     taylor_picard_integrator_class.def("flow_to",(ValidatedVectorFunctionModelDP(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow_to);
     taylor_picard_integrator_class.def("flow",(List<ValidatedVectorFunctionModelDP>(TaylorPicardIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorPicardIntegrator::flow);
 
-    class_<TaylorSeriesIntegrator > taylor_series_integrator_class("TaylorSeriesIntegrator",init<double>());
+    pybind11::class_<TaylorSeriesIntegrator > taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
+    taylor_series_integrator_class.def(pybind11::init<double>());
     taylor_series_integrator_class.def("maximum_spacial_order",&TaylorSeriesIntegrator::maximum_spacial_order);
     taylor_series_integrator_class.def("maximum_temporal_order",&TaylorSeriesIntegrator::maximum_temporal_order);
     taylor_series_integrator_class.def("maximum_error",&TaylorSeriesIntegrator::maximum_error);
@@ -154,20 +168,21 @@ Void export_integrator()
     taylor_series_integrator_class.def("flow_to",(ValidatedVectorFunctionModelDP(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow_to);
     taylor_series_integrator_class.def("flow",(List<ValidatedVectorFunctionModelDP>(TaylorSeriesIntegrator::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&TaylorSeriesIntegrator::flow);
 
-    class_<RungeKutta4Integrator > runge_kutta_4_integrator_class("RungeKutta4Integrator",init<double>());
+    pybind11::class_<RungeKutta4Integrator > runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
+    runge_kutta_4_integrator_class.def(pybind11::init<double>());
     runge_kutta_4_integrator_class.def("step", &RungeKutta4Integrator::step);
     runge_kutta_4_integrator_class.def("evolve", &RungeKutta4Integrator::evolve);
 }
 
 
-Void solver_submodule()
+Void solver_submodule(pybind11::module& module)
 {
-    to_python_list< Set< ExactBoxType > >();
-    to_python< List< ExactBoxType > >();
-    to_python< Pair< FloatDP, ExactBoxType > >();
+//    to_python_list< Set< ExactBoxType > >();
+//    to_python< List< ExactBoxType > >();
+//    to_python< Pair< FloatDP, ExactBoxType > >();
 
-    export_solver();
-    export_integrator();
+    export_solver(module);
+    export_integrator(module);
 
 }
 

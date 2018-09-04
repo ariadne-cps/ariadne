@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 #include "utilities.hpp"
 
 #include <iostream>
@@ -38,7 +38,6 @@
 #include "symbolic/space.hpp"
 #include "symbolic/expression_set.hpp"
 
-using namespace boost::python;
 using namespace Ariadne;
 
 
@@ -65,7 +64,7 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
     return substitute(e,lst_a);
 }
 
-
+/*
 template<class T>
 struct from_python< Space<T> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
@@ -96,7 +95,10 @@ struct from_python< Vector<X>> {
         data->convertible = storage;
     }
 };
+*/
 
+LetIntegerVariable let(const IntegerVariable&);
+LetRealVariable let(const RealVariable&);
 DottedRealVariable dot(const RealVariable&);
 
 RealExpression var(const StringType& s) { return RealExpression(RealVariable(s)); }
@@ -150,47 +152,39 @@ void foo(Map<int,double>const&) { }
 
 
 
-Void export_formula()
+Void export_formula(pybind11::module& module)
 {
-    implicitly_convertible<String,StringExpression>();
-    implicitly_convertible<StringVariable,StringExpression>();
 
-    implicitly_convertible<Int,IntegerExpression>();
-    implicitly_convertible<Integer,IntegerExpression>();
-    implicitly_convertible<IntegerVariable,IntegerExpression>();
+//    to_python< List<RealExpression> >();
 
-    // FIXME: Allowing this conversion over-eagerly prevent Real in RealVector([...])
-    // implicitly_convertible<Real,RealExpression>();
-    implicitly_convertible<RealVariable,RealExpression>();
-
-    to_python< List<RealExpression> >();
-
-    from_python< List<RealVariableInterval> >();
-    from_python< List<ContinuousPredicate> >();
+//    from_python< List<RealVariableInterval> >();
+//    from_python< List<ContinuousPredicate> >();
 
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
-    //implicitly_convertible<double,RealExpression>();
-    //implicitly_convertible<ExactIntervalType,RealExpression>();
+    //pybind11::implicitly_convertible<double,RealExpression>();
+    //pybind11::implicitly_convertible<ExactIntervalType,RealExpression>();
 
-    class_<StringVariable> string_variable_class("StringVariable", init<StringType>());
+    pybind11::class_<StringVariable> string_variable_class(module,"StringVariable");
+    string_variable_class.def(pybind11::init<StringType>());
     string_variable_class.def("__eq__", &__eq__<Expression<Boolean>,StringVariable,StringType>);
     string_variable_class.def("__ne__", &__ne__<Expression<Boolean>,StringVariable,StringType>);
     string_variable_class.def("__str__", &__cstr__<StringVariable>);
     string_variable_class.def("__repr__", &__repr__<StringVariable>);
 
-    class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
+    pybind11::class_<StringExpression> string_expression_class(module,"StringExpression");
+    string_expression_class.def(pybind11::init<StringExpression>());
     string_expression_class.def("__str__", &__cstr__<StringExpression>);
     string_expression_class.def("__repr__", &__repr__<StringExpression>);
 
-    class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
+    pybind11::class_<PrimedStringVariable> string_next_variable_class(module,"PrimedStringVariable");
     string_next_variable_class.def("__lshift__", (PrimedStringAssignment(PrimedStringVariable::*)(const StringExpression&)const) &PrimedStringVariable::operator=);
-    string_next_variable_class.def(self_ns::str(self));
+    string_next_variable_class.def("__str__", &__cstr__<PrimedStringVariable>);
 
-    def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
+    module.def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
 
 
-    class_<IntegerVariable> integer_variable_class("IntegerVariable", init<StringType>());
-    integer_variable_class.def("__lshift__", (IntegerAssignment(LetIntegerVariable::*)(const IntegerExpression&)const) &LetIntegerVariable::operator=);
+    pybind11::class_<IntegerVariable> integer_variable_class(module,"IntegerVariable");
+    integer_variable_class.def(pybind11::init<StringType>());
     integer_variable_class.def("__pos__", &__pos__<IntegerExpression,IntegerVariable>);
     integer_variable_class.def("__neg__", &__neg__<IntegerExpression,IntegerVariable>);
     integer_variable_class.def("__add__", &__add__<IntegerExpression,IntegerVariable,IntegerExpression>);
@@ -208,13 +202,18 @@ Void export_formula()
     integer_variable_class.def("__str__", &__cstr__<IntegerVariable>);
     integer_variable_class.def("__repr__", &__repr__<IntegerVariable>);
 
-    class_<PrimedIntegerVariable> integer_next_variable_class("PrimedIntegerVariable", no_init);
+    pybind11::class_<LetIntegerVariable> let_integer_variable_class(module,"LetIntegerVariable");
+    let_integer_variable_class.def("__lshift__", (IntegerAssignment(LetIntegerVariable::*)(const IntegerExpression&)const) &LetIntegerVariable::operator=);
+    module.def("let", (LetIntegerVariable(*)(const IntegerVariable&)) &let);
+
+
+    pybind11::class_<PrimedIntegerVariable> integer_next_variable_class(module,"PrimedIntegerVariable");
     integer_next_variable_class.def("__lshift__", (PrimedIntegerAssignment(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
-    integer_next_variable_class.def(self_ns::str(self));
+    integer_next_variable_class.def("__str__", &__cstr__<PrimedIntegerVariable>);
+    module.def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
 
-    def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
-
-    class_<IntegerExpression> integer_expression_class("IntegerExpression", init<IntegerExpression>());
+    pybind11::class_<IntegerExpression> integer_expression_class(module,"IntegerExpression");
+    integer_expression_class.def(pybind11::init<IntegerExpression>());
     integer_expression_class.def("__pos__", &__pos__<IntegerExpression,IntegerExpression>);
     integer_expression_class.def("__neg__", &__neg__<IntegerExpression,IntegerExpression>);
     integer_expression_class.def("__add__", &__add__<IntegerExpression,IntegerExpression,IntegerExpression>);
@@ -229,12 +228,12 @@ Void export_formula()
     integer_expression_class.def("__ge__", &__ge__<DiscretePredicate,IntegerExpression,IntegerExpression>);
     integer_expression_class.def("__lt__", &__lt__<DiscretePredicate,IntegerExpression,IntegerExpression>);
     integer_expression_class.def("__gt__", &__gt__<DiscretePredicate,IntegerExpression,IntegerExpression>);
-    integer_expression_class.def(self_ns::str(self));
     integer_expression_class.def("__str__", &__cstr__<IntegerExpression>);
     integer_expression_class.def("__repr__", &__repr__<IntegerExpression>);
 
 
-    class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
+    pybind11::class_<RealVariable> real_variable_class(module,"RealVariable");
+    real_variable_class.def(pybind11::init<StringType>());
     real_variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);
     real_variable_class.def("__neg__", &__neg__<RealExpression,RealVariable>);
     real_variable_class.def("__add__", &__add__<RealExpression,RealVariable,RealExpression>);
@@ -259,39 +258,43 @@ Void export_formula()
     real_variable_class.def("__ge__", &__ge__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__lt__", &__lt__<ContinuousPredicate,RealVariable,RealExpression>);
     real_variable_class.def("__gt__", &__gt__<ContinuousPredicate,RealVariable,RealExpression>);
-    real_variable_class.def("__lshift__", (RealAssignment(LetRealVariable::*)(const RealExpression&)const) &LetRealVariable::operator=);
     real_variable_class.def("__str__", &__cstr__<RealVariable>);
     real_variable_class.def("__repr__", &__repr__<RealVariable>);
 
-    class_<RealVariables> real_variables_class("RealVariables", init<StringType,SizeType>());
+    pybind11::class_<RealVariables> real_variables_class(module,"RealVariables");
+    real_variables_class.def(pybind11::init<StringType,SizeType>());
     real_variables_class.def("__getitem__", &__getitem__<RealVariables,SizeType,RealVariable>);
-    real_variables_class.def(self_ns::str(self));
+    real_variables_class.def("__str__", &__cstr__<RealVariables>);
 
-    class_<DottedRealVariable> real_dotted_variable_class("DottedRealVariable", no_init);
+    pybind11::class_<LetRealVariable> real_let_variable_class(module,"LetRealVariable");
+    real_let_variable_class.def("__lshift__", (RealAssignment(LetRealVariable::*)(const RealExpression&)const) &LetRealVariable::operator=);
+    module.def("let", (LetRealVariable(*)(const RealVariable&)) &let);
+
+    pybind11::class_<DottedRealVariable> real_dotted_variable_class(module,"DottedRealVariable");
     real_dotted_variable_class.def("__lshift__", (DottedRealAssignment(DottedRealVariable::*)(const RealExpression&)const) &DottedRealVariable::operator=);
-    real_dotted_variable_class.def(self_ns::str(self));
+    real_dotted_variable_class.def("__str__", &__cstr__<DottedRealVariable>);
+    module.def("dot", (DottedRealVariable(*)(const RealVariable&)) &dot);
 
-    def("dot", (DottedRealVariable(*)(const RealVariable&)) &dot);
-
-    class_<PrimedRealVariable> real_next_variable_class("PrimedRealVariable", no_init);
+    pybind11::class_<PrimedRealVariable> real_next_variable_class(module,"PrimedRealVariable");
     real_next_variable_class.def("__lshift__", (PrimedRealAssignment(PrimedRealVariable::*)(const RealExpression&)const) &PrimedRealVariable::operator=);
-    real_next_variable_class.def(self_ns::str(self));
+    real_next_variable_class.def("__str__", &__cstr__<PrimedRealVariable>);
+    module.def("next", (PrimedRealVariable(*)(const RealVariable&)) &next);
 
-    def("next", (PrimedRealVariable(*)(const RealVariable&)) &next);
-
-    class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
+    pybind11::class_<RealSpace> real_space_class(module,"RealSpace");
+    real_space_class.def(pybind11::init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
     real_space_class.def("variable", &RealSpace::variable);
     real_space_class.def("index", (SizeType(RealSpace::*)(const Identifier&)const) &RealSpace::index);
     real_space_class.def("index", (SizeType(RealSpace::*)(const RealVariable&)const) &RealSpace::index);
-    real_space_class.def(self_ns::str(self));
+    real_next_variable_class.def("__str__", &__cstr__<RealSpace>);
 
-    from_python<RealSpace>();
+//    from_python<RealSpace>();
 
-    class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
-    real_expression_class.def(init<Real>());
-    real_expression_class.def(init<RealVariable>());
-    def("simplify", (RealExpression(*)(const RealExpression&)) &simplify);
+    pybind11::class_<RealExpression> real_expression_class(module,"RealExpression");
+    real_expression_class.def(pybind11::init<RealExpression>());
+    real_expression_class.def(pybind11::init<Real>());
+    real_expression_class.def(pybind11::init<RealVariable>());
+    module.def("simplify", (RealExpression(*)(const RealExpression&)) &simplify);
     real_expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
     real_expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
     real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);
@@ -323,66 +326,69 @@ Void export_formula()
     real_expression_class.def("__le__", &__le__<ContinuousPredicate,Real,RealExpression>);
     real_expression_class.def("__ge__", &__ge__<ContinuousPredicate,Real,RealExpression>);
 
-    def("neg", (RealExpression(*)(RealExpression const&)) &neg);
-    def("rec", (RealExpression(*)(RealExpression const&)) &rec);
-    def("sqr", (RealExpression(*)(RealExpression const&)) &sqr);
-    def("pow", (RealExpression(*)(RealExpression const&,Int)) &pow);
-    def("sqrt", (RealExpression(*)(RealExpression const&)) &sqrt);
-    def("exp", (RealExpression(*)(RealExpression const&)) &exp);
-    def("log", (RealExpression(*)(RealExpression const&)) &log);
-    def("sin", (RealExpression(*)(RealExpression const&)) &sin);
-    def("cos", (RealExpression(*)(RealExpression const&)) &cos);
-    def("tan", (RealExpression(*)(RealExpression const&)) &tan);
+    module.def("neg", (RealExpression(*)(RealExpression const&)) &neg);
+    module.def("rec", (RealExpression(*)(RealExpression const&)) &rec);
+    module.def("sqr", (RealExpression(*)(RealExpression const&)) &sqr);
+    module.def("pow", (RealExpression(*)(RealExpression const&,Int)) &pow);
+    module.def("sqrt", (RealExpression(*)(RealExpression const&)) &sqrt);
+    module.def("exp", (RealExpression(*)(RealExpression const&)) &exp);
+    module.def("log", (RealExpression(*)(RealExpression const&)) &log);
+    module.def("sin", (RealExpression(*)(RealExpression const&)) &sin);
+    module.def("cos", (RealExpression(*)(RealExpression const&)) &cos);
+    module.def("tan", (RealExpression(*)(RealExpression const&)) &tan);
 
-    class_<RealAssignment> real_assignment_class("RealAssignment",no_init);
-    real_assignment_class.def(self_ns::str(self));
-    class_<DottedRealAssignment> dotted_real_assignment_class("DottedRealAssignment",no_init);
-    dotted_real_assignment_class.def(self_ns::str(self));
-    class_<PrimedRealAssignment> primed_real_assignment_class("PrimedRealAssignment",no_init);
-    primed_real_assignment_class.def(self_ns::str(self));
-    class_<PrimedStringAssignment> primed_string_assignment_class("PrimedStringAssignment",no_init);
-    primed_string_assignment_class.def(self_ns::str(self));
-    class_<IntegerAssignment> integer_assignment_class("IntegerAssignment",no_init);
-    integer_assignment_class.def(self_ns::str(self));
-    class_<PrimedIntegerAssignment> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
-    primed_integer_assignment_class.def(self_ns::str(self));
+    pybind11::class_<RealAssignment> real_assignment_class(module,"RealAssignment");
+    real_assignment_class.def("__str__",&__cstr__<RealAssignment>);
+    pybind11::class_<DottedRealAssignment> dotted_real_assignment_class(module,"DottedRealAssignment");
+    dotted_real_assignment_class.def("__str__",&__cstr__<DottedRealAssignment>);
+    pybind11::class_<PrimedRealAssignment> primed_real_assignment_class(module,"PrimedRealAssignment");
+    primed_real_assignment_class.def("__str__",&__cstr__<PrimedRealAssignment>);
+    pybind11::class_<PrimedStringAssignment> primed_string_assignment_class(module,"PrimedStringAssignment");
+    primed_string_assignment_class.def("__str__",&__cstr__<PrimedStringAssignment>);
+    pybind11::class_<IntegerAssignment> integer_assignment_class(module,"IntegerAssignment");
+    integer_assignment_class.def("__str__",&__cstr__<IntegerAssignment>);
+    pybind11::class_<PrimedIntegerAssignment> primed_integer_assignment_class(module,"PrimedIntegerAssignment");
+    primed_integer_assignment_class.def("__str__",&__cstr__<PrimedIntegerAssignment>);
+    
+//    from_python<Pair<RealVariable,RealExpression>>();
+//    from_python<Map<RealVariable,RealExpression>>();
 
-    from_python<Pair<RealVariable,RealExpression>>();
-    from_python<Map<RealVariable,RealExpression>>();
+//    from_python<Pair<RealVariable,Real>>();
+//    from_python<Map<RealVariable,Real>>();
 
-    from_python<Pair<RealVariable,Real>>();
-    from_python<Map<RealVariable,Real>>();
+//    module.def("substitute",(RealExpression(*)(RealExpression const&, const List<Assignment<RealVariable,RealExpression>>&)) &substitute);
+    module.def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,RealExpression>&)) &substitute);
+    module.def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,Real>&)) &substitute);
 
-//    def("substitute",(RealExpression(*)(RealExpression const&, const List<Assignment<RealVariable,RealExpression>>&)) &substitute);
-    def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,RealExpression>&)) &substitute);
-    def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,Real>&)) &substitute);
+//    to_python< List<KleeneanExpression> >();
 
-    to_python< List<KleeneanExpression> >();
-
-    class_<DiscretePredicate> discrete_predicate_class("DiscretePredicate", init<DiscretePredicate>());
-    discrete_predicate_class.def(init<Bool>());
+    pybind11::class_<DiscretePredicate> discrete_predicate_class(module,"DiscretePredicate");
+    discrete_predicate_class.def(pybind11::init<DiscretePredicate>());
+    discrete_predicate_class.def(pybind11::init<Bool>());
     discrete_predicate_class.def("__and__", &__and__<DiscretePredicate,DiscretePredicate,DiscretePredicate>);
     discrete_predicate_class.def("__or__", &__or__<DiscretePredicate,DiscretePredicate,DiscretePredicate>);
     discrete_predicate_class.def("__invert__", &__not__<DiscretePredicate,DiscretePredicate>);
-    discrete_predicate_class.def(self_ns::str(self));
+    discrete_predicate_class.def("__str__",&__cstr__<DiscretePredicate>);
 
-    class_<ContinuousPredicate> continuous_predicate_class("ContinuousPredicate", init<ContinuousPredicate>());
-    continuous_predicate_class.def(init<Kleenean>());
+    pybind11::class_<ContinuousPredicate> continuous_predicate_class(module,"ContinuousPredicate");
+    continuous_predicate_class.def(pybind11::init<ContinuousPredicate>());
+    continuous_predicate_class.def(pybind11::init<Kleenean>());
     continuous_predicate_class.def("__and__", &__and__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__or__", &__or__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__invert__", &__not__<ContinuousPredicate,ContinuousPredicate>);
-    continuous_predicate_class.def(self_ns::str(self));
+    continuous_predicate_class.def("__str__",&__cstr__<ContinuousPredicate>);
 
-    class_<KleeneanVariable> tribool_variable_class("KleeneanVariable", init<StringType>());
-    tribool_variable_class.def(self_ns::str(self));
+    pybind11::class_<KleeneanVariable> tribool_variable_class(module,"KleeneanVariable");
+    tribool_variable_class.def(pybind11::init<StringType>());
+    tribool_variable_class.def("__str__",&__cstr__<KleeneanVariable>);
 
-    from_python<Vector<RealExpression>>();
-    def("make_function", (RealScalarUnivariateFunction(*)(RealVariable const&, RealExpression const&)) &make_function);
-    def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
-    def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
+//    from_python<Vector<RealExpression>>();
+    module.def("make_function", (RealScalarUnivariateFunction(*)(RealVariable const&, RealExpression const&)) &make_function);
+    module.def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
+    module.def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
 
     /*
-    class_<KleeneanExpression> tribool_expression_class("KleeneanExpression",init<KleeneanExpression>());
+    pybind11::class_<KleeneanExpression> tribool_expression_class(module,"KleeneanExpression",pybind11::init<KleeneanExpression>());
     tribool_expression_class.def("name", &KleeneanExpression::operator_name);
     tribool_expression_class.def("subexpressions", &KleeneanExpression::subexpressions);
     tribool_expression_class.def("substitute", &KleeneanExpression::substitute<Real>);
@@ -394,18 +400,22 @@ Void export_formula()
     tribool_expression_class.def(self_ns::str(self));
     */
 
-    implicitly_convertible<KleeneanVariable,ContinuousPredicate>();
+    pybind11::implicitly_convertible<KleeneanVariable,ContinuousPredicate>();
 
-    def("sgn", (KleeneanExpression(*)(RealExpression const&)) &sgn);
+    module.def("sgn", (KleeneanExpression(*)(RealExpression const&)) &sgn);
 
 
 
-    //class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
+    //pybind11::class_<RealVariable> real_variable_class(module,"RealVariable", pybind11::init<StringType>());
 
-    class_<RealVariableLowerInterval> real_variable_lower_interval_class("RealVariableLowerInterval", init<Real,RealVariable>());
-    real_variable_lower_interval_class.def(self_ns::str(self));
-    class_<RealVariableUpperInterval> real_variable_upper_interval_class("RealVariableUpperInterval", init<RealVariable,Real>());
-    real_variable_upper_interval_class.def(self_ns::str(self));
+    pybind11::class_<RealVariableLowerInterval> real_variable_lower_interval_class(module,"RealVariableLowerInterval");
+    real_variable_lower_interval_class.def(pybind11::init<Real,RealVariable>());
+    real_variable_lower_interval_class.def("__str__",&__cstr__<RealVariableLowerInterval>);
+
+    pybind11::class_<RealVariableUpperInterval> real_variable_upper_interval_class(module,"RealVariableUpperInterval");
+    real_variable_upper_interval_class.def(pybind11::init<RealVariable,Real>());
+    real_variable_upper_interval_class.def("__str__",&__cstr__<RealVariableUpperInterval>);
+
     real_variable_class.def("__le__", &__le__<RealVariableLowerInterval,Real,RealVariable>);
     real_variable_class.def("__ge__", &__ge__<RealVariableLowerInterval,RealVariable,Real>);
     real_variable_class.def("__le__", &__le__<RealVariableUpperInterval,RealVariable,Real>);
@@ -417,38 +427,55 @@ Void export_formula()
 
     real_variable_class.def("__or__", &__bitor__<RealVariableInterval,RealVariable,RealInterval>);
 
-    class_<RealVariableInterval> real_variable_interval_class("RealVariableInterval", init<Real,RealVariable,Real>());
-    real_variable_interval_class.def("variable", &RealVariableInterval::variable, return_value_policy<copy_const_reference>());
+    pybind11::class_<RealVariableInterval> real_variable_interval_class(module,"RealVariableInterval");
+    real_variable_interval_class.def(pybind11::init<Real,RealVariable,Real>());
+    real_variable_interval_class.def("variable", &RealVariableInterval::variable);
     real_variable_interval_class.def("interval", &RealVariableInterval::interval);
     real_variable_interval_class.def("lower", &RealVariableInterval::lower);
     real_variable_interval_class.def("upper", &RealVariableInterval::upper);
-    real_variable_interval_class.def(self_ns::str(self));
+    real_variable_interval_class.def("__str__",&__cstr__<RealVariableInterval>);
 
-    class_<RealVariablesBox> real_variables_box_class("RealVariablesBox", init<List<RealVariableInterval>>());
-    real_variables_box_class.def("__getitem__", &RealVariablesBox::operator[],return_value_policy<copy_const_reference>());
-    real_variables_box_class.def(self_ns::str(self));
+    pybind11::class_<RealVariablesBox> real_variables_box_class(module,"RealVariablesBox");
+    real_variables_box_class.def(pybind11::init<List<RealVariableInterval>>());
+    real_variables_box_class.def("__getitem__", &RealVariablesBox::operator[]);
+    real_variables_box_class.def("__str__",&__cstr__<RealVariablesBox>);
 
-    implicitly_convertible<List<RealVariableInterval>,RealVariablesBox>();
 
-    class_<RealExpressionConstraintSet> real_expression_constraint_set_class("RealExpressionConstraintSet", init<List<ContinuousPredicate>>());
-    real_expression_constraint_set_class.def(self_ns::str(self));
+    pybind11::class_<RealExpressionConstraintSet> real_expression_constraint_set_class(module,"RealExpressionConstraintSet");
+    real_expression_constraint_set_class.def(pybind11::init<List<ContinuousPredicate>>());
+    real_expression_constraint_set_class.def("__str__",&__cstr__<RealExpressionConstraintSet>);
 
-    implicitly_convertible<List<ContinuousPredicate>,RealExpressionConstraintSet>();
+    pybind11::class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class(module,"RealExpressionBoundedConstraintSet");
+    real_expression_bounded_constraint_set_class.def(pybind11::init<List<RealVariableInterval>,List<ContinuousPredicate>>());
+    real_expression_bounded_constraint_set_class.def(pybind11::init<RealVariablesBox,RealExpressionConstraintSet>());
+    real_expression_bounded_constraint_set_class.def("__str__",&__cstr__<RealExpressionBoundedConstraintSet>);
+    
+    module.def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
+    module.def("make_set", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
+    module.def("make_set", (ConstraintSet(*)(RealSpace const&, RealExpressionConstraintSet const&)) &make_set);
+    module.def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealExpressionBoundedConstraintSet const&)) &make_set);
+    module.def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&)) &make_set);
 
-    class_<RealExpressionBoundedConstraintSet> real_expression_bounded_constraint_set_class("RealExpressionConstraintSet", init<List<RealVariableInterval>,List<ContinuousPredicate>>());
-    real_expression_bounded_constraint_set_class.def(init<RealVariablesBox,RealExpressionConstraintSet>());
-    real_expression_bounded_constraint_set_class.def(self_ns::str(self));
 
-    def("make_box", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
-    def("make_set", (RealBox(*)(RealSpace const&, RealVariablesBox const&)) &make_box);
-    def("make_set", (ConstraintSet(*)(RealSpace const&, RealExpressionConstraintSet const&)) &make_set);
-    def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealExpressionBoundedConstraintSet const&)) &make_set);
-    def("make_set", (BoundedConstraintSet(*)(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&)) &make_set);
+//    pybind11::implicitly_convertible<String,StringExpression>();
+//    pybind11::implicitly_convertible<StringVariable,StringExpression>();
+
+    pybind11::implicitly_convertible<Int,IntegerExpression>();
+    pybind11::implicitly_convertible<Integer,IntegerExpression>();
+    pybind11::implicitly_convertible<IntegerVariable,IntegerExpression>();
+
+    // FIXME: Allowing this conversion over-eagerly prevent Real in RealVector([...])
+    // pybind11::implicitly_convertible<Real,RealExpression>();
+    pybind11::implicitly_convertible<RealVariable,RealExpression>();
+
+    pybind11::implicitly_convertible<List<RealVariableInterval>,RealVariablesBox>();
+    pybind11::implicitly_convertible<List<ContinuousPredicate>,RealExpressionConstraintSet>();
+
 }
 
 
 
-Void symbolic_submodule() {
-    export_formula();
+Void symbolic_submodule(pybind11::module& module) {
+    export_formula(module);
 }
 

@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 
-void numeric_submodule();
+void numeric_submodule(pybind11::module& module);
 
-BOOST_PYTHON_MODULE(numeric)
-{
-    numeric_submodule();
+PYBIND11_MODULE(numeric, module) {
+
+    numeric_submodule(module);
 }

@@ -29,7 +29,9 @@
 #ifndef ARIADNE_PYTHON_UTILITIES_HPP
 #define ARIADNE_PYTHON_UTILITIES_HPP
 
-#include "boost_python.hpp"
+//#include "boost_python.hpp"
+
+#include <pybind11/pybind11.h>
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
@@ -43,6 +45,12 @@ class Real;
 
 template<class X> inline std::string python_name(const std::string& name) {
     return class_name<X>()+name; }
+
+template<class T> struct to_python;
+template<class T> struct from_python;
+template<class T> struct from_python_dict;
+
+/*
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;
@@ -344,8 +352,7 @@ struct from_python_tuple< Ariadne::Array<T> > {
     }
 };
 
-
-class MultiIndex;
+*/
 
 
 template<class C, class I0, class I1, class S> inline
@@ -516,6 +523,20 @@ template<class T> StringType __repr__(const T& t) {
     return ss.str();
 }
 
+
+template<class T>
+Void export_array(pybind11::module& module, const char* name)
+{
+    pybind11::class_< Array<T> > array_class(module,name);
+    array_class.def(pybind11::init < Array<T> >());
+    array_class.def(pybind11::init<Int>());
+    array_class.def("__len__", &Array<T>::size);
+    array_class.def("__getitem__",&__getitem__< Array<T>, Nat, T>);
+    array_class.def("__setitem__",&__setitem__< Array<T>, Nat, T>);
+    array_class.def("__str__", &__cstr__< Array<T> >);
+}
+
+/*
 template<class T>
 Void export_array(const char* name)
 {
@@ -526,7 +547,7 @@ Void export_array(const char* name)
     array_class.def("__setitem__",&__setitem__< Array<T>, Nat, T>);
     array_class.def(boost::python::self_ns::str(boost::python::self));
 }
-
+*/
 
 
 

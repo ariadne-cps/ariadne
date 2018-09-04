@@ -22,7 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
+#include <pybind11/stl.h>
+
 #include "utilities.hpp"
 
 #include "utility/typedefs.hpp"
@@ -36,19 +38,22 @@
 #include "algebra/fixed_univariate_differential.hpp"
 #include "algebra/expansion.inl.hpp"
 
-using namespace boost::python;
 using namespace Ariadne;
 
-template<class X> Void read_array(Array<X>&, const boost::python::object& obj) { }
-inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariadne::bin(d+as,as); }
-
 namespace Ariadne {
+
+inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariadne::bin(d+as,as); }
 
 // FIXME: Ensure all valid arithmetic and comparisons are defined!
 inline auto operator==(FloatDPBounds x, Int n) -> decltype(x==FloatDPValue(n)) { return x==FloatDPValue(n); }
 inline auto operator!=(FloatDPBounds x, Int n) -> decltype(x!=FloatDPValue(n)) { return x!=FloatDPValue(n); }
 inline auto operator> (FloatDPBounds x, Int n) -> decltype(x> FloatDPValue(n)) { return x> FloatDPValue(n); }
 inline auto operator*=(FloatDPApproximation x, Int n) -> decltype(x*=FloatDPApproximation(n)) { return x*=FloatDPApproximation(n); }
+
+/*
+
+template<class X> Void read_array(Array<X>&, const boost::python::object& obj) { 
+}
 
 template<class X>
 struct to_python_dict< Ariadne::Expansion<MultiIndex,X>  > {
@@ -98,6 +103,8 @@ struct to_python_list< Ariadne::Expansion<MultiIndex,X>  > {
     static const PyTypeObject* get_pytype() { return &PyList_Type; }
 };
 
+*/
+
 /*
    static PyObject* convert(const Tuple<T1,T2,T3,T4>& tup) {
         boost::python::list lst;
@@ -114,8 +121,9 @@ struct to_python_list< Ariadne::Expansion<MultiIndex,X>  > {
         }
         return boost::python::incref(boost::python::dict(result).ptr());
 */
-}
+} // namespace Ariadne
 
+/*
 
 template<class DIFF>
 DIFF*
@@ -188,6 +196,7 @@ template<class X, class Y, class PR> Vector<Differential<X>> make_variables(Degr
     return Differential<X>::variables(d,Vector<X>(vy,pr));
 }
 
+*/
 
 template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
 X get_item(const C& c, const I& i) {
@@ -231,16 +240,20 @@ template<class D> using GradientType = decltype(declval<D>().gradient());
 template<class D> using HessianType = decltype(declval<D>().hessian());
 
 template<class DIFF>
-Void export_differential(const String& name)
+Void export_differential(pybind11::module& module, const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef typename X::GenericType Y;
     typedef DIFF D;
 
-    class_<D> differential_class(name.c_str(), init<D>() );
-    differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
-    differential_class.def( init< SizeType, DegreeType >());
-    differential_class.def( init< Expansion<MultiIndex,X>, DegreeType >());
+    static constexpr auto self = pybind11::detail::self;
+    
+    pybind11::class_<D> differential_class(module,name.c_str());
+    differential_class.def(pybind11::init<D>());
+#warning Cannot add constructors to classes using pybind11
+//    differential_class.def("__init__", pybind11::make_constructor(&make_sparse_differential<D>) );
+    differential_class.def( pybind11::init< SizeType, DegreeType >());
+    differential_class.def( pybind11::init< Expansion<MultiIndex,X>, DegreeType >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -268,54 +281,52 @@ Void export_differential(const String& name)
     differential_class.def(self-=X());
     differential_class.def(self*=X());
     differential_class.def(self/=X());
-    differential_class.def(self_ns::str(self));
+    differential_class.def("__str__", &__cstr__<D>);
     differential_class.def("__repr__", &__repr__<D>);
 
-    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value, return_value_policy<copy_const_reference>());
+    differential_class.def("value", (ValueType<D>(D::*)()const)&D::value);
     differential_class.def("gradient", (GradientType<D>(D::*)()const)&D::gradient);
     differential_class.def("hessian", (HessianType<D>(D::*)()const)&D::hessian);
-    differential_class.def("expansion", (Expansion<MultiIndex,X>const&(D::*)()const)&D::expansion, return_value_policy<copy_const_reference>());
+    differential_class.def("expansion", (Expansion<MultiIndex,X>const&(D::*)()const)&D::expansion);
 
-    differential_class.def("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
-    differential_class.def("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);
-    differential_class.def("constants",(Vector<D>(*)(SizeType, DegreeType, const Vector<X>&))&D::constants);
-    differential_class.def("variables",(Vector<D>(*)(DegreeType, const Vector<X>&))&D::variables);
+    differential_class.def_static("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
+    differential_class.def_static("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);
+    differential_class.def_static("constants",(Vector<D>(*)(SizeType, DegreeType, const Vector<X>&))&D::constants);
+    differential_class.def_static("variables",(Vector<D>(*)(DegreeType, const Vector<X>&))&D::variables);
 
-
-    differential_class.staticmethod("constant");
-    differential_class.staticmethod("variable");
-    differential_class.staticmethod("variables");
-
-    def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
-    def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
+    
+    module.def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
+    module.def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
     typedef D(*UFn)(D const&);
     
-    def("neg", (D(*)(D const&)) &_neg_<D>);
-    def("sqr", (UFn) &_sqr_<D>);
-    def("rec",(UFn) &_rec_<D>);
-    def("pow", (D(*)(D const&,Int const&)) &_pow_<D,Int>);
-    def("sqrt",(UFn) &_sqrt_<D>);
-    def("exp",(UFn) &_exp_<D>);
-    def("log",(UFn) &_log_<D>);
-    def("sin",(UFn) &_sin_<D>);
-    def("cos",(UFn) &_cos_<D>);
-    def("tan",(UFn) &_tan_<D>);
-    def("atan",(UFn) &_atan_<D>);
+    module.def("neg", (D(*)(D const&)) &_neg_<D>);
+    module.def("sqr", (UFn) &_sqr_<D>);
+    module.def("rec",(UFn) &_rec_<D>);
+    module.def("pow", (D(*)(D const&,Int const&)) &_pow_<D,Int>);
+    module.def("sqrt",(UFn) &_sqrt_<D>);
+    module.def("exp",(UFn) &_exp_<D>);
+    module.def("log",(UFn) &_log_<D>);
+    module.def("sin",(UFn) &_sin_<D>);
+    module.def("cos",(UFn) &_cos_<D>);
+    module.def("tan",(UFn) &_tan_<D>);
+    module.def("atan",(UFn) &_atan_<D>);
 }
 
 template<class DIFF>
 Void
-export_differential_vector(const String& name)
+export_differential_vector(pybind11::module& module, const String& name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
     typedef DIFF D;
     typedef Vector<D> DV;
 
-    class_<DV> differential_vector_class(name.c_str(), init<DV>());
-    differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
-    differential_vector_class.def( init< Nat, Nat, Nat >());
+    pybind11::class_<DV> differential_vector_class(module,name.c_str());
+    differential_vector_class.def(pybind11::init<DV>());
+#warning Cannot make_constructor 
+//    differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
+    differential_vector_class.def( pybind11::init< Nat, Nat, Nat >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);
     differential_vector_class.def("__getitem__", &get_item<DV,Int,D>);
     differential_vector_class.def("__setitem__",&set_item<DV,Int,X>);
@@ -332,41 +343,41 @@ export_differential_vector(const String& name)
     differential_vector_class.def("__div__",&__div__<DV,DV,X>);
     differential_vector_class.def("value", &DV::value);
     differential_vector_class.def("jacobian", &DV::jacobian);
-    differential_vector_class.def(self_ns::str(self));
-    differential_vector_class.def(self_ns::repr(self));
+    differential_vector_class.def("__str__",&__cstr__<DV>);
+//    differential_vector_class.def("__repr__",&__repr__<DV>);
 
-    def("compose",(D(*)(const D&,const DV&))&D::_compose);
-    def("compose",(DV(*)(const DV&,const DV&))&DV::_compose);
+    module.def("compose",(D(*)(const D&,const DV&))&D::_compose);
+    module.def("compose",(DV(*)(const DV&,const DV&))&DV::_compose);
 
-    def("solve",(DV(*)(const DV&,const V&))&DV::_solve);
-    def("flow",(DV(*)(const DV&,const V&))&DV::_flow);
+    module.def("solve",(DV(*)(const DV&,const V&))&DV::_solve);
+    module.def("flow",(DV(*)(const DV&,const V&))&DV::_flow);
 
     //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template Void export_differential< Differential<FloatDPApproximation> >(const String&);
-template Void export_differential< Differential<FloatDPBounds> >(const String&);
+template Void export_differential< Differential<FloatDPApproximation> >(pybind11::module&,const String&);
+template Void export_differential< Differential<FloatDPBounds> >(pybind11::module&,const String&);
 
-template Void export_differential_vector< Differential<FloatDPApproximation> >(const String&);
-template Void export_differential_vector< Differential<FloatDPBounds> >(const String&);
+template Void export_differential_vector< Differential<FloatDPApproximation> >(pybind11::module&,const String&);
+template Void export_differential_vector< Differential<FloatDPBounds> >(pybind11::module&,const String&);
 
-Void differentiation_submodule()
+Void differentiation_submodule(pybind11::module& module)
 {
-    to_python_dict < Expansion<MultiIndex,FloatDPApproximation> >();
-    to_python_dict < Expansion<MultiIndex,FloatDPBounds> >();
+//    to_python_dict < Expansion<MultiIndex,FloatDPApproximation> >();
+//    to_python_dict < Expansion<MultiIndex,FloatDPBounds> >();
 
-    export_differential< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("Differential"));
-    export_differential< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("Differential"));
-    export_differential_vector< Differential<FloatDPApproximation> >(python_name<FloatDPApproximation>("DifferentialVector"));
-    export_differential_vector< Differential<FloatDPBounds> >(python_name<FloatDPBounds>("DifferentialVector"));
+    export_differential< Differential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("Differential"));
+    export_differential< Differential<FloatDPBounds> >(module,python_name<FloatDPBounds>("Differential"));
+    export_differential_vector< Differential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("DifferentialVector"));
+    export_differential_vector< Differential<FloatDPBounds> >(module,python_name<FloatDPBounds>("DifferentialVector"));
 
-    export_differential< Differential<FloatMPApproximation> >(python_name<FloatMPApproximation>("Differential"));
-    export_differential< Differential<FloatMPBounds> >(python_name<FloatMPBounds>("Differential"));
-    export_differential_vector< Differential<FloatMPApproximation> >(python_name<FloatMPApproximation>("DifferentialVector"));
-    export_differential_vector< Differential<FloatMPBounds> >(python_name<FloatMPBounds>("DifferentialVector"));
+    export_differential< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("Differential"));
+    export_differential< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("Differential"));
+    export_differential_vector< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("DifferentialVector"));
+    export_differential_vector< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("DifferentialVector"));
 
-    def("differential_variables", (Vector<Differential<FloatDPBounds>>(*)(DegreeType, Vector<Real>, DoublePrecision)) &make_variables<FloatDPBounds>);
-    def("differential_variables", (Vector<Differential<FloatMPBounds>>(*)(DegreeType, Vector<Real>, MultiplePrecision)) &make_variables<FloatMPBounds>);
+//    module.def("differential_variables", (Vector<Differential<FloatDPBounds>>(*)(DegreeType, Vector<Real>, DoublePrecision)) &make_variables<FloatDPBounds>);
+//    module.def("differential_variables", (Vector<Differential<FloatMPBounds>>(*)(DegreeType, Vector<Real>, MultiplePrecision)) &make_variables<FloatMPBounds>);
 
 
 }

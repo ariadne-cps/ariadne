@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 #include "utilities.hpp"
 
 #include "config.hpp"
@@ -31,45 +31,46 @@
 #include "output/graphics.hpp"
 #include "output/geometry2d.hpp"
 #include "geometry/point.hpp"
-    #include "geometry/box.hpp"
+#include "geometry/box.hpp"
 #include "function/function.hpp"
-
-using namespace boost::python;
 
 using namespace Ariadne;
 
 
-Void export_figure()
+Void export_figure(pybind11::module& module)
 {
-    class_<PlanarProjectionMap>("PlanarProjectionMap",init<Nat,Nat,Nat>());
+    pybind11::class_<PlanarProjectionMap> planar_projection_map_class(module,"PlanarProjectionMap");
+    planar_projection_map_class.def(pybind11::init<Nat,Nat,Nat>());
 
-    return_value_policy<reference_existing_object> ref_existing;
+    static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
 
-    class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);
-    class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
+#warning Handle abstract interface
+//    class_<FigureInterface>("FigureInterface");
+    pybind11::class_<Figure> figure_class(module,"Figure");
+    figure_class.def(pybind11::init<>());
 
     //class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
-    figure_class.def("set_projection_map",(Figure&(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map, ref_existing);
-    figure_class.def("set_projection",(Figure&(Figure::*)(Nat,Nat,Nat)) &Figure::set_projection, ref_existing);
-    figure_class.def("set_bounding_box",&Figure::set_bounding_box, ref_existing);
-    figure_class.def("set_dot_radius", (Figure&(Figure::*)(double)) &Figure::set_dot_radius, ref_existing);
-    figure_class.def("set_line_style", (Figure&(Figure::*)(Bool)) &Figure::set_line_style, ref_existing);
-    figure_class.def("set_line_width", (Figure&(Figure::*)(double)) &Figure::set_line_width, ref_existing);
-    figure_class.def("set_line_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_line_colour, ref_existing);
-    figure_class.def("set_fill_style", (Figure&(Figure::*)(Bool)) &Figure::set_fill_style, ref_existing);
-    figure_class.def("set_fill_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_fill_colour, ref_existing);
-    figure_class.def("set_fill_opacity", (Figure&(Figure::*)(double)) &Figure::set_fill_opacity, ref_existing);
-    figure_class.def("draw",(Figure&(Figure::*)(const DrawableInterface&))&Figure::draw, ref_existing);
-    figure_class.def("draw",(Figure&(Figure::*)(const RealBox&))&Figure::draw, ref_existing);
-    figure_class.def("draw",(Figure&(Figure::*)(const ApproximateBoxType&))&Figure::draw, ref_existing);
-    figure_class.def("clear",&Figure::clear, ref_existing);
+    figure_class.def("set_projection_map",(Figure&(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map, reference_internal);
+    figure_class.def("set_projection",(Figure&(Figure::*)(Nat,Nat,Nat)) &Figure::set_projection, reference_internal);
+    figure_class.def("set_bounding_box",&Figure::set_bounding_box, reference_internal);
+    figure_class.def("set_dot_radius", (Figure&(Figure::*)(double)) &Figure::set_dot_radius, reference_internal);
+    figure_class.def("set_line_style", (Figure&(Figure::*)(Bool)) &Figure::set_line_style, reference_internal);
+    figure_class.def("set_line_width", (Figure&(Figure::*)(double)) &Figure::set_line_width, reference_internal);
+    figure_class.def("set_line_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_line_colour, reference_internal);
+    figure_class.def("set_fill_style", (Figure&(Figure::*)(Bool)) &Figure::set_fill_style, reference_internal);
+    figure_class.def("set_fill_colour", (Figure&(Figure::*)(double,double,double)) &Figure::set_fill_colour, reference_internal);
+    figure_class.def("set_fill_opacity", (Figure&(Figure::*)(double)) &Figure::set_fill_opacity, reference_internal);
+    figure_class.def("draw",(Figure&(Figure::*)(const DrawableInterface&))&Figure::draw, reference_internal);
+    figure_class.def("draw",(Figure&(Figure::*)(const RealBox&))&Figure::draw, reference_internal);
+    figure_class.def("draw",(Figure&(Figure::*)(const ApproximateBoxType&))&Figure::draw, reference_internal);
+    figure_class.def("clear",&Figure::clear, reference_internal);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",(Void(Figure::*)(const char*)const)&Figure::write);
     figure_class.def("write",(Void(Figure::*)(const char*,Nat,Nat)const)&Figure::write);
 }
 
 
-Void graphics_submodule() {
-    export_figure();
+Void graphics_submodule(pybind11::module& module) {
+    export_figure(module);
 }
 

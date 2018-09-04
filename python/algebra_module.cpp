@@ -22,15 +22,14 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "boost_python.hpp"
+#include "pybind11.hpp"
 
-void numeric_submodule();
-void linear_algebra_submodule();
-void differentiation_submodule();
+void numeric_submodule(pybind11::module&);
+void linear_algebra_submodule(pybind11::module&);
+void differentiation_submodule(pybind11::module&);
 
-BOOST_PYTHON_MODULE(algebra)
-{
-    numeric_submodule();
-    linear_algebra_submodule();
-    differentiation_submodule();
+PYBIND11_MODULE(algebra, module) {
+    numeric_submodule(module);
+    linear_algebra_submodule(module);
+    differentiation_submodule(module);
 }

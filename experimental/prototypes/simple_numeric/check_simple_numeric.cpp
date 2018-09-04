@@ -1,4 +1,4 @@
-#include "simple_numeric.hpp"
+#include "../../prototypes/simple_numeric/simple_numeric.hpp"
 
 using namespace Ariadne;
 

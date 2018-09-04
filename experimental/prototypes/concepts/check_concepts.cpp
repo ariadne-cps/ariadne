@@ -1,4 +1,4 @@
-#include "./concepts.hpp"
+#include "../../prototypes/concepts/concepts.hpp"
 
 namespace Ariadne {
 //template class RealConcept<Real>;

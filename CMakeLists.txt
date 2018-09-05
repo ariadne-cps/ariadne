@@ -93,7 +93,7 @@ else()
 endif()
 
 
-configure_file (${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
+configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
@@ -140,10 +140,6 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
-
-target_link_libraries(ariadne dl)
-target_link_libraries(ariadne-kernel dl)
-target_link_libraries(ariadne-core dl)
 
 target_link_libraries(ariadne ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})

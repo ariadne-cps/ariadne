@@ -40,15 +40,15 @@ cotire(pyariadne-src)
 
 add_library(pyariadne MODULE $<TARGET_OBJECTS:pyariadne-src>)
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")
-target_link_libraries (pyariadne ariadne pybind11::module)
+target_link_libraries (pyariadne PUBLIC ariadne PRIVATE pybind11::module)
 
 add_library(pyariadne-numeric MODULE $<TARGET_OBJECTS:pyariadne-numeric-src> $<TARGET_OBJECTS:ariadne-utility> $<TARGET_OBJECTS:ariadne-numeric>)
 set_target_properties(pyariadne-numeric PROPERTIES PREFIX "" OUTPUT_NAME "numeric" SUFFIX ".so")
-target_link_libraries (pyariadne-numeric pybind11::module ${MPFR_LIBRARIES} ${GMP_LIBRARIES} )
+target_link_libraries (pyariadne-numeric PUBLIC ${MPFR_LIBRARIES} ${GMP_LIBRARIES} PRIVATE pybind11::module)
 
 add_library(pyariadne-algebra MODULE $<TARGET_OBJECTS:pyariadne-algebra-src>)
 set_target_properties(pyariadne-algebra PROPERTIES PREFIX "" OUTPUT_NAME "algebra" SUFFIX ".so")
-target_link_libraries (pyariadne-algebra ariadne pybind11::module)
+target_link_libraries (pyariadne-algebra PUBLIC ariadne PRIVATE pybind11::module)
 
 add_subdirectory(tests)
 

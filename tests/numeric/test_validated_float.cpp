@@ -172,7 +172,7 @@ TestDirectedFloats<PR>::test_validation() {
     Rational two_=2;
     ARIADNE_TEST_ASSERT(refines(FloatLowerBoundType(one,precision),FloatLowerBoundType(-one,precision)));
     ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-one,precision),FloatUpperBoundType(+one,precision)));
-    ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-two,precision),FloatUpperBoundType(-one,precision)));
+    ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-two_,precision),FloatUpperBoundType(-one,precision)));
 //    ARIADNE_TEST_ASSERT(refines(rec(FloatUpperBoundType(-two,precision)),rec(FloatUpperBoundType(-one,precision))));
 }
 

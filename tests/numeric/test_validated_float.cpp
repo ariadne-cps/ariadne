@@ -169,7 +169,7 @@ TestDirectedFloats<PR>::test_conversions()
 template<class PR> Void
 TestDirectedFloats<PR>::test_validation() {
     Rational one=1;
-    Rational two=2;
+    Rational two_=2;
     ARIADNE_TEST_ASSERT(refines(FloatLowerBoundType(one,precision),FloatLowerBoundType(-one,precision)));
     ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-one,precision),FloatUpperBoundType(+one,precision)));
     ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-two,precision),FloatUpperBoundType(-one,precision)));
@@ -630,7 +630,7 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
 {
     // Test lower, upper, midpoint, radius, width
     RawFloatType one=1.0;
-    RawFloatType two=2.0;
+    RawFloatType two_=2.0;
 
     // Tests for exact operations
     ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25,0.50).lower().raw(),-0.25);
@@ -645,10 +645,10 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
     ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).error().raw(),0.5)
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).lower().raw(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).upper().raw(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).value().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two,3)).error().raw(),0.50000000000000011102);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).lower().raw(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).upper().raw(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).value().raw(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).error().raw(),0.50000000000000011102);
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_input()
@@ -708,8 +708,8 @@ template<class PR> Void TestFloatBounds<PR>::test_aliasing() {
 template<class PR> Void TestFloatBounds<PR>::test_monotone_functions()
 {
 
-    FloatBoundsType two(2.0);
-    FloatBoundsType sqrttwo=sqrt(two);
+    FloatBoundsType two_(2.0);
+    FloatBoundsType sqrttwo=sqrt(two_);
     ARIADNE_TEST_PRINT(sqrttwo);
     ARIADNE_TEST_COMPARE(sqrttwo.lower_raw(),<=,1.4142135623730949);
     ARIADNE_TEST_COMPARE(sqrttwo.lower_raw(),> ,1.4142135623730947);

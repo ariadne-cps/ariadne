@@ -315,7 +315,7 @@ TestFloat<PR>::test_limits()
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
-    Float two=Float(2,precision);
+    Float two_=Float(2,precision);
 
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
@@ -325,7 +325,7 @@ TestFloat<PR>::test_limits()
 
     ARIADNE_TEST_PRINT(eps);
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);
-    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two)),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two_)),==,one);
 
     ARIADNE_TEST_ASSERT(min>zero);
     ARIADNE_TEST_ASSERT(max<inf);
@@ -508,7 +508,7 @@ template<> Void
 TestFloat<DoublePrecision>::test_rounding()
 {
     volatile double one   = 1;
-    volatile double two   = 2;
+    volatile double two_  = 2;
     volatile double three = 3;
     volatile double five  = 5;
     const double onethirddown    = 0.33333333333333331483;
@@ -534,16 +534,16 @@ TestFloat<DoublePrecision>::test_rounding()
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
     Ariadne::set_rounding_downward();
-    double twofifthsrounddown=two/five;
+    double twofifthsrounddown=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
     Ariadne::set_rounding_upward();
-    double twofifthsroundup=two/five;
+    double twofifthsroundup=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
     Ariadne::set_rounding_toward_zero();
-    double twofifthsroundchop=two/five;
+    double twofifthsroundchop=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
     Ariadne::set_rounding_to_nearest();
-    double twofifthsroundnearest=two/five;
+    double twofifthsroundnearest=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
@@ -551,7 +551,7 @@ template<class PR> Void
 TestFloat<PR>::test_rounding()
 {
     volatile double one   = 1;
-    volatile double two   = 2;
+    volatile double two_  = 2;
     volatile double three = 3;
     volatile double five  = 5;
     const double onethirddown    = 0.33333333333333331483;
@@ -577,16 +577,16 @@ TestFloat<PR>::test_rounding()
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
     Ariadne::set_rounding_downward();
-    double twofifthsrounddown=two/five;
+    double twofifthsrounddown=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
     Ariadne::set_rounding_upward();
-    double twofifthsroundup=two/five;
+    double twofifthsroundup=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
     Ariadne::set_rounding_toward_zero();
-    double twofifthsroundchop=two/five;
+    double twofifthsroundchop=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
     Ariadne::set_rounding_to_nearest();
-    double twofifthsroundnearest=two/five;
+    double twofifthsroundnearest=two_/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
@@ -908,7 +908,6 @@ TestFloat<PR>::test_arctan()
 
     const RawFloat<PR> zero(0,precision);
     const RawFloat<PR> one(1,precision);
-    const RawFloat<PR> two(2,precision);
     const RawFloat<PR> four(4,precision);
     const RawFloat<PR> six(6,precision);
     const RawFloat<PR> eps=RawFloat<PR>::eps(precision);

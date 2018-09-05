@@ -136,9 +136,9 @@ class TestAffineSet
     Void test_separated() {
         D=ExactBoxType::unit_box(3);
         x=Affine<ValidatedNumericType>::variables(3);
-        ValidatedAffineConstrainedImageSet affine_set(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
-        affine_set.new_parameter_constraint(-1.1875_ex+0.0625_ex*x[0]+x[1]<=0.0_ex);
-        ARIADNE_TEST_PRINT(affine_set);
+        set=ValidatedAffineConstrainedImageSet(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
+        set.new_parameter_constraint(-1.1875_ex+0.0625_ex*x[0]+x[1]<=0.0_ex);
+        ARIADNE_TEST_PRINT(set);
         ExactBoxType cell1({{-1.0,-0.9375},{0.8125, 0.875}}); // subset
         ExactBoxType cell2({{-0.5625,-0.50},{1.4375,1.5}}); // overlaps
         ExactBoxType cell3({{-0.875,-0.75},{0.625,0.7578125}}); // touches at (-0.875,0.7578125);
@@ -146,17 +146,17 @@ class TestAffineSet
         ExactBoxType cell5({{-0.9375,-0.875},{0.4375,0.5}}); // disjoint
         ExactBoxType cell6({{-1.5,-1.375},{0.5,0.625}}); // disjoint; regression test
 
-        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell1)));
-        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell2)));
-        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell3)));
+        ARIADNE_TEST_ASSERT(!definitely(set.separated(cell1)));
+        ARIADNE_TEST_ASSERT(!definitely(set.separated(cell2)));
+        ARIADNE_TEST_ASSERT(!definitely(set.separated(cell3)));
         //ARIADNE_TEST_ASSERT(!definitely(affine_set.overlaps(cell3)));
-        ARIADNE_TEST_ASSERT(possibly(affine_set.separated(cell4)));
-        ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell5)));
-        ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell6)));
+        ARIADNE_TEST_ASSERT(possibly(set.separated(cell4)));
+        ARIADNE_TEST_ASSERT(definitely(set.separated(cell5)));
+        ARIADNE_TEST_ASSERT(definitely(set.separated(cell6)));
 
         figure.clear();
-        figure.set_bounding_box(widen(affine_set.bounding_box(),0.125_x));
-        figure << affine_set
+        figure.set_bounding_box(widen(set.bounding_box(),0.125_x));
+        figure << set
                << fill_colour(0,0,1) << cell1
                << fill_colour(0,1,0) << cell2
                << fill_colour(1,1,0) << cell3
@@ -173,7 +173,7 @@ class TestAffineSet
         {
             D=ExactBoxType::unit_box(2);
             x=Affine<ValidatedNumericType>::variables(2);
-            ValidatedAffineConstrainedImageSet set(D,{x[0],x[1]});
+            set=ValidatedAffineConstrainedImageSet(D,{x[0],x[1]});
             set.new_parameter_constraint(x[0]+x[1]<=-0.5_ex);
             ARIADNE_TEST_PRINT(set);
 
@@ -182,7 +182,7 @@ class TestAffineSet
             std::cout<<std::setprecision(17);
             ARIADNE_TEST_PRINT(paving);
 
-            Figure figure;
+            figure.clear();
             figure.set_bounding_box(widen(set.bounding_box(),0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
@@ -194,12 +194,12 @@ class TestAffineSet
 
         {
             // The following set has difficulties
-            ValidatedAffineConstrainedImageSet set(D,{x[0],x[1]});
+            set=ValidatedAffineConstrainedImageSet(D,{x[0],x[1]});
             set.new_parameter_constraint(2.0_ex*x[0]+1.0_ex*x[1]<=0.5_ex);
             set.new_parameter_constraint(-0.5_ex*x[0]+1.0_ex*x[1]<=0.75_ex);
             set.new_parameter_constraint(-0.5_ex*x[0]-1.0_ex*x[1]<=0.875_ex);
 
-            Figure figure;
+            figure.clear();
             figure.set_bounding_box(widen(ExactBoxType{{-1.0,+1.0},{-1.0,+1.0}},+0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
@@ -226,7 +226,7 @@ class TestAffineSet
             set.adjoin_outer_approximation_to(paving,3);
             paving.recombine();
 
-            Figure figure;
+            figure.clear();
             figure.set_bounding_box(ExactBoxType{{-7.0,+7.0},{-1.0,+5.0}});
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.set_fill_opacity(0.5);
@@ -238,7 +238,7 @@ class TestAffineSet
         }
 
         {
-            ValidatedAffineConstrainedImageSet set(ExactBoxType::unit_box(3),{-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
+            set=ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(3),{-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
             set.new_parameter_constraint(0.0625_ex*x[0]+x[1]<=1.1875_ex);
             ARIADNE_TEST_PRINT(set);
 
@@ -247,7 +247,7 @@ class TestAffineSet
             std::cout<<std::setprecision(17);
             ARIADNE_TEST_PRINT(paving);
 
-            Figure figure;
+            figure.clear();
             figure.set_bounding_box(widen(set.bounding_box(),+0.125_x));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);

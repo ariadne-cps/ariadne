@@ -71,7 +71,6 @@ class TestExpression {
 
     Void test_assignment() {
         Real zero(0), one(1);
-        RealVariable x("x"), y("y"), z("x");
         RealExpression e(x*y+o);
 
         ARIADNE_TEST_ASSERT((not IsAssignable<Variable<Real>,Expression<Real>>::value));
@@ -103,8 +102,6 @@ class TestExpression {
     }
 
     Void test_parameters() {
-        RealVariable x("x");
-
         RealExpression expr = x;//+u;
 
         Map<Identifier,Real> valuation;
@@ -121,7 +118,6 @@ class TestExpression {
     }
 
     Void test_derivative() {
-        RealVariable x("x"), y("y");
         RealExpression expr = 2*x+y;
         ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
         RealExpression expr2 = pow(x,3);
@@ -130,7 +126,7 @@ class TestExpression {
 
     Void test_simplify() {
 
-        RealVariable x("x"), y("y"), u("u");
+        RealVariable u("u");
         RealExpression expr = -u*x*y+2*x;
         RealExpression simplification = simplify(derivative(expr,x));
         ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
@@ -138,7 +134,7 @@ class TestExpression {
 
     Void test_substitute() {
 
-        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        RealVariable u1("u1"), u2("u2");
         RealExpression expr = -u1*x*y+2*pow(x+u2,2);
 
         List<Assignment<RealVariable,RealExpression>> subs={{u1,u1+1},{u2,u1*x}};
@@ -150,7 +146,7 @@ class TestExpression {
 
     Void test_scalar_properties()
     {
-        RealVariable x("x"), y("y"), u("u");
+        RealVariable u("u");
         Real c(3);
         ARIADNE_TEST_ASSERT(is_constant_in(3*y,{x}));
         ARIADNE_TEST_ASSERT(is_constant_in(pow(x,2),{y}));
@@ -178,7 +174,7 @@ class TestExpression {
 
     Void test_vector_properties()
     {
-        RealVariable x("x"), y("y"), u1("u1"), u2("u2");
+        RealVariable u1("u1"), u2("u2");
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y+u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u2,y+u1}),{u1,u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y}),{u1}));
@@ -202,9 +198,6 @@ class TestExpression {
         Valuation<Real> tw({{x,tx},{y,ty},{z,tz}});
 
         RealConstant c("5",tc);
-        RealVariable x("x");
-        RealVariable y("y");
-        RealVariable z("z");
 
         RealExpression e1=c;
         EffectiveScalarFunction f1=make_function(e1,RealSpace(List<RealVariable>({x,y,z})));

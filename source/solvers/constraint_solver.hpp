@@ -125,6 +125,7 @@ class ConstraintSolver
     Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, Nat j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
+    virtual ~ConstraintSolver() = default;
 };
 
 

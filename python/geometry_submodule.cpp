@@ -274,8 +274,8 @@ Void export_set_interface(pybind11::module& module) {
 
 Void export_point(pybind11::module& module)
 {
-    static_assert(pybind11::class_<ExactPoint>::is_valid_class_option<DrawableInterface>::value);
-    static_assert(not pybind11::class_<ExactPoint>::is_valid_class_option<DrawableWrapper>::value);
+    //static_assert(pybind11::class_<ExactPoint>::is_valid_class_option<DrawableInterface>::value);
+    //static_assert(not pybind11::class_<ExactPoint>::is_valid_class_option<DrawableWrapper>::value);
 
 //    pybind11::class_<ExactPoint,pybind11::bases<DrawableWrapper>> point_class(module,"ExactPoint");
 //    pybind11::class_<ExactPoint, DrawableWrapper> point_class(module,"ExactPoint", pybind11::multiple_inheritance());

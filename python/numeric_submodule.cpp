@@ -41,6 +41,9 @@
 
 namespace Ariadne {
 
+extern template Nat Error<FloatDP>::output_places;
+extern template Nat Error<FloatMP>::output_places;
+
 template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
 

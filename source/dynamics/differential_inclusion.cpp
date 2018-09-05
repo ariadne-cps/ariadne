@@ -383,10 +383,10 @@ ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFuncti
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size)
+InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
-    , _step_size(step_size)
+    , _step_size(step_size_)
     , _number_of_steps_between_simplifications(8)
     , _number_of_variables_to_keep(4)
 {
@@ -859,8 +859,8 @@ template<> Vector<ValidatedScalarFunction> InputApproximatorBase<PiecewiseApprox
 }
 
 
-LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep)
-    : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep) {
+LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep_)
+    : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep_) {
     this->verbosity = 0;
 }
 

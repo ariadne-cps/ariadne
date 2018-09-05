@@ -781,13 +781,13 @@ Void TaylorSeriesIntegrator::write(OutputStream& os) const {
 
 
 
-template<class X> Void truncate(Differential<X>& x, Nat spacial_order, Nat temporal_order) {
+template<class X> Void truncate(Differential<X>& x, Nat spacial_order_, Nat temporal_order_) {
     Nat n=x.argument_size()-1;
     typename Differential<X>::Iterator write_iter=x.begin();
     typename Differential<X>::ConstIterator read_iter=x.begin();
     while(read_iter!=x.end()) {
         ConstReferenceType<MultiIndex> index = read_iter->index();
-        if(index[n]>temporal_order || index[n]+spacial_order<index.degree()) {
+        if(index[n]>temporal_order_ || index[n]+spacial_order_<index.degree()) {
         } else {
             *write_iter=*read_iter;
             ++write_iter;
@@ -797,10 +797,15 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order, Nat tempo
     x.expansion().resize(static_cast<SizeType>(write_iter-x.begin()));
 }
 
-template<class X> Void truncate(Vector< Differential<X> >& x, Nat spacial_order, Nat temporal_order) {
-    for(Nat i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order,temporal_order); }
+template<class X> Void truncate(Vector< Differential<X> >& x, Nat spacial_order_, Nat temporal_order_) {
+    for(Nat i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order_,temporal_order_); }
 }
 
+AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, TemporalOrder temporal_order_)
+    : IntegratorBase(maximum_error_,lipschitz_constant=0.5), _spacial_order(1u), _temporal_order(temporal_order_) { }
+
+AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, SpacialOrder spacial_order_, TemporalOrder temporal_order_)
+    : IntegratorBase(maximum_error_,lipschitz_constant=0.5), _spacial_order(spacial_order_), _temporal_order(temporal_order_) { }
 
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector<ValidatedNumericType>& dom) const

@@ -381,7 +381,7 @@ class LohnerReconditioner : public Reconditioner, public Loggable {
 public:
     LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep);
     void set_sweeper(SweeperDP sweeper) { _sweeper = sweeper; }
-    void set_number_of_variables_to_keep(Nat number_of_variables_to_keep) { _number_of_variables_to_keep = number_of_variables_to_keep; }
+    void set_number_of_variables_to_keep(Nat num_variables_to_keep) { _number_of_variables_to_keep = num_variables_to_keep; }
     virtual ValidatedVectorFunctionModelType expand_errors(ValidatedVectorFunctionModelType f) const override;
     virtual Void simplify(ValidatedVectorFunctionModelType& f) const override;
     virtual ~LohnerReconditioner() = default;
@@ -406,11 +406,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_variables_to_keep;
   public:
     InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes)
-        : InclusionIntegrator(approximations, sweeper,step_size) {
-        this->set(attributes...);
-        _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
-    }
+    template<class... AS> InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes);
   public:
     InclusionIntegrator& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
     InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
@@ -428,6 +424,11 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Vector<ValidatedScalarFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
+template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)
+                : InclusionIntegrator::InclusionIntegrator(approximations, sweeper,step_size_) {
+    this->set(attributes...);
+    _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
+}
 
 BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h, Nat num_params);
 

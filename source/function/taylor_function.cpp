@@ -73,8 +73,8 @@ FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold) {
-    return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold));
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold_) {
+    return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold_));
 }
 
 

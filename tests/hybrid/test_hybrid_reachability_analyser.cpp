@@ -276,8 +276,8 @@ class TestHybridReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
-        auto grid=analyser.configuration().grid();
-        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_depth());
+        auto hgrid=analyser.configuration().grid();
+        auto safe_cells=inner_approximation(safe_set, hgrid, analyser.configuration().maximum_grid_depth());
         plot("test_reachability_analyser-verify_safety.png",axes,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,

@@ -4,5 +4,4 @@ target_link_libraries(c1_taylor_function ariadne)
 
 add_executable(test_c1_taylor_function test_c1_taylor_function.cpp)
 target_include_directories(test_c1_taylor_function PUBLIC ../../../tests/function ../../../source/function)
-add_test(test_c1_taylor_function test_c1_taylor_function)
 target_link_libraries(test_c1_taylor_function c1_taylor_function)

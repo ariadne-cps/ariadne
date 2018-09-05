@@ -1533,9 +1533,10 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
         // Apply maximum time bound, as this will be applied after the next flow step
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
-            if(possibly(jump_set.time_range().upper()>timing_data.final_time)) {
-                jump_set.bound_time(timing_data.final_time);
-                if(definitely(not jump_set.is_empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
+            HybridEnclosure& _jump_set=*jump_set_iter;
+            if(possibly(_jump_set.time_range().upper()>timing_data.final_time)) {
+                _jump_set.bound_time(timing_data.final_time);
+                if(definitely(not _jump_set.is_empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
             }
         }
 
@@ -1557,15 +1558,15 @@ _apply_evolution_step(EvolutionData& evolution_data,
         ARIADNE_LOG(3, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         // Apply reset
         for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
-            HybridEnclosure& jump_set=*jump_set_iter;
-            if(!definitely(jump_set.is_empty())) {
+            HybridEnclosure& _jump_set=*jump_set_iter;
+            if(!definitely(_jump_set.is_empty())) {
                 DiscreteLocation const& target=transitions[event].target;
                 ARIADNE_LOG(9,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target)<<"\n");
-                jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
-                jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
-                evolution_data.initial_sets.append(jump_set);
+                _jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
+                _jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
+                evolution_data.initial_sets.append(_jump_set);
                 _step_data.events.insert(event);
-                ARIADNE_LOG(6, "jump_set="<<jump_set<<"\n");
+                ARIADNE_LOG(6, "jump_set="<<_jump_set<<"\n");
             }
         }
     }

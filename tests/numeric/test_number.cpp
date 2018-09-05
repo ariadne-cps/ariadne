@@ -107,7 +107,6 @@ template<class Y> void test_number_get() {
     Rational q=3/5_q;
     Real r(q);
     Y y(r);
-    DoublePrecision dp;
     MultiplePrecision mp(192);
     MultiplePrecision mpe(128);
 
@@ -142,7 +141,6 @@ template<> void test_number_get<ExactNumber>() { }
 template<> void test_number_get<ApproximateNumber>() {
     Rational q=3/5_q;
     ApproximateNumber y(q);
-    DoublePrecision dp;
     MultiplePrecision mp(128);
     ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,3e-16);
     ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,3e-16);

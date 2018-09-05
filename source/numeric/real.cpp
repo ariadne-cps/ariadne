@@ -277,7 +277,6 @@ OutputStream& WhenRealExpression::_write(OutputStream& os) const {
 // Equivalent to choose(r>a,r<b)
 Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b) {
     ARIADNE_PRECONDITION(a<b);
-    DoublePrecision dp;
     FloatDPBounds x0=r.get(dp);
     if(x0.lower_raw()>a) { return true; } else if(x0.upper_raw()<b) { return false; }
     Nat bits=64;

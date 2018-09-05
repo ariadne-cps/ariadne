@@ -72,16 +72,6 @@ typedef GeneralHybridEvolver HybridEvolverType;
 //   Temperature below which the heater must be turned on Toninv
 
 
-//! [create_heating_system]
-// Create the discrete system variables.
-StringVariable clock("clock");
-StringVariable heating("heating");
-// Create the values of the discrete variables.
-StringConstant on("on");
-StringConstant off("off");
-// Declare the continuous system variables.
-RealVariable T("T");
-RealVariable C("C");
 
 CompositeHybridAutomaton create_heating_system()
 {
@@ -90,6 +80,10 @@ CompositeHybridAutomaton create_heating_system()
     RealConstant K("K",1.0_decimal);
     RealConstant Tav("Tav",16.0_decimal);
     RealConstant Tamp("Tamp",8.0_decimal);
+
+    // Declare the continuous system variables.
+    RealVariable T("T");
+    RealVariable C("C");
 
     // Set the system control parameters
     RealConstant Tmax("Tmax",23.0_decimal);
@@ -148,7 +142,6 @@ HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 //! [simulate_evolution]
 Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
-    // Redefine the two discrete states
     StringVariable clock("clock");
     StringVariable heating("heating");
     StringConstant on("on");

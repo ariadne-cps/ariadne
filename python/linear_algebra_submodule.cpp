@@ -132,8 +132,8 @@ template<class X> Covector<X> covector_from_python(pybind11::object const& obj) 
     SizeType n=lst.size();
     Covector<X> r(n);
     for(SizeType j=0; j!=n; ++j) {
-        pybind11::object obj=lst[j];
-        X const* val = obj.cast<X*>();
+        pybind11::object elem=lst[j];
+        X const* val = elem.cast<X*>();
         r[j]=*val;
     }
     return r;

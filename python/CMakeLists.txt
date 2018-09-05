@@ -1,5 +1,3 @@
-add_subdirectory(pybind11) 
-
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(SYSTEM ${PYBIND11_INCLUDE_DIR})
 

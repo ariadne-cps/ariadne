@@ -106,6 +106,7 @@ add_subdirectory(experimental EXCLUDE_FROM_ALL)
 find_package(PythonLibs)
 if(PYTHONLIBS_FOUND)
     message(STATUS "PythonLibs found, Python bindings will be built.")
+    add_subdirectory(external/pybind11)
     add_subdirectory(python)
 endif()
 

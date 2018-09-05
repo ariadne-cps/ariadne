@@ -110,7 +110,7 @@ template<class F> class TestTaylorModel
     typedef Expansion<MI,F> ExpansionType;
   public:
     Sweeper<F> swp; PR pr;
-    ValidatedTaylorModel<F> z,o,x,y,e;
+    ValidatedTaylorModel<F> x0,x1,x2,r,o;
   public:
     typedef F FloatType;
   public:
@@ -138,11 +138,11 @@ template<class F> class TestTaylorModel
 
 template<class F> TestTaylorModel<F>::TestTaylorModel(Sweeper<F> sweeper)
     : swp(sweeper), pr(sweeper.precision())
-    , z(ValidatedTaylorModel<F>::zero(2,swp))
+    , x0(ValidatedTaylorModel<F>::coordinate(2,0,swp))
+    , x1(ValidatedTaylorModel<F>::coordinate(2,1,swp))
+    , x2(ValidatedTaylorModel<F>::zero(2,swp))
+    , r(ValidatedTaylorModel<F>::unit_ball(2,swp))
     , o(ValidatedTaylorModel<F>::constant(2,Dyadic(1),swp))
-    , x(ValidatedTaylorModel<F>::coordinate(2,0,swp))
-    , y(ValidatedTaylorModel<F>::coordinate(2,1,swp))
-    , e(ValidatedTaylorModel<F>::unit_ball(2,swp))
 {
 }
 
@@ -228,13 +228,13 @@ template<class F> Void TestTaylorModel<F>::test_constructors()
 
 template<class F> Void TestTaylorModel<F>::test_predicates()
 {
-    ARIADNE_TEST_REFINES(1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
-    ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/1048576,1+x+(x^2)/2+e/6);
+    ARIADNE_TEST_REFINES(1+x0+(x0^2)/2+(x0^3)/4,1+x0+(x0^2)/2+r/4);
+    ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x0+(x0^2)/2+(x0^3)/6+r/1048576,1+x0+(x0^2)/2+r/6);
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv1,(1+2*x+3*(x^2)+e*3/4));
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv2,(1+x*7/4+(x^2)*13/4+e/4));
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv3,(o*9/8+x*7/4+(x^2)*13/4+e/4));
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv4,(1+x*9/4+(x^2)*3-(x^4)/4+e/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv1,(1+2*x0+3*(x0^2)+r*3/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv2,(1+x0*7/4+(x0^2)*13/4+r/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv3,(o*9/8+x0*7/4+(x0^2)*13/4+r/4));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv4,(1+x0*9/4+(x0^2)*3-(x0^4)/4+r/4));
 
     ARIADNE_TEST_REFINES(tv1,tv1);
     ARIADNE_TEST_REFINES(tv2,tv1);
@@ -242,22 +242,22 @@ template<class F> Void TestTaylorModel<F>::test_predicates()
     ARIADNE_TEST_REFINES(tv4,tv1);
 
     FloatValue<PR> h(Dyadic(0.5),pr);
-    ARIADNE_TEST_BINARY_PREDICATE(consistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
-    ARIADNE_TEST_BINARY_PREDICATE(consistent,1+e*3/4,2+e/4);
-    ARIADNE_TEST_BINARY_PREDICATE(not consistent,x-(x^3)*2/3+e/(3.0_exd+pow(h,20)),z);
-    ARIADNE_TEST_BINARY_PREDICATE(inconsistent,1-2*(x^2),e*7/8);
-    ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
-    ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+e*3/4,2+e/4);
+    ARIADNE_TEST_BINARY_PREDICATE(consistent,1+2*x0+3*x1+r*3/4,1+2*x0+3*x1+r*3/4);
+    ARIADNE_TEST_BINARY_PREDICATE(consistent,1+r*3/4,2+r/4);
+    ARIADNE_TEST_BINARY_PREDICATE(not consistent,x0-(x0^3)*2/3+r/(3.0_exd+pow(h,20)),x2);
+    ARIADNE_TEST_BINARY_PREDICATE(inconsistent,1-2*(x0^2),r*7/8);
+    ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+2*x0+3*x1+r*3/4,1+2*x0+3*x1+r*3/4);
+    ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+r*3/4,2+r/4);
 
-    if(not refines(1-(x^2)/2,e/2)) {
+    if(not refines(1-(x0^2)/2,r/2)) {
         ARIADNE_TEST_WARN("refines(ValidatedTaylorModel<F>,ValidatedTaylorModel<F>) may return false even if the first model refines the second.");
     }
 
-    if(not consistent(x-(x^3)*2/3+e/3,z)) {
+    if(not consistent(x0-(x0^3)*2/3+r/3,x2)) {
         ARIADNE_TEST_WARN("consistent(ValidatedTaylorModel<F>,ValidatedTaylorModel<F>) may return false even if models are consistent with representing the same function.");
     }
 
-    if(not inconsistent(x-(x^3)*2/3+e/4,z)) {
+    if(not inconsistent(x0-(x0^3)*2/3+r/4,x2)) {
         ARIADNE_TEST_WARN("inconsistent(ValidatedTaylorModel<F>,ValidatedTaylorModel<F>) may return false even if models are consistent with representing the same function.");
     }
 
@@ -282,7 +282,7 @@ template<class F> Void TestTaylorModel<F>::test_unscale()
 template<class F> Void TestTaylorModel<F>::test_evaluate()
 {
     Vector<FloatBounds<PR>> iv={{0.25_exact,0.5_exact},{-0.75_exact,-0.5_exact}};
-    ValidatedTaylorModel<F> tv=1+2*x+3*y+4*(x^2)+5*(x*y)+6*(y^2)+e/2;
+    ValidatedTaylorModel<F> tv=1+2*x0+3*x1+4*(x0^2)+5*(x0*x1)+6*(x1^2)+r/2;
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),FloatBounds<PR>(-1,1));
 }
 
@@ -309,14 +309,14 @@ template<class F> Void TestTaylorModel<F>::test_arithmetic()
     ARIADNE_TEST_SAME(ValidatedTaylorModel<F>({{{0},1.0},{{1},-2.0},{{2},3.0}},0.75,swp)*ValidatedTaylorModel<F>({{{0},3.0},{{1},2.0},{{2},-4.0}},0.5,swp),
                       ValidatedTaylorModel<F>({{{0},3.0},{{1},-4.0},{{2},1.0},{{3},14.0},{{4},-12.0}}, 10.125,swp));
 
-    ARIADNE_TEST_SAME(1-2*x+3*(x^2)+e*3/4, ValidatedTaylorModel<F>({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}}, 0.75,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,t,(1-2*x+3*(x^2)+e*3/4));
+    ARIADNE_TEST_SAME(1-2*x0+3*(x0^2)+r*3/4, ValidatedTaylorModel<F>({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}}, 0.75,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,t,(1-2*x0+3*(x0^2)+r*3/4));
     ARIADNE_TEST_SAME(t,ValidatedTaylorModel<F>({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}},0.75,swp));
 
     // Reciprocal of a constant
     ARIADNE_TEST_SAME(rec(o*4),o/4);
 
-    ARIADNE_TEST_SAME((1-2*x+3*y)*(3+2*x-4*y),3-4*x+5*y-4*(x^2)+14*(x*y)-12*(y^2));
+    ARIADNE_TEST_SAME((1-2*x0+3*x1)*(3+2*x0-4*x1),3-4*x0+5*x1-4*(x0^2)+14*(x0*x1)-12*(x1^2));
     ARIADNE_TEST_SAME(sqr(t),t*t);
     ARIADNE_TEST_SAME(pow(t,0),o);
     ARIADNE_TEST_SAME(pow(t,1),t);
@@ -340,12 +340,12 @@ template<class F> Void TestTaylorModel<F>::test_range()
     typedef Interval<FloatValue<PR>> ExactRangeType;
 
     // Test range of cubic, which should be exact
-    ValidatedTaylorModel<F> t1 = x*x*x+x;
+    ValidatedTaylorModel<F> t1 = x0*x0*x0+x0;
     ARIADNE_TEST_SAME(t1.range(),ExactRangeType(-2,+2));
 
     //x^2+x = (x+1/2)^2-1/4; Range [-0.25,+2.0]
     // Test range of quadratic, which could be exact, but need not be
-    ValidatedTaylorModel<F> t2 = x*x+x;
+    ValidatedTaylorModel<F> t2 = x0*x0+x0;
     ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),ExactRangeType(-2,+2));
     ARIADNE_TEST_BINARY_PREDICATE(refines,ExactRangeType(-0.25,+2),t2.range());
     if(cast_exact_interval(t2.range())!=ExactRangeType(-0.25,2.0)) {
@@ -425,11 +425,11 @@ template<class F> Void TestTaylorModel<F>::test_functions()
     ARIADNE_TEST_REFINES(sqrt(9*ophx),expected_sqrt_ophx*3+tolerance.pm(expected_sqrt_ophx.error()*4u));
     ARIADNE_TEST_REFINES(log(3*ophx),expected_log_ophx+log(FloatValue<PR>(3))+tolerance);
 
-    Nat rn=3; FloatValue<PR> c(2); FloatValue<PR> r(rn);
+    Nat rn=3; FloatValue<PR> c(2); FloatValue<PR> frn(rn);
     ARIADNE_TEST_PRINT(c);
-    ARIADNE_TEST_PRINT(r);
+    ARIADNE_TEST_PRINT(frn);
     ARIADNE_TEST_REFINES(exp(hx),expected_exp_hx+tolerance);
-    ARIADNE_TEST_REFINES(exp(c+r*hx),exp(c)*pow(expected_exp_hx,rn)+tolerance);
+    ARIADNE_TEST_REFINES(exp(c+frn*hx),exp(c)*pow(expected_exp_hx,rn)+tolerance);
     ARIADNE_TEST_REFINES(sin(c+hx),sin(c)*expected_cos_hx+cos(c)*expected_sin_hx+tolerance);
     ARIADNE_TEST_REFINES(cos(c+hx),cos(c)*expected_cos_hx-sin(c)*expected_sin_hx+tolerance);
 
@@ -499,13 +499,13 @@ template<class F> Void TestTaylorModel<F>::test_antiderivative()
     ValidatedTaylorModel<F> tm=ValidatedTaylorModel<F>::constant(2,1,swp);
     ValidatedTaylorModel<F> atm=antiderivative(tm,1);
 
-    ARIADNE_TEST_SAME(antiderivative(2*o,0),2*x);
-    ARIADNE_TEST_SAME(antiderivative(2*o,1),2*y);
-    ARIADNE_TEST_SAME(antiderivative(3*x,0),(x^2)*3/2);
-    ARIADNE_TEST_SAME(antiderivative(2*o+3*x,0),x*2+(x^2)*3/2);
-    ARIADNE_TEST_SAME(antiderivative((x^2)*15/2,0),(x^3)*5/2);
-    ARIADNE_TEST_SAME(antiderivative((x^2)*(y^4)*15/2,0),(x^3)*(y^4)*5/2);
-    ARIADNE_TEST_SAME(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
+    ARIADNE_TEST_SAME(antiderivative(2*o,0),2*x0);
+    ARIADNE_TEST_SAME(antiderivative(2*o,1),2*x1);
+    ARIADNE_TEST_SAME(antiderivative(3*x0,0),(x0^2)*3/2);
+    ARIADNE_TEST_SAME(antiderivative(2*o+3*x0,0),x0*2+(x0^2)*3/2);
+    ARIADNE_TEST_SAME(antiderivative((x0^2)*15/2,0),(x0^3)*5/2);
+    ARIADNE_TEST_SAME(antiderivative((x0^2)*(x1^4)*15/2,0),(x0^3)*(x1^4)*5/2);
+    ARIADNE_TEST_SAME(antiderivative((x0^2)*(x1^4)*15/2,1),(x0^2)*(x1^5)*3/2);
 
     ValidatedTaylorModel<F> x=ValidatedTaylorModel<F>::coordinate(1,0,swp);
     ValidatedTaylorModel<F> e=ValidatedTaylorModel<F>::zero(1,swp)+FloatBounds<PR>(-1,+1);
@@ -523,7 +523,7 @@ template<class F> Void TestTaylorModel<F>::test_antiderivative()
 
 template<class F> Void TestTaylorModel<F>::test_compose()
 {
-    ARIADNE_TEST_SAME(compose(2-x*x-y/4,{2-x*x-y/4,x}),-2-(x^4)-(y^2)/16+4*(x^2)+y-(x^2)*y/2-x/4);
+    ARIADNE_TEST_SAME(compose(2-x0*x0-x1/4,{2-x0*x0-x1/4,x0}),-2-(x0^4)-(x1^2)/16+4*(x0^2)+x1-(x0^2)*x1/2-x0/4);
 
 }
 

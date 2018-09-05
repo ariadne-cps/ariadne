@@ -871,9 +871,9 @@ template<class F> struct Operations<Bounds<F>> {
         if(x._l>0 || x._u<0) {
             return Bounds<F>(rec(down,x._u),rec(up,x._l));
         } else {
-            F inf=F::inf(x.precision());
+            F inf_=F::inf(x.precision());
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
-            return Bounds<F>(-inf,+inf);
+            return Bounds<F>(-inf_,+inf_);
         }
     }
 

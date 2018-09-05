@@ -323,12 +323,12 @@ template<class F> Void TestTaylorModel<F>::test_arithmetic()
     ARIADNE_TEST_SAME(pow(t,2),t*t);
     ARIADNE_TEST_SAME(pow(t,3),t*t*t);
 
-    F inf = F::inf(pr);
-    ValidatedTaylorModel<F> tm_inf(Expansion<MultiIndex,FloatType>(2),+inf,swp);
+    F inf_ = F::inf(pr);
+    ValidatedTaylorModel<F> tm_inf(Expansion<MultiIndex,FloatType>(2),+inf_,swp);
     ValidatedTaylorModel<F> tm_zero_times_inf=0*tm_inf;
     if(is_nan(tm_zero_times_inf.error().raw())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
-    } else if(tm_zero_times_inf.error().raw()==+inf) {
+    } else if(tm_zero_times_inf.error().raw()==+inf_) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
     } else if(tm_zero_times_inf.error().raw()==0.0) {
         ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");

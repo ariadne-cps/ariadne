@@ -761,7 +761,7 @@ template<class PR> Void TestFloatBounds<PR>::test_trigonometric_functions()
 }
 
 template<class PR> Void TestFloatBounds<PR>::regression_tests() {
-    RawFloatType inf=RawFloatType::inf(precision);
+    RawFloatType inf_=RawFloatType::inf(precision);
 
     // Regression test; fails dramatically on certain types of rounding
     {
@@ -777,11 +777,11 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
 
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
-    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-0.0,1.0)).upper_raw(),+inf);
-    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf);
+    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-0.0,1.0)).upper_raw(),+inf_);
+    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
 
-    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-0.0,+1.0)).upper_raw(),+inf);
-    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf);
+    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-0.0,+1.0)).upper_raw(),+inf_);
+    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
 }
 
 Int main() {

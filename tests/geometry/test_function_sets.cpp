@@ -164,7 +164,7 @@ class TestConstrainedImageSet
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
-        Figure figure;
+        figure.clear();
         figure.set_bounding_box(widen(set.bounding_box(),0.5_exact));
         ExactBoxType b(cast_exact_box(set.bounding_box()));
         List<ExactBoxType> stack(1u,b);
@@ -247,7 +247,7 @@ class TestConstrainedImageSet
 
         translation={x0-Real(2.5),x1};
         set.apply(translation);
-        Figure figure;
+        figure.clear();
         figure.set_bounding_box(ExactBoxType({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
         figure.draw(cast_exact_box(set.bounding_box()));

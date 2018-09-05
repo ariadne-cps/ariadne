@@ -315,7 +315,7 @@ class Slice {
     SizeType stride() const { return this->_stride; }
     SizeType stop() const { return this->_start+this->_size*this->_stride; }
 };
-inline Slice slice(SizeType size, SizeType start, SizeType stride) { return Slice(size,start,stride); }
+inline Slice slice(SizeType size_, SizeType start, SizeType stride) { return Slice(size_,start,stride); }
 
 
 template<class V> class VectorRange

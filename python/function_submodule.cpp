@@ -373,20 +373,20 @@ template<class F> Void export_function_evaluation(pybind11::class_<F>& function_
 
 
 template<class P> Void export_scalar_function_evaluation(pybind11::class_<ScalarFunction<P>>& scalar_function_class) {
-    using F=ScalarFunction<P>;
+    using FP=ScalarFunction<P>;
     export_function_evaluation(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatDPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatMPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatDPBounds>>(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatMPBounds>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatDPBounds>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatMPBounds>>(scalar_function_class);
 }
 
 template<> Void export_scalar_function_evaluation<ApproximateTag>(pybind11::class_<ScalarFunction<ApproximateTag>>& scalar_function_class) {
     using P=ApproximateTag;
-    using F=ScalarFunction<P>;
+    using FP=ScalarFunction<P>;
     export_function_evaluation(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatDPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<F,FloatMPApproximation>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
+    def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
 }
 
 Void export_function_evaluation(pybind11::class_<ScalarFunction<ApproximateTag>>& scalar_function_class)

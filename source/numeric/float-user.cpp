@@ -871,9 +871,9 @@ template<class F> struct Operations<Bounds<F>> {
         if(x._l>0 || x._u<0) {
             return Bounds<F>(rec(down,x._u),rec(up,x._l));
         } else {
-            F inf=F::inf(x.precision());
+            F inf_=F::inf(x.precision());
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
-            return Bounds<F>(-inf,+inf);
+            return Bounds<F>(-inf_,+inf_);
         }
     }
 
@@ -998,27 +998,27 @@ template<class F> struct Operations<Bounds<F>> {
         PR prec=x.precision();
 
         const F one(1,prec);
-        const Value<F> two(2,prec);
-        const Bounds<F> pi=_pi_val(prec);
+        const Value<F> _two(2,prec);
+        const Bounds<F> _pi=_pi_val(prec);
         const Bounds<F> two_pi=2*_pi_val(prec);
         if(x.error().raw()>two_pi.lower().raw()) { return Bounds<F>(-one,+one); }
 
         Value<F> n(round(div(near,x.value_raw(),(two_pi.value_raw()))));
-        Bounds<F> y=x-two*(n*pi);
+        Bounds<F> y=x-_two*(n*_pi);
 
-        ARIADNE_ASSERT(y.lower_raw()<=pi.upper_raw());
-        ARIADNE_ASSERT(y.upper_raw()>=-pi.upper_raw());
+        ARIADNE_ASSERT(y.lower_raw()<=_pi.upper_raw());
+        ARIADNE_ASSERT(y.upper_raw()>=-_pi.upper_raw());
 
         F rl,ru;
-        if(y.lower_raw()<=-pi.lower_raw()) {
+        if(y.lower_raw()<=-_pi.lower_raw()) {
             if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
             else { rl=-one; ru=+one; }
         } else if(y.lower_raw()<=0.0) {
             if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
-            else if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
+            else if(y.upper_raw()<=_pi.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
             else { rl=-one; ru=+one; }
-        } else if(y.lower_raw()<=pi.upper_raw()) {
-            if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
+        } else if(y.lower_raw()<=_pi.upper_raw()) {
+            if(y.upper_raw()<=_pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
             else if(y.upper_raw()<=two_pi.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,two_pi.lower_raw(),y.upper_raw()))); }
             else { rl=-one; ru=+one; }
         } else {

@@ -288,7 +288,6 @@ Pair< Array<SizeType>, Matrix<RigorousNumericType<X>> >
 SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 {
     ARIADNE_LOG(9,"compute_basis(A) with A="<<A<<"\n");
-    typedef typename RigorousNumericsTraits<X>::Type XX;
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     ARIADNE_DEBUG_ASSERT(n>=m);
@@ -305,12 +304,12 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 
         // Look for a column which is the unit vector ek below k
         Bool found_unit=false;
-        SizeType j;
-        for(j=k; j!=n; ++j) {
-            if(decide(U[k][j]==+1)) {
+        SizeType col;
+        for(col=k; col!=n; ++col) {
+            if(decide(U[k][col]==+1)) {
                 found_unit=true;
                 for(Nat i=k+1; i!=m; ++i) {
-                    if(decide(U[i][j]!=0)) { found_unit=false; break; }
+                    if(decide(U[i][col]!=0)) { found_unit=false; break; }
                 }
             }
             if(found_unit) { break; }
@@ -320,22 +319,22 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
         if(!found_unit) {
             XX Ukjmax = abs(U[k][k]);
             SizeType jmax=k;
-            for(j=k+1; j!=n; ++j) {
-                XX absUkj=abs(U[k][j]);
+            for(col=k+1; col!=n; ++col) {
+                XX absUkj=abs(U[k][col]);
                 if(decide(absUkj>Ukjmax)) {
                     Ukjmax=absUkj;
-                    jmax=j;
+                    jmax=col;
                 }
             }
-            j=jmax;
+            col=jmax;
         }
 
-        if (decide(abs(U[k][j]) < SINGULARITY_THRESHOLD)) { ARIADNE_THROW(SingularLinearProgram,"compute_basis"," matrix A="<<A<<" is singular or very nearly singular"); }
+        if (decide(abs(U[k][col]) < SINGULARITY_THRESHOLD)) { ARIADNE_THROW(SingularLinearProgram,"compute_basis"," matrix A="<<A<<" is singular or very nearly singular"); }
 
-        if(j!=k) {
-            std::swap(p[k],p[j]);
+        if(col!=k) {
+            std::swap(p[k],p[col]);
             for(SizeType i=0; i!=m; ++i) {
-                std::swap(U[i][k],U[i][j]);
+                std::swap(U[i][k],U[i][col]);
             }
         }
 
@@ -556,7 +555,7 @@ template<class X,class XX,class XXX>
 Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
-    const FloatDPValue CUTOFF_THRESHOLD(Ariadne::CUTOFF_THRESHOLD);
+    const FloatDPValue CUTOFF_THRESHOLD_DP(Ariadne::CUTOFF_THRESHOLD);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -571,7 +570,7 @@ compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, co
         for(SizeType i=0; i!=m; ++i) {
             z[j]-=y[i]*A[i][j];
         }
-        if(decide(abs(z[j])<CUTOFF_THRESHOLD)) {
+        if(decide(abs(z[j])<CUTOFF_THRESHOLD_DP)) {
             //z[j]=0;
         }
     }
@@ -689,7 +688,7 @@ template<class X, class XX>
 Pair<SizeType,XX>
 compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<XX>& x, const Vector<XX>& d, const SizeType s)
 {
-    const X inf=X(Ariadne::inf);
+    const X inf_=X(Ariadne::inf);
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -698,23 +697,23 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     SizeType r=n;
     Int ds=(vt[p[s]]==Slackness::LOWER ? +1 : -1);
     XX t=xu[p[s]]-xl[p[s]];
-    if(decide(t<inf)) { r=s; }
+    if(decide(t<inf_)) { r=s; }
     XX tk=x.zero_element();
     ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
-        if( decide(d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=xl[j] && xl[j] != -inf) ) {
+        if( decide(d[k]*ds<-CUTOFF_THRESHOLD && x[j]>=xl[j] && xl[j] != -inf_) ) {
             tk=(xl[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( decide(tk<t || (tk==t && p[k]<p[r])) ) { t=tk; r=k; }
-        } else if( decide(d[k]*ds>CUTOFF_THRESHOLD && x[j]<=xu[j] && xu[j] != inf) ) {
+        } else if( decide(d[k]*ds>CUTOFF_THRESHOLD && x[j]<=xu[j] && xu[j] != inf_) ) {
             tk=(xu[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( decide(tk<t || (tk==t && p[k]<p[r])) ) { t=tk; r=k; }
         } else {
-            tk=inf;
+            tk=inf_;
         }
         ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
@@ -734,7 +733,7 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
 {
     typedef FloatDP X;
     typedef RigorousNumericType<X> XX;
-    const X inf=Ariadne::inf;
+    const X inf_=Ariadne::inf;
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -743,23 +742,23 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
     SizeType r=n;
     X ds=(vt[p[s]]==Slackness::LOWER ? +1 : -1);
     XX t=XX(xu[p[s]])-XX(xl[p[s]]);
-    if(definitely(t<inf)) { r=s; }
+    if(definitely(t<inf_)) { r=s; }
     XX tk=0;
     ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
-        if( definitely(d[k]*ds<0) && definitely(x[j]>=xl[j]) && xl[j] != -inf) {
+        if( definitely(d[k]*ds<0) && definitely(x[j]>=xl[j]) && xl[j] != -inf_) {
             tk=(xl[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( definitely(tk<t) || definitely(tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-        } else if( definitely(d[k]*ds>0) && definitely(x[j]<=xu[j]) && xu[j] != inf ) {
+        } else if( definitely(d[k]*ds>0) && definitely(x[j]<=xu[j]) && xu[j] != inf_ ) {
             tk=(xu[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( definitely(tk<t) || definitely(tk==t && p[k]<p[r])) { t=tk; r=k; }
         } else {
-            tk=XX(inf);
+            tk=XX(inf_);
         }
         ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
@@ -900,8 +899,6 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     const SizeType n=A.column_size();
     static const X inf = X(Ariadne::inf);
 
-    typedef typename RigorousNumericsTraits<X>::Type XX;
-
     ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
     ARIADNE_LOG(9," B="<<B<<"\n");
@@ -988,8 +985,6 @@ SizeType
 SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                          Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x, SizeType s) const
 {
-    const X BOUNDS_TOLERANCE = X(Ariadne::BOUNDS_TOLERANCE);
-
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
@@ -1062,10 +1057,10 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
     for(Nat i=0; i!=m; ++i) {
         if(decide(x[p[i]]<xl[p[i]])) {
-            ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-BOUNDS_TOLERANCE));
+            ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-X(BOUNDS_TOLERANCE)));
             x[p[i]]=xl[p[i]];
         } else if(decide(x[p[i]]>xu[p[i]])) {
-            ARIADNE_ASSERT(decide(x[p[i]]<xu[p[i]]+BOUNDS_TOLERANCE));
+            ARIADNE_ASSERT(decide(x[p[i]]<xu[p[i]]+X(BOUNDS_TOLERANCE)));
             x[p[i]]=xu[p[i]];
         }
     }
@@ -1305,7 +1300,6 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
     ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<"\n");
     const Array<SizeType> p=compute_p(vt);
 
-    typedef typename RigorousNumericsTraits<X>::Type XX;
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     ARIADNE_ASSERT(b.size()==m);

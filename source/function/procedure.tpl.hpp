@@ -211,7 +211,7 @@ template<class X, class Y> Void _execute(List<X>& v, const List<ProcedureInstruc
 
 template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const List<ProcedureInstruction>& p, const List<Y>& c)
 {
-    FloatDPValue infty(inf);
+    FloatDPValue inf_(inf);
 
     ARIADNE_ASSERT(v.size()==p.size());
     SizeType r=p.size();
@@ -245,7 +245,7 @@ template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const L
             case OperatorCode::TAN:  restrict(v[a],atan(v[r])); break;
             case OperatorCode::ATAN: restrict(v[a],tan(v[r])); break;
             case OperatorCode::EQ:   restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
-            case OperatorCode::LEQ:  restrict(v[a1],X(-infty,v[a2].upper())); restrict(v[a1],X(v[a2].lower(),+infty)); break;
+            case OperatorCode::LEQ:  restrict(v[a1],X(-inf_,v[a2].upper())); restrict(v[a1],X(v[a2].lower(),+inf_)); break;
             default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<X>,List<X>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
         }
     }

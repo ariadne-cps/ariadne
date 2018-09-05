@@ -253,10 +253,8 @@ class AffineIntegrator
     Nat _spacial_order;
     Nat _temporal_order;
   public:
-    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order)
-        : IntegratorBase(maximum_error,lipschitz_constant=0.5), _spacial_order(1u), _temporal_order(temporal_order) { }
-    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order)
-        : IntegratorBase(maximum_error,lipschitz_constant=0.5), _spacial_order(spacial_order), _temporal_order(temporal_order) { }
+    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
+    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
     Nat spacial_order() const { return this->_spacial_order; }

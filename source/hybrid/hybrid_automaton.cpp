@@ -560,8 +560,8 @@ HybridAutomaton::input_variables(DiscreteLocation location) const {
     }
     for(Map<DiscreteEvent,List<PrimedRealAssignment> >::ConstIterator iter=mode._resets.begin(); iter!=mode._resets.end(); ++iter) {
         const List<PrimedRealAssignment>& reset=iter->second;
-        for(List<PrimedRealAssignment>::ConstIterator iter=reset.begin(); iter!=reset.end(); ++iter) {
-            used.adjoin(iter->rhs.arguments());
+        for(List<PrimedRealAssignment>::ConstIterator rst_iter=reset.begin(); rst_iter!=reset.end(); ++rst_iter) {
+            used.adjoin(rst_iter->rhs.arguments());
         }
     }
     Set<RealVariable> result;

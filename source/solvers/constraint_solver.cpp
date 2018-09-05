@@ -333,19 +333,19 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     Vector<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
-    const FloatDP size = lower.width().raw() / (1<<MAX_STEPS);
+    const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
     do {
         FloatDPUpperBound ub; FloatDPUpperInterval ivl; FloatDPValue val; ub=val;
 
         // Apply Newton contractor on lower and upper strips
-        if(lower.width().raw()>size) {
+        if(lower.width().raw()>threshold) {
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
             if(definitely(new_lower.upper()<lower.lower())) { lower=UpperIntervalType(lower.lower().raw(),lower.lower().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
-        if(upper.width().raw()>size) {
+        if(upper.width().raw()>threshold) {
             splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
@@ -353,7 +353,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=UpperIntervalType(lower.lower(),upper.upper());
-    } while(lower.width().raw()>size && upper.width().raw()>size);
+    } while(lower.width().raw()>threshold && upper.width().raw()>threshold);
     domain=subdomain;
 
     return definitely(domain.is_empty());

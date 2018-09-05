@@ -115,10 +115,9 @@ struct from_python< Expansion<MultiIndex,T> > {
         Expansion<MultiIndex,T> r(0);
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
-        MultiIndex a;
         if(len(lst)!=0) {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[0]);
-            a=boost::python::extract<MultiIndex>(tup[0]);
+            MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
             r=Expansion<MultiIndex,T>(a.size());
             r.reserve(static_cast<SizeType>(len(lst)));
         }

@@ -43,9 +43,7 @@
 using namespace Ariadne;
 using namespace std;
 
-typedef Interval<Dyadic> DyadicInterval;
 typedef Vector<DyadicInterval> DyadicIntervalVector;
-typedef Vector<FloatDPBounds> FloatBoundsVector;
 
 class TestSolver
 {

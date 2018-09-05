@@ -193,12 +193,12 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     }
 
     for(Nat n=0; n!=subdomains.size(); ++n) {
-        ValidatedConstrainedImageSet set(subdomains[n],function,constraints);
-        set.affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
+        ValidatedConstrainedImageSet subset(subdomains[n],function,constraints);
+        subset.affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
     }
 }
 
-unsigned int verbosity;
+Nat verbosity;
 
 namespace {
 
@@ -331,8 +331,6 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const ExactBoxType& d, const ValidatedVectorFunction& f,
     const ValidatedVectorFunction& g, const ExactBoxType& c, const GridCell& b, ExactPoint x, ExactPoint y, Nat e)
 {
-    Nat verbosity=0;
-
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const FloatDPValue XSIGMA { 0.125 };
@@ -402,7 +400,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     if(!(t<inf)) {
         ARIADNE_WARN("feasibility failed\n");
-        char c; std::cin >> c;
+        char ch; std::cin >> ch;
         at=0;
         ay=midpoint(d);
         ax=FloatApproximationVector(x.size(),one/x.size());

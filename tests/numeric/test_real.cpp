@@ -111,8 +111,8 @@ void TestReal::test_concept() {
 
 void TestReal::test_conversions() {
     Real one=1;
-    Real pi=4*atan(one);
-    auto pi_dp=pi.get(dp);
+    Real pi_=4*atan(one);
+    auto pi_dp=pi_.get(dp);
 //    auto pi_mp=pi(MultiplePrecision(2));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
@@ -120,21 +120,20 @@ void TestReal::test_conversions() {
 }
 
 void TestReal::test_constructors() {
-    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
-    ARIADNE_TEST_EQUALS(xv.get(pr),0);
-    ARIADNE_TEST_EQUALS(xv.lower().get(pr).raw(),0);
-    ARIADNE_TEST_EQUALS(xv.upper().get(pr).raw(),0);
+    ARIADNE_TEST_EQUALS(xv.get(dp),0);
+    ARIADNE_TEST_EQUALS(xv.lower().get(dp).raw(),0);
+    ARIADNE_TEST_EQUALS(xv.upper().get(dp).raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
-    ARIADNE_TEST_EQUALS(xz.get(pr),1);
+    ARIADNE_TEST_EQUALS(xz.get(dp),1);
     ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
-    ARIADNE_TEST_EQUALS(xe.get(pr),1.5);
+    ARIADNE_TEST_EQUALS(xe.get(dp),1.5);
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
-    ARIADNE_TEST_COMPARE(Rational(xn.lower().get(pr).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xn.upper().get(pr).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.lower().get(dp).raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.upper().get(dp).raw()),>,Rational(11,10));
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
-    ARIADNE_TEST_COMPARE(Rational(xq.lower().get(pr).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xq.upper().get(pr).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.lower().get(dp).raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.upper().get(dp).raw()),>,Rational(11,10));
 }
 
 void TestReal::test_arithmetic() {
@@ -182,7 +181,6 @@ void TestReal::test_comparison() {
     Effort effort(0);
     Real one=1;
     Real e=exp(one);
-    Real pi=Ariadne::pi;
     Real elogpi=e*log(pi);
 //    ARIADNE_TEST_SAME(e,e);
 //    ARIADNE_TEST_EQUALS(log(e),one);
@@ -208,16 +206,15 @@ void TestReal::test_comparison() {
 void TestReal::test_accuracy() {
     FloatDPBounds::set_output_places(18);
     Real one=1;
-    Real pi=4*atan(one);
+    Real pi_=4*atan(one);
 
     MultiplePrecision mp_high(320);
     RawFloatMP pi_near = FloatMP::pi(near,mp_high);
 
-    DoublePrecision dp;
-    ARIADNE_TEST_CONSTRUCT(FloatDPBounds,pi_dp,(pi.get(dp)));
+    ARIADNE_TEST_CONSTRUCT(FloatDPBounds,pi_dp,(pi_.get(dp)));
 
     MultiplePrecision mp(128);
-    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_mp,(pi.get(mp)));
+    ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_mp,(pi_.get(mp)));
 
     ARIADNE_TEST_ASSERT(pi_dp.lower_raw()<=pi_near);
     ARIADNE_TEST_ASSERT(pi_dp.upper_raw()>=pi_near);
@@ -227,10 +224,10 @@ void TestReal::test_accuracy() {
 
     mp=precision(320);
     Effort effort{256};
-    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi.compute(effort)));
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi_.compute(effort)));
     Accuracy accuracy{256};
     FloatMPValue error(accuracy.error(),mp);
-    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi.compute(accuracy)));
+    ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi_.compute(accuracy)));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
     ARIADNE_TEST_PRINT(pi_met_mp.error());
     ARIADNE_TEST_PRINT(abs(sub(up,pi_met_mp.value_raw(),pi_near)));
@@ -238,7 +235,7 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(rad(up,pi_met_mp.value().raw(),pi_near) <= error.raw());
 
     Dyadic eps(1,1024u);
-    ARIADNE_TEST_CONSTRUCT(Real,sin_pi,(sin(pi)));
+    ARIADNE_TEST_CONSTRUCT(Real,sin_pi,(sin(pi_)));
     ARIADNE_TEST_PRINT(choose(sin_pi>-eps,sin_pi<eps));
 /*
     ARIADNE_TEST_PRINT(nondeterministic_greater(sin_pi,-eps,eps));
@@ -262,26 +259,26 @@ void TestReal::test_sequence() {
 
     ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
 
-    Real pi=4*atan(Real(1));
+    Real pi_=4*atan(Real(1));
     Decimal pi_lower="3.1415926535897932"_dec;
     Decimal pi_upper="3.1415926535897933"_dec;
-    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
     ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
-    ARIADNE_TEST_ASSERT(nondeterministic_greater(pi,3.0_dec,3.1_dec));
-    ARIADNE_TEST_ASSERT(not nondeterministic_greater(pi,3.2_dec,3.3_dec));
-    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897937"_dec));
-    ARIADNE_TEST_PRINT(nondeterministic_greater(pi,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
+    ARIADNE_TEST_ASSERT(nondeterministic_greater(pi_,3.0_dec,3.1_dec));
+    ARIADNE_TEST_ASSERT(not nondeterministic_greater(pi_,3.2_dec,3.3_dec));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897937"_dec));
+    ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
 
-    ARIADNE_TEST_PRINT(pi.compute(Accuracy(256)).get(MultiplePrecision(256)));
+    ARIADNE_TEST_PRINT(pi_.compute(Accuracy(256)).get(MultiplePrecision(256)));
     ARIADNE_TEST_PRINT(std::boolalpha);
-    ARIADNE_TEST_PRINT(choose(pi>pi_lower,pi<pi_upper));
-    ARIADNE_TEST_PRINT(choose(pi>pi_lower,pi<3.2_dec));
+    ARIADNE_TEST_PRINT(choose(pi_>pi_lower,pi_<pi_upper));
+    ARIADNE_TEST_PRINT(choose(pi_>pi_lower,pi_<3.2_dec));
 
-    ARIADNE_TEST_PRINT(choose({pi>pi_lower,Real(4)},{pi<3.2_dec,Real(3)}));
-    ARIADNE_TEST_PRINT(choose({pi>pi_lower,Real(4)},{pi<pi_upper,Real(3)}));
+    ARIADNE_TEST_PRINT(choose({pi_>pi_lower,Real(4)},{pi_<3.2_dec,Real(3)}));
+    ARIADNE_TEST_PRINT(choose({pi_>pi_lower,Real(4)},{pi_<pi_upper,Real(3)}));
 
-    Dyadic pi_upper_bound = pi.compute(Accuracy(256)).get().upper_raw();
-    Real x=pi-pi_upper_bound;
+    Dyadic pi_upper_bound = pi_.compute(Accuracy(256)).get().upper_raw();
+    Real x=pi_-pi_upper_bound;
     ARIADNE_TEST_PRINT((x>=0).check(Effort(5u)));
     ARIADNE_TEST_PRINT((x>=0).check(Effort(6u)));
 //    ARIADNE_TEST_PRINT(unify(x>=0,+x,x<=0,-x));

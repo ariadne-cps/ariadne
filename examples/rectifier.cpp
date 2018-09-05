@@ -68,12 +68,12 @@ Int main(Int argc, const char* argv[])
     Real Rl (1000.0);
 
     /// Introduces the dynamics parameters
-    Vector<Real> dp(5);
-    dp[0] = amplitude; /// Amplitude of the input voltage, Vi
-    dp[1] = frequency; /// Sinusoid frequency, f
-    dp[2] = Ron; /// Diode resistance when on, Ron
-    dp[3] = Cl; /// Load capacitance, Cl
-    dp[4] = Rl; /// Load resistance, Rl
+    Vector<Real> parameters(5);
+    parameters[0] = amplitude; /// Amplitude of the input voltage, Vi
+    parameters[1] = frequency; /// Sinusoid frequency, f
+    parameters[2] = Ron; /// Diode resistance when on, Ron
+    parameters[3] = Cl; /// Load capacitance, Cl
+    parameters[4] = Rl; /// Load resistance, Rl
 
     RealConstant pi_c("pi",pi);
 
@@ -120,7 +120,7 @@ Int main(Int argc, const char* argv[])
     PrimedRealAssignments noop_r( next({t,vi,vo}) = {t,vi,vo} );
 
     /// Create the guards
-    Real f=dp[1];
+    Real f=parameters[1];
     /// Guard for the reset of time (t>=1/f)
     ContinuousPredicate resettime_g( t>=1/f );
     /// Guard for the jump from onoff to offoff (vi-vo<=0)
@@ -202,7 +202,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*dp[0]});
+    RealVariablesBox initial_box({t==0, vi==0, vo==Real(0.8_dec)*parameters[0]});
     HybridSet initial_set(offoff,initial_box);
 
 //    ExactBoxType initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
@@ -219,8 +219,8 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
-    Axes2d graphic_axes(0.0<=t<=1.0/dp[1].get_d(),-dp[0]<=vi<=dp[0]);
-    Axes2d graphic_axes2(-dp[0]<=t<=dp[0],2<=vi<=dp[0]);
+    Axes2d graphic_axes(0.0<=t<=1.0/parameters[1].get_d(),-parameters[0]<=vi<=parameters[0]);
+    Axes2d graphic_axes2(-parameters[0]<=t<=parameters[0],2<=vi<=parameters[0]);
 
     std::cout << "Plotting results..." << std::flush;
 

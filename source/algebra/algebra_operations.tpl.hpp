@@ -224,8 +224,6 @@ inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
 
 template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
 {
-    typedef typename A::NumericType X;
-
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -289,7 +287,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
 
 template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
 {
-    typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -365,8 +362,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 // and that the power series is of the form x*f(x^2)
 template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
 {
-    typedef typename A::NumericType X;
-    Real const& pi=Ariadne::pi;
     // FIXME: Truncation error may be incorrect
 
     auto tol = cast_exact(x.tolerance());
@@ -407,8 +402,6 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
 // and that the power series is of the form f(x^2)
 template<class A> A NormedAlgebraOperations<A>::apply(Cos, const A& x)
 {
-    typedef typename A::NumericType X;
-
     auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();

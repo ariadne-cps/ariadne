@@ -38,10 +38,6 @@
 #include "../symbolic/expression_set.hpp"
 #include "../hybrid/hybrid_graphics.hpp"
 
-#ifdef HAVE_GTK_H
-#include <gtk/gtk.h>
-#endif
-
 namespace Ariadne {
 
 static const Nat DEFAULT_WIDTH = 800;

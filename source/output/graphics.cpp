@@ -35,7 +35,7 @@
 #include "../output/graphics.hpp"
 #include "../output/cairo.hpp"
 
-#ifdef HAVE_GTK_H
+#ifdef HAVE_GTK2_H
 #include <gtk/gtk.h>
 #endif
 
@@ -359,7 +359,7 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 
 
 
-#ifdef HAVE_GTK_H
+#ifdef HAVE_GTK2_H
 
 Void Figure::display() const
 {
@@ -401,14 +401,14 @@ Void Figure::display() const
 
 }
 
-#else // NO GTK_H
+#else // NO GTK2_H
 
 Void Figure::display() const
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
 
-#endif // HAVE_GTK_H
+#endif // HAVE_GTK2_H
 
 
 

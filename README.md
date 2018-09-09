@@ -1,3 +1,5 @@
+![Ariadne logo](http://www.ariadne-cps.org/img/ariadne-transparent.png "Ariadne")
+
 # Ariadne #
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.org/ariadne-cps/development.svg?branch=master)](https://travis-ci.org/ariadne-cps/development) [![codecov](https://codecov.io/gh/ariadne-cps/development/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/development)
@@ -25,6 +27,8 @@ git submodule update --init --recursive
 
 If you downloaded an automatically packaged archive for Ariadne instead, you will need to manually clone the pybind11 repository into an external/pybind11 directory.
 
+Finally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
+
 Specific instructions for Ubuntu and macOS follow.
 
 ##### Ubuntu
@@ -36,8 +40,6 @@ Additional Aptitude package required for the Python interface: `python3-dev` or 
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
 
 2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake mpfr gmp gtk cairo`
-
-Optionally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
 #### Building
 
@@ -112,7 +114,7 @@ To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_P
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
 
-The tutorials directory contains two CMake projects that rely on the installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside.
+The tutorials directory contains two CMake projects that rely on the installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
 
 ### Contribution guidelines ###
 

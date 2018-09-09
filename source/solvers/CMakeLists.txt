@@ -8,4 +8,4 @@ add_library(ariadne-solvers OBJECT
     runge_kutta_integrator.cpp
 )
 
-cotire(ariadne-solvers)
+cotire(ariadne-solvers CONFIGURATIONS None)

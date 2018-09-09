@@ -4,4 +4,4 @@ add_library(ariadne-output OBJECT
     drawer.cpp
 )
 
-cotire(ariadne-output)
+cotire(ariadne-output CONFIGURATIONS None)

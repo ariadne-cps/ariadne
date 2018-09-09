@@ -34,9 +34,9 @@ add_library(pyariadne-src OBJECT
     graphics_submodule.cpp
 )
 
-cotire(pyariadne-numeric-src)
-cotire(pyariadne-algebra-src)
-cotire(pyariadne-src)
+cotire(pyariadne-numeric-src CONFIGURATIONS None)
+cotire(pyariadne-algebra-src CONFIGURATIONS None)
+cotire(pyariadne-src CONFIGURATIONS None)
 
 add_library(pyariadne MODULE $<TARGET_OBJECTS:pyariadne-src>)
 set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne" SUFFIX ".so")

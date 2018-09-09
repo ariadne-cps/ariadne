@@ -12,4 +12,4 @@ add_library(ariadne-geometry OBJECT
     enclosure.cpp
 )
 
-cotire(ariadne-geometry)
+cotire(ariadne-geometry CONFIGURATIONS None)

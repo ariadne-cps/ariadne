@@ -12,4 +12,4 @@ add_library(ariadne-hybrid OBJECT
     hybrid_graphics.cpp
 )
 
-cotire(ariadne-hybrid)
+cotire(ariadne-hybrid CONFIGURATIONS None)

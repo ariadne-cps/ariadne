@@ -8,4 +8,4 @@ add_library(ariadne-algebra OBJECT
     algebra.cpp
 )
 
-cotire(ariadne-algebra)
+cotire(ariadne-algebra CONFIGURATIONS None)

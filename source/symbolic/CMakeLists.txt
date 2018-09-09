@@ -4,4 +4,4 @@ add_library(ariadne-symbolic OBJECT
     expression_set.cpp
 )
 
-cotire(ariadne-symbolic)
+cotire(ariadne-symbolic CONFIGURATIONS None)

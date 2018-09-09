@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.9)
 project (Ariadne)
 
 set(Ariadne_VERSION_MAJOR 2)
@@ -18,15 +18,18 @@ set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wpedantic -Wsign-conversion -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wsign-conversion -Wno-unused-parameter")
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
+endif()
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    include(CodeCoverage)
+    APPEND_COVERAGE_COMPILER_FLAGS()
 endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 endif()
 
-# add support for precompiled headers and single compilation unit
 include(cotire)
 
 include(UseDoxygen OPTIONAL)
@@ -140,6 +143,10 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
+
+target_link_libraries(ariadne dl)
+target_link_libraries(ariadne-kernel dl)
+target_link_libraries(ariadne-core dl)
 
 target_link_libraries(ariadne ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})

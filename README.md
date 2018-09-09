@@ -1,9 +1,11 @@
-# README #
+# Ariadne #
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.org/ariadne-cps/development.svg?branch=master)](https://travis-ci.org/ariadne-cps/development) [![codecov](https://codecov.io/gh/ariadne-cps/development/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/development)
 
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 
-* This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *stable* repository
-* The latest semi-stable tagged version is internal_release-1.1.0. However, the code in the master branch should always be usable.
+* This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *release-1.0* repository.
+* The latest stable tagged version is internal_release-1.9.0. However, the code in the master branch should always be usable.
 
 ### Installation ###
 
@@ -15,17 +17,25 @@ The build system is CMake. The library is tested for compilation using gcc and c
 
 #### Dependencies
 
-The library dependencies of ARIADNE are the following:
+The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo (to save into png files) and GTK2 (for window display). Finally, the Python bindings require the Python headers (Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. If you cloned the Ariadne repository, you can fetch the pybind11 dependency by issuing
+
+```
+git submodule update --init --recursive
+```
+
+If you downloaded an automatically packaged archive for Ariadne instead, you will need to manually clone the pybind11 repository into an external/pybind11 directory.
+
+Specific instructions for Ubuntu and macOS follow.
 
 ##### Ubuntu
-Aptitude packages required: `cmake libgmp-dev libmpfr-dev libgtk2.0-dev libcairo2-dev`
+Aptitude packages: `cmake libgmp-dev libmpfr-dev libgtk2.0-dev libcairo2-dev`
 
-Additional Aptitude packages required for the Python interface: `python2.7-dev libboost-python-dev`
+Additional Aptitude package required for the Python interface: `python3-dev` or `python-dev`.
 
 ##### OSX
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
 
-2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake boost gtk cairo`
+2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake mpfr gmp gtk cairo`
 
 Optionally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
@@ -61,7 +71,8 @@ $ make pyariadne
 Optionally, you can also build and run the test suite for the library:
 
 ```
-$ make tests; make test
+$ make tests
+$ make test
 ```
 
 where no error should appear.
@@ -70,11 +81,6 @@ To build libraries, tests and examples, simply type:
 
 ```
 $ make
-```
-or
-
-```
-$ make all
 ```
 
 To build the documentation, use:
@@ -92,7 +98,15 @@ To install the library globally, you must do
 $ make install
 ```
 
-To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_PATH in the .bashrc file:
+or
+
+```
+$ sudo make install
+```
+
+if you require administrator privileges, in particular for a Linux installation.
+
+To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_PATH in the .bashrc file of your home directory:
 
 ```
 export LD_LIBRARY_PATH=/usr/local/lib

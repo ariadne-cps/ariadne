@@ -1,4 +1,4 @@
-![Ariadne logo](http://www.ariadne-cps.org/img/ariadne-transparent.png "Ariadne")
+<img src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="150"/>
 
 # Ariadne #
 

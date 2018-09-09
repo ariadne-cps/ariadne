@@ -1,6 +1,6 @@
-<img src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="150"/>
 
-# Ariadne #
+
+# Ariadne # <img align="right" src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="80"/> 
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.org/ariadne-cps/development.svg?branch=master)](https://travis-ci.org/ariadne-cps/development) [![codecov](https://codecov.io/gh/ariadne-cps/development/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/development)
 

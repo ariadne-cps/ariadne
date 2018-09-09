@@ -86,7 +86,7 @@ else()
     message(WARNING "Unable to find Cairo. You will not be able to use graphics.")
 endif()
 
-find_package(GTK2)
+#find_package(GTK2)
 if(GTK2_FOUND)
     set(HAVE_GTK2_H ON)
     include_directories( ${GTK2_INCLUDE_DIRS})

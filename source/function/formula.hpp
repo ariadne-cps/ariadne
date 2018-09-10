@@ -354,12 +354,6 @@ template<class X, class Y> Vector<X> evaluate(const Vector<Formula<Y>>& f, const
     return cached_evaluate(f,x);
 }
 
-
-// Declare conversion operators from an expression
-template<class X> class Expression;
-template<class X> class Space;
-Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
-
 //! \ingroup FunctionModule
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.

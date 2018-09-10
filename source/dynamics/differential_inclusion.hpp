@@ -186,6 +186,7 @@ inline std::ostream& operator << (std::ostream& os, const InputApproximation& ki
         case InputApproximation::AFFINE: os << "AFFINE"; break;
         case InputApproximation::SINUSOIDAL: os << "SINUSOIDAL"; break;
         case InputApproximation::PIECEWISE: os << "PIECEWISE"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled input approximation for output streaming\n");
     }
     return os;
 }
@@ -262,6 +263,7 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRoles& kind) {
         case InputsRoles::AFFINE: os << "AFFINE"; break;
         case InputsRoles::SINGULAR: os << "SINGULAR"; break;
         case InputsRoles::ADDITIVE: os << "ADDITIVE"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
     }
     return os;
 }

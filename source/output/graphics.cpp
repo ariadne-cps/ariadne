@@ -37,6 +37,8 @@
 
 #ifdef HAVE_GTK2_H
 #include <gtk/gtk.h>
+#undef FALSE
+#undef TRUE
 #endif
 
 namespace Ariadne {
@@ -369,13 +371,12 @@ paint (GtkWidget      *widget,
     cairo_t *cr;
 
     Figure* figure=static_cast<Figure*>(gdata);
-    PlanarProjectionMap projection=figure->get_projection_map();
 
     // Get Cairo drawing context
     cr = gdk_cairo_create (widget->window);
 
     // Draw Cairo objects
-    CairoCanvas canvas(cr,projection.i,projection.j);
+    CairoCanvas canvas(cr);
     figure->_paint_all(canvas);
 }
 

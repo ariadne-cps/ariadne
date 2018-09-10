@@ -213,13 +213,6 @@ template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Varia
 template<class V, class X> Valuation<V,X>::Valuation(const InitializerList<Pair<Variable<V>,X> >& la) {
     for(auto iter=la.begin(); iter!=la.end(); ++iter) { this->insert(iter->first,iter->second); } }
 
-Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
-Boolean evaluate(const Expression<Boolean>& e, const StringValuation& q);
-String evaluate(const Expression<String>& e, const StringValuation& q);
-Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
-Real evaluate(const Expression<Real>& e, const Valuation<Real>& q);
-Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& q);
-
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
 template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
 

@@ -383,11 +383,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         try {
             optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
         }
-        catch(const NearBoundaryOfFeasibleDomainException& e) {
+        catch(const NearBoundaryOfFeasibleDomainException& exc) {
             break;
         }
-        catch(const std::runtime_error& e) {
-            ARIADNE_FAIL_MSG(""<<e.what()<<"\n");
+        catch(const std::runtime_error& err) {
+            ARIADNE_FAIL_MSG(""<<err.what()<<"\n");
             break;
         }
         ARIADNE_LOG(6,", x="<<ax<<", y="<<ay<<", z="<<az<<"\n");

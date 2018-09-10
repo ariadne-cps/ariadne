@@ -11,7 +11,9 @@ endif()
 enable_testing()
 include(CTest)
 
-set(COMPILER_WARN all extra pedantic sign-conversion shadow)
+#cast-qual ctor-dtor-privacy disabled-optimization init-self missing-include-dirs overloaded-virtual sign-promo switch-default undef redundant-decls missing-declarations
+
+set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual ctor-dtor-privacy disabled-optimization init-self missing-include-dirs overloaded-virtual sign-promo switch-default undef redundant-decls missing-declarations)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")

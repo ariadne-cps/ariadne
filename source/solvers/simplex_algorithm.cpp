@@ -897,7 +897,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
 {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    static const X inf = X(Ariadne::inf);
+    static const X _inf = X(Ariadne::inf);
 
     ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
@@ -912,8 +912,8 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     Vector<X> relaxed_xu(xu);
     for(Nat i=0; i!=m; ++i) {
         SizeType j=p[i];
-        if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-inf; feasible=indeterminate; }
-        if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+inf; feasible=indeterminate; }
+        if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-_inf; feasible=indeterminate; }
+        if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+_inf; feasible=indeterminate; }
     }
     ARIADNE_LOG(9," c="<<c<<"\n");
     if(definitely(feasible)) { return true; }
@@ -1109,7 +1109,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; xl="<<xl<<" xu="<<xu<<"\n  vt="<<vt<<"\n");
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    static const X inf = X(Ariadne::inf);
+    static const X _inf = X(Ariadne::inf);
 
     Vector<X> cc(n);
     Vector<X> ll(xl);
@@ -1122,8 +1122,8 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     Bool infeasible=false;
     for(SizeType j=0; j!=n; ++j) {
         // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=xl[j] to x[j]>=-inf.
-        if(decide(x[j]<xl[j])) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-        else if(decide(x[j]>xu[j])) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+        if(decide(x[j]<xl[j])) { cc[j]=-1; ll[j]=-_inf; infeasible=true; }
+        else if(decide(x[j]>xu[j])) { cc[j]=+1; uu[j]=+_inf; infeasible=true; }
         else { cc[j]=0; }
     }
     ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
@@ -1150,8 +1150,8 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         for(SizeType j=0; j!=n; ++j) {
             if(vt[j]==Slackness::LOWER) { ARIADNE_ASSERT(decide(x[j]==xl[j])); }
             if(vt[j]==Slackness::UPPER) { ARIADNE_ASSERT(decide(x[j]==xu[j])); }
-            if(decide(x[j]<xl[j]+ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
-            else if(decide(x[j]>xu[j]-ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=+1; uu[j]=+inf; infeasible=true; }
+            if(decide(x[j]<xl[j]+ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=-1; ll[j]=-_inf; infeasible=true; }
+            else if(decide(x[j]>xu[j]-ROBUST_FEASIBILITY_THRESHOLD)) { cc[j]=+1; uu[j]=+_inf; infeasible=true; }
             else { cc[j]=0; ll[j]=xl[j]; uu[j]=xu[j]; }
         }
         ARIADNE_LOG(9,"\n    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");

@@ -670,7 +670,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     static const Int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const FloatDP inf = Ariadne::inf;
+    static const FloatDP _inf = Ariadne::inf;
 
     const SizeType nx=_domain.size();
     const SizeType ne=2u;
@@ -777,7 +777,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     do {
         ++STEPS;
-        FloatDP cot_theta_max=-inf;
+        FloatDP cot_theta_max=-_inf;
         Nat s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
@@ -818,7 +818,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
                 if(cross<=0.0 ) {
                     cross=+0.0;
-                    cot_theta=(dot>0.0) ? +inf : -inf;
+                    cot_theta=(dot>0.0) ? +_inf : -_inf;
                 }
 
                 // Allow for equality; in particular, if cot_theta=-infty,

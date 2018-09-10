@@ -93,7 +93,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 
     static const FloatDPValue XSIGMA=0.125_exact;
     static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
-    static const FloatDP inf = Ariadne::inf;
+    static const FloatDP _inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
     ARIADNE_ASSERT(codomain.dimension()>0);
@@ -169,7 +169,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         ARIADNE_LOG(4,"    txg="<<txg<<"\n");
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        this->hull_reduce(subdomain,txg,ExactIntervalType(0,inf));
+        this->hull_reduce(subdomain,txg,ExactIntervalType(0,_inf));
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(definitely(subdomain.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -177,7 +177,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         }
 
         for(Nat i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,txg,ExactIntervalType(0,inf),i);
+            this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
             if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
         }

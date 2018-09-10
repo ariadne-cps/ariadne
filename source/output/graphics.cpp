@@ -37,8 +37,6 @@
 
 #ifdef HAVE_GTK2_H
 #include <gtk/gtk.h>
-#undef FALSE
-#undef TRUE
 #endif
 
 namespace Ariadne {

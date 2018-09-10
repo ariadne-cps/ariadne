@@ -1112,9 +1112,6 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 
 // Inplace operators manipulating the error term
 
-// Given an array of ordered indices below some maximum, make an array of the indices not in the array
-Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
-
 template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embed_error(const TaylorModel<ValidatedTag,F>& tm) {
     const SizeType as=tm.argument_size();
     TaylorModel<ValidatedTag,F> rtm(as+1u,tm.sweeper());

@@ -1091,9 +1091,6 @@ uniform_error_recondition()
 
 }
 
-// In MultiIndex code file
-Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
-
 TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {

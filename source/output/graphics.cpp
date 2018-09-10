@@ -83,10 +83,6 @@ StringType str(FloatDP x) {
     return ss.str();
 }
 
-Void draw(Figure& fig, const DrawableInterface& shape) {
-    fig.draw(shape);
-}
-
 Void draw(Figure& fig, FloatDPApproximateBox const& box) {
     fig.draw(box);
 }

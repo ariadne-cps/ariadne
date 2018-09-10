@@ -5,6 +5,6 @@ add_library(ariadne-output OBJECT
 )
 
 # GTK2 headers on gcc mess with cotire
-if(NOT((DEFINED GTK2_FOUND) AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU")))
+if(NOT((DEFINED GTK2_FOUND)))
     cotire(ariadne-output CONFIGURATIONS None)
 endif()

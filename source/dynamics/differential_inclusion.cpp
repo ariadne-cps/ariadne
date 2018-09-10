@@ -53,20 +53,20 @@ std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp
     return os;
 }
 
-struct ScheduledApproximation
+struct ScheduledApproximator
 {
     SizeType step;
-    InputApproximator approximation;
+    InputApproximator approximator;
 
-    ScheduledApproximation(SizeType step, InputApproximator approximation) : step(step), approximation(approximation) {}
+    ScheduledApproximator(SizeType s, InputApproximator a) : step(s), approximator(a) {}
 };
 
-OutputStream& operator<<(OutputStream& os, ScheduledApproximation const& sa) {
-    return os << "(" << sa.step << ":" << sa.approximation.kind() << ")"; }
+OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
+    return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
 
-struct ScheduledApproximationComparator
+struct ScheduledApproximatorComparator
 {
-    inline bool operator() (const ScheduledApproximation& sa1, const ScheduledApproximation& sa2)
+    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2)
     {
         return (sa1.step > sa2.step);
     }
@@ -192,11 +192,11 @@ FloatDP volume(Vector<ApproximateIntervalType> const& box) {
 }
 
 
-C1Norms::C1Norms(FloatDPError const& K,Vector<FloatDPError> const& Kj,FloatDPError const& pK,Vector<FloatDPError> const& pKj,
-             FloatDPError const& L,Vector<FloatDPError> const& Lj,FloatDPError const& pL,Vector<FloatDPError> const& pLj,
-             FloatDPError const& H,Vector<FloatDPError> const& Hj,FloatDPError const& pH,Vector<FloatDPError> const& pHj,
-             FloatDPError const& expLambda,FloatDPError const& expL)
- : K(K), Kj(Kj), pK(pK), pKj(pKj), L(L), Lj(Lj), pL(pL), pLj(pLj), H(H), Hj(Hj), pH(pH), pHj(pHj), expLambda(expLambda), expL(expL) {
+C1Norms::C1Norms(FloatDPError const& K_,Vector<FloatDPError> const& Kj_,FloatDPError const& pK_,Vector<FloatDPError> const& pKj_,
+             FloatDPError const& L_,Vector<FloatDPError> const& Lj_,FloatDPError const& pL_,Vector<FloatDPError> const& pLj_,
+             FloatDPError const& H_,Vector<FloatDPError> const& Hj_,FloatDPError const& pH_,Vector<FloatDPError> const& pHj_,
+             FloatDPError const& expLambda_,FloatDPError const& expL_)
+ : K(K_), Kj(Kj_), pK(pK_), pKj(pKj_), L(L_), Lj(Lj_), pL(pL_), pLj(pLj_), H(H_), Hj(Hj_), pH(pH_), pHj(pHj_), expLambda(expLambda_), expL(expL_) {
     _dimension = Kj.size();
     assert(Kj.size() == _dimension and pKj.size() == _dimension and Lj.size() == _dimension and pKj.size() == _dimension and Hj.size() == _dimension && pHj.size() == _dimension);
 }
@@ -423,7 +423,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
     SizeType step = 0;
 
-    List<ScheduledApproximation> schedule;
+    List<ScheduledApproximator> schedule;
     Map<InputApproximation,Nat> delays;
 
     List<InputApproximator> approximations;
@@ -432,7 +432,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         approximations.append(factory.create(di,appro,_sweeper));
 
     for (auto appro: approximations) {
-        schedule.push_back(ScheduledApproximation(SizeType(step),appro));
+        schedule.push_back(ScheduledApproximator(SizeType(step),appro));
         delays[appro.kind()] = 0;
     }
 
@@ -443,11 +443,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
 
         ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<InputApproximator> approximations_to_use;
+        List<InputApproximator> approximators_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
-                approximations_to_use.push_back(entry.approximation);
+                approximators_to_use.push_back(entry.approximator);
                 schedule.pop_back();
             } else if (entry.step > step) {
                 break;
@@ -474,11 +474,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         SharedPointer<InputApproximator> best;
         FloatDP best_volume(0);
 
-        ARIADNE_LOG(4,"n. of approximations to use="<<approximations_to_use.size()<<"\n");
+        ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
 
-        for (auto i : range(approximations_to_use.size())) {
-            this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximations_to_use.at(i)));
-            ARIADNE_LOG(5,"checking approximation "<<this->_approximator->kind()<<"\n");
+        for (auto i : range(approximators_to_use.size())) {
+            this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximators_to_use.at(i)));
+            ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
             auto current_reach=reach(di,D,evolve_function,B,t,h);
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
@@ -500,19 +500,19 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
             }
         }
 
-        if (approximations_to_use.size() > 1)
+        if (approximators_to_use.size() > 1)
             ARIADNE_LOG(4,"chosen approximation: " << best->kind() << "\n");
 
-        for (auto appro : approximations_to_use) {
+        for (auto appro : approximators_to_use) {
             if (best->kind() == appro.kind())
                 delays[appro.kind()] = 0;
             else
                 delays[appro.kind()]++;
 
             Nat offset = 1u<<delays[appro.kind()];
-            schedule.push_back(ScheduledApproximation(step+offset,appro));
+            schedule.push_back(ScheduledApproximator(step+offset,appro));
         }
-        std::sort(schedule.begin(),schedule.end(),ScheduledApproximationComparator());
+        std::sort(schedule.begin(),schedule.end(),ScheduledApproximatorComparator());
 
         ARIADNE_LOG(4,"updated schedule: " << schedule << "\n");
 

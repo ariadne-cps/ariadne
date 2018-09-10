@@ -68,8 +68,9 @@ inline String class_name(const VariableType& tp) {
         case VariableType::STRING: return "String";
         case VariableType::INTEGER: return "Integer";
         case VariableType::REAL: return "Real";
+        default:
+            ARIADNE_FAIL_MSG("Unhandled VariableType for output stream\n");
     }
-    assert(false); // To prevent warnings on reaching end of function
 }
 
 //! A named variable of unknown type.
@@ -139,6 +140,17 @@ template<class T> class Variables : public List<Variable<T>> {
 
 enum class VariableCategory : char { SIMPLE, DOTTED, PRIMED };
 
+inline OutputStream& operator<<(OutputStream& os, VariableCategory const& cat) {
+    switch(cat) {
+        case VariableCategory::SIMPLE: os << "SIMPLE"; break;
+        case VariableCategory::PRIMED: os << "DOTTED"; break;
+        case VariableCategory::DOTTED: os << "PRIMED"; break;
+        default:
+            ARIADNE_FAIL_MSG("Unhandled VariableCategory for output streaming\n");
+    }
+    return os;
+}
+
 //! A named variable of type \a T, possibly decorated by a "let", "dot" or "prime"
 //! representing a time derivative or updated value.
 class ExtendedUntypedVariable
@@ -157,6 +169,8 @@ inline OutputStream& operator<<(OutputStream& os, ExtendedUntypedVariable const&
         case VariableCategory::SIMPLE: os << var.name(); break;
         case VariableCategory::PRIMED: os << "prime("<<var.name()<<")"; break;
         case VariableCategory::DOTTED: os << "dot("<<var.name()<<")"; break;
+        default:
+            ARIADNE_FAIL_MSG("Unhandled VariableCategory "<<var.category()<<"\n");
     }
     return os;
 }

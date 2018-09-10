@@ -62,7 +62,6 @@ typedef Affine<ValidatedNumericType> ValidatedAffineFunction;
 
 EffectiveAffineConstraint operator<=(const EffectiveNumericType& l, const EffectiveAffine& am);
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
 EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumericType& b);
 
 ValidatedAffineConstraint operator<=(const FloatDPBounds& l, const ValidatedAffineFunction& am);

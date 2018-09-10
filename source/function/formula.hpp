@@ -209,25 +209,26 @@ template<class Y> struct IndexFormulaNode : public FormulaNode<Y> {
 };
 template<class Y, class A=Y> struct UnaryFormulaNode : public FormulaNode<Y> {
     Formula<Y> arg;
-    UnaryFormulaNode(const Operator& op, Formula<Y> const& a) : FormulaNode<Y>(op), arg(a) { }
+    UnaryFormulaNode(const Operator& oper, Formula<Y> const& a)
+        : FormulaNode<Y>(oper), arg(a) { }
 };
 template<class Y, class A1=Y, class A2=A1> struct BinaryFormulaNode {
     Formula<Y> arg1; Formula<Y> arg2;
 };
 template<class Y> struct BinaryFormulaNode<Y> : public FormulaNode<Y> {
     Formula<Y> arg1; Formula<Y> arg2;
-    BinaryFormulaNode(const Operator& op, Formula<Y> const& a1, Formula<Y> const& a2)
-        : FormulaNode<Y>(op), arg1(a1), arg2(a2) { }
+    BinaryFormulaNode(const Operator& oper, Formula<Y> const& a1, Formula<Y> const& a2)
+        : FormulaNode<Y>(oper), arg1(a1), arg2(a2) { }
 };
 template<class Y> struct GradedFormulaNode : public UnaryFormulaNode<Y> {
     Int num;
-    GradedFormulaNode(const Operator& op, Formula<Y> const& a, Int n)
-        : UnaryFormulaNode<Y>(op,a), num(n) { }
+    GradedFormulaNode(const Operator& oper, Formula<Y> const& a, Int n)
+        : UnaryFormulaNode<Y>(oper,a), num(n) { }
 };
 template<class Y> struct ScalarFormulaNode : public UnaryFormulaNode<Y> {
     Y cnst;
-    ScalarFormulaNode(const Operator& op, Y const& c, Formula<Y> const& a)
-        : UnaryFormulaNode<Y>(op,a), cnst(c) { }
+    ScalarFormulaNode(const Operator& oper, Y const& c, Formula<Y> const& a)
+        : UnaryFormulaNode<Y>(oper,a), cnst(c) { }
 };
 
 template<class Y> inline const Operator& Formula<Y>::op() const {

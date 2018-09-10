@@ -45,12 +45,8 @@ template<class I, class X> class Expansion;
 template<class X> class Differential;
 
 
-DegreeType min(DegreeType d1, DegreeType d2) { return std::min(d1,d2); }
-DegreeType max(DegreeType d1, DegreeType d2) { return std::max(d1,d2); }
-
-
-
-
+inline DegreeType min(DegreeType d1, DegreeType d2) { return std::min(d1,d2); }
+inline DegreeType max(DegreeType d1, DegreeType d2) { return std::max(d1,d2); }
 
 //template<class X> Differential<X>::Differential() : _expansion(0), _degree(0) { }
 

@@ -72,7 +72,7 @@ inline void _set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd)
 inline rounding_mode_t _get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
 
 enum class RoundingMode : rounding_mode_t {
-    ROUND_TO_NEAREST = ROUND_TO_NEAREST, ROUND_DOWNWARD = ROUND_DOWNWARD, ROUND_UPWARD = ROUND_UPWARD, ROUND_TOWARD_ZERO = ROUND_TOWARD_ZERO
+    TO_NEAREST = ROUND_TO_NEAREST, DOWNWARD = ROUND_DOWNWARD, UPWARD = ROUND_UPWARD, TOWARD_ZERO = ROUND_TOWARD_ZERO
 };
 
 } // namespace Ariadne

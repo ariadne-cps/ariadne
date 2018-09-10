@@ -361,6 +361,24 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 
 #ifdef HAVE_GTK2_H
 
+void
+paint (GtkWidget      *widget,
+       GdkEventExpose *eev,
+       gpointer        gdata)
+{
+    cairo_t *cr;
+
+    Figure* figure=static_cast<Figure*>(gdata);
+    PlanarProjectionMap projection=figure->get_projection_map();
+
+    // Get Cairo drawing context
+    cr = gdk_cairo_create (widget->window);
+
+    // Draw Cairo objects
+    CairoCanvas canvas(cr,projection.i,projection.j);
+    figure->_paint_all(canvas);
+}
+
 Void Figure::display() const
 {
 

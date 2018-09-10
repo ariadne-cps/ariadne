@@ -94,10 +94,10 @@ int test_case_counter = 0;
 
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
 #define ARIADNE_TEST_CATCH(message)                                     \
-    catch(const std::exception& exc) {                                    \
+    catch(const std::exception& except) {                                    \
         ++ARIADNE_TEST_FAILURES;                                        \
-        std::cout << "exception: \"" << exc.what() << "\"\n" << std::endl; \
-        std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << exc.what() << "\"." << std::endl;     \
+        std::cout << "exception: \"" << except.what() << "\"\n" << std::endl; \
+        std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << except.what() << "\"." << std::endl;     \
     }                                                                   \
     catch(...) {                                                        \
         ++ARIADNE_TEST_FAILURES;                                        \
@@ -114,12 +114,12 @@ int test_case_counter = 0;
                   << "****************************************\n" << std::endl; \
         try {                                                           \
             function;                                                   \
-        } catch(const std::exception& exc) {                              \
+        } catch(const std::exception& except) {                              \
             ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "ERROR: exception '" << exc.what() << "' in " << #function << ": "    \
-                      << exc.what() << std::endl;                         \
+            std::cout << "ERROR: exception '" << except.what() << "' in " << #function << ": "    \
+                      << except.what() << std::endl;                         \
             std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": calling " \
-                      << #function << ": " << exc.what() << std::endl; \
+                      << #function << ": " << except.what() << std::endl; \
             std::cout << std::endl;                                     \
         }                                                               \
     }                                                                   \
@@ -449,10 +449,10 @@ int test_case_counter = 0;
         catch(const error& err) {                                         \
             std::cout << "caught " << #error << " as expected\n" << std::endl; \
         }                                                               \
-        catch(const std::exception& exc) {                                \
+        catch(const std::exception& except) {                                \
             ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: caught exception " << exc.what() << "; expected " << #error << "\n"; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << exc.what() << "; expected " << #error << std::endl; \
+            std::cout << "\nERROR: caught exception " << except.what() << "; expected " << #error << "\n"; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << except.what() << "; expected " << #error << std::endl; \
         }                                                               \
     }                                                                   \
 

@@ -107,7 +107,7 @@ template<class T> class Variable
     //! \brief Construct a variable with name \a nm.
     explicit Variable(const Identifier& nm) : UntypedVariable(nm,variable_type<T>()) { }
     Variable<T> const& base() const { return *this; }
-    inline Variable<T>& operator=(const Variable<T>& e) = default;
+    inline Variable<T>& operator=(const Variable<T>& v) = default;
     inline Assignment<Variable<T>,T> operator=(const T& c) const;
     template<class XL, class XU> inline VariableInterval<XU> in(const XL& l, const XU& u);
     template<class XU> inline VariableInterval<XU> in(const Interval<XU>& ivl);

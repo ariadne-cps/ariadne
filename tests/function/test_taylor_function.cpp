@@ -174,9 +174,6 @@ Void TestScalarTaylorFunction::test_create()
 
 Void TestScalarTaylorFunction::test_predicates()
 {
-    ValidatedScalarTaylorFunctionModelDP x=ValidatedScalarTaylorFunctionModelDP::coordinate(d(1),0,swp);
-    ValidatedScalarTaylorFunctionModelDP e=ValidatedScalarTaylorFunctionModelDP::unit_ball(d(1),swp);
-
     ValidatedScalarTaylorFunctionModelDP tv1(d(1),{{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
     ValidatedScalarTaylorFunctionModelDP tv2(d(1),{{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
     ValidatedScalarTaylorFunctionModelDP tv3(d(1),{{{0},1.125},{{1},1.75},{{2},3.25}}, 0.25, swp);

@@ -39,7 +39,7 @@ using namespace Ariadne;
 using namespace std;
 
 struct ExactFloatVector2d : ExactFloatVector, Vector2d {
-    ExactFloatVector2d(double x, double y) : ExactFloatVector{FloatDPValue(x),FloatDPValue(y)}, Vector2d(x,y) { }
+    ExactFloatVector2d(double x_, double y_) : ExactFloatVector{FloatDPValue(x_),FloatDPValue(y_)}, Vector2d(x_,y_) { }
 };
 
 struct Polytope2d

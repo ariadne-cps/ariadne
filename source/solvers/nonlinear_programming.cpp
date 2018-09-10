@@ -1402,7 +1402,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     FloatApproximationVector& x, FloatApproximationVector& y, FloatDPApproximation& t) const
 {
-    static const double inf = std::numeric_limits<double>::infinity();
+    static const double _inf = std::numeric_limits<double>::infinity();
 
     static const FloatDPApproximation gamma=0.0009765625_approx; // 1.0/1024;
     static const FloatDPApproximation sigma=0.125_approx;
@@ -1444,8 +1444,8 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     Vector<FloatDPApproximation> D(n);
     for(Nat j=0; j!=n; ++j) {
         if(c[j].lower()==c[j].upper()) {
-        } else if(c[j].upper().raw()==+inf) {
-        } else if(c[j].lower().raw()==-inf) {
+        } else if(c[j].upper().raw()==+_inf) {
+        } else if(c[j].lower().raw()==-_inf) {
         } else {
             ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+infty));
         }

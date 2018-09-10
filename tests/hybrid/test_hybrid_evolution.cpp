@@ -74,7 +74,7 @@ class TestHybridEvolution
     Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const unsigned int verbosity) : verbosity(verbosity) { }
+TestHybridEvolution::TestHybridEvolution(const unsigned int verb) : verbosity(verb) { }
 
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {

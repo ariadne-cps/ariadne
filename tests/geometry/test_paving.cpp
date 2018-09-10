@@ -57,7 +57,7 @@ Void TestPaving::test() const {
     ARIADNE_TEST_CALL(test_branch());
     ARIADNE_TEST_CALL(test_geometry());
     ARIADNE_TEST_CALL(test_approximation());
-};
+}
 
 Void TestPaving::test_constructors() const {
     Grid grid(2);

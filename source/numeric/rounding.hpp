@@ -210,11 +210,6 @@ void set_rounding_toward_zero();
 //! \brief Set the rounding mode to the expected default rounding mode.
 void set_default_rounding();
 
-//! \brief Set the rounding mode.
-void set_rounding_mode(RoundingModeType rnd);
-//! \brief Get the current rounding mode.
-RoundingModeType get_rounding_mode();
-
 } // namespace Ariadne;
 
 #include <mpfr.h>

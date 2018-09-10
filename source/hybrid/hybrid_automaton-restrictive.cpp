@@ -920,7 +920,7 @@ EffectiveScalarFunction
 CompositionalHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
-    RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
+    RealExpression invariant=indicator(invariant_predicate(location,event),Sign::NEGATIVE);
     return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
 }
 
@@ -928,7 +928,7 @@ EffectiveScalarFunction
 CompositionalHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
-    RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
+    RealExpression guard=indicator(guard_predicate(location,event),Sign::POSITIVE);
     return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
 }
 

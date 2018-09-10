@@ -53,15 +53,15 @@ typedef Vector<FloatDPValue> ExactFloatVector;
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
 Sign sign(const FloatDP& x) {
-    if(x>0) { return NEGATIVE; }
-    else if(x<0) {  return POSITIVE; }
-    else { return ZERO; }
+    if(x>0) { return Sign::NEGATIVE; }
+    else if(x<0) {  return Sign::POSITIVE; }
+    else { return Sign::ZERO; }
 }
 
 Sign sign(const ExactIntervalType& ivl) {
-    if(ivl.lower()>0) { return NEGATIVE; }
-    else if(ivl.upper()<0) {  return POSITIVE; }
-    else { return ZERO; }
+    if(ivl.lower()>0) { return Sign::NEGATIVE; }
+    else if(ivl.upper()<0) {  return Sign::POSITIVE; }
+    else { return Sign::ZERO; }
 }
 
 

@@ -165,7 +165,7 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
 Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
 
 //! \brief Given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<Kleenean> p, Sign sign=POSITIVE);
+Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);

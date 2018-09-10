@@ -701,7 +701,7 @@ template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
     switch(e.op()) {
         case OperatorCode::CNST: {
-            Kleenean value=( sign==POSITIVE ? e.val() : !e.val() );
+            Kleenean value=( sign==Sign::POSITIVE ? e.val() : !e.val() );
             ValidatedKleenean checked_value = value.check(Effort::get_default());
             if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
             else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
@@ -710,10 +710,10 @@ Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
         case OperatorCode::VAR:
             return Expression<Real>(Variable<Real>(e.var()));
         case OperatorCode::GEQ: case OperatorCode::GT:
-            if(sign==POSITIVE) { return e.cmp1<Real>()-e.cmp2<Real>(); }
+            if(sign==Sign::POSITIVE) { return e.cmp1<Real>()-e.cmp2<Real>(); }
             else { return e.cmp2<Real>()-e.cmp1<Real>(); }
         case OperatorCode::LEQ: case OperatorCode::LT:
-            if(sign==POSITIVE) { return e.cmp2<Real>()-e.cmp1<Real>(); }
+            if(sign==Sign::POSITIVE) { return e.cmp2<Real>()-e.cmp1<Real>(); }
             else { return e.cmp1<Real>()-e.cmp2<Real>(); }
         case OperatorCode::AND:
             return min(indicator(e.arg1(),sign),indicator(e.arg2(),sign));

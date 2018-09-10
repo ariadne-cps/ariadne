@@ -692,12 +692,12 @@ EffectiveVectorFunction HybridAutomaton::reset_function(DiscreteLocation locatio
 
 EffectiveScalarFunction HybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._invariants[event],NEGATIVE);
+    return Ariadne::constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._invariants[event],Sign::NEGATIVE);
 }
 
 EffectiveScalarFunction HybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],POSITIVE);
+    return Ariadne::constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],Sign::POSITIVE);
 }
 
 

@@ -443,7 +443,7 @@ EffectiveScalarFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
+    RealExpression invariant=indicator(invariant_predicate(location,event),Sign::NEGATIVE);
     return make_function(space,substitute(invariant,algebraic));
 }
 
@@ -451,7 +451,7 @@ EffectiveScalarFunction
 CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
+    RealExpression guard=indicator(guard_predicate(location,event),Sign::POSITIVE);
     return make_function(space,substitute(guard,algebraic));
 }
 

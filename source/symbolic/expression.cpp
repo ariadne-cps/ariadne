@@ -159,7 +159,7 @@ template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public U
 };
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
-    return os << (Void*)(e);
+    return os << (const Void*)(e);
 }
 
 

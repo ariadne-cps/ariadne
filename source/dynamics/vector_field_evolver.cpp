@@ -65,8 +65,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 namespace Ariadne {
 
-EffectiveVectorFunction make_function(RealSpace const&, Vector<RealExpression> const&);
-
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
     : _variable_names(variable_names(left_hand_sides(dynamics)))
     , _function(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))))

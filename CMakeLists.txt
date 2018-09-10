@@ -8,12 +8,9 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
-enable_testing()
-include(CTest)
-
-#cast-qual ctor-dtor-privacy disabled-optimization init-self missing-include-dirs overloaded-virtual sign-promo switch-default undef redundant-decls missing-declarations
-
-set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization init-self missing-include-dirs overloaded-virtual sign-promo switch-default undef redundant-decls missing-declarations)
+set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization 
+                  init-self missing-include-dirs overloaded-virtual sign-promo switch-default 
+                  undef redundant-decls missing-declarations)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -38,6 +35,8 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     APPEND_COVERAGE_COMPILER_FLAGS()
 endif()
 
+enable_testing()
+include(CTest)
 
 include(cotire)
 

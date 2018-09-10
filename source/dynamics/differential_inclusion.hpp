@@ -67,12 +67,12 @@ Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVar
 Tuple<ValidatedVectorFunction,ValidatedVectorFunction,Vector<ValidatedVectorFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
 BoxDomainType bounds_to_domain(RealVariablesBox const& var_box);
 
-Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
+inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 
 FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
-Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
+inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
     return refines(v1,static_cast<Vector<UpperIntervalType>const&>(bx2)); }
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
@@ -167,7 +167,7 @@ private:
     SizeType _dimension;
 };
 
-std::ostream& operator << (std::ostream& os, const C1Norms& n) {
+inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
     os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", Kj'=" << n.Kj <<
           ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", Lj'=" << n.Lj <<
           ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", Hj'=" << n.Hj <<
@@ -179,7 +179,7 @@ C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&,
 
 enum class InputApproximation : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
-std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
+inline std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
     switch (kind) {
         case InputApproximation::ZERO: os << "ZERO"; break;
         case InputApproximation::CONSTANT: os << "CONSTANT"; break;
@@ -257,7 +257,7 @@ class AdditiveInputs : public InputsRole {
 public: AdditiveInputs() : InputsRole(InputsRoles::ADDITIVE) { }
 };
 
-std::ostream& operator << (std::ostream& os, const InputsRoles& kind) {
+inline std::ostream& operator<<(std::ostream& os, const InputsRoles& kind) {
     switch (kind) {
         case InputsRoles::AFFINE: os << "AFFINE"; break;
         case InputsRoles::SINGULAR: os << "SINGULAR"; break;

@@ -40,7 +40,7 @@ DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynami
     _has_singular_input = (inputs.variables().size() == 1);
 }
 
-std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di) {
+inline std::ostream& operator<<(std::ostream& os, const DifferentialInclusion& di) {
     os << "DI: dynamics: " << di.dynamics() << "\n    inputs: " << di.inputs() << "\n";
     os << "    (F: " << di.F() << "\n     f_component: " << di.f_component() << "\n     g_components: " << di.g_components() << "\n     V: " << di.V() << ")\n";
     os << "    " << (di.is_input_additive() ? "input-additive" : "input-affine")
@@ -48,7 +48,7 @@ std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di) {
     return os;
 }
 
-std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp) {
+inline std::ostream& operator<<(std::ostream& os, const DifferentialInclusionIVP& ivp) {
     os << ivp.di() << "Initial: " << ivp.initial() << "(X0: " << ivp.X0() << ")\n";
     return os;
 }
@@ -61,7 +61,7 @@ struct ScheduledApproximator
     ScheduledApproximator(SizeType s, InputApproximator a) : step(s), approximator(a) {}
 };
 
-OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
+inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
     return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
 
 struct ScheduledApproximatorComparator
@@ -72,7 +72,7 @@ struct ScheduledApproximatorComparator
     }
 };
 
-char activity_symbol(SizeType step) {
+inline char activity_symbol(SizeType step) {
     switch (step % 4) {
     case 0: return '\\';
     case 1: return '|';
@@ -164,11 +164,11 @@ expression_to_function(DottedRealAssignments const& dynamics, const RealVariable
 }
 
 
-Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<ExactIntervalType>& bx) {
+inline Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<ExactIntervalType>& bx) {
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-Map<InputApproximation,FloatDP> convert_to_percentages(const Map<InputApproximation,SizeType>& approximation_global_frequencies) {
+inline Map<InputApproximation,FloatDP> convert_to_percentages(const Map<InputApproximation,SizeType>& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
@@ -362,24 +362,6 @@ InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproxima
     default:
         ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
     }
-}
-
-ValidatedVectorTaylorFunctionModelDP build_f_plus_Gw(ValidatedVectorTaylorFunctionModelDP phi,
-                                                     ValidatedVectorFunction f, Vector<ValidatedVectorFunction> g,
-                                                     ValidatedVectorTaylorFunctionModelDP wf) {
-    auto n=f.result_size();
-    auto m=g.size();
-
-    ValidatedVectorTaylorFunctionModelDP result(n);
-
-    for (auto i : range(n)) {
-        result[i] = compose(f[i], phi);
-        for (auto j : range(m)) {
-            result[i] = result[i] + compose(g[j][i],phi) * wf[j];
-        }
-    }
-
-    return result;
 }
 
 
@@ -882,7 +864,7 @@ struct IndexedFloatDPError
     IndexedFloatDPError() : index(0), value(FloatDPError()) {}
 };
 
-OutputStream& operator<<(OutputStream& os, IndexedFloatDPError const& ifl) {
+inline OutputStream& operator<<(OutputStream& os, IndexedFloatDPError const& ifl) {
     return os << "(" << ifl.index << ":" << std::scientific << ifl.value.raw() << std::fixed << ")"; }
 
 struct IndexedFloatDPErrorComparator

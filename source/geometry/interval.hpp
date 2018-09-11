@@ -324,6 +324,9 @@ template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& 
 template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl, UpperBound<F> e);
 template<class F> Interval<UpperBound<F>> narrow(Interval<LowerBound<F>> const& ivl, ValidatedUpperNumber e);
 
+Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl);
+Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
+
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 

@@ -147,8 +147,6 @@ FloatDPUpperInterval atan(FloatDPUpperInterval const& ivl) {
 
 FloatDPError mag(FloatDPUpperInterval const& ivl) {
     return mag(cast_singleton(ivl)); }
-FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) {
-    return mig(cast_singleton(ivl)); }
 
 ValidatedKleenean eq(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return eq(cast_singleton(ivl1),cast_singleton(ivl2)); }
@@ -161,8 +159,6 @@ FloatMPUpperInterval make_interval(FloatMPBounds const& x) {
     return FloatMPUpperInterval(x.lower(),x.upper()); }
 FloatMPError mag(FloatMPUpperInterval const& ivl) {
     return mag(cast_singleton(ivl)); }
-FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) {
-    return mig(cast_singleton(ivl)); }
 
 template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }

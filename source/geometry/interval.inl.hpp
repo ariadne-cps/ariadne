@@ -197,5 +197,7 @@ inline Interval<FloatValue<DP>> cast_exact_interval(Interval<FloatApproximation<
 inline Interval<FloatValue<MP>> cast_exact_interval(Interval<FloatApproximation<MP>> const& ivl) {
     return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
 
+inline FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
+inline FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
 
 } // namespace Ariadne

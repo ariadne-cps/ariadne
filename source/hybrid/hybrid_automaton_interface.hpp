@@ -251,6 +251,7 @@ inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
         case EventKind::PERMISSIVE: os<<"permissive"; break;
         case EventKind::URGENT: os<<"urgent"; break;
         case EventKind::IMPACT: os<<"impact"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled EventKind for output streaming.\n");
     } return os;
 }
 

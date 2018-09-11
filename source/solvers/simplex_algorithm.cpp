@@ -65,6 +65,13 @@ OutputStream& operator<<(OutputStream& os, Slackness t) {
     return os << (t==Slackness::BASIS ? 'B' : t==Slackness::LOWER ? 'L' : t==Slackness::UPPER ? 'U' : t==Slackness::FIXED ? 'E' : '?');
 }
 
+// <start: declarations to address warnings
+Array<SizeType> extend_p(const Array<SizeType>& p, const SizeType n);
+SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p);
+Array<SizeType> compute_p(const Array<Slackness>& tv);
+Pair<SizeType,RigorousNumericType<FloatDP>> compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s);
+// end>
+
 // Add functions to remove dependencies
 inline Bool operator==(Rational q, Int n) { return q==Rational(n); }
 inline Bool operator!=(Rational q, Int n) { return q!=Rational(n); }
@@ -74,7 +81,7 @@ inline Bool operator> (Rational q, Int n) { return q> Rational(n); }
 inline Bool operator< (Rational q, Int n) { return q< Rational(n); }
 
 inline Bool operator==(Rational q, double n) { return q==Rational(n); }
-Rational midpoint(Rational const& q) { return q; }
+inline Rational midpoint(Rational const& q) { return q; }
 
 inline auto operator<=(FloatDPBounds x1, Int x2) -> decltype(x1<=FloatDPBounds(x2)) { return x1<=FloatDPBounds(x2); }
 inline auto operator>=(FloatDPBounds x1, Int x2) -> decltype(x1>=FloatDPBounds(x2)) { return x1>=FloatDPBounds(x2); }

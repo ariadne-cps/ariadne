@@ -160,7 +160,8 @@ inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }
 inline Dyadic operator"" _q2(long double x) { return operator"" _dyadic(x); }
 inline Dyadic operator"" _bin(long double x) { return operator"" _dyadic(x); }
 
-
+Comparison cmp(Dyadic const& x1, Dyadic const& x2);
+Dyadic make_dyadic(unsigned long long int n);
 
 } // namespace Ariadne
 

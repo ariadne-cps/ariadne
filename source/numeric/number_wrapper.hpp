@@ -149,6 +149,7 @@ template<class X, class I, class AW> struct LatticeFieldAware
 };
 
 template<class X, class I> struct UnaryOperationsMixin : public virtual I {
+    using I::_apply;
     static X const& _cast(UnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
     virtual I* _apply(Pos op) const final { return _make_wrapper(pos(_cast(*this))); }
@@ -168,6 +169,7 @@ template<class X, class I> struct UnaryOperationsMixin : public virtual I {
 
 
 template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J {
+    using J::_rapply; using J::_apply;
     static X const& _cast(AwareFieldMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     virtual I* _apply(Add op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
     virtual I* _apply(Sub op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
@@ -180,6 +182,7 @@ template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J 
 };
 
 template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual J {
+    using J::_rapply; using J::_apply;
     static X const& _cast(AwareLatticeMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     virtual I* _apply(Max op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
     virtual I* _apply(Min op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }

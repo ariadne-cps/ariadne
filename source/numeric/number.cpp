@@ -124,7 +124,7 @@ template<> FloatMPValue::operator ExactNumber() const { return ExactNumber(new N
 
 template<> String class_name<NumberHandle>() { return "NumberHandle"; }
 
-Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
+inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
     return y1.get(dp).raw() <= y2.get(dp).raw(); }
 
 Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y) {

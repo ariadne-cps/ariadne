@@ -49,6 +49,8 @@
 #include "../solvers/integrator.hpp"
 #include "../solvers/solver.hpp"
 
+#include "../dynamics/reachability_analyser.tpl.hpp"
+
 #include "../hybrid/hybrid_automaton_interface.hpp"
 
 #include "../hybrid/hybrid_time.hpp"
@@ -58,6 +60,7 @@
 #include "../hybrid/hybrid_paving.hpp"
 #include "../hybrid/hybrid_evolver.hpp"
 #include "../hybrid/hybrid_reachability_analyser.hpp"
+
 
 #include "../output/logging.hpp"
 #include "../output/graphics.hpp"
@@ -82,8 +85,6 @@ inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
     return integer_cast<Nat>(FloatDPApproximation(t,dp)/h);
 }
 
-template<> Nat integer_cast<Nat,Real>(Real const& r);
-
 template<> inline Nat integer_cast<Nat>(FloatDPBounds const& x) {
     return integer_cast<Nat>(FloatDPApproximation(x).raw());
 }
@@ -101,8 +102,6 @@ inline const HybridExactBoxes& cast_exact(const HybridExactBoxes& boxes) {
 }
 
 } // namespace Ariadne
-
-#include "../dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
 

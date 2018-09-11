@@ -26,7 +26,6 @@
 
 using namespace Ariadne;
 
-
 inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> O7()
 {
     RealVariable x("x"), y("y"), u("u");

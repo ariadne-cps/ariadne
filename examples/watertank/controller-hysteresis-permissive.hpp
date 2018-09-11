@@ -26,7 +26,7 @@
 
 using namespace Ariadne;
 
-AtomicHybridAutomaton getController()
+inline AtomicHybridAutomaton getController()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.

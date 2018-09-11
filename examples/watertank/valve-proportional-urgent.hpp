@@ -26,7 +26,7 @@
 
 using namespace Ariadne;
 
-AtomicHybridAutomaton getValve()
+inline AtomicHybridAutomaton getValve()
 {
 
     // Declare some constants.

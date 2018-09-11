@@ -40,7 +40,7 @@ using std::cout; using std::cerr; using std::endl; using std::flush;
 typedef GeneralHybridEvolver HybridEvolverType;
 
 
-Void press_enter_to_continue() {
+inline Void press_enter_to_continue() {
     std::cout << "Press ENTER to continue... " << flush;
     std::cin.ignore( std::numeric_limits <std::streamsize> ::max(), '\n' );
 }

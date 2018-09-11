@@ -21,12 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
 #include "ariadne.hpp"
 
 using namespace Ariadne;
 
-AtomicHybridAutomaton getController2()
+inline AtomicHybridAutomaton getController2()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.

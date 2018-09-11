@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> LA()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> LA()
 {
     RealVariable x("x"), y("y"), z("z"), u("u");
     DottedRealAssignments dynamics={dot(x)=10*(y-x),

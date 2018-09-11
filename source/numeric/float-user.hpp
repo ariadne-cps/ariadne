@@ -102,6 +102,23 @@ template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> 
 template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
 }
 
+// <begin declarations to address warnings
+
+FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr);
+FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr);
+
+Rational cast_exact(Real const& x);
+
+PositiveFloatDPApproximation mig(FloatDPApproximation const& x);
+PositiveFloatMPApproximation mig(FloatMPApproximation const& x);
+
+FloatDPBounds round(FloatDPBounds const& x);
+FloatMPBounds round(FloatMPBounds const& x);
+
+FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2);
+FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2);
+
+// end>
 
 extern const FloatDPValue infty;
 

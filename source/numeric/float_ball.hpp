@@ -125,6 +125,7 @@ template<class F, class FE> class Ball
     friend Bool same(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Bool models(Ball<F,FE> const&, Value<F> const&);
     friend Bool consistent(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Bool inconsistent(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Bool refines(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Ball<F,FE> refinement(Ball<F,FE> const&, Ball<F,FE> const&);
   private: public:

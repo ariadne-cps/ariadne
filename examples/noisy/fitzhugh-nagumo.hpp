@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> FN()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> FN()
 {
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
     DottedRealAssignments dynamics={dot(x)=x-pow(x,3)-y+u1,dot(y)=x+u2-0.8_dec*y};

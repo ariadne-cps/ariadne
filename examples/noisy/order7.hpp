@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> O7()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> O7()
 {
     RealVariable x("x"), y("y"), u("u");
     DottedRealAssignments dynamics={dot(x)=-42*pow(x,7)+68*pow(x,6)*y-46*pow(x,5)*y+256*pow(x,4)*y+156*pow(x,3)*y+50*pow(x,2)*y+20*x*pow(y,6)-8*pow(y,7),

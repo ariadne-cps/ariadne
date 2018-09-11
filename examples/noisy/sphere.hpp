@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SP()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SP()
 {
     RealVariable x("x"), y("y"), z("z"), u1("u1"), u2("u2"), u3("u3");
     RealExpression cuberadius(pow(x,3)+pow(y,3)+pow(z,3));

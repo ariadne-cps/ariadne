@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> J16()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> J16()
 {
     RealVariable x("x"), y("y"), z("z"), u("u");
     DottedRealAssignments dynamics={dot(x)=y,dot(y)=z,dot(z)=-y+pow(x,2)+u};

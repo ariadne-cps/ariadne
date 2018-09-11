@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> CR()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> CR()
 {
     RealVariable xA("xA"), xB("xB"), xC("xC"), xD("xD"), u1("u1"), u2("u2"), u3("u3");
     DottedRealAssignments dynamics={dot(xA)=-u3*xA*xB-0.4_dec*xA*xC+0.05_dec*u1-0.1_dec*xA,

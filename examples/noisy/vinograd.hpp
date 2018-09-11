@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> VG()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> VG()
 {
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
     DottedRealAssignments dynamics={dot(x)=pow(y,5)+pow(x,2)*(-x+y)+u1,

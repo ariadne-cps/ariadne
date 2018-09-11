@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> CK()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> CK()
 {
     RealVariable x("x"), y("y"), u1("u1"), u2("u2");
     DottedRealAssignments dynamics={dot(x)=u1,dot(y)=u2};

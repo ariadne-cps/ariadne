@@ -39,7 +39,7 @@ template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& l
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }
 
-FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
+inline FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
     auto bbx = evolve_set.bounding_box();
     return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }

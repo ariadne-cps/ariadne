@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HO()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HO()
 {
     RealVariable x("x"), y("y"), u("u");
     DottedRealAssignments dynamics={dot(x)=y+u,dot(y)=-x};

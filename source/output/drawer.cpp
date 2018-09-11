@@ -37,15 +37,13 @@
 
 namespace Ariadne {
 
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining);
+
 Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { ARIADNE_NOT_IMPLEMENTED; }
-
-Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
-{
-    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
-}
 
 OutputStream& BoxDrawer::_write(OutputStream& os) const {
     return os << "BoxDrawer()"; }
@@ -59,18 +57,6 @@ OutputStream& GridDrawer::_write(OutputStream& os) const {
     return os << "GridDrawer(depth=" << this->_depth << ")"; }
 
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
-
-
-Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining)
-{
-    if(splittings_remaining==0) {
-        set.affine_over_approximation().draw(cnvs,proj);
-    } else {
-        Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split=set.split();
-        affine_draw(cnvs,proj,split.first,splittings_remaining-1u);
-        affine_draw(cnvs,proj,split.second,splittings_remaining-1u);
-    }
-}
 
 Void AffineDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const
 {
@@ -141,12 +127,25 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     }
 }
 
-
-
 Void GridDrawer::draw(CanvasInterface& canvas, const Projection2d& projection, const ValidatedConstrainedImageSet& set) const {
     set.outer_approximation(Grid(set.dimension()),this->_depth).draw(canvas,projection);
 }
 
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
+{
+    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
+}
+
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining)
+{
+    if(splittings_remaining==0) {
+        set.affine_over_approximation().draw(cnvs,proj);
+    } else {
+        Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split=set.split();
+        affine_draw(cnvs,proj,split.first,splittings_remaining-1u);
+        affine_draw(cnvs,proj,split.second,splittings_remaining-1u);
+    }
+}
 
 } // namespace Ariadne
 

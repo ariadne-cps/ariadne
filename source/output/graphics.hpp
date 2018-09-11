@@ -77,6 +77,7 @@ struct GraphicsProperties {
     Colour fill_colour;
 };
 
+Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
 
 //! \brief Class for plotting figures.
 class Figure

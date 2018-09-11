@@ -50,6 +50,9 @@ static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
 
+OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable);
+
+
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
 Colour::Colour(double rd, double gr, double bl, Bool tr)
@@ -77,7 +80,7 @@ const Colour magenta=Colour("magenta",1.0,0.0,1.0);
 
 
 
-StringType str(FloatDP x) {
+inline StringType str(FloatDP x) {
     StringStream ss;
     ss << x;
     return ss.str();
@@ -361,10 +364,10 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 
 #ifdef HAVE_GTK2_H
 
+void paint (GtkWidget *widget, GdkEventExpose *eev, gpointer gdata);
+
 void
-paint (GtkWidget      *widget,
-       GdkEventExpose *eev,
-       gpointer        gdata)
+paint (GtkWidget *widget, GdkEventExpose *eev, gpointer gdata)
 {
     cairo_t *cr;
 

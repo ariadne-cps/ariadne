@@ -187,9 +187,15 @@ Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
+
+const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache);
 
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
@@ -204,6 +210,7 @@ ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Spac
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s);
 
+Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 
 //@}
 

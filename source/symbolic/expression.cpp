@@ -1005,7 +1005,6 @@ Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
 }
 
 Formula<Real> make_formula(const EffectiveScalarFunction& f);
-Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s) {
     return make_expression(make_formula(f),s); }
 

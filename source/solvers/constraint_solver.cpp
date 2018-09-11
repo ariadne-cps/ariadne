@@ -50,22 +50,24 @@ namespace Ariadne {
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
 typedef Vector<FloatDPValue> ExactFloatVector;
 
+Bool has_nan(const ExactBoxType& domain);
+
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
-Sign sign(const FloatDP& x) {
+inline Sign sign(const FloatDP& x) {
     if(x>0) { return Sign::NEGATIVE; }
     else if(x<0) {  return Sign::POSITIVE; }
     else { return Sign::ZERO; }
 }
 
-Sign sign(const ExactIntervalType& ivl) {
+inline Sign sign(const ExactIntervalType& ivl) {
     if(ivl.lower()>0) { return Sign::NEGATIVE; }
     else if(ivl.upper()<0) {  return Sign::POSITIVE; }
     else { return Sign::ZERO; }
 }
 
 
-OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
+inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }

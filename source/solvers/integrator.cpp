@@ -40,6 +40,7 @@
 #include "../function/function.hpp"
 #include "../function/function_model.hpp"
 #include "../function/formula.hpp"
+#include "../function/taylor_function.hpp"
 #include "../function/taylor_model.hpp"
 
 #include "../function/polynomial.hpp"
@@ -63,9 +64,6 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
     return Vector<UpperIntervalType>(bx) + Vector<UpperIntervalType>(v);
 }
 
-
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double s);
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
     :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory())
@@ -330,7 +328,6 @@ Void TaylorPicardIntegrator::write(OutputStream& os) const {
 
 #include "../algebra/graded.hpp"
 #include "../function/procedure.hpp"
-#include "../function/taylor_function.hpp"
 namespace Ariadne {
 
 class FormulaFunction;
@@ -340,7 +337,24 @@ typedef Polynomial<FloatDPBounds> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
-
+// <start: declarations required to suppress warnings
+Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const UpperBoxType& c, Nat M, Nat N);
+Void flow_init(const Vector<ValidatedProcedure>& p,
+               Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y,
+               const Vector<ValidatedNumericType>& x, const Vector<ValidatedNumericType>& r,  Nat so);
+Void flow_iterate(const Vector<ValidatedProcedure>& p, FloatDPValue h,
+                  Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y);
+Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferential> const& dphia, Vector<GradedValidatedDifferential> const& dphib,
+                                               Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphid,
+                                               Nat so, Nat to, Nat verbosity);
+ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const FloatDPValue& h, double swpt, Nat verbosity);
+ValidatedVectorFunctionModelDP differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& flth, const UpperBoxType& bx,
+                       double swpt, Nat so, Nat to, Nat verbosity);
+ValidatedVectorFunctionModelDP differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDP& h, const UpperBoxType& bx,
+                                  double swpt, Nat so, Nat to, Nat verbosity);
+ValidatedVectorFunctionModelDP series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, const FloatDPValue& h, const UpperBoxType& bbx,
+                 double max_err, double swpt, Nat init_so, Nat init_to, Nat max_so, Nat max_to, Nat verbosity);
+// end>
 
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err)
@@ -418,7 +432,7 @@ inline Vector<GradedValidatedDifferential> graded_variables(Int so, const Vector
 }
 
 
-Vector<ValidatedFormula> formula(const ValidatedVectorFunction& f) {
+inline Vector<ValidatedFormula> formula(const ValidatedVectorFunction& f) {
     return f.evaluate(ValidatedFormula::identity(f.argument_size()));
 }
 

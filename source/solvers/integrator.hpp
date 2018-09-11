@@ -242,6 +242,9 @@ class TaylorSeriesIntegrator
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
+
+  private:
+
 };
 
 

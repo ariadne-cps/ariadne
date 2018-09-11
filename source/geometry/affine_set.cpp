@@ -46,8 +46,8 @@ namespace Ariadne {
 typedef Vector<FloatDP> RawFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
-
-
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl);
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl);
 
 template<class X>
 struct LinearProgram {

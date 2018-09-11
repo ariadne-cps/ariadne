@@ -73,7 +73,7 @@ typedef GeneralHybridEvolver HybridEvolverType;
 
 
 
-CompositeHybridAutomaton create_heating_system()
+inline CompositeHybridAutomaton create_heating_system()
 {
     // Set the system dynamic parameters
     RealConstant P("P",4.0_decimal);
@@ -124,7 +124,7 @@ CompositeHybridAutomaton create_heating_system()
 //! [create_heating_system]
 
 //! [create_evolver]
-HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
+inline HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 {
     // Create a GeneralHybridEvolver object
     HybridEvolverType evolver(heating_system);
@@ -140,7 +140,7 @@ HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 //! [create_evolver]
 
 //! [simulate_evolution]
-Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+inline Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
     StringVariable clock("clock");
     StringVariable heating("heating");
@@ -179,7 +179,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const Gen
 
 
 //! [compute_evolution]
-Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+inline Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
     StringVariable clock("clock");
     StringVariable heating("heating");
@@ -237,7 +237,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 }
 //! [compute_evolution]
 
-Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
+inline Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object

@@ -60,9 +60,6 @@ Projection2d projection(const RealSpace& space, const Variables2d& variables) {
 }
 
 
-
-Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
-
 Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
     for(Nat i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;

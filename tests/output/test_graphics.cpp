@@ -36,9 +36,8 @@
 using namespace Ariadne;
 
 
-EffectiveScalarFunction operator+(EffectiveScalarFunction f, double c) { return f+Real(c); }
-EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
-//struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
+inline EffectiveScalarFunction operator+(EffectiveScalarFunction f, double c) { return f+Real(c); }
+inline EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
 
 
 Int main(Int argc, char **argv)

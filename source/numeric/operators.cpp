@@ -39,7 +39,6 @@ double div(double,double);
 
 namespace Ariadne {
 
-ValidatedKleenean check_sgn(Real r, Effort eff);
 template<class OP, class... AS> class Expression;
 
 template<class Y> class Expression<Sgn,Y> : public LogicalInterface {

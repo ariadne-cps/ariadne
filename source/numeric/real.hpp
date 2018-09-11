@@ -230,6 +230,8 @@ class Real
     friend Sierpinskian operator!=(Real const& r1, Real const& r2); //!< Inequality is undecidable and may only robustly be verified.
     friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
     friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
+
+    ValidatedKleenean check_sgn(Real r, Effort eff);
     friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
     friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.
 
@@ -369,6 +371,12 @@ class LowerReal
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, LowerReal const& r); //< Write to an output stream.
     //@}
+
+    //@{
+    //! \name Mixed operations
+    friend Real min(LowerReal const& lr1, Real const& r2);
+    friend Real min(Real const& r1, LowerReal const& lr2);
+    //@}
 };
 
 //! \ingroup NumericModule
@@ -452,6 +460,12 @@ class UpperReal
     //@{
     //! \name Input/output operations
     friend OutputStream& operator<<(OutputStream& os, UpperReal const& r); //< Write to an output stream.
+    //@}
+
+    //@{
+    //! \name Mixed operations
+    friend Real max(UpperReal const& ur1, Real const& r2);
+    friend Real max(Real r1, UpperReal const& ur2);
     //@}
 };
 
@@ -604,6 +618,12 @@ class PositiveReal : public Real
     PositiveReal add(PositiveReal const&, PositiveReal const&);
     PositiveReal mul(PositiveReal const&, PositiveReal const&);
     PositiveReal div(PositiveReal const&, PositiveReal const&);
+  public:
+    friend PositiveReal min(PositiveReal const& pr1, PositiveReal const& pr2);
+    friend PositiveReal add(PositiveReal const& pr1, PositiveReal const& pr2);
+    friend PositiveReal mul(PositiveReal const& pr1, PositiveReal const& pr2);
+    friend PositiveReal div(PositiveReal const& pr1, PositiveReal const& pr2);
+    friend PositiveReal rec(PositiveReal const& pr);
 };
 
 //! \ingroup UserNumericTypeSubModule
@@ -642,8 +662,21 @@ class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUppe
     PositiveLowerReal div(PositiveLowerReal const&, PositiveUpperReal const&);
 };
 
+PositiveUpperReal rec(PositiveLowerReal plr);
+PositiveLowerReal rec(PositiveUpperReal pur);
+PositiveLowerReal add(PositiveLowerReal plr1, PositiveLowerReal plr2);
+PositiveUpperReal add(PositiveUpperReal pur1, PositiveUpperReal pur2);
+PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2);
+PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2);
+PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2);
+PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
+
 PositiveReal cast_positive(Real const& x);
 
+LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
+UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
+
+ValidatedKleenean check_sgn(Real r, Effort eff);
 
 class ValidatedRealInterface;
 

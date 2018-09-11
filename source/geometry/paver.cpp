@@ -46,7 +46,7 @@ namespace Ariadne {
 
 Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBoxType& domain) {
+inline Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const UpperBoxType& domain) {
     return lipschitz_index_and_error(function,cast_exact_box(domain));
 }
 

@@ -929,6 +929,12 @@ GridTreePaving outer_approximation(const ListSet<BS>& theSet, const Grid& theGri
     return result;
 }
 
+//**************************************Drawing*********************************************************/
+
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridCell& theGridCell);
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridTreePaving& theGridTreeSet);
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const CompactSetInterface& theSet);
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_GRID_SET_HPP */

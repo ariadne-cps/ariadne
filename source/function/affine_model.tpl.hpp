@@ -77,11 +77,6 @@ Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> con
 }
 */
 
-FloatDPBounds cast_singleton(Interval<FloatDPUpperBound> const& ivl);
-FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
-
-
-
 template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     typedef typename F::PrecisionType PrecisionType;
     typedef AffineModel<ApproximateTag,F> AffineModelType;

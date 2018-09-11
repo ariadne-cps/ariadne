@@ -59,8 +59,19 @@ uint DRAWING_ACCURACY=1u;
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType domain);
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom);
+Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
+Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBoxType& dom);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType domain);
 Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+
+Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub);
+ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl);
+ExactBoxType under_approximation(const EffectiveBoxType& rbx);
+ExactBoxType over_approximation(const EffectiveBoxType& rbx);
+ExactBoxType approximation(const EffectiveBoxType& rbx);
+
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom)
 {
@@ -567,7 +578,7 @@ UpperBoxType ConstrainedImageSet::bounding_box() const
     return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
-Matrix<FloatDPValue> cast_exact(Matrix<FloatDPBounds> vA) {
+inline Matrix<FloatDPValue> cast_exact(Matrix<FloatDPBounds> vA) {
     Matrix<FloatDPApproximation> aA=vA;
     return reinterpret_cast<Matrix<FloatDPValue>&>(aA);
 }
@@ -710,26 +721,6 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorFunction& function) {
     set.apply(function); return set;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom);
 
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBoxType& dom)

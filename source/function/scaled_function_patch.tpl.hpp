@@ -50,11 +50,6 @@ namespace Ariadne {
 
 namespace {
 
-Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision);
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr);
-
-Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision);
-
 Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
     Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
     for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }

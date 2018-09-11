@@ -39,6 +39,9 @@
 
 namespace Ariadne {
 
+Comparison cmp(Integer const& z1, Integer const& z2);
+Integer make_integer(unsigned long long int n);
+
 uint32_t
 fac(uint8_t n)
 {

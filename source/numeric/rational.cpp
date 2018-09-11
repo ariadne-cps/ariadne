@@ -419,11 +419,6 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     return os;
 }
 
-Comparison cmp(Rational const& q1, FloatDP const& x2) {
-    return cmp(q1,Rational(x2));
-}
-
-
 
 template<> String class_name<Rational>() { return "Rational"; }
 

@@ -117,6 +117,8 @@ Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsBuiltinIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
 
+OutputStream& write(OutputStream& os, mpz_t const z);
+InputStream& operator>>(InputStream& is, Rational& q1);
 
 
 } // namespace Ariadne

@@ -298,9 +298,6 @@ template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X>
     return dfx;
 }
 
-Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
-Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
-
 } // namespace Ariadne
 
 #include "../algebra/fixed_differential.hpp"

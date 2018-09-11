@@ -110,12 +110,12 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
 
 } // namespace
 
-Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
-Pair<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP> split(const ValidatedVectorFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP> split(const ValidatedVectorFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
@@ -1030,9 +1030,8 @@ GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat depth) const
 
 
 
-
-
-
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error);
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables);
 
 
 Void
@@ -1268,7 +1267,7 @@ ValidatedScalarFunctionModelDP const Enclosure::get_function(SizeType i) const {
     else { return compose(this->_auxiliary_mapping[i-this->state_dimension()-1u],this->_state_function); }
 }
 
-ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP& f1, const ValidatedScalarFunctionModelDP& f2, const ValidatedVectorFunctionModelDP& f3) {
+inline ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP& f1, const ValidatedScalarFunctionModelDP& f2, const ValidatedVectorFunctionModelDP& f3) {
     return join(join(f1,f2),f3);
 }
 
@@ -1302,9 +1301,9 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 
-const ValidatedScalarFunctionModelDP& repr(const ValidatedScalarFunctionModelDP& f) { return f; }
-const ValidatedVectorFunctionModelDP& repr(const ValidatedVectorFunctionModelDP& f) { return f; }
-const List<ValidatedScalarFunctionModelDP>& repr(const List<ValidatedScalarFunctionModelDP>& f) { return f; }
+inline const ValidatedScalarFunctionModelDP& repr(const ValidatedScalarFunctionModelDP& f) { return f; }
+inline const ValidatedVectorFunctionModelDP& repr(const ValidatedVectorFunctionModelDP& f) { return f; }
+inline const List<ValidatedScalarFunctionModelDP>& repr(const List<ValidatedScalarFunctionModelDP>& f) { return f; }
 
 OutputStream& Enclosure::write(OutputStream& os) const {
     const Bool LONG_FORMAT=false;

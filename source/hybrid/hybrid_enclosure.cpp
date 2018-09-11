@@ -54,6 +54,9 @@
 
 namespace Ariadne {
 
+OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt);
+OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
+OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 
 OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
     switch (evt) {
@@ -69,7 +72,7 @@ OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-List<String> variable_names(const List<EnclosureVariableType>& vt) {
+inline List<String> variable_names(const List<EnclosureVariableType>& vt) {
     std::map<EnclosureVariableType,Nat> counts;
     List<String> result;
     for(Nat i=0; i!=vt.size(); ++i) {
@@ -584,7 +587,7 @@ HybridEnclosure::split() const
 }
 
 
-Void check_subset(const ExactBoxType& dom1, const ExactBoxType& dom2, const char* msg)
+inline Void check_subset(const ExactBoxType& dom1, const ExactBoxType& dom2, const char* msg)
 {
     if(dom1.size()!=dom2.size()) {
         ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
@@ -702,7 +705,7 @@ HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, co
     return result;
 }
 
-Void
+inline Void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
     for(ListSet<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
         draw(figure,iter->continuous_set());

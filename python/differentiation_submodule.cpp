@@ -44,95 +44,37 @@ namespace Ariadne {
 
 inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariadne::bin(d+as,as); }
 
-// FIXME: Ensure all valid arithmetic and comparisons are defined!
-inline auto operator==(FloatDPBounds x, Int n) -> decltype(x==FloatDPValue(n)) { return x==FloatDPValue(n); }
-inline auto operator!=(FloatDPBounds x, Int n) -> decltype(x!=FloatDPValue(n)) { return x!=FloatDPValue(n); }
-inline auto operator> (FloatDPBounds x, Int n) -> decltype(x> FloatDPValue(n)) { return x> FloatDPValue(n); }
-inline auto operator*=(FloatDPApproximation x, Int n) -> decltype(x*=FloatDPApproximation(n)) { return x*=FloatDPApproximation(n); }
-
-/*
-
-template<class X> Void read_array(Array<X>&, const boost::python::object& obj) { 
+template<class I, class X> Expansion<I,X> expansion_from_python(pybind11::dict pydct) {
+    std::map<I,X> mp=pybind11::cast<std::map<I,X>>(pydct);
+    return Expansion<I,X>(mp);
 }
 
-template<class X>
-struct to_python_dict< Ariadne::Expansion<MultiIndex,X>  > {
-    to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<MultiIndex,X>, to_python_dict< Ariadne::Expansion<MultiIndex,X> > >(); }
-    static PyObject* convert(const Ariadne::Expansion<MultiIndex,X>& e) {
-        Nat n=e.argument_size();
-        boost::python::dict res;
-        boost::python::list lst;
-        for(Nat i=0; i!=n; ++i) { lst.append(0); }
-        Ariadne::MultiIndex a;
-        X c;
-        for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->index();
-            c=iter->coefficient();
-            for(Nat i=0; i!=a.size(); ++i) { Int ai=a[i]; lst[i]=ai; }
-            boost::python::tuple tup(lst);
-            //res[tup]=boost::python::object(c);
-            res[boost::python::object(a)]=boost::python::object(c);
-        }
-        return boost::python::incref(boost::python::dict(res).ptr());
+template<class I, class X> pybind11::dict to_python_dict(Ariadne::Expansion<I,X> const& e) {
+    Nat n=e.argument_size();
+    pybind11::dict res;
+    pybind11::list lst;
+    for(Nat i=0; i!=n; ++i) { lst.append(0); }
+    I a;
+    X c;
+    for(typename Expansion<I,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
+        a=iter->index();
+        c=iter->coefficient();
+        for(Nat i=0; i!=a.size(); ++i) { Int ai=a[i]; lst[i]=ai; }
+        pybind11::tuple tup(lst);
+        res[pybind11::object(a)]=pybind11::object(c);
     }
-    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
-};
+    return res;
+}
 
-template<class X>
-struct to_python_list< Ariadne::Expansion<MultiIndex,X>  > {
-    to_python_list() { boost::python::to_python_converter< Ariadne::Expansion<MultiIndex,X>, to_python_list< Ariadne::Expansion<MultiIndex,X> > >(); }
-    static PyObject* convert(const Ariadne::Expansion<MultiIndex,X>& e) {
-        Nat n=e.argument_size();
-        boost::python::list res;
-        boost::python::list alst;
-        for(Nat i=0; i!=n; ++i) { alst.append(0); }
-        std::cerr<<"Here\n";
-        boost::python::list pr; pr.append(0); pr.append(0);
-        Ariadne::MultiIndex a;
-        X c;
-        for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            a=iter->index();
-            c=iter->coefficient();
-            for(Nat i=0; i!=n; ++i) { Int ai=a[i]; alst[i]=ai; }
-            pr[0]=boost::python::tuple(alst);
-            pr[1]=boost::python::object(c);
-            res.append(boost::python::tuple(pr));
-        }
-        return boost::python::incref(boost::python::list(res).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-*/
-
-/*
-   static PyObject* convert(const Tuple<T1,T2,T3,T4>& tup) {
-        boost::python::list lst;
-        lst.append(boost::python::object(tup.first));
-        lst.append(boost::python::object(tup.second));
-        lst.append(boost::python::object(tup.third));
-        lst.append(boost::python::object(tup.fourth));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    static PyObject* convert(const std::map<K,V>& map) {
-        boost::python::dict result;
-        for(typename std::map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
-            result[boost::python::object(iter->first)]=boost::python::object(iter->second);
-        }
-        return boost::python::incref(boost::python::dict(result).ptr());
-*/
 } // namespace Ariadne
 
-/*
 
 template<class DIFF>
-DIFF*
-make_dense_differential(const Nat& as, const Nat& d, const boost::python::object& obj)
+DIFF make_dense_differential(const Nat& as, const Nat& d, const pybind11::object& obj)
 {
     typedef typename DIFF::ValueType X;
-    DIFF* result=new DIFF(as,d);
-    Array<X> coefficient;
-    read_array(coefficient,obj);
+    DIFF result(as,d);
+    Array<X> coefficient=make_array<X>(obj);
     std::cerr<<"polynomial_data_size("<<as<<","<<d<<")="<<compute_polynomial_data_size(1u,as,d)<<"\n";
     std::cerr<<"coefficient="<<coefficient<<"\n";
     assert(coefficient.size()==compute_polynomial_data_size(1u,as,d));
@@ -146,21 +88,21 @@ make_dense_differential(const Nat& as, const Nat& d, const boost::python::object
 }
 
 template<class DIFF>
-DIFF*
-make_sparse_differential(const boost::python::object& obj,const Nat& d)
+DIFF
+make_sparse_differential(const pybind11::object& obj,const Nat& d)
 {
     typedef typename DIFF::ValueType X;
-    Expansion<MultiIndex,X> expansion = boost::python::extract< Expansion<MultiIndex,X> >(obj);
-    DIFF* result=new DIFF(expansion,d);
+    Expansion<MultiIndex,X> expansion = pybind11::cast< Expansion<MultiIndex,X> >(obj);
+    DIFF result=DIFF(expansion,d);
     return result;
 }
 
 
 template<class DIFF>
-boost::python::list
+pybind11::list
 make_differential_variables(const Nat& d, const Vector<typename DIFF::NumericType>& x)
 {
-    boost::python::list result;
+    pybind11::list result;
     for(Nat i=0; i!=x.size(); ++i) {
         result.append(DIFF::variable(x.size(),d,x[i],i));
     }
@@ -169,19 +111,16 @@ make_differential_variables(const Nat& d, const Vector<typename DIFF::NumericTyp
 
 
 template<class DIFF>
-Vector<DIFF>*
-make_differential_vector(const Nat& rs, const Nat& as, const Nat& d, const boost::python::object& obj)
+Vector<DIFF>
+make_differential_vector(const Nat& rs, const Nat& as, const Nat& d, const pybind11::object& obj)
 {
     typedef typename DIFF::ValueType X;
-    boost::python::list lst=boost::python::extract<boost::python::list>(obj);
-    Array<X> coefficient;
-    read_array(coefficient,obj);
+    pybind11::list lst=pybind11::cast<pybind11::list>(obj);
+    Array<X> coefficient = make_array<X>(obj);
     ARIADNE_ASSERT(coefficient.size()==compute_polynomial_data_size(rs,as,d));
-    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d));
+    Vector<DIFF> result=Vector<DIFF>(rs,DIFF(as,d));
     for(SizeType i=0; i!=rs; ++i) {
-        DIFF* ri = make_sparse_differential<DIFF>(lst[i],d);
-        (*result)[i]=*ri;
-        delete ri;
+        result[i]=make_sparse_differential<DIFF>(lst[i],d);
     }
     return result;
 }
@@ -196,7 +135,7 @@ template<class X, class Y, class PR> Vector<Differential<X>> make_variables(Degr
     return Differential<X>::variables(d,Vector<X>(vy,pr));
 }
 
-*/
+
 
 template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
 X get_item(const C& c, const I& i) {
@@ -250,8 +189,7 @@ Void export_differential(pybind11::module& module, const String& name)
     
     pybind11::class_<D> differential_class(module,name.c_str());
     differential_class.def(pybind11::init<D>());
-#warning Cannot add constructors to classes using pybind11
-//    differential_class.def("__init__", pybind11::make_constructor(&make_sparse_differential<D>) );
+    differential_class.def(pybind11::init(&make_sparse_differential<D>) );
     differential_class.def( pybind11::init< SizeType, DegreeType >());
     differential_class.def( pybind11::init< Expansion<MultiIndex,X>, DegreeType >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
@@ -324,9 +262,8 @@ export_differential_vector(pybind11::module& module, const String& name)
 
     pybind11::class_<DV> differential_vector_class(module,name.c_str());
     differential_vector_class.def(pybind11::init<DV>());
-#warning Cannot make_constructor 
-//    differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
-    differential_vector_class.def( pybind11::init< Nat, Nat, Nat >());
+    differential_vector_class.def(pybind11::init(&make_differential_vector<D>));
+    differential_vector_class.def(pybind11::init<Nat,Nat,Nat>());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);
     differential_vector_class.def("__getitem__", &get_item<DV,Int,D>);
     differential_vector_class.def("__setitem__",&set_item<DV,Int,X>);
@@ -336,15 +273,16 @@ export_differential_vector(pybind11::module& module, const String& name)
     differential_vector_class.def("__sub__",&__sub__<DV,DV,DV>);
     differential_vector_class.def("__add__",&__add__<DV,DV,V>);
     differential_vector_class.def("__sub__",&__sub__<DV,DV,V>);
-    //differential_vector_class.def("__mul__",&__mul__<DV,DV,D>);
-    //differential_vector_class.def("__div__",&__div__<DV,DV,D>);
+    differential_vector_class.def("__rmul__",&__rmul__<DV,DV,D>);
+    differential_vector_class.def("__mul__",&__mul__<DV,DV,D>);
+    differential_vector_class.def("__div__",&__div__<DV,DV,D>);
     differential_vector_class.def("__rmul__",&__rmul__<DV,DV,X>);
     differential_vector_class.def("__mul__",&__mul__<DV,DV,X>);
     differential_vector_class.def("__div__",&__div__<DV,DV,X>);
     differential_vector_class.def("value", &DV::value);
     differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def("__str__",&__cstr__<DV>);
-//    differential_vector_class.def("__repr__",&__repr__<DV>);
+    //differential_vector_class.def("__repr__",&__repr__<DV>);
 
     module.def("compose",(D(*)(const D&,const DV&))&D::_compose);
     module.def("compose",(DV(*)(const DV&,const DV&))&DV::_compose);
@@ -352,7 +290,7 @@ export_differential_vector(pybind11::module& module, const String& name)
     module.def("solve",(DV(*)(const DV&,const V&))&DV::_solve);
     module.def("flow",(DV(*)(const DV&,const V&))&DV::_flow);
 
-    //def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
+    //module.def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
 template Void export_differential< Differential<FloatDPApproximation> >(pybind11::module&,const String&);
@@ -363,8 +301,6 @@ template Void export_differential_vector< Differential<FloatDPBounds> >(pybind11
 
 Void differentiation_submodule(pybind11::module& module)
 {
-//    to_python_dict < Expansion<MultiIndex,FloatDPApproximation> >();
-//    to_python_dict < Expansion<MultiIndex,FloatDPBounds> >();
 
     export_differential< Differential<FloatDPApproximation> >(module,python_name<FloatDPApproximation>("Differential"));
     export_differential< Differential<FloatDPBounds> >(module,python_name<FloatDPBounds>("Differential"));
@@ -376,8 +312,8 @@ Void differentiation_submodule(pybind11::module& module)
     export_differential_vector< Differential<FloatMPApproximation> >(module,python_name<FloatMPApproximation>("DifferentialVector"));
     export_differential_vector< Differential<FloatMPBounds> >(module,python_name<FloatMPBounds>("DifferentialVector"));
 
-//    module.def("differential_variables", (Vector<Differential<FloatDPBounds>>(*)(DegreeType, Vector<Real>, DoublePrecision)) &make_variables<FloatDPBounds>);
-//    module.def("differential_variables", (Vector<Differential<FloatMPBounds>>(*)(DegreeType, Vector<Real>, MultiplePrecision)) &make_variables<FloatMPBounds>);
+    module.def("differential_variables", (Vector<Differential<FloatDPBounds>>(*)(DegreeType, Vector<Real>, DoublePrecision)) &make_variables<FloatDPBounds>);
+    module.def("differential_variables", (Vector<Differential<FloatMPBounds>>(*)(DegreeType, Vector<Real>, MultiplePrecision)) &make_variables<FloatMPBounds>);
 
 
 }

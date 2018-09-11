@@ -25,6 +25,8 @@
 #include "pybind11.hpp"
 #include <pybind11/operators.h>
 
+#include "utilities.hpp"
+
 #if defined(__GNUG__) && !defined(__clang__)
 #  pragma GCC diagnostic ignored "-Wattributes"
 #endif
@@ -54,17 +56,15 @@ template<> String numeric_class_tag<MultiplePrecision>() { return "MP"; }
 template<class T> struct PythonName { const char* get() const { return class_name<T>().c_str(); } };
 template<class T> inline const char* python_name() { return PythonName<T>().get(); }
 
-template<class T> std::string to_cppstring(T const& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
-
-template<class T> struct PythonRepresentation {
-    const T* pointer;
-    PythonRepresentation(const T& t) : pointer(&t) { }
-    const T& reference() const { return *pointer; }
-};
-
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& repr) {
+    return os << "Integer("<<repr.reference()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Dyadic>& repr) {
+    return os << "Dyadic("<<repr.reference().mantissa()<<","<<repr.reference().exponent()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr) {
     return os << "Rational("<<repr.reference().numerator()<<","<<repr.reference().denominator()<<")"; }
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr) {
+    return os << "Real("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr) {
     return os << "FloatDP("<<repr.reference()<<")"; }
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPApproximation>& repr) {
@@ -265,8 +265,8 @@ template<class P> void export_logical(pymodule& module, std::string name)
     logical_class.def(init<bool>());
     logical_class.def(init<LogicalType<P>>());
     logical_class.define_self_logical();
-    logical_class.def("__str__", &to_cppstring<LogicalType<P>>);
-    logical_class.def("__repr__", &to_cppstring<LogicalType<P>>);
+    logical_class.def("__str__", &__cstr__<LogicalType<P>>);
+    logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
 
     module.def("decide", (bool(*)(LogicalType<P>)) &decide);
     module.def("possibly", (bool(*)(LogicalType<P>)) &possibly);
@@ -282,8 +282,8 @@ template<> void export_logical<ExactTag>(pymodule& module, std::string name)
     logical_class.def(init<bool>());
     logical_class.def(init<LogicalType<P>>());
     logical_class.define_self_logical();
-    logical_class.def("__str__", &to_cppstring<LogicalType<P>>);
-    logical_class.def("__repr__", &to_cppstring<LogicalType<P>>);
+    logical_class.def("__str__", &__cstr__<LogicalType<P>>);
+    logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
 
 //    implicitly_convertible<LogicalType<ExactTag>,bool>();
 }
@@ -308,8 +308,8 @@ void export_integer(pymodule& module)
     integer_class.def(init<int>());
     integer_class.def(init<Integer>());
 
-    integer_class.def("__str__", &to_cppstring<Integer>);
-    integer_class.def("__repr__", &to_cppstring<Integer>);
+    integer_class.def("__str__", &__cstr__<Integer>);
+    integer_class.def("__repr__", &__repr__<Integer>);
 
     // Allows mixed operations with integral types
     integer_class.define_self_arithmetic();
@@ -328,8 +328,7 @@ void export_dyadic(pymodule& module)
 
     numeric_class_<Dyadic> dyadic_class(module,"Dyadic");
     dyadic_class.def(init<Int,Nat>());
-//    dyadic_class.def(init<Integer,Natural>());
-//    dyadic_class.def(init<Int>());
+    dyadic_class.def(init<Integer,Natural>());
     dyadic_class.def(init<Integer>());
     dyadic_class.def(init<Dyadic>());
     dyadic_class.def(init<FloatDPValue>());
@@ -339,8 +338,8 @@ void export_dyadic(pymodule& module)
     dyadic_class.define_self_comparisons();
     module.def("hlf", (Dyadic(*)(Dyadic const&)) &_hlf_);
 
-    dyadic_class.def("__str__", &to_cppstring<Dyadic>);
-    dyadic_class.def("__repr__", &to_cppstring<Dyadic>);
+    dyadic_class.def("__str__", &__cstr__<Dyadic>);
+    dyadic_class.def("__repr__", &__repr__<Dyadic>);
 
     dyadic_class.def("get_d", &Dyadic::get_d);
 
@@ -356,7 +355,6 @@ void export_rational(pymodule& module)
     rational_class.def(init<int,int>());
     rational_class.def(init<Integer,Integer>());
     rational_class.def(init<int>());
-    //rational_class.def(init<double>());
     rational_class.def(init<Integer>());
     rational_class.def(init<Dyadic>());
     rational_class.def(init<Decimal>());
@@ -365,8 +363,8 @@ void export_rational(pymodule& module)
     rational_class.define_self_arithmetic();
     rational_class.define_self_comparisons();
 
-    rational_class.def("__str__", &to_cppstring<Rational>);
-    rational_class.def("__repr__", &to_cppstring<Rational>);
+    rational_class.def("__str__", &__cstr__<Rational>);
+    rational_class.def("__repr__", &__repr__<Rational>);
 
     rational_class.def("get_d", &Rational::get_d);
 
@@ -381,8 +379,8 @@ void export_decimal(pymodule& module)
     decimal_class.def(init<Decimal>());
     decimal_class.def(init<StringType>());
     decimal_class.def(init<double>());
-    decimal_class.def("__str__", &to_cppstring<Decimal>);
-    decimal_class.def("__repr__", &to_cppstring<Decimal>);
+    decimal_class.def("__str__", &__cstr__<Decimal>);
+    decimal_class.def("__repr__", &__cstr__<Decimal>);
     implicitly_convertible<Decimal,Rational>();
 }
 
@@ -406,8 +404,8 @@ void export_real(pymodule& module)
     module.def("cos", (Real(*)(Real const&)) &_cos_);
     module.def("tan", (Real(*)(Real const&)) &_tan_);
 
-    real_class.def("__str__", &to_cppstring<Real>);
-    real_class.def("__repr__", &to_cppstring<Real>);
+    real_class.def("__str__", &__cstr__<Real>);
+    real_class.def("__repr__", &__cstr__<Real>);
 
     real_class.def("get", (FloatDPBounds(Real::*)(DoublePrecision)const) &Real::get);
     real_class.def("get", (FloatMPBounds(Real::*)(MultiplePrecision)const) &Real::get);
@@ -424,8 +422,8 @@ void export_real(pymodule& module)
     validated_real_class.def("get", (FloatDPBounds(ValidatedReal::*)(DoublePrecision)const) &ValidatedReal::get);
     validated_real_class.def("get", (FloatMPBounds(ValidatedReal::*)(MultiplePrecision)const) &ValidatedReal::get);
 
-    validated_real_class.def("__str__", &to_cppstring<ValidatedReal>);
-    validated_real_class.def("__repr__", &to_cppstring<ValidatedReal>);
+    validated_real_class.def("__str__", &__cstr__<ValidatedReal>);
+    validated_real_class.def("__repr__", &__cstr__<ValidatedReal>);
 }
 
 
@@ -467,24 +465,24 @@ void export_numbers(pymodule& module)
     approximate_number_class.define_self_arithmetic();
     approximate_number_class.define_mixed_arithmetic<ApproximateNumber>();
     approximate_number_class.define_transcendental_functions();
-    approximate_number_class.def("__str__", &to_cppstring<ApproximateNumber>);
-    approximate_number_class.def("__repr__", &to_cppstring<ApproximateNumber>);
+    approximate_number_class.def("__str__", &__cstr__<ApproximateNumber>);
+    approximate_number_class.def("__repr__", &__cstr__<ApproximateNumber>);
 
     numeric_class_<ValidatedLowerNumber> lower_number_class(module,class_name<LowerTag>()+"Number");
     lower_number_class.def(init<ValidatedNumber>());
     lower_number_class.def("get", (FloatDPLowerBound(*)(ValidatedLowerNumber const&, DoublePrecision const&)) &get);
     lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, MultiplePrecision const&)) &get);
     lower_number_class.define_monotonic_functions();
-    lower_number_class.def("__str__", &to_cppstring<ValidatedLowerNumber>);
-    lower_number_class.def("__repr__", &to_cppstring<ValidatedLowerNumber>);
+    lower_number_class.def("__str__", &__cstr__<ValidatedLowerNumber>);
+    lower_number_class.def("__repr__", &__cstr__<ValidatedLowerNumber>);
 
     numeric_class_<ValidatedUpperNumber> upper_number_class(module,class_name<UpperTag>()+"Number");
     upper_number_class.def(init<ValidatedNumber>());
     upper_number_class.def("get", (FloatDPUpperBound(*)(ValidatedUpperNumber const&, DoublePrecision const&)) &get);
     upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, MultiplePrecision const&)) &get);
     upper_number_class.define_monotonic_functions();
-    upper_number_class.def("__str__", &to_cppstring<ValidatedUpperNumber>);
-    upper_number_class.def("__repr__", &to_cppstring<ValidatedUpperNumber>);
+    upper_number_class.def("__str__", &__cstr__<ValidatedUpperNumber>);
+    upper_number_class.def("__repr__", &__cstr__<ValidatedUpperNumber>);
 
     numeric_class_<ValidatedNumber> validated_number_class(module,class_name<ValidatedTag>()+"Number");
     validated_number_class.def(init<Rational>());
@@ -497,8 +495,8 @@ void export_numbers(pymodule& module)
     validated_number_class.define_self_arithmetic();
     validated_number_class.define_mixed_arithmetic<ValidatedNumber>();
     validated_number_class.define_transcendental_functions();
-    validated_number_class.def("__str__", &to_cppstring<ValidatedNumber>);
-    validated_number_class.def("__repr__", &to_cppstring<ValidatedNumber>);
+    validated_number_class.def("__str__", &__cstr__<ValidatedNumber>);
+    validated_number_class.def("__repr__", &__cstr__<ValidatedNumber>);
 
     numeric_class_<EffectiveNumber> effective_number_class(module,class_name<EffectiveTag>()+"Number");
     effective_number_class.def(init<Rational>());
@@ -510,16 +508,16 @@ void export_numbers(pymodule& module)
     effective_number_class.define_self_arithmetic();
     effective_number_class.define_mixed_arithmetic<EffectiveNumber>();
     effective_number_class.define_transcendental_functions();
-    effective_number_class.def("__str__", &to_cppstring<EffectiveNumber>);
-    effective_number_class.def("__repr__", &to_cppstring<EffectiveNumber>);
+    effective_number_class.def("__str__", &__cstr__<EffectiveNumber>);
+    effective_number_class.def("__repr__", &__cstr__<EffectiveNumber>);
 
     numeric_class_<ExactNumber> exact_number_class(module,class_name<ExactTag>()+"Number");
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
     exact_number_class.def("get", (FloatDPBounds(*)(ExactNumber const&, DoublePrecision const&)) &get);
     exact_number_class.def("get", (FloatMPBounds(*)(ExactNumber const&, MultiplePrecision const&)) &get);
-    exact_number_class.def("__str__", &to_cppstring<ExactNumber>);
-    exact_number_class.def("__repr__", &to_cppstring<ExactNumber>);
+    exact_number_class.def("__str__", &__cstr__<ExactNumber>);
+    exact_number_class.def("__repr__", &__cstr__<ExactNumber>);
 
 
     implicitly_convertible<ValidatedNumber,ApproximateNumber>();
@@ -541,8 +539,8 @@ void export_dyadic_bounds(pymodule& module)
     dyadic_bounds_class.def(init<DyadicBounds>());
     dyadic_bounds_class.def(init<Dyadic,Dyadic>());
 
-    dyadic_bounds_class.def("__str__", &to_cppstring<DyadicBounds>);
-    dyadic_bounds_class.def("__repr__", &to_cppstring<DyadicBounds>);
+    dyadic_bounds_class.def("__str__", &__cstr__<DyadicBounds>);
+    dyadic_bounds_class.def("__repr__", &__cstr__<DyadicBounds>);
 
 }
 
@@ -568,8 +566,8 @@ template<class PR> void export_raw_float(pymodule& module)
     raw_float_class.def(init<double,PR>());
     raw_float_class.def(init<Dyadic,PR>());
     raw_float_class.def(init<Rational,RND,PR>());
-    raw_float_class.def("__str__", &to_cppstring<RawFloat<PR>>);
-    raw_float_class.def("__repr__", &to_cppstring<RawFloat<PR>>);
+    raw_float_class.def("__str__", &__cstr__<RawFloat<PR>>);
+    raw_float_class.def("__repr__", &__cstr__<RawFloat<PR>>);
 
     module.def("nul", (F(*)(Fcr)) &_nul_);
     module.def("pos", (F(*)(Fcr)) &_pos_);
@@ -633,8 +631,8 @@ template<class PR> void export_float_value(pymodule& module)
     float_value_class.def("raw", (RawFloat<PR>const&(FloatValue<PR>::*)()const)&FloatValue<PR>::raw);
     float_value_class.def("get_d",&FloatValue<PR>::get_d);
 
-    float_value_class.def("__str__", &to_cppstring<FloatValue<PR>>);
-    float_value_class.def("__repr__", &to_cppstring<FloatValue<PR>>);
+    float_value_class.def("__str__", &__cstr__<FloatValue<PR>>);
+    float_value_class.def("__repr__", &__cstr__<FloatValue<PR>>);
 
     float_value_class.def_static("set_output_places",&FloatValue<PR>::set_output_places);
 }
@@ -653,8 +651,8 @@ template<class PRE> void export_float_error(pymodule& module)
 
     //float_error_class.def("raw",(RawFloat<PRE>&(FloatError<PRE>::*)())&FloatError<PRE>::raw,return_value_policy<Reference_existing_object>());
     float_error_class.def("raw",(RawFloat<PRE>const&(FloatError<PRE>::*)()const)&FloatError<PRE>::raw);
-    float_error_class.def("__str__", &to_cppstring<FloatError<PRE>>);
-    float_error_class.def("__repr__", &to_cppstring<FloatError<PRE>>);
+    float_error_class.def("__str__", &__cstr__<FloatError<PRE>>);
+    float_error_class.def("__repr__", &__cstr__<FloatError<PRE>>);
 
     float_error_class.def("precision", &FloatError<PRE>::precision);
 
@@ -697,8 +695,8 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     float_ball_class.define_unary_arithmetic();
     float_ball_class.define_transcendental_functions();
 
-    float_ball_class.def("__str__", &to_cppstring<FloatBall<PR>>);
-    float_ball_class.def("__repr__", &to_cppstring<FloatBall<PR>>);
+    float_ball_class.def("__str__", &__cstr__<FloatBall<PR>>);
+    float_ball_class.def("__repr__", &__cstr__<FloatBall<PR>>);
 }
 
 
@@ -736,8 +734,8 @@ template<class PR> void export_float_bounds(pymodule& module)
 
     float_bounds_class.define_transcendental_functions();
 
-    float_bounds_class.def("__str__", &to_cppstring<FloatBounds<PR>>);
-    float_bounds_class.def("__repr__", &to_cppstring<FloatBounds<PR>>);
+    float_bounds_class.def("__str__", &__cstr__<FloatBounds<PR>>);
+    float_bounds_class.def("__repr__", &__cstr__<FloatBounds<PR>>);
 
     implicitly_convertible<FloatValue<PR>,FloatBounds<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();
@@ -758,8 +756,8 @@ template<class PR> void export_float_upper_bound(pymodule& module)
     float_upper_bound_class.def(init<FloatBounds<PR>>());
     float_upper_bound_class.def(init<FloatUpperBound<PR>>());
     float_upper_bound_class.def(init<ValidatedUpperNumber,PR>());
-    float_upper_bound_class.def("__str__", &to_cppstring<FloatUpperBound<PR>>);
-    float_upper_bound_class.def("__repr__", &to_cppstring<FloatUpperBound<PR>>);
+    float_upper_bound_class.def("__str__", &__cstr__<FloatUpperBound<PR>>);
+    float_upper_bound_class.def("__repr__", &__cstr__<FloatUpperBound<PR>>);
 
     float_upper_bound_class.def("precision", &FloatUpperBound<PR>::precision);
     float_upper_bound_class.def("raw", (RawFloat<PR>const&(FloatUpperBound<PR>::*)()const)&FloatUpperBound<PR>::raw);
@@ -809,8 +807,8 @@ template<class PR> void export_float_lower_bound(pymodule& module)
     float_lower_bound_class.def(init<FloatBounds<PR>>());
     float_lower_bound_class.def(init<FloatLowerBound<PR>>());
     float_lower_bound_class.def(init<ValidatedLowerNumber,PR>());
-    float_lower_bound_class.def("__str__", &to_cppstring<FloatLowerBound<PR>>);
-    float_lower_bound_class.def("__repr__", &to_cppstring<FloatLowerBound<PR>>);
+    float_lower_bound_class.def("__str__", &__cstr__<FloatLowerBound<PR>>);
+    float_lower_bound_class.def("__repr__", &__cstr__<FloatLowerBound<PR>>);
 
     float_lower_bound_class.def("precision", &FloatLowerBound<PR>::precision);
 
@@ -878,8 +876,8 @@ template<class PR> void export_float_approximation(pymodule& module)
     float_approximation_class.def("raw", (RawFloat<PR>const&(FloatApproximation<PR>::*)()const)&FloatApproximation<PR>::raw);
     float_approximation_class.def("get_d", &FloatApproximation<PR>::get_d);
 
-    float_approximation_class.def("__str__", &to_cppstring<FloatApproximation<PR>>);
-    float_approximation_class.def("__repr__", &to_cppstring<FloatApproximation<PR>>);
+    float_approximation_class.def("__str__", &__cstr__<FloatApproximation<PR>>);
+    float_approximation_class.def("__repr__", &__cstr__<FloatApproximation<PR>>);
 
     implicitly_convertible<double,FloatApproximation<PR>>();
     //implicitly_convertible<Integer,FloatBounds<PR>>();
@@ -899,15 +897,15 @@ Void export_effort(pymodule& module) {
     numeric_class_<Effort> effort_class(module,"Effort");
     effort_class.def(init<Nat>());
     effort_class.def("work",&Effort::work);
-    effort_class.def("__str__", &to_cppstring<Effort>);
+    effort_class.def("__str__", &__cstr__<Effort>);
 }
 
 Void export_accuracy(pymodule& module) {
     numeric_class_<Accuracy> accuracy_class(module,"Accuracy");
     accuracy_class.def(init<Nat>());
     accuracy_class.def("bits",&Accuracy::bits);
-    accuracy_class.def("__str__", &to_cppstring<Accuracy>);
-    accuracy_class.def("__repr__", &to_cppstring<Accuracy>);
+    accuracy_class.def("__str__", &__cstr__<Accuracy>);
+    accuracy_class.def("__repr__", &__cstr__<Accuracy>);
 }
 
 template<class PR> Void export_precision(pymodule& module);
@@ -915,7 +913,7 @@ template<class PR> Void export_precision(pymodule& module);
 template<> Void export_precision<DoublePrecision>(pymodule& module) {
     numeric_class_<DoublePrecision> precision_class(module,"DoublePrecision");
     precision_class.def(init<>());
-    precision_class.def("__str__", &to_cppstring<DoublePrecision>);
+    precision_class.def("__str__", &__cstr__<DoublePrecision>);
 //    boost::python::scope().attr("double_precision") = double_precision;
 }
 
@@ -923,7 +921,7 @@ template<> Void export_precision<MultiplePrecision>(pymodule& module) {
     numeric_class_<MultiplePrecision> precision_class(module,"MultiplePrecision");
     precision_class.def(init<Nat>());
     precision_class.def("bits",&MultiplePrecision::bits);
-    precision_class.def("__str__", &to_cppstring<MultiplePrecision>);
+    precision_class.def("__str__", &__cstr__<MultiplePrecision>);
     module.def("multiple_precision", &multiple_precision);
     module.def("precision", &precision);
 

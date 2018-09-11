@@ -74,56 +74,13 @@ ASF pos(ASF const&); ASF neg(ASF const&); ASF sqr(ASF const&); ASF rec(ASF const
 ASF sqrt(ASF const&); ASF exp(ASF const&); ASF log(ASF const&); ASF atan(ASF const&);
 ASF sin(ASF const&); ASF cos(ASF const&); ASF tan(ASF const&);
 
-/*
-RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
-FloatDPApproximation evaluate(const ScalarFunction<ValidatedTag>&, const Vector<FloatDPApproximation>&);
-FloatDPApproximation evaluate(const ScalarFunction<EffectiveTag>&, const Vector<FloatDPApproximation>&);
-FloatDPBounds evaluate(const ScalarFunction<ValidatedTag>&, const Vector<FloatDPBounds>&);
-FloatDPBounds evaluate(const ScalarFunction<EffectiveTag>&, const Vector<FloatDPBounds>&);
-Vector<FloatDPApproximation> evaluate(const VectorFunction<ValidatedTag>&, const Vector<FloatDPApproximation>&);
-Vector<FloatDPApproximation> evaluate(const VectorFunction<EffectiveTag>&, const Vector<FloatDPApproximation>&);
-Vector<FloatDPBounds> evaluate(const VectorFunction<ValidatedTag>&, const Vector<FloatDPBounds>&);
-Vector<FloatDPBounds> evaluate(const VectorFunction<EffectiveTag>&, const Vector<FloatDPBounds>&);
-*/
-
-/*
-template<>
-struct from_python< MultiIndex >
-{
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj_ptr);
-        Void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
-        MultiIndex res(static_cast<SizeType>(len(tup)));
-        for(Nat i=0; i!=res.size(); ++i) { res.set(i,boost::python::extract<Nat>(tup[i])); }
-        new (storage) MultiIndex(res);
-        data->convertible = storage;
-    }
-};
 
 
-
-
-template<>
-struct from_python<EffectiveVectorFunction>
-{
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<EffectiveVectorFunction>()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        list lst=boost::python::extract<list>(obj_ptr);
-        Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
-        assert(len(lst)!=0);
-        EffectiveScalarFunction sf0 = boost::python::extract<EffectiveScalarFunction>(lst[0]);
-        EffectiveVectorFunction res(static_cast<SizeType>(len(lst)),sf0.argument_size());
-        for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,boost::python::extract<EffectiveScalarFunction>(lst[i])); }
-        new (storage) EffectiveVectorFunction(res);
-        data->convertible = storage;
-    }
-};
-*/
-
-
+MultiIndex multi_index_from_python(pybind11::tuple pytup) {
+    MultiIndex res(static_cast<SizeType>(len(pytup)));
+    for(SizeType i=0; i!=res.size(); ++i) { res.set(i,pybind11::cast<Nat>(pytup[i])); }
+    return res;
+}
 
 template<class X, class D>
 inline Matrix<X> get_jacobian(const Vector<D>& d) {
@@ -137,6 +94,10 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     return J;
 }
 
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex>& arepr) {
+    MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os; 
+}
+
 template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunction<X> >& frepr) {
     static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
@@ -145,84 +106,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Representatio
     static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
-/*
-class ScalarPythonFunction
-    : public ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>
-{
-  public:
-    friend class ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>;
-    template<class T> Void _compute(T& r, const Vector<T>& a) const {
-        r=boost::python::extract<T>(this->_pyf(a)); }
-  public:
-    ScalarPythonFunction(StringType& nm, SizeType as, const boost::python::object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
-    ScalarPythonFunction(SizeType as, const boost::python::object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
-    ScalarPythonFunction(const boost::python::object& pyf)
-        : _name(),
-          _argument_size(boost::python::extract<SizeType>(pyf.attr("argument_size"))),
-          _pyf(pyf) { }
-
-    ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
-    virtual SizeType argument_size() const { return this->_argument_size; }
-
-    virtual EffectiveScalarFunctionInterface* _derivative (SizeType j) const {
-        ARIADNE_FAIL_MSG("Cannot symbolically differentiate a Python function"); }
-    virtual OutputStream& repr(OutputStream& os) const { return os; }
-    virtual OutputStream& write(OutputStream& os) const {
-        os << "ScalarUserFunction( ";
-        if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
-        os << "argument_size="<<this->_argument_size;
-        return os << " )"; }
-    EffectiveScalarFunction derivative(SizeType j) const { return EffectiveScalarFunction(this->_derivative(j)); }
-  private:
-    StringType _name;
-    SizeType _argument_size;
-    boost::python::object _pyf;
-};
-
-
-class VectorPythonFunction
-    : public VectorFunctionMixin<VectorPythonFunction,EffectiveTag>
-{
-  public:
-    friend class VectorFunctionMixin<VectorPythonFunction,EffectiveTag>;
-    template<class T> Void _compute(Vector<T>& r, const Vector<T>& a) const {
-        r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
-  public:
-    VectorPythonFunction(StringType& nm, SizeType rs, SizeType as, const boost::python::object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
-    VectorPythonFunction(SizeType rs, SizeType as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
-    VectorPythonFunction(const object& pyf)
-        : _name(),
-          _result_size(boost::python::extract<Nat>(pyf.attr("result_size"))),
-          _argument_size(boost::python::extract<Nat>(pyf.attr("argument_size"))),
-          _pyf(pyf) { }
-
-    VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }
-    virtual SizeType result_size() const { return this->_result_size; }
-    virtual SizeType argument_size() const { return this->_argument_size; }
-
-    virtual EffectiveVectorFunctionInterface* _derivative (SizeType j) const {
-        ARIADNE_FAIL_MSG("Cannot symbolically differentiate a Python function"); }
-    virtual EffectiveScalarFunctionInterface* _get(SizeType i) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
-    virtual EffectiveScalarFunction operator[](SizeType i) const {
-        ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
-
-    virtual OutputStream& write(OutputStream& os) const {
-        os << "VectorUserFunction( ";
-        if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
-        os << "result_size="<<this->_result_size;
-        os << ", argument_size="<<this->_argument_size;
-        return os << " )"; }
-  private:
-    StringType _name;
-    SizeType _result_size;
-    SizeType _argument_size;
-    boost::python::object _pyf;
-};
-*/
-
-
-}
+}// namespace Ariadne
 
 using namespace Ariadne;
 
@@ -248,15 +132,15 @@ Void export_multi_index(pybind11::module& module)
 {
     pybind11::class_< MultiIndex > multi_index_class(module,"MultiIndex");
     multi_index_class.def(pybind11::init<Nat>());
+    multi_index_class.def(pybind11::init(&multi_index_from_python));
     multi_index_class.def(pybind11::init<MultiIndex>());
     multi_index_class.def("__getitem__",&MultiIndex::get);
     multi_index_class.def("__setitem__",&MultiIndex::set);
     multi_index_class.def("degree",&MultiIndex::degree);
     multi_index_class.def("__str__", &__cstr__<MultiIndex>);
-//    multi_index_class.def("__repr__", &__repr__<MultiIndex>);
+    multi_index_class.def("__repr__", &__repr__<MultiIndex>);
 
-//    from_python<MultiIndex>();
-//    to_python< List<MultiIndex> >();
+    pybind11::implicitly_convertible<pybind11::tuple,MultiIndex>();
 }
 
 template<class X>
@@ -299,6 +183,7 @@ Void export_polynomial(pybind11::module& module)
     polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
     //polynomial_class.def(self_ns::repr(self));
 
+#warning Ensure a vector of polynomials is treated properly
     to_python< Vector< Polynomial<X> > >();
 }
 
@@ -363,13 +248,6 @@ template<class F> Void export_function_evaluation(pybind11::class_<F>& function_
     export_function_evaluation(function_class, Paradigm<F>());
 }
 
-
-/*
-    function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarFunction<P>::*)(const Argument<FloatDPApproximation>&)const)&ScalarFunction<P>::gradient );
-    function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Argument<FloatDPBounds>&)const)&ScalarFunction<P>::gradient );
-    function_class.def("differential", (Differential<FloatDPApproximation>(ScalarFunction<P>::*)(const Argument<FloatDPApproximation>&,DegreeType)const) &ScalarFunction<P>::differential);
-    function_class.def("differential", (Differential<FloatDPBounds>(ScalarFunction<P>::*)(const Argument<FloatDPBounds>&,DegreeType)const) &ScalarFunction<P>::differential);
-*/
 
 
 template<class P> Void export_scalar_function_evaluation(pybind11::class_<ScalarFunction<P>>& scalar_function_class) {
@@ -437,6 +315,11 @@ template<class P> Void export_scalar_function(pybind11::module& module)
     scalar_function_class.def_static("constant", (ScalarFunction<P>(*)(SizeType,Number<P>)) &ScalarFunction<P>::constant);
     scalar_function_class.def_static("coordinate", (ScalarFunction<P>(*)(SizeType,SizeType)) &ScalarFunction<P>::coordinate);
 
+    scalar_function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarFunction<P>::gradient);
+    if constexpr (not IsSame<P,ApproximateTag>::value) {
+        scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
+    }
+    
     module.def("pow", (ScalarFunction<P>(*)(const ScalarFunction<P>&,Int)) &pow);
     module.def("rec", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &rec);
     module.def("sqr", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqr);
@@ -458,27 +341,28 @@ template<class P> Void export_vector_function(pybind11::module& module)
     pybind11::class_<VectorFunction<P>> vector_function_class(module,(class_name<P>()+"VectorFunction").c_str());
     vector_function_class.def(pybind11::init<VectorFunction<P>>());
     vector_function_class.def(pybind11::init<Nat,Nat>());
+    vector_function_class.def(pybind11::init([](std::vector<ScalarFunction<P>> const& lst){return VectorFunction<P>(lst);}));
 
     vector_function_class.def("result_size", &VectorFunction<P>::result_size);
     vector_function_class.def("argument_size", &VectorFunction<P>::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction<P>::get);
     vector_function_class.def("__setitem__", &VectorFunction<P>::set);
     export_vector_function_evaluation(vector_function_class);
-//    vector_function_class.def("__call__", (Vector<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const)&VectorFunction<P>::operator() );
-//    vector_function_class.def("__call__", (Vector<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const)&VectorFunction<P>::operator() );
-//    vector_function_class.def("__call__", (Vector<Differential<FloatDPBounds>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPBounds>>&)const)&VectorFunction<P>::evaluate );
-//    vector_function_class.def("__call__", (Vector<Differential<FloatDPApproximation>>(VectorFunction<P>::*)(const Vector<Differential<FloatDPApproximation>>&)const)&VectorFunction<P>::evaluate );
-//    vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
-//    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);
-//    vector_function_class.def("differential", (Vector<Differential<FloatDPBounds> >(VectorFunction<P>::*)(const Vector<FloatDPBounds>&,DegreeType)const) &VectorFunction<P>::differential);
-//    vector_function_class.def("differential", (Vector<Differential<FloatDPApproximation> >(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&,DegreeType)const) &VectorFunction<P>::differential);
+
+    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);
+    if constexpr (not IsSame<P,ApproximateTag>::value) {
+        vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
+    }
+    
     vector_function_class.def("__str__", &__cstr__<VectorFunction<P>>);
     vector_function_class.def("__repr__", &__crepr__<VectorFunction<P>>);
 
     vector_function_class.def_static("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
 
     module.def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
-//    module.def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+    if constexpr (not IsSame<P,ApproximateTag>::value) {
+        module.def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+    }
 
     module.def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
     module.def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);
@@ -518,29 +402,12 @@ Void export_vector_functions(pybind11::module& module) {
     pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
     pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ApproximateTag>>();
     pybind11::implicitly_convertible<VectorFunction<ValidatedTag>,VectorFunction<ApproximateTag>>();
-//    from_python<VectorFunction<EffectiveTag>>();
 }
 
 
-/*
-Void export_scalar_python_function(pybind11::module& module)
-{
-    pybind11::class_<ScalarPythonFunction, bases< EffectiveScalarFunctionInterface > > scalar_python_function_class(module,"ScalarUserFunction", pybind11::init<object>());
-    scalar_python_function_class.def(pybind11::init<Nat,object>());
-}
-
-Void export_vector_python_function(pybind11::module& module)
-{
-    pybind11::class_<VectorPythonFunction, bases< EffectiveVectorFunctionInterface > > vector_python_function_class(module,"VectorUserFunction", pybind11::init<object>());
-    vector_python_function_class.def(pybind11::init<Nat,Nat,object>());
-}
-*/
 
 
 Void function_submodule(pybind11::module& module) {
-//    to_python< Array<StringType> >();
-//    from_python< Array<StringType> >();
-
     export_multi_index(module);
 
     export_univariate_function(module);
@@ -549,9 +416,5 @@ Void function_submodule(pybind11::module& module) {
 
     export_procedure<ApproximateNumber, FloatDPApproximation>(module);
     export_procedure<ValidatedNumber, FloatDPBounds>(module);
-
-
-    //export_scalar_python_function(module);
-    //export_vector_python_function(module);
 }
 

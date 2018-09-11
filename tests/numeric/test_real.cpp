@@ -36,6 +36,10 @@
 #include "numeric/float_bounds.hpp"
 
 namespace Ariadne {
+
+Rational to_rational(String x);
+Rational operator"" _q (const char* str, std::size_t);
+
 Rational to_rational(String x) {
     Rational q=0;
     SizeType i=0;
@@ -55,7 +59,7 @@ Rational to_rational(String x) {
     return q;
 }
 
-Rational operator"" _q (const char* str, size_t) { return Rational(Decimal(String(str))); }
+Rational operator"" _q (const char* str, std::size_t) { return Rational(Decimal(String(str))); }
 Decimal operator"" _dec (const char* str, std::size_t) { return Decimal(String(str)); }
 
 //Boolean nondeterministic_greater(Real const& x, Rational const& a, Rational const& b);

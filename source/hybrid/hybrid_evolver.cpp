@@ -69,6 +69,9 @@ static const DiscreteEvent step_event("_h_");
 typedef Vector<FloatDPValue> ExactFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
+Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& transitions);
+Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& transitions);
+
 OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
     return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
               << ", maximum_steps="<<termination.maximum_steps()
@@ -164,7 +167,7 @@ template<class K, class V> OutputStream& operator<<(OutputStream& os, LogOutput<
     os << "{"; for(auto iter=map.begin(); iter!=map.end(); ++iter) { os << (iter==map.begin()?"":",") << iter->first << ":" << log_output(iter->second); } return os << "}"; }
 template<class T> OutputStream& operator<<(OutputStream& os, LogOutput<List<T>> const& lst) {
     os << "["; for(SizeType i=0; i!=lst._ref.size(); ++i) { os<<(i==0?"":",")<<LogOutput<T>{lst._ref[i]}; } return os << "]"; }
-OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const& crossing_data_output) {
+inline OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const& crossing_data_output) {
     CrossingData const& crossing_data = crossing_data_output._ref;
     os << "{kind="<<crossing_data.crossing_kind;
     if(crossing_data.crossing_kind==CrossingKind::TRANSVERSE) {
@@ -1144,6 +1147,8 @@ _apply_guard(List<HybridEnclosure>& sets,
                         // Can't continue the evolution, so set a trivially-falsified constraint
                         set.new_parameter_constraint(event, this->function_factory().create_constant(set.parameter_domain(),1) <= zero);
                         break;
+                    default:
+                        ARIADNE_FAIL_MSG("Unhandled semantics.\n");
                 }
                 break;
             }

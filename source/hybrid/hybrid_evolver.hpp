@@ -483,7 +483,7 @@ struct TransitionData
     //TransitionData(DiscreteLocation t, ValidatedScalarFunction g, ValidatedVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
 };
-
+OutputStream& operator<<(OutputStream& os, const TransitionData& transition);
 
 //! \relates HybridEvolverBase
 //! \brief Information on how a flow tube crosses a hypersurface.
@@ -499,6 +499,7 @@ enum class DirectionKind : std::uint8_t {
     CONVEX, //!< The guard function varies convexly along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$.
     INDETERMINATE //!< Neither the guard function, nor its first or second Lie derivatives, has a definite sign.
 };
+OutputStream& operator<<(OutputStream& os, const DirectionKind& dir);
 
 //! \relates HybridEvolverBase
 //! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\frac{dx}{dt}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
@@ -619,6 +620,7 @@ struct TimingData
     ExactIntervalType evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
     ValidatedScalarFunctionModelDP evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
+OutputStream& operator<<(OutputStream& os, const TimingData& timing);
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
 //! \relates HybridEvolverInterface

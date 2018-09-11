@@ -139,6 +139,9 @@ class PenaltyFunctionOptimiser
     : public OptimiserBase
 {
   public:
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
+  public:
     virtual PenaltyFunctionOptimiser* clone() const;
     virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x, ExactVector y) const;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const;

@@ -153,7 +153,7 @@ TestNumber<Y>::test_get()
 
 }
 
-FloatDPValue max(Int y1, FloatDPValue x2) { return max(FloatDPValue(y1,x2.precision()),x2); }
+inline FloatDPValue max(Int y1, FloatDPValue x2) { return max(FloatDPValue(y1,x2.precision()),x2); }
 
 template<class Y> Void
 TestNumber<Y>::test_class()

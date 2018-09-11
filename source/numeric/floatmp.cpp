@@ -41,35 +41,6 @@ namespace Ariadne {
 inline MultiplePrecision cmb(MultiplePrecision pr1, MultiplePrecision pr2) { return min(pr1,pr2); }
 inline MultiplePrecision cmb(MultiplePrecision pr1, MultiplePrecision pr2, MultiplePrecision pr3) { return cmb(cmb(pr1,pr2),pr3); }
 
-// Mixed operations
-FloatMP add(FloatMP const& x1, Dbl x2);
-FloatMP sub(FloatMP const& x1, Dbl x2);
-FloatMP mul(FloatMP const& x1, Dbl x2);
-FloatMP div(FloatMP const& x1, Dbl x2);
-FloatMP add(Dbl x1, FloatMP const& x2);
-FloatMP sub(Dbl x1, FloatMP const& x2);
-FloatMP mul(Dbl x1, FloatMP const& x2);
-FloatMP div(Dbl x1, FloatMP const& x2);
-
-// Correctly rounded operations
-FloatMP sqr_rnd(FloatMP const& x);
-FloatMP add_rnd(FloatMP const& x1, FloatMP const& x2);
-FloatMP sub_rnd(FloatMP const& x1, FloatMP const& x2);
-FloatMP mul_rnd(FloatMP const& x1, FloatMP const& x2);
-FloatMP div_rnd(FloatMP const& x1, FloatMP const& x2);
-FloatMP pow_rnd(FloatMP const& x, Int n);
-FloatMP sqrt_rnd(FloatMP const& x);
-FloatMP exp_rnd(FloatMP const& x);
-FloatMP log_rnd(FloatMP const& x);
-FloatMP sin_rnd(FloatMP const& x);
-FloatMP cos_rnd(FloatMP const& x);
-FloatMP tan_rnd(FloatMP const& x);
-FloatMP atan_rnd(FloatMP const& x);
-
-String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd);
-String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd);
-String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd);
-
 FloatMP::~FloatMP() {
     mpfr_clear(_mpfr);
 }

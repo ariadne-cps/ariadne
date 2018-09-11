@@ -341,6 +341,16 @@ class FloatDP {
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingModeType rnd);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingModeType rnd);
   private:
+    // Rounded arithmetic
+    friend FloatDP pow_rnd(FloatDP x, Int n);
+    friend FloatDP sqrt_rnd(FloatDP x);
+    friend FloatDP exp_rnd(FloatDP x);
+    friend FloatDP log_rnd(FloatDP x);
+    friend FloatDP sin_rnd(FloatDP x);
+    friend FloatDP cos_rnd(FloatDP x);
+    friend FloatDP tan_rnd(FloatDP x);
+    friend FloatDP atan_rnd(FloatDP x);
+
     // Opposite rounded arithmetic
     friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return -t; }
     friend FloatDP neg_opp(FloatDP x) { volatile double t=x.dbl; return -t; }
@@ -354,15 +364,6 @@ class FloatDP {
 };
 
 static const FloatDP inf = std::numeric_limits<double>::infinity();
-
-FloatDP pow_rnd(FloatDP x, Int n);
-FloatDP sqrt_rnd(FloatDP x);
-FloatDP exp_rnd(FloatDP x);
-FloatDP log_rnd(FloatDP x);
-FloatDP sin_rnd(FloatDP x);
-FloatDP cos_rnd(FloatDP x);
-FloatDP tan_rnd(FloatDP x);
-FloatDP atan_rnd(FloatDP x);
 
 struct Float32 {
     float flt;

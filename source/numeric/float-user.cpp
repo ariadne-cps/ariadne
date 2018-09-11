@@ -1946,6 +1946,9 @@ template<> Int integer_cast<Int,FloatDPLowerBound>(FloatDPLowerBound const& x) {
 template<> Int integer_cast<Int,FloatDPBounds>(FloatDPBounds const& x) {
     return std::round((x.lower().get_d()+x.upper().get_d())/2); }
 
+template<> Int integer_cast<Int,FloatMPBounds>(FloatMPBounds const& x) {
+    return std::round((x.lower().get_d()+x.upper().get_d())/2); }
+
 template<> Nat integer_cast<Nat,FloatMPApproximation>(FloatMPApproximation const& x) {
     return std::round(x.get_d()); }
 template<> Int integer_cast<Int,FloatMPApproximation>(FloatMPApproximation const& x) {
@@ -2100,10 +2103,10 @@ Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<Fl
 PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
-FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2) {
+inline FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2) {
     return FloatDPError(div(up,x1._e,x2._l)); }
 
-FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
+inline FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
     FloatDPUpperBound x2(y2,x1.precision()); return FloatDPUpperBound(mul(up,x1._u,x2._u)); }
 
 

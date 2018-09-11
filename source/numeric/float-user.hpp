@@ -109,9 +109,6 @@ FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr);
 
 Rational cast_exact(Real const& x);
 
-FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2);
-FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2);
-
 // end>
 
 extern const FloatDPValue infty;

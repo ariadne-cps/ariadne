@@ -338,10 +338,37 @@ class FloatMP {
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
   private:
+
+    // Mixed operations
+    friend FloatMP add(FloatMP const& x1, Dbl x2);
+    friend FloatMP sub(FloatMP const& x1, Dbl x2);
+    friend FloatMP mul(FloatMP const& x1, Dbl x2);
+    friend FloatMP div(FloatMP const& x1, Dbl x2);
+    friend FloatMP add(Dbl x1, FloatMP const& x2);
+    friend FloatMP sub(Dbl x1, FloatMP const& x2);
+    friend FloatMP mul(Dbl x1, FloatMP const& x2);
+    friend FloatMP div(Dbl x1, FloatMP const& x2);
+
+    // Correctly rounded operations
+    friend FloatMP sqr_rnd(FloatMP const& x);
+    friend FloatMP add_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP pow_rnd(FloatMP const& x, Int n);
+    friend FloatMP sqrt_rnd(FloatMP const& x);
+    friend FloatMP exp_rnd(FloatMP const& x);
+    friend FloatMP log_rnd(FloatMP const& x);
+    friend FloatMP sin_rnd(FloatMP const& x);
+    friend FloatMP cos_rnd(FloatMP const& x);
+    friend FloatMP tan_rnd(FloatMP const& x);
+    friend FloatMP atan_rnd(FloatMP const& x);
+
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
-    friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
-    friend String print(FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
+    friend String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd);
+    friend String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd);
+    friend String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd);
 };
 
 template<class R, class A> R integer_cast(const A& a);

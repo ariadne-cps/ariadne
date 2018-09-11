@@ -309,16 +309,12 @@ template<class X> class Space;
 
 SizeType dimension(const Space<Real>& spc);
 
-Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Variable<Real>& var);
-Formula<EffectiveNumber> make_formula(const Expression<Real>& expr, const Space<Real>& spc);
-Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
 
-
-EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
+inline EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
-EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
+inline EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarFunction(EuclideanDomain(as),fm); }
-EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
+inline EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
     return EffectiveVectorFunction(EuclideanDomain(as),fm); }
 
 EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {

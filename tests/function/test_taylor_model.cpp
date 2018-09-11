@@ -41,7 +41,7 @@ using namespace Ariadne;
 
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 
-Dyadic operator"" _exd (long double x) { return Dyadic(x); }
+inline Dyadic operator"" _exd (long double x) { return Dyadic(x); }
 
 template<class T, class = decltype(declval<T>().clobber())> True has_clobber(int);
 template<class T> False has_clobber(...);
@@ -73,7 +73,7 @@ template<class T> T norm(T const& t) { return t; }
         }                                                               \
     }                                                                   \
 
-Vector<Dyadic> v(Nat n, Nat i) { return Vector<Dyadic>::unit(n,i); }
+inline Vector<Dyadic> v(Nat n, Nat i) { return Vector<Dyadic>::unit(n,i); }
 template<class F> ValidatedTaylorModel<F> ctm(Nat m, double c, Sweeper<F> swp) {
     typedef typename F::PrecisionType PR; return ValidatedTaylorModel<F>::constant(m,FloatValue<PR>(c),swp); }
 template<class F> ValidatedTaylorModel<F> ctm(Nat m, Sweeper<F> swp) {

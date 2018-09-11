@@ -48,9 +48,9 @@ using namespace Ariadne;
 
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
 
-Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
-Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }
-ValidatedScalarTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarTaylorFunctionModelDP::coordinate(d,j,swp); }
+inline Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
+inline Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }
+inline ValidatedScalarTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarTaylorFunctionModelDP::coordinate(d,j,swp); }
 
 template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
     Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size()));
@@ -398,7 +398,7 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-Bool operator==(Expansion<MultiIndex,FloatDPValue> const& e1, Expansion<MultiIndex,RawFloatDP> const& e2) {
+inline Bool operator==(Expansion<MultiIndex,FloatDPValue> const& e1, Expansion<MultiIndex,RawFloatDP> const& e2) {
     return reinterpret_cast<Expansion<MultiIndex,RawFloatDP>const&>(e1)==e2;
 }
 

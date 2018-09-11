@@ -70,6 +70,7 @@ double sub_rnd(double x1, double x2);
 double mul_rnd(double x1, double x2);
 double div_rnd(double x1, double x2);
 double fma_rnd(double x1, double x2, double x3);
+double pow_rnd(double x, Nat n);
 double pow_rnd(double x, int n);
 double sqrt_rnd(double x);
 double exp_rnd(double x);
@@ -80,8 +81,18 @@ double tan_rnd(double x);
 double asin_rnd(double x);
 double acos_rnd(double x);
 double atan_rnd(double x);
+double neg_rec_rnd(double x);
+double atan_rnd_series(double x);
 double pi_rnd();
 
+double texp(double x);
+
+double pi_opp();
+double add_opp(double x, double y);
+double sub_opp(double x, double y);
+double mul_opp(double x, double y);
+double div_opp(double x, double y);
+double neg_rec_opp(double x);
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
@@ -344,6 +355,14 @@ class FloatDP {
 
 static const FloatDP inf = std::numeric_limits<double>::infinity();
 
+FloatDP pow_rnd(FloatDP x, Int n);
+FloatDP sqrt_rnd(FloatDP x);
+FloatDP exp_rnd(FloatDP x);
+FloatDP log_rnd(FloatDP x);
+FloatDP sin_rnd(FloatDP x);
+FloatDP cos_rnd(FloatDP x);
+FloatDP tan_rnd(FloatDP x);
+FloatDP atan_rnd(FloatDP x);
 
 struct Float32 {
     float flt;

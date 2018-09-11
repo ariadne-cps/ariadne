@@ -80,6 +80,8 @@ typedef Vector<FloatDPValue> ExactFloatVector;
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
 
+Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&);
+
 inline Vector<Differential<RawFloatDP>>const& cast_raw(Vector<Differential<FloatDPApproximation>>const& v) {
     return reinterpret_cast<Vector<Differential<RawFloatDP>>const&>(v);
 }
@@ -453,7 +455,7 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
+inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
     for(Nat i=0; i!=bx.size(); ++i) {
         bx[i]=ExactIntervalType(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
     }

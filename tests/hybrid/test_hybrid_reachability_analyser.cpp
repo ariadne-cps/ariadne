@@ -58,7 +58,7 @@ Colour safe_set_colour(0.50,1.00,0.50);
 
 namespace Ariadne {
 
-HybridExactBoxes
+inline HybridExactBoxes
 bounding_boxes(const HybridSpaceInterface& space, ExactIntervalType bound)
 {
     HybridExactBoxes result;

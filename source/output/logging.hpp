@@ -75,7 +75,6 @@ extern std::ofstream log_file_stream;
 //! \brief Redirect logging output to file \a filename.
 void redirect_log(const char* filename);
 
-
 } // namespace Ariadne
 
 #endif // ARIADNE_LOGGING_HPP

@@ -45,7 +45,7 @@ int global_verbosity=0;
 
 }
 
-bool startup_function() {
+inline bool startup_function() {
     std::cerr << std::boolalpha;
     std::cout << std::boolalpha;
     std::clog << std::boolalpha;

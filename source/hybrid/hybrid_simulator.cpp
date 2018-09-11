@@ -56,6 +56,10 @@ template<class T> class Orbit;
 
 class DegenerateCrossingException { };
 
+ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc);
+
+Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location);
+
 HybridSimulator::HybridSimulator()
     : _step_size(0.125)
 {

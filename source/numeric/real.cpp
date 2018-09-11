@@ -209,6 +209,43 @@ Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
 Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDPValue)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
+// <fix: missing declaration warnings
+
+ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2);
+ValidatedSierpinskian operator!=(Real const& x1, Int64 n2);
+Kleenean operator< (Real const& x1, Int64 n2);
+Kleenean operator> (Real const& x1, Int64 n2);
+Kleenean operator<=(Real const& x1, Int64 n2);
+Kleenean operator>=(Real const& x1, Int64 n2);
+
+ValidatedKleenean check_sgn(Real r, Effort eff);
+
+PositiveUpperReal rec(PositiveLowerReal plr);
+PositiveLowerReal rec(PositiveUpperReal pur);
+PositiveLowerReal add(PositiveLowerReal plr1, PositiveLowerReal plr2);
+PositiveUpperReal add(PositiveUpperReal pur1, PositiveUpperReal pur2);
+PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2);
+PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2);
+PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2);
+PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
+
+Real min(LowerReal const& lr1, Real const& r2);
+Real min(Real const& r1, LowerReal const& lr2);
+Real max(UpperReal const& ur1, Real const& r2);
+Real max(Real r1, UpperReal const& ur2);
+
+LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
+UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
+
+PositiveReal min(PositiveReal const& pr1, PositiveReal const& pr2);
+PositiveReal add(PositiveReal const& pr1, PositiveReal const& pr2);
+PositiveReal mul(PositiveReal const& pr1, PositiveReal const& pr2);
+PositiveReal div(PositiveReal const& pr1, PositiveReal const& pr2);
+PositiveReal rec(PositiveReal const& pr);
+
+// /fix>
+
+
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
 Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }
 Real mul(Real const& x1, Real const& x2) { return make_real(Mul(),x1,x2); }
@@ -455,8 +492,6 @@ LowerReal neg(UpperReal const& ur) { return make_lower(neg(cast_real(ur))); }
 UpperReal neg(LowerReal const& lr) { return make_upper(neg(cast_real(lr))); }
 LowerReal add(LowerReal const& lr1, LowerReal const& lr2) { return make_lower(add(cast_real(lr1),cast_real(lr2))); }
 UpperReal add(UpperReal const& ur1, UpperReal const& ur2) { return make_upper(add(cast_real(ur1),cast_real(ur2))); }
-LowerReal add(LowerReal const& lr1, UpperReal const& ur2) { return make_lower(add(cast_real(lr1),cast_real(ur2))); }
-UpperReal add(UpperReal const& ur1, LowerReal const& lr2) { return make_upper(add(cast_real(ur1),cast_real(lr2))); }
 
 PositiveFloatDPBounds PositiveReal::get(DoublePrecision pr) const {
     return PositiveFloatDPBounds(this->_ptr->_compute_get(pr));

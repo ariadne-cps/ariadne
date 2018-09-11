@@ -123,6 +123,12 @@ namespace Detail {
     LogicalHandle operator==(LogicalHandle v1, LogicalHandle v2);
     LogicalHandle operator^(LogicalHandle v1, LogicalHandle v2);
     LogicalHandle operator!(LogicalHandle v);
+
+    LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle negation(LogicalHandle l);
+    LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
 }
 
 using Detail::LogicalValue;

@@ -28,6 +28,7 @@
 
 #include "../utility/stdlib.hpp"
 #include "../utility/string.hpp"
+#include "../utility/macros.hpp"
 #include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
@@ -134,6 +135,7 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
         case LogicalValue::INDETERMINATE: os << "indeterminate";  break;
         case LogicalValue::UNLIKELY: os << "unlikely"; break;
         case LogicalValue::FALSE: os << "false"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled LogicalValue for output streaming.\n");
     }
     return os;
 }

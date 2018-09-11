@@ -78,9 +78,9 @@ static const Colour colour(0.5,1.0,1.0);
 static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
-decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { return af <= FloatDPValue(w,dp); }
-FloatDPValue operator"" _ex (long double x) { return FloatDPValue((double)x); }
-FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1)/x2; }
+inline decltype(auto) operator<=(Affine<FloatDPBounds>const& af, Dyadic w) { return af <= FloatDPValue(w,dp); }
+inline FloatDPValue operator"" _ex (long double x) { return FloatDPValue((double)x); }
+inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1)/x2; }
 }
 
 class TestAffineSet

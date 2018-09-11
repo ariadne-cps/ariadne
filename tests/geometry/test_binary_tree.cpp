@@ -43,7 +43,7 @@
 using namespace Ariadne;
 using namespace std;
 
-Void test_binary_tree() {
+inline Void test_binary_tree() {
     const BinaryTreeNode * binary_tree_node_null_pointer = nullptr;
 
     // !!!

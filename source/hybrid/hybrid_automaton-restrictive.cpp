@@ -191,7 +191,15 @@ Set<Var> duplicates(const List<Var>& variables) {
 } // namespace
 
 
+// Construct the set of events such that for each variable v in vars , there is a rule saying that v is nonjumping
+EventSet ignorable(const List< Tuple<EventSet,Set<Identifier> > >& rules, const Set<Identifier>& vars);
+// Construct the set of events such that for each variable v in vars , there is a rule saying that v is nonjumping
+EventSet ignorable(const List< Tuple<DiscretePredicate, EventSet, Set<Identifier> > >& nonjumping, const DiscreteLocation& q, const Set<Identifier>& vars);
 
+DiscretePredicate make_predicate(const DiscreteLocation& q);
+List<PrimedStringAssignment> make_update(const DiscreteLocation& q);
+
+List<PrimedRealAssignment> primed_real_assignments(const Set<Identifier>& nonjumping);
 
 Set<Identifier> names(const Set<RealVariable>& v) {
     Set<Identifier> r;

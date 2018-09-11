@@ -784,7 +784,7 @@ CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& compo
     return CompositeHybridAutomaton(name_composition(components),components);
 }
 
-HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)
+inline HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

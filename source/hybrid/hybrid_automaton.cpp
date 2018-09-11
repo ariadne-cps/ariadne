@@ -40,6 +40,11 @@
 
 namespace Ariadne {
 
+EffectiveVectorFunction auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
+EffectiveVectorFunction dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
+EffectiveVectorFunction reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
+EffectiveScalarFunction constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
+
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
 DiscreteMode::DiscreteMode()

@@ -160,6 +160,7 @@ template<class F> class Bounds
     friend Bool inconsistent(Bounds<F> const&, Bounds<F> const&);
     friend Bool refines(Bounds<F> const&, Bounds<F> const&);
     friend Bounds<F> refinement(Bounds<F> const&, Bounds<F> const&);
+    friend Bounds<F> round(Bounds<F> const&);
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }

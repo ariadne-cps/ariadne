@@ -110,6 +110,7 @@ template<class F> class Approximation
   public:
     friend Bool same(Approximation<F> const&, Approximation<F> const&);
     friend PositiveApproximation<F> mag(Approximation<F> const&);
+    friend PositiveApproximation<F> mig(Approximation<F> const&);
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }

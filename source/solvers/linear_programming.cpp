@@ -41,6 +41,29 @@ namespace Ariadne {
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
 
+// Return r[i]=x[i]-c for i=1,...,n
+Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c);
+// Return r[i]=x[i]*y[i] for i=1,...,n
+Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y);
+// Return r[i]=x[i]*y[i] for i=1,...,n
+Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z);
+// Return r[i]=x[i]*y[i]+z for i=1,...,n
+Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const FloatDP& z);
+// Return r[i]=1/y[i] for i=1,...,n
+Vector<FloatDP> erec(const Vector<FloatDP>& v);
+
+Bool is_nan(Vector<FloatDP> const& v);
+
+// Compute R=ADA^T for diagonal D
+Matrix<FloatDP> adat(const Matrix<FloatDP>& A, const Vector<FloatDP>& D);
+
+Bool all_greater(const Vector<FloatDP>& x, const FloatDP& e);
+Bool all_less(const Vector<FloatDP>& x, const FloatDP& e);
+Bool all_greater(const Vector<FloatDP>& x1, const Vector<FloatDP>& x2);
+
+FloatDP compute_mu(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
+                 const Vector<FloatDP>& x, const Vector<FloatDP>& zl, const Vector<FloatDP>& zu);
+
 
 // Return r[i]=x[i]-c for i=1,...,n
 Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c) {

@@ -474,7 +474,13 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 #ifdef ARIADNE_DISABLE
 
 
-
+inline Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,RealInterval> res;
+    for(Nat i=0; i!=b.size(); ++i) {
+        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
+    }
+    return res;
+}
 
 DiscreteLocation evaluate(const DiscreteUpdate& update, const DiscreteLocation& location) {
     DiscreteLocation result;

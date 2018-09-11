@@ -50,6 +50,8 @@ namespace Ariadne {
 ExactBoxType over_approximation(RealBox const&);
 ExactBoxType under_approximation(RealBox const&);
 ExactBoxType approximation(RealBox const&);
+HybridExactBox under_approximation(HybridRealBox const& hbx);
+HybridExactBox over_approximation(HybridRealBox const& hbx);
 
 HybridExactBox under_approximation(HybridRealBox const& hbx) {
     return HybridExactBox(hbx.location(),hbx.space(),under_approximation(hbx.euclidean_set()));
@@ -188,18 +190,6 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
     return os;
 }
 
-
-
-
-
-
-Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
-    Map<RealVariable,RealInterval> res;
-    for(Nat i=0; i!=b.size(); ++i) {
-        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
-    }
-    return res;
-}
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& x)
     : HybridBasicSet<Point<X>>(q,make_list(x.keys()),Point<X>(x.size()))

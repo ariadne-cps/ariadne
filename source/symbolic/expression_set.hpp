@@ -67,7 +67,18 @@ typedef VariablesBox<ExactIntervalType> ExactVariablesBoxType;
 class RealExpressionConstraintSet;
 class RealExpressionBoundedConstraintSet;
 
+Set<Identifier> variables(const Map<RealVariable,RealInterval>& bnds);
+Set<Identifier> variables(const List<RealVariableInterval>& bnds);
 Set<Identifier> arguments(const List<ContinuousPredicate>& c);
+
+ExactIntervalType over_approximation(RealInterval ivl);
+ExactIntervalType under_approximation(RealInterval ivl);
+ExactIntervalType approximation(RealInterval ivl);
+ExactVariablesBoxType over_approximation(const RealVariablesBox& ebx);
+ExactVariablesBoxType approximation(const RealVariablesBox& ebx);
+ExactVariablesBoxType under_approximation(const RealVariablesBox& ebx);
+
+ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space);
 
 template<class C, class P> decltype(auto) any(C const& c, P const& p) {
     typedef decltype(p(*c.begin())) R;

@@ -29,6 +29,12 @@ namespace Ariadne {
 
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 
+void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, Real evolution_time, double step);
+void run_noisy_system(SystemType system);
+
+
 template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& list) {
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }

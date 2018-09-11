@@ -143,7 +143,6 @@ class Figure
     Data* _data;
 };
 
-Void draw(Figure& fig, const DrawableInterface& shape);
 Void draw(Figure& fig, const ApproximateBoxType& box);
 
 inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.set_line_style(ls); return g; }

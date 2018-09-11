@@ -34,6 +34,7 @@
 #include "../utility/module.hpp"
 #include "../utility/metaprogramming.hpp"
 #include "../numeric/paradigm.hpp"
+#include "../numeric/sign.hpp"
 
 namespace Ariadne {
 
@@ -71,9 +72,6 @@ template<class N> inline N& operator+=(NumberObject<N>& n1, const NumberObject<N
     n1.upcast()=n1.upcast()+n2.upcast(); return n1.upcast(); }
 template<class N> inline N& operator*=(NumberObject<N>& n1, const NumberObject<N>& n2) {
     return n1.upcast()=n1.upcast()*n2.upcast(); return n1.upcast(); }
-
-enum class Sign : std::int8_t { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
-enum class Comparison : std::int8_t { LESS=-1, EQUAL=0, GREATER=+1 };
 
 class FloatDP : public ScalarObject<FloatDP> {
     volatile double d;

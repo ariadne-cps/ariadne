@@ -344,16 +344,6 @@ Natural min(Natural const& z1,Natural const& z2) {
     return (z1<z2)?z1:z2;
 }
 
-OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
-    switch(cmp) {
-        case Comparison::LESS: os << "LESS";  break;
-        case Comparison::EQUAL: os << "EQUAL";  break;
-        case Comparison::GREATER: os << "GREATER";  break;
-        case Comparison::INCOMPARABLE: os << "INCOMPARABLE"; break;
-    }
-    return os;
-}
-
 Sign sgn(Integer const& z) {
     return static_cast<Sign>(mpz_sgn(z._mpz));
 }

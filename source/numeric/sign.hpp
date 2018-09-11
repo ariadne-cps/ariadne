@@ -31,6 +31,7 @@
 #define ARIADNE_SIGN_HPP
 
 #include <iosfwd>
+#include "../utility/macros.hpp"
 
 namespace Ariadne {
 
@@ -44,7 +45,18 @@ inline Sign operator*(Sign s1, Sign s2) { return Sign(static_cast<char>(s1)*stat
 
 //! \brief The result of a comparison operation.
 enum class Comparison : char { LESS=-1, EQUAL=0, GREATER=+1, INCOMPARABLE=char(-128) };
-OutputStream& operator<<(OutputStream& os, Comparison c);
+
+inline OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
+    switch(cmp) {
+        case Comparison::LESS: os << "LESS";  break;
+        case Comparison::EQUAL: os << "EQUAL";  break;
+        case Comparison::GREATER: os << "GREATER";  break;
+        case Comparison::INCOMPARABLE: os << "INCOMPARABLE"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled Comparison for output streaming.\n");
+    }
+    return os;
+}
+
 static const Comparison LESS = Comparison::LESS;
 static const Comparison EQUAL = Comparison::EQUAL;
 static const Comparison GREATER = Comparison::GREATER;

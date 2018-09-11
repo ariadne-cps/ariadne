@@ -23,6 +23,7 @@
  */
 
 #include "pybind11.hpp"
+#include "pybind11.hpp"
 #include "utilities.hpp"
 
 #include "config.hpp"
@@ -42,44 +43,9 @@
 
 namespace Ariadne {
 
-//static constexpr auto self = boost::python::self_ns::self;
 static constexpr auto self = pybind11::detail::self;
 
 /*
-template<class UB>
-struct from_python_dict<Interval<UB>> {
-    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval<UB>>()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyDict_Check(obj_ptr) || len(boost::python::extract<boost::python::dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        typedef typename Interval<UB>::LowerBoundType LB;
-        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
-        boost::python::list lst=dct.items();
-        assert(boost::python::len(lst)==1);
-        Void* storage = ((converter::rvalue_from_python_storage<Interval<UB>>*)data)->storage.bytes;
-        LB lb=boost::python::extract<LB>(lst[0][0]); UB ub=boost::python::extract<UB>(lst[0][1]);
-        new (storage) Interval<UB>(lb,ub);
-        data->convertible = storage;
-    }
-};
-
-
-template<class UB>
-struct from_python_list<Interval<UB>> {
-    from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<ExactIntervalType>()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr) || len(boost::python::extract<boost::python::list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        typedef typename Interval<UB>::LowerBoundType LB;
-        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-        assert(boost::python::len(lst)==2);
-        Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        LB lb=boost::python::extract<LB>(lst[0]); UB ub=boost::python::extract<UB>(lst[1]);
-        new (storage) Interval<UB>(lb,ub);
-        data->convertible = storage;
-    }
-};
-
 template<class X>
 struct from_python<Point<X>> {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point<X>>()); }
@@ -240,6 +206,24 @@ class LocatedSetWrapper
 
 using namespace Ariadne;
 
+template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
+    typedef typename IVL::LowerBoundType LB;
+    typedef typename IVL::UpperBoundType UB;
+    assert(dct.size()==1);
+    pybind11::detail::dict_iterator::reference item = *dct.begin();
+    pybind11::handle lh = item.first;
+    pybind11::handle uh = item.second;
+    LB lb = pybind11::cast<LB>(lh);
+    UB ub = pybind11::cast<UB>(uh);
+    return IVL(lb,ub);
+}
+
+template<class BX> BX box_from_list(pybind11::list lst) {
+    typedef typename BX::IntervalType IVL;
+    std::vector<IVL> vec=pybind11::cast<std::vector<IVL>>(lst);
+    Array<IVL> ary(vec.begin(),vec.end());
+    return BX(ary);
+}
 
 
 Void export_drawable_interface(pybind11::module& module) {
@@ -303,17 +287,17 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     typedef decltype(disjoint(declval<IntervalType>(),declval<IntervalType>())) DisjointType;
     typedef decltype(subset(declval<IntervalType>(),declval<IntervalType>())) SubsetType;
 
-//    from_python_dict<IVL>();
-
     pybind11::class_< IntervalType > interval_class(module,name.c_str());
     interval_class.def(pybind11::init<IntervalType>());
-    //interval_class.def(pybind11::init<MidpointType>());
+    interval_class.def(pybind11::init<MidpointType>());
     interval_class.def(pybind11::init<LowerBoundType,UpperBoundType>());
+    interval_class.def(pybind11::init([](pybind11::dict pydct){return interval_from_dict<IntervalType>(pydct);}));
 
-    // FIXME: Only export this if constructor exists
-//    if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value and not IsConstructible<UB,Dyadic>::value) {
-        interval_class.def(pybind11::init<Interval<Dyadic>>());
-//    }
+    if constexpr (IsConstructibleGivenDefaultPrecision<UpperBoundType,Dyadic>::value and not IsConstructible<UpperBoundType,Dyadic>::value) {
+        interval_class.def(pybind11::init<DyadicInterval>());
+    }
+
+    pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
 
     interval_class.def(self == self);
     interval_class.def(self != self);
@@ -325,7 +309,7 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def("contains", (ContainsType(*)(IntervalType const&,MidpointType const&)) &contains);
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def("__str__",&__cstr__<IntervalType>);
-//    interval_class.def("__repr__",&__repr__<IntervalType>);
+    //interval_class.def("__repr__",&__repr__<IntervalType>);
 
     //from_python_list<IntervalType>();
     //from_python_str<ExactIntervalType>();
@@ -352,9 +336,9 @@ Void export_intervals(pybind11::module& module) {
 
 template<class BX> Void export_box(pybind11::module& module, std::string name)
 {
+    using BoxType = BX;
     using IVL = typename BX::IntervalType;
     using UB = typename IVL::UpperBoundType;
-    //class_<Vector<ExactIntervalType>> interval_vector_class(module,"ExactIntervalVectorType");
 
     typedef decltype(disjoint(declval<BX>(),declval<BX>())) DisjointType;
     typedef decltype(subset(declval<BX>(),declval<BX>())) SubsetType;
@@ -364,16 +348,16 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     typedef decltype(inside(declval<BX>(),declval<BX>())) InsideType;
 
 //    pybind11::class_<ExactBoxType,pybind11::bases<CompactSetWrapper,OpenSetWrapper,Vector<ExactIntervalType>,DrawableWrapper > >
-    pybind11::class_<BX > box_class(module,name.c_str());
-    box_class.def(pybind11::init<BX>());
+    pybind11::class_<BoxType > box_class(module,name.c_str());
+    box_class.def(pybind11::init<BoxType>());
+    box_class.def(pybind11::init<DimensionType>());
+    box_class.def(pybind11::init(&box_from_list<BoxType>));
     if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value and not IsConstructible<UB,Dyadic>::value) {
         box_class.def(pybind11::init<Box<Interval<Dyadic>>>());
     }
 
-    static_assert(IsConstructibleGivenDefaultPrecision<FloatDPValue,Dyadic>::value and not IsConstructible<FloatDPValue,Dyadic>::value);
-
-    box_class.def(pybind11::init<DimensionType>());
-    box_class.def(pybind11::init< Vector<IVL> >());
+    pybind11::implicitly_convertible<pybind11::list,BoxType>();
+    
     //box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
@@ -395,17 +379,20 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     module.def("product", (BX(*)(const BX&,const BX&)) &product);
     module.def("hull", (BX(*)(const BX&,const BX&)) &hull);
     module.def("intersection", (BX(*)(const BX&,const BX&)) &intersection);
-
-//    from_python<BX>();
-//    to_python< Pair<BX,BX> >();
 }
+
 
 template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name)
 {
     using BX=DyadicBox;
-    pybind11::class_<BX> box_class(module,name.c_str());
-    box_class.def(pybind11::init<BX>());
-//    from_python<BX>();
+    using BoxType = BX;
+    pybind11::class_<BoxType> box_class(module,name.c_str());
+    box_class.def(pybind11::init(&box_from_list<BoxType>));
+    box_class.def(pybind11::init<BoxType>());
+    box_class.def("__str__",&__cstr__<BoxType>);
+
+    pybind11::implicitly_convertible<pybind11::list,BoxType>();
+    
 }
 
 Void export_boxes(pybind11::module& module) {
@@ -588,7 +575,6 @@ Void export_constrained_image_set(pybind11::module& module)
 
 //    module.def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactBoxType&)) &product);
 }
-
 
 
 

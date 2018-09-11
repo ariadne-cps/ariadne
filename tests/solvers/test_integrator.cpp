@@ -43,9 +43,8 @@ using namespace Ariadne;
 using namespace std;
 
 inline EffectiveScalarFunction operator^(EffectiveScalarFunction f, Int m) { return pow(f,m); }
-//inline double operator^(double f, Nat m) { return pow(f,m); }
+inline EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
 
-EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
 struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
 
 class TestIntegrator

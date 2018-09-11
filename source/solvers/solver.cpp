@@ -118,6 +118,11 @@ static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
+ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v);
+ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v);
+FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x);
+
+
 ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
     ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());

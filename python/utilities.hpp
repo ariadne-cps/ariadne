@@ -34,6 +34,7 @@
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
+#include "utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -284,7 +285,7 @@ void export_vector(pybind11::module& module, std::string name) {
     module.def("join", &_join_<Vector<X>,X>);
     module.def("join", &_join_<X,Vector<X>>);
     module.def("join", [](X const& x1, X const& x2){return Vector<X>({x1,x2});});
-};
+}
 
 
 #endif /* ARIADNE_PYTHON_UTILITIES_HPP */

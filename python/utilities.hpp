@@ -29,341 +29,31 @@
 #ifndef ARIADNE_PYTHON_UTILITIES_HPP
 #define ARIADNE_PYTHON_UTILITIES_HPP
 
-//#include "boost_python.hpp"
-
-#include <pybind11/pybind11.h>
+#include "pybind11.hpp"
 
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
 
 namespace Ariadne {
 
-class Real;
+class String;
+template<class X> String class_name();
 
 template<class X> inline std::string python_name(const std::string& name) {
     return class_name<X>()+name; }
 
-template<class T> struct to_python;
-template<class T> struct from_python;
-template<class T> struct from_python_dict;
-
-/*
-
-template<class T> struct to_python;
-template<class T> struct to_python_list;
-template<class T> struct to_python_dict;
-template<class T> struct to_python_tuple;
-template<class T> struct to_python_set;
-
-template<class T> struct from_python;
-template<class T> struct from_python_list;
-template<class T> struct from_python_tuple;
-template<class T> struct from_python_dict;
-template<class T> struct from_python_set;
-
-
-
-
-template<class T1, class T2>
-struct to_python< std::pair<T1,T2> > {
-    to_python() { boost::python::to_python_converter< std::pair<T1,T2>, to_python< std::pair<T1,T2> > >(); }
-    static PyObject* convert(const std::pair<T1,T2>& pair) {
-        boost::python::list lst;
-        lst.append(boost::python::object(pair.first));
-        lst.append(boost::python::object(pair.second));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
-};
-
-
-template<class T1, class T2>
-struct from_python< Ariadne::Pair<T1,T2> > {
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Pair<T1,T2> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::tuple tup = boost::python::extract<boost::python::tuple>(obj_ptr);
-        assert(len(tup)==2); T1 t1=boost::python::extract<T1>(tup[0]); T2 t2=boost::python::extract<T2>(tup[1]); Pair<T1,T2> pr(t1,t2);
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Pair<T1,T2> >*)data)->storage.bytes;
-        new (storage) Pair<T1,T2>(pr);
-        data->convertible = storage;
-    }
-};
-
-
-template<class T>
-struct to_python< std::vector<T> > {
-    to_python() { boost::python::to_python_converter< std::vector<T>, to_python< std::vector<T> > >(); }
-
-    static PyObject* convert(const std::vector<T>& vec) {
-        boost::python::list result;
-        for(typename std::vector<T>::ConstIterator iter=vec.begin(); iter!=vec.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-
-template<class T>
-struct to_python<std::set<T> > {
-    to_python() { boost::python::to_python_converter< std::set<T>, to_python< std::set<T> > >(); }
-    static PyObject* convert(const std::set<T>& set) {
-        boost::python::list values;
-        for(typename std::set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
-            values.append(boost::python::object(*iter));
-        }
-        PyObject* result=PySet_New(values.ptr());
-        return result;
-    }
-    static const PyTypeObject* get_pytype() { return &PySet_Type; }
-};
-
-template<class T>
-struct to_python_list<std::set<T> > {
-    to_python_list() { boost::python::to_python_converter< std::set<T>, to_python_list< std::set<T> > >(); }
-    static PyObject* convert(const std::set<T>& set) {
-        boost::python::list result;
-        for(typename std::set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-template<class K, class V>
-struct to_python<std::map<K,V> > {
-    to_python() { boost::python::to_python_converter< std::map<K,V>, to_python< std::map<K,V> > >(); }
-    static PyObject* convert(const std::map<K,V>& map) {
-        boost::python::dict result;
-        for(typename std::map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
-            result[boost::python::object(iter->first)]=boost::python::object(iter->second);
-        }
-        return boost::python::incref(boost::python::dict(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
-};
-
-template<class K, class V>
-struct from_python< Ariadne::Map<K,V> > {
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Map<K,V> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
-        boost::python::list lst = dct.items();
-        Ariadne::Map<K,V> m; for(Nat i=0; i!=len(lst); ++i) { std::pair<K,V> item=boost::python::extract<std::pair<K,V>>(lst[i]); m.insert(item); }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Ariadne::Map<K,V> >*)data)->storage.bytes;
-        new (storage) Ariadne::Map<K,V>(m);
-        data->convertible = storage;
-    }
-};
-
-
-template<class T1, class T2>
-struct to_python< std::tuple<T1,T2> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2>, to_python< Ariadne::Tuple<T1,T2> > >(); }
-    static PyObject* convert(const Ariadne::Tuple<T1,T2>& tup) {
-        boost::python::list lst;
-        lst.append(boost::python::object(std::get<0>(tup)));
-        lst.append(boost::python::object(std::get<1>(tup)));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
-};
-
-template<class T1, class T2, class T3>
-struct to_python< std::tuple<T1,T2,T3> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2,T3>, to_python< Ariadne::Tuple<T1,T2,T3> > >(); }
-    static PyObject* convert(const Ariadne::Tuple<T1,T2,T3>& tup) {
-        boost::python::list lst;
-        lst.append(boost::python::object(std::get<0>(tup)));
-        lst.append(boost::python::object(std::get<1>(tup)));
-        lst.append(boost::python::object(std::get<2>(tup)));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
-};
-
-template<class T1, class T2, class T3, class T4>
-struct to_python< std::tuple<T1,T2,T3,T4> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Tuple<T1,T2,T3,T4>, to_python< Ariadne::Tuple<T1,T2,T3,T4> > >(); }
-    static PyObject* convert(const Ariadne::Tuple<T1,T2,T3,T4>& tup) {
-        boost::python::list lst;
-        lst.append(boost::python::object(std::get<0>(tup)));
-        lst.append(boost::python::object(std::get<1>(tup)));
-        lst.append(boost::python::object(std::get<2>(tup)));
-        lst.append(boost::python::object(std::get<3>(tup)));
-        boost::python::tuple result(lst);
-        return boost::python::incref(boost::python::tuple(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyTuple_Type; }
-};
-
-template<class T>
-struct to_python< Ariadne::Array<T> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Array<T>, to_python< Ariadne::Array<T> > >(); }
-    static PyObject* convert(const Ariadne::Array<T>& ary) {
-        boost::python::list result;
-        for(typename Ariadne::Array<T>::ConstIterator iter=ary.begin(); iter!=ary.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-template<class T>
-struct to_python< Ariadne::List<T> > {
-    to_python() { boost::python::to_python_converter< Ariadne::List<T>, to_python< Ariadne::List<T> > >(); }
-    static PyObject* convert(const Ariadne::List<T>& lst) {
-        boost::python::list result;
-        for(typename List<T>::ConstIterator iter=lst.begin(); iter!=lst.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-template<class T>
-struct to_python< Ariadne::Set<T> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Set<T>, to_python< Ariadne::Set<T> > >(); }
-    static PyObject* convert(const Ariadne::Set<T>& set) {
-        boost::python::list values;
-        for(typename Ariadne::Set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
-            values.append(boost::python::object(*iter));
-        }
-        PyObject* result=PySet_New(values.ptr());
-        return result;
-    }
-    static const PyTypeObject* get_pytype() { return &PySet_Type; }
-};
-
-template<class T>
-struct to_python_list< Ariadne::Set<T> > {
-    to_python_list() { boost::python::to_python_converter< Ariadne::Set<T>, to_python_list< Ariadne::Set<T> > >(); }
-    static PyObject* convert(const Set<T>& set) {
-        boost::python::list result;
-        for(typename Set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-template<class K, class V>
-struct to_python<Ariadne::Map<K,V> > {
-    to_python() { boost::python::to_python_converter< Ariadne::Map<K,V>, to_python< Ariadne::Map<K,V> > >(); }
-    static PyObject* convert(const Ariadne::Map<K,V>& map) {
-        boost::python::dict result;
-        for(typename Ariadne::Map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
-            result[boost::python::object(iter->first)]=boost::python::object(iter->second);
-        }
-        return boost::python::incref(boost::python::dict(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
-};
-
-
-template<class X>
-struct to_python< Vector<X> > {
-    to_python() { boost::python::to_python_converter< Vector<X>, to_python< Vector<X> > >(); }
-    static PyObject* convert(const Vector<X>& vec) {
-        boost::python::list result;
-        for(Nat i=0; i!=vec.size(); ++i) {
-            result.append(boost::python::object(vec[i]));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-
-template<class T>
-struct from_python< Ariadne::Array<T> > {
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Array<T> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-        Array<T> a=Array<T>(static_cast<Nat>(len(lst))); for(Nat i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<T>(lst[i]); }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Array<T> >*)data)->storage.bytes;
-        new (storage) Array<T>(a);
-        data->convertible = storage;
-    }
-};
-
-template<class T>
-struct from_python< Ariadne::List<T> > {
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< List<T> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-        List<T> l; l.reserve(static_cast<unsigned long>(len(lst))); for(Int i=0; i!=len(lst); ++i) { l.append(boost::python::extract<T>(lst[i])); }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Array<T> >*)data)->storage.bytes;
-        new (storage) List<T>(l);
-        data->convertible = storage;
-    }
-};
-
-template<class T>
-struct from_python_list< Ariadne::Array<T> > {
-    from_python_list() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Array<T> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
-        Array<T> a=Array<T>(len(lst)); for(Nat i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<T>(lst[i]); }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Array<T> >*)data)->storage.bytes;
-        new (storage) Array<T>(a);
-        data->convertible = storage;
-    }
-};
-
-template<class T>
-struct from_python_tuple< Ariadne::Array<T> > {
-    from_python_tuple() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Array<T> >()); }
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        boost::python::tuple tup = boost::python::extract<boost::python::tuple>(obj_ptr);
-        Array<T> a(len(tup)); for(Nat i=0; i!=a.size(); ++i) { (a)[i]=boost::python::extract<T>(tup[i]); }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Array<T> >*)data)->storage.bytes;
-        new (storage) Array<T>(a);
-        data->convertible = storage;
-    }
-};
-
-*/
 
 
 template<class C, class I0, class I1, class S> inline
 S __getslice__(const C& c, const I0& i0, const I1& i1) { return project(c,range(i0,i1)); }
 
-template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
+template<class C, class I, class X, EnableIf<IsSame<I,int>> =dummy> inline
 X __getitem__(const C& c, const I& i) {
-    return c[static_cast<Nat>(i)];
+    return c[static_cast<uint>(i)];
 }
 
-template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
+template<class C, class I, class X, EnableIf<Not<IsSame<I,int>>> =dummy> inline
 X __getitem__(const C& c, const I& i) {
     return c[i];
 }
@@ -468,6 +158,7 @@ template<class... AS> inline decltype(auto) _unchecked_evaluate_(AS... as) { ret
 template<class... AS> inline decltype(auto) _compose_(AS... as) { return compose(as...); }
 template<class... AS> inline decltype(auto) _unchecked_compose_(AS... as) { return unchecked_compose(as...); }
 
+template<class... AS> inline decltype(auto) _dot_(AS... as) { return dot(as...); }
 template<class... AS> inline decltype(auto) _join_(AS... as) { return join(as...); }
 template<class... AS> inline decltype(auto) _combine_(AS... as) { return combine(as...); }
 
@@ -500,11 +191,11 @@ template<class... AS> decltype(auto) _image_(AS const& ... as) { return image(as
 template<class... AS> decltype(auto) _preimage_(AS const& ... as) { return preimage(as...); }
 
 
-template<class T> StringType __cstr__(const T& t) {
-    StringStream ss; ss << t; return ss.str(); }
+template<class T> std::string __cstr__(const T& t) {
+    std::stringstream ss; ss << t; return ss.str(); }
 
-template<class T> StringType __crepr__(const T& t) {
-    StringStream ss; ss << representation(t); return ss.str(); }
+template<class T> std::string __crepr__(const T& t) {
+    std::stringstream ss; ss << representation(t); return ss.str(); }
 
 
 template<class T> struct PythonRepresentation {
@@ -513,44 +204,86 @@ template<class T> struct PythonRepresentation {
     const T& reference() const { return *pointer; }
 };
 
-template<class T> PythonRepresentation<T>
-python_representation(const T& t) {
+template<class T> PythonRepresentation<T> python_representation(const T& t) {
     return PythonRepresentation<T>(t); }
 
-template<class T> StringType __repr__(const T& t) {
-    StringStream ss;
-    ss << PythonRepresentation<T>(t);
-    return ss.str();
-}
-
-
-template<class T>
-Void export_array(pybind11::module& module, const char* name)
-{
-    pybind11::class_< Array<T> > array_class(module,name);
-    array_class.def(pybind11::init < Array<T> >());
-    array_class.def(pybind11::init<Int>());
-    array_class.def("__len__", &Array<T>::size);
-    array_class.def("__getitem__",&__getitem__< Array<T>, Nat, T>);
-    array_class.def("__setitem__",&__setitem__< Array<T>, Nat, T>);
-    array_class.def("__str__", &__cstr__< Array<T> >);
-}
-
-/*
-template<class T>
-Void export_array(const char* name)
-{
-    boost::python::class_< Array<T> > array_class(name,boost::python::init < Array<T> >());
-    array_class.def(boost::python::init<Int>());
-    array_class.def("__len__", &Array<T>::size);
-    array_class.def("__getitem__",&__getitem__< Array<T>, Nat, T>);
-    array_class.def("__setitem__",&__setitem__< Array<T>, Nat, T>);
-    array_class.def(boost::python::self_ns::str(boost::python::self));
-}
-*/
-
-
+template<class T> std::string __repr__(const T& t) {
+    std::stringstream ss; ss << python_representation(t); return ss.str();}
 
 } // namespace Ariadne
+
+
+template<class T>
+void export_array(pybind11::module& module, const char* name)
+{
+    using namespace Ariadne;
+
+    pybind11::class_<Array<T>> array_class(module,name);
+    array_class.def(pybind11::init<Array<T>>());
+    array_class.def(pybind11::init<uint>());
+    array_class.def("__len__", &Array<T>::size);
+    array_class.def("__getitem__", &__getitem__<Array<T>,uint,T>);
+    array_class.def("__setitem__", &__setitem__<Array<T>,uint,T>);
+    array_class.def("__str__", &__cstr__<Array<T>>);
+}
+
+
+namespace pybind11::detail {
+template <class T> struct type_caster<Ariadne::Array<T>>
+    : array_caster<Ariadne::Array<T>, T, true> { };
+template <class T> struct type_caster<Ariadne::List<T>>
+    : list_caster<Ariadne::List<T>, T> { };
+template <class T> struct type_caster<Ariadne::Set<T>>
+    : set_caster<Ariadne::Set<T>, T> { };
+template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
+    : map_caster<Ariadne::Map<K,V>, K,V> { };
+} // namespace pybind11::detail
+
+
+
+#include "algebra/vector.hpp"
+
+template<class X>
+void export_vector(pybind11::module& module, std::string name) {
+    using namespace Ariadne;
+
+    pybind11::class_<Vector<X>> vector_class(module, name.c_str());
+    vector_class.def(pybind11::init<Vector<X>>());
+    vector_class.def(pybind11::init<Array<X>>());
+    if constexpr (IsDefaultConstructible<X>::value) {
+        vector_class.def(pybind11::init<Nat>());
+    }
+    vector_class.def(pybind11::init<Nat,X>());
+    vector_class.def("size", &Vector<X>::size);
+    vector_class.def("__len__", &Vector<X>::size);
+    vector_class.def("__setitem__", &__setitem__<Vector<X>,Nat,X>);
+    vector_class.def("__getitem__", &__getitem__<Vector<X>,Nat,X>);
+    //vector_class.def("__getslice__", &__getslice__<Vector<X>,int,int,Vector<X>>);
+    if constexpr(HasEquality<X,X>::value) {
+        vector_class.def("__eq__", &__eq__<EqualityType<X,X>,Vector<X>,Vector<X> >);
+        vector_class.def("__ne__", &__ne__<InequalityType<X,X>,Vector<X>,Vector<X> >);
+    }
+    vector_class.def("__pos__", &__pos__<Vector<X>,Vector<X>>);
+    vector_class.def("__neg__", &__neg__<Vector<X>,Vector<X>>);
+    vector_class.def("__add__",__add__<Vector<SumType<X,X>>, Vector<X>, Vector<X> >);
+    vector_class.def("__sub__",__sub__<Vector<DifferenceType<X,X>>, Vector<X>, Vector<X> >);
+    vector_class.def("__rmul__",__rmul__<Vector<ProductType<X,X>>, Vector<X>, X >);
+    vector_class.def("__mul__",__mul__<Vector<ProductType<X,X>>, Vector<X>, X >);
+    if constexpr(CanDivide<X,X>::value) {
+        vector_class.def("__div__",__div__<Vector<QuotientType<X,X>>, Vector<X>, X >);
+    }
+    vector_class.def("__str__",&__cstr__<Vector<X>>);
+    //vector_class.def("__repr__",&__repr__<Vector<X>>);
+    vector_class.def_static("unit",&Vector<X>::unit);
+    vector_class.def_static("basis",&Vector<X>::basis);
+
+    module.def("dot", &_dot_<Vector<X>,Vector<X>>);
+
+    module.def("join", &_join_<Vector<X>,Vector<X>>);
+    module.def("join", &_join_<Vector<X>,X>);
+    module.def("join", &_join_<X,Vector<X>>);
+    module.def("join", [](X const& x1, X const& x2){return Vector<X>({x1,x2});});
+};
+
 
 #endif /* ARIADNE_PYTHON_UTILITIES_HPP */

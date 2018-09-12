@@ -42,33 +42,9 @@
 using namespace Ariadne;
 
 
-template<class X>
-pybind11::tuple
-python_compute_basis(const Matrix<X>& A) {
-    Array<SizeType> p;
-    Matrix<X> B;
-    make_lpair(p,B)=compute_basis(A);
-    pybind11::list l;
-    for(SizeType i=0; i!=p.size(); ++i) {
-        l.append(p[i]);
-    }
-    return pybind11::make_tuple(l,B);
-}
-
-template<class T> T get(const Array<T>& ary, SizeType i) { return ary[i]; }
-template<class T> Void set(Array<T>& ary, SizeType i, const T& t) { ary[i]=t; }
-
-template<class T>
-Void export_internal_array(pybind11::module& module, const char* name)
-{
-    pybind11::class_< Array<T> > array_class(module,name);
-    array_class.def("__len__", &Array<T>::size);
-    array_class.def("__getitem__",&get<T>);
-    array_class.def("__str__", &__cstr__<Array<T>>);
-}
 
 
-Void export_variable_type(pybind11::module& module)
+Void export_slackness(pybind11::module& module)
 {
     pybind11::enum_<Slackness> variable_enum(module,"Slackness");
     variable_enum.value("BASIS", Slackness::BASIS);
@@ -81,7 +57,7 @@ Void export_constraint(pybind11::module& module)
     pybind11::class_<EffectiveConstraint> effective_nonlinear_constraint_class(module,"EffectiveConstraint");
     effective_nonlinear_constraint_class.def(pybind11::init<Real,EffectiveScalarFunction,EffectiveNumericType>());
     effective_nonlinear_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
-    
+
     pybind11::class_<ValidatedConstraint> validated_nonlinear_constraint_class(module,"ValidatedConstraint");
     validated_nonlinear_constraint_class.def(pybind11::init<ValidatedNumericType,ValidatedScalarFunction,ValidatedNumericType>());
     validated_nonlinear_constraint_class.def(pybind11::init<ValidatedConstraint>());
@@ -92,10 +68,35 @@ Void export_constraint(pybind11::module& module)
     validated_nonlinear_constraint_class.def("__str__",&__cstr__<ValidatedConstraint>);
 }
 
+Void export_optimiser_interface(pybind11::module& module)
+{
+    pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
+    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarFunction, ExactBoxType, ValidatedVectorFunction, ExactBoxType)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarFunction, ExactBoxType, ValidatedVectorFunction, ValidatedVectorFunction)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType)const) &OptimiserInterface::feasible);
+    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ValidatedVectorFunction)const) &OptimiserInterface::feasible);
+    optimiser_interface_class.def("almost_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatApproximationVector, FloatDPApproximation)const) &OptimiserInterface::almost_feasible_point);
+    optimiser_interface_class.def("is_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactFloatVector)const) &OptimiserInterface::is_feasible_point);
+    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector)const) &OptimiserInterface::contains_feasible_point);
+    //NOTE: Not in C++ API
+    //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
+}
+
+Void export_interior_point_solvers(pybind11::module& module)
+{
+    pybind11::class_<NonlinearInfeasibleInteriorPointOptimiser,OptimiserInterface> nonlinear_infeasible_interior_point_solver_class(module,"NonlinearInfeasibleInteriorPointOptimiser");
+    nonlinear_infeasible_interior_point_solver_class.def(pybind11::init<>());
+
+    pybind11::class_<NonlinearInteriorPointOptimiser,OptimiserInterface> nonlinear_interior_point_solver_class(module,"NonlinearInteriorPointOptimiser");
+    nonlinear_interior_point_solver_class.def(pybind11::init<>());
+};
+
 Void export_interior_point_solver(pybind11::module& module)
 {
-//    to_python< Ariadne::Tuple< Vector<FloatDP>, Vector<FloatDP>, Vector<FloatDP> > >();
-
     pybind11::class_<InteriorPointSolver> interior_point_solver_class(module,"InteriorPointSolver");
     interior_point_solver_class.def(pybind11::init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
@@ -121,8 +122,6 @@ Void export_simplex_solver(pybind11::module& module)
 {
     typedef Array<SizeType> SizeArray;
 
-//    to_python< std::pair< Array<SizeType>, Matrix<X> > >();
-
     pybind11::class_< SimplexSolver<X> > simplex_solver_class(module,(class_name<X>()+"SimplexSolver").c_str());
     simplex_solver_class.def(pybind11::init<>());
     simplex_solver_class.def("lpstep",(Bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
@@ -132,16 +131,16 @@ Void export_simplex_solver(pybind11::module& module)
 
     simplex_solver_class.def("verify_feasibility",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
-    simplex_solver_class.def("compute_basis",(std::pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
+    simplex_solver_class.def("compute_basis",(Pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 
 }
 
 
 Void optimization_submodule(pybind11::module& module) {
-    export_variable_type(module);
+    export_slackness(module);
     export_constraint(module);
-    export_array<SizeType>(module,"SizeArray");
-    export_internal_array<Slackness>(module,"SlacknessArray");
+    export_optimiser_interface(module);
+    export_interior_point_solvers(module);
     export_simplex_solver<FloatDP>(module);
     export_simplex_solver<Rational>(module);
     export_interior_point_solver(module);

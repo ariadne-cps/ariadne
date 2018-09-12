@@ -23,8 +23,6 @@
  */
 
 #include "pybind11.hpp"
-#include <pybind11/stl.h>
-
 #include "utilities.hpp"
 
 #include "config.hpp"
@@ -36,7 +34,6 @@
 #include "algebra/diagonal_matrix.hpp"
 
 using namespace Ariadne;
-
 
 namespace Ariadne {
 
@@ -69,6 +66,22 @@ Void __vsetitem__(Vector<X>& v, Int i, const X& x)
     v[static_cast<Nat>(i)]=x;
 }
 
+
+template<class X>
+X __cvgetitem__(const Covector<X>& u, Int i)
+{
+    if(i<0) { i+=static_cast<Int>(u.size()); }
+    ARIADNE_ASSERT_MSG(0<=i && Nat(i)<u.size(),"v="<<u<<" i="<<i);
+    return u[static_cast<Nat>(i)];
+}
+
+template<class X>
+Void __cvsetitem__(Covector<X>& u, Int i, const X& x)
+{
+    if(i<0) { i+=static_cast<Int>(u.size()); }
+    ARIADNE_ASSERT(0<=i && Nat(i)<u.size());
+    u[static_cast<Nat>(i)]=x;
+}
 
 template<class X>
 X __mgetitem__(const Matrix<X>& A, const std::tuple<Nat,Nat>& ind)
@@ -157,74 +170,15 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
     return r;
 }
 
-    
-/*
 
-template<class X>
-struct from_python< Vector<X> >
-{
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Vector<X> >());
-    }
-
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; }
-        return obj_ptr;
-    }
-
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data)
-    {
-        boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
-        Vector<X> res(static_cast<SizeType>(len(lst)));
-        for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
-        new (storage) Vector<X>(res);
-        data->convertible = storage;
-    }
-};
-
-template<class X>
-struct from_python< Matrix<X> >
-{
-    from_python() {
-        boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Matrix<X> >());
-    }
-
-    static Void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr)) { return 0; }
-        return obj_ptr;
-    }
-
-    static Void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data)
-    {
-        boost::python::list rows=boost::python::extract<boost::python::list>(obj_ptr);
-        Matrix<X> res(static_cast<SizeType>(len(rows)),static_cast<SizeType>(len(boost::python::extract<boost::python::list>(rows[0]))));
-        for(Nat i=0; i!=res.row_size(); ++i) {
-            boost::python::list elmnts=boost::python::extract<boost::python::list>(rows[i]);
-            ARIADNE_ASSERT(Nat(len(elmnts))==res.column_size());
-            for(Nat j=0; j!=res.column_size(); ++j) {
-                res[i][j]=boost::python::extract<X>(elmnts[j]); } }
-        Void* storage = ((boost::python::converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
-        new (storage) Matrix<X>(res);
-        data->convertible = storage;
-    }
-};
-
-*/
-
-
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPApproximation>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPValue>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 
-template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<X>& repr) {
-    return os << repr.reference(); }
-template<class PR> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatValue<PR>>& repr) {
-    return os << repr.reference(); }
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr) {
+template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
     return os << repr.reference(); }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
@@ -277,14 +231,13 @@ Void export_vector_class(pybind11::module& module, pybind11::class_<Vector<X> >&
     module.def("join", &__join__<X,Vector<X>>);
     module.def("join", &__sjoin__<X>);
 
-//    from_python< Vector<X> >();
-//    to_python< Array< Vector<X> > >();
+//    vector_class.def(pybind11::init(&vector_from_python<X>));
+//    pybind11::implicitly_convertible<pybind11::list, Vector<X> >();
 }
 
 template<class Y, class X>
 Void export_vector_conversion(pybind11::module& module, pybind11::class_<Vector<X> >& vector_class)
 {
-    //vector_class.def(pybind11::init<Int,Y>());
     vector_class.def(pybind11::init< Vector<Y> >());
     pybind11::implicitly_convertible< Vector<Y>, Vector<X> >();
 }
@@ -362,7 +315,7 @@ template<> Void export_vector<FloatDPApproximation>(pybind11::module& module)
     export_vector_class<X>(module, vector_class);
     export_vector_arithmetic<X,X>(module, vector_class);
     module.def("norm",&__norm__<Vector<X>>);
-    //export_vector_conversion<FloatDPBounds,FloatDPApproximation>(module, vector_class);
+    export_vector_conversion<FloatDPBounds,FloatDPApproximation>(module, vector_class);
     vector_class.def(pybind11::init< Vector<FloatDPBounds> >());
 }
 
@@ -375,7 +328,7 @@ template<> Void export_vector<FloatMPApproximation>(pybind11::module& module)
     export_vector_class<X>(module, vector_class);
     export_vector_arithmetic<X,X>(module, vector_class);
     module.def("norm",&__norm__<Vector<X>>);
-    //export_vector_conversion<FloatMPBounds,FloatMPApproximation>(module, vector_class);
+    export_vector_conversion<FloatMPBounds,FloatMPApproximation>(module, vector_class);
     vector_class.def(pybind11::init< Vector<FloatMPBounds> >());
 }
 
@@ -387,9 +340,8 @@ Void export_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def(pybind11::init<Int,X>());
     covector_class.def("size", &Covector<X>::size);
     covector_class.def("__len__", &Covector<X>::size);
-//    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
-//    covector_class.def("__setitem__", &__setitem__<Covector<X>>);
-//      covector_class.def("__getitem__", &__getitem__<Covector<X>>);
+//    covector_class.def("__setitem__", &__cvsetitem__<Covector<X>>);
+//    covector_class.def("__getitem__", &__cvgetitem__<Covector<X>>);
     covector_class.def("__str__",&__cstr__< Covector<X> >);
 
     covector_class.def("__add__",__add__< Covector<SumType<X,X>>, Covector<X>, Covector<X> >);
@@ -427,7 +379,8 @@ Void export_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X> >&
 
     matrix_class.def_static("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
 
-//    from_python< Matrix<X> >();
+//    matrix_class.def(pybind11::init(&matrix_from_python<X>));
+//    pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
 }
 
 
@@ -579,9 +532,6 @@ template Void export_matrix<Rational>(pybind11::module& module);
 
 
 Void linear_algebra_submodule(pybind11::module& module) {
-//    from_python<Vector<ApproximateNumber>>();
-//    from_python<Vector<ValidatedNumber>>();
-
     export_vector<FloatDPApproximation>(module);
     export_vector<FloatDPBounds>(module);
     export_vector<FloatDPBall>(module);
@@ -611,8 +561,6 @@ Void linear_algebra_submodule(pybind11::module& module) {
     export_vector<Real>(module);
 
     export_vector<Rational>(module);
+    export_covector<Rational>(module);
     export_matrix<Rational>(module);
-
-//    pybind11::implicitly_convertible<Vector<Real>,Vector<ApproximateNumber>>();
-//    pybind11::implicitly_convertible<Vector<Real>,Vector<ValidatedNumber>>();
 }

@@ -49,93 +49,6 @@ namespace Ariadne {
 
 namespace {
 
-/*
-// Compute the Jacobian over an arbitrary domain
-Matrix<ValidatedNumericType>
-jacobian2(const Vector<ValidatedTaylorModelDP>& f, const Vector<ValidatedNumericType>& x)
-{
-    Vector< Differential<ValidatedNumericType> > dx(x.size(), f.size(), 1u);
-    for(Nat i=0; i!=x.size()-f.size(); ++i) {
-        dx[i]=Differential<ValidatedNumericType>::constant(f.size(),1u,x[i]); }
-    for(Nat i=0; i!=f.size(); ++i) {
-        Nat j=i+(x.size()-f.size());
-        dx[j]=Differential<ValidatedNumericType>::variable(f.size(),1u,x[j],i); }
-    Vector< Differential<ValidatedNumericType> > df(f.size(), f.size(), 1u);
-    for(Nat i=0; i!=f.size(); ++i) {
-        df[i]=evaluate(f[i].expansion(),dx);
-    }
-    Matrix<ValidatedNumericType> J=jacobian(df);
-    return J;
-}
-
-// Compute the Jacobian over the unit domain
-Matrix<FloatDPValue>
-jacobian2_value(const Vector<ValidatedTaylorModelDP>& f)
-{
-    const Nat rs=f.size();
-    const Nat fas=f.zero_element().argument_size();
-    const Nat has=fas-rs;
-    Matrix<FloatDPValue> J(rs,rs);
-    MultiIndex a(fas);
-    for(Nat i=0; i!=rs; ++i) {
-        for(Nat j=0; j!=rs; ++j) {
-            a[has+j]=1; const FloatDPValue x=f[i][a]; J[i][j]=x; a[has+j]=0;
-        }
-    }
-    return J;
-}
-
-// Compute the Jacobian over the unit domain
-Matrix<ValidatedNumericType>
-jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
-{
-    Nat rs=f.size();
-    Nat fas=f.zero_element().argument_size();
-    Nat has=fas-rs;
-    Matrix<ValidatedNumericType> J(rs,rs);
-    for(Nat i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModelDP::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            for(Nat k=0; k!=rs; ++k) {
-                const Nat c=iter->index()[has+k];
-                if(c>0) {
-                    ConstReferenceType<FloatDPValue> x=iter->coefficient();
-                    if(iter->index().degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
-                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->index()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
-                }
-            }
-        }
-    }
-    return J;
-}
-*/
-
-
-} // namespace
-
-
-static const Bool ALLOW_PARTIAL_FUNCTION = true;
-
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
-
-ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v);
-ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v);
-FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x);
-
-
-ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v) {
-    ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
-    for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarFunctionModelDP t=r[i];
-        for(Nat j=0; j!=v.size(); ++j) {
-            t+=FloatDPValue(A[i][j])*v[j];
-        }
-        r[i]=t;
-    }
-    return r;
-}
-
 ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
     ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
@@ -156,9 +69,12 @@ FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x) {
 }
 
 
+}
 
 
+static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
 
 SolverBase::SolverBase(double max_error, Nat max_steps)

@@ -35,7 +35,6 @@
 
 using namespace Ariadne;
 
-
 namespace Ariadne {
 
 template<class X1, class X2> ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2);

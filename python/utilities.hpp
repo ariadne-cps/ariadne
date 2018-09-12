@@ -34,27 +34,26 @@
 #include "utility/array.hpp"
 #include "utility/tuple.hpp"
 #include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
 
 namespace Ariadne {
 
-class Real;
+class String;
+template<class X> String class_name();
 
 template<class X> inline std::string python_name(const std::string& name) {
     return class_name<X>()+name; }
 
 
-    
+
 template<class C, class I0, class I1, class S> inline
 S __getslice__(const C& c, const I0& i0, const I1& i1) { return project(c,range(i0,i1)); }
 
-template<class C, class I, class X, EnableIf<IsSame<I,Int>> =dummy> inline
+template<class C, class I, class X, EnableIf<IsSame<I,int>> =dummy> inline
 X __getitem__(const C& c, const I& i) {
-    return c[static_cast<Nat>(i)];
+    return c[static_cast<uint>(i)];
 }
 
-template<class C, class I, class X, EnableIf<Not<IsSame<I,Int>>> =dummy> inline
+template<class C, class I, class X, EnableIf<Not<IsSame<I,int>>> =dummy> inline
 X __getitem__(const C& c, const I& i) {
     return c[i];
 }
@@ -159,6 +158,7 @@ template<class... AS> inline decltype(auto) _unchecked_evaluate_(AS... as) { ret
 template<class... AS> inline decltype(auto) _compose_(AS... as) { return compose(as...); }
 template<class... AS> inline decltype(auto) _unchecked_compose_(AS... as) { return unchecked_compose(as...); }
 
+template<class... AS> inline decltype(auto) _dot_(AS... as) { return dot(as...); }
 template<class... AS> inline decltype(auto) _join_(AS... as) { return join(as...); }
 template<class... AS> inline decltype(auto) _combine_(AS... as) { return combine(as...); }
 
@@ -192,10 +192,10 @@ template<class... AS> decltype(auto) _preimage_(AS const& ... as) { return preim
 
 
 template<class T> std::string __cstr__(const T& t) {
-    StringStream ss; ss << t; return ss.str(); }
+    std::stringstream ss; ss << t; return ss.str(); }
 
 template<class T> std::string __crepr__(const T& t) {
-    StringStream ss; ss << representation(t); return ss.str(); }
+    std::stringstream ss; ss << representation(t); return ss.str(); }
 
 
 template<class T> struct PythonRepresentation {
@@ -208,35 +208,82 @@ template<class T> PythonRepresentation<T> python_representation(const T& t) {
     return PythonRepresentation<T>(t); }
 
 template<class T> std::string __repr__(const T& t) {
-    StringStream ss; ss << python_representation(t); return ss.str();}
-
-    
-
-template<class T> Array<T> make_array(pybind11::object pyobj) {
-    std::vector<T> lst = pybind11::cast<std::vector<T>>(pyobj);
-    return Array<T>(lst.begin(),lst.end());
-}
-
-template<class T>
-Void export_array(pybind11::module& module, const char* name)
-{
-    pybind11::class_< Array<T> > array_class(module,name);
-    array_class.def(pybind11::init < Array<T> >());
-    array_class.def(pybind11::init<Int>());
-    array_class.def("__len__", &Array<T>::size);
-    array_class.def("__getitem__",&__getitem__< Array<T>, Nat, T>);
-    array_class.def("__setitem__",&__setitem__< Array<T>, Nat, T>);
-    array_class.def("__str__", &__cstr__< Array<T> >);
-}
-
-
-template<class T> pybind11::list to_python(Vector<T> const& v) {
-    std::vector<T> cv(v.begin(),v.end());
-    return pybind11::cast(cv);
-}
-
-
+    std::stringstream ss; ss << python_representation(t); return ss.str();}
 
 } // namespace Ariadne
+
+
+template<class T>
+void export_array(pybind11::module& module, const char* name)
+{
+    using namespace Ariadne;
+
+    pybind11::class_<Array<T>> array_class(module,name);
+    array_class.def(pybind11::init<Array<T>>());
+    array_class.def(pybind11::init<uint>());
+    array_class.def("__len__", &Array<T>::size);
+    array_class.def("__getitem__", &__getitem__<Array<T>,uint,T>);
+    array_class.def("__setitem__", &__setitem__<Array<T>,uint,T>);
+    array_class.def("__str__", &__cstr__<Array<T>>);
+}
+
+
+namespace pybind11::detail {
+template <class T> struct type_caster<Ariadne::Array<T>>
+    : array_caster<Ariadne::Array<T>, T, true> { };
+template <class T> struct type_caster<Ariadne::List<T>>
+    : list_caster<Ariadne::List<T>, T> { };
+template <class T> struct type_caster<Ariadne::Set<T>>
+    : set_caster<Ariadne::Set<T>, T> { };
+template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
+    : map_caster<Ariadne::Map<K,V>, K,V> { };
+} // namespace pybind11::detail
+
+
+
+#include "algebra/vector.hpp"
+
+template<class X>
+void export_vector(pybind11::module& module, std::string name) {
+    using namespace Ariadne;
+
+    pybind11::class_<Vector<X>> vector_class(module, name.c_str());
+    vector_class.def(pybind11::init<Vector<X>>());
+    vector_class.def(pybind11::init<Array<X>>());
+    if constexpr (IsDefaultConstructible<X>::value) {
+        vector_class.def(pybind11::init<Nat>());
+    }
+    vector_class.def(pybind11::init<Nat,X>());
+    vector_class.def("size", &Vector<X>::size);
+    vector_class.def("__len__", &Vector<X>::size);
+    vector_class.def("__setitem__", &__setitem__<Vector<X>,Nat,X>);
+    vector_class.def("__getitem__", &__getitem__<Vector<X>,Nat,X>);
+    //vector_class.def("__getslice__", &__getslice__<Vector<X>,int,int,Vector<X>>);
+    if constexpr(HasEquality<X,X>::value) {
+        vector_class.def("__eq__", &__eq__<EqualityType<X,X>,Vector<X>,Vector<X> >);
+        vector_class.def("__ne__", &__ne__<InequalityType<X,X>,Vector<X>,Vector<X> >);
+    }
+    vector_class.def("__pos__", &__pos__<Vector<X>,Vector<X>>);
+    vector_class.def("__neg__", &__neg__<Vector<X>,Vector<X>>);
+    vector_class.def("__add__",__add__<Vector<SumType<X,X>>, Vector<X>, Vector<X> >);
+    vector_class.def("__sub__",__sub__<Vector<DifferenceType<X,X>>, Vector<X>, Vector<X> >);
+    vector_class.def("__rmul__",__rmul__<Vector<ProductType<X,X>>, Vector<X>, X >);
+    vector_class.def("__mul__",__mul__<Vector<ProductType<X,X>>, Vector<X>, X >);
+    if constexpr(CanDivide<X,X>::value) {
+        vector_class.def("__div__",__div__<Vector<QuotientType<X,X>>, Vector<X>, X >);
+    }
+    vector_class.def("__str__",&__cstr__<Vector<X>>);
+    //vector_class.def("__repr__",&__repr__<Vector<X>>);
+    vector_class.def_static("unit",&Vector<X>::unit);
+    vector_class.def_static("basis",&Vector<X>::basis);
+
+    module.def("dot", &_dot_<Vector<X>,Vector<X>>);
+
+    module.def("join", &_join_<Vector<X>,Vector<X>>);
+    module.def("join", &_join_<Vector<X>,X>);
+    module.def("join", &_join_<X,Vector<X>>);
+    module.def("join", [](X const& x1, X const& x2){return Vector<X>({x1,x2});});
+};
+
 
 #endif /* ARIADNE_PYTHON_UTILITIES_HPP */

@@ -95,7 +95,7 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 }
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex>& arepr) {
-    MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os; 
+    MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os;
 }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunction<X> >& frepr) {
@@ -122,10 +122,6 @@ typedef Vector<ValidatedTaylorModelDP> TMV;
 typedef ValidatedVectorTaylorFunctionModelDP TFM;
 typedef ValidatedTaylorModelDP TM;
 
-template<class X> using Monomial = ExpansionValue<MultiIndex,X>;
-
-static constexpr auto self = pybind11::detail::self;
-
 
 
 Void export_multi_index(pybind11::module& module)
@@ -143,50 +139,54 @@ Void export_multi_index(pybind11::module& module)
     pybind11::implicitly_convertible<pybind11::tuple,MultiIndex>();
 }
 
-template<class X>
-Void export_monomial(pybind11::module& module)
-{
-    pybind11::class_< ExpansionValue<MultiIndex,X> > monomial_class(python_name<X>("Monomial"));
-    monomial_class.def(pybind11::init<MultiIndex,X>());
-    monomial_class.def("key",(const MultiIndex&(ExpansionValue<MultiIndex,X>::*)()const)&ExpansionValue<MultiIndex,X>::key);
-    monomial_class.def("data",(const X&(ExpansionValue<MultiIndex,X>::*)()const) &ExpansionValue<MultiIndex,X>::data);
-    monomial_class.def("__str__", &__cstr__< ExpansionValue<MultiIndex,X> >);
-}
 
 template<class X>
 Void export_polynomial(pybind11::module& module)
 {
-    X real;
+    pybind11::class_< Monomial<X> > monomial_class(module,python_name<X>("Monomial").c_str());
+    monomial_class.def(pybind11::init<MultiIndex,X>());
+    monomial_class.def("index", (MultiIndex const&(Monomial<X>::*)()const) &Monomial<X>::index);
+    monomial_class.def("coefficient", (X const&(Monomial<X>::*)()const) &Monomial<X>::coefficient);
+    monomial_class.def("__str__", &__cstr__<Monomial<X>>);
 
-    pybind11::class_< Polynomial<X> > polynomial_class(python_name<X>("Polynomial"));
+
+    pybind11::class_< Polynomial<X> > polynomial_class(module,python_name<X>("Polynomial").c_str());
     polynomial_class.def(pybind11::init< Polynomial<X> >());
     polynomial_class.def(pybind11::init<Nat>());
-    polynomial_class.def_static("constant", (Polynomial<X>(*)(Nat,double)) &Polynomial<X>::constant);
+    polynomial_class.def_static("constant", (Polynomial<X>(*)(Nat,X const&)) &Polynomial<X>::constant);
     polynomial_class.def_static("variable", (Polynomial<X>(*)(Nat,Nat)) &Polynomial<X>::variable);
     polynomial_class.def_static("coordinate", (Polynomial<X>(*)(Nat,Nat)) &Polynomial<X>::variable);
-    polynomial_class.def_static("variables", (Vector< Polynomial<X> >(*)(Nat)) &Polynomial<X>::variables);
+
+    polynomial_class.def_static("variables", [](Nat as){return Polynomial<X>::variables(as).array();});
 
     polynomial_class.def("argument_size", &Polynomial<X>::argument_size);
     polynomial_class.def("insert", &Polynomial<X>::insert);
-    polynomial_class.def(+self);
-    polynomial_class.def(-self);
-    polynomial_class.def(self+self);
-    polynomial_class.def(self-self);
-    polynomial_class.def(self*self);
-    polynomial_class.def(self+real);
-    polynomial_class.def(self-real);
-    polynomial_class.def(self*real);
-    polynomial_class.def(self/real);
-    polynomial_class.def(real+self);
-    polynomial_class.def(real-self);
-    polynomial_class.def(real*self);
-    polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
-    //polynomial_class.def(self_ns::repr(self));
 
-#warning Ensure a vector of polynomials is treated properly
-    to_python< Vector< Polynomial<X> > >();
+    typedef Polynomial<X> SelfType;
+    typedef X RealType;
+
+    polynomial_class.def("__pos__", &__pos__<SelfType,SelfType>);
+    polynomial_class.def("__neg__", &__neg__<SelfType,SelfType>);
+    polynomial_class.def("__add__", &__add__<SelfType,SelfType,SelfType>);
+    polynomial_class.def("__sub__", &__add__<SelfType,SelfType,SelfType>);
+    polynomial_class.def("__mul__", &__add__<SelfType,SelfType,SelfType>);
+    polynomial_class.def("__add__", &__add__<SelfType,SelfType,RealType>);
+    polynomial_class.def("__sub__", &__add__<SelfType,SelfType,RealType>);
+    polynomial_class.def("__mul__", &__add__<SelfType,SelfType,RealType>);
+    polynomial_class.def("__div__", &__add__<SelfType,SelfType,RealType>);
+    polynomial_class.def("__add__", &__add__<SelfType,RealType,SelfType>);
+    polynomial_class.def("__sub__", &__add__<SelfType,RealType,SelfType>);
+    polynomial_class.def("__mul__", &__add__<SelfType,RealType,SelfType>);
+    polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
+
+    export_vector<Polynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
 }
 
+Void export_polynomials(pybind11::module& module)
+{
+    export_polynomial<FloatDPBounds>(module);
+    export_polynomial<FloatDPApproximation>(module);
+}
 
 Void export_univariate_function(pybind11::module& module)
 {
@@ -319,7 +319,7 @@ template<class P> Void export_scalar_function(pybind11::module& module)
     if constexpr (not IsSame<P,ApproximateTag>::value) {
         scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
     }
-    
+
     module.def("pow", (ScalarFunction<P>(*)(const ScalarFunction<P>&,Int)) &pow);
     module.def("rec", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &rec);
     module.def("sqr", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqr);
@@ -353,7 +353,7 @@ template<class P> Void export_vector_function(pybind11::module& module)
     if constexpr (not IsSame<P,ApproximateTag>::value) {
         vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
     }
-    
+
     vector_function_class.def("__str__", &__cstr__<VectorFunction<P>>);
     vector_function_class.def("__repr__", &__crepr__<VectorFunction<P>>);
 
@@ -408,7 +408,10 @@ Void export_vector_functions(pybind11::module& module) {
 
 
 Void function_submodule(pybind11::module& module) {
+
     export_multi_index(module);
+
+    export_polynomials(module);
 
     export_univariate_function(module);
     export_scalar_functions(module);
@@ -416,5 +419,6 @@ Void function_submodule(pybind11::module& module) {
 
     export_procedure<ApproximateNumber, FloatDPApproximation>(module);
     export_procedure<ValidatedNumber, FloatDPBounds>(module);
+
 }
 

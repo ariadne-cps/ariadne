@@ -43,75 +43,6 @@
 
 namespace Ariadne {
 
-static constexpr auto self = pybind11::detail::self;
-
-/*
-template<class X>
-struct from_python<Point<X>> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point<X>>()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::extract<boost::python::tuple> xtup(obj_ptr);
-        boost::python::extract<boost::python::list> xlst(obj_ptr);
-        Point<X> pt;
-        if(xtup.check()) {
-            boost::python::tuple tup=xtup(); pt=Point<X>(len(tup));
-            for(Nat i=0; i!=static_cast<Nat>(len(tup)); ++i) { pt[i]=boost::python::extract<X>(tup[i]); }
-        } else if(xlst.check()) {
-            boost::python::list lst=xlst(); pt=Point<X>(len(lst));
-            for(Nat i=0; i!=static_cast<Nat>(len(lst)); ++i) { pt[i]=boost::python::extract<X>(lst[i]); }
-        }
-        Void* storage = ((converter::rvalue_from_python_storage<X>*)data)->storage.bytes;
-        new (storage) Point<X>(pt);
-        data->convertible = storage;
-    }
-};
-
-template<class IVL>
-struct from_python<Box<IVL>> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Box<IVL>>()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((converter::rvalue_from_python_storage<IVL>*)data)->storage.bytes;
-        boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        Box<IVL>* bx_ptr = new (storage) Box<IVL>(static_cast<SizeType>(len(lst)));
-        for(Int i=0; i!=len(lst); ++i) { (*bx_ptr)[static_cast<SizeType>(i)]=boost::python::extract<IVL>(lst[i]); }
-        data->convertible = storage;
-    }
-};
-
-
-template<class ES>
-struct to_python< ListSet<ES> > {
-    to_python() { boost::python::to_python_converter< ListSet<ES>, to_python< ListSet<ES> > >(); }
-
-    static PyObject* convert(const ListSet<ES>& ls) {
-        boost::python::list result;
-        for(typename ListSet<ES>::ConstIterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-            result.append(boost::python::object(*iter));
-        }
-        return boost::python::incref(boost::python::list(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyList_Type; }
-};
-
-template<class ES>
-struct to_python< ListSet< HybridBasicSet<ES> > > {
-    typedef ListSet< HybridBasicSet<ES> > SetType;
-    to_python() { boost::python::to_python_converter< SetType, to_python<SetType> >(); }
-
-    static PyObject* convert(const SetType& hls) {
-        boost::python::dict result;
-        for(typename SetType::LocationsConstIterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
-            result[iter->first]=iter->second;
-        }
-        return boost::python::incref(boost::python::dict(result).ptr());
-    }
-    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
-};
-
-*/
-
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
@@ -204,6 +135,7 @@ class LocatedSetWrapper
 
 } // namespace Ariadne
 
+
 using namespace Ariadne;
 
 template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
@@ -235,47 +167,46 @@ Void export_drawable_interface(pybind11::module& module) {
 
 
 Void export_set_interface(pybind11::module& module) {
-    pybind11::class_<OpenSetInterface, OpenSetWrapper> open_set_wrapper_class(module,"OpenSetInterface");
-    open_set_wrapper_class.def("covers",(LowerKleenean(OpenSetInterface::*)(const ExactBoxType& bx)const) &OpenSetInterface::covers);
-#warning Export inherited members
-    //    open_set_wrapper_class.def("overlaps",(LowerKleenean(OvertSetInterface::*)(const ExactBoxType& bx)const) &OvertSetInterface::overlaps);
+    pybind11::class_<OvertSetInterface, OvertSetWrapper> overt_set_interface_class(module,"OvertSetInterface");
+    overt_set_interface_class.def("overlaps",(LowerKleenean(OvertSetInterface::*)(const ExactBoxType& bx)const) &OvertSetInterface::overlaps);
 
-    pybind11::class_<ClosedSetInterface, ClosedSetWrapper> closed_set_wrapper_class(module,"ClosedSetInterface");
-    closed_set_wrapper_class.def("separated",(LowerKleenean(ClosedSetInterface::*)(const ExactBoxType& bx)const) &ClosedSetInterface::separated);
+    pybind11::class_<OpenSetInterface, OpenSetWrapper> open_set_interface_class(module,"OpenSetInterface",overt_set_interface_class);
+    open_set_interface_class.def("covers",(LowerKleenean(OpenSetInterface::*)(const ExactBoxType& bx)const) &OpenSetInterface::covers);
 
-    pybind11::class_<OvertSetInterface, OvertSetWrapper> overt_set_wrapper_class(module,"OvertSetInterface");
-    overt_set_wrapper_class.def("overlaps",(LowerKleenean(OvertSetInterface::*)(const ExactBoxType& bx)const) &OvertSetInterface::overlaps);
+    pybind11::class_<ClosedSetInterface, ClosedSetWrapper> closed_set_interface_class(module,"ClosedSetInterface");
+    closed_set_interface_class.def("separated",(LowerKleenean(ClosedSetInterface::*)(const ExactBoxType& bx)const) &ClosedSetInterface::separated);
 
-    pybind11::class_<CompactSetInterface, CompactSetWrapper> compact_set_wrapper_class(module,"CompactSetInterface");
-//    compact_set_wrapper_class.def("separated",(LowerKleenean(ClosedSetInterface::*)(const ExactBoxType& bx)const) &CompactSetInterface::separated);
-//    compact_set_wrapper_class.def("inside",(LowerKleenean(BoundedSetInterface::*)(const ExactBoxType& bx)const) &CompactSetInterface::inside);
-//    compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
+    pybind11::class_<BoundedSetInterface>bounded_set_interface_class(module,"BoundedSetInterface",bounded_set_interface_class);
+    bounded_set_interface_class.def("inside",(LowerKleenean(BoundedSetInterface::*)(const ExactBoxType& bx)const) &BoundedSetInterface::inside);
+    bounded_set_interface_class.def("bounding_box", (ExactBoxType(BoundedSetInterface::*)()const)&BoundedSetInterface::bounding_box);
 
-    pybind11::class_<LocatedSetInterface, pybind11::noncopyable> located_set_wrapper_class(module,"LocatedSetInterface");
-    pybind11::class_<RegularSetInterface, pybind11::noncopyable> regular_set_wrapper_class(module,"RegularSetInterface");
+    pybind11::class_<CompactSetInterface, CompactSetWrapper, ClosedSetInterface, BoundedSetInterface> compact_set_interface_class(module,"CompactSetInterface", pybind11::multiple_inheritance());
+
+    pybind11::class_<LocatedSetInterface, OvertSetInterface,CompactSetInterface> located_set_interface_class(module,"LocatedSetInterface", pybind11::multiple_inheritance());
+    pybind11::class_<RegularSetInterface, OpenSetInterface,ClosedSetInterface> regular_set_interface_class(module,"RegularSetInterface", pybind11::multiple_inheritance());
 }
 
 
-Void export_point(pybind11::module& module)
+template<class PT> PT point_from_python(pybind11::list pylst) {
+    typedef typename PT::ValueType X;
+    std::vector<X> lst=pybind11::cast<std::vector<X>>(pylst);
+    Array<X> ary(lst.begin(),lst.end());
+    return PT(Vector<X>(ary));
+}
+
+template<class X> Void export_point(pybind11::module& module, std::string name)
 {
-    //static_assert(pybind11::class_<ExactPoint>::is_valid_class_option<DrawableInterface>::value);
-    //static_assert(not pybind11::class_<ExactPoint>::is_valid_class_option<DrawableWrapper>::value);
-
-//    pybind11::class_<ExactPoint,pybind11::bases<DrawableWrapper>> point_class(module,"ExactPoint");
-//    pybind11::class_<ExactPoint, DrawableWrapper> point_class(module,"ExactPoint", pybind11::multiple_inheritance());
-    pybind11::class_<ExactPoint, DrawableInterface> point_class(module,"ExactPoint", pybind11::multiple_inheritance());
-    point_class.def(pybind11::init<ExactPoint>());
+    pybind11::class_<Point<X>, DrawableInterface> point_class(module,name.c_str());
+    point_class.def(pybind11::init(&point_from_python<Point<X>>));
+    point_class.def(pybind11::init<Point<X>>());
     point_class.def(pybind11::init<Nat>());
-    point_class.def("__getitem__", &__getitem__<ExactPoint,Int,FloatDPValue>);
-    point_class.def("__str__", &__cstr__<ExactPoint>);
-    
-//    from_python<ExactPoint>();
-    pybind11::implicitly_convertible<Vector<FloatDPValue>,ExactPoint>();
-
+    point_class.def("__getitem__", &__getitem__<Point<X>,Int,X>);
+    point_class.def("__str__", &__cstr__<Point<X>>);
 }
 
-typedef LogicalType<ExactTag> ExactLogicalType;
-
+Void export_points(pybind11::module& module) {
+    export_point<FloatDPValue>(module,"ExactPoint");
+}
 
 template<class IVL> Void export_interval(pybind11::module& module, std::string name) {
     typedef IVL IntervalType;
@@ -292,15 +223,17 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def(pybind11::init<MidpointType>());
     interval_class.def(pybind11::init<LowerBoundType,UpperBoundType>());
     interval_class.def(pybind11::init([](pybind11::dict pydct){return interval_from_dict<IntervalType>(pydct);}));
+    pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
 
-    if constexpr (IsConstructibleGivenDefaultPrecision<UpperBoundType,Dyadic>::value and not IsConstructible<UpperBoundType,Dyadic>::value) {
+    if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
         interval_class.def(pybind11::init<DyadicInterval>());
     }
 
-    pybind11::implicitly_convertible<pybind11::dict, IntervalType>();
+    if constexpr (HasEquality<IVL,IVL>::value) {
+        interval_class.def("__eq__",  &__eq__<EqualityType<IVL,IVL>,IVL,IVL>);
+        interval_class.def("__ne__",  &__ne__<InequalityType<IVL,IVL>,IVL,IVL>);
+    }
 
-    interval_class.def(self == self);
-    interval_class.def(self != self);
     interval_class.def("lower", &IntervalType::lower);
     interval_class.def("upper", &IntervalType::upper);
     interval_class.def("midpoint", &IntervalType::midpoint);
@@ -310,9 +243,6 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     interval_class.def("empty", &IntervalType::is_empty);
     interval_class.def("__str__",&__cstr__<IntervalType>);
     //interval_class.def("__repr__",&__repr__<IntervalType>);
-
-    //from_python_list<IntervalType>();
-    //from_python_str<ExactIntervalType>();
 
     module.def("midpoint", &IntervalType::midpoint);
     module.def("radius", &IntervalType::radius);
@@ -336,9 +266,10 @@ Void export_intervals(pybind11::module& module) {
 
 template<class BX> Void export_box(pybind11::module& module, std::string name)
 {
+    using IVL=typename BX::IntervalType;
+
     using BoxType = BX;
-    using IVL = typename BX::IntervalType;
-    using UB = typename IVL::UpperBoundType;
+    using IntervalType = IVL;
 
     typedef decltype(disjoint(declval<BX>(),declval<BX>())) DisjointType;
     typedef decltype(subset(declval<BX>(),declval<BX>())) SubsetType;
@@ -347,18 +278,24 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     typedef decltype(covers(declval<BX>(),declval<BX>())) CoversType;
     typedef decltype(inside(declval<BX>(),declval<BX>())) InsideType;
 
-//    pybind11::class_<ExactBoxType,pybind11::bases<CompactSetWrapper,OpenSetWrapper,Vector<ExactIntervalType>,DrawableWrapper > >
-    pybind11::class_<BoxType > box_class(module,name.c_str());
+    //NOTE: Boxes do not inherit SetInterfaces or DrawableInterface in C++ API
+    //pybind11::class_<ExactBoxType,pybind11::bases<CompactSetInterface,OpenSetInterface,DrawableInterface>>
+    pybind11::class_<BoxType> box_class(module,name.c_str());
     box_class.def(pybind11::init<BoxType>());
     box_class.def(pybind11::init<DimensionType>());
+    box_class.def(pybind11::init<Array<IntervalType>>());
     box_class.def(pybind11::init(&box_from_list<BoxType>));
-    if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value and not IsConstructible<UB,Dyadic>::value) {
-        box_class.def(pybind11::init<Box<Interval<Dyadic>>>());
+    pybind11::implicitly_convertible<pybind11::list,BoxType>();
+
+    if constexpr (IsConstructible<BoxType,DyadicBox>::value and not IsSame<BoxType,DyadicBox>::value) {
+         box_class.def(pybind11::init<Box<Interval<Dyadic>>>());
     }
 
-    pybind11::implicitly_convertible<pybind11::list,BoxType>();
-    
-    //box_class.def("__eq__", (ExactLogicalType(*)(const Vector<ExactIntervalType>&,const Vector<ExactIntervalType>&)) &operator==);
+    if constexpr (HasEquality<BX,BX>::value) {
+        box_class.def("__eq__",  __eq__<EqualityType<BX,BX>,BX,BX>);
+        box_class.def("__ne__",  __ne__<InequalityType<BX,BX>,BX,BX>);
+    }
+
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
     box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
@@ -392,7 +329,7 @@ template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name
     box_class.def("__str__",&__cstr__<BoxType>);
 
     pybind11::implicitly_convertible<pybind11::list,BoxType>();
-    
+
 }
 
 Void export_boxes(pybind11::module& module) {
@@ -411,21 +348,17 @@ Void export_boxes(pybind11::module& module) {
 }
 
 /*
-Pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
-    ListSet<Zonotope> split_list=split(z);
-    ARIADNE_ASSERT(split_list.size()==2);
-    return Pair<Zonotope,Zonotope>(split_list[0],split_list[1]);
-}
 
 Void export_zonotope(pybind11::module& module)
 {
-    pybind11::class_<Zonotope,pybind11::bases<CompactSetWrapper,OpenSetWrapper,DrawableWrapper> > zonotope_class(module,"Zonotope",pybind11::init<Zonotope>());
-    zonotope_class.def(pybind11::init< Vector<FloatDPValue>, Matrix<FloatDPValue>, Vector<FloatDPError> >());
-    zonotope_class.def(pybind11::init< Vector<FloatDPValue>, Matrix<FloatDPValue> >());
-    zonotope_class.def(pybind11::init< ExactBoxType >());
-    zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
-    zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
-    zonotope_class.def("error",&Zonotope::error,return_value_policy<copy_const_reference>());
+    pybind11::class_<Zonotope,pybind11::bases<CompactSetInterface,OpenSetInterface,DrawableInterface>> zonotope_class(module,"Zonotope");
+    zonotope_class.def(pybind11::init<Zonotope>());
+    zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>,Vector<FloatDPError>>());
+    zonotope_class.def(pybind11::init<Vector<FloatDPValue>,Matrix<FloatDPValue>>());
+    zonotope_class.def(pybind11::init<ExactBoxType>());
+    zonotope_class.def("centre",&Zonotope::centre);
+    zonotope_class.def("generators",&Zonotope::generators);
+    zonotope_class.def("error",&Zonotope::error);
     zonotope_class.def("contains",&Zonotope::contains);
     zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
@@ -440,33 +373,28 @@ Void export_zonotope(pybind11::module& module)
     module.def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
     module.def("error_free_over_approximation", (Zonotope(*)(const Zonotope&)) &error_free_over_approximation);
 
-//    module.def("apply", (Zonotope(*)(const ValidatedVectorFunction&, const Zonotope&)) &apply);
-
-    to_python< ListSet<Zonotope> >();
+//    module.def("image", (Zonotope(*)(const Zonotope&, const ValidatedVectorFunction&)) &image);
 }
-
 
 Void export_polytope(pybind11::module& module)
 {
-    pybind11::class_<Polytope,pybind11::bases<LocatedSetWrapper,DrawableWrapper> > polytope_class(module,"Polytope",pybind11::init<Polytope>());
+    pybind11::class_<Polytope,pybind11::bases<LocatedSetInterface,DrawableInterface>> polytope_class(module,"Polytope");
+    polytope_class.def(pybind11::init<Polytope>());
     polytope_class.def(pybind11::init<Int>());
     polytope_class.def("new_vertex",&Polytope::new_vertex);
     polytope_class.def("__iter__",boost::python::range(&Polytope::vertices_begin,&Polytope::vertices_end));
     polytope_class.def(self_ns::str(self));
-
 }
+
 */
 
 Void export_curve(pybind11::module& module)
 {
-//    to_python< Pair<const FloatDPValue,ExactPoint> >();
-
-    //pybind11::class_<InterpolatedCurve> interpolated_curve_class(module,"InterpolatedCurve", drawable_class);    
-    pybind11::class_<InterpolatedCurve, DrawableInterface> interpolated_curve_class(module,"InterpolatedCurve", pybind11::multiple_inheritance());
+    pybind11::class_<InterpolatedCurve, DrawableInterface> interpolated_curve_class(module,"InterpolatedCurve");
     interpolated_curve_class.def(pybind11::init<InterpolatedCurve>());
     interpolated_curve_class.def(pybind11::init<FloatDPValue,ExactPoint>());
     interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDPValue&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
-//    interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
+    interpolated_curve_class.def("__iter__", [](InterpolatedCurve const& c){return pybind11::make_iterator(c.begin(),c.end());});
     interpolated_curve_class.def("__str__", &__cstr__<InterpolatedCurve>);
 
 
@@ -476,7 +404,6 @@ Void export_curve(pybind11::module& module)
 
 Void export_affine_set(pybind11::module& module)
 {
-//    pybind11::class_<ValidatedAffineConstrainedImageSet,pybind11::bases<CompactSetInterface,DrawableInterface> >
     pybind11::class_<ValidatedAffineConstrainedImageSet,pybind11::bases<DrawableInterface> >
         affine_set_class(module,"ValidatedAffineConstrainedImageSet", pybind11::multiple_inheritance());
     affine_set_class.def(pybind11::init<ValidatedAffineConstrainedImageSet>());
@@ -495,12 +422,12 @@ Void export_affine_set(pybind11::module& module)
     affine_set_class.def("outer_approximation", &ValidatedAffineConstrainedImageSet::outer_approximation);
     affine_set_class.def("boundary", &ValidatedAffineConstrainedImageSet::boundary);
     affine_set_class.def("__str__",&__cstr__<ValidatedAffineConstrainedImageSet>);
-    
+
     module.def("image", (ValidatedAffineConstrainedImageSet(*)(ValidatedAffineConstrainedImageSet const&,ValidatedVectorFunction const&)) &_image_);
 }
 
 Void export_constraint_set(pybind11::module& module)
-{    
+{
 //    from_python< List<EffectiveConstraint> >();
 
     pybind11::class_<ConstraintSet,pybind11::bases<RegularSetInterface,OpenSetInterface> >
@@ -509,7 +436,7 @@ Void export_constraint_set(pybind11::module& module)
     constraint_set_class.def(pybind11::init< List<EffectiveConstraint> >());
     constraint_set_class.def("dimension", &ConstraintSet::dimension);
     constraint_set_class.def("__str__", &__cstr__<ConstraintSet>);
-    
+
 //    pybind11::class_<BoundedConstraintSet,pybind11::bases<DrawableWrapper> >
     pybind11::class_<BoundedConstraintSet,pybind11::bases<RegularSetInterface,CompactSetInterface,DrawableInterface> >
         bounded_constraint_set_class(module,"BoundedConstraintSet", pybind11::multiple_inheritance());
@@ -543,7 +470,7 @@ Void export_constrained_image_set(pybind11::module& module)
     constrained_image_set_class.def("dimension", &ConstrainedImageSet::dimension);
 //    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("__str__",&__cstr__<ConstrainedImageSet>);
-    
+
 //    pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<CompactSetInterface,DrawableInterface> >
     pybind11::class_<ValidatedConstrainedImageSet,pybind11::bases<DrawableInterface> >
         validated_constrained_image_set_class(module,"ValidatedConstrainedImageSet", pybind11::multiple_inheritance());
@@ -561,7 +488,7 @@ Void export_constrained_image_set(pybind11::module& module)
     validated_constrained_image_set_class.def("apply", &ValidatedConstrainedImageSet::apply);
     validated_constrained_image_set_class.def("new_space_constraint", (Void(ValidatedConstrainedImageSet::*)(const ValidatedConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
     validated_constrained_image_set_class.def("new_parameter_constraint", (Void(ValidatedConstrainedImageSet::*)(const ValidatedConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
-    //constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
+    validated_constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
     validated_constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
     validated_constrained_image_set_class.def("adjoin_outer_approximation_to", &ValidatedConstrainedImageSet::adjoin_outer_approximation_to);
     validated_constrained_image_set_class.def("bounding_box", &ValidatedConstrainedImageSet::bounding_box);
@@ -573,7 +500,7 @@ Void export_constrained_image_set(pybind11::module& module)
     validated_constrained_image_set_class.def("__str__", &__cstr__<ValidatedConstrainedImageSet>);
     validated_constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
 
-//    module.def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactBoxType&)) &product);
+    //module.def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactBoxType&)) &product);
 }
 
 
@@ -581,8 +508,8 @@ Void export_constrained_image_set(pybind11::module& module)
 Void geometry_submodule(pybind11::module& module) {
     export_drawable_interface(module);
     export_set_interface(module);
-    export_point(module);
 
+    export_points(module);
     export_intervals(module);
     export_boxes(module);
 //    export_zonotope(module);
@@ -593,6 +520,10 @@ Void geometry_submodule(pybind11::module& module) {
 
     export_constraint_set(module);
     export_constrained_image_set(module);
+
+    module.def("foo",[](){return Array<Dyadic>({2,3,5});});
+    module.def("food",[](Array<Dyadic> const& ary){return;});
+
 
 }
 

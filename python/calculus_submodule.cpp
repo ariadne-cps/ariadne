@@ -180,17 +180,13 @@ ValidatedVectorFunction unrestrict(const ValidatedVectorFunctionModelDP& fm) {
     return ValidatedVectorFunction(fm.raw_pointer()->_clone());
 }
 
-
-ExactIntervalType _range1(const ValidatedTaylorModelDP&);
-ExactIntervalType _range2(const ValidatedTaylorModelDP&);
-ExactIntervalType _range3(const ValidatedTaylorModelDP&);
-
 } // namespace Ariadne
 
 static constexpr auto self = pybind11::detail::self;
 
 Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) { return new ThresholdSweeper<FloatDP>(pr,x); }
 Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) { return new GradedSweeper<FloatDP>(pr,n); }
+
 
 Void export_expansion(pybind11::module& module)
 {
@@ -221,10 +217,9 @@ Void export_sweeper(pybind11::module& module)
 
 Expansion<MultiIndex,FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
 
+
 Void export_validated_taylor_model(pybind11::module& module)
 {
-    typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelType;
-
     pybind11::class_<ValidatedTaylorModelDP> taylor_model_class(module,"ValidatedTaylorModelDP");
     taylor_model_class.def(pybind11::init<ValidatedTaylorModelDP>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
@@ -361,7 +356,6 @@ Void export_approximate_taylor_model(pybind11::module& module)
 
 
 
-
 Void export_scalar_function_model(pybind11::module& module)
 {
     pybind11::class_<ValidatedScalarFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarFunctionModel");
@@ -445,7 +439,6 @@ Void export_vector_function_model(pybind11::module& module)
 }
 
 
-
 Void export_scalar_taylor_function(pybind11::module& module)
 {
     typedef ValidatedScalarTaylorFunctionModelDP F;
@@ -455,10 +448,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     typedef Vector<X> VX;
     typedef SizeType I;
     typedef typename X::GenericType Y;
-    typedef Vector<Y> VY;
 
-    typedef F const& Fcr;
-    
     pybind11::class_<ValidatedScalarTaylorFunctionModelDP> scalar_taylor_function_class(module,"ValidatedScalarTaylorFunctionModel");
     scalar_taylor_function_class.def(pybind11::init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(pybind11::init<ExactBoxType,ValidatedTaylorModelDP>());
@@ -554,20 +544,21 @@ Void export_scalar_taylor_function(pybind11::module& module)
 
     module.def("max", &_abs_<F>);
 
-    module.def("neg", &_neg_<F>); 
-    module.def("rec", &_rec_<F>); 
-    module.def("sqr", &_sqr_<F>); 
+    module.def("neg", &_neg_<F>);
+    module.def("rec", &_rec_<F>);
+    module.def("sqr", &_sqr_<F>);
     module.def("pow", &_pow_<F,Int>);
-    module.def("sqrt", &_sqrt_<F>); 
-    module.def("exp", &_exp_<F>); 
-    module.def("log", &_log_<F>); 
+    module.def("sqrt", &_sqrt_<F>);
+    module.def("exp", &_exp_<F>);
+    module.def("log", &_log_<F>);
     module.def("atan", &_atan_<F>);
-    module.def("sin", &_sin_<F>); 
-    module.def("cos", &_cos_<F>); 
+    module.def("sin", &_sin_<F>);
+    module.def("cos", &_cos_<F>);
     module.def("tan", &_tan_<F>);
 
 //    to_python< Vector<ValidatedScalarTaylorFunctionModelDP> >();
 }
+
 
 Void export_vector_taylor_function(pybind11::module& module)
 {
@@ -601,8 +592,8 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("clobber", (Void(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber);
     vector_taylor_function_class.def("set_properties",&ValidatedVectorTaylorFunctionModelDP::set_properties);
     vector_taylor_function_class.def("properties",&ValidatedVectorTaylorFunctionModelDP::properties);
-    //vector_taylor_function_class.def("__getslice__", &__getslice__<ValidatedVectorTaylorFunctionModelDP,SizeType,SizeType,ValidatedScalarTaylorFunctionModelDP>);
-    vector_taylor_function_class.def("__getslice__", (ValidatedVectorTaylorFunctionModelDP(*)(const ValidatedVectorTaylorFunctionModelDP&,Int,Int))&__getslice__);
+    //FIXME: Omitted since project(...) fails
+    //vector_taylor_function_class.def("__getslice__", &__getslice__<ValidatedVectorTaylorFunctionModelDP,SizeType,SizeType,ValidatedVectorTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__getitem__", &__getitem__<ValidatedVectorTaylorFunctionModelDP,SizeType,ValidatedScalarTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__setitem__",&__setitem__<ValidatedVectorTaylorFunctionModelDP,SizeType,ValidatedScalarTaylorFunctionModelDP>);
     vector_taylor_function_class.def(-self);
@@ -612,7 +603,8 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def(self-Vector<ValidatedNumericType>());
     vector_taylor_function_class.def(self*ValidatedNumericType());
     vector_taylor_function_class.def(self/ValidatedNumericType());
-    vector_taylor_function_class.def(self*ValidatedScalarTaylorFunctionModelDP());
+    //FIXME: Overload not found when linking/loading
+    // vector_taylor_function_class.def(self*ValidatedScalarTaylorFunctionModelDP());
     vector_taylor_function_class.def(self+=Vector<ValidatedNumericType>());
     vector_taylor_function_class.def(self-=Vector<ValidatedNumericType>());
     vector_taylor_function_class.def(self*=ValidatedNumericType());
@@ -628,7 +620,6 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<FloatDPBounds> >(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::polynomials);
     vector_taylor_function_class.def("function", (ValidatedVectorFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
 
-
     vector_taylor_function_class.def_static("constant",(ValidatedVectorTaylorFunctionModelDP(*)(const ExactBoxType&, const Vector<ValidatedNumericType>&,SweeperDP))&ValidatedVectorTaylorFunctionModelDP::constant);
     vector_taylor_function_class.def_static("identity",(ValidatedVectorTaylorFunctionModelDP(*)(const ExactBoxType&,SweeperDP))&ValidatedVectorTaylorFunctionModelDP::identity);
 
@@ -636,11 +627,11 @@ Void export_vector_taylor_function(pybind11::module& module)
     module.def("refinement", &_refinement_<VF,VF>);
     module.def("refines", &_refines_<VF,VF>);
 
-    module.def("join", &_join_<VF,SF>); 
+    module.def("join", &_join_<VF,SF>);
         module.def("join", &_join_<SF,SF>);
-    module.def("combine", &_combine_<VF,SF>); 
+    module.def("combine", &_combine_<VF,SF>);
         module.def("combine", &_combine_<SF,SF>);
-    module.def("embed", &_embed_<VF,D>); 
+    module.def("embed", &_embed_<VF,D>);
         module.def("embed", &_embed_<D,VF,D>);
 
     module.def("restriction", &_restriction_<VF,I,Di>);
@@ -657,12 +648,8 @@ Void export_vector_taylor_function(pybind11::module& module)
     module.def("derivative", &_derivative_<VF,I>);
     module.def("antiderivative", &_antiderivative_<VF,I>);
     module.def("antiderivative", &_antiderivative_<VF,I,X>);
-
-
-//    from_python<ValidatedVectorTaylorFunctionModelDP>();
-
-
 }
+
 
 Void calculus_submodule(pybind11::module& module)
 {

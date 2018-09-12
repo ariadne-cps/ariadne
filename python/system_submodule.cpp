@@ -50,37 +50,11 @@ template<> Nat __hash__<DiscreteEvent>(const DiscreteEvent& e) {
 template<> Nat __hash__<DiscreteLocation>(const DiscreteLocation& q) {
     return reinterpret_cast<const unsigned short&>(to_string(q).c_str()[0]); }
 
-/* 
-
-template<>
-struct from_python< Set<DiscreteEvent> > {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Set<DiscreteEvent> >()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
-        boost::python::list elements=boost::python::extract<boost::python::list>(obj_ptr);
-        Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
-        for(Int i=0; i!=len(elements); ++i) {
-            boost::python::extract<String> xs(elements[i]);
-            if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
-            else { DiscreteEvent e=boost::python::extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
-        }
-        data->convertible = storage;
-    }
-};
-
-*/
-
 }
 
 Void export_hybrid_automaton(pybind11::module& module)
 {
     // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
-
-//    to_python< Set<DiscreteEvent> >();
-//    to_python< Set<DiscreteLocation> >();
-
-//    from_python< List<DiscreteEvent> >();
 
     pybind11::class_<DiscreteLocation> discrete_state_class(module,"DiscreteLocation");
     discrete_state_class.def(pybind11::init<DiscreteLocation>());
@@ -88,7 +62,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     discrete_state_class.def("__ne__", &__ne__<Bool,DiscreteLocation,DiscreteLocation>);
     discrete_state_class.def("__hash__", &__hash__<DiscreteLocation>);
     discrete_state_class.def("__str__",&__cstr__<DiscreteLocation>);
-    
+
     pybind11::class_<DiscreteEvent> discrete_event_class(module,"DiscreteEvent");
     discrete_event_class.def(pybind11::init<DiscreteEvent>());
     discrete_event_class.def("__eq__", &__eq__<Bool,DiscreteEvent,DiscreteEvent>);
@@ -103,7 +77,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_time_class.def(pybind11::init<double,Int>());
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time);
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time);
-    
+
     pybind11::class_<HybridAutomaton> hybrid_automaton_class(module,"HybridAutomaton");
     hybrid_automaton_class.def(pybind11::init<>());
     hybrid_automaton_class.def("locations", &HybridAutomaton::locations);
@@ -116,7 +90,7 @@ Void export_hybrid_automaton(pybind11::module& module)
     hybrid_automaton_class.def("new_invariant",(Void(HybridAutomaton::*)(DiscreteLocation,ContinuousPredicate const&,DiscreteEvent)) &HybridAutomaton::new_invariant);
     hybrid_automaton_class.def("new_transition",(Void(HybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,List<PrimedRealAssignment> const&,ContinuousPredicate const&,EventKind)) &HybridAutomaton::new_transition);
     hybrid_automaton_class.def("__str__", &__cstr__<HybridAutomaton>);
-    
+
 }
 
 

@@ -234,7 +234,7 @@ template<class T> class logical_class_ : public pybind11::class_<T> {
 };
 
 
-} // namespace Ariadne 
+} // namespace Ariadne
 
 
 using namespace Ariadne;
@@ -413,6 +413,9 @@ void export_real(pymodule& module)
     real_class.def("compute", (ValidatedReal(Real::*)(Accuracy)const) &Real::compute);
     real_class.def("get_d", &Real::get_d);
 
+    implicitly_convertible<Int,Real>();
+    implicitly_convertible<Integer,Real>();
+    implicitly_convertible<Dyadic,Real>();
     implicitly_convertible<Rational,Real>();
 
 

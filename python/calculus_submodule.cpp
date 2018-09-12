@@ -164,9 +164,9 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedV
     return os;
 }
 
-List<MultiIndex> keys(const ValidatedTaylorModelDP& tm) {
+template<class P, class F> List<MultiIndex> keys(const TaylorModel<P,F>& tm) {
     List<MultiIndex> r(tm.argument_size());
-    for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(auto iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
         r.append(iter->index());
     }
     return r;
@@ -216,6 +216,7 @@ Void export_sweeper(pybind11::module& module)
 
 
 Expansion<MultiIndex,FloatDPValue>const& get_expansion(ValidatedTaylorModelDP const& tm) { return tm.expansion(); }
+Expansion<MultiIndex,FloatDPApproximation>const& get_expansion(ApproximateTaylorModelDP const& tm) { return tm.expansion(); }
 
 
 Void export_validated_taylor_model(pybind11::module& module)
@@ -616,7 +617,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("clobber", (Void(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber);
     vector_taylor_function_class.def("__call__", (Vector<FloatDPApproximation>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorTaylorFunctionModelDP::operator());
     vector_taylor_function_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::operator());
-     vector_taylor_function_class.def("jacobian", (Vector<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::jacobian);
+     vector_taylor_function_class.def("jacobian", (Matrix<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::jacobian);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<FloatDPBounds> >(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::polynomials);
     vector_taylor_function_class.def("function", (ValidatedVectorFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
 

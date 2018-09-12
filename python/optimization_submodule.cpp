@@ -81,7 +81,7 @@ Void export_optimiser_interface(pybind11::module& module)
     optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
     optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
     optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
-    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
     //NOTE: Not in C++ API
     //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
 }
@@ -93,7 +93,7 @@ Void export_interior_point_solvers(pybind11::module& module)
 
     pybind11::class_<NonlinearInteriorPointOptimiser,OptimiserInterface> nonlinear_interior_point_solver_class(module,"NonlinearInteriorPointOptimiser");
     nonlinear_interior_point_solver_class.def(pybind11::init<>());
-};
+}
 
 Void export_interior_point_solver(pybind11::module& module)
 {

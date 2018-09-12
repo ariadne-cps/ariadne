@@ -178,7 +178,7 @@ Void export_set_interface(pybind11::module& module) {
 
     pybind11::class_<BoundedSetInterface>bounded_set_interface_class(module,"BoundedSetInterface",bounded_set_interface_class);
     bounded_set_interface_class.def("inside",(LowerKleenean(BoundedSetInterface::*)(const ExactBoxType& bx)const) &BoundedSetInterface::inside);
-    bounded_set_interface_class.def("bounding_box", (ExactBoxType(BoundedSetInterface::*)()const)&BoundedSetInterface::bounding_box);
+    bounded_set_interface_class.def("bounding_box", (UpperBoxType(BoundedSetInterface::*)()const)&BoundedSetInterface::bounding_box);
 
     pybind11::class_<CompactSetInterface, CompactSetWrapper, ClosedSetInterface, BoundedSetInterface> compact_set_interface_class(module,"CompactSetInterface", pybind11::multiple_inheritance());
 

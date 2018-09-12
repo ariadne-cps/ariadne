@@ -337,25 +337,6 @@ typedef Polynomial<FloatDPBounds> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
-// <start: declarations required to suppress warnings
-Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const UpperBoxType& c, Nat M, Nat N);
-Void flow_init(const Vector<ValidatedProcedure>& p,
-               Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y,
-               const Vector<ValidatedNumericType>& x, const Vector<ValidatedNumericType>& r,  Nat so);
-Void flow_iterate(const Vector<ValidatedProcedure>& p, FloatDPValue h,
-                  Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y);
-Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferential> const& dphia, Vector<GradedValidatedDifferential> const& dphib,
-                                               Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphid,
-                                               Nat so, Nat to, Nat verbosity);
-ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const FloatDPValue& h, double swpt, Nat verbosity);
-ValidatedVectorFunctionModelDP differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& flth, const UpperBoxType& bx,
-                       double swpt, Nat so, Nat to, Nat verbosity);
-ValidatedVectorFunctionModelDP differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDP& h, const UpperBoxType& bx,
-                                  double swpt, Nat so, Nat to, Nat verbosity);
-ValidatedVectorFunctionModelDP series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, const FloatDPValue& h, const UpperBoxType& bbx,
-                 double max_err, double swpt, Nat init_so, Nat init_to, Nat max_so, Nat max_to, Nat verbosity);
-// end>
-
 
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err)
     : TaylorSeriesIntegrator(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
@@ -381,7 +362,7 @@ TaylorSeriesIntegrator::TaylorSeriesIntegrator(
 { }
 
 
-
+namespace {
 
 
 template<class F> GradedValidatedDifferential flow(const F& f, const ExactIntervalType& c, Nat M, Nat N) {
@@ -392,25 +373,6 @@ template<class F> GradedValidatedDifferential flow(const F& f, const ExactInterv
     for(Nat n=0; n!=N; ++n) {
         t=f(y);
         y=antidifferential(t);
-    }
-
-    return y;
-}
-
-Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const UpperBoxType& c, Nat M, Nat N) {
-    GradedValidatedDifferential null;
-    Vector< GradedValidatedDifferential > y(f.result_size(),null);
-    Vector< GradedValidatedDifferential > fy(f.result_size(),null);
-    List< GradedValidatedDifferential > t(f.temporaries_size(),null);
-    for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=GradedValidatedDifferential(ValidatedDifferential::variable(y.size(),M,cast_singleton(c[i]),i));
-    }
-
-    for(Nat n=0; n!=N; ++n) {
-        Ariadne::compute(f,fy,t,y);
-        for(Nat i=0; i!=y.size(); ++i) {
-            y[i]=antidifferential(fy[i]);
-        }
     }
 
     return y;
@@ -520,111 +482,6 @@ ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDiffere
             error+=coef.error();
             expansion.append(a,x);
             ++iter;
-        }
-        model.cleanup();
-    }
-    return tphi;
-}
-
-ValidatedVectorFunctionModelDP
-differential_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDPValue& flth, const UpperBoxType& bx,
-                       double swpt, Nat so, Nat to, Nat verbosity=0)
-{
-    Nat n=f.result_size();
-    Vector<ValidatedDifferential> idc(n,n+1,so+to);
-    Vector<ValidatedDifferential> idb(n,n+1,so+to);
-    Vector<ValidatedDifferential> dphic(n,n+1,so+to);
-    Vector<ValidatedDifferential> dphib(n,n+1,so+to);
-    FloatDPValue h(flth);
-    for(Nat i=0; i!=n; ++i) {
-        idc[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+dx[i].midpoint();
-        idb[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+cast_singleton(bx[i]);
-        dphic[i]=idc[i];
-        dphib[i]=idb[i];
-    }
-    for(Nat i=0; i!=so+to; ++i) {
-        dphic=antiderivative(f(dphic),n)*h+idc;
-        dphib=antiderivative(f(dphib),n)*h+idb;
-    }
-
-    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
-    for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModelDP& model=tphi.model(i);
-        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
-        FloatDPError& error=model.error();
-        error=0u;
-        expansion.reserve(dphic[i].expansion().number_of_nonzeros());
-
-        ValidatedDifferential::ConstIterator citer=dphic[i].begin();
-        ValidatedDifferential::ConstIterator biter=dphib[i].begin();
-        while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
-            assert(citer->index()==biter->index());
-            MultiIndex const a=citer->index();
-            ValidatedNumericType coef;
-            if (a.degree()==so+to) {
-                coef=biter->coefficient();
-            } else {
-                coef=citer->coefficient();
-            }
-            FloatDPValue x=coef.value();
-            FloatDPError e=coef.error();
-            error+=e;
-            expansion.append(a,x);
-            ++citer;
-            ++biter;
-        }
-        model.cleanup();
-    }
-    return tphi;
-}
-
-ValidatedVectorFunctionModelDP
-differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& dx, const FloatDP& h, const UpperBoxType& bx,
-                                  double swpt, Nat so, Nat to, Nat verbosity=0)
-{
-    Nat n=f.result_size();
-    Vector<ValidatedDifferential> idc(n,n+1,so+to);
-    Vector<ValidatedDifferential> idb(n,n+1,so+to);
-    Vector<ValidatedDifferential> dphic(n,n+1,so+to);
-    Vector<ValidatedDifferential> dphib(n,n+1,so+to);
-    for(Nat i=0; i!=n; ++i) {
-        idc[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+dx[i].midpoint();
-        idb[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+cast_singleton(bx[i]);
-        dphic[i]=idc[i];
-        dphib[i]=idb[i];
-    }
-    for(Nat i=0; i!=so+to; ++i) {
-        dphic=antiderivative(f(dphic),n)*cast_exact(h)+idc;
-        dphib=antiderivative(f(dphib),n)*cast_exact(h)+idb;
-    }
-
-    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),ThresholdSweeper<FloatDP>(dp,swpt));
-    for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModelDP& model=tphi.model(i);
-        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
-        FloatDPError& error=model.error();
-        error=0u;
-        expansion.reserve(dphic[i].expansion().number_of_nonzeros());
-
-        ValidatedDifferential::ConstIterator citer=dphic[i].begin();
-        ValidatedDifferential::ConstIterator biter=dphib[i].begin();
-        while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
-            assert(citer->index()==biter->index());
-            MultiIndex const a=citer->index();
-            ValidatedNumericType coef;
-            if (a[n]<=to && a.degree()<=so+a[n]) {
-                if(a[n]<to && a.degree()<so+a[n]) {
-                    coef=citer->coefficient();
-                } else {
-                    coef=biter->coefficient();
-                }
-                FloatDPValue x=coef.value();
-                FloatDPError e=coef.error();
-                error+=e;
-                expansion.append(a,x);
-            }
-            ++citer;
-            ++biter;
         }
         model.cleanup();
     }
@@ -749,6 +606,8 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBoxType& bdx, cons
     ARIADNE_LOG(2,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
     ARIADNE_LOG(4,"phi="<<tphi<<"\n");
     return tphi;
+}
+
 }
 
 ValidatedVectorFunctionModelDP

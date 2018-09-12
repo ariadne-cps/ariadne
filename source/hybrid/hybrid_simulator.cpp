@@ -56,10 +56,6 @@ template<class T> class Orbit;
 
 class DegenerateCrossingException { };
 
-ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc);
-
-Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location);
-
 HybridSimulator::HybridSimulator()
     : _step_size(0.125)
 {
@@ -70,6 +66,16 @@ Void HybridSimulator::set_step_size(double h)
     this->_step_size=h;
 }
 
+namespace {
+
+Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
+    Set<DiscreteEvent> events=system.events(location);
+    Map<DiscreteEvent,EffectiveScalarFunction> guards;
+    for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
+        guards.insert(*iter,system.guard_function(location,*iter));
+    }
+    return guards;
+}
 
 ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
@@ -81,17 +87,10 @@ ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& 
     return pt;
 }
 
+}
+
 inline FloatDPApproximation evaluate(const EffectiveScalarFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
-
-Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
-    Set<DiscreteEvent> events=system.events(location);
-    Map<DiscreteEvent,EffectiveScalarFunction> guards;
-    for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
-        guards.insert(*iter,system.guard_function(location,*iter));
-    }
-    return guards;
-}
 
 Orbit<HybridApproximatePoint>
 HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& tmax) const

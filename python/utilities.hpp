@@ -134,62 +134,62 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
-template<class... AS> decltype(auto) _nul_(AS const& ... as) { return nul(as...); }
-template<class... AS> decltype(auto) _pos_(AS const& ... as) { return pos(as...); }
-template<class... AS> decltype(auto) _neg_(AS const& ... as) { return neg(as...); }
-template<class... AS> decltype(auto) _hlf_(AS const& ... as) { return hlf(as...); }
-template<class... AS> decltype(auto) _rec_(AS const& ... as) { return rec(as...); }
-template<class... AS> decltype(auto) _sqr_(AS const& ... as) { return sqr(as...); }
-template<class... AS> decltype(auto) _pow_(AS const& ... as) { return pow(as...); }
-template<class... AS> decltype(auto) _sqrt_(AS const& ... as) { return sqrt(as...); }
-template<class... AS> decltype(auto) _exp_(AS const& ... as) { return exp(as...); }
-template<class... AS> decltype(auto) _log_(AS const& ... as) { return log(as...); }
-template<class... AS> decltype(auto) _sin_(AS const& ... as) { return sin(as...); }
-template<class... AS> decltype(auto) _cos_(AS const& ... as) { return cos(as...); }
-template<class... AS> decltype(auto) _tan_(AS const& ... as) { return tan(as...); }
-template<class... AS> decltype(auto) _atan_(AS const& ... as) { return atan(as...); }
-template<class... AS> decltype(auto) _max_(AS const& ... as) { return max(as...); }
-template<class... AS> decltype(auto) _min_(AS const& ... as) { return min(as...); }
-template<class... AS> decltype(auto) _abs_(AS const& ... as) { return abs(as...); }
-template<class... AS> decltype(auto) _sgn_(AS const& ... as) { return sgn(as...); }
+template<class... AS> auto _nul_(AS const& ... as) -> decltype(nul(as...)) { return nul(as...); }
+template<class... AS> auto _pos_(AS const& ... as) -> decltype(pos(as...)) { return pos(as...); }
+template<class... AS> auto _neg_(AS const& ... as) -> decltype(neg(as...)) { return neg(as...); }
+template<class... AS> auto _hlf_(AS const& ... as) -> decltype(hlf(as...)) { return hlf(as...); }
+template<class... AS> auto _rec_(AS const& ... as) -> decltype(rec(as...)) { return rec(as...); }
+template<class... AS> auto _sqr_(AS const& ... as) -> decltype(sqr(as...)) { return sqr(as...); }
+template<class... AS> auto _pow_(AS const& ... as) -> decltype(pow(as...)) { return pow(as...); }
+template<class... AS> auto _sqrt_(AS const& ... as) -> decltype(sqrt(as...)) { return sqrt(as...); }
+template<class... AS> auto _exp_(AS const& ... as) -> decltype(exp(as...)) { return exp(as...); }
+template<class... AS> auto _log_(AS const& ... as) -> decltype(log(as...)) { return log(as...); }
+template<class... AS> auto _sin_(AS const& ... as) -> decltype(sin(as...)) { return sin(as...); }
+template<class... AS> auto _cos_(AS const& ... as) -> decltype(cos(as...)) { return cos(as...); }
+template<class... AS> auto _tan_(AS const& ... as) -> decltype(tan(as...)) { return tan(as...); }
+template<class... AS> auto _atan_(AS const& ... as) -> decltype(atan(as...)) { return atan(as...); }
+template<class... AS> auto _max_(AS const& ... as) -> decltype(max(as...)) { return max(as...); }
+template<class... AS> auto _min_(AS const& ... as) -> decltype(min(as...)) { return min(as...); }
+template<class... AS> auto _abs_(AS const& ... as) -> decltype(abs(as...)) { return abs(as...); }
+template<class... AS> auto _sgn_(AS const& ... as) -> decltype(sgn(as...)) { return sgn(as...); }
 
-template<class... AS> inline decltype(auto) _evaluate_(AS... as) { return evaluate(as...); }
-template<class... AS> inline decltype(auto) _partial_evaluate_(AS... as) { return partial_evaluate(as...); }
-template<class... AS> inline decltype(auto) _unchecked_evaluate_(AS... as) { return unchecked_evaluate(as...); }
-template<class... AS> inline decltype(auto) _compose_(AS... as) { return compose(as...); }
-template<class... AS> inline decltype(auto) _unchecked_compose_(AS... as) { return unchecked_compose(as...); }
+template<class... AS> auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
+template<class... AS> auto _partial_evaluate_(AS... as) -> decltype(partial_evaluate(as...)) { return partial_evaluate(as...); }
+template<class... AS> auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
+template<class... AS> auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
+template<class... AS> auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
 
-template<class... AS> inline decltype(auto) _dot_(AS... as) { return dot(as...); }
-template<class... AS> inline decltype(auto) _join_(AS... as) { return join(as...); }
-template<class... AS> inline decltype(auto) _combine_(AS... as) { return combine(as...); }
+template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }
+template<class... AS> auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
+template<class... AS> auto _combine_(AS... as) -> decltype(combine(as...)) { return combine(as...); }
 
-template<class... AS> inline decltype(auto) _midpoint_(AS... as) { return midpoint(as...); }
-template<class... AS> inline decltype(auto) _embed_(AS... as) { return embed(as...); }
-template<class... AS> inline decltype(auto) _extension_(AS... as) { return extension(as...); }
-template<class... AS> inline decltype(auto) _restriction_(AS... as) { return restriction(as...); }
-template<class... AS> inline decltype(auto) _split_(AS... as) { return split(as...); }
-template<class... AS> inline decltype(auto) _derivative_(AS... as) { return derivative(as...); }
-template<class... AS> inline decltype(auto) _antiderivative_(AS... as) { return antiderivative(as...); }
+template<class... AS> auto _midpoint_(AS... as) -> decltype(midpoint(as...)) { return midpoint(as...); }
+template<class... AS> auto _embed_(AS... as) -> decltype(embed(as...)) { return embed(as...); }
+template<class... AS> auto _extension_(AS... as) -> decltype(extension(as...)) { return extension(as...); }
+template<class... AS> auto _restriction_(AS... as) -> decltype(restriction(as...)) { return restriction(as...); }
+template<class... AS> auto _split_(AS... as) -> decltype(split(as...)) { return split(as...); }
+template<class... AS> auto _derivative_(AS... as) -> decltype(derivative(as...)) { return derivative(as...); }
+template<class... AS> auto _antiderivative_(AS... as) -> decltype(antiderivative(as...)) { return antiderivative(as...); }
 
-template<class... AS> inline decltype(auto) _refinement_(AS... as) { return refinement(as...); }
-template<class... AS> inline decltype(auto) _refines_(AS... as) { return refines(as...); }
-template<class... AS> inline decltype(auto) _inconsistent_(AS... as) { return inconsistent(as...); }
+template<class... AS> auto _refinement_(AS... as) -> decltype(refinement(as...)) { return refinement(as...); }
+template<class... AS> auto _refines_(AS... as) -> decltype(refines(as...)) { return refines(as...); }
+template<class... AS> auto _inconsistent_(AS... as) -> decltype(inconsistent(as...)) { return inconsistent(as...); }
 
-template<class... AS> decltype(auto) _widen_(AS const& ... as) { return widen(as...); }
+template<class... AS> auto _widen_(AS const& ... as) -> decltype(widen(as...)) { return widen(as...); }
 
-template<class... AS> decltype(auto) _contains_(AS const& ... as) { return contains(as...); }
-template<class... AS> decltype(auto) _intersection_(AS const& ... as) { return intersection(as...); }
-template<class... AS> decltype(auto) _disjoint_(AS const& ... as) { return disjoint(as...); }
-template<class... AS> decltype(auto) _subset_(AS const& ... as) { return subset(as...); }
-template<class... AS> decltype(auto) _product_(AS const& ... as) { return product(as...); }
-template<class... AS> decltype(auto) _hull_(AS const& ... as) { return hull(as...); }
-template<class... AS> decltype(auto) _separated_(AS const& ... as) { return separated(as...); }
-template<class... AS> decltype(auto) _overlap_(AS const& ... as) { return overlap(as...); }
-template<class... AS> decltype(auto) _covers_(AS const& ... as) { return covers(as...); }
-template<class... AS> decltype(auto) _inside_(AS const& ... as) { return inside(as...); }
+template<class... AS> auto _contains_(AS const& ... as) -> decltype(contains(as...)) { return contains(as...); }
+template<class... AS> auto _intersection_(AS const& ... as) -> decltype(intersection(as...)) { return intersection(as...); }
+template<class... AS> auto _disjoint_(AS const& ... as) -> decltype(disjoint(as...)) { return disjoint(as...); }
+template<class... AS> auto _subset_(AS const& ... as) -> decltype(subset(as...)) { return subset(as...); }
+template<class... AS> auto _product_(AS const& ... as) -> decltype(product(as...)) { return product(as...); }
+template<class... AS> auto _hull_(AS const& ... as) -> decltype(hull(as...)) { return hull(as...); }
+template<class... AS> auto _separated_(AS const& ... as) -> decltype(separated(as...)) { return separated(as...); }
+template<class... AS> auto _overlap_(AS const& ... as) -> decltype(overlap(as...)) { return overlap(as...); }
+template<class... AS> auto _covers_(AS const& ... as) -> decltype(covers(as...)) { return covers(as...); }
+template<class... AS> auto _inside_(AS const& ... as) -> decltype(inside(as...)) { return inside(as...); }
 
-template<class... AS> decltype(auto) _image_(AS const& ... as) { return image(as...); }
-template<class... AS> decltype(auto) _preimage_(AS const& ... as) { return preimage(as...); }
+template<class... AS> auto _image_(AS const& ... as) -> decltype(image(as...)) { return image(as...); }
+template<class... AS> auto _preimage_(AS const& ... as) -> decltype(preimage(as...)) { return preimage(as...); }
 
 
 template<class T> std::string __cstr__(const T& t) {

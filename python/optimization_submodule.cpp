@@ -93,7 +93,7 @@ Void export_interior_point_solvers(pybind11::module& module)
 
     pybind11::class_<NonlinearInteriorPointOptimiser,OptimiserInterface> nonlinear_interior_point_solver_class(module,"NonlinearInteriorPointOptimiser");
     nonlinear_interior_point_solver_class.def(pybind11::init<>());
-};
+}
 
 Void export_interior_point_solver(pybind11::module& module)
 {

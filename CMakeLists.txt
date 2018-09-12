@@ -9,8 +9,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization 
-                  init-self missing-include-dirs overloaded-virtual sign-promo switch-default 
-                  undef redundant-decls missing-declarations)
+                  init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")

@@ -52,7 +52,9 @@ static const Nat heightTwo = 2;
 static const Nat heightThree = 3;
 static const Nat heightFour = 4;
 
-inline Void test_grid_paving_cursor(){
+namespace {
+
+Void test_grid_paving_cursor(){
 
     //Allocate the Grid
     Grid theGrid( Vector<FloatDP>({-0.25, 0.25, 1.5}), Vector<FloatDP>({0.25, 0.25, 0.25}) );
@@ -184,7 +186,7 @@ inline Void test_grid_paving_cursor(){
     ARIADNE_TEST_THROWS( theGPCursor.set_disabled(), NotALeafNodeException);
 }
 
-inline Void test_grid_paving_const_iterator(){
+Void test_grid_paving_const_iterator(){
     std::vector< GridCell *> expected_result( 8 );
 
     //Allocate the Grid
@@ -332,7 +334,7 @@ inline Void test_grid_paving_const_iterator(){
     ARIADNE_TEST_EQUAL(theGPCursor.is_enabled(), true);
 }
 
-inline Void test_grid_sub_paving_one(){
+Void test_grid_sub_paving_one(){
 
     //Allocate the Grid, one Dimension
     Vector<FloatDP> originOne(1); originOne.set(0, 0.0);
@@ -453,7 +455,7 @@ inline Void test_grid_sub_paving_one(){
     ARIADNE_TEST_EQUAL( theGridSPTwoDim.depth(), 4u );
 }
 
-inline Void test_grid_sub_paving_two() {
+Void test_grid_sub_paving_two() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTwoDimGrid(2, 1.0);
 
@@ -504,7 +506,7 @@ inline Void test_grid_sub_paving_two() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_grid_sub_paving_three() {
+Void test_grid_sub_paving_three() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTwoDimGrid(2, 1.0);
 
@@ -544,7 +546,7 @@ inline Void test_grid_sub_paving_three() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_grid_paving(){
+Void test_grid_paving(){
     //Create a trivial 4-dimensional Grid
     Grid trivialFourDimGrid( Vector<FloatDP>({0.0,0.0,0.0,0.0}), Vector<FloatDP>({1.0,1.0,1.0,1.0}) );
 
@@ -631,7 +633,7 @@ inline Void test_grid_paving(){
     ARIADNE_TEST_EQUAL( expectedTreeSetThree, initialTreeSetTwo );
 }
 
-inline Void test_grid_cell(){
+Void test_grid_cell(){
     BinaryWord expected_result;
 
     // !!!
@@ -727,7 +729,7 @@ inline Void test_grid_cell(){
     ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->interior().box() );
 }
 
-inline Void test_grid_open_cell_two(){
+Void test_grid_open_cell_two(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -764,7 +766,7 @@ inline Void test_grid_open_cell_two(){
     ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( TernaryChild::RIGHT ).box() );
 }
 
-inline Void test_grid_open_cell_three(){
+Void test_grid_open_cell_three(){
     //Allocate a trivial Grid two dimensional grid
     Grid theGrid(2, 1.0);
 
@@ -857,7 +859,7 @@ inline Void test_grid_open_cell_three(){
     ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
 }
 
-inline Void test_grid_open_cell_four(){
+Void test_grid_open_cell_four(){
     //Allocate a trivial Grid two dimensional grid
     Grid theGrid(2, 1.0);
 
@@ -892,7 +894,7 @@ inline Void test_grid_open_cell_four(){
     ARIADNE_TEST_EQUAL( GridOpenCell::intersect( leftOpenCell, rightOpenCell ), false );
 }
 
-inline Void test_grid_open_cell_five() {
+Void test_grid_open_cell_five() {
     //The vector for storing the results
     std::vector< GridCell* > expected_result_arr(4);
 
@@ -1126,7 +1128,7 @@ inline Void test_grid_open_cell_five() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_grid_open_cell_six() {
+Void test_grid_open_cell_six() {
     std::vector<GridOpenCell> expectedResult;
     std::vector<GridOpenCell> actualResult;
     Nat theHeight;
@@ -1222,7 +1224,7 @@ inline Void test_grid_open_cell_six() {
     expectedResult.erase( expectedResult.begin(), expectedResult.end() );
 }
 
-inline Void test_grid_open_cell_one(){
+Void test_grid_open_cell_one(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1374,7 +1376,7 @@ inline Void test_grid_open_cell_one(){
     ARIADNE_TEST_EQUAL( expected_open_cell_box20, openCell20.box() );
 }
 
-inline Void test_adjoin_operation_one(){
+Void test_adjoin_operation_one(){
     //Allocate a trivial Grid
     Grid theGrid(2, 1.0);
 
@@ -1408,7 +1410,7 @@ inline Void test_adjoin_operation_one(){
     ARIADNE_TEST_EQUAL( expected_two_cell_paving, theOneCellPaving );
 }
 
-inline Void test_adjoin_operation_two(){
+Void test_adjoin_operation_two(){
 
     //Allocate a trivial Grid
     Grid theGrid(2, 1.0);
@@ -1449,7 +1451,7 @@ inline Void test_adjoin_operation_two(){
     ARIADNE_TEST_EQUAL( expected_tree_set_result, theOneCellPaving );
 }
 
-inline Void test_adjoin_operation_three(){
+Void test_adjoin_operation_three(){
     string expected_result;
 
     //Allocate a trivial Grid
@@ -1493,7 +1495,7 @@ inline Void test_adjoin_operation_three(){
     ARIADNE_TEST_EQUAL( expected_tree_set_result, theOneCellPaving );
 }
 
-inline Void test_adjoin_outer_approximation_operation(){
+Void test_adjoin_outer_approximation_operation(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1568,7 +1570,7 @@ inline Void test_adjoin_outer_approximation_operation(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_adjoin_inner_approximation_operation_one(){
+Void test_adjoin_inner_approximation_operation_one(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1610,7 +1612,7 @@ inline Void test_adjoin_inner_approximation_operation_one(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_adjoin_inner_approximation_operation_two(){
+Void test_adjoin_inner_approximation_operation_two(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1654,7 +1656,7 @@ inline Void test_adjoin_inner_approximation_operation_two(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_adjoin_inner_approximation_operation_three(){
+Void test_adjoin_inner_approximation_operation_three(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1693,7 +1695,7 @@ inline Void test_adjoin_inner_approximation_operation_three(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_restrict() {
+Void test_restrict() {
     std::vector< GridCell* > expected_result_arr(3);
 
     //Allocate a trivial Grid
@@ -1779,7 +1781,7 @@ inline Void test_restrict() {
     //    The GridTreeSubpaving is at level 1 and it's primary cell is at level 2
 }
 
-inline Void test_remove_one() {
+Void test_remove_one() {
     std::vector< GridCell* > expected_result_arr(3);
 
     //Allocate a trivial Grid
@@ -1867,7 +1869,7 @@ inline Void test_remove_one() {
     //    The GridTreeSubpaving is at level 1 and it's primary cell is at level 2
 }
 
-inline Void test_remove_two() {
+Void test_remove_two() {
     std::vector< GridCell* > expected_result_arr(4);
 
     //Allocate a trivial Grid
@@ -1931,7 +1933,7 @@ inline Void test_remove_two() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-inline Void test_cell_subset_subset() {
+Void test_cell_subset_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2116,7 +2118,7 @@ inline Void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
 }
 
-inline Void test_subsets_join() {
+Void test_subsets_join() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2148,7 +2150,7 @@ inline Void test_subsets_join() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-inline Void test_subsets_intersection() {
+Void test_subsets_intersection() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2179,7 +2181,7 @@ inline Void test_subsets_intersection() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-inline Void test_subsets_difference() {
+Void test_subsets_difference() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2210,7 +2212,7 @@ inline Void test_subsets_difference() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-inline Void test_cell_intersect_subset() {
+Void test_cell_intersect_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2329,7 +2331,7 @@ inline Void test_cell_intersect_subset() {
 }
 
 
-inline Void test_subset_intersect_subset() {
+Void test_subset_intersect_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2416,7 +2418,7 @@ inline Void test_subset_intersect_subset() {
 
 }
 
-inline Void test_subset_subset_subset() {
+Void test_subset_subset_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2486,7 +2488,7 @@ inline Void test_subset_subset_subset() {
 
 }
 
-inline Void test_subset_intersects_box() {
+Void test_subset_intersects_box() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2556,7 +2558,7 @@ inline Void test_subset_intersects_box() {
     //Somehow I need two boxes for which we can not determine if they intersect or not.
 }
 
-inline Void test_subset_subset_box(){
+Void test_subset_subset_box(){
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2672,7 +2674,7 @@ inline Void test_subset_subset_box(){
 
 }
 
-inline Void test_subset_superset_box(){
+Void test_subset_superset_box(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -2754,6 +2756,8 @@ inline Void test_subset_superset_box(){
 
     //TODO: I do not know how to test indeterminate result of the superset relation here.
     //I need two boxes for which we can not determine if they one is a superset of another.
+
+}
 
 }
 

@@ -64,81 +64,10 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
     return substitute(e,lst_a);
 }
 
-/*
-template<class T>
-struct from_python< Space<T> > {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        Void* storage = ((converter::rvalue_from_python_storage<ExactIntervalType>*)data)->storage.bytes;
-        boost::python::list elements=boost::python::extract<boost::python::list>(obj_ptr);
-        Space<T>* spc_ptr = new (storage) Space<T>();
-        for(Int i=0; i!=len(elements); ++i) {
-            boost::python::extract<String> xs(elements[i]);
-            if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
-            else { Variable<T> v=boost::python::extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
-        }
-        data->convertible = storage;
-    }
-};
-
-template<class X>
-struct from_python< Vector<X>> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >()); }
-    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        boost::python::list lst=boost::python::extract<boost::python::list>(obj_ptr);
-        Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
-        Vector<X> res(static_cast<SizeType>(len(lst)));
-        for(Nat i=0; i!=res.size(); ++i) { res[i]=boost::python::extract<X>(lst[i]); }
-        new (storage) Vector<X>(res);
-        data->convertible = storage;
-    }
-};
-*/
 
 LetIntegerVariable let(const IntegerVariable&);
 LetRealVariable let(const RealVariable&);
 DottedRealVariable dot(const RealVariable&);
-
-RealExpression var(const StringType& s) { return RealExpression(RealVariable(s)); }
-RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
-RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
-RealExpression operator+(const RealVariable& v, const RealExpression& e) { return RealExpression(v)+e; }
-RealExpression operator-(const RealVariable& v, const RealExpression& e) { return RealExpression(v)-e; }
-RealExpression operator*(const RealVariable& v, const RealExpression& e) { return RealExpression(v)*e; }
-RealExpression operator/(const RealVariable& v, const RealExpression& e) { return RealExpression(v)/e; }
-RealExpression operator+(const RealExpression& e, const RealVariable& v) { return e+RealExpression(v); }
-RealExpression operator-(const RealExpression& e, const RealVariable& v) { return e-RealExpression(v); }
-RealExpression operator*(const RealExpression& e, const RealVariable& v) { return e*RealExpression(v); }
-RealExpression operator/(const RealExpression& e, const RealVariable& v) { return e/RealExpression(v); }
-RealExpression operator+(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)+RealExpression(v2); }
-RealExpression operator-(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)-RealExpression(v2); }
-RealExpression operator*(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)*RealExpression(v2); }
-RealExpression operator/(const RealVariable& v1, const RealVariable& v2) { return RealExpression(v1)/RealExpression(v2); }
-RealExpression operator+(const RealVariable& v, const Real& x) { return RealExpression(v)+RealExpression(x); }
-RealExpression operator-(const RealVariable& v, const Real& x) { return RealExpression(v)-RealExpression(x); }
-RealExpression operator*(const RealVariable& v, const Real& x) { return RealExpression(v)*RealExpression(x); }
-RealExpression operator/(const RealVariable& v, const Real& x) { return RealExpression(v)/RealExpression(x); }
-RealExpression operator+(const Real& x, const RealVariable& v) { return RealExpression(x)+RealExpression(v); }
-RealExpression operator-(const Real& x, const RealVariable& v) { return RealExpression(x)-RealExpression(v); }
-RealExpression operator*(const Real& x, const RealVariable& v) { return RealExpression(x)*RealExpression(v); }
-RealExpression operator/(const Real& x, const RealVariable& v) { return RealExpression(x)/RealExpression(v); }
-RealExpression neg(const RealExpression&);
-RealExpression rec(const RealExpression&);
-RealExpression sqr(const RealExpression&);
-RealExpression pow(const RealExpression&,Int);
-RealExpression sqrt(const RealExpression&);
-RealExpression exp(const RealExpression&);
-RealExpression log(const RealExpression&);
-RealExpression sin(const RealExpression&);
-RealExpression cos(const RealExpression&);
-RealExpression tan(const RealExpression&);
-RealExpression tan(const RealExpression&);
-RealExpression max(const RealExpression&,const RealExpression&);
-RealExpression min(const RealExpression&,const RealExpression&);
-RealExpression abs(const RealExpression&,const RealExpression&);
-KleeneanExpression sgn(const RealExpression&);
 
 } // namespace Ariadne
 
@@ -337,18 +266,20 @@ Void export_expressions(pybind11::module& module)
     real_expression_class.def("__le__", &__le__<ContinuousPredicate,Real,RealExpression>);
     real_expression_class.def("__ge__", &__ge__<ContinuousPredicate,Real,RealExpression>);
 
-    module.def("neg", (RealExpression(*)(RealExpression const&)) &neg);
-    module.def("rec", (RealExpression(*)(RealExpression const&)) &rec);
-    module.def("sqr", (RealExpression(*)(RealExpression const&)) &sqr);
-    module.def("pow", (RealExpression(*)(RealExpression const&,Int)) &pow);
-    module.def("sqrt", (RealExpression(*)(RealExpression const&)) &sqrt);
-    module.def("exp", (RealExpression(*)(RealExpression const&)) &exp);
-    module.def("log", (RealExpression(*)(RealExpression const&)) &log);
-    module.def("sin", (RealExpression(*)(RealExpression const&)) &sin);
-    module.def("cos", (RealExpression(*)(RealExpression const&)) &cos);
-    module.def("tan", (RealExpression(*)(RealExpression const&)) &tan);
+    module.def("neg", &_neg_<RealExpression>);
+    module.def("rec", &_rec_<RealExpression>);
+    module.def("sqr", &_sqr_<RealExpression>);
+    module.def("pow",&_pow_<RealExpression,Int>);
+    module.def("sqrt", &_sqrt_<RealExpression>);
+    module.def("exp", &_exp_<RealExpression>);
+    module.def("log", &_log_<RealExpression>);
+    module.def("sin", &_sin_<RealExpression>);
+    module.def("cos", &_cos_<RealExpression>);
+    module.def("tan", &_tan_<RealExpression>);
 
-    module.def("max", (RealExpression(*)(RealExpression const&, RealExpression const&)) &max);
+    module.def("max", &_max_<RealExpression,RealExpression>);
+    module.def("min", &_min_<RealExpression,RealExpression>);
+    module.def("abs", &_abs_<RealExpression>);
 
     module.def("substitute",(RealExpression(*)(RealExpression const&, const List<Assignment<RealVariable,RealExpression>>&)) &substitute);
     module.def("substitute",(RealExpression(*)(RealExpression const&, const Map<RealVariable,RealExpression>&)) &substitute);
@@ -385,7 +316,7 @@ Void export_expressions(pybind11::module& module)
     pybind11::implicitly_convertible<BooleanVariable,DiscretePredicate>();
     pybind11::implicitly_convertible<KleeneanVariable,ContinuousPredicate>();
 
-    module.def("sgn", (KleeneanExpression(*)(RealExpression const&)) &sgn);
+    module.def("sgn", &_sgn_<RealExpression>);
 
 
     pybind11::implicitly_convertible<std::string,StringExpression>();

@@ -151,6 +151,7 @@ template<class... AS> decltype(auto) _atan_(AS const& ... as) { return atan(as..
 template<class... AS> decltype(auto) _max_(AS const& ... as) { return max(as...); }
 template<class... AS> decltype(auto) _min_(AS const& ... as) { return min(as...); }
 template<class... AS> decltype(auto) _abs_(AS const& ... as) { return abs(as...); }
+template<class... AS> decltype(auto) _sgn_(AS const& ... as) { return sgn(as...); }
 
 template<class... AS> inline decltype(auto) _evaluate_(AS... as) { return evaluate(as...); }
 template<class... AS> inline decltype(auto) _partial_evaluate_(AS... as) { return partial_evaluate(as...); }

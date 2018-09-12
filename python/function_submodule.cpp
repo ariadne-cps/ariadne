@@ -56,23 +56,6 @@
 
 namespace Ariadne {
 
-typedef ScalarFunction<EffectiveTag> ESF;
-ESF pow(ESF const&, Int);
-ESF pos(ESF const&); ESF neg(ESF const&); ESF sqr(ESF const&); ESF rec(ESF const&);
-ESF sqrt(ESF const&); ESF exp(ESF const&); ESF log(ESF const&); ESF atan(ESF const&);
-ESF sin(ESF const&); ESF cos(ESF const&); ESF tan(ESF const&);
-
-typedef ScalarFunction<ValidatedTag> VSF;
-VSF pow(VSF const&, Int);
-VSF pos(VSF const&); VSF neg(VSF const&); VSF sqr(VSF const&); VSF rec(VSF const&);
-VSF sqrt(VSF const&); VSF exp(VSF const&); VSF log(VSF const&); VSF atan(VSF const&);
-VSF sin(VSF const&); VSF cos(VSF const&); VSF tan(VSF const&);
-
-typedef ScalarFunction<ApproximateTag> ASF;
-ASF pow(ASF const&, Int);
-ASF pos(ASF const&); ASF neg(ASF const&); ASF sqr(ASF const&); ASF rec(ASF const&);
-ASF sqrt(ASF const&); ASF exp(ASF const&); ASF log(ASF const&); ASF atan(ASF const&);
-ASF sin(ASF const&); ASF cos(ASF const&); ASF tan(ASF const&);
 
 
 
@@ -320,15 +303,15 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
     }
 
-    module.def("pow", (ScalarFunction<P>(*)(const ScalarFunction<P>&,Int)) &pow);
-    module.def("rec", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &rec);
-    module.def("sqr", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqr);
-    module.def("sqrt", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sqrt);
-    module.def("exp", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &exp);
-    module.def("log", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &log);
-    module.def("sin", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &sin);
-    module.def("cos", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &cos);
-    module.def("tan", (ScalarFunction<P>(*)(const ScalarFunction<P>&)) &tan);
+    module.def("pow", _pow_<ScalarFunction<P>,Int>);
+    module.def("rec", _rec_<ScalarFunction<P>>);
+    module.def("sqr", _sqr_<ScalarFunction<P>>);
+    module.def("sqrt", _sqrt_<ScalarFunction<P>>);
+    module.def("exp", _exp_<ScalarFunction<P>>);
+    module.def("log", _log_<ScalarFunction<P>>);
+    module.def("sin", _sin_<ScalarFunction<P>>);
+    module.def("cos", _cos_<ScalarFunction<P>>);
+    module.def("tan", _tan_<ScalarFunction<P>>);
 
     module.def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 

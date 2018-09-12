@@ -47,21 +47,21 @@ namespace Ariadne {
 //ValidatedNumericType evaluate(const ValidatedScalarFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 //Vector<ValidatedNumericType> evaluate(const ValidatedVectorFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 
-ValidatedScalarFunctionModelDP partial_evaluate(const ValidatedScalarFunctionModelDP&, SizeType, const ValidatedNumericType&);
-ValidatedVectorFunctionModelDP partial_evaluate(const ValidatedVectorFunctionModelDP&, SizeType, const ValidatedNumericType&);
+//ValidatedScalarFunctionModelDP partial_evaluate(const ValidatedScalarFunctionModelDP&, SizeType, const ValidatedNumericType&);
+//ValidatedVectorFunctionModelDP partial_evaluate(const ValidatedVectorFunctionModelDP&, SizeType, const ValidatedNumericType&);
 
 //ValidatedScalarFunctionModelDP antiderivative(const ValidatedScalarFunctionModelDP&, SizeType, ValidatedNumericType);
 //ValidatedVectorFunctionModelDP antiderivative(const ValidatedVectorFunctionModelDP&, SizeType, ValidatedNumericType);
 
-ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&);
-ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunction&, const ValidatedVectorFunctionModelDP&);
+//ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
+//ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&);
+//ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
+//ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunction&, const ValidatedVectorFunctionModelDP&);
 
-ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
-ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
-ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
+//ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
+//ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
+//ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
+//ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
 
 template<class P, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunctionModel<P,PR,PRE> >& frepr) {
     static_cast<const ScalarFunctionInterface<P>&>(frepr.reference()).repr(os); return os;
@@ -386,8 +386,8 @@ Void export_scalar_function_model(pybind11::module& module)
     module.def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
 //    module.def("partial_evaluate", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&,SizeType,const ValidatedNumericType&)) &partial_evaluate);
 
-    module.def("compose", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&)) &compose);
-    module.def("compose", (ValidatedScalarFunctionModelDP(*)(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&)) &compose);
+    module.def("compose", _compose_<ValidatedScalarFunctionModelDP,ValidatedVectorFunctionModelDP>);
+    module.def("compose", _compose_<ValidatedScalarFunction,ValidatedVectorFunctionModelDP>);
 
     module.def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModelDP&)) &unrestrict);
 
@@ -422,18 +422,18 @@ Void export_vector_function_model(pybind11::module& module)
 
 //    module.def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
 
-    module.def("compose", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &compose);
-    module.def("compose", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunction&,const ValidatedVectorFunctionModelDP&)) &compose);
+    module.def("compose", &_compose_<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP>);
+    module.def("compose", &_compose_<ValidatedVectorFunction,ValidatedVectorFunctionModelDP>);
 
     module.def("unrestrict", (ValidatedVectorFunction(*)(const ValidatedVectorFunctionModelDP&)) &unrestrict);
 
-    module.def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&,const ValidatedScalarFunctionModelDP&)) &join);
-    module.def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedScalarFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &join);
-    module.def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedScalarFunctionModelDP&)) &join);
-    module.def("join", (ValidatedVectorFunctionModelDP(*)(const ValidatedVectorFunctionModelDP&,const ValidatedVectorFunctionModelDP&)) &join);
+    module.def("join", &_join_<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP>);
+    module.def("join", &_join_<ValidatedScalarFunctionModelDP,ValidatedVectorFunctionModelDP>);
+    module.def("join", &_join_<ValidatedVectorFunctionModelDP,ValidatedScalarFunctionModelDP>);
+    module.def("join", &_join_<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP>);
 
-    module.def("antiderivative", (ValidatedVectorFunctionModelDP(*)(ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType)) &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
-    module.def("antiderivative", (ValidatedVectorFunctionModelDP(*)(ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber)) &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
+    module.def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
+    module.def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
 
 //    to_python< List<ValidatedVectorFunctionModelDP> >();
 }

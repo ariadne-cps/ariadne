@@ -317,10 +317,13 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_zero() c
     return ScaledFunctionPatch<M>(this->domain(),this->properties());
 }
 
+//FIXME: Should allow this in code file
+/*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const
 {
     return new ScaledFunctionPatch<M>(*this);
 }
+*/
 
 template<class M> ScaledFunctionPatchFactory<M>* ScaledFunctionPatch<M>::_factory() const
 {
@@ -654,10 +657,13 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(Initia
 }
 
 
+// FIXME: Should be possible to put in code file
+/*
 template<class M> VectorScaledFunctionPatch<M>* VectorScaledFunctionPatch<M>::_clone() const
 {
     return new VectorScaledFunctionPatch<M>(*this);
 }
+*/
 
 template<class M> ScaledFunctionPatchFactory<M>* VectorScaledFunctionPatch<M>::_factory() const
 {

@@ -53,13 +53,6 @@ FunctionMixin<F,Void,D,IntervalDomainType>::_base_evaluate(const ElementType<D,X
 }
 */
 
-template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<FloatDPApproximation>& x) const -> Result<FloatDPApproximation> {
     return this->_base_evaluate(x); }

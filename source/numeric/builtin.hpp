@@ -30,6 +30,7 @@
 #define ARIADNE_BUILTIN_HPP
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -61,7 +62,7 @@ class ExactDouble {
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
-    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(_d==x); }
+    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }

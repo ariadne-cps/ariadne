@@ -79,9 +79,9 @@ script:
   - $SH_PREFIX ctest -L "primary" -LE "python" -E "taylor_model|dyadic|number|test_paving"
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi
-  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution' && cmake . $CMAKE_ARGS && make; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && cmake . '$CMAKE_ARGS' && make'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/hybrid_evolution/hybrid_evolution_tutorial &> /dev/null'; fi
-  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics' && cmake . $CMAKE_ARGS && make; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && cmake . '$CMAKE_ARGS' && make'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/rigorous_numerics/rigorous_numerics_tutorial &> /dev/null'; fi
   
 after_success:

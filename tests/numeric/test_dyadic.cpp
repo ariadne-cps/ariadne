@@ -54,7 +54,6 @@ class TestDyadic
 
 void TestDyadic::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
@@ -82,36 +81,12 @@ void TestDyadic::test_concept() {
 
     w=1.5_q2; w=-1.375_q2;
 
-    ARIADNE_TEST_ASSERT(w==w);
-    ARIADNE_TEST_ASSERT(not(w!=w));
-    ARIADNE_TEST_ASSERT(w<=w);
-    ARIADNE_TEST_ASSERT(w>=w);
-    ARIADNE_TEST_ASSERT(not(w<w));
-    ARIADNE_TEST_ASSERT(not(w>w));
-    ARIADNE_TEST_ASSERT(not(w==n));
-    ARIADNE_TEST_ASSERT(w!=n);
-    ARIADNE_TEST_ASSERT(not(w<=n));
-    ARIADNE_TEST_ASSERT(w>=n);
-    ARIADNE_TEST_ASSERT(not(w<n));
-    ARIADNE_TEST_ASSERT(w>n);
-    ARIADNE_TEST_ASSERT(not(n==w));
-    ARIADNE_TEST_ASSERT(n!=w);
-    ARIADNE_TEST_ASSERT(n<=w);
-    ARIADNE_TEST_ASSERT(not(n>=w));
-    ARIADNE_TEST_ASSERT(n<w);
-    ARIADNE_TEST_ASSERT(not(n>w));
-    ARIADNE_TEST_ASSERT(not(w==z));
-    ARIADNE_TEST_ASSERT(w!=z);
-    ARIADNE_TEST_ASSERT(not(w<=z));
-    ARIADNE_TEST_ASSERT(w>=z);
-    ARIADNE_TEST_ASSERT(not(w<z));
-    ARIADNE_TEST_ASSERT(w>z);
-    ARIADNE_TEST_ASSERT(not(z==w));
-    ARIADNE_TEST_ASSERT(z!=w);
-    ARIADNE_TEST_ASSERT(z<=w);
-    ARIADNE_TEST_ASSERT(not(z>=w));
-    ARIADNE_TEST_ASSERT(z<w);
-    ARIADNE_TEST_ASSERT(not(z>w));
+    w==w; w!=w; w<=w; w>=w; w<w; w>w;
+    w==n; w!=n; w<=n; w>=n; w<n; w>n;
+    n==w; n!=w; n<=w; n>=w; n<w; n>w;
+    w==z; w!=z; w<=z; w>=z; w<z; w>z;
+    z==w; z!=w; z<=w; z>=w; z<w; z>w;
+//    z+1.0;
 }
 
 void TestDyadic::test_literal() {

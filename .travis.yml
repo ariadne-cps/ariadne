@@ -81,10 +81,10 @@ script:
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && cmake . '$CMAKE_ARGS; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && make'; fi  
-  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/hybrid_evolution/hybrid_evolution_tutorial'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/hybrid_evolution/hybrid_evolution_tutorial > /dev/null'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && cmake . '$CMAKE_ARGS; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && make'; fi  
-  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/rigorous_numerics/rigorous_numerics_tutorial'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c '~/tutorials/rigorous_numerics/rigorous_numerics_tutorial > /dev/null'; fi
   
 after_success:
   - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi

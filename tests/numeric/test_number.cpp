@@ -33,6 +33,78 @@
 using namespace std;
 using namespace Ariadne;
 
+class TestNumbers
+{
+  public:
+    Void test();
+    Void test_float_value_behaviour();
+    Void test_operations();
+};
+
+void TestNumbers::test()
+{
+    ARIADNE_TEST_CALL(test_operations());
+    ARIADNE_TEST_CALL(test_float_value_behaviour());
+}
+
+Void
+TestNumbers::test_float_value_behaviour()
+{
+    ExactNumber y(FloatDPValue(0,dp)); 
+    try {
+        y = y+y;
+        ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> within ExactNumber yield "<<y.class_name());
+    } catch (DispatchException e) {
+        ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> give error:\n    "<<e.what());
+    }
+}
+    
+Void
+TestNumbers::test_operations()
+{
+    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
+    ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
+    ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
+    
+    Dyadic w2(2);
+    Dyadic w3(3);
+    Rational q2(2);
+    Rational q3(3);
+    FloatDPValue x2(2,dp);
+    FloatDPValue x3(3,dp);
+    ExactNumber y2(x2), y3(x3);
+    ARIADNE_TEST_PRINT(w2/w3);
+    ARIADNE_TEST_PRINT(x2/x3);
+    ARIADNE_TEST_THROWS(y2/y3, DispatchException);
+    ARIADNE_TEST_THROWS(q2/y3, DispatchException);
+    ARIADNE_TEST_THROWS(y2/q3, DispatchException);
+
+    ARIADNE_TEST_FAIL(add(yv,yv));
+    ARIADNE_TEST_PRINT(add(yb,yb));
+    ARIADNE_TEST_PRINT(add(yb,yv));
+//    ARIADNE_TEST_PRINT(add(b,z));
+    ARIADNE_TEST_PRINT(add(b,yb));
+    ARIADNE_TEST_PRINT(add(yb,yn));
+
+    ValidatedErrorNumber ym=max(en,ev);
+    ARIADNE_TEST_PRINT(max(en,ev));
+    ARIADNE_TEST_PRINT(max(en,ev).pointer());
+    ARIADNE_TEST_PRINT(max(en,ev).class_name());
+    ARIADNE_TEST_PRINT(max(en,ev));
+
+    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_FAIL(add(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
+
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
+    ARIADNE_TEST_FAIL(max(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+
+    max(1,FloatDPValue(3));
+//    max(1u,FloatDPError(3u));
+}
+
 template<class Y> class TestNumber
 {
   public:
@@ -47,6 +119,8 @@ template<class Y> class TestNumber
 
 
 Int main() {
+    TestNumbers().test();
+    
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
@@ -68,7 +142,6 @@ TestNumber<Y>::test()
     //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_get());
-    ARIADNE_TEST_CALL(test_operations());
     ARIADNE_TEST_CALL(test_comparisons());
 }
 
@@ -166,38 +239,6 @@ TestNumber<Y>::test_class()
     ARIADNE_TEST_EQUAL(yb.class_name(),"FloatDPBounds");
 }
 
-template<class Y> Void
-TestNumber<Y>::test_operations()
-{
-    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
-    ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
-    ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
-
-    ARIADNE_TEST_FAIL(add(yv,yv));
-    ARIADNE_TEST_PRINT(add(yb,yb));
-    ARIADNE_TEST_PRINT(add(yb,yv));
-//    ARIADNE_TEST_PRINT(add(b,z));
-    ARIADNE_TEST_PRINT(add(b,yb));
-    ARIADNE_TEST_PRINT(add(yb,yn));
-
-    ValidatedErrorNumber ym=max(en,ev);
-    ARIADNE_TEST_EXECUTE(max(en,ev));
-    ARIADNE_TEST_PRINT(max(en,ev).pointer());
-    ARIADNE_TEST_PRINT(max(en,ev).class_name());
-    ARIADNE_TEST_PRINT(max(en,ev));
-
-    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2))));
-    ARIADNE_TEST_PRINT(add(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
-
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
-    ARIADNE_TEST_PRINT(max(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
-    ARIADNE_TEST_EXECUTE(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
-
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
-
-    max(1,FloatDPValue(3));
-//    max(1u,FloatDPError(3u));
-}
 
 template<class Y> Void
 TestNumber<Y>::test_comparisons() {

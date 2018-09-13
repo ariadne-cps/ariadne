@@ -1,6 +1,6 @@
 set(TUTORIALS
-    rigorous-numerics
-    hybrid-evolution
+    rigorous_numerics
+    hybrid_evolution
 )
 
 add_custom_target(tutorials)

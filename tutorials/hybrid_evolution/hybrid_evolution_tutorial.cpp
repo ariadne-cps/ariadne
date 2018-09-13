@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid-evolution_tutorial.cpp
+ *            hybrid_evolution_tutorial.cpp
  *
  *  Copyright  2008-17  Pieter Collins
  *

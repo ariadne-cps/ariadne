@@ -14,7 +14,7 @@ find_package(Ariadne REQUIRED)
 include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
 
 # Set the executable along with the required source files
-add_executable(rigorous-numerics_tutorial rigorous-numerics_tutorial.cpp)
+add_executable(rigorous_numerics_tutorial rigorous_numerics_tutorial.cpp)
 
 # Instruct to link against the ariadne library
-target_link_libraries(rigorous-numerics_tutorial ${ARIADNE_LIBRARIES})
+target_link_libraries(rigorous_numerics_tutorial ${ARIADNE_LIBRARIES})

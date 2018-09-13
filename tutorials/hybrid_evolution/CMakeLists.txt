@@ -14,7 +14,7 @@ find_package(Ariadne REQUIRED)
 include_directories(SYSTEM ${ARIADNE_INCLUDE_DIRS})
 
 # Set the executable along with the required source files
-add_executable(hybrid-evolution_tutorial hybrid-evolution_tutorial.cpp)
+add_executable(hybrid_evolution_tutorial hybrid_evolution_tutorial.cpp)
 
 # Instruct to link against the ariadne library
-target_link_libraries(hybrid-evolution_tutorial ${ARIADNE_LIBRARIES})
+target_link_libraries(hybrid_evolution_tutorial ${ARIADNE_LIBRARIES})

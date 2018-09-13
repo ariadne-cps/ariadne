@@ -1,7 +1,7 @@
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(SYSTEM ${PYBIND11_INCLUDE_DIR})
 
-message(STATUS "You need to use the Python ${PYTHON_VERSION_MAJOR} interpreter to import Ariadne correctly.")
+message(STATUS "You will have to use the Python ${PYTHON_VERSION_MAJOR} interpreter to import Ariadne correctly.")
 
 add_library(pyariadne-numeric-src OBJECT
     numeric_module.cpp

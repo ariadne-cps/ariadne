@@ -378,19 +378,11 @@ template<class F> GradedValidatedDifferential flow(const F& f, const ExactInterv
     return y;
 }
 
-template<class X> inline Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex& a1, const Nat a2, const X& c) {
+template<class X> Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex& a1, const Nat a2, const X& c) {
     MultiIndex a(a1.size()+1);
     for(Nat i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
     a[a1.size()]=a2;
     e.append(a,c);
-}
-
-inline Vector<GradedValidatedDifferential> graded_variables(Int so, const Vector<ValidatedNumericType>& x) {
-    Vector<GradedValidatedDifferential> r(x.size(),GradedValidatedDifferential());
-    for(Nat i=0; i!=x.size(); ++i) {
-        r[i]=GradedValidatedDifferential(ValidatedDifferential::variable(x.size(),so,x[i],i));
-    }
-    return r;
 }
 
 

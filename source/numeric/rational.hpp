@@ -82,6 +82,11 @@ class Rational
     Rational& operator=(const Rational&);
     Rational& operator=(Rational&&);
     operator Number<ExactTag> () const;
+
+    static Rational inf(Sign sgn);
+    static Rational inf();
+    static Rational nan();
+
     Integer get_num() const;
     Integer get_den() const;
     Integer numerator() const;
@@ -98,6 +103,13 @@ class Rational
 
     friend Sign sgn(Rational const& q);
 
+    friend Bool is_nan(Rational const& q);
+    friend Bool is_inf(Rational const& q);
+    friend Bool is_infinite(Rational const& q);
+    friend Bool is_finite(Rational const& q);
+    friend Bool is_zero(Rational const& q);
+
+    friend Sign sgn(Rational const& q);
     friend Comparison cmp(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
     friend Comparison cmp(ExactDouble const& d1, Rational const& q2);

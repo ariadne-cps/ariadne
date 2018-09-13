@@ -97,6 +97,13 @@ class Dyadic
     explicit Dyadic(double x);
     //! \brief Convert to a generic number.
     operator Number<ExactTag> () const;
+    //! \brief A representation of ±∞ or NaN.
+    static Dyadic inf(Sign sgn);
+    //! \brief A representation of +∞.
+    static Dyadic inf();
+    //! \brief A representation of NaN (not-a-number).
+    static Dyadic nan();
+
     //! \brief The smallest integer \a p such that \a x=p/2<sup>q</sup>
     Integer mantissa() const;
     //! \brief The (negative) integer \a -q such that \a x=p/2<sup>q</sup>
@@ -128,6 +135,16 @@ class Dyadic
     friend Integer round(Dyadic const&);
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
+
+    //! \brief Tests whether the value is NaN (not-a-number).
+    friend Bool is_nan(Dyadic const& w);
+    //! \brief Tests whether the value is ±∞.
+    friend Bool is_inf(Dyadic const& w);
+    friend Bool is_infinite(Dyadic const& w);
+    //! \brief Tests whether the value is finite.
+    friend Bool is_finite(Dyadic const& w);
+    //! \brief Tests whether the value is zero.
+    friend Bool is_zero(Dyadic const& w);
 };
 
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }

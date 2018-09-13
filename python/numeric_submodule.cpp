@@ -234,7 +234,7 @@ template<class T> class logical_class_ : public pybind11::class_<T> {
 };
 
 
-} // namespace Ariadne 
+} // namespace Ariadne
 
 
 using namespace Ariadne;
@@ -335,6 +335,9 @@ void export_dyadic(pymodule& module)
     dyadic_class.def(init<FloatDPValue>());
     dyadic_class.def(init<FloatMPValue>());
 
+    dyadic_class.def_static("nan", (Dyadic(*)()) &Dyadic::nan);
+    dyadic_class.def_static("inf", (Dyadic(*)()) &Dyadic::inf);
+
     dyadic_class.define_self_arithmetic();
     dyadic_class.define_self_comparisons();
     module.def("hlf", (Dyadic(*)(Dyadic const&)) &_hlf_);
@@ -361,6 +364,9 @@ void export_rational(pymodule& module)
     rational_class.def(init<Dyadic>());
     rational_class.def(init<Decimal>());
     rational_class.def(init<Rational>());
+
+    rational_class.def_static("nan", (Rational(*)()) &Rational::nan);
+    rational_class.def_static("inf", (Rational(*)()) &Rational::inf);
 
     rational_class.define_self_arithmetic();
     rational_class.define_self_comparisons();

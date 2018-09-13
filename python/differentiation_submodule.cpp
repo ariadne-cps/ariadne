@@ -72,25 +72,10 @@ Void export_differential(pybind11::module& module, const String& name)
     differential_class.def( pybind11::init<Expansion<MultiIndex,X>,DegreeType>());
     differential_class.def("__getitem__", &__getitem__<D,MultiIndex,X>);
     differential_class.def("__setitem__",&__setitem__<D,MultiIndex,X>);
-    differential_class.def(-self);
-    differential_class.def(self+self);
-    differential_class.def(self-self);
-    differential_class.def(self*self);
-    differential_class.def(self/self);
-    differential_class.def(self+X());
-    differential_class.def(self-X());
-    differential_class.def(self*X());
-    differential_class.def(self/X());
-    differential_class.def(X()+self);
-    differential_class.def(X()-self);
-    differential_class.def(X()*self);
-    differential_class.def(self+Y());
-    differential_class.def(self-Y());
-    differential_class.def(self*Y());
-    differential_class.def(self/Y());
-    differential_class.def(Y()+self);
-    differential_class.def(Y()-self);
-    differential_class.def(Y()*self);
+    
+    define_elementary_algebra<D,X>(module, differential_class);
+    define_mixed_arithmetic<D,Y>(module, differential_class);
+        
     differential_class.def(self+=self);
     differential_class.def(self-=self);
     differential_class.def(self+=X());
@@ -114,19 +99,6 @@ Void export_differential(pybind11::module& module, const String& name)
     module.def("derivative", (D(*)(const D&, SizeType))&D::_derivative);
     module.def("antiderivative", (D(*)(const D&, SizeType))&D::_antiderivative);
 
-    typedef D(*UFn)(D const&);
-
-    module.def("neg", (D(*)(D const&)) &_neg_<D>);
-    module.def("sqr", (UFn) &_sqr_<D>);
-    module.def("rec",(UFn) &_rec_<D>);
-    module.def("pow", (D(*)(D const&,Int const&)) &_pow_<D,Int>);
-    module.def("sqrt",(UFn) &_sqrt_<D>);
-    module.def("exp",(UFn) &_exp_<D>);
-    module.def("log",(UFn) &_log_<D>);
-    module.def("sin",(UFn) &_sin_<D>);
-    module.def("cos",(UFn) &_cos_<D>);
-    module.def("tan",(UFn) &_tan_<D>);
-    module.def("atan",(UFn) &_atan_<D>);
 }
 
 template<class DIFF>
@@ -146,17 +118,9 @@ export_differential_vector(pybind11::module& module, const String& name)
     differential_vector_class.def("__getitem__", &__getitem__<DV,Nat,D>);
     differential_vector_class.def("__setitem__",&__setitem__<DV,Nat,X>);
     differential_vector_class.def("__setitem__",&__setitem__<DV,Nat,D>);
-    differential_vector_class.def("__neg__",&__neg__<DV,DV>);
-    differential_vector_class.def("__add__",&__add__<DV,DV,DV>);
-    differential_vector_class.def("__sub__",&__sub__<DV,DV,DV>);
-    differential_vector_class.def("__add__",&__add__<DV,DV,V>);
-    differential_vector_class.def("__sub__",&__sub__<DV,DV,V>);
-    differential_vector_class.def("__rmul__",&__rmul__<DV,DV,D>);
-    differential_vector_class.def("__mul__",&__mul__<DV,DV,D>);
-    differential_vector_class.def("__div__",&__div__<DV,DV,D>);
-    differential_vector_class.def("__rmul__",&__rmul__<DV,DV,X>);
-    differential_vector_class.def("__mul__",&__mul__<DV,DV,X>);
-    differential_vector_class.def("__div__",&__div__<DV,DV,X>);
+    
+    define_vector_algebra_arithmetic(module, differential_vector_class);
+
     differential_vector_class.def("value", &DV::value);
     differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def("__str__",&__cstr__<DV>);

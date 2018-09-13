@@ -148,18 +148,7 @@ Void export_polynomial(pybind11::module& module)
     typedef Polynomial<X> SelfType;
     typedef X RealType;
 
-    polynomial_class.def("__pos__", &__pos__<SelfType,SelfType>);
-    polynomial_class.def("__neg__", &__neg__<SelfType,SelfType>);
-    polynomial_class.def("__add__", &__add__<SelfType,SelfType,SelfType>);
-    polynomial_class.def("__sub__", &__add__<SelfType,SelfType,SelfType>);
-    polynomial_class.def("__mul__", &__add__<SelfType,SelfType,SelfType>);
-    polynomial_class.def("__add__", &__add__<SelfType,SelfType,RealType>);
-    polynomial_class.def("__sub__", &__add__<SelfType,SelfType,RealType>);
-    polynomial_class.def("__mul__", &__add__<SelfType,SelfType,RealType>);
-    polynomial_class.def("__div__", &__add__<SelfType,SelfType,RealType>);
-    polynomial_class.def("__add__", &__add__<SelfType,RealType,SelfType>);
-    polynomial_class.def("__sub__", &__add__<SelfType,RealType,SelfType>);
-    polynomial_class.def("__mul__", &__add__<SelfType,RealType,SelfType>);
+    define_algebra(module,polynomial_class);
     polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
 
     export_vector<Polynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
@@ -272,21 +261,8 @@ template<class P> Void export_scalar_function(pybind11::module& module)
     scalar_function_class.def(pybind11::init<SizeType>());
     scalar_function_class.def("argument_size", &ScalarFunction<P>::argument_size);
     scalar_function_class.def("derivative", &ScalarFunction<P>::derivative);
-    scalar_function_class.def("__pos__", &__pos__<ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__neg__", &__neg__<ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__add__", &__add__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__sub__", &__sub__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__mul__", &__mul__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__div__", &__div__<ScalarFunction<P>,ScalarFunction<P>,ScalarFunction<P>>);
-    scalar_function_class.def("__add__", &__add__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__sub__", &__sub__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__mul__", &__mul__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__div__", &__div__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__radd__", &__radd__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__rsub__", &__rsub__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__rmul__", &__rmul__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-    scalar_function_class.def("__rdiv__", &__rdiv__<ScalarFunction<P>,ScalarFunction<P>,Number<P>>);
-
+    define_elementary_algebra<ScalarFunction<P>,Number<P>>(module,scalar_function_class);
+    
 //FIXME
 //    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
 //    scalar_function_class.def("__le__", &__le__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
@@ -303,16 +279,7 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
     }
 
-    module.def("pow", _pow_<ScalarFunction<P>,Int>);
-    module.def("rec", _rec_<ScalarFunction<P>>);
-    module.def("sqr", _sqr_<ScalarFunction<P>>);
-    module.def("sqrt", _sqrt_<ScalarFunction<P>>);
-    module.def("exp", _exp_<ScalarFunction<P>>);
-    module.def("log", _log_<ScalarFunction<P>>);
-    module.def("sin", _sin_<ScalarFunction<P>>);
-    module.def("cos", _cos_<ScalarFunction<P>>);
-    module.def("tan", _tan_<ScalarFunction<P>>);
-
+    
     module.def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 
     export_scalar_function_evaluation(scalar_function_class);
@@ -330,6 +297,10 @@ template<class P> Void export_vector_function(pybind11::module& module)
     vector_function_class.def("argument_size", &VectorFunction<P>::argument_size);
     vector_function_class.def("__getitem__", &VectorFunction<P>::get);
     vector_function_class.def("__setitem__", &VectorFunction<P>::set);
+    
+    // TODO: Put these in C++ API
+    // define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>,Number<P>>(module,vector_function_class);
+
     export_vector_function_evaluation(vector_function_class);
 
     vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);

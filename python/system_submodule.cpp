@@ -58,15 +58,15 @@ Void export_hybrid_automaton(pybind11::module& module)
 
     pybind11::class_<DiscreteLocation> discrete_state_class(module,"DiscreteLocation");
     discrete_state_class.def(pybind11::init<DiscreteLocation>());
-    discrete_state_class.def("__eq__", &__eq__<Bool,DiscreteLocation,DiscreteLocation>);
-    discrete_state_class.def("__ne__", &__ne__<Bool,DiscreteLocation,DiscreteLocation>);
+    discrete_state_class.def("__eq__", &__eq__<DiscreteLocation,DiscreteLocation , Return<Bool> >);
+    discrete_state_class.def("__ne__", &__ne__<DiscreteLocation,DiscreteLocation , Return<Bool> >);
     discrete_state_class.def("__hash__", &__hash__<DiscreteLocation>);
     discrete_state_class.def("__str__",&__cstr__<DiscreteLocation>);
 
     pybind11::class_<DiscreteEvent> discrete_event_class(module,"DiscreteEvent");
     discrete_event_class.def(pybind11::init<DiscreteEvent>());
-    discrete_event_class.def("__eq__", &__eq__<Bool,DiscreteEvent,DiscreteEvent>);
-    discrete_event_class.def("__ne__", &__ne__<Bool,DiscreteEvent,DiscreteEvent>);
+    discrete_event_class.def("__eq__", &__eq__<DiscreteEvent,DiscreteEvent , Return<Bool> >);
+    discrete_event_class.def("__ne__", &__ne__<DiscreteEvent,DiscreteEvent , Return<Bool> >);
     discrete_event_class.def("__hash__", &__hash__<DiscreteEvent>);
     discrete_event_class.def("__str__", &__cstr__<DiscreteEvent>);
     pybind11::implicitly_convertible<Int,DiscreteEvent>();

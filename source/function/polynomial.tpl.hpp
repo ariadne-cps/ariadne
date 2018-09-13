@@ -203,10 +203,18 @@ Void Polynomial<X>::check() const
 
 
 
+template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Pos, const Polynomial<X>& p) {
+    Polynomial<X> r(p.argument_size());
+    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+        r[iter->index()]=+iter->coefficient();
+    }
+    return r;
+}
+
 template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Neg, const Polynomial<X>& p) {
     Polynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        r[iter->index()]-=iter->coefficient();
+        r[iter->index()]=-iter->coefficient();
     }
     return r;
 }

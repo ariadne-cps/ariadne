@@ -88,7 +88,10 @@ template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<
 
 struct Fallback { };
 struct DontCare { template<class T> DontCare(T); };
-template<class R> struct Return { };
+
+template<class R> struct Return { typedef R ReturnType; };
+template<class RET> using ReturnType = typename RET::ReturnType;
+
 struct Any { };
 
 template<template<class...>class F, class... T> False _has(...);

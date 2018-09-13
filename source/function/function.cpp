@@ -515,6 +515,15 @@ EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVecto
 }
 
 
+EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const EffectiveNumber& c) {
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vf[i]/c);
+    }
+    return r;
+}
+
+
 
 EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());

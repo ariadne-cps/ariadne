@@ -230,8 +230,8 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     }
 
     if constexpr (HasEquality<IVL,IVL>::value) {
-        interval_class.def("__eq__",  &__eq__<EqualityType<IVL,IVL>,IVL,IVL>);
-        interval_class.def("__ne__",  &__ne__<InequalityType<IVL,IVL>,IVL,IVL>);
+        interval_class.def("__eq__",  &__eq__<IVL,IVL , Return<EqualityType<IVL,IVL>> >);
+        interval_class.def("__ne__",  &__ne__<IVL,IVL , Return<InequalityType<IVL,IVL>> >);
     }
 
     interval_class.def("lower", &IntervalType::lower);
@@ -292,8 +292,8 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     }
 
     if constexpr (HasEquality<BX,BX>::value) {
-        box_class.def("__eq__",  __eq__<EqualityType<BX,BX>,BX,BX>);
-        box_class.def("__ne__",  __ne__<InequalityType<BX,BX>,BX,BX>);
+        box_class.def("__eq__",  __eq__<BX,BX , Return<EqualityType<BX,BX>> >);
+        box_class.def("__ne__",  __ne__<BX,BX , Return<InequalityType<BX,BX>> >);
     }
 
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);

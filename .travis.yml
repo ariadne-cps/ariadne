@@ -49,12 +49,12 @@ before_install:
       if [[ "$COMPILER" == "g++-7" ]]; then 
         curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         sudo -H python2 get-pip.py
-        sudo -H pip2 install pytest --upgrade --ignore-installed six
+        sudo -H pip2 install coverage pytest --upgrade --ignore-installed six
         PYTHON_VERSION=2
       else
         sudo easy_install pip
         sudo pip3 install --upgrade pip
-        sudo pip3 install pytest
+        sudo pip3 install coverage pytest
         PYTHON_VERSION=3
       fi
     fi
@@ -68,7 +68,7 @@ before_install:
       $SH_PREFIX apt install -y cmake   
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX apt install -y clang++-5.0 python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install pytest; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install coverage pytest; fi
 
 script: 
   - git submodule update --init --recursive
@@ -76,7 +76,7 @@ script:
   - if [[ -n "$COVERAGE" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi  
   - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" 
   - $SH_PREFIX cmake . $CMAKE_ARGS
-  - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests; else $SH_PREFIX make; fi
+  - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests pyariadne; else $SH_PREFIX make; fi
   - $SH_PREFIX ctest -L "primary"
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi

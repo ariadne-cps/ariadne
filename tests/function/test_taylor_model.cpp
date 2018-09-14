@@ -67,9 +67,10 @@ template<class T> T norm(T const& t) { return t; }
             std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": "; \
             std::cerr << "`refines(" << #expression << "," << #expected << ")' failed;\n"; \
             std::cerr << "result=" << (result) << "\nexpected="<< (expected) << std::endl; \
-            auto difference=(result-(expected)); do_clobber(difference); \
-            std::cerr << "difference=" << difference << "=" << (result) << #expected << "=" << (expected) << std::endl; \
-            std::cerr<<"  norm="<<norm(difference)<<" error="<<(result).error()<<" tolerance="<<(expected).error()<<"\n"; \
+            auto exact_result=result; auto exact_expected=expected; clobber(exact_expected); clobber(exact_result); \
+            auto difference=(exact_result-exact_expected); \
+            std::cerr << "difference=" << difference << std::endl; \
+            std::cerr<<"  norm(difference)="<<norm(difference)<<" result.error="<<(result).error()<<" expected.error="<<(expected).error()<<"\n"; \
         }                                                               \
     }                                                                   \
 
@@ -406,23 +407,27 @@ template<class F> Void TestTaylorModel<F>::test_functions()
     // 1, 1/4, -1/32, 1/128, -5/2048, 7/8192, -21/65536, 33/262144, 429/8388608, 715/33554432, 2431/268435456
     ValidatedTaylorModel<F> expected_rec_ophx
         = 1-x/2+(x^2)/4-(x^3)/8+(x^4)/16-(x^5)/32+(x^6)/64-(x^7)/128+(x^8)/256-(x^9)/512+(x^10)/1024+e/1024;
+    ValidatedTaylorModel<F> expected_rec_ophx_coarse_error
+        = 1-x/2+(x^2)/4-(x^3)/8+(x^4)/16-(x^5)/32+(x^6)/64-(x^7)/128+(x^8)/256-(x^9)/512+(x^10)/1024+e/1024*2;
     ValidatedTaylorModel<F> expected_sqrt_ophx
         = 1+x/4-(x^2)/32+(x^3)/128-(x^4)*5/2048+(x^5)*7/8192-(x^6)*21/65536+(x^7)*33/262144-(x^8)*429/8388608+(x^9)*715/33554432+e*2431/268435456;
+    ValidatedTaylorModel<F> expected_sqrt_ophx_coarse_error
+        = 1+x/4-(x^2)/32+(x^3)/128-(x^4)*5/2048+(x^5)*7/8192-(x^6)*21/65536+(x^7)*33/262144-(x^8)*429/8388608+(x^9)*715/33554432+e*2431/268435456*2;
     ValidatedTaylorModel<F> expected_log_ophx
         = x/2-(x^2)/4/2+(x^3)/8/3-(x^4)/16/4+(x^5)/32/5-(x^6)/64/6+(x^7)/128/7-(x^8)/256/8+(x^9)/512/9-(x^10)/1024/10+e/1024/10;
     ARIADNE_TEST_REFINES(rec(ophx),expected_rec_ophx+tolerance);
-    ARIADNE_TEST_REFINES(sqrt(ophx),expected_sqrt_ophx+tolerance*128);
+    ARIADNE_TEST_REFINES(sqrt(ophx),expected_sqrt_ophx_coarse_error+tolerance);
     ARIADNE_TEST_REFINES(log(ophx),expected_log_ophx+tolerance);
 
-    ARIADNE_TEST_REFINES(sqrt(ophx)*sqrt(ophx),ophx+tolerance);
+    ARIADNE_TEST_REFINES(sqrt(ophx)*sqrt(ophx),ophx+tolerance*2);
 
     // Doubling formulae
     ARIADNE_TEST_REFINES(exp(2*x),(expected_exp_x^2)+tolerance);
     ARIADNE_TEST_REFINES(sin(2*x),2*expected_sin_x*expected_cos_x+tolerance);
     ARIADNE_TEST_REFINES(cos(2*x),2*(expected_cos_x^2)-1+tolerance);
 
-    ARIADNE_TEST_REFINES(rec(3*ophx),expected_rec_ophx/3+tolerance);
-    ARIADNE_TEST_REFINES(sqrt(9*ophx),expected_sqrt_ophx*3+tolerance.pm(expected_sqrt_ophx.error()*4u));
+    ARIADNE_TEST_REFINES(3*rec(3*ophx),expected_rec_ophx_coarse_error+tolerance);
+    ARIADNE_TEST_REFINES(sqrt(9*ophx)/3,expected_sqrt_ophx_coarse_error+tolerance);
     ARIADNE_TEST_REFINES(log(3*ophx),expected_log_ophx+log(FloatValue<PR>(3))+tolerance);
 
     Nat rn=3; FloatValue<PR> c(2); FloatValue<PR> frn(rn);
@@ -507,17 +512,19 @@ template<class F> Void TestTaylorModel<F>::test_antiderivative()
     ARIADNE_TEST_SAME(antiderivative((x0^2)*(x1^4)*15/2,0),(x0^3)*(x1^4)*5/2);
     ARIADNE_TEST_SAME(antiderivative((x0^2)*(x1^4)*15/2,1),(x0^2)*(x1^5)*3/2);
 
-    ValidatedTaylorModel<F> x=ValidatedTaylorModel<F>::coordinate(1,0,swp);
-    ValidatedTaylorModel<F> e=ValidatedTaylorModel<F>::zero(1,swp)+FloatBounds<PR>(-1,+1);
-    ARIADNE_TEST_SAME(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
-    ARIADNE_TEST_SAME(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
-    ARIADNE_TEST_SAME(antiderivative(2*(x^2),0),FloatValue<PR>(0.66666666666666663)*(x^3)+FloatValue<PR>(5.5511151231257827021e-17)*e);
-    ARIADNE_TEST_SAME(antiderivative(2*(x^2)+e,0),FloatValue<PR>(0.66666666666666663)*(x^3)+FloatValue<PR>(1.0000000000000002)*e);
+    if constexpr (IsSame<F,FloatDP>::value) {
+        ValidatedTaylorModel<F> x=ValidatedTaylorModel<F>::coordinate(1,0,swp);
+        ValidatedTaylorModel<F> e=ValidatedTaylorModel<F>::zero(1,swp)+FloatBounds<PR>(-1,+1);
+        ARIADNE_TEST_SAME(antiderivative(2*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
+        ARIADNE_TEST_SAME(antiderivative(2*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
+        ARIADNE_TEST_SAME(antiderivative(2*(x^2),0),FloatValue<PR>(0.66666666666666663)*(x^3)+FloatValue<PR>(5.5511151231257827021e-17)*e);
+        ARIADNE_TEST_SAME(antiderivative(2*(x^2)+e,0),FloatValue<PR>(0.66666666666666663)*(x^3)+FloatValue<PR>(1.0000000000000002)*e);
 
-    // Regression test
-    ValidatedTaylorModel<F> t1({ {{0,0},1.}, {{1,0},2.}, {{0,1},3.}, {{2,0},4.}, {{1,1},5.}, {{0,2},6.} }, 0., swp);
-    ValidatedTaylorModel<F> at1({ {{1,0},1.}, {{2,0},1.}, {{1,1},3.}, {{3,0},1.33333333333333333}, {{2,1},2.5}, {{1,2},6.} }, 1.1102230246251565404e-16, swp);
-    ARIADNE_TEST_SAME(antiderivative(t1,0),at1);
+        // Regression test
+        ValidatedTaylorModel<F> t1({ {{0,0},1.}, {{1,0},2.}, {{0,1},3.}, {{2,0},4.}, {{1,1},5.}, {{0,2},6.} }, 0., swp);
+        ValidatedTaylorModel<F> at1({ {{1,0},1.}, {{2,0},1.}, {{1,1},3.}, {{3,0},1.33333333333333333}, {{2,1},2.5}, {{1,2},6.} }, 1.1102230246251565404e-16, swp);
+        ARIADNE_TEST_SAME(antiderivative(t1,0),at1);
+    }
 }
 
 

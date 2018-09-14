@@ -69,7 +69,7 @@ before_install:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX apt install -y clang++-5.0 python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install pytest; fi
-#- if [[ -n "$COVERAGE" ]]; then $SH_PREFIX ctest -L "primary" -LE "python" -E "taylor_model|dyadic|number|test_paving"; else $SH_PREFIX ctest; fi
+
 script: 
   - git submodule update --init --recursive
   - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER"
@@ -77,7 +77,7 @@ script:
   - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" 
   - $SH_PREFIX cmake . $CMAKE_ARGS
   - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests; else $SH_PREFIX make; fi
-  - $SH_PREFIX ctest -L "primary" -LE "python" -E "taylor_model|dyadic|number|test_paving"
+  - $SH_PREFIX ctest -L "primary"
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && cmake . '$CMAKE_ARGS; fi

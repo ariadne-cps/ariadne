@@ -50,21 +50,22 @@ before_install:
         curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         sudo -H python2 get-pip.py
         sudo -H pip2 install pytest --upgrade --ignore-installed six
+        PYTHON_VERSION=2
       else
         sudo easy_install pip
         sudo pip3 install --upgrade pip
         sudo pip3 install pytest
+        PYTHON_VERSION=3
       fi
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      if [[ -n "$DOCKER" ]]; then
-        docker pull $DOCKER
-        CONTAINER_ID=$(docker run --detach --tty --volume="$PWD":/ariadne --workdir=/ariadne $DOCKER)
-        SH_PREFIX="docker exec --tty $CONTAINER_ID"
-        $SH_PREFIX apt update
-        $SH_PREFIX apt install -y cmake   
-      fi
+      PYTHON_VERSION=3
+      docker pull $DOCKER
+      CONTAINER_ID=$(docker run --detach --tty --volume="$PWD":/ariadne --workdir=/ariadne $DOCKER)
+      SH_PREFIX="docker exec --tty $CONTAINER_ID"
+      $SH_PREFIX apt update
+      $SH_PREFIX apt install -y cmake   
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX apt install -y clang++-5.0 python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install pytest; fi
@@ -85,6 +86,7 @@ script:
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && cmake . '$CMAKE_ARGS; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && make'; fi  
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && ./rigorous_numerics_tutorial > /dev/null'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/python_interface && python'$PYTHON_VERSION' -m tutorial.py > /dev/null'; fi  
   
 after_success:
   - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi

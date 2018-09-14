@@ -76,7 +76,7 @@ script:
   - if [[ -n "$COVERAGE" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi  
   - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" 
   - $SH_PREFIX cmake . $CMAKE_ARGS
-  - $SH_PREFIX make
+  - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests; else $SH_PREFIX make; fi
   - $SH_PREFIX ctest -L "primary" -LE "python" -E "taylor_model|dyadic|number|test_paving"
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi

@@ -53,7 +53,7 @@ template<class T, class... BS> class class_<T,bases<BS...>> : public class_<T,BS
 };
 
 // A pybind11 object convertible to C++. Useful for the result of an overloaded function.
-class result_object {
+class __attribute__ ((visibility ("default"))) result_object {
   public:
     explicit result_object() : _obj() { }
     explicit result_object(pybind11::object obj) : _obj(obj) { }
@@ -73,7 +73,7 @@ class result_object {
 };
 
 // A pybind11 function which returns an object convertible to a C++ type.
-struct override_function {
+struct __attribute__ ((visibility ("default"))) override_function {
     override_function(function func) : _func(func) { }
     template<class... ARGS> result_object operator() (ARGS& ... args) { return result_object(_func(args...)); }
   private:

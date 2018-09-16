@@ -320,6 +320,9 @@ TestFloat<PR>::test_limits()
     Float eps=Float::eps(precision);
     Float max=Float::max(precision);
     Float inf_=Float::inf();
+    Float pinf=Float::inf(Sign::POSITIVE);
+    Float ninf=Float::inf(Sign::NEGATIVE);
+    Float zinf=Float::inf(Sign::ZERO);
     Float nan=Float::nan();
 
     ARIADNE_TEST_PRINT(eps);
@@ -331,6 +334,10 @@ TestFloat<PR>::test_limits()
 
     ARIADNE_TEST_ASSERT(add(down,inf_,min)==inf_);
     ARIADNE_TEST_ASSERT(add(up,max,min)==inf_);
+
+    ARIADNE_TEST_ASSERT(is_nan(zinf));
+    ARIADNE_TEST_EQUAL(pinf,inf_);
+    ARIADNE_TEST_EQUAL(ninf,-inf_);
 
     ARIADNE_TEST_ASSERT(is_nan(nan));
     ARIADNE_TEST_ASSERT(not(nan==nan));

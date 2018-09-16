@@ -244,6 +244,16 @@ FloatMP FloatMP::inf() {
     return x;
 }
 
+FloatMP FloatMP::inf(Sign sgn) {
+    FloatMP x;
+    switch (sgn) {
+    case Sign::POSITIVE: mpfr_set_inf(x._mpfr,+1); break;
+    case Sign::NEGATIVE: mpfr_set_inf(x._mpfr,-1); break;
+    default: mpfr_set_nan(x._mpfr);
+    }
+    return x;
+}
+
 FloatMP FloatMP::eps(MultiplePrecision pr) {
     FloatMP x(pr);
     mpfr_set_ui_2exp(x._mpfr,1u,1-mpfr_exp_t(pr.bits()),to_nearest);

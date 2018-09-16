@@ -100,6 +100,7 @@ class FloatMP {
   public:
     static FloatMP nan();
     static FloatMP inf();
+    static FloatMP inf(Sign sgn);
     static FloatMP max(PrecisionType);
     static FloatMP eps(PrecisionType);
     static FloatMP min(PrecisionType);

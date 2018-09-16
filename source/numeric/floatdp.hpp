@@ -139,6 +139,7 @@ class FloatDP {
   public:
     static FloatDP nan();
     static FloatDP inf();
+    static FloatDP inf(Sign sgn);
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);

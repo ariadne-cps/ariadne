@@ -356,10 +356,6 @@ Bool is_inf(Integer const& z) {
     return false;
 }
 
-Bool is_infinite(Integer const& z) {
-    return false;
-}
-
 Bool is_finite(Integer const& z) {
     return true;
 }

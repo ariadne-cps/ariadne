@@ -141,17 +141,6 @@ template<class X> class ExtendedOperations {
     }
 };
 
-/*
-// These functions are out-of-line since they are the only ones with direct access to the representation.
-template<class X> inline Extended<X>::Extended(X const& x)
-    : _is_finite(true), _x(x) { }
-template<class X> inline Extended<X> Extended<X>::inf(Sign s) {
-    Extended<X> x(s==Sign::ZERO ? 0 : s==Sign::POSITIVE ? +1 : -1);
-    x._is_finite=false; return x; }
-template<class X> inline Sign Extended<X>::_sgn() const { return sgn(_base(*this)); }
-template<class X> inline Bool Extended<X>::_is_infinite() const { return !_is_finite; }
-*/
-
 } // namespace Ariadne
 
 #endif

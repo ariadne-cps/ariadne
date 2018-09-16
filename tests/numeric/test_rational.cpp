@@ -137,9 +137,8 @@ void TestRational::test_infinity() {
 
     ARIADNE_TEST_ASSERT(is_nan(Rational::nan()));
     ARIADNE_TEST_ASSERT(is_inf(Rational::inf()));
-    ARIADNE_TEST_ASSERT(is_infinite(Rational::inf()));
-    ARIADNE_TEST_ASSERT(is_infinite(Rational::inf(Sign(+1))));
-    ARIADNE_TEST_ASSERT(is_infinite(Rational::inf(Sign(-1))));
+    ARIADNE_TEST_ASSERT(is_inf(Rational::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_inf(Rational::inf(Sign(-1))));
     ARIADNE_TEST_ASSERT(is_finite(Rational(0)));
     ARIADNE_TEST_ASSERT(is_zero(Rational(0)));
     ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1)),Rational::inf());

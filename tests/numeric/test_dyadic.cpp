@@ -142,9 +142,8 @@ void TestDyadic::test_infinity() {
 
     ARIADNE_TEST_ASSERT(is_nan(Dyadic::nan()));
     ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf()));
-    ARIADNE_TEST_ASSERT(is_infinite(Dyadic::inf()));
-    ARIADNE_TEST_ASSERT(is_infinite(Dyadic::inf(Sign(+1))));
-    ARIADNE_TEST_ASSERT(is_infinite(Dyadic::inf(Sign(-1))));
+    ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf(Sign(-1))));
     ARIADNE_TEST_ASSERT(is_finite(Dyadic(0)));
     ARIADNE_TEST_ASSERT(is_zero(Dyadic(0)));
     ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1)),Dyadic::inf());

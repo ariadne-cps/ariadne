@@ -146,7 +146,6 @@ class Dyadic
     friend Bool is_nan(Dyadic const& w);
     //! \brief Tests whether the value is ±∞.
     friend Bool is_inf(Dyadic const& w);
-    friend Bool is_infinite(Dyadic const& w);
     //! \brief Tests whether the value is finite.
     friend Bool is_finite(Dyadic const& w);
     //! \brief Tests whether the value is zero.

@@ -275,10 +275,6 @@ Bool is_inf(FloatMP const& x) {
     return mpfr_inf_p(x._mpfr);
 }
 
-Bool is_infinite(FloatMP const& x) {
-    return mpfr_inf_p(x._mpfr);
-}
-
 Bool is_finite(FloatMP const& x) {
     return mpfr_number_p(x._mpfr);
 }

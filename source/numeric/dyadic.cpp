@@ -182,10 +182,6 @@ Bool is_inf(const Dyadic& x) {
     return ExtensionOperations<Dyadic>::is_inf(x);
 }
 
-Bool is_infinite(const Dyadic& x) {
-    return x._mpf[0]._mp_size==0 and std::abs(x._mpf[0]._mp_exp)==1;
-}
-
 Bool is_finite(const Dyadic& x) {
     return ExtensionOperations<Dyadic>::is_finite(x);
 }

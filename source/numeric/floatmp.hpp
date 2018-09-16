@@ -144,7 +144,6 @@ class FloatMP {
   public:
     friend Bool is_nan(FloatMP const& x);
     friend Bool is_inf(FloatMP const& x);
-    friend Bool is_infinite(FloatMP const& x);
     friend Bool is_finite(FloatMP const& x);
     friend Bool is_zero(FloatMP const& x);
 

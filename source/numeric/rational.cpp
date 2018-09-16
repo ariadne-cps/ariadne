@@ -360,10 +360,6 @@ Bool is_inf(Rational const& q) {
     return is_zero(q.get_den()) and not is_zero(q.get_num());
 }
 
-Bool is_infinite(Rational const& q) {
-    return is_zero(q.get_den()) and not is_zero(q.get_num());
-}
-
 Bool is_finite(Rational const& q) {
     return not is_zero(q.get_den());
 }

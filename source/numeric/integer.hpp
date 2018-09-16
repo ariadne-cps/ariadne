@@ -140,7 +140,6 @@ class Integer
 
     friend Bool is_nan(Integer const& z);
     friend Bool is_inf(Integer const& z);
-    friend Bool is_infinite(Integer const& z);
     friend Bool is_finite(Integer const& z);
     friend Bool is_zero(Integer const& z);
 

@@ -106,7 +106,6 @@ class Rational
 
     friend Bool is_nan(Rational const& q);
     friend Bool is_inf(Rational const& q);
-    friend Bool is_infinite(Rational const& q);
     friend Bool is_finite(Rational const& q);
     friend Bool is_zero(Rational const& q);
 

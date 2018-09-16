@@ -250,20 +250,20 @@ Rational operator/(Integer const& z1, Integer const& z2) {
 }
 
 
-Rational& operator+=(Rational& q1, Rational const& q2) {
-    ExtendedOperations<Rational>::add(q1,q1,q2); return q1;
+Rational operator+(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::add(r,q1,q2); return r;
 }
 
-Rational& operator-=(Rational& q1, Rational const& q2) {
-    ExtendedOperations<Rational>::sub(q1,q1,q2); return q1;
+Rational operator-(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::sub(r,q1,q2); return r;
 }
 
-Rational& operator*=(Rational& q1, Rational const& q2) {
-    ExtendedOperations<Rational>::mul(q1,q1,q2); return q1;
+Rational operator*(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::mul(r,q1,q2); return r;
 }
 
-Rational& operator/=(Rational& q1, Rational const& q2) {
-    ExtendedOperations<Rational>::div(q1,q1,q2); return q1;
+Rational operator/(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::div(r,q1,q2); return r;
 }
 
 

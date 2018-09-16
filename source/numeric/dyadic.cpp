@@ -235,16 +235,16 @@ OutputStream& operator<<(OutputStream& os, TwoExp w) {
     return os << "2^" <<  w.exponent();
 }
 
-Dyadic& operator+=(Dyadic& x1, Dyadic const& x2) {
-    ExtendedOperations<Dyadic>::add(x1,x1,x2); return x1;
+Dyadic operator+(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::add(r,x1,x2); return r;
 }
 
-Dyadic& operator-=(Dyadic& x1, Dyadic const& x2) {
-    ExtendedOperations<Dyadic>::sub(x1,x1,x2); return x1;
+Dyadic operator-(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::sub(r,x1,x2); return r;
 }
 
-Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
-    ExtendedOperations<Dyadic>::mul(x1,x1,x2); return x1;
+Dyadic operator*(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::mul(r,x1,x2); return r;
 }
 
 Integer round(Dyadic const& x) {

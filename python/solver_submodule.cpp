@@ -44,60 +44,60 @@ typedef Vector<ValidatedNumericType> ValidatedVectorType;
 typedef Vector<ApproximateNumericType> ApproximateVectorType;
 
 class SolverWrapper
-  : public SolverInterface, public pybind11::wrapper< SolverInterface >
+  : public pybind11::wrapper< SolverInterface >
 {
   public:
-    SolverInterface* clone() const { return this->get_override("clone"); }
-    Void set_maximum_error(RawFloatDP) { this->get_override("set_maximum_error"); }
-    FloatDPValue maximum_error() const { return this->get_override("maximum_error"); }
-    Void set_maximum_number_of_steps(Nat) { this->get_override("set_maximum_number_of_steps"); }
-    Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps"); }
+    SolverInterface* clone() const { return this->get_override("clone")(); }
+    Void set_maximum_error(RawFloatDP me) { this->get_override("set_maximum_error")(me); }
+    FloatDPValue maximum_error() const { return this->get_override("maximum_error")(); }
+    Void set_maximum_number_of_steps(Nat ns) { this->get_override("set_maximum_number_of_steps")(ns); }
+    Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
     ValidatedVectorType zero(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
-        return this->get_override("zero"); }
+        return this->get_override("zero")(f,bx); }
     ValidatedVectorType fixed_point(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
-        return this->get_override("fixed_point"); }
+        return this->get_override("fixed_point")(f,bx); }
     ValidatedVectorType solve(const ValidatedVectorFunction& f, const ValidatedVectorType& pt) const {
-        return this->get_override("solve"); }
+        return this->get_override("solve")(f,pt); }
     ValidatedVectorType solve(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
-        return this->get_override("solve"); }
+        return this->get_override("solve")(f,bx); }
     ValidatedVectorFunctionModelDP implicit(const ValidatedVectorFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
-        return this->get_override("implicit"); }
+        return this->get_override("implicit")(f,pd,bx); }
     ValidatedScalarFunctionModelDP implicit(const ValidatedScalarFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
-        return this->get_override("implicit"); }
+        return this->get_override("implicit")(f,pd,ivl); }
     ValidatedVectorFunctionModelDP continuation(const ValidatedVectorFunction& f, const ApproximateVectorType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
-        return this->get_override("continuation"); }
+        return this->get_override("continuation")(f,a,X,A); }
     Set< ValidatedVectorType > solve_all(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
-        return this->get_override("solve_all"); }
-    Void write(OutputStream&) const { this->get_override("write"); }
+        return this->get_override("solve_all")(f,bx); }
+    Void write(OutputStream& os) const { this->get_override("write")(os); }
 };
 
 
 class IntegratorWrapper
-  : public IntegratorInterface, public pybind11::wrapper<IntegratorInterface>
+  : public pybind11::wrapper<IntegratorInterface>
 {
   public:
     IntegratorInterface* clone() const {
-        return this->get_override("clone"); }
-    Void set_temporal_order(uint) {
-        this->get_override("set_temporal_order"); }
-    Void set_maximum_error(double) {
-        this->get_override("set_maximum_error"); }
+        return this->get_override("clone")(); }
+    Void set_temporal_order(uint to) {
+        this->get_override("set_temporal_order")(to); }
+    Void set_maximum_error(double me) {
+        this->get_override("set_maximum_error")(me); }
     double maximum_error() const {
-        return this->get_override("maximum_error"); }
-    Pair<FloatDPValue,UpperBoxType> flow_bounds(const ValidatedVectorFunction&,const ExactBoxType&,const RawFloatDP&) const {
-        return this->get_override("flow_bounds"); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction&,const ExactBoxType&,RawFloatDP&) const {
-        return this->get_override("flow_step"); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDPValue&,const UpperBoxType&) const {
-        return this->get_override("flow_step"); }
-    ValidatedVectorFunctionModelDP flow_to(const ValidatedVectorFunction& vector_field,const ExactBoxType&,const Real&) const {
-        return this->get_override("flow_to"); }
-    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&,const Real&) const {
-        return this->get_override("flow"); }
-    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction&,const ExactBoxType&,const Real&) const {
-        return this->get_override("flow"); }
-    Void write(OutputStream&) const {
-        this->get_override("write"); }
+        return this->get_override("maximum_error")(); }
+    Pair<FloatDPValue,UpperBoxType> flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& D, const RawFloatDP& h) const {
+        return this->get_override("flow_bounds")(vf,D,h); }
+    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, RawFloatDP& h) const {
+        return this->get_override("flow_step")(vf,D,h); }
+    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, const FloatDPValue& h, const UpperBoxType& B) const {
+        return this->get_override("flow_step")(vf,D,h,B); }
+    ValidatedVectorFunctionModelDP flow_to(const ValidatedVectorFunction& vf ,const ExactBoxType& D, const Real& tf) const {
+        return this->get_override("flow_to")(vf,D,tf); }
+    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
+        return this->get_override("flow")(vf,D,t0,tf); }
+    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction& vf, const ExactBoxType& D, const Real& tf) const {
+        return this->get_override("flow")(vf,D,tf); }
+    Void write(OutputStream& os) const {
+        this->get_override("write")(os); }
 };
 
 } // namespace Ariadne

@@ -51,85 +51,85 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInter
 
 
 class DrawableWrapper
-  : public virtual DrawableInterface, public pybind11::wrapper< DrawableInterface >
+  : public pybind11::wrapper< DrawableInterface >
 {
   public:
-    virtual DrawableInterface* clone() const { return this->get_override("clone"); }
-    virtual Void draw(CanvasInterface& c, const Projection2d& p) const { this->get_override("draw"); }
-    virtual DimensionType dimension() const { return this->get_override("dimension"); }
-    virtual OutputStream& write(OutputStream& os) const { return this->get_override("write"); }
+    virtual DrawableInterface* clone() const { return this->get_override("clone")(); }
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const { this->get_override("draw")(c,p); }
+    virtual DimensionType dimension() const { return this->get_override("dimension")(); }
+    virtual OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 class OpenSetWrapper
-  : public virtual OpenSetInterface, public pybind11::wrapper< OpenSetInterface >
+  : public pybind11::wrapper<OpenSetInterface>
 {
   public:
-    OpenSetInterface* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers"); }
-    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    OpenSetInterface* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 class ClosedSetWrapper
-  : public virtual ClosedSetInterface, public pybind11::wrapper< ClosedSetInterface >
+  : public pybind11::wrapper<ClosedSetInterface>
 {
   public:
-    ClosedSetInterface* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    ClosedSetInterface* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 
 class OvertSetWrapper
-  : public virtual OvertSetInterface, public pybind11::wrapper< OvertSetInterface >
+  : public pybind11::wrapper<OvertSetInterface>
 {
   public:
-    OvertSetInterface* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    OvertSetInterface* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 
 class CompactSetWrapper
-  : public virtual CompactSetInterface, public pybind11::wrapper< CompactSetInterface >
+  : public pybind11::wrapper<CompactSetInterface>
 {
   public:
-    CompactSetInterface* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated"); }
-    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside"); }
-    LowerKleenean is_bounded() const { return this->get_override("is_bounded"); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    CompactSetInterface* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(); }
+    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
+    LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
+    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(); }
 };
 
 class RegularSetWrapper
-  : public virtual LocatedSetInterface, public pybind11::wrapper< RegularSetWrapper >
+  : public pybind11::wrapper<RegularSetInterface>
 {
   public:
-    RegularSetWrapper* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps"); }
-    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers"); }
-    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    RegularSetWrapper* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
+    LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 class LocatedSetWrapper
-  : public virtual LocatedSetInterface, public pybind11::wrapper< LocatedSetInterface >
+  : public pybind11::wrapper<LocatedSetInterface>
 {
   public:
-    LocatedSetInterface* clone() const { return this->get_override("clone"); }
-    SizeType dimension() const { return this->get_override("dimension"); }
-    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps"); }
-    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated"); }
-    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside"); }
-    LowerKleenean is_bounded() const { return this->get_override("is_bounded"); }
-    UpperBoxType bounding_box() const { return this->get_override("bounding_box"); }
-    OutputStream& write(OutputStream&) const { return this->get_override("write"); }
+    LocatedSetInterface* clone() const { return this->get_override("clone")(); }
+    SizeType dimension() const { return this->get_override("dimension")(); }
+    LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
+    LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
+    LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(r); }
+    LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
+    UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
+    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
 };
 
 

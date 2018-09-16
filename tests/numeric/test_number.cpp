@@ -54,7 +54,7 @@ TestNumbers::test_float_value_behaviour()
     try {
         y = y+y;
         ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> within ExactNumber yield "<<y.class_name());
-    } catch (DispatchException e) {
+    } catch (const DispatchException& e) {
         ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> give error:\n    "<<e.what());
     }
 }

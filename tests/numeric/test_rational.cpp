@@ -215,7 +215,7 @@ void TestRational::test_infinity() {
     ARIADNE_TEST_EQUALS(max(Rational::inf(Sign(-1)),Rational(-2)),Rational(-2));
     ARIADNE_TEST_EQUALS(max(Rational(-2),Rational::inf(Sign(+1))),Rational::inf(Sign(+1)));
 
-};
+}
 
 void TestRational::test_decimal() {
     ARIADNE_TEST_CONSTRUCT(Decimal,d1,(23,1u));

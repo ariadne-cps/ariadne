@@ -319,7 +319,7 @@ TestFloat<PR>::test_limits()
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
     Float max=Float::max(precision);
-    Float inf_=Float::inf(precision);
+    Float inf_=Float::inf();
     Float nan=Float::nan(precision);
 
     ARIADNE_TEST_PRINT(eps);

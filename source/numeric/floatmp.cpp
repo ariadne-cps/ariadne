@@ -238,8 +238,8 @@ FloatMP FloatMP::nan(MultiplePrecision pr) {
     return x;
 }
 
-FloatMP FloatMP::inf(MultiplePrecision pr) {
-    FloatMP x(pr);
+FloatMP FloatMP::inf() {
+    FloatMP x;
     mpfr_set_inf(x._mpfr,+1);
     return x;
 }

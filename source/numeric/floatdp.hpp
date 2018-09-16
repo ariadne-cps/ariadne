@@ -138,7 +138,7 @@ class FloatDP {
     Void set_precision(DoublePrecision);
   public:
     static FloatDP nan(DoublePrecision pr);
-    static FloatDP inf(DoublePrecision pr);
+    static FloatDP inf();
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);

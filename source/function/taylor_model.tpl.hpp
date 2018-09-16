@@ -419,7 +419,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
     ARIADNE_ASSERT_MSG(is_finite(c.lower().raw()) && is_finite(c.upper().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 
-    const F inf = F::inf(r.precision());
+    const F inf = F::inf();
     if(r.error().raw()==inf) {
         r.expansion().clear(); return;
     }
@@ -476,7 +476,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<
     ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
     typedef typename F::PrecisionType PR;
 
-    const F inf = F::inf(r.precision());
+    const F inf = F::inf();
     if(c.lower().raw()==-inf || c.upper().raw()==+inf) {
         r.clear();
         r.set_error(mag(FloatValue<PR>(inf)));

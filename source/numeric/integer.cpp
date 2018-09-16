@@ -347,6 +347,23 @@ Natural min(Natural const& z1,Natural const& z2) {
     return (z1<z2)?z1:z2;
 }
 
+
+Bool is_nan(Integer const& z) {
+    return false;
+}
+
+Bool is_inf(Integer const& z) {
+    return false;
+}
+
+Bool is_finite(Integer const& z) {
+    return true;
+}
+
+Bool is_zero(Integer const& z) {
+    return mpz_cmp_si(z._mpz,0)==0;
+}
+
 Sign sgn(Integer const& z) {
     return static_cast<Sign>(mpz_sgn(z._mpz));
 }

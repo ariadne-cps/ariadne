@@ -49,6 +49,7 @@ class TestRational
     void test_conversions();
     void test_arithmetic();
     void test_comparisons();
+    void test_infinity();
 
     void test_decimal();
 
@@ -56,66 +57,44 @@ class TestRational
 
 void TestRational::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_comparisons());
+    ARIADNE_TEST_CALL(test_infinity());
 
     ARIADNE_TEST_CALL(test_decimal());
 }
 
 void TestRational::test_concept() {
-    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Rational q;
+    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5; Dyadic w=z;
+    Rational q; Boolean b;
 
-    q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z);
+    q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z); q=Rational(z);
     q=m; q=lm; q=n; q=ln; q=z; q=q;
 
     q=+q; q=-q;
-
-    q=q/q; q=q+q; q=q-q; q=q*q;
+    q=q+q; q=q-q; q=q*q; q=q/q;
 
     q=q+n; q=q-n; q=q*n; q=q/n;
-    q=n-q; q=n*q; q=n+q; q=n/q;
+    q=n+q; q=n-q; q=n*q; q=n/q;
     q=q+z; q=q-z; q=q*z; q=q/z;
     q=z+q; q=z-q; q=z*q; q=z/q;
+    q=q+w; q=q-w; q=q*w; q=q/w;
+    q=w+q; q=w-q; q=w*q; q=w/q;
 
     q=max(q,q); q=min(q,q); q=abs(q);
     q=pos(q); q=neg(q); q=sqr(q); q=rec(q);
 
-    q=1.5_q; q=-1.3_q;
+    q=1.5_q; q=3/2_q; q=-1.3_q;
 
-    ARIADNE_TEST_ASSERT(q==q);
-    ARIADNE_TEST_ASSERT(not(q!=q));
-    ARIADNE_TEST_ASSERT(q<=q);
-    ARIADNE_TEST_ASSERT(q>=q);
-    ARIADNE_TEST_ASSERT(not(q<q));
-    ARIADNE_TEST_ASSERT(not(q>q));
-    ARIADNE_TEST_ASSERT(not(q==n));
-    ARIADNE_TEST_ASSERT(q!=n);
-    ARIADNE_TEST_ASSERT(not(q<=n));
-    ARIADNE_TEST_ASSERT(q>=n);
-    ARIADNE_TEST_ASSERT(not(q<n));
-    ARIADNE_TEST_ASSERT(q>n);
-    ARIADNE_TEST_ASSERT(not(n==q));
-    ARIADNE_TEST_ASSERT(n!=q);
-    ARIADNE_TEST_ASSERT(n<=q);
-    ARIADNE_TEST_ASSERT(not(n>=q));
-    ARIADNE_TEST_ASSERT(n<q);
-    ARIADNE_TEST_ASSERT(not(n>q));
-    ARIADNE_TEST_ASSERT(not(q==z));
-    ARIADNE_TEST_ASSERT(q!=z);
-    ARIADNE_TEST_ASSERT(not(q<=z));
-    ARIADNE_TEST_ASSERT(q>=z);
-    ARIADNE_TEST_ASSERT(not(q<z));
-    ARIADNE_TEST_ASSERT(q>z);
-    ARIADNE_TEST_ASSERT(not(z==q));
-    ARIADNE_TEST_ASSERT(z!=q);
-    ARIADNE_TEST_ASSERT(z<=q);
-    ARIADNE_TEST_ASSERT(not(z>=q));
-    ARIADNE_TEST_ASSERT(z<q);
-    ARIADNE_TEST_ASSERT(not(z>q));
+    b=(q==q); b=(q!=q); b=(q<=q); b=(q>=q); b=(q<q); b=(q>q);
+    b=(q==n); b=(q!=n); b=(q<=n); b=(q>=n); b=(q<n); b=(q>n);
+    b=(n==q); b=(n!=q); b=(n<=q); b=(n>=q); b=(n<q); b=(n>q);
+    b=(q==z); b=(q!=z); b=(q<=z); b=(q>=z); b=(q<z); b=(q>z);
+    b=(z==q); b=(z!=q); b=(z<=q); b=(z>=q); b=(z<q); b=(z>q);
+    b=(q==w); b=(q!=w); b=(q<=w); b=(q>=w); b=(q<w); b=(q>w);
+    b=(w==q); b=(w!=q); b=(w<=q); b=(w>=q); b=(w<q); b=(w>q);
 }
 
 void TestRational::test_literal() {
@@ -153,6 +132,90 @@ void TestRational::test_comparisons() {
     ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Rational(18,35));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(18,35),+inf);
 }
+
+void TestRational::test_infinity() {
+    Rational qinf=Rational::inf();
+    Rational qnan=Rational::nan();
+
+    ARIADNE_TEST_ASSERT(is_nan(Rational::nan()));
+    ARIADNE_TEST_ASSERT(is_inf(Rational::inf()));
+    ARIADNE_TEST_ASSERT(is_inf(Rational::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_inf(Rational::inf(Sign(-1))));
+    ARIADNE_TEST_ASSERT(is_finite(Rational(0)));
+    ARIADNE_TEST_ASSERT(is_zero(Rational(0)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1)),Rational::inf());
+    ARIADNE_TEST_ASSERT(Rational::inf(Sign(+1))>Rational(0));
+    ARIADNE_TEST_ASSERT(Rational::inf(Sign(-1))<Rational(0));
+
+    ARIADNE_TEST_EQUALS(sgn(Rational::inf()), Sign::POSITIVE);
+    ARIADNE_TEST_EQUALS(sgn(Rational::nan()), Sign::ZERO);
+    ARIADNE_TEST_EQUALS(sgn(-Rational::inf()), Sign::NEGATIVE);
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,Rational(2,0),Rational(1,0));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,0),Rational(2,0));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,2),Rational(1,0));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(0,1),Rational(1,0));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(3,2),Rational(1,0));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,0),Rational(1,2));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,0),Rational(-3,2));
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,Rational::inf(),Rational::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,4),Rational::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(0),Rational::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(3,2),Rational::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Rational::inf(),Rational::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Rational::inf(),Rational(1,4));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Rational::inf(),Rational(-3,2));
+
+
+    ARIADNE_TEST_ASSERT(is_nan(-Rational::nan()));
+    ARIADNE_TEST_EQUAL(-Rational::inf(Sign::POSITIVE),Rational::inf(Sign::NEGATIVE));
+    ARIADNE_TEST_EQUAL(-Rational::inf(Sign::NEGATIVE),Rational::inf(Sign::POSITIVE));
+
+    ARIADNE_TEST_ASSERT(is_nan(Rational::inf()+(-Rational::inf())));
+    ARIADNE_TEST_EQUALS(Rational::inf()+Rational::inf(),Rational::inf());
+    ARIADNE_TEST_EQUALS(Rational::inf()+Rational(-2),Rational::inf());
+
+    ARIADNE_TEST_ASSERT(is_nan(Rational::inf()-Rational::inf()));
+    ARIADNE_TEST_EQUALS(Rational(2)-Rational::inf(),-Rational::inf())
+
+    ARIADNE_TEST_ASSERT(is_nan(Rational::inf(Sign(+1))*Rational(0)));
+    ARIADNE_TEST_ASSERT(is_nan(Rational::inf(Sign(-1))*Rational(0)));
+    ARIADNE_TEST_ASSERT(is_nan(Rational(0)*Rational::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_nan(Rational(0)*Rational::inf(Sign(-1))));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))*Rational::inf(Sign(+1)),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))*Rational::inf(Sign(-1)),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))*Rational::inf(Sign(+1)),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))*Rational::inf(Sign(-1)),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational(+2)*Rational::inf(Sign(+1)),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational(+2)*Rational::inf(Sign(-1)),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational(-2)*Rational::inf(Sign(+1)),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational(-2)*Rational::inf(Sign(-1)),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))*Rational(+2),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))*Rational(-2),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))*Rational(+2),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))*Rational(-2),Rational::inf(Sign(+1)));
+
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))/Rational(+2),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(+1))/Rational(-2),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))/Rational(+2),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Rational::inf(Sign(-1))/Rational(-2),Rational::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Rational(+2)/Rational::inf(Sign(+1)),Rational(0));
+    ARIADNE_TEST_EQUALS(Rational(-2)/Rational::inf(Sign(+1)),Rational(0));
+    ARIADNE_TEST_EQUALS(Rational(+2)/Rational::inf(Sign(-1)),Rational(0));
+    ARIADNE_TEST_EQUALS(Rational(-2)/Rational::inf(Sign(-1)),Rational(0));
+
+    ARIADNE_TEST_ASSERT(is_nan(abs(Rational::nan())));
+    ARIADNE_TEST_EQUALS(abs(Rational::inf()),Rational::inf());
+    ARIADNE_TEST_EQUALS(abs(-Rational::inf()),Rational::inf());
+
+    ARIADNE_TEST_ASSERT(is_nan(max(Rational::nan(),Rational(0))));
+    ARIADNE_TEST_ASSERT(is_nan(max(Rational::nan(),Rational::inf())));
+    ARIADNE_TEST_EQUALS(max(Rational::inf(Sign(-1)),Rational::inf(Sign(-1))),Rational::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(max(Rational::inf(Sign(-1)),Rational(-2)),Rational(-2));
+    ARIADNE_TEST_EQUALS(max(Rational(-2),Rational::inf(Sign(+1))),Rational::inf(Sign(+1)));
+
+};
 
 void TestRational::test_decimal() {
     ARIADNE_TEST_CONSTRUCT(Decimal,d1,(23,1u));

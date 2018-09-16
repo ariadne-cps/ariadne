@@ -54,7 +54,6 @@ class TestDyadic
 
 void TestDyadic::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
@@ -64,7 +63,7 @@ void TestDyadic::test()
 
 void TestDyadic::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Dyadic w;
+    Dyadic w; Boolean b;
 
     w=Dyadic(); w=Dyadic(m); w=Dyadic(lm); w=Dyadic(n); w=Dyadic(ln); w=Dyadic(z); w=Dyadic(z);
     w=m; w=lm; w=n; w=ln; w=z; w=w;
@@ -80,38 +79,13 @@ void TestDyadic::test_concept() {
     w=max(w,w); w=min(w,w); w=abs(w);
     w=pos(w); w=neg(w); w=sqr(w); w=hlf(w);
 
-    w=1.5_q2; w=-1.375_q2;
+    w=1.5_q2; w=1.5_dy; w=1.5_dyadic;
 
-    ARIADNE_TEST_ASSERT(w==w);
-    ARIADNE_TEST_ASSERT(not(w!=w));
-    ARIADNE_TEST_ASSERT(w<=w);
-    ARIADNE_TEST_ASSERT(w>=w);
-    ARIADNE_TEST_ASSERT(not(w<w));
-    ARIADNE_TEST_ASSERT(not(w>w));
-    ARIADNE_TEST_ASSERT(not(w==n));
-    ARIADNE_TEST_ASSERT(w!=n);
-    ARIADNE_TEST_ASSERT(not(w<=n));
-    ARIADNE_TEST_ASSERT(w>=n);
-    ARIADNE_TEST_ASSERT(not(w<n));
-    ARIADNE_TEST_ASSERT(w>n);
-    ARIADNE_TEST_ASSERT(not(n==w));
-    ARIADNE_TEST_ASSERT(n!=w);
-    ARIADNE_TEST_ASSERT(n<=w);
-    ARIADNE_TEST_ASSERT(not(n>=w));
-    ARIADNE_TEST_ASSERT(n<w);
-    ARIADNE_TEST_ASSERT(not(n>w));
-    ARIADNE_TEST_ASSERT(not(w==z));
-    ARIADNE_TEST_ASSERT(w!=z);
-    ARIADNE_TEST_ASSERT(not(w<=z));
-    ARIADNE_TEST_ASSERT(w>=z);
-    ARIADNE_TEST_ASSERT(not(w<z));
-    ARIADNE_TEST_ASSERT(w>z);
-    ARIADNE_TEST_ASSERT(not(z==w));
-    ARIADNE_TEST_ASSERT(z!=w);
-    ARIADNE_TEST_ASSERT(z<=w);
-    ARIADNE_TEST_ASSERT(not(z>=w));
-    ARIADNE_TEST_ASSERT(z<w);
-    ARIADNE_TEST_ASSERT(not(z>w));
+    b=(w==w); b=(w!=w); b=(w<=w); b=(w>=w); b=(w<w); b=(w>w);
+    b=(w==n); b=(w!=n); b=(w<=n); b=(w>=n); b=(w<n); b=(w>n);
+    b=(n==w); b=(n!=w); b=(n<=w); b=(n>=w); b=(n<w); b=(n>w);
+    b=(w==z); b=(w!=z); b=(w<=z); b=(w>=z); b=(w<z); b=(w>z);
+    b=(z==w); b=(z!=w); b=(z<=w); b=(z>=w); b=(z<w); b=(z>w);
 }
 
 void TestDyadic::test_literal() {
@@ -151,18 +125,92 @@ void TestDyadic::test_comparisons() {
 }
 
 void TestDyadic::test_infinity() {
-    double dblmax=std::numeric_limits<double>::max();
-    double dblinf=std::numeric_limits<double>::infinity();
-    ARIADNE_TEST_CONSTRUCT(Dyadic,inf,(dblinf));
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(dblmax),inf);
 
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(4,3u),inf);
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(0),inf);
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Dyadic(0));
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,Dyadic(-4,3u));
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,-inf,inf);
-    ARIADNE_TEST_BINARY_PREDICATE(operator<=,inf,inf);
-    ARIADNE_TEST_BINARY_PREDICATE(operator==,inf,inf);
+    mpf_t mpf; static_assert(std::is_signed<decltype(mpf[0]._mp_exp)>::value,"");
+
+    mp_exp_t mp_exp_t_min = std::numeric_limits<mp_exp_t>::min();
+    assert(-mp_exp_t_min == mp_exp_t_min);
+    Dyadic z(0);
+    assert(z._mpf[0]._mp_size==0u && z._mpf[0]._mp_exp==0);
+
+    ARIADNE_TEST_PRINT(Dyadic::nan());
+    ARIADNE_TEST_PRINT(Dyadic::inf());
+    ARIADNE_TEST_PRINT(Dyadic::inf(Sign(0)));
+    ARIADNE_TEST_PRINT(Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_PRINT(Dyadic::inf(Sign(-1)))
+
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic::nan()));
+    ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf()));
+    ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_inf(Dyadic::inf(Sign(-1))));
+    ARIADNE_TEST_ASSERT(is_finite(Dyadic(0)));
+    ARIADNE_TEST_ASSERT(is_zero(Dyadic(0)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1)),Dyadic::inf());
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign(+1))>Dyadic(0));
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign(-1))<Dyadic(0));
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator==,Dyadic::inf(),Dyadic::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(-1,2u),Dyadic::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(0),Dyadic::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(3,1u),Dyadic::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Dyadic::inf(),Dyadic::inf());
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Dyadic::inf(),Dyadic(1,2u));
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,-Dyadic::inf(),Dyadic(-3,1u));
+
+    ExactDouble double_max(std::numeric_limits<double>::max());
+    ExactDouble double_inf(std::numeric_limits<double>::infinity());
+    ExactDouble double_nan(double_inf.get_d()*0.0);
+
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(double_max),Dyadic(double_inf));
+
+    ARIADNE_TEST_ASSERT(Dyadic(+double_inf)==Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_ASSERT(Dyadic(-double_inf)==Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic(double_nan)));
+
+    ARIADNE_TEST_ASSERT(is_nan(-Dyadic::nan()));
+    ARIADNE_TEST_EQUAL(-Dyadic::inf(Sign::POSITIVE),Dyadic::inf(Sign::NEGATIVE));
+    ARIADNE_TEST_EQUAL(-Dyadic::inf(Sign::NEGATIVE),Dyadic::inf(Sign::POSITIVE));
+    ARIADNE_TEST_EQUALS(sgn(Dyadic::inf()), Sign::POSITIVE);
+    ARIADNE_TEST_EQUALS(sgn(-Dyadic::inf()), Sign::NEGATIVE);
+
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic::inf()+(-Dyadic::inf())));
+    ARIADNE_TEST_EQUALS(Dyadic::inf()+Dyadic::inf(),Dyadic::inf());
+    ARIADNE_TEST_EQUALS(Dyadic::inf()+Dyadic(-2),Dyadic::inf());
+
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic::inf()-Dyadic::inf()));
+    ARIADNE_TEST_EQUALS(Dyadic(2)-Dyadic::inf(),-Dyadic::inf())
+
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic::inf(Sign(+1))*Dyadic(0)));
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic::inf(Sign(-1))*Dyadic(0)));
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic(0)*Dyadic::inf(Sign(+1))));
+    ARIADNE_TEST_ASSERT(is_nan(Dyadic(0)*Dyadic::inf(Sign(-1))));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1))*Dyadic::inf(Sign(+1)),Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1))*Dyadic::inf(Sign(-1)),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(-1))*Dyadic::inf(Sign(+1)),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(-1))*Dyadic::inf(Sign(-1)),Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Dyadic(+2)*Dyadic::inf(Sign(+1)),Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Dyadic(+2)*Dyadic::inf(Sign(-1)),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic(-2)*Dyadic::inf(Sign(+1)),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic(-2)*Dyadic::inf(Sign(-1)),Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1))*Dyadic(+2),Dyadic::inf(Sign(+1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(+1))*Dyadic(-2),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(-1))*Dyadic(+2),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(Dyadic::inf(Sign(-1))*Dyadic(-2),Dyadic::inf(Sign(+1)));
+
+    ARIADNE_TEST_ASSERT(is_nan(hlf(Dyadic::nan())));
+    ARIADNE_TEST_EQUALS(hlf(Dyadic::inf()),Dyadic::inf());
+    ARIADNE_TEST_EQUALS(hlf(-Dyadic::inf()),-Dyadic::inf());
+
+    ARIADNE_TEST_ASSERT(is_nan(abs(Dyadic::nan())));
+    ARIADNE_TEST_EQUALS(abs(Dyadic::inf()),Dyadic::inf());
+    ARIADNE_TEST_EQUALS(abs(-Dyadic::inf()),Dyadic::inf());
+
+    ARIADNE_TEST_ASSERT(is_nan(max(Dyadic::nan(),Dyadic(0))));
+    ARIADNE_TEST_ASSERT(is_nan(max(Dyadic::nan(),Dyadic::inf())));
+    ARIADNE_TEST_EQUALS(max(Dyadic::inf(Sign(-1)),Dyadic::inf(Sign(-1))),Dyadic::inf(Sign(-1)));
+    ARIADNE_TEST_EQUALS(max(Dyadic::inf(Sign(-1)),Dyadic(-2)),Dyadic(-2));
+    ARIADNE_TEST_EQUALS(max(Dyadic(-2),Dyadic::inf(Sign(+1))),Dyadic::inf(Sign(+1)));
+
 }
 
 

@@ -279,6 +279,10 @@ Bool is_finite(FloatMP const& x) {
     return mpfr_number_p(x._mpfr);
 }
 
+Bool is_zero(FloatMP const& x) {
+    return mpfr_zero_p(x._mpfr);
+}
+
 FloatMP next(RoundUpward rnd, FloatMP const& x) { return add(rnd,x,FloatMP::min(x.precision())); }
 FloatMP next(RoundDownward rnd, FloatMP const& x) { return sub(rnd,x,FloatMP::min(x.precision())); }
 

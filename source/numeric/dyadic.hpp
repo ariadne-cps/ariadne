@@ -69,7 +69,7 @@ class Dyadic
     explicit Dyadic (mpf_t mpf);
     //! \brief Construct the Dyadic number \a p/2<sup>q</sup>.
     Dyadic (Integer const& p, Nat q);
-    Dyadic (Integer const& p, Int q) = delete;
+    Dyadic (Integer const& p, Int q) = delete; // Can only construct a dyadic p/2^q for a positive (unsigned) value q, such at uint or Nat.
     Dyadic (Integer const& p, Natural q);
     //! \brief Destructor.
     ~Dyadic();
@@ -97,6 +97,13 @@ class Dyadic
     explicit Dyadic(double x);
     //! \brief Convert to a generic number.
     operator Number<ExactTag> () const;
+    //! \brief A representation of ±∞ or NaN.
+    static Dyadic inf(Sign sgn);
+    //! \brief A representation of +∞.
+    static Dyadic inf();
+    //! \brief A representation of NaN (not-a-number).
+    static Dyadic nan();
+
     //! \brief The smallest integer \a p such that \a x=p/2<sup>q</sup>
     Integer mantissa() const;
     //! \brief The (negative) integer \a -q such that \a x=p/2<sup>q</sup>
@@ -106,7 +113,7 @@ class Dyadic
     mpf_t const& get_mpf() const;
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend Dyadic operator"" _bin(long double x);
-    //! \brief Halve a number.
+    //! \brief Halve the number.
     friend Dyadic hlf(Dyadic const&);
     //| \brief Power of a number (m always positive).
     friend Dyadic pow(Dyadic const& x, Int m);
@@ -124,10 +131,25 @@ class Dyadic
     friend Real tan(Real const&);
     friend Real atan(Real const&);
 
+    //! \brief The sign of the number.
     friend Sign sgn(Dyadic const&);
+    //! \brief Round down to the nearest lower integer.
+    friend Integer floor(Dyadic const&);
+    //! \brief Round to the nearest integer. Rounding of halves is implementation-dependent.
     friend Integer round(Dyadic const&);
-    //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
+    //! \brief Round up to the nearest higher integer.
+    friend Integer ceil(Dyadic const&);
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
+
+    //! \brief Tests whether the value is NaN (not-a-number).
+    friend Bool is_nan(Dyadic const& w);
+    //! \brief Tests whether the value is ±∞.
+    friend Bool is_inf(Dyadic const& w);
+    //! \brief Tests whether the value is finite.
+    friend Bool is_finite(Dyadic const& w);
+    //! \brief Tests whether the value is zero.
+    friend Bool is_zero(Dyadic const& w);
 };
 
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }

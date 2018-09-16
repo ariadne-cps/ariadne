@@ -233,8 +233,23 @@ template<class T> class logical_class_ : public pybind11::class_<T> {
     }
 };
 
+template<class A> auto _is_nan_(A const& a) -> Bool { return is_nan(a); }
+template<class A> auto _is_inf_(A const& a) -> Bool { return is_inf(a); }
+template<class A> auto _is_finite_(A const& a) -> Bool { return is_finite(a); }
+template<class A> auto _is_zero_(A const& a) -> Bool { return is_zero(a); }
 
-} // namespace Ariadne 
+template<class X> Void define_infinitary(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    pyclass.def_static("nan", (X(*)()) &X::nan);
+    pyclass.def_static("inf", (X(*)()) &X::inf);
+    pyclass.def_static("inf", (X(*)(Sign)) &X::inf);
+
+    module.def("is_nan", &_is_nan_<X>);
+    module.def("is_inf", &_is_inf_<X>);
+    module.def("is_finite", &_is_finite_<X>);
+    module.def("is_zero", &_is_zero_<X>);
+}
+
+} // namespace Ariadne
 
 
 using namespace Ariadne;
@@ -334,6 +349,8 @@ void export_dyadic(pymodule& module)
     dyadic_class.def(init<Dyadic>());
     dyadic_class.def(init<FloatDPValue>());
     dyadic_class.def(init<FloatMPValue>());
+    
+    define_infinitary(module,dyadic_class);
 
     dyadic_class.define_self_arithmetic();
     dyadic_class.define_self_comparisons();
@@ -361,6 +378,8 @@ void export_rational(pymodule& module)
     rational_class.def(init<Dyadic>());
     rational_class.def(init<Decimal>());
     rational_class.def(init<Rational>());
+
+    define_infinitary(module,rational_class);
 
     rational_class.define_self_arithmetic();
     rational_class.define_self_comparisons();
@@ -570,7 +589,8 @@ template<class PR> void export_raw_float(pymodule& module)
     raw_float_class.def(init<Rational,RND,PR>());
     raw_float_class.def("__str__", &to_cppstring<RawFloat<PR>>);
     raw_float_class.def("__repr__", &to_cppstring<RawFloat<PR>>);
-
+    define_infinitary(module,raw_float_class);
+    
     module.def("nul", (F(*)(Fcr)) &_nul_);
     module.def("pos", (F(*)(Fcr)) &_pos_);
     module.def("neg", (F(*)(Fcr)) &_neg_);

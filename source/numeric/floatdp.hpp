@@ -171,6 +171,7 @@ class FloatDP {
     friend Bool is_nan(FloatDP x) { return std::isnan(x.dbl); }
     friend Bool is_inf(FloatDP x) { return std::isinf(x.dbl); }
     friend Bool is_finite(FloatDP x) { return std::isfinite(x.dbl); }
+    friend Bool is_zero(FloatDP x) { return x.dbl==0.0; }
 
     friend FloatDP next(RoundUpward rnd, FloatDP x) { return add(rnd,x,FloatDP::min(x.precision())); }
     friend FloatDP next(RoundDownward rnd, FloatDP x) { return sub(rnd,x,FloatDP::min(x.precision())); }

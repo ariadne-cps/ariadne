@@ -49,7 +49,6 @@ class TestInteger
 
 void TestInteger::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_comparisons());
     ARIADNE_TEST_CALL(test_literal());
@@ -57,7 +56,8 @@ void TestInteger::test()
 }
 
 void TestInteger::test_concept() {
-    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
+    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2;
+    Integer z; Boolean b;
 
     z=Integer(); z=Integer(m); z=Integer(lm); z=Integer(n); z=Integer(ln); z=Integer(z);
     z=m; z=lm; z=n; z=ln; z=z;
@@ -69,25 +69,11 @@ void TestInteger::test_concept() {
 
     z=1_z; z=-1_z;
 
-    ARIADNE_TEST_ASSERT(z==z);
-    ARIADNE_TEST_ASSERT(not(z!=z));
-    ARIADNE_TEST_ASSERT(z<=z);
-    ARIADNE_TEST_ASSERT(z>=z);
-    ARIADNE_TEST_ASSERT(not(z<z));
-    ARIADNE_TEST_ASSERT(not(z>z));
-    ARIADNE_TEST_ASSERT(not(z==n));
-    ARIADNE_TEST_ASSERT(z!=n);
-    ARIADNE_TEST_ASSERT(not(z<=n));
-    ARIADNE_TEST_ASSERT(z>=n);
-    ARIADNE_TEST_ASSERT(not(z<n));
-    ARIADNE_TEST_ASSERT(z>n);
-    ARIADNE_TEST_ASSERT(not(n==z));
-    ARIADNE_TEST_ASSERT(n!=z);
-    ARIADNE_TEST_ASSERT(n<=z);
-    ARIADNE_TEST_ASSERT(not(n>=z));
-    ARIADNE_TEST_ASSERT(n<z);
-    ARIADNE_TEST_ASSERT(not(n>z));
+    b=(z==z); b=(z!=z); b=(z<=z); b=(z>=z); b=(z<z); b=(z>z);
+    b=(z==n); b=(z!=n); b=(z<=n); b=(z>=n); b=(z<n); b=(z>n);
+    b=(n==z); b=(n!=z); b=(n<=z); b=(n>=z); b=(n<z); b=(n>z);
 }
+
 
 void TestInteger::test_literal() {
     ARIADNE_TEST_CONSTRUCT(Integer,z,(3_z));

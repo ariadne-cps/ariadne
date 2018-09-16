@@ -59,6 +59,9 @@ class NumberInterface;
 template<class P> class Number;
 template<class P> struct IsNumericType<Number<P>> : True { };
 
+struct DispatchException : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 /*
 struct DefineBuiltinFloatOperators {

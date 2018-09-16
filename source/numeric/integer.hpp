@@ -138,7 +138,13 @@ class Integer
     friend Integer rem(Integer const& z1, Integer const& z2);
     friend Integer operator%(Integer const& z1, Integer const& z2);
 
+    friend Bool is_nan(Integer const& z);
+    friend Bool is_inf(Integer const& z);
+    friend Bool is_finite(Integer const& z);
+    friend Bool is_zero(Integer const& z);
+
     friend Sign sgn(Integer const& z);
+    friend Comparison cmp(Integer const& z1, Integer const& z2);
 
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);

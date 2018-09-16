@@ -66,7 +66,7 @@ inline OutputStream& operator<<(OutputStream& os, Sign s) {
     return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
 }
 
-// FIXME: Should test for other potential infiniteis
+// FIXME: Should test for other potential infinities
 inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     Comparison res;
     FloatDPValue const* x1=extract<FloatDPValue>(&y1);
@@ -89,8 +89,8 @@ template<class I, class OP, class Y> struct OperableInterface {
 template<class X, class I, class OP, class Y> struct OperableMixin : virtual OperableInterface<I,OP,Y> {
     static X const& _cast(OperableMixin<X,I,OP,Y> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
-    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
+    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
+    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
 };
 template<class X, class I, class OP, class AW> struct Operable;
 template<class X, class I, class OP, class Y, class... YS> struct Operable<X,I,OP,Aware<Y,YS...>>
@@ -101,8 +101,8 @@ template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
     Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
     Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
-    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
-    ARIADNE_THROW(std::runtime_error,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();    
+    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
 
 
@@ -114,7 +114,7 @@ template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I co
 template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
     if(aware_other_ptr) { return aware_other_ptr->_apply_left(op,self); }
-    else { return make_symbolic(op,self_ptr,other_ptr); }
+    else { return make_symbolic(op,other_ptr,self_ptr); }
 }
 
 
@@ -196,13 +196,13 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
     X const& _cast(I const& other) { return dynamic_cast<Wrapper<X,I>const&>(other); }
     I* _heap_move(X&& x) { return new W(x); }
     virtual I* _add(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _sub(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _mul(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _div(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _sub(I const* other) const final { return _heap_move(sub(_cast(*this),_cast(*other))); }
+    virtual I* _mul(I const* other) const final { return _heap_move(mul(_cast(*this),_cast(*other))); }
+    virtual I* _div(I const* other) const final { return _heap_move(div(_cast(*this),_cast(*other))); }
     virtual I* _radd(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rsub(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rmul(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+    virtual I* _rsub(I const* other) const final { return _heap_move(sub(_cast(*other),_cast(*this))); }
+    virtual I* _rmul(I const* other) const final { return _heap_move(mul(_cast(*other),_cast(*this))); }
+    virtual I* _rdiv(I const* other) const final { return _heap_move(div(_cast(*other),_cast(*this))); }
 };
 
 template<class X> class NumberGetterMixin : public virtual NumberInterface {

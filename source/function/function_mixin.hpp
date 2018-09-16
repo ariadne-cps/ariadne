@@ -50,6 +50,10 @@ template<class F, class P, class D=BoxDomainType> class ScalarFunctionMixin;
 template<class F, class P, class D=BoxDomainType> class VectorFunctionMixin;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
+template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
+
+template<class P, class D> ScalarFunctionInterface<P,D>* heap_copy(ScalarFunction<P,D> const& f) { return f.raw_pointer()->_clone(); }
+    
 
 template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
@@ -148,7 +152,8 @@ template<class F, class P, class D> class VectorFunctionMixin
     : public FunctionMixin<F,P,D,BoxDomainType>
     , public virtual VectorOfFunctionInterface<P,D>
 {
-    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override = 0;
+    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override { 
+        auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 };
 
 

@@ -84,7 +84,9 @@ struct VectorFormulaFunction
 
     VectorFormulaFunction(SizeType as, const List< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
     VectorFormulaFunction(SizeType as, const Vector< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
-
+    
+    ScalarFormulaFunction<Y> operator[](SizeType i) const { return ScalarFormulaFunction(_argument_size,_formulae[i]); }
+    
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeType argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<Y>* _get(SizeType i) const { return new ScalarFormulaFunction<Y>(this->_argument_size,this->_formulae[i]); }
@@ -433,9 +435,13 @@ struct EmbeddedFunction
 
 
 template<class P, class D, class C, class E>
-struct ComposedFunction
-    : FunctionMixin<ComposedFunction<P,D,C,E>,P,D,C>
+struct ComposedFunction;
+
+template<class P, class D, class E>
+struct ComposedFunction<P,D,IntervalDomainType,E>
+    : FunctionMixin<ComposedFunction<P,D,IntervalDomainType,E>,P,D,IntervalDomainType>
 {
+    typedef IntervalDomainType C;
     typedef D DomainType;
     typedef C CodomainType;
     typedef ElementSizeType<D> ArgumentSizeType;
@@ -457,6 +463,35 @@ struct ComposedFunction
     Function<P,D,E> _g;
 };
 
+
+template<class P, class D, class E>
+struct ComposedFunction<P,D,BoxDomainType,E>
+    : VectorFunctionMixin<ComposedFunction<P,D,BoxDomainType,E>,P,D>
+{
+    typedef BoxDomainType C;
+    typedef D DomainType;
+    typedef C CodomainType;
+    typedef ElementSizeType<D> ArgumentSizeType;
+    typedef ElementSizeType<C> ResultSizeType;
+
+    ComposedFunction(const Function<P,E,C>& f, const Function<P,D,E>& g)
+        : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
+    virtual DomainType const domain() const { return _g.domain(); }
+    virtual CodomainType const codomain() const { return _f.codomain(); }
+    virtual ArgumentSizeType argument_size() const { return _g.argument_size(); }
+    virtual ResultSizeType result_size() const { return _f.result_size(); }
+    virtual FunctionInterface<P,D,C>* _derivative(ElementIndexType<D> j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
+
+    template<class X> inline Void _compute(ElementType<C,X>& r, const ElementType<D,X>& x) const {
+        r=_f.evaluate(_g.evaluate(x)); }
+
+    ScalarFunction<P,D> operator[](SizeType i) const { return compose(_f[i],_g); }
+        
+    Function<P,E,C> _f;
+    Function<P,D,E> _g;
+};
+
 template<class P, class D=BoxDomainType, class C1=BoxDomainType, class C2=BoxDomainType>
 struct JoinedFunction
     : VectorFunctionMixin<JoinedFunction<P,D,C1,C2>,P,D>
@@ -473,6 +508,9 @@ struct JoinedFunction
 
     JoinedFunction(Function<P,D,C1> f1, Function<P,D,C2> f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
+    ScalarFunction<P,D> operator[](SizeType i) const { 
+        return (i<_f1.result_size()) ? _f1[i] : _f2[i-_f1.result_size()]; }
+        
     virtual DomainType const domain() const { return intersection(_f1.domain(),_f2.domain()); }
     virtual CodomainType const codomain() const { return product(_f1.codomain(),_f2.codomain()); }
     virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }

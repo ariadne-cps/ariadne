@@ -837,6 +837,8 @@ template<class M> class VectorScaledFunctionPatch
         return _apply(Divides(),f1,f2); }
 
 
+    friend VectorScaledFunctionPatch<M> operator+(const VectorScaledFunctionPatch<M>& f) {
+        return VectorScaledFunctionPatch<M>(f.domain(),Vector<M>(+f.models())); }
     friend VectorScaledFunctionPatch<M> operator-(const VectorScaledFunctionPatch<M>& f) {
         return VectorScaledFunctionPatch<M>(f.domain(),Vector<M>(-f.models())); }
     friend VectorScaledFunctionPatch<M> operator*(const NumericType& c, const VectorScaledFunctionPatch<M>& f) {
@@ -996,7 +998,17 @@ template<class M> template<class OP>
 VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_apply(OP op, const ScaledFunctionPatch<M>& f1, const VectorScaledFunctionPatch<M>& f2) {
     check_function_patch_domain(to_str(op),f1,f2);
     if(f1.domain()==f2.domain()) {
-        return VectorScaledFunctionPatch<M>(f1.domain(),Vector<ModelType>(op(f1.models(),f2.models())));
+        return VectorScaledFunctionPatch<M>(f1.domain(),Vector<ModelType>(op(f1.model(),f2.models())));
+    } else {
+        BoxDomainType new_domain=intersection(f1.domain(),f2.domain());
+        return op(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+template<class M> template<class OP>
+VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::_apply(OP op, const VectorScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) {
+    check_function_patch_domain(to_str(op),f1,f2);
+    if(f1.domain()==f2.domain()) {
+        return VectorScaledFunctionPatch<M>(f1.domain(),Vector<ModelType>(op(f1.models(),f2.model())));
     } else {
         BoxDomainType new_domain=intersection(f1.domain(),f2.domain());
         return op(restriction(f1,new_domain),restriction(f2,new_domain));
@@ -1224,6 +1236,13 @@ template<class M> class ScaledFunctionPatchCreator
 };
 
 
+template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const {
+    return new ScaledFunctionPatch<M>(*this);
+}
+
+template<class M> VectorScaledFunctionPatch<M>* VectorScaledFunctionPatch<M>::_clone() const {
+    return new VectorScaledFunctionPatch<M>(*this);
+}
 
 } // namespace Ariadne
 

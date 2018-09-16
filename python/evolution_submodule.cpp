@@ -47,7 +47,7 @@ Void export_orbit(pybind11::module& module, const char* name)
 }
 
 
-template<class Ev, class Params>
+template<class Ev, class... Params>
 Void export_evolver(pybind11::module& module, const char* name)
 {
     typedef typename Ev::EnclosureType ES;
@@ -55,7 +55,7 @@ Void export_evolver(pybind11::module& module, const char* name)
     typedef typename Ev::OrbitType Orb;
 
     pybind11::class_<Ev> evolver_class(module,name);
-    evolver_class.def(pybind11::init<Params>());
+    evolver_class.def(pybind11::init<Params...>());
     evolver_class.def("orbit",(Orb(Ev::*)(const ES&,const Tm&,Semantics)const) &Ev::orbit);
     evolver_class.def("__str__",&__cstr__<Ev>);
 }
@@ -63,6 +63,6 @@ Void export_evolver(pybind11::module& module, const char* name)
 Void evolution_submodule(pybind11::module& module)
 {
     export_orbit< Orbit<HybridEnclosure> >(module, "HybridOrbit");
-    //export_evolver<VectorFieldEvolver, ContinuousEvolutionParameters>(module,"VectorFieldEvolver");
+    export_evolver<VectorFieldEvolver, VectorField, IntegratorInterface const&>(module,"VectorFieldEvolver");
     export_evolver<GeneralHybridEvolver, GeneralHybridEvolver::SystemType const&>(module,"GeneralHybridEvolver");
 }

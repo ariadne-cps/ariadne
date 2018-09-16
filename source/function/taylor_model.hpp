@@ -593,6 +593,10 @@ class TaylorModel<ApproximateTag,F>
 
     //@{
     /*! \name Data access */
+    //! \brief The expansion.
+    const ExpansionType& expansion() const { return this->_expansion; }
+    //! \brief A reference to the expansion.
+    ExpansionType& expansion() { return this->_expansion; }
     //! \brief The number of variables in the argument of the quantity.
     SizeType argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.

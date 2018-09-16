@@ -152,6 +152,15 @@ template<class F, class P, class D> class VectorFunctionMixin
 };
 
 
+template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+
+
+
 } // namespace Ariadne
 
 #endif // ARIADNE_FUNCTION_TEMPLATE_HPP

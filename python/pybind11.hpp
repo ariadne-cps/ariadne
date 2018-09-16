@@ -30,6 +30,7 @@
 #define ARIADNE_PYBIND11_HPP
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
 #include <string>
@@ -44,48 +45,60 @@
 
 namespace pybind11 {
 
+// Indicate bases of a pybind11 class.
 template<class... BS> class bases { };
 template<class T, class... BS> class class_<T,bases<BS...>> : public class_<T,BS...> {
   public:
     using class_<T,BS...>::class_;
 };
 
-class noncopyable { };
-template<class T> class class_<T,noncopyable> : public class_<T> {
+// A pybind11 object convertible to C++. Useful for the result of an overloaded function.
+class result_object {
   public:
-    using class_<T>::class_;
+    explicit result_object() : _obj() { }
+    explicit result_object(pybind11::object obj) : _obj(obj) { }
+  public:
+    template <class T> operator T() { return this->convert_to<T>(); }
+    template <class T> operator T&() const { return const_cast<result_object*>(this)->convert_to<T&>(); }
+  private:
+    template<class T> T convert_to() { 
+        if (pybind11::detail::cast_is_temporary_value_reference<T>::value) { 
+            static detail::overload_caster_t<T> caster; 
+            return detail::cast_ref<T>(std::move(_obj), caster); 
+        } else {
+            return detail::cast_safe<T>(std::move(_obj));
+        }
+    }
+    pybind11::object _obj;
 };
 
-// The result of calling a method.
-class method_result {
-  public:
-    explicit method_result() { } // : m_obj(x) { }
-    explicit method_result(PyObject* x); // : m_obj(x) { }
-  public:
-    template <class T> operator T() { assert(false); }
-        // { converter::return_from_python<T> converter; return converter(m_obj.release()); }
-    template <class T> operator T&() const { assert(false); }
-        // { converter::return_from_python<T&> converter; return converter(const_cast<handle<>&>(m_obj).release()); }
-    template <class T> T as();
-        // { converter::return_from_python<T> converter; return converter(m_obj.release()); }
-    template <class T> T unchecked();
-        // { return extract<T>(m_obj.get())(); }
-private:
-//    mutable handle<> m_obj;
+// A pybind11 function which returns an object convertible to a C++ type.
+struct override_function {
+    override_function(function func) : _func(func) { }
+    template<class... ARGS> result_object operator() (ARGS& ... args) { return result_object(_func(args...)); }
+  private:
+    function _func;
 };
 
-class override_helper { // : public object {
- private:
-//    override_helper(handle x) : object(x) { }
- public:
-    method_result operator()() const;
-        // { method_result x(PyEval_CallFunction(this->ptr(), const_cast<char*>("()"))); return x; }
-};
 
-template<class T> class wrapper {
+// Define get_override for classes wrapping interface I
+template<class I> class wrapper : public I {
+    const char* _pyclass_name;
   protected:
-    //override_helper get_override(const char* str) const;
-    method_result get_override(const char* str) const { return method_result(); }
+    wrapper(const char* pyclass_name) : _pyclass_name(pyclass_name) { } 
+    override_function get_override(const char* pymethod) const { 
+       {
+            gil_scoped_acquire gil; 
+            function overload = get_overload(static_cast<const I*>(this), pymethod); 
+            if (overload) { 
+                return override_function(overload);
+            } else {
+                std::string error_msg=std::string("Tried to call pure virtual function \"")+_pyclass_name+"::"+pymethod+"\"";
+                pybind11_fail(error_msg.c_str()); 
+            }
+        }
+        // FIXME: For non-abstract method, should return I::method value
+    }
 };
 
 } // namespace pybind11

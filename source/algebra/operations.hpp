@@ -92,14 +92,20 @@ template<class V, class X> struct DeclareVectorOperators
     friend V& operator/=(V& v1, X const& x2);
 };
 
-template<class V, class A, class X> struct DeclareVectorAlgebraOperators
-    : DeclareVectorOperators<V,A>
+template<class VA, class A, class VX, class X> struct DeclareVectorAlgebraOperators
+    : DeclareVectorOperators<VA,A>
 {
-    friend V operator*(V const& v1, X const& x2);
-    friend V operator/(V const& v1, X const& x2);
-    friend V operator*(X const& x1, V const& v2);
-    friend V& operator*=(V& v1, X const& x2);
-    friend V& operator/=(V& v1, X const& x2);
+    friend VA operator+(VA const& va1, VX const& vx2);
+    friend VA operator+(VX const& vx1, VA const& va2);
+    friend VA operator-(VA const& va1, VX const& vx2);
+    friend VA operator-(VX const& vx1, VA const& va2);
+    friend VA operator*(VA const& va1, X const& x2);
+    friend VA operator/(VA const& va1, X const& x2);
+    friend VA operator*(X const& x1, VA const& va2);
+    friend VA& operator+=(VA& va1, VX const& vx2);
+    friend VA& operator-=(VA& va1, VX const& vx2);
+    friend VA& operator*=(VA& va1, X const& x2);
+    friend VA& operator/=(VA& va1, X const& x2);
 };
 
 template<class A, class X> struct DeclareAlgebraOperators

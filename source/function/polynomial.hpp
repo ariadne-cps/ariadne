@@ -229,6 +229,7 @@ class Polynomial
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {
   public:
+    static Polynomial<X> apply(Pos, const Polynomial<X>& p);
     static Polynomial<X> apply(Neg, const Polynomial<X>& p);
     static Polynomial<X> apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2);
     static Polynomial<X> apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2);

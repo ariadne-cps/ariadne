@@ -398,7 +398,7 @@ struct ProvideVectorOperations {
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> dot(const Vector<X1>& v1, const Vector<X2>& v2) {
         ARIADNE_PRECONDITION(v1.size()==v2.size());
-        ArithmeticType<X1,X2> r=abs(v1.zero_element()*v2.zero_element());
+        ArithmeticType<X1,X2> r=v1.zero_element()*v2.zero_element();
         for(SizeType i=0; i!=v1.size(); ++i) {
             r+=v1[i]*v2[i];
         }

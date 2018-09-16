@@ -133,9 +133,9 @@ template<> struct DeclareExpressionOperations<Real> {
     //! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
     friend Expression<Kleenean> operator> (Expression<Real> const& e1, Expression<Real> const& e2);
 
-    //! \related Expression \brief Fuzzy equality comparison predicate (less) of real expressions.
+    //! \related Expression \brief Equality comparison predicate of real expressions.
     friend Expression<Kleenean> operator==(Expression<Real> const& e1, Expression<Real> const& e2);
-    //! \related Expression \brief Fuzzy inequality comparison predicate (less) of real expressions.
+    //! \related Expression \brief Negated equality comparison predicate of real expressions.
     friend Expression<Kleenean> operator!=(Expression<Real> const& e1, Expression<Real> const& e2);
 
     //! \related Expression \brief %Real unary plus expression.

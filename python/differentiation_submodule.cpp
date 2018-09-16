@@ -64,8 +64,6 @@ Void export_differential(pybind11::module& module, const String& name)
     typedef typename X::GenericType Y;
     typedef DIFF D;
 
-    static constexpr auto self = pybind11::detail::self;
-
     pybind11::class_<D> differential_class(module,name.c_str());
     differential_class.def(pybind11::init<D>());
     differential_class.def( pybind11::init<SizeType,DegreeType >());
@@ -75,13 +73,7 @@ Void export_differential(pybind11::module& module, const String& name)
     
     define_elementary_algebra<D,X>(module, differential_class);
     define_mixed_arithmetic<D,Y>(module, differential_class);
-        
-    differential_class.def(self+=self);
-    differential_class.def(self-=self);
-    differential_class.def(self+=X());
-    differential_class.def(self-=X());
-    differential_class.def(self*=X());
-    differential_class.def(self/=X());
+    define_inplace_algebra<D,X>(module,differential_class);
     differential_class.def("__str__", &__cstr__<D>);
     differential_class.def("__repr__", &__repr__<D>);
 

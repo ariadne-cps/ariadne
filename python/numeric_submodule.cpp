@@ -92,8 +92,6 @@ template<class L> decltype(auto) operator~(L const& l) { return not l; }
 
 template<class OP, class... TS> auto py_apply(TS const& ... ts) -> decltype(OP()(ts...)){ OP op; return op(ts...); }
 
-template<class... T> struct Tag { };
-
 } // namespace Ariadne
 
 

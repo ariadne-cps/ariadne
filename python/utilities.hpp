@@ -131,6 +131,18 @@ template<class A1, class A2, class RET=Return<decltype(declval<A1>()<=declval<A2
 ReturnType<RET> __le__(const A1& a1, const A2& a2) { return static_cast<ReturnType<RET>>(a1<=a2); }
 
 
+template<class A1, class A2>
+A1& __iadd__(A1& a1, const A2& a2) { return a1+=a2; }
+
+template<class A1, class A2>
+A1& __isub__(A1& a1, const A2& a2) { return a1-=a2; }
+
+template<class A1, class A2>
+A1& __imul__(A1& a1, const A2& a2) { return a1*=a2; }
+
+template<class A1, class A2>
+A1& __idiv__(A1& a1, const A2& a2) { return a1/=a2; }
+
 template<class... AS> auto _add_(AS const& ... as) -> decltype(add(as...)) { return add(as...); }
 template<class... AS> auto _sub_(AS const& ... as) -> decltype(sub(as...)) { return sub(as...); }
 template<class... AS> auto _mul_(AS const& ... as) -> decltype(mul(as...)) { return mul(as...); }
@@ -249,7 +261,7 @@ template <class K, class V> struct type_caster<Ariadne::Map<K,V>>
 
 namespace Ariadne {
 
-template<class... TS> using pyclass_ = pybind11::class_<TS...>;
+template<class... TS> struct Tag { };
 
 template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, pybind11::class_<A>& pyclass) {
     pyclass.def("__and__", &__and__<A,A>);
@@ -257,6 +269,24 @@ template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, 
     pyclass.def("__not__", &__not__<A>);
     return pyclass;
 }
+
+template<class A> pybind11::class_<A>& define_lattice(pybind11::module& module, pybind11::class_<A>& pyclass) {
+    module.def("abs", &_abs_<A>);
+    module.def("max", &_max_<A,A>);
+    module.def("min", &_min_<A,A>);
+    return pyclass;
+}
+
+template<class A> pybind11::class_<A>& define_comparisons(pybind11::module& module, pybind11::class_<A>& pyclass) {
+    pyclass.def("__eq__", &__eq__<A,A>);
+    pyclass.def("__ne__", &__ne__<A,A>);
+    pyclass.def("__le__", &__le__<A,A>);
+    pyclass.def("__ge__", &__ge__<A,A>);
+    pyclass.def("__lt__", &__lt__<A,A>);
+    pyclass.def("__gt__", &__lt__<A,A>);
+    return pyclass;
+}
+
 
 template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
     pyclass.def("__pos__", &__pos__<X>);
@@ -270,7 +300,7 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
     return pyclass;
 }
 
-template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
     pyclass.def("__add__", &__add__<X,Y>);
     pyclass.def("__radd__", &__radd__<X,Y>);
     pyclass.def("__sub__", &__sub__<X,Y>);
@@ -283,6 +313,15 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11
     if constexpr(CanDivide<Y,X>::value) {
         pyclass.def("__rdiv__", &__rdiv__<X,Y>);
     }
+    return pyclass;
+}
+
+template<class X, class Y>
+pybind11::class_<X>& define_inplace_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+    module.def("__iadd__", &__iadd__<X,Y>);
+    module.def("__isub__", &__isub__<X,Y>);
+    module.def("__imul__", &__imul__<X,Y>);
+    module.def("__idiv__", &__idiv__<X,Y>);
     return pyclass;
 }
 
@@ -301,6 +340,13 @@ template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& m
     return pyclass;
 }
 
+template<class X> pybind11::class_<X>& define_elementary(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    define_arithmetic(module,pyclass);
+    define_transcendental(module,pyclass);
+    return pyclass;
+}
+
+
 template<class X> pybind11::class_<X>& define_monotonic(pybind11::module& module, pybind11::class_<X>& pyclass) {
     using NX = decltype(-declval<X>());
     pyclass.def("__pos__", &__pos__<X>);
@@ -314,7 +360,7 @@ template<class X> pybind11::class_<X>& define_monotonic(pybind11::module& module
     return pyclass;
 }
 
-template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11::module& module, pybind11::class_<X>& pyclass) {
+template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
     using NY = decltype(-declval<Y>());
     pyclass.def("__add__", &__add__<X,Y>);
     pyclass.def("__radd__", &__radd__<X,Y>);
@@ -323,38 +369,25 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11:
     return pyclass;
 }
 
-template<class X> pybind11::class_<X>& define_elementary(pybind11::module& module, pybind11::class_<X>& pyclass) {
+
+template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {
     define_arithmetic(module,pyclass);
-    define_transcendental(module,pyclass);
+    define_mixed_arithmetic(module,pyclass,Tag<X>());
     return pyclass;
 }
 
-template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_algebra(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    define_arithmetic(module,pyclass);
-    define_mixed_arithmetic<A,X>(module,pyclass);
-    return pyclass;
-}
 
-template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_elementary_algebra(pybind11::module& module, pybind11::class_<A>& pyclass) {
+template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_elementary_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {
     define_algebra<A,X>(module,pyclass);
     define_transcendental(module,pyclass);
     return pyclass;
 }
 
-template<class A> pybind11::class_<A>& define_lattice(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    module.def("abs", &_abs_<A>);
-    module.def("max", &_max_<A,A>);
-    module.def("min", &_min_<A,A>);
-    return pyclass;
-}
-
-template<class A> pybind11::class_<A>& define_comparisons(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    pyclass.def("__eq__", &__eq__<A,A>);
-    pyclass.def("__ne__", &__ne__<A,A>);
-    pyclass.def("__le__", &__le__<A,A>);
-    pyclass.def("__ge__", &__ge__<A,A>);
-    pyclass.def("__lt__", &__lt__<A,A>);
-    pyclass.def("__gt__", &__lt__<A,A>);
+template<class A, class X=typename A::NumericType>
+pybind11::class_<A>& define_inplace_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {
+    module.def("__iadd__", &__iadd__<A,A>);
+    module.def("__iadd__", &__isub__<A,A>);
+    define_inplace_arithmetic(module,pyclass,Tag<X>());
     return pyclass;
 }
 
@@ -382,7 +415,7 @@ pybind11::class_<V>& define_vector_operations(pybind11::module& module, pybind11
 }
 
 template<class V, class X=typename V::ScalarType>
-pybind11::class_<V>& define_vector_arithmetic(pybind11::module& module, pybind11::class_<V>& pyclass) {
+pybind11::class_<V>& define_vector_arithmetic(pybind11::module& module, pybind11::class_<V>& pyclass, Tag<X> = Tag<X>()) {
     pyclass.def("__pos__", &__pos__<V>);
     pyclass.def("__neg__", &__neg__<V>);
     pyclass.def("__add__", &__add__<V,V>);
@@ -392,12 +425,12 @@ pybind11::class_<V>& define_vector_arithmetic(pybind11::module& module, pybind11
     if constexpr(CanDivide<X,X>::value) {
         pyclass.def("__div__",__div__<V,X>);
     }
-    module.def("dot",  &_dot_<Vector<X>,Vector<X>>);
+//    module.def("dot",  &_dot_<Vector<X>,Vector<X>>);
     return pyclass;
 }
 
 template<class VX, class VY>
-pybind11::class_<VX>& define_mixed_vector_arithmetic(pybind11::module& module, pybind11::class_<VX>& pyclass) {
+pybind11::class_<VX>& define_mixed_vector_arithmetic(pybind11::module& module, pybind11::class_<VX>& pyclass, Tag<VY> = Tag<VY>()) {
     using X=typename VX::ScalarType;
     using Y=typename VY::ScalarType;
     pyclass.def("__add__", &__add__<VX,VY>);
@@ -411,6 +444,25 @@ pybind11::class_<VX>& define_mixed_vector_arithmetic(pybind11::module& module, p
     }
     module.def("dot",  &_dot_<Vector<X>,Vector<Y>>);
     module.def("dot",  &_dot_<Vector<Y>,Vector<X>>);
+    return pyclass;
+}
+
+template<class V, class X=typename V::ScalarType>
+pybind11::class_<V>& define_inplace_vector_arithmetic(pybind11::module& module, pybind11::class_<V>& pyclass, Tag<X> = Tag<X>()) {
+    module.def("__iadd__", &__iadd__<V,V>);
+    module.def("__isub__", &__isub__<V,V>);
+    module.def("__imul__", &__imul__<V,X>);
+    module.def("__idiv__", &__idiv__<V,X>);
+    return pyclass;
+}
+
+template<class VX, class VY>
+pybind11::class_<VX>& define_inplace_mixed_vector_arithmetic(pybind11::module& module, pybind11::class_<VX>& pyclass, Tag<VY> = Tag<VY>()) {
+    using Y=typename VY::ScalarType;
+    module.def("__iadd__", &__iadd__<VX,VY>);
+    module.def("__isub__", &__isub__<VX,VY>);
+    module.def("__imul__", &__imul__<VX,Y>);
+    module.def("__idiv__", &__idiv__<VX,Y>);
     return pyclass;
 }
 

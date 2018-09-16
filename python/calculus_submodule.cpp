@@ -225,6 +225,8 @@ Void export_validated_taylor_model(pybind11::module& module)
     typedef NumericType<ModelType> NumericType;
     typedef GenericType<NumericType> GenericNumericType;
     
+    Tag<GenericNumericType> generic_number_tag;
+    
     pybind11::class_<ValidatedTaylorModelDP> taylor_model_class(module,"ValidatedTaylorModelDP");
     taylor_model_class.def(pybind11::init<ValidatedTaylorModelDP>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
@@ -243,19 +245,12 @@ Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModelDP,MultiIndex,FloatDPValue>);
     taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModelDP,MultiIndex,FloatDPValue>);
     
-    define_elementary_algebra<ModelType,NumericType>(module,taylor_model_class);
-
-    taylor_model_class.def(self+=ValidatedNumericType());
-    taylor_model_class.def(self-=ValidatedNumericType());
-    taylor_model_class.def(self*=ValidatedNumericType());
-    taylor_model_class.def(self/=ValidatedNumericType());
-    taylor_model_class.def(self+=self);
-    taylor_model_class.def(self-=self);
-
-    module.def("max",&_max_<ValidatedTaylorModelDP,ValidatedTaylorModelDP>);
-    module.def("min",&_min_<ValidatedTaylorModelDP,ValidatedTaylorModelDP>);
-    module.def("abs",&_abs_<ValidatedTaylorModelDP>);
-
+    define_elementary_algebra(module,taylor_model_class);
+    define_inplace_algebra(module,taylor_model_class);
+    define_mixed_arithmetic(module, taylor_model_class, generic_number_tag);
+    
+    define_lattice(module,taylor_model_class);
+    
 
     taylor_model_class.def("__str__", &__cstr__<ValidatedTaylorModelDP>);
 
@@ -293,19 +288,9 @@ Void export_approximate_taylor_model(pybind11::module& module)
     taylor_model_class.def("__getitem__", &__getitem__<ApproximateTaylorModelDP,MultiIndex,FloatDPApproximation>);
     taylor_model_class.def("__setitem__",&__setitem__<ApproximateTaylorModelDP,MultiIndex,FloatDPApproximation>);
     
-    define_elementary_algebra<ModelType,NumericType>(module,taylor_model_class);
-    
-    taylor_model_class.def(self+=ApproximateNumericType());
-    taylor_model_class.def(self-=ApproximateNumericType());
-    taylor_model_class.def(self*=ApproximateNumericType());
-    taylor_model_class.def(self/=ApproximateNumericType());
-    taylor_model_class.def(self+=self);
-    taylor_model_class.def(self-=self);
-
-    module.def("max",&_max_<ApproximateTaylorModelDP,ApproximateTaylorModelDP>);
-    module.def("min",&_min_<ApproximateTaylorModelDP,ApproximateTaylorModelDP>);
-    module.def("abs",&_abs_<ApproximateTaylorModelDP>);
-
+    define_elementary_algebra(module,taylor_model_class);
+    define_inplace_algebra(module,taylor_model_class);
+    define_lattice(module,taylor_model_class);
     
     taylor_model_class.def("__str__",&__cstr__<ApproximateTaylorModelDP>);
 
@@ -381,8 +366,8 @@ Void export_vector_function_model(pybind11::module& module)
     //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunction>);
     vector_function_model_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorFunctionModelDP::operator());
 
-#warning
-    // define_vector_algebra_arithmetic<VectorFunctionModelType,ScalarFunctionModelType,NumericType>(module,vector_function_model_class);
+    // NOTE: Not all operations are exported in C++ API.
+    //define_vector_algebra_arithmetic<VectorFunctionModelType,ScalarFunctionModelType,NumericType>(module,vector_function_model_class);
     //define_vector_arithmetic<VectorFunctionModelType,ScalarFunctionModelType>(module,vector_function_model_class);
     
     vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorFunctionModelDP>);
@@ -425,6 +410,9 @@ Void export_scalar_taylor_function(pybind11::module& module)
     typedef SizeType I;
     typedef typename X::GenericType Y;
 
+    Tag<GenericNumericType> generic_number_tag;
+    Tag<GenericFunctionType> generic_function_tag;
+
     pybind11::class_<ValidatedScalarTaylorFunctionModelDP> scalar_taylor_function_class(module,"ValidatedScalarTaylorFunctionModel");
     scalar_taylor_function_class.def(pybind11::init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(pybind11::init<ExactBoxType,ValidatedTaylorModelDP>());
@@ -443,24 +431,13 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ValidatedScalarTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ValidatedScalarTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
     
-    define_elementary_algebra<FunctionModelType,NumericType>(module,scalar_taylor_function_class);
-    scalar_taylor_function_class.def(self+=self);
-    scalar_taylor_function_class.def(self-=self);
-    scalar_taylor_function_class.def(self+=X());
-    scalar_taylor_function_class.def(self-=X());
-    scalar_taylor_function_class.def(self*=X());
-    scalar_taylor_function_class.def(self/=X());
-    define_mixed_arithmetic<FunctionModelType,GenericNumericType>(module,scalar_taylor_function_class);
-    scalar_taylor_function_class.def(self+=Y());
-    scalar_taylor_function_class.def(self-=Y());
-    scalar_taylor_function_class.def(self*=Y());
-    scalar_taylor_function_class.def(self/=Y());
-    define_mixed_arithmetic<FunctionModelType,GenericFunctionType>(module,scalar_taylor_function_class);
+    define_elementary_algebra(module,scalar_taylor_function_class);
+    define_inplace_algebra(module,scalar_taylor_function_class);
+    define_mixed_arithmetic(module,scalar_taylor_function_class,generic_number_tag);
+    define_mixed_arithmetic(module,scalar_taylor_function_class,generic_function_tag);
 
-    module.def("max", &_max_<F,F>);
-    module.def("min", &_min_<F,F>);
-    module.def("abs", &_abs_<F>);
-
+    define_lattice(module,scalar_taylor_function_class);
+    
     scalar_taylor_function_class.def("__str__", &__cstr__<F>);
     scalar_taylor_function_class.def("__repr__", &__crepr__<F>);
 
@@ -519,6 +496,9 @@ Void export_vector_taylor_function(pybind11::module& module)
     typedef typename VF::NumericType X;
     typedef Vector<X> VX;
 
+    Tag<ValidatedScalarFunctionModelDP> scalar_taylor_function_tag;
+    Tag<Vector<NumericType>> number_vector_tag;
+    
     pybind11::class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorTaylorFunctionModel");
     vector_taylor_function_class.def( pybind11::init<ValidatedVectorTaylorFunctionModelDP>());
     vector_taylor_function_class.def( pybind11::init< SizeType, ExactBoxType, SweeperDP >());
@@ -543,18 +523,11 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("__getitem__", &__getitem__<ValidatedVectorTaylorFunctionModelDP,SizeType,ValidatedScalarTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__setitem__",&__setitem__<ValidatedVectorTaylorFunctionModelDP,SizeType,ValidatedScalarTaylorFunctionModelDP>);
 
-//FIXME
-    //define_vector_algebra_arithmetic<VectorFunctionModelType, ScalarFunctionModelType, NumericType>;
+    define_vector_arithmetic(module,vector_taylor_function_class, scalar_taylor_function_tag);
+    //FIXME: Not completely defined in C++ API
+    //define_inplace_vector_arithmetic(module,vector_taylor_function_class, scalar_taylor_function_tag);
+    define_inplace_mixed_vector_arithmetic(module,vector_taylor_function_class, number_vector_tag);
     
-    //FIXME: Overload not found when linking/loading
-    // vector_taylor_function_class.def(self*ValidatedScalarTaylorFunctionModelDP());
-    vector_taylor_function_class.def(self+=Vector<ValidatedNumericType>());
-    vector_taylor_function_class.def(self-=Vector<ValidatedNumericType>());
-    vector_taylor_function_class.def(self*=ValidatedNumericType());
-    vector_taylor_function_class.def(self/=ValidatedNumericType());
-    
-    vector_taylor_function_class.def(self+=self);
-    vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def("__str__", &__cstr__<ValidatedVectorTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__repr__", &__crepr__<ValidatedVectorTaylorFunctionModelDP>);
     vector_taylor_function_class.def("clobber", (Void(ValidatedVectorTaylorFunctionModelDP::*)()) &ValidatedVectorTaylorFunctionModelDP::clobber);
@@ -599,12 +572,14 @@ Void calculus_submodule(pybind11::module& module)
 {
     export_expansion(module);
     export_sweeper(module);
+/*
     export_approximate_taylor_model(module);
     export_validated_taylor_model(module);
     export_scalar_function_model(module);
     export_vector_function_model(module);
     export_scalar_taylor_function(module);
     export_vector_taylor_function(module);
+*/
 }
 
 

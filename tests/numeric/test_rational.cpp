@@ -67,8 +67,8 @@ void TestRational::test()
 }
 
 void TestRational::test_concept() {
-    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Rational q;
+    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5; Dyadic w=z;
+    Rational q; Boolean b;
 
     q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z); q=Rational(z);
     q=m; q=lm; q=n; q=ln; q=z; q=q;
@@ -80,19 +80,21 @@ void TestRational::test_concept() {
     q=n+q; q=n-q; q=n*q; q=n/q;
     q=q+z; q=q-z; q=q*z; q=q/z;
     q=z+q; q=z-q; q=z*q; q=z/q;
+    q=q+w; q=q-w; q=q*w; q=q/w;
+    q=w+q; q=w-q; q=w*q; q=w/q;
 
     q=max(q,q); q=min(q,q); q=abs(q);
     q=pos(q); q=neg(q); q=sqr(q); q=rec(q);
 
-    q=1.5_q; q=-1.3_q;
+    q=1.5_q; q=3/2_q; q=-1.3_q;
 
-    q==q; q!=q; q<=q; q>=q; q<q; q>q;
-    q==n; q!=n; q<=n; q>=n; q<n; q>n;
-    n==q; n!=q; n<=q; n>=q; n<q; n>q;
-    q==z; q!=z; q<=z; q>=z; q<z; q>z;
-    z==q; z!=q; z<=q; z>=q; z<q; z>q;
-
-//    z+1.0;
+    b=(q==q); b=(q!=q); b=(q<=q); b=(q>=q); b=(q<q); b=(q>q);
+    b=(q==n); b=(q!=n); b=(q<=n); b=(q>=n); b=(q<n); b=(q>n);
+    b=(n==q); b=(n!=q); b=(n<=q); b=(n>=q); b=(n<q); b=(n>q);
+    b=(q==z); b=(q!=z); b=(q<=z); b=(q>=z); b=(q<z); b=(q>z);
+    b=(z==q); b=(z!=q); b=(z<=q); b=(z>=q); b=(z<q); b=(z>q);
+    b=(q==w); b=(q!=w); b=(q<=w); b=(q>=w); b=(q<w); b=(q>w);
+    b=(w==q); b=(w!=q); b=(w<=q); b=(w>=q); b=(w<q); b=(w>q);
 }
 
 void TestRational::test_literal() {

@@ -139,7 +139,6 @@ Int main() {
 template<class Y> Void
 TestNumber<Y>::test()
 {
-    //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_get());
     ARIADNE_TEST_CALL(test_comparisons());

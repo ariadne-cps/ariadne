@@ -319,7 +319,6 @@ class TestFloatBounds
 template<class PR> Void
 TestFloatBounds<PR>::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_input());
     ARIADNE_TEST_CALL(test_class());

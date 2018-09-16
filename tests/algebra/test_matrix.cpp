@@ -57,7 +57,6 @@ class TestMatrix {
 Void
 TestMatrix::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_project());
     ARIADNE_TEST_CALL(test_misc());
 }

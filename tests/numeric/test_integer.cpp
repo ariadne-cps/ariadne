@@ -56,7 +56,8 @@ void TestInteger::test()
 }
 
 void TestInteger::test_concept() {
-    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
+    unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2;
+    Integer z; Boolean b;
 
     z=Integer(); z=Integer(m); z=Integer(lm); z=Integer(n); z=Integer(ln); z=Integer(z);
     z=m; z=lm; z=n; z=ln; z=z;
@@ -68,11 +69,9 @@ void TestInteger::test_concept() {
 
     z=1_z; z=-1_z;
 
-    z==z; z!=z; z<=z; z>=z; z<z; z>z;
-    z==n; z!=n; z<=n; z>=n; z<n; z>n;
-    n==z; n!=z; n<=z; n>=z; n<z; n>z;
-
-//    z+1.0;
+    b=(z==z); b=(z!=z); b=(z<=z); b=(z>=z); b=(z<z); b=(z>z);
+    b=(z==n); b=(z!=n); b=(z<=n); b=(z>=n); b=(z<n); b=(z>n);
+    b=(n==z); b=(n!=z); b=(n<=z); b=(n>=z); b=(n<z); b=(n>z);
 }
 
 

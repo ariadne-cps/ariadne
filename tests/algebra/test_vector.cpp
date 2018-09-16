@@ -51,7 +51,6 @@ class TestVector {
 Void
 TestVector::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_comparisons());
     ARIADNE_TEST_CALL(test_arithmetic());

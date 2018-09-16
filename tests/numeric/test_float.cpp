@@ -141,7 +141,6 @@ TestFloat<PR>::TestFloat(PR pr)
 template<class PR> Void
 TestFloat<PR>::test()
 {
-    //ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_limits());
     ARIADNE_TEST_CALL(test_conversion());

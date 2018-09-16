@@ -92,7 +92,6 @@ class TestReal
 void TestReal::test()
 {
     FloatDPApproximation::set_output_places(18);
-//    ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());

@@ -66,7 +66,6 @@ Int main() {
 Void
 TestParadigm::test()
 {
-    ARIADNE_TEST_CALL(test_concept());
 }
 
 // Test that the type implements all operations of

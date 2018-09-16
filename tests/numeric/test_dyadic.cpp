@@ -63,7 +63,7 @@ void TestDyadic::test()
 
 void TestDyadic::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Dyadic w;
+    Dyadic w; Boolean b;
 
     w=Dyadic(); w=Dyadic(m); w=Dyadic(lm); w=Dyadic(n); w=Dyadic(ln); w=Dyadic(z); w=Dyadic(z);
     w=m; w=lm; w=n; w=ln; w=z; w=w;
@@ -79,14 +79,13 @@ void TestDyadic::test_concept() {
     w=max(w,w); w=min(w,w); w=abs(w);
     w=pos(w); w=neg(w); w=sqr(w); w=hlf(w);
 
-    w=1.5_q2; w=-1.375_q2;
+    w=1.5_q2; w=1.5_dy; w=1.5_dyadic;
 
-    w==w; w!=w; w<=w; w>=w; w<w; w>w;
-    w==n; w!=n; w<=n; w>=n; w<n; w>n;
-    n==w; n!=w; n<=w; n>=w; n<w; n>w;
-    w==z; w!=z; w<=z; w>=z; w<z; w>z;
-    z==w; z!=w; z<=w; z>=w; z<w; z>w;
-//    z+1.0;
+    b=(w==w); b=(w!=w); b=(w<=w); b=(w>=w); b=(w<w); b=(w>w);
+    b=(w==n); b=(w!=n); b=(w<=n); b=(w>=n); b=(w<n); b=(w>n);
+    b=(n==w); b=(n!=w); b=(n<=w); b=(n>=w); b=(n<w); b=(n>w);
+    b=(w==z); b=(w!=z); b=(w<=z); b=(w>=z); b=(w<z); b=(w>z);
+    b=(z==w); b=(z!=w); b=(z<=w); b=(z>=w); b=(z<w); b=(z>w);
 }
 
 void TestDyadic::test_literal() {

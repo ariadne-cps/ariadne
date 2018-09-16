@@ -145,9 +145,6 @@ Void export_polynomial(pybind11::module& module)
     polynomial_class.def("argument_size", &Polynomial<X>::argument_size);
     polynomial_class.def("insert", &Polynomial<X>::insert);
 
-    typedef Polynomial<X> SelfType;
-    typedef X RealType;
-
     define_algebra(module,polynomial_class);
     polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
 

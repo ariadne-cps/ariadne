@@ -270,39 +270,38 @@ Void export_validated_taylor_model(pybind11::module& module)
 Void export_approximate_taylor_model(pybind11::module& module)
 {
     typedef ApproximateTaylorModelDP ModelType;
-    typedef NumericType<ModelType> NumericType;
     
-    pybind11::class_<ApproximateTaylorModelDP> taylor_model_class(module,"ApproximateTaylorModelDP");
-    taylor_model_class.def(pybind11::init<ApproximateTaylorModelDP>());
+    pybind11::class_<ModelType> taylor_model_class(module,"ApproximateTaylorModelDP");
+    taylor_model_class.def(pybind11::init<ModelType>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
-    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ApproximateTaylorModelDP&))&keys);
-    taylor_model_class.def("value", (const FloatDPApproximation&(ApproximateTaylorModelDP::*)()const) &ApproximateTaylorModelDP::value);
-    taylor_model_class.def("gradient", (const FloatDPApproximation&(ApproximateTaylorModelDP::*)(SizeType)const) &ApproximateTaylorModelDP::gradient_value);
-    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPApproximation>&(*)(ApproximateTaylorModelDP const&)) &get_expansion);
-    taylor_model_class.def("argument_size", &ApproximateTaylorModelDP::argument_size);
-    taylor_model_class.def("domain", &ApproximateTaylorModelDP::domain);
-    taylor_model_class.def("range", &ApproximateTaylorModelDP::range);
-    taylor_model_class.def("set_sweeper", &ApproximateTaylorModelDP::set_sweeper);
-    taylor_model_class.def("sweeper", &ApproximateTaylorModelDP::sweeper);
-    taylor_model_class.def("sweep", (ApproximateTaylorModelDP&(ApproximateTaylorModelDP::*)()) &ApproximateTaylorModelDP::sweep, pybind11::return_value_policy::reference);
-    taylor_model_class.def("__getitem__", &__getitem__<ApproximateTaylorModelDP,MultiIndex,FloatDPApproximation>);
-    taylor_model_class.def("__setitem__",&__setitem__<ApproximateTaylorModelDP,MultiIndex,FloatDPApproximation>);
+    taylor_model_class.def("keys", (List<MultiIndex>(*)(const ModelType&))&keys);
+    taylor_model_class.def("value", (const FloatDPApproximation&(ModelType::*)()const) &ModelType::value);
+    taylor_model_class.def("gradient", (const FloatDPApproximation&(ModelType::*)(SizeType)const) &ModelType::gradient_value);
+    taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPApproximation>&(*)(ModelType const&)) &get_expansion);
+    taylor_model_class.def("argument_size", &ModelType::argument_size);
+    taylor_model_class.def("domain", &ModelType::domain);
+    taylor_model_class.def("range", &ModelType::range);
+    taylor_model_class.def("set_sweeper", &ModelType::set_sweeper);
+    taylor_model_class.def("sweeper", &ModelType::sweeper);
+    taylor_model_class.def("sweep", (ModelType&(ModelType::*)()) &ModelType::sweep, pybind11::return_value_policy::reference);
+    taylor_model_class.def("__getitem__", &__getitem__<ModelType,MultiIndex,FloatDPApproximation>);
+    taylor_model_class.def("__setitem__",&__setitem__<ModelType,MultiIndex,FloatDPApproximation>);
     
     define_elementary_algebra(module,taylor_model_class);
     define_inplace_algebra(module,taylor_model_class);
     define_lattice(module,taylor_model_class);
     
-    taylor_model_class.def("__str__",&__cstr__<ApproximateTaylorModelDP>);
+    taylor_model_class.def("__str__",&__cstr__<ModelType>);
 
-    taylor_model_class.def_static("constant",(ApproximateTaylorModelDP(*)(SizeType, const ApproximateNumericType&,SweeperDP))&ApproximateTaylorModelDP::constant);
-    taylor_model_class.def_static("coordinate",(ApproximateTaylorModelDP(*)(SizeType, SizeType,SweeperDP))&ApproximateTaylorModelDP::coordinate);
+    taylor_model_class.def_static("constant",(ModelType(*)(SizeType, const ApproximateNumericType&,SweeperDP))&ModelType::constant);
+    taylor_model_class.def_static("coordinate",(ModelType(*)(SizeType, SizeType,SweeperDP))&ModelType::coordinate);
 
     //FIXME: Not in C++ API
-    //module.def("evaluate",&_evaluate_<ApproximateTaylorModelDP,Vector<ApproximateNumericType>>);
-    //module.def("split",&_split_<ApproximateTaylorModelDP,SizeType,SplitPart>);
+    //module.def("evaluate",&_evaluate_<ModelType,Vector<ApproximateNumericType>>);
+    //module.def("split",&_split_<ModelType,SizeType,SplitPart>);
 
-    //from_python< Vector<ApproximateTaylorModelDP> >();
-    //to_python< Vector<ApproximateTaylorModelDP> >();
+    //from_python< Vector<ModelType> >();
+    //to_python< Vector<ModelType> >();
 }
 
 
@@ -348,9 +347,8 @@ Void export_scalar_function_model(pybind11::module& module)
 
 Void export_vector_function_model(pybind11::module& module)
 {
-    using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
-    using ScalarFunctionModelType = ValidatedScalarFunctionModelDP;
-    using NumericType = NumericType<VectorFunctionModelType>;
+    //using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
+    //using ScalarFunctionModelType = ValidatedScalarFunctionModelDP;
     
     pybind11::class_<ValidatedVectorFunctionModelDP> vector_function_model_class(module,"ValidatedVectorFunctionModel");
     vector_function_model_class.def(pybind11::init<ValidatedVectorFunctionModelDP>());
@@ -408,7 +406,6 @@ Void export_scalar_taylor_function(pybind11::module& module)
     typedef typename F::NumericType X;
     typedef Vector<X> VX;
     typedef SizeType I;
-    typedef typename X::GenericType Y;
 
     Tag<GenericNumericType> generic_number_tag;
     Tag<GenericFunctionType> generic_function_tag;
@@ -482,7 +479,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
 Void export_vector_taylor_function(pybind11::module& module)
 {
 
-    using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
+    //using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
     using ScalarFunctionModelType = ValidatedScalarFunctionModelDP;
     using NumericType = NumericType<ScalarFunctionModelType>;
     

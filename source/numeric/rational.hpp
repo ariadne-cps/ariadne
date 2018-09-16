@@ -109,7 +109,6 @@ class Rational
     friend Bool is_finite(Rational const& q);
     friend Bool is_zero(Rational const& q);
 
-    friend Sign sgn(Rational const& q);
     friend Comparison cmp(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
     friend Comparison cmp(ExactDouble const& d1, Rational const& q2);

@@ -232,8 +232,8 @@ double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
 }
 
-FloatMP FloatMP::nan(MultiplePrecision pr) {
-    FloatMP x(pr);
+FloatMP FloatMP::nan() {
+    FloatMP x;
     mpfr_set_nan(x._mpfr);
     return x;
 }

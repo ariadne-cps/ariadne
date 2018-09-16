@@ -98,7 +98,7 @@ class FloatMP {
     static Void set_default_precision(PrecisionType prec);
     static PrecisionType get_default_precision();
   public:
-    static FloatMP nan(PrecisionType);
+    static FloatMP nan();
     static FloatMP inf();
     static FloatMP max(PrecisionType);
     static FloatMP eps(PrecisionType);

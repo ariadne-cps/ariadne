@@ -726,7 +726,7 @@ FloatDP FloatDP::min(PrecisionType) { return std::numeric_limits<double>::min();
 FloatDP FloatDP::max(PrecisionType) { return std::numeric_limits<double>::max(); }
 FloatDP FloatDP::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
 FloatDP FloatDP::inf() { return std::numeric_limits<double>::infinity(); }
-FloatDP FloatDP::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
+FloatDP FloatDP::nan() { return std::numeric_limits<double>::quiet_NaN(); }
 
 template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return x.dbl; }

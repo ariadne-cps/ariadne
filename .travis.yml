@@ -13,32 +13,32 @@ branches:
 matrix:
   include:
 
-    - name: macOS clang 
+    - name: macOS 10.13 + AppleClang 9.1 
       os: osx
       env: COMPILER=clang++
 
-    - name: macOS gcc 
+    - name: macOS 10.12 + gcc 7 
       os: osx
       osx_image: xcode8.3
       env: COMPILER=g++-7
 
-    - name: Linux clang
+    - name: Ubuntu 18.04 + clang 5.0
       os: linux
       services:
         - docker      
       env: DOCKER=ubuntu:latest COMPILER=clang++-5.0
       
-    - name: Linux gcc
+    - name: Ubuntu 18.04 + gcc 8
       os: linux
       services:
         - docker
-      env: DOCKER=ubuntu:latest COMPILER=c++  
+      env: DOCKER=ubuntu:latest COMPILER=g++-8  
 
     - name: Coverage
       os: linux
       services:
         - docker
-      env: DOCKER=ubuntu:latest COMPILER=c++ COVERAGE=ON
+      env: DOCKER=ubuntu:latest COMPILER=g++-8 COVERAGE=ON
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi 
@@ -67,15 +67,16 @@ before_install:
       $SH_PREFIX apt update
       $SH_PREFIX apt install -y cmake   
     fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX apt install -y clang++-5.0 python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX sh -c 'apt install -y '$COMPILER' python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev'; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install coverage pytest; fi
 
 script: 
   - git submodule update --init --recursive
   - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER"
   - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCOVERAGE=ON"; fi
-  - if [[ -n "$COVERAGE" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi  
-  - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" 
+  - if [[ -n "$COVERAGE" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi 
+  - if [[ "$TRAVIS_BRANCH" =~ pending|master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
+  - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE"
   - $SH_PREFIX cmake . $CMAKE_ARGS
   - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests pyariadne; else $SH_PREFIX make; fi
   - $SH_PREFIX ctest -L "primary"

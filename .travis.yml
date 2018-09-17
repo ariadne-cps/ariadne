@@ -38,7 +38,7 @@ matrix:
       os: linux
       services:
         - docker
-      env: DOCKER=ubuntu:latest COMPILER=g++-8 COVERAGE=ON
+      env: DOCKER=ubuntu:latest COMPILER=g++-7 COVERAGE=ON
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi 

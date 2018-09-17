@@ -56,13 +56,13 @@ Then you can prepare the build environment, choosing a Release build for maximum
 $ cmake .. -DCMAKE_BUILD_TYPE=Release
 ```
 
-At this point, if no error arises, you can build the library `libariadne.so` itself:
+At this point, if no error arises, you can build the library itself:
 
 ```
 $ make ariadne
 ```
 
-If you prefer to use the Python interface over the C++ library, you should build the file `ariadne.so` with:
+If you prefer to use the Python interface over the C++ library, you should build the Python module with:
 
 
 ```
@@ -79,13 +79,13 @@ $ make test
 
 where no error should appear.
 
-To build libraries, tests and examples, simply type:
+To build libraries, tests, examples and tutorials, simply type:
 
 ```
 $ make
 ```
 
-To build the documentation, use:
+To build the documentation, instead use:
 
 ```
 $ make doc
@@ -106,7 +106,7 @@ or
 $ sudo make install
 ```
 
-if you require administrator privileges, in particular for a Linux installation.
+if you require administrator privileges, in particular for a Linux installation. Please note that the installation will build the whole distribution beforehand.
 
 To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_PATH in the .bashrc file of your home directory:
 
@@ -114,7 +114,7 @@ To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_P
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
 
-The tutorials directory contains two CMake projects that rely on the installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
+The tutorials directory contains three CMake projects that rely on a correct installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
 
 ### Contribution guidelines ###
 

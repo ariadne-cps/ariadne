@@ -204,6 +204,7 @@ class Box
     static Box<I> _product(const Box<I>& bx1, const Box<I>& bx2);
     static Box<I> _product(const Box<I>& bx1, const I& ivl2);
     static Box<I> _product(const I& ivl1, const Box<I>& bx2);
+    static Box<I> _product(const I& ivl1, const I& ivl2);
 
     static Box<I> _project(const Box<I>& bx, const Array<SizeType>& rng);
     static Box<I> _project(const Box<I>& bx, const Range& rng);
@@ -235,6 +236,8 @@ template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx, SizeType k)
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Interval<I>& ivl1, const Box<I>& bx2) { return Box<I>::_product(ivl1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
+template<class I> inline Box<I> product(const I& ivl1, const Box<I>& bx2) { return Box<I>::_product(ivl1,bx2); }
+template<class UB> inline Box<Interval<UB>> product(const Interval<UB>& ivl1, const Interval<UB>& ivl2) { return Box<Interval<UB>>::_product(ivl1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2, const Box<I>& bx3) { return Box<I>::_product(bx1,Box<I>({ivl2}),bx3); }
 

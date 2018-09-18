@@ -234,6 +234,24 @@ template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const I& ivl2)
     return r;
 }
 
+template<class I> Box<I> Box<I>::_product(const I& ivl1, const Box<I>& bx2)
+{
+    Box<I> r(1u+bx2.size());
+    r[0u]=ivl1;
+    for(SizeType i=0; i!=bx2.size(); ++i) {
+        r[i+1u]=bx2[i];
+    }
+    return r;
+}
+
+template<class I> Box<I> Box<I>::_product(const I& ivl1, const I& ivl2)
+{
+    Box<I> r(2u);
+    r[0u]=ivl1;
+    r[1u]=ivl1;
+    return r;
+}
+
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3)
 {
     Box<I> r(bx1.dimension()+bx2.dimension()+bx3.dimension());

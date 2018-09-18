@@ -13,22 +13,23 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.13 + AppleClang 9.1 
+    - name: macOS 10.13 + AppleClang 10
       os: osx
+      osx_image: xcode10
       env: COMPILER=clang++
 
-    - name: macOS 10.12 + gcc 7 
+    - name: macOS 10.12 + GCC 7
       os: osx
       osx_image: xcode8.3
       env: COMPILER=g++-7
 
-    - name: Ubuntu 18.04 + clang 5.0
+    - name: Ubuntu 18.04 + Clang 5
       os: linux
       services:
         - docker      
       env: DOCKER=ubuntu:latest COMPILER=clang++-5.0
       
-    - name: Ubuntu 18.04 + gcc 8
+    - name: Ubuntu 18.04 + GCC 8
       os: linux
       services:
         - docker

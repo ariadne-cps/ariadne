@@ -52,21 +52,21 @@ class SolverWrapper
     FloatDPValue maximum_error() const { return this->get_override("maximum_error")(); }
     Void set_maximum_number_of_steps(Nat ns) { this->get_override("set_maximum_number_of_steps")(ns); }
     Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    ValidatedVectorType zero(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
+    ValidatedVectorType zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("zero")(f,bx); }
-    ValidatedVectorType fixed_point(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
+    ValidatedVectorType fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("fixed_point")(f,bx); }
-    ValidatedVectorType solve(const ValidatedVectorFunction& f, const ValidatedVectorType& pt) const {
+    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorType& pt) const {
         return this->get_override("solve")(f,pt); }
-    ValidatedVectorType solve(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
+    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve")(f,bx); }
-    ValidatedVectorFunctionModelDP implicit(const ValidatedVectorFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
+    ValidatedVectorMultivariateFunctionModelDP implicit(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
         return this->get_override("implicit")(f,pd,bx); }
-    ValidatedScalarFunctionModelDP implicit(const ValidatedScalarFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
+    ValidatedScalarMultivariateFunctionModelDP implicit(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
         return this->get_override("implicit")(f,pd,ivl); }
-    ValidatedVectorFunctionModelDP continuation(const ValidatedVectorFunction& f, const ApproximateVectorType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
+    ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const ApproximateVectorType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
         return this->get_override("continuation")(f,a,X,A); }
-    Set< ValidatedVectorType > solve_all(const ValidatedVectorFunction& f, const ExactBoxType& bx) const {
+    Set< ValidatedVectorType > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve_all")(f,bx); }
     Void write(OutputStream& os) const { this->get_override("write")(os); }
 };
@@ -84,17 +84,17 @@ class IntegratorWrapper
         this->get_override("set_maximum_error")(me); }
     double maximum_error() const {
         return this->get_override("maximum_error")(); }
-    Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
+    Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
+    ValidatedVectorMultivariateFunctionModelDP flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
         return this->get_override("flow_step")(vf,D,h); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
+    ValidatedVectorMultivariateFunctionModelDP flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
-    ValidatedVectorFunctionModelDP flow_to(const ValidatedVectorFunction& vf ,const ExactBoxType& D, const Real& tf) const {
+    ValidatedVectorMultivariateFunctionModelDP flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow_to")(vf,D,tf); }
-    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
+    List<ValidatedVectorMultivariateFunctionModelDP> flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
         return this->get_override("flow")(vf,D,t0,tf); }
-    List<ValidatedVectorFunctionModelDP> flow(const ValidatedVectorFunction& vf, const ExactBoxType& D, const Real& tf) const {
+    List<ValidatedVectorMultivariateFunctionModelDP> flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow")(vf,D,tf); }
     Void write(OutputStream& os) const {
         this->get_override("write")(os); }
@@ -106,10 +106,10 @@ class IntegratorWrapper
 Void export_solvers(pybind11::module& module)
 {
     pybind11::class_<SolverInterface,SolverWrapper> solver_interface_class(module,"SolverInterface");
-    solver_interface_class.def("solve", (Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve);
-    solver_interface_class.def("implicit",(ValidatedVectorFunctionModelDP(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit);
-    solver_interface_class.def("implicit",(ValidatedScalarFunctionModelDP(SolverInterface::*)(const ValidatedScalarFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit);
-    solver_interface_class.def("solve_all",(Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&)const) &SolverInterface::solve_all);
+    solver_interface_class.def("solve", (Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve);
+    solver_interface_class.def("implicit",(ValidatedVectorMultivariateFunctionModelDP(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit);
+    solver_interface_class.def("implicit",(ValidatedScalarMultivariateFunctionModelDP(SolverInterface::*)(const ValidatedScalarMultivariateFunction&,const ExactBoxType&,const ExactIntervalType&)const) &SolverInterface::implicit);
+    solver_interface_class.def("solve_all",(Set< Vector<ValidatedNumericType> >(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve_all);
     solver_interface_class.def("__str__",&__cstr__<SolverInterface>);
 
     pybind11::class_<IntervalNewtonSolver, SolverInterface> interval_newton_solver_class(module,"IntervalNewtonSolver");
@@ -124,11 +124,11 @@ Void export_solvers(pybind11::module& module)
 Void export_integrators(pybind11::module& module)
 {
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");
-    integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
-    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_to",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
-    integrator_interface_class.def("flow",(List<ValidatedVectorFunctionModelDP>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
+    integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
+    integrator_interface_class.def("flow_step",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_step",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_to",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
+    integrator_interface_class.def("flow",(List<ValidatedVectorMultivariateFunctionModelDP>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");

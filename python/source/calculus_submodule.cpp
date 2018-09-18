@@ -44,31 +44,27 @@ namespace Ariadne {
 
 
 
-//ValidatedNumericType evaluate(const ValidatedScalarFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
-//Vector<ValidatedNumericType> evaluate(const ValidatedVectorFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
+//ValidatedNumericType evaluate(const ValidatedScalarMultivariateFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
+//Vector<ValidatedNumericType> evaluate(const ValidatedVectorMultivariateFunctionModelDP& f, const Vector<ValidatedNumericType>& x) { return f(x); }
 
-//ValidatedScalarFunctionModelDP partial_evaluate(const ValidatedScalarFunctionModelDP&, SizeType, const ValidatedNumericType&);
-//ValidatedVectorFunctionModelDP partial_evaluate(const ValidatedVectorFunctionModelDP&, SizeType, const ValidatedNumericType&);
+//ValidatedScalarMultivariateFunctionModelDP partial_evaluate(const ValidatedScalarMultivariateFunctionModelDP&, SizeType, const ValidatedNumericType&);
+//ValidatedVectorMultivariateFunctionModelDP partial_evaluate(const ValidatedVectorMultivariateFunctionModelDP&, SizeType, const ValidatedNumericType&);
 
-//ValidatedScalarFunctionModelDP antiderivative(const ValidatedScalarFunctionModelDP&, SizeType, ValidatedNumericType);
-//ValidatedVectorFunctionModelDP antiderivative(const ValidatedVectorFunctionModelDP&, SizeType, ValidatedNumericType);
+//ValidatedScalarMultivariateFunctionModelDP antiderivative(const ValidatedScalarMultivariateFunctionModelDP&, SizeType, ValidatedNumericType);
+//ValidatedVectorMultivariateFunctionModelDP antiderivative(const ValidatedVectorMultivariateFunctionModelDP&, SizeType, ValidatedNumericType);
 
-//ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-//ValidatedScalarFunctionModelDP compose(const ValidatedScalarFunction&, const ValidatedVectorFunctionModelDP&);
-//ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-//ValidatedVectorFunctionModelDP compose(const ValidatedVectorFunction&, const ValidatedVectorFunctionModelDP&);
+//ValidatedScalarMultivariateFunctionModelDP compose(const ValidatedScalarMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
+//ValidatedScalarMultivariateFunctionModelDP compose(const ValidatedScalarMultivariateFunction&, const ValidatedVectorMultivariateFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP compose(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP compose(const ValidatedVectorMultivariateFunction&, const ValidatedVectorMultivariateFunctionModelDP&);
 
-//ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
-//ValidatedVectorFunctionModelDP join(const ValidatedScalarFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
-//ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedScalarFunctionModelDP&);
-//ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP&, const ValidatedVectorFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP join(const ValidatedScalarMultivariateFunctionModelDP&, const ValidatedScalarMultivariateFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP join(const ValidatedScalarMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedScalarMultivariateFunctionModelDP&);
+//ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
 
-template<class P, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunctionModel<P,PR,PRE> >& frepr) {
-    static_cast<const ScalarFunctionInterface<P>&>(frepr.reference()).repr(os); return os;
-}
-
-template<class P, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< VectorFunctionModel<P,PR,PRE> >& frepr) {
-    static_cast<const VectorFunctionInterface<P>&>(frepr.reference()).write(os); return os;
+template<class P, class D, class C, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< FunctionModel<P,D,C,PR,PRE> >& frepr) {
+    static_cast<const FunctionInterface<P,D,C>&>(frepr.reference()).repr(os); return os;
 }
 
 ValidatedVectorTaylorFunctionModelDP __getslice__(const ValidatedVectorTaylorFunctionModelDP& tf, Int start, Int stop) {
@@ -172,12 +168,12 @@ template<class P, class F> List<MultiIndex> keys(const TaylorModel<P,F>& tm) {
     return r;
 }
 
-ValidatedScalarFunction unrestrict(const ValidatedScalarFunctionModelDP& fm) {
-    return ValidatedScalarFunction(fm.raw_pointer()->_clone());
+ValidatedScalarMultivariateFunction unrestrict(const ValidatedScalarMultivariateFunctionModelDP& fm) {
+    return ValidatedScalarMultivariateFunction(fm.raw_pointer()->_clone());
 }
 
-ValidatedVectorFunction unrestrict(const ValidatedVectorFunctionModelDP& fm) {
-    return ValidatedVectorFunction(fm.raw_pointer()->_clone());
+ValidatedVectorMultivariateFunction unrestrict(const ValidatedVectorMultivariateFunctionModelDP& fm) {
+    return ValidatedVectorMultivariateFunction(fm.raw_pointer()->_clone());
 }
 
 } // namespace Ariadne
@@ -319,16 +315,16 @@ Void export_approximate_taylor_model(pybind11::module& module)
 
 Void export_scalar_function_model(pybind11::module& module)
 {
-    pybind11::class_<ValidatedScalarFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModel");
-    scalar_function_model_class.def(pybind11::init<ValidatedScalarFunctionModelDP>());
+    pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModel");
+    scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateFunctionModelDP>());
     scalar_function_model_class.def(pybind11::init<ValidatedScalarTaylorFunctionModelDP>());
-    scalar_function_model_class.def("argument_size", &ValidatedScalarFunctionModelDP::argument_size);
-    scalar_function_model_class.def("domain", &ValidatedScalarFunctionModelDP::domain);
-    scalar_function_model_class.def("codomain", &ValidatedScalarFunctionModelDP::codomain);
-    scalar_function_model_class.def("range", &ValidatedScalarFunctionModelDP::range);
-    scalar_function_model_class.def("clobber", &ValidatedScalarFunctionModelDP::clobber);
-    scalar_function_model_class.def("error", &ValidatedScalarFunctionModelDP::error);
-    scalar_function_model_class.def("__call__", (FloatDPBounds(ValidatedScalarFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarFunctionModelDP::operator());
+    scalar_function_model_class.def("argument_size", &ValidatedScalarMultivariateFunctionModelDP::argument_size);
+    scalar_function_model_class.def("domain", &ValidatedScalarMultivariateFunctionModelDP::domain);
+    scalar_function_model_class.def("codomain", &ValidatedScalarMultivariateFunctionModelDP::codomain);
+    scalar_function_model_class.def("range", &ValidatedScalarMultivariateFunctionModelDP::range);
+    scalar_function_model_class.def("clobber", &ValidatedScalarMultivariateFunctionModelDP::clobber);
+    scalar_function_model_class.def("error", &ValidatedScalarMultivariateFunctionModelDP::error);
+    scalar_function_model_class.def("__call__", (FloatDPBounds(ValidatedScalarMultivariateFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarMultivariateFunctionModelDP::operator());
     scalar_function_model_class.def(self+self);
     scalar_function_model_class.def(self-self);
     scalar_function_model_class.def(self*self);
@@ -341,78 +337,78 @@ Void export_scalar_function_model(pybind11::module& module)
     scalar_function_model_class.def(ValidatedNumericType()-self);
     scalar_function_model_class.def(ValidatedNumericType()*self);
     scalar_function_model_class.def(ValidatedNumericType()/self);
-    scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarFunctionModelDP>);
-    scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarFunctionModelDP>);
+    scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarMultivariateFunctionModelDP>);
+    scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarMultivariateFunctionModelDP>);
 
-    module.def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
-    module.def("partial_evaluate", &_partial_evaluate_<ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType>);
+    module.def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarMultivariateFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
+    module.def("partial_evaluate", &_partial_evaluate_<ValidatedScalarMultivariateFunctionModelDP,SizeType,ValidatedNumericType>);
 
-    module.def("compose", _compose_<ValidatedScalarFunctionModelDP,ValidatedVectorFunctionModelDP>);
-    module.def("compose", _compose_<ValidatedScalarFunction,ValidatedVectorFunctionModelDP>);
+    module.def("compose", _compose_<ValidatedScalarMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);
+    module.def("compose", _compose_<ValidatedScalarMultivariateFunction,ValidatedVectorMultivariateFunctionModelDP>);
 
-    module.def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModelDP&)) &unrestrict);
+    module.def("unrestrict", (ValidatedScalarMultivariateFunction(*)(const ValidatedScalarMultivariateFunctionModelDP&)) &unrestrict);
 
-    module.def("antiderivative",  &_antiderivative_<ValidatedScalarFunctionModelDP,SizeType,ValidatedNumericType>);
+    module.def("antiderivative",  &_antiderivative_<ValidatedScalarMultivariateFunctionModelDP,SizeType,ValidatedNumericType>);
 
 }
 
 Void export_vector_function_model(pybind11::module& module)
 {
-    //using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
-    //using ScalarFunctionModelType = ValidatedScalarFunctionModelDP;
+    //using VectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
+    //using ScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
     
-    pybind11::class_<ValidatedVectorFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModel");
-    vector_function_model_class.def(pybind11::init<ValidatedVectorFunctionModelDP>());
-//    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarFunctionModelDP> ary){return ValidatedVectorFunctionModelDP(Vector<ValidatedScalarFunctionModelDP>(ary));}));
+    pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModel");
+    vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateFunctionModelDP>());
+//    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarMultivariateFunctionModelDP> ary){return ValidatedVectorMultivariateFunctionModelDP(Vector<ValidatedScalarMultivariateFunctionModelDP>(ary));}));
     vector_function_model_class.def(pybind11::init<ValidatedVectorTaylorFunctionModelDP>());
-    vector_function_model_class.def("result_size", &ValidatedVectorFunctionModelDP::result_size);
-    vector_function_model_class.def("argument_size", &ValidatedVectorFunctionModelDP::argument_size);
-    vector_function_model_class.def("domain", &ValidatedVectorFunctionModelDP::domain);
-    vector_function_model_class.def("codomain", &ValidatedVectorFunctionModelDP::codomain);
-    vector_function_model_class.def("range", &ValidatedVectorFunctionModelDP::range);
+    vector_function_model_class.def("result_size", &ValidatedVectorMultivariateFunctionModelDP::result_size);
+    vector_function_model_class.def("argument_size", &ValidatedVectorMultivariateFunctionModelDP::argument_size);
+    vector_function_model_class.def("domain", &ValidatedVectorMultivariateFunctionModelDP::domain);
+    vector_function_model_class.def("codomain", &ValidatedVectorMultivariateFunctionModelDP::codomain);
+    vector_function_model_class.def("range", &ValidatedVectorMultivariateFunctionModelDP::range);
     //vector_function_model_class.def("__getslice__", (ValidatedVectorTaylorFunctionModelDP(*)(const ValidatedVectorTaylorFunctionModelDP&,Int,Int))&__getslice__);
-    vector_function_model_class.def("__getitem__", &__getitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunctionModelDP>);
-    vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunctionModelDP>);
-    //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModelDP,SizeType,ValidatedScalarFunction>);
-    vector_function_model_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorFunctionModelDP::operator());
+    vector_function_model_class.def("__getitem__", &__getitem__<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedScalarMultivariateFunctionModelDP>);
+    vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedScalarMultivariateFunctionModelDP>);
+    //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedScalarMultivariateFunction>);
+    vector_function_model_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorMultivariateFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorMultivariateFunctionModelDP::operator());
 
     // NOTE: Not all operations are exported in C++ API.
-    //define_vector_algebra_arithmetic<VectorFunctionModelType,ScalarFunctionModelType,NumericType>(module,vector_function_model_class);
-    //define_vector_arithmetic<VectorFunctionModelType,ScalarFunctionModelType>(module,vector_function_model_class);
+    //define_vector_algebra_arithmetic<VectorMultivariateFunctionModelType,ScalarMultivariateFunctionModelType,NumericType>(module,vector_function_model_class);
+    //define_vector_arithmetic<VectorMultivariateFunctionModelType,ScalarMultivariateFunctionModelType>(module,vector_function_model_class);
     
-    vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorFunctionModelDP>);
-    vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorFunctionModelDP>);
-    //export_vector_function_model.def(pybind11::module& module, "__repr__",&__repr__<ValidatedVectorFunctionModelDP>);
+    vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorMultivariateFunctionModelDP>);
+    vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorMultivariateFunctionModelDP>);
+    //export_vector_function_model.def(pybind11::module& module, "__repr__",&__repr__<ValidatedVectorMultivariateFunctionModelDP>);
 
 
-//    module.def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
-    module.def("partial_evaluate", &_partial_evaluate_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
+//    module.def("evaluate", (Vector<ValidatedNumericType>(*)(const ValidatedVectorMultivariateFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
+    module.def("partial_evaluate", &_partial_evaluate_<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedNumericType>);
 
-    module.def("compose", &_compose_<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP>);
-    module.def("compose", &_compose_<ValidatedVectorFunction,ValidatedVectorFunctionModelDP>);
+    module.def("compose", &_compose_<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);
+    module.def("compose", &_compose_<ValidatedVectorMultivariateFunction,ValidatedVectorMultivariateFunctionModelDP>);
 
-    module.def("unrestrict", (ValidatedVectorFunction(*)(const ValidatedVectorFunctionModelDP&)) &unrestrict);
+    module.def("unrestrict", (ValidatedVectorMultivariateFunction(*)(const ValidatedVectorMultivariateFunctionModelDP&)) &unrestrict);
 
-    module.def("join", &_join_<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP>);
-    module.def("join", &_join_<ValidatedScalarFunctionModelDP,ValidatedVectorFunctionModelDP>);
-    module.def("join", &_join_<ValidatedVectorFunctionModelDP,ValidatedScalarFunctionModelDP>);
-    module.def("join", &_join_<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP>);
+    module.def("join", &_join_<ValidatedScalarMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP>);
+    module.def("join", &_join_<ValidatedScalarMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);
+    module.def("join", &_join_<ValidatedVectorMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP>);
+    module.def("join", &_join_<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);
 
-    module.def("combine", &_combine_<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP>);
-        module.def("combine", &_combine_<ValidatedVectorFunctionModelDP,ValidatedScalarFunctionModelDP>);
+    module.def("combine", &_combine_<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);
+        module.def("combine", &_combine_<ValidatedVectorMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP>);
 
-    module.def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumericType>);
-    module.def("antiderivative", &_antiderivative_<ValidatedVectorFunctionModelDP,SizeType,ValidatedNumber>);
+    module.def("antiderivative", &_antiderivative_<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedNumericType>);
+    module.def("antiderivative", &_antiderivative_<ValidatedVectorMultivariateFunctionModelDP,SizeType,ValidatedNumber>);
 
-//    to_python< List<ValidatedVectorFunctionModelDP> >();
+//    to_python< List<ValidatedVectorMultivariateFunctionModelDP> >();
 }
 
 
 Void export_scalar_taylor_function(pybind11::module& module)
 {
     using FunctionModelType = ValidatedScalarTaylorFunctionModelDP;
-//    using FunctionType = ScalarFunction<Paradigm<FunctionModelType>>;
-    using GenericFunctionType = ScalarFunction<ValidatedTag>;
+//    using FunctionType = ScalarMultivariateFunction<Paradigm<FunctionModelType>>;
+    using GenericFunctionType = ScalarMultivariateFunction<ValidatedTag>;
     using NumericType = NumericType<FunctionModelType>;
     using GenericNumericType = GenericType<NumericType>;
     
@@ -430,7 +426,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def(pybind11::init<ValidatedScalarTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(pybind11::init<ExactBoxType,ValidatedTaylorModelDP>());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType,SweeperDP >());
-    scalar_taylor_function_class.def(pybind11::init< ExactBoxType, const EffectiveScalarFunction&,SweeperDP >());
+    scalar_taylor_function_class.def(pybind11::init< ExactBoxType, const EffectiveScalarMultivariateFunction&,SweeperDP >());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType, Expansion<MultiIndex,FloatDPValue>, FloatDPError, SweeperDP >());
     scalar_taylor_function_class.def("error", (const FloatDPError&(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::error);
     scalar_taylor_function_class.def("set_error", (Void(ValidatedScalarTaylorFunctionModelDP::*)(const FloatDPError&)) &ValidatedScalarTaylorFunctionModelDP::set_error);
@@ -461,7 +457,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("__call__", (FloatDPApproximation(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedScalarTaylorFunctionModelDP::operator());
     scalar_taylor_function_class.def("__call__", (FloatDPBounds(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarTaylorFunctionModelDP::operator());
     scalar_taylor_function_class.def("gradient", (Covector<FloatDPBounds>(ValidatedScalarTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarTaylorFunctionModelDP::gradient);
-    scalar_taylor_function_class.def("function", (ValidatedScalarFunction(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::function);
+    scalar_taylor_function_class.def("function", (ValidatedScalarMultivariateFunction(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<FloatDPBounds>(ValidatedScalarTaylorFunctionModelDP::*)()const) &ValidatedScalarTaylorFunctionModelDP::polynomial);
     scalar_taylor_function_class.def("restriction", &_restriction_<F,D>);
     module.def("restrict", &_restriction_<F,D>);
@@ -497,13 +493,13 @@ Void export_scalar_taylor_function(pybind11::module& module)
 Void export_vector_taylor_function(pybind11::module& module)
 {
 
-    //using VectorFunctionModelType = ValidatedVectorFunctionModelDP;
-    using ScalarFunctionModelType = ValidatedScalarFunctionModelDP;
-    using NumericType = NumericType<ScalarFunctionModelType>;
+    //using VectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
+    using ScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
+    using NumericType = NumericType<ScalarMultivariateFunctionModelType>;
     
     typedef SizeType I;
-    typedef ValidatedScalarFunction SFN;
-    typedef ValidatedVectorFunction VFN;
+    typedef ValidatedScalarMultivariateFunction SFN;
+    typedef ValidatedVectorMultivariateFunction VFN;
     typedef ValidatedScalarTaylorFunctionModelDP SF;
     typedef ValidatedVectorTaylorFunctionModelDP VF;
     typedef typename VF::DomainType D;
@@ -511,7 +507,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     typedef typename VF::NumericType X;
     typedef Vector<X> VX;
 
-    Tag<ValidatedScalarFunctionModelDP> scalar_taylor_function_tag;
+    Tag<ValidatedScalarMultivariateFunctionModelDP> scalar_taylor_function_tag;
     Tag<Vector<NumericType>> number_vector_tag;
     
     pybind11::class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorMultivariateTaylorFunctionModel");
@@ -519,7 +515,7 @@ Void export_vector_taylor_function(pybind11::module& module)
 //    vector_taylor_function_class.def( pybind11::init<Vector<ValidatedScalarTaylorFunctionModelDP>>());
     vector_taylor_function_class.def( pybind11::init([](Array<ValidatedScalarTaylorFunctionModelDP> ary){return ValidatedVectorTaylorFunctionModelDP(Vector<ValidatedScalarTaylorFunctionModelDP>(ary));}));
     vector_taylor_function_class.def( pybind11::init< SizeType, ExactBoxType, SweeperDP >());
-    vector_taylor_function_class.def( pybind11::init< ExactBoxType,const EffectiveVectorFunction&,SweeperDP >());
+    vector_taylor_function_class.def( pybind11::init< ExactBoxType,const EffectiveVectorMultivariateFunction&,SweeperDP >());
     vector_taylor_function_class.def(pybind11::init< ExactBoxType, Vector< Expansion<MultiIndex,FloatDPValue> >, Vector<FloatDPError>, SweeperDP >());
     vector_taylor_function_class.def( pybind11::init< Vector<ValidatedScalarTaylorFunctionModelDP> >());
     vector_taylor_function_class.def("_len_", &ValidatedVectorTaylorFunctionModelDP::result_size);
@@ -552,7 +548,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::operator());
      vector_taylor_function_class.def("jacobian", (Matrix<FloatDPBounds>(ValidatedVectorTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorTaylorFunctionModelDP::jacobian);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<FloatDPBounds> >(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::polynomials);
-    vector_taylor_function_class.def("function", (ValidatedVectorFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
+    vector_taylor_function_class.def("function", (ValidatedVectorMultivariateFunction(ValidatedVectorTaylorFunctionModelDP::*)()const) &ValidatedVectorTaylorFunctionModelDP::function);
 
     vector_taylor_function_class.def_static("constant",(ValidatedVectorTaylorFunctionModelDP(*)(const ExactBoxType&, const Vector<ValidatedNumericType>&,SweeperDP))&ValidatedVectorTaylorFunctionModelDP::constant);
     vector_taylor_function_class.def_static("constant",[](const ExactBoxType& bx, const Vector<ValidatedNumber>& c,SweeperDP swp){return ValidatedVectorTaylorFunctionModelDP::constant(bx,Vector<ValidatedNumericType>(c,swp.precision()),swp);});
@@ -585,8 +581,8 @@ Void export_vector_taylor_function(pybind11::module& module)
     module.def("antiderivative", &_antiderivative_<VF,I>);
     module.def("antiderivative", &_antiderivative_<VF,I,X>);
 
-    module.def("compose", &_compose_<EffectiveScalarFunction,VF>);
-    module.def("compose", &_compose_<EffectiveVectorFunction,VF>);
+    module.def("compose", &_compose_<EffectiveScalarMultivariateFunction,VF>);
+    module.def("compose", &_compose_<EffectiveVectorMultivariateFunction,VF>);
 
 }
 

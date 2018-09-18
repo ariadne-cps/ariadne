@@ -281,7 +281,7 @@ template<class X> inline Bool all_greater(const Vector<X>& x, const X& e) {
 
 
 
-template<class X> Vector< Differential<X> > second_derivative(const ValidatedVectorFunction& f, const Vector<X>& x) {
+template<class X> Vector< Differential<X> > second_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<X>& x) {
     Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2);
     return f.evaluate(d);
 }
@@ -467,7 +467,7 @@ const FloatDPValue OptimiserBase::zero = FloatDPValue(0,dp);
 const FloatDPValue OptimiserBase::one = FloatDPValue(1,dp);
 
 Bool OptimiserBase::
-almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ApproximateVector ax, FloatDPApproximation error) const
+almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ApproximateVector ax, FloatDPApproximation error) const
 {
     ExactVector ex=cast_exact(ax);
     if(!contains(D,ex)) { return false; }
@@ -477,7 +477,7 @@ almost_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
 
 
 Bool OptimiserBase::
-is_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x) const
+is_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactVector x) const
 {
     if(!contains(D,x)) { return false; }
     Vector<FloatDPBounds> gx=g(x);
@@ -486,7 +486,7 @@ is_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, Exa
 
 
 ValidatedKleenean OptimiserBase::
-contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ValidatedVector X) const
+contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ValidatedVector X) const
 {
     ARIADNE_LOG(4,"OptimiserBase::contains_feasible_point(D,g,C,X):\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<", X="<<X<<"\n");
@@ -520,7 +520,7 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
 
     // Construct the function g_e(x) = g_{e_i}(x)
     ARIADNE_ASSERT(g.result_size()>0);
-    ValidatedVectorFunction ge(equality_constraints.size(),g.domain());
+    ValidatedVectorMultivariateFunction ge(equality_constraints.size(),g.domain());
     ExactIntervalVectorType ce(equality_constraints.size());
     for(Nat i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
@@ -572,14 +572,14 @@ contains_feasible_point(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType 
 
 
 Bool OptimiserBase::
-validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                      ExactVector x0, ExactVector y0) const
 {
     return this->validate_feasibility(D,g,C,x0);
 }
 
 Bool OptimiserBase::
-validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                      ExactVector x0) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -611,7 +611,7 @@ validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
 
     Nat k=equalities.size();
     Nat n=D.size();
-    ValidatedVectorFunction h(equalities.size(),g.domain());
+    ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
     ExactFloatVector c(equalities.size());
     for(Nat i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
@@ -684,7 +684,7 @@ validate_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
 
 
 Bool OptimiserBase::
-validate_infeasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                        ExactVector x, ExactVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -723,7 +723,7 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C
 
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
-is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactFloatVector y) const
+is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactFloatVector y) const
 {
     ARIADNE_LOG(2,"OptimiserBase::is_infeasibility_certificate(D,g,C,y)\n");
     ARIADNE_LOG(2,"  D="<<D<<", g="<<g<<", C="<<C<<", y="<<y<<"\n");
@@ -757,10 +757,10 @@ is_infeasibility_certificate(ExactBoxType D, ValidatedVectorFunction g, ExactBox
 
 
 ValidatedVector OptimiserBase::
-minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::minimise(f,D,g,h)\n");
-    ValidatedVectorFunction gh=join(g,h);
+    ValidatedVectorMultivariateFunction gh=join(g,h);
     ExactBoxType C(gh.result_size(),ExactIntervalType(0,0));
     for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactIntervalType(-inf,0); }
     return this->minimise(f,D,gh,C);
@@ -769,10 +769,10 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, V
 
 
 ValidatedKleenean OptimiserBase::
-feasible(ExactBoxType D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
-    ValidatedVectorFunction gh=join(g,h);
+    ValidatedVectorMultivariateFunction gh=join(g,h);
     ExactBoxType C(gh.result_size(),ExactIntervalType(0,0));
     for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactIntervalType(-inf,0); }
     return this->feasible(D,gh,C);
@@ -790,7 +790,7 @@ struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualDa
 };
 
 ValidatedVector NonlinearInfeasibleInteriorPointOptimiser::
-minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(2,"  f="<<f<<", D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -842,7 +842,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, E
 }
 
 ValidatedKleenean NonlinearInfeasibleInteriorPointOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -854,7 +854,7 @@ feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
     FloatApproximationVector& x=cast_approximate(v.x);
     FloatApproximationVector& y=cast_approximate(v.y);
 
-    ApproximateScalarFunction f(D);
+    ApproximateScalarMultivariateFunction f(D);
     ExactBoxType R=intersection(cast_exact_box(apply(g,D)+UpperBoxType(C.size(),UpperIntervalType(-1,+1))),C);
     this->setup_feasibility(D,g,R,v);
 
@@ -884,7 +884,7 @@ feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
+setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
                   StepData& v) const
 {
     ExactIntervalType I(-1,+1);
@@ -910,7 +910,7 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorFunction& g, con
 
 Void
 NonlinearInfeasibleInteriorPointOptimiser::step(
-    const ApproximateScalarFunction& f, const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
+    const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     StepData& v) const
 {
     RawFloatVector& w=v.w; RawFloatVector& x=v.x; RawFloatVector& y=v.y; FloatDP& mu=v.mu;
@@ -1162,11 +1162,11 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 //------- NonlinearInteriorPointOptimiser -----------------------------------//
 
 ValidatedVector NonlinearInteriorPointOptimiser::
-minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
-    ValidatedVectorFunction h(0,D);
+    ValidatedVectorMultivariateFunction h(0,D);
 
     UpperBoxType gD = apply(g,D);
     if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
@@ -1197,7 +1197,7 @@ minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, E
 // min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
 // Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
 Void NonlinearInteriorPointOptimiser::
-minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c, const ApproximateVectorFunction& h,
+minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c, const ApproximateVectorMultivariateFunction& h,
                   FloatApproximationVector& x, FloatApproximationVector& w,
                   FloatApproximationVector& kappa, FloatApproximationVector& lambda, const FloatDPApproximation& mu) const
 {
@@ -1359,7 +1359,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBoxType& d, con
 
 
 ValidatedKleenean NonlinearInteriorPointOptimiser::
-feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
+feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(D,g,C,h)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
@@ -1392,7 +1392,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 
 Void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
+    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     FloatApproximationVector& x, FloatApproximationVector& y) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1401,7 +1401,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 Void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
+    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     FloatApproximationVector& x, FloatApproximationVector& y, FloatDPApproximation& t) const
 {
     static const double _inf = std::numeric_limits<double>::infinity();
@@ -1540,7 +1540,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 /*
 Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
-    const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
+    const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     FloatDP& t, RawFloatVector& x, RawFloatVector& y) const
 {
     static const double gamma=1.0/1024;
@@ -1660,7 +1660,7 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 
 
 FloatDPApproximation NonlinearInteriorPointOptimiser::
-compute_mu(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
+compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
            const FloatApproximationVector& x, const FloatApproximationVector& lambda) const
 {
     // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
@@ -1682,7 +1682,7 @@ compute_mu(const ExactBoxType& D, const ApproximateVectorFunction& g, const Exac
 
 
 Void NonlinearInteriorPointOptimiser::
-setup_feasibility(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
+setup_feasibility(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
                   FloatApproximationVector& x, FloatApproximationVector& y) const
 {
     const Nat l=2*(d.size()+c.size());
@@ -1703,13 +1703,13 @@ clone() const
 }
 
 ValidatedVector PenaltyFunctionOptimiser::
-minimise(ValidatedScalarFunction f, ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 ValidatedKleenean PenaltyFunctionOptimiser::
-feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
+feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
     ARIADNE_LOG(2,"PenaltyFunctionOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<" g="<<g<<" C="<<C<<" \n");
@@ -1733,10 +1733,10 @@ feasible(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C) const
 }
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& X, const ApproximateVectorFunction& g, const ExactBoxType& W,
+feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& W,
                  FloatApproximationVector& x, FloatApproximationVector& w, FloatDPApproximation& mu) const
 {
-    ApproximateVectorFunction h(0u,X);
+    ApproximateVectorMultivariateFunction h(0u,X);
     const Nat n=X.size();
     const Nat m=W.size();
     const Nat l=h.result_size();
@@ -1824,7 +1824,7 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorFunction& g, cons
 
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const ExactBoxType& C,
+feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
                  FloatBoundsVector& x, FloatBoundsVector& w) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1834,7 +1834,7 @@ feasibility_step(const ExactBoxType& D, const ValidatedVectorFunction& g, const 
 // Use a penalty approach without multipliers on the constraint functions
 // Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
 Void PenaltyFunctionOptimiser::
-feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, ExactBoxType const& C,
+feasibility_step(ExactBoxType const& D, ApproximateVectorMultivariateFunction const& g, ExactBoxType const& C,
                  FloatApproximationVector& x, FloatApproximationVector& y, FloatApproximationVector& w) const
 {
 
@@ -1947,7 +1947,7 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, Exac
 
 /*
 Void NonlinearInteriorPointOptimiser::
-compute_tz(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& b,
+compute_tz(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& b,
            const RawFloatVector& y, FloatDP& t, RawFloatVector& z) const
 {
     static const double ZMIN=0.5;
@@ -1983,7 +1983,7 @@ compute_tz(const ExactBoxType& d, const ApproximateVectorFunction& g, const Exac
     }
 }
 
-Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& b,
+Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& b,
                                                 const RawFloatVector& y, const FloatDP& t, RawFloatVector& z) const
 {
     const Nat m=g.argument_size();
@@ -2009,7 +2009,7 @@ Void NonlinearInteriorPointOptimiser::compute_z(const ExactBoxType& d, const App
 
 
 ValidatedKleenean ApproximateOptimiser::
-feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const
 {
     ARIADNE_LOG(2,"ApproximateOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2028,7 +2028,7 @@ feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 }
 
 Void ApproximateOptimiser::
-feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
+feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& h,
                  FloatApproximationVector& x, FloatApproximationVector& y) const
 {
     ARIADNE_LOG(4,"ApproximateOptimiser::feasibility_step(D,h,x,y)\n");
@@ -2084,7 +2084,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& h,
 
 
 ValidatedKleenean PenaltyFunctionOptimiser::
-check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
+check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                      ExactFloatVector x, ExactFloatVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -2114,7 +2114,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
     if(definitely(result)) {
         if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
-        ValidatedVectorFunction h(equalities.size(),g.domain());
+        ValidatedVectorMultivariateFunction h(equalities.size(),g.domain());
         FloatBoundsVector c(equalities.size());
         for(Nat i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
@@ -2213,7 +2213,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C,
 //     Dg dx - I dz
 //    2y . dy - dmu
 Void PenaltyFunctionOptimiser::
-feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, const ExactBoxType& C,
+feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
                  RawFloatVector& x, RawFloatVector& y, RawFloatVector& z) const
 {
     ARIADNE_LOG(2,"feasibility_step\n");
@@ -2309,7 +2309,7 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorFunction& g, cons
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 ValidatedKleenean IntervalOptimiser::
-feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
+feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const
 {
     ARIADNE_LOG(2,"IntervalOptimiser::feasible_zero(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2332,7 +2332,7 @@ feasible_zero(ExactBoxType D, ValidatedVectorFunction h) const
 }
 
 Void IntervalOptimiser::
-feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
+feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorMultivariateFunction& h,
                  FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& zl, FloatBoundsVector zu, FloatDPBounds& mu) const
 {
     ARIADNE_LOG(4,"IntervalOptimiser::feasibility_step(D,h,X,Lambda)\n");
@@ -2398,14 +2398,14 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
 
 /*
 
-struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,ExactIntervalType>
+struct KuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<KuhnTuckerFunctionBody,ExactIntervalType>
 {
-    ValidatedScalarFunction f;
-    Array<ValidatedScalarFunction> g;
-    Array<ValidatedScalarFunction> df;
-    Array<Array<ValidatedScalarFunction> > dg;
+    ValidatedScalarMultivariateFunction f;
+    Array<ValidatedScalarMultivariateFunction> g;
+    Array<ValidatedScalarMultivariateFunction> df;
+    Array<Array<ValidatedScalarMultivariateFunction> > dg;
 
-    KuhnTuckerFunctionBody(ValidatedScalarFunction _f, ValidatedVectorFunction _g) {
+    KuhnTuckerFunctionBody(ValidatedScalarMultivariateFunction _f, ValidatedVectorMultivariateFunction _g) {
         ARIADNE_ASSERT(_f.argument_size()==_g.argument_size());
         const Nat m=_g.argument_size();
         const Nat n=_g.result_size();
@@ -2418,7 +2418,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Exact
 
     Nat result_size() const { return g.size()*2+f.argument_size(); }
     Nat argument_size() const { return g.size()*2+f.argument_size(); }
-    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2437,12 +2437,12 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Exact
     }
 };
 
-struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
+struct FeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
 {
-    Array<ValidatedScalarFunction> g;
-    Array<Array<ValidatedScalarFunction> > dg;
+    Array<ValidatedScalarMultivariateFunction> g;
+    Array<Array<ValidatedScalarMultivariateFunction> > dg;
 
-    FeasibilityKuhnTuckerFunctionBody(ValidatedVectorFunction _g) {
+    FeasibilityKuhnTuckerFunctionBody(ValidatedVectorMultivariateFunction _g) {
         const Nat m=_g.argument_size();
         const Nat n=_g.result_size();
         g.resize(n); dg.resize(n); for(Nat j=0; j!=n; ++j) { dg[j].resize(m); }
@@ -2451,7 +2451,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
 
     Nat result_size() const { return g.size()*2+g[0].argument_size()+1; }
     Nat argument_size() const { return g.size()*2+g[0].argument_size()+1; }
-    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2475,16 +2475,16 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
 
 
 
-struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
+struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactIntervalType>
 {
     Nat m;
     Nat n;
     ExactIntervalVectorType d;
-    Array<ValidatedScalarFunction> g;
+    Array<ValidatedScalarMultivariateFunction> g;
     ExactIntervalVectorType c;
-    Array<Array<ValidatedScalarFunction> > dg;
+    Array<Array<ValidatedScalarMultivariateFunction> > dg;
 
-    ConstrainedFeasibilityKuhnTuckerFunctionBody(ExactBoxType D, ValidatedVectorFunction _g, ExactBoxType C) {
+    ConstrainedFeasibilityKuhnTuckerFunctionBody(ExactBoxType D, ValidatedVectorMultivariateFunction _g, ExactBoxType C) {
         m=_g.argument_size();
         n=_g.result_size();
         d=D; c=C;
@@ -2494,7 +2494,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
     Nat result_size() const { return 5*m+4*n+1u; }
     Nat argument_size() const { return 5*m+4*n+1u; }
-    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2529,16 +2529,16 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
 
 ValidatedVector KrawczykOptimiser::
-minimise(ValidatedScalarFunction f, ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
+minimise(ValidatedScalarMultivariateFunction f, ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 ValidatedKleenean KrawczykOptimiser::
-feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
+feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) const
 {
-    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c)\n");
+    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
@@ -2581,7 +2581,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
 
 
 
-Void KrawczykOptimiser::setup_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+Void KrawczykOptimiser::setup_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c,
                                           ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     const Nat m=g.argument_size();
@@ -2594,7 +2594,7 @@ Void KrawczykOptimiser::setup_feasibility(const ExactBoxType& d, const Validated
 }
 
 
-Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c,
                                    const ExactIntervalVectorType& y, ExactIntervalType& t, ExactIntervalVectorType& z) const
 {
     ARIADNE_ASSERT(d.size()>0u);
@@ -2669,7 +2669,7 @@ Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorF
 
 
 Void KrawczykOptimiser::
-minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
+minimisation_step(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g,
                   ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z) const
 {
     const Nat m=f.argument_size();
@@ -2694,7 +2694,7 @@ minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunctio
 
 
 
-Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
+Void KrawczykOptimiser::feasibility_step(const ValidatedVectorMultivariateFunction& g,
                                          ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -2738,7 +2738,7 @@ Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
 // Feasibility step for dual (inequality constrained) problem without using slack variables
 // FIXME: Do we need a slackness parameter mu? Probably not; hopefully the infinities are kept in check...
 // This method has the advantage of not needing to update the primal variables
-Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c,
                                          ExactIntervalVectorType& y, ExactIntervalType& t) const
 {
     const Nat m=d.size();
@@ -2817,7 +2817,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
 
 
 
-Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorFunction& g, const ExactBoxType& c,
+Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c,
                                          ExactIntervalVectorType& x, ExactIntervalVectorType& y, ExactIntervalVectorType& z, ExactIntervalType& t) const
 {
     const Nat m=d.size();

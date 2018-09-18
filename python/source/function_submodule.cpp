@@ -81,12 +81,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex
     MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os;
 }
 
-template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunction<X> >& frepr) {
-    static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
-}
-
-template<class X> OutputStream& operator<<(OutputStream& os, const Representation< VectorFunction<X> >& frepr) {
-    static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
+template<class P, class D, class C> OutputStream& operator<<(OutputStream& os, const Representation< Function<P,D,C> >& frepr) {
+    static_cast<const FunctionInterface<P,D,C>&>(frepr.reference()).repr(os); return os;
 }
 
 }// namespace Ariadne
@@ -219,8 +215,8 @@ template<class F> Void export_function_evaluation(pybind11::class_<F>& function_
 
 
 
-template<class P> Void export_scalar_function_evaluation(pybind11::class_<ScalarFunction<P>>& scalar_function_class) {
-    using FP=ScalarFunction<P>;
+template<class P> Void export_scalar_function_evaluation(pybind11::class_<ScalarMultivariateFunction<P>>& scalar_function_class) {
+    using FP=ScalarMultivariateFunction<P>;
     export_function_evaluation(scalar_function_class);
     def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
     def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
@@ -228,15 +224,15 @@ template<class P> Void export_scalar_function_evaluation(pybind11::class_<Scalar
     def_gradient<ArgumentType<FP,FloatMPBounds>>(scalar_function_class);
 }
 
-template<> Void export_scalar_function_evaluation<ApproximateTag>(pybind11::class_<ScalarFunction<ApproximateTag>>& scalar_function_class) {
+template<> Void export_scalar_function_evaluation<ApproximateTag>(pybind11::class_<ScalarMultivariateFunction<ApproximateTag>>& scalar_function_class) {
     using P=ApproximateTag;
-    using FP=ScalarFunction<P>;
+    using FP=ScalarMultivariateFunction<P>;
     export_function_evaluation(scalar_function_class);
     def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
     def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
 }
 
-Void export_function_evaluation(pybind11::class_<ScalarFunction<ApproximateTag>>& scalar_function_class)
+Void export_function_evaluation(pybind11::class_<ScalarMultivariateFunction<ApproximateTag>>& scalar_function_class)
 {
     def_call<Vector<FloatDPApproximation>>(scalar_function_class);
     def_call<Vector<FloatMPApproximation>>(scalar_function_class);
@@ -247,46 +243,46 @@ Void export_function_evaluation(pybind11::class_<ScalarFunction<ApproximateTag>>
     def_evaluate<Vector<FloatMPApproximation>>(scalar_function_class);
 }
 
-template<class P> Void export_vector_function_evaluation(pybind11::class_<VectorFunction<P>>& vector_function_class){
+template<class P> Void export_vector_function_evaluation(pybind11::class_<VectorMultivariateFunction<P>>& vector_function_class){
     export_function_evaluation(vector_function_class);
 }
 
 template<class P> Void export_scalar_function(pybind11::module& module)
 {
-    pybind11::class_<ScalarFunction<P>> scalar_function_class(module,(class_name<P>()+"ScalarMultivariateFunction").c_str());
-    scalar_function_class.def(pybind11::init<ScalarFunction<P>>());
+    pybind11::class_<ScalarMultivariateFunction<P>> scalar_function_class(module,(class_name<P>()+"ScalarMultivariateFunction").c_str());
+    scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<P>>());
     scalar_function_class.def(pybind11::init<SizeType>());
-    scalar_function_class.def("argument_size", &ScalarFunction<P>::argument_size);
-    scalar_function_class.def("derivative", &ScalarFunction<P>::derivative);
-    define_elementary_algebra<ScalarFunction<P>,Number<P>>(module,scalar_function_class);
+    scalar_function_class.def("argument_size", &ScalarMultivariateFunction<P>::argument_size);
+    scalar_function_class.def("derivative", &ScalarMultivariateFunction<P>::derivative);
+    define_elementary_algebra<ScalarMultivariateFunction<P>,Number<P>>(module,scalar_function_class);
 
     if constexpr (IsSame<P,ValidatedTag>::value) {
-        scalar_function_class.def(pybind11::init<ScalarFunction<EffectiveTag>>());
-        pybind11::implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ValidatedTag>>();
+        scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<EffectiveTag>>());
+        pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
     }
     
     
 //FIXME
-//    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
-//    scalar_function_class.def("__le__", &__le__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
-//    scalar_function_class.def("__ge__", &__ge__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
+//    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
+//    scalar_function_class.def("__le__", &__le__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
+//    scalar_function_class.def("__ge__", &__ge__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
 
-    scalar_function_class.def("__str__", &__cstr__<ScalarFunction<P>>);
-    scalar_function_class.def("__repr__", &__crepr__<ScalarFunction<P>>);
+    scalar_function_class.def("__str__", &__cstr__<ScalarMultivariateFunction<P>>);
+    scalar_function_class.def("__repr__", &__crepr__<ScalarMultivariateFunction<P>>);
 
-    scalar_function_class.def_static("constant", (ScalarFunction<P>(*)(SizeType,Number<P>)) &ScalarFunction<P>::constant);
-    scalar_function_class.def_static("coordinate", (ScalarFunction<P>(*)(SizeType,SizeType)) &ScalarFunction<P>::coordinate);
+    scalar_function_class.def_static("constant", (ScalarMultivariateFunction<P>(*)(SizeType,Number<P>)) &ScalarMultivariateFunction<P>::constant);
+    scalar_function_class.def_static("coordinate", (ScalarMultivariateFunction<P>(*)(SizeType,SizeType)) &ScalarMultivariateFunction<P>::coordinate);
 
-    scalar_function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarFunction<P>::gradient);
+    scalar_function_class.def("gradient", (Covector<FloatDPApproximation>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &ScalarMultivariateFunction<P>::gradient);
     if constexpr (not IsSame<P,ApproximateTag>::value) {
-        scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
+        scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarMultivariateFunction<P>::gradient);
     }
 
-    module.def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
+    module.def("derivative", (ScalarMultivariateFunction<P>(ScalarMultivariateFunction<P>::*)(SizeType)const) &ScalarMultivariateFunction<P>::derivative);
 
-    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
+    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
     if constexpr (not IsSame<P,ApproximateTag>::value) {
-        module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+        module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
     }
 
     export_scalar_function_evaluation(scalar_function_class);
@@ -295,15 +291,15 @@ template<class P> Void export_scalar_function(pybind11::module& module)
 
 template<class P> Void export_vector_function(pybind11::module& module)
 {
-    pybind11::class_<VectorFunction<P>> vector_function_class(module,(class_name<P>()+"VectorMultivariateFunction").c_str());
-    vector_function_class.def(pybind11::init<VectorFunction<P>>());
+    pybind11::class_<VectorMultivariateFunction<P>> vector_function_class(module,(class_name<P>()+"VectorMultivariateFunction").c_str());
+    vector_function_class.def(pybind11::init<VectorMultivariateFunction<P>>());
     vector_function_class.def(pybind11::init<Nat,Nat>());
     if constexpr (IsSame<P,ValidatedTag>::value) {
-        vector_function_class.def(pybind11::init<VectorFunction<EffectiveTag>>());
-//        pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
+        vector_function_class.def(pybind11::init<VectorMultivariateFunction<EffectiveTag>>());
+//        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
     }
     // NOTE: This must go *after* the conversion constructor
-    vector_function_class.def(pybind11::init([](std::vector<ScalarFunction<P>> const& lst){return VectorMultivariateFunction<P>(lst);}));
+    vector_function_class.def(pybind11::init([](std::vector<ScalarMultivariateFunction<P>> const& lst){return VectorMultivariateFunction<P>(lst);}));
 
     vector_function_class.def("result_size", &VectorMultivariateFunction<P>::result_size);
     vector_function_class.def("argument_size", &VectorMultivariateFunction<P>::argument_size);
@@ -311,36 +307,36 @@ template<class P> Void export_vector_function(pybind11::module& module)
     vector_function_class.def("__setitem__", &VectorMultivariateFunction<P>::set);
 
     // TODO: Put these in C++ API
-    // define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>,Number<P>>(module,vector_function_class);
+    // define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>,Number<P>>(module,vector_function_class);
 
     // FIXME: Define vector function operations for Validated and Approximate
     if constexpr (IsSame<P,EffectiveTag>::value) {
-        define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>>(module,vector_function_class);
+        define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>>(module,vector_function_class);
     }
     export_vector_function_evaluation(vector_function_class);
 
-    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);
+    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorMultivariateFunction<P>::jacobian);
     if constexpr (not IsSame<P,ApproximateTag>::value) {
-        vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorFunction<P>::jacobian);
+        vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorMultivariateFunction<P>::jacobian);
     }
 
-    vector_function_class.def("__str__", &__cstr__<VectorFunction<P>>);
-    vector_function_class.def("__repr__", &__crepr__<VectorFunction<P>>);
+    vector_function_class.def("__str__", &__cstr__<VectorMultivariateFunction<P>>);
+    vector_function_class.def("__repr__", &__crepr__<VectorMultivariateFunction<P>>);
 
-    vector_function_class.def_static("identity", (VectorFunction<P>(*)(SizeType)) &VectorFunction<P>::identity);
+    vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(SizeType)) &VectorMultivariateFunction<P>::identity);
 
-    module.def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
+    module.def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
     if constexpr (not IsSame<P,ApproximateTag>::value) {
-        module.def("evaluate", (Vector<FloatDPBounds>(*)(const VectorFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+        module.def("evaluate", (Vector<FloatDPBounds>(*)(const VectorMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
     }
 
-    module.def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const ScalarFunction<P>&)) &join);
-    module.def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const ScalarFunction<P>&)) &join);
-    module.def("join", (VectorFunction<P>(*)(const ScalarFunction<P>&, const VectorFunction<P>&)) &join);
-    module.def("join", (VectorFunction<P>(*)(const VectorFunction<P>&, const VectorFunction<P>&)) &join);
+    module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
+    module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
+    module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
+    module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
 
-    module.def("compose", (ScalarFunction<P>(*)(const ScalarFunction<P>&,const VectorFunction<P>&)) &compose);
-    module.def("compose", (VectorFunction<P>(*)(const VectorFunction<P>&,const VectorFunction<P>&)) &compose);
+    module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
+    module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
 
     export_vector_function_evaluation(vector_function_class);
 }
@@ -349,7 +345,7 @@ template<class Y, class X> Void export_procedure(pybind11::module& module) {
     typedef Paradigm<Y> P;
     pybind11::class_<Procedure<Y>> procedure_class(module,(class_name<P>()+"Procedure").c_str());
     procedure_class.def("__str__", &__cstr__<Procedure<Y>>);
-    module.def("make_procedure", (Procedure<Y>(*)(ScalarFunction<P> const&)) &make_procedure);
+    module.def("make_procedure", (Procedure<Y>(*)(ScalarMultivariateFunction<P> const&)) &make_procedure);
     module.def("evaluate", (X(*)(Procedure<Y> const&, Vector<X> const&)) &evaluate);
     module.def("gradient", (Covector<X>(*)(Procedure<Y> const&, Vector<X> const&)) &gradient);
     module.def("hessian", (X(*)(Procedure<Y> const&, Vector<X> const&, Vector<X> const&)) &hessian);
@@ -359,19 +355,19 @@ Void export_scalar_functions(pybind11::module& module) {
     export_scalar_function<ApproximateTag>(module);
     export_scalar_function<ValidatedTag>(module);
     export_scalar_function<EffectiveTag>(module);
-    pybind11::implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<ScalarFunction<ValidatedTag>,ScalarFunction<ApproximateTag>>();
-    module.def("lie_derivative", (ScalarFunction<EffectiveTag>(*)(const ScalarFunction<EffectiveTag>&,const VectorFunction<EffectiveTag>&)) &lie_derivative);
+    pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
+    pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ApproximateTag>>();
+    pybind11::implicitly_convertible<ScalarMultivariateFunction<ValidatedTag>,ScalarMultivariateFunction<ApproximateTag>>();
+    module.def("lie_derivative", (ScalarMultivariateFunction<EffectiveTag>(*)(const ScalarMultivariateFunction<EffectiveTag>&,const VectorMultivariateFunction<EffectiveTag>&)) &lie_derivative);
 }
 
 Void export_vector_functions(pybind11::module& module) {
     export_vector_function<ApproximateTag>(module);
     export_vector_function<ValidatedTag>(module);
     export_vector_function<EffectiveTag>(module);
-    pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
-    pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ApproximateTag>>();
-    pybind11::implicitly_convertible<VectorFunction<ValidatedTag>,VectorFunction<ApproximateTag>>();
+    pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
+    pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ApproximateTag>>();
+    pybind11::implicitly_convertible<VectorMultivariateFunction<ValidatedTag>,VectorMultivariateFunction<ApproximateTag>>();
 }
 
 

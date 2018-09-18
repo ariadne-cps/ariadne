@@ -359,7 +359,7 @@ Void export_boxes(pybind11::module& module) {
     pybind11::implicitly_convertible<UpperBoxType,ApproximateBoxType>();
 
     module.def("widen", (UpperBoxType(*)(ExactBoxType const&, FloatDPValue eps)) &widen);
-    module.def("image", (UpperBoxType(*)(UpperBoxType const&, ValidatedVectorFunction const&)) &_image_);
+    module.def("image", (UpperBoxType(*)(UpperBoxType const&, ValidatedVectorMultivariateFunction const&)) &_image_);
 }
 
 /*
@@ -388,7 +388,7 @@ Void export_zonotope(pybind11::module& module)
     module.def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
     module.def("error_free_over_approximation", (Zonotope(*)(const Zonotope&)) &error_free_over_approximation);
 
-//    module.def("image", (Zonotope(*)(const Zonotope&, const ValidatedVectorFunction&)) &image);
+//    module.def("image", (Zonotope(*)(const Zonotope&, const ValidatedVectorMultivariateFunction&)) &image);
 }
 
 Void export_polytope(pybind11::module& module)
@@ -438,7 +438,7 @@ Void export_affine_set(pybind11::module& module)
     affine_set_class.def("boundary", &ValidatedAffineConstrainedImageSet::boundary);
     affine_set_class.def("__str__",&__cstr__<ValidatedAffineConstrainedImageSet>);
 
-    module.def("image", (ValidatedAffineConstrainedImageSet(*)(ValidatedAffineConstrainedImageSet const&,ValidatedVectorFunction const&)) &_image_);
+    module.def("image", (ValidatedAffineConstrainedImageSet(*)(ValidatedAffineConstrainedImageSet const&,ValidatedVectorMultivariateFunction const&)) &_image_);
 }
 
 Void export_constraint_set(pybind11::module& module)
@@ -470,7 +470,7 @@ Void export_constraint_set(pybind11::module& module)
     module.def("intersection", (BoundedConstraintSet(*)(ConstraintSet const&, BoundedConstraintSet const&)) &_intersection_);
     module.def("intersection", (BoundedConstraintSet(*)(BoundedConstraintSet const&, ConstraintSet const&)) &_intersection_);
 
-    module.def("image", (ConstrainedImageSet(*)(BoundedConstraintSet const&, EffectiveVectorFunction const&)) &_image_);
+    module.def("image", (ConstrainedImageSet(*)(BoundedConstraintSet const&, EffectiveVectorMultivariateFunction const&)) &_image_);
 
 }
 
@@ -491,10 +491,10 @@ Void export_constrained_image_set(pybind11::module& module)
         validated_constrained_image_set_class(module,"ValidatedConstrainedImageSet", pybind11::multiple_inheritance());
     validated_constrained_image_set_class.def(pybind11::init<ValidatedConstrainedImageSet>());
     validated_constrained_image_set_class.def(pybind11::init<ExactBoxType>());
-    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,EffectiveVectorFunction>());
-    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorFunction>());
-    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorFunction,List<ValidatedConstraint> >());
-    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorFunctionModelDP>());
+    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,EffectiveVectorMultivariateFunction>());
+    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorMultivariateFunction>());
+    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorMultivariateFunction,List<ValidatedConstraint> >());
+    validated_constrained_image_set_class.def(pybind11::init<ExactBoxType,ValidatedVectorMultivariateFunctionModelDP>());
     validated_constrained_image_set_class.def("domain", &ValidatedConstrainedImageSet::domain);
     validated_constrained_image_set_class.def("function", &ValidatedConstrainedImageSet::function);
     validated_constrained_image_set_class.def("constraint", &ValidatedConstrainedImageSet::constraint);

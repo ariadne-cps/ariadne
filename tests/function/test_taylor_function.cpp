@@ -162,9 +162,9 @@ Void TestScalarTaylorFunction::test_create()
     FloatDPValue c2={1,pr};
     ValidatedScalarTaylorFunctionModelDP pf1=ValidatedScalarTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarTaylorFunctionModelDP pf2=ValidatedScalarTaylorFunctionModelDP::constant(D,c2,swp);
-    ValidatedScalarFunctionModelDP fm1=pf1;
-    ValidatedScalarFunctionModelDP fm2=pf2;
-    ValidatedScalarFunction f2=fm2;
+    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
+    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
+    ValidatedScalarMultivariateFunction f2=fm2;
     ARIADNE_TEST_EQUAL(factory(pf1).create(pf2).range(),c2);
     ARIADNE_TEST_EQUAL(factory(pf1).create(fm2).range(),c2);
     ARIADNE_TEST_EQUAL(factory(pf1).create(f2).range(),c2);
@@ -200,9 +200,9 @@ Void TestScalarTaylorFunction::test_evaluate()
 
 Void TestScalarTaylorFunction::test_gradient()
 {
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     Real a(1.5); Real b(0.25);
-    EffectiveScalarFunction quadratic = a-x[0]*x[0]+b*x[1];
+    EffectiveScalarMultivariateFunction quadratic = a-x[0]*x[0]+b*x[1];
 
     ExactBoxType domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBoxType domain2={{-0.5,+0.5},{-0.25,+0.25}};
@@ -309,13 +309,13 @@ Void TestScalarTaylorFunction::test_conversion() {
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
     Vector<FloatDPValue> pt={-0.25_exact,0.25_exact};
     Vector<FloatDPBounds> ipt(pt);
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     ARIADNE_TEST_PRINT(x);
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,tx,(D,x,swp));
 
-    ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(1-x[0]*x[0]-x[1]/2));
+    ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,f,(1-x[0]*x[0]-x[1]/2));
     ARIADNE_TEST_PRINT(compose(f,tx));
-    ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,y,(x[1]/2));
+    ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,y,(x[1]/2));
     ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,ty,(D,x[1]/2,swp));
     ARIADNE_TEST_PRINT(ValidatedScalarTaylorFunctionModelDP(D,x[1],swp)/2);
     ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,tf,(D,f,swp));
@@ -333,11 +333,11 @@ Void TestScalarTaylorFunction::test_generic() {
     ValidatedScalarTaylorFunctionModelDP pf0=ValidatedScalarTaylorFunctionModelDP::constant(D,c0,swp);
     ValidatedScalarTaylorFunctionModelDP pf1=ValidatedScalarTaylorFunctionModelDP::constant(D,c1,swp);
     ValidatedScalarTaylorFunctionModelDP pf2=ValidatedScalarTaylorFunctionModelDP::constant(D,c2,swp);
-    ValidatedScalarFunctionModelDP fm1=pf1;
-    ValidatedScalarFunctionModelDP fm2=pf2;
-    ValidatedScalarFunctionModelDP fm4=pf0;
-    ValidatedScalarFunction f1=fm1;
-    ValidatedScalarFunction f2=fm2;
+    ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
+    ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
+    ValidatedScalarMultivariateFunctionModelDP fm4=pf0;
+    ValidatedScalarMultivariateFunction f1=fm1;
+    ValidatedScalarMultivariateFunction f2=fm2;
     ARIADNE_TEST_EQUAL((pf1+pf2).range(),c1+c2);
 //    ARIADNE_TEST_EQUAL((pf1+fm2).range(),c1+c2);
     ARIADNE_TEST_EQUAL((pf1+ f2).range(),c1+c2);
@@ -411,9 +411,9 @@ Void TestVectorTaylorFunction::test_constructors()
     Vector< RawFloatDP > errors(2);
 
     ExactBoxType domain={{0.25,1.25},{0.5,1.0}};
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     Real a(1.5); Real b(0.25);
-    EffectiveVectorFunction henon_function={a-x[0]*x[0]+b*x[1], x[0]*1};
+    EffectiveVectorMultivariateFunction henon_function={a-x[0]*x[0]+b*x[1], x[0]*1};
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
@@ -458,9 +458,9 @@ Void TestVectorTaylorFunction::test_restrict()
 
 Void TestVectorTaylorFunction::test_jacobian()
 {
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     Real a(1.5); Real b(0.25);
-    EffectiveVectorFunction henon={a-x[0]*x[0]+b*x[1], x[0]*1};
+    EffectiveVectorMultivariateFunction henon={a-x[0]*x[0]+b*x[1], x[0]*1};
     ExactBoxType domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBoxType domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBoxType domain3={{-0.25,+0.75},{0.0,+0.50}};
@@ -481,10 +481,10 @@ Void TestVectorTaylorFunction::test_jacobian()
 Void TestVectorTaylorFunction::test_compose()
 {
     Real a(1.5); Real b(0.25);
-    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
-    EffectiveVectorFunction henon_square_polynomial=
+    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+    EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+    EffectiveVectorMultivariateFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
+    EffectiveVectorMultivariateFunction henon_square_polynomial=
         {a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x, a-x*x+b*y};
     //    compose(henon_polynomial,henon_polynomial);
     ExactBoxType domain1={{0.25,1.25},{0.5,1.0}};
@@ -537,10 +537,10 @@ Void TestVectorTaylorFunction::test_antiderivative()
 Void TestVectorTaylorFunction::test_join()
 {
     ExactBoxType domain={{-0.25,+0.25},{-0.5,+0.5}};
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-    EffectiveVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
-    EffectiveVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(2,1);
-    EffectiveVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
+    EffectiveVectorMultivariateFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
+    EffectiveVectorMultivariateFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(2,1);
+    EffectiveVectorMultivariateFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(3,2);
 
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction1,(domain,function1,swp));
@@ -556,13 +556,13 @@ Void TestVectorTaylorFunction::test_combine()
     ExactBoxType domain1={{-0.25,+0.25},{-0.5,+0.5}};
     ExactBoxType domain2={{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
     ExactBoxType domain3={{-0.25,+0.25},{-0.5,+0.5},{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
-    EffectiveVectorFunction x;
-    x=EffectiveVectorFunction::identity(2);
-    EffectiveVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
-    x=EffectiveVectorFunction::identity(3);
-    EffectiveVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[2])*e(2,1);
-    x=EffectiveVectorFunction::identity(5);
-    EffectiveVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
+    EffectiveVectorMultivariateFunction x;
+    x=EffectiveVectorMultivariateFunction::identity(2);
+    EffectiveVectorMultivariateFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
+    x=EffectiveVectorMultivariateFunction::identity(3);
+    EffectiveVectorMultivariateFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[2])*e(2,1);
+    x=EffectiveVectorMultivariateFunction::identity(5);
+    EffectiveVectorMultivariateFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[2]*x[2]+5*x[2]*x[3]+6*x[3]*x[4])*e(3,2);
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction1,(domain1,function1,swp));
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction2,(domain2,function2,swp));
@@ -578,9 +578,9 @@ Void TestVectorTaylorFunction::test_conversion()
     Vector<RawFloatDP> pt={-0.25,0.25};
     Vector<FloatDPBounds> ipt(pt);
     Vector<FloatDPApproximation> apt(pt);
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
 
-    EffectiveVectorFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
+    EffectiveVectorMultivariateFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
     ValidatedVectorTaylorFunctionModelDP th(D,h,swp);
 
     ARIADNE_TEST_PRINT(h);
@@ -597,10 +597,10 @@ Void TestVectorTaylorFunction::test_conversion()
 // Regression test for domain with empty interior
 Void TestVectorTaylorFunction::test_domain()
 {
-    EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
-    EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1);
-    EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
-    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
+    EffectiveScalarMultivariateFunction z=EffectiveScalarMultivariateFunction::constant(2,0);
+    EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1);
+    EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
+    EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(2,1);
 
     ExactBoxType D1={{-1.0,1.0},{-1.0,1.0}};
     ValidatedVectorTaylorFunctionModelDP t1(D1, {o,x0+x1}, swp);
@@ -674,13 +674,13 @@ Void TestTaylorFunctionFactory::test_create()
     Vector<ExactIntervalType> dom={{-1,+1},{0.5,3.5}};
     Vector<FloatDPBounds> args=reinterpret_cast<Vector<FloatDPBounds>const&>(dom);
 
-    ValidatedScalarTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
+    ValidatedScalarTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarMultivariateFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.properties(),&sweeper);
     ARIADNE_TEST_EQUALS(stf(args),FloatDPBounds(0.0));
     ARIADNE_TEST_EQUALS(evaluate(stf,args),FloatDPBounds(0.0));
 
-    ValidatedVectorTaylorFunctionModelDP vtf=factory.create(dom, EffectiveVectorFunction::identity(dom.size()) );
+    ValidatedVectorTaylorFunctionModelDP vtf=factory.create(dom, EffectiveVectorMultivariateFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error

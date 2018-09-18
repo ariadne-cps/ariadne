@@ -79,7 +79,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
-    ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
+    ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
     ExactBoxType bounds(constraints.size());
 
     for(Nat i=0; i!=constraints.size(); ++i) {
@@ -90,7 +90,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 }
 
 
-Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
 
     static const FloatDPValue XSIGMA=0.125_exact;
@@ -125,7 +125,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     FloatApproximationVector slack(l); // The slack between the test point and the violated constraints
 
     FloatDPApproximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
-    const ExactBoxType& d=domain; const ValidatedVectorFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
+    const ExactBoxType& d=domain; const ValidatedVectorMultivariateFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
     ValidatedVectorTaylorFunctionModelDP tfn(d,fn,default_sweeper());
 
     point=static_cast<FloatApproximationVector>(midpoint(d));
@@ -201,7 +201,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 }
 
 
-Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
+Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
     const FloatDP MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
@@ -302,9 +302,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const Vector<ValidatedP
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
@@ -312,9 +312,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFu
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
@@ -322,9 +322,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFu
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
-    ValidatedScalarFunction derivative=function.derivative(variable);
+    ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
     ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
@@ -402,7 +402,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
@@ -462,13 +462,13 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFun
 }
 
 
-Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const
+Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c) const
 {
     return d.split();
 }
 
 
-ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c, const ExactPoint& y) const
+ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

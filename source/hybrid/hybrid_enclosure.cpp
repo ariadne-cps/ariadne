@@ -198,7 +198,7 @@ HybridEnclosure::function_factory() const
     return this->_set.function_factory();
 }
 
-ValidatedScalarFunctionModelDP const
+ValidatedScalarMultivariateFunctionModelDP const
 HybridEnclosure::function(RealVariable var) const
 {
     if(this->state_space().contains(var)) {
@@ -213,38 +213,38 @@ HybridEnclosure::function(RealVariable var) const
     }
 }
 
-ValidatedVectorFunctionModelDP const&
+ValidatedVectorMultivariateFunctionModelDP const&
 HybridEnclosure::state_function() const
 {
     return this->_set.state_function();
 }
 
-ValidatedScalarFunctionModelDP const&
+ValidatedScalarMultivariateFunctionModelDP const&
 HybridEnclosure::time_function() const
 {
     return this->_set.time_function();
 }
 
-ValidatedScalarFunctionModelDP const&
+ValidatedScalarMultivariateFunctionModelDP const&
 HybridEnclosure::dwell_time_function() const
 {
     return this->_set.dwell_time_function();
 }
 
-ValidatedVectorFunctionModelDP const
+ValidatedVectorMultivariateFunctionModelDP const
 HybridEnclosure::auxiliary_function() const
 {
     return this->_set.auxiliary_function();
 }
 
-ValidatedVectorFunctionModelDP const
+ValidatedVectorMultivariateFunctionModelDP const
 HybridEnclosure::state_time_auxiliary_function() const
 {
     return this->_set.state_time_auxiliary_function();
 }
 
 
-Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModelDP& time_function)
+Void HybridEnclosure::set_time_function(const ValidatedScalarMultivariateFunctionModelDP& time_function)
 {
     ARIADNE_NOT_IMPLEMENTED;
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
@@ -263,7 +263,7 @@ HybridEnclosure::state_bounding_box() const
 }
 
 UpperIntervalType
-HybridEnclosure::range_of(EffectiveScalarFunction const& g) const
+HybridEnclosure::range_of(EffectiveScalarMultivariateFunction const& g) const
 {
     return apply(compose(g,this->state_function()),this->_set.reduced_domain());
 }
@@ -309,7 +309,7 @@ HybridEnclosure::bounding_box() const
 }
 
 
-Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorFunction aux)
+Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux)
 {
     if(vars.size()!=aux.result_size()) { std::cerr<<vars<<" "<<aux<<"\n"; }
     ARIADNE_ASSERT(this->_state_space.size()==aux.argument_size());
@@ -330,19 +330,19 @@ Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType 
     this->_variables.append(vt);
 }
 
-Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma) {
+Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
     this->_set.new_state_time_bound(gamma);
 }
 
-Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
 
-Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
 }
 
-Void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint_function) {
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
@@ -374,7 +374,7 @@ Void HybridEnclosure::clear_events()
     this->_events.clear();
 }
 
-Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace state_space, const ValidatedVectorFunction& map)
+Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace state_space, const ValidatedVectorMultivariateFunction& map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->state_dimension(),"*this="<<*this<<", event="<<event<<", state_space="<<state_space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
@@ -383,44 +383,44 @@ Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const StepSizeType& elps)
+Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_space_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& elps)
 {
     this->_set.apply_space_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& elps)
 {
     this->_set.apply_spacetime_reach_step(phi,elps);
 }
 
 
-Void HybridEnclosure::apply_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& elps)
 {
     this->_set.apply_parameter_evolve_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_finishing_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& omega)
+Void HybridEnclosure::apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega)
 {
     this->_set.apply_finishing_parameter_evolve_step(phi,omega);
 }
 
 
-Void HybridEnclosure::apply_parameter_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& elps)
+Void HybridEnclosure::apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& elps)
 {
     this->_set.apply_parameter_reach_step(phi,elps);
 }
 
-Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModelDP& phi)
+Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi)
 {
     this->_set.apply_full_reach_step(phi);
 }
@@ -433,7 +433,7 @@ Void HybridEnclosure::bound_time(Real tmax) {
     }
 }
 
-Void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
+Void HybridEnclosure::bound_time(ValidatedScalarMultivariateFunction tmax) {
     this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.function_factory().create(this->_set.domain(),tmax));
 }
 
@@ -442,7 +442,7 @@ Void HybridEnclosure::set_time(Real time)
     this->_set.new_zero_parameter_constraint(this->time_function()-time);
 }
 
-Void HybridEnclosure::set_time(ValidatedScalarFunction time)
+Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 {
     this->_set.new_zero_parameter_constraint(this->time_function()-this->function_factory().create(this->_set.domain(),time));
 }
@@ -453,7 +453,7 @@ Void HybridEnclosure::set_maximum_time(DiscreteEvent event, FloatDP final_time)
     this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumericType(final_time)); // Deprecated
 }
 
-Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {
+Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint) {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 
@@ -492,7 +492,7 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
 }
 
 HybridBasicSet<Enclosure> project(HybridEnclosure const& encl, RealSpace const& spc) {
-    ValidatedVectorFunctionModelDP spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
+    ValidatedVectorMultivariateFunctionModelDP spc_funct=encl.function_factory().create_zeros(spc.dimension(),encl.parameter_domain());
     for(SizeType i=0; i!=spc.dimension(); ++i) { spc_funct[i] = encl.function(spc[i]); }
     Enclosure spc_set(encl.parameter_domain(),spc_funct,encl.time_function(),encl.constraints(),encl.function_factory());
     return HybridBasicSet<Enclosure>(encl.location(),spc,spc_set);

@@ -207,9 +207,9 @@ template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }
 
-UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-UpperBoxType image(UpperBoxType bx, ValidatedVectorFunction const& f);
+UpperIntervalType apply(ScalarMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
+Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
+UpperBoxType image(UpperBoxType bx, ValidatedVectorMultivariateFunction const& f);
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }

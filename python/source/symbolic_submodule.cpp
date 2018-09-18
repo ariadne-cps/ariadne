@@ -293,8 +293,8 @@ Void export_expressions(pybind11::module& module)
     continuous_predicate_class.def("__str__",&__cstr__<ContinuousPredicate>);
 
     module.def("make_function", (RealScalarUnivariateFunction(*)(RealVariable const&, RealExpression const&)) &make_function);
-    module.def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
-    module.def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
+    module.def("make_function", (RealScalarMultivariateFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
+    module.def("make_function", (RealVectorMultivariateFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
 
     pybind11::implicitly_convertible<StringVariable,StringExpression>();
     pybind11::implicitly_convertible<IntegerVariable,IntegerExpression>();

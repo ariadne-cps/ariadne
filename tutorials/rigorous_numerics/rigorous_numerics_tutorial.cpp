@@ -88,9 +88,9 @@ int main() {
     //! [function_demonstration]
     {
         Real a(1.875_dy), b(0.3_dec);
-        auto id=EffectiveVectorFunction::identity(EuclideanDomain(2));
+        auto id=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
         auto x=id[0]; auto y=id[1];
-        auto h = EffectiveVectorFunction{a-x*x-b*y,x};
+        auto h = EffectiveVectorMultivariateFunction{a-x*x-b*y,x};
 //        Vector<FloatDPValue> v({0.5_x,1.0_x},double_precision);
           Vector<FloatDPValue> v({0.5,1.0},double_precision);
         print(v);
@@ -115,10 +115,10 @@ int main() {
 
     //! [geometry_demonstration]
     {
-        auto x=EffectiveScalarFunction::coordinate(EuclideanDomain(2),0);
-        auto y=EffectiveScalarFunction::coordinate(EuclideanDomain(2),1);
+        auto x=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),0);
+        auto y=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),1);
         auto g = sqr(x)+4*sqr(y);
-        auto h = EffectiveVectorFunction{1+x+y*y,2+x-y};
+        auto h = EffectiveVectorMultivariateFunction{1+x+y*y,2+x-y};
         EffectiveConstraint c=(g<=1);
         ConstraintSet cs={c};
         RealBox bx={{-2,+2},{-2,+2}};

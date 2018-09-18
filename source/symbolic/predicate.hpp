@@ -59,9 +59,9 @@ class ExpressionPredicate
 {
     friend ExpressionPredicate operator!(const ExpressionPredicate&);
   public:
-    ExpressionPredicate(const EffectiveScalarFunction& expression)
+    ExpressionPredicate(const EffectiveScalarMultivariateFunction& expression)
         : _expression(expression), _sign(+1) { }
-    const EffectiveScalarFunction& expression() const { return _expression; }
+    const EffectiveScalarMultivariateFunction& expression() const { return _expression; }
     Int sign() const { return _sign; }
 
     Bool same(const ExpressionPredicate& ep2) const {
@@ -84,7 +84,7 @@ class ExpressionPredicate
         else if(range.lower()>0) { return false; }
         else { return indeterminate; } }
   private:
-    EffectiveScalarFunction _expression;
+    EffectiveScalarMultivariateFunction _expression;
     Int _sign;
 };
 

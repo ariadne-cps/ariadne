@@ -565,15 +565,15 @@ class HybridAutomaton
     virtual DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
-    virtual EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
+    virtual EffectiveVectorMultivariateFunction auxiliary_function(DiscreteLocation location) const;
     //! \brief The function outputting the differential equations \f$\dt{x}=f(x)\f$ in the location.
-    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual EffectiveVectorMultivariateFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
-    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarMultivariateFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard function \f$g(x)\geq 0\f$ corresponding to the given event.
-    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarMultivariateFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
-    virtual EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveVectorMultivariateFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //@}
 

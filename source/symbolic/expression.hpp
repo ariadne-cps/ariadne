@@ -201,15 +201,15 @@ const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, c
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
-ScalarFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
+ScalarMultivariateFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
-VectorFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
+VectorMultivariateFunction<EffectiveTag> make_function(const Space<Real>& s, const Vector<Expression<Real>>& e);
 
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables. // DEPRECATED
-ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
+ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
 
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
-Expression<Real> make_expression(const ScalarFunction<EffectiveTag>& f, const Space<Real>& s);
+Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 

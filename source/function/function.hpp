@@ -51,7 +51,7 @@
 
 namespace Ariadne {
 
-template<class P, class D=BoxDomainType> struct VectorFunctionElementReference;
+template<class P, class D> struct VectorFunctionElementReference;
 
 template<class T> class Variable;
 typedef Variable<Real> RealVariable;
@@ -99,7 +99,7 @@ class FunctionConstructors {
 
 };
 
-template<class P, class X> using EvaluateType = decltype(declval<ScalarFunctionInterface<P>>()._evaluate(declval<Vector<X>>()));
+template<class P, class X> using EvaluateType = decltype(declval<ScalarMultivariateFunctionInterface<P>>()._evaluate(declval<Vector<X>>()));
 
 template<class P, class D, class C> class FunctionFacade {
 };
@@ -333,43 +333,43 @@ FunctionFacade<P,BoxDomainType,BoxDomainType>::jacobian(Vector<X> const& x) cons
 }
 
 
-ValidatedScalarFunction& operator*=(ValidatedScalarFunction& sf, const ExactNumber& c);
-EffectiveVectorFunction operator*(const EffectiveNumericType& c, const EffectiveVectorFunction& vf);
+ValidatedScalarMultivariateFunction& operator*=(ValidatedScalarMultivariateFunction& sf, const ExactNumber& c);
+EffectiveVectorMultivariateFunction operator*(const EffectiveNumericType& c, const EffectiveVectorMultivariateFunction& vf);
 
-EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);
-EffectiveVectorFunction embed(SizeType as1, const EffectiveVectorFunction& f2, SizeType as3);
+EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3);
+EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMultivariateFunction& f2, SizeType as3);
 
-EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2);
-EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveVectorFunction& f2);
-EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveScalarFunction& f2);
-EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
+EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2);
+EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2);
+EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2);
+EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2);
 
-EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g);
-EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g);
+EffectiveScalarMultivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
+EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
 
-EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
-EffectiveVectorFunction lie_derivative(const EffectiveVectorFunction& g, const EffectiveVectorFunction& f);
+EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
+EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 
-Formula<EffectiveNumericType> make_formula(const EffectiveScalarFunction& f);
-Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorFunction& f);
-//RealExpression evaluate(EffectiveScalarFunction const& f, Vector<RealVariable> const& vars);
-
-
-
-ValidatedVectorFunction join(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2);
-ValidatedVectorFunction join(const ValidatedScalarFunction& f1, const ValidatedVectorFunction& f2);
-ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedScalarFunction& f2);
-ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
-ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
-ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
+Formula<EffectiveNumericType> make_formula(const EffectiveScalarMultivariateFunction& f);
+Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorMultivariateFunction& f);
+//RealExpression evaluate(EffectiveScalarMultivariateFunction const& f, Vector<RealVariable> const& vars);
 
 
-ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2);
-ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateVectorFunction& f2);
-ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateScalarFunction& f2);
-ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateVectorFunction& f2);
-ApproximateScalarFunction compose(const ApproximateScalarFunction& f, const ApproximateVectorFunction& g);
-ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const ApproximateVectorFunction& g);
+
+ValidatedVectorMultivariateFunction join(const ValidatedScalarMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2);
+ValidatedVectorMultivariateFunction join(const ValidatedScalarMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
+ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2);
+ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
+ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
+
+
+ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
+ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
+ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
+ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
+ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
+ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
 
 
 
@@ -424,30 +424,30 @@ template<class P, class D> template<class XX> inline XX VectorFunctionElementRef
 
 
 
-UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
-Vector<UpperIntervalType> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
-Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x);
-Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x);
-Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x);
+UpperIntervalType evaluate_range(ScalarMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
+Vector<UpperIntervalType> evaluate_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x);
+Vector<Differential<UpperIntervalType>> derivative_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x);
+Covector<UpperIntervalType> gradient_range(ValidatedScalarMultivariateFunction const& f, const Vector<UpperIntervalType>& x);
+Matrix<UpperIntervalType> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<UpperIntervalType>& x);
 
 
 
 /*
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
+inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
     return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Matrix<UpperIntervalType> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+inline Matrix<UpperIntervalType> jacobian_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
-inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
+inline Covector<UpperIntervalType> gradient(ScalarMultivariateFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Covector<UpperIntervalType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Covector<UpperIntervalType> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
+inline Covector<UpperIntervalType> gradient(ScalarMultivariateFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperIntervalType>>(x)); }
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
+inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<EffectiveTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(f.jacobian(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-inline Matrix<UpperIntervalType> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
+inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperIntervalType>>(x)); }
 */
 
@@ -462,29 +462,29 @@ class FunctionFactory<ValidatedTag>
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
     FunctionFactory(SharedPointer< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarFunction create(const BoxDomainType& d, const ValidatedScalarFunctionInterface& f) const;
-    inline ValidatedVectorFunction create(const BoxDomainType& d, const ValidatedVectorFunctionInterface& f) const;
-    inline ValidatedScalarFunction create_zero(const BoxDomainType& d) const;
-    inline ValidatedVectorFunction create_identity(const BoxDomainType& d) const;
+    inline ValidatedScalarMultivariateFunction create(const BoxDomainType& d, const ValidatedScalarMultivariateFunctionInterface& f) const;
+    inline ValidatedVectorMultivariateFunction create(const BoxDomainType& d, const ValidatedVectorMultivariateFunctionInterface& f) const;
+    inline ValidatedScalarMultivariateFunction create_zero(const BoxDomainType& d) const;
+    inline ValidatedVectorMultivariateFunction create_identity(const BoxDomainType& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarFunctionInterface& function) const {
-    return ValidatedScalarFunction(SharedPointer<ValidatedScalarFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorFunctionInterface& function) const {
-    return ValidatedVectorFunction(SharedPointer<ValidatedVectorFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
-    return this->create(domain,EffectiveScalarFunction::zero(domain.dimension())); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
-    return this->create(domain,EffectiveVectorFunction::identity(domain.dimension())); }
+inline ValidatedScalarMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunctionInterface& function) const {
+    return ValidatedScalarMultivariateFunction(SharedPointer<ValidatedScalarMultivariateFunctionInterface>(this->_create(domain,function))); }
+inline ValidatedVectorMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunctionInterface& function) const {
+    return ValidatedVectorMultivariateFunction(SharedPointer<ValidatedVectorMultivariateFunctionInterface>(this->_create(domain,function))); }
+inline ValidatedScalarMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
+    return this->create(domain,EffectiveScalarMultivariateFunction::zero(domain.dimension())); }
+inline ValidatedVectorMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
+    return this->create(domain,EffectiveVectorMultivariateFunction::identity(domain.dimension())); }
 
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
+inline ValidatedScalarMultivariateFunction FunctionFactory<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
     return this->_ptr->create_zero(domain); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
+inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {

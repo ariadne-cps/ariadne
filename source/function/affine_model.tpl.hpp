@@ -350,7 +350,7 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
     F::set_rounding_mode(rnd);
 }
 
-template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision)
+template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarMultivariateFunction<P>& function, PR precision)
 {
     ValidatedScalarTaylorFunctionModelDP tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
     return affine_model(tf.model());
@@ -444,7 +444,7 @@ template<class F> OutputStream& AffineModel<ValidatedTag,F>::_write(OutputStream
 }
 
 template<class F> auto
-AffineModel<ApproximateTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+AffineModel<ApproximateTag,F>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
     auto c=values(g);
     auto b=f(c);
     auto A=f.gradient(c);
@@ -452,7 +452,7 @@ AffineModel<ApproximateTag,F>::_compose(const ScalarFunction<P>& f, Vector<Affin
 }
 
 template<class F> auto
-AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+AffineModel<ApproximateTag,F>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
     auto c=values(g);
     auto b=f(c);
     auto A=f.jacobian(c);
@@ -460,7 +460,7 @@ AffineModel<ApproximateTag,F>::_compose(const VectorFunction<P>& f, Vector<Affin
 }
 
 template<class F> auto
-AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
+AffineModel<ValidatedTag,F>::_compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> AffineModel<P,F> {
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);
@@ -470,7 +470,7 @@ AffineModel<ValidatedTag,F>::_compose(const ScalarFunction<P>& f, Vector<AffineM
 }
 
 template<class F> auto
-AffineModel<ValidatedTag,F>::_compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
+AffineModel<ValidatedTag,F>::_compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) -> Vector<AffineModel<P,F>> {
     auto d = ranges(g);
     auto r = cast_singleton(d);
     auto c=values(g);

@@ -132,18 +132,18 @@ template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Re
     *this = make_formula_function<P>(dom,e);
 }
 
-template<class P, class D, class C> struct MakeVectorFunction;
-template<class P, class D> struct MakeVectorFunction<P,D,IntervalDomainType> {
+template<class P, class D, class C> struct MakeVectorMultivariateFunction;
+template<class P, class D> struct MakeVectorMultivariateFunction<P,D,IntervalDomainType> {
     Function<P,D,IntervalDomainType> create(Vector<ScalarFunction<P,D>> const& lsf) {
         ARIADNE_FAIL_MSG("Cannot construct scalar function from list."); }
 };
-template<class P, class D> struct MakeVectorFunction<P,D,BoxDomainType> {
+template<class P, class D> struct MakeVectorMultivariateFunction<P,D,BoxDomainType> {
     Function<P,D,BoxDomainType> create(Vector<ScalarFunction<P,D>> const& lsf) {
         return Function<P,D,BoxDomainType>(std::make_shared<VectorOfScalarFunction<P,D>>(lsf)); }
 };
 
 template<class P, class D, class C> Function<P,D,C> make_vector_function(Vector<ScalarFunction<P,D>> const& lsf) {
-    return MakeVectorFunction<P,D,C>().create(lsf);
+    return MakeVectorMultivariateFunction<P,D,C>().create(lsf);
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunction<P,D>> const& vsf)
@@ -153,37 +153,37 @@ template<class P, class D, class C> Function<P,D,C>::Function(Vector<ScalarFunct
 
 //------------------------ Function Constructors -----------------------------------//
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(BoxDomainType dom) {
-    return ConstantFunction<Y>(dom, Y(0));
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::zero(BoxDomainType dom) {
+    return ConstantFunction<Y,BoxDomainType>(dom, Y(0));
 }
 
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(BoxDomainType dom, NumericType c) {
-    return ConstantFunction<Y>(dom, c);
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::constant(BoxDomainType dom, NumericType c) {
+    return ConstantFunction<Y,BoxDomainType>(dom, c);
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(BoxDomainType dom, SizeType j) {
-    return CoordinateFunction<P>(dom, j);
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordinate(BoxDomainType dom, SizeType j) {
+    return CoordinateFunction<P,BoxDomainType>(dom, j);
 }
 
-template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
-    List<ScalarFunction<P>> r; r.reserve(dom.dimension());
+template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
+    List<ScalarMultivariateFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
     return std::move(r);
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
-    return VectorFunction<P>(new VectorOfScalarFunction<P>(rs,zero(dom)));
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
+    return VectorMultivariateFunction<P>(new VectorOfScalarMultivariateFunction<P>(rs,zero(dom)));
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::identity(BoxDomainType dom) {
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(BoxDomainType dom) {
     SizeType n=dom.dimension();
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(dom);
-    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
+    ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(dom);
+    VectorOfScalarMultivariateFunction<P>* res = new VectorOfScalarMultivariateFunction<P>(n,z);
     for(SizeType i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction<P>::coordinate(dom,i);
+        res->_vec[i]=ScalarMultivariateFunction<P>::coordinate(dom,i);
     }
-    return VectorFunction<P>(res);
+    return VectorMultivariateFunction<P>(res);
 }
 
 
@@ -235,51 +235,51 @@ template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(
 }
 
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::zero(SizeType as) {
-    ScalarFunction<P> sf(new ScalarFormulaFunction<Y>(as,Formula<Y>::zero()));
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::zero(SizeType as) {
+    ScalarMultivariateFunction<P> sf(new ScalarFormulaFunction<Y>(as,Formula<Y>::zero()));
     return sf;
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::constant(SizeType as, NumericType c) {
-    return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::constant(c)));
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::constant(SizeType as, NumericType c) {
+    return ScalarMultivariateFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::constant(c)));
 }
 
-template<class P> ScalarFunction<P> FunctionConstructors<P>::coordinate(SizeType as, SizeType j) {
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordinate(SizeType as, SizeType j) {
     ARIADNE_ASSERT(j<as);
-    return ScalarFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::coordinate(j)));
+    return ScalarMultivariateFunction<P>(new ScalarFormulaFunction<Y>(as,Formula<Y>::coordinate(j)));
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::zeros(SizeType rs, SizeType as) {
-    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(rs,as);
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, SizeType as) {
+    VectorOfScalarFunction<P,BoxDomainType>* res = new VectorOfScalarFunction<P,BoxDomainType>(rs,as);
     for(SizeType i=0; i!=rs; ++i) {
-        res->_vec[i]=ScalarFunction<P>::zero(as);
+        res->_vec[i]=ScalarMultivariateFunction<P>::zero(as);
     }
-    return VectorFunction<P>(res);
+    return VectorMultivariateFunction<P>(res);
 }
 
-template<class P> List<ScalarFunction<P>> FunctionConstructors<P>::coordinates(SizeType as) {
-    List<ScalarFunction<P>> r; r.reserve(as);
+template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(SizeType as) {
+    List<ScalarMultivariateFunction<P>> r; r.reserve(as);
     for(SizeType j=0; j!=as; ++j) { r.append(coordinate(as,j)); }
     return std::move(r);
 }
 
-template<class P> VectorFunction<P> FunctionConstructors<P>::identity(SizeType n) {
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(n);
-    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,n);
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(SizeType n) {
+    ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(n);
+    VectorOfScalarFunction<P,BoxDomainType>* res = new VectorOfScalarFunction<P,BoxDomainType>(n,n);
     for(SizeType i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction<P>::coordinate(n,i);
+        res->_vec[i]=ScalarMultivariateFunction<P>::coordinate(n,i);
     }
-    return VectorFunction<P>(res);
+    return VectorMultivariateFunction<P>(res);
 }
 
 template<class P> VectorFunction<P,BoxDomainType> FunctionConstructors<P>::constant(BoxDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
-    ScalarFunction<P> z=ScalarFunction<P,BoxDomainType>::zero(dom);
-    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,z);
+    ScalarFunction<P,BoxDomainType> z=ScalarFunction<P,BoxDomainType>::zero(dom);
+    VectorOfScalarFunction<P,BoxDomainType>* res = new VectorOfScalarFunction<P,BoxDomainType>(n,z);
     for(SizeType i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction<P>::constant(dom,c[i]);
+        res->_vec[i]=ScalarMultivariateFunction<P>::constant(dom,c[i]);
     }
-    return VectorFunction<P>(res);
+    return VectorMultivariateFunction<P>(res);
 }
 
 template<class P> VectorFunction<P,IntervalDomainType> FunctionConstructors<P>::constant(IntervalDomainType dom, Vector<NumericType> c) {
@@ -312,16 +312,16 @@ SizeType dimension(const Space<Real>& spc);
 
 inline EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
-inline EffectiveScalarFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
-    return EffectiveScalarFunction(EuclideanDomain(as),fm); }
-inline EffectiveVectorFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
-    return EffectiveVectorFunction(EuclideanDomain(as),fm); }
+inline EffectiveScalarMultivariateFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
+    return EffectiveScalarMultivariateFunction(EuclideanDomain(as),fm); }
+inline EffectiveVectorMultivariateFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
+    return EffectiveVectorMultivariateFunction(EuclideanDomain(as),fm); }
 
 EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
     return make_formula_function(SizeOne(),make_formula(expr,var)); }
-EffectiveScalarFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
+EffectiveScalarMultivariateFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
-EffectiveVectorFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
+EffectiveVectorMultivariateFunction make_function(const Space<Real>& spc, const Vector<Expression<Real>>& expr) {
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
 
 template<class P, class D, class C, class E> Function<P,D,C> make_composed_function(const Function<P,E,C>& f, const Function<P,D,E>& g) {
@@ -329,10 +329,10 @@ template<class P, class D, class C, class E> Function<P,D,C> make_composed_funct
     return Function<P,D,C>(new ComposedFunction<P,D,C,E>(f,g)); }
 
 [[deprecated]]
-EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
+EffectiveScalarMultivariateFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
     return make_function(spc,expr); }
 
-Formula<Real> make_formula(const EffectiveScalarFunction& f) {
+Formula<Real> make_formula(const EffectiveScalarMultivariateFunction& f) {
     Vector<Formula<Real>> x(f.argument_size());
     for(SizeType i=0; i!=x.size(); ++i) {
         x[i]=Formula<Real>::coordinate(i);
@@ -340,11 +340,11 @@ Formula<Real> make_formula(const EffectiveScalarFunction& f) {
     return f(x);
 }
 
-Vector<Formula<Real>> make_formula(const EffectiveVectorFunction& f) {
-    const VectorFunctionInterface<EffectiveTag>& fi=f;
+Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f) {
+    const VectorMultivariateFunctionInterface<EffectiveTag>& fi=f;
     const VectorFormulaFunction<Real>* ff;
-    const VectorOfScalarFunction<EffectiveTag>* vf;
-    if( (vf=dynamic_cast<const VectorOfScalarFunction<EffectiveTag>*>(&fi)) ) {
+    const VectorOfScalarFunction<EffectiveTag,BoxDomainType>* vf;
+    if( (vf=dynamic_cast<const VectorOfScalarFunction<EffectiveTag,BoxDomainType>*>(&fi)) ) {
         Vector< Formula<Real> > r(vf->result_size());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=make_formula((*vf)[i]); }
         return r;
@@ -374,20 +374,20 @@ template<class P, class D, class C> Void Function<P,D,C>::set(SizeType i, Scalar
 }
 
 /*
-template<class P, class D> VectorFunction<P,D>::VectorFunction()
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction()
     : Function<P,D,C>(new VectorOfScalarFunction<P,D>(0u,ScalarFunction<P,D>()))
 {
 }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(SizeType rs, SizeType as)
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(SizeType rs, SizeType as)
     : Function<P,D,C>(new VectorOfScalarFunction<P,D>(rs,ScalarFunction<P,D>::zero(as)))
 {
 }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(const InitializerList<ScalarFunction<P,D>>& lsf)
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(const InitializerList<ScalarFunction<P,D>>& lsf)
     : VectorFunction<P,D>(List<ScalarFunction<P,D>>(lsf)) { }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(const List<ScalarFunction<P,D>>& lsf) {
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(const List<ScalarFunction<P,D>>& lsf) {
     ARIADNE_ASSERT(lsf.size()>0);
     SizeType as=lsf[0].argument_size();
     VectorOfScalarFunction<P,D>* new_ptr=new VectorOfScalarFunction<P,D>(lsf.size(),as);
@@ -397,12 +397,12 @@ template<class P, class D> VectorFunction<P,D>::VectorFunction(const List<Scalar
     this->_ptr=std::shared_ptr< const VectorFunctionInterface<P,D> >(new_ptr);
 }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(const Vector<ScalarFunction<P,D>>& vsf) {
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(const Vector<ScalarFunction<P,D>>& vsf) {
     VectorOfScalarFunction<P,D>* new_ptr=new VectorOfScalarFunction<P,D>(vsf);
     this->_ptr=std::shared_ptr< const VectorFunctionInterface<P,D> >(new_ptr);
 }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(SizeType as, const List<Formula<X>>& le) {
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(SizeType as, const List<Formula<X>>& le) {
     ARIADNE_ASSERT(le.size()>0);
     VectorOfScalarFunction<P,D>* new_ptr=new VectorOfScalarFunction<P,D>(le.size(),as);
     for(SizeType i=0; i!=le.size(); ++i) {
@@ -411,7 +411,7 @@ template<class P, class D> VectorFunction<P,D>::VectorFunction(SizeType as, cons
     this->_ptr=std::shared_ptr< const VectorFunctionInterface<P,D> >(new_ptr);
 }
 
-template<class P, class D> VectorFunction<P,D>::VectorFunction(SizeType rs, ScalarFunction<P,D> const& sf)
+template<class P, class D> VectorFunction<P,D>::VectorMultivariateFunction(SizeType rs, ScalarFunction<P,D> const& sf)
     : Function<P,D,C>(new VectorOfScalarFunction<P,D>(rs,sf))
 {
 }
@@ -430,9 +430,9 @@ template<class P, class D> Void VectorFunction<P,D>::set(SizeType i, ScalarFunct
     vfi->_set(i,sf);
 }
 
-template class VectorFunction<ApproximateTag>;
-template class VectorFunction<ValidatedTag>;
-template class VectorFunction<EffectiveTag>;
+template class VectorMultivariateFunction<ApproximateTag>;
+template class VectorMultivariateFunction<ValidatedTag>;
+template class VectorMultivariateFunction<EffectiveTag>;
 
 */
 
@@ -459,72 +459,72 @@ template class Function<EffectiveTag,BoxDomainType,BoxDomainType>;
 
 //------------------------ Vector function operators -------------------------------//
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector<EffectiveNumber>& e) {
+EffectiveVectorMultivariateFunction operator*(const EffectiveScalarMultivariateFunction& f, const Vector<EffectiveNumber>& e) {
     for(SizeType i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(decide(e[i]==EffectiveNumber(0)) || decide(e[i]==EffectiveNumber(1))); }
-    VectorFunction<EffectiveTag> r(e.size(),f.domain());
+    VectorMultivariateFunction<EffectiveTag> r(e.size(),f.domain());
     for(SizeType i=0; i!=e.size(); ++i) {
         if(decide(e[i]==EffectiveNumber(1))) { r.set(i,f); }
     }
     return r;
 }
 
-EffectiveVectorFunction operator+(const EffectiveVectorFunction& f) {
-    EffectiveVectorFunction r(f.result_size(),f.domain());
+EffectiveVectorMultivariateFunction operator+(const EffectiveVectorMultivariateFunction& f) {
+    EffectiveVectorMultivariateFunction r(f.result_size(),f.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,+f[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator-(const EffectiveVectorFunction& f) {
-    EffectiveVectorFunction r(f.result_size(),f.domain());
+EffectiveVectorMultivariateFunction operator-(const EffectiveVectorMultivariateFunction& f) {
+    EffectiveVectorMultivariateFunction r(f.result_size(),f.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,-f[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
+EffectiveVectorMultivariateFunction operator+(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(f1.result_size(),f1.domain());
+    EffectiveVectorMultivariateFunction r(f1.result_size(),f1.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,f1[i]+f2[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
+EffectiveVectorMultivariateFunction operator-(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(f1.result_size(),f1.domain());
+    EffectiveVectorMultivariateFunction r(f1.result_size(),f1.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,f1[i]-f2[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf) {
+EffectiveVectorMultivariateFunction operator*(const EffectiveScalarMultivariateFunction& sf, const EffectiveVectorMultivariateFunction& vf) {
     ARIADNE_ASSERT(sf.argument_size()==vf.argument_size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,sf*vf[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf) {
+EffectiveVectorMultivariateFunction operator*(const EffectiveVectorMultivariateFunction& vf, const EffectiveScalarMultivariateFunction& sf) {
     ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]*sf);
     }
     return r;
 }
 
-EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf) {
+EffectiveVectorMultivariateFunction operator/(const EffectiveVectorMultivariateFunction& vf, const EffectiveScalarMultivariateFunction& sf) {
     ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]/sf);
     }
@@ -532,60 +532,60 @@ EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const Effec
 }
 
 
-EffectiveVectorFunction operator+(const Vector<EffectiveNumber>& vc, const EffectiveVectorFunction& vf) {
+EffectiveVectorMultivariateFunction operator+(const Vector<EffectiveNumber>& vc, const EffectiveVectorMultivariateFunction& vf) {
     ARIADNE_ASSERT(vc.size()==vf.result_size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vc[i]+vf[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator+(const EffectiveVectorFunction& vf, const Vector<EffectiveNumber>& vc) {
+EffectiveVectorMultivariateFunction operator+(const EffectiveVectorMultivariateFunction& vf, const Vector<EffectiveNumber>& vc) {
     ARIADNE_ASSERT(vf.result_size()==vc.size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]+vc[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator-(const Vector<EffectiveNumber>& vc, const EffectiveVectorFunction& vf) {
+EffectiveVectorMultivariateFunction operator-(const Vector<EffectiveNumber>& vc, const EffectiveVectorMultivariateFunction& vf) {
     ARIADNE_ASSERT(vc.size()==vf.result_size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vc[i]-vf[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator-(const EffectiveVectorFunction& vf, const Vector<EffectiveNumber>& vc) {
+EffectiveVectorMultivariateFunction operator-(const EffectiveVectorMultivariateFunction& vf, const Vector<EffectiveNumber>& vc) {
     ARIADNE_ASSERT(vf.result_size()==vc.size());
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]-vc[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVectorFunction& vf) {
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+EffectiveVectorMultivariateFunction operator*(const EffectiveNumber& c, const EffectiveVectorMultivariateFunction& vf) {
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,c*vf[i]);
     }
     return r;
 }
 
-EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveNumber& c) {
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+EffectiveVectorMultivariateFunction operator*(const EffectiveVectorMultivariateFunction& vf, const EffectiveNumber& c) {
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]*c);
     }
     return r;
 }
 
-EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const EffectiveNumber& c) {
-    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+EffectiveVectorMultivariateFunction operator/(const EffectiveVectorMultivariateFunction& vf, const EffectiveNumber& c) {
+    EffectiveVectorMultivariateFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]/c);
     }
@@ -594,17 +594,17 @@ EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const Effec
 
 
 
-EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2) {
+EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(2,f1.domain());
+    EffectiveVectorMultivariateFunction r(2,f1.domain());
     r.set(0,f1);
     r.set(1,f2);
     return r;
 }
 
-EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveScalarFunction& f2) {
+EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(f1.result_size()+1u,f1.domain());
+    EffectiveVectorMultivariateFunction r(f1.result_size()+1u,f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -612,9 +612,9 @@ EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveS
     return r;
 }
 
-EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveVectorFunction& f2) {
+EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(f2.result_size()+1u,f1.domain());
+    EffectiveVectorMultivariateFunction r(f2.result_size()+1u,f1.domain());
     r.set(0u,f1);
     for(SizeType i=0u; i!=f2.result_size(); ++i) {
         r.set(i+1u,f2.get(i));
@@ -622,9 +622,9 @@ EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveV
     return r;
 }
 
-EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
+EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    EffectiveVectorFunction r(f1.result_size()+f2.result_size(),f1.domain());
+    EffectiveVectorMultivariateFunction r(f1.result_size()+f2.result_size(),f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -635,31 +635,31 @@ EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveV
 }
 
 
-EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3) {
+EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3) {
     typedef BoxDomainType D; typedef IntervalDomainType C;
-    return EffectiveScalarFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
+    return EffectiveScalarMultivariateFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
-EffectiveVectorFunction embed(SizeType as1, const EffectiveVectorFunction& f2, SizeType as3) {
+EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMultivariateFunction& f2, SizeType as3) {
     typedef BoxDomainType D; typedef BoxDomainType C;
-    return EffectiveVectorFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
+    return EffectiveVectorMultivariateFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
-EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g) {
+EffectiveScalarMultivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g) {
     return make_composed_function(f,g);
 }
 
-EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g) {
+EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g) {
     return make_composed_function(f,g);
 }
 
-EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f) {
+EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f) {
     ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
 
     try {
-        EffectiveScalarFunction r=g.derivative(0)*f[0];
+        EffectiveScalarMultivariateFunction r=g.derivative(0)*f[0];
         for(SizeType i=1; i!=g.argument_size(); ++i) {
             r=r+g.derivative(i)*f[i];
         }
@@ -670,13 +670,13 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
     }
 }
 
-EffectiveVectorFunction lie_derivative(const EffectiveVectorFunction& g, const EffectiveVectorFunction& f) {
+EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f) {
     ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
 
     try {
-        EffectiveVectorFunction r(g.result_size(),g.domain());
+        EffectiveVectorMultivariateFunction r(g.result_size(),g.domain());
         for(SizeType i=0; i!=g.result_size(); ++i) { r[i]=lie_derivative(g[i],f); }
         return r;
     }
@@ -691,17 +691,17 @@ EffectiveVectorFunction lie_derivative(const EffectiveVectorFunction& g, const E
 
 
 
-ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const> f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const> f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
+ValidatedVectorMultivariateFunction operator-(ValidatedVectorMultivariateFunction const& f1, ValidatedVectorMultivariateFunction const& f2) {
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const> f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const> f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return ValidatedVectorFunctionModelDP(*f1p) - ValidatedVectorFunctionModelDP(*f2p);
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) - ValidatedVectorMultivariateFunctionModelDP(*f2p);
     } else if(f1p) {
-        return ValidatedVectorFunctionModelDP(*f1p) - f2.reference();
+        return ValidatedVectorMultivariateFunctionModelDP(*f1p) - f2.reference();
     } else if(f2p) {
-        return f1.reference() - ValidatedVectorFunctionModelDP(*f2p);
+        return f1.reference() - ValidatedVectorMultivariateFunctionModelDP(*f2p);
     } else {
-        VectorOfScalarFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
+        VectorOfScalarFunction<ValidatedTag,BoxDomainType> r(f1.result_size(),ValidatedScalarMultivariateFunction(f1.argument_size()));
         for(SizeType i=0; i!=r.result_size(); ++i) {
             r[i]=f1[i]-f2[i];
         }
@@ -710,95 +710,97 @@ ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVe
 }
 
 
-ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g) {
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(g.managed_pointer());
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(g.managed_pointer());
     if(gp) {
-        return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
+        return compose(f,ValidatedVectorMultivariateFunctionModelDP(gp->_clone()));
     } else {
         return make_composed_function(f,g);
     }
 }
 
-ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g) {
+ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(g.managed_pointer());
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        gp=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(g.managed_pointer());
     if(gp) {
-        return compose(f,ValidatedVectorFunctionModelDP(gp->_clone()));
+        return compose(f,ValidatedVectorMultivariateFunctionModelDP(gp->_clone()));
     } else {
         return make_composed_function(f,g);
     }
 }
 
-ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedVectorFunction& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
+ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m(f2p); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedVectorFunctionModelDP f2m(f2p); ValidatedVectorFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f2m(f2p); ValidatedVectorMultivariateFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
-        return ValidatedVectorFunction(new JoinedFunction<ValidatedTag>(f1,f2));
+        typedef ValidatedVectorMultivariateFunction::DomainType DomainType;
+        typedef ValidatedVectorMultivariateFunction::CodomainType CodomainType;
+        return ValidatedVectorMultivariateFunction(new JoinedFunction<ValidatedTag,DomainType,CodomainType,CodomainType>(f1,f2));
     }
 }
 
-ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedScalarFunction& f2) {
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
+ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction const& f1, const ValidatedScalarMultivariateFunction& f2) {
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedVectorFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedScalarFunctionModelDP f2m(f2p); ValidatedVectorFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f2m(f2p); ValidatedVectorMultivariateFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
-        VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+        VectorOfScalarFunction<ValidatedTag,BoxDomainType> r(f1.result_size()+1u,f1.domain());
         for(SizeType i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
         r[f1.result_size()]=f2;
         return r;
     }
 }
 
-ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedVectorFunction& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelDPInterface const>(f2.managed_pointer());
+ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
+    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m(f2p); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedVectorFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedVectorFunctionModelDP f2m(f2p); ValidatedScalarFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedVectorMultivariateFunctionModelDP f2m(f2p); ValidatedScalarMultivariateFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
-        VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+1u,f1.domain());
+        VectorOfScalarFunction<ValidatedTag,BoxDomainType> r(f1.result_size()+1u,f1.domain());
         r[0u]=f1;
         for(SizeType i=0; i!=f1.result_size(); ++i) { r[i+1]=f2[i]; }
         return r;
     }
 }
 
-ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedScalarFunction& f2) {
-    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
+ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction const& f1, const ValidatedScalarMultivariateFunction& f2) {
+    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
+        f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
+        f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
-        ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m=factory(f1m).create(f2); return join(f1m,f2m);
     } else if(f2p) {
-        ValidatedScalarFunctionModelDP f2m(f2p); ValidatedScalarFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
+        ValidatedScalarMultivariateFunctionModelDP f2m(f2p); ValidatedScalarMultivariateFunctionModelDP f1m=factory(f2m).create(f1); return join(f1m,f2m);
     } else {
-        VectorOfScalarFunction<ValidatedTag> r(2u,f1.domain());
+        VectorOfScalarFunction<ValidatedTag,BoxDomainType> r(2u,f1.domain());
         r[0u]=f1;
         r[1u]=f2;
         return r;
@@ -806,30 +808,30 @@ ValidatedVectorFunction join(ValidatedScalarFunction const& f1, const ValidatedS
 }
 
 
-UpperIntervalType evaluate_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+UpperIntervalType evaluate_range(ScalarMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<UpperIntervalType> evaluate_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
+Vector<UpperIntervalType> evaluate_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Vector<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<Differential<UpperIntervalType>> derivative_range(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
+Vector<Differential<UpperIntervalType>> derivative_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
     return static_cast<Vector<Differential<UpperIntervalType>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
-Covector<UpperIntervalType> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperIntervalType>& x) {
+Covector<UpperIntervalType> gradient_range(ValidatedScalarMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
-Matrix<UpperIntervalType> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperIntervalType>& x) {
+Matrix<UpperIntervalType> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
     return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
 
 //------------------------ Function operators -------------------------------//
 
-template<class P> VectorFunction<P> join(const ScalarFunction<P>& f1, const ScalarFunction<P>& f2) {
+template<class P> VectorMultivariateFunction<P> join(const ScalarMultivariateFunction<P>& f1, const ScalarMultivariateFunction<P>& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    VectorFunction<P> r(2,f1.domain());
+    VectorMultivariateFunction<P> r(2,f1.domain());
     r.set(0,f1);
     r.set(1,f2);
     return r;
 }
 
-template<class P> VectorFunction<P> join(const VectorFunction<P>& f1, const ScalarFunction<P>& f2) {
+template<class P> VectorMultivariateFunction<P> join(const VectorMultivariateFunction<P>& f1, const ScalarMultivariateFunction<P>& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    VectorFunction<P> r(f1.result_size()+1u,f1.domain());
+    VectorMultivariateFunction<P> r(f1.result_size()+1u,f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -837,9 +839,9 @@ template<class P> VectorFunction<P> join(const VectorFunction<P>& f1, const Scal
     return r;
 }
 
-template<class P> VectorFunction<P> join(const ScalarFunction<P>& f1, const VectorFunction<P>& f2) {
+template<class P> VectorMultivariateFunction<P> join(const ScalarMultivariateFunction<P>& f1, const VectorMultivariateFunction<P>& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    VectorFunction<P> r(f2.result_size()+1u,f1.domain());
+    VectorMultivariateFunction<P> r(f2.result_size()+1u,f1.domain());
     r.set(0u,f1);
     for(SizeType i=0u; i!=f2.result_size(); ++i) {
         r.set(i+1u,f2.get(i));
@@ -847,9 +849,9 @@ template<class P> VectorFunction<P> join(const ScalarFunction<P>& f1, const Vect
     return r;
 }
 
-template<class P> VectorFunction<P> join(const VectorFunction<P>& f1, const VectorFunction<P>& f2) {
+template<class P> VectorMultivariateFunction<P> join(const VectorMultivariateFunction<P>& f1, const VectorMultivariateFunction<P>& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    VectorFunction<P> r(f1.result_size()+f2.result_size(),f1.domain());
+    VectorMultivariateFunction<P> r(f1.result_size()+f2.result_size(),f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -859,17 +861,17 @@ template<class P> VectorFunction<P> join(const VectorFunction<P>& f1, const Vect
     return r;
 }
 
-ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateScalarFunction& f2) {
+ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    ApproximateVectorFunction r(2,f1.domain());
+    ApproximateVectorMultivariateFunction r(2,f1.domain());
     r.set(0,f1);
     r.set(1,f2);
     return r;
 }
 
-ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateScalarFunction& f2) {
+ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    ApproximateVectorFunction r(f1.result_size()+1u,f1.domain());
+    ApproximateVectorMultivariateFunction r(f1.result_size()+1u,f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -877,9 +879,9 @@ ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const Approx
     return r;
 }
 
-ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const ApproximateVectorFunction& f2) {
+ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    ApproximateVectorFunction r(f2.result_size()+1u,f1.domain());
+    ApproximateVectorMultivariateFunction r(f2.result_size()+1u,f1.domain());
     r.set(0u,f1);
     for(SizeType i=0u; i!=f2.result_size(); ++i) {
         r.set(i+1u,f2.get(i));
@@ -887,9 +889,9 @@ ApproximateVectorFunction join(const ApproximateScalarFunction& f1, const Approx
     return r;
 }
 
-ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const ApproximateVectorFunction& f2) {
+ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    ApproximateVectorFunction r(f1.result_size()+f2.result_size(),f1.domain());
+    ApproximateVectorMultivariateFunction r(f1.result_size()+f2.result_size(),f1.domain());
     for(SizeType i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -900,12 +902,12 @@ ApproximateVectorFunction join(const ApproximateVectorFunction& f1, const Approx
 }
 
 
-ApproximateScalarFunction compose(const ApproximateScalarFunction& f, const ApproximateVectorFunction& g) {
+ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g) {
     return make_composed_function(f,g);
 }
 
 
-ApproximateVectorFunction compose(const ApproximateVectorFunction& f, const ApproximateVectorFunction& g) {
+ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g) {
     return make_composed_function(f,g);
 }
 
@@ -914,83 +916,83 @@ using std::dynamic_pointer_cast;
 
 template<class A> struct AlgebraOperationsBase;
 
-template<> struct AlgebraOperationsBase<ScalarFunction<EffectiveTag>> {
+template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<EffectiveTag>> {
     typedef EffectiveTag P;
-    template<class OP> static EffectiveScalarFunction apply(OP op, EffectiveScalarFunction const& f) {
+    template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f) {
         auto e=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f.managed_pointer());
         if(e) { return make_formula_function(e->_argument_size,op(e->_formula)); }
-        else { return EffectiveScalarFunction(new UnaryFunction<EffectiveTag>(op.code(),f)); }
+        else { return EffectiveScalarMultivariateFunction(new UnaryMultivaluedFunction<EffectiveTag>(op.code(),f)); }
     }
-    template<class OP> static EffectiveScalarFunction apply(OP op, EffectiveScalarFunction const& f1, EffectiveScalarFunction const& f2) {
+    template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f1, EffectiveScalarMultivariateFunction const& f2) {
         auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
         auto e2=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f2.managed_pointer());
         if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
             return make_formula_function(e1->_argument_size,op(e1->_formula,e2->_formula));
         }
-        else { return EffectiveScalarFunction(new BinaryFunction<EffectiveTag>(op.code(),f1,f2)); }
+        else { return EffectiveScalarMultivariateFunction(new BinaryMultivaluedFunction<EffectiveTag>(op.code(),f1,f2)); }
     }
-    template<class OP> static EffectiveScalarFunction apply(OP op, EffectiveScalarFunction const& f1, Number<P> const& c2) {
+    template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f1, Number<P> const& c2) {
         auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
         if(e1) { return make_formula_function(e1->_argument_size,op(e1->_formula,c2)); }
-        else { return op(f1,EffectiveScalarFunction::constant(f1.argument_size(),c2)); }
+        else { return op(f1,EffectiveScalarMultivariateFunction::constant(f1.argument_size(),c2)); }
     }
-    template<class OP> static EffectiveScalarFunction apply(OP op, Number<P> const& c1, EffectiveScalarFunction const& f2) {
+    template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, Number<P> const& c1, EffectiveScalarMultivariateFunction const& f2) {
         auto e2=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f2.managed_pointer());
         if(e2) { return make_formula_function(e2->_argument_size,op(c1,e2->_formula)); }
-        else { return op(EffectiveScalarFunction::constant(f2.argument_size(),c1),f2); }
+        else { return op(EffectiveScalarMultivariateFunction::constant(f2.argument_size(),c1),f2); }
     }
-    template<class OP> static EffectiveScalarFunction apply(OP op, EffectiveScalarFunction const& f, Int n) {
-        return EffectiveScalarFunction(new GradedFunction<P>(op.code(),f,n));
-    }
-};
-
-template<> struct AlgebraOperationsBase<ScalarFunction<ValidatedTag>> {
-    template<class OP> static ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f) {
-        auto fp=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f.managed_pointer());
-        if(fp) { ValidatedScalarFunctionModelDP fm(fp); return op(fm); }
-        else { return ValidatedScalarFunction(new UnaryFunction<ValidatedTag>(op.code(),f)); }
-    }
-
-    template<class OP> static ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
-        auto f1p=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
-        auto f2p=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
-        if(f1p && f2p) { ValidatedScalarFunctionModelDP f1m(f1p); ValidatedScalarFunctionModelDP f2m(f2p); return op(f1m,f2m); }
-        else if(f1p) { ValidatedScalarFunctionModelDP f1m(f1p); return op(f1m,factory(f1m).create(f2)); }
-        else if(f2p) { ValidatedScalarFunctionModelDP f2m(f2p); return op(factory(f2m).create(f1),f2m); }
-        else { return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f2)); }
-    }
-
-    template<class OP> static ValidatedScalarFunction apply(OP op, ValidatedScalarFunction const& f1, ValidatedNumber const& c2) {
-        auto f1p=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f1.managed_pointer());
-        if(f1p) { ValidatedScalarFunctionModelDP f1m=f1p; return op(f1,c2); }
-        else { return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2))); }
-    }
-
-    template<class OP> static ValidatedScalarFunction apply(OP op, ValidatedNumber const& c1, ValidatedScalarFunction const& f2) {
-        auto f2p=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f2.managed_pointer());
-        if(f2p) { ValidatedScalarFunctionModelDP f2m=f2p; return op(c1,f2m); }
-        else { return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2)); }
-    }
-
-    static ValidatedScalarFunction apply(Pow op, ValidatedScalarFunction const& f, Int n) {
-        auto fp=dynamic_pointer_cast<ValidatedScalarFunctionModelDPInterface const>(f.managed_pointer());
-        if(fp) { ValidatedScalarFunctionModelDP fm=fp; return op(fm,n); }
-        else { return ValidatedScalarFunction(new GradedFunction<ValidatedTag>(op.code(),f,n)); }
+    template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f, Int n) {
+        return EffectiveScalarMultivariateFunction(new GradedMultivaluedFunction<P>(op.code(),f,n));
     }
 };
 
-template<> struct AlgebraOperationsBase<ScalarFunction<ApproximateTag>> {
+template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<ValidatedTag>> {
+    template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f) {
+        auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
+        if(fp) { ValidatedScalarMultivariateFunctionModelDP fm(fp); return op(fm); }
+        else { return ValidatedScalarMultivariateFunction(new UnaryMultivaluedFunction<ValidatedTag>(op.code(),f)); }
+    }
+
+    template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f1, ValidatedScalarMultivariateFunction const& f2) {
+        auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+        auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+        if(f1p && f2p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(f1m,f2m); }
+        else if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); return op(f1m,factory(f1m).create(f2)); }
+        else if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(factory(f2m).create(f1),f2m); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f1,f2)); }
+    }
+
+    template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f1, ValidatedNumber const& c2) {
+        auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+        if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m=f1p; return op(f1,c2); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2))); }
+    }
+
+    template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedNumber const& c1, ValidatedScalarMultivariateFunction const& f2) {
+        auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+        if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m=f2p; return op(c1,f2m); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2)); }
+    }
+
+    static ValidatedScalarMultivariateFunction apply(Pow op, ValidatedScalarMultivariateFunction const& f, Int n) {
+        auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
+        if(fp) { ValidatedScalarMultivariateFunctionModelDP fm=fp; return op(fm,n); }
+        else { return ValidatedScalarMultivariateFunction(new GradedMultivaluedFunction<ValidatedTag>(op.code(),f,n)); }
+    }
+};
+
+template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<ApproximateTag>> {
     typedef ApproximateTag P;
-    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f) {
-        return ScalarFunction<P>(new UnaryFunction<P>(op.code(),f)); }
-    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f1, ScalarFunction<P> const& f2) {
-        return ScalarFunction<P>(new BinaryFunction<P>(op.code(),f1,f2)); }
-    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f1, Number<P> const& c2) {
-        return ScalarFunction<P>(new BinaryFunction<P>(op.code(),f1,f1.create_constant(c2))); }
-    template<class OP> static ScalarFunction<P> apply(OP op, Number<P> const& c1, ScalarFunction<P> const& f2) {
-        return ScalarFunction<P>(new BinaryFunction<P>(op.code(),f2.create_constant(c1),f2)); }
-    template<class OP> static ScalarFunction<P> apply(OP op, ScalarFunction<P> const& f, Int n) {
-        return ScalarFunction<P>(new GradedFunction<P>(op.code(),f,n)); }
+    template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f) {
+        return ScalarMultivariateFunction<P>(new UnaryMultivaluedFunction<P>(op.code(),f)); }
+    template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f1, ScalarMultivariateFunction<P> const& f2) {
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f1,f2)); }
+    template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f1, Number<P> const& c2) {
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f1,f1.create_constant(c2))); }
+    template<class OP> static ScalarMultivariateFunction<P> apply(OP op, Number<P> const& c1, ScalarMultivariateFunction<P> const& f2) {
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f2.create_constant(c1),f2)); }
+    template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f, Int n) {
+        return ScalarMultivariateFunction<P>(new GradedMultivaluedFunction<P>(op.code(),f,n)); }
 };
 
 template<class P> struct AlgebraOperationsBase<ScalarUnivariateFunction<P>> {
@@ -1028,9 +1030,9 @@ template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Cos op, F 
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
 template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
 
-template struct AlgebraOperations<ScalarFunction<ApproximateTag>,Number<ApproximateTag>>;
-template struct AlgebraOperations<ScalarFunction<ValidatedTag>,Number<ValidatedTag>>;
-template struct AlgebraOperations<ScalarFunction<EffectiveTag>,Number<EffectiveTag>>;
+template struct AlgebraOperations<ScalarMultivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
+template struct AlgebraOperations<ScalarMultivariateFunction<ValidatedTag>,Number<ValidatedTag>>;
+template struct AlgebraOperations<ScalarMultivariateFunction<EffectiveTag>,Number<EffectiveTag>>;
 
 template struct AlgebraOperations<ScalarUnivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
 template struct AlgebraOperations<ScalarUnivariateFunction<ValidatedTag>,Number<ValidatedTag>>;

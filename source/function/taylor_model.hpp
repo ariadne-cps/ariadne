@@ -129,9 +129,9 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatBounds<PR> ValidatedNumericType;
     typedef FloatApproximation<PR> ApproximateNumericType;
 
-    typedef ValidatedScalarFunction FunctionType;
-    typedef ValidatedScalarFunction ScalarFunctionType;
-    typedef ValidatedVectorFunction VectorFunctionType;
+    typedef ValidatedScalarMultivariateFunction FunctionType;
+    typedef ValidatedScalarMultivariateFunction ScalarFunctionType;
+    typedef ValidatedVectorMultivariateFunction VectorFunctionType;
 
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;

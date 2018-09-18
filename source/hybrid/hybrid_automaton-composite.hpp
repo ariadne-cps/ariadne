@@ -181,15 +181,15 @@ class CompositeHybridAutomaton
     DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
-    EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
+    EffectiveVectorMultivariateFunction auxiliary_function(DiscreteLocation location) const;
     //! \brief The function outputting the differential equations \f$dx/dt =f(x)\f$ in the location.
-    EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
+    EffectiveVectorMultivariateFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
-    EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveVectorMultivariateFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
-    EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveScalarMultivariateFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard function \f$g(x)\geq 0\f$ corresponding to the given event.
-    EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveScalarMultivariateFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The type of the event (urgent, permissive, impact etc).
     EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 

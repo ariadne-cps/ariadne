@@ -61,7 +61,7 @@ class TestConstraintSolver
     }
 
     Void test_empty_reduce_inequality() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {4<=2*x[0]+x[1]};
 
@@ -74,7 +74,7 @@ class TestConstraintSolver
     }
 
     Void test_empty_reduce_equality() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {2*x[0]+x[1]==4};
 
@@ -87,7 +87,7 @@ class TestConstraintSolver
     }
 
     Void test_empty_reduce_mixed() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
@@ -100,7 +100,7 @@ class TestConstraintSolver
     }
 
     Void test_empty_hull_reduce() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0,2.0}};
         List<EffectiveConstraint> c = {x[1]<=1, x[0]+x[1]==2};
 
@@ -114,7 +114,7 @@ class TestConstraintSolver
     }
 
     Void test_empty_box_reduce() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
@@ -132,7 +132,7 @@ class TestConstraintSolver
     }
 
     Void test_hull_reduce() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         List<EffectiveConstraint> c = {-2<=2*x[0]+x[1]<=1};
 
@@ -144,7 +144,7 @@ class TestConstraintSolver
     }
 
     Void test_box_reduce() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
@@ -159,7 +159,7 @@ class TestConstraintSolver
 
 
     Void test_monotone_reduce() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
@@ -178,7 +178,7 @@ class TestConstraintSolver
 
     Void test_feasible() {
 
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(1);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(1);
         EffectiveConstraint c = (x[0]-2<=0);
 
         List<ValidatedConstraint> constraints;

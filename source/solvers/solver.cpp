@@ -49,11 +49,11 @@ namespace Ariadne {
 
 namespace {
 
-ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v) {
+ValidatedVectorMultivariateFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorMultivariateFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
+    ValidatedVectorMultivariateFunctionModelDP r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarFunctionModelDP t=r[i];
+        ValidatedScalarMultivariateFunctionModelDP t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
             t+=A[i][j]*v[j];
         }
@@ -62,7 +62,7 @@ ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,c
     return r;
 }
 
-FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x) {
+FloatDPError sup_error(const ValidatedVectorMultivariateFunctionModelDP& x) {
     FloatDPError r; r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
@@ -96,7 +96,7 @@ SolverBase::function_factory() const
 
 
 Vector<ValidatedNumericType>
-SolverBase::solve(const ValidatedVectorFunction& f,
+SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
                   const Vector<ValidatedNumericType>& ix) const
 {
     ExactBoxType bx=cast_exact_box(ix);
@@ -104,7 +104,7 @@ SolverBase::solve(const ValidatedVectorFunction& f,
 }
 
 Vector<ValidatedNumericType>
-SolverBase::solve(const ValidatedVectorFunction& f,
+SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
                   const ExactBoxType& bx) const
 {
     Set< Vector<ValidatedNumericType> > r = this->solve_all(f,bx);
@@ -116,11 +116,11 @@ SolverBase::solve(const ValidatedVectorFunction& f,
 Void
 solve_all(Set< Vector<ValidatedNumericType> >& r,
           const SolverInterface& s,
-          const ValidatedVectorFunction& f,
+          const ValidatedVectorMultivariateFunction& f,
           const ExactBoxType& ix);
 
 Set< Vector<ValidatedNumericType> >
-SolverBase::solve_all(const ValidatedVectorFunction& f,
+SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
                       const ExactBoxType& bx) const
 {
     ARIADNE_LOG(5,"SolverBase::solve_all(f,bx): f="<<f<<", ix="<<bx<<"\n");
@@ -204,7 +204,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
 
 Vector<ValidatedNumericType>
-SolverBase::zero(const ValidatedVectorFunction& f,
+SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
                  const ExactBoxType& bx) const
 {
     const FloatDPValue e=this->maximum_error();
@@ -247,19 +247,19 @@ SolverBase::zero(const ValidatedVectorFunction& f,
 
 
 Vector<ValidatedNumericType>
-SolverBase::fixed_point(const ValidatedVectorFunction& f, const ExactBoxType& bx) const
+SolverBase::fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const
 {
-    ValidatedVectorFunction id=ValidatedVectorFunction::identity(f.argument_size());
+    ValidatedVectorMultivariateFunction id=ValidatedVectorMultivariateFunction::identity(f.argument_size());
     return this->solve(f-id,bx);
 }
 
 
-ValidatedVectorFunctionModelDP
-SolverBase::implicit(const ValidatedVectorFunction& f,
+ValidatedVectorMultivariateFunctionModelDP
+SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
                       const ExactBoxType& ip,
                       const ExactBoxType& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorFunction f, ExactIntervalVectorType ip, ExactIntervalVectorType ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorMultivariateFunction f, ExactIntervalVectorType ip, ExactIntervalVectorType ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
@@ -267,10 +267,10 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     const Nat n=ix.size();
     const FloatDPValue err=this->maximum_error();
 
-    ValidatedVectorFunctionModelDP id(this->function_factory().create_identity(ip));
-    ValidatedVectorFunctionModelDP h(this->function_factory().create_constants(ip,cast_singleton(ix)));
-    ValidatedVectorFunctionModelDP nh(this->function_factory().create_zeros(n,ip));
-    ValidatedVectorFunctionModelDP fnh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorMultivariateFunctionModelDP id(this->function_factory().create_identity(ip));
+    ValidatedVectorMultivariateFunctionModelDP h(this->function_factory().create_constants(ip,cast_singleton(ix)));
+    ValidatedVectorMultivariateFunctionModelDP nh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorMultivariateFunctionModelDP fnh(this->function_factory().create_zeros(n,ip));
 
     Nat steps_remaining=this->maximum_number_of_steps();
     Nat number_unrefined=n;
@@ -291,7 +291,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
                     if(refines(nh[i],h[i])) {
                         is_refinement[i]=true;
                         --number_unrefined;
-                    } else if(definitely(disjoint(ValidatedScalarFunctionModelDP(nh[i]).range(),ix[i]))) {
+                    } else if(definitely(disjoint(ValidatedScalarMultivariateFunctionModelDP(nh[i]).range(),ix[i]))) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
                     }
                 }
@@ -330,19 +330,19 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
 }
 
-ValidatedScalarFunctionModelDP
-SolverBase::implicit(const ValidatedScalarFunction& f,
+ValidatedScalarMultivariateFunctionModelDP
+SolverBase::implicit(const ValidatedScalarMultivariateFunction& f,
                      const ExactBoxType& ip,
                      const ExactIntervalType& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarFunction f, ExactIntervalVectorType ip, ExactIntervalType ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarMultivariateFunction f, ExactIntervalVectorType ip, ExactIntervalType ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
-    ValidatedVectorFunctionModelDP res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,ExactBoxType(1u,ix));
+    ValidatedVectorMultivariateFunctionModelDP res=this->implicit(ValidatedVectorMultivariateFunction(List<ValidatedScalarMultivariateFunction>(1u,f)),ip,ExactBoxType(1u,ix));
     return res[0];
 }
 
-ValidatedVectorFunctionModelDP
-SolverBase::continuation(const ValidatedVectorFunction& f,
+ValidatedVectorMultivariateFunctionModelDP
+SolverBase::continuation(const ValidatedVectorMultivariateFunction& f,
                          const Vector<ApproximateNumericType>& p,
                          const ExactBoxType& ix,
                          const ExactBoxType& ip) const
@@ -354,7 +354,7 @@ SolverBase::continuation(const ValidatedVectorFunction& f,
 
 
 Vector<ValidatedNumericType>
-IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
+IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
                            const Vector<ValidatedNumericType>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -376,7 +376,7 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
 }
 
 Vector<ValidatedNumericType>
-KrawczykSolver::step(const ValidatedVectorFunction& f,
+KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
                      const Vector<ValidatedNumericType>& x) const
 {
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
@@ -402,7 +402,7 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
 
 
 Vector<ValidatedNumericType>
-FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
+FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
                              const Vector<ValidatedNumericType>& x) const
 {
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
@@ -428,23 +428,23 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
 }
 
 
-ValidatedVectorFunctionModelDP
-IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
-                                    const ValidatedVectorFunctionModelDP& id,
-                                    const ValidatedVectorFunctionModelDP& h) const
+ValidatedVectorMultivariateFunctionModelDP
+IntervalNewtonSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
+                                    const ValidatedVectorMultivariateFunctionModelDP& id,
+                                    const ValidatedVectorMultivariateFunctionModelDP& h) const
 {
     const Nat m=id.size();
     const Nat n=h.size();
 
-    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(ValidatedVectorFunction f, ValidatedVectorFunctionModelDP id, ValidatedVectorFunctionModelDP h)\n");
+    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(ValidatedVectorMultivariateFunction f, ValidatedVectorMultivariateFunctionModelDP id, ValidatedVectorMultivariateFunctionModelDP h)\n");
     ARIADNE_LOG(7,"f="<<f<<"\n");
     ARIADNE_LOG(7,"h="<<h<<"\n");
 
-    ValidatedVectorFunctionModelDP mh=h; mh.clobber();
+    ValidatedVectorMultivariateFunctionModelDP mh=h; mh.clobber();
     ARIADNE_LOG(7,"midpoint(h)="<<mh<<"\n");
 
-    ValidatedScalarFunction zero_function(f.domain());
-    Matrix<ValidatedScalarFunction> D2f(n,n,zero_function);
+    ValidatedScalarMultivariateFunction zero_function(f.domain());
+    Matrix<ValidatedScalarMultivariateFunction> D2f(n,n,zero_function);
     for(Nat i=0; i!=n; ++i) {
         for(Nat j=0; j!=n; ++j) {
             D2f[i][j]=f[i].derivative(m+j);
@@ -453,10 +453,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(7,"D2f="<<D2f<<"\n");
 
     ValidatedNumericType zero(0);
-    ValidatedScalarFunctionModelDP z=h[0]*zero;
-    ValidatedVectorFunctionModelDP idh=join(id,h);
+    ValidatedScalarMultivariateFunctionModelDP z=h[0]*zero;
+    ValidatedVectorMultivariateFunctionModelDP idh=join(id,h);
 
-    Matrix<ValidatedScalarFunctionModelDP> J(n,n,z);
+    Matrix<ValidatedScalarMultivariateFunctionModelDP> J(n,n,z);
     for(Nat i=0; i!=n; ++i) {
         for(Nat j=0; j!=n; ++j) {
             J[i][j]=compose(D2f[i][j],idh);
@@ -473,10 +473,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"rngJ="<<rngJ<<"\n");
 
-    ValidatedVectorFunctionModelDP fidmh=compose(f,join(id,mh));
+    ValidatedVectorMultivariateFunctionModelDP fidmh=compose(f,join(id,mh));
     ARIADNE_LOG(7,"compose(f,join(id,midpoint(h)))="<<fidmh<<"\n");
 
-    ValidatedVectorFunctionModelDP dh(n,z);
+    ValidatedVectorMultivariateFunctionModelDP dh(n,z);
     if(n==1) {
         if(possibly(contains(rngJ[0][0],FloatDPValue(0.0)))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
@@ -491,16 +491,16 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"dh="<<dh<<"\n");
 
-    ValidatedVectorFunctionModelDP nh=mh-dh;
+    ValidatedVectorMultivariateFunctionModelDP nh=mh-dh;
     ARIADNE_LOG(7,"nh="<<nh<<"\n");
     return nh;
 }
 
 
-ValidatedVectorFunctionModelDP
-KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
-                              const ValidatedVectorFunctionModelDP& p,
-                              const ValidatedVectorFunctionModelDP& x) const
+ValidatedVectorMultivariateFunctionModelDP
+KrawczykSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
+                              const ValidatedVectorMultivariateFunctionModelDP& p,
+                              const ValidatedVectorMultivariateFunctionModelDP& x) const
 {
     const Nat np=p.size();
     const Nat nx=x.size();
@@ -509,14 +509,14 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(4,"    p="<<p<<"\n");
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
-    ValidatedVectorFunctionModelDP mx(x);
+    ValidatedVectorMultivariateFunctionModelDP mx(x);
     for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<FloatDPError> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumericType> eix=make_bounds(ex);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
-    ValidatedVectorFunctionModelDP fm=compose(f,join(p,mx));
+    ValidatedVectorMultivariateFunctionModelDP fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<ValidatedNumericType> rp(np);
     for(Nat i=0; i!=np; ++i) { rp[i]=cast_singleton(p[i].range()); }
@@ -529,28 +529,28 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
     ARIADNE_LOG(5,"    (I-M*J)="<<(I-M*J)<<"\n");
     ARIADNE_LOG(5,"    (I-M*J) * (ex*ValidatedNumericType(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix<<"\n");
-    ValidatedVectorFunctionModelDP dx= M*fm - (I-M*J) * eix;
+    ValidatedVectorMultivariateFunctionModelDP dx= M*fm - (I-M*J) * eix;
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
-    ValidatedVectorFunctionModelDP nwx= mx - dx;
+    ValidatedVectorMultivariateFunctionModelDP nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
     return nwx;
 }
 
 
 /*
-ValidatedScalarFunctionModelDP
-IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
+ValidatedScalarMultivariateFunctionModelDP
+IntervalNewtonSolver::implicit(const ValidatedScalarMultivariateFunction& f,
                                const ExactBoxType& ip,
                                const ExactIntervalType& ix) const
 {
     return this->SolverBase::implicit(f,ip,ix);
-    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(ValidatedScalarFunction f, ExactIntervalVectorType P, ExactIntervalType X)\n");
+    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(ValidatedScalarMultivariateFunction f, ExactIntervalVectorType P, ExactIntervalType X)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"P="<<ip<<"\n");
     ARIADNE_LOG(5,"X="<<std::setprecision(17)<<ix<<"\n");
     ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", P="<<ip<<", X="<<ix<<"\n");
     const Nat n=ip.size();
-    ValidatedScalarFunction df=f.derivative(n);
+    ValidatedScalarMultivariateFunction df=f.derivative(n);
     ARIADNE_LOG(5,"df="<<df<<"\n");
 
     // Simple check to see if there is definitely no solution
@@ -570,13 +570,13 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
 
 
     // Set up auxiliary functions
-    ValidatedScalarFunctionModelDP h=this->function_factory().create_constant(ip,ix);
-    ValidatedVectorFunctionModelDP id=this->function_factory().create_identity(ip);
-    ValidatedScalarFunctionModelDP dh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModelDP mh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModelDP nh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModelDP dfidh=this->function_factory().create_zero(ip);
-    ValidatedScalarFunctionModelDP fidmh=this->function_factory().create_zero(ip);
+    ValidatedScalarMultivariateFunctionModelDP h=this->function_factory().create_constant(ip,ix);
+    ValidatedVectorMultivariateFunctionModelDP id=this->function_factory().create_identity(ip);
+    ValidatedScalarMultivariateFunctionModelDP dh=this->function_factory().create_zero(ip);
+    ValidatedScalarMultivariateFunctionModelDP mh=this->function_factory().create_zero(ip);
+    ValidatedScalarMultivariateFunctionModelDP nh=this->function_factory().create_zero(ip);
+    ValidatedScalarMultivariateFunctionModelDP dfidh=this->function_factory().create_zero(ip);
+    ValidatedScalarMultivariateFunctionModelDP fidmh=this->function_factory().create_zero(ip);
 
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"df="<<df<<"\n");

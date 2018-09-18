@@ -200,30 +200,30 @@ class TestExpression {
         RealConstant c("5",tc);
 
         RealExpression e1=c;
-        EffectiveScalarFunction f1=make_function(e1,RealSpace(List<RealVariable>({x,y,z})));
+        EffectiveScalarMultivariateFunction f1=make_function(e1,RealSpace(List<RealVariable>({x,y,z})));
         ARIADNE_TEST_PRINT(f1);
         ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
 
         RealExpression e2=c+x;
-        EffectiveScalarFunction f2=make_function(e2,RealSpace(List<RealVariable>({x,y,z})));
+        EffectiveScalarMultivariateFunction f2=make_function(e2,RealSpace(List<RealVariable>({x,y,z})));
         ARIADNE_TEST_PRINT(f2);
         ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
 
         RealExpression e3=c+x+c*y;
-        EffectiveScalarFunction f3=make_function(e3,{x,y,z});
+        EffectiveScalarMultivariateFunction f3=make_function(e3,{x,y,z});
         ARIADNE_TEST_PRINT(f3);
         ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
 
         RealExpression e4=exp(c+x);
-        EffectiveScalarFunction f4=make_function(e4,{x,y,z});
+        EffectiveScalarMultivariateFunction f4=make_function(e4,{x,y,z});
         ARIADNE_TEST_PRINT(f4);
         ARIADNE_TEST_ASSERT(possibly((f4.evaluate(tv) == exp(tc+tx)).check(Effort(0))));
 
-        //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
+        //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
 
-        //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
+        //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
 
         EffectiveAlgebra ax=RealExpression(x);
         EffectiveAlgebra ay=RealExpression(y);

@@ -77,10 +77,10 @@ Void TestMapEvolver::test() const
     // Set up the map field
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
     Real a=Dyadic(1.5); Real b=Dyadic(0.375);
-    EffectiveVectorFunction henon;
+    EffectiveVectorMultivariateFunction henon;
     {
-        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
         henon = { a-x*x+b*y, x };
     }
     ARIADNE_TEST_PRINT(henon);

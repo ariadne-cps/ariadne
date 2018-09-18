@@ -50,8 +50,8 @@
 namespace Ariadne {
 
 template<class FM, class P, class D, class C, class PR=DoublePrecision, class PRE=PR> class FunctionModelMixin;
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using ScalarFunctionModelMixin = FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>;
-template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using VectorFunctionModelMixin = FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>;
+template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using ScalarMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>;
+template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> using VectorMultivariateFunctionModelMixin = FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>;
 
 template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>
     : public virtual ScalarFunctionModelInterface<P,D,PR,PRE>
@@ -95,7 +95,7 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         static_cast<FM&>(*this)+=dynamic_cast<const FM&>(f1)*dynamic_cast<const FM&>(f2); }
 };
 
-template<class FM, class P, class D, class PR, class PRE> FM ScalarFunctionModelMixin<FM,P,D,PR,PRE>::apply(OperatorCode op) const {
+template<class FM, class P, class D, class PR, class PRE> FM ScalarMultivariateFunctionModelMixin<FM,P,D,PR,PRE>::apply(OperatorCode op) const {
     const FM& f=static_cast<const FM&>(*this);
     switch(op) {
         case OperatorCode::NEG: return neg(f);
@@ -110,14 +110,14 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
     : public virtual VectorFunctionModelInterface<P,D,PR,PRE>
     , public VectorFunctionMixin<FM,P,D>
 {
-    typedef typename Element<FM>::Type ScalarFunctionType;
+    typedef typename Element<FM>::Type ScalarMultivariateFunctionType;
     typedef FloatError<PR> NormType;
   public:
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _clone() const override { return new FM(static_cast<const FM&>(*this)); }
     virtual Void _set(SizeType i, const ScalarFunctionModelInterface<P,D,PR,PRE>& sf) override {
-        if(!dynamic_cast<const typename FM::ScalarFunctionType*>(&sf)) {
-            ARIADNE_FAIL_MSG("Cannot set element of VectorFunctionModel "<<*this<<" to "<<sf<<"\n"); }
-        static_cast<FM&>(*this).FM::set(i,dynamic_cast<const ScalarFunctionType&>(sf)); }
+        if(!dynamic_cast<const typename FM::ScalarMultivariateFunctionType*>(&sf)) {
+            ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionModel "<<*this<<" to "<<sf<<"\n"); }
+        static_cast<FM&>(*this).FM::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     NormType const _norm() const override {
@@ -127,20 +127,20 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
     VectorFunctionModelInterface<P,D,PR,PRE>* _restriction(const BoxDomainType& d) const override {
         return new FM(restriction(static_cast<const FM&>(*this),d)); }
     Void _adjoin(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) override {
-        static_cast<FM&>(*this).FM::adjoin(dynamic_cast<const ScalarFunctionType&>(f)); }
+        static_cast<FM&>(*this).FM::adjoin(dynamic_cast<const ScalarMultivariateFunctionType&>(f)); }
     VectorFunctionModelInterface<P,D,PR,PRE>* _join(const VectorFunctionModelInterface<P,D,PR,PRE>& f) const override {
         return heap_copy(join(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
     VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionModelInterface<P,D,PR,PRE>& f) const override {
         return heap_copy(combine(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
     Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const override {
         return unchecked_evaluate(static_cast<const FM&>(*this),x); }
-    ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarFunctionInterface<P>& f) const override {
+    ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarMultivariateFunctionInterface<P>& f) const override {
         return heap_copy(compose(f,static_cast<const FM&>(*this))); }
-    VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorFunctionInterface<P>& f) const override {
+    VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorMultivariateFunctionInterface<P>& f) const override {
         return heap_copy(compose(f,static_cast<const FM&>(*this))); }
-    ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P>& f) const override {
-        return heap_copy(unchecked_compose(dynamic_cast<const ScalarFunctionType&>(f),static_cast<const FM&>(*this))); }
-    VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorFunctionInterface<P>& f) const override {
+    ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarMultivariateFunctionInterface<P>& f) const override {
+        return heap_copy(unchecked_compose(dynamic_cast<const ScalarMultivariateFunctionType&>(f),static_cast<const FM&>(*this))); }
+    VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorMultivariateFunctionInterface<P>& f) const override {
         return heap_copy(unchecked_compose(dynamic_cast<const FM&>(f),static_cast<const FM&>(*this))); }
     VectorFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const override {
         return heap_copy(partial_evaluate(static_cast<const FM&>(*this),j,c)); }
@@ -161,8 +161,8 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
     virtual OutputStream& _write(OutputStream& os) const override { return os << this->upcast(); }
 /*
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
-    ScalarFunctionModel<P,D,PR,PRE> create(const BoxDomainType& domain, const ScalarFunctionInterface<P>& function) const;
-    VectorFunctionModel<P,D,PR,PRE> create(const BoxDomainType& domain, const VectorFunctionInterface<P>& function) const;
+    ScalarFunctionModel<P,D,PR,PRE> create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const;
+    VectorFunctionModel<P,D,PR,PRE> create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const;
     ScalarFunctionModel<P,D,PR,PRE> create_zero(const BoxDomainType& domain) const;
     VectorFunctionModel<P,D,PR,PRE> create_zeros(SizeType result_size, const BoxDomainType& domain) const;
     ScalarFunctionModel<P,D,PR,PRE> create_constant(const BoxDomainType& domain, const Number<P>& value) const;

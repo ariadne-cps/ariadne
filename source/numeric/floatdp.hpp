@@ -137,9 +137,11 @@ class FloatDP {
     DoublePrecision precision() const;
     Void set_precision(DoublePrecision);
   public:
-    static FloatDP nan();
-    static FloatDP inf();
-    static FloatDP inf(Sign sgn);
+
+    static FloatDP nan(DoublePrecision pr);
+    static FloatDP inf(Sign sgn, DoublePrecision pr);
+    static FloatDP inf(DoublePrecision pr);
+
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);

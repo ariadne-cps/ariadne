@@ -114,7 +114,11 @@ To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_P
 export LD_LIBRARY_PATH=/usr/local/lib
 ```
 
+### Building executables using Ariadne
+
 The tutorials directory contains three CMake projects that rely on a correct installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
+
+Due to limitations of the C++ standard library on macOS since C++11, you won't be able to build an executable with GCC if the Ariadne library has been built using Clang, and viceversa. Hence on macOS you shall use the same compiler for both Ariadne and any projects that depend on it.
 
 ### Contribution guidelines ###
 

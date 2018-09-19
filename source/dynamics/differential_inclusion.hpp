@@ -191,30 +191,15 @@ inline std::ostream& operator << (std::ostream& os, const InputApproximationKind
     return os;
 }
 
-class ParametricInputApproximation {
-protected:
-    ParametricInputApproximation(InputApproximationKind kind) : _kind(kind) { }
-public:
-    InputApproximationKind kind() { return _kind; }
-private:
-    InputApproximationKind _kind;
+template<InputApproximationKind A> struct InputApproximationKindTrait {
+    static InputApproximationKind kind() { return A; }
 };
 
-class ZeroApproximation : public ParametricInputApproximation {
-public: ZeroApproximation() : ParametricInputApproximation(InputApproximationKind::ZERO) { }
-};
-class ConstantApproximation : public ParametricInputApproximation {
-public: ConstantApproximation() : ParametricInputApproximation(InputApproximationKind::CONSTANT) { }
-};
-class AffineApproximation : public ParametricInputApproximation {
-public: AffineApproximation() : ParametricInputApproximation(InputApproximationKind::AFFINE) { }
-};
-class SinusoidalApproximation : public ParametricInputApproximation {
-public: SinusoidalApproximation() : ParametricInputApproximation(InputApproximationKind::SINUSOIDAL) { }
-};
-class PiecewiseApproximation : public ParametricInputApproximation {
-public: PiecewiseApproximation() : ParametricInputApproximation(InputApproximationKind::PIECEWISE) { }
-};
+class ZeroApproximation : public InputApproximationKindTrait<InputApproximationKind::ZERO> { };
+class ConstantApproximation : public InputApproximationKindTrait<InputApproximationKind::CONSTANT> { };
+class AffineApproximation : public InputApproximationKindTrait<InputApproximationKind::AFFINE> { };
+class SinusoidalApproximation : public InputApproximationKindTrait<InputApproximationKind::SINUSOIDAL> { };
+class PiecewiseApproximation : public InputApproximationKindTrait<InputApproximationKind::PIECEWISE> { };
 
 template<class A> ErrorType r_value();
 template<> ErrorType r_value<ZeroApproximation>() { return ErrorType(0u); }
@@ -222,13 +207,6 @@ template<> ErrorType r_value<ConstantApproximation>() { return ErrorType(1u); }
 template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); }
 template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
 template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
-
-template<class A> constexpr InputApproximationKind approximation_kind();
-template<> constexpr InputApproximationKind approximation_kind<ZeroApproximation>() { return InputApproximationKind::ZERO; }
-template<> constexpr InputApproximationKind approximation_kind<ConstantApproximation>() { return InputApproximationKind::CONSTANT; }
-template<> constexpr InputApproximationKind approximation_kind<AffineApproximation>() { return InputApproximationKind::AFFINE; }
-template<> constexpr InputApproximationKind approximation_kind<SinusoidalApproximation>() { return InputApproximationKind::SINUSOIDAL; }
-template<> constexpr InputApproximationKind approximation_kind<PiecewiseApproximation>() { return InputApproximationKind::PIECEWISE; }
 
 template<class A> constexpr Nat num_params_per_input();
 template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
@@ -357,7 +335,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
     SweeperDP _sweeper;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
     InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
-        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
+        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(A::kind()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
     const InputApproximationKind _kind;
     const Nat _num_params_per_input;

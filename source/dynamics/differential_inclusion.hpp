@@ -215,32 +215,21 @@ template<> constexpr Nat num_params_per_input<AffineApproximation>() { return 2u
 template<> constexpr Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
 template<> constexpr Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
 
-enum class InputsRoles : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
+enum class InputsRelationKind : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
 
-class InputsRole {
-protected:
-    InputsRole(InputsRoles kind) : _kind(kind) { }
-public:
-    InputsRoles kind() { return _kind; }
-private:
-    InputsRoles _kind;
+template<InputsRelationKind R> struct InputsRelationKindTrait {
+    static InputsRelationKind kind() { return R; }
 };
 
-class AffineInputs : public InputsRole {
-public: AffineInputs() : InputsRole(InputsRoles::AFFINE) { }
-};
-class SingularInput : public InputsRole {
-public: SingularInput() : InputsRole(InputsRoles::SINGULAR) { }
-};
-class AdditiveInputs : public InputsRole {
-public: AdditiveInputs() : InputsRole(InputsRoles::ADDITIVE) { }
-};
+class AffineInputs : public InputsRelationKindTrait<InputsRelationKind::AFFINE> { };
+class SingularInput : public InputsRelationKindTrait<InputsRelationKind::SINGULAR> { };
+class AdditiveInputs : public InputsRelationKindTrait<InputsRelationKind::ADDITIVE> { };
 
-inline std::ostream& operator<<(std::ostream& os, const InputsRoles& kind) {
+inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind) {
     switch (kind) {
-        case InputsRoles::AFFINE: os << "AFFINE"; break;
-        case InputsRoles::SINGULAR: os << "SINGULAR"; break;
-        case InputsRoles::ADDITIVE: os << "ADDITIVE"; break;
+        case InputsRelationKind::AFFINE: os << "AFFINE"; break;
+        case InputsRelationKind::SINGULAR: os << "SINGULAR"; break;
+        case InputsRelationKind::ADDITIVE: os << "ADDITIVE"; break;
         default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
     }
     return os;

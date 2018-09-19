@@ -168,14 +168,14 @@ inline Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const 
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-inline Map<InputApproximation,FloatDP> convert_to_percentages(const Map<InputApproximation,SizeType>& approximation_global_frequencies) {
+inline Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<InputApproximationKind,SizeType>& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InputApproximation,FloatDP> result;
+    Map<InputApproximationKind,FloatDP> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1.0/total_steps*entry.second;
     }
@@ -351,21 +351,21 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 InputApproximator
-InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const {
+InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const {
 
     switch(kind) {
-    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
-    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
-    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
-    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
-    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
+    case InputApproximationKind::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
+    case InputApproximationKind::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
+    case InputApproximationKind::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
+    case InputApproximationKind::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
+    case InputApproximationKind::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
     default:
         ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
     }
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_)
+InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
@@ -395,7 +395,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
-    Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
     for (auto appro: _approximations) {
         approximation_global_frequencies[appro] = 0;
         approximation_local_frequencies[appro] = 0;
@@ -406,7 +406,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     SizeType step = 0;
 
     List<ScheduledApproximator> schedule;
-    Map<InputApproximation,Nat> delays;
+    Map<InputApproximationKind,Nat> delays;
 
     List<InputApproximator> approximations;
     InputApproximatorFactory factory;
@@ -511,10 +511,10 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
             for (auto appro: approximation_local_frequencies) {
                 SizeType ppi;
                 switch (appro.first) {
-                    case InputApproximation::ZERO:
+                    case InputApproximationKind::ZERO:
                         ppi = 0;
                         break;
-                    case InputApproximation::CONSTANT:
+                    case InputApproximationKind::CONSTANT:
                         ppi = 1;
                         break;
                     default:
@@ -559,7 +559,7 @@ InclusionIntegrator::reach(DifferentialInclusion const& di, BoxDomainType D, Val
 
     ValidatedVectorFunctionModelType result;
 
-    if (this->_approximator->kind() != InputApproximation::PIECEWISE) {
+    if (this->_approximator->kind() != InputApproximationKind::PIECEWISE) {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
         auto DVh = this->_approximator->build_flow_domain(D,di.V(),h);

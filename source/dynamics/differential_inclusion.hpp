@@ -177,15 +177,15 @@ inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
 
 C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
-enum class InputApproximation : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
+enum class InputApproximationKind : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
-inline std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
+inline std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind) {
     switch (kind) {
-        case InputApproximation::ZERO: os << "ZERO"; break;
-        case InputApproximation::CONSTANT: os << "CONSTANT"; break;
-        case InputApproximation::AFFINE: os << "AFFINE"; break;
-        case InputApproximation::SINUSOIDAL: os << "SINUSOIDAL"; break;
-        case InputApproximation::PIECEWISE: os << "PIECEWISE"; break;
+        case InputApproximationKind::ZERO: os << "ZERO"; break;
+        case InputApproximationKind::CONSTANT: os << "CONSTANT"; break;
+        case InputApproximationKind::AFFINE: os << "AFFINE"; break;
+        case InputApproximationKind::SINUSOIDAL: os << "SINUSOIDAL"; break;
+        case InputApproximationKind::PIECEWISE: os << "PIECEWISE"; break;
         default: ARIADNE_FAIL_MSG("Unhandled input approximation for output streaming\n");
     }
     return os;
@@ -193,27 +193,27 @@ inline std::ostream& operator << (std::ostream& os, const InputApproximation& ki
 
 class ParametricInputApproximation {
 protected:
-    ParametricInputApproximation(InputApproximation kind) : _kind(kind) { }
+    ParametricInputApproximation(InputApproximationKind kind) : _kind(kind) { }
 public:
-    InputApproximation kind() { return _kind; }
+    InputApproximationKind kind() { return _kind; }
 private:
-    InputApproximation _kind;
+    InputApproximationKind _kind;
 };
 
 class ZeroApproximation : public ParametricInputApproximation {
-public: ZeroApproximation() : ParametricInputApproximation(InputApproximation::ZERO) { }
+public: ZeroApproximation() : ParametricInputApproximation(InputApproximationKind::ZERO) { }
 };
 class ConstantApproximation : public ParametricInputApproximation {
-public: ConstantApproximation() : ParametricInputApproximation(InputApproximation::CONSTANT) { }
+public: ConstantApproximation() : ParametricInputApproximation(InputApproximationKind::CONSTANT) { }
 };
 class AffineApproximation : public ParametricInputApproximation {
-public: AffineApproximation() : ParametricInputApproximation(InputApproximation::AFFINE) { }
+public: AffineApproximation() : ParametricInputApproximation(InputApproximationKind::AFFINE) { }
 };
 class SinusoidalApproximation : public ParametricInputApproximation {
-public: SinusoidalApproximation() : ParametricInputApproximation(InputApproximation::SINUSOIDAL) { }
+public: SinusoidalApproximation() : ParametricInputApproximation(InputApproximationKind::SINUSOIDAL) { }
 };
 class PiecewiseApproximation : public ParametricInputApproximation {
-public: PiecewiseApproximation() : ParametricInputApproximation(InputApproximation::PIECEWISE) { }
+public: PiecewiseApproximation() : ParametricInputApproximation(InputApproximationKind::PIECEWISE) { }
 };
 
 template<class A> ErrorType r_value();
@@ -223,12 +223,12 @@ template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); 
 template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
 template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
 
-template<class A> constexpr InputApproximation approximation_kind();
-template<> constexpr InputApproximation approximation_kind<ZeroApproximation>() { return InputApproximation::ZERO; }
-template<> constexpr InputApproximation approximation_kind<ConstantApproximation>() { return InputApproximation::CONSTANT; }
-template<> constexpr InputApproximation approximation_kind<AffineApproximation>() { return InputApproximation::AFFINE; }
-template<> constexpr InputApproximation approximation_kind<SinusoidalApproximation>() { return InputApproximation::SINUSOIDAL; }
-template<> constexpr InputApproximation approximation_kind<PiecewiseApproximation>() { return InputApproximation::PIECEWISE; }
+template<class A> constexpr InputApproximationKind approximation_kind();
+template<> constexpr InputApproximationKind approximation_kind<ZeroApproximation>() { return InputApproximationKind::ZERO; }
+template<> constexpr InputApproximationKind approximation_kind<ConstantApproximation>() { return InputApproximationKind::CONSTANT; }
+template<> constexpr InputApproximationKind approximation_kind<AffineApproximation>() { return InputApproximationKind::AFFINE; }
+template<> constexpr InputApproximationKind approximation_kind<SinusoidalApproximation>() { return InputApproximationKind::SINUSOIDAL; }
+template<> constexpr InputApproximationKind approximation_kind<PiecewiseApproximation>() { return InputApproximationKind::PIECEWISE; }
 
 template<class A> constexpr Nat num_params_per_input();
 template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
@@ -288,7 +288,7 @@ class InputApproximatorInterface;
 
 class InputApproximatorFactory {
 public:
-    InputApproximator create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const;
+    InputApproximator create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -325,7 +325,7 @@ public:
 
 class InputApproximatorInterface {
   public:
-    virtual InputApproximation kind() const = 0;
+    virtual InputApproximationKind kind() const = 0;
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const = 0;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
@@ -341,7 +341,7 @@ class InputApproximator : public InputApproximatorInterface {
     InputApproximator(InputApproximator const& other) : _impl(other._impl) { }
     InputApproximator& operator=(InputApproximator const& other) { _impl = other._impl; return *this; }
   public:
-    virtual InputApproximation kind() const override { return _impl->kind(); }
+    virtual InputApproximationKind kind() const override { return _impl->kind(); }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
@@ -359,10 +359,10 @@ class InputApproximatorBase : public InputApproximatorInterface {
     InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
         _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
-    const InputApproximation _kind;
+    const InputApproximationKind _kind;
     const Nat _num_params_per_input;
   public:
-    virtual InputApproximation kind() const override { return _kind; }
+    virtual InputApproximationKind kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
@@ -399,7 +399,7 @@ class InclusionIntegratorInterface {
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<InputApproximation> _approximations;
+    List<InputApproximationKind> _approximations;
     SharedPointer<InputApproximator> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
@@ -407,8 +407,8 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes);
+    InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes);
   public:
     InclusionIntegrator& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
     InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
@@ -426,7 +426,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Vector<ValidatedScalarFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
 };
 
-template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)
+template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)
                 : InclusionIntegrator::InclusionIntegrator(approximations, sweeper,step_size_) {
     this->set(attributes...);
     _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

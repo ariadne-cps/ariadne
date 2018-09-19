@@ -424,6 +424,8 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorFunctionModelDP evaluate_evolve_function(ValidatedVectorFunctionModelDP reach_function, PositiveFloatDPValue t) const;
     ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     Vector<ValidatedScalarFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
+  private:
+    Bool must_recondition(Nat step) const;
 };
 
 template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)

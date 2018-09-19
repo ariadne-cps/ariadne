@@ -377,6 +377,10 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximat
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
 
+Bool InclusionIntegrator::must_recondition(Nat step) const {
+    return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
+}
+
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
     ARIADNE_LOG(2,"\n"<<ivp<<"\n");
 
@@ -504,7 +508,7 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (step%freq==freq-1) {
+        if (must_recondition(step)) {
 
             double base = 0;
             double rho = 6.0;
@@ -523,12 +527,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
                 double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
                 base += partial*appro.second/freq;
             }
-            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
 
             Nat num_variables_to_keep(base);
             ARIADNE_LOG(5,"simplifying to "<<num_variables_to_keep<<" variables\n");
+            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
             lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
-            this->_reconditioner->simplify(evolve_function);
+            lreconditioner.simplify(evolve_function);
+
             for (auto appro: _approximations) {
                 approximation_local_frequencies[appro] = 0;
             }

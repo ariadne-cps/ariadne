@@ -135,7 +135,7 @@ template<class X> Matrix<X> cojoin(Vector<X> const& v1, Matrix<X> const& A2) {
 
 
 #ifdef ARIADNE_OMIT
-template<class X> InputStream& Matrix<X>::read(InputStream& is) {
+template<class X> InputStream& Matrix<X>::_read(InputStream& is) {
     Matrix<X>& A=*this;
     char c;
     is >> c;

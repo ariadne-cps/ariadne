@@ -3,6 +3,7 @@ set(LIBRARY_NAME ariadne-algebra)
 add_library(${LIBRARY_NAME} OBJECT
     vector.cpp
     matrix.cpp
+    eigenvalues.cpp
     series.cpp
     multi_index.cpp
     expansion.cpp

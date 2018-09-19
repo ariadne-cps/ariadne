@@ -102,6 +102,7 @@ template class Matrix<FloatMPApproximation>;
 template Matrix<FloatMPApproximation> inverse(const Matrix<FloatMPApproximation>&);
 template Matrix<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Matrix<FloatMPApproximation>&);
 template Vector<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
+template Vector<FloatMPApproximation> lu_solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
 template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
 template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> orthogonal_decomposition(Matrix<FloatMPApproximation> const&);
 template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> gram_schmidt_orthogonalisation(Matrix<FloatMPApproximation> const&);

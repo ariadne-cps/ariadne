@@ -55,21 +55,18 @@ inline std::ostream& operator<<(std::ostream& os, const DifferentialInclusionIVP
 
 struct ScheduledApproximator
 {
-    SizeType step;
+    Nat step;
     InputApproximator approximator;
 
-    ScheduledApproximator(SizeType s, InputApproximator a) : step(s), approximator(a) {}
+    ScheduledApproximator(Nat s, InputApproximator a) : step(s), approximator(a) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
     return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
 
-struct ScheduledApproximatorComparator
-{
-    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2)
-    {
-        return (sa1.step > sa2.step);
-    }
+struct ScheduledApproximatorComparator {
+    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2) {
+        return (sa1.step > sa2.step); }
 };
 
 inline char activity_symbol(SizeType step) {
@@ -400,17 +397,14 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     auto t=PositiveFloatDPValue(0.0);
 
     Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximationKind,Nat> delays;
     for (auto appro: _approximations) {
         approximation_global_frequencies[appro] = 0;
         approximation_local_frequencies[appro] = 0;
+        delays[appro] = 0;
     }
 
-    List<ValidatedVectorFunctionModelDP> result;
-
-    SizeType step = 0;
-
     List<ScheduledApproximator> schedule;
-    Map<InputApproximationKind,Nat> delays;
 
     List<InputApproximator> approximations;
     InputApproximatorFactory factory;
@@ -418,10 +412,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         approximations.append(factory.create(di,appro,_sweeper));
 
     for (auto appro: approximations) {
-        schedule.push_back(ScheduledApproximator(SizeType(step),appro));
-        delays[appro.kind()] = 0;
+        schedule.push_back(ScheduledApproximator(0u,appro));
     }
 
+    List<ValidatedVectorFunctionModelDP> result;
+    Nat step = 0u;
     while (possibly(t<FloatDPBounds(tmax,pr))) {
 
         if (verbosity == 1)

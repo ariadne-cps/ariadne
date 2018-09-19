@@ -725,15 +725,16 @@ Void FloatDP::set_precision(FloatDP::PrecisionType) { }
 FloatDP FloatDP::min(PrecisionType) { return std::numeric_limits<double>::min(); }
 FloatDP FloatDP::max(PrecisionType) { return std::numeric_limits<double>::max(); }
 FloatDP FloatDP::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
-FloatDP FloatDP::nan() { return std::numeric_limits<double>::quiet_NaN(); }
-FloatDP FloatDP::inf() { return std::numeric_limits<double>::infinity(); }
-FloatDP FloatDP::inf(Sign sgn) {
+
+FloatDP FloatDP::inf(Sign sgn, PrecisionType pr) {
     switch (sgn) {
     case Sign::POSITIVE: return std::numeric_limits<double>::infinity();
     case Sign::NEGATIVE: return -std::numeric_limits<double>::infinity();
     default: return std::numeric_limits<double>::quiet_NaN();
     }
 }
+FloatDP FloatDP::inf(PrecisionType pr) { return FloatDP::inf(Sign::POSITIVE,pr); }
+FloatDP FloatDP::nan(PrecisionType pr) { return FloatDP::inf(Sign::ZERO,pr); }
 
 template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return x.dbl; }

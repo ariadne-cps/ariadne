@@ -55,7 +55,7 @@ template<class F> Nat Approximation<F>::output_places = 4;
 template<class F> Nat Bounds<F>::output_places=8;
 template<class F> Nat Value<F>::output_places = 16;
 
-const FloatDPValue infty = FloatDPValue(FloatDP::inf());
+const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
 
 OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
     return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
@@ -871,7 +871,7 @@ template<class F> struct Operations<Bounds<F>> {
         if(x._l>0 || x._u<0) {
             return Bounds<F>(rec(down,x._u),rec(up,x._l));
         } else {
-            F inf_=F::inf();
+            F inf_=F::inf(x.precision());
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
             return Bounds<F>(-inf_,+inf_);
         }
@@ -945,8 +945,9 @@ template<class F> struct Operations<Bounds<F>> {
         }
         else {
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-            rl=-F::inf();
-            ru=+F::inf();
+            PR pr=max(x1.precision(),x2.precision());
+            rl=-F::inf(pr);
+            ru=+F::inf(pr);
         }
         return Bounds<F>(rl,ru);
     }

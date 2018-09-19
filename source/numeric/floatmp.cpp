@@ -232,20 +232,20 @@ double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
 }
 
-FloatMP FloatMP::nan() {
-    FloatMP x;
+FloatMP FloatMP::nan(MultiplePrecision pr) {
+    FloatMP x(pr);
     mpfr_set_nan(x._mpfr);
     return x;
 }
 
-FloatMP FloatMP::inf() {
-    FloatMP x;
+FloatMP FloatMP::inf(MultiplePrecision pr) {
+    FloatMP x(pr);
     mpfr_set_inf(x._mpfr,+1);
     return x;
 }
 
-FloatMP FloatMP::inf(Sign sgn) {
-    FloatMP x;
+FloatMP FloatMP::inf(Sign sgn, MultiplePrecision pr) {
+    FloatMP x(pr);
     switch (sgn) {
     case Sign::POSITIVE: mpfr_set_inf(x._mpfr,+1); break;
     case Sign::NEGATIVE: mpfr_set_inf(x._mpfr,-1); break;

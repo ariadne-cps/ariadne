@@ -319,11 +319,12 @@ TestFloat<PR>::test_limits()
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
     Float max=Float::max(precision);
-    Float inf_=Float::inf();
-    Float pinf=Float::inf(Sign::POSITIVE);
-    Float ninf=Float::inf(Sign::NEGATIVE);
-    Float zinf=Float::inf(Sign::ZERO);
-    Float nan=Float::nan();
+
+    Float inf_=Float::inf(precision);
+    Float pinf=Float::inf(Sign::POSITIVE,precision);
+    Float ninf=Float::inf(Sign::NEGATIVE,precision);
+    Float zinf=Float::inf(Sign::ZERO,precision);
+    Float nan=Float::nan(precision);
 
     ARIADNE_TEST_PRINT(eps);
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);

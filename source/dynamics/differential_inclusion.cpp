@@ -745,24 +745,6 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
         picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.argument_size()-1)+x0f;
     }
 
-    /*
-    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
-
-    auto BVh =_approximator->build_flow_domain(cast_exact_box(B), V, h);
-
-    auto seriesPhi = integrator.flow_step(dyn,DVh,h,BVh);
-
-    if (volume(picardPhi.range()) < volume(seriesPhi.range())) {
-        ARIADNE_LOG(2,"Picard flow function chosen\n");
-        return picardPhi;
-
-    } else {
-        ARIADNE_LOG(2,"Series flow function chosen\n");
-        return seriesPhi;
-    }
-    */
-
-
     return picardPhi;
 }
 

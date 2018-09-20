@@ -711,22 +711,7 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
 
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
-
-    PositiveFloatDPValue h=cast_exact(hsug);
-
-    RalstonFlowBoundsHandler fbh;
-
-    UpperBoxType B = fbh.initial(f,dom,h);
-
-    while(not refines(fbh.refinement(B,f,dom,h),B)) {
-        h=hlf(h);
-    }
-
-    for(Nat i=0; i<4; ++i) {
-        B = fbh.refinement(B,f,dom,h);
-    }
-
-    return std::make_pair(h,B);
+    return RalstonBounder().flow_bounds(f,dom,hsug);
 }
 
 

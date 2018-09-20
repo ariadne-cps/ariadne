@@ -708,13 +708,14 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
     return compose(F,substitution);
 }
 
-enum class FlowBoundsMethod : std::uint8_t { EULER, HEUN };
+enum class FlowBoundsMethod : std::uint8_t { EULER, HEUN, RALSTON };
 
 inline std::ostream& operator << (std::ostream& os, const FlowBoundsMethod& kind) {
     switch (kind) {
         case FlowBoundsMethod::EULER: os << "EULER"; break;
         case FlowBoundsMethod::HEUN: os << "HEUN"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled flow bounds method kind for output streaming\n");
+        case FlowBoundsMethod::RALSTON: os << "RALSTON"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled flow bounds method for output streaming\n");
     }
     return os;
 }
@@ -798,12 +799,33 @@ class HeunFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMetho
     virtual ~HeunFlowBoundsHandler() = default;
 };
 
+class RalstonFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::RALSTON> {
+  protected:
+    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+        UpperBoxType B2 = D+2*k1/3;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        return wD + (k1+3*k2)/2;
+    }
+    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
+        UpperBoxType B2 = D+2*k1/3;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        return D + (k1+3*k2)/2;
+    }
+  public:
+    virtual ~RalstonFlowBoundsHandler() = default;
+};
+
 class FlowBoundsMethodHandlerFactory {
 public:
     static FlowBoundsMethodHandler create(FlowBoundsMethod method) {
         switch(method) {
         case FlowBoundsMethod::EULER : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new EulerFlowBoundsHandler()));
         case FlowBoundsMethod::HEUN : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new HeunFlowBoundsHandler()));
+        case FlowBoundsMethod::RALSTON : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new RalstonFlowBoundsHandler()));
         default:
             ARIADNE_FAIL_MSG("Unexpected flow bounds method "<<method<<"\n");
         }
@@ -818,7 +840,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
     PositiveFloatDPValue h=cast_exact(hsug);
 
-    FlowBoundsMethodHandler fbm = FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod::HEUN);
+    FlowBoundsMethodHandler fbm = FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod::RALSTON);
 
     UpperBoxType B = fbm.initial(f,dom,h);
 

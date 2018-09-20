@@ -786,14 +786,18 @@ class EulerFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMeth
 class HeunFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::HEUN> {
   protected:
     virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,dom);
-        UpperBoxType BV_end = product(B_end,UpperBoxType(V));
-        return wD + IntervalDomainType(0,h)*(apply(f,dom)+apply(f,BV_end));
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+        UpperBoxType B2 = D + k1;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        return wD + k1+k2;
     }
     virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,BV);
-        UpperBoxType BV_end = product(B_end,UpperBoxType(V));
-        return D + IntervalDomainType(0,h)/2*(apply(f,BV)+apply(f,BV_end));
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
+        UpperBoxType B2 = D+k1;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        return D + (k1+k2)/2;
     }
   public:
     virtual ~HeunFlowBoundsHandler() = default;

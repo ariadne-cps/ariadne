@@ -102,6 +102,7 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
+
 class DifferentialInclusion {
 private:
     DottedRealAssignments _dynamics;

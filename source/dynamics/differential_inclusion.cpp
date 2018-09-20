@@ -349,7 +349,6 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
 InputApproximator
 InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const {
-
     switch(kind) {
     case InputApproximationKind::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
     case InputApproximationKind::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
@@ -709,6 +708,17 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
     return compose(F,substitution);
 }
 
+enum class FlowBoundsMethodKind : std::uint8_t { EULER, HEUN };
+
+inline std::ostream& operator << (std::ostream& os, const FlowBoundsMethodKind& kind) {
+    switch (kind) {
+        case FlowBoundsMethodKind::EULER: os << "EULER"; break;
+        case FlowBoundsMethodKind::HEUN: os << "HEUN"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled flow bounds method kind for output streaming\n");
+    }
+    return os;
+}
+
 class FlowBoundsMethodInterface {
   public:
     virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
@@ -717,76 +727,106 @@ class FlowBoundsMethodInterface {
 
 class FlowBoundsMethodBase : public FlowBoundsMethodInterface {
   public:
-    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
+    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        SizeType p = f.argument_size();
+        BoxDomainType D = project(dom,range(0,n));
+        BoxDomainType V = project(dom,range(n,p));
+        UpperBoxType wD = D + (D-D.midpoint());
+        return _initial(wD,D,V,f,dom,h);
+    }
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        SizeType p = f.argument_size();
+        BoxDomainType D = project(dom,range(0,n));
+        BoxDomainType V = project(dom,range(n,p));
+        UpperBoxType BV = product(B,UpperBoxType(V));
+        return _refinement(D,V,BV,B,f,dom,h);
+    }
   protected:
-    virtual UpperBoxType _initial(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const;
-    virtual UpperBoxType _refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const;
+    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
+    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
   public:
     virtual ~FlowBoundsMethodBase() = default;
 };
 
-class EulerFlowBoundsMethod : public FlowBoundsMethodInterface {
+class FlowBoundsMethodFactory;
+
+class FlowBoundsMethod : public FlowBoundsMethodInterface {
+    friend class FlowBoundsMethodFactory;
+  private:
+    SharedPointer<FlowBoundsMethodInterface> _impl;
+    FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface> const& impl) : _impl(impl) { }
   public:
+    FlowBoundsMethod(FlowBoundsMethod const& other) : _impl(other._impl) { }
+    FlowBoundsMethod& operator=(FlowBoundsMethod const& other) { _impl = other._impl; return *this; }
+
     virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        SizeType n = f.result_size();
-        BoxDomainType D = project(dom,range(0,n));
-        UpperBoxType wD = D + (D-D.midpoint());
+        return _impl->initial(f,dom,h); }
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        return _impl->refinement(B,f,dom,h); }
+  public:
+    virtual ~FlowBoundsMethod() = default;
+};
+
+class EulerFlowBoundsMethod : public FlowBoundsMethodBase {
+  protected:
+    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         return wD + 2*IntervalDomainType(0,h)*apply(f,dom);
     }
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        SizeType n = f.result_size();
-        SizeType p = f.argument_size();
-        BoxDomainType D = project(dom,range(0,n));
-        BoxDomainType V = project(dom,range(n,p));
-        UpperBoxType BV = product(B,UpperBoxType(V));
+    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         return D + IntervalDomainType(0,h)*apply(f,BV);
     }
-
+  public:
     virtual ~EulerFlowBoundsMethod() = default;
 };
 
-class HeunFlowBoundsMethod : public FlowBoundsMethodInterface {
-  public:
-    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        SizeType n = f.result_size();
-        SizeType p = f.argument_size();
-        BoxDomainType D = project(dom,range(0,n));
-        BoxDomainType V = project(dom,range(n,p));
-        UpperBoxType wD = D + (D-D.midpoint());
+class HeunFlowBoundsMethod : public FlowBoundsMethodBase {
+  protected:
+    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,dom);
         UpperBoxType BV_end = product(B_end,UpperBoxType(V));
         return wD + IntervalDomainType(0,h)*(apply(f,dom)+apply(f,BV_end));
     }
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        SizeType n = f.result_size();
-        SizeType p = f.argument_size();
-        BoxDomainType D = project(dom,range(0,n));
-        BoxDomainType V = project(dom,range(n,p));
-        UpperBoxType BV = product(B,UpperBoxType(V));
+    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,BV);
         UpperBoxType BV_end = product(B_end,UpperBoxType(V));
         return D + IntervalDomainType(0,h)/2*(apply(f,BV)+apply(f,BV_end));
     }
-
+  public:
     virtual ~HeunFlowBoundsMethod() = default;
 };
+
+class FlowBoundsMethodFactory {
+public:
+    static FlowBoundsMethod create(FlowBoundsMethodKind kind) {
+        switch(kind) {
+        case FlowBoundsMethodKind::EULER : return FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface>(new EulerFlowBoundsMethod()));
+        case FlowBoundsMethodKind::HEUN : return FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface>(new HeunFlowBoundsMethod()));
+        default:
+            ARIADNE_FAIL_MSG("Unexpected flow bounds method kind "<<kind<<"\n");
+        }
+    }
+};
+
+
+
 
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
 
     PositiveFloatDPValue h=cast_exact(hsug);
 
-    EulerFlowBoundsMethod is;
+    FlowBoundsMethod fbm = FlowBoundsMethodFactory::create(FlowBoundsMethodKind::HEUN);
 
-    UpperBoxType B = is.initial(f,dom,h);
+    UpperBoxType B = fbm.initial(f,dom,h);
 
-    while(not refines(is.refinement(B,f,dom,h),B)) {
+    while(not refines(fbm.refinement(B,f,dom,h),B)) {
         h=hlf(h);
     }
 
     for(Nat i=0; i<4; ++i) {
-        B = is.refinement(B,f,dom,h);
+        B = fbm.refinement(B,f,dom,h);
     }
 
     return std::make_pair(h,B);

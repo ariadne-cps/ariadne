@@ -735,7 +735,7 @@ class FlowBoundsMethodHandlerBase : public FlowBoundsMethodHandlerInterface {
         BoxDomainType D = project(dom,range(0,n));
         BoxDomainType V = project(dom,range(n,p));
         UpperBoxType wD = D + (D-D.midpoint());
-        return _initial(wD,D,V,f,dom,h);
+        return wD + 2*formula(D,V,f,UpperBoxType(dom),h);
     }
     virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         SizeType n = f.result_size();
@@ -743,11 +743,10 @@ class FlowBoundsMethodHandlerBase : public FlowBoundsMethodHandlerInterface {
         BoxDomainType D = project(dom,range(0,n));
         BoxDomainType V = project(dom,range(n,p));
         UpperBoxType BV = product(B,UpperBoxType(V));
-        return _refinement(D,V,BV,B,f,dom,h);
+        return D + formula(D,V,f,BV,h);
     }
   protected:
-    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
-    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const = 0;
   public:
     virtual ~FlowBoundsMethodHandlerBase() = default;
 };
@@ -773,11 +772,8 @@ class FlowBoundsMethodHandler : public FlowBoundsMethodHandlerInterface {
 
 class EulerFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::EULER> {
   protected:
-    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        return wD + 2*IntervalDomainType(0,h)*apply(f,dom);
-    }
-    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        return D + IntervalDomainType(0,h)*apply(f,BV);
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+        return IntervalDomainType(0,h)*apply(f,B);
     }
   public:
     virtual ~EulerFlowBoundsHandler() = default;
@@ -785,19 +781,12 @@ class EulerFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMeth
 
 class HeunFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::HEUN> {
   protected:
-    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
         UpperBoxType B2 = D + k1;
         UpperBoxType BV2 = product(B2,UpperBoxType(V));
         UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        return wD + k1+k2;
-    }
-    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
-        UpperBoxType B2 = D+k1;
-        UpperBoxType BV2 = product(B2,UpperBoxType(V));
-        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        return D + (k1+k2)/2;
+        return (k1+k2)/2;
     }
   public:
     virtual ~HeunFlowBoundsHandler() = default;
@@ -805,19 +794,12 @@ class HeunFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMetho
 
 class RalstonFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::RALSTON> {
   protected:
-    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
         UpperBoxType B2 = D+2*k1/3;
         UpperBoxType BV2 = product(B2,UpperBoxType(V));
         UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        return wD + (k1+3*k2)/2;
-    }
-    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
-        UpperBoxType B2 = D+2*k1/3;
-        UpperBoxType BV2 = product(B2,UpperBoxType(V));
-        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        return D + (k1+3*k2)/4;
+        return (k1+3*k2)/4;
     }
   public:
     virtual ~RalstonFlowBoundsHandler() = default;
@@ -825,8 +807,8 @@ class RalstonFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMe
 
 class RungeKutta4FlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::RUNGEKUTTA4> {
   protected:
-    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
         UpperBoxType B2 = D+k1/2;
         UpperBoxType BV2 = product(B2,UpperBoxType(V));
         UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
@@ -836,20 +818,7 @@ class RungeKutta4FlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoun
         UpperBoxType B4 = D+k3;
         UpperBoxType BV4 = product(B4,UpperBoxType(V));
         UpperBoxType k4 = IntervalDomainType(0,h)*apply(f,BV4);
-        return wD + (k1+2*k2+2*k3+k4)/3;
-    }
-    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
-        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
-        UpperBoxType B2 = D+k1/2;
-        UpperBoxType BV2 = product(B2,UpperBoxType(V));
-        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        UpperBoxType B3 = D+k2/2;
-        UpperBoxType BV3 = product(B3,UpperBoxType(V));
-        UpperBoxType k3 = IntervalDomainType(0,h)*apply(f,BV3);
-        UpperBoxType B4 = D+k3;
-        UpperBoxType BV4 = product(B4,UpperBoxType(V));
-        UpperBoxType k4 = IntervalDomainType(0,h)*apply(f,BV4);
-        return D + (k1+2*k2+2*k3+k4)/6;
+        return (k1+2*k2+2*k3+k4)/6;
     }
   public:
     virtual ~RungeKutta4FlowBoundsHandler() = default;

@@ -26,7 +26,23 @@
 
 namespace Ariadne {
 
-UpperBoxType FlowBoundsMethodHandlerBase::initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+    PositiveFloatDPValue h=cast_exact(hsug);
+
+    UpperBoxType B = this->_initial(f,dom,h);
+
+    while(not refines(this->_refinement(B,f,dom,h),B)) {
+        h=hlf(h);
+    }
+
+    for(Nat i=0; i<4; ++i) {
+        B = this->_refinement(B,f,dom,h);
+    }
+
+    return std::make_pair(h,B);
+}
+
+UpperBoxType BounderBase::_initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
@@ -35,7 +51,7 @@ UpperBoxType FlowBoundsMethodHandlerBase::initial(ValidatedVectorFunction f, Box
     return wD + 2*formula(D,V,f,UpperBoxType(dom),h);
 }
 
-UpperBoxType FlowBoundsMethodHandlerBase::refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+UpperBoxType BounderBase::_refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
@@ -44,11 +60,11 @@ UpperBoxType FlowBoundsMethodHandlerBase::refinement(UpperBoxType B, ValidatedVe
     return D + formula(D,V,f,BV,h);
 }
 
-UpperBoxType EulerFlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
     return IntervalDomainType(0,h)*apply(f,B);
 }
 
-UpperBoxType HeunFlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+UpperBoxType HeunBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
     UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
     UpperBoxType B2 = D + k1;
     UpperBoxType BV2 = product(B2,UpperBoxType(V));
@@ -56,7 +72,7 @@ UpperBoxType HeunFlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V, Va
     return (k1+k2)/2;
 }
 
-UpperBoxType RalstonFlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+UpperBoxType RalstonBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
     UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
     UpperBoxType B2 = D+2*k1/3;
     UpperBoxType BV2 = product(B2,UpperBoxType(V));
@@ -64,7 +80,7 @@ UpperBoxType RalstonFlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V,
     return (k1+3*k2)/4;
 }
 
-UpperBoxType RungeKutta4FlowBoundsHandler::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+UpperBoxType RungeKutta4Bounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
     UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
     UpperBoxType B2 = D+k1/2;
     UpperBoxType BV2 = product(B2,UpperBoxType(V));
@@ -78,12 +94,12 @@ UpperBoxType RungeKutta4FlowBoundsHandler::formula(BoxDomainType D, BoxDomainTyp
     return (k1+2*k2+2*k3+k4)/6;
 }
 
-FlowBoundsMethodHandler FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod method) {
+BounderHandler BounderFactory::create(Bounder method) {
     switch(method) {
-    case FlowBoundsMethod::EULER : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new EulerFlowBoundsHandler()));
-    case FlowBoundsMethod::HEUN : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new HeunFlowBoundsHandler()));
-    case FlowBoundsMethod::RALSTON : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new RalstonFlowBoundsHandler()));
-    case FlowBoundsMethod::RUNGEKUTTA4 : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new RungeKutta4FlowBoundsHandler()));
+    case Bounder::EULER : return BounderHandler(SharedPointer<BounderInterface>(new EulerBounder()));
+    case Bounder::HEUN : return BounderHandler(SharedPointer<BounderInterface>(new HeunBounder()));
+    case Bounder::RALSTON : return BounderHandler(SharedPointer<BounderInterface>(new RalstonBounder()));
+    case Bounder::RUNGEKUTTA4 : return BounderHandler(SharedPointer<BounderInterface>(new RungeKutta4Bounder()));
     default:
         ARIADNE_FAIL_MSG("Unexpected flow bounds method "<<method<<"\n");
     }

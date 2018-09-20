@@ -445,7 +445,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         UpperBoxType B;
         PositiveFloatDPValue h;
 
-        std::tie(h,B)=this->flow_bounds(F,V,D,hsug);
+        BoxDomainType dom = product(D,V);
+
+        std::tie(h,B)=this->flow_bounds(F,dom,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -709,18 +711,34 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
 
 class FlowBoundsMethodInterface {
   public:
-    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const = 0;
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const = 0;
+    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
+};
+
+class FlowBoundsMethodBase : public FlowBoundsMethodInterface {
+  public:
+    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
+  protected:
+    virtual UpperBoxType _initial(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const;
+    virtual UpperBoxType _refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const;
+  public:
+    virtual ~FlowBoundsMethodBase() = default;
 };
 
 class EulerFlowBoundsMethod : public FlowBoundsMethodInterface {
   public:
-    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const {
+    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        BoxDomainType D = project(dom,range(0,n));
         UpperBoxType wD = D + (D-D.midpoint());
-        ExactBoxType DV = product(D,V);
-        return wD + 2*IntervalDomainType(0,h)*apply(f,DV);
+        return wD + 2*IntervalDomainType(0,h)*apply(f,dom);
     }
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const {
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        SizeType p = f.argument_size();
+        BoxDomainType D = project(dom,range(0,n));
+        BoxDomainType V = project(dom,range(n,p));
         UpperBoxType BV = product(B,UpperBoxType(V));
         return D + IntervalDomainType(0,h)*apply(f,BV);
     }
@@ -730,14 +748,21 @@ class EulerFlowBoundsMethod : public FlowBoundsMethodInterface {
 
 class HeunFlowBoundsMethod : public FlowBoundsMethodInterface {
   public:
-    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const {
+    virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        SizeType p = f.argument_size();
+        BoxDomainType D = project(dom,range(0,n));
+        BoxDomainType V = project(dom,range(n,p));
         UpperBoxType wD = D + (D-D.midpoint());
-        ExactBoxType DV = product(D,V);
-        UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,DV);
+        UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,dom);
         UpperBoxType BV_end = product(B_end,UpperBoxType(V));
-        return wD + IntervalDomainType(0,h)*(apply(f,DV)+apply(f,BV_end));
+        return wD + IntervalDomainType(0,h)*(apply(f,dom)+apply(f,BV_end));
     }
-    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPValue h) const {
+    virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        SizeType n = f.result_size();
+        SizeType p = f.argument_size();
+        BoxDomainType D = project(dom,range(0,n));
+        BoxDomainType V = project(dom,range(n,p));
         UpperBoxType BV = product(B,UpperBoxType(V));
         UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,BV);
         UpperBoxType BV_end = product(B_end,UpperBoxType(V));
@@ -748,20 +773,20 @@ class HeunFlowBoundsMethod : public FlowBoundsMethodInterface {
 };
 
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
 
     PositiveFloatDPValue h=cast_exact(hsug);
 
     EulerFlowBoundsMethod is;
 
-    UpperBoxType B = is.initial(f,V,D,h);
+    UpperBoxType B = is.initial(f,dom,h);
 
-    while(not refines(is.refinement(B,f,V,D,h),B)) {
+    while(not refines(is.refinement(B,f,dom,h),B)) {
         h=hlf(h);
     }
 
     for(Nat i=0; i<4; ++i) {
-        B = is.refinement(B,f,V,D,h);
+        B = is.refinement(B,f,dom,h);
     }
 
     return std::make_pair(h,B);

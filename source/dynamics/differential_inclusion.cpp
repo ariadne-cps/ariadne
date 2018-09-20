@@ -708,7 +708,7 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
     return compose(F,substitution);
 }
 
-enum class FlowBoundsMethod : std::uint8_t { EULER, HEUN, RALSTON };
+enum class FlowBoundsMethod : std::uint8_t { EULER, HEUN, RALSTON, RUNGEKUTTA4 };
 
 inline std::ostream& operator << (std::ostream& os, const FlowBoundsMethod& kind) {
     switch (kind) {
@@ -813,10 +813,42 @@ class RalstonFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMe
         UpperBoxType B2 = D+2*k1/3;
         UpperBoxType BV2 = product(B2,UpperBoxType(V));
         UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-        return D + (k1+3*k2)/2;
+        return D + (k1+3*k2)/4;
     }
   public:
     virtual ~RalstonFlowBoundsHandler() = default;
+};
+
+class RungeKutta4FlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::RUNGEKUTTA4> {
+  protected:
+    virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,dom);
+        UpperBoxType B2 = D+k1/2;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        UpperBoxType B3 = D+k2/2;
+        UpperBoxType BV3 = product(B3,UpperBoxType(V));
+        UpperBoxType k3 = IntervalDomainType(0,h)*apply(f,BV3);
+        UpperBoxType B4 = D+k3;
+        UpperBoxType BV4 = product(B4,UpperBoxType(V));
+        UpperBoxType k4 = IntervalDomainType(0,h)*apply(f,BV4);
+        return wD + (k1+2*k2+2*k3+k4)/3;
+    }
+    virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
+        UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,BV);
+        UpperBoxType B2 = D+k1/2;
+        UpperBoxType BV2 = product(B2,UpperBoxType(V));
+        UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
+        UpperBoxType B3 = D+k2/2;
+        UpperBoxType BV3 = product(B3,UpperBoxType(V));
+        UpperBoxType k3 = IntervalDomainType(0,h)*apply(f,BV3);
+        UpperBoxType B4 = D+k3;
+        UpperBoxType BV4 = product(B4,UpperBoxType(V));
+        UpperBoxType k4 = IntervalDomainType(0,h)*apply(f,BV4);
+        return D + (k1+2*k2+2*k3+k4)/6;
+    }
+  public:
+    virtual ~RungeKutta4FlowBoundsHandler() = default;
 };
 
 class FlowBoundsMethodHandlerFactory {
@@ -826,6 +858,7 @@ public:
         case FlowBoundsMethod::EULER : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new EulerFlowBoundsHandler()));
         case FlowBoundsMethod::HEUN : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new HeunFlowBoundsHandler()));
         case FlowBoundsMethod::RALSTON : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new RalstonFlowBoundsHandler()));
+        case FlowBoundsMethod::RUNGEKUTTA4 : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new RungeKutta4FlowBoundsHandler()));
         default:
             ARIADNE_FAIL_MSG("Unexpected flow bounds method "<<method<<"\n");
         }
@@ -840,7 +873,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
     PositiveFloatDPValue h=cast_exact(hsug);
 
-    FlowBoundsMethodHandler fbm = FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod::RALSTON);
+    FlowBoundsMethodHandler fbm = FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod::RUNGEKUTTA4);
 
     UpperBoxType B = fbm.initial(f,dom,h);
 

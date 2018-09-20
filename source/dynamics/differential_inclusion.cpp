@@ -708,24 +708,25 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
     return compose(F,substitution);
 }
 
-enum class FlowBoundsMethodKind : std::uint8_t { EULER, HEUN };
+enum class FlowBoundsMethod : std::uint8_t { EULER, HEUN };
 
-inline std::ostream& operator << (std::ostream& os, const FlowBoundsMethodKind& kind) {
+inline std::ostream& operator << (std::ostream& os, const FlowBoundsMethod& kind) {
     switch (kind) {
-        case FlowBoundsMethodKind::EULER: os << "EULER"; break;
-        case FlowBoundsMethodKind::HEUN: os << "HEUN"; break;
+        case FlowBoundsMethod::EULER: os << "EULER"; break;
+        case FlowBoundsMethod::HEUN: os << "HEUN"; break;
         default: ARIADNE_FAIL_MSG("Unhandled flow bounds method kind for output streaming\n");
     }
     return os;
 }
 
-class FlowBoundsMethodInterface {
+class FlowBoundsMethodHandlerInterface {
   public:
     virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
     virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
 };
 
-class FlowBoundsMethodBase : public FlowBoundsMethodInterface {
+template<FlowBoundsMethod M>
+class FlowBoundsMethodHandlerBase : public FlowBoundsMethodHandlerInterface {
   public:
     virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         SizeType n = f.result_size();
@@ -747,29 +748,29 @@ class FlowBoundsMethodBase : public FlowBoundsMethodInterface {
     virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
     virtual UpperBoxType _refinement(BoxDomainType D, BoxDomainType V, UpperBoxType BV, UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const = 0;
   public:
-    virtual ~FlowBoundsMethodBase() = default;
+    virtual ~FlowBoundsMethodHandlerBase() = default;
 };
 
-class FlowBoundsMethodFactory;
+class FlowBoundsMethodHandlerFactory;
 
-class FlowBoundsMethod : public FlowBoundsMethodInterface {
-    friend class FlowBoundsMethodFactory;
+class FlowBoundsMethodHandler : public FlowBoundsMethodHandlerInterface {
+    friend class FlowBoundsMethodHandlerFactory;
   private:
-    SharedPointer<FlowBoundsMethodInterface> _impl;
-    FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface> const& impl) : _impl(impl) { }
+    SharedPointer<FlowBoundsMethodHandlerInterface> _impl;
+    FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface> const& impl) : _impl(impl) { }
   public:
-    FlowBoundsMethod(FlowBoundsMethod const& other) : _impl(other._impl) { }
-    FlowBoundsMethod& operator=(FlowBoundsMethod const& other) { _impl = other._impl; return *this; }
+    FlowBoundsMethodHandler(FlowBoundsMethodHandler const& other) : _impl(other._impl) { }
+    FlowBoundsMethodHandler& operator=(FlowBoundsMethodHandler const& other) { _impl = other._impl; return *this; }
 
     virtual UpperBoxType initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         return _impl->initial(f,dom,h); }
     virtual UpperBoxType refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         return _impl->refinement(B,f,dom,h); }
   public:
-    virtual ~FlowBoundsMethod() = default;
+    virtual ~FlowBoundsMethodHandler() = default;
 };
 
-class EulerFlowBoundsMethod : public FlowBoundsMethodBase {
+class EulerFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::EULER> {
   protected:
     virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         return wD + 2*IntervalDomainType(0,h)*apply(f,dom);
@@ -778,10 +779,10 @@ class EulerFlowBoundsMethod : public FlowBoundsMethodBase {
         return D + IntervalDomainType(0,h)*apply(f,BV);
     }
   public:
-    virtual ~EulerFlowBoundsMethod() = default;
+    virtual ~EulerFlowBoundsHandler() = default;
 };
 
-class HeunFlowBoundsMethod : public FlowBoundsMethodBase {
+class HeunFlowBoundsHandler : public FlowBoundsMethodHandlerBase<FlowBoundsMethod::HEUN> {
   protected:
     virtual UpperBoxType _initial(UpperBoxType wD, BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const {
         UpperBoxType B_end = D + IntervalDomainType(0,h)*apply(f,dom);
@@ -794,17 +795,17 @@ class HeunFlowBoundsMethod : public FlowBoundsMethodBase {
         return D + IntervalDomainType(0,h)/2*(apply(f,BV)+apply(f,BV_end));
     }
   public:
-    virtual ~HeunFlowBoundsMethod() = default;
+    virtual ~HeunFlowBoundsHandler() = default;
 };
 
-class FlowBoundsMethodFactory {
+class FlowBoundsMethodHandlerFactory {
 public:
-    static FlowBoundsMethod create(FlowBoundsMethodKind kind) {
-        switch(kind) {
-        case FlowBoundsMethodKind::EULER : return FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface>(new EulerFlowBoundsMethod()));
-        case FlowBoundsMethodKind::HEUN : return FlowBoundsMethod(SharedPointer<FlowBoundsMethodInterface>(new HeunFlowBoundsMethod()));
+    static FlowBoundsMethodHandler create(FlowBoundsMethod method) {
+        switch(method) {
+        case FlowBoundsMethod::EULER : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new EulerFlowBoundsHandler()));
+        case FlowBoundsMethod::HEUN : return FlowBoundsMethodHandler(SharedPointer<FlowBoundsMethodHandlerInterface>(new HeunFlowBoundsHandler()));
         default:
-            ARIADNE_FAIL_MSG("Unexpected flow bounds method kind "<<kind<<"\n");
+            ARIADNE_FAIL_MSG("Unexpected flow bounds method "<<method<<"\n");
         }
     }
 };
@@ -817,7 +818,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(Validat
 
     PositiveFloatDPValue h=cast_exact(hsug);
 
-    FlowBoundsMethod fbm = FlowBoundsMethodFactory::create(FlowBoundsMethodKind::HEUN);
+    FlowBoundsMethodHandler fbm = FlowBoundsMethodHandlerFactory::create(FlowBoundsMethod::HEUN);
 
     UpperBoxType B = fbm.initial(f,dom,h);
 

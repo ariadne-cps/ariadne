@@ -176,6 +176,7 @@ class Box
     static Box<I> _product(const Box<I>& bx1, const I& ivl2);
 
     static Box<I> _project(const Box<I>& bx, const Array<SizeType>& rng);
+    static Box<I> _project(const Box<I>& bx, const Range& rng);
 };
 
 template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>& bx) {
@@ -214,6 +215,7 @@ UpperBoxType image(UpperBoxType bx, ValidatedVectorFunction const& f);
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
+template<class I> inline Box<I> project(const Box<I> & bx, Range const& rng) { return Box<I>::_project(bx,rng); }
 
 template<class I> auto midpoint(const Box<I>& bx) -> typename Box<I>::MidpointType {
     return bx.midpoint();

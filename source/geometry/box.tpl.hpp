@@ -183,6 +183,15 @@ template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Array<SizeType
     return std::move(res);
 }
 
+template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Range& rng)
+{
+    Box<I> res(rng.size());
+    for(SizeType i=0; i!=rng.size(); ++i) {
+        res[i]=bx[rng[i]];
+    }
+    return std::move(res);
+}
+
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const Box<I>& bx2)
 {
     Box<I> r(bx1.size()+bx2.size());

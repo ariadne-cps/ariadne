@@ -83,22 +83,21 @@ class RungeKutta4Bounder : public BounderBase {
     virtual ~RungeKutta4Bounder() = default;
 };
 
-class BounderHandler : public BounderInterface {
+class BounderHandle : public BounderInterface {
     friend class BounderFactory;
   private:
     SharedPointer<BounderInterface> _impl;
-    BounderHandler(SharedPointer<BounderInterface> const& impl) : _impl(impl) { }
   public:
-    BounderHandler(BounderHandler const& other) : _impl(other._impl) { }
-    BounderHandler& operator=(BounderHandler const& other) { _impl = other._impl; return *this; }
+    BounderHandle(SharedPointer<BounderInterface> const& impl) : _impl(impl) { }
+    BounderHandle(BounderHandle const& other) : _impl(other._impl) { }
+    BounderHandle& operator=(BounderHandle const& other) { _impl = other._impl; return *this; }
 
     virtual Pair<PositiveFloatDPValue,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
         return _impl->flow_bounds(f,dom,hsug);
     }
   public:
-    virtual ~BounderHandler() = default;
+    virtual ~BounderHandle() = default;
 };
-
 
 } // namespace Ariadne
 

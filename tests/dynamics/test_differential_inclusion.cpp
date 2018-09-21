@@ -137,6 +137,7 @@ void TestInclusionIntegrator::test() const {
 }
 
 int main() {
+
     TestInclusionIntegrator().test();
     return ARIADNE_TEST_FAILURES;
 }

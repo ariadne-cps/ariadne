@@ -25,6 +25,7 @@
 #include "differential_inclusion.hpp"
 #include "../function/taylor_function.hpp"
 #include "../solvers/integrator.hpp"
+#include "../solvers/bounder.hpp"
 #include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
@@ -352,7 +353,6 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
 InputApproximator
 InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const {
-
     switch(kind) {
     case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
     case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
@@ -446,7 +446,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         UpperBoxType B;
         PositiveFloatDPValue h;
 
-        std::tie(h,B)=this->flow_bounds(F,V,D,hsug);
+        BoxDomainType dom = product(D,V);
+
+        std::tie(h,B)=this->flow_bounds(F,dom,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -708,24 +710,8 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
 }
 
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
-
-    PositiveFloatDPValue h=cast_exact(hsug);
-    UpperBoxType wD = D + (D-D.midpoint());
-    ExactBoxType DV = product(D,V);
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,DV);
-    UpperBoxType BV = product(B,UpperBoxType(V));
-
-    while(not refines(D+IntervalDomainType(0,h)*apply(f,BV),B)) {
-        h=hlf(h);
-    }
-
-    for(Nat i=0; i<4; ++i) {
-        B=D+IntervalDomainType(0,h)*apply(f,BV);
-        BV = product(B,UpperBoxType(V));
-    }
-
-    return std::make_pair(h,B);
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+    return EulerBounder().compute(f,dom,hsug);
 }
 
 

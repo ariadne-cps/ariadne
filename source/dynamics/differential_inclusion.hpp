@@ -102,6 +102,7 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
+
 class DifferentialInclusion {
 private:
     DottedRealAssignments _dynamics;
@@ -393,7 +394,7 @@ public:
 class InclusionIntegratorInterface {
   public:
     virtual List<ValidatedVectorFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) = 0;
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const = 0;
+    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, ApproximateTimeStepType hsug) const = 0;
     virtual ValidatedVectorFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
 };
 
@@ -416,7 +417,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
 
     virtual List<ValidatedVectorFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) override;
 
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
+    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, ApproximateTimeStepType hsug) const override;
     virtual ValidatedVectorFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
     ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;

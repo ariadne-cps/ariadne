@@ -64,7 +64,7 @@ int test_case_counter = 0;
 /*! \brief Print the title for the test case */
 #define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle )                         \
     {                                                                   \
-        std::cout << std::endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << std::endl; \
+        std::cout << std::endl << "*** " << ++test_case_counter << ": "<< pTitle << " ***" << std::endl; \
         std::cout.flush();                                                   \
     }                                                                   \
 

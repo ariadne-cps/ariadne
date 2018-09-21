@@ -42,26 +42,55 @@ class TestBounder
 {
   private:
     std::unique_ptr<BounderInterface> bounder_ptr;
+    EffectiveScalarFunction x, y;
   public:
     TestBounder(const BounderInterface& b)
         : bounder_ptr(b.clone())
     {
-
+        x=EffectiveScalarFunction::coordinate(2,0);
+        y=EffectiveScalarFunction::coordinate(2,1);
     }
 
     Int test() {
-        ARIADNE_TEST_PRINT(*bounder_ptr);
-        ARIADNE_TEST_CALL(test_without_parameters());
-        ARIADNE_TEST_CALL(test_with_parameters());
+        ARIADNE_TEST_CALL(test_print_name());
+        ARIADNE_TEST_CALL(test_suggested_step_acceptable());
+        ARIADNE_TEST_CALL(test_suggested_step_not_acceptable());
         return 0;
     }
 
-    Void test_without_parameters() {
+    Void test_print_name() {
+        ARIADNE_TEST_PRINT(*bounder_ptr);
+    }
+
+    Void test_suggested_step_acceptable() {
+        EffectiveVectorFunction f={x,-y};
+        ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        PositiveFloatDPApproximation hsug=cast_positive(0.25_exact);
+
+        PositiveFloatDPValue h;
+        UpperBoxType B;
+        std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
+
+        ARIADNE_TEST_PRINT(h);
+        ARIADNE_TEST_PRINT(B);
+        ARIADNE_TEST_EQUAL(h,hsug);
+        ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
 
     }
 
-    Void test_with_parameters() {
+    Void test_suggested_step_not_acceptable() {
+        EffectiveVectorFunction f={x,-y};
+        ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        PositiveFloatDPApproximation hsug=cast_positive(1.0_exact);
 
+        PositiveFloatDPValue h;
+        UpperBoxType B;
+        std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
+
+        ARIADNE_TEST_PRINT(h);
+        ARIADNE_TEST_PRINT(B);
+        ARIADNE_TEST_COMPARE(h,<,hsug);
+        ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
     }
 };
 

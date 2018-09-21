@@ -94,7 +94,7 @@ IntegratorBase::function_factory() const
 
 Pair<FloatDPValue,UpperBoxType>
 IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& domx, const RawFloatDP& hsug) const {
-    return EulerBounder().flow_bounds(vf,domx,PositiveFloatDPApproximation(hsug));
+    return EulerBounder().compute(vf,domx,PositiveFloatDPApproximation(hsug));
 }
 
 

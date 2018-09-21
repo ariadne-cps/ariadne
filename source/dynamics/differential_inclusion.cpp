@@ -711,7 +711,7 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
 
 
 Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
-    return EulerBounder().flow_bounds(f,dom,hsug);
+    return EulerBounder().compute(f,dom,hsug);
 }
 
 

@@ -43,8 +43,12 @@ class BounderInterface {
     virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const = 0;
     virtual Void write(OutputStream& os) const = 0;
 
+    virtual BounderInterface* clone() const = 0;
+
     friend inline OutputStream& operator<<(OutputStream& os, const BounderInterface& bounder) {
         bounder.write(os); return os; }
+
+    virtual ~BounderInterface() = default;
 };
 
 class BounderBase : public BounderInterface, Loggable {
@@ -65,6 +69,7 @@ class EulerBounder : public BounderBase {
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
     virtual Void write(OutputStream& os) const { os << "Euler"; }
+    virtual EulerBounder* clone() const { return new EulerBounder(*this); }
     virtual ~EulerBounder() = default;
 };
 
@@ -73,6 +78,7 @@ class HeunBounder : public BounderBase {
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
     virtual Void write(OutputStream& os) const { os << "Heun"; }
+    virtual HeunBounder* clone() const { return new HeunBounder(*this); }
     virtual ~HeunBounder() = default;
 };
 
@@ -81,6 +87,7 @@ class RalstonBounder : public BounderBase {
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
     virtual Void write(OutputStream& os) const { os << "Ralston"; }
+    virtual RalstonBounder* clone() const { return new RalstonBounder(*this); }
     virtual ~RalstonBounder() = default;
 };
 
@@ -89,6 +96,7 @@ class RungeKutta4Bounder : public BounderBase {
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
     virtual Void write(OutputStream& os) const { os << "RungeKutta4"; }
+    virtual RungeKutta4Bounder* clone() const { return new RungeKutta4Bounder(*this); }
     virtual ~RungeKutta4Bounder() = default;
 };
 

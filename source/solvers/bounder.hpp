@@ -51,8 +51,8 @@ class BounderBase : public BounderInterface {
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const = 0;
   private:
-    UpperBoxType _initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
-    UpperBoxType _refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h) const;
+    UpperBoxType _initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const;
+    UpperBoxType _refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const;
   public:
     virtual ~BounderBase() = default;
 };

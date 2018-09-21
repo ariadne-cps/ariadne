@@ -19,27 +19,21 @@ The build system is CMake. The library is tested for compilation using gcc and c
 
 #### Dependencies
 
-The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo (to save into png files) and GTK2 (for window display). Finally, the Python bindings require the Python headers (Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. If you cloned the Ariadne repository, you can fetch the pybind11 dependency by issuing
-
-```
-git submodule update --init --recursive
-```
-
-If you downloaded an automatically packaged archive for Ariadne instead, you will need to manually clone the pybind11 repository into an external/pybind11 directory.
+The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo (to save into png files) and GTK2 (for window display). Finally, the Python bindings require the Python headers (Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to fetch the dependency, Git must be installed.
 
 Finally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
-Specific instructions for Ubuntu and macOS follow.
+Specific instructions for Ubuntu and macOS follow (documentation packages are excluded).
 
 ##### Ubuntu
-Aptitude packages: `cmake libgmp-dev libmpfr-dev libgtk2.0-dev libcairo2-dev`
+Aptitude packages: `cmake git libgmp-dev libmpfr-dev libgtk2.0-dev libcairo2-dev`
 
 Additional Aptitude package required for the Python interface: `python3-dev` or `python-dev`.
 
 ##### OSX
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
 
-2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake mpfr gmp gtk cairo`
+2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake git mpfr gmp gtk cairo`
 
 #### Building
 

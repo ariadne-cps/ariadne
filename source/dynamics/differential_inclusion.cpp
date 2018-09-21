@@ -25,6 +25,7 @@
 #include "differential_inclusion.hpp"
 #include "../function/taylor_function.hpp"
 #include "../solvers/integrator.hpp"
+#include "../solvers/bounder.hpp"
 #include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
@@ -55,21 +56,18 @@ inline std::ostream& operator<<(std::ostream& os, const DifferentialInclusionIVP
 
 struct ScheduledApproximator
 {
-    SizeType step;
+    Nat step;
     InputApproximator approximator;
 
-    ScheduledApproximator(SizeType s, InputApproximator a) : step(s), approximator(a) {}
+    ScheduledApproximator(Nat s, InputApproximator a) : step(s), approximator(a) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
     return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
 
-struct ScheduledApproximatorComparator
-{
-    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2)
-    {
-        return (sa1.step > sa2.step);
-    }
+struct ScheduledApproximatorComparator {
+    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2) {
+        return (sa1.step > sa2.step); }
 };
 
 inline char activity_symbol(SizeType step) {
@@ -168,14 +166,14 @@ inline Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const 
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-inline Map<InputApproximation,FloatDP> convert_to_percentages(const Map<InputApproximation,SizeType>& approximation_global_frequencies) {
+inline Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<InputApproximationKind,SizeType>& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InputApproximation,FloatDP> result;
+    Map<InputApproximationKind,FloatDP> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1.0/total_steps*entry.second;
     }
@@ -351,21 +349,20 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 InputApproximator
-InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const {
-
+InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const {
     switch(kind) {
-    case InputApproximation::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
-    case InputApproximation::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
-    case InputApproximation::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
-    case InputApproximation::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
-    case InputApproximation::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
+    case InputApproximationKind::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
+    case InputApproximationKind::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
+    case InputApproximationKind::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(di,sweeper)));
+    case InputApproximationKind::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(di,sweeper)));
+    case InputApproximationKind::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(di,sweeper)));
     default:
         ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
     }
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_)
+InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
@@ -376,6 +373,10 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations
 }
 
 static const SizeType NUMBER_OF_PICARD_ITERATES=6;
+
+Bool InclusionIntegrator::must_recondition(Nat step) const {
+    return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
+}
 
 List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclusionIVP const& ivp, Real tmax) {
     ARIADNE_LOG(2,"\n"<<ivp<<"\n");
@@ -395,18 +396,15 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
     ValidatedVectorFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
-    Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InputApproximationKind,Nat> delays;
     for (auto appro: _approximations) {
         approximation_global_frequencies[appro] = 0;
         approximation_local_frequencies[appro] = 0;
+        delays[appro] = 0;
     }
 
-    List<ValidatedVectorFunctionModelDP> result;
-
-    SizeType step = 0;
-
     List<ScheduledApproximator> schedule;
-    Map<InputApproximation,Nat> delays;
 
     List<InputApproximator> approximations;
     InputApproximatorFactory factory;
@@ -414,10 +412,11 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         approximations.append(factory.create(di,appro,_sweeper));
 
     for (auto appro: approximations) {
-        schedule.push_back(ScheduledApproximator(SizeType(step),appro));
-        delays[appro.kind()] = 0;
+        schedule.push_back(ScheduledApproximator(0u,appro));
     }
 
+    List<ValidatedVectorFunctionModelDP> result;
+    Nat step = 0u;
     while (possibly(t<FloatDPBounds(tmax,pr))) {
 
         if (verbosity == 1)
@@ -446,7 +445,9 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         UpperBoxType B;
         PositiveFloatDPValue h;
 
-        std::tie(h,B)=this->flow_bounds(F,V,D,hsug);
+        BoxDomainType dom = product(D,V);
+
+        std::tie(h,B)=this->flow_bounds(F,dom,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -504,17 +505,17 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (step%freq==freq-1) {
+        if (must_recondition(step)) {
 
             double base = 0;
             double rho = 6.0;
             for (auto appro: approximation_local_frequencies) {
                 SizeType ppi;
                 switch (appro.first) {
-                    case InputApproximation::ZERO:
+                    case InputApproximationKind::ZERO:
                         ppi = 0;
                         break;
-                    case InputApproximation::CONSTANT:
+                    case InputApproximationKind::CONSTANT:
                         ppi = 1;
                         break;
                     default:
@@ -523,12 +524,13 @@ List<ValidatedVectorFunctionModelDP> InclusionIntegrator::flow(DifferentialInclu
                 double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
                 base += partial*appro.second/freq;
             }
-            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
 
             Nat num_variables_to_keep(base);
             ARIADNE_LOG(5,"simplifying to "<<num_variables_to_keep<<" variables\n");
+            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
             lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
-            this->_reconditioner->simplify(evolve_function);
+            lreconditioner.simplify(evolve_function);
+
             for (auto appro: _approximations) {
                 approximation_local_frequencies[appro] = 0;
             }
@@ -559,7 +561,7 @@ InclusionIntegrator::reach(DifferentialInclusion const& di, BoxDomainType D, Val
 
     ValidatedVectorFunctionModelType result;
 
-    if (this->_approximator->kind() != InputApproximation::PIECEWISE) {
+    if (this->_approximator->kind() != InputApproximationKind::PIECEWISE) {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
         auto DVh = this->_approximator->build_flow_domain(D,di.V(),h);
@@ -708,24 +710,8 @@ ValidatedVectorFunction build_Fw(ValidatedVectorFunction const& F, Vector<Valida
 }
 
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
-
-    PositiveFloatDPValue h=cast_exact(hsug);
-    UpperBoxType wD = D + (D-D.midpoint());
-    ExactBoxType DV = product(D,V);
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,DV);
-    UpperBoxType BV = product(B,UpperBoxType(V));
-
-    while(not refines(D+IntervalDomainType(0,h)*apply(f,BV),B)) {
-        h=hlf(h);
-    }
-
-    for(Nat i=0; i<4; ++i) {
-        B=D+IntervalDomainType(0,h)*apply(f,BV);
-        BV = product(B,UpperBoxType(V));
-    }
-
-    return std::make_pair(h,B);
+Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+    return EulerBounder().compute(f,dom,hsug);
 }
 
 
@@ -744,24 +730,6 @@ compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& d
         auto dyn_of_phi = compose(dyn,join(picardPhi,af));
         picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.argument_size()-1)+x0f;
     }
-
-    /*
-    TaylorSeriesIntegrator integrator(MaximumError(1e-4),SweepThreshold(1e-8),LipschitzConstant(0.5));
-
-    auto BVh =_approximator->build_flow_domain(cast_exact_box(B), V, h);
-
-    auto seriesPhi = integrator.flow_step(dyn,DVh,h,BVh);
-
-    if (volume(picardPhi.range()) < volume(seriesPhi.range())) {
-        ARIADNE_LOG(2,"Picard flow function chosen\n");
-        return picardPhi;
-
-    } else {
-        ARIADNE_LOG(2,"Series flow function chosen\n");
-        return seriesPhi;
-    }
-    */
-
 
     return picardPhi;
 }

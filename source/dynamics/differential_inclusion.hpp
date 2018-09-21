@@ -102,6 +102,7 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
+
 class DifferentialInclusion {
 private:
     DottedRealAssignments _dynamics;
@@ -177,44 +178,29 @@ inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
 
 C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
-enum class InputApproximation : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
+enum class InputApproximationKind : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
-inline std::ostream& operator << (std::ostream& os, const InputApproximation& kind) {
+inline std::ostream& operator << (std::ostream& os, const InputApproximationKind& kind) {
     switch (kind) {
-        case InputApproximation::ZERO: os << "ZERO"; break;
-        case InputApproximation::CONSTANT: os << "CONSTANT"; break;
-        case InputApproximation::AFFINE: os << "AFFINE"; break;
-        case InputApproximation::SINUSOIDAL: os << "SINUSOIDAL"; break;
-        case InputApproximation::PIECEWISE: os << "PIECEWISE"; break;
+        case InputApproximationKind::ZERO: os << "ZERO"; break;
+        case InputApproximationKind::CONSTANT: os << "CONSTANT"; break;
+        case InputApproximationKind::AFFINE: os << "AFFINE"; break;
+        case InputApproximationKind::SINUSOIDAL: os << "SINUSOIDAL"; break;
+        case InputApproximationKind::PIECEWISE: os << "PIECEWISE"; break;
         default: ARIADNE_FAIL_MSG("Unhandled input approximation for output streaming\n");
     }
     return os;
 }
 
-class ParametricInputApproximation {
-protected:
-    ParametricInputApproximation(InputApproximation kind) : _kind(kind) { }
-public:
-    InputApproximation kind() { return _kind; }
-private:
-    InputApproximation _kind;
+template<InputApproximationKind A> struct InputApproximationKindTrait {
+    static InputApproximationKind kind() { return A; }
 };
 
-class ZeroApproximation : public ParametricInputApproximation {
-public: ZeroApproximation() : ParametricInputApproximation(InputApproximation::ZERO) { }
-};
-class ConstantApproximation : public ParametricInputApproximation {
-public: ConstantApproximation() : ParametricInputApproximation(InputApproximation::CONSTANT) { }
-};
-class AffineApproximation : public ParametricInputApproximation {
-public: AffineApproximation() : ParametricInputApproximation(InputApproximation::AFFINE) { }
-};
-class SinusoidalApproximation : public ParametricInputApproximation {
-public: SinusoidalApproximation() : ParametricInputApproximation(InputApproximation::SINUSOIDAL) { }
-};
-class PiecewiseApproximation : public ParametricInputApproximation {
-public: PiecewiseApproximation() : ParametricInputApproximation(InputApproximation::PIECEWISE) { }
-};
+class ZeroApproximation : public InputApproximationKindTrait<InputApproximationKind::ZERO> { };
+class ConstantApproximation : public InputApproximationKindTrait<InputApproximationKind::CONSTANT> { };
+class AffineApproximation : public InputApproximationKindTrait<InputApproximationKind::AFFINE> { };
+class SinusoidalApproximation : public InputApproximationKindTrait<InputApproximationKind::SINUSOIDAL> { };
+class PiecewiseApproximation : public InputApproximationKindTrait<InputApproximationKind::PIECEWISE> { };
 
 template<class A> ErrorType r_value();
 template<> ErrorType r_value<ZeroApproximation>() { return ErrorType(0u); }
@@ -223,13 +209,6 @@ template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); 
 template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
 template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
 
-template<class A> constexpr InputApproximation approximation_kind();
-template<> constexpr InputApproximation approximation_kind<ZeroApproximation>() { return InputApproximation::ZERO; }
-template<> constexpr InputApproximation approximation_kind<ConstantApproximation>() { return InputApproximation::CONSTANT; }
-template<> constexpr InputApproximation approximation_kind<AffineApproximation>() { return InputApproximation::AFFINE; }
-template<> constexpr InputApproximation approximation_kind<SinusoidalApproximation>() { return InputApproximation::SINUSOIDAL; }
-template<> constexpr InputApproximation approximation_kind<PiecewiseApproximation>() { return InputApproximation::PIECEWISE; }
-
 template<class A> constexpr Nat num_params_per_input();
 template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
 template<> constexpr Nat num_params_per_input<ConstantApproximation>() { return 1u; }
@@ -237,32 +216,21 @@ template<> constexpr Nat num_params_per_input<AffineApproximation>() { return 2u
 template<> constexpr Nat num_params_per_input<SinusoidalApproximation>() { return 2u; }
 template<> constexpr Nat num_params_per_input<PiecewiseApproximation>() { return 2u; }
 
-enum class InputsRoles : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
+enum class InputsRelationKind : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
 
-class InputsRole {
-protected:
-    InputsRole(InputsRoles kind) : _kind(kind) { }
-public:
-    InputsRoles kind() { return _kind; }
-private:
-    InputsRoles _kind;
+template<InputsRelationKind R> struct InputsRelationKindTrait {
+    static InputsRelationKind kind() { return R; }
 };
 
-class AffineInputs : public InputsRole {
-public: AffineInputs() : InputsRole(InputsRoles::AFFINE) { }
-};
-class SingularInput : public InputsRole {
-public: SingularInput() : InputsRole(InputsRoles::SINGULAR) { }
-};
-class AdditiveInputs : public InputsRole {
-public: AdditiveInputs() : InputsRole(InputsRoles::ADDITIVE) { }
-};
+class AffineInputs : public InputsRelationKindTrait<InputsRelationKind::AFFINE> { };
+class SingularInput : public InputsRelationKindTrait<InputsRelationKind::SINGULAR> { };
+class AdditiveInputs : public InputsRelationKindTrait<InputsRelationKind::ADDITIVE> { };
 
-inline std::ostream& operator<<(std::ostream& os, const InputsRoles& kind) {
+inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind) {
     switch (kind) {
-        case InputsRoles::AFFINE: os << "AFFINE"; break;
-        case InputsRoles::SINGULAR: os << "SINGULAR"; break;
-        case InputsRoles::ADDITIVE: os << "ADDITIVE"; break;
+        case InputsRelationKind::AFFINE: os << "AFFINE"; break;
+        case InputsRelationKind::SINGULAR: os << "SINGULAR"; break;
+        case InputsRelationKind::ADDITIVE: os << "ADDITIVE"; break;
         default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
     }
     return os;
@@ -288,7 +256,7 @@ class InputApproximatorInterface;
 
 class InputApproximatorFactory {
 public:
-    InputApproximator create(DifferentialInclusion const& di, InputApproximation kind, SweeperDP sweeper) const;
+    InputApproximator create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -325,7 +293,7 @@ public:
 
 class InputApproximatorInterface {
   public:
-    virtual InputApproximation kind() const = 0;
+    virtual InputApproximationKind kind() const = 0;
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const = 0;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
@@ -341,7 +309,7 @@ class InputApproximator : public InputApproximatorInterface {
     InputApproximator(InputApproximator const& other) : _impl(other._impl) { }
     InputApproximator& operator=(InputApproximator const& other) { _impl = other._impl; return *this; }
   public:
-    virtual InputApproximation kind() const override { return _impl->kind(); }
+    virtual InputApproximationKind kind() const override { return _impl->kind(); }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
@@ -357,12 +325,12 @@ class InputApproximatorBase : public InputApproximatorInterface {
     SweeperDP _sweeper;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
     InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
-        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(approximation_kind<A>()), _num_params_per_input(num_params_per_input<A>()) { }
+        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(A::kind()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
-    const InputApproximation _kind;
+    const InputApproximationKind _kind;
     const Nat _num_params_per_input;
   public:
-    virtual InputApproximation kind() const override { return _kind; }
+    virtual InputApproximationKind kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
@@ -393,13 +361,13 @@ public:
 class InclusionIntegratorInterface {
   public:
     virtual List<ValidatedVectorFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) = 0;
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const = 0;
+    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, ApproximateTimeStepType hsug) const = 0;
     virtual ValidatedVectorFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
 };
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
   protected:
-    List<InputApproximation> _approximations;
+    List<InputApproximationKind> _approximations;
     SharedPointer<InputApproximator> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
@@ -407,8 +375,8 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size);
-    template<class... AS> InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes);
+    InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size);
+    template<class... AS> InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size, AS... attributes);
   public:
     InclusionIntegrator& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
     InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
@@ -416,7 +384,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
 
     virtual List<ValidatedVectorFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) override;
 
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
+    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, ApproximateTimeStepType hsug) const override;
     virtual ValidatedVectorFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
     ValidatedVectorFunctionModelType compute_flow_function(ValidatedVectorFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;
@@ -424,9 +392,11 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorFunctionModelDP evaluate_evolve_function(ValidatedVectorFunctionModelDP reach_function, PositiveFloatDPValue t) const;
     ValidatedVectorFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorFunctionModelDP evolve_function, ValidatedVectorFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     Vector<ValidatedScalarFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
+  private:
+    Bool must_recondition(Nat step) const;
 };
 
-template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximation> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)
+template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_, AS... attributes)
                 : InclusionIntegrator::InclusionIntegrator(approximations, sweeper,step_size_) {
     this->set(attributes...);
     _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));

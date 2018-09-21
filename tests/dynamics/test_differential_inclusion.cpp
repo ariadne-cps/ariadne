@@ -41,16 +41,16 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         for (auto appro: approximations) {
-            List<InputApproximation> singleapproximation = {appro};
+            List<InputApproximationKind> singleapproximation = {appro};
             std::cout << appro << std::endl;
             run_single_test(name,ivp,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
         }
     }
 
-    Void run_single_test(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_single_test(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
@@ -66,12 +66,12 @@ class TestInclusionIntegrator {
         ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
         unsigned int verbosity = 0;
 
-        List<InputApproximation> approximations;
-        approximations.append(InputApproximation::ZERO);
-        approximations.append(InputApproximation::CONSTANT);
-        approximations.append(InputApproximation::AFFINE);
-        approximations.append(InputApproximation::SINUSOIDAL);
-        approximations.append(InputApproximation::PIECEWISE);
+        List<InputApproximationKind> approximations;
+        approximations.append(InputApproximationKind::ZERO);
+        approximations.append(InputApproximationKind::CONSTANT);
+        approximations.append(InputApproximationKind::AFFINE);
+        approximations.append(InputApproximationKind::SINUSOIDAL);
+        approximations.append(InputApproximationKind::PIECEWISE);
 
         this->run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
     }
@@ -137,6 +137,7 @@ void TestInclusionIntegrator::test() const {
 }
 
 int main() {
+
     TestInclusionIntegrator().test();
     return ARIADNE_TEST_FAILURES;
 }

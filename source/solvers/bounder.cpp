@@ -123,15 +123,4 @@ UpperBoxType RungeKutta4Bounder::formula(BoxDomainType D, BoxDomainType V, Valid
     return (k1+2*k2+2*k3+k4)/6;
 }
 
-BounderHandler BounderFactory::create(Bounder method) {
-    switch(method) {
-    case Bounder::EULER : return BounderHandler(SharedPointer<BounderInterface>(new EulerBounder()));
-    case Bounder::HEUN : return BounderHandler(SharedPointer<BounderInterface>(new HeunBounder()));
-    case Bounder::RALSTON : return BounderHandler(SharedPointer<BounderInterface>(new RalstonBounder()));
-    case Bounder::RUNGEKUTTA4 : return BounderHandler(SharedPointer<BounderInterface>(new RungeKutta4Bounder()));
-    default:
-        ARIADNE_FAIL_MSG("Unexpected flow bounds method "<<method<<"\n");
-    }
-}
-
 } // namespace Ariadne;

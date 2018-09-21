@@ -38,8 +38,6 @@
 
 namespace Ariadne {
 
-class BounderFactory;
-
 class BounderInterface {
   public:
     virtual Pair<PositiveFloatDPValue,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const = 0;
@@ -99,24 +97,6 @@ class BounderHandler : public BounderInterface {
     }
   public:
     virtual ~BounderHandler() = default;
-};
-
-enum class Bounder : std::uint8_t { EULER, HEUN, RALSTON, RUNGEKUTTA4 };
-
-inline std::ostream& operator << (std::ostream& os, const Bounder& kind) {
-    switch (kind) {
-        case Bounder::EULER: os << "EULER"; break;
-        case Bounder::HEUN: os << "HEUN"; break;
-        case Bounder::RALSTON: os << "RALSTON"; break;
-        case Bounder::RUNGEKUTTA4: os << "RUNGEKUTTA4"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled bounder method for output streaming\n");
-    }
-    return os;
-}
-
-class BounderFactory {
-public:
-    static BounderHandler create(Bounder method);
 };
 
 

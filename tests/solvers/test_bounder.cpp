@@ -96,14 +96,10 @@ class TestBounder
 
 Int main(Int argc, const char* argv[]) {
 
-    ARIADNE_PRINT_TEST_CASE_TITLE("EulerBounder");
-    TestBounder(EulerBounder()).test();
-    ARIADNE_PRINT_TEST_CASE_TITLE("HeunBounder");
-    TestBounder(HeunBounder()).test();
-    ARIADNE_PRINT_TEST_CASE_TITLE("RalstonBounder");
-    TestBounder(RalstonBounder()).test();
-    ARIADNE_PRINT_TEST_CASE_TITLE("RungeKutta4Bounder");
-    TestBounder(RungeKutta4Bounder()).test();
+    List<BounderHandle> bounders = { EulerBounder(), HeunBounder(), RalstonBounder(), RungeKutta4Bounder() };
+
+    for (BounderHandle bounder : bounders)
+        TestBounder(bounder).test();
 
     return ARIADNE_TEST_FAILURES;
 }

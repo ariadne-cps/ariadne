@@ -105,11 +105,12 @@ class BounderHandle : public BounderInterface {
   private:
     SharedPointer<BounderInterface> _impl;
   public:
-    BounderHandle(SharedPointer<BounderInterface> const& impl) : _impl(impl) { }
+    BounderHandle(BounderInterface const& bounder) : _impl(bounder.clone()) { }
     BounderHandle(BounderHandle const& other) : _impl(other._impl) { }
     BounderHandle& operator=(BounderHandle const& other) { _impl = other._impl; return *this; }
 
     virtual Void write(OutputStream& os) const { _impl->write(os); }
+    virtual BounderHandle* clone() const { return new BounderHandle(*this); }
 
     virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
         return _impl->compute(f,dom,hsug);

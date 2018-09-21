@@ -29,7 +29,6 @@ namespace Ariadne {
 Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
-    const PositiveFloatDPValue NO_WIDENING=cast_positive(1.0_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);
     const Nat EXPANSION_STEPS=4;
     const Nat REFINEMENT_STEPS=4;
@@ -41,11 +40,12 @@ Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVector
     h=cast_positive(min(hlip,h));
 
     UpperBoxType B;
+    UpperBoxType V(project(dom,range(f.result_size(),f.argument_size())));
     Bool success=false;
     while(!success) {
-        B=this->_initial(f,dom,h,INITIAL_STARTING_WIDENING);
+        B=this->_initial(dom,f,UpperBoxType(dom),h,INITIAL_STARTING_WIDENING);
         for(Nat i=0; i<EXPANSION_STEPS; ++i) {
-            UpperBoxType Br=this->_refinement(B,f,dom,h,NO_WIDENING);
+            UpperBoxType Br=this->_refinement(dom,f,B,h);
             if(not definitely(is_bounded(Br))) {
                 success=false;
                 break;
@@ -54,7 +54,8 @@ Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVector
                 success=true;
                 break;
             } else {
-                B=this->_refinement(B,f,dom,h,INITIAL_REFINING_WIDENING);
+                UpperBoxType BV=product(B,V);
+                B=this->_initial(dom,f,BV,h,INITIAL_REFINING_WIDENING);
             }
         }
         if(!success) {
@@ -63,33 +64,33 @@ Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVector
     }
 
     for(Nat i=0; i<REFINEMENT_STEPS; ++i) {
-        B = this->_refinement(B,f,dom,h,NO_WIDENING);
+        B = this->_refinement(dom,f,B,h);
     }
 
     return std::make_pair(h,B);
 }
 
-UpperBoxType BounderBase::_initial(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const {
+UpperBoxType BounderBase::_initial(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const {
     const PositiveFloatDPValue BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
     BoxDomainType V = project(dom,range(n,p));
     UpperBoxType wD = D + BOX_RADIUS_WIDENING*(D-D.midpoint());
-    return wD + FORMULA_WIDENING*formula(D,V,f,UpperBoxType(dom),h);
+    return wD + FORMULA_WIDENING*formula(D,V,f,arg,h);
 }
 
-UpperBoxType BounderBase::_refinement(UpperBoxType B, ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const {
+UpperBoxType BounderBase::_refinement(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
     BoxDomainType V = project(dom,range(n,p));
     UpperBoxType BV = product(B,UpperBoxType(V));
-    return D + FORMULA_WIDENING*formula(D,V,f,BV,h);
+    return D + formula(D,V,f,BV,h);
 }
 
-UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
-    return IntervalDomainType(0,h)*apply(f,B);
+UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h) const {
+    return IntervalDomainType(0,h)*apply(f,arg);
 }
 
 UpperBoxType HeunBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {

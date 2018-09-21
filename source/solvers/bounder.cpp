@@ -26,7 +26,7 @@
 
 namespace Ariadne {
 
-Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);

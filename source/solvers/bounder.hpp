@@ -40,12 +40,16 @@ namespace Ariadne {
 
 class BounderInterface {
   public:
-    virtual Pair<PositiveFloatDPValue,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const = 0;
+    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const = 0;
+    virtual Void write(OutputStream& os) const = 0;
+
+    friend inline OutputStream& operator<<(OutputStream& os, const BounderInterface& bounder) {
+        bounder.write(os); return os; }
 };
 
-class BounderBase : public BounderInterface {
+class BounderBase : public BounderInterface, Loggable {
   public:
-    Pair<PositiveFloatDPValue,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const;
+    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const;
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const = 0;
   private:
@@ -53,12 +57,14 @@ class BounderBase : public BounderInterface {
     UpperBoxType _refinement(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
     virtual ~BounderBase() = default;
+
 };
 
 class EulerBounder : public BounderBase {
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
+    virtual Void write(OutputStream& os) const { os << "Euler"; }
     virtual ~EulerBounder() = default;
 };
 
@@ -66,6 +72,7 @@ class HeunBounder : public BounderBase {
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
+    virtual Void write(OutputStream& os) const { os << "Heun"; }
     virtual ~HeunBounder() = default;
 };
 
@@ -73,6 +80,7 @@ class RalstonBounder : public BounderBase {
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
+    virtual Void write(OutputStream& os) const { os << "Ralston"; }
     virtual ~RalstonBounder() = default;
 };
 
@@ -80,6 +88,7 @@ class RungeKutta4Bounder : public BounderBase {
   protected:
     virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
   public:
+    virtual Void write(OutputStream& os) const { os << "RungeKutta4"; }
     virtual ~RungeKutta4Bounder() = default;
 };
 
@@ -92,12 +101,16 @@ class BounderHandle : public BounderInterface {
     BounderHandle(BounderHandle const& other) : _impl(other._impl) { }
     BounderHandle& operator=(BounderHandle const& other) { _impl = other._impl; return *this; }
 
-    virtual Pair<PositiveFloatDPValue,UpperBoxType> flow_bounds(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
-        return _impl->flow_bounds(f,dom,hsug);
+    virtual Void write(OutputStream& os) const { _impl->write(os); }
+
+    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+        return _impl->compute(f,dom,hsug);
     }
   public:
     virtual ~BounderHandle() = default;
 };
+
+
 
 } // namespace Ariadne
 

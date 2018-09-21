@@ -1,4 +1,5 @@
 set(UNIT_TESTS
+    test_bounder
     test_constraint_solver
     test_integrator    
     test_linear_programming

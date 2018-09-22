@@ -95,12 +95,12 @@ class TestReachabilityAnalyser
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        TaylorSeriesIntegrator integrator(MaximumError(1e-5));
+        TaylorSeriesIntegrator integrator(MaximumError(1e-2));
 
         EvolverType evolver(system,integrator);
 
         AnalyserType analyser(system,evolver);
-        analyser.configuration().set_maximum_grid_depth(4);
+        analyser.configuration().set_maximum_grid_depth(3);
         cout << "Done building analyser\n";
         return analyser;
     }

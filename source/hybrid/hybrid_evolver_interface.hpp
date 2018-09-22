@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_evolver_interface.hpp
@@ -28,15 +29,15 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_HPP
 
-#include "dynamics/evolver_interface.hpp"
+#include "../dynamics/evolver_interface.hpp"
 
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -92,7 +93,7 @@ class HybridEvolverInterface
     virtual Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const = 0;
+    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const = 0;
     //@}
 
     //@{

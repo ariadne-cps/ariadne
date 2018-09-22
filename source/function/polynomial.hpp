@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file polynomial.hpp
@@ -35,11 +36,10 @@
 #include <map>
 #include <algorithm>
 
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/operations.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/evaluate.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/operations.hpp"
+#include "../algebra/differential.hpp"
 
 
 namespace Ariadne {
@@ -47,13 +47,15 @@ namespace Ariadne {
 template<class T> class Array;
 template<class X> class Algebra;
 
-//! \brief A monomial with coefficients of some type \a X.
+//! \brief A monomial with index \a I and coefficients of some type \a X.
 template<class X>
 class Monomial
-    : public ExpansionValue<X>
+    : public ExpansionValue<MultiIndex,X>
 {
-    Monomial(const MultiIndex& a, const X& x) : ExpansionValue<X>(a,x) { }
-    Monomial(const ExpansionValue<X>& v) : ExpansionValue<X>(v) { }
+    typedef MultiIndex I;
+  public:
+    Monomial(const MultiIndex& a, const X& x) : ExpansionValue<I,X>(a,x) { }
+    Monomial(const ExpansionValue<I,X>& v) : ExpansionValue<I,X>(v) { }
 };
 
 //! \ingroup FunctionModule
@@ -63,13 +65,13 @@ class Polynomial
     : public DispatchAlgebraOperations<Polynomial<X>,X>
 {
     template<class XX> friend class Polynomial;
-    friend class AlgebraOperations<Polynomial<X>,X>;
+    friend struct AlgebraOperations<Polynomial<X>,X>;
   public:
-    typedef typename Expansion<X>::ValueType ValueType;
-    typedef typename Expansion<X>::Reference Reference;
-    typedef typename Expansion<X>::ConstReference ConstReference;
-    typedef typename Expansion<X>::Iterator Iterator;
-    typedef typename Expansion<X>::ConstIterator ConstIterator;
+    typedef typename Expansion<MultiIndex,X>::ValueType ValueType;
+    typedef typename Expansion<MultiIndex,X>::Reference Reference;
+    typedef typename Expansion<MultiIndex,X>::ConstReference ConstReference;
+    typedef typename Expansion<MultiIndex,X>::Iterator Iterator;
+    typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
 
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
@@ -85,7 +87,7 @@ class Polynomial
     //! \brief Copy/conversion constructor.
     template<class XX> Polynomial(const Polynomial<XX>& p);
     //! \brief Copy/conversion constructor.
-    template<class XX> explicit Polynomial(const Expansion<XX>& e);
+    template<class XX> explicit Polynomial(const Expansion<MultiIndex,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
     //@}
@@ -130,9 +132,9 @@ class Polynomial
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
     const X& operator[](const MultiIndex& a) const;
     //! \brief A constant reference to the raw data expansion.
-    const Expansion<X>& expansion() const;
+    const Expansion<MultiIndex,X>& expansion() const;
     //! \brief A reference to the raw data expansion.
-    Expansion<X>& expansion();
+    Expansion<MultiIndex,X>& expansion();
     //@}
 
     //@{
@@ -208,7 +210,7 @@ class Polynomial
     Void _append(const MultiIndex& a, const X& c);
     Iterator _unique_key();
   private:
-    SortedExpansion<X,ReverseLexicographicIndexLess> _expansion;
+    SortedExpansion<MultiIndex,X,ReverseLexicographicIndexLess> _expansion;
   private: // FIXME: Put these concrete-generic operations in proper place
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
         friend Polynomial<X> operator+(Polynomial<X> p, const Y& c) {
@@ -227,16 +229,17 @@ class Polynomial
 
 template<class X> struct AlgebraOperations<Polynomial<X>> {
   public:
-    static Polynomial<X> _neg(const Polynomial<X>& p);
-    static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _add(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const X& c);
-    static Polynomial<X> _mul(Polynomial<X> p, const Monomial<X>& m);
-    static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
-    static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
+    static Polynomial<X> apply(Pos, const Polynomial<X>& p);
+    static Polynomial<X> apply(Neg, const Polynomial<X>& p);
+    static Polynomial<X> apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Mul, const Polynomial<X>& p1, const Polynomial<X>& p2);
+    static Polynomial<X> apply(Add, Polynomial<X> p, const X& c);
+    static Polynomial<X> apply(Mul, Polynomial<X> p, const X& c);
+    static Polynomial<X> apply(Mul, Polynomial<X> p, const Monomial<X>& m);
+    static Polynomial<X>& iapply(Add, Polynomial<X>& p, const X& c);
+    static Polynomial<X>& iapply(Mul, Polynomial<X>& p, const X& c);
+    static Polynomial<X>& iapply(Mul, Polynomial<X>& p, const Monomial<X>& m);
 
 };
 
@@ -244,7 +247,7 @@ template<class X> struct AlgebraOperations<Polynomial<X>> {
 template<class X> template<class XX> Polynomial<X>::Polynomial(const Polynomial<XX>& p)
     : _expansion(p._expansion) { }
 
-template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<XX>& e)
+template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<MultiIndex,XX>& e)
     : _expansion(e) { this->cleanup(); }
 
 template<class X> template<class XX> Bool Polynomial<X>::operator==(const Polynomial<XX>& p) const {

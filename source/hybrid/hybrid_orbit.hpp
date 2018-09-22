@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_orbit.hpp
@@ -34,13 +35,13 @@
 #include <map>
 #include <memory>
 
-#include "numeric/numeric.hpp"
-#include "output/graphics_interface.hpp"
-#include "geometry/function_set.hpp"
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
+#include "../numeric/numeric.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../geometry/function_set.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_enclosure.hpp"
 
-#include "dynamics/orbit.hpp"
+#include "../dynamics/orbit.hpp"
 
 namespace Ariadne {
 
@@ -53,10 +54,10 @@ template<class X> class Point;
 typedef Point<ExactNumericType> ExactPoint;
 class Grid;
 class GridCell;
-class GridTreeSet;
+class GridTreePaving;
 class HybridGrid;
 class HybridGridCell;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 class HybridTime;
 
 class DiscreteLocation;
@@ -90,17 +91,17 @@ class Orbit<HybridGridCell>
     struct Data;
   public:
     typedef HybridGridCell EnclosureType;
-    typedef HybridGridTreeSet EnclosureListType;
+    typedef HybridGridTreePaving EnclosureListType;
 
     Orbit(const HybridGrid&, const HybridGridCell&);
-    Orbit(const HybridGridTreeSet&);
-    Orbit(const HybridGridTreeSet&, const HybridGridTreeSet&,
-          const HybridGridTreeSet&, const HybridGridTreeSet&);
+    Orbit(const HybridGridTreePaving&);
+    Orbit(const HybridGridTreePaving&, const HybridGridTreePaving&,
+          const HybridGridTreePaving&, const HybridGridTreePaving&);
     HybridGrid const& grid() const;
-    HybridGridTreeSet const& initial() const;
-    HybridGridTreeSet const& reach() const;
-    HybridGridTreeSet const& intermediate() const;
-    HybridGridTreeSet const& final() const;
+    HybridGridTreePaving const& initial() const;
+    HybridGridTreePaving const& reach() const;
+    HybridGridTreePaving const& intermediate() const;
+    HybridGridTreePaving const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

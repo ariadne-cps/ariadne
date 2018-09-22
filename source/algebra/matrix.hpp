@@ -6,26 +6,25 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file algebra/matrix.hpp
  *  \brief
  */
-
-
 
 #ifndef ARIADNE_MATRIX_HPP
 #define ARIADNE_MATRIX_HPP
@@ -67,6 +66,8 @@ class DeclareMatrixOperations {
     template<class X1, class X2> friend Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s, Matrix<X2> const& A);
     template<class X1, class X2> friend Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A, X2 const& s);
     template<class X1, class X2> friend Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A, X2 const& s);
+    template<class X1, class X2> friend Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A, X2 const& s);
+    template<class X1, class X2> friend Matrix<InplaceQuotientType<X1,X2>>& operator/=(Matrix<X1>& A, X2 const& s);
 
     template<class X> friend Matrix<X> operator+(Matrix<X> A);
     template<class X> friend Matrix<X> operator-(Matrix<X> A);
@@ -135,6 +136,7 @@ template<class X> class Matrix
     Matrix();
 
     //! Construct a matrix with \a m rows and \a n columns with values uninitialised.
+    //! The values should be initialised using placement new.
     Matrix(SizeType m, SizeType n, Uninitialised);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.
@@ -176,7 +178,12 @@ template<class X> class Matrix
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>> =dummy>
         explicit Matrix(const M& A);
 
+    template<class M, class... PRS, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType,PRS...>>> =dummy>
+        explicit Matrix(const M& A, PRS... prs);
+
+
     template<class M> Matrix<X>& operator+=(const M& A);
+    template<class M> Matrix<X>& operator-=(const M& A);
 
     //! \brief The number of rows of the matrix.
     SizeType row_size() const;
@@ -409,7 +416,7 @@ template<class M> struct MatrixRows {
     MatrixRowsColumn<M> operator[](SizeType j) { return MatrixRowsColumn<M>(_A,_is,j); }
     MatrixRange<M> operator[](Range js) { return MatrixRange<M>(_A,_is,js); }
     MatrixRows<M>& operator=(Matrix<ScalarType> const& B) {
-        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType pi=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(pi,j,B.get(i,j)); } } return *this; }
+        for(SizeType i=0; i!=B.row_size(); ++i) { SizeType p_i=_is[i]; for(SizeType j=0; j!=B.column_size(); ++j) { _A.set(p_i,j,B.get(i,j)); } } return *this; }
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
@@ -562,10 +569,18 @@ template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvert
 template<class X> template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>>>
 Matrix<X>::Matrix(const M& A) : Matrix(A.row_size(),A.column_size(),X(A.zero_element()))
 {
-    this->resize(A.row_size(),A.column_size());
     for(SizeType i=0; i!=this->row_size(); ++i) {
         for(SizeType j=0; j!=this->column_size(); ++j) {
             this->at(i,j)=X(A.get(i,j));
+        }
+    }
+}
+
+template<class X> template<class M, class... PRS, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType,PRS...>>>>
+Matrix<X>::Matrix(const M& A, PRS... prs) : Matrix(A.row_size(),A.column_size(),X(A.zero_element(),prs...)) {
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)=X(A.get(i,j),prs...);
         }
     }
 }
@@ -589,6 +604,15 @@ template<class X> template<class M> Matrix<X>& Matrix<X>::operator+=(const M& A)
     for(SizeType i=0; i!=this->row_size(); ++i) {
         for(SizeType j=0; j!=this->column_size(); ++j) {
             this->at(i,j)+=A.get(i,j);
+        }
+    }
+    return *this;
+}
+
+template<class X> template<class M> Matrix<X>& Matrix<X>::operator-=(const M& A) {
+    for(SizeType i=0; i!=this->row_size(); ++i) {
+        for(SizeType j=0; j!=this->column_size(); ++j) {
+            this->at(i,j)-=A.get(i,j);
         }
     }
     return *this;
@@ -623,7 +647,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
         ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
         ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-        Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size());
+        Matrix<SumType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()+A2.zero_element());
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]+A2[i][j];
@@ -635,7 +659,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
         ARIADNE_PRECONDITION(A1.row_size()==A2.row_size());
         ARIADNE_PRECONDITION(A1.column_size()==A2.column_size());
-        Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size());
+        Matrix<DifferenceType<X1,X2>> R(A1.row_size(),A1.column_size(),A1.zero_element()-A2.zero_element());
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]-A2[i][j];
@@ -645,7 +669,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
-        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size());
+        Matrix<ProductType<X1,X2>> R(A2.row_size(),A2.row_size(),s1*A2.zero_element());
         for(SizeType i=0; i!=A2.row_size(); ++i) {
             for(SizeType j=0; j!=A2.column_size(); ++j) {
                 R[i][j]=s1*A2[i][j];
@@ -655,7 +679,7 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size());
+        Matrix<ProductType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()*s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]*s2;
@@ -665,13 +689,31 @@ struct ProvideMatrixOperations {
     }
 
     template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
-        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size());
+        Matrix<QuotientType<X1,X2>> R(A1.row_size(),A1.row_size(),A1.zero_element()/s2);
         for(SizeType i=0; i!=A1.row_size(); ++i) {
             for(SizeType j=0; j!=A1.column_size(); ++j) {
                 R[i][j]=A1[i][j]/s2;
             }
         }
         return std::move(R);
+    }
+
+    template<class X1, class X2> friend inline Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A1, X2 const& s2) {
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                A1[i][j]*=s2;
+            }
+        }
+        return A1;
+    }
+
+    template<class X1, class X2> friend inline Matrix<InplaceQuotientType<X1,X2>>& operator/=(Matrix<X1>& A1, X2 const& s2) {
+        for(SizeType i=0; i!=A1.row_size(); ++i) {
+            for(SizeType j=0; j!=A1.column_size(); ++j) {
+                A1[i][j]/=s2;
+            }
+        }
+        return A1;
     }
 
     //template<class X1, class X2> friend inline MatrixMatrixProduct<X1,X2> operator*(Matrix<X1> const& A1, Matrix<X2> const& A2) {
@@ -732,7 +774,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2) {
         Matrix<X1> const& A1T=A1._AT;
         ARIADNE_PRECONDITION(A1T.row_size()==A2.row_size());
-        Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size());
+        Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size(),A1.zero_element()*A2.zero_element());
         for(SizeType i=0; i!=A1T.column_size(); ++i) {
             for(SizeType j=0; j!=A2.column_size(); ++j) {
                 for(SizeType k=0; k!=A1T.row_size(); ++k) {
@@ -746,7 +788,7 @@ struct ProvideMatrixOperations {
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> const& v2) {
         Matrix<X1> const& A1T=A1._AT;
         ARIADNE_PRECONDITION(A1T.row_size()==v2.size());
-        Vector<ArithmeticType<X1,X2>> v0(A1T.column_size());
+        Vector<ArithmeticType<X1,X2>> v0(A1T.column_size(),A1.zero_element()*v2.zero_element());
         for(SizeType i=0; i!=v0.size(); ++i) {
             for(SizeType j=0; j!=v2.size(); ++j) {
                 v0.at(i)+=A1T.at(j,i)*v2.at(j);

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_enclosure.hpp
@@ -33,19 +34,18 @@
 #include <list>
 #include <iostream>
 
-#include "utility/logging.hpp"
-#include "utility/declarations.hpp"
-#include "utility/pointer.hpp"
-#include "utility/container.hpp"
+#include "../output/logging.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/pointer.hpp"
+#include "../utility/container.hpp"
 
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "hybrid/hybrid_graphics_interface.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/enclosure.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/enclosure.hpp"
 
 namespace Ariadne {
 
@@ -54,7 +54,7 @@ template<class X> struct LinearProgram;
 
 class Enclosure;
 class Grid;
-class GridTreeSet;
+class GridTreePaving;
 class AffineSet;
 class DiscreteEvent;
 class Figure;
@@ -70,7 +70,7 @@ template<class ES> class HybridListSet;
 class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
 
-enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
+enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.
@@ -197,7 +197,9 @@ class HybridEnclosure
     friend HybridBasicSet<Enclosure> project(HybridEnclosure const&, RealSpace const& spc);
     //! \brief The continuous state set.
     HybridBasicSet<Enclosure> state_set() const;
-    //! \brief The continuous state set.
+    //! \brief The continuous state set including time.
+    HybridBasicSet<Enclosure> state_time_set() const;
+    //! \brief The continuous state set including auxiliary variables.
     HybridBasicSet<Enclosure> state_auxiliary_set() const;
     //! \brief The continuous enclosure.
     const ContinuousStateSetType& continuous_set() const;
@@ -262,6 +264,8 @@ class HybridEnclosure
     Void new_state_time_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     Void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
+    //! \brief Introduces the new constraint \f$t\leq\gamma(x)\f$.
+    Void new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
     Void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
@@ -294,13 +298,15 @@ class HybridEnclosure
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
 
+    //! \brief Reduce the size of the domain by constraint propagation, if possible.
+    Void reduce();
     //! \brief Simplifies the representation.
     Void recondition();
     //! \brief Simplifies the representation by changing all uniform errors into independent variables.
@@ -339,7 +345,7 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnc
 
 
 class HybridGrid;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 template<>
 class ListSet<HybridEnclosure>
@@ -349,6 +355,8 @@ class ListSet<HybridEnclosure>
     typedef List<HybridEnclosure>::Iterator Iterator;
     typedef List<HybridEnclosure>::ConstIterator ConstIterator;
   public:
+    operator const List<HybridEnclosure>& () const { return _list; }
+    operator List<HybridEnclosure>& () { return _list; }
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
     ListSet(const List<HybridEnclosure>& hel) : _list(hel) { }
@@ -360,6 +368,12 @@ class ListSet<HybridEnclosure>
     SizeType size() const { return _list.size(); }
     const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
+    Void reduce() { for(auto& set : _list ) { set.reduce(); } }
+    Void clear() { this->_list.clear(); }
+    HybridEnclosure& front() { return this->_list.front(); }
+    const HybridEnclosure& front() const { return this->_list.front(); }
+    HybridEnclosure& back() { return this->_list.back(); }
+    const HybridEnclosure& back() const { return this->_list.back(); }
     Iterator begin() { return _list.begin(); }
     Iterator end() { return _list.end(); }
     ConstIterator begin() const { return _list.begin(); }
@@ -367,25 +381,16 @@ class ListSet<HybridEnclosure>
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
         for(Nat i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
-    friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls);
+    friend ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
+        ValidatedLowerKleenean result=true; for(auto iter=set.begin(); iter!=set.end(); ++iter) { result = result && inside(*iter,bx); } return result; }
+    friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
+        return os << hls._list; };
+    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
   private:
     List<HybridEnclosure> _list;
 };
 
-inline ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
-    ValidatedLowerKleenean result=true;
-    for(auto iter=set.begin(); iter!=set.end(); ++iter) {
-        result = result && inside(*iter,bx);
-    }
-    return result;
-}
-
-
-inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
-    return os << hls._list;
-}
-
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
+HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 
 
 } // namespace Ariadne

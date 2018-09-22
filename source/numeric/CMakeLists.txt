@@ -12,4 +12,4 @@ add_library(ariadne-numeric OBJECT
     float-user.cpp
 )
 
-cotire(ariadne-numeric)
+cotire(ariadne-numeric CONFIGURATIONS None)

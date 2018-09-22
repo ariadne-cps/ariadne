@@ -6,35 +6,36 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "numeric/numeric.hpp"
-#include "function/function.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "output/cairo.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../numeric/numeric.hpp"
+#include "../function/function.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../output/geometry2d.hpp"
+#include "../output/graphics.hpp"
+#include "../output/cairo.hpp"
 
-#ifdef HAVE_GTK_H
+#ifdef HAVE_GTK2_H
 #include <gtk/gtk.h>
 #endif
 
@@ -47,6 +48,9 @@ static const Int LEFT_MARGIN = 160;
 static const Int BOTTOM_MARGIN = 40;
 static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
+
+
+OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable);
 
 
 Colour::Colour()
@@ -76,7 +80,7 @@ const Colour magenta=Colour("magenta",1.0,0.0,1.0);
 
 
 
-StringType str(FloatDP x) {
+inline StringType str(FloatDP x) {
     StringStream ss;
     ss << x;
     return ss.str();
@@ -221,6 +225,11 @@ double Figure::get_line_width() const
     return this->_data->properties.line_width;
 }
 
+double Figure::get_dot_radius() const
+{
+    return this->_data->properties.dot_radius;
+}
+
 Colour Figure::get_line_colour() const
 {
     return this->_data->properties.line_colour;
@@ -353,7 +362,24 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 
 
 
-#ifdef HAVE_GTK_H
+#ifdef HAVE_GTK2_H
+
+void paint (GtkWidget *widget, GdkEventExpose *eev, gpointer gdata);
+
+void
+paint (GtkWidget *widget, GdkEventExpose *eev, gpointer gdata)
+{
+    cairo_t *cr;
+
+    Figure* figure=static_cast<Figure*>(gdata);
+
+    // Get Cairo drawing context
+    cr = gdk_cairo_create (widget->window);
+
+    // Draw Cairo objects
+    CairoCanvas canvas(cr);
+    figure->_paint_all(canvas);
+}
 
 Void Figure::display() const
 {
@@ -395,14 +421,14 @@ Void Figure::display() const
 
 }
 
-#else // NO GTK_H
+#else // NO GTK2_H
 
 Void Figure::display() const
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
 
-#endif // HAVE_GTK_H
+#endif // HAVE_GTK2_H
 
 
 
@@ -416,15 +442,15 @@ CairoCanvas::~CairoCanvas()
 }
 
 CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), dr(1.0), lc(0,0,0), fc(1,1,1, 1.0)
+    : cr(c), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
 }
 
 CairoCanvas::CairoCanvas(const ImageSize2d& size)
-    : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
+    : cr(0), lw(1.0), dr(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
-    const Int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_width = static_cast<Int>(size.nx)+LEFT_MARGIN+RIGHT_MARGIN;
+    const Int canvas_height = static_cast<Int>(size.ny)+BOTTOM_MARGIN+TOP_MARGIN;
 
     cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -482,8 +508,8 @@ Void CairoCanvas::move_to(double x, double y) { cairo_move_to (cr, x, y); }
 Void CairoCanvas::line_to(double x, double y) { cairo_line_to (cr, x, y); }
 Void CairoCanvas::circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
 Void CairoCanvas::dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
-Void CairoCanvas::set_dot_radius(double dr) { this->dr=dr; }
-Void CairoCanvas::set_line_width(double lw) { this->lw=lw; }
+Void CairoCanvas::set_dot_radius(double radius) { this->dr=radius; }
+Void CairoCanvas::set_line_width(double width) { this->lw=width; }
 Void CairoCanvas::set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
 Void CairoCanvas::set_fill_opacity(double o) { fc.opacity=o; }
 Void CairoCanvas::set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
@@ -496,11 +522,11 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
 
 
     CairoCanvas& cairo_canvas=*this;
-    cairo_t *cr=cairo_canvas.cr;
+    cairo_t *crp=cairo_canvas.cr;
 
     const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
-    const Int drawing_width = drawing_size.nx;
-    const Int drawing_height = drawing_size.ny;
+    const Int drawing_width = static_cast<Int>(drawing_size.nx);
+    const Int drawing_height = static_cast<Int>(drawing_size.ny);
 
     //const Int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
     //const Int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
@@ -511,15 +537,15 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     const Int top_margin = TOP_MARGIN;
 
     // clear background
-    cairo_set_source_rgb (cr, 1,1,1);
-    cairo_paint (cr);
+    cairo_set_source_rgb (crp, 1,1,1);
+    cairo_paint (crp);
 
     // Set text font
-    cairo_select_font_face (cr, "roman",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 30);
+    cairo_select_font_face (crp, "roman",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (crp, 30);
 
     // Set text colour
-    cairo_set_source_rgb (cr, 0., 0., 0.);
+    cairo_set_source_rgb (crp, 0., 0., 0.);
 
     // Get axis label text
     StringType text_xl=str(xl);
@@ -529,43 +555,43 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
 
     // Write axis labels
     cairo_text_extents_t te;
-    cairo_text_extents (cr, text_xl.c_str(), &te);
-    cairo_move_to(cr, left_margin-2, top_margin+drawing_height+4+te.height);
-    cairo_show_text (cr, text_xl.c_str());
-    cairo_text_extents (cr, text_xu.c_str(), &te);
-    cairo_move_to(cr, left_margin+drawing_width-te.width-4, top_margin+drawing_height+4+te.height);
-    cairo_show_text (cr, text_xu.c_str());
-    cairo_text_extents (cr, text_x.c_str(), &te);
-    cairo_move_to(cr, left_margin+drawing_width/2-te.width/2-3, top_margin+drawing_height+4+te.height);
-    cairo_show_text (cr, text_x.c_str());
+    cairo_text_extents (crp, text_xl.c_str(), &te);
+    cairo_move_to(crp, left_margin-2, top_margin+drawing_height+4+te.height);
+    cairo_show_text (crp, text_xl.c_str());
+    cairo_text_extents (crp, text_xu.c_str(), &te);
+    cairo_move_to(crp, left_margin+drawing_width-te.width-4, top_margin+drawing_height+4+te.height);
+    cairo_show_text (crp, text_xu.c_str());
+    cairo_text_extents (crp, text_x.c_str(), &te);
+    cairo_move_to(crp, left_margin+drawing_width/2-te.width/2-3, top_margin+drawing_height+4+te.height);
+    cairo_show_text (crp, text_x.c_str());
 
-    cairo_text_extents (cr, text_yl.c_str(), &te);
-    cairo_move_to(cr, left_margin-te.width-6, top_margin+drawing_height+2);
-    cairo_show_text (cr, text_yl.c_str());
-    cairo_text_extents (cr, text_yu.c_str(), &te);
-    cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
-    cairo_show_text (cr, text_yu.c_str());
-    cairo_text_extents (cr, text_y.c_str(), &te);
-    cairo_move_to(cr, left_margin-te.width-6, top_margin+drawing_height/2+te.height+2);
-    cairo_show_text (cr, text_y.c_str());
+    cairo_text_extents (crp, text_yl.c_str(), &te);
+    cairo_move_to(crp, left_margin-te.width-6, top_margin+drawing_height+2);
+    cairo_show_text (crp, text_yl.c_str());
+    cairo_text_extents (crp, text_yu.c_str(), &te);
+    cairo_move_to(crp, left_margin-te.width-6, top_margin+te.height+2);
+    cairo_show_text (crp, text_yu.c_str());
+    cairo_text_extents (crp, text_y.c_str(), &te);
+    cairo_move_to(crp, left_margin-te.width-6, top_margin+drawing_height/2+te.height+2);
+    cairo_show_text (crp, text_y.c_str());
 
 
     // Save unclipped state and canvas coordinates
-    cairo_save (cr);
+    cairo_save (crp);
 
     // Set clipping region
-    cairo_move_to (cr, left_margin, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin);
-    cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, top_margin+drawing_height);
+    cairo_move_to (crp, left_margin, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin);
+    cairo_line_to (crp, left_margin, top_margin);
+    cairo_line_to (crp, left_margin, top_margin+drawing_height);
 
     // Fill clipping region with a very light colour to indicate where figure
     // should be drawn
-    cairo_set_source_rgb(cr, 0.97,0.97,0.97);
-    cairo_fill_preserve (cr);
-    cairo_clip (cr);
-    cairo_new_path (cr);
+    cairo_set_source_rgb(crp, 0.97,0.97,0.97);
+    cairo_fill_preserve (crp);
+    cairo_clip (crp);
+    cairo_new_path (crp);
 
     //std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<xl<<" xu="<<xu<<"\n";
     //std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<yl<<" yu="<<yu<<"\n";
@@ -579,9 +605,9 @@ Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     double utr1=(-yu);
 
     // Scale to user coordinates
-    cairo_translate(cr, ctr0, ctr1);
-    cairo_scale (cr, sc0,sc1);
-    cairo_translate(cr, utr0, utr1);
+    cairo_translate(crp, ctr0, ctr1);
+    cairo_scale (crp, sc0,sc1);
+    cairo_translate(crp, utr0, utr1);
 }
 
 Void CairoCanvas::write(const char* filename) const {
@@ -591,26 +617,26 @@ Void CairoCanvas::write(const char* filename) const {
 
 Void CairoCanvas::finalise()
 {
-    cairo_t *cr=this->cr;
+    cairo_t *crp=this->cr;
 
     // Restore canvas coordinates and unclipped state
-    cairo_restore (cr);
+    cairo_restore (crp);
 
     const ImageSize2d drawing_size = this->size_in_pixels();
-    const Int drawing_width = drawing_size.nx;
-    const Int drawing_height = drawing_size.ny;
+    const Int drawing_width = static_cast<Int>(drawing_size.nx);
+    const Int drawing_height = static_cast<Int>(drawing_size.ny);
 
     const Int left_margin = LEFT_MARGIN;
     const Int top_margin = TOP_MARGIN;
 
-    cairo_set_line_width (cr, 2.0);
-    cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-    cairo_move_to (cr, left_margin, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin);
-    cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, top_margin+drawing_height);
-    cairo_stroke (cr);
+    cairo_set_line_width (crp, 2.0);
+    cairo_set_source_rgb (crp, 0.0, 0.0, 0.0);
+    cairo_move_to (crp, left_margin, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (crp, left_margin+drawing_width, top_margin);
+    cairo_line_to (crp, left_margin, top_margin);
+    cairo_line_to (crp, left_margin, top_margin+drawing_height);
+    cairo_stroke (crp);
 }
 
 #endif

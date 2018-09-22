@@ -1,0 +1,15 @@
+set(UNIT_TESTS
+    test_continuous_evolution
+    test_differential_inclusion
+    test_discrete_evolution
+    test_reachability_analyser
+)
+
+foreach(TEST ${UNIT_TESTS})
+    add_executable(${TEST} ${TEST}.cpp)
+    target_link_libraries(${TEST} ariadne)
+    add_test(${TEST} ${TEST})    
+    set_property(TEST ${TEST} PROPERTY LABELS "dynamics;primary")
+endforeach()
+
+add_dependencies(tests ${UNIT_TESTS})

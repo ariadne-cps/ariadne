@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_reachability_analyser.hpp
@@ -29,18 +30,19 @@
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_HPP
 
 
-#include "solvers/configuration_interface.hpp"
-#include "dynamics/reachability_analyser.hpp"
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
-#include "hybrid/hybrid_evolver_interface.hpp"
-#include "hybrid/hybrid_reachability_analyser_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
+#include "../dynamics/reachability_analyser.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../hybrid/hybrid_evolver_interface.hpp"
+#include "../hybrid/hybrid_reachability_analyser_interface.hpp"
 
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_grid.hpp"
-#include "hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_grid.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 
 namespace Ariadne {
@@ -52,8 +54,8 @@ class HybridAutomatonInterface;
 
 class HybridGrid;
 class HybridGridCell;
-class HybridGridTreeSet;
-class HybridGridTreeSet;
+class HybridGridTreePaving;
+class HybridGridTreePaving;
 
 template<class ES> class HybridListSet;
 
@@ -63,8 +65,8 @@ class HybridAutomaton;
 
 template<> struct SafetyCertificate<HybridSpace> {
     ValidatedSierpinskian is_safe;
-    HybridGridTreeSet chain_reach_set;
-    HybridGridTreeSet safe_set;
+    HybridGridTreePaving chain_reach_set;
+    HybridGridTreePaving safe_set;
 };
 
 using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
@@ -93,11 +95,11 @@ class HybridReachabilityAnalyser
     //@}
 
   protected:
-    Void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
-                                    HybridGridTreeSet& evolve_cells,
-                                    const HybridGridTreeSet& set,
+    Void _adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
+                                    HybridGridTreePaving& evolve_cells,
+                                    const HybridGridTreePaving& set,
                                     const HybridTerminationCriterion& termination,
-                                    const Int accuracy,
+                                    const Nat accuracy,
                                     const HybridEvolverInterface& evolver) const;
 
 };
@@ -108,8 +110,6 @@ class HybridReachabilityAnalyser
 template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : public ConfigurationInterface {
 
   public:
-    //! \brief The integer type.
-    typedef Int IntType;
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
     //! \brief The real type.
@@ -120,6 +120,8 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
 
     //! \brief Default constructor gives reasonable values.
     ReachabilityAnalyserConfiguration(ReachabilityAnalyser<HybridAutomatonInterface>& analyser);
+
+    virtual ~ReachabilityAnalyserConfiguration() = default;
 
   private:
 
@@ -196,14 +198,14 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    IntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_depth;
 
     //! \brief The maximum height used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    IntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_height;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
@@ -242,11 +244,11 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     const Set<DiscreteEvent>& lock_to_grid_events() const { return _lock_to_grid_events; }
     Void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
 
-    const IntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
+    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
 
-    const IntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
+    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
 
     const std::shared_ptr<HybridExactBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.

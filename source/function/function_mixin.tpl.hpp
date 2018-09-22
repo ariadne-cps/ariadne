@@ -6,32 +6,33 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 #ifndef ARIADNE_FUNCTION_MIXIN_TCC
 #define ARIADNE_FUNCTION_MIXIN_TCC
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/differential.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "algebra/algebra.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/differential.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../algebra/algebra.hpp"
 
-#include "function/function_mixin.hpp"
+#include "../function/function_mixin.hpp"
 
 namespace Ariadne {
 
@@ -44,18 +45,13 @@ FunctionMixin<F,Void,D,C>::_base_evaluate(const ElementType<D,X>& x) const -> El
     static_cast<const F*>(this)->_compute(r,x); return std::move(r);
 }
 
+/*
 template<class F, class D> template<class X> auto
 FunctionMixin<F,Void,D,IntervalDomainType>::_base_evaluate(const ElementType<D,X>& x) const -> X {
-    ElementType<C,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
+    ElementType<IntervalDomainType,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
     static_cast<const F*>(this)->_compute(r,x); return std::move(r);
 }
-
-template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
-    return new F(static_cast<const F&>(*this)); }
+*/
 
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<FloatDPApproximation>& x) const -> Result<FloatDPApproximation> {

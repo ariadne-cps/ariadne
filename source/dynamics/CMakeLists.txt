@@ -6,4 +6,4 @@ add_library(ariadne-dynamics OBJECT
     reachability_analyser.cpp
 )
 
-cotire(ariadne-dynamics)
+cotire(ariadne-dynamics CONFIGURATIONS None)

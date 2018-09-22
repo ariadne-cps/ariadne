@@ -6,23 +6,24 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <string>
 #include <sstream>
@@ -34,36 +35,46 @@
 #include <valarray>
 
 
-#include "utility/exceptions.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
-#include "geometry/function_set.hpp"
+#include "../solvers/integrator.hpp"
+#include "../solvers/solver.hpp"
+#include "../geometry/function_set.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "../dynamics/vector_field.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser.hpp"
+#include "../dynamics/orbit.hpp"
+#include "../dynamics/vector_field_evolver.hpp"
+#include "../dynamics/reachability_analyser.hpp"
 
-#include "utility/logging.hpp"
-#include "output/graphics.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../output/logging.hpp"
+#include "../output/graphics.hpp"
+#include "../solvers/linear_programming.hpp"
 
-#include "dynamics/reachability_analyser.tpl.hpp"
+#include "../dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
 
 template class ReachabilityAnalyser<VectorField>;
 template class ReachabilityAnalyserConfiguration<VectorField>;
+
+OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy)
+{
+    switch(policy) {
+        case ChainOverspillPolicy::IGNORE: os<<"ignore"; break;
+        case ChainOverspillPolicy::WARNING: os<<"warning"; break;
+        case ChainOverspillPolicy::ERROR: os<<"error"; break;
+        default: abort();
+    } return os;
+}
 
 } // namespace Ariadne

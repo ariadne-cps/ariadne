@@ -6,36 +6,37 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/expression.hpp"
-#include "expression/space.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/space.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 
@@ -83,18 +84,6 @@ class CompositeHybridSpace
 
 namespace {
 
-List<DottedRealVariable> dot(const List<RealVariable>& v) {
-    List<DottedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
-    return result;
-}
-
-List<PrimedRealVariable> next(const List<RealVariable>& v) {
-    List<PrimedRealVariable> result;
-    for(Nat i=0; i!=v.size(); ++i) { result.append(next(v[i])); }
-    return result;
-}
-
 Identifier name_composition(const List<HybridAutomaton>& components)
 {
     List<HybridAutomaton>::ConstIterator comp_it = components.begin();
@@ -129,8 +118,6 @@ CompositeHybridAutomaton::CompositeHybridAutomaton(
 		Identifier name,
 		const List<HybridAutomaton>& components)
     : _name(name),_components(components) { }
-
-CompositeHybridAutomaton::~CompositeHybridAutomaton() { }
 
 Nat
 CompositeHybridAutomaton::number_of_components() const
@@ -456,7 +443,7 @@ EffectiveScalarFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
+    RealExpression invariant=indicator(invariant_predicate(location,event),Sign::NEGATIVE);
     return make_function(space,substitute(invariant,algebraic));
 }
 
@@ -464,7 +451,7 @@ EffectiveScalarFunction
 CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
+    RealExpression guard=indicator(guard_predicate(location,event),Sign::POSITIVE);
     return make_function(space,substitute(guard,algebraic));
 }
 
@@ -797,7 +784,7 @@ CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& compo
     return CompositeHybridAutomaton(name_composition(components),components);
 }
 
-HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)
+inline HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

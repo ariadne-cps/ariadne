@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file metaprogramming.hpp
@@ -87,7 +88,10 @@ template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<
 
 struct Fallback { };
 struct DontCare { template<class T> DontCare(T); };
-template<class R> struct Return { };
+
+template<class R> struct Return { typedef R ReturnType; };
+template<class RET> using ReturnType = typename RET::ReturnType;
+
 struct Any { };
 
 template<template<class...>class F, class... T> False _has(...);
@@ -121,6 +125,44 @@ template<class X1, class X2=X1> using ArithmeticType = SumType<ProductType<X1,X2
 template<class X1, class X2=X1> using EqualsType = decltype(declval<X1>()==declval<X2>());
 template<class X1, class X2=X1> using LessType = decltype(declval<X1>()< declval<X2>());
 template<class X1, class X2=X1> using ComparisonType = LessType<X1,X2>;
+
+template<class X1, class X2=X1> using EqualityType = decltype(declval<X1>()==declval<X2>());
+template<class X1, class X2=X1> using InequalityType = decltype(declval<X1>()!=declval<X2>());
+
+template<class X1, class X2=X1> using InplaceSumType = RemoveReference<decltype(declval<X1&>()+=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceDifferenceType = RemoveReference<decltype(declval<X1&>()-=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceProductType = RemoveReference<decltype(declval<X1&>()*=declval<X2>())>;
+template<class X1, class X2=X1> using InplaceQuotientType = RemoveReference<decltype(declval<X1&>()/=declval<X2>())>;
+
+template<class A1, class A2> struct HasEquality {
+    template<class AA1, class AA2, class=decltype(std::declval<AA1>()==std::declval<AA2>())> static std::true_type test(int);
+    template<class AA1, class AA2> static std::false_type test(...);
+    static const bool value = decltype(test<A1,A2>(1))::value;
+};
+
+template<class A1, class A2> struct CanAdd {
+    template<class AA1, class AA2, class=decltype(std::declval<AA1>()+std::declval<AA2>())> static std::true_type test(int);
+    template<class AA1, class AA2> static std::false_type test(...);
+    static const bool value = decltype(test<A1,A2>(1))::value;
+};
+
+template<class A1, class A2> struct CanSubtract {
+    template<class AA1, class AA2, class=decltype(std::declval<AA1>()-std::declval<AA2>())> static std::true_type test(int);
+    template<class AA1, class AA2> static std::false_type test(...);
+    static const bool value = decltype(test<A1,A2>(1))::value;
+};
+
+template<class A1, class A2> struct CanMultiply {
+    template<class AA1, class AA2, class=decltype(std::declval<AA1>()*std::declval<AA2>())> static std::true_type test(int);
+    template<class AA1, class AA2> static std::false_type test(...);
+    static const bool value = decltype(test<A1,A2>(1))::value;
+};
+
+template<class A1, class A2> struct CanDivide {
+    template<class AA1, class AA2, class=decltype(std::declval<AA1>()/std::declval<AA2>())> static std::true_type test(int);
+    template<class AA1, class AA2> static std::false_type test(...);
+    static const bool value = decltype(test<A1,A2>(1))::value;
+};
 
 //template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class F, class... AS> struct IsInvocable;

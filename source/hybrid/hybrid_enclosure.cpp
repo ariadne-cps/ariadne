@@ -6,71 +6,73 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/algebra.hpp"
-#include "numeric/operators.hpp"
-#include "function/function.hpp"
-#include "function/procedure.hpp"
-#include "function/constraint.hpp"
-#include "function/polynomial.hpp"
-#include "function/taylor_function.hpp"
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/algebra.hpp"
+#include "../numeric/operators.hpp"
+#include "../function/function.hpp"
+#include "../function/procedure.hpp"
+#include "../function/constraint.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/taylor_function.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_location.hpp"
 
-#include "solvers/linear_programming.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/constraint_solver.hpp"
-#include "geometry/affine_set.hpp"
+#include "../solvers/linear_programming.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_expression_set.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../hybrid/hybrid_enclosure.hpp"
+#include "../hybrid/hybrid_expression_set.hpp"
 
 
 namespace Ariadne {
 
+OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt);
+OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
+OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 
 OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
     switch (evt) {
-        case INITIAL: return os << "x";
-        case TEMPORAL: return os << "t";
-        //case CROSSING: return os << "t";
-        //case STEP: return os << "h";
-        case PARAMETER: return os << "a";
-        case INPUT: return os << "u";
-        case NOISE: return os << "v";
-        case ERROR: return os << "e";
-        case UNKNOWN: default: return os << "s";
+        case EnclosureVariableType::INITIAL: return os << "x";
+        case EnclosureVariableType::TEMPORAL: return os << "t";
+        case EnclosureVariableType::PARAMETER: return os << "a";
+        case EnclosureVariableType::INPUT: return os << "u";
+        case EnclosureVariableType::NOISE: return os << "v";
+        case EnclosureVariableType::ERROR: return os << "e";
+        case EnclosureVariableType::UNKNOWN: default: return os << "s";
     }
 }
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-List<String> variable_names(const List<EnclosureVariableType>& vt) {
+inline List<String> variable_names(const List<EnclosureVariableType>& vt) {
     std::map<EnclosureVariableType,Nat> counts;
     List<String> result;
     for(Nat i=0; i!=vt.size(); ++i) {
@@ -112,7 +114,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
                                  const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _state_space(state_space.variables()), _set(),
-      _variables(state_space.dimension(),INITIAL)
+      _variables(state_space.dimension(),EnclosureVariableType::INITIAL)
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
     this->_set=Enclosure(euclidean_set,factory);
@@ -122,7 +124,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
                                  const RealBox& box, const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(location), _events(), _state_space(state_space.variables()), _set(box,factory),
-      _variables(box.dimension(),INITIAL)
+      _variables(box.dimension(),EnclosureVariableType::INITIAL)
 {
 }
 
@@ -139,12 +141,12 @@ HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const Validated
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
     : _location(location), _events(), _state_space(spc.variables()), _set(set),
-      _variables(set.state_dimension(),INITIAL)
+      _variables(set.state_dimension(),EnclosureVariableType::INITIAL)
 {
     if(_variables.size()<set.number_of_parameters()) {
-        _variables.append(TEMPORAL);
+        _variables.append(EnclosureVariableType::TEMPORAL);
         while(_variables.size()<set.number_of_parameters()) {
-            _variables.append(UNKNOWN);
+            _variables.append(EnclosureVariableType::UNKNOWN);
         }
     }
 }
@@ -328,10 +330,13 @@ Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType 
     this->_variables.append(vt);
 }
 
+Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma) {
+    this->_set.new_state_time_bound(gamma);
+}
+
 Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
-
 
 Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
@@ -468,6 +473,14 @@ HybridBasicSet<Enclosure> HybridEnclosure::state_set() const {
     return HybridBasicSet<Enclosure>(this->location(),this->state_space(),this->continuous_set());
 }
 
+HybridBasicSet<Enclosure> HybridEnclosure::state_time_set() const {
+    auto state_time_space=join(this->state_space(),TimeVariable());
+    auto state_time_function=join(this->state_function(),this->time_function());
+    Enclosure enclosure(this->parameter_domain(),state_time_function,this->time_function(),this->constraints(),this->function_factory());
+    HybridBasicSet<Enclosure> hset(this->location(),state_time_space,enclosure);
+    return hset;
+}
+
 HybridBasicSet<Enclosure> HybridEnclosure::state_auxiliary_set() const {
     auto state_auxiliary_space=join(this->state_space(),this->auxiliary_space());
     auto state_auxiliary_function=join(this->state_function(),this->auxiliary_function());
@@ -531,6 +544,12 @@ HybridEnclosure::restrict(const ExactBoxType& subdomain)
 }
 
 Void
+HybridEnclosure::reduce()
+{
+    this->_set.reduce();
+}
+
+Void
 HybridEnclosure::recondition()
 {
     this->uniform_error_recondition();
@@ -543,7 +562,7 @@ HybridEnclosure::uniform_error_recondition()
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
     ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
-    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),ERROR));
+    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
     this->_check();
 }
 
@@ -568,7 +587,7 @@ HybridEnclosure::split() const
 }
 
 
-Void check_subset(const ExactBoxType& dom1, const ExactBoxType& dom2, const char* msg)
+inline Void check_subset(const ExactBoxType& dom1, const ExactBoxType& dom2, const char* msg)
 {
     if(dom1.size()!=dom2.size()) {
         ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
@@ -597,6 +616,21 @@ Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>&
 }
 
 
+OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c) {
+    auto tcf = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModelDP>(c.function().managed_pointer());
+    if(tcf == nullptr) {
+        auto ecf = tcf->error();
+        const_cast<ScaledFunctionPatch<ValidatedTaylorModelDP>&>(*tcf).clobber();
+        auto pcf = Polynomial<FloatDPApproximation>(tcf->polynomial());
+        return os << c.lower_bound() << "<=" << pcf << "+/-" << ecf << "<=" << c.upper_bound();
+    }
+    return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
+}
+
+OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
+    os << "    \n[ "; for(SizeType i=0; i!=c.size(); ++i) { if (i!=0) { os << ",\n      "; } os << c[i]; } os << "]"; return os;
+}
+
 OutputStream& HybridEnclosure::write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
@@ -611,6 +645,7 @@ OutputStream& HybridEnclosure::write(OutputStream& os) const
               << ", state=" << this->_set.state_function()
               << ", constraints=" << this->_set.constraints()
               << ", time="<< this->_set.time_function()
+              << ", empty="<< this->_set.is_empty()
               << ")";
 }
 
@@ -644,10 +679,10 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
-Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Int depth) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat depth) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    GridTreeSet& paving = hgts[location];
+    GridTreePaving& paving = hgts[location];
     RealSpace paving_space=hgts.space(location);
     RealSpace state_space=this->state_space();
     RealSpace auxiliary_space=this->auxiliary_space();
@@ -662,15 +697,15 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Int
     }
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int depth) {
-    HybridGridTreeSet result(g);
+HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat depth) {
+    HybridGridTreePaving result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
         result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
     }
     return result;
 }
 
-Void
+inline Void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
     for(ListSet<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
         draw(figure,iter->continuous_set());

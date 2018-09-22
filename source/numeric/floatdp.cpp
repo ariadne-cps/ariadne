@@ -6,22 +6,23 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/standard.hpp"
+#include "../utility/standard.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -30,36 +31,15 @@
 
 
 
-#include "config.h"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/rounding.hpp"
-
-#if defined ARIADNE_C99_ROUNDING
-    #warning "Using standard fenv.hpp C header file for setting the rounding mode."
-#elif defined ARIADNE_BOOST_ROUNDING
-    #if defined BOOST_NUMERIC_INTERVAL_DETAIL_C99_ROUNDING_CONTROL_HPP
-        #warning "Using Boost interval library standard fenv.hpp C header for setting the rounding mode."
-    #else
-        #warning "Using Boost interval library hardware rounding for setting the rounding mode."
-    #endif
-#elif defined ARIADNE_GCC_ROUNDING
-    #warning "Using ordinary GCC inline assembler for setting the rounding mode."
-#elif defined ARIADNE_EGCC_ROUNDING
-    #warning "Using extended GCC inline assembler for setting the rounding mode."
-#elif defined ARIADNE_SSE_ROUNDING
-    #warning "Using SSE <xmmintrin.h> header file for setting the rounding mode."
-#elif defined ARIADNE_MSVC_ROUNDING
-    #warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
-#else
-    #warning "No rounding mode defined."
-#endif
-
-#include "numeric/floatdp.hpp"
-#include "numeric/floatmp.hpp"
+#include "../utility/macros.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/rounding.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../numeric/floatmp.hpp"
 
 
 namespace Ariadne {
@@ -78,14 +58,10 @@ Void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
 
 Void set_default_rounding() { _set_rounding_upward(); }
 
-
-static const double _quarter_pi_up=0.78539816339744839;
-static const double _half_pi_up=1.5707963267948968;
 static const double _pi_up=3.1415926535897936;
 static const double _pi_down=3.1415926535897931;
 
 static const double _quarter_pi_approx=0.78539816339744828;
-static const double _half_pi_approx=1.5707963267948966;
 static const double _pi_approx=3.1415926535897931;
 static const double _two_pi_approx=6.2831853071795862;
 static const double _sqrt2_approx=0.70710678118654757;
@@ -103,15 +79,6 @@ static inline double next_opp(double x) {
     volatile double y=-x; y=y+1e-300; y=y-1e-300; return -y;
 }
 
-
-static inline char rounding_mode_char()
-{
-    if((get_rounding_mode() & 3072) == 0000) { return 'n'; }
-    if((get_rounding_mode() & 3072) == 1024) { return 'd'; }
-    if((get_rounding_mode() & 3072) == 2048) { return 'u'; }
-    if((get_rounding_mode() & 3072) == 3072) { return 'z'; }
-    return '?';
-}
 
 static inline double horner_rnd(Int n, double x, const long long int* c)
 {
@@ -336,7 +303,7 @@ double sin_rnd(double x) {
     case +1: { w = +y - 1*half_pi_opp; w=-w; s=pos_cos_rnd_series(w); break; }
     case +2: { w = -y + 1*half_pi_rnd; w=-w; s=pos_cos_rnd_series(w); break; }
     case +3: { w = -y + 2*half_pi_rnd; w=+w; s=pos_sin_rnd_series(w); break; }
-    default: { assert(false); }
+    default: { s=0; assert(false); }
     }
 
     return s;
@@ -416,6 +383,7 @@ double cos_rnd(double x) {
         w=sub_opp(pi_opp,y);
         c=neg_cos_rnd_series(w);
     } else {
+        w=0;c=0;
         assert(false);
     }
 
@@ -739,7 +707,7 @@ FloatDP FloatDP::pi(RoundingModeType rnd, DoublePrecision pr) {
         case FloatDP::ROUND_UPWARD: return _pi_up;
         case FloatDP::ROUND_DOWNWARD: return _pi_down;
         case FloatDP::ROUND_TO_NEAREST: return _pi_near;
-        default: assert(false);
+        default: assert(false); return _pi_near;
     }
 }
 
@@ -757,8 +725,16 @@ Void FloatDP::set_precision(FloatDP::PrecisionType) { }
 FloatDP FloatDP::min(PrecisionType) { return std::numeric_limits<double>::min(); }
 FloatDP FloatDP::max(PrecisionType) { return std::numeric_limits<double>::max(); }
 FloatDP FloatDP::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
-FloatDP FloatDP::inf(PrecisionType) { return std::numeric_limits<double>::infinity(); }
-FloatDP FloatDP::nan(PrecisionType) { return std::numeric_limits<double>::quiet_NaN(); }
+
+FloatDP FloatDP::inf(Sign sgn, PrecisionType pr) {
+    switch (sgn) {
+    case Sign::POSITIVE: return std::numeric_limits<double>::infinity();
+    case Sign::NEGATIVE: return -std::numeric_limits<double>::infinity();
+    default: return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+FloatDP FloatDP::inf(PrecisionType pr) { return FloatDP::inf(Sign::POSITIVE,pr); }
+FloatDP FloatDP::nan(PrecisionType pr) { return FloatDP::inf(Sign::ZERO,pr); }
 
 template<class R, class A> R integer_cast(A const&);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return x.dbl; }

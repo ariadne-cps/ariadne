@@ -1,0 +1,95 @@
+language: cpp
+
+sudo: enabled
+dist: trusty
+
+branches:
+  only:
+  - master
+  - pending
+  - working
+  - working-ci
+
+matrix:
+  include:
+
+    - name: macOS 10.13 + AppleClang 10
+      os: osx
+      osx_image: xcode10
+      env: COMPILER=clang++
+
+    - name: macOS 10.12 + GCC 7
+      os: osx
+      osx_image: xcode8.3
+      env: COMPILER=g++-7
+
+    - name: Ubuntu 18.04 + Clang 5
+      os: linux
+      services:
+        - docker      
+      env: DOCKER=ubuntu:latest COMPILER=clang++-5.0
+      
+    - name: Ubuntu 18.04 + GCC 8
+      os: linux
+      services:
+        - docker
+      env: DOCKER=ubuntu:latest COMPILER=g++-8  
+
+    - name: Coverage
+      os: linux
+      services:
+        - docker
+      env: DOCKER=ubuntu:latest COMPILER=g++-7 COVERAGE=ON
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi 
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask uninstall --force oclint; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc@7 mpfr gmp gtk cairo; fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ "$COMPILER" == "g++-7" ]]; then 
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        sudo -H python2 get-pip.py
+        sudo -H pip2 install coverage pytest --upgrade --ignore-installed six
+        PYTHON_VERSION=2
+      else
+        sudo easy_install pip
+        sudo pip3 install --upgrade pip
+        sudo pip3 install coverage pytest
+        PYTHON_VERSION=3
+      fi
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      PYTHON_VERSION=3
+      docker pull $DOCKER
+      CONTAINER_ID=$(docker run --detach --tty --volume="$PWD":/ariadne --workdir=/ariadne $DOCKER)
+      SH_PREFIX="docker exec --tty $CONTAINER_ID"
+      $SH_PREFIX apt update
+      $SH_PREFIX apt install -y cmake   
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX sh -c 'apt install -y '$COMPILER' python3-pip libpython3-dev libgtk2.0-dev libcairo2-dev libmpfr-dev libgmp-dev'; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX pip3 install coverage pytest; fi
+
+script: 
+  - git submodule update --init --recursive
+  - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER"
+  - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCOVERAGE=ON"; fi
+  - if [[ -n "$COVERAGE" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi 
+  - if [[ "$TRAVIS_BRANCH" =~ pending|master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
+  - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE"
+  - $SH_PREFIX cmake . $CMAKE_ARGS
+  - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests pyariadne; else $SH_PREFIX make; fi
+  - $SH_PREFIX ctest -L "primary" -LE "python"
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && cmake . '$CMAKE_ARGS; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && make'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && ./hybrid_evolution_tutorial > /dev/null'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && cmake . '$CMAKE_ARGS; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && make'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && ./rigorous_numerics_tutorial > /dev/null'; fi
+ # - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/python_interface && python'$PYTHON_VERSION' -m tutorial.py > /dev/null'; fi  
+  
+after_success:
+  - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi

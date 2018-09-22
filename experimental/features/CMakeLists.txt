@@ -1,0 +1,5 @@
+add_subdirectory(c1_taylor_function)
+add_subdirectory(control_validator)
+add_subdirectory(dynamic_game)
+add_subdirectory(hybrid_system)
+add_subdirectory(riccati)

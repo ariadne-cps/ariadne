@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License n published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \brief \file multi_index.hpp
@@ -32,212 +33,228 @@
 #include <initializer_list>
 #include <iostream>
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 
-uint32_t fac(uint8_t);
-uint32_t bin(uint8_t,uint8_t);
-
-class MultiIndex;
-class MultiIndexValueReference;
-
-class MultiIndexBound;
-
-template<class T> class Reference;
-template<> class Reference<MultiIndex>;
-template<> class Reference<const MultiIndex>;
-
-
 struct MultiIndexData {
-    friend class MultiIndexReference;
-    friend class MultiIndexValueReference;
+    friend class MultiIndexList;
   public:
-    typedef Ariadne::SizeType SizeType;
     typedef DegreeType IndexType;
+    typedef DegreeType& Reference;
+    typedef const DegreeType& ConstReference;
   protected:
-    typedef unsigned char ByteType;
-    typedef unsigned int WordType;
-  protected:
-    MultiIndexData(SizeType n, IndexType* p) : _n(n), _p(p) { }
+    ~MultiIndexData();
+    explicit MultiIndexData(SizeType n, IndexType* p);
   public:
-    SizeType size() const { return _n; }
-    DegreeType degree() const { return _p[_n]; }
-    IndexType const* begin() const { return _p; }
-    MultiIndexValueReference operator[](SizeType i);
-  protected:
+    SizeType size() const;
+    SizeType number_of_variables() const;
+    DegreeType degree() const;
+    IndexType const& operator[](SizeType i) const;
+    IndexType& operator[](SizeType i);
+
+    DegreeType get(SizeType i) const;
+    Void set(SizeType i, DegreeType n);
+
+    Void assign(const MultiIndexData& a);
+  public:
+    friend Bool operator==(const MultiIndexData& a1, const MultiIndexData& a2);
+    friend Bool operator!=(const MultiIndexData& a1, const MultiIndexData& a2);
+  public:
+    friend Bool graded_less(const MultiIndexData& a1, const MultiIndexData& a2);
+    friend Bool lexicographic_less(const MultiIndexData& a1, const MultiIndexData& a2);
+    friend Bool reverse_lexicographic_less(const MultiIndexData& a1, const MultiIndexData& a2);
+    friend OutputStream& operator<<(OutputStream&, const MultiIndexData&);
+  public:
+    IndexType* begin();
+    IndexType* end();
+    const IndexType* begin() const;
+    const IndexType* end() const;
+  protected: public:
     SizeType _n;
     IndexType* _p;
 };
 
-//! \brief An Array of non-negative integers, suitable for storing the
-//! powers of a term in some polynomial expansion, ordered by degree.
-//!
-//! \par Python interface
-//! In the Python interface, multi-indices can be constructed and automatically converted from Python Tuple literals \c (a1,...,am)
-//!
-//! \b Rationale: The reason why tuples are used for multi-index literals is that they can be used n keys in Python \c dict objects.
 class MultiIndex
     : public MultiIndexData
 {
   public:
-    typedef MultiIndexValueReference Reference;
-    typedef const DegreeType& ConstReference;
-  public:
-    //! \brief Destructor.
     ~MultiIndex();
-    //! \brief Construct a multi index with no coefficients.
     explicit MultiIndex();
-    //! \brief Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(SizeType nv);
-    //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(SizeType nv, const DegreeType* ary);
-    //! \brief Construct a multi index with from an initializer list.
     MultiIndex(InitializerList<DegreeType> lst);
 
-    //! \brief Copy constructor.
     MultiIndex(const MultiIndex& a);
-    //! \brief Copy assignment operator.
     MultiIndex& operator=(const MultiIndex& a);
 
-    //! \brief Construct the zero multi index with \a nv variables.
     static MultiIndex zero(SizeType nv);
-    //! \brief Construct the unit multi index in variable \a j with \a nv variables.
     static MultiIndex unit(SizeType nv, SizeType j);
-    //! \brief Construct the first multi index of degree \a d with \a nv variables.
-    static MultiIndex first(SizeType nv, DegreeType d);
 
-    //! \brief Resize to hold n variables.
     Void resize(SizeType n);
-    //! \brief Assigns values from another index. Precondition: the size of \a a must equal the current size.
-    Void assign(const MultiIndex& a);
-    //! \brief Set all values to zero.
     Void clear();
-    //! \brief The number of variables.
-    SizeType size() const;
-    //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
-    DegreeType degree() const;
-     //! \brief The number of variables.
-    SizeType number_of_variables() const;
-    //! \brief The number of occurrences of the \a i th variable.
-    DegreeType get(SizeType i) const;
-    //! \brief Set the number of occurrences of the \a i th variable to \a n.
-    Void set(SizeType i, DegreeType n);
-    //! \brief The number of occurrences of the \a i th variable.
-    const DegreeType& operator[](SizeType i) const;
-    //! \brief The number of occurrences of the \a i th variable.
-    MultiIndexValueReference operator[](SizeType i);
-    //! \brief Increment the value of the \a ith element
-    Void increment(SizeType i);
-    //! \brief Decrement the value of the \a ith element
-    Void decrement(SizeType i);
 
-    //! \brief Equality operator.
-    friend Bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
-    //! \brief Inequality operator.
-    friend Bool operator!=(const MultiIndex& a1, const MultiIndex& a2); // inline
+    MultiIndex& operator++();
 
-    //! \brief Increment. No post-increment operator n we sometimes pass MultiIndex by reference.
-    MultiIndex& operator++(); // inline
-    // No post-increment operator n we sometimes pass MultiIndex by reference.Post increment.
-    // MultiIndex operator++(Int);
-    //! \brief Inplace sum.
-    MultiIndex& operator+=(const MultiIndex& a); // inline
-    //! \brief Inplace difference.
-    MultiIndex& operator-=(const MultiIndex& a); // inline
-    //! \brief Inplace scalar product.
-    MultiIndex& operator*=(const DegreeType& a); // inline
-    //! \brief Sum.
-    friend MultiIndex operator+(MultiIndex a1, const MultiIndex& a2); // inline
-    //! \brief Difference.
-    friend MultiIndex operator-(MultiIndex a1, const MultiIndex& a2); // inline
-    //! \brief Scalar product.
-    friend MultiIndex operator*(MultiIndex a, IndexType s); // inline
-    //! \brief Scalar product.
-    friend MultiIndex operator*(DegreeType s, MultiIndex a); // inline
+    MultiIndex& operator+=(const MultiIndex& a);
+    MultiIndex& operator-=(const MultiIndex& a);
+    MultiIndex& operator*=(const DegreeType& a);
+    friend MultiIndex operator+(MultiIndex a1, const MultiIndex& a2);
+    friend MultiIndex operator-(MultiIndex a1, const MultiIndex& a2);
+    friend MultiIndex operator*(MultiIndex a, IndexType s);
+    friend MultiIndex operator*(DegreeType s, MultiIndex a);
 
-    friend Void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2); // inline
+    friend Void swap(MultiIndex& a1, MultiIndex& a2);
 
-    friend Bool graded_less(const MultiIndex& a1, const MultiIndex& a2);
-    friend Bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);
-    friend Bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2);
-
-    //! \brief The position of the element in the Array of tensor values.
-    SizeType position() const;
-    //! \brief The product of the factorials of the indices.
-    SizeType factorial() const;
-    //! \brief The number of ordered index arrays with each element occurring the number of times specified by the multi index.
-    SizeType number() const;
-
-    //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream&, const MultiIndex&);
-  public:
-    //IndexType& at(SizeType i) { return _p[i]; }
-    const DegreeType& at(SizeType i) const { return reinterpret_cast<const DegreeType*>(_p)[i]; }
-    DegreeType& at(SizeType i) { return reinterpret_cast<DegreeType*>(_p)[i]; }
-    DegreeType* begin() { return reinterpret_cast<DegreeType*>(_p); }
-    DegreeType* end() { return reinterpret_cast<DegreeType*>(_p)+_n; }
-    const DegreeType* begin() const { return reinterpret_cast<const DegreeType*>(_p); }
-    const DegreeType* end() const { return reinterpret_cast<const DegreeType*>(_p)+_n; }
-  public:
-    static Void _deallocate(DegreeType* p) { delete[] p; }
-    static DegreeType* _allocate(SizeType n) { DegreeType* p=new DegreeType[n+1]; return p; }
+//    SizeType position() const;
+//    SizeType factorial() const;
+//    SizeType number() const;
 };
 
-class MultiIndexReference
-    : public MultiIndexData
-{
-  public:
-    MultiIndexReference(SizeType n, DegreeType* p) : MultiIndexData(n,p) { }
-    MultiIndexReference(MultiIndexData const& a) : MultiIndexData(a) { }
-    MultiIndexReference& operator=(MultiIndexData const& a) {
-        assert(a.size()==_n); IndexType const* a_p=a.begin(); std::copy(a_p,a_p+_n+1,_p); return *this; }
-
-    MultiIndexReference(MultiIndexReference const& a) : MultiIndexData(a._n, a._p) { }
-    MultiIndexReference& operator=(MultiIndexReference const& a) {
-        ARIADNE_ASSERT(a._n==_n); std::copy(a._p,a._p+_n+1,_p); return *this; }
-
-    operator const MultiIndex& () const { return static_cast<MultiIndex const&>(static_cast<MultiIndexData const&>(*this)); }
-    operator MultiIndex& () { return static_cast<MultiIndex&>(static_cast<MultiIndexData&>(*this)); }
-    friend Void swap(MultiIndexReference a1, MultiIndexReference a2) {
-        ARIADNE_ASSERT(a1._n==a2._n); DegreeType t;
-        for(SizeType i=0; i!=a1.size()+1; ++i) { t=a1._p[i]; a1._p[i]=a2._p[i]; a2._p[i]=t; } }
-
-    MultiIndexReference& operator+=(MultiIndexData const& a) {
-        ARIADNE_ASSERT(this->_n==a._n); for(SizeType i=0; i!=this->size()+1; ++i) { this->_p[i]+=a._p[i]; } return *this; }
-
-    friend OutputStream& operator<<(OutputStream& os, const MultiIndex& a);
+struct LexicographicLess {
+    Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
 
-class MultiIndexValueReference {
-  private:
-    SizeType _n; DegreeType* _p; SizeType _i;
-  public:
-    MultiIndexValueReference(SizeType n, DegreeType* p, SizeType i) : _n(n), _p(p), _i(i) { }
-    operator const DegreeType& () { return _p[_i]; }
-    MultiIndexValueReference& operator=(const DegreeType& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
-    MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
-    MultiIndexValueReference& operator--();
-    MultiIndexValueReference& operator+=(DegreeType k) { _p[_n]+=k; _p[_i]+=k; return *this; }
-    MultiIndexValueReference& operator-=(DegreeType k) { _p[_n]-=k; _p[_i]-=k; return *this; }
+struct ReverseLexicographicLess {
+    Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
 
 struct GradedLess {
-    Bool operator()(const MultiIndex& a1, const MultiIndex& a2) const { return graded_less(a1,a2); }
+    Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
-struct LexicographicLess {
-    Bool operator()(const MultiIndex& a1, const MultiIndex& a2) const { return lexicographic_less(a1,a2); }
+
+
+static const SizeType DEFAULT_CAPACITY = 4u;
+
+struct MultiIndexReference : public MultiIndexData {
+    MultiIndexReference(SizeType n, IndexType* p);
+    MultiIndexReference(MultiIndexData const&);
+    MultiIndexReference(MultiIndexReference const&) = default;
+    MultiIndexReference& operator=(MultiIndexReference const&);
+    MultiIndexReference& operator=(MultiIndexData const&);
+    operator MultiIndex& ();
+    operator MultiIndex const& () const;
+    MultiIndexReference& operator+=(MultiIndexData const&);
+    friend Void swap(MultiIndexReference, MultiIndexReference);
 };
-struct ReverseLexicographicLess {
-    Bool operator()(const MultiIndex& a1, const MultiIndex& a2) const { return reverse_lexicographic_less(a1,a2); }
+
+struct MultiIndexConstReference : public MultiIndexData {
+    MultiIndexConstReference(SizeType n, DegreeType const* p);
+    MultiIndexConstReference(MultiIndexConstReference const&) = default;
+    MultiIndexConstReference& operator=(MultiIndexConstReference const&) = delete;
+    MultiIndexConstReference(MultiIndexReference const&);
+    operator MultiIndex const& () const;
+    friend MultiIndex operator+(MultiIndex a1, const MultiIndex& a2);
+};
+
+struct MultiIndexPointer {
+    MultiIndexReference _r;
+  public:
+    MultiIndexPointer(MultiIndexReference* _p) : _r(*_p) { }
+    MultiIndexReference& operator*() { return _r; }
+    MultiIndexReference* operator->() { return &_r; }
+    friend OutputStream& operator<<(OutputStream& os, MultiIndexPointer const&);
+};
+struct MultiIndexConstPointer {
+    MultiIndexConstReference _r;
+  public:
+    MultiIndexConstPointer(MultiIndexConstReference* _p) : _r(*_p) { }
+    MultiIndexConstReference& operator*() const { return const_cast<MultiIndexConstReference&>(_r); }
+    MultiIndexConstReference* operator->() const { return const_cast<MultiIndexConstReference*>(&_r); }
+    friend OutputStream& operator<<(OutputStream& os, MultiIndexConstPointer const&);
+};
+
+
+
+class MultiIndexListIterator;
+class MultiIndexListConstIterator;
+
+class MultiIndexList {
+    SizeType _capacity; SizeType _size; SizeType _argument_size;
+    DegreeType* _indices;
+  public:
+    typedef MultiIndex ValueType;
+    typedef MultiIndexReference Reference;
+    typedef MultiIndexConstReference ConstReference;
+    typedef MultiIndexListIterator Iterator;
+    typedef MultiIndexListConstIterator ConstIterator;
+  protected: public:
+    explicit MultiIndexList(SizeType as);
+  public:
+    ~MultiIndexList();
+//    MultiIndexList(SizeType as, SizeType cap);
+    MultiIndexList(InitializerList<InitializerList<DegreeType>> const& lst);
+    MultiIndexList(InitializerList<MultiIndex> const& lst);
+    MultiIndexList(SizeType n, MultiIndex const& a);
+    MultiIndexList(MultiIndexList const&);
+    MultiIndexList(MultiIndexList&&);
+    MultiIndexList& operator=(MultiIndexList const&);
+    MultiIndexList& operator=(MultiIndexList&&);
+    Void resize(SizeType n);
+    Void reserve(SizeType n);
+    SizeType size() const;
+    SizeType capacity() const;
+    SizeType argument_size() const;
+    Void append(MultiIndexData const& a);
+    Void append_sum(MultiIndexData const& a1, MultiIndexData const& a2);
+    Reference operator[](SizeType i);
+    ConstReference operator[](SizeType i) const;
+    Reference front();
+    ConstReference front() const;
+    Reference back();
+    ConstReference back() const;
+    Iterator begin();
+    Iterator end();
+    ConstIterator begin() const;
+    ConstIterator end() const;
+    Iterator erase(Iterator pos);
+    Void clear();
+    friend Bool operator==(MultiIndexList const& lst1, MultiIndexList const& lst2);
+    friend OutputStream& operator<<(OutputStream& os, MultiIndexList const& lst);
+};
+
+class MultiIndexListIterator {
+    friend class MultiIndexListConstIterator;
+    MultiIndexReference _r;
+  public:
+    explicit MultiIndexListIterator(SizeType n, DegreeType* p);
+    MultiIndexListIterator(MultiIndexListIterator const&);
+    MultiIndexListIterator& operator=(MultiIndexListIterator const&);
+    Bool operator==(MultiIndexListIterator const& other) const;
+    Bool operator!=(MultiIndexListIterator const& other) const;
+    MultiIndexListIterator& operator++();
+    MultiIndexListIterator& operator--();
+    MultiIndexListIterator& operator+=(PointerDifferenceType k);
+    MultiIndexListIterator operator+(PointerDifferenceType k) const;
+    MultiIndexReference operator*() const;
+    MultiIndexPointer operator->() const;
+    friend OutputStream& operator<<(OutputStream& os, MultiIndexListIterator const&);
+};
+
+class MultiIndexListConstIterator {
+    MultiIndexConstReference _r;
+  public:
+    explicit MultiIndexListConstIterator(SizeType n, DegreeType const* p);
+    MultiIndexListConstIterator(MultiIndexListIterator const& iter);
+    MultiIndexListConstIterator(MultiIndexListConstIterator const& iter);
+    MultiIndexListConstIterator& operator=(MultiIndexListConstIterator const& iter);
+    Bool operator==(MultiIndexListConstIterator const& other);
+    Bool operator!=(MultiIndexListConstIterator const& other) const;
+    MultiIndexListConstIterator& operator++();
+    MultiIndexListConstIterator& operator--();
+    MultiIndexListConstIterator& operator+=(PointerDifferenceType k);
+    MultiIndexListConstIterator operator+(PointerDifferenceType k) const;
+    MultiIndexConstReference operator*() const;
+    MultiIndexConstPointer operator->() const;
+    friend OutputStream& operator<<(OutputStream& os, MultiIndexListConstIterator const&);
 };
 
 
 class MultiIndexBound {
   public:
-    typedef MultiIndex::SizeType SizeType;
     MultiIndexBound(SizeType n, SizeType d);
     MultiIndexBound(const MultiIndex& a);
     SizeType size() const { return _groups.size(); }
@@ -246,6 +263,20 @@ class MultiIndexBound {
     Array<SizeType> _groups;
     Array<SizeType> _max_degrees;
 };
+
+
+template<class T> class UniformList
+    : public List<T>
+{
+    using List<T>::List;
+};
+
+template<> class UniformList<MultiIndex>
+    : public MultiIndexList
+{
+    using MultiIndexList::MultiIndexList;
+};
+
 
 } // namespace Ariadne
 

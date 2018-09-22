@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file rounding.hpp
@@ -29,6 +30,7 @@
 #ifndef ARIADNE_ROUNDING_HPP
 #define ARIADNE_ROUNDING_HPP
 
+#include <iosfwd>
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
@@ -38,8 +40,6 @@
     #else
         #define ARIADNE_C99_ROUNDING
     #endif
-#else
-    #define ARIADNE_BOOST_ROUNDING
 #endif
 
 
@@ -56,7 +56,7 @@
 
 namespace Ariadne {
 
-typedef unsigned short rounding_mode_t;
+typedef std::uint16_t rounding_mode_t;
 
 const rounding_mode_t ROUND_TO_NEAREST  = _MM_ROUND_NEAREST;
 const rounding_mode_t ROUND_DOWNWARD    = _MM_ROUND_DOWN;
@@ -72,7 +72,7 @@ inline void _set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd)
 inline rounding_mode_t _get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
 
 enum class RoundingMode : rounding_mode_t {
-    ROUND_TO_NEAREST = ROUND_TO_NEAREST, ROUND_DOWNWARD = ROUND_DOWNWARD, ROUND_UPWARD = ROUND_UPWARD, ROUND_TOWARD_ZERO = ROUND_TOWARD_ZERO
+    TO_NEAREST = ROUND_TO_NEAREST, DOWNWARD = ROUND_DOWNWARD, UPWARD = ROUND_UPWARD, TOWARD_ZERO = ROUND_TOWARD_ZERO
 };
 
 } // namespace Ariadne
@@ -99,41 +99,6 @@ inline void _set_rounding_toward_zero() { fesetround(FE_TOWARDZERO);  }
 
 inline void _set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t _get_rounding_mode() { return fegetround(); }
-
-} // namespace Ariadne
-
-
-
-#elif defined ARIADNE_BOOST_ROUNDING
-
-#include <boost/numeric/interval/hw_rounding.hpp>
-
-namespace Ariadne {
-
-typedef boost::numeric::interval_lib::rounding_control<double>::rounding_mode rounding_mode_t;
-
-class RoundDownward;
-class RoundToNearest;
-class RoundUpward;
-class RoundTowardZero;
-
-const RoundToNearest  to_nearest=RoundToNearest();
-const RoundDownward   downward=RoundDownward();
-const RoundUpward     upward=RoundUpward();
-const RoundTowardZero toward_zero=RoundTowardZero();
-
-inline void FloatDP::set_rounding_to_nearest() { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void FloatDP::set_rounding_downward() { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void FloatDP::set_rounding_upward() { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void FloatDP::set_rounding_toward_zero() { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
-
-inline void FloatDP::set_rounding_mode(RoundToNearest const&) { boost::numeric::interval_lib::rounding_control<double>::to_nearest(); }
-inline void FloatDP::set_rounding_mode(RoundDownward const&) { boost::numeric::interval_lib::rounding_control<double>::downward(); }
-inline void FloatDP::set_rounding_mode(RoundUpward const&) { boost::numeric::interval_lib::rounding_control<double>::upward(); }
-inline void FloatDP::set_rounding_mode(RoundTowardZero const&) { boost::numeric::interval_lib::rounding_control<double>::toward_zero(); }
-
-inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { boost::numeric::interval_lib::rounding_control<double>::FloatDP::set_rounding_mode(rnd); }
-inline rounding_mode_t FloatDP::get_rounding_mode() { rounding_mode_t rnd; boost::numeric::interval_lib::rounding_control<double>::FloatDP::get_rounding_mode(rnd); return rnd; }
 
 } // namespace Ariadne
 
@@ -245,11 +210,6 @@ void set_rounding_toward_zero();
 //! \brief Set the rounding mode to the expected default rounding mode.
 void set_default_rounding();
 
-//! \brief Set the rounding mode.
-void set_rounding_mode(RoundingModeType rnd);
-//! \brief Get the current rounding mode.
-RoundingModeType get_rounding_mode();
-
 } // namespace Ariadne;
 
 #include <mpfr.h>
@@ -261,34 +221,59 @@ typedef mpfr_rnd_t RoundingModeMP;
 typedef RoundingModeType BuiltinRoundingModeType;
 typedef RoundingModeMP MPFRRoundingModeType;
 
+//! \brief Tag class for downward rounding. Constants \ref downward, \ref down. \ingroup NumericModule
 struct RoundDownward {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_DOWNWARD; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDD; }
 };
+//! \brief Tag class for rounding to nearest. Constants \ref to_nearest, \ref near. \ingroup NumericModule
 struct RoundToNearest {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
 };
+//! \brief Tag class for upward rounding. Constants \ref upward, \ref up. \ingroup NumericModule
 struct RoundUpward {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_UPWARD; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDU; }
 };
+//! \brief Tag class for rounding towards zero. Constant \ref toward_zero. \ingroup NumericModule
 struct RoundTowardZero {
     constexpr operator BuiltinRoundingModeType() const { return ROUND_TOWARD_ZERO; }
     constexpr operator MPFRRoundingModeType() const { return MPFR_RNDZ; }
 };
+//! \brief Tag class for approximate rounding. Constants \ref approx. \ingroup NumericModule
+struct RoundApproximately {
+    constexpr operator BuiltinRoundingModeType() const { return ROUND_TO_NEAREST; }
+    constexpr operator MPFRRoundingModeType() const { return MPFR_RNDN; }
+};
 
-const RoundDownward downward = RoundDownward();
-const RoundToNearest to_nearest = RoundToNearest();
-const RoundUpward upward = RoundUpward();
-const RoundTowardZero toward_zero = RoundTowardZero();
+using OutputStream = std::ostream;
 
-const RoundDownward down = downward;
-const RoundToNearest near = to_nearest;
-const RoundUpward up = upward;
+//! \brief General rounding mode class. \ingroup NumericModule
+class Rounding {
+    BuiltinRoundingModeType _rbp; MPFRRoundingModeType _rmp;
+  public:
+    Rounding(BuiltinRoundingModeType rbp, MPFRRoundingModeType rmp) : _rbp(rbp), _rmp(rmp) { }
+    Rounding(RoundDownward) : Rounding(ROUND_DOWNWARD,MPFR_RNDD) { }
+    Rounding(RoundToNearest) : Rounding(ROUND_TO_NEAREST,MPFR_RNDN) { }
+    Rounding(RoundUpward) :  Rounding(ROUND_UPWARD,MPFR_RNDU) { }
+    operator BuiltinRoundingModeType() const { return _rbp; }
+    operator MPFRRoundingModeType() const { return _rmp; }
+    friend OutputStream& operator<<(OutputStream& os, Rounding const& rnd);
+};
 
-using RoundApprox = RoundToNearest;
-const RoundApprox approx = to_nearest;
+
+const RoundDownward downward = RoundDownward(); //!< Round exact answer downward to a representable value. Synonymous with \ref down. \ingroup NumericModule
+const RoundToNearest to_nearest = RoundToNearest(); //!< Round exact answer to a nearest representable value. Synonymous with \ref near. \ingroup NumericModule
+const RoundUpward upward = RoundUpward(); //!< Round exact answer upward to a representable value. Synonymous with \ref up. \ingroup NumericModule
+const RoundTowardZero toward_zero = RoundTowardZero(); //!< Round exact answer to a representable value at least as close to zero. \ingroup NumericModule
+
+const RoundDownward down = downward; //!< Round exact answer downward to a representable value. Synonymous with \ref downward. \ingroup NumericModule
+const RoundToNearest near = to_nearest; //!< Round exact answer to a nearest representable value. Synonymous with \ref to_nearest. \ingroup NumericModule
+const RoundUpward up = upward; //!< Round exact answer upward to a representable value. Synonymous with \ref upward. \ingroup NumericModule
+const RoundApproximately approx = RoundApproximately(); //!< Round exact answer to some close representable value, which need not be the nearest. \ingroup NumericModule
+
+using RoundApprox = RoundApproximately;
 
 } // namespace Ariadne
 

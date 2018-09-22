@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
- *  You should have received _a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file floatmp.cpp
@@ -27,7 +28,7 @@
 
 
 
-#include "utility/module.hpp"
+#include "../utility/module.hpp"
 #include "logical.hpp"
 #include "floatmp.hpp"
 #include "floatdp.hpp"
@@ -156,8 +157,8 @@ FloatMP::operator Rational() const {
     mpz_t num; mpz_init(num);
     mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
     mpq_t res; mpq_init(res); mpq_set_z(res,num);
-    if(exp>=0) { mpq_mul_2exp(res,res,exp); }
-    else { mpq_div_2exp(res,res,-exp); }
+    if(exp>=0) { mpq_mul_2exp(res,res,static_cast<mp_bitcnt_t>(exp)); }
+    else { mpq_div_2exp(res,res,static_cast<mp_bitcnt_t>(-exp)); }
     return Rational(res);
 }
 
@@ -243,9 +244,19 @@ FloatMP FloatMP::inf(MultiplePrecision pr) {
     return x;
 }
 
+FloatMP FloatMP::inf(Sign sgn, MultiplePrecision pr) {
+    FloatMP x(pr);
+    switch (sgn) {
+    case Sign::POSITIVE: mpfr_set_inf(x._mpfr,+1); break;
+    case Sign::NEGATIVE: mpfr_set_inf(x._mpfr,-1); break;
+    default: mpfr_set_nan(x._mpfr);
+    }
+    return x;
+}
+
 FloatMP FloatMP::eps(MultiplePrecision pr) {
     FloatMP x(pr);
-    mpfr_set_ui_2exp(x._mpfr,1u,1-pr.bits(),to_nearest);
+    mpfr_set_ui_2exp(x._mpfr,1u,1-mpfr_exp_t(pr.bits()),to_nearest);
     return x;
 }
 
@@ -276,6 +287,10 @@ Bool is_inf(FloatMP const& x) {
 
 Bool is_finite(FloatMP const& x) {
     return mpfr_number_p(x._mpfr);
+}
+
+Bool is_zero(FloatMP const& x) {
+    return mpfr_zero_p(x._mpfr);
 }
 
 FloatMP next(RoundUpward rnd, FloatMP const& x) { return add(rnd,x,FloatMP::min(x.precision())); }
@@ -310,7 +325,7 @@ FloatMP min(FloatMP const& x1, FloatMP const& x2) { return min(FloatMP::get_roun
 FloatMP abs(FloatMP const& x) { return abs(FloatMP::get_rounding_mode(),x); }
 FloatMP mag(FloatMP const& x) { return mag(FloatMP::get_rounding_mode(),x); }
 
-    // Mixed operations
+// Mixed operations
 FloatMP add(FloatMP const& x1, Dbl x2) { return add(FloatMP::get_rounding_mode(),x1,x2); }
 FloatMP sub(FloatMP const& x1, Dbl x2) { return sub(FloatMP::get_rounding_mode(),x1,x2); }
 FloatMP mul(FloatMP const& x1, Dbl x2) { return mul(FloatMP::get_rounding_mode(),x1,x2); }
@@ -404,7 +419,7 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
     mpfr_snprintf(cstr,buf_size,fmt,rnd,x);
     cstr[1023]='\0';
     return String(cstr);
-};
+}
 
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
     static const double log2ten = 3.3219280948873621817;
@@ -415,11 +430,10 @@ String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
 }
 
 String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
-    static const double log2ten = 3.3219280948873621817;
     int zdgts = std::max(log10floor(x),0)+1;
-    int fdgts = plcs;
+    int fdgts = static_cast<int>(plcs);
     return print(x._mpfr,zdgts,fdgts,rnd);
-};
+}
 
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     return os << print(x,plcs,rnd);
@@ -460,13 +474,13 @@ InputStream& operator>>(InputStream& is, FloatMP& x) {
 
 FloatMP floor(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_floor(r._mpfr,x._mpfr); return r;
-};
+}
 FloatMP ceil(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_ceil(r._mpfr,x._mpfr); return r;
-};
+}
 FloatMP round(FloatMP const& x) {
     FloatMP r(x.precision()); mpfr_round(r._mpfr,x._mpfr); return r;
-};
+}
 
 FloatMP abs(FloatMP::RoundingModeType rnd, FloatMP const& x) {
     FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return r;

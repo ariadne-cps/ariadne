@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file builtin.hpp
@@ -29,12 +30,13 @@
 #define ARIADNE_BUILTIN_HPP
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
 
-#include "utility/metaprogramming.hpp"
-#include "numeric/number.decl.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/number.decl.hpp"
 
 
 namespace Ariadne {
@@ -60,7 +62,7 @@ class ExactDouble {
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
-    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(_d==x); }
+    template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }
     operator ExactNumber() const;
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }

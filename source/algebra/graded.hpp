@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file graded.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_GRADED_HPP
 #define ARIADNE_GRADED_HPP
 
-#include "function/procedure.hpp"
+#include "../function/procedure.hpp"
 
 namespace Ariadne {
 
@@ -54,17 +55,17 @@ template<class Op, class A1, class A2, class A3> struct ClosureExpression {
 template<class Op, class A> ClosureExpression<Op,A>
 make_expression(Op op, const A& a) {
     return ClosureExpression<Op,A>(a);
-};
+}
 
 template<class Op, class A1, class A2> ClosureExpression<Op,A1,A2>
 make_expression(Op op, const A1& a1, const A2& a2) {
     return ClosureExpression<Op,A1,A2>(a1,a2);
-};
+}
 
 template<class Op, class A1, class A2, class A3> ClosureExpression<Op,A1,A2,A3>
 make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
     return ClosureExpression<Op,A1,A2,A3>(a1,a2,a3);
-};
+}
 
 
 

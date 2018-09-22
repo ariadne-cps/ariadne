@@ -1,29 +1,31 @@
 /***************************************************************************
- *            expansion.tpl.hpp
+ *            evaluate.tpl.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "algebra/vector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -40,9 +42,9 @@ namespace Ariadne {
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
+template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
 {
-    typedef typename Expansion<X>::ConstIterator ConstIterator;
+    typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
     const SizeType n=e.argument_size();
     const Y z=x.zero_element(); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
@@ -51,14 +53,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
     ConstIterator iter=e.begin();
     ConstIterator end=e.end();
     SizeType k=n;   // The current working register
-    const DegreeType* na=iter->key().begin(); // The values of the next multi-index
+    MultiIndex na=iter->index(); // The values of the next multi-index
     SizeType j=k;   // The lowest register containing a non-zero value
-    X c=iter->data();
+    X c=iter->coefficient();
     Y t=z;
-    const DegreeType* a=na;
+    MultiIndex a=na; // The values of the next multi-index
     ++iter;
     while(iter!=end) {
-        na=iter->key().begin();
+        na=iter->index();
         k=n-1;
         while(a[k]==na[k]) { --k; }
         // Since terms are ordered reverse-lexicographically,
@@ -88,7 +90,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         r[k]=t;
         //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<k<<" r="<<r<<"\n";
         j=k;
-        c=iter->data();
+        c=iter->coefficient();
         a=na;
         ++iter;
     }
@@ -111,18 +113,18 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
 }
 
 template<class X, class Y>
-Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     Y zero = y.zero_element();
     Y one = zero + 1;
 
     Y r=zero;
     Y t=zero;
-    for(typename Expansion<X>::ConstIterator iter=e.begin();
+    for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
-        const MultiIndex& j=iter->key();
-        const X& c=iter->data();
+        ConstReferenceType<MultiIndex> j=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         t=one;
         for(Nat k=0; k!=e.argument_size(); ++k) {
             for(Nat l=0; l!=j[k]; ++l) {
@@ -138,19 +140,19 @@ Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 
 
 template<class X, class Y>
-Y evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y)
+Y simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
+Vector<Y> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size(),y.zero_element());
     for(SizeType i=0; i!=x.size(); ++i) {

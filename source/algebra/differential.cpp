@@ -6,29 +6,34 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "numeric/numeric.hpp"
-#include "geometry/interval.hpp"
+#include "../numeric/numeric.hpp"
+#include "../geometry/interval.hpp"
 
-#include "algebra/differential.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/univariate_differential.hpp"
+#include "../algebra/fixed_differential.hpp"
+#include "../algebra/fixed_univariate_differential.hpp"
 
 #include "operations.hpp"
 
 #include "differential.tpl.hpp"
+#include "univariate_differential.tpl.hpp"
 
 namespace Ariadne {
 
@@ -46,9 +51,9 @@ template class Differential<FloatDPBounds>;
 template class Differential<FloatDPApproximation>;
 template class Differential<UpperIntervalType>;
 
-template class AlgebraOperations<Differential<FloatDP>>;
-template class AlgebraOperations<Differential<FloatDPApproximation>>;
-template class AlgebraOperations<Differential<FloatDPBounds>>;
+template struct AlgebraOperations<Differential<FloatDP>>;
+template struct AlgebraOperations<Differential<FloatDPApproximation>>;
+template struct AlgebraOperations<Differential<FloatDPBounds>>;
 template class GradedAlgebraOperations<Differential<FloatDP>>;
 template class GradedAlgebraOperations<Differential<FloatDPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
@@ -60,8 +65,8 @@ template class Vector<Differential<FloatDPApproximation>>;
 
 template class Differential<FloatMPBounds>;
 template class Differential<FloatMPApproximation>;
-template class AlgebraOperations<Differential<FloatMPApproximation>>;
-template class AlgebraOperations<Differential<FloatMPBounds>>;
+template struct AlgebraOperations<Differential<FloatMPApproximation>>;
+template struct AlgebraOperations<Differential<FloatMPBounds>>;
 template class GradedAlgebraOperations<Differential<FloatMPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatMPBounds>>;
 

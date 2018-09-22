@@ -6,25 +6,26 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef ARIADNE_FUNCTION_MIXIN_HPP
 #define ARIADNE_FUNCTION_MIXIN_HPP
 
-#include "function/function_interface.hpp"
+#include "../function/function_interface.hpp"
 
 // Adaptors for classes to conform to the Function interface.
 
@@ -49,6 +50,10 @@ template<class F, class P, class D=BoxDomainType> class ScalarFunctionMixin;
 template<class F, class P, class D=BoxDomainType> class VectorFunctionMixin;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
+template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
+
+template<class P, class D> ScalarFunctionInterface<P,D>* heap_copy(ScalarFunction<P,D> const& f) { return f.raw_pointer()->_clone(); }
+    
 
 template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
@@ -58,36 +63,21 @@ template<class F, class D, class C>
 class FunctionMixin<F,Void,D,C>
     : public virtual FunctionInterface<Void,D,C>
 {
+  public:
     typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
     typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
+    typedef typename FunctionInterface<Void,D,C>::ArgumentSizeType ArgumentSizeType;
+    typedef typename FunctionInterface<Void,D,C>::ResultSizeType ResultSizeType;
   protected:
     FunctionMixin() { }
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
   public:
+//    virtual DomainType const domain() const override = 0;
+//    virtual CodomainType const codomain() const override = 0;
     virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
-    virtual SizeType argument_size() const override { return this->domain().dimension(); }
-    virtual SizeType result_size() const override { return this->codomain().dimension(); }
-
-    virtual OutputStream& write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
-};
-
-template<class F, class D>
-class FunctionMixin<F,Void,D,IntervalDomainType>
-    : public virtual FunctionInterface<Void,D,IntervalDomainType>
-{
-    typedef IntervalDomainType C;
-    typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
-    typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
-  protected:
-    FunctionMixin() { }
-    template<class X> X _base_evaluate(const ElementType<D,X>& x) const;
-  public:
-    virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
-    virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
-    virtual SizeType argument_size() const override { return this->domain().dimension(); }
-    virtual SizeType result_size() const override { return 1u; }
+    virtual ArgumentSizeType argument_size() const override { return this->domain().dimension(); }
+    virtual ResultSizeType result_size() const override { return this->codomain().dimension(); }
 
     virtual OutputStream& write(OutputStream& os) const override = 0;
     virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
@@ -162,8 +152,18 @@ template<class F, class P, class D> class VectorFunctionMixin
     : public FunctionMixin<F,P,D,BoxDomainType>
     , public virtual VectorOfFunctionInterface<P,D>
 {
-    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override = 0;
+    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override { 
+        auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 };
+
+
+template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+
 
 
 } // namespace Ariadne

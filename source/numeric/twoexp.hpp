@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/twoexp.hpp
@@ -35,6 +36,9 @@ namespace Ariadne {
 
 /************ TwoExp ***************************************************/
 
+class Integer;
+class Dyadic;
+
 //! \ingroup NumericModule
 //! \brief A class representing a number of the form  \c 2<sup>\it n</sup> for some \it n.
 //! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
@@ -47,24 +51,26 @@ class TwoExp {
     FloatDP get_raw(DoublePrecision pr) const;
     FloatMP get_raw(MultiplePrecision pr) const;
     double get_d() const { return std::pow(2.0,this->_n); }
+    friend TwoExp rec(TwoExp w) { return TwoExp(-w._n); }
     friend Dyadic operator+(TwoExp);
     friend Dyadic operator-(TwoExp);
+    friend Dyadic operator*(Integer, TwoExp);
+    friend Dyadic operator/(Integer, TwoExp);
+    friend OutputStream& operator<<(OutputStream& os, TwoExp);
 };
-inline TwoExp two_exp(Int n) { return TwoExp(n); }
 
-struct Two : public std::integral_constant<uint,2u> {
+//! \ingroup NumericModule
+//! \brief The integer constant 2. Only used for creating dyadic numbers.
+//! Not a subtype of std::integral_constant<uint,2u> to avoid conversion to builtin integers yielding e.g. 1/two=0.
+struct Two
+  : public std::integral_constant<uint,2u>
+{
+    friend TwoExp operator^(Two, Nat m) { return TwoExp(static_cast<Int>(m)); }
     friend TwoExp operator^(Two, Int n) { return TwoExp(n); }
+    friend TwoExp pow(Two, int n) { return TwoExp(n); }
 };
 static const Two two = Two();
-
-/*
-inline FloatDP TwoExp::get_raw(DoublePrecision pr) const {
-    return FloatDP(this->get_d());
-}
-inline FloatMP TwoExp::get_raw(MultiplePrecision pr) const {
-    return FloatMP(this->get_d(),pr);
-}
-*/
+static const Two _2 = Two();
 
 } // namespace Ariadne
 

@@ -21,12 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
 #include "ariadne.hpp"
 
 using namespace Ariadne;
 
-AtomicHybridAutomaton getValve()
+inline AtomicHybridAutomaton getValve()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.
@@ -70,10 +69,10 @@ AtomicHybridAutomaton getValve()
     valve.new_invariant(fully1,height2<=hmin-delta,must_start_towards2);
     valve.new_invariant(fully2,height1<=hmin-delta,must_start_towards1);
 
-    valve.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin+delta,permissive);
-    valve.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin+delta,permissive);
-    valve.new_transition(towards1,finished_towards1,fully1,aperture1>=1,urgent);
-    valve.new_transition(towards2,finished_towards2,fully2,aperture2>=1,urgent);
+    valve.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin+delta,EventKind::PERMISSIVE);
+    valve.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin+delta,EventKind::PERMISSIVE);
+    valve.new_transition(towards1,finished_towards1,fully1,aperture1>=1,EventKind::URGENT);
+    valve.new_transition(towards2,finished_towards2,fully2,aperture2>=1,EventKind::URGENT);
 
     return valve;
 }

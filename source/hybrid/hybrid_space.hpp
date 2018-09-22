@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_space.hpp
@@ -30,11 +31,11 @@
 
 #include <map>
 
-#include "utility/container.hpp"
-#include "utility/stlio.hpp"
-#include "expression/space.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
+#include "../utility/container.hpp"
+#include "../utility/stlio.hpp"
+#include "../symbolic/space.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
 
 
 namespace Ariadne {
@@ -44,11 +45,12 @@ class LocationException : public std::runtime_error {
     LocationException(const StringType& what) : std::runtime_error(what) { }
 };
 
-class HybridGridTreeSet;
+class HybridGridTreePaving;
 
 class HybridSpaceInterface
 {
   public:
+    virtual ~HybridSpaceInterface() = default;
     virtual Bool has_location(const DiscreteLocation& q) const  = 0;
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
@@ -83,7 +85,7 @@ class HybridSpace
     //! \brief The interface satisified by located sets in the space.
     typedef HybridRegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef HybridGridTreeSet SetApproximationType;
+    typedef HybridGridTreePaving SetApproximationType;
   public:
     HybridSpace(const HybridSpaceInterface& hspc) : _ptr(hspc.clone()) { }
     HybridSpace(const HybridSpaceInterface* hspc_ptr) : _ptr(hspc_ptr) { }

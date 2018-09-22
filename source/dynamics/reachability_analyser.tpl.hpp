@@ -6,22 +6,23 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
 #include <string>
 #include <sstream>
@@ -33,43 +34,36 @@
 #include <valarray>
 
 
-#include "utility/exceptions.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
-#include "geometry/function_set.hpp"
+#include "../solvers/integrator.hpp"
+#include "../solvers/solver.hpp"
+#include "../geometry/function_set.hpp"
 
-#include "dynamics/vector_field.hpp"
+#include "../dynamics/vector_field.hpp"
 
-#include "dynamics/orbit.hpp"
-#include "dynamics/vector_field_evolver.hpp"
-#include "dynamics/reachability_analyser.hpp"
+#include "../dynamics/orbit.hpp"
+#include "../dynamics/vector_field_evolver.hpp"
+#include "../dynamics/reachability_analyser.hpp"
 
-#include "utility/logging.hpp"
-#include "output/graphics.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../output/logging.hpp"
+#include "../output/graphics.hpp"
+#include "../solvers/linear_programming.hpp"
 
 namespace Ariadne {
 
-enum class ChainOverspillPolicy : char { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 template<> Nat integer_cast<Nat,Real>(Real const& r);
-
-template<class SYS>
-ReachabilityAnalyser<SYS>::
-~ReachabilityAnalyser()
-{
-}
 
 
 template<class SYS>
@@ -97,7 +91,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
                      const TimeType& time,
-                     const Int accuracy,
+                     const Nat accuracy,
                      ListSet<EnclosureType>& evolve_enclosures,
                      Semantics semantics,
                      const EvolverType& evolver) const
@@ -140,7 +134,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_reach(const PavingType& set,
              const TimeType& time,
-             const Int accuracy,
+             const Nat accuracy,
              const EvolverType& evolver) const
     -> PavingType
 {
@@ -150,7 +144,7 @@ _upper_reach(const PavingType& set,
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,UPPER_SEMANTICS);
+        ListSet<EnclosureType> reach = evolver.reach(initial_enclosure,time,Semantics::UPPER);
         for(auto enclosure : reach) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -163,7 +157,7 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 _upper_evolve(const PavingType& set,
               const TimeType& time,
-              const Int accuracy,
+              const Nat accuracy,
               const EvolverType& evolver) const
     -> PavingType
 {
@@ -172,7 +166,7 @@ _upper_evolve(const PavingType& set,
     for(auto cell : cells) {
         ARIADNE_LOG(5,"Evolving cell = "<<cell<<"\n");
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
-        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,UPPER_SEMANTICS);
+        ListSet<EnclosureType> final = evolver.evolve(initial_enclosure,time,Semantics::UPPER);
         for(auto enclosure : final) {
             enclosure.adjoin_outer_approximation_to(result,accuracy);
         }
@@ -188,7 +182,7 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
                            PavingType& evolve_cells,
                            const PavingType& set,
                            const TimeType& time,
-                           const Int accuracy,
+                           const Nat accuracy,
                            const EvolverType& evolver) const
 {
     ARIADNE_LOG(4,"ReachabilityAnalyser<SYS>::_adjoin_upper_reach_evolve(...)\n");
@@ -202,7 +196,7 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,Semantics::UPPER);
         ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(5,"  adjoining "<<reach_enclosures.size()<<" reach enclosures to grid... ");
         if(verbosity==1) {
@@ -240,8 +234,8 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     -> PavingType
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_evolve(...)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
     GridType grid=this->_configuration->grid();
     PavingType initial_cells(grid); PavingType final_cells(grid);
 
@@ -251,7 +245,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"computing lower evolution.");
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,LOWER_SEMANTICS);
+        ListSet<EnclosureType> final_enclosures=_evolver->evolve(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(final_cells,grid_depth);
         }
@@ -269,8 +263,8 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     -> SetApproximationType
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach(set,time)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
     const GridType& grid=this->_configuration->grid();
     PavingType initial_cells(grid); PavingType reach_cells(grid);
 
@@ -281,7 +275,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"Computing lower reach set...");
     for(auto cell : initial_cells) {
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
-        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,LOWER_SEMANTICS);
+        ListSet<EnclosureType> reach_enclosures=_evolver->reach(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,grid_depth);
         }
@@ -298,8 +292,8 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
     -> Pair<SetApproximationType,SetApproximationType>
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach_evolve(...)\n");
-    Int grid_depth = this->_configuration->maximum_grid_depth();
-    Int grid_height = this->_configuration->maximum_grid_height();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_height = this->_configuration->maximum_grid_height();
 
     const GridType& grid=this->_configuration->grid();
 
@@ -315,7 +309,7 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
         EnclosureType initial_enclosure=_evolver->enclosure(cell.box());
         ListSet<EnclosureType> reach_enclosures;
         ListSet<EnclosureType> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,LOWER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = _evolver->reach_evolve(initial_enclosure,time,Semantics::LOWER);
         for(auto enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach,grid_depth);
         }
@@ -336,8 +330,8 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_reach(set)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Nat maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
@@ -371,7 +365,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
         make_lpair(reach_cells,evolve_cells) =
             _reach_evolve_resume(initial_enclosures,transient_time,
-                maximum_grid_depth,starting_enclosures,LOWER_SEMANTICS,*_evolver);
+                maximum_grid_depth,starting_enclosures,Semantics::LOWER,*_evolver);
 
         evolve_cells.restrict_to_height(maximum_grid_height);
         ARIADNE_LOG(3,"Completed restriction to height.");
@@ -388,7 +382,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
         PavingType new_reach_cells(grid);
         ListSet<EnclosureType> new_evolve_enclosures;
         make_lpair(new_reach_cells,evolve_cells) = _reach_evolve_resume(starting_enclosures,lock_to_grid_time,
-                maximum_grid_depth,new_evolve_enclosures,LOWER_SEMANTICS,*_evolver);
+                maximum_grid_depth,new_evolve_enclosures,Semantics::LOWER,*_evolver);
 
         ARIADNE_LOG(3,"Removing...\n");
         evolve_cells.remove(reach_cells);
@@ -425,7 +419,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::upper_evolve(...)\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
@@ -460,7 +454,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
@@ -512,7 +506,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
     PavingType evolve_cells(grid);
-    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Nat grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
@@ -555,8 +549,8 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     ARIADNE_LOG(2,"ReachabilityAnalyser::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Nat maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
@@ -647,8 +641,7 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    Int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
@@ -711,19 +704,19 @@ _checked_restriction(PavingType& set, const PavingType& bounding) const
     ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
     PavingType set_copy(set.grid());
 
-    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::IGNORE) {
         set_copy = set;
     }
     set.restrict_to_height(this->_configuration->maximum_grid_height());
     if (!bounding.is_empty()) set.restrict(bounding);
 
-    if (policy != ChainOverspillPolicy::OVERSPILL_IGNORE) {
+    if (policy != ChainOverspillPolicy::IGNORE) {
         set_copy.remove(set);
         if (!set_copy.is_empty()) {
-            if (policy == ChainOverspillPolicy::OVERSPILL_WARNING) {
+            if (policy == ChainOverspillPolicy::WARNING) {
                 ARIADNE_WARN("The computed chain reach has been restricted, an outer approximation is .");
             }
-            if (policy == ChainOverspillPolicy::OVERSPILL_ERROR) {
+            if (policy == ChainOverspillPolicy::ERROR) {
                 ARIADNE_THROW(OuterChainOverspill,"outer_chain_reach","The computed chain reach has been restricted.");
             }
         }
@@ -747,7 +740,7 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
     set_grid(Grid(_analyser.system().dimension()));
-    set_outer_overspill_policy(ChainOverspillPolicy::OVERSPILL_ERROR);
+    set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 
 

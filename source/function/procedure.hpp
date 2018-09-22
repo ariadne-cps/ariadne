@@ -6,21 +6,21 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 
 /*! \file procedure.hpp
  *  \brief Procedure to compute a real function
@@ -31,32 +31,27 @@
 
 #include <iostream>
 
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
 
-#include "function/domain.hpp"
-
-#include "numeric/operators.hpp"
-#include "function/formula.hpp"
-#include "algebra/expansion.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
+class MultiIndex;
+template<class I, class X> class Expansion;
 template<class Y> class Formula;
 template<class X> class Graded;
 
 template<class Y> class Procedure;
 typedef Procedure<ApproximateNumber> ApproximateProcedure;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
-
-template<class Y, class X> Formula<Y> to_formula(const Expansion<X>& e) {
-    return horner_evaluate(e,Formula<Y>::identity(e.argument_size()));
-};
-
+typedef Procedure<EffectiveNumber> EffectiveProcedure;
 
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
+/*
 struct ProcedureInstruction {
     explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o), arg(a) { }
     explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o), arg1(a1), arg2(a2) { }
@@ -66,6 +61,29 @@ struct ProcedureInstruction {
         struct { SizeType arg; Int np; };
         struct { SizeType arg1; SizeType arg2; };
     };
+};
+*/
+
+struct UnaryGradedArgs { SizeType arg; Int np; };
+struct BinaryArgs { SizeType arg1; SizeType arg2; };
+
+union UnionArgs {
+    UnaryGradedArgs ug;
+    BinaryArgs b;
+};
+
+struct ProcedureInstruction {
+    explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o) { args.ug.arg = a; }
+    explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o) { args.b.arg1 = a1; args.b.arg2 = a2; }
+    explicit ProcedureInstruction(OperatorCode o, SizeType a, Int n) : op(o) { args.ug.arg = a; args.ug.np = n; }
+    OperatorCode op;
+private:
+    UnionArgs args;
+public:
+    const SizeType& arg() const { return args.ug.arg; }
+    const SizeType& arg1() const { return args.b.arg1; }
+    const Int& np() const { return args.ug.np; }
+    const SizeType& arg2() const { return args.b.arg2; }
 };
 
 //! \brief An algorithmic procedure for computing a function.
@@ -79,8 +97,7 @@ class Procedure {
   public:
     explicit Procedure<Y>();
     explicit Procedure<Y>(const Formula<Y>& f);
-    template<class X, EnableIf<IsConvertible<X,Y>> =dummy> explicit Procedure<Y>(const Expansion<X>& e)
-        : Procedure(to_formula<Y>(e)) { }
+    template<class X, EnableIf<IsConvertible<X,Y>> =dummy> explicit Procedure<Y>(const Expansion<MultiIndex,X>& e);
     friend OutputStream& operator<<(OutputStream& os, Procedure<Y> const& p) { return p._write(os); }
   public:
    template<class X, class YY> friend X evaluate(const Procedure<YY>& p, const Vector<X>& x);
@@ -96,6 +113,7 @@ class Procedure {
   private:
     OutputStream& _write(OutputStream& os) const;
 };
+
 
 //! \brief An algorithmic procedure for computing a function.
 //!
@@ -152,7 +170,7 @@ template<class X, class Y> Void execute(List<X>& t, const Vector<Procedure<Y>>& 
     _execute(t,p._instructions,p._constants,x);
 }
 
-// \related Backpropagate the results of a validated procedure to the inputs \a x.
+// \related Procedure \brief Backpropagate the results of a validated procedure to the inputs \a x.
 template<class X, class Y> Void backpropagate(List<X>& t, const Procedure<Y>& p, Vector<X>& x) {
     _backpropagate(t,p._instructions,p._constants,x);
 }
@@ -160,6 +178,15 @@ template<class X, class Y> Void backpropagate(List<X>& t, const Procedure<Y>& p,
 template<class X, class Y> Void backpropagate(List<X>& t, const Vector<Procedure<Y>>& p, Vector<X>& x) {
     _backpropagate(t,p._instructions,p._constants,x);
 }
+
+// \related Procedure \brief Compute the gradient of a Procedure by backwards automatic differentiation.
+template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X> const& x);
+// \related Procedure \brief Compute the second derivative of a Procedure at \a x in direction \a s.
+template<class X, class Y> X hessian(Procedure<Y> const& f, Vector<X> const& x, Vector<X> const& s);
+
+// \related Convert a function into a procedure.
+template<class P> Procedure<Number<P>> make_procedure(const ScalarFunction<P>& f);
+
 
 
 } // namespace Ariadne

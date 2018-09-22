@@ -6,37 +6,38 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "utility/tuple.hpp"
-#include "expression/expression.hpp"
-#include "expression/assignment.hpp"
-#include "expression/space.hpp"
-#include "function/function.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/tuple.hpp"
+#include "../symbolic/expression.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
 
-#include "hybrid/hybrid_automaton-restrictive.hpp"
+#include "../hybrid/hybrid_automaton-restrictive.hpp"
 
 namespace Ariadne {
 
@@ -190,7 +191,15 @@ Set<Var> duplicates(const List<Var>& variables) {
 } // namespace
 
 
+// Construct the set of events such that for each variable v in vars , there is a rule saying that v is nonjumping
+EventSet ignorable(const List< Tuple<EventSet,Set<Identifier> > >& rules, const Set<Identifier>& vars);
+// Construct the set of events such that for each variable v in vars , there is a rule saying that v is nonjumping
+EventSet ignorable(const List< Tuple<DiscretePredicate, EventSet, Set<Identifier> > >& nonjumping, const DiscreteLocation& q, const Set<Identifier>& vars);
 
+DiscretePredicate make_predicate(const DiscreteLocation& q);
+List<PrimedStringAssignment> make_update(const DiscreteLocation& q);
+
+List<PrimedRealAssignment> primed_real_assignments(const Set<Identifier>& nonjumping);
 
 Set<Identifier> names(const Set<RealVariable>& v) {
     Set<Identifier> r;
@@ -234,10 +243,6 @@ List<PrimedRealAssignment> primed_real_assignments(const Set<Identifier>& nonjum
 
 
 HybridSystem::HybridSystem()
-{
-}
-
-HybridSystem::~HybridSystem()
 {
 }
 
@@ -477,7 +482,13 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 #ifdef ARIADNE_DISABLE
 
 
-
+inline Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,RealInterval> res;
+    for(Nat i=0; i!=b.size(); ++i) {
+        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
+    }
+    return res;
+}
 
 DiscreteLocation evaluate(const DiscreteUpdate& update, const DiscreteLocation& location) {
     DiscreteLocation result;
@@ -923,7 +934,7 @@ EffectiveScalarFunction
 CompositionalHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
-    RealExpression invariant=indicator(invariant_predicate(location,event),NEGATIVE);
+    RealExpression invariant=indicator(invariant_predicate(location,event),Sign::NEGATIVE);
     return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
 }
 
@@ -931,7 +942,7 @@ EffectiveScalarFunction
 CompositionalHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
-    RealExpression guard=indicator(guard_predicate(location,event),POSITIVE);
+    RealExpression guard=indicator(guard_predicate(location,event),Sign::POSITIVE);
     return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
 }
 

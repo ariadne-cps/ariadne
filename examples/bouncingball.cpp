@@ -25,11 +25,11 @@
 #include "ariadne.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
@@ -57,7 +57,7 @@ Int main(Int argc, const char* argv[])
 
     /// Build the automaton
     ball.new_mode(freefall,{dot(x)=v,dot(v)=-g});
-    ball.new_guard(freefall,bounce,x<=0,impact);
+    ball.new_guard(freefall,bounce,x<=0,EventKind::IMPACT);
     ball.new_update(freefall,bounce,freefall,{next(x)=x,next(v)=-a*v});
     /// Finished building the automaton
 
@@ -74,8 +74,6 @@ Int main(Int argc, const char* argv[])
     std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
-    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
     Real e(1.0/16);
@@ -83,7 +81,7 @@ Int main(Int argc, const char* argv[])
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing evolution... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::LOWER);
     std::cout << "done." << std::endl;
 
     plot("bouncingball-xv",Axes2d(-0.1,x,2.1, -10.1,v,10.1), Colour(0.0,0.5,1.0), orbit);

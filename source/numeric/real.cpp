@@ -6,28 +6,29 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU G3c767e04cec413f9afb4c30b521ca71ceb5b0409eneral Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file real.cpp
  *  \brief
  */
 
-#include "utility/module.hpp"
-#include "numeric/operators.hpp"
-#include "expression/templates.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 #include "real.hpp"
@@ -49,31 +50,7 @@ TwoExp Accuracy::error() const {
     return TwoExp(-(Int)this->bits());
 }
 
-template<> Ball<FloatDP>::Ball(Real const& r, DoublePrecision pr) : Ball(r.get(pr)) { }
-template<> Bounds<FloatDP>::Bounds(Real const& r, DoublePrecision pr) : Bounds<FloatDP>(r.get(pr)) { }
-template<> UpperBound<FloatDP>::UpperBound(Real const& r, DoublePrecision pr) : UpperBound<FloatDP>(r.upper().get(pr)) { }
-template<> LowerBound<FloatDP>::LowerBound(Real const& r, DoublePrecision pr) : LowerBound<FloatDP>(r.lower().get(pr)) { }
-template<> Approximation<FloatDP>::Approximation(Real const& r, DoublePrecision pr) : Approximation<FloatDP>(r.get(pr)) { }
-
-using DyadicBounds = Bounds<Dyadic>;
-
-template<> class Bounds<Dyadic> {
-    Dyadic _l, _u;
-  public:
-    Bounds<Dyadic>(Dyadic w) : _l(w), _u(w) { }
-    Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
-    Bounds<Dyadic>(FloatDPBounds x) : DyadicBounds(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
-    Bounds<Dyadic>(FloatMPBounds x) : DyadicBounds(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
-    Bounds<Dyadic> pm(Dyadic e) { return DyadicBounds(_l-e,_u+e); }
-    Dyadic lower_raw() const { return _l; }
-    Dyadic upper_raw() const { return _u; }
-    FloatDPBounds get(DoublePrecision pr) const { return FloatDPBounds(_l,_u,pr); }
-    FloatMPBounds get(MultiplePrecision pr) const { return FloatMPBounds(_l,_u,pr); }
-    friend OutputStream& operator<<(OutputStream& os, DyadicBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
-};
-
 template<class X> struct ValidatedRealWrapper;
-
 
 template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInterface, public DyadicBounds {
     typedef DyadicBounds X;
@@ -127,7 +104,7 @@ template<> struct RealConstant<FloatDPBounds> : RealInterface, FloatDPBounds {
     typedef FloatDPBounds X;
   public:
     RealConstant(X const& x) : FloatDPBounds(x,dp) { }
-    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<FloatDPBounds const&>(*this)); }
+    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<DyadicBounds>(*this)); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
@@ -151,11 +128,11 @@ template<> struct RealLimit<Real> : RealInterface {
   public:
     RealLimit(Sequence<Real> const& seq) : _seq(seq) { }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
-        return FloatDPBounds(_seq[53u],pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+        return FloatDPBounds(_seq[53u],pr).pm(FloatDPError(two^-53,DoublePrecision())); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
         Effort eff(pr.bits()+1u); return this->_compute(eff).get(pr); }
     virtual ValidatedReal _compute(Effort eff) const {
-        Nat n = eff.work()+1u; Accuracy acc(n+1u); return ValidatedReal(_seq[n].compute(Accuracy(n)).get().pm(Dyadic(two_exp(-n)))); }
+        Nat n = eff.work()+1u; Accuracy acc(n+1u); return ValidatedReal(_seq[n].compute(Accuracy(n)).get().pm(two^(-n))); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
@@ -165,11 +142,11 @@ template<> struct RealLimit<Dyadic> : RealInterface {
   public:
     RealLimit(Sequence<Dyadic> const& seq) : _seq(seq) { }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
-        Dyadic w=_seq[53u]; return FloatDPBounds(w,pr).pm(FloatDPError(two^(-53),DoublePrecision())); }
+        Dyadic w=_seq[53u]; return FloatDPBounds(w,pr).pm(FloatDPError(two^-53,DoublePrecision())); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
-        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return FloatMPBounds(_seq[n],pr).pm(FloatMPError(two_exp(-n),pr)); }
+        Nat n = pr.bits()+1u; Accuracy acc(n+1u); return FloatMPBounds(_seq[n],pr).pm(FloatMPError(two^-n,pr)); }
     virtual ValidatedReal _compute(Effort eff) const {
-        Nat n = eff.work()+1u; Accuracy acc(n+1u); return DyadicBounds(_seq[n]).pm(Dyadic(two_exp(-n))); }
+        Nat n = eff.work()+1u; Accuracy acc(n+1u); return DyadicBounds(_seq[n]).pm(two^-n); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
@@ -179,9 +156,9 @@ template<> struct RealLimit<DyadicBounds> : RealInterface {
   public:
     RealLimit(ConvergentSequence<DyadicBounds> const& seq) : _seq(seq) { }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
-        return _seq[0u].get(pr); }
+        return FloatDPBounds(_seq[0u],pr); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
-        return _seq[pr.bits()].get(pr); }
+        return FloatMPBounds(_seq[pr.bits()],pr); }
     virtual OutputStream& _write(OutputStream& os) const {
         return os << "{" << _seq[0u] << ", " << _seq[1u] << ", " <<_seq[2u] << ", ... }"; }
 };
@@ -204,6 +181,13 @@ Real::Real(double x)
     : Real(std::make_shared<RealConstant<FloatDPBounds>>(FloatDPBounds(x)))
 {
 }
+
+ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2);
+ValidatedSierpinskian operator!=(Real const& x1, Int64 n2);
+Kleenean operator< (Real const& x1, Int64 n2);
+Kleenean operator> (Real const& x1, Int64 n2);
+Kleenean operator<=(Real const& x1, Int64 n2);
+Kleenean operator>=(Real const& x1, Int64 n2);
 
 
 UpperReal Real::upper() const { return UpperReal(this->_ptr); }
@@ -230,7 +214,8 @@ Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { 
 Real::Real(Decimal const& d) : Real(std::make_shared<RealConstant<Decimal>>(d)) { }
 Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
 Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
-Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDPValue)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
+Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { }
+
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
 Real sub(Real const& x1, Real const& x2) { return make_real(Sub(),x1,x2); }
@@ -256,8 +241,61 @@ PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
 Real max(Real const& x1, Real const& x2) { return make_real(Max(),x1,x2); }
 Real min(Real const& x1, Real const& x2) { return make_real(Min(),x1,x2); }
 
-Real limit(StrongCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
-Real limit(StrongCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
+Real limit(FastCauchySequence<Real> const& seq) { return Real(std::make_shared<RealLimit<Real>>(seq)); }
+Real limit(FastCauchySequence<Dyadic> const& seq) { return Real(std::make_shared<RealLimit<Dyadic>>(seq)); }
+
+Real choose(Case<LowerKleenean,Real> const& c1, Case<LowerKleenean,Real> const& c2) {
+    if (choose(c1.condition(),c2.condition())) { return c1.term(); } else { return c2.term(); } }
+
+class WhenRealExpression : public RealInterface {
+    UpperKleenean _p1, _p2; Real _r1, _r2;
+  public:
+    WhenRealExpression(UpperKleenean const& p1, Real const& r1, UpperKleenean const& p2, Real const& r2) : _p1(p1), _p2(p2), _r1(r1), _r2(r2) { }
+    WhenRealExpression(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2)
+        : WhenRealExpression(c1.condition(),c1.term(),c2.condition(),c2.term()) { }
+    virtual ValidatedReal _compute(Effort eff) const;
+    virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return this->_compute(Effort(0u)).get(pr); }
+    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return this->_compute(Effort(pr.bits())).get(pr); }
+  public:
+    virtual OutputStream& _write(OutputStream& os) const;
+};
+Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2) {
+    return Real(std::make_shared<WhenRealExpression>(c1,c2)); }
+
+ValidatedReal WhenRealExpression::_compute(Effort eff) const {
+    if(not possibly(_p1.check(eff))) { return _r2.compute(eff); }
+    if(not possibly(_p2.check(eff))) { return _r1.compute(eff); }
+
+    ValidatedReal vr1=_r1.compute(eff);
+    ValidatedReal vr2=_r2.compute(eff);
+
+    DyadicBounds w1=vr1.get();
+    DyadicBounds w2=vr2.get();
+
+    ARIADNE_ASSERT(w1.lower_raw()<=w2.upper_raw() && w1.upper_raw()>=w2.lower_raw());
+    return DyadicBounds(min(w1.lower_raw(),w2.lower_raw()),max(w1.upper_raw(),w2.upper_raw()));
+}
+
+OutputStream& WhenRealExpression::_write(OutputStream& os) const {
+    return os << "when(" << _p1 << " => " << _r1 << " & " << _p2 << " => " << _r2 << ")";
+}
+
+
+// May be true if r>a; may be false if r<b
+// Equivalent to choose(r>a,r<b)
+Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b) {
+    ARIADNE_PRECONDITION(a<b);
+    FloatDPBounds x0=r.get(dp);
+    if(x0.lower_raw()>a) { return true; } else if(x0.upper_raw()<b) { return false; }
+    Nat bits=64;
+    while(true) {
+        MultiplePrecision pr(bits);
+        FloatMPBounds x=r.get(pr);
+        if(x.lower_raw()>a) { return true; } else if(x.upper_raw()<b) { return false; }
+        bits+=64;
+    }
+}
+
 
 PositiveUpperReal mag(Real const& r) { return abs(r); }
 FloatDPError mag(Real const& r, DoublePrecision pr) { return mag(r.get(pr)); }
@@ -330,6 +368,7 @@ FloatMPBounds Real::get(MultiplePrecision pr) const {
 }
 
 ValidatedReal Real::compute(Effort eff) const {
+    return this->_ptr->_compute(eff);
     return ValidatedReal(DyadicBounds(this->_ptr->_compute_get(MultiplePrecision(eff.work()))));
 }
 
@@ -337,7 +376,7 @@ ValidatedReal Real::compute(Accuracy accuracy) const {
     Nat effort=1;
     Nat acc=accuracy.bits();
     MultiplePrecision precision(effort*64);
-    FloatMPError error_bound(FloatMP(Rational(two_exp(-acc).get_d()),upward,precision));
+    FloatMPError error_bound(FloatMP(two^-acc,upward,precision));
     FloatMPError error=2u*error_bound;
     FloatMPBounds res;
     while (!(error.raw()<error_bound.raw())) {
@@ -424,8 +463,6 @@ LowerReal neg(UpperReal const& ur) { return make_lower(neg(cast_real(ur))); }
 UpperReal neg(LowerReal const& lr) { return make_upper(neg(cast_real(lr))); }
 LowerReal add(LowerReal const& lr1, LowerReal const& lr2) { return make_lower(add(cast_real(lr1),cast_real(lr2))); }
 UpperReal add(UpperReal const& ur1, UpperReal const& ur2) { return make_upper(add(cast_real(ur1),cast_real(ur2))); }
-LowerReal add(LowerReal const& lr1, UpperReal const& ur2) { return make_lower(add(cast_real(lr1),cast_real(ur2))); }
-UpperReal add(UpperReal const& ur1, LowerReal const& lr2) { return make_upper(add(cast_real(ur1),cast_real(lr2))); }
 
 PositiveFloatDPBounds PositiveReal::get(DoublePrecision pr) const {
     return PositiveFloatDPBounds(this->_ptr->_compute_get(pr));

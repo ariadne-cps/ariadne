@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_automaton-atomic.hpp
@@ -28,8 +29,8 @@
 #ifndef ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
 #define ARIADNE_ATOMIC_HYBRID_AUTOMATON_HPP
 
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_automaton-composite.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton-composite.hpp"
 
 namespace Ariadne {
 
@@ -127,8 +128,8 @@ class AtomicHybridAutomaton
                     ContinuousPredicate invariant,
                     DiscreteEvent event,
                     ContinuousPredicate activation,
-                    EventKind kind=PERMISSIVE) {
-        ARIADNE_ASSERT(kind==PERMISSIVE);
+                    EventKind kind=EventKind::PERMISSIVE) {
+        ARIADNE_ASSERT(kind==EventKind::PERMISSIVE);
         this->HybridAutomaton::new_action(this->_variable|location,invariant,event,activation,kind);
     }
 
@@ -136,8 +137,8 @@ class AtomicHybridAutomaton
     Void new_action(AtomicDiscreteLocation location,
                     DiscreteEvent event,
                     ContinuousPredicate guard,
-                    EventKind kind=URGENT) {
-        ARIADNE_ASSERT(kind==URGENT || kind==IMPACT);
+                    EventKind kind=EventKind::URGENT) {
+        ARIADNE_ASSERT(kind==EventKind::URGENT || kind==EventKind::IMPACT);
         this->HybridAutomaton::new_guard(this->_variable|location,event,guard,kind);
     }
 
@@ -160,14 +161,14 @@ class AtomicHybridAutomaton
     Void new_urgent_guard(AtomicDiscreteLocation location,
                           DiscreteEvent event,
                           ContinuousPredicate const& guard) {
-        this->HybridAutomaton::new_guard(this->_variable|location,event,guard,urgent);
+        this->HybridAutomaton::new_guard(this->_variable|location,event,guard,EventKind::URGENT);
     }
 
     //! \brief Adds a permissive guard to the automaton.
     Void new_permissive_guard(AtomicDiscreteLocation location,
                               DiscreteEvent event,
                               ContinuousPredicate const& guard) {
-        this->HybridAutomaton::new_guard(this->_variable|location,event,guard,permissive);
+        this->HybridAutomaton::new_guard(this->_variable|location,event,guard,EventKind::PERMISSIVE);
     }
 
     //! \brief Adds an update/reset to the automaton.
@@ -193,7 +194,7 @@ class AtomicHybridAutomaton
                         ContinuousPredicate const& guard,
                         AtomicDiscreteLocation target,
                         List<PrimedRealAssignment> const& reset,
-                        EventKind urgency=urgent) {
+                        EventKind urgency=EventKind::URGENT) {
         this->HybridAutomaton::new_transition(this->_variable|source,event,this->_variable|target,reset,guard,urgency);
     }
 
@@ -203,7 +204,7 @@ class AtomicHybridAutomaton
                         AtomicDiscreteLocation target,
                         List<PrimedRealAssignment> const& reset,
                         ContinuousPredicate const& guard,
-                        EventKind urgency=urgent) {
+                        EventKind urgency=EventKind::URGENT) {
         this->HybridAutomaton::new_transition(this->_variable|source,event,this->_variable|target,reset,guard,urgency);
     }
 
@@ -213,7 +214,7 @@ class AtomicHybridAutomaton
                         DiscreteEvent event,
                         AtomicDiscreteLocation target,
                         ContinuousPredicate const& guard,
-                        EventKind urgency=urgent) {
+                        EventKind urgency=EventKind::URGENT) {
         this->HybridAutomaton::new_transition(this->_variable|source,event,this->_variable|target,guard,urgency);
     };
 

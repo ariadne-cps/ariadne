@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_evolver.hpp
@@ -34,18 +35,18 @@
 #include <iostream>
 
 
-#include "utility/tuple.hpp"
+#include "../utility/tuple.hpp"
 
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_set.hpp"
 
-#include "solvers/configuration_interface.hpp"
-#include "hybrid/hybrid_enclosure.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "hybrid/hybrid_evolver_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
+#include "../hybrid/hybrid_enclosure.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_evolver_interface.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -150,21 +151,21 @@ class HybridEvolverBase
     //@{
     //! \name Main evolution functions.
 
-    Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridBoxSet& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const HybridBoxSet& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
+    Orbit<EnclosureType> orbit(const HybridBoundedConstraintSet& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
     //@}
 
     //@{
@@ -189,8 +190,8 @@ class HybridEvolverBase
     //! \param time The maximum time of evolution; either specifies the stopping time
     //!   or the maximum number of steps.
     //! \param semantics The semantics used for the solution trajectories.
-    //!   Either \a #LOWER_SEMANTICS, in which case trajectories terminate at
-    //!   discontinuities, or #UPPER_SEMANTICS, in which case all branches
+    //!   Either \a #Semantics::LOWER, in which case trajectories terminate at
+    //!   discontinuities, or #Semantics::UPPER, in which case all branches
     //!   are taken.
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
@@ -482,11 +483,11 @@ struct TransitionData
     //TransitionData(DiscreteLocation t, ValidatedScalarFunction g, ValidatedVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
 };
-
+OutputStream& operator<<(OutputStream& os, const TransitionData& transition);
 
 //! \relates HybridEvolverBase
 //! \brief Information on how a flow tube crosses a hypersurface.
-enum class DirectionKind {
+enum class DirectionKind : std::uint8_t {
     POSITIVE, //!< The guard function is strictly positive on the flow range.
         //! The event occurs immediately (if urgent) or at any time (if permissive).
     NEGATIVE, //!< The guard function is strictly negative on the flow range. No event occurs.
@@ -498,6 +499,7 @@ enum class DirectionKind {
     CONVEX, //!< The guard function varies convexly along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$.
     INDETERMINATE //!< Neither the guard function, nor its first or second Lie derivatives, has a definite sign.
 };
+OutputStream& operator<<(OutputStream& os, const DirectionKind& dir);
 
 //! \relates HybridEvolverBase
 //! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\frac{dx}{dt}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
@@ -509,7 +511,7 @@ enum class DirectionKind {
 //! also imply that the crossing information is too expensive or sensitive to
 //! compute.
 //! \relates HybridEvolverInterface \relates CrossingData
-enum class CrossingKind {
+enum class CrossingKind : std::uint8_t {
     DEGENERATE, //!< The crossing may be degenerate to second order.
     NEGATIVE, //!< The guard function is negative on the flow domain. No event occurs.
     POSITIVE, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
@@ -562,7 +564,7 @@ OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
 //! typically only defined over a singleton set of space and time.
 //! \relates TimingData
-enum class StepKind {
+enum class StepKind : std::uint8_t {
     CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     SPACE_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
@@ -588,7 +590,7 @@ OutputStream& operator<<(OutputStream& os, const StepKind& crk);
 //! Needed since the final time may be an arbitrary real number, at it may not be possible to determine
 //! whether a given enclosure is exactly at the final time or not
 //! \relates TimingData
-enum class FinishingKind {
+enum class FinishingKind : std::uint8_t {
     BEFORE_FINAL_TIME, //!< At the end of the step, the final time has definitely not been reached by any point.
     AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
     AFTER_FINAL_TIME, //!< At the end of the step, the final time has definitely been passed by every point. No more evolution is possible.
@@ -618,6 +620,7 @@ struct TimingData
     ExactIntervalType evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
     ValidatedScalarFunctionModelDP evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
+OutputStream& operator<<(OutputStream& os, const TimingData& timing);
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
 //! \relates HybridEvolverInterface
@@ -645,7 +648,7 @@ struct EvolutionData
     //! the result, but useful for plotting, especially for debugging.
     List<HybridEnclosure> intermediate_sets;
 
-    //! \brief The semantics used to compute the evolution. Defaults to UPPER_SEMANTICS.
+    //! \brief The semantics used to compute the evolution. Defaults to Semantics::UPPER.
     Semantics semantics;
 };
 
@@ -780,7 +783,7 @@ class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
 
     GeneralHybridEvolverConfiguration(GeneralHybridEvolver& evolver);
 
-    virtual ~GeneralHybridEvolverConfiguration() { }
+    virtual ~GeneralHybridEvolverConfiguration() = default;
 };
 
 //! \brief Factory for GeneralHybridEvolver objects.

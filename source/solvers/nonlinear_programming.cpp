@@ -6,50 +6,53 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // See Hande Y. Benson, David F. Shanno, And Robert J. Vanderbei,
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <limits>
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/diagonal_matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/function.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/diagonal_matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/function.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
 
-#include "solvers/nonlinear_programming.hpp"
-#include "solvers/solver.hpp"
-#include "algebra/multi_index-noaliasing.hpp"
-#include "solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../solvers/solver.hpp"
+#include "../algebra/multi_index-noaliasing.hpp"
+#include "../solvers/constraint_solver.hpp"
+
+#include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
 
@@ -76,6 +79,8 @@ typedef Vector<FloatDPValue> ExactFloatVector;
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
+
+Matrix<ApproximateNumericType> join(Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&, Matrix<ApproximateNumericType> const&);
 
 inline Vector<Differential<RawFloatDP>>const& cast_raw(Vector<Differential<FloatDPApproximation>>const& v) {
     return reinterpret_cast<Vector<Differential<RawFloatDP>>const&>(v);
@@ -282,13 +287,12 @@ template<class X> Vector< Differential<X> > second_derivative(const ValidatedVec
 }
 
 template<class Vec, class Diff> Void set_gradient(Vec& g, const Diff& D) {
-    typedef typename Diff::ValueType X;
     Nat i=0;
     typename Diff::ConstIterator iter=D.begin();
-    if(iter!=D.end() && iter->key().degree()==0) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()<=2) {
-        while(iter->key()[i]==0) { ++i; }
-        g[i]=iter->data();
+    if(iter!=D.end() && iter->index().degree()==0) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()<=2) {
+        while(iter->index()[i]==0) { ++i; }
+        g[i]=iter->coefficient();
         ++iter;
     }
 }
@@ -305,10 +309,10 @@ template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
     typedef typename Diff::ValueType X;
     Nat i=0; Nat j=1;
     typename Diff::ConstIterator iter=D.begin();
-    while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()<=2) {
-        const MultiIndex& a=iter->key();
-        const X& c=iter->data();
+    while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()<=2) {
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -319,10 +323,10 @@ template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
 template<class Mx, class S, class Diff> Void add_hessian(Mx& H, const S& s, const Diff& D) {
     typedef typename Diff::ValueType X;
     typename Diff::ConstIterator iter=D.begin();
-    while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
-    while(iter!=D.end() && iter->key().degree()==2) {
-        const MultiIndex& a=iter->key();
-        const X& c=iter->data();
+    while(iter!=D.end() && iter->index().degree()<=1) { ++iter; }
+    while(iter!=D.end() && iter->index().degree()==2) {
+        ConstReferenceType<MultiIndex> a=iter->index();
+        ConstReferenceType<X> c=iter->coefficient();
         Nat i=0;
         while(a[i]==0) { ++i; }
         if(a[i]==2) { H[i][i]+=s*c; }
@@ -451,18 +455,7 @@ class ConstrainedFeasibilityMatrix {
 };
 
 
-
-enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
-
-inline ConstraintKind constraint_kind(ExactIntervalType C) {
-    if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
-    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
-    else { return BOUNDED; }
-}
-
-
-ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
+inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
     for(Nat i=0; i!=bx.size(); ++i) {
         bx[i]=ExactIntervalType(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
     }
@@ -1411,7 +1404,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     const ExactBoxType& d, const ApproximateVectorFunction& g, const ExactBoxType& c,
     FloatApproximationVector& x, FloatApproximationVector& y, FloatDPApproximation& t) const
 {
-    static const double inf = std::numeric_limits<double>::infinity();
+    static const double _inf = std::numeric_limits<double>::infinity();
 
     static const FloatDPApproximation gamma=0.0009765625_approx; // 1.0/1024;
     static const FloatDPApproximation sigma=0.125_approx;
@@ -1453,8 +1446,8 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     Vector<FloatDPApproximation> D(n);
     for(Nat j=0; j!=n; ++j) {
         if(c[j].lower()==c[j].upper()) {
-        } else if(c[j].upper().raw()==+inf) {
-        } else if(c[j].lower().raw()==-inf) {
+        } else if(c[j].upper().raw()==+_inf) {
+        } else if(c[j].lower().raw()==-_inf) {
         } else {
             ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+infty));
         }
@@ -1852,14 +1845,10 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorFunction const& g, Exac
     FloatApproximationVector dl=lower_bounds(D);
     FloatApproximationVector du=upper_bounds(D);
 
-    ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::feasibility_step(D,g,C,x,y,w)\n");
+    ARIADNE_LOG(4,"PenaltyFunctionOptimiser::feasibility_step(D,g,C,x,y,w)\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<"\n");
     ARIADNE_LOG(5,"  dl ="<<dl<<", du="<<du<<"\n  cl ="<<cl<<",  cu ="<<cu<<"\n");
     ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<"\n");
-
-    static const double gamma=1.0/1024;
-    static const double sigma=1.0/8;
-    static const double scale=0.75;
 
     ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
     ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);
@@ -2565,7 +2554,7 @@ feasible(ExactBoxType d, ValidatedVectorFunction g, ExactBoxType c) const
         try {
             this->feasibility_step(d,g,c,x,y,z,t);
         }
-        catch(SingularMatrixException) {
+        catch(const SingularMatrixException& e) {
             return indeterminate;
         }
         if(t.lower()>t.upper()) {

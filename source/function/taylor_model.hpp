@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file taylor_model.hpp
@@ -30,19 +31,19 @@
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/declarations.hpp"
-#include "utility/array.hpp"
-#include "utility/pointer.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/covector.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/sweeper.hpp"
-#include "algebra/operations.hpp"
-#include "algebra/evaluate.hpp"
-#include "function/domain.hpp"
-#include "function/scaling.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/array.hpp"
+#include "../utility/pointer.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/covector.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/sweeper.hpp"
+#include "../algebra/operations.hpp"
+#include "../algebra/evaluate.hpp"
+#include "../function/domain.hpp"
+#include "../function/scaling.hpp"
 
 namespace Ariadne {
 
@@ -65,19 +66,26 @@ class IntersectionException : public std::runtime_error {
     IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
+template<class P, class F> struct ModelNumericTypedef;
+template<class F> struct ModelNumericTypedef<ValidatedTag,F> { typedef FloatBounds<typename F::PrecisionType> Type; };
+template<class F> struct ModelNumericTypedef<ApproximateTag,F> { typedef FloatApproximation<typename F::PrecisionType> Type; };
+template<class P, class F> using ModelNumericType = typename ModelNumericTypedef<P,F>::Type;
 
-template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>> : NormedAlgebraOperations<TaylorModel<P,F>> {
-    typedef typename TaylorModel<P,F>::NumericType X;
-    static TaylorModel<P,F> _pos(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _neg(TaylorModel<P,F> dx);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> dx, X const& c);
-    static TaylorModel<P,F> _add(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _sub(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _mul(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _min(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _max(TaylorModel<P,F> const& dx1, TaylorModel<P,F> const& dx2);
-    static TaylorModel<P,F> _abs(TaylorModel<P,F> const& dx);
+template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
+    : NormedAlgebraOperations<TaylorModel<P,F>>
+{
+    typedef ModelNumericType<P,F> X;
+    using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
+    static TaylorModel<P,F> apply(Pos,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Neg,TaylorModel<P,F> tm);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> tm, X const& c);
+    static TaylorModel<P,F> apply(Add,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Sub,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Min,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Max,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 
 
@@ -103,7 +111,7 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatError<PRE> ErrorType;
     typedef FloatError<PR> NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
     typedef Sweeper<F> SweeperType;
 
     typedef IntervalDomainType CodomainType;
@@ -146,9 +154,9 @@ class TaylorModel<ValidatedTag,F>
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
     TaylorModel<ValidatedTag,F>(SizeType as, SweeperType swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedTag,F>(const Expansion<double>& f, const double& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<CoefficientType>& f, const ErrorType& e, SweeperType swp);
-    TaylorModel<ValidatedTag,F>(const Expansion<RawFloatType>& f, const RawFloatType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp);
+    TaylorModel<ValidatedTag,F>(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp);
     //! \brief Fast swap with another Taylor model.
     Void swap(TaylorModel<ValidatedTag,F>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -507,7 +515,7 @@ class TaylorModel<ApproximateTag,F>
     typedef FloatApproximation<PR> CoefficientType;
     typedef FloatApproximation<PR> ErrorType;
     typedef ReverseLexicographicIndexLess ComparisonType;
-    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
+    typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
 
     typedef IntervalDomainType CodomainType;
     typedef Interval<FloatApproximation<PR>> RangeType;
@@ -585,6 +593,10 @@ class TaylorModel<ApproximateTag,F>
 
     //@{
     /*! \name Data access */
+    //! \brief The expansion.
+    const ExpansionType& expansion() const { return this->_expansion; }
+    //! \brief A reference to the expansion.
+    ExpansionType& expansion() { return this->_expansion; }
     //! \brief The number of variables in the argument of the quantity.
     SizeType argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
@@ -731,7 +743,7 @@ template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<Ta
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
-    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+    Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
     return std::move(r);
 }

@@ -6,28 +6,30 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file logical.cpp
  *  \brief
  */
 
-#include "utility/stdlib.hpp"
-#include "utility/string.hpp"
-#include "expression/templates.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/string.hpp"
+#include "../utility/macros.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
 
@@ -69,44 +71,44 @@ LogicalHandle::LogicalHandle(LogicalValue l)
 
 LogicalHandle operator&&(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle operator||(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator==(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 LogicalHandle operator^(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 LogicalHandle operator!(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<AndOp,LogicalHandle,LogicalHandle>>(AndOp(),l1,l2));
-};
+}
 
 LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<OrOp,LogicalHandle,LogicalHandle>>(OrOp(),l1,l2));
-};
+}
 
 LogicalHandle negation(LogicalHandle l) {
     return LogicalHandle(std::make_shared<LogicalExpression<NotOp,LogicalHandle>>(NotOp(),l));
-};
+}
 
 LogicalHandle equality(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<Equal,LogicalHandle,LogicalHandle>>(Equal(),l1,l2));
-};
+}
 
 
 LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2) {
     return LogicalHandle(std::make_shared<LogicalExpression<XOrOp,LogicalHandle,LogicalHandle>>(XOrOp(),l1,l2));
-};
+}
 
 
 LogicalValue operator==(LogicalValue l1, LogicalValue l2) {
@@ -133,6 +135,7 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
         case LogicalValue::INDETERMINATE: os << "indeterminate";  break;
         case LogicalValue::UNLIKELY: os << "unlikely"; break;
         case LogicalValue::FALSE: os << "false"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled LogicalValue for output streaming.\n");
     }
     return os;
 }
@@ -142,6 +145,15 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
 Nat Effort::_default = 0u;
 
 const Indeterminate indeterminate = Indeterminate();
+
+Bool NondeterministicBoolean::_choose(LowerKleenean p1, LowerKleenean p2) {
+    Effort eff(0u);
+    while(true) {
+        if(definitely(p1.check(eff))) { return true; }
+        if(definitely(p2.check(eff))) { return false; }
+        ++eff;
+    }
+}
 
 template<> String class_name<ExactTag>() { return "Exact"; }
 template<> String class_name<EffectiveTag>() { return "Effective"; }
@@ -164,21 +176,5 @@ template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; 
 template<> String class_name<ValidatedLowerKleenean>() { return "ValidatedLowerKleenean"; }
 template<> String class_name<ValidatedUpperKleenean>() { return "ValidatedUpperKleenean"; }
 template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenean"; }
-
-void try_logical() {
-    Kleenean k(true);
-    Effort e(3);
-    Sierpinskian s(true);
-    Boolean b(true);
-    k=b and s;
-    k=k and b;
-    k=k and s;
-    k=s and not s;
-    ValidatedKleenean vk=k.check(e);
-    vk && vk;
-    ValidatedLowerKleenean vlk = vk;
-    vlk || vk;
-    ValidatedUpperKleenean vuk = !vlk;
-}
 
 } // namespace Ariadne

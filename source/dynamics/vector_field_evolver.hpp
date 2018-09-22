@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file vector_field_evolver.hpp
@@ -34,15 +35,15 @@
 #include <iostream>
 
 
-#include "utility/tuple.hpp"
+#include "../utility/tuple.hpp"
 
-#include "dynamics/vector_field.hpp"
-#include "function/function_interface.hpp"
-#include "solvers/configuration_interface.hpp"
-#include "solvers/integrator_interface.hpp"
-#include "dynamics/evolver_base.hpp"
+#include "../dynamics/vector_field.hpp"
+#include "../function/function_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
+#include "../solvers/integrator_interface.hpp"
+#include "../dynamics/evolver_base.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -103,7 +104,7 @@ class VectorFieldEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
 
     using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
     using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
@@ -111,13 +112,13 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,false);
         return final; }
 
     //! \brief Compute an approximation to the reachable set under upper semantics.
     EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
         return reachable; }
     //@}
 
@@ -148,6 +149,8 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
+
+    virtual ~VectorFieldEvolverConfiguration() = default;
 
   private:
 

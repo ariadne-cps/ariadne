@@ -265,6 +265,7 @@ class RealExpressionBoundedConstraintSet
     List<ContinuousPredicate> _constraints;
   public:
     RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain);
+    RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain, const InitializerList<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const Map<RealVariable,RealInterval>& domain, const List<ContinuousPredicate>& constraints);

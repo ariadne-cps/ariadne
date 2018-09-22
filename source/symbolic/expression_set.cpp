@@ -174,6 +174,11 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Ini
 {
 }
 
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& bounds, const InitializerList<ContinuousPredicate>& constraints)
+    : RealExpressionBoundedConstraintSet(List<RealVariableInterval>(bounds),List<ContinuousPredicate>(constraints))
+{
+}
+
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds)
     : _bounds(make_key_value_map(bounds)), _constraints()
 {

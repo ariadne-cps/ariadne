@@ -36,7 +36,7 @@
 #include "dynamics/reachability_analyser.hpp"
 #include "symbolic/expression_set.hpp"
 #include "solvers/integrator.hpp"
-#include "output/colour.hpp"
+#include "output/graphics.hpp"
 #include "output/logging.hpp"
 
 #include "../test.hpp"
@@ -58,6 +58,7 @@ class TestReachabilityAnalyser
 
     typedef VectorFieldEvolver EvolverType;
     typedef EvolverType::SystemType SystemType;
+    typedef SystemType::TimeType TimeType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef EvolverType::EnclosureType EnclosureType;
     typedef RealExpressionBoundedConstraintSet SetType;
@@ -68,10 +69,11 @@ class TestReachabilityAnalyser
     Grid grid;
     RealVariable x;
     RealVariable y;
+    ExactBoxType graphics_box;
     ExactBoxType bounding;
     SetType initial_set;
     SetType safe_set;
-    Real reach_time;
+    TimeType reach_time;
   public:
 
     static SystemType build_system()
@@ -89,8 +91,8 @@ class TestReachabilityAnalyser
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        TaylorPicardIntegrator integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                                 step_maximum_error=1e-6,step_sweep_threshold=1e-10,maximum_temporal_order=8);
+        TaylorSeriesIntegrator integrator(MaximumError(1e-5));
+
         EvolverType evolver(system,integrator);
 
         AnalyserType analyser(system,evolver);
@@ -105,6 +107,7 @@ class TestReachabilityAnalyser
           grid(2),
           x("x"),
           y("y"),
+          graphics_box({{-3,3},{-3,3}}),
           bounding({{-4,4},{-4,4}}),
           initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
           safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec}),//,{sqr(x)+sqr(y)<=sqr((Real)3)}),
@@ -118,29 +121,25 @@ class TestReachabilityAnalyser
         cout << "initial_set=" << initial_set << endl;
         cout << "safe_set=" << safe_set << endl;
     }
-/*
-    Void test_lower_reach_lower_evolve() {
-        DiscreteLocation loc(1);
-        ExactBoxType bounding_box(2,bound);
-        cout << "Computing timed reachable set" << endl;
-        HybridGridTreePaving hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
-        GridTreePaving& lower_reach=hybrid_lower_reach[loc];
 
+    Void test_lower_reach_lower_evolve() {
+        auto initial_set_euclidean = initial_set.euclidean_set(system.state_space());
+
+        cout << "Computing timed reachable set" << endl;
+        auto lower_reach=analyser.lower_reach(initial_set_euclidean,reach_time);
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        HybridGridTreePaving hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
-        GridTreePaving& lower_evolve=hybrid_lower_evolve[loc];
-
+        auto lower_evolve=analyser.lower_evolve(initial_set_euclidean,reach_time);
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-map_lower_reach_lower_evolve.png",axes,
-             reach_set_colour,hybrid_lower_reach,evolve_set_colour,hybrid_lower_evolve);
+        plot("test_reachability_analyser-lower_reach_lower_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+             reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
     }
-
+/*
     Void test_lower_reach_evolve() {
         DiscreteLocation loc(1);
         ExactBoxType bounding_box(2,bound);
@@ -252,9 +251,9 @@ class TestReachabilityAnalyser
     }
 */
     Void test() {
-/*
+
         ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
-        ARIADNE_TEST_CALL(test_lower_reach_evolve());
+/*        ARIADNE_TEST_CALL(test_lower_reach_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_evolve());
         ARIADNE_TEST_CALL(test_infinite_time_lower_reach());

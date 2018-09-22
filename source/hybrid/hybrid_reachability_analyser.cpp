@@ -217,14 +217,4 @@ HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGr
     _grid_ptr = value_ptr;
 }
 
-OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy)
-{
-    switch(policy) {
-        case ChainOverspillPolicy::IGNORE: os<<"ignore"; break;
-        case ChainOverspillPolicy::WARNING: os<<"warning"; break;
-        case ChainOverspillPolicy::ERROR: os<<"error"; break;
-        default: abort();
-    } return os;
-}
-
 } // namespace Ariadne

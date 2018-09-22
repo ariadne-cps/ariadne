@@ -5,7 +5,6 @@ set(UNIT_TESTS
     test_hybrid_evolution    
     test_hybrid_evolver
     test_hybrid_graphics
-    test_hybrid_reachability_analyser
     test_hybrid_set
     test_hybrid_simulator
 )

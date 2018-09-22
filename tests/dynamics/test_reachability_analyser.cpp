@@ -61,8 +61,10 @@ class TestReachabilityAnalyser
     typedef SystemType::TimeType TimeType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef EvolverType::EnclosureType EnclosureType;
-    typedef RealExpressionBoundedConstraintSet SetType;
+    typedef RealExpressionBoundedConstraintSet SymbolicSetType;
+    typedef BoundedConstraintSet SetType;
     typedef ReachabilityAnalyser<SystemType> AnalyserType;
+    typedef AnalyserType::BoundingDomainType BoundingDomainType;
 
     SystemType system;
     AnalyserType analyser;
@@ -70,8 +72,10 @@ class TestReachabilityAnalyser
     RealVariable x;
     RealVariable y;
     ExactBoxType graphics_box;
-    ExactBoxType bounding;
+    BoundingDomainType bounding;
+    SymbolicSetType symbolic_initial_set;
     SetType initial_set;
+    SymbolicSetType symbolic_safe_set;
     SetType safe_set;
     TimeType reach_time;
   public:
@@ -109,8 +113,10 @@ class TestReachabilityAnalyser
           y("y"),
           graphics_box({{-3,3},{-3,3}}),
           bounding({{-4,4},{-4,4}}),
-          initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
-          safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec}),//,{sqr(x)+sqr(y)<=sqr((Real)3)}),
+          symbolic_initial_set({1.98_dec<=x<=1.99_dec,0.01_dec<=y<=0.02_dec}),
+          initial_set(symbolic_initial_set.euclidean_set(system.state_space())),
+          symbolic_safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec},{sqr(x)+sqr(y)<=sqr((Real)3)}),
+          safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
           reach_time(3.0)
     {
         analyser.verbosity=analyser_verbosity;
@@ -123,107 +129,97 @@ class TestReachabilityAnalyser
     }
 
     Void test_lower_reach_lower_evolve() {
-        auto initial_set_euclidean = initial_set.euclidean_set(system.state_space());
-
         cout << "Computing timed reachable set" << endl;
-        auto lower_reach=analyser.lower_reach(initial_set_euclidean,reach_time);
+        auto lower_reach=analyser.lower_reach(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        auto lower_evolve=analyser.lower_evolve(initial_set_euclidean,reach_time);
+        auto lower_evolve=analyser.lower_evolve(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
-        cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
+        cout << "Reached " << lower_reach.size() << " cells " << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
         plot("test_reachability_analyser-lower_reach_lower_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
              reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
     }
-/*
-    Void test_lower_reach_evolve() {
-        DiscreteLocation loc(1);
-        ExactBoxType bounding_box(2,bound);
 
+    Void test_lower_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<HybridGridTreePaving,HybridGridTreePaving> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreePaving& lower_reach=reach_evolve_set.first[loc];
-        GridTreePaving& lower_evolve=reach_evolve_set.second[loc];
-        cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
+        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
+        GridTreePaving& lower_reach=reach_evolve_set.first;
+        GridTreePaving& lower_evolve=reach_evolve_set.second;
+        cout << "Reached " << lower_reach.size() << " cells " << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
-             reach_set_colour,reach_evolve_set.first,evolve_set_colour,reach_evolve_set.second);
+        plot("test_reachability_analyser-map_lower_reach_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+             reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
     }
 
     Void test_upper_reach_upper_evolve() {
-        DiscreteLocation loc(1);
-        ExactBoxType bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
-        HybridGridTreePaving upper_reach_set=analyser.upper_reach(initial_set,reach_time);
-        cout << "upper_reach_set="<<upper_reach_set<<std::endl;
-
+        GridTreePaving upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        HybridGridTreePaving upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
-        cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
-
+        GridTreePaving upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
 
-        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",axes,
+        cout << "Reached " << upper_reach_set.size() << " cells " << endl;
+        cout << "Evolved to " << upper_evolve_set.size() << " cells " << endl << endl;
+
+        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
              reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
     }
 
     Void test_upper_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        DiscreteLocation loc(1);
-        ExactBoxType bounding_box(2,bound);
-        Pair<HybridGridTreePaving,HybridGridTreePaving> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
+        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
 
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
         ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
 
-        plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
+        cout << "Reached " << reach_evolve_set.first.size() << " cells " << endl;
+        cout << "Evolved to " << reach_evolve_set.second.size() << " cells " << endl << endl;
+
+        plot("test_reachability_analyser-map_upper_reach_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
              reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
     }
 
     Void test_infinite_time_lower_reach() {
-
-        DiscreteLocation loc(1);
-        HybridExactBoxes bounding_boxes
-            =Ariadne::bounding_boxes(system.state_space(),bound);
-
-        analyser.configuration().set_transient_time(4.0);
-        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridExactBoxes>(new HybridExactBoxes(bounding_boxes)));
+        analyser.configuration().set_transient_time(4.0_dec);
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
-        HybridGridTreePaving lower_reach_set=analyser.lower_reach(initial_set);
+        GridTreePaving lower_reach_set=analyser.lower_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
 
-        plot("test_reachability_analyser-map_infinite_time_lower_reach.png",axes,
+        cout << "Reached " << lower_reach_set.size() << " cells " << endl << endl;
+
+        plot("test_reachability_analyser-map_infinite_time_lower_reach.png",PlanarProjectionMap(2,0,1),graphics_box,
              reach_set_colour,lower_reach_set);
     }
 
     Void test_outer_chain_reach() {
         cout << "Computing outer chain reachable set" << endl;
-
-        analyser.configuration().set_transient_steps(1);
-        analyser.configuration().set_transient_time(12.0);
-        analyser.configuration().set_lock_to_grid_time(6.0);
+        analyser.configuration().set_transient_time(12.0_dec);
+        analyser.configuration().set_lock_to_grid_time(6.0_dec);
         analyser.configuration().set_maximum_grid_depth(3);
-        analyser.configuration().set_bounding_domain_ptr(shared_ptr<ExactBox>(new ExactBox(system.,bound)));
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 
-        HybridGridTreePaving outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+        GridTreePaving outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
 
-        plot("test_reachability_analyser-map_outer_chain_reach.png",axes,
+        cout << "Reached " << outer_chain_reach_set.size() << " cells " << endl << endl;
+
+        plot("test_reachability_analyser-map_outer_chain_reach.png",PlanarProjectionMap(2,0,1),graphics_box,
              reach_set_colour,outer_chain_reach_set);
 
         cout << "Recomputing with tight restriction" << endl;
@@ -241,26 +237,23 @@ class TestReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
-        auto grid=analyser.configuration().grid();
         auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_depth());
-        plot("test_reachability_analyser-verify_safety.png",axes,
+        plot("test_reachability_analyser-verify_safety.png",PlanarProjectionMap(2,0,1),graphics_box,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,
              initial_set_colour,initial_set);
-
     }
-*/
+
     Void test() {
 
         ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
-/*        ARIADNE_TEST_CALL(test_lower_reach_evolve());
+        ARIADNE_TEST_CALL(test_lower_reach_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_evolve());
-        ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
 
+        ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
         ARIADNE_TEST_CALL(test_outer_chain_reach());
         ARIADNE_TEST_CALL(test_verify_safety());
-*/
     }
 
 };

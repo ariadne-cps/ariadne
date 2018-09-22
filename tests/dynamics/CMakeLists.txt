@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_continuous_evolution
     test_differential_inclusion
     test_discrete_evolution
+    test_reachability_analyser
 )
 
 foreach(TEST ${UNIT_TESTS})

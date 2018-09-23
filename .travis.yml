@@ -46,15 +46,9 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc@8 mpfr gmp gtk cairo; fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      if [[ "$COMPILER" == "g++-8" ]]; then 
-        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        sudo -H python$PYTHON get-pip.py
-        sudo -H pip$PYTHON install coverage pytest --upgrade --ignore-installed six
-      else
-        sudo easy_install pip
-        sudo pip$PYTHON install --upgrade pip
-        sudo pip$PYTHON install coverage pytest
-      fi
+      sudo easy_install pip
+      sudo pip$PYTHON install --upgrade pip
+      sudo pip$PYTHON install coverage pytest
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then

@@ -227,7 +227,7 @@ inline Void compute_evolution(const CompositeHybridAutomaton& heating_system,con
     cout << "Plotting reach and evolve sets... " << flush;
     plot("tutorial-reach_evolve.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve);
-
+    cout << "    done." << endl;
 /*
     plot("tutorial-reach_evolve-off.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
          Colour(0.0,0.5,1.0), reach[heating|off], Colour(0.25,0.0,0.5), evolve[heating|off]);
@@ -309,12 +309,18 @@ using namespace Ariadne::HeatingSystemTutorial;
 //! [main]
 Int main(Int argc, const char* argv[])
 {
+    Nat verbosity=1;
+    if(argc>1) {
+        if(std::strcmp(argv[1],"-v")==0) { if(argc>2) { verbosity=(Nat)std::atoi(argv[2]); } }
+    }
+
     // Create the system
     CompositeHybridAutomaton heating_system=create_heating_system();
     cout << heating_system << "\n";
 
     // Create the analyser classes
     HybridEvolverType evolver=create_evolver(heating_system);
+    evolver.verbosity = verbosity;
     cout << evolver << "\n";
 
     // Compute an approximate simulation of the system evolution

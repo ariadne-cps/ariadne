@@ -625,7 +625,7 @@ double atan_rnd(double x) {
 FloatDP::FloatDP(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())
 {
-    ARIADNE_ASSERT(Dyadic(*this)==w);
+    ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
 }
 
 FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)

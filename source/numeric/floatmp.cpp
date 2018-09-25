@@ -158,7 +158,15 @@ FloatMP& FloatMP::operator=(FloatMP&& x) {
 
 FloatMP::operator Dyadic() const {
     Dyadic res;
-    mpfr_get_f(res._mpf,this->_mpfr, MPFR_RNDN);
+    if (is_finite(*this)) {
+        mpfr_get_f(res._mpf,this->_mpfr, MPFR_RNDN);
+    } else if (is_nan(*this)) {
+        res._mpf[0]._mp_size=0;
+        res._mpf[0]._mp_exp=std::numeric_limits<mp_exp_t>::min();
+    } else {
+        res._mpf[0]._mp_size=0;
+        res._mpf[0]._mp_exp = (*this > 0) ? +1 : -1;
+    }
     return res;
 }
 

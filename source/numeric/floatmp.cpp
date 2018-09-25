@@ -85,8 +85,18 @@ FloatMP::FloatMP(Int32 n, MultiplePrecision pr) {
 
 FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
-    mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
-    ARIADNE_ASSERT(Dyadic(*this)==w);
+    if (is_finite(w)) {
+        mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
+    } else if (is_nan(w)) {
+        mpfr_set_nan(_mpfr);
+    } else {
+        if (sgn(w) == Sign::POSITIVE) {
+            mpfr_set_inf(_mpfr,+1);
+        } else {
+            mpfr_set_inf(_mpfr,-1);
+        }
+    }
+    ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
 }
 
 FloatMP::FloatMP(double d, RoundingModeType rnd, MultiplePrecision pr) {

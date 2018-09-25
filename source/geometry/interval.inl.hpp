@@ -31,9 +31,25 @@ template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return b
 
 
 template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
-template<class U> Interval<U>::Interval(EmptyInterval const&) : Interval(+infty,-infty) { }
+template<class U> Interval<U>::Interval(EmptyInterval const&) {
+    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
+        _l = L(Dyadic::inf(Sign::POSITIVE),L::RawType::get_default_precision());
+        _u = U(Dyadic::inf(Sign::NEGATIVE),U::RawType::get_default_precision());
+    } else {
+        _l = Dyadic::inf(Sign::POSITIVE);
+        _u = Dyadic::inf(Sign::NEGATIVE);
+    }
+}
 template<class U> Interval<U>::Interval(UnitInterval const&) : Interval(-1,+1) { }
-template<class U> Interval<U>::Interval(EntireInterval const&) : Interval(-infty,+infty) { }
+template<class U> Interval<U>::Interval(EntireInterval const&) {
+    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
+        _l = L(Dyadic::inf(Sign::NEGATIVE),L::RawType::get_default_precision());
+        _u = U(Dyadic::inf(Sign::POSITIVE),U::RawType::get_default_precision());
+    } else {
+        _l = Dyadic::inf(Sign::NEGATIVE);
+        _u = Dyadic::inf(Sign::POSITIVE);
+    }
+}
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
 template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
@@ -47,7 +63,7 @@ template<class U> auto Interval<U>::width() const -> WidthType { return cast_pos
 
 template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyInterval()); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
-template<class U> Interval<U> Interval<U>::biinfinite_interval() { return Interval<U>(-infty,+infty); }
+template<class U> Interval<U> Interval<U>::biinfinite_interval() { return Interval<U>(EntireInterval()); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<declval<L>()) { return Ariadne::is_bounded(*this); }

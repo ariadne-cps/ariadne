@@ -36,6 +36,7 @@
 #include "../numeric/logical.hpp"
 #include "../numeric/number.hpp"
 #include "../numeric/float.hpp"
+#include "../numeric/dyadic.hpp"
 #include "../numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
@@ -331,6 +332,7 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 
 class EmptyInterval { };
+class EntireInterval { };
 
 } // namespace Ariadne
 

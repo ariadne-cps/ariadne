@@ -43,12 +43,12 @@ template<class PR> class FloatFactory {
     PR precision() const { return this->_pr; }
     PR properties() const { return this->_pr; }
   public:
-    FloatApproximation<PR> create(Number<ApproximateTag> const& y);
-    FloatLowerBound<PR> create(Number<ValidatedLowerTag> const& y);
-    FloatUpperBound<PR> create(Number<ValidatedUpperTag> const& y);
-    FloatBounds<PR> create(Number<ValidatedTag> const& y);
-    FloatBounds<PR> create(Number<EffectiveTag> const& y);
-    FloatBounds<PR> create(Number<ExactTag> const& y);
+    FloatApproximation<PR> create(ApproximateNumber const& y);
+    FloatLowerBound<PR> create(ValidatedLowerNumber const& y);
+    FloatUpperBound<PR> create(ValidatedUpperNumber const& y);
+    FloatBounds<PR> create(ValidatedNumber const& y);
+    FloatBounds<PR> create(EffectiveNumber const& y);
+    FloatBounds<PR> create(ExactNumber const& y);
     FloatBounds<PR> create(Real const& y);
     FloatBounds<PR> create(Rational const& y);
     FloatBounds<PR> create(Dyadic const& y);
@@ -59,10 +59,10 @@ template<class PR> class FloatFactory {
     template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y);
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y);
     template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y);
-    PositiveFloatApproximation<PR> create(PositiveNumber<ApproximateTag> const& y);
-    PositiveFloatLowerBound<PR> create(PositiveNumber<ValidatedLowerTag> const& y);
-    PositiveFloatUpperBound<PR> create(PositiveNumber<ValidatedUpperTag> const& y);
-    PositiveFloatBounds<PR> create(PositiveNumber<ValidatedTag> const& y);
+    PositiveFloatApproximation<PR> create(PositiveApproximateNumber const& y);
+    PositiveFloatLowerBound<PR> create(PositiveValidatedLowerNumber const& y);
+    PositiveFloatUpperBound<PR> create(PositiveValidatedUpperNumber const& y);
+    PositiveFloatBounds<PR> create(PositiveValidatedNumber const& y);
 };
 
 template<class PR, class PRE> class FloatBallFactory : public FloatFactory<PR> {

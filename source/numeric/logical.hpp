@@ -266,6 +266,7 @@ class Boolean : public Logical<Boolean,LogicalValue> {
 class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> {
     typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
+    explicit Sierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
     explicit Sierpinskian(LogicalPointer l) : Base(l) { }
     explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     Sierpinskian(Indeterminate) : Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
@@ -295,6 +296,7 @@ class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinski
 class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> {
     typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
+    explicit NegatedSierpinskian(LogicalValue l) : Base(LogicalHandle(l)) { }
     explicit NegatedSierpinskian(LogicalPointer l) : Base(l) { }
     explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
     NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }

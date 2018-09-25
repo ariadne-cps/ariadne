@@ -41,6 +41,17 @@
 using namespace std;
 using namespace Ariadne;
 
+
+template<class F, class FE> Bool models(Ball<F,FE> const& x, Rational const& q) {
+    return abs(Dyadic(x.value().raw())-q)<=Dyadic(x.error().raw()); }
+template<class F> Bool models(Bounds<F> const& x, Rational const& q) {
+    return Dyadic(x.lower().raw())<=q && q <= Dyadic(x.upper().raw()); }
+template<class F> Bool models(LowerBound<F> const& x, Rational const& q) {
+    return Dyadic(x.raw())<=q; }
+template<class F> Bool models(UpperBound<F> const& x, Rational const& q) {
+    return q<=Dyadic(x.raw()); }
+
+
 class TestNumbers
 {
   public:
@@ -50,7 +61,7 @@ class TestNumbers
     Void test_misc();
 };
 
-void TestNumbers::test()
+Void TestNumbers::test()
 {
     ARIADNE_TEST_CALL(test_operations());
     ARIADNE_TEST_CALL(test_float_value_behaviour());
@@ -72,9 +83,9 @@ TestNumbers::test_float_value_behaviour()
 Void
 TestNumbers::test_operations()
 {
-    Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
+    Nat m=1u; Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
-    ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
+    ValidatedErrorNumber en=m; ValidatedErrorNumber ev=v;
 
     Dyadic w2(2);
     Dyadic w3(3);
@@ -82,9 +93,9 @@ TestNumbers::test_operations()
     Rational q3(3);
     FloatDPValue x2(2,dp);
     FloatDPValue x3(3,dp);
-    ExactNumber y2(x2), y3(x3);
-    ARIADNE_TEST_PRINT(w2/w3);
-    ARIADNE_TEST_PRINT(x2/x3);
+    ExactNumber y2(x2);
+    ExactNumber y3(x3);
+
     ARIADNE_TEST_THROWS(y2/y3, DispatchException);
     ARIADNE_TEST_THROWS(q2/y3, DispatchException);
     ARIADNE_TEST_THROWS(y2/q3, DispatchException);
@@ -98,7 +109,7 @@ TestNumbers::test_operations()
 
     ValidatedErrorNumber ym=max(en,ev);
     ARIADNE_TEST_PRINT(max(en,ev));
-    ARIADNE_TEST_PRINT(max(en,ev).pointer());
+    ARIADNE_TEST_PRINT(max(en,ev).handle().pointer());
     ARIADNE_TEST_PRINT(max(en,ev).class_name());
     ARIADNE_TEST_PRINT(max(en,ev));
 
@@ -145,24 +156,6 @@ template<class Y> class TestNumber
 };
 
 
-Int main() {
-    TestNumbers().test();
-
-    std::cout<<std::setprecision(20);
-    std::cerr<<std::setprecision(20);
-
-    TestNumber<ApproximateNumber>().test();
-    TestNumber<ValidatedNumber>().test();
-    return ARIADNE_TEST_FAILURES;
-    TestNumber<EffectiveNumber>().test();
-    TestNumber<ExactNumber>().test();
-
-    std::cerr<<"INCOMPLETE ";
-    return ARIADNE_TEST_FAILURES;
-//    TestNumber<ValidatedUpperNumber>().test();
-//    TestNumber<ValidatedLowerNumber>().test();
-}
-
 
 template<class Y> Void
 TestNumber<Y>::test()
@@ -191,17 +184,7 @@ TestNumber<Y>::test_concept()
 
     y==y; y!=y; y<=y; y>=y; y<y; y>y;
     y==n; y!=n; y<=n; y>=n; y<n; y>n;
-    cout << y;
 }
-
-template<class F, class FE> Bool models(Ball<F,FE> const& x, Rational const& q) {
-    return abs(Dyadic(x.value().raw())-q)<=Dyadic(x.error().raw()); }
-template<class F> Bool models(Bounds<F> const& x, Rational const& q) {
-    return Dyadic(x.lower().raw())<=q && q <= Dyadic(x.upper().raw()); }
-template<class F> Bool models(LowerBound<F> const& x, Rational const& q) {
-    return Dyadic(x.raw())<=q; }
-template<class F> Bool models(UpperBound<F> const& x, Rational const& q) {
-    return q<=Dyadic(x.raw()); }
 
 
 template<class Y> void test_number_get() {
@@ -222,8 +205,8 @@ template<class Y> void test_number_get() {
     ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),dp),q);
     ARIADNE_TEST_BINARY_PREDICATE(models,y.get(UpperTag(),mp),q);
 
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(BoundedTag(),dp),q);
-    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(BoundedTag(),mp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(OrderTag(),dp),q);
+    ARIADNE_TEST_BINARY_PREDICATE(models,y.get(OrderTag(),mp),q);
 
     ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),dp),q);
     ARIADNE_TEST_BINARY_PREDICATE(models,y.get(MetricTag(),mp),q);
@@ -266,8 +249,6 @@ TestNumber<Y>::test_get()
 
 }
 
-inline FloatDPValue max(Int y1, FloatDPValue x2) { return max(FloatDPValue(y1,x2.precision()),x2); }
-
 template<class Y> Void
 TestNumber<Y>::test_class()
 {
@@ -292,14 +273,13 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_CONSTRUCT(ExactNumber,pinf,(+ExactDouble::infinity()));
     ARIADNE_TEST_CONSTRUCT(ExactNumber,ninf,(-ExactDouble::infinity()));
 
-/*
     ARIADNE_TEST_BINARY_PREDICATE( operator==,y1,y1);
     ARIADNE_TEST_BINARY_PREDICATE(!operator!=,y1,y1);
     ARIADNE_TEST_BINARY_PREDICATE( operator<=,y1,y1);
     ARIADNE_TEST_BINARY_PREDICATE( operator>=,y1,y1);
     ARIADNE_TEST_BINARY_PREDICATE(!operator< ,y1,y1);
     ARIADNE_TEST_BINARY_PREDICATE(!operator> ,y1,y1);
-*/
+
     ARIADNE_TEST_BINARY_PREDICATE(!operator==,y1,y2);
     ARIADNE_TEST_BINARY_PREDICATE( operator!=,y1,y2);
     ARIADNE_TEST_BINARY_PREDICATE( operator<=,y1,y2);
@@ -332,3 +312,83 @@ TestNumber<ExactNumber>::test_comparisons() {
     ARIADNE_TEST_ASSERT(not definitely(ValidatedUpperNumber(4)>ValidatedLowerNumber(3)));
 
 }
+
+
+
+template<class Y> class TestDirectedNumber
+{
+  public:
+    Void test();
+  private:
+    Void test_concept();
+    Void test_operations();
+};
+
+template<class Y> Void
+TestDirectedNumber<Y>::test() {
+    test_operations();
+}
+
+template<class Y> Void
+TestDirectedNumber<Y>::test_concept() {
+    static_assert(IsSame<NegationType<NegationType<Y>>,Y>::value);
+    typedef NegationType<Y> NY;
+    Y y; NY ny;
+    y=+y; ny=-y; y=-ny;
+    y=y+y; y=y-ny; y+=y; y+=ny;
+    y=add(y,y); y=sub(y,ny); ny=sub(ny,y);
+    y=sqrt(y); y=exp(y); y=log(y); y=tan(y);
+
+    y==ny; y!=ny; y<ny; y>ny;
+    ny==y; ny!=y; ny<y; ny>y;
+}
+
+template<class Y> Void
+TestDirectedNumber<Y>::test_operations() {
+    if constexpr (IsSame<Paradigm<Y>,ValidatedTag>::value) {
+        if constexpr (IsSame<Y,ValidatedLowerNumber>::value) {
+            typedef DoublePrecision PR;
+            PR pr;
+            Rational q(1,3);
+            FloatBounds<PR> x(q,pr);
+            FloatLowerBound<PR> xl=x;
+            FloatUpperBound<PR> xu=4*x;
+            
+            ValidatedLowerNumber yl(xl);
+            ValidatedUpperNumber yu(xu);
+            
+            // Tests
+            ARIADNE_TEST_ASSERT(not definitely (yl > q));
+            ARIADNE_TEST_ASSERT(not definitely (-yl < -q));
+            ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
+            ARIADNE_TEST_ASSERT(not definitely (yl+yl+yl > 1));
+            ARIADNE_TEST_ASSERT(not definitely (yl - yu > -1));
+            ARIADNE_TEST_ASSERT(not definitely (yl - yu > -2));
+            std::cerr << (yl-yu) << "\n";
+        }
+    }
+}
+
+
+Int main() {
+    TestNumbers().test();
+
+    std::cout<<std::setprecision(20);
+    std::cerr<<std::setprecision(20);
+
+    TestNumber<ApproximateNumber>().test();
+    TestNumber<ValidatedNumber>().test();
+    TestNumber<EffectiveNumber>().test();
+    TestNumber<ExactNumber>().test();
+
+    TestDirectedNumber<ValidatedLowerNumber>().test();
+    TestDirectedNumber<ValidatedUpperNumber>().test();
+    TestDirectedNumber<EffectiveLowerNumber>().test();
+    TestDirectedNumber<EffectiveUpperNumber>().test();
+
+    std::cerr<<"INCOMPLETE ";
+    return ARIADNE_TEST_FAILURES;
+//    TestNumber<ValidatedUpperNumber>().test();
+//    TestNumber<ValidatedLowerNumber>().test();
+}
+

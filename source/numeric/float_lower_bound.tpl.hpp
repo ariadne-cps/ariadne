@@ -36,6 +36,8 @@
 
 namespace Ariadne {
 
+template<class F> LowerBound<F>::LowerBound(Value<F> const& x, PR pr) : _l(x._v,downward,pr) {}
+template<class F> LowerBound<F>::LowerBound(Bounds<F> const& x, PR pr) : _l(x._l,downward,pr) {}
 template<class F> LowerBound<F>::LowerBound(LowerBound<F> const& x, PR pr) : _l(x._l,downward,pr) {}
 
 template<class F> LowerBound<F>::LowerBound(Bounds<F> const& x) : LowerBound<F>(x.lower_raw()) { }
@@ -44,7 +46,7 @@ template<class F> LowerBound<F>::LowerBound(Value<F> const& x) : LowerBound<F>(x
 template<class F> LowerBound<F>::LowerBound(Real const& r, PR pr) : LowerBound(r.get(pr)) {}
 template<class F> LowerBound<F>::LowerBound(ValidatedLowerNumber const& y, PR pr) : LowerBound(y.get(LowerTag(),pr)) {}
 template<class F> LowerBound<F>::operator ValidatedLowerNumber() const {
-    return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
+    return ValidatedLowerNumber(Handle<NumberInterface>(new NumberWrapper<LowerBound<F>>(*this)));
 }
 
 } // namespace Ariadne

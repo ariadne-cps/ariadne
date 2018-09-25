@@ -200,9 +200,8 @@ Bool NondeterministicBoolean::_choose(LowerKleenean p1, LowerKleenean p2) {
 template<> String class_name<ExactTag>() { return "Exact"; }
 template<> String class_name<EffectiveTag>() { return "Effective"; }
 template<> String class_name<ValidatedTag>() { return "Validated"; }
-template<> String class_name<BoundedTag>() { return "Bounded"; }
-template<> String class_name<UpperTag>() { return "Upper"; }
-template<> String class_name<LowerTag>() { return "Lower"; }
+//template<> String class_name<UpperTag>() { return "Upper"; }
+//template<> String class_name<LowerTag>() { return "Lower"; }
 template<> String class_name<ApproximateTag>() { return "Approximate"; }
 
 template<> String class_name<Bool>() { return "Bool"; }

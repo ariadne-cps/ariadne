@@ -326,8 +326,7 @@ class LowerReal
     , public DirectedAbelian<LowerReal,UpperReal>
 {
   public:
-    typedef RealInterface Interface;
-    typedef EffectiveLowerTag Paradigm;
+    typedef EffectiveTag Paradigm;
     typedef LowerReal NumericType;
   public:
     LowerReal(Real);
@@ -428,8 +427,7 @@ class UpperReal
     , public DirectedAbelian<UpperReal,LowerReal>
 {
   public:
-    typedef UpperRealInterface Interface;
-    typedef EffectiveUpperTag Paradigm;
+    typedef EffectiveTag Paradigm;
     typedef UpperReal NumericType;
   public:
     UpperReal(Real);

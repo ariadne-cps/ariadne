@@ -390,7 +390,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue( cmp(*this,y)==Comparison::EQUAL ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),dp) == y._get(BoundedTag(),dp)); }
+            return LogicalValue(this->_get(OrderTag(),dp) == y._get(OrderTag(),dp)); }
         else {
             return LogicalValue(this->_get(ApproximateTag(),dp) == y._get(ApproximateTag(),dp)); }
     }
@@ -398,7 +398,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         if (this->_paradigm() == ParadigmCode::EXACT && y._paradigm() == ParadigmCode::EXACT) {
             return LogicalValue( cmp(*this,y)==Comparison::LESS ? LogicalValue::TRUE : LogicalValue::FALSE ); }
         else if (this->_paradigm() == ParadigmCode::VALIDATED && y._paradigm() == ParadigmCode::VALIDATED) {
-            return LogicalValue(this->_get(BoundedTag(),dp) < y._get(BoundedTag(),dp)); }
+            return LogicalValue(this->_get(OrderTag(),dp) < y._get(OrderTag(),dp)); }
         else {
             return LogicalValue(this->_get(ApproximateTag(),dp) < y._get(ApproximateTag(),dp));
         }
@@ -409,7 +409,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
 
     virtual FloatDPBall _get(MetricTag,DoublePrecision pr,DoublePrecision pre) const override {
         return this->_get_as<FloatDPBall>(pr); }
-    virtual FloatDPBounds _get(BoundedTag,DoublePrecision pr) const override {
+    virtual FloatDPBounds _get(OrderTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPBounds>(pr); }
     virtual FloatDPUpperBound _get(UpperTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPUpperBound>(pr); }
@@ -421,7 +421,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         return this->_get_as<FloatMPDPBall>(pr,pre); }
     virtual FloatMPBall _get(MetricTag, MultiplePrecision pr, MultiplePrecision pre) const override {
         return this->_get_as<FloatMPBall>(pr,pre); }
-    virtual FloatMPBounds _get(BoundedTag, MultiplePrecision pr) const override {
+    virtual FloatMPBounds _get(OrderTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPBounds>(pr); }
     virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPUpperBound>(pr); }

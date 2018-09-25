@@ -52,12 +52,14 @@ OutputStream& operator<<(OutputStream& os, const SplitPart& s);
 template<class U> struct CentreTrait { typedef decltype(declval<U>()-declval<U>()) Type; };
 template<class F> struct CentreTrait<UpperBound<F>> { typedef Approximation<F> Type; };
 template<class F> struct CentreTrait<LowerBound<F>> { typedef Approximation<F> Type; };
+template<class P> struct CentreTrait<UpperNumber<P>> { typedef ApproximateNumber Type; };
 
 template<class U> struct MidpointTrait { typedef decltype(max(-declval<U>(),declval<U>())) Type; };
 template<class F> struct MidpointTrait<UpperBound<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<LowerBound<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<Bounds<F>> { typedef Value<F> Type; };
 template<class F> struct MidpointTrait<Ball<F>> { typedef Value<F> Type; };
+template<class P> struct MidpointTrait<UpperNumber<P>> { typedef ExactNumber Type; };
 
 template<class U> struct RadiusTrait { using M=typename MidpointTrait<U>::Type; typedef decltype(cast_positive(declval<U>()-declval<M>())) Type; };
 template<class U> struct WidthTrait { using L=decltype(-declval<U>()); typedef decltype(cast_positive(declval<U>()-declval<L>())) Type; };

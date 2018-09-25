@@ -67,12 +67,19 @@ template<class P> struct LogicalTypedef;
 template<class P> using LogicalType = typename LogicalTypedef<P>::Type;
 template<> struct LogicalTypedef<ExactTag> { typedef Boolean Type; };
 template<> struct LogicalTypedef<EffectiveTag> { typedef Kleenean Type; };
-template<> struct LogicalTypedef<EffectiveLowerTag> { typedef LowerKleenean Type; };
-template<> struct LogicalTypedef<EffectiveUpperTag> { typedef UpperKleenean Type; };
 template<> struct LogicalTypedef<ValidatedTag> { typedef ValidatedKleenean Type; };
-template<> struct LogicalTypedef<ValidatedLowerTag> { typedef ValidatedLowerKleenean Type; };
-template<> struct LogicalTypedef<ValidatedUpperTag> { typedef ValidatedUpperKleenean Type; };
 template<> struct LogicalTypedef<ApproximateTag> { typedef ApproximateKleenean Type; };
+
+template<class P> struct LowerLogicalTypedef;
+template<class P> using LowerLogicalType = typename LowerLogicalTypedef<P>::Type;
+template<> struct LowerLogicalTypedef<EffectiveTag> { typedef LowerKleenean Type; };
+template<> struct LowerLogicalTypedef<ValidatedTag> { typedef ValidatedLowerKleenean Type; };
+
+template<class P> struct UpperLogicalTypedef;
+template<class P> using UpperLogicalType = typename UpperLogicalTypedef<P>::Type;
+template<> struct UpperLogicalTypedef<EffectiveTag> { typedef UpperKleenean Type; };
+template<> struct UpperLogicalTypedef<ValidatedTag> { typedef ValidatedUpperKleenean Type; };
+
 
 using Decidable = Boolean;
 using Quasidecidable = Kleenean;
@@ -82,6 +89,18 @@ using Falsifyable = NegatedSierpinskian;
 Boolean operator!(Boolean const&);
 NegatedSierpinskian operator!(Sierpinskian const&);
 Kleenean operator!(Kleenean const&);
+
+
+template<class P> struct ApartnessTraits;
+template<class P> using ApartnessType = typename ApartnessTraits<P>::Type;
+template<> struct ApartnessTraits<ExactTag> { typedef Boolean Type; };
+template<> struct ApartnessTraits<EffectiveTag> { typedef Sierpinskian Type; };
+template<> struct ApartnessTraits<ValidatedTag> { typedef ValidatedSierpinskian Type; };
+template<> struct ApartnessTraits<ApproximateTag> { typedef ApproximateKleenean Type; };
+
+template<class P> using EqualityLogicalType = decltype(not declval<ApartnessType<P>>());
+template<class P> using InequalityLogicalType = ApartnessType<P>;
+
 
 namespace Detail {
 enum class LogicalValue : char;

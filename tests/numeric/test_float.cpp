@@ -34,6 +34,7 @@
 #include "numeric/rounding.hpp"
 #include "numeric/float.hpp"
 #include "numeric/numeric.hpp"
+#include "numeric/dyadic.hpp"
 
 #include "../test.hpp"
 
@@ -311,6 +312,9 @@ TestFloat<PR>::test_class()
 template<class PR> Void
 TestFloat<PR>::test_limits()
 {
+    double pinf_d = std::numeric_limits<double>::infinity();
+    double ninf_d = -std::numeric_limits<double>::infinity();
+    double nan_d = std::numeric_limits<double>::quiet_NaN();
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
@@ -360,6 +364,13 @@ TestFloat<PR>::test_limits()
     ARIADNE_TEST_ASSERT(not(nan> one));
     ARIADNE_TEST_ASSERT(not(one> nan));
 
+    ARIADNE_TEST_EQUALS(Float(pinf_d).get_d(),pinf_d);
+    ARIADNE_TEST_EQUALS(Float(ninf_d).get_d(),ninf_d);
+    ARIADNE_TEST_ASSERT(is_nan(Float(nan_d)));
+
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),precision),FloatDP(pinf_d));
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),precision),FloatDP(ninf_d));
+    ARIADNE_TEST_ASSERT(is_nan(Float(Dyadic::inf(Sign::ZERO),precision)));
 }
 
 

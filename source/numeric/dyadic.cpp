@@ -208,7 +208,13 @@ mpf_t const& Dyadic::get_mpf() const {
 }
 
 double Dyadic::get_d() const {
-    return mpf_get_d(this->_mpf);
+    if (is_nan(*this)) {
+        return std::numeric_limits<double>::quiet_NaN();
+    } else if (is_inf(*this)) {
+        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
+    } else {
+        return mpf_get_d(this->_mpf);
+    }
 }
 
 Dyadic operator+(TwoExp y) {

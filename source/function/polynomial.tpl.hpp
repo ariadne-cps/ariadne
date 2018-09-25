@@ -133,8 +133,8 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::differentiate(SizeType j) {
     for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        ReferenceType<MultiIndex> a=iter->index();
-        ReferenceType<X> c=iter->coefficient();
+        IndexReference a=iter->index();
+        CoefficientReference c=iter->coefficient();
         c*=static_cast<Nat>(a[j]);
         if(a[j]!=0u) { ++a[j]; }
     }
@@ -145,8 +145,8 @@ template<class X>
 Polynomial<X>&
 Polynomial<X>::antidifferentiate(SizeType j) {
     for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        ReferenceType<MultiIndex> a=iter->index();
-        ReferenceType<X> c=iter->coefficient();
+        IndexReference a=iter->index();
+        CoefficientReference c=iter->coefficient();
         ++a[j];
         c/=static_cast<Nat>(a[j]);
     }
@@ -359,10 +359,10 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
     MultiIndex ra(r.argument_size());
     if(is_null(c)) {
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            ConstReferenceType<MultiIndex> xa=xiter->index();
+            IndexConstReference xa=xiter->index();
             MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
-                ConstReferenceType<X> xv=xiter->coefficient();
+                CoefficientConstReference xv=xiter->coefficient();
                 for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
                 for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
                 r.expansion().append(ra,xv);
@@ -373,8 +373,8 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
         Array< Polynomial<X> > p(x.degree()+1u,Polynomial<X>(x.argument_size()-1u));
 
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            ConstReferenceType<MultiIndex> xa=xiter->index();
-            ConstReferenceType<X> xv=xiter->coefficient();
+            IndexConstReference xa=xiter->index();
+            CoefficientConstReference xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
@@ -398,8 +398,8 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
         }
 
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-            ConstReferenceType<MultiIndex> xa=xiter->index();
-            ConstReferenceType<X> xv=xiter->coefficient();
+            IndexConstReference xa=xiter->index();
+            CoefficientConstReference xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
             for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }

@@ -69,6 +69,8 @@ template<class T> class List : public std::vector<T> {
     typedef typename std::vector<T>::value_type ValueType;
     typedef typename std::vector<T>::reference Reference;
     typedef typename std::vector<T>::const_reference ConstReference;
+    typedef typename std::vector<T>::pointer Pointer;
+    typedef typename std::vector<T>::const_pointer ConstPointer;
     typedef typename std::vector<T>::iterator Iterator;
     typedef typename std::vector<T>::const_iterator ConstIterator;
     using std::vector<T>::vector;

@@ -166,7 +166,7 @@ class TestIntegrator
         //ExactIntervalVectorType d(1u,ExactIntervalType(-0.125,+0.125));
         //StepSizeType h=0.125_x;
         ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
-        ValidatedVectorTaylorFunctionModelDP taylor_flow=dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(flow.reference());
+        ValidatedVectorMultivariateTaylorFunctionModelDP taylor_flow=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(flow.reference());
         //EffectiveVectorMultivariateFunction expected_flow( (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t, y0+t) );
         //EffectiveVectorMultivariateFunction expected_flow(1u, (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t) );
         EffectiveVectorMultivariateFunction expected_flow(1u, flowf );

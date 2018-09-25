@@ -1153,7 +1153,7 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
 Void
 Enclosure::kuhn_recondition()
 {
-    if(!dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(&this->state_function().reference())) {
+    if(!dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(&this->state_function().reference())) {
         ARIADNE_WARN("Cannot Kuhn reduce an Enclosure which is not given by TaylorFunctions.");
     }
 
@@ -1168,7 +1168,7 @@ Enclosure::kuhn_recondition()
         return;
     }
 
-    const ValidatedVectorTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(this->state_function().reference());
+    const ValidatedVectorMultivariateTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->state_function().reference());
     const Vector<ValidatedTaylorModelDP>& models = function.models();
     Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters());
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
@@ -1214,17 +1214,17 @@ Enclosure::kuhn_recondition()
     this->_domain = new_domain;
     this->_reduced_domain = new_reduced_domain;
 
-    Enclosure new_set(new_domain,ValidatedVectorTaylorFunctionModelDP(new_domain,new_models),this->function_factory());
+    Enclosure new_set(new_domain,ValidatedVectorMultivariateTaylorFunctionModelDP(new_domain,new_models),this->function_factory());
     for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         const ValidatedConstraintModel& constraint=this->_constraints[i];
-        ValidatedScalarTaylorFunctionModelDP const& constraint_function=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(constraint.function().reference());
-        ValidatedScalarMultivariateFunctionModelDP new_constraint_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
+        ValidatedScalarMultivariateTaylorFunctionModelDP const& constraint_function=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(constraint.function().reference());
+        ValidatedScalarMultivariateFunctionModelDP new_constraint_function=ValidatedScalarMultivariateTaylorFunctionModelDP(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
         new_set._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
     }
-    ValidatedScalarTaylorFunctionModelDP const& time=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_time_function.reference());
-    new_set._time_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
-    ValidatedScalarTaylorFunctionModelDP const& dwell_time=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_dwell_time_function.reference());
-    new_set._dwell_time_function=ValidatedScalarTaylorFunctionModelDP(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
+    ValidatedScalarMultivariateTaylorFunctionModelDP const& time=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_time_function.reference());
+    new_set._time_function=ValidatedScalarMultivariateTaylorFunctionModelDP(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
+    ValidatedScalarMultivariateTaylorFunctionModelDP const& dwell_time=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_dwell_time_function.reference());
+    new_set._dwell_time_function=ValidatedScalarMultivariateTaylorFunctionModelDP(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
 
     (*this)=new_set;
 

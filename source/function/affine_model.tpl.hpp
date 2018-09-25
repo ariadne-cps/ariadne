@@ -352,7 +352,7 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const TaylorModel<Val
 
 template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarMultivariateFunction<P>& function, PR precision)
 {
-    ValidatedScalarTaylorFunctionModelDP tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
+    ValidatedScalarMultivariateTaylorFunctionModelDP tf(domain,function,AffineSweeper<RawFloat<PR>>(precision));
     return affine_model(tf.model());
 }
 

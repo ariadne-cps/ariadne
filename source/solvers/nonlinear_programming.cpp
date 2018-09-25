@@ -700,8 +700,8 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Ex
     UpperIntervalType yC = dot(UpperIntervalVectorType(y),UpperIntervalVectorType(C));
 
     // Compute Taylor estimate of y g(X)
-    ValidatedVectorTaylorFunctionModelDP tg(D,g,default_sweeper());
-    ValidatedScalarTaylorFunctionModelDP tyg(D,default_sweeper());
+    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
+    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperIntervalType tygD = apply(tyg,D);
 
@@ -733,9 +733,9 @@ is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction
     // Try to prove lambda.(g(y)-c) != 0
     const Nat n=C.size();
 
-    ValidatedScalarTaylorFunctionModelDP tyg(D,default_sweeper());
+    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
     for(Nat i=0; i!=n; ++i) {
-        tyg+=y[i]*ValidatedScalarTaylorFunctionModelDP(D,g[i],default_sweeper());
+        tyg+=y[i]*ValidatedScalarMultivariateTaylorFunctionModelDP(D,g[i],default_sweeper());
     }
     ValidatedNumericType iygx = tyg(cast_singleton(D));
 
@@ -2146,8 +2146,8 @@ check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBo
     UpperIntervalType yC = dot(iy,C);
 
     // Compute Taylor estimate of y g(X)
-    ValidatedVectorTaylorFunctionModelDP tg(D,g,default_sweeper());
-    ValidatedScalarTaylorFunctionModelDP tyg(D,default_sweeper());
+    ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
+    ValidatedScalarMultivariateTaylorFunctionModelDP tyg(D,default_sweeper());
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
 

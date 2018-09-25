@@ -50,7 +50,7 @@ extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
 
 inline Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 inline Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }
-inline ValidatedScalarTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarTaylorFunctionModelDP::coordinate(d,j,swp); }
+inline ValidatedScalarMultivariateTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,j,swp); }
 
 template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
     Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size()));
@@ -117,8 +117,8 @@ Void TestScalarTaylorFunction::test_concept()
     const FloatDPBounds i;
     const Vector<FloatDPValue> vf;
     const Vector<FloatDPBounds> vi;
-    const ValidatedScalarTaylorFunctionModelDP  t;
-    ValidatedScalarTaylorFunctionModelDP tr;
+    const ValidatedScalarMultivariateTaylorFunctionModelDP  t;
+    ValidatedScalarMultivariateTaylorFunctionModelDP tr;
 
     tr=t+f; tr=t-f; tr=t*f; tr=t/f;
     tr=f+t; tr=f-t; tr=f*t; tr=f/t;
@@ -146,7 +146,7 @@ Void TestScalarTaylorFunction::test_concept()
 
 Void TestScalarTaylorFunction::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,tv1,({{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP,tv1,({{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
 
     ARIADNE_ASSERT_EQUAL(tv1.domain(),Box<ExactIntervalType>({{-1,+1},{-1,+1}}));
     ARIADNE_ASSERT_EQUAL(tv1.argument_size(),2);
@@ -160,8 +160,8 @@ Void TestScalarTaylorFunction::test_create()
     ExactBoxType D={{-0.5,0.5},{-1.0,2.0}};
     FloatDPValue c1={1,pr};
     FloatDPValue c2={1,pr};
-    ValidatedScalarTaylorFunctionModelDP pf1=ValidatedScalarTaylorFunctionModelDP::constant(D,c1,swp);
-    ValidatedScalarTaylorFunctionModelDP pf2=ValidatedScalarTaylorFunctionModelDP::constant(D,c2,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
     ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
     ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
     ValidatedScalarMultivariateFunction f2=fm2;
@@ -174,10 +174,10 @@ Void TestScalarTaylorFunction::test_create()
 
 Void TestScalarTaylorFunction::test_predicates()
 {
-    ValidatedScalarTaylorFunctionModelDP tv1(d(1),{{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
-    ValidatedScalarTaylorFunctionModelDP tv2(d(1),{{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
-    ValidatedScalarTaylorFunctionModelDP tv3(d(1),{{{0},1.125},{{1},1.75},{{2},3.25}}, 0.25, swp);
-    ValidatedScalarTaylorFunctionModelDP tv4(d(1),{{{0},1.00},{{1},2.25},{{2},3.00},{{3},-0.25}}, 0.25, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tv1(d(1),{{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tv2(d(1),{{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tv3(d(1),{{{0},1.125},{{1},1.75},{{2},3.25}}, 0.25, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tv4(d(1),{{{0},1.00},{{1},2.25},{{2},3.00},{{3},-0.25}}, 0.25, swp);
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
@@ -187,14 +187,14 @@ Void TestScalarTaylorFunction::test_predicates()
 
 Void TestScalarTaylorFunction::test_approximation()
 {
-//    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,tv1,(d(2),e(2,3,{1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}),0.25,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,tv2,(d(1),{{{0},1.0},{{1},2.0},{{2},3.0}},0.25,swp));
+//    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP,tv1,(d(2),e(2,3,{1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}),0.25,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP,tv2,(d(1),{{{0},1.0},{{1},2.0},{{2},3.0}},0.25,swp));
 }
 
 Void TestScalarTaylorFunction::test_evaluate()
 {
     Vector<FloatDPBounds> iv({{0.25_exact,0.5_exact},{-0.75_exact,-0.5_exact}});
-    ValidatedScalarTaylorFunctionModelDP tv(d(2),{{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}},0.25,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tv(d(2),{{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}},0.25,swp);
     ARIADNE_TEST_SAME(evaluate(tv,iv),FloatDPBounds(-0.375000,3.43750));
 }
 
@@ -211,51 +211,51 @@ Void TestScalarTaylorFunction::test_gradient()
     Vector<FloatDPBounds> point1=Vector<FloatDPBounds>{0.0_exact,0.0_exact};
     Vector<FloatDPBounds> point2=Vector<FloatDPBounds>{0.0_exact,0.25_exact};
 
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain1,quadratic,swp).gradient(point1),quadratic.gradient(point1));
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain1,quadratic,swp).gradient(point2),quadratic.gradient(point2));
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain2,quadratic,swp).gradient(point1),quadratic.gradient(point1));
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain2,quadratic,swp).gradient(point2),quadratic.gradient(point2));
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point1),quadratic.gradient(point1));
-    ARIADNE_TEST_EQUAL(ValidatedScalarTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point2),quadratic.gradient(point2));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain1,quadratic,swp).gradient(point1),quadratic.gradient(point1));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain1,quadratic,swp).gradient(point2),quadratic.gradient(point2));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain2,quadratic,swp).gradient(point1),quadratic.gradient(point1));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain2,quadratic,swp).gradient(point2),quadratic.gradient(point2));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point1),quadratic.gradient(point1));
+    ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point2),quadratic.gradient(point2));
 }
 
 
 Void TestScalarTaylorFunction::test_arithmetic()
 {
     //Operations which can be performed exactly with floating-point arithmetic.
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+(-3), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},-2.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-(-3), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},4.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*(-3), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},-3.0},{{1},6.0},{{2},-9.0}}, 2.25, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)/(-4), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},-0.25},{{1},0.5},{{2},-0.75}}, 0.1875, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+FloatDPBounds(-1,2), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.5},{{1},-2.0},{{2},3.0}}, 2.25, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-FloatDPBounds(-1,2), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},0.5},{{1},-2.0},{{2},3.0}}, 2.25, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*FloatDPBounds(-1,2), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},0.5},{{1},-1.0},{{2},1.5}}, 10.5, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)/FloatDPBounds(0.25,2.0), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},2.25},{{1},-4.5},{{2},6.75}}, 13.5, swp));
-    ARIADNE_TEST_SAME(+ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
-    ARIADNE_TEST_SAME(-ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},-1.0},{{1},2.0},{{2},-3.0}}, 0.75, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+(-3), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},-2.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-(-3), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},4.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*(-3), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},-3.0},{{1},6.0},{{2},-9.0}}, 2.25, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)/(-4), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},-0.25},{{1},0.5},{{2},-0.75}}, 0.1875, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+FloatDPBounds(-1,2), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.5},{{1},-2.0},{{2},3.0}}, 2.25, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-FloatDPBounds(-1,2), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},0.5},{{1},-2.0},{{2},3.0}}, 2.25, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*FloatDPBounds(-1,2), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},0.5},{{1},-1.0},{{2},1.5}}, 10.5, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)/FloatDPBounds(0.25,2.0), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},2.25},{{1},-4.5},{{2},6.75}}, 13.5, swp));
+    ARIADNE_TEST_SAME(+ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp));
+    ARIADNE_TEST_SAME(-ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},-1.0},{{1},2.0},{{2},-3.0}}, 0.75, swp));
 
     // Regression test to check subtraction yielding zero coefficients
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},4.0},{{1},0.0},{{2},-1.0}}, 1.25, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)+ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},4.0},{{1},0.0},{{2},-1.0}}, 1.25, swp));
 
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp), ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},-2.0},{{1},-4.0},{{2},7.0}}, 1.25, swp));
-    ARIADNE_TEST_SAME(ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp),
-                       ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},-4.0},{{2},1.0},{{3},14.0},{{4},-12.0}}, 10.125, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)-ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp), ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},-2.0},{{1},-4.0},{{2},7.0}}, 1.25, swp));
+    ARIADNE_TEST_SAME(ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75, swp)*ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},2.0},{{2},-4.0}}, 0.5, swp),
+                       ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},3.0},{{1},-4.0},{{2},1.0},{{3},14.0},{{4},-12.0}}, 10.125, swp));
 
 }
 
 Void TestScalarTaylorFunction::test_functions()
 {
-    ValidatedScalarTaylorFunctionModelDP xz(d(1),{{{0},0.0},{{1}, 0.5}}, 0.0, swp);
-    ValidatedScalarTaylorFunctionModelDP xo(d(1),{{{0},1.0},{{1}, 0.5}}, 0.0, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP xz(d(1),{{{0},0.0},{{1}, 0.5}}, 0.0, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP xo(d(1),{{{0},1.0},{{1}, 0.5}}, 0.0, swp);
 
     //Functions based on their natural defining points
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.00000},{{1},0.50000},{{2},0.12500},{{3},0.02083},{{4},0.00260},{{5},0.00026},{{6},0.00002}}, 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},0.00000},{{1},0.50000},{{2},0.0000},{{3},-0.02083},{{4},0.00000},{{5},0.00026},{{6},0.00000}}, 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.00000},{{1},0.0000},{{2},-0.12500},{{3},0.00000},{{4},0.00260},{{5},0.0000},{{6},-0.00002}}, 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.00000},{{1},0.50000},{{2},0.12500},{{3},0.02083},{{4},0.00260},{{5},0.00026},{{6},0.00002}}, 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},0.00000},{{1},0.50000},{{2},0.0000},{{3},-0.02083},{{4},0.00000},{{5},0.00026},{{6},0.00000}}, 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.00000},{{1},0.0000},{{2},-0.12500},{{3},0.00000},{{4},0.00260},{{5},0.0000},{{6},-0.00002}}, 0.00003, swp));
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.000000},{{1},-0.500000},{{2},0.250000},{{3},-0.125000},{{4}, 0.062500},{{5},-0.031250},{{6},0.015625}}, 0.018, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},1.000000},{{1}, 0.250000},{{2},-0.031250},{{3}, 0.007813},{{4},-0.002441},{{5}, 0.000854},{{6},-0.000320}}, 0.0003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),ValidatedScalarTaylorFunctionModelDP(d(1),{{{0},0.000000},{{1},0.500000},{{2},-0.125000},{{3}, 0.041667},{{4},-0.015625},{{5}, 0.006250},{{6},-0.002604}}, 0.003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.000000},{{1},-0.500000},{{2},0.250000},{{3},-0.125000},{{4}, 0.062500},{{5},-0.031250},{{6},0.015625}}, 0.018, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},1.000000},{{1}, 0.250000},{{2},-0.031250},{{3}, 0.007813},{{4},-0.002441},{{5}, 0.000854},{{6},-0.000320}}, 0.0003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),ValidatedScalarMultivariateTaylorFunctionModelDP(d(1),{{{0},0.000000},{{1},0.500000},{{2},-0.125000},{{3}, 0.041667},{{4},-0.015625},{{5}, 0.006250},{{6},-0.002604}}, 0.003, swp));
 
 }
 
@@ -267,22 +267,22 @@ Void TestScalarTaylorFunction::test_compose()
 
 Void TestScalarTaylorFunction::test_antiderivative()
 {
-    ValidatedScalarTaylorFunctionModelDP tm=ValidatedScalarTaylorFunctionModelDP::constant(d(2),1.0_exact,swp);
-    ValidatedScalarTaylorFunctionModelDP atm=antiderivative(tm,1u);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tm=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(d(2),1.0_exact,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP atm=antiderivative(tm,1u);
 
     ARIADNE_TEST_CONSTRUCT(ExactBoxType,dom,({{1.0, 4.0}, {0.0, 2.0}}));
-    ValidatedVectorTaylorFunctionModelDP x = ValidatedVectorTaylorFunctionModelDP::identity(dom,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP x = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(dom,swp);
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP, f, (1 + 2*x[0]+3*x[1]+5*x[0]*x[0]+4*x[0]*x[1]));
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP, g, (antiderivative(f,0,2.0_exact)) );
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP, f, (1 + 2*x[0]+3*x[1]+5*x[0]*x[0]+4*x[0]*x[1]));
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP, g, (antiderivative(f,0,2.0_exact)) );
     ARIADNE_TEST_PRINT( derivative(g,0) );
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP, dg, (derivative(g,0)) );
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP, dg, (derivative(g,0)) );
     ARIADNE_TEST_LESS(norm(dg-f),1e-8);
 
     // We should have f(c,s)=0 for all x1
-    ValidatedScalarTaylorFunctionModelDP s = ValidatedScalarTaylorFunctionModelDP::coordinate({dom[1]},0u,swp);
-    ValidatedScalarTaylorFunctionModelDP c = ValidatedScalarTaylorFunctionModelDP::constant(s.domain(),2.0_exact,swp);
-    ValidatedScalarTaylorFunctionModelDP h=compose(g,ValidatedVectorTaylorFunctionModelDP({c,s}));
+    ValidatedScalarMultivariateTaylorFunctionModelDP s = ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate({dom[1]},0u,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP c = ValidatedScalarMultivariateTaylorFunctionModelDP::constant(s.domain(),2.0_exact,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP h=compose(g,ValidatedVectorMultivariateTaylorFunctionModelDP({c,s}));
 
     Vector<ExactIntervalType> hdom=h.domain();
     Vector<FloatDPBounds> domv(reinterpret_cast<Vector<FloatDPBounds>const&>(hdom));
@@ -311,14 +311,14 @@ Void TestScalarTaylorFunction::test_conversion() {
     Vector<FloatDPBounds> ipt(pt);
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     ARIADNE_TEST_PRINT(x);
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,tx,(D,x,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,tx,(D,x,swp));
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,f,(1-x[0]*x[0]-x[1]/2));
     ARIADNE_TEST_PRINT(compose(f,tx));
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,y,(x[1]/2));
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,ty,(D,x[1]/2,swp));
-    ARIADNE_TEST_PRINT(ValidatedScalarTaylorFunctionModelDP(D,x[1],swp)/2);
-    ARIADNE_TEST_CONSTRUCT(ValidatedScalarTaylorFunctionModelDP,tf,(D,f,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP,ty,(D,x[1]/2,swp));
+    ARIADNE_TEST_PRINT(ValidatedScalarMultivariateTaylorFunctionModelDP(D,x[1],swp)/2);
+    ARIADNE_TEST_CONSTRUCT(ValidatedScalarMultivariateTaylorFunctionModelDP,tf,(D,f,swp));
 
     // Conversion to TaylorFunction should be exact in second component
     ARIADNE_TEST_BINARY_PREDICATE(refines,f(ipt),tf(ipt));
@@ -330,9 +330,9 @@ Void TestScalarTaylorFunction::test_generic() {
     FloatDPValue c0={0,pr};
     FloatDPValue c1={0,pr};
     FloatDPValue c2={0,pr};
-    ValidatedScalarTaylorFunctionModelDP pf0=ValidatedScalarTaylorFunctionModelDP::constant(D,c0,swp);
-    ValidatedScalarTaylorFunctionModelDP pf1=ValidatedScalarTaylorFunctionModelDP::constant(D,c1,swp);
-    ValidatedScalarTaylorFunctionModelDP pf2=ValidatedScalarTaylorFunctionModelDP::constant(D,c2,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP pf0=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c0,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP pf1=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c1,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP pf2=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(D,c2,swp);
     ValidatedScalarMultivariateFunctionModelDP fm1=pf1;
     ValidatedScalarMultivariateFunctionModelDP fm2=pf2;
     ValidatedScalarMultivariateFunctionModelDP fm4=pf0;
@@ -350,9 +350,9 @@ Void TestScalarTaylorFunction::test_generic() {
 }
 
 /*
-ValidatedVectorTaylorFunctionModelDP henon(const ValidatedVectorTaylorFunctionModelDP& x, const Vector<FloatDPValue>& p)
+ValidatedVectorMultivariateTaylorFunctionModelDP henon(const ValidatedVectorMultivariateTaylorFunctionModelDP& x, const Vector<FloatDPValue>& p)
 {
-    ValidatedVectorTaylorFunctionModelDP r(2,2,x.degree()); henon(r,x,p); return r;
+    ValidatedVectorMultivariateTaylorFunctionModelDP r(2,2,x.degree()); henon(r,x,p); return r;
 }
 */
 
@@ -414,16 +414,16 @@ Void TestVectorTaylorFunction::test_constructors()
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     Real a(1.5); Real b(0.25);
     EffectiveVectorMultivariateFunction henon_function={a-x[0]*x[0]+b*x[1], x[0]*1};
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,henon_model,(domain,henon_function,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
     Vector<FloatDPBounds> e0(e(2,0),pr); Vector<FloatDPBounds> e1(e(2,1),pr);
 
-    ValidatedVectorTaylorFunctionModelDP t=ValidatedVectorTaylorFunctionModelDP::identity(domain,swp);
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,variables_model,((1.5_exact-t[0]*t[0]+0.25_exact*t[1])*e0+t[0]*e1));
+    ValidatedVectorMultivariateTaylorFunctionModelDP t=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(domain,swp);
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,variables_model,((1.5_exact-t[0]*t[0]+0.25_exact*t[1])*e0+t[0]*e1));
     ARIADNE_TEST_EXECUTE(variables_model.simplify());
-    ARIADNE_TEST_SAME(variables_model,ValidatedVectorTaylorFunctionModelDP(domain,expansion,errors,swp));
+    ARIADNE_TEST_SAME(variables_model,ValidatedVectorMultivariateTaylorFunctionModelDP(domain,expansion,errors,swp));
 
 }
 
@@ -437,8 +437,8 @@ Void TestVectorTaylorFunction::test_restrict()
     Expansion<MultiIndex,RawFloatDP> subexpansion1({{{0,0},1.031250},{{1,0},1.812500},{{0,1},0.625000}, {{2,0},1.812500},{{1,1},0.562500},{{0,2},0.0468750},
                                         {{3,0},0.875000},{{2,1},0.500000},{{1,2},0.281250},{{0,3},0.156250}});
     Vector<RawFloatDP> error1={0.0};
-    ValidatedVectorTaylorFunctionModelDP function1(domain1,expansion1*unit0,error1,swp);
-    ValidatedVectorTaylorFunctionModelDP restricted_function1(subdomain1,subexpansion1*unit0,error1,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP function1(domain1,expansion1*unit0,error1,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP restricted_function1(subdomain1,subexpansion1*unit0,error1,swp);
     ARIADNE_TEST_SAME(restriction(function1,subdomain1),restricted_function1);
 
     ExactBoxType domain2={{-1.0,+1.0}};
@@ -447,8 +447,8 @@ Void TestVectorTaylorFunction::test_restrict()
     Vector<ExactIntervalType> subdomain2={{3e-16,1.0}};
     Expansion<MultiIndex,RawFloatDP> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
     Vector<RawFloatDP> suberror2={0.125000000000000028};
-    ValidatedVectorTaylorFunctionModelDP function2(domain2,expansion2*unit0,error2,swp);
-    ValidatedVectorTaylorFunctionModelDP restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP function2(domain2,expansion2*unit0,error2,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
     FloatDPValue::set_output_places(18);
     FloatDPError::set_output_places(18);
     ARIADNE_TEST_SAME(restriction(function2,subdomain2),restricted_function2);
@@ -470,12 +470,12 @@ Void TestVectorTaylorFunction::test_jacobian()
     Vector<FloatDPBounds> point2=Vector<FloatDPBounds>{0.0_exact,0.25_exact};
     //Vector<FloatDPValue> point1=Vector<FloatDPValue>{0.0,0.0};
     //Vector<FloatDPValue> point2=Vector<FloatDPValue>{0.5,0.25};
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain2,henon,swp).jacobian(point2),henon.jacobian(point2));
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain3,henon,swp).jacobian(point1),henon.jacobian(point1));
-    ARIADNE_TEST_EQUAL(ValidatedVectorTaylorFunctionModelDP(domain3,henon,swp).jacobian(point2),henon.jacobian(point2));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain2,henon,swp).jacobian(point2),henon.jacobian(point2));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain3,henon,swp).jacobian(point1),henon.jacobian(point1));
+    ARIADNE_TEST_EQUAL(ValidatedVectorMultivariateTaylorFunctionModelDP(domain3,henon,swp).jacobian(point2),henon.jacobian(point2));
 }
 
 Void TestVectorTaylorFunction::test_compose()
@@ -493,10 +493,10 @@ Void TestVectorTaylorFunction::test_compose()
     ARIADNE_TEST_PRINT(e(2,0));
     ARIADNE_TEST_PRINT((a-x*x+b*y)*e(2,0));
     ARIADNE_TEST_PRINT(henon_polynomial);
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,function1,(domain1,henon_polynomial,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,function2,(domain2,henon_polynomial,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,function1,(domain1,henon_polynomial,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,function2,(domain2,henon_polynomial,swp));
 
-    ValidatedVectorTaylorFunctionModelDP composition1(domain1,henon_square_polynomial,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP composition1(domain1,henon_square_polynomial,swp);
     ARIADNE_TEST_SAME(compose(function2,function1),composition1);
 }
 
@@ -509,27 +509,27 @@ Void TestVectorTaylorFunction::test_antiderivative()
     Vector<RawFloatDP> unit0={1};
     ExactBoxType domain1={{-1,+1},{-1,+1}};
     Expansion<MultiIndex,RawFloatDP> expansion1={{{0,0},3.0}};
-    ValidatedVectorTaylorFunctionModelDP function1(domain1,expansion1*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP function1(domain1,expansion1*unit0,swp);
     Expansion<MultiIndex,RawFloatDP> aexpansion1={{{0,1},3.0}};
-    ValidatedVectorTaylorFunctionModelDP antiderivative1(domain1,aexpansion1*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP antiderivative1(domain1,aexpansion1*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function1,index1),antiderivative1);
 
     ExactBoxType domain2={{-0.25,0.75},{0.0,0.5}};
     Expansion<MultiIndex,RawFloatDP> expansion2={{{0,0},3.0}};
-    ValidatedVectorTaylorFunctionModelDP function2(domain2,expansion2*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP function2(domain2,expansion2*unit0,swp);
     Expansion<MultiIndex,RawFloatDP> aexpansion2={{{0,1},0.75}};
-    ValidatedVectorTaylorFunctionModelDP antiderivative2(domain2,aexpansion2*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP antiderivative2(domain2,aexpansion2*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function2,index1),antiderivative2);
 
     ExactBoxType domain3={{-0.25,0.75},{0.0,0.5}};
     Expansion<MultiIndex,RawFloatDP> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
-    ValidatedVectorTaylorFunctionModelDP function3(domain3,expansion3*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP function3(domain3,expansion3*unit0,swp);
     Expansion<MultiIndex,RawFloatDP> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
     Vector<FloatDP> aerror30={5.5511151231257827e-17};
-    ValidatedVectorTaylorFunctionModelDP antiderivative30(domain3,aexpansion30*unit0,aerror30,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP antiderivative30(domain3,aexpansion30*unit0,aerror30,swp);
     ARIADNE_TEST_SAME(antiderivative(function3,index0),antiderivative30);
     Expansion<MultiIndex,RawFloatDP> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
-    ValidatedVectorTaylorFunctionModelDP antiderivative31(domain3,aexpansion31*unit0,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP antiderivative31(domain3,aexpansion31*unit0,swp);
     ARIADNE_TEST_SAME(antiderivative(function3,index1),antiderivative31);
 
 }
@@ -543,9 +543,9 @@ Void TestVectorTaylorFunction::test_join()
     EffectiveVectorMultivariateFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(3,2);
 
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction1,(domain,function1,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction2,(domain,function2,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction3,(domain,function3,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction1,(domain,function1,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction2,(domain,function2,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction3,(domain,function3,swp));
     ARIADNE_TEST_SAME(join(taylorfunction1,taylorfunction2),taylorfunction3);
 
 }
@@ -564,9 +564,9 @@ Void TestVectorTaylorFunction::test_combine()
     x=EffectiveVectorMultivariateFunction::identity(5);
     EffectiveVectorMultivariateFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[2]*x[2]+5*x[2]*x[3]+6*x[3]*x[4])*e(3,2);
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction1,(domain1,function1,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction2,(domain2,function2,swp));
-    ARIADNE_TEST_CONSTRUCT(ValidatedVectorTaylorFunctionModelDP,taylorfunction3,(domain3,function3,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction1,(domain1,function1,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction2,(domain2,function2,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,taylorfunction3,(domain3,function3,swp));
     ARIADNE_TEST_SAME(combine(taylorfunction1,taylorfunction2),taylorfunction3);
 
 }
@@ -581,7 +581,7 @@ Void TestVectorTaylorFunction::test_conversion()
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
 
     EffectiveVectorMultivariateFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
-    ValidatedVectorTaylorFunctionModelDP th(D,h,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP th(D,h,swp);
 
     ARIADNE_TEST_PRINT(h);
     ARIADNE_TEST_PRINT(th);
@@ -603,18 +603,18 @@ Void TestVectorTaylorFunction::test_domain()
     EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(2,1);
 
     ExactBoxType D1={{-1.0,1.0},{-1.0,1.0}};
-    ValidatedVectorTaylorFunctionModelDP t1(D1, {o,x0+x1}, swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP t1(D1, {o,x0+x1}, swp);
     ARIADNE_TEST_PRINT(t1);
     ARIADNE_TEST_PRINT(t1.codomain());
     ExactBoxType D2={{1.0,1.0},{-2.0,2.0}};
-    ValidatedScalarTaylorFunctionModelDP t2(D2,2*x0+x1*x1,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP t2(D2,2*x0+x1*x1,swp);
     ARIADNE_TEST_PRINT(t2.domain());
     ARIADNE_TEST_PRINT(t2.model());
     ARIADNE_TEST_PRINT(t2.codomain());
 
     ARIADNE_TEST_PRINT(t2);
     ARIADNE_TEST_PRINT(compose(t2,t1));
-    ValidatedScalarTaylorFunctionModelDP t3(D1,2+(x0+x1)*(x0+x1),swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP t3(D1,2+(x0+x1)*(x0+x1),swp);
     ARIADNE_TEST_SAME(compose(t2,t1),t3);
 
     Vector<FloatDPBounds> x={FloatDPBounds{1.0,1.0},FloatDPBounds{0.5,1.5}};
@@ -627,11 +627,11 @@ Void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
     // Ensure evaluation and composition throw errors when expected
-    ValidatedVectorTaylorFunctionModelDP vt2={t2};
+    ValidatedVectorMultivariateTaylorFunctionModelDP vt2={t2};
     ARIADNE_TEST_THROWS(vt2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(vt2,xe),DomainException);
 
-    ValidatedVectorTaylorFunctionModelDP te1=t1; te1[0]=te1[0]+FloatDPBounds(-0.125,+0.125);
+    ValidatedVectorMultivariateTaylorFunctionModelDP te1=t1; te1[0]=te1[0]+FloatDPBounds(-0.125,+0.125);
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
     ARIADNE_TEST_THROWS(compose(vt2,te1),DomainException);
 
@@ -639,11 +639,11 @@ Void TestVectorTaylorFunction::test_domain()
 
     // Regression test for printing functions with trivial domain component
     ExactBoxType D4={{1.0,1.0},{0.0,2.0}};
-    ValidatedScalarTaylorFunctionModelDP st40(D4, x0, swp);
-    ValidatedScalarTaylorFunctionModelDP st41(D4, x1, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP st40(D4, x0, swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP st41(D4, x1, swp);
     ARIADNE_TEST_PRINT(st40);
     ARIADNE_TEST_PRINT(st41);
-    ValidatedVectorTaylorFunctionModelDP t4(D4, {x0,x1}, swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP t4(D4, {x0,x1}, swp);
     ARIADNE_TEST_PRINT(t4);
 }
 
@@ -674,13 +674,13 @@ Void TestTaylorFunctionFactory::test_create()
     Vector<ExactIntervalType> dom={{-1,+1},{0.5,3.5}};
     Vector<FloatDPBounds> args=reinterpret_cast<Vector<FloatDPBounds>const&>(dom);
 
-    ValidatedScalarTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarMultivariateFunction::zero(dom.size()) );
+    ValidatedScalarMultivariateTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarMultivariateFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.properties(),&sweeper);
     ARIADNE_TEST_EQUALS(stf(args),FloatDPBounds(0.0));
     ARIADNE_TEST_EQUALS(evaluate(stf,args),FloatDPBounds(0.0));
 
-    ValidatedVectorTaylorFunctionModelDP vtf=factory.create(dom, EffectiveVectorMultivariateFunction::identity(dom.size()) );
+    ValidatedVectorMultivariateTaylorFunctionModelDP vtf=factory.create(dom, EffectiveVectorMultivariateFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error

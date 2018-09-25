@@ -98,7 +98,7 @@ typedef Matrix<ExactIntervalType> IMx;
 typedef Vector< Differential<FloatDPApproximation> > FSDV;
 typedef Vector< Differential<ExactIntervalType> > ISDV;
 typedef Vector<ValidatedTaylorModelDP> TMV;
-typedef ValidatedVectorTaylorFunctionModelDP TFM;
+typedef ValidatedVectorMultivariateTaylorFunctionModelDP TFM;
 typedef ValidatedTaylorModelDP TM;
 
 

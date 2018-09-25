@@ -46,24 +46,15 @@ namespace Ariadne {
 template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
-typedef ScalarScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedScalarTaylorFunctionModelDP;
-typedef VectorScaledFunctionPatch<ValidatedTaylorModelDP> ValidatedVectorTaylorFunctionModelDP;
+template<class P, class F> using ScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<TaylorModel<P,F>>;
+template<class P, class F> using VectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<TaylorModel<P,F>>;
 
-/*
-class ValidatedScalarTaylorFunctionModelDP : public ScaledFunctionPatch<ValidatedTaylorModelDP> {
-  public:
-    using ScaledFunctionPatch<ValidatedTaylorModelDP>::ScaledFunctionPatch;
-    ValidatedScalarTaylorFunctionModelDP() : ScaledFunctionPatch<ValidatedTaylorModelDP>() { }
-    ValidatedScalarTaylorFunctionModelDP(ScaledFunctionPatch<ValidatedTaylorModelDP> const& f) : ScaledFunctionPatch<ValidatedTaylorModelDP>(f) { }
-};
+template<class F> using ValidatedScalarMultivariateTaylorFunctionModel = ScalarScaledFunctionPatch<ValidatedTaylorModel<F>>;
+template<class F> using ValidatedVectorMultivariateTaylorFunctionModel = VectorScaledFunctionPatch<ValidatedTaylorModel<F>>;
 
-class ValidatedVectorTaylorFunctionModelDP : public VectorScaledFunctionPatch<Vali_datedTaylorModelDP> {
-  public:
-    using VectorScaledFunctionPatch<ValidatedTaylorModelDP>::VectorScaledFunctionPatch;
-    ValidatedVectorTaylorFunctionModelDP() : VectorScaledFunctionPatch<ValidatedTaylorModelDP>() { }
-    ValidatedVectorTaylorFunctionModelDP(VectorScaledFunctionPatch<ValidatedTaylorModelDP> const& f) : VectorScaledFunctionPatch<ValidatedTaylorModelDP>(f) { }
-};
-*/
+using ValidatedScalarMultivariateTaylorFunctionModelDP = ScalarScaledFunctionPatch<ValidatedTaylorModelDP>;
+using ValidatedVectorMultivariateTaylorFunctionModelDP = VectorScaledFunctionPatch<ValidatedTaylorModelDP>;
+
 
 class TaylorFunctionFactory
     : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>

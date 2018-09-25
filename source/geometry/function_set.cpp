@@ -59,11 +59,11 @@ uint DRAWING_ACCURACY=1u;
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom);
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom);
 Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
 Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
 Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType domain);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain);
 Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub);
@@ -73,11 +73,11 @@ ExactBoxType over_approximation(const EffectiveBoxType& rbx);
 ExactBoxType approximation(const EffectiveBoxType& rbx);
 
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorTaylorFunctionModelDP& f, const ExactBoxType& dom)
+Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom)
 {
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    ValidatedVectorTaylorFunctionModelDP g=restriction(f,dom);
+    ValidatedVectorMultivariateTaylorFunctionModelDP g=restriction(f,dom);
 
     Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     MultiIndex a;
@@ -166,7 +166,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     return nonlinearities;
 }
 
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType domain) {
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain) {
     Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -725,8 +725,8 @@ ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorMultivar
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
 {
-    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(f.raw_pointer()));
-    return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(*f.raw_pointer()),dom);
+    ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer()));
+    return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(*f.raw_pointer()),dom);
 }
 
 /*
@@ -878,7 +878,7 @@ ConstrainedImageSet::write(OutputStream& os) const
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarMultivariateFunction<X> > { typedef VectorMultivariateFunction<X> VectorMultivariateFunctionType; };
-template<> struct FunctionTraits< ValidatedScalarTaylorFunctionModelDP > { typedef ValidatedVectorTaylorFunctionModelDP VectorMultivariateFunctionType; };
+template<> struct FunctionTraits< ValidatedScalarMultivariateTaylorFunctionModelDP > { typedef ValidatedVectorMultivariateTaylorFunctionModelDP VectorMultivariateFunctionType; };
 
 template<class SF> class TemplatedConstraintSet;
 template<class SF> class TemplatedConstrainedImageSet;
@@ -913,17 +913,17 @@ ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     this->_check();
-    typedef List<ValidatedScalarTaylorFunctionModelDP>::ConstIterator ConstIterator;
+    typedef List<ValidatedScalarMultivariateTaylorFunctionModelDP>::ConstIterator ConstIterator;
 
     const Nat nx=this->state_dimension();
     const Nat nc=this->number_of_constraints();
     const Nat np=this->number_of_parameters();
 
     AffineSweeper<FloatDP> affine_sweeper((dp));
-    ValidatedVectorTaylorFunctionModelDP state_function=dynamic_cast<const ValidatedVectorTaylorFunctionModelDP&>(this->_state_function.reference());
-    ValidatedScalarTaylorFunctionModelDP time_function=dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_time_function.reference());
-    List<ValidatedScalarTaylorFunctionModelDP> constraint_functions;
-    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarTaylorFunctionModelDP&>(this->_constraints[i].function().reference())); }
+    ValidatedVectorMultivariateTaylorFunctionModelDP state_function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->_state_function.reference());
+    ValidatedScalarMultivariateTaylorFunctionModelDP time_function=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_time_function.reference());
+    List<ValidatedScalarMultivariateTaylorFunctionModelDP> constraint_functions;
+    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_constraints[i].function().reference())); }
 
     //std::cerr<<"\n"<<state_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
 
@@ -980,7 +980,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     Matrix<FloatDP> G(nx,np+nerr);
     Nat ierr=0; // The index where the error bound should go
     for(Nat i=0; i!=nx; ++i) {
-        ValidatedScalarTaylorFunctionModelDP component_function=function[i];
+        ValidatedScalarMultivariateTaylorFunctionModelDP component_function=function[i];
         h[i]=component_function.model().value();
         for(Nat j=0; j!=np; ++j) {
             G[i][j]=component_function.model().gradient(j);
@@ -997,7 +997,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     FloatDP b;
 
     for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        ValidatedScalarTaylorFunctionModelDP constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
+        ValidatedScalarMultivariateTaylorFunctionModelDP constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub(up,constraint_function.model().error(),constraint_function.model().value());
         for(Nat j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
         result.new_parameter_constraint(-inf,a,b);

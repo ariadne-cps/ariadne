@@ -103,7 +103,7 @@ int main() {
 
 //        BoxDomainType dom({{0.0_x,1.0_x},{0.5_x,1.5_x}});
           BoxDomainType dom({{0,1},{0.5,1.5}});
-        auto th = ValidatedVectorTaylorFunctionModelDP(dom,h,ThresholdSweeper<FloatDP>(double_precision,1e-4));
+        auto th = ValidatedVectorMultivariateTaylorFunctionModelDP(dom,h,ThresholdSweeper<FloatDP>(double_precision,1e-4));
         print(th);
         auto thh=compose(h,th);
         print(thh);

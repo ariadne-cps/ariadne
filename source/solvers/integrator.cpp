@@ -457,10 +457,10 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-ValidatedVectorTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swpt, Nat verbosity=0) {
+ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swpt, Nat verbosity=0) {
     const Nat n=dphi.size();
     Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,swpt));
-    ValidatedVectorTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
+    ValidatedVectorMultivariateTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
 
     for(Nat i=0; i!=n; ++i) {
         ValidatedTaylorModelDP& model=tphi.model(i);
@@ -533,7 +533,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
     Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
 
-    ValidatedVectorTaylorFunctionModelDP tphi=flow_function(dphi,bdx,h,swpt,verbosity);
+    ValidatedVectorMultivariateTaylorFunctionModelDP tphi=flow_function(dphi,bdx,h,swpt,verbosity);
     ARIADNE_LOG(5,"phi="<<tphi<<"\n");
 
     FloatDPError old_error=tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
@@ -569,7 +569,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
                 Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
             }
             Vector<ValidatedDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
-            ValidatedVectorTaylorFunctionModelDP ntphi=flow_function(ndphi,bdx,h,swpt,verbosity);
+            ValidatedVectorMultivariateTaylorFunctionModelDP ntphi=flow_function(ndphi,bdx,h,swpt,verbosity);
 
             Nat nnnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
             ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");

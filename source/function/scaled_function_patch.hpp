@@ -111,9 +111,9 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
 };
 
 /*! \ingroup FunctionModelSubModule
- *  \brief A ValidatedScalarTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
+ *  \brief A ValidatedScalarMultivariateTaylorFunctionModelDP is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
- * Formally, a ValidatedScalarTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+ * Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
  * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
  * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
  * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
@@ -129,7 +129,7 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
  * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
  * for but there are a number of techniques available.
  *
- * \sa Expansion, TaylorModel, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
+ * \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class M> class ScaledFunctionPatch
     : public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, BoxDomainType, typename M::PrecisionType, typename M::ErrorPrecisionType>
@@ -512,7 +512,7 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 /*! \ingroup FunctionModelSubModule
  *  \brief A Taylor function model with multivalued codomain built from the TaylorModel class.
  *
- *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorTaylorFunctionModelDP.
+ *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP.
  */
 template<class M> class VectorScaledFunctionPatch
     : public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,BoxDomainType,typename M::PrecisionType,typename M::ErrorPrecisionType>

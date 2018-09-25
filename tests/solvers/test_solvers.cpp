@@ -173,7 +173,7 @@ class TestSolver
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -191,24 +191,7 @@ class TestSolver
 #include "algebra/differential.hpp"
 
 Int main(Int argc, const char **argv) {
-/*
-    ExactIntervalVectorType D={{-1,+1},{-1,+1}};
-    ValidatedVectorTaylorFunctionModelDP x=ValidatedVectorTaylorFunctionModelDP::identity(D,ThresholdSweeper(1e-10));
-    ValidatedScalarTaylorFunctionModelDP f=2*x[0]-x[1];
-    std::cerr<<"D="<<D<<"\n";
-    ExactIntervalType D0=D[0];
-    std::cerr<<"f="<<representation(f)<<"\n";
-    Vector<Differential<ExactIntervalType>> dx=Differential<ExactIntervalType>::variables(2,2,1u,D);
-    Differential<ExactIntervalType> dx0=dx[0];
-    std::cerr<<"dx="<<dx<<"\n";
-    std::cerr<<"unscale(dx[0],D[0])="<<unscale(dx0,D[0])<<"\n";
-    ExactIntervalType c(add_ivl(D0.lower()/2,D0.upper()/2));
-    ExactIntervalType r(sub_ivl(D0.upper()/2,D0.lower()/2));
-    std::cerr<<"(dx[0]-c)/r="<<((dx0-c)/r)<<" c="<<c<<" r="<<r<<"\n";
-    std::cerr<<"unscale(dx,D)="<<unscale(dx,D)<<"\n";
-    std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
-    return 0;
-*/
+
     unsigned int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);

@@ -392,7 +392,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
 
     PositiveFloatDPValue hsug(this->_step_size);
 
-    ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorTaylorFunctionModelDP::identity(X0,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(X0,this->_sweeper);
     auto t=PositiveFloatDPValue(0.0);
 
     Map<InputApproximation,SizeType> approximation_global_frequencies, approximation_local_frequencies;
@@ -633,14 +633,14 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
     BoxDomainType XPT = join(X,PA,PB,PM,Tau);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
-    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
-    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
-    ValidatedVectorTaylorFunctionModelDP mf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a+b,n+a+b+2*m),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XPT,n+a+b+2*m,swp);
-    ValidatedScalarTaylorFunctionModelDP hf=tf-t;
+    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP mf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a+b,n+a+b+2*m),swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XPT,n+a+b+2*m,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP hf=tf-t;
 
-    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,mf));
+    ValidatedVectorMultivariateTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,mf));
 
     return compose(Phi,join(ef,bf,mf,hf));
 }
@@ -664,13 +664,13 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
     BoxDomainType XPT = join(X,PA,PB,Tau);
-    ValidatedVectorTaylorFunctionModelDP xf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
-    ValidatedVectorTaylorFunctionModelDP af=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
-    ValidatedVectorTaylorFunctionModelDP bf=ValidatedVectorTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
-    ValidatedScalarTaylorFunctionModelDP tf=ValidatedScalarTaylorFunctionModelDP::coordinate(XPT,n+a+b,swp);
-    ValidatedScalarTaylorFunctionModelDP hf=tf-t;
+    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XPT,n+a+b,swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP hf=tf-t;
 
-    ValidatedVectorTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af));
+    ValidatedVectorMultivariateTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af));
 
     return compose(Phi,join(ef,bf,hf));
 }
@@ -681,7 +681,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_
 
 ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e) {
     assert(phi.result_size()==e.size());
-    ValidatedVectorTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(phi.reference());
+    ValidatedVectorMultivariateTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(phi.reference());
     for (auto i : range(e.size())) {
         tphi[i].add_error(e[i]);
     }
@@ -734,10 +734,10 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     auto n=dyn.result_size();
     auto swp=this->_sweeper;
 
-    auto x0f=ValidatedVectorTaylorFunctionModelDP::projection(domain,range(n),swp);
-    auto af=ValidatedVectorTaylorFunctionModelDP::projection(domain,range(n,dyn.argument_size()),swp);
+    auto x0f=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(domain,range(n),swp);
+    auto af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(domain,range(n,dyn.argument_size()),swp);
 
-    auto picardPhi=ValidatedVectorTaylorFunctionModelDP(n,domain,swp);
+    auto picardPhi=ValidatedVectorMultivariateTaylorFunctionModelDP(n,domain,swp);
     picardPhi=picardPhi+cast_singleton(B);
 
     for(Nat i=0; i<NUMBER_OF_PICARD_ITERATES; ++i) {
@@ -852,7 +852,7 @@ ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(Va
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
     for(SizeType i=0; i!=f.result_size(); ++i) { f[i].set_error(0); }
-    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorTaylorFunctionModelDP::identity(errors,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(f,errors)+embed(domain,error_function);
 }
 
@@ -884,7 +884,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
 
     ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
 
-    ValidatedVectorTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorTaylorFunctionModelDP&>(f.reference());
+    ValidatedVectorMultivariateTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(f.reference());
 
     // Compute effect of error terms, but not of original variables;
     Matrix<FloatDPError> C(m,n);
@@ -969,11 +969,11 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
 
     auto old_domain=f.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));
-    auto projection=ValidatedVectorTaylorFunctionModelDP(m,new_domain,this->_sweeper);
-    for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarTaylorFunctionModelDP::coordinate(new_domain,i,this->_sweeper); }
+    auto projection=ValidatedVectorMultivariateTaylorFunctionModelDP(m,new_domain,this->_sweeper);
+    for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(new_domain,i,this->_sweeper); }
     for (auto i : range(remove_indices.size())) {
         auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
-        projection[j]=ValidatedScalarTaylorFunctionModelDP::constant(new_domain,cj,this->_sweeper); }
+        projection[j]=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(new_domain,cj,this->_sweeper); }
     f=compose(f,projection);
 }
 
@@ -986,7 +986,7 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
 
 namespace Ariadne {
 
-ValidatedVectorTaylorFunctionModelDP lohner_approximation(ValidatedVectorTaylorFunctionModelDP f) {
+ValidatedVectorMultivariateTaylorFunctionModelDP lohner_approximation(ValidatedVectorMultivariateTaylorFunctionModelDP f) {
     auto n=f.result_size();
     auto models=f.models();
     DoublePrecision pr;
@@ -1018,7 +1018,7 @@ ValidatedVectorTaylorFunctionModelDP lohner_approximation(ValidatedVectorTaylorF
         r[i].set_error(e[i]);
     }
 
-    return ValidatedVectorTaylorFunctionModelDP(BoxDomainType(n,IntervalDomainType(-1,+1)),r);
+    return ValidatedVectorMultivariateTaylorFunctionModelDP(BoxDomainType(n,IntervalDomainType(-1,+1)),r);
 }
 
 

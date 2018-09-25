@@ -135,9 +135,9 @@ template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f
 }
 
 template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(ScalarFunctionModel<P,PR,PRE> const& f, Projection const& prj) {
-    auto fpp = std::dynamic_pointer_cast<const ValidatedScalarTaylorFunctionModelDP>(f.managed_pointer());
+    auto fpp = std::dynamic_pointer_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP>(f.managed_pointer());
     if(fpp) {
-        return compose(ValidatedScalarTaylorFunctionModelDP(fpp),prj);
+        return compose(ValidatedScalarMultivariateTaylorFunctionModelDP(fpp),prj);
     }
     auto f_dom=f.domain();
     BoxDomainType dom=preimage(prj,f_dom);

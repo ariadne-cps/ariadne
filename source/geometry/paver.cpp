@@ -420,14 +420,14 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         TrivialSweeper<FloatDP> sweeper{dp};
         EffectiveScalarMultivariateFunction zero_function=EffectiveScalarMultivariateFunction::zero(m);
         EffectiveVectorMultivariateFunction identity_function=EffectiveVectorMultivariateFunction::identity(m);
-        ValidatedScalarTaylorFunctionModelDP txg(domain,zero_function,sweeper);
+        ValidatedScalarMultivariateTaylorFunctionModelDP txg(domain,zero_function,sweeper);
         FloatDPBounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
-            txg = txg - (FloatDPBounds(x[j])-FloatDPBounds(x[n+j]))*ValidatedScalarTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(fg[j]),sweeper);
+            txg = txg - (FloatDPBounds(x[j])-FloatDPBounds(x[n+j]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (FloatDPBounds(x[2*n+i])-FloatDPBounds(x[2*n+m+i]))*ValidatedScalarTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(identity_function[i]),sweeper);
+            txg = txg - (FloatDPBounds(x[2*n+i])-FloatDPBounds(x[2*n+m+i]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         txg = FloatDPBounds(cnst) + txg;
@@ -486,7 +486,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Nat e)
+Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Nat e)
 {
     auto properties = fg.properties();
     auto pr = properties.precision();
@@ -533,14 +533,14 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ValidatedScalarTaylorFunctionModelDP xg=ValidatedScalarTaylorFunctionModelDP::zero(d,properties);
+        ValidatedScalarMultivariateTaylorFunctionModelDP xg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,properties);
         FloatDPBounds cnst = {0,pr};
         for(Nat j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ValidatedScalarTaylorFunctionModelDP(d,fg[j],properties);
+            xg = xg - (x[j]-x[n+j])*ValidatedScalarMultivariateTaylorFunctionModelDP(d,fg[j],properties);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarTaylorFunctionModelDP::coordinate(d,i,properties);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,properties);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -640,22 +640,22 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
     ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
 
-    ValidatedVectorTaylorFunctionModelDP fg;
-    const ValidatedVectorTaylorFunctionModelDP* tfptr;
-    if( (tfptr=dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(f.raw_pointer())) ) {
-        const ValidatedVectorTaylorFunctionModelDP* tgptr;
-        if( ( tgptr = dynamic_cast<const ValidatedVectorTaylorFunctionModelDP*>(g.raw_pointer()) ) ) {
+    ValidatedVectorMultivariateTaylorFunctionModelDP fg;
+    const ValidatedVectorMultivariateTaylorFunctionModelDP* tfptr;
+    if( (tfptr=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer())) ) {
+        const ValidatedVectorMultivariateTaylorFunctionModelDP* tgptr;
+        if( ( tgptr = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(g.raw_pointer()) ) ) {
             fg=join(*tfptr,*tgptr);
         } else {
             if(g.result_size()>0) {
-                fg=join(*tfptr,ValidatedVectorTaylorFunctionModelDP(tfptr->domain(),g,tfptr->properties()));
+                fg=join(*tfptr,ValidatedVectorMultivariateTaylorFunctionModelDP(tfptr->domain(),g,tfptr->properties()));
             } else {
                 fg=*tfptr;
             }
         }
     } else {
         ThresholdSweeper<FloatDP> swp(dp,1e-12);
-        fg=ValidatedVectorTaylorFunctionModelDP(d,join(f,g),swp);
+        fg=ValidatedVectorMultivariateTaylorFunctionModelDP(d,join(f,g),swp);
     }
     Ariadne::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
 }

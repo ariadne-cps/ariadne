@@ -47,6 +47,8 @@ namespace Ariadne {
 template<class I, class X> class ExpansionValue;
 template<class I, class X> class ExpansionReference;
 template<class I, class X> class ExpansionConstReference;
+template<class I, class X> class ExpansionPointer;
+template<class I, class X> class ExpansionConstPointer;
 template<class I, class X> class ExpansionIterator;
 template<class I, class X> class ExpansionConstIterator;
 template<class I, class X> class ExpansionValueReference;
@@ -74,14 +76,22 @@ template<class I, class X> class Expansion {
     UniformList<X> _coefficients;
     X _zero_coefficient;
   public:
-    typedef ExpansionIterator<I,X> Iterator;
-    typedef ExpansionConstIterator<I,X> ConstIterator;
     typedef S ArgumentSizeType;
     typedef I IndexType;
     typedef X CoefficientType;
+
     typedef ExpansionValue<I,X> ValueType;
     typedef ExpansionReference<I,X> Reference;
     typedef ExpansionConstReference<I,X> ConstReference;
+    typedef ExpansionPointer<I,X> Pointer;
+    typedef ExpansionConstPointer<I,X> ConstPointer;
+    typedef ExpansionIterator<I,X> Iterator;
+    typedef ExpansionConstIterator<I,X> ConstIterator;
+
+    typedef typename UniformList<I>::Reference IndexReference;
+    typedef typename UniformList<X>::Reference CoefficientReference;
+    typedef typename UniformList<I>::ConstReference IndexConstReference;
+    typedef typename UniformList<X>::ConstReference CoefficientConstReference;
 
     ~Expansion();
     explicit Expansion(ArgumentSizeType as);

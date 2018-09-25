@@ -119,10 +119,10 @@ template<class I, class X> class ExpansionReference
 {
   public:
     typedef I IndexType; typedef X CoefficientType;
-    typedef typename UniformList<I>::Reference IndexReference;
-    typedef typename UniformList<X>::Reference CoefficientReference;
-    typedef typename UniformList<I>::ConstReference IndexConstReference;
-    typedef typename UniformList<X>::ConstReference CoefficientConstReference;
+    typedef typename Expansion<I,X>::IndexReference IndexReference;
+    typedef typename Expansion<I,X>::CoefficientReference CoefficientReference;
+    typedef typename Expansion<I,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<I,X>::CoefficientConstReference CoefficientConstReference;
   private:
     IndexReference _a; CoefficientReference _c;
   public:
@@ -143,8 +143,8 @@ template<class I, class X> class ExpansionConstReference
 {
   public:
     typedef I IndexType; typedef X CoefficientType;
-    typedef typename UniformList<I>::ConstReference IndexConstReference;
-    typedef typename UniformList<X>::ConstReference CoefficientConstReference;
+    typedef typename Expansion<I,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<I,X>::CoefficientConstReference CoefficientConstReference;
   private:
     IndexConstReference _a; CoefficientConstReference _c;
   public:

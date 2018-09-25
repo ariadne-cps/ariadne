@@ -179,6 +179,8 @@ class MultiIndexList {
     typedef MultiIndex ValueType;
     typedef MultiIndexReference Reference;
     typedef MultiIndexConstReference ConstReference;
+    typedef MultiIndexPointer Pointer;
+    typedef MultiIndexConstPointer ConstPointer;
     typedef MultiIndexListIterator Iterator;
     typedef MultiIndexListConstIterator ConstIterator;
   protected: public:

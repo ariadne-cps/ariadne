@@ -651,7 +651,7 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order_, Nat temp
     typename Differential<X>::Iterator write_iter=x.begin();
     typename Differential<X>::ConstIterator read_iter=x.begin();
     while(read_iter!=x.end()) {
-        ConstReferenceType<MultiIndex> index = read_iter->index();
+        UniformConstReference<MultiIndex> index = read_iter->index();
         if(index[n]>temporal_order_ || index[n]+spacial_order_<index.degree()) {
         } else {
             *write_iter=*read_iter;
@@ -713,10 +713,10 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBoxType
 
     for(Nat i=0; i!=n; ++i) {
         for(Expansion<MultiIndex,ValidatedNumericType>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
-            ConstReferenceType<MultiIndex> a=iter->index();
+            UniformConstReference<MultiIndex> a=iter->index();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
-                ConstReferenceType<ValidatedNumericType> rng = iter->coefficient();
-                ConstReferenceType<ValidatedNumericType> mid = mdphi[i][a];
+                UniformConstReference<ValidatedNumericType> rng = iter->coefficient();
+                UniformConstReference<ValidatedNumericType> mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower().raw()<=mid.lower().raw() && mid.upper().raw()<=rng.upper().raw());
                 FloatDPError mag = FloatDPError(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
                 for(Nat j=0; j!=n+1; ++j) { mag *= pow(rad[j],Nat(a[j])); }

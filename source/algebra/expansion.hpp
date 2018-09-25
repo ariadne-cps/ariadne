@@ -44,6 +44,11 @@ namespace Ariadne {
 
 /************ Expansion ******************************************************/
 
+template<class T> using UniformReference = typename UniformList<T>::Reference;
+template<class T> using UniformConstReference = typename UniformList<T>::ConstReference;
+template<class T> using UniformPointer = typename UniformList<T>::Pointer;
+template<class T> using UniformConstPointer = typename UniformList<T>::ConstPointer;
+
 template<class I, class X> class ExpansionValue;
 template<class I, class X> class ExpansionReference;
 template<class I, class X> class ExpansionConstReference;

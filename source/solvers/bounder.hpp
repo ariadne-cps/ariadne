@@ -59,9 +59,6 @@ class BounderBase : public BounderInterface, Loggable {
   private:
     UpperBoxType _initial(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const;
     UpperBoxType _refinement(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
-  public:
-    virtual ~BounderBase() = default;
-
 };
 
 class EulerBounder : public BounderBase {
@@ -70,34 +67,6 @@ class EulerBounder : public BounderBase {
   public:
     virtual Void write(OutputStream& os) const { os << "Euler"; }
     virtual EulerBounder* clone() const { return new EulerBounder(*this); }
-    virtual ~EulerBounder() = default;
-};
-
-class HeunBounder : public BounderBase {
-  protected:
-    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
-  public:
-    virtual Void write(OutputStream& os) const { os << "Heun"; }
-    virtual HeunBounder* clone() const { return new HeunBounder(*this); }
-    virtual ~HeunBounder() = default;
-};
-
-class RalstonBounder : public BounderBase {
-  protected:
-    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
-  public:
-    virtual Void write(OutputStream& os) const { os << "Ralston"; }
-    virtual RalstonBounder* clone() const { return new RalstonBounder(*this); }
-    virtual ~RalstonBounder() = default;
-};
-
-class RungeKutta4Bounder : public BounderBase {
-  protected:
-    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
-  public:
-    virtual Void write(OutputStream& os) const { os << "RungeKutta4"; }
-    virtual RungeKutta4Bounder* clone() const { return new RungeKutta4Bounder(*this); }
-    virtual ~RungeKutta4Bounder() = default;
 };
 
 class BounderHandle : public BounderInterface {
@@ -115,8 +84,6 @@ class BounderHandle : public BounderInterface {
     virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
         return _impl->compute(f,dom,hsug);
     }
-  public:
-    virtual ~BounderHandle() = default;
 };
 
 

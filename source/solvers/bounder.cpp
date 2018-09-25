@@ -95,34 +95,4 @@ UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVe
     return IntervalDomainType(0,h)*apply(f,arg);
 }
 
-UpperBoxType HeunBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
-    UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
-    UpperBoxType B2 = D + k1;
-    UpperBoxType BV2 = product(B2,UpperBoxType(V));
-    UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-    return (k1+k2)/2;
-}
-
-UpperBoxType RalstonBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
-    UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
-    UpperBoxType B2 = D+2*k1/3;
-    UpperBoxType BV2 = product(B2,UpperBoxType(V));
-    UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-    return (k1+3*k2)/4;
-}
-
-UpperBoxType RungeKutta4Bounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
-    UpperBoxType k1 = IntervalDomainType(0,h)*apply(f,B);
-    UpperBoxType B2 = D+k1/2;
-    UpperBoxType BV2 = product(B2,UpperBoxType(V));
-    UpperBoxType k2 = IntervalDomainType(0,h)*apply(f,BV2);
-    UpperBoxType B3 = D+k2/2;
-    UpperBoxType BV3 = product(B3,UpperBoxType(V));
-    UpperBoxType k3 = IntervalDomainType(0,h)*apply(f,BV3);
-    UpperBoxType B4 = D+k3;
-    UpperBoxType BV4 = product(B4,UpperBoxType(V));
-    UpperBoxType k4 = IntervalDomainType(0,h)*apply(f,BV4);
-    return (k1+2*k2+2*k3+k4)/6;
-}
-
 } // namespace Ariadne;

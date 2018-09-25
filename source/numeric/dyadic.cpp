@@ -208,12 +208,12 @@ mpf_t const& Dyadic::get_mpf() const {
 }
 
 double Dyadic::get_d() const {
-    if (is_nan(*this)) {
-        return std::numeric_limits<double>::quiet_NaN();
-    } else if (is_inf(*this)) {
-        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
-    } else {
+    if (is_finite(*this))
         return mpf_get_d(this->_mpf);
+    else if (is_nan(*this)) {
+        return std::numeric_limits<double>::quiet_NaN();
+    } else {
+        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
     }
 }
 

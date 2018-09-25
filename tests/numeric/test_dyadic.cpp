@@ -164,6 +164,10 @@ void TestDyadic::test_infinity() {
 
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(double_max),Dyadic(double_inf));
 
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign::POSITIVE).get_d()==std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign::NEGATIVE).get_d()==-std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_ASSERT(isnan(Dyadic::inf(Sign::ZERO).get_d()));
+
     ARIADNE_TEST_ASSERT(Dyadic(+double_inf)==Dyadic::inf(Sign(+1)));
     ARIADNE_TEST_ASSERT(Dyadic(-double_inf)==Dyadic::inf(Sign(-1)));
     ARIADNE_TEST_ASSERT(is_nan(Dyadic(double_nan)));

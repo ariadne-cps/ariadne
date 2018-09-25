@@ -63,7 +63,7 @@ FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
 }
 
 FloatMP::FloatMP(double d, MultiplePrecision pr) : FloatMP(d,MPFR_RNDN,pr) {
-    ARIADNE_ASSERT(d==this->get_d());
+    ARIADNE_ASSERT(d==this->get_d() || isnan(d));
 }
 
 FloatMP::FloatMP(FloatDP const& x, MultiplePrecision pr) : FloatMP(x.get_d(),pr) {

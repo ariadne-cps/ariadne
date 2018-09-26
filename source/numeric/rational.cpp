@@ -140,8 +140,15 @@ Rational::Rational(Integer const& z) {
 }
 
 Rational::Rational(Dyadic const& f) {
-    mpq_init(_mpq);
-    mpq_set_f(_mpq,f._mpf);
+    mpq_init(this->_mpq);
+    Rational& q=*this;
+    if (is_finite(f)) {
+        mpq_set_f(q._mpq,f._mpf);
+    } else if (is_nan(f)) {
+        ExtensionOperations<Rational>::set_nan(q);
+    } else {
+        ExtensionOperations<Rational>::set_inf(q, f>0 ? Sign::POSITIVE : Sign::NEGATIVE);
+    }
 }
 
 Rational::Rational(Integer const& znum, Integer const& zden) {

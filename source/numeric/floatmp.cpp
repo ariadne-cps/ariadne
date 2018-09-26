@@ -83,20 +83,12 @@ FloatMP::FloatMP(Int32 n, MultiplePrecision pr) {
     mpfr_set_si(_mpfr,n.get_si(),get_rounding_mode());
 }
 
-FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) {
-    mpfr_init2(_mpfr,pr);
-    if (is_finite(w)) {
-        mpfr_set_f(_mpfr,w.get_mpf(),get_rounding_mode());
-    } else if (is_nan(w)) {
-        mpfr_set_nan(_mpfr);
-    } else {
-        if (sgn(w) == Sign::POSITIVE) {
-            mpfr_set_inf(_mpfr,+1);
-        } else {
-            mpfr_set_inf(_mpfr,-1);
-        }
-    }
-    ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
+FloatMP::FloatMP(Rational const& q, MultiplePrecision pr) : FloatMP(q,get_rounding_mode(),pr) {
+
+}
+
+FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
+
 }
 
 FloatMP::FloatMP(double d, RoundingModeType rnd, MultiplePrecision pr) {
@@ -116,12 +108,32 @@ FloatMP::FloatMP(Integer const& z, RoundingModeType rnd, MultiplePrecision pr) {
 
 FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
-    mpfr_set_f(_mpfr,w.get_mpf(),rnd);
+    if (is_finite(w)) {
+        mpfr_set_f(_mpfr,w.get_mpf(),rnd);
+    } else if (is_nan(w)) {
+        mpfr_set_nan(_mpfr);
+    } else {
+        if (sgn(w) == Sign::POSITIVE) {
+            mpfr_set_inf(_mpfr,+1);
+        } else {
+            mpfr_set_inf(_mpfr,-1);
+        }
+    }
 }
 
 FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
-    mpfr_set_q(_mpfr,q.get_mpq(),rnd);
+    if (is_finite(q)) {
+        mpfr_set_q(_mpfr,q.get_mpq(),rnd);
+    } else if (is_nan(q)) {
+        mpfr_set_nan(_mpfr);
+    } else {
+        if (sgn(q) == Sign::POSITIVE) {
+            mpfr_set_inf(_mpfr,+1);
+        } else {
+            mpfr_set_inf(_mpfr,-1);
+        }
+    }
 }
 
 FloatMP::FloatMP(FloatMP const& x, RoundingModeType rnd, MultiplePrecision pr) {

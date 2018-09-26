@@ -117,6 +117,7 @@ class FloatMP {
     explicit FloatMP(PrecisionType);
     explicit FloatMP(double, PrecisionType);
     explicit FloatMP(FloatDP const&, PrecisionType);
+    explicit FloatMP(Rational const&, PrecisionType);
     explicit FloatMP(Dyadic const&, PrecisionType);
 
     FloatMP(const FloatMP&);

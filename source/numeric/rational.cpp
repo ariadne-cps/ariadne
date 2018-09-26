@@ -225,7 +225,13 @@ mpq_t const& Rational::get_mpq() const {
 }
 
 double Rational::get_d() const {
-    return mpq_get_d(this->_mpq);
+    if (is_finite(*this))
+        return mpq_get_d(this->_mpq);
+    else if (is_nan(*this)) {
+        return std::numeric_limits<double>::quiet_NaN();
+    } else {
+        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
+    }
 }
 
 Integer Rational::get_num() const {

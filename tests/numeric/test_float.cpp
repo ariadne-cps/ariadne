@@ -371,6 +371,10 @@ TestFloat<PR>::test_limits()
     ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),precision),FloatDP(pinf_d));
     ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),precision),FloatDP(ninf_d));
     ARIADNE_TEST_ASSERT(is_nan(Float(Dyadic::inf(Sign::ZERO),precision)));
+
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),upward,precision),FloatDP(pinf_d));
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),upward,precision),FloatDP(ninf_d));
+    ARIADNE_TEST_ASSERT(is_nan(Float(Dyadic::inf(Sign::ZERO),upward,precision)));
 }
 
 

@@ -636,16 +636,18 @@ FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
 FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType)
     : FloatDP(q.get_d())
 {
-    RoundingModeType old_rnd=get_rounding_mode();
-    if(rnd==ROUND_UPWARD) {
-        set_rounding_upward();
-        while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
-        set_rounding_mode(old_rnd);
-    }
-    if(rnd==ROUND_DOWNWARD) {
-        set_rounding_downward();
-        while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
-        set_rounding_mode(old_rnd);
+   if (is_finite(q)) {
+        RoundingModeType old_rnd=get_rounding_mode();
+        if(rnd==ROUND_UPWARD) {
+            set_rounding_upward();
+            while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
+            set_rounding_mode(old_rnd);
+        }
+        if(rnd==ROUND_DOWNWARD) {
+            set_rounding_downward();
+            while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
+            set_rounding_mode(old_rnd);
+        }
     }
 }
 

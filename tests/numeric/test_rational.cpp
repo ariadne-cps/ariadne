@@ -135,6 +135,7 @@ void TestRational::test_comparisons() {
 
 void TestRational::test_infinity() {
     Rational qinf=Rational::inf();
+    Rational qninf=Rational::inf(Sign::NEGATIVE);
     Rational qnan=Rational::nan();
 
     ARIADNE_TEST_ASSERT(is_nan(Rational::nan()));
@@ -215,6 +216,9 @@ void TestRational::test_infinity() {
     ARIADNE_TEST_EQUALS(max(Rational::inf(Sign(-1)),Rational(-2)),Rational(-2));
     ARIADNE_TEST_EQUALS(max(Rational(-2),Rational::inf(Sign(+1))),Rational::inf(Sign(+1)));
 
+    ARIADNE_TEST_EQUALS(Rational(Dyadic::inf(Sign::POSITIVE)),qinf);
+    ARIADNE_TEST_EQUALS(Rational(Dyadic::inf(Sign::NEGATIVE)),qninf);
+    ARIADNE_TEST_ASSERT(is_nan(Rational(Dyadic::inf(Sign::ZERO))));
 }
 
 void TestRational::test_decimal() {

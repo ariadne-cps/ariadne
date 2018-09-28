@@ -44,11 +44,14 @@ namespace Ariadne {
 static const Int DEFAULT_WIDTH = 800;
 static const Int DEFAULT_HEIGHT = 800;
 
+#ifdef HAVE_CAIRO_H
+
 static const Int LEFT_MARGIN = 160;
 static const Int BOTTOM_MARGIN = 40;
 static const Int TOP_MARGIN = 10;
 static const Int RIGHT_MARGIN = 10;
 
+#endif
 
 OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable);
 

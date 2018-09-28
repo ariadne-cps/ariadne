@@ -358,7 +358,8 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 #else
 
 SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height) {
-    throw std::runtime_error("No facilities for displaying graphics are available.");
+    ARIADNE_ERROR("No facilities for displaying graphics are available.");
+    return std::make_shared<NullCanvas>();
 }
 
 #endif

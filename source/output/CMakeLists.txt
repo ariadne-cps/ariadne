@@ -4,7 +4,7 @@ add_library(ariadne-output OBJECT
     drawer.cpp
 )
 
-if(NOT((DEFINED GTK2_FOUND)))
+if(NOT GTK2_FOUND)
     cotire(ariadne-output CONFIGURATIONS None)
 else()
     message(STATUS "cotire disabled for the output module due to conflicts with the GTK2 library.")

@@ -81,6 +81,32 @@ class CairoCanvas
     ImageSize2d size_in_pixels() const;
 };
 
+#else
+
+class NullCanvas
+    : public CanvasInterface
+{
+  public:
+    virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) { }
+    virtual Void finalise() { }
+
+    virtual Void write(const char* filename) const { }
+
+    virtual Void move_to(double x, double y) { }
+    virtual Void line_to(double x, double y) { }
+    virtual Void circle(double x, double y, double r) { }
+    virtual Void dot(double x, double y) { }
+    virtual Void stroke() { }
+    virtual Void fill() { }
+    virtual Void set_line_width(double lw) { }
+    virtual Void set_line_colour(double r, double g, double b) { }
+    virtual Void set_fill_opacity(double fo) { }
+    virtual Void set_fill_colour(double r, double g, double b) { }
+
+    virtual Vector2d scaling() const { return Vector2d(0,0); }
+    virtual Box2d bounds() const { return Box2d(0,0,0,0); }
+};
+
 #endif // HAVE_CAIRO_H
 
 } // namespace Ariadne

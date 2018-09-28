@@ -83,10 +83,6 @@ FloatMP::FloatMP(Int32 n, MultiplePrecision pr) {
     mpfr_set_si(_mpfr,n.get_si(),get_rounding_mode());
 }
 
-FloatMP::FloatMP(Rational const& q, MultiplePrecision pr) : FloatMP(q,get_rounding_mode(),pr) {
-
-}
-
 FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
 
 }

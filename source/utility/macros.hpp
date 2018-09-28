@@ -153,7 +153,14 @@
     {                                                                \
         std::cerr << "WARNING: " << msg << "" << std::endl;                \
     }
-                                                                  \
+
+#define ARIADNE_WARN_ONCE(msg)          \
+    static bool first_time=true; \
+    if(first_time) { \
+        first_time=false; \
+        std::cerr << "WARNING: " << msg << "" << std::endl; \
+    } \
+
 #define ARIADNE_ERROR(msg)          \
     {                                                                \
         std::cerr << "ERROR: " << msg << "" << std::endl;                \

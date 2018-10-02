@@ -125,7 +125,6 @@ class FloatMP {
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(Int32 n, MultiplePrecision pr);
     FloatMP(double, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
     FloatMP(Integer const&, RoundingModeType, PrecisionType);

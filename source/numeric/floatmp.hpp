@@ -75,7 +75,6 @@ inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 class FloatMP {
   private:
     mpfr_t _mpfr;
-    typedef decltype(_mpfr[0]) MpfrReference;
   public:
     typedef RawTag Paradigm;
     typedef FloatMP NumericType;
@@ -139,8 +138,7 @@ class FloatMP {
     Void set_precision(MultiplePrecision);
   public:
     FloatMP const& raw() const;
-    MpfrReference get_mpfr();
-    MpfrReference get_mpfr() const;
+    mpfr_t const& get_mpfr() const;
     double get_d() const;
   public:
     friend Bool is_nan(FloatMP const& x);

@@ -142,6 +142,7 @@ FloatMP::FloatMP(FloatMP&& x) {
     mpfr_swap(_mpfr,x._mpfr);
 }
 
+
 FloatMP& FloatMP::operator=(const FloatMP& x) {
     // TODO: Decide whether equality changes precision
     // NOTE: mpfr_set_prec clears a number, even if precision does not change
@@ -251,6 +252,10 @@ FloatMP::PrecisionType FloatMP::precision() const {
 
 double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,get_rounding_mode());
+}
+
+mpfr_t const& FloatMP::get_mpfr() const {
+    return this->_mpfr;
 }
 
 FloatMP FloatMP::nan(MultiplePrecision pr) {
@@ -714,6 +719,26 @@ FloatMP add_opp(FloatMP const& x, FloatMP const& y);
 FloatMP sub_opp(FloatMP const& x, FloatMP const& y);
 FloatMP mul_opp(FloatMP const& x, FloatMP const& y);
 FloatMP div_opp(FloatMP const& x, FloatMP const& y);
+
+
+namespace {
+
+mpfr_rnd_t to_mpfr_rnd_t(RoundingModeType rnd) {
+    switch (rnd) {
+        case ROUND_TO_NEAREST:  return MPFR_RNDN;
+        case ROUND_DOWNWARD:    return MPFR_RNDD;
+        case ROUND_UPWARD:      return MPFR_RNDU;
+        case ROUND_TOWARD_ZERO: return MPFR_RNDZ;
+        default: abort();
+    }
+}
+
+}
+
+FloatDP::FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr) : FloatDP(mpfr_get_d(d.get_mpfr(),to_mpfr_rnd_t(rnd)))
+{
+
+}
 
 template<> String class_name<FloatMP>() { return "FloatMP"; }
 

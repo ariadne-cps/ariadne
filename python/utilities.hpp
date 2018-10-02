@@ -36,7 +36,13 @@
 #include "utility/container.hpp"
 #include "utility/declarations.hpp"
 
+
+
+
 namespace Ariadne {
+
+static const char* __py_div__ = (PY_MAJOR_VERSION>=3) ? "__truediv__" : "__div__";
+static const char* __py_rdiv__ = (PY_MAJOR_VERSION>=3) ? "__rrtruediv__" : "__rdiv__";
 
 class String;
 template<class X> String class_name();
@@ -295,7 +301,7 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
     pyclass.def("__sub__", &__sub__<X,X>);
     pyclass.def("__mul__", &__mul__<X,X>);
     if constexpr(CanDivide<X,X>::value) {
-        pyclass.def("__div__", &__div__<X,X>);
+        pyclass.def(__py_div__, &__div__<X,X>);
     }
     return pyclass;
 }
@@ -308,10 +314,10 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11
     pyclass.def("__mul__", &__mul__<X,Y>);
     pyclass.def("__rmul__", &__rmul__<X,Y>);
     if constexpr(CanDivide<X,Y>::value) {
-        pyclass.def("__div__", &__div__<X,Y>);
+        pyclass.def(__py_div__, &__div__<X,Y>);
     }
     if constexpr(CanDivide<Y,X>::value) {
-        pyclass.def("__rdiv__", &__rdiv__<X,Y>);
+        pyclass.def("__py_rdiv__", &__rdiv__<X,Y>);
     }
     return pyclass;
 }
@@ -423,7 +429,7 @@ pybind11::class_<V>& define_vector_arithmetic(pybind11::module& module, pybind11
     pyclass.def("__rmul__", &__rmul__<V,X>);
     pyclass.def("__mul__", &__mul__<V,X>);
     if constexpr(CanDivide<X,X>::value) {
-        pyclass.def("__div__",__div__<V,X>);
+        pyclass.def(__py_div__,__div__<V,X>);
     }
 //    module.def("dot",  &_dot_<Vector<X>,Vector<X>>);
     return pyclass;
@@ -440,7 +446,7 @@ pybind11::class_<VX>& define_mixed_vector_arithmetic(pybind11::module& module, p
     pyclass.def("__rmul__", &__rmul__<VX,Y>);
     pyclass.def("__mul__", &__mul__<VX,Y>);
     if constexpr(CanDivide<X,Y>::value) {
-        pyclass.def("__div__",__div__<VX,Y>);
+        pyclass.def(__py_div__,__div__<VX,Y>);
     }
     module.def("dot",  &_dot_<Vector<X>,Vector<Y>>);
     module.def("dot",  &_dot_<Vector<Y>,Vector<X>>);
@@ -492,13 +498,13 @@ pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module& module,
     pyclass.def("__rmul__", &__rmul__<VA,A>);
     pyclass.def("__mul__", &__mul__<VA,A>);
     if constexpr(CanDivide<VA,A>::value) {
-        pyclass.def("__div__", &__div__<VA,A>);
+        pyclass.def(__py_div__, &__div__<VA,A>);
     }
 
     pyclass.def("__rmul__", &__rmul__<VA,X>);
     pyclass.def("__mul__", &__mul__<VA,X>);
     if constexpr(CanDivide<VA,X>::value) {
-        pyclass.def("__div__", &__div__<VA,X>);
+        pyclass.def(__py_div__, &__div__<VA,X>);
     }
     return pyclass;
 }
@@ -536,7 +542,7 @@ void export_vector(pybind11::module& module, std::string name) {
     vector_class.def("__rmul__",__rmul__<Vector<X>,X , Return<Vector<ProductType<X,X>>> >);
     vector_class.def("__mul__",__mul__<Vector<X>,X , Return<Vector<ProductType<X,X>>> >);
     if constexpr(CanDivide<X,X>::value) {
-        vector_class.def("__div__",__div__<Vector<X>,X , Return<Vector<QuotientType<X,X>>> >);
+        vector_class.def(__py_div__,__div__<Vector<X>,X , Return<Vector<QuotientType<X,X>>> >);
     }
     vector_class.def("__str__",&__cstr__<Vector<X>>);
     //vector_class.def("__repr__",&__repr__<Vector<X>>);

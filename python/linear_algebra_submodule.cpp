@@ -227,7 +227,7 @@ Void define_mixed_vector_arithmetic(pybind11::module& module, pybind11::class_<V
     vector_class.def("__sub__",__sub__<Vector<X>,Vector<Y> , Return<Vector<DifferenceType<X,Y>>> >);
     vector_class.def("__rmul__",__rmul__<Vector<X>,Y , Return<Vector<ProductType<Y,X>>> >);
     vector_class.def("__mul__",__mul__<Vector<X>,Y , Return<Vector<ProductType<X,Y>>> >);
-    vector_class.def("__div__",__div__<Vector<X>,Y , Return<Vector<QuotientType<X,Y>>> >);
+    vector_class.def(__py_div__,__div__<Vector<X>,Y , Return<Vector<QuotientType<X,Y>>> >);
     module.def("dot",  &_dot_<Vector<X>,Vector<Y>>);
     // Don't use operators self+other (as below) because of
     // below) because of need to convert result expressions to Vector<R>.
@@ -309,7 +309,7 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     covector_class.def("__sub__",__sub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >);
     covector_class.def("__rmul__",__rmul__<Covector<X>,X , Return<Covector<ProductType<X,X>>> >);
     covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >);
-    covector_class.def("__div__",__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >);
+    covector_class.def(__py_div__,__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >);
 
     module.def("transpose", (Covector<X>const&(*)(Vector<X>const&)) &transpose);
     module.def("transpose", (Vector<X>const&(*)(Covector<X>const&)) &transpose);
@@ -362,7 +362,7 @@ Void define_matrix_arithmetic(pybind11::module& module, pybind11::class_<Matrix<
     matrix_class.def("__sub__", &__sub__<Matrix<X>,Matrix<Y> , Return<Matrix<DifferenceType<X,Y>>> >);
     matrix_class.def("__mul__", &__mul__<Matrix<X>,Y , Return<Matrix<ArithmeticType<X,Y>>> >);
     matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Y , Return<Matrix<ProductType<X,Y>>> >);
-    matrix_class.def("__div__", &__div__<Matrix<X>,Y , Return<Matrix<QuotientType<X,Y>>> >);
+    matrix_class.def(__py_div__, &__div__<Matrix<X>,Y , Return<Matrix<QuotientType<X,Y>>> >);
     matrix_class.def("__mul__", &__mul__<Matrix<X>,Vector<Y> , Return<Vector<ArithmeticType<X,Y>>> >);
     matrix_class.def("__mul__", &__mul__<Matrix<X>,Matrix<Y> , Return<Matrix<ArithmeticType<X,Y>>> >);
     matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Covector<Y> , Return<Covector<ArithmeticType<X,Y>>> >);
@@ -450,7 +450,7 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
     diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
-    diagonal_matrix_class.def("__div__", &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
+    diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
     diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X> , Return<Vector<X>> >);
     diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >);
     //diagonal_matrix_class.def("__rmul__", &__mul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
@@ -459,7 +459,7 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
     //diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator+ );
     //diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator- );
     //diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator* );
-    //diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
+    //diagonal_matrix_class.def(__py_div__, (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
     //diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,Vector<X>)) operator* );
     //diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,Matrix<X>)) operator* );
     //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);

@@ -162,6 +162,7 @@ template<> class Bounds<Dyadic> {
     Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
     template<class X, EnableIf<IsConstructible<Dyadic,X>> =dummy> Bounds<Dyadic>(Bounds<X> const& x)
         : DyadicBounds(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
+    operator ValidatedNumber() const;
     Bounds<Dyadic> pm(Dyadic e) { return DyadicBounds(_l-e,_u+e); }
     Dyadic lower_raw() const { return _l; }
     Dyadic upper_raw() const { return _u; }

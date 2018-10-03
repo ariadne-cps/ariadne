@@ -79,6 +79,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveFl
 
 Dyadic cast_exact(double d) { return Dyadic(ExactDouble(d)); }
 
+inline Dyadic operator/(Dyadic x, Two w) { return Dyadic(x/(w^1)); }
+
 
 template<class L> Bool decide(L l) { return Ariadne::decide(l); }
 template<class L> Bool definitely(L l) { return Ariadne::definitely(l); }
@@ -225,6 +227,16 @@ void export_dyadic(pymodule& module)
 
     implicitly_convertible<int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
+
+    pybind11::class_<Two> two_class(module,"Two");
+    two_class.def("__pow__", &__pow__<Two,Int>);
+    two_class.def(__py_rdiv__, &__rdiv__<Two,Dyadic, Return<Dyadic>>);
+    dyadic_class.def(__py_div__, &__div__<Dyadic,Two, Return<Dyadic>>);
+    module.attr("two") = Two();
+
+    pybind11::class_<TwoExp> two_exp_class(module,"TwoExp");
+    two_exp_class.def(__py_rdiv__, &__rdiv__<TwoExp,Dyadic, Return<Dyadic>>);
+    dyadic_class.def(__py_div__, &__div__<Dyadic,TwoExp, Return<Dyadic>>);
 
     module.def("cast_exact",(Dyadic(*)(double)) &cast_exact);
 }

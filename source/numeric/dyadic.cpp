@@ -225,16 +225,15 @@ Dyadic operator-(TwoExp y) {
     return -Dyadic(y);
 }
 
-Dyadic operator*(Integer z, TwoExp w) {
-    Dyadic r(z);
+Dyadic operator*(Dyadic x, TwoExp w) {
     const int q=w.exponent();
-    if(q>=0) { mpf_mul_2exp(r._mpf,r._mpf,static_cast<mp_bitcnt_t>(q)); }
-    else { mpf_div_2exp(r._mpf,r._mpf,static_cast<mp_bitcnt_t>(-q)); }
-    return r;
+    if(q>=0) { mpf_mul_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(q)); }
+    else { mpf_div_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(-q)); }
+    return x;
 }
 
-Dyadic operator/(Integer z, TwoExp w) {
-    return z*rec(w);
+Dyadic operator/(Dyadic x, TwoExp w) {
+    return x*rec(w);
 }
 
 OutputStream& operator<<(OutputStream& os, TwoExp w) {

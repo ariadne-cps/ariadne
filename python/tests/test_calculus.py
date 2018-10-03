@@ -21,37 +21,42 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
 
-d=Float(2.5)
-i=Interval(1.5,1.75)
+def test_calculus():
 
-bx=Box([{1:3},{-1:2},{-3:3}])
+    dp=DoublePrecision()
 
-swp = ThresholdSweeper(1e-8);
+    cy=ValidatedNumber(2)
+    cx=FloatDPBounds(2,dp)
 
-c=ScalarTaylorFunction.constant(bx,1.5,swp)
-x=ScalarTaylorFunction.coordinate(bx,0,swp)
-y=ScalarTaylorFunction.coordinate(bx,1,swp)
-v=VectorTaylorFunction.identity(bx,swp)
-y=v[1]
-t=5+2*x+y
+    bx=ExactBox([{Dyadic(1):3},{-1:2},{-3:3}])
 
-+t; -t; t+t; t-t; t*t; t/t;
-+t; -t; t+t; t-t; t*t;
-t+d; t-d; t*d; t/d;
-d+t; d-t; d*t;
-t+i; t-i; t*i; t/i;
-i+i; i-t; i*t;
+    swp = ThresholdSweeper(1e-8);
 
-derivative(t,0)
-antiderivative(t,0)
+    tc=ScalarTaylorFunction.constant(bx,dec(1.5),swp)
+    tx=ScalarTaylorFunction.coordinate(bx,0,swp)
+    ty=ScalarTaylorFunction.coordinate(bx,1,swp)
+    tid=VectorTaylorFunction.identity(bx,swp)
+    ty=tid[1]
 
-f=VectorTaylorFunction([x,c,y])
-g=ScalarTaylorFunction(t)
-compose(f,f); compose(g,f)
+    t=5+2*tx+ty
 
-p=RealVectorFunction.identity(3)
-q=RealScalarFunction.coordinate(3,1)
-compose(p,f); compose(q,f)
+    +t; -t; t+t; t-t; t*t; t/t;
+    +t; -t; t+t; t-t; t*t;
+    t+cy; t-cy; t*cy; t/cy;
+    cy+t; cy-t; cy*t;
+    t+cx; t-cx; t*cx; t/cx;
+    cx+cx; cx-t; cx*t;
 
+    derivative(t,0)
+    antiderivative(t,0)
+
+    f=VectorTaylorFunction([x,c,y])
+    g=ScalarTaylorFunction(t)
+    compose(f,f); compose(g,f)
+
+    p=RealVectorFunction.identity(3)
+    q=RealScalarFunction.coordinate(3,1)
+    compose(p,f); compose(q,f)
+
+test_calculus()

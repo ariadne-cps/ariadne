@@ -22,12 +22,13 @@
 
 from ariadne import *
 
-fo=RealScalarFunction(2)
-fx=RealScalarFunction.coordinate(2,0)
-fy=RealScalarFunction.coordinate(2,1)
 
-fn=IntervalVectorFunction([fx+fy,fy])
-b=IntervalVector([[-1,+1],[-1,+1]])
+fo=EffectiveScalarMultivariateFunction(2)
+fx=EffectiveScalarMultivariateFunction.coordinate(2,0)
+fy=EffectiveScalarMultivariateFunction.coordinate(2,1)
+
+fn=ValidatedVectorMultivariateFunction([fx+fy,fy])
+b=ExactBox([{-1:+1},{-1:+1}])
 
 solver=IntervalNewtonSolver(1e-8,12)
 solver.solve(fn,b)
@@ -35,14 +36,16 @@ solver.solve(fn,b)
 solver=KrawczykSolver(1e-8,12)
 solver.solve(fn,b)
 
-d=IntervalVector([[-1,+1],[-1,+1]])
-h=Float(0.25)
+d=ExactBox([{-1:+1},{-1:+1}])
+h=Dyadic(0.25)
+h=FloatDP(h,DoublePrecision())
 
-vf=RealVectorFunction([fo,fx])
+vf=EffectiveVectorMultivariateFunction([fo,fx])
+vf=ValidatedVectorMultivariateFunction(vf)
 integrator=TaylorPicardIntegrator(1e-8)
 integrator.flow_step(vf,d,h)
 
-vf=IntervalVectorFunction([fo,fx])
+vf=ValidatedVectorMultivariateFunction([fo,fx])
 integrator=TaylorSeriesIntegrator(1e-8)
 integrator.flow_step(vf,d,h)
 

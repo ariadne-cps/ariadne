@@ -21,28 +21,35 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
 
-r=Real(1.75)
+def test_function():
 
-c=RealScalarFunction.constant(3,1.5)
-x=RealScalarFunction.coordinate(3,0)
-y=RealScalarFunction.coordinate(3,1)
-id=RealVectorFunction.identity(3)
+    def dec(x): return Decimal(x)
 
-p=x+y
+    dp = DoublePrecision()
+    r=Real(Decimal(1.75))
 
-+p; -p; p+p; p-p; p*p;
-p+r; p-r; p*r; p/r;
-r+p; r-p; r*p;
+    c=EffectiveScalarMultivariateFunction.constant(3,r)
+    x=EffectiveScalarMultivariateFunction.coordinate(3,0)
+    y=EffectiveScalarMultivariateFunction.coordinate(3,1)
+    id=EffectiveVectorMultivariateFunction.identity(3)
 
-derivative(p,0)
+    p=x+y
 
-b=Box([{0:0.25},{0.25:0.50},{0.50:0.75}])
-f=RealVectorFunction([c,x,y])
-g=RealScalarFunction(p)
+    +p; -p; p+p; p-p; p*p;
+    p+r; p-r; p*r; p/r;
+    #r+p; r-p; r*p;
 
-join(g,g); join(f,g); join(g,f); join(f,f)
-compose(g,f); compose(f,f)
-evaluate(f,b); evaluate(g,b)
+    derivative(p,0)
 
+#    b=ExactBox([{0:dec(0.25)},{dec(0.25):dec(0.50)},{dec(0.50):dec(0.75)}])
+    b=FloatDPBoundsVector([1,2,3],dp)
+    f=EffectiveVectorMultivariateFunction([c,x,y])
+    g=EffectiveScalarMultivariateFunction(p)
+
+    join(g,g); join(f,g); join(g,f); join(f,f)
+    compose(g,f); compose(f,f)
+    evaluate(f,b);
+    evaluate(g,b)
+
+test_function()

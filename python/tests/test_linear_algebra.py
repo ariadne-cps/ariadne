@@ -13,7 +13,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR Aa PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -21,65 +21,71 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
-FVector=FloatVector
-IVector=IntervalVector
-FMatrix=FloatMatrix
-IMatrix=IntervalMatrix
 
-n=2
-d=2.125
-one=Float(1.000)
-x=Float(2.125)
-ix=Interval(2.00,2.25)
-v=FloatVector(2)
-v=FloatVector(v)
-v=FloatVector([1.125,2.125])
-v=FloatVector([1.125,x])
-iv=IntervalVector(2)
-iv=IntervalVector(v)
-iv=IntervalVector([1.125,2.125])
-iv=IntervalVector([{2:3},{3:4}])
-iv=IntervalVector(iv)
-#cv=Covector([1.125,x])
-#icv=IntervalCovector([1.125,x])
-A=FloatMatrix(2,2)
-A=FloatMatrix(A)
-A=FloatMatrix([[x,1],[1.0,one]])
-#iA=IntervalMatrix([["[1.875,2.125]","[0.875,1.125]"],["[0.875,1.125]","[0.875,1.125]"]])
-iA=IntervalMatrix([[{1.875:2.125},{0.875:1.125}],[{0.875:1.125},{0.875:1.125}]])
+def test_linear_algebra():
+    Precision=DoublePrecision
+    ApproximateScalar=FloatDPApproximation
+    ValidatedScalar=FloatDPBounds
+    ExactScalar=FloatDPValue
+    ApproximateVector=FloatDPApproximationVector
+    ValidatedVector=FloatDPBoundsVector
+    ApproximateMatrix=FloatDPApproximationMatrix
+    ValidatedMatrix=FloatDPBoundsMatrix
 
-(-v,-iv)
-(v+v,v+iv,iv+v,iv+iv)
-(v-v,v-iv,iv-v,iv-iv)
-(x*v,x*iv,ix*v,ix*iv)
-(v*x,iv*x,v*ix,iv*ix)
-(v/x,iv/x,v/ix,iv/ix)
+    n=2
+    d=2.125
+    pr=Precision()
+    one=ExactScalar(1.000,pr)
+    xa=ApproximateScalar(2.125,pr)
+    xb=ValidatedScalar(2.00,2.25,pr)
+    va=ApproximateVector(2)
+    va=ApproximateVector(va)
+    va=ApproximateVector([1.125,2.125])
+    va=ApproximateVector([1.125,x])
+    vb=BoundsVector(2)
+    vb=BoundsVector(va)
+    vb=BoundsVector([1.125,2.125])
+    vb=BoundsVector([{2:3},{3:4}])
+    vb=BoundsVector(vb)
+    #cv=Covector([1.125,x])
+    #icv=IntervalCovector([1.125,x])
+    Aa=ApproximateMatrix(2,2)
+    Aa=ApproximateMatrix(Aa)
+    Aa=ApproximateMatrix([[x,1],[1.0,one]])
+    #Ab=BoundsMatrix([["[1.875,2.125]","[0.875,1.125]"],["[0.875,1.125]","[0.875,1.125]"]])
+    Ab=BoundsMatrix([[{1.875:2.125},{0.875:1.125}],[{0.875:1.125},{0.875:1.125}]])
 
-(n*v,n*iv,v*n,iv*n,v/n,iv/n)
-(d*v,d*iv,v*d,iv*d,v/d,iv/d)
+    (-va,-vb)
+    (va+va,va+vb,vb+va,vb+vb)
+    (va-va,va-vb,vb-va,vb-vb)
+    (x*va,x*vb,ix*va,ix*vb)
+    (va*x,vb*x,va*ix,vb*ix)
+    (va/x,vb/x,va/ix,vb/ix)
 
-#(-cv,-icv)
-#(cv+cv,cv+icv,icv+cv,icv+icv)
-#(cv-cv,cv-icv,icv-cv,icv-icv)
-#(x*cv,x*icv,ix*cv,ix*icv)
-#(cv*x,icv*x,cv*ix,icv*ix)
-#(cv/x,icv/x,cv/ix,icv/ix)
+    (n*va,n*vb,va*n,vb*n,va/n,vb/n)
+    (d*va,d*vb,va*d,vb*d,va/d,vb/d)
 
-#(n*cv,n*icv,cv*n,icv*n,cv/n,icv/n)
-#(d*cv,d*icv,cv*d,icv*d,cv/d,icv/d)
+    #(-cv,-icv)
+    #(cv+cv,cv+icv,icv+cv,icv+icv)
+    #(cv-cv,cv-icv,icv-cv,icv-icv)
+    #(x*cv,x*icv,ix*cv,ix*icv)
+    #(cv*x,icv*x,cv*ix,icv*ix)
+    #(cv/x,icv/x,cv/ix,icv/ix)
 
-(-A,-iA)
-(A+A,A+iA,iA+A,iA+iA)
-(A-A,A-iA,iA-A,iA-iA)
-(x*A,x*iA,ix*A,ix*iA)
-(A*x,iA*x,A*ix,iA*ix)
-(A/x,iA/x,A/ix,iA/ix)
+    #(n*cv,n*icv,cv*n,icv*n,cv/n,icv/n)
+    #(d*cv,d*icv,cv*d,icv*d,cv/d,icv/d)
 
-(n*A,n*iA,A*n,iA*n,A/n,iA/n)
-(d*A,d*iA,A*d,iA*d,A/d,iA/d)
+    (-Aa,-Ab)
+    (Aa+Aa,Aa+Ab,Ab+Aa,Ab+Ab)
+    (Aa-Aa,Aa-Ab,Ab-Aa,Ab-Ab)
+    (x*Aa,x*Ab,ix*Aa,ix*Ab)
+    (Aa*x,Ab*x,Aa*ix,Ab*ix)
+    (Aa/x,Ab/x,Aa/ix,Ab/ix)
 
-#(cv*v,icv*v,cv*iv,icv*iv)
-(A*v,iA*v,A*iv,iA*iv)
-#(cv*A,icv*A,cv*iA,icv*iA)
-(A*A,iA*A,A*iA,iA*iA)
+    (n*Aa,n*Ab,Aa*n,Ab*n,Aa/n,Ab/n)
+    (d*Aa,d*Ab,Aa*d,Ab*d,Aa/d,Ab/d)
+
+    #(cv*va,icv*va,cv*vb,icv*vb)
+    (Aa*va,Ab*va,Aa*vb,Ab*vb)
+    #(cv*Aa,icv*Aa,cv*Ab,icv*Ab)
+    (Aa*Aa,Ab*Aa,Aa*Ab,Ab*Ab)

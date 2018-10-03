@@ -256,7 +256,7 @@ void export_dyadic(pymodule& module)
     implicitly_convertible<Integer,Dyadic>();
     implicitly_convertible<Dyadic,ExactNumber>();
     implicitly_convertible<Dyadic,ValidatedNumber>();
-    
+
     pybind11::class_<Two> two_class(module,"Two");
     two_class.def("__pow__", &__pow__<Two,Int>);
     two_class.def(__py_rdiv__, &__rdiv__<Two,Dyadic, Return<Dyadic>>);
@@ -541,9 +541,11 @@ template<class PR> void export_raw_float(pymodule& module)
 template<class PR> void export_float_value(pymodule& module)
 {
     pybind11::class_<FloatValue<PR>> float_value_class(module,("Float"+numeric_class_tag<PR>()+"Value").c_str());
+    float_value_class.def(init<PR>());
     float_value_class.def(init<RawFloat<PR>>());
     float_value_class.def(init<int>());
     float_value_class.def(init<double>());
+//    float_value_class.def(init<ExactDouble>());
     float_value_class.def(init<Integer,PR>());
     float_value_class.def(init<Dyadic,PR>());
     float_value_class.def(init<FloatValue<PR>>());
@@ -578,6 +580,7 @@ template<class PR> void export_float_value(pymodule& module)
 template<class PRE> void export_float_error(pymodule& module)
 {
     pybind11::class_<FloatError<PRE>> float_error_class(module,("Float"+numeric_class_tag<PRE>()+"Error").c_str());
+    float_error_class.def(init<PRE>());
     float_error_class.def(init<RawFloat<PRE>>());
     float_error_class.def(init<uint>());
     float_error_class.def(init<double>());
@@ -601,6 +604,7 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
 {
     String tag = IsSame<PR,PRE>::value ? numeric_class_tag<PR>() : numeric_class_tag<PR>()+numeric_class_tag<PRE>();
     pybind11::class_<FloatBall<PR,PRE>> float_ball_class(module,("Float"+tag+"Ball").c_str());
+    float_ball_class.def(init<PR,PRE>());
     float_ball_class.def(init<RawFloat<PR>,RawFloat<PRE>>());
     float_ball_class.def(init<FloatValue<PR>,FloatError<PRE>>());
     float_ball_class.def(init<Real,PR>());
@@ -640,6 +644,7 @@ template<class PR> void export_float_bounds(pymodule& module)
 {
     pybind11::class_<FloatBounds<PR>> float_bounds_class(module,("Float"+numeric_class_tag<PR>()+"Bounds").c_str());
     float_bounds_class.def(init<PR>());
+    float_bounds_class.def(init<RawFloat<PR>>());
     float_bounds_class.def(init<RawFloat<PR>,RawFloat<PR>>());
     float_bounds_class.def(init<double,double>());
     float_bounds_class.def(init<FloatLowerBound<PR>,FloatUpperBound<PR>>());
@@ -681,6 +686,7 @@ template<class PR> void export_float_bounds(pymodule& module)
 template<class PR> void export_float_upper_bound(pymodule& module)
 {
     pybind11::class_<FloatUpperBound<PR>> float_upper_bound_class(module,("Float"+numeric_class_tag<PR>()+"UpperBound").c_str());
+    float_upper_bound_class.def(init<PR>());
     float_upper_bound_class.def(init<RawFloat<PR>>());
     float_upper_bound_class.def(init<int>());
     float_upper_bound_class.def(init<double>());
@@ -722,6 +728,7 @@ template<class PR> void export_float_upper_bound(pymodule& module)
 template<class PR> void export_float_lower_bound(pymodule& module)
 {
     pybind11::class_<FloatLowerBound<PR>> float_lower_bound_class(module,("Float"+numeric_class_tag<PR>()+"LowerBound").c_str());
+    float_lower_bound_class.def(init<PR>());
     float_lower_bound_class.def(init<RawFloat<PR>>());
     float_lower_bound_class.def(init<int>());
     float_lower_bound_class.def(init<double>());
@@ -770,6 +777,7 @@ template<class PR> void export_float_approximation(pymodule& module)
     if(IsSame<PR,DoublePrecision>::value) {
         float_approximation_class.def(init<double>());
     }
+    float_approximation_class.def(init<PR>());
     float_approximation_class.def(init<double,PR>());
     float_approximation_class.def(init<RawFloat<PR>>());
     float_approximation_class.def(init<Real,PR>());

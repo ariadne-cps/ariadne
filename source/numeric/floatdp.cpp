@@ -634,7 +634,7 @@ FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
 }
 
 FloatDP::FloatDP(Integer const& x, RoundingModeType rnd, PrecisionType pr)
-    : FloatDP(Rational(x),rnd,pr)
+    : FloatDP(Dyadic(x),rnd,pr)
 {
 }
 

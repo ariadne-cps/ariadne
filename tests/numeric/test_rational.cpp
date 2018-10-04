@@ -68,10 +68,11 @@ void TestRational::test()
 
 void TestRational::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5; Dyadic w=z;
-    Rational q; Boolean b;
+    Rational q, q2; Boolean b;
 
     q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z); q=Rational(z);
-    q=m; q=lm; q=n; q=ln; q=z; q=q;
+    q2=Rational();
+    q=m; q=lm; q=n; q=ln; q=z; q=q2;
 
     q=+q; q=-q;
     q=q+q; q=q-q; q=q*q; q=q/q;

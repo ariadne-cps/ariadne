@@ -151,9 +151,10 @@ TestNumber<Y>::test_concept()
     Y y;
     y=Y(2);
     y=3;
+    Y y2(1);
 
     y=y+y; y=y-y; y=y*y; y=y/y;
-    y+=y; y-=y; y*=y; y/=y;
+    y+=y2; y-=y2; y*=y2; y/=y2;
     y=abs(y); y=max(y,y); y=min(y,y);
     y=add(y,y); y=sub(y,y); y=mul(y,y); y=div(y,y);
     y=sqrt(y); y=exp(y); y=log(y); y=atan(y);

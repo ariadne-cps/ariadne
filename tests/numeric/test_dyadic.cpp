@@ -63,10 +63,11 @@ void TestDyadic::test()
 
 void TestDyadic::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Dyadic w; Boolean b;
+    Dyadic w, w2; Boolean b;
 
     w=Dyadic(); w=Dyadic(m); w=Dyadic(lm); w=Dyadic(n); w=Dyadic(ln); w=Dyadic(z); w=Dyadic(z);
-    w=m; w=lm; w=n; w=ln; w=z; w=w;
+    w2=Dyadic();
+    w=m; w=lm; w=n; w=ln; w=z; w=w2;
 
     w=+w; w=-w;
     w=w+w; w=w-w; w=w*w;

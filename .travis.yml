@@ -124,7 +124,7 @@ script:
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && make'; fi  
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && ./rigorous_numerics_tutorial > /dev/null'; fi
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'mkdir ~/tutorials/python && cp -Rf python/tutorials/ ~/tutorials/python'; fi    
-  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/python && python'$PYTHON' -m tutorial.py > /dev/null'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/python && python'$PYTHON' tutorial.py > /dev/null'; fi  
   
 after_success:
   - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi

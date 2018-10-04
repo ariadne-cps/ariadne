@@ -595,7 +595,7 @@ ValidatedVectorFunctionModelDP
 HybridEvolverBase::
 _compute_flow(EffectiveVectorFunction dynamic,
               ExactBoxType const& initial_box,
-              const FloatDPValue& maximum_step_size) const
+              const StepSizeType& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
 
@@ -608,13 +608,13 @@ _compute_flow(EffectiveVectorFunction dynamic,
     // We then restrict to the time domain [0,h] since this can make evaluation
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
-    FloatDPValue step_size=maximum_step_size;
-    ValidatedVectorFunctionModelDP flow_model=integrator.flow_step(dynamic,initial_box,step_size.raw());
+    StepSizeType step_size=maximum_step_size;
+    ValidatedVectorFunctionModelDP flow_model=integrator.flow_step(dynamic,initial_box,step_size);
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     ExactIntervalVectorType flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
-    flow_domain[flow_domain.size()-1u]=ExactIntervalType(zero,step_size);
+    flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
     flow_model=restrict(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
@@ -809,7 +809,8 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                         ValidatedScalarFunctionModelDP reduced_critical_time=INTERVAL_REDUCTION_FACTOR * critical_time;
                         HybridEnclosure evolve_set_at_reduced_critical_time=initial_set;
                         evolve_set_at_reduced_critical_time.apply_space_evolve_step(flow,reduced_critical_time);
-                        HybridEnclosure evolve_set_at_upper_reduced_critical_time=initial_set; evolve_set_at_upper_reduced_critical_time.apply_fixed_evolve_step(flow,cast_exact(reduced_critical_time.range().upper()));
+                        HybridEnclosure evolve_set_at_upper_reduced_critical_time=initial_set;
+                        evolve_set_at_upper_reduced_critical_time.apply_fixed_evolve_step(flow,static_cast<StepSizeType>(cast_exact(reduced_critical_time.range().upper())));
                         ARIADNE_LOG(8,"guard_range_at_initial_time="<<initial_set.range_of(guard)<<"\n");
                         ARIADNE_LOG(8,"guard_range_at_reduced_critical_time="<<evolve_set_at_reduced_critical_time.range_of(guard)<<"\n");
                         ARIADNE_LOG(8,"guard_derivative_range_at_initial_time="<<initial_set.range_of(guard_derivative)<<"\n");
@@ -1307,7 +1308,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
 
     // Compute flow and actual time step size used
-    const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,FloatDPValue(this->configuration().maximum_step_size()));
+    const FlowFunctionModel flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->configuration().maximum_step_size());
     ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
 
     // Compute possibly active events
@@ -1595,13 +1596,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 {
     // Compute the evolution time for the given step.
     ARIADNE_LOG(7,"HybridEvolverBase::_estimate_timing(...)\n");
-    const FloatDPValue step_size=static_cast<FloatDPValue>(flow.domain()[flow.domain().size()-1].upper());
+    const StepSizeType step_size=static_cast<StepSizeType>(flow.domain()[flow.domain().size()-1].upper());
     TimingData result;
     result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
     result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
     result.step_size=step_size;
     result.final_time=final_time;
-    result.evolution_time_domain=ExactIntervalType(zero,step_size);
+    result.evolution_time_domain=ExactIntervalType(0,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
     result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),FloatDPValue(result.step_size));
     ARIADNE_LOG(8,"  timing_data="<<result<<"\n");

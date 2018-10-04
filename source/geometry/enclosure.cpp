@@ -480,10 +480,10 @@ Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactIntervalType time)
 }
 */
 
-Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, FloatDPValue time)
+Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, StepSizeType time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    ValidatedScalarFunctionModelDP evolve_time_function=this->function_factory().create_constant(this->domain(),FloatDPValue(time));
+    ValidatedScalarFunctionModelDP evolve_time_function=this->function_factory().create_constant(this->domain(),time);
     this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;

@@ -383,7 +383,7 @@ Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const FloatDPValue& elps)
+Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const StepSizeType& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }

@@ -47,6 +47,10 @@ struct FlowTimeStepException : public std::runtime_error {
 };
 
 //! \ingroup SolverModule EvaluationModule
+//! \brief The type to use for the size of a step of a continuous (or hybrid) system.
+typedef Dyadic StepSizeType;
+
+//! \ingroup SolverModule EvaluationModule
 //! \brief Interface for integrating differential equations of the form \f$\dt{x}=f(x)\f$.
 class IntegratorInterface
 {
@@ -69,10 +73,10 @@ class IntegratorInterface
     //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{\max}\f$ is the \a maximum_time_step.
-    virtual Pair<FloatDPValue,UpperBoxType>
+    virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const RawFloatDP& maximum_time_step) const = 0;
+                const StepSizeType& maximum_time_step) const = 0;
 
     //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, where \f$h\f$ is a time step which is taken to be equal to \f$h_\mathrm{sug}\f$ if possible. The value of \f$h_\mathrm{sug}\f$ is overwritten with \f$h\f$, the actual time step used.
     //! <br>
@@ -82,7 +86,7 @@ class IntegratorInterface
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              RawFloatDP& suggested_time_step) const = 0;
+              StepSizeType& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, assuming that the flow remains in \f$B\f$.
     //! If the flow does not remain in \f$B\f$, then \f$\hat{\phi}(x,t)\f$ may not be a bound for \f$\phi(x,t)\f$ if \f$\exists \tau\in[0,t],\ \phi(x,\tau)\not\in B\f$.
@@ -96,7 +100,7 @@ class IntegratorInterface
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const FloatDPValue& time_step,
+              const StepSizeType& time_step,
               const UpperBoxType& state_bounding_box) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$.

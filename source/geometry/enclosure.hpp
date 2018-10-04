@@ -60,6 +60,8 @@ class PavingInterface;
 
 typedef Constraint<ValidatedScalarFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
 
+typedef Dyadic StepSizeType;
+
 struct EnclosureConfiguration {
     ValidatedFunctionModelDPFactory _function_factory;
     Paver _paver;
@@ -168,7 +170,7 @@ class Enclosure
     //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, FloatDPValue h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.

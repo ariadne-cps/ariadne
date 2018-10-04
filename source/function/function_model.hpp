@@ -169,6 +169,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     typedef IntervalDomainType C;
   public:
     typedef ScalarFunction<P,D> GenericType;
+    typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
@@ -198,6 +199,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
 //    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarTaylorFunctionModelDP& f);
 
+    inline PrecisionType const precision() const { return this->_ptr->value().precision(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
         return this->_ptr->_evaluate(x); }
@@ -224,6 +226,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
   public:
     friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
         return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+    friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+        return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
 
     friend NormType norm(const ScalarFunctionModel<P,D,PR,PRE>& f) {
         return f._ptr->_norm(); }
@@ -398,6 +402,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
   public:
     clone_on_copy_ptr< VectorFunctionModelInterface<P,D,PR,PRE> > _ptr;
   public:
+    typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
@@ -435,6 +440,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline VectorFunctionModelElement<P,D,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,D,PR,PRE>(this,i); }
     inline VectorFunctionModel<P,D,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,D,PR,PRE> r=factory(*this).create_zeros(rng.size());
         for(SizeType i=0; i!=rng.size(); ++i) { r[i]=this->operator[](rng[i]); } return r; }
+    inline PrecisionType const precision() const { return this->get(0).precision(); }
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
@@ -558,6 +564,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
 
     friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
         return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+        return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
 
     friend OutputStream& operator<<(OutputStream& os, const VectorFunctionModel<P,D,PR,PRE>& f) {
         return os <<  f.operator VectorFunction<P>(); }

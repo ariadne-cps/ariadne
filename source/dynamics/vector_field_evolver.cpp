@@ -232,7 +232,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     const FunctionType& dynamic=_sys_ptr->function();
 
     // Set evolution parameters
-    const FloatDPValue maximum_step_size=this->_configuration->maximum_step_size();
+    const StepSizeType maximum_step_size=this->_configuration->maximum_step_size();
     //const FloatDP maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
     //const FloatDP zero_time=0.0;
 
@@ -245,8 +245,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     // TODO: Modify this for general integrator interface
     //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
-    FloatDPValue step_size=maximum_step_size;
-    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size.raw());
+    StepSizeType step_size=maximum_step_size;
+    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
     FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
@@ -256,8 +256,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     TimeStepType next_time=current_time+TimeStepType(step_size);
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
-    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(FloatDPValue(0.0),step_size))<<"\n");
-    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(FloatDPValue(0.0),step_size)));
+    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0,step_size))<<"\n");
+    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0,step_size)));
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     EnclosureType next_set_model=apply(flow_step_model,current_set_model);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
@@ -275,7 +275,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
-    maximum_step_size(1.0);
+    maximum_step_size(1);
     maximum_enclosure_radius(100.0);
     enable_reconditioning(true);
     maximum_spacial_error(1e-2);

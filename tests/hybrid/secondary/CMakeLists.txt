@@ -9,4 +9,5 @@ foreach(TEST ${UNIT_TESTS})
     set_property(TEST ${TEST} PROPERTY LABELS "hybrid;secondary") 
 endforeach()
 
+add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})

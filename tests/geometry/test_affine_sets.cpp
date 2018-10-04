@@ -48,7 +48,7 @@ inline FloatDPBounds operator/(Int n1, FloatDPValue x2) { return FloatDPValue(n1
 }
 
 struct ExactFloatVector2d : ExactFloatVector, Vector2d {
-    ExactFloatVector2d(double x, double y) : ExactFloatVector{FloatDPValue(x),FloatDPValue(y)}, Vector2d(x,y) { }
+    ExactFloatVector2d(double vx, double vy) : ExactFloatVector{FloatDPValue(vx),FloatDPValue(vy)}, Vector2d(vx,vy) { }
 };
 
 class TestAffineSet

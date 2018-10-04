@@ -41,8 +41,8 @@
 
 namespace Ariadne {
 
-static const char* __py_div__ = (PY_MAJOR_VERSION>=3) ? "__truediv__" : "__div__";
-static const char* __py_rdiv__ = (PY_MAJOR_VERSION>=3) ? "__rtruediv__" : "__rdiv__";
+#define __py_div__ (PY_MAJOR_VERSION>=3) ? "__truediv__" : "__div__"
+#define __py_rdiv__ (PY_MAJOR_VERSION>=3) ? "__rtruediv__" : "__rdiv__"
 
 class String;
 template<class X> String class_name();

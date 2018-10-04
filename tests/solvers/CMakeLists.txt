@@ -14,4 +14,5 @@ foreach(TEST ${UNIT_TESTS})
 endforeach()
 
 add_dependencies(tests-kernel ${UNIT_TESTS})
+add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})

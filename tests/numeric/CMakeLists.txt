@@ -19,6 +19,7 @@ endforeach()
 
 add_dependencies(tests-core ${UNIT_TESTS})
 add_dependencies(tests-kernel ${UNIT_TESTS})
+add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})
 
 #add_library(check_numeric OBJECT check_numeric.cpp)

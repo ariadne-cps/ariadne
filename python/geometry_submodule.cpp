@@ -138,6 +138,7 @@ class LocatedSetWrapper
 
 using namespace Ariadne;
 
+
 template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
     typedef typename IVL::LowerBoundType LB;
     typedef typename IVL::UpperBoundType UB;
@@ -145,9 +146,20 @@ template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
     pybind11::detail::dict_iterator::reference item = *dct.begin();
     pybind11::handle lh = item.first;
     pybind11::handle uh = item.second;
+    if constexpr (IsConstructibleGivenDefaultPrecision<UB,Dyadic>::value) {
+        typedef PrecisionType<UB> PR; PR pr;
+        try {
+            LB lb(pybind11::cast<Dyadic>(lh),pr);
+            UB ub(pybind11::cast<Dyadic>(uh),pr);
+            return IVL(lb,ub);
+        }
+        catch(pybind11::cast_error) {
+        }
+    }
     LB lb = pybind11::cast<LB>(lh);
     UB ub = pybind11::cast<UB>(uh);
     return IVL(lb,ub);
+
 }
 
 template<class BX> BX box_from_list(pybind11::list lst) {
@@ -227,6 +239,9 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
 
     if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
         interval_class.def(pybind11::init<DyadicInterval>());
+    }
+    if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
+        interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
     }
 
     if constexpr (HasEquality<IVL,IVL>::value) {
@@ -520,10 +535,6 @@ Void geometry_submodule(pybind11::module& module) {
 
     export_constraint_set(module);
     export_constrained_image_set(module);
-
-    module.def("foo",[](){return Array<Dyadic>({2,3,5});});
-    module.def("food",[](Array<Dyadic> const& ary){return;});
-
 
 }
 

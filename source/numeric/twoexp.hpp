@@ -54,8 +54,8 @@ class TwoExp {
     friend TwoExp rec(TwoExp w) { return TwoExp(-w._n); }
     friend Dyadic operator+(TwoExp);
     friend Dyadic operator-(TwoExp);
-    friend Dyadic operator*(Integer, TwoExp);
-    friend Dyadic operator/(Integer, TwoExp);
+    friend Dyadic operator*(Dyadic, TwoExp);
+    friend Dyadic operator/(Dyadic, TwoExp);
     friend OutputStream& operator<<(OutputStream& os, TwoExp);
 };
 

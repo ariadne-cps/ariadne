@@ -223,7 +223,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
   public:
   public:
     friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        return f._ptr->_partial_evaluate(j,c); }
+        return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
 
     friend NormType norm(const ScalarFunctionModel<P,D,PR,PRE>& f) {
         return f._ptr->_norm(); }

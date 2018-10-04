@@ -33,6 +33,8 @@
 #include "algebra/matrix.hpp"
 #include "algebra/diagonal_matrix.hpp"
 
+#include "algebra/matrix.tpl.hpp"
+
 using namespace Ariadne;
 
 namespace Ariadne {
@@ -210,6 +212,15 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
     vector_class.def_static("unit",&Vector<X>::unit);
     vector_class.def_static("basis",&Vector<X>::basis);
     vector_class.def(pybind11::init([](pybind11::list const& lst){return Vector<X>(pybind11::cast<Array<X>>(lst));}));
+
+    // Convert from a Python list and properties
+    if constexpr (HasGenericType<X>::value) {
+        typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
+        if constexpr(IsConstructible<Vector<X>,Vector<Y>,PR>::value) {
+            vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
+        }
+    }
+
     pybind11::implicitly_convertible<pybind11::list,Vector<X>>();
 }
 
@@ -344,6 +355,15 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
+
+    if constexpr (HasGenericType<X>::value) {
+        typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
+        if constexpr(IsConstructible<Matrix<X>,Matrix<Y>,PR>::value) {
+            matrix_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Matrix<X>(matrix_from_python<Y>(lst),pr);}));
+        }
+    }
+
+
 }
 
 

@@ -253,12 +253,18 @@ template<class P> Void export_vector_function_evaluation(pybind11::class_<Vector
 
 template<class P> Void export_scalar_function(pybind11::module& module)
 {
-    pybind11::class_<ScalarFunction<P>> scalar_function_class(module,(class_name<P>()+"ScalarFunction").c_str());
+    pybind11::class_<ScalarFunction<P>> scalar_function_class(module,(class_name<P>()+"ScalarMultivariateFunction").c_str());
     scalar_function_class.def(pybind11::init<ScalarFunction<P>>());
     scalar_function_class.def(pybind11::init<SizeType>());
     scalar_function_class.def("argument_size", &ScalarFunction<P>::argument_size);
     scalar_function_class.def("derivative", &ScalarFunction<P>::derivative);
     define_elementary_algebra<ScalarFunction<P>,Number<P>>(module,scalar_function_class);
+
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        scalar_function_class.def(pybind11::init<ScalarFunction<EffectiveTag>>());
+        pybind11::implicitly_convertible<ScalarFunction<EffectiveTag>,ScalarFunction<ValidatedTag>>();
+    }
+    
     
 //FIXME
 //    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarFunction<P>,Number<P>>,ScalarFunction<P>,Number<P>>);
@@ -276,7 +282,7 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
     }
 
-    
+
     module.def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
 
     export_scalar_function_evaluation(scalar_function_class);
@@ -285,16 +291,21 @@ template<class P> Void export_scalar_function(pybind11::module& module)
 
 template<class P> Void export_vector_function(pybind11::module& module)
 {
-    pybind11::class_<VectorFunction<P>> vector_function_class(module,(class_name<P>()+"VectorFunction").c_str());
+    pybind11::class_<VectorFunction<P>> vector_function_class(module,(class_name<P>()+"VectorMultivariateFunction").c_str());
     vector_function_class.def(pybind11::init<VectorFunction<P>>());
     vector_function_class.def(pybind11::init<Nat,Nat>());
-    vector_function_class.def(pybind11::init([](std::vector<ScalarFunction<P>> const& lst){return VectorFunction<P>(lst);}));
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        vector_function_class.def(pybind11::init<VectorFunction<EffectiveTag>>());
+//        pybind11::implicitly_convertible<VectorFunction<EffectiveTag>,VectorFunction<ValidatedTag>>();
+    }
+    // NOTE: This must go *after* the conversion constructor
+    vector_function_class.def(pybind11::init([](std::vector<ScalarFunction<P>> const& lst){return VectorMultivariateFunction<P>(lst);}));
 
-    vector_function_class.def("result_size", &VectorFunction<P>::result_size);
-    vector_function_class.def("argument_size", &VectorFunction<P>::argument_size);
-    vector_function_class.def("__getitem__", &VectorFunction<P>::get);
-    vector_function_class.def("__setitem__", &VectorFunction<P>::set);
-    
+    vector_function_class.def("result_size", &VectorMultivariateFunction<P>::result_size);
+    vector_function_class.def("argument_size", &VectorMultivariateFunction<P>::argument_size);
+    vector_function_class.def("__getitem__", &VectorMultivariateFunction<P>::get);
+    vector_function_class.def("__setitem__", &VectorMultivariateFunction<P>::set);
+
     // TODO: Put these in C++ API
     // define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>,Number<P>>(module,vector_function_class);
 
@@ -370,6 +381,5 @@ Void function_submodule(pybind11::module& module) {
 
     export_procedure<ApproximateNumber, FloatDPApproximation>(module);
     export_procedure<ValidatedNumber, FloatDPBounds>(module);
-
 }
 

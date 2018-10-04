@@ -158,10 +158,17 @@ class FloatDP {
 
     //! \brief Construct from a double number using given rounding
     explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);
-    //! \brief Construct from a number using given rounding
-    explicit FloatDP(FloatDP d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from another FloatDP using given rounding
+
+    explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from an integer number using given rounding
+    explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a dyadic number with given rounding
+    explicit FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a FloatMP using given rounding
+    explicit FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
-    explicit FloatDP(const Rational& q, RoundingModeType rnd, PrecisionType pr);
+    explicit FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.
     explicit operator Dyadic () const;
     //! \brief Convert to a rational number.

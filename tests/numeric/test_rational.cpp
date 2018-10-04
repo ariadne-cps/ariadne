@@ -152,6 +152,10 @@ void TestRational::test_infinity() {
     ARIADNE_TEST_EQUALS(sgn(Rational::nan()), Sign::ZERO);
     ARIADNE_TEST_EQUALS(sgn(-Rational::inf()), Sign::NEGATIVE);
 
+    ARIADNE_TEST_ASSERT(std::isnan(Rational::nan().get_d()));
+    ARIADNE_TEST_EQUAL(Rational::inf(Sign::POSITIVE).get_d(),std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_EQUAL(Rational::inf(Sign::NEGATIVE).get_d(),-std::numeric_limits<double>::infinity());
+
     ARIADNE_TEST_BINARY_PREDICATE(operator==,Rational(2,0),Rational(1,0));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,0),Rational(2,0));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,2),Rational(1,0));

@@ -58,7 +58,7 @@ typedef Space<Real> RealSpace;
 
 template<class UB> class VariableInterval;
 template<class IVL> class VariablesBox;
-template<class S> class ExpressionSet;
+template<class S> class LabelledSet;
 
 typedef VariableInterval<Real> RealVariableInterval;
 typedef VariablesBox<RealInterval> RealVariablesBox;
@@ -216,7 +216,7 @@ template<class IVL> class VariablesBox {
     decltype(auto) is_empty() const { return any(_bnds,[](auto e){return e.second.is_empty();}); }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBoxType& ebx) {
         return os << "VariablesBox"<<class_name<IVL>()<<"( bounds=" << ebx.bounds() << " )"; }
-    explicit operator ExpressionSet<Box<IVL>> () const;
+    explicit operator LabelledSet<Box<IVL>> () const;
 };
 
 template<class IVL> VariablesBox<IVL>::VariablesBox(const RealSpace& spc, const Box<IVL>& bx) {
@@ -280,14 +280,14 @@ class RealExpressionBoundedConstraintSet
 };
 
 
-//! \brief A box defining ranges for a collection of real variables.
-template<class S> class ExpressionSet {
+//! \brief A set formed by labelling the variables of a Euclidean set of type \a S.
+template<class S> class LabelledSet {
     RealSpace _spc;
     S _set;
   public:
     typedef S EuclideanSetType;
 
-    ExpressionSet(const RealSpace& spc, const EuclideanSetType& set) : _spc(spc), _set(set) { ARIADNE_ASSERT(spc.dimension()==set.dimension()); }
+    LabelledSet(const RealSpace& spc, const EuclideanSetType& set) : _spc(spc), _set(set) { ARIADNE_ASSERT(spc.dimension()==set.dimension()); }
     Set<RealVariable> variables() const { return _spc.variables(); }
     RealSpace const& space() const { return this->_spc; }
     RealSpace canonical_space() const; [[deprecated]]
@@ -296,19 +296,19 @@ template<class S> class ExpressionSet {
     EuclideanSetType& euclidean_set() { return this->_set; }
     EuclideanSetType euclidean_set(const RealSpace& vars) const {
         Array<SizeType> prj(vars.dimension()); for(SizeType i=0; i!=vars.dimension(); ++i) { prj[i]=this->_spc.index(vars.variable(i)); } return project(this->_set,prj); }
-    friend OutputStream& operator<<(OutputStream& os, const ExpressionSet<S>& eset) {
-        return os << "ExpressionSet( space=" << eset.space() << ", set=" << eset.continuous_set() << " )"; }
+    friend OutputStream& operator<<(OutputStream& os, const LabelledSet<S>& eset) {
+        return os << "LabelledSet( space=" << eset.space() << ", set=" << eset.continuous_set() << " )"; }
 };
 
-template<class S> EqualsType<S> operator==(ExpressionSet<S> const& eset1, ExpressionSet<S> const& eset2) {
+template<class S> EqualsType<S> operator==(LabelledSet<S> const& eset1, LabelledSet<S> const& eset2) {
     if(eset1.variables()!=eset2.variables()) { return false; }
     ARIADNE_ASSERT(eset1.space()==eset2.space());
     return eset1.euclidean_set()==eset2.euclidean_set();
 }
 
-template<class IVL> VariablesBox<IVL>::operator ExpressionSet<Box<IVL>>() const {
+template<class IVL> VariablesBox<IVL>::operator LabelledSet<Box<IVL>>() const {
     RealSpace spc(List<RealVariable>(this->variables()));
-    return ExpressionSet<Box<IVL>>(spc,this->euclidean_set(spc));
+    return LabelledSet<Box<IVL>>(spc,this->euclidean_set(spc));
 }
 
 

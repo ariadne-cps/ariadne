@@ -166,13 +166,13 @@ TestFloat<PR>::test_concept()
     Int n=1;
     Nat m=1;
     double d=1;
-    Float x=1;
+    Float x=1, x2=1;
 
     // Constructors
     x=Float(); x=Float(n); x=Float(m); x=Float(d); x=Float(x);
 
     // Assignment
-    x=n; x=m; x=d; x=x;
+    x=n; x=m; x=d; x=x2;
 
     // Conversion
     d=x.get_d();
@@ -228,7 +228,7 @@ TestFloat<PR>::test_concept()
     // Operators in rounding mode
     x=+x; x=-x;
     x=x+x; x=x-x; x=x*x; x=x/x;
-    x+x; x-=x; x*=x; x/=x;
+    x+x; x-=x2; x*=x2; x/=x2;
 
     // Comparisons
     b=(x==n); b=(x!=n); b=(x<=n); b=(x>=n); b=(x<n); b=(x>n);

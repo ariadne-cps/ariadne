@@ -57,10 +57,11 @@ void TestInteger::test()
 
 void TestInteger::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2;
-    Integer z; Boolean b;
+    Integer z,z2; Boolean b;
 
     z=Integer(); z=Integer(m); z=Integer(lm); z=Integer(n); z=Integer(ln); z=Integer(z);
-    z=m; z=lm; z=n; z=ln; z=z;
+    z2=Integer();
+    z=m; z=lm; z=n; z=ln; z=z2;
 
     z=+z; z=-z;
     z=z+z; z=z-z; z=z*z;

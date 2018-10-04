@@ -153,7 +153,7 @@ template<class IVL> IVL interval_from_dict(pybind11::dict dct) {
             UB ub(pybind11::cast<Dyadic>(uh),pr);
             return IVL(lb,ub);
         }
-        catch(pybind11::cast_error) {
+        catch(pybind11::cast_error& ) {
         }
     }
     LB lb = pybind11::cast<LB>(lh);

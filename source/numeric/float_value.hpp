@@ -61,7 +61,7 @@ template<class F> class Value
     , DispatchComparisonOperations<Value<F>,Boolean>
     , DefineMixedComparisonOperators<Value<F>,ExactNumber,Boolean>
     , DefineMixedComparisonOperators<Value<F>,Rational,Boolean>
-//    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
+    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Integer,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Int,Boolean>
 //        , public DispatchFloatOperations<Ball<F>>

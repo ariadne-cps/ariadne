@@ -51,6 +51,7 @@
 namespace Ariadne {
 
 typedef Map< DiscreteLocation, Vector<FloatDPValue> > HybridExactFloatVector;
+typedef Dyadic StepSizeType;
 
 class IntegratorInterface;
 class SolverInterface;
@@ -64,7 +65,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModelDP& f) : ValidatedVectorFunctionModelDP(f) { }
-    FloatDPValue step_size() const { return cast_exact(this->time_domain().upper()); }
+    StepSizeType step_size() const { return static_cast<StepSizeType>(this->time_domain().upper()); }
     ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBoxType const codomain() const { return this->ValidatedVectorFunctionModelDP::codomain(); }
@@ -237,7 +238,7 @@ class HybridEvolverBase
     ValidatedVectorFunctionModelDP
     _compute_flow(EffectiveVectorFunction vector_field,
                   ExactBoxType const& initial_set,
-                  const FloatDPValue& maximum_step_size) const;
+                  const StepSizeType& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.
@@ -678,7 +679,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    RealType _maximum_step_size;
+    StepSizeType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -701,8 +702,9 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
     //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
     Void set_flow_accuracy(const RawRealType value);
 
-    const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = RealType(value); }
+    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
+    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
+    Void set_maximum_step_size(const double value) { _maximum_step_size = static_cast<StepSizeType>(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
     Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = RealType(value); }

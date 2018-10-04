@@ -213,7 +213,7 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const FloatDPValue& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const StepSizeType& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
     Void apply_space_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))

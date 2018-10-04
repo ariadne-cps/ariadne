@@ -156,7 +156,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    RealType _maximum_step_size;
+    StepSizeType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -171,8 +171,9 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    const RealType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<RealType>(value); }
+    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
+    Void maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
+    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
     Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }

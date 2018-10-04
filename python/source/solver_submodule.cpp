@@ -84,11 +84,11 @@ class IntegratorWrapper
         this->get_override("set_maximum_error")(me); }
     double maximum_error() const {
         return this->get_override("maximum_error")(); }
-    Pair<FloatDPValue,UpperBoxType> flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& D, const RawFloatDP& h) const {
+    Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, RawFloatDP& h) const {
+    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
         return this->get_override("flow_step")(vf,D,h); }
-    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, const FloatDPValue& h, const UpperBoxType& B) const {
+    ValidatedVectorFunctionModelDP flow_step(const ValidatedVectorFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
     ValidatedVectorFunctionModelDP flow_to(const ValidatedVectorFunction& vf ,const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow_to")(vf,D,tf); }
@@ -124,9 +124,9 @@ Void export_solvers(pybind11::module& module)
 Void export_integrators(pybind11::module& module)
 {
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");
-    integrator_interface_class.def("flow_bounds",(Pair<FloatDPValue,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const RawFloatDP&)const)&IntegratorInterface::flow_bounds);
-    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, RawFloatDP&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const FloatDPValue&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
+    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_step",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
     integrator_interface_class.def("flow_to",(ValidatedVectorFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
     integrator_interface_class.def("flow",(List<ValidatedVectorFunctionModelDP>(IntegratorInterface::*)(const ValidatedVectorFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);

@@ -38,6 +38,7 @@
 
 #include "../utility/declarations.hpp"
 #include "../utility/attribute.hpp"
+#include "../numeric/dyadic.hpp"
 #include "../output/logging.hpp"
 #include "../utility/pointer.hpp"
 #include "../function/affine.hpp"
@@ -91,8 +92,8 @@ class IntegratorBase
     Void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
     double lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
     //! \brief  Set maximum size used for a single step.
-    double maximum_step_size() const { return this->_maximum_step_size; }
-    Void set_maximum_step_size(double hmax) { this->_maximum_step_size = hmax; }
+    StepSizeType maximum_step_size() const { return this->_maximum_step_size; }
+    Void set_maximum_step_size(StepSizeType hmax) { this->_maximum_step_size = hmax; }
 
     //! \brief The class which constructs functions for representing the flow.
     const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
@@ -100,15 +101,15 @@ class IntegratorBase
     Void set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory);
 
 
-    virtual Pair<FloatDPValue,UpperBoxType>
+    virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const RawFloatDP& maximum_time_step) const;
+                const StepSizeType& maximum_time_step) const;
 
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              RawFloatDP& suggested_time_step) const;
+              StepSizeType& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModelDP
     flow_to(const ValidatedVectorFunction& vector_field,
@@ -131,13 +132,13 @@ class IntegratorBase
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const FloatDPValue& suggested_time_step,
+              const StepSizeType& suggested_time_step,
               const UpperBoxType& bounding_box) const = 0;
 
   public:
     double _maximum_error;
     double _lipschitz_tolerance;
-    double _maximum_step_size;
+    StepSizeType _maximum_step_size;
     FunctionFactoryPointer _function_factory_ptr;
 };
 
@@ -175,7 +176,7 @@ class TaylorPicardIntegrator
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const FloatDPValue& time_step,
+              const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -230,15 +231,15 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual Pair<FloatDPValue,UpperBoxType>
+    virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBoxType& state_domain,
-                const RawFloatDP& suggested_time_step) const;
+                const StepSizeType& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const FloatDPValue& time_step,
+              const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -269,7 +270,7 @@ class AffineIntegrator
     virtual ValidatedVectorFunctionModelDP
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBoxType& state_domain,
-              const FloatDPValue& time_step,
+              const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;

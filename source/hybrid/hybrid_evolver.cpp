@@ -447,7 +447,6 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
     UpperIntervalType starting_time_range=starting_set.time_range();
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
-    if(verbosity>=1) { std::clog<<"\n"; }
     ARIADNE_LOG(1,(verbosity==1?"\r":"")
             <<"#w="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
             <<"#r="<<std::setw(5)<<std::left<<evolution_data.reach_sets.size()
@@ -802,7 +801,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                         // No crossing
                         const_cast<Set<DiscreteEvent>&>(active_events).erase(event); // WARNING: Maybe removing event is unsafe
                     } else if(definitely(guard_range_at_critical_time.lower()>0)) {
-                        std::cerr<<"Guard range eventually positive\n";
+                        ARIADNE_LOG(8,"guard range eventually positive\n");
                         // Transverse crossing
                         // FIXME: Find a more reliable way of solving the implicit equation for the crossing time
                         //   which takes into account the fact that the derivative over the domain goes negative
@@ -918,7 +917,6 @@ _apply_guard_step(HybridEnclosure& set,
                   CrossingData const& crossing_data,
                   const Semantics semantics) const
 {
-    std::clog<<"\n";
     ARIADNE_LOG(4,"HybridEvolverBase::_apply_guard_step(...)\n");
     // Compute flow to guard set up to evolution time.
     HybridEnclosure& jump_set=set;

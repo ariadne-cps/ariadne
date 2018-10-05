@@ -51,9 +51,9 @@ void TestCrossingsIssue::test()
 void TestCrossingsIssue::test_crossings()
 {
     /// Build the Hybrid System
-    RealConstant v("v",0.092_dec);
+    RealConstant v("v",0.1_dec);
     RealConstant L("L",0.00025_dec);
-    RealConstant M("M",0.0023_dec);
+    RealConstant M("M",0.005_dec);
 
     /// Create a HybridAutomaton object
     AtomicHybridAutomaton automaton("compute_crossings_issue");
@@ -83,14 +83,14 @@ void TestCrossingsIssue::test_crossings()
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
-    evolver.configuration().set_maximum_step_size(0.01);
+    evolver.configuration().set_maximum_step_size(0.05);
 
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     Real initial_x(0);
     HybridSet initial_set({automaton|far},{x==initial_x});
 
-    Nat max_n = 3; Real max_t = 0.046_dec;
+    Nat max_n = 3; Real max_t = 0.8_dec;
     HybridTime evolution_time(max_t,max_n);
 
     std::cout << "Computing orbit... " << std::flush;

@@ -74,8 +74,8 @@ void TestCrossingsIssue::test_crossings()
     DiscreteEvent comes("comes");
     DiscreteEvent leaves("leaves");
 
-    automaton.new_transition(far,comes,close,{next(x)=x+L/4},sqr(x-M)<=sqr(L),EventKind::URGENT);
-	automaton.new_transition(close,leaves,far,{next(x)=x+L/2},sqr(x-M)>=sqr(L),EventKind::URGENT);
+    automaton.new_transition(far,comes,close,{next(x)=x},sqr(x-M)<=sqr(L),EventKind::IMPACT);
+	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L),EventKind::IMPACT);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(automaton);
@@ -83,7 +83,7 @@ void TestCrossingsIssue::test_crossings()
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
-    evolver.configuration().set_maximum_step_size(0.10);
+    evolver.configuration().set_maximum_step_size(0.01);
 
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 

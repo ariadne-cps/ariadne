@@ -2,16 +2,16 @@
 
 # Ariadne <img align="right" src="http://www.ariadne-cps.org/img/ariadne-transparent.png" alt="Ariadne" width="80"/> 
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.org/ariadne-cps/development.svg?branch=master)](https://travis-ci.org/ariadne-cps/development) [![codecov](https://codecov.io/gh/ariadne-cps/development/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/development)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.org/ariadne-cps/ariadne.svg?branch=master)](https://travis-ci.org/ariadne-cps/ariadne) [![codecov](https://codecov.io/gh/ariadne-cps/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/ariadne)
 
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 
 * This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *release-1.0* repository.
-* The latest stable tagged version is internal_release-1.9.0. However, the code in the master branch should always be usable.
+* The latest internal release is [v1.9.0](https://github.com/ariadne-cps/ariadne/releases/tag/v1.9.0). However, the code in the master branch should always be usable.
 
 ### Installation ###
 
-These installation instructions have been tested on Ubuntu 18.04 and macOS 10.13.
+The installation instructions are presented for Ubuntu 18.04 and macOS 10.14 only. However, openSUSE Tumbleweed and Fedora 29 are known to be working when using their package managers. Windows installations are not supported yet.
 
 For the Ubuntu installation, we will refer to packages available on Aptitude. The macOS installation instead will assume you are using the Brew package manager.
 
@@ -116,7 +116,7 @@ Due to limitations of the C++ standard library on macOS since C++11, you won't b
 
 ### Contribution guidelines ###
 
-* If you would like to contribute to Ariadne, please contact the developers. We are especially interested to hear how the documentation and user interface could be improved.
+If you would like to contribute to Ariadne, please contact the developers. We are especially interested to hear how the documentation and user interface could be improved.
 
 * Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 * Luca Geretti <luca.geretti@univr.it>

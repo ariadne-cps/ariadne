@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file graphics_interface.hpp
@@ -31,6 +32,9 @@
 typedef unsigned int Nat;
 
 namespace Ariadne {
+
+template<class T >
+class List;
 
 template<class R, class A> inline R numeric_cast(const A&);
 
@@ -46,7 +50,8 @@ inline OutputStream& operator<<(OutputStream& os, const Vector2d& v) {
     return os << "["<<v.x<<","<<v.y<<"]"; }
 
 struct Point2d {
-    double x,y; Point2d(double x_, double y_) : x(x_), y(y_) { }
+    double x,y; Point2d() : x(), y() { } Point2d(double x_, double y_) : x(x_), y(y_) { }
+    double& operator[](SizeType i) { return (&x)[i]; } double const& operator[](SizeType i) const { return (&x)[i]; }
     template<class X, class Y> Point2d(const X& x_, const Y& y_) : x(numeric_cast<double>(x_)), y(numeric_cast<double>(y_)) { }
 };
 inline Bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
@@ -61,6 +66,35 @@ struct Box2d {
 };
 inline OutputStream& operator<<(OutputStream& os, const Box2d& bx) {
     return os << "["<<bx.xl<<","<<bx.xu<<"]x["<<bx.yl<<","<<bx.yu<<"]"; }
+
+struct Polytope2d
+    : public DrawableInterface
+{
+    List<Point2d> boundary;
+  public:
+    Polytope2d(List<Point2d> bd_) : boundary(bd_) { }
+    SizeType number_of_vertices() const { return boundary.size(); }
+    List<Point2d>& vertices() { return boundary; }
+    List<Point2d>const& vertices() const { return boundary; }
+    Point2d const& vertex(SizeType i) const { return boundary[i]; }
+
+    virtual Polytope2d* clone() const { return new Polytope2d(*this); }
+    virtual DimensionType dimension() const { return 2u; }
+
+    virtual Void draw(CanvasInterface& canvas, const Projection2d& p) const {
+        if(boundary.size()==1) { canvas.dot(boundary[0].x,boundary[0].y); return; }
+        canvas.move_to(boundary[0].x,boundary[0].y);
+        for(SizeType i=1; i!=boundary.size(); ++i) {
+            canvas.line_to(boundary[i].x,boundary[i].y);
+        }
+        canvas.line_to(boundary[0].x,boundary[0].y);
+        canvas.fill();
+    }
+
+    Polytope2d operator+(const Vector2d& v) {
+        Polytope2d r(*this); for(Nat i=0; i!=r.boundary.size(); ++i) { r.boundary[i]+=v; } return r;
+    }
+};
 
 
 } // namespace Ariadne

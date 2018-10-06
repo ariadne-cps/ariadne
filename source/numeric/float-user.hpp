@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file float.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_USER_HPP
 #define ARIADNE_FLOAT_USER_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -101,6 +102,14 @@ template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> 
 template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : _l(x.lower_raw()), _u(x.upper_raw()) {
 }
 
+// <begin declarations to address warnings
+
+FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr);
+FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr);
+
+Rational cast_exact(Real const& x);
+
+// end>
 
 extern const FloatDPValue infty;
 
@@ -137,6 +146,8 @@ template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(c
 template<template<class>class T, class F> inline const T<Value<F>>& cast_exact(const T<Error<F>>& t) {
     return reinterpret_cast<const T<Value<F>>&>(t); }
 
+template<class F> inline const Positive<Value<F>> cast_exact(const Positive<Bounds<F>>& t) {
+    return Positive<Value<F>>(cast_exact(static_cast<Bounds<F>const&>(t))); }
 
 inline RawFloatDP const& cast_raw(RawFloatDP const& x) { return reinterpret_cast<RawFloatDP const&>(x); }
 inline RawFloatDP const& cast_raw(FloatDPApproximation const& x) { return reinterpret_cast<RawFloatDP const&>(x); }

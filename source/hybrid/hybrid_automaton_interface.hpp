@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_automaton_interface.hpp
@@ -29,9 +30,9 @@
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_HPP
 
 #include <cassert>
-#include "function/function.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_location.hpp"
 
 namespace Ariadne {
 
@@ -46,17 +47,11 @@ class DiscreteLocation;
 template<class T> class Space;
 typedef Space<Real> RealSpace;
 
-enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
+enum class EventKind : std::uint8_t { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
 inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;
 class HybridEnclosure;
-
-static const EventKind invariant = INVARIANT;
-static const EventKind progress = PROGRESS;
-static const EventKind permissive = PERMISSIVE;
-static const EventKind urgent = URGENT;
-static const EventKind impact = IMPACT;
 
 class SystemSpecificationError : public std::runtime_error {
   public:
@@ -159,7 +154,7 @@ class HybridAutomatonInterface {
 
   public:
     //! \brief Virtual destructor.
-    virtual ~HybridAutomatonInterface() { }
+    virtual ~HybridAutomatonInterface() = default;
 
     //! \brief Cloning operator.
     virtual HybridAutomatonInterface* clone() const = 0;
@@ -230,7 +225,7 @@ class HybridAutomatonInterface {
     virtual RealSpace continuous_auxiliary_space(DiscreteLocation location) const = 0;
 
     //! \brief The continuous state space in the \a location.
-    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); }
+    virtual List<RealExpression> auxiliary_expressions(DiscreteLocation location) const { assert(false); return List<RealExpression>(); }
 
 
     //@}
@@ -251,11 +246,12 @@ inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface
 
 inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
     switch(evk) {
-        case INVARIANT: os<<"invariant"; break;
-        case PROGRESS: os<<"progress"; break;
-        case PERMISSIVE: os<<"permissive"; break;
-        case URGENT: os<<"urgent"; break;
-        case IMPACT: os<<"impact"; break;
+        case EventKind::INVARIANT: os<<"invariant"; break;
+        case EventKind::PROGRESS: os<<"progress"; break;
+        case EventKind::PERMISSIVE: os<<"permissive"; break;
+        case EventKind::URGENT: os<<"urgent"; break;
+        case EventKind::IMPACT: os<<"impact"; break;
+        default: ARIADNE_FAIL_MSG("Unhandled EventKind for output streaming.\n");
     } return os;
 }
 

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file geometry/interval.hpp
@@ -30,12 +31,13 @@
 #ifndef ARIADNE_INTERVAL_HPP
 #define ARIADNE_INTERVAL_HPP
 
-#include "utility/module.hpp"
+#include "../utility/module.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/number.hpp"
-#include "numeric/float.hpp"
-#include "numeric/arithmetic.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/number.hpp"
+#include "../numeric/float.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
 
@@ -92,6 +94,12 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
 };
 
 template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
+
+template<class T, class U> struct IsConstructibleGivenDefaultPrecision {
+    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),declval<TT>().precision()))> static std::true_type test(int);
+    template<class TT, class UU> static std::false_type test(...);
+    static const bool value = decltype(test<T,U>(1))::value;
+};
 
 //! \ingroup GeometryModule
 //! \brief Intervals with upper endoint of type \a U.
@@ -169,6 +177,9 @@ template<class U> class Interval
     //! \brief Construct from an interval of a different type using the given precision.
     template<class UU, class PR, EnableIf<IsConstructible<U,UU,PR>> =dummy>
         explicit Interval(Interval<UU> const& x, PR pr) : _l(x.lower(),pr), _u(x.upper(),pr) { }
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
+        explicit Interval(Interval<UU> const& x) : Interval(x,PrecisionType<U>()) { }
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.
@@ -314,10 +325,14 @@ template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& 
 template<class F> Interval<LowerBound<F>> narrow(Interval<LowerBound<F>> const& ivl, UpperBound<F> e);
 template<class F> Interval<UpperBound<F>> narrow(Interval<LowerBound<F>> const& ivl, ValidatedUpperNumber e);
 
+Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl);
+Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
+
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 
 class EmptyInterval { };
+class EntireInterval { };
 
 } // namespace Ariadne
 

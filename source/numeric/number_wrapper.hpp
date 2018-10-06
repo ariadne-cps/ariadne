@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/number_wrapper.hpp
@@ -30,8 +31,8 @@
 #ifndef ARIADNE_NUMBER_WRAPPER_HPP
 #define ARIADNE_NUMBER_WRAPPER_HPP
 
-#include "utility/module.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "number_interface.hpp"
 
@@ -41,8 +42,8 @@
 #include "floatmp.hpp"
 #include "float-user.hpp"
 
-#include "expression/templates.hpp"
-#include "numeric/operators.hpp"
+#include "../symbolic/templates.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -65,7 +66,7 @@ inline OutputStream& operator<<(OutputStream& os, Sign s) {
     return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
 }
 
-// FIXME: Should test for other potential infiniteis
+// FIXME: Should test for other potential infinities
 inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     Comparison res;
     FloatDPValue const* x1=extract<FloatDPValue>(&y1);
@@ -88,8 +89,8 @@ template<class I, class OP, class Y> struct OperableInterface {
 template<class X, class I, class OP, class Y> struct OperableMixin : virtual OperableInterface<I,OP,Y> {
     static X const& _cast(OperableMixin<X,I,OP,Y> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
-    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
+    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
+    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
 };
 template<class X, class I, class OP, class AW> struct Operable;
 template<class X, class I, class OP, class Y, class... YS> struct Operable<X,I,OP,Aware<Y,YS...>>
@@ -100,8 +101,10 @@ template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
     Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
     Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
-    return nullptr;
-};
+    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();    
+    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+}
+
 
 template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
@@ -111,7 +114,7 @@ template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I co
 template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
     auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
     if(aware_other_ptr) { return aware_other_ptr->_apply_left(op,self); }
-    else { return make_symbolic(op,self_ptr,other_ptr); }
+    else { return make_symbolic(op,other_ptr,self_ptr); }
 }
 
 
@@ -146,6 +149,7 @@ template<class X, class I, class AW> struct LatticeFieldAware
 };
 
 template<class X, class I> struct UnaryOperationsMixin : public virtual I {
+    using I::_apply;
     static X const& _cast(UnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
     virtual I* _apply(Pos op) const final { return _make_wrapper(pos(_cast(*this))); }
@@ -165,6 +169,7 @@ template<class X, class I> struct UnaryOperationsMixin : public virtual I {
 
 
 template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J {
+    using J::_rapply; using J::_apply;
     static X const& _cast(AwareFieldMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     virtual I* _apply(Add op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
     virtual I* _apply(Sub op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
@@ -177,6 +182,7 @@ template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J 
 };
 
 template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual J {
+    using J::_rapply; using J::_apply;
     static X const& _cast(AwareLatticeMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     virtual I* _apply(Max op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
     virtual I* _apply(Min op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
@@ -190,13 +196,13 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
     X const& _cast(I const& other) { return dynamic_cast<Wrapper<X,I>const&>(other); }
     I* _heap_move(X&& x) { return new W(x); }
     virtual I* _add(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _sub(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _mul(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _div(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
+    virtual I* _sub(I const* other) const final { return _heap_move(sub(_cast(*this),_cast(*other))); }
+    virtual I* _mul(I const* other) const final { return _heap_move(mul(_cast(*this),_cast(*other))); }
+    virtual I* _div(I const* other) const final { return _heap_move(div(_cast(*this),_cast(*other))); }
     virtual I* _radd(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rsub(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rmul(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rdiv(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
+    virtual I* _rsub(I const* other) const final { return _heap_move(sub(_cast(*other),_cast(*this))); }
+    virtual I* _rmul(I const* other) const final { return _heap_move(mul(_cast(*other),_cast(*this))); }
+    virtual I* _rdiv(I const* other) const final { return _heap_move(div(_cast(*other),_cast(*this))); }
 };
 
 template<class X> class NumberGetterMixin : public virtual NumberInterface {
@@ -233,7 +239,7 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
     virtual Rational _get_q() const override {
         return this->_get_as<Rational>(); }
 
-    virtual FloatDPBall _get(MetricTag,DoublePrecision pr) const override {
+    virtual FloatDPBall _get(MetricTag,DoublePrecision pr,DoublePrecision pre) const override {
         return this->_get_as<FloatDPBall>(pr); }
     virtual FloatDPBounds _get(BoundedTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPBounds>(pr); }
@@ -243,8 +249,10 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         return this->_get_as<FloatDPLowerBound>(pr); }
     virtual FloatDPApproximation _get(ApproximateTag,DoublePrecision pr) const override {
         return this->_get_as<FloatDPApproximation>(pr); }
-    virtual FloatMPBall _get(MetricTag, MultiplePrecision pr) const override {
-        return this->_get_as<FloatMPBall>(pr); }
+    virtual FloatMPDPBall _get(MetricTag,MultiplePrecision pr, DoublePrecision pre) const override {
+        return this->_get_as<FloatMPDPBall>(pr,pre); }
+    virtual FloatMPBall _get(MetricTag, MultiplePrecision pr, MultiplePrecision pre) const override {
+        return this->_get_as<FloatMPBall>(pr,pre); }
     virtual FloatMPBounds _get(BoundedTag, MultiplePrecision pr) const override {
         return this->_get_as<FloatMPBounds>(pr); }
     virtual FloatMPUpperBound _get(UpperTag, MultiplePrecision pr) const override {
@@ -267,6 +275,10 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         inline R _get_as(PR pr) const { return R(_cast(*this),pr); }
     template<class R, class PR, DisableIf<IsConstructible<R,X,PR>> = dummy>
         inline R _get_as(PR pr) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << "\n"; throw ParadigmError(); }
+    template<class R, class PR, class PRE, EnableIf<IsConstructible<R,X,PR,PRE>> = dummy>
+        inline R _get_as(PR pr, PRE pre) const { return R(_cast(*this),pr,pre); }
+    template<class R, class PR, class PRE, DisableIf<IsConstructible<R,X,PR,PRE>> = dummy>
+        inline R _get_as(PR pr, PRE pre) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << " and error precision " << pre << "\n"; throw ParadigmError(); }
 };
 
 template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };

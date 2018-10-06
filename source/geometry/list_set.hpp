@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file list_set.hpp
@@ -30,13 +31,13 @@
 
 
 #include <vector>
-#include "utility/stlio.hpp"
-#include "utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/macros.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "hybrid/discrete_location.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../hybrid/discrete_location.hpp"
 
-#include "geometry/box.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -60,7 +61,7 @@ class ListSet
     typedef typename std::vector<BS>::iterator Iterator;
     typedef BS value_type;
 
-    virtual ~ListSet() { }
+    virtual ~ListSet() = default;
 
     ListSet() { };
     explicit ListSet(Nat d) { };
@@ -70,7 +71,7 @@ class ListSet
     ListSet(const std::vector<BS>& lst) {
         this->_data.insert(this->end(),lst.begin(),lst.end()); }
     template<class Iter> ListSet(Iter first, Iter last) {
-        this->_data.insert(this->end(),first,last); };
+        this->_data.insert(this->end(),first,last); }
 
     ListSet<BS>* clone() const { return new ListSet<BS>(*this); }
 

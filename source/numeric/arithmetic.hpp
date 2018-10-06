@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file arithmetic.hpp
@@ -28,8 +29,9 @@
 #ifndef ARIADNE_ARITHMETIC_HPP
 #define ARIADNE_ARITHMETIC_HPP
 
-#include "utility/metaprogramming.hpp"
+#include "../utility/metaprogramming.hpp"
 #include "logical.decl.hpp"
+#include "number.decl.hpp"
 #include "sign.hpp"
 #include "logical.hpp" // TODO: Try to remove; needed for specialisation of Boolean DefineMixedComparisonOperators
 
@@ -60,73 +62,158 @@ template<class T, class MT=T> struct Multiplicative {
     friend T pow(T const&, Nat);
 };
 
-template<class T, class NT=T> struct Abelian {
+//! \brief An algebraic structure supporting addition and negation.
+template<class T> struct Abelian {
+    //! \brief Zero element.
     friend T nul(T const&);
+    //! \brief Identity operator.
     friend T pos(T const&);
-    friend NT neg(T const&);
+    //! \brief Negation.
+    friend T neg(T const&);
+    //! \brief Addition.
     friend T add(T const&, T const&);
+    //! \brief Subtraction.
     friend T sub(T const&, T const&);
 };
 
+//! \brief An algebraic structure supporting addition and multiplication.
 template<class T> struct SemiRing {
+    //! \brief Addition.
     friend T add(T const&, T const&);
+    //! \brief Multiplication.
     friend T mul(T const&, T const&);
+    //! \brief Square.
     friend T sqr(T const&);
 };
 
-template<class T, class NT=T> struct Ring : Abelian<T,NT> {
+//! \brief An algebraic structure supporting addition, subtraction and multiplication.
+template<class T> struct Ring : Abelian<T> {
+    //! \brief Square.
     friend T sqr(T const&);
+    //! \brief Multiplication.
     friend T mul(T const&, T const&);
+    //! \brief Power to a positive integer.
     friend T pow(T const&, Nat);
 };
 
-template<class T, class NT=T> struct DiadicRing : Ring<T,NT> {
+//! \brief An algebraic structure supporting addition, subtraction, multiplication and halving.
+template<class T> struct DiadicRing : Ring<T> {
+    //! \brief Half.
     friend T hlf(T const&);
 };
 
-template<class T, class NT=T, class QT=NT> struct Field : DiadicRing<T,NT> {
-    friend QT rec(T const&);
-    friend QT div(T const&, T const&);
-    friend QT pow(T const&, Int);
+//! \brief An algebraic structure supporting addition, subtraction, multiplication and division.
+template<class T> struct Field : DiadicRing<T> {
+    //! \brief Reciprocal.
+    friend T rec(T const&);
+    //! \brief Division.
+    friend T div(T const&, T const&);
+    //! \brief Power to an integer.
+    friend T pow(T const&, Int);
 };
 
+//! \brief An analytic structure supporting monotone elementary operations.
 template<class T, class PT=T> struct Monotone {
+    //! \brief Square root.
     friend PT sqrt(PT const&);
+    //! \brief Natural exponent.
     friend PT exp(T const&);
+    //! \brief Natural logarithm.
     friend T log(PT const&);
+    //! \brief Inverse sine (arcsine).
     friend T asin(T const&);
+    //! \brief Inverse tangent (arctangent).
     friend T atan(T const&);
 };
 
 template<class T, class PT=T> struct MonotoneSemiRing : SemiRing<T>, SemiRing<PT>, Monotone<T,PT> { };
 template<class T> struct MonotoneSemiRing<T> : SemiRing<T>, Monotone<T,T> { };
 
-template<class T, class NT, class PT> struct DirectedRing : Abelian<T,NT>, SemiRing<PT>, Monotone<T,PT> { };
+//! \brief An algebraic structure \a T supporting addition and negation. Negation returns an object of type \a NT. Negating \a NT returns the original \a T.
+template<class T, class NT> struct DirectedAbelian {
+    //! \brief Zero element.
+    friend T nul(T const&);
+    //! \brief Identity operator.
+    friend T pos(T const&);
+    //! \brief Negation.
+    friend NT neg(T const&);
+#ifdef DOXYGEN
+    //! \brief Negation.
+    friend T neg(NT const&);
+#endif
+    //! \brief Addition.
+    friend T add(T const&, T const&);
+    //! \brief Subtraction.
+    friend T sub(T const&, NT const&);
+#ifdef DOXYGEN
+    //! \brief Subtraction.
+    friend NT sub(NT const&, T const&);
+#endif
+};
 
+//! \brief An algebraic structure \a T supporting addition, multiplication and reciprocation. Reciprocal returns an object of type \a QT.
+template<class T, class QT> struct DirectedSemiRing {
+    //! \brief Zero element.
+    friend T nul(T const&);
+    //! \brief Identity operator.
+    friend T pos(T const&);
+    //! \brief Reciprocal.
+    friend QT neg(T const&);
+#ifdef DOXYGEN
+    //! \brief Reciprocal.
+    friend T neg(QT const&);
+#endif
+    //! \brief Addition.
+    friend T add(T const&, T const&);
+    //! \brief Multiplication.
+    friend T mul(T const&, T const&);
+    //! \brief Division.
+    friend T div(T const&, QT const&);
+#ifdef DOXYGEN
+    //! \brief Division.
+    friend QT sub(QT const&, T const&);
+#endif
+};
+
+//! \brief Elements of a type supporting addition, involutive negation, multiplication of positive objects, and monotone operations.
+template<class T, class NT, class PT> struct DirectedMonotoneSemiRing : DirectedAbelian<T,NT>, SemiRing<PT>, Monotone<T,PT> { };
+
+//! \brief Elementary transcendental functions.
 template<class T, class PT=T> struct Transcendental : Monotone<T,PT> {
+    //! \brief Sine function.
     friend T sin(T const&);
+    //! \brief Cosine function.
     friend T cos(T const&);
+    //! \brief Tangent function.
     friend T tan(T const&);
 };
 
 template<class T, class PT=T> struct TranscendentalField : Field<T>, SemiRing<PT>, Transcendental<T,PT> { };
+//! \brief A field supporting elementary functions.
 template<class T> struct TranscendentalField<T> : Field<T>, Transcendental<T> { };
 
+//! \brief Lattice operations.
 template<class T> struct Lattice {
+    //! \brief Maximum (supremum; join);
     friend T max(T const&, T const&);
+    //! \brief Maximum (infemum; meet);
     friend T min(T const&, T const&);
 };
 
 
+//! \brief Operations on a lattice with negation.
 template<class T, class PT=T> struct DirectedLattice : Lattice<T> {
+    //! \brief Absolute value. Equal to max(t,-t);
     friend PT abs(T const&);
 };
 
 
+//! \brief A type with an apartness relation \f$ x_1 \neq x_2\f$.
 template<class T, class A> struct Apartness {
     friend A neq(T const&, T const&);
 };
 
+//! \brief A type with an partial order \f$ x_1 \leq x_2\f$.
 template<class T, class O, class A=O> struct Ordered : Apartness<T,A> {
     friend O leq(T const&, T const&);
 };
@@ -909,7 +996,7 @@ template<class X, class Y, class R=X> struct ProvideConcreteGenericFieldOperator
     : DefineInplaceFieldOperators<X,Y,R>
 {
     //static R create(Y const& y, X const& x) { return X(y,x.precision()); }
-    friend R _create(Y const& y, X const& x) { return factory(x).create(y); }
+    friend decltype(auto) _create(Y const& y, X const& x) { return factory(x).create(y); }
     friend R operator+(const X& x1, const Y& y2) { return operator+(x1,_create(y2,x1)); }
     friend R operator-(const X& x1, const Y& y2) { return operator-(x1,_create(y2,x1)); }
     friend R operator*(const X& x1, const Y& y2) { return operator*(x1,_create(y2,x1)); }
@@ -948,22 +1035,19 @@ template<class X, class Y> struct ProvideConcreteGenericArithmeticOperators<X,Y,
     friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
 };
 
-template<class X> using GenericType = typename X::GenericType;
-template<class X> struct IsConcrete : Has<GenericType,X> { };
-
 template<class X> struct ProvideConcreteGenericArithmeticOperators<X,Void> {
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+(Y const& y, X const& x) { return add(factory(x).create(y),x); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/(Y const& y, X const& x) { return div(factory(x).create(y),x); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator+=(X& x, Y const& y) { return x=add(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator-=(X& x, Y const& y) { return x=sub(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator*=(X& x, Y const& y) { return x=mul(x,factory(x).create(y)); }
-    template<class Y, DisableIf<IsConcrete<Y>> =dummy> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator+(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator-(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator*(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator/(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator+(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator-(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator*(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator/(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator+=(X& x, Y const& y) { return x=add(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator-=(X& x, Y const& y) { return x=sub(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator*=(X& x, Y const& y) { return x=mul(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
 };
 
 
@@ -1010,11 +1094,43 @@ template<class X, class QX=X, class R=X, class QR=QX> class ProvideDirectedSemiF
     // friend QR operator/(QX const&, X const&);
 };
 
-
-
 template<class Y> struct IsGenericNumericType;
 template<class Y> using IsGenericNumber = IsGenericNumericType<Y>;
-template<class X> struct DefineConcreteGenericArithmeticOperators {
+
+template<class X> struct DefineConcreteGenericArithmeticOperations {
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) add(X const& x, Y const& y) { return add(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) sub(X const& x, Y const& y) { return sub(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) mul(X const& x, Y const& y) { return mul(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) div(X const& x, Y const& y) { return div(x,factory(x).create(y)); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) add(Y const& y, X const& x) { return add(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) sub(Y const& y, X const& x) { return sub(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) mul(Y const& y, X const& x) { return mul(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) div(Y const& y, X const& x) { return div(factory(x).create(y),x); }
+
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) max(X const& x, Y const& y) { return max(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) min(X const& x, Y const& y) { return min(x,factory(x).create(y)); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) max(Y const& y, X const& x) { return max(factory(x).create(y),x); }
+    template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
+    friend decltype(auto) min(Y const& y, X const& x) { return min(factory(x).create(y),x); }
+
+};
+
+
+template<class X> struct DefineConcreteGenericArithmeticOperators
+    : DefineConcreteGenericArithmeticOperations<X>
+{
     template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
     friend decltype(auto) operator+(X const& x, Y const& y) { return x+factory(x).create(y); }
     template<class Y, EnableIf<IsGenericNumber<Y>> =dummy>
@@ -1076,12 +1192,12 @@ template<class X> struct DefineConcreteGenericOperators
 
 
 
+template<class T> struct NumericTraits;
 
 template<class X> class Operations {
     typedef decltype(add(declval<X>(),declval<X>())) R;
     typedef decltype(neg(declval<X>())) NX;
-    // FIXME: No function returning non-widened reciprocal
-    typedef decltype(neg(declval<X>())) QX;
+    typedef typename NumericTraits<X>::OppositeType QX;
     typedef decltype(rec(declval<X>())) QR;
     typedef R PR;
     typedef decltype(abs(declval<X>())) PX;
@@ -1128,10 +1244,6 @@ template<class X, class R=X> struct DispatchNumericOperations
     friend X hlf(X const& x) { return OperationsType::_hlf(x); }
     friend R sqr(X const& x) { return OperationsType::_sqr(x); }
     friend R rec(X const& x) { return OperationsType::_rec(x); }
-//    friend R add(X const& x1, X const& x2);
-//    friend R sub(X const& x1, X const& x2);
-//    friend R mul(X const& x1, X const& x2);
-//    friend R div(X const& x1, X const& x2);
     friend R add(X const& x1, X const& x2) { return OperationsType::_add(x1,x2); }
     friend R sub(X const& x1, X const& x2) { return OperationsType::_sub(x1,x2); }
     friend R mul(X const& x1, X const& x2) { return OperationsType::_mul(x1,x2); }

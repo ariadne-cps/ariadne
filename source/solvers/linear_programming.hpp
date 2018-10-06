@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file linear_programming.hpp
@@ -28,11 +29,11 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
-#include "utility/logging.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/tuple.hpp"
+#include "../output/logging.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/tuple.hpp"
 
 namespace Ariadne {
 
@@ -40,7 +41,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Affine;
 
-enum LinearProgramStatus { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
+enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
 
 class DegenerateFeasibilityProblemException : public std::runtime_error {
   public:
@@ -119,7 +120,7 @@ template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds T
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).
-enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
+enum class Slackness : std::int8_t { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
 //! \ingroup OptimisationModule

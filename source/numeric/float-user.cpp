@@ -6,34 +6,35 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
+#include "../config.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/float-user.hpp"
+#include "../numeric/float-user.hpp"
 
-#include "numeric/integer.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/real.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/real.hpp"
 
-#include "numeric/number_wrapper.hpp"
+#include "../numeric/number_wrapper.hpp"
 
 namespace Ariadne {
 
@@ -41,6 +42,9 @@ template<class FE, class FLT, DisableIf<IsSame<FE,FLT>> =dummy> inline FE _make_
     typename FE::PrecisionType pre; return FE(Dyadic(x),upward,pre); }
 template<class FE, class FLT, EnableIf<IsSame<FE,FLT>> =dummy> inline FE _make_error(FLT const& x) {
     return x; }
+
+template<class FE, class FLT, class PRE> inline FE _make_error(FLT const& x, PRE pre) {
+    return FE(Dyadic(x),upward,pre); }
 
 FloatDP set(RoundUpward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 FloatDP set(RoundDownward rnd, FloatMP const& x, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
@@ -52,6 +56,9 @@ template<class F> Nat Bounds<F>::output_places=8;
 template<class F> Nat Value<F>::output_places = 16;
 
 const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
+
+OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
+    return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
 
 FloatError<DoublePrecision> operator"" _error(long double lx) {
     double x=lx;
@@ -87,6 +94,7 @@ FloatLowerBound<DoublePrecision> operator"" _lower(long double lx) {
     static const double min = std::numeric_limits<double>::min();
     double x=lx;
     if(x>lx) { x-=min; }
+
     while (x>lx) { x-=std::abs(x)*eps; }
     return FloatLowerBound<DoublePrecision>(x);
 }
@@ -107,7 +115,7 @@ template<class F> Value<F>::Value(TwoExp const& t, PR pr)
     : _v(t,pr)
 {
     ARIADNE_ASSERT_MSG(Dyadic(this->_v)==Dyadic(t),"Number 2^"<<t.exponent()<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+}
 
 template<class F> Value<F>::Value(Integer const& z, PR pr)
     : _v(z,to_nearest,pr)
@@ -119,14 +127,14 @@ template<class F> Value<F>::Value(Integer const& z, PR pr)
 template<class F> Value<F>::Value(Dyadic const& w, PR pr)
     : _v(w,pr)
 {
-    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w || is_nan(w),"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
+}
 
 template<class F> Value<F>::Value(Value<F> const& x, PR pr)
     : _v(x._v,to_nearest,pr)
 {
     ARIADNE_ASSERT_MSG(*this==x,"Exact FloatValue "<<x<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
-};
+}
 
 /*
 template<class F> Value<F>::Value(Rational const& q, PR pr)
@@ -150,16 +158,16 @@ template<class F> Value<F>& Value<F>::operator=(Dyadic const& w) {
     _v=F(w,this->precision());
     ARIADNE_ASSERT_MSG(Dyadic(_v)==w,"Dyadic number "<<w<<" cannot be assigned exactly to a floating-point number with precision "<<this->precision()<<"; nearest is "<<(*this));
     return *this;
-};
+}
 
 template<class F> auto Value<F>::create(ValidatedNumber const& y) const -> Ball<F> {
     return Ball<F>(y,this->precision());
 }
-
+/*
 template<class F> Value<F>::operator ExactNumber() const {
     return ExactNumber(new NumberWrapper<Value<F>>(*this));
 }
-
+*/
 template<class F, class FE> Ball<F,FE>::Ball(ExactDouble d, PR pr)
     : _v(d.get_d(),to_nearest,pr), _e(0,_error_precision<PRE>(pr)) {
 }
@@ -198,14 +206,38 @@ template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr)
     : Ball(y.get(MetricTag(),pr)) {
 }
 
+template<class F, class FE> Ball<F,FE>::Ball(Bounds<F> const& x, PRE pre)
+    : _v(x.value_raw()) , _e(_make_error<FE>(x.error_raw(),pre)) {
+}
+
+
+
+template<class F, class FE> Ball<F,FE>::Ball(Real const& r, PR pr, PRE pre)
+    : Ball(r.get(pr),pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(Rational const& q, PR pr, PRE pre)
+    : _v(F(q,to_nearest,pr)), _e(abs(Rational(_v)-q),upward,pre) {
+}
+
+template<class F, class FE> Ball<F,FE>::Ball(ValidatedNumber const& y, PR pr, PRE pre)
+    : Ball(y.get(MetricTag(),pr,pre)) {
+}
+
 template<class F, class FE> Ball<F,FE> Ball<F,FE>::create(ValidatedNumber const& y) const {
     return Ball<F,FE>(y,this->precision());
 }
 
+template<class F, class FE> Ball<F,FE>& Ball<F,FE>::operator=(ValidatedNumber const& y)
+{
+    return *this = Ball(y,this->precision(),this->error_precision());
+}
+
+/*
 template<class F, class FE> Ball<F,FE>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this));
 }
-
+*/
 
 template<class F> Bounds<F>::Bounds(ExactDouble d, PR pr)
     : _l(d.get_d(),downward,pr),_u(d.get_d(),upward,pr) {
@@ -257,6 +289,9 @@ template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, ValidatedUpperNu
 template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, UpperBound<F> const& upper)
     : Bounds<F>(upper.create(lower),upper) { }
 
+template<class F> Bounds<F>::Bounds(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr)
+    : Bounds<F>(lower.get(LowerTag(),pr),upper.get(UpperTag(),pr)) { }
+
 template<class F> Bounds<F>::Bounds(ValidatedNumber const& y, PR pr)
     : Bounds(y.get(BoundedTag(),pr)) {
 }
@@ -268,11 +303,11 @@ template<class F> Bounds<F> Bounds<F>::create(ValidatedNumber const& y) const {
 template<class F> Bounds<F>& Bounds<F>::operator=(ValidatedNumber const& y) {
     return *this = Bounds<F>(y,this->precision());
 }
-
+/*
 template<class F> Bounds<F>::operator ValidatedNumber() const {
     return ValidatedNumber(new NumberWrapper<Bounds<F>>(*this));
 }
-
+*/
 template<class F> UpperBound<F>::UpperBound(ExactDouble d, PR pr)
     : _u(d.get_d(),upward,pr) {
 }
@@ -423,11 +458,11 @@ template<class F> Approximation<F>& Approximation<F>::operator=(ApproximateNumbe
 template<class F> Approximation<F> Approximation<F>::create(ApproximateNumber const& y) const {
     return Approximation<F>(y,this->precision());
 }
-
+/*
 template<class F> Approximation<F>::operator ApproximateNumber() const {
     return ApproximateNumber(new NumberWrapper<Approximation<F>>(*this));
 }
-
+*/
 
 
 
@@ -531,7 +566,7 @@ template<class F> struct Operations<Approximation<F>> {
         return Approximation<F>(div(near,x1._a,x2._a)); }
 
     static Approximation<F> _pow(Approximation<F> const& x, Nat m) {
-        return Approximation<F>(pow(approx,x._a,m)); }
+        return Approximation<F>(pow(approx,x._a,static_cast<Int>(m))); }
     static Approximation<F> _pow(Approximation<F> const& x, Int n) {
         return Approximation<F>(pow(approx,x._a,n)); }
 
@@ -612,7 +647,7 @@ template<class F> struct Operations<LowerBound<F>> {
 
     static LowerBound<F> _pow(LowerBound<F> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return LowerBound<F>(pow(down,x.raw(),m)); }
+        return LowerBound<F>(pow(down,x.raw(),static_cast<int>(m))); }
 
     static Approximation<F> _pow(LowerBound<F> const& x, Int n) {
         return pow(Approximation<F>(x),n); }
@@ -712,7 +747,7 @@ template<class F> struct Operations<UpperBound<F>> {
 
     static UpperBound<F> _pow(UpperBound<F> const& x, Nat m) {
         ARIADNE_PRECONDITION(x.raw()>=0);
-        return UpperBound<F>(pow(up,x._u,m)); }
+        return UpperBound<F>(pow(up,x._u,static_cast<Int>(m))); }
 
     static Approximation<F> _pow(UpperBound<F> const& x, Int n) {
         return pow(Approximation<F>(x),n); }
@@ -836,10 +871,9 @@ template<class F> struct Operations<Bounds<F>> {
         if(x._l>0 || x._u<0) {
             return Bounds<F>(rec(down,x._u),rec(up,x._l));
         } else {
-            F inf=F::inf(x.precision());
-            F rl=-inf; F ru=+inf;
+            F inf_=F::inf(x.precision());
             //ARIADNE_THROW(DivideByZeroException,"FloatBounds rec(FloatBounds x)","x="<<x);
-            return Bounds<F>(-inf,+inf);
+            return Bounds<F>(-inf_,+inf_);
         }
     }
 
@@ -855,7 +889,6 @@ template<class F> struct Operations<Bounds<F>> {
         const F& x1l=x1._l; const F& x1u=x1._u;
         const F& x2l=x2._l; const F& x2u=x2._u;
         F rl,ru;
-        typename F::RoundingModeType rnd=F::get_rounding_mode();
         if(x1l>=0) {
             if(x2l>=0) {
                 rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
@@ -932,8 +965,8 @@ template<class F> struct Operations<Bounds<F>> {
     static Bounds<F> _pow(Bounds<F> const& x, Nat m) {
         Bounds<F> y = x;
         if(m%2==0) { y=abs(x); }
-        F rl=pow(down,y.lower_raw(),m);
-        F ru=pow(up,y.upper_raw(),m);
+        F rl=pow(down,y.lower_raw(),static_cast<Int>(m));
+        F ru=pow(up,y.upper_raw(),static_cast<Int>(m));
         return Bounds<F>(rl,ru);
     }
 
@@ -965,27 +998,27 @@ template<class F> struct Operations<Bounds<F>> {
         PR prec=x.precision();
 
         const F one(1,prec);
-        const Value<F> two(2,prec);
-        const Bounds<F> pi=_pi_val(prec);
+        const Value<F> _two(2,prec);
+        const Bounds<F> _pi=_pi_val(prec);
         const Bounds<F> two_pi=2*_pi_val(prec);
         if(x.error().raw()>two_pi.lower().raw()) { return Bounds<F>(-one,+one); }
 
         Value<F> n(round(div(near,x.value_raw(),(two_pi.value_raw()))));
-        Bounds<F> y=x-two*(n*pi);
+        Bounds<F> y=x-_two*(n*_pi);
 
-        ARIADNE_ASSERT(y.lower_raw()<=pi.upper_raw());
-        ARIADNE_ASSERT(y.upper_raw()>=-pi.upper_raw());
+        ARIADNE_ASSERT(y.lower_raw()<=_pi.upper_raw());
+        ARIADNE_ASSERT(y.upper_raw()>=-_pi.upper_raw());
 
         F rl,ru;
-        if(y.lower_raw()<=-pi.lower_raw()) {
+        if(y.lower_raw()<=-_pi.lower_raw()) {
             if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
             else { rl=-one; ru=+one; }
         } else if(y.lower_raw()<=0.0) {
             if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
-            else if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
+            else if(y.upper_raw()<=_pi.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
             else { rl=-one; ru=+one; }
-        } else if(y.lower_raw()<=pi.upper_raw()) {
-            if(y.upper_raw()<=pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
+        } else if(y.lower_raw()<=_pi.upper_raw()) {
+            if(y.upper_raw()<=_pi.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
             else if(y.upper_raw()<=two_pi.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,two_pi.lower_raw(),y.upper_raw()))); }
             else { rl=-one; ru=+one; }
         } else {
@@ -1156,15 +1189,15 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     double ldbl=l.get_d();
     double udbl=u.get_d();
     if(ldbl==0.0 && udbl==0.0) { return os << "0.0[:]"; }
-    int errplc=FloatError<MultiplePrecision>::output_places;
-    int bndplc=FloatBounds<MultiplePrecision>::output_places;
+    int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
+    //int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
     int log10wdth=log10floor(sub(to_nearest,u,l));
     int log10mag=log10floor(max(-ldbl,udbl));
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
-    int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
+    //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects
-    int dgts=max(min(dgtswdth,dgtsprec),1);
+    Nat dgts=static_cast<Nat>(max(min(dgtswdth,dgtsprec),1));
     DecimalPlaces plcs{dgts};
     String lstr=print(l,plcs,MPFR_RNDD);
     String ustr=print(u,plcs,MPFR_RNDU);
@@ -1402,11 +1435,11 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     FloatMP const& e=x.error_raw();
     double edbl=e.get_d();
     // Compute the number of decimal places to be displayed
-    int errplc = FloatError<MultiplePrecision>::output_places;
-    int log10err = log10floor(edbl);
-    int dgtserr = errplc-(log10err+1);
-    int dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
-    int dgts = std::max(std::min(dgtsval,dgtserr),errplc);
+    Nat errplc = static_cast<Nat>(FloatError<MultiplePrecision>::output_places);
+    Nat log10err = static_cast<Nat>(log10floor(edbl));
+    Nat dgtserr = errplc-(log10err+1);
+    Nat dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
+    Nat dgts = std::max(std::min(dgtsval,dgtserr),errplc);
     if(edbl==0.0) { dgts = dgtsval; }
     DecimalPlaces plcs{dgts};
     // Get string version of mpfr values
@@ -1415,7 +1448,7 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
 
     // Find position of first significan digit of error
     auto vcstr=vstr.c_str(); auto ecstr=estr.c_str();
-    int cpl=0;
+    size_t cpl=0;
     if(edbl==0.0) {
         cpl=std::strlen(vcstr);
     } else if(edbl<1.0) {
@@ -1423,7 +1456,7 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
         const char* eptr = std::strchr(ecstr,'.');
         ++vptr; ++eptr;
         while((*eptr)=='0') { ++eptr; ++vptr; }
-        cpl = vptr-vcstr;
+        cpl = static_cast<size_t>(vptr-vcstr);
     }
 
     // Chop and catenate strings
@@ -1737,7 +1770,7 @@ template<class F> struct Operations<PositiveUpperBound<F>> {
     }
 
     static PositiveUpperBound<F> _pow(PositiveUpperBound<F> const& x1, Nat m2) {
-        return PositiveUpperBound<F>(pow(up,x1._u,m2));
+        return PositiveUpperBound<F>(pow(up,x1._u,static_cast<Int>(m2)));
     }
 
     static UpperBound<F> _log(PositiveUpperBound<F> const& x) {
@@ -1810,7 +1843,7 @@ template<class F> struct Operations<PositiveLowerBound<F>> {
     }
 
     static PositiveLowerBound<F> _pow(PositiveLowerBound<F> const& x1, Nat m2) {
-        return PositiveLowerBound<F>(pow(down,x1._l,m2));
+        return PositiveLowerBound<F>(pow(down,x1._l,static_cast<Int>(m2)));
     }
 
     static LowerBound<F> _log(PositiveLowerBound<F> const& x) {
@@ -1865,7 +1898,7 @@ template<class F> struct Operations<PositiveBounds<F>> {
     static PositiveBounds<F> _div(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveBounds<F>(div(down,x1._l,x2._u),div(up,x1._u,x2._l)); }
     static PositiveBounds<F> _pow(PositiveBounds<F> const& x1, Nat m2) {
-        return PositiveBounds<F>(pow(down,x1._l,m2),pow(up,x1._u,m2)); }
+        return PositiveBounds<F>(pow(down,x1._l,static_cast<Int>(m2)),pow(up,x1._u,static_cast<Int>(m2))); }
     static PositiveBounds<F> _pow(PositiveBounds<F> const& x1, Int n2) {
         if(n2>=0) { return _pow(x1,Nat(n2)); } else { return _rec(_pow(x1,Nat(-n2))); } }
     static Bounds<F> _log(PositiveBounds<F> const& x) {
@@ -1911,6 +1944,9 @@ template<> Int integer_cast<Int,FloatDPLowerBound>(FloatDPLowerBound const& x) {
     return std::round(x.get_d()); }
 
 template<> Int integer_cast<Int,FloatDPBounds>(FloatDPBounds const& x) {
+    return std::round((x.lower().get_d()+x.upper().get_d())/2); }
+
+template<> Int integer_cast<Int,FloatMPBounds>(FloatMPBounds const& x) {
     return std::round((x.lower().get_d()+x.upper().get_d())/2); }
 
 template<> Nat integer_cast<Nat,FloatMPApproximation>(FloatMPApproximation const& x) {
@@ -2064,22 +2100,17 @@ Bool same(FloatDPValue const& x1, FloatDPValue const& x2) { return Operations<Fl
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
-
-
-
-
 PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }
 PositiveFloatMPValue hlf(PositiveFloatMPValue const& x) { return PositiveFloatMPValue(hlf(x._v)); }
 
-FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2) {
+inline FloatDPError operator/(FloatDPError const& x1, PositiveFloatDPLowerBound const& x2) {
     return FloatDPError(div(up,x1._e,x2._l)); }
 
-FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
+inline FloatDPUpperBound operator*(FloatDPUpperBound const& x1, Real const& y2) {
     FloatDPUpperBound x2(y2,x1.precision()); return FloatDPUpperBound(mul(up,x1._u,x2._u)); }
 
 
 FloatDPValue midpoint(FloatDPBounds const& x) { return x.value(); }
-
 
 template<> String class_name<FloatDPApproximation>() { return "FloatDPApproximation"; }
 template<> String class_name<FloatDPLowerBound>() { return "FloatDPLowerBound"; }

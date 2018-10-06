@@ -1,12 +1,9 @@
 set(EXAMPLES
-    rigorous_numerics_tutorial
-    hybrid_system_tutorial
     ballinabox
     bouncingball
     heating
     rectifier
 )
-
 
 foreach(example ${EXAMPLES})
     add_executable(${example} ${example}.cpp)
@@ -16,8 +13,7 @@ endforeach()
 add_custom_target(examples)
 add_dependencies(examples ${EXAMPLES})
 
-add_custom_target(examples-experimental)
-
 add_subdirectory(watertank)
 add_subdirectory(twowatertanks)
-add_subdirectory(experimental)
+add_subdirectory(threewatertanks)
+add_subdirectory(noisy)

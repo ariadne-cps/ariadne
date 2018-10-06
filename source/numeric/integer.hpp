@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/integer.hpp
@@ -30,16 +31,16 @@
 #ifndef ARIADNE_INTEGER_HPP
 #define ARIADNE_INTEGER_HPP
 
-#include "external/gmp.hpp"
+#include "../external/gmp.hpp"
 
 #include <cassert>
 
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "numeric/sign.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/sign.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
 
 namespace Ariadne {
 
@@ -59,7 +60,7 @@ class Nat64 {
   public:
     Nat64() : _m(0u) { }
     template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Nat64(M m) : _m(m) { assert(_m==m); }
-    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Nat64(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n);
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Nat64(N n) : _m(static_cast<uint64_t>(n)) { assert(n>=0); assert((int64_t)_m==n);
         assert(uint64_t(int64_t(_m))==_m); }
     uint64_t get_ui() const { return _m; }
 };
@@ -68,7 +69,7 @@ class Int32 {
     int32_t _n;
   public:
     Int32() : _n(0) { }
-    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int32(M m) : _n(m) { assert(_n>=0); assert((uint32_t)_n==m); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int32(M m) : _n(static_cast<int32_t>(m)) { assert(_n>=0); assert((uint32_t)_n==m); }
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
     int32_t get_si() const { return _n; }
 };
@@ -77,7 +78,7 @@ class Int64 {
     int64_t _n;
   public:
     Int64() : _n(0) { }
-    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int64(M m) : _n(m) { assert(_n>=0); assert((uint64_t)_n==m); }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int64(M m) : _n(static_cast<int64_t>(m)) { assert(_n>=0); assert((uint64_t)_n==m); }
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
     int64_t get_si() const { return _n; }
 };
@@ -137,6 +138,14 @@ class Integer
     friend Integer rem(Integer const& z1, Integer const& z2);
     friend Integer operator%(Integer const& z1, Integer const& z2);
 
+    friend Bool is_nan(Integer const& z);
+    friend Bool is_inf(Integer const& z);
+    friend Bool is_finite(Integer const& z);
+    friend Bool is_zero(Integer const& z);
+
+    friend Sign sgn(Integer const& z);
+    friend Comparison cmp(Integer const& z1, Integer const& z2);
+
     friend OutputStream& operator<<(OutputStream& os, Integer const& z);
     friend Integer operator"" _z(unsigned long long int n);
 /*
@@ -183,6 +192,8 @@ class Natural : public Positive<Integer> {
     friend Natural operator+(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)+static_cast<Integer const&>(n2)); }
     friend Natural operator*(Natural const& n1, Natural const& n2) { return Natural(static_cast<Integer const&>(n1)*static_cast<Integer const&>(n2)); }
 };
+
+inline Natural cast_positive(Integer const& z) { return Natural(z); }
 
 } // namespace Ariadne
 

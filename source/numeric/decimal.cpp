@@ -6,30 +6,31 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/standard.hpp"
-#include "config.h"
+#include "../utility/standard.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/dyadic.hpp"
-#include "numeric/decimal.hpp"
-#include "numeric/rational.hpp"
-#include "numeric/float.hpp"
+#include "../utility/macros.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/dyadic.hpp"
+#include "../numeric/decimal.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/float.hpp"
 
 namespace Ariadne {
 
@@ -56,7 +57,7 @@ Decimal::Decimal(Dyadic const& w)
 {
     assert(w.exponent()>=0);
     this->_p=w.mantissa();
-    this->_q=w.exponent();
+    this->_q=static_cast<Nat>(w.exponent());
     Integer five(5);
     this->_p *= pow(five,this->_q);
     this->canonicalize();
@@ -80,6 +81,16 @@ Decimal operator"" _decimal(unsigned long long int n)
 Decimal operator"" _dec(unsigned long long int n)
 {
     return operator"" _decimal(n);
+}
+
+Decimal operator"" _decimal(const char* s, std::size_t)
+{
+    return Decimal(String(s));
+}
+
+Decimal operator"" _dec(const char* s, std::size_t n)
+{
+    return operator"" _decimal(s,n);
 }
 
 Decimal operator+(Decimal const& d)
@@ -178,7 +189,7 @@ Decimal::Decimal(double x)
     while(y>=1.0) { y/=10; exp+=1; }
     // Now 0.1<=y<1.0; and |x| = y*10^exp
     long int n=std::round(y/acc); // An approximation of y*10^sf
-    exp-=sf;
+    exp-=static_cast<Int>(sf);
     double re=std::fabs(y-n*acc); // The error of n/10^sf
 
     if(std::fabs(re)>=tol) {
@@ -190,7 +201,7 @@ Decimal::Decimal(double x)
         this->_p *= pow(ten,Nat(exp));
         this->_q=0u;
     } else {
-        this->_q=-exp;
+        this->_q=static_cast<Nat>(-exp);
     }
 
     this->canonicalize();
@@ -201,12 +212,12 @@ Decimal::Decimal(String const& str)
     // Parse string to ensure correctness
     Bool found_decimal_point=false;
     const char* c_ptr=str.c_str();
-    const char& c=*c_ptr;
+    const char& ch=*c_ptr;
 
     Int s = +1;
-    if(c=='-') {
+    if(ch=='-') {
         s = -1; ++c_ptr;
-    } else if (c=='+') {
+    } else if (ch=='+') {
         ++c_ptr;
     }
 
@@ -237,6 +248,8 @@ Decimal::Decimal(String const& str)
     this->_p *= s;
 
 }
+
+template<> String class_name<Decimal>() { return "Decimal"; }
 
 OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     Integer p=abs(d._p);

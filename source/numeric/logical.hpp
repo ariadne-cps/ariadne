@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 //! \file logical.hpp
@@ -27,9 +28,9 @@
 #ifndef ARIADNE_LOGICAL_HPP
 #define ARIADNE_LOGICAL_HPP
 
-#include "utility/stdlib.hpp"
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 #include "logical.decl.hpp"
 
@@ -58,6 +59,9 @@ class Effort {
     //! \brief Convert to a raw positive integer.
     operator Nat() const { return _m; }
     Nat work() const { return _m; }
+    Effort& operator++() { ++_m; return *this; }
+    Effort& operator+=(Nat m) { _m+=m; return *this; }
+    Effort& operator*=(Nat m) { _m*=m; return *this; }
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 
@@ -77,7 +81,7 @@ namespace Detail {
     };
     inline LogicalValue make_logical_value(bool b) { return b ? LogicalValue::TRUE : LogicalValue::FALSE; }
     inline Bool definitely(LogicalValue lv) { return lv==LogicalValue::TRUE; }
-    inline Bool probably(const LogicalValue& lv) { return lv>=LogicalValue::LIKELY; };
+    inline Bool probably(const LogicalValue& lv) { return lv>=LogicalValue::LIKELY; }
     inline Bool decide(LogicalValue lv) { return lv>=LogicalValue::LIKELY; }
     inline Bool possibly(LogicalValue lv) { return lv!=LogicalValue::FALSE; }
     inline Bool is_determinate(LogicalValue lv) { return lv==LogicalValue::TRUE or lv==LogicalValue::FALSE; }
@@ -119,6 +123,12 @@ namespace Detail {
     LogicalHandle operator==(LogicalHandle v1, LogicalHandle v2);
     LogicalHandle operator^(LogicalHandle v1, LogicalHandle v2);
     LogicalHandle operator!(LogicalHandle v);
+
+    LogicalHandle conjunction(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle disjunction(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle negation(LogicalHandle l);
+    LogicalHandle equality(LogicalHandle l1, LogicalHandle l2);
+    LogicalHandle exclusive(LogicalHandle l1, LogicalHandle l2);
 }
 
 using Detail::LogicalValue;
@@ -531,6 +541,27 @@ inline ValidatedUpperKleenean UpperKleenean::check(Effort e) const {
     return ValidatedUpperKleenean(this->repr().check(e)); }
 inline ApproximateKleenean NaiveKleenean::check(Effort e) const {
     return ApproximateKleenean(this->repr().check(e)); }
+
+
+class NondeterministicBoolean {
+    LowerKleenean _pt; LowerKleenean _pf; Bool _r;
+  public:
+    NondeterministicBoolean(LowerKleenean pt, LowerKleenean pf) : _pt(pt), _pf(pf), _r(_choose(pt,pf)) { }
+    operator bool() const { return _r; }
+  private:
+    static Bool _choose(LowerKleenean pt, LowerKleenean pf);
+};
+inline NondeterministicBoolean choose(LowerKleenean pt, LowerKleenean pf) {
+    return NondeterministicBoolean(pt,pf);
+}
+
+template<class P, class T> class Case {
+    P _p; T _t;
+  public:
+    Case(P p, T t) : _p(p), _t(t) { }
+    P condition() const { return _p; }
+    T term() const { return _t; }
+};
 
 }
 

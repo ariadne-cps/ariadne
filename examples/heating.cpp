@@ -28,17 +28,19 @@
 
 #include "hybrid/hybrid_automaton-composite.hpp"
 #include "hybrid/hybrid_set.hpp"
+#include "hybrid/hybrid_paving.hpp"
 #include "hybrid/hybrid_evolver.hpp"
 #include "hybrid/hybrid_simulator.hpp"
 #include "hybrid/hybrid_graphics.hpp"
 #include "hybrid/hybrid_enclosure.hpp"
 
 using namespace Ariadne;
+using std::cout; using std::cerr; using std::endl; using std::flush;
 
 typedef GeneralHybridEvolver HybridEvolverType;
 
 
-Void press_enter_to_continue() {
+inline Void press_enter_to_continue() {
     std::cout << "Press ENTER to continue... " << flush;
     std::cin.ignore( std::numeric_limits <std::streamsize> ::max(), '\n' );
 }
@@ -59,8 +61,7 @@ Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, c
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity = 0;
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    Nat evolver_verbosity=get_verbosity(argc,argv);
 
     // Create the system
     // Set the system dynamic parameters
@@ -99,15 +100,15 @@ Int main(Int argc, const char* argv[])
     heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
-    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, permissive );
+    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::PERMISSIVE );
     // Comment out above two lines and uncomment the line below to make the switch_on transition urgent
-    //heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, urgent );
-    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, urgent );
+    //heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, EventKind::URGENT );
+    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, EventKind::URGENT );
 
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( {dot(C)=1} );
-    clock.new_transition( midnight, next(C)=0, C>=1, urgent );
+    clock.new_transition( midnight, next(C)=0, C>=1, EventKind::URGENT );
 
     CompositeHybridAutomaton heating_system({clock,heater});
     cout << "heating_system=" << heating_system << "\n" << "\n";
@@ -136,7 +137,7 @@ Int main(Int argc, const char* argv[])
 
 
     // Set colours for drawing
-    DRAWING_METHOD = AFFINE_DRAW;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
     DRAWING_ACCURACY += 1;
 
     Colour guard_colour(0.5,0.5,0.5);
@@ -163,7 +164,7 @@ Int main(Int argc, const char* argv[])
 
     cout << "\nComputing orbit using series integrator... \n" << flush;
     evolver.set_integrator(series_integrator);
-    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,Semantics::UPPER);
     cout << "    done." << endl;
 
     cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
@@ -182,7 +183,7 @@ Int main(Int argc, const char* argv[])
 
     cout << "\nComputing event-terminated orbit using series integrator... \n" << flush;
     evolver.set_integrator(series_integrator);
-    series_orbit = evolver.orbit(initial_enclosure,evolution_termination,UPPER_SEMANTICS);
+    series_orbit = evolver.orbit(initial_enclosure,evolution_termination,Semantics::UPPER);
     cout << "    done." << endl;
 
     cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
@@ -204,12 +205,12 @@ Int main(Int argc, const char* argv[])
     analyser.configuration().set_maximum_grid_depth(5);
     analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
-    HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(initial_set);
+    HybridGridTreePaving chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;
     cout << "\nPlotting chain-reachable set... " << flush;
-    HybridGridTreeSet chain_reach_set_off=chain_reach_set;
+    HybridGridTreePaving chain_reach_set_off=chain_reach_set;
     chain_reach_set_off[heating|on].clear();
-    HybridGridTreeSet chain_reach_set_on=chain_reach_set;
+    HybridGridTreePaving chain_reach_set_on=chain_reach_set;
     chain_reach_set_on[heating|off].clear();
     plot("heating-chainreach.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off, chain_reach_on_colour, chain_reach_set_on);
     plot("heating-chainreach-off.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off);

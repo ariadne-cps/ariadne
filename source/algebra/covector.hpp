@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file algebra/covector.hpp
@@ -30,9 +31,9 @@
 #ifndef ARIADNE_COVECTOR_HPP
 #define ARIADNE_COVECTOR_HPP
 
-#include "utility/metaprogramming.hpp"
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
 
 namespace Ariadne {
 
@@ -47,6 +48,10 @@ struct DeclareCovectorOperations {
     template<class X1, class X2> friend Covector<ProductType<Scalar<X1>,X2>> operator*(X1 const& x1, Covector<X2> const& v2);
     template<class X1, class X2> friend Covector<ProductType<X1,Scalar<X2>>> operator*(Covector<X1> const& v1, X2 const& x2);
     template<class X1, class X2> friend Covector<QuotientType<X1,Scalar<X2>>> operator/(Covector<X1> const& v1, X2 const& x2);
+    template<class X1, class X2> friend Covector<InplaceSumType<X1,X2>>& operator+=(Covector<X1>& u1, const Covector<X2>& u2);
+    template<class X1, class X2> friend Covector<InplaceDifferenceType<X1,X2>>& operator-=(Covector<X1>& u1, const Covector<X2>& u2);
+    template<class X1, class X2> friend Covector<InplaceProductType<X1,X2>>& operator*=(Covector<X1>& u1, const X2& s2);
+    template<class X1, class X2> friend Covector<InplaceQuotientType<X1,X2>>& operator/=(Covector<X1>& u1, const X2& s2);
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2);
     template<class X1, class X2> friend EqualsType<X1,X2> operator==(const Covector<X1>& u1, const Covector<X2>& u2);
     template<class X> friend OutputStream& operator<<(OutputStream& os, const Covector<X>& u);
@@ -71,6 +76,8 @@ template<class X> class Covector
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> Covector(SizeType n, PRS... prs) : _ary(n,X(prs...)) { }
+    template<class XX, class PR, EnableIf<IsConstructible<X,XX,PR>> =dummy> Covector(Covector<XX> const& u, PR pr) : _ary(u.array(),pr) { }
     explicit Covector() : _ary() { }
     explicit Covector(SizeType n) : _ary(n) { }
     explicit Covector(SizeType n, const X& x) : _ary(n,x) { }
@@ -83,7 +90,8 @@ template<class X> class Covector
     const X& at(SizeType j) const { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]"); return _ary[j]; }
     X& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]");  return _ary[j]; }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
-
+    Array<X> const& array() const { return _ary; }
+    
     template<class CVE, EnableIf<IsConvertible<typename CVE::ScalarType,X>> =dummy>
     Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {
         for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
@@ -115,25 +123,45 @@ template<class V> inline CovectorRange<V> project(const CovectorExpression<V>& v
 
 class ProvideCovectorOperations {
 
+    template<class X> friend Covector<X> operator+(Covector<X> const& u) {
+        Covector<X> r(u.size(),+u.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=+u[i]; } return std::move(r); }
+
     template<class X> friend Covector<NegationType<X>> operator-(Covector<X> const& u) {
         Covector<NegationType<X>> r(u.size(),-u.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=-u[i]; } return std::move(r); }
-
-    template<class X1,class X2> friend Covector<DifferenceType<X1,X2>> operator-(Covector<X1> const& u1, Covector<X2> const& u2) {
-        ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<DifferenceType<X1,X2>> r(u1.size(),u1.zero_element()-u2.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]-u2[i]; } return std::move(r); }
 
     template<class X1,class X2> friend Covector<SumType<X1,X2>> operator+(Covector<X1> const& u1, Covector<X2> const& u2) {
         ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<SumType<X1,X2>> r(u1.size(),u1.zero_element()+u2.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]+u2[i]; } return std::move(r); }
 
-    template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
+    template<class X1,class X2> friend Covector<DifferenceType<X1,X2>> operator-(Covector<X1> const& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<DifferenceType<X1,X2>> r(u1.size(),u1.zero_element()-u2.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]-u2[i]; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
         Covector<ProductType<X1,X2>> r(u2.size(),s1*u2.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=s1*u2[i]; } return std::move(r); }
 
-    template<class X1,class X2> friend Covector<ProductType<X1,X2>> operator*(Covector<X1> const& u1, X2 const& s2) {
+    template<class X1,class X2> friend Covector<ProductType<X1,Scalar<X2>>> operator*(Covector<X1> const& u1, X2 const& s2) {
         Covector<ProductType<X1,X2>> r(u1.size(),u1.zero_element()*s2);
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]*s2; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<QuotientType<X1,Scalar<X2>>> operator/(Covector<X1> const& u1, X2 const& s2) {
+        Covector<QuotientType<X1,X2>> r(u1.size(),u1.zero_element()*s2);
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]/s2; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<InplaceSumType<X1,X2>>& operator+=(Covector<X1>& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]+=u2[i]; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceDifferenceType<X1,X2>>& operator-=(Covector<X1>& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); for(SizeType i=0; i!=u1.size(); ++i) { u1[i]-=u2[i]; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceProductType<X1,X2>>& operator*=(Covector<X1>& u1, X2 const& s2) {
+        for(SizeType i=0; i!=u1.size(); ++i) { u1[i]*=s2; } return u1; }
+
+    template<class X1,class X2> friend Covector<InplaceQuotientType<X1,X2>>& operator/=(Covector<X1>& u1, X2 const& s2) {
+        for(SizeType i=0; i!=u1.size(); ++i) { u1[i]/=s2; } return u1; }
 
     template<class X1, class X2> friend ArithmeticType<X1,X2> operator*(const Covector<X1>& u1, const Vector<X2>& v2) {
         ARIADNE_PRECONDITION(u1.size()==v2.size()); ArithmeticType<X1,X2> r=u1.zero_element()*v2.zero_element();

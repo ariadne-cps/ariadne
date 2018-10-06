@@ -10,4 +10,4 @@ add_library(ariadne-function OBJECT
     taylor_function.cpp
 )
 
-cotire(ariadne-function)
+cotire(ariadne-function CONFIGURATIONS None)

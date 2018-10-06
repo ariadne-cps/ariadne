@@ -6,66 +6,37 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "formula.hpp"
+
+#include "../numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 
 template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
 {
     const Formula<Y>& f = *this;
-    switch(f.op()) {
-        case OperatorCode::CNST:
-            return Formula<Y>::constant(0);
-        case OperatorCode::IND:
-            if(f.ind()==j) { return Formula<Y>::constant(1); }
-            else { return Formula<Y>::constant(0); }
-        case OperatorCode::ADD:
-            return derivative(f.arg1(),j)+derivative(f.arg2(),j);
-        case OperatorCode::SUB:
-            return derivative(f.arg1(),j)-derivative(f.arg2(),j);
-        case OperatorCode::MUL:
-            return f.arg1()*derivative(f.arg2(),j)+derivative(f.arg1(),j)*f.arg2();
-        case OperatorCode::DIV:
-            return derivative(f.arg1() * rec(f.arg2()),j);
-        case OperatorCode::SADD:
-            return derivative(f.arg(),j);
-        case OperatorCode::SSUB:
-            return -derivative(f.arg(),j);
-        case OperatorCode::SMUL:
-            return f.cnst()*derivative(f.arg(),j);
-        case OperatorCode::SDIV:
-            return f.cnst() * derivative(rec(f.arg()),j);
-        case OperatorCode::NEG:
-            return  - derivative(f.arg(),j);
-        case OperatorCode::REC:
-            return  - derivative(f.arg(),j) * rec(sqr(f.arg()));
-        case OperatorCode::SQR:
-            return static_cast<Y>(2) * derivative(f.arg(),j) * f.arg();
-        case OperatorCode::EXP:
-            return derivative(f.arg(),j) * f.arg();
-        case OperatorCode::LOG:
-            return derivative(f.arg(),j) * rec(f.arg());
-        case OperatorCode::SIN:
-            return derivative(f.arg(),j) * cos(f.arg());
-        case OperatorCode::COS:
-            return -derivative(f.arg(),j) * sin(f.arg());
-        case OperatorCode::TAN:
-            return derivative(f.arg(),j) * (static_cast<Y>(1)-sqr(f.arg()));
+    switch(f.kind()) {
+        case OperatorKind::NULLARY: return Formula<Y>::constant(0);
+        case OperatorKind::COORDINATE: return Formula<Y>::constant(f.ind()==j?1:0);
+        case OperatorKind::UNARY: return derivative(f.op(),f.arg(),derivative(f.arg(),j));
+        case OperatorKind::BINARY: return derivative(f.op(),f.arg1(),derivative(f.arg1(),j),f.arg2(),derivative(f.arg2(),j));
+        case OperatorKind::GRADED: return derivative(f.op(),f.arg(),derivative(f.arg(),j),f.num());
         default:
             ARIADNE_THROW(std::runtime_error,"derivative(Formula<Y>)",
                           "Cannot compute derivative of "<<f<<"\n");

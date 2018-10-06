@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file set_interface.hpp
@@ -30,9 +31,9 @@
 
 #include <iosfwd>
 
-#include "utility/declarations.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
 
 namespace Ariadne {
 
@@ -87,7 +88,7 @@ class SetInterfaceBase
 {
   public:
     //! \brief Virtual destructor.
-    virtual ~SetInterfaceBase() { };
+    virtual ~SetInterfaceBase() = default;
     //! \brief Construct a dynamically-allocated copy.
     virtual SetInterfaceBase* clone() const = 0;
     //! \brief The dimension of the set.
@@ -360,7 +361,7 @@ class ValidatedRegularLocatedSetInterface
 
 
 
-class GridTreeSet;
+class GridTreePaving;
 
 //! \brief A Euclidean space \f$\R^d\f$ of dimension \a d.
 class EuclideanSpace
@@ -385,7 +386,7 @@ class EuclideanSpace
     //! \brief The interface satisified by bounded regular sets.
     typedef RegularLocatedSetInterface RegularLocatedSetInterfaceType;
     //! \brief The type of approximations to sets in the space.
-    typedef GridTreeSet SetApproximationType;
+    typedef GridTreePaving SetApproximationType;
   public:
     EuclideanSpace(const SizeType& d) : _dimension(d) { }
     const SizeType& dimension() const { return this->_dimension; }

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file graphics.hpp
@@ -28,16 +29,16 @@
 #ifndef ARIADNE_GRAPHICS_HPP
 #define ARIADNE_GRAPHICS_HPP
 
-#include "config.h"
+#include "../config.hpp"
 
 #include <iosfwd>
 #include <string>
 #include <vector>
 
-#include "utility/typedefs.hpp"
-#include "utility/declarations.hpp"
-#include "output/colour.hpp"
-#include "output/graphics_interface.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/declarations.hpp"
+#include "../output/colour.hpp"
+#include "../output/graphics_interface.hpp"
 
 typedef unsigned int Nat;
 
@@ -65,9 +66,9 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
-    GraphicsProperties(Bool ls, double lw, Colour lc, Bool fs, Colour fc)
-        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
+    GraphicsProperties(Bool ls, double lw, double dr, Colour lc, Bool fs, Colour fc)
+        : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
     double dot_radius;
     Bool line_style;
     double line_width;
@@ -76,6 +77,7 @@ struct GraphicsProperties {
     Colour fill_colour;
 };
 
+Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
 
 //! \brief Class for plotting figures.
 class Figure
@@ -116,6 +118,7 @@ class Figure
 
     Bool get_line_style() const;
     double get_line_width() const;
+    double get_dot_radius() const;
     Colour get_line_colour() const;
     Bool get_fill_style() const;
     double get_fill_opacity() const;
@@ -141,7 +144,6 @@ class Figure
     Data* _data;
 };
 
-Void draw(Figure& fig, const DrawableInterface& shape);
 Void draw(Figure& fig, const ApproximateBoxType& box);
 
 inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
@@ -154,145 +156,19 @@ inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(f
 inline Figure& operator<<(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
 inline Figure& operator<<(Figure& fig, const ApproximateBoxType& box) { fig.draw(box); return fig; }
 
-template<class SET> Void plot(const char* filename, const SET& set) {
-    Figure g; draw(g,set); g.write(filename); }
+inline Void draw(Figure& g) { }
 
-template<class SET> Void plot(const char* filename, const Colour& fc, const SET& set) {
-    Figure g; g.set_fill_colour(fc); draw(g,set); g.write(filename); }
+template<class SET, class... CSETS> inline Void
+draw(Figure& g, const Colour& fc, const SET& set, CSETS const& ... csets) {
+    g.set_fill_colour(fc); draw(g,set); draw(g,csets...); }
 
-template<class SET> Void plot(const char* filename, const ApproximateBoxType& bbox, const SET& set) {
-    Figure g; g.set_bounding_box(bbox); draw(g,set); g.write(filename); }
+template<class... CSETS> Void
+plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox, CSETS const&... csets) {
+    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); draw(g,csets...);  g.write(filename); }
 
-template<class SET> Void plot(const char* filename, const ApproximateBoxType& bbox, const Colour& fc, const SET& set) {
-    Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
-
-template<class SET> Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox, const Colour& fc, const SET& set) {
-    Figure g; g.set_projection_map(pr), g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
-
-template<class SET1, class SET2>
-Void plot(const char* filename, const ApproximateBoxType& bbox, const SET1& set1, const SET2& set2) {
-    Figure g; g.set_bounding_box(bbox); draw(g,set1); draw(g,set2); g.write(filename); }
-
-template<class SET1, class SET2>
-Void plot(const char* filename, const ApproximateBoxType& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
-    Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
-
-template<class SET1, class SET2>
-Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
-    Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
-
-template<class SET1, class SET2, class SET3>
-Void plot(const char* filename, const ApproximateBoxType& bbox,
-          const SET1& set1, const SET2& set2, const SET3& set3)
-{
-    Figure g; g.set_bounding_box(bbox);
-    draw(g,set1); draw(g,set2); draw(g,set3); g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3>
-Void plot(const char* filename, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, const Colour& fc3, const SET3& set3)
-{
-    Figure g; g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.set_fill_colour(fc3); draw(g,set3); g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3>
-Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, const Colour& fc3, const SET3& set3)
-{
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.set_fill_colour(fc3); draw(g,set3); g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4>
-Void plot(const char* filename, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4)
-{
-    Figure g; g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4>
-Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4)
-{
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4, class SET5>
-Void plot(const char* filename, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-          const Colour& fc5, const SET5& set5)
-{
-    Figure g; g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5);
-    g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4, class SET5>
-Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox,
-        const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-        const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-        const Colour& fc5, const SET5& set5)
-{
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5);
-    g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4, class SET5, class SET6>
-Void plot(const char* filename, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-          const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6)
-{
-    Figure g; g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5);
-    g.set_fill_colour(fc6); draw(g,set6);
-    g.write(filename);
-}
-
-template<class SET1, class SET2, class SET3, class SET4, class SET5, class SET6>
-Void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox,
-          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-          const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6)
-{
-    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
-    g.set_fill_colour(fc1); draw(g,set1);
-    g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3);
-    g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5);
-    g.set_fill_colour(fc6); draw(g,set6);
-    g.write(filename);
-}
-
+template<class... CSETS> Void
+plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {
+    plot(filename, PlanarProjectionMap(2u,0,1), bbox, csets...); }
 
 } // namespace Ariadne
 

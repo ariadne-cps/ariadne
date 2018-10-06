@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file float_ball.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_BALL_HPP
 #define ARIADNE_FLOAT_BALL_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -39,6 +40,7 @@ namespace Ariadne {
 
 template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
     typedef ValidatedNumber GenericType;
+    typedef Ball<F,FE> OppositeType;
     typedef PositiveBall<F,FE> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;
@@ -73,6 +75,7 @@ template<class F, class FE> class Ball
     explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
+    Ball<F,FE>(Bounds<F> const& x, PRE pre);
     Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 
     Ball<F,FE>(ExactDouble d, PR pr);
@@ -85,12 +88,17 @@ template<class F, class FE> class Ball
         Ball<F,FE>(const Ball<F,FE>& x, PR pr);
     Ball<F,FE>(const ValidatedNumber& y, PR pr);
 
+    // FIXME: Constructors for other types
+        Ball<F,FE>(const Rational& q, PR pr, PRE pre);
+        Ball<F,FE>(const Real& q, PR pr, PRE pre);
+    Ball<F,FE>(const ValidatedNumber& y, PR pr, PRE pre);
+
     explicit Ball<F,FE>(Bounds<F> const& x);
     Ball<F,FE>(Value<F> const& x);
 
     Ball<F,FE>& operator=(const ValidatedNumber& y);
 
-    operator ValidatedNumber () const;
+    operator ValidatedNumber () const { return ValidatedNumber(new NumberWrapper<Ball<F,FE>>(*this)); }
 
     Ball<F,FE> create(const ValidatedNumber& y) const;
 
@@ -117,6 +125,7 @@ template<class F, class FE> class Ball
     friend Bool same(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Bool models(Ball<F,FE> const&, Value<F> const&);
     friend Bool consistent(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Bool inconsistent(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Bool refines(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Ball<F,FE> refinement(Ball<F,FE> const&, Ball<F,FE> const&);
   private: public:

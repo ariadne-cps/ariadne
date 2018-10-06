@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file utility/array.hpp
@@ -33,6 +34,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
+#include <cassert>
 #include "metaprogramming.hpp"
 
 namespace Ariadne {
@@ -74,7 +76,7 @@ class Array {
     Array() : _size(0), _ptr(0) { }
     /*! \brief Constructs an Array of size \a n with default-initialised elements. */
     explicit Array(const SizeType n) : _size(n), _ptr(uninitialized_new(n)) { for(SizeType i=0; i!=n; ++i) { new (_ptr+i) T(); } }
-    /*! \brief Constructs an Array of size \a n with uninitialised elements. */
+    /*! \brief Constructs an Array of size \a n with uninitialised elements. The elements should be initialised using placement new. */
     explicit Array(const SizeType n, Uninitialised) : _size(n), _ptr(uninitialized_new(n)) { }
     /*! \brief Constructs an Array of size \a n with elements initialised to \a x. */
     Array(const SizeType n, const ValueType& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
@@ -97,7 +99,8 @@ class Array {
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator>
     Array(ForwardIterator first, ForwardIterator last)
-            : _size(std::distance(first,last)), _ptr(uninitialized_new(_size)) {
+            : _size(static_cast<SizeType>(std::distance(first,last))), _ptr(uninitialized_new(_size)) {
+        assert(std::distance(first,last) >= 0);
         this->_uninitialized_fill(first); }
 
     /*! \brief Conversion constructor. */
@@ -240,6 +243,19 @@ template<class T> class SharedArray {
     Iterator end() { return _ptr+_size; }
     ConstIterator end() const { return _ptr+_size; }
 };
+
+inline Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {
+    Array<SizeType> cmpl(nmax-vars.size());
+    SizeType kr=0; SizeType kv=0;
+    for(SizeType j=0; j!=nmax; ++j) {
+        if(kv==vars.size() || j!=vars[kv]) {
+            cmpl[kr]=j; ++kr;
+        } else {
+            ++kv;
+        }
+    }
+    return cmpl;
+}
 
 } // namespace Ariadne
 

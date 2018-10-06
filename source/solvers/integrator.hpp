@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file integrator.hpp
@@ -32,14 +33,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "solvers/integrator_interface.hpp"
-#include "function/function_interface.hpp"
+#include "../solvers/integrator_interface.hpp"
+#include "../function/function_interface.hpp"
 
-#include "utility/declarations.hpp"
-#include "utility/attribute.hpp"
-#include "utility/logging.hpp"
-#include "utility/pointer.hpp"
-#include "function/affine.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/attribute.hpp"
+#include "../output/logging.hpp"
+#include "../utility/pointer.hpp"
+#include "../function/affine.hpp"
 
 namespace Ariadne {
 
@@ -151,7 +152,7 @@ class TaylorPicardIntegrator
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
         : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*128)), _maximum_temporal_order(16) { }
+        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _maximum_temporal_order(12) { }
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
@@ -241,6 +242,9 @@ class TaylorSeriesIntegrator
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
+
+  private:
+
 };
 
 
@@ -252,10 +256,8 @@ class AffineIntegrator
     Nat _spacial_order;
     Nat _temporal_order;
   public:
-    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order)
-        : IntegratorBase(maximum_error,lipschitz_constant=0.5), _spacial_order(1u), _temporal_order(temporal_order) { }
-    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order)
-        : IntegratorBase(maximum_error,lipschitz_constant=0.5), _spacial_order(spacial_order), _temporal_order(temporal_order) { }
+    AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
+    AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
     Nat spacial_order() const { return this->_spacial_order; }

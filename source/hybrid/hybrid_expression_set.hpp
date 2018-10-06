@@ -1,28 +1,29 @@
 /***************************************************************************
- *            hybrid_set.hpp
+ *            hybrid_expression_set.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_set.hpp
- *  \brief Sets in hybrid spaces.
+/*! \file hybrid_expression_set.hpp
+ *  \brief Sets in hybrid spaces denoted by variables.
  */
 
 #ifndef ARIADNE_HYBRID_EXPRESSION_SET_HPP
@@ -31,25 +32,25 @@
 #include <map>
 #include <memory>
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "utility/declarations.hpp"
-#include "utility/container.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/curve.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/declarations.hpp"
+#include "../utility/container.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../geometry/curve.hpp"
 
-#include "expression/expression_set.hpp"
+#include "../symbolic/expression_set.hpp"
 
-#include "hybrid/hybrid_set.decl.hpp"
-#include "hybrid/hybrid_set_interface.hpp"
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_grid.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
+#include "../hybrid/hybrid_set.decl.hpp"
+#include "../hybrid/hybrid_set_interface.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_grid.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
 
-#include "hybrid/hybrid_graphics_interface.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 

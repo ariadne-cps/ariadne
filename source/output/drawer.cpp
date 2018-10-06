@@ -6,45 +6,44 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "output/drawer.hpp"
+#include "../output/drawer.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "output/graphics_interface.hpp"
+#include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
+
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining);
 
 Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
 
 
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { ARIADNE_NOT_IMPLEMENTED; }
-
-Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
-{
-    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
-}
 
 OutputStream& BoxDrawer::_write(OutputStream& os) const {
     return os << "BoxDrawer()"; }
@@ -58,18 +57,6 @@ OutputStream& GridDrawer::_write(OutputStream& os) const {
     return os << "GridDrawer(depth=" << this->_depth << ")"; }
 
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
-
-
-Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Int splittings_remaining)
-{
-    if(splittings_remaining==0) {
-        set.affine_over_approximation().draw(cnvs,proj);
-    } else {
-        Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split=set.split();
-        affine_draw(cnvs,proj,split.first,splittings_remaining-1u);
-        affine_draw(cnvs,proj,split.second,splittings_remaining-1u);
-    }
-}
 
 Void AffineDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const
 {
@@ -133,19 +120,32 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
     for(Nat n=0; n!=subdomains.size(); ++n) {
         try {
             set.restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
-        } catch(std::runtime_error& e) {
+        } catch(const std::runtime_error& e) {
             ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set<<"\n");
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
-};
-
-
+}
 
 Void GridDrawer::draw(CanvasInterface& canvas, const Projection2d& projection, const ValidatedConstrainedImageSet& set) const {
     set.outer_approximation(Grid(set.dimension()),this->_depth).draw(canvas,projection);
 }
 
+Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)
+{
+    cast_exact_box(apply(set.function(),set.domain())).draw(cnvs,proj);
+}
+
+Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining)
+{
+    if(splittings_remaining==0) {
+        set.affine_over_approximation().draw(cnvs,proj);
+    } else {
+        Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split=set.split();
+        affine_draw(cnvs,proj,split.first,splittings_remaining-1u);
+        affine_draw(cnvs,proj,split.second,splittings_remaining-1u);
+    }
+}
 
 } // namespace Ariadne
 

@@ -6,38 +6,39 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/constraint.hpp"
-#include "geometry/enclosure.hpp"
-#include "dynamics/orbit.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/stlio.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/constraint.hpp"
+#include "../geometry/enclosure.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
-#include "dynamics/map.hpp"
-#include "dynamics/map_evolver.hpp"
+#include "../dynamics/map.hpp"
+#include "../dynamics/map_evolver.hpp"
 
 namespace {
 
@@ -61,7 +62,6 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -92,14 +92,6 @@ orbit(const EnclosureType& initial_set,
     return orbit;
 }
 
-
-
-
-enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
-enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
-
-
-
 Void
 MapEvolver::
 _evolution(EnclosureListType& final_sets,
@@ -111,8 +103,6 @@ _evolution(EnclosureListType& final_sets,
            Bool reach) const
 {
     verbosity=0;
-
-    typedef EffectiveVectorFunction FunctionType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -137,7 +127,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound initial_set_radius=initial_enclosure.bounding_box().radius();
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
                   && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
@@ -145,7 +135,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << initial_time
                          << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {

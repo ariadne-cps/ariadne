@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/paradigm.hpp
@@ -28,7 +29,8 @@
 #ifndef ARIADNE_PARADIGM_HPP
 #define ARIADNE_PARADIGM_HPP
 
-#include "utility/metaprogramming.hpp"
+#include <cstdint>
+#include "../utility/metaprogramming.hpp"
 
 namespace Ariadne {
 
@@ -36,7 +38,7 @@ typedef Void Void;
 
 class ParadigmError { };
 
-typedef unsigned short ParadigmCodeType;
+typedef std::uint16_t  ParadigmCodeType;
 
 enum class ParadigmCode : ParadigmCodeType {
     APPROXIMATE_FLAG=1,
@@ -322,7 +324,7 @@ template<class P> using Widen = ParadigmClass<widen(P::code())>;
 template<class P> using Unorder = ParadigmClass<undirect(P::code())>;
 template<class P> using Undirect = ParadigmClass<undirect(P::code())>;
 template<class P> using Null = ParadigmClass<null(P::code())>;
-template<class P1, class P2=Negated<P1>> using LessThan = Weaker<P1,Negated<P2>>;
+template<class P1, class P2=Negated<P1>> using LessThan = Weaker<Negated<P1>,P2>;
 template<class P1, class P2=Negated<P1>> using Equality = Null<Weaker<P1,Negated<P2>>>;
 
 } // namespace Ariadne

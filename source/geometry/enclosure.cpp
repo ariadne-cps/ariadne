@@ -6,74 +6,75 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <iomanip>
 
-#include "function/constraint.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "geometry/enclosure.hpp"
+#include "../function/constraint.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../geometry/enclosure.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
 
-#include "function/function_model.hpp"
-#include "function/taylor_function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid.hpp"
 
-#include "geometry/function_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "geometry/paving_interface.hpp"
-#include "geometry/paver.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../geometry/paver.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/nonlinear_programming.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/nonlinear_programming.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/drawer.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer.hpp"
 
-#include "hybrid/discrete_event.hpp"
+#include "../hybrid/discrete_event.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
-#include "numeric/operators.hpp"
-#include "expression/space.hpp"
+#include "../numeric/operators.hpp"
+#include "../symbolic/space.hpp"
+
+#include "../algebra/expansion.inl.hpp"
 
 
 namespace Ariadne {
-
-static const Nat verbosity = 0u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
@@ -91,14 +92,9 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl)
 
 namespace {
 
-ExactIntervalType cast_exact_interval(const Real& r) {
-    DoublePrecision pr; auto x=r.get(pr); return ExactIntervalType(x.lower().raw(),x.upper().raw());
-}
-
 ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const EnclosureConfiguration& configuration) {
     ExactIntervalVectorType dom(bx.dimension());
     Vector<ErrorNumericType> errs(bx.dimension());
-    DoublePrecision dp;
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
         make_lpair(dom[i],errs[i])=make_domain(bx[i]);
@@ -110,20 +106,16 @@ ValidatedVectorFunctionModelDP make_identity(const EffectiveBoxType& bx, const E
     }
 
     return res;
-};
-
-// TODO: Make more efficient
-inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
 }
+
 } // namespace
 
-Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedScalarFunctionModelDP,ValidatedScalarFunctionModelDP> split(const ValidatedScalarFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
-Pair<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP> split(const ValidatedVectorFunctionModelDP& f, Nat k) {
+inline Pair<ValidatedVectorFunctionModelDP,ValidatedVectorFunctionModelDP> split(const ValidatedVectorFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
@@ -180,6 +172,12 @@ Enclosure::set_drawer(Drawer const& drawer) {
 }
 
 /*
+
+// TODO: Make more efficient
+inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
+    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+}
+
 // FIXME: What if solving for constraint leaves domain?
 Void Enclosure::_solve_zero_constraints() {
     this->_check();
@@ -194,13 +192,13 @@ Void Enclosure::_solve_zero_constraints() {
         MultiIndex r(k);
         // Try linear approach in last coefficient
         for(ValidatedTaylorModelDP::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
-            if(tmiter->key()[k]==0) {
-                assign_all_but_last(r,tmiter->key());
-                zeroth_order.expansion().append(r,tmiter->data());
-            } else if(tmiter->key()[k]==1) {
+            if(tmiter->index()[k]==0) {
+                assign_all_but_last(r,tmiter->index());
+                zeroth_order.expansion().append(r,tmiter->coefficient());
+            } else if(tmiter->index()[k]==1) {
                 is_zeroth_order=false;
-                assign_all_but_last(r,tmiter->key());
-                first_order.expansion().append(r,tmiter->data());
+                assign_all_but_last(r,tmiter->index());
+                first_order.expansion().append(r,tmiter->coefficient());
             } else {
                 is_first_order=false; break;
             }
@@ -322,7 +320,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
     : _configuration(configuration)
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
@@ -351,7 +348,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorFunction& 
 {
     ARIADNE_ASSERT_MSG(domain.size()==state_function.argument_size(),"domain="<<domain<<", state_function="<<state_function);
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
-    const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(decide(this->_domain[i].width()==0)) {
@@ -545,8 +541,8 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModelDP phi)
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
-    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),FloatDPValue(h));
+    FloatDPValue h=phi.domain()[phi.result_size()].upper();
+    ValidatedScalarFunctionModelDP elps=this->function_factory().create_constant(this->domain(),h);
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
 }
@@ -581,6 +577,13 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, V
     if(phi.domain()[phi.result_size()].lower()<time_domain.upper()) {
         this->new_negative_parameter_constraint(time_step_function-embed(elps,time_domain));
     }
+    this->_check();
+}
+
+Void Enclosure::new_state_time_bound(ValidatedScalarFunction gamma) {
+    ARIADNE_ASSERT(gamma.argument_size()==this->state_dimension());
+    this->_is_fully_reduced=false;
+    this->_constraints.append(compose(gamma,this->state_function())<=this->time_function());
     this->_check();
 }
 
@@ -911,7 +914,6 @@ Enclosure::split_first_order() const
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat imax=nonlinearities.row_size();
     Nat jmax_in_row_imax=nonlinearities.column_size();
     FloatDP max_row_sum=0.0;
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
@@ -926,7 +928,6 @@ Enclosure::split_first_order() const
             }
         }
         if(row_sum>max_row_sum) {
-            imax=i;
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -1014,24 +1015,23 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 
 
-Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),depth);
 }
 
 
-GridTreeSet Enclosure::outer_approximation(const Grid& grid, Int depth) const
+GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat depth) const
 {
-    GridTreeSet paving(grid);
+    GridTreePaving paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
     return paving;
 }
 
 
 
-
-
-
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error);
+TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables);
 
 
 Void
@@ -1090,9 +1090,6 @@ uniform_error_recondition()
 
 }
 
-// In MultiIndex code file
-Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
-
 TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
@@ -1122,14 +1119,14 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         ra[number_of_kept_variables+index_of_error]=1;
         r.expansion().append(ra,FloatDPValue());
         ra[number_of_kept_variables+index_of_error]=0;
-        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->data());
+        error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
     FloatDPError& error=*error_ptr;
     error += tm.error();
 
     for(TaylorModel<ValidatedTag,FloatDP>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        MultiIndex const& xa=iter->key();
-        FloatDPValue const& xv=iter->data();
+        UniformConstReference<MultiIndex> xa=iter->index();
+        UniformConstReference<FloatDPValue> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1177,8 +1174,8 @@ Enclosure::kuhn_recondition()
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-                if(iter->key()[j]!=0) {
-                    dependencies[i][j]+=abs(iter->data()).raw();
+                if(iter->index()[j]!=0) {
+                    dependencies[i][j]+=abs(iter->coefficient()).raw();
                 }
             }
         }
@@ -1270,7 +1267,7 @@ ValidatedScalarFunctionModelDP const Enclosure::get_function(SizeType i) const {
     else { return compose(this->_auxiliary_mapping[i-this->state_dimension()-1u],this->_state_function); }
 }
 
-ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP& f1, const ValidatedScalarFunctionModelDP& f2, const ValidatedVectorFunctionModelDP& f3) {
+inline ValidatedVectorFunctionModelDP join(const ValidatedVectorFunctionModelDP& f1, const ValidatedScalarFunctionModelDP& f2, const ValidatedVectorFunctionModelDP& f3) {
     return join(join(f1,f2),f3);
 }
 
@@ -1289,7 +1286,7 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 
 Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat depth) const {
     GridDrawer(depth).draw(canvas,projection,this->state_time_auxiliary_set());
-};
+}
 
 
 
@@ -1304,9 +1301,9 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 
-const ValidatedScalarFunctionModelDP& repr(const ValidatedScalarFunctionModelDP& f) { return f; }
-const ValidatedVectorFunctionModelDP& repr(const ValidatedVectorFunctionModelDP& f) { return f; }
-const List<ValidatedScalarFunctionModelDP>& repr(const List<ValidatedScalarFunctionModelDP>& f) { return f; }
+inline const ValidatedScalarFunctionModelDP& repr(const ValidatedScalarFunctionModelDP& f) { return f; }
+inline const ValidatedVectorFunctionModelDP& repr(const ValidatedVectorFunctionModelDP& f) { return f; }
+inline const List<ValidatedScalarFunctionModelDP>& repr(const List<ValidatedScalarFunctionModelDP>& f) { return f; }
 
 OutputStream& Enclosure::write(OutputStream& os) const {
     const Bool LONG_FORMAT=false;
@@ -1392,11 +1389,11 @@ struct ValidatedAffineModel {
 ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
     ValidatedAffineModel result(0.0,Vector<FloatDPValue>(tm.argument_size(),0.0),tm.error());
     for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
-        else if(iter->key().degree()==0) {result. _c=iter->data(); }
+        if(iter->index().degree()>=2) { result._e+=abs(iter->coefficient()); }
+        else if(iter->index().degree()==0) {result. _c=iter->coefficient(); }
         else {
             for(Nat j=0; j!=tm.argument_size(); ++j) {
-                if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
+                if(iter->index()[j]!=0) { result._g[j]=iter->coefficient(); break; }
             }
         }
     }

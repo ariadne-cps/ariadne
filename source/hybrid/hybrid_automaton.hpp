@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_automaton.hpp
@@ -34,14 +35,14 @@
 #include <set>
 #include <map>
 
-#include "function/function.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/discrete_event.hpp"
-#include "expression/assignment.hpp"
-#include "expression/expression.hpp"
-#include "utility/logging.hpp"
+#include "../function/function.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/discrete_event.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../symbolic/expression.hpp"
+#include "../output/logging.hpp"
 
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
 
 namespace Ariadne {
 
@@ -278,7 +279,7 @@ class HybridAutomaton
     HybridAutomaton* clone() const { return new HybridAutomaton(*this); }
 
     //! \brief Destructor.
-    virtual ~HybridAutomaton();
+    virtual ~HybridAutomaton() = default;
     //@}
 
     //@{
@@ -328,8 +329,8 @@ class HybridAutomaton
                     ContinuousPredicate invariant,
                     DiscreteEvent event,
                     ContinuousPredicate activation,
-                    EventKind kind=PERMISSIVE) {
-        ARIADNE_ASSERT(kind==PERMISSIVE);
+                    EventKind kind=EventKind::PERMISSIVE) {
+        ARIADNE_ASSERT(kind==EventKind::PERMISSIVE);
         this->_new_action(location,invariant,event,activation,kind);
     }
 
@@ -337,8 +338,8 @@ class HybridAutomaton
     Void new_action(DiscreteLocation location,
                     DiscreteEvent event,
                     ContinuousPredicate guard,
-                    EventKind kind=URGENT) {
-        ARIADNE_ASSERT(kind==URGENT || kind==IMPACT);
+                    EventKind kind=EventKind::URGENT) {
+        ARIADNE_ASSERT(kind==EventKind::URGENT || kind==EventKind::IMPACT);
         this->_new_guard(location,event,guard,kind);
     }
 
@@ -355,7 +356,7 @@ class HybridAutomaton
                        DiscreteEvent event) {
         DiscreteMode& mode=this->_modes.value(location);
         mode._invariants[event] = invariant;
-        mode._kinds[event] = INVARIANT;
+        mode._kinds[event] = EventKind::INVARIANT;
     }
 
     //! \brief Adds a guard to the automaton.
@@ -426,8 +427,8 @@ class HybridAutomaton
                         const List<PrimedRealAssignment>& reset,
                         const ContinuousPredicate& guard,
                         EventKind kind) {
-        if(kind==urgent || kind==impact) { this->_new_action(source,!guard,event,guard,kind); }
-        else if(kind==permissive) { this->_new_guard(source,event,guard,kind); }
+        if(kind==EventKind::URGENT || kind==EventKind::IMPACT) { this->_new_action(source,!guard,event,guard,kind); }
+        else if(kind==EventKind::PERMISSIVE) { this->_new_guard(source,event,guard,kind); }
         else { ARIADNE_FAIL_MSG("Unhandled event kind "<<kind); }
         this->_new_update(source,event,target,reset);
     }

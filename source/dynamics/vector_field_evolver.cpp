@@ -6,44 +6,45 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "utility/tuple.hpp"
-#include "utility/stlio.hpp"
-#include "utility/container.hpp"
-#include "algebra/vector.hpp"
-#include "function/function.hpp"
-#include "function/constraint.hpp"
-#include "geometry/enclosure.hpp"
-#include "dynamics/orbit.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/stlio.hpp"
+#include "../utility/container.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/function.hpp"
+#include "../function/constraint.hpp"
+#include "../geometry/enclosure.hpp"
+#include "../dynamics/orbit.hpp"
 
-#include "solvers/integrator.hpp"
+#include "../solvers/integrator.hpp"
 
-#include "utility/logging.hpp"
+#include "../output/logging.hpp"
 
-#include "dynamics/vector_field.hpp"
-#include "dynamics/vector_field_evolver.hpp"
+#include "../dynamics/vector_field.hpp"
+#include "../dynamics/vector_field_evolver.hpp"
 
-#include "expression/space.hpp"
-#include "expression/assignment.hpp"
+#include "../symbolic/space.hpp"
+#include "../symbolic/assignment.hpp"
 
 namespace {
 
@@ -64,8 +65,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 namespace Ariadne {
 
-EffectiveVectorFunction make_function(RealSpace const&, Vector<RealExpression> const&);
-
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
     : _variable_names(variable_names(left_hand_sides(dynamics)))
     , _function(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))))
@@ -82,7 +81,6 @@ const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -126,12 +124,6 @@ orbit(const EnclosureType& initial_set,
 
 
 
-
-enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
-enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
-
-
-
 Void
 VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets,
@@ -142,11 +134,6 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            Bool reach) const
 {
-    typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModelDP FunctionModelType;
-    typedef ValidatedVectorFunctionModelDP FlowModelType;
-
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     List< TimedEnclosureType > working_sets;
@@ -170,7 +157,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound current_set_radius=current_set_model.bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
@@ -178,7 +165,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time
                          << " and set " << current_set_model << " due to maximum radius being exceeded.");
         } else {
@@ -197,7 +184,6 @@ _evolution(EnclosureListType& final_sets,
                         <<" c="<<current_set_model.centre() << "\n");
 
     }
-
 }
 
 
@@ -216,10 +202,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
-    typedef Vector<ExactIntervalType> BoxType;
-    typedef ValidatedVectorFunctionModelDP MapModelType;
     typedef ValidatedVectorFunctionModelDP FlowModelType;
-    typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;

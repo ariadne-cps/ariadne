@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
- *  You should have received _a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/floatmp.hpp
@@ -45,7 +46,6 @@ struct RawPtr { };
 
 struct RoundUpward; struct RoundDownward;
 
-//enum RoundingModeMP { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 typedef mpfr_rnd_t RoundingModeMP;
 
 class MultiplePrecision {
@@ -55,10 +55,10 @@ class MultiplePrecision {
     typedef unsigned_mpfr_prec_t Type;
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
     explicit MultiplePrecision(DoublePrecision const& pr) : prec(53u) { }
-    unsigned_mpfr_prec_t bits() const { return prec; }
+    unsigned_mpfr_prec_t bits() const { return static_cast<unsigned_mpfr_prec_t>(prec); }
     operator mpfr_prec_t () const { return prec; }
-    friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::max(mp1.bits(),mp2.bits())); }
-    friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(std::min(mp1.bits(),mp2.bits())); }
+    friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::max(mp1.bits(),mp2.bits()))); }
+    friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::min(mp1.bits(),mp2.bits()))); }
     friend bool operator==(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()==mp2.bits(); }
     friend bool operator<=(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()<=mp2.bits(); }
     friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
@@ -75,7 +75,6 @@ inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 class FloatMP {
   private:
     mpfr_t _mpfr;
-    typedef decltype(_mpfr[0]) MpfrReference;
   public:
     typedef RawTag Paradigm;
     typedef FloatMP NumericType;
@@ -98,8 +97,10 @@ class FloatMP {
     static Void set_default_precision(PrecisionType prec);
     static PrecisionType get_default_precision();
   public:
-    static FloatMP nan(PrecisionType);
+    static FloatMP inf(Sign, PrecisionType);
     static FloatMP inf(PrecisionType);
+    static FloatMP nan(PrecisionType);
+
     static FloatMP max(PrecisionType);
     static FloatMP eps(PrecisionType);
     static FloatMP min(PrecisionType);
@@ -123,7 +124,6 @@ class FloatMP {
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(Int32 n, MultiplePrecision pr);
     FloatMP(double, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
@@ -138,13 +138,13 @@ class FloatMP {
     Void set_precision(MultiplePrecision);
   public:
     FloatMP const& raw() const;
-    MpfrReference get_mpfr();
-    MpfrReference get_mpfr() const;
+    mpfr_t const& get_mpfr() const;
     double get_d() const;
   public:
     friend Bool is_nan(FloatMP const& x);
     friend Bool is_inf(FloatMP const& x);
     friend Bool is_finite(FloatMP const& x);
+    friend Bool is_zero(FloatMP const& x);
 
     friend FloatMP next(RoundUpward rnd, FloatMP const& x);
     friend FloatMP next(RoundDownward rnd, FloatMP const& x);
@@ -338,10 +338,37 @@ class FloatMP {
     friend OutputStream& operator<<(OutputStream& os, FloatMP const& x);
     friend InputStream& operator>>(InputStream& is, FloatMP& x);
   private:
+
+    // Mixed operations
+    friend FloatMP add(FloatMP const& x1, Dbl x2);
+    friend FloatMP sub(FloatMP const& x1, Dbl x2);
+    friend FloatMP mul(FloatMP const& x1, Dbl x2);
+    friend FloatMP div(FloatMP const& x1, Dbl x2);
+    friend FloatMP add(Dbl x1, FloatMP const& x2);
+    friend FloatMP sub(Dbl x1, FloatMP const& x2);
+    friend FloatMP mul(Dbl x1, FloatMP const& x2);
+    friend FloatMP div(Dbl x1, FloatMP const& x2);
+
+    // Correctly rounded operations
+    friend FloatMP sqr_rnd(FloatMP const& x);
+    friend FloatMP add_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP pow_rnd(FloatMP const& x, Int n);
+    friend FloatMP sqrt_rnd(FloatMP const& x);
+    friend FloatMP exp_rnd(FloatMP const& x);
+    friend FloatMP log_rnd(FloatMP const& x);
+    friend FloatMP sin_rnd(FloatMP const& x);
+    friend FloatMP cos_rnd(FloatMP const& x);
+    friend FloatMP tan_rnd(FloatMP const& x);
+    friend FloatMP atan_rnd(FloatMP const& x);
+
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
     friend OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
-    friend String print(FloatMP const& x, DecimalPlaces dgts, RoundingModeMP rnd);
-    friend String print(FloatMP const& x, DecimalPrecision dgts, RoundingModeMP rnd);
+    friend String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd);
+    friend String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd);
+    friend String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd);
 };
 
 template<class R, class A> R integer_cast(const A& a);

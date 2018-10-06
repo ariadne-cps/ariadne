@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file paver.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_PAVER_HPP
 #define ARIADNE_PAVER_HPP
 
-#include "geometry/paver_interface.hpp"
+#include "../geometry/paver_interface.hpp"
 
 namespace Ariadne {
 
@@ -38,7 +39,7 @@ class Paver {
     using SetType = PaverInterface::SetType;
     Paver(SharedPointer<const PaverInterface> ptr) : _ptr(ptr) { }
     Paver(const PaverInterface* ptr) : _ptr(ptr) { }
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const {
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const {
         this->_ptr->adjoin_outer_approximation(paving,set,depth); }
     friend OutputStream& operator<<(OutputStream& os, Paver const& pv) { return pv._ptr->_write(os); }
 };
@@ -47,7 +48,7 @@ class Paver {
 class AffinePaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -55,8 +56,8 @@ class AffinePaver : public PaverInterface
 class SubdivisionPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
-    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Int depth, const Vector<FloatDPValue>& max_errors) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
+    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat depth, const Vector<FloatDPValue>& max_errors) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -64,7 +65,7 @@ class SubdivisionPaver : public PaverInterface
 class ReducePaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -72,7 +73,7 @@ class ReducePaver : public PaverInterface
 class ConstraintPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -80,7 +81,7 @@ class ConstraintPaver : public PaverInterface
 class OptimalConstraintPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Int depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
     OutputStream& _write(OutputStream& os) const;
 };
 

@@ -468,6 +468,22 @@ EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector
     return r;
 }
 
+EffectiveVectorFunction operator+(const EffectiveVectorFunction& f) {
+    EffectiveVectorFunction r(f.result_size(),f.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,+f[i]);
+    }
+    return r;
+}
+
+EffectiveVectorFunction operator-(const EffectiveVectorFunction& f) {
+    EffectiveVectorFunction r(f.result_size(),f.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,-f[i]);
+    }
+    return r;
+}
+
 EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
@@ -488,6 +504,15 @@ EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const Effec
     return r;
 }
 
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf) {
+    ARIADNE_ASSERT(sf.argument_size()==vf.argument_size());
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,sf*vf[i]);
+    }
+    return r;
+}
+
 EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf) {
     ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
     EffectiveVectorFunction r(vf.result_size(),vf.domain());
@@ -497,11 +522,48 @@ EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const Effec
     return r;
 }
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf) {
-    ARIADNE_ASSERT(sf.argument_size()==vf.argument_size());
+EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf) {
+    ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
     EffectiveVectorFunction r(vf.result_size(),vf.domain());
     for(SizeType i=0; i!=r.result_size(); ++i) {
-        r.set(i,sf*vf[i]);
+        r.set(i,vf[i]/sf);
+    }
+    return r;
+}
+
+
+EffectiveVectorFunction operator+(const Vector<EffectiveNumber>& vc, const EffectiveVectorFunction& vf) {
+    ARIADNE_ASSERT(vc.size()==vf.result_size());
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vc[i]+vf[i]);
+    }
+    return r;
+}
+
+EffectiveVectorFunction operator+(const EffectiveVectorFunction& vf, const Vector<EffectiveNumber>& vc) {
+    ARIADNE_ASSERT(vf.result_size()==vc.size());
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vf[i]+vc[i]);
+    }
+    return r;
+}
+
+EffectiveVectorFunction operator-(const Vector<EffectiveNumber>& vc, const EffectiveVectorFunction& vf) {
+    ARIADNE_ASSERT(vc.size()==vf.result_size());
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vc[i]-vf[i]);
+    }
+    return r;
+}
+
+EffectiveVectorFunction operator-(const EffectiveVectorFunction& vf, const Vector<EffectiveNumber>& vc) {
+    ARIADNE_ASSERT(vf.result_size()==vc.size());
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vf[i]-vc[i]);
     }
     return r;
 }
@@ -514,6 +576,13 @@ EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVecto
     return r;
 }
 
+EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveNumber& c) {
+    EffectiveVectorFunction r(vf.result_size(),vf.domain());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,vf[i]*c);
+    }
+    return r;
+}
 
 EffectiveVectorFunction operator/(const EffectiveVectorFunction& vf, const EffectiveNumber& c) {
     EffectiveVectorFunction r(vf.result_size(),vf.domain());

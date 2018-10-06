@@ -21,28 +21,37 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
 
-r=Real(1.75)
+def test_function():
 
-c=RealScalarFunction.constant(3,1.5)
-x=RealScalarFunction.coordinate(3,0)
-y=RealScalarFunction.coordinate(3,1)
-id=RealVectorFunction.identity(3)
+    dp = DoublePrecision()
+    c=Real(Decimal(1.75))
 
-p=x+y
+    fc=EffectiveScalarMultivariateFunction.constant(3,c)
+    fx=EffectiveScalarMultivariateFunction.coordinate(3,0)
+    fy=EffectiveScalarMultivariateFunction.coordinate(3,1)
+    fid=EffectiveVectorMultivariateFunction.identity(3)
 
-+p; -p; p+p; p-p; p*p;
-p+r; p-r; p*r; p/r;
-r+p; r-p; r*p;
+    sf=fx+fy
+    vf=fid
+    
+    +sf; -sf; sf+sf; sf-sf; sf*sf; sf/sf;
+    sf+c; sf-c; sf*c; sf/c;
+    c+sf; c-sf; c*sf;
 
-derivative(p,0)
+    +vf; -vf; vf+vf; vf-vf; sf*vf; vf*sf; vf/sf;
+    c*vf; vf*c; vf/c;
 
-b=Box([{0:0.25},{0.25:0.50},{0.50:0.75}])
-f=RealVectorFunction([c,x,y])
-g=RealScalarFunction(p)
+    derivative(sf,0)
 
-join(g,g); join(f,g); join(g,f); join(f,f)
-compose(g,f); compose(f,f)
-evaluate(f,b); evaluate(g,b)
+    va=FloatDPApproximationVector([1,2,3],dp)
+    vb=FloatDPBoundsVector([1,2,3],dp)
+    sf=EffectiveScalarMultivariateFunction(fc+fx*fy)
+    vf=EffectiveVectorMultivariateFunction([fc,fx,fy])
 
+    sf(va), sf(vb), evaluate(sf,va), evaluate(sf,vb)
+    vf(va), vf(vb), evaluate(vf,va), evaluate(vf,vb)
+    compose(sf,vf); compose(vf,vf)
+    join(sf,sf); join(vf,sf); join(sf,vf); join(vf,vf)
+
+    

@@ -31,32 +31,32 @@ def test_calculus():
 
     bx=ExactBox([{Dyadic(1):3},{-1:2},{-3:3}])
 
-    swp = ThresholdSweeper(1e-8);
+    swp = ThresholdSweeper(dp,1e-8);
 
-    tc=ScalarTaylorFunction.constant(bx,dec(1.5),swp)
-    tx=ScalarTaylorFunction.coordinate(bx,0,swp)
-    ty=ScalarTaylorFunction.coordinate(bx,1,swp)
-    tid=VectorTaylorFunction.identity(bx,swp)
+    tc=ValidatedScalarMultivariateTaylorFunctionModel.constant(bx,cast_exact(1.5),swp)
+    tx=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,0,swp)
+    ty=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,1,swp)
+    tid=ValidatedVectorMultivariateTaylorFunctionModel.identity(bx,swp)
     ty=tid[1]
 
-    t=5+2*tx+ty
+    tf=5+2*tx+ty
 
-    +t; -t; t+t; t-t; t*t; t/t;
-    +t; -t; t+t; t-t; t*t;
-    t+cy; t-cy; t*cy; t/cy;
-    cy+t; cy-t; cy*t;
-    t+cx; t-cx; t*cx; t/cx;
-    cx+cx; cx-t; cx*t;
+    +tf; -tf; tf+tf; tf-tf; tf*tf; tf/tf;
+    +tf; -tf; tf+tf; tf-tf; tf*tf;
+    tf+cy; tf-cy; tf*cy; tf/cy;
+    cy+tf; cy-tf; cy*tf;
+    tf+cx; tf-cx; tf*cx; tf/cx;
+    cx+cx; cx-tf; cx*tf;
 
-    derivative(t,0)
-    antiderivative(t,0)
+    derivative(tf,0)
+    antiderivative(tf,0)
 
-    f=VectorTaylorFunction([x,c,y])
-    g=ScalarTaylorFunction(t)
-    compose(f,f); compose(g,f)
+    vtf=ValidatedVectorMultivariateTaylorFunctionModel([tx,tc,ty])
+    vtf=tid
+    stf=ValidatedScalarMultivariateTaylorFunctionModel(tf)
+    compose(vtf,vtf)
+    compose(stf,vtf)
 
-    p=RealVectorFunction.identity(3)
-    q=RealScalarFunction.coordinate(3,1)
-    compose(p,f); compose(q,f)
-
-test_calculus()
+    vf=EffectiveVectorMultivariateFunction.identity(3)
+    sf=EffectiveScalarMultivariateFunction.coordinate(3,1)
+    compose(sf,vtf); compose(vf,vtf)

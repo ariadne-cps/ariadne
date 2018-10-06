@@ -24,32 +24,34 @@ from ariadne import *
 
 def test_function():
 
-    def dec(x): return Decimal(x)
-
     dp = DoublePrecision()
-    r=Real(Decimal(1.75))
+    c=Real(Decimal(1.75))
 
-    c=EffectiveScalarMultivariateFunction.constant(3,r)
-    x=EffectiveScalarMultivariateFunction.coordinate(3,0)
-    y=EffectiveScalarMultivariateFunction.coordinate(3,1)
-    id=EffectiveVectorMultivariateFunction.identity(3)
+    fc=EffectiveScalarMultivariateFunction.constant(3,c)
+    fx=EffectiveScalarMultivariateFunction.coordinate(3,0)
+    fy=EffectiveScalarMultivariateFunction.coordinate(3,1)
+    fid=EffectiveVectorMultivariateFunction.identity(3)
 
-    p=x+y
+    sf=fx+fy
+    vf=fid
+    
+    +sf; -sf; sf+sf; sf-sf; sf*sf; sf/sf;
+    sf+c; sf-c; sf*c; sf/c;
+    c+sf; c-sf; c*sf;
 
-    +p; -p; p+p; p-p; p*p;
-    p+r; p-r; p*r; p/r;
-    #r+p; r-p; r*p;
+    +vf; -vf; vf+vf; vf-vf; sf*vf; vf*sf; vf/sf;
+    c*vf; vf*c; vf/c;
 
-    derivative(p,0)
+    derivative(sf,0)
 
-#    b=ExactBox([{0:dec(0.25)},{dec(0.25):dec(0.50)},{dec(0.50):dec(0.75)}])
-    b=FloatDPBoundsVector([1,2,3],dp)
-    f=EffectiveVectorMultivariateFunction([c,x,y])
-    g=EffectiveScalarMultivariateFunction(p)
+    va=FloatDPApproximationVector([1,2,3],dp)
+    vb=FloatDPBoundsVector([1,2,3],dp)
+    sf=EffectiveScalarMultivariateFunction(fc+fx*fy)
+    vf=EffectiveVectorMultivariateFunction([fc,fx,fy])
 
-    join(g,g); join(f,g); join(g,f); join(f,f)
-    compose(g,f); compose(f,f)
-    evaluate(f,b);
-    evaluate(g,b)
+    sf(va), sf(vb), evaluate(sf,va), evaluate(sf,vb)
+    vf(va), vf(vb), evaluate(vf,va), evaluate(vf,vb)
+    compose(sf,vf); compose(vf,vf)
+    join(sf,sf); join(vf,sf); join(sf,vf); join(vf,vf)
 
-test_function()
+    

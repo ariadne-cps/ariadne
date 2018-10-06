@@ -22,70 +22,89 @@
 
 from ariadne import *
 
-def test_linear_algebra():
-    Precision=DoublePrecision
-    ApproximateScalar=FloatDPApproximation
-    ValidatedScalar=FloatDPBounds
-    ExactScalar=FloatDPValue
-    ApproximateVector=FloatDPApproximationVector
-    ValidatedVector=FloatDPBoundsVector
-    ApproximateMatrix=FloatDPApproximationMatrix
-    ValidatedMatrix=FloatDPBoundsMatrix
+print(dir(FloatDPBoundsVector))
 
-    n=2
-    d=2.125
-    pr=Precision()
-    one=ExactScalar(1.000,pr)
-    xa=ApproximateScalar(2.125,pr)
-    xb=ValidatedScalar(2.00,2.25,pr)
-    va=ApproximateVector(2)
+def exact(x): return Dyadic(ExactDouble(x))
+
+Precision=DoublePrecision
+ApproximateScalar=FloatDPApproximation
+ValidatedScalar=FloatDPBounds
+ExactScalar=FloatDPValue
+ApproximateVector=FloatDPApproximationVector
+ValidatedVector=FloatDPBoundsVector
+ApproximateCovector=FloatDPApproximationCovector
+ValidatedCovector=FloatDPBoundsCovector
+ApproximateMatrix=FloatDPApproximationMatrix
+ValidatedMatrix=FloatDPBoundsMatrix
+
+n=2
+d=2.125
+pr=Precision()
+one=ExactScalar(exact(1.000),pr)
+xa=ApproximateScalar(2.125,pr)
+xb=ValidatedScalar(exact(2.00),exact(2.25),pr)
+
+def test_vector():
+    va=ApproximateVector(2,pr)
     va=ApproximateVector(va)
-    va=ApproximateVector([1.125,2.125])
-    va=ApproximateVector([1.125,x])
-    vb=BoundsVector(2)
-    vb=BoundsVector(va)
-    vb=BoundsVector([1.125,2.125])
-    vb=BoundsVector([{2:3},{3:4}])
-    vb=BoundsVector(vb)
-    #cv=Covector([1.125,x])
-    #icv=IntervalCovector([1.125,x])
-    Aa=ApproximateMatrix(2,2)
+    va=ApproximateVector([1.125,2.125],pr)
+    va=ApproximateVector([1.125,xa],pr)
+    vb=ValidatedVector(2,pr)
+    vb=ValidatedVector([exact(1.125),exact(2.125)],pr)
+    vb=ValidatedVector([{2:3},{3:4}],pr)
+    vb=ValidatedVector(vb)
+
+    (+va,-va,va+va,va-va,xa*va,va*xa,va/xa)
+    (+vb,-vb,vb+vb,vb-vb,xb*vb,vb*xb,vb/xb)
+    
+    # Mixed vector operations
+    # Disallowed mixed ValidatedVector - ApproximateScalar operations
+    (va+vb,va-vb,va*xb,va/xb)
+    (vb+va,vb-va)
+    
+    # NOTE: No GenericScalar - ConcreteVector operations
+#    (va*n,va/n)
+#    (va*d,va/d)
+#    (vb*n,vb/n)
+ 
+ 
+def test_covector():
+    ua=ApproximateCovector([1.125,xa],pr)
+    ua=ApproximateCovector([1.125,2.125],pr)
+    ub=ValidatedCovector([exact(1.125),xb],pr)
+    ub=ValidatedCovector([1,2],pr)
+
+    (+ua,-ua,ua+ua,ua-ua,xa*ua,ua*xa,ua/xa)
+    (+ub,-ub,ub+ub,ub-ub,xb*ub,ub*xb,ub/xb)
+
+    (ua+ub,ua-ub,ua*xb,ua/xb)
+    (ub+ua,ub-ua)
+    
+#    (ua*n,ua/n)
+#    (ua*d,ua/d)
+#    (ub*n,ub/n)
+
+
+def test_matrix():
+    va=ApproximateVector([1,2],pr)
+    vb=ValidatedVector([1,2],pr)
+    ua=ApproximateCovector([1,2],pr)
+    ub=ValidatedCovector([1,2],pr)
+
+    Aa=ApproximateMatrix(2,2,pr)
+    Aa=ApproximateMatrix([[xa,1],[1.0,one]],pr)
+    Aa=ApproximateMatrix([[2.125,1],[1.0,1]],pr)
     Aa=ApproximateMatrix(Aa)
-    Aa=ApproximateMatrix([[x,1],[1.0,one]])
-    #Ab=BoundsMatrix([["[1.875,2.125]","[0.875,1.125]"],["[0.875,1.125]","[0.875,1.125]"]])
-    Ab=BoundsMatrix([[{1.875:2.125},{0.875:1.125}],[{0.875:1.125},{0.875:1.125}]])
+    Ab=ValidatedMatrix([[{exact(1.875):exact(2.125)},{exact(0.875):exact(1.125)}],[{exact(0.875):exact(1.125)},{exact(0.875):exact(1.125)}]],pr)
 
-    (-va,-vb)
-    (va+va,va+vb,vb+va,vb+vb)
-    (va-va,va-vb,vb-va,vb-vb)
-    (x*va,x*vb,ix*va,ix*vb)
-    (va*x,vb*x,va*ix,vb*ix)
-    (va/x,vb/x,va/ix,vb/ix)
+    (+Aa,-Aa,Aa+Aa,Aa-Aa,Aa*Aa,xa*Aa,Aa*xa,Aa/xa,Aa*va,ua*Aa)
+    (+Ab,-Ab,Ab+Ab,Ab-Ab,Ab*Ab,xb*Ab,Ab*xb,Ab/xb,Ab*vb,ub*Ab)
 
-    (n*va,n*vb,va*n,vb*n,va/n,vb/n)
-    (d*va,d*vb,va*d,vb*d,va/d,vb/d)
+    # NOTE: No ValidatedMatrix - ApproximateScalar operations
+    (Aa+Ab,Aa-Ab,Aa*Ab,Aa*xb,Aa/xb,Aa*vb) #ua*Ab
+    (Ab+Aa,Ab-Aa,Ab*Aa,xb*Aa,ub*Aa) #Ab*va
 
-    #(-cv,-icv)
-    #(cv+cv,cv+icv,icv+cv,icv+icv)
-    #(cv-cv,cv-icv,icv-cv,icv-icv)
-    #(x*cv,x*icv,ix*cv,ix*icv)
-    #(cv*x,icv*x,cv*ix,icv*ix)
-    #(cv/x,icv/x,cv/ix,icv/ix)
+#    (Aa*n,Aa/n)
+#    (Aa*d,Aa/d)
+#    (Ab*n,Ab/n)
 
-    #(n*cv,n*icv,cv*n,icv*n,cv/n,icv/n)
-    #(d*cv,d*icv,cv*d,icv*d,cv/d,icv/d)
-
-    (-Aa,-Ab)
-    (Aa+Aa,Aa+Ab,Ab+Aa,Ab+Ab)
-    (Aa-Aa,Aa-Ab,Ab-Aa,Ab-Ab)
-    (x*Aa,x*Ab,ix*Aa,ix*Ab)
-    (Aa*x,Ab*x,Aa*ix,Ab*ix)
-    (Aa/x,Ab/x,Aa/ix,Ab/ix)
-
-    (n*Aa,n*Ab,Aa*n,Ab*n,Aa/n,Ab/n)
-    (d*Aa,d*Ab,Aa*d,Ab*d,Aa/d,Ab/d)
-
-    #(cv*va,icv*va,cv*vb,icv*vb)
-    (Aa*va,Ab*va,Aa*vb,Ab*vb)
-    #(cv*Aa,icv*Aa,cv*Ab,icv*Ab)
-    (Aa*Aa,Ab*Aa,Aa*Ab,Ab*Ab)

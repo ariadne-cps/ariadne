@@ -22,30 +22,30 @@
 
 from ariadne import *
 
-
 fo=EffectiveScalarMultivariateFunction(2)
 fx=EffectiveScalarMultivariateFunction.coordinate(2,0)
 fy=EffectiveScalarMultivariateFunction.coordinate(2,1)
 
-fn=ValidatedVectorMultivariateFunction([fx+fy,fy])
-b=ExactBox([{-1:+1},{-1:+1}])
+def test_solvers():
+    f=ValidatedVectorMultivariateFunction([fx+fy,fy])
+    b=ExactBox([{-1:+1},{-1:+1}])
 
-solver=IntervalNewtonSolver(1e-8,12)
-solver.solve(fn,b)
+    solver=IntervalNewtonSolver(1e-8,12)
+    solver.solve(f,b)
 
-solver=KrawczykSolver(1e-8,12)
-solver.solve(fn,b)
+    solver=KrawczykSolver(1e-8,12)
+    solver.solve(f,b)
 
-d=ExactBox([{-1:+1},{-1:+1}])
-h=Dyadic(0.25)
-h=FloatDP(h,DoublePrecision())
+def test_integrators():
+    d=ExactBox([{-1:+1},{-1:+1}])
+    h=Dyadic(0.25)
+    h=FloatDP(h,DoublePrecision())
 
-vf=EffectiveVectorMultivariateFunction([fo,fx])
-vf=ValidatedVectorMultivariateFunction(vf)
-integrator=TaylorPicardIntegrator(1e-8)
-integrator.flow_step(vf,d,h)
+    vf=EffectiveVectorMultivariateFunction([fo,fx])
+    integrator=TaylorPicardIntegrator(1e-8)
+    integrator.flow_step(vf,d,h)
 
-vf=ValidatedVectorMultivariateFunction([fo,fx])
-integrator=TaylorSeriesIntegrator(1e-8)
-integrator.flow_step(vf,d,h)
+    vf=ValidatedVectorMultivariateFunction([fo,fx])
+    integrator=TaylorSeriesIntegrator(1e-8)
+    integrator.flow_step(vf,d,h)
 

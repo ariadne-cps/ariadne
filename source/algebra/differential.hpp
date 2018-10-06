@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file differential.hpp
@@ -30,16 +31,18 @@
 
 #include <map>
 
-#include "utility/macros.hpp"
-#include "utility/array.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "algebra/series.hpp"
-#include "algebra/expansion.hpp"
-#include "algebra/operations.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/array.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../algebra/series.hpp"
+#include "../algebra/expansion.hpp"
+#include "../algebra/operations.hpp"
+
+#include "../algebra/univariate_differential.hpp"
 
 namespace Ariadne {
 
@@ -47,7 +50,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
-template<class X> class Expansion;
+template<class I, class X> class Expansion;
 template<class X> class Differential;
 template<class X> class UnivariateDifferential;
 template<class X> class NonAssignableDifferential;
@@ -57,91 +60,23 @@ typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
 typedef Differential<FloatDPBounds> FloatBoundsDifferential;
 typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
-
-template<class X> using EqualityType = decltype(declval<X>()==declval<X>());
-template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
-
-
-template<class PR> class DifferentialFactory : public FloatFactory<PR> {
+template<class X> class DifferentialFactory {
+    typedef PrecisionType<X> PR;
+    PR _pr;
   public:
-    DifferentialFactory<PR>(PR const& pr) : FloatFactory<PR>(pr) { }
-    template<class Y> using ConcreteNumberType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));
-    using FloatFactory<PR>::create;
-    template<class Y> UnivariateDifferential<ConcreteNumberType<Y>> create(UnivariateDifferential<Y> const&);
-    template<class Y> Differential<ConcreteNumberType<Y>> create(Differential<Y> const&);
-    template<class Z> Differential<Z>const& create(NonAssignableDifferential<Z> const& dx) { return dx; }
+    DifferentialFactory<X>(PR const& pr) : _pr(pr) { }
+
+    template<class Y, EnableIf<IsConstructible<X,Y,PR>> =dummy> X create(Y const& y) { return X(y,_pr); }
+    template<class Y> UnivariateDifferential<X> create(UnivariateDifferential<Y> const&);
+    template<class Y> Differential<X> create(Differential<Y> const&);
+    Differential<X>const& create(NonAssignableDifferential<X> const& dx) { return dx; }
 };
-template<class PR> inline DifferentialFactory<PR> differential_factory(PR const& pr) { return DifferentialFactory<PR>(pr); }
-template<class X> DifferentialFactory<PrecisionType<X>> factory(UnivariateDifferential<X> const& dx) {
-    return differential_factory(dx.value().precision()); }
-template<class X> DifferentialFactory<PrecisionType<X>> factory(Differential<X> const& dx) {
-    return differential_factory(dx.value().precision()); }
+template<class X> inline DifferentialFactory<X> differential_factory(X const& x) { return DifferentialFactory<X>(x.precision()); }
+template<class X> inline DifferentialFactory<X> factory(UnivariateDifferential<X> const& dx) {
+    return DifferentialFactory<X>(dx.value().precision()); }
+template<class X> inline DifferentialFactory<X> factory(Differential<X> const& dx) {
+    return DifferentialFactory<X>(dx.value().precision()); }
 
-
-
-//! \ingroup DifferentiationModule
-//! \brief Arbitrary-order derivatives with respect to a single argument.
-template<class X> class UnivariateDifferential
-    : public DispatchTranscendentalAlgebraOperations<UnivariateDifferential<X>,X>
-{
-    Array<X> _ary;
-  public:
-    typedef X NumericType;
-    typedef typename X::Paradigm Paradigm;
-    typedef UnivariateDifferential<X> SelfType;
-    typedef typename Array<X>::Iterator Iterator;
-    typedef typename Array<X>::ConstIterator ConstIterator;
-
-    UnivariateDifferential();
-    UnivariateDifferential(DegreeType d);
-    UnivariateDifferential(DegreeType d, InitializerList<X> e);
-    template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
-    UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
-
-    static SelfType constant(DegreeType d, const NumericType& c);
-    static SelfType variable(DegreeType d, const NumericType& c);
-
-    SelfType create_zero() const;
-    SelfType create_constant(const NumericType& c) const;
-    SelfType create_variable(const NumericType& c) const;
-
-    SizeType argument_size() const;
-    DegreeType degree() const;
-    X zero_coefficient() const;
-    const Array<X>& array() const;
-    Expansion<X>& array();
-    const X& operator[](SizeType k) const;
-    X& operator[](SizeType k);
-
-    SelfType& operator=(const NumericType& c);
-    template<class T, EnableIf<IsAssignable<X,T>> =dummy>
-        SelfType& operator=(const T& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
-
-    SelfType& operator+=(const SelfType& x);
-    SelfType& operator-=(const SelfType& x);
-    SelfType& operator*=(const SelfType& x);
-    SelfType& operator+=(const NumericType& c);
-    SelfType& operator*=(const NumericType& c);
-
-    SelfType apply(Rec) const;
-
-    X value() const;
-    X gradient() const;
-    X hessian() const;
-
-    Void clear();
-    OutputStream& write(OutputStream& os) const;
-
-    friend OutputStream& operator<<(OutputStream& os, UnivariateDifferential<X> const& dx) {
-        return dx.write(os); }
-    static UnivariateDifferential<X> _compose(Series<X> const& f, Differential<X> const& dx);
-};
-
-template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, XX const* ptr)
-    : _ary(d+1,X(0))
-{
-    std::copy(ptr,ptr+d+1,_ary.begin());
-}
 
 
 
@@ -164,7 +99,7 @@ class Differential
 
     static const DegreeType MAX_DEGREE=65535;
 
-    SortedExpansion<X,GradedIndexLess> _expansion;
+    SortedExpansion<MultiIndex,X,GradedIndexLess> _expansion;
     DegreeType _degree;
   public:
     //! \brief The type used for a power series.
@@ -172,7 +107,7 @@ class Differential
     //! \brief The comparison used to sort the coefficients.
     typedef GradedLess IndexComparisonType;
     //! \brief The type of used to represent numbers in the coefficient.
-    typedef SortedExpansion<X,GradedIndexLess> ExpansionType;
+    typedef SortedExpansion<MultiIndex,X,GradedIndexLess> ExpansionType;
     //! \brief The kind of information provided by the concrete values.
     typedef typename X::Paradigm Paradigm;
     //! \brief The type of used to represent numbers in the coefficient.
@@ -194,18 +129,18 @@ class Differential
     explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from the power-series expansion \a e.
     //! Terms in \a e of degree higher than \a deg are truncated
-    explicit Differential(const Expansion<X>& e, DegreeType deg);
-    //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
+    explicit Differential(const Expansion<MultiIndex,X>& e, DegreeType deg);
+    //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
     explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,X> > lst);
-    //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
-    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
-        explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PR pr);
+    //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PRS... pr);
+    //! \brief Construct a dense differential of degree \a deg from an initializer list of coefficient arranged in graded lexicographic order of the index.
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        explicit Differential(SizeType as, DegreeType deg, InitializerList<Dbl> lst, PRS... prs);
 
-    //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
-    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Differential(SizeType as, DegreeType deg, const Y* ptr, PRS... prs);
     //! \brief Conversion constructor from a different numerical type.
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Differential(const Differential<Y>& dy, PRS... prs);
-
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     Differential<X>& operator=(const X& c);
@@ -216,19 +151,24 @@ class Differential
     static Differential<X> constant(SizeType as, DegreeType deg, const X& c);
     //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
     static Differential<X> variable(SizeType as, DegreeType deg, const X& v, SizeType j);
-    //! \brief A vector of \a rs constant differentials of degree \a deg in \a as arguments with values \a c[j].
+    //! \brief A differential of degree \a deg in \a as arguments representing a quantity with value \a v and gradient \a g.
+    static Differential<X> affine(SizeType as, DegreeType d, const X& v, const Covector<X>& g);
+    static Differential<X> affine(DegreeType d, const X& v, const Covector<X>& g);
+
+    //! \brief A vector of \a rs constant differentials of degree \a deg in \a as arguments with values \a c[i].
     static Vector< Differential<X> > constants(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& c);
-    //! \brief A vector of \a rs differentials of degree \a deg in \a as arguments with values \f$v_i+x_i\f$.
+    static Vector< Differential<X> > constants(SizeType as, DegreeType deg, const Vector<X>& c);
+    //! \brief A vector of \a rs differentials of degree \a deg in \a as arguments with values \f$v_i+dx_i\f$.
     //! \pre \a rs == \a as == c.size().
-    static Vector< Differential<X> > variables(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& x);
+    static Vector< Differential<X> > variables(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& v);
+    static Vector< Differential<X> > variables(DegreeType deg, const Vector<X>& v);
+    //! \brief A vector of \a rs affine differentials of degree \a deg in \a as arguments with values \a v[i] and gradients \a G[i][j].
+    static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
+    static Vector<Differential<X>> affine(DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
 
-    //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
-    static Vector< Differential<X> > variables(DegreeType deg, const Vector<X>& x);
-
-    //TODO: Complete UnivariateDifferential
-    //static UnivariateDifferential<X> identity(DegreeType deg, const X& x);
-    static Differential<X> identity(DegreeType deg, const X& x);
-    static Vector< Differential<X> > identity(DegreeType deg, const Vector<X>& x);
+//    static UnivariateDifferential<X> identity(DegreeType deg, const Vector<X>& v);
+    static Differential<X> identity(DegreeType deg, const X& v); // FIXME: Should use UnivariateDifferentia; required for derivative of UnivariateFunction.
+    static Vector<Differential<X>> identity(DegreeType deg, const Vector<X>& v);
 
     //! \brief Equality operator. Tests equality of representation, so comparing two differentials which are mathematically equal may return false if the structural zeros are different.
     EqualityType<X> operator==(const Differential<X>& other) const;
@@ -243,9 +183,9 @@ class Differential
     //! \brief A zero with the precision argument of the numbers.
     X zero_coefficient() const;
     //! \brief The internal representation of the polynomial expansion.
-    const Expansion<X>& expansion() const;
+    const Expansion<MultiIndex,X>& expansion() const;
     //! \brief A reference to the internal representation of the polynomial expansion.
-    Expansion<X>& expansion();
+    Expansion<MultiIndex,X>& expansion();
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const;
     //! \brief The coefficient of \f$x_j\f$.
@@ -256,6 +196,7 @@ class Differential
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
     Matrix<X> hessian() const;
+    Matrix<X> half_hessian() const;
 
     //! \brief A reference to the coefficient of \f$x_j\f$.
     X& operator[](const SizeType& j);
@@ -309,6 +250,7 @@ class Differential
     friend X value(const Differential<X>& x) { return x.value(); }
     friend Covector<X> gradient(const Differential<X>& x) { return x.gradient(); }
     friend Matrix<X> hessian(const Differential<X>& x) { return x.hessian(); }
+    friend Matrix<X> half_hessian(const Differential<X>& x) { return x.half_hessian(); }
 
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }
   public:
@@ -345,37 +287,42 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumeri
 decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factory(x).create(y); }
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
-    static Differential<X> _pos(Differential<X> dx);
-    static Differential<X> _neg(Differential<X> dx);
-    static Differential<X> _add(Differential<X> dx, X const& c);
-    static Differential<X> _mul(Differential<X> dx, X const& c);
-    static Differential<X> _add(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _sub(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _mul(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _div(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _rec(Differential<X> const& dx);
-    static Differential<X> _min(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _max(Differential<X> const& dx1, Differential<X> const& dx2);
-    static Differential<X> _abs(Differential<X> const& dx);
+    template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {
+        return compose(UnivariateDifferential<X>(op,dx.degree(),dx.value()),dx); }
+    static Differential<X> apply(Pos op, Differential<X> dx);
+    static Differential<X> apply(Neg op, Differential<X> dx);
+    static Differential<X> apply(Add op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Sub op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Mul op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Div op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Pow op, Differential<X> const& dx, Int n);
+    static Differential<X> apply(Add op, Differential<X> dx, X const& c);
+    static Differential<X> apply(Mul op, Differential<X> dx, X const& c);
+    static Differential<X> apply(Min op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Max op, Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> apply(Abs op, Differential<X> const& dx);
 };
 
-template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Differential<X>::Differential(SizeType as, DegreeType deg, const Y* ptr, PRS... prs) : _expansion(as), _degree(deg) {
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        Y const& y=*ptr;
-        if(!decide(y==0)) {
-            _expansion.append(j,X(y,prs...));
-        }
-        ++ptr;
-    }
-    this->cleanup();
-}
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
 Differential<X>::Differential(const Differential<Y>& x, PRS... prs)
     : _expansion(x.expansion(),prs...), _degree(x.degree())
 {
 }
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PRS... prs)
+    : Differential<X>(Expansion<MultiIndex,X>(lst,prs...),deg)
+{ }
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList<Dbl> lst, PRS... prs) : _expansion(as,X(prs...)), _degree(deg) {
+    auto iter = lst.begin();
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        Dbl const& y=*iter; if(y!=0.0) { _expansion.append(j,X(y,prs...)); } ++iter; }
+    this->cleanup();
+}
+
 
 
 template<class X> Vector<Differential<X>> compose(Vector<Differential<X>> const&, Vector<Differential<X>> const&);
@@ -385,7 +332,6 @@ template<class X> Vector<X> value(const Vector<Differential<X>>& x);
 template<class X> Matrix<X> jacobian(Vector<Differential<X>> const&);
 
 template<class X> Vector<Differential<X>> lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
-
 
 
 
@@ -414,10 +360,10 @@ class NonAssignableDifferential
 template<class X> class DifferentialCharacteristics {
     SizeType _argument_size; DegreeType _degree; X _zero_coefficient;
   public:
-    DifferentialCharacteristics() : _argument_size(0u), _degree(0u), _zero_coefficient(0) { };
-    DifferentialCharacteristics(SizeType as, DegreeType d) : _argument_size(as), _degree(d), _zero_coefficient(0) { };
-    template<class PR> DifferentialCharacteristics(SizeType as, DegreeType d, PR pr) : _argument_size(as), _degree(d), _zero_coefficient(pr) { };
-    DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { };
+    DifferentialCharacteristics() : _argument_size(0u), _degree(0u), _zero_coefficient(0) { }
+    DifferentialCharacteristics(SizeType as, DegreeType d) : _argument_size(as), _degree(d), _zero_coefficient(0) { }
+    template<class PR> DifferentialCharacteristics(SizeType as, DegreeType d, PR pr) : _argument_size(as), _degree(d), _zero_coefficient(pr) { }
+    DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { }
     SizeType argument_size() const { return this->_argument_size; }
     DegreeType degree() const { return this->_degree; }
     X zero_coefficient() const { return this->_zero_coefficient; }
@@ -451,13 +397,17 @@ class Vector< Differential<X> >
         : Vector<Differential<X>>(rs,as,d,X(prs...)) { }
     Vector(SizeType rs, SizeType as, DegreeType d, X const& z);
     Vector(SizeType rs, const Differential<X>& sd);
-    Vector(SizeType rs, const Differential<X>* p);
-    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(const Vector<Differential<Y>>& dv, PRS... prs);
-    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(SizeType rs, SizeType as, DegreeType d, const Y* ptr, PRS... prs);
-    Vector(SizeType rs, SizeType as, DegreeType d,const Vector<X>& v, const Matrix<X>& A);
+    Vector(InitializerList<Differential<X>> const& lst);
+    Vector(Array<Differential<X>> ary);
     template<class E> Vector(const VectorExpression<E>& ve);
     template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve);
+    template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>> =dummy> Vector(SizeType n, G const& g);
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(const Vector<Differential<Y>>& dv, PRS... prs);
 
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,Dbl>>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        explicit Vector<Differential<X>>(SizeType rs, SizeType as, DegreeType deg, InitializerList<InitializerList<Dbl>> lst, PRS... prs);
 
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }
@@ -465,6 +415,7 @@ class Vector< Differential<X> >
     const Differential<X> zero_element() const { return Differential<X>::constant(this->argument_size(),this->degree(),this->zero_coefficient()); }
 
     NonAssignableDifferential<X>& at(SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }
+    const Differential<X>& at(SizeType i) const { return this->_ary[i]; }
     const Differential<X>& get(SizeType i) const { return this->_ary[i]; }
     Void set(SizeType i, const Differential<X>& x) {
         ARIADNE_PRECONDITION(i<this->size()); ARIADNE_PRECONDITION(this->argument_size()==x.argument_size()); this->_ary[i]=x; }
@@ -474,28 +425,39 @@ class Vector< Differential<X> >
     SizeType argument_size() const { return this->_chars.argument_size(); }
     DegreeType degree() const { return this->_chars.degree(); }
     X zero_coefficient() const { return this->_chars.zero_coefficient(); }
+    const Array<Differential<X>>& array() const { return _ary; }
 
     Vector<X> value() const;
     Matrix<X> jacobian() const;
 
     Void set_value(const Vector<X>& c);
 
-    static Vector<Differential<X>> constant(SizeType rs, SizeType as, DegreeType d, const Vector<X>& c);
-    static Vector<Differential<X>> variable(SizeType rs, SizeType as, DegreeType d, const Vector<X>& x);
-    static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType d, const Vector<X>& b, const Matrix<X>& A);
+    //! \brief Set the degree to be equal to \a d.
+    Void set_degree(DegreeType d);
 
     friend Vector<X> value(const Vector<Differential<X>>& x) { return x.value(); }
     friend Matrix<X> jacobian(const Vector<Differential<X>>& x) { return x.jacobian(); }
+    //! \brief Compute the differential of the composiition \f$f\circ g\f$.
     friend Vector<Differential<X>> compose(const Vector<Differential<X>>& x, Vector<Differential<X>> const& y) { return _compose(x,y); }
+    //! \brief Compute the differential of the composiition \f$f\circ g\f$.
     friend Vector<Differential<X>> derivative(const Vector<Differential<X>>& x, SizeType k) { return _derivative(x,k); }
+    //! \brief Compute the differential of the antiderivative \f$ \int^{x_k} f(x_0,\ldots,x_{k-1},\xi,x_{k+1},\ldots) d\xi\f$.
     friend Vector<Differential<X>> antiderivative(const Vector<Differential<X>>& x, SizeType k) { return _antiderivative(x,k); }
+    //! \brief Compute the differential of the Lie derivative \f$L_fg(x) = f(x) \cdot \nabla{g}(x)\f$.
     friend Vector<Differential<X>> lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg) { return _lie_derivative(df,dg); }
+
+    //! \brief Compute the differential of the solutions \f$y=h(x)\f$ to \f$f(x,y)=0\f$. Requires \f$f(x0,y0)=0\f$.
+    friend Vector<Differential<X>> solve(const Vector<Differential<X> >& df, const Vector<X>& y0) { return _solve(df,y0); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x0,t) = f(\phi(x0,t)) \f$ at \f$t=0\f$, with respect to the independent variables of
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0); }
 
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
     static Vector<Differential<X>> _derivative(Vector<Differential<X>> const& x, SizeType k);
     static Vector<Differential<X>> _antiderivative(Vector<Differential<X>> const& x, SizeType k);
     static Vector<Differential<X>> _lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
+    static Vector<Differential<X>> _solve(const Vector<Differential<X> >& df, const Vector<X>& y0);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0);
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
@@ -503,11 +465,23 @@ Vector<Differential<X>>::Vector(const Vector<Differential<Y>>& dv, PRS... prs)
     : _chars(dv.argument_size(),dv.degree(),X(prs...)), _ary(dv._ary,prs...) {
 }
 
-template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
-Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, const Y* ptr, PRS... prs)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Dbl>> lst, PRS... prs)
     : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
-    for(SizeType i=0; i!=rs; ++i) { for(MultiIndex j(as); j.degree()<=d; ++j) { if(*ptr!=0) { (*this)[i][j]=X(*ptr,prs...); } ++ptr; } }
+    auto iter=lst.begin();
+    for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,Dbl>>> lst, PRS... prs)
+    : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
+    auto iter=lst.begin();
+    for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
+}
+
+template<class X> template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>>>
+Vector<Differential<X>>::Vector(SizeType n, G const& g)
+    : _chars(g(0).argument_size(),g(0).degree()), _ary(n,g) { }
 
 template<class X> template<class E>
 Vector<Differential<X>>::Vector(const VectorExpression<E>& ve) : _ary(ve().size(),Uninitialised()) {
@@ -521,10 +495,6 @@ Vector<Differential<X>>& Vector<Differential<X>>::operator=(const VectorExpressi
     ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics<X>(_ary[0]); return *this;
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PR pr)
-    : Differential<X>(Expansion<X>(lst,pr),deg)
-{ }
 
 
 

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file operations.hpp
@@ -28,92 +29,52 @@
 #ifndef ARIADNE_ALGEBRA_OPERATIONS_HPP
 #define ARIADNE_ALGEBRA_OPERATIONS_HPP
 
-#include "numeric/operators.hpp"
-#include "numeric/arithmetic.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/arithmetic.hpp"
 
 namespace Ariadne {
 
-
-template<class A, class X=typename A::NumericType> class AlgebraOperations {
-    template<class OP> static A _create(OP, A const&);
-    template<class OP> static A _create(OP, A const&, A const&);
-    template<class OP> static A _create(OP, X const&, A const&);
-    template<class OP> static A _create(OP, A const&, X const&);
-  public:
-    static A _nul(A const& a);
-    static A _pos(A const& a);
-    static A _neg(A const& a);
-    static A _hlf(A const& a);
-    static A _sqr(A const& a);
-    static A _rec(A const& a);
-    static A _add(A const& a1, A const& a2);
-    static A _sub(A const& a1, A const& a2);
-    static A _mul(A const& a1, A const& a2);
-    static A _div(A const& a1, A const& a2);
-    static A _add(A const& a1, X const& x2);
-    static A _sub(A const& a1, X const& x2);
-    static A _mul(A const& a1, X const& x2);
-    static A _div(A const& a1, X const& x2);
-    static A _add(X const& x1, A const& a2);
-    static A _sub(X const& x1, A const& a2);
-    static A _mul(X const& x1, A const& a2);
-    static A _div(X const& x1, A const& a2);
-    static A _pow(A const& a, Nat m);
-    static A _pow(A const& a, Int n);
-    static A _sqrt(A const& a);
-    static A _exp(A const& a);
-    static A _log(A const& a);
-    static A _sin(A const& a);
-    static A _cos(A const& a);
-    static A _tan(A const& a);
-    static A _asin(A const& a);
-    static A _acos(A const& a);
-    static A _atan(A const& a);
-};
+template<class A, class X=typename A::NumericType> struct AlgebraOperations;
 
 template<class A> class GradedAlgebraOperations {
     typedef typename A::NumericType X;
-  public:
-    static A _sqr(A const& a) {
-        return a*a; }
-    static A _div(A const& a1, A const& a2) {
-        return mul(a1,rec(a2)); }
-    static A _pow(A const& a, Nat m) {
-        A s=a; A r=s.create_constant(1); while(m) { if(m%2) { r*=s; } s=sqr(s); m/=2; } return r; }
-    static A _pow(A const& a, Int n) {
-        if(n>=0) { return _pow(a,Nat(n)); } else { return rec(_pow(a,Nat(-n))); } }
+  private:
     static A _compose(const Series<X>& f, const A& a) { return A::_compose(f,a); }
-    static A _rec(const A& a) { return _compose(Series<X>::rec(a.value()),a); }
-    static A _sqrt(const A& a) { return _compose(Series<X>::sqrt(a.value()),a); }
-    static A _exp(const A& a) { return _compose(Series<X>::exp(a.value()),a); }
-    static A _log(const A& a) { return _compose(Series<X>::log(a.value()),a); }
-    static A _sin(const A& a) { return _compose(Series<X>::sin(a.value()),a); }
-    static A _cos(const A& a) { return _compose(Series<X>::cos(a.value()),a); }
-    static A _tan(const A& a) { return _compose(Series<X>::tan(a.value()),a); }
-    static A _atan(const A& a) { return _compose(Series<X>::atan(a.value()),a); }
+  public:
+    static A apply(Sqr op, A const& a) {
+        return a*a; }
+    static A apply(Div op, A const& a1, A const& a2) {
+        return mul(a1,rec(a2)); }
+    static A apply(Pow op, A const& a, Nat m) {
+        A s=a; A r=s.create_constant(1); while(m) { if(m%2) { r*=s; } s=sqr(s); m/=2; } return r; }
+    static A apply(Pow op, A const& a, Int n) {
+        if(n>=0) { return pow(a,Nat(n)); } else { return rec(pow(a,Nat(-n))); } }
+
+    template<class OP> static A apply(OP op, const A& a) { return _compose(Series<X>(op,a.value()),a); }
 };
 
 template<class A> class NormedAlgebraOperations {
     typedef typename A::NumericType X;
   public:
-    static A _sqr(A const& a) {
+    static A apply(Sqr, A const& a) {
         return a*a; }
-    static A _pow(A const& a, Nat m) {
+    static A apply(Pow, A const& a, Nat m) {
         A s=a; A r=s.create_constant(1); while(m) { if(m%2) { r*=s; } s=sqr(s); m/=2; } return r; }
-    static A _pow(A const& a, Int n) {
-        if(n>=0) { return _pow(a,Nat(n)); } else { return rec(_pow(a,Nat(-n))); } }
-    static A _div(A const& a1, A const& a2) {
+    static A apply(Pow, A const& a, Int n) {
+        if(n>=0) { return pow(a,Nat(n)); } else { return rec(pow(a,Nat(-n))); } }
+    static A apply(Div, A const& a1, A const& a2) {
         return mul(a1,rec(a2)); }
-    static A _rec(const A& a);
-    static A _sqrt(const A& a);
-    static A _exp(const A& a);
-    static A _log(const A& a);
-    static A _sin(const A& a);
-    static A _cos(const A& a);
-    static A _tan(const A& a);
-    static A _asin(const A& a);
-    static A _acos(const A& a);
-    static A _atan(const A& a);
+
+    static A apply(Rec, const A& a);
+    static A apply(Sqrt, const A& a);
+    static A apply(Exp, const A& a);
+    static A apply(Log, const A& a);
+    static A apply(Sin, const A& a);
+    static A apply(Cos, const A& a);
+    static A apply(Tan, const A& a);
+    static A apply(Asin, const A& a);
+    static A apply(Acos, const A& a);
+    static A apply(Atan, const A& a);
 };
 
 template<class V, class X> struct DeclareVectorOperators
@@ -131,14 +92,20 @@ template<class V, class X> struct DeclareVectorOperators
     friend V& operator/=(V& v1, X const& x2);
 };
 
-template<class V, class A, class X> struct DeclareVectorAlgebraOperators
-    : DeclareVectorOperators<V,A>
+template<class VA, class A, class VX, class X> struct DeclareVectorAlgebraOperators
+    : DeclareVectorOperators<VA,A>
 {
-    friend V operator*(V const& v1, X const& x2);
-    friend V operator/(V const& v1, X const& x2);
-    friend V operator*(X const& x1, V const& v2);
-    friend V& operator*=(V& v1, X const& x2);
-    friend V& operator/=(V& v1, X const& x2);
+    friend VA operator+(VA const& va1, VX const& vx2);
+    friend VA operator+(VX const& vx1, VA const& va2);
+    friend VA operator-(VA const& va1, VX const& vx2);
+    friend VA operator-(VX const& vx1, VA const& va2);
+    friend VA operator*(VA const& va1, X const& x2);
+    friend VA operator/(VA const& va1, X const& x2);
+    friend VA operator*(X const& x1, VA const& va2);
+    friend VA& operator+=(VA& va1, VX const& vx2);
+    friend VA& operator-=(VA& va1, VX const& vx2);
+    friend VA& operator*=(VA& va1, X const& x2);
+    friend VA& operator/=(VA& va1, X const& x2);
 };
 
 template<class A, class X> struct DeclareAlgebraOperators
@@ -249,63 +216,23 @@ template<class A, class X> struct DispatchAlgebraOperations
 {
     typedef AlgebraOperations<A,X> OperationsType;
    public:
-    friend A nul(A const& a) { return OperationsType()._nul(a); }
-    friend A pos(A const& a) { return OperationsType()._pos(a); }
-    friend A neg(A const& a) { return OperationsType()._neg(a); }
-    friend A hlf(A const& a) { return OperationsType()._hlf(a); }
-    friend A sqr(A const& a) { return OperationsType()._sqr(a); }
-    friend A add(A const& a1, A const& a2) { return OperationsType()._add(a1, a2); }
-    friend A sub(A const& a1, A const& a2) { return OperationsType()._sub(a1, a2); }
-    friend A mul(A const& a1, A const& a2) { return OperationsType()._mul(a1, a2); }
+    friend A nul(A const& a) { return OperationsType::apply(Nul(),a); }
+    friend A pos(A const& a) { return OperationsType::apply(Pos(),a); }
+    friend A neg(A const& a) { return OperationsType::apply(Neg(),a); }
+    friend A hlf(A const& a) { return OperationsType::apply(Hlf(),a); }
+    friend A sqr(A const& a) { return OperationsType::apply(Sqr(),a); }
+    friend A add(A const& a1, A const& a2) { return OperationsType::apply(Add(),a1, a2); }
+    friend A sub(A const& a1, A const& a2) { return OperationsType::apply(Sub(),a1, a2); }
+    friend A mul(A const& a1, A const& a2) { return OperationsType::apply(Mul(),a1, a2); }
 
-    friend A add(A const& a1, X const& x2) { return OperationsType()._add(a1, x2); }
-    friend A sub(A const& a1, X const& x2) { return OperationsType()._add(a1, neg(x2)); }
-    friend A mul(A const& a1, X const& x2) { return OperationsType()._mul(a1, x2); }
-    friend A div(A const& a1, X const& x2) { return OperationsType()._mul(a1, rec(x2)); }
-    friend A add(X const& x1, A const& a2) { return OperationsType()._add(a2, x1); }
-    friend A sub(X const& x1, A const& a2) { return OperationsType()._add(neg(a2), x1); }
-    friend A mul(X const& x1, A const& a2) { return OperationsType()._mul(a2, x1); }
-    friend A pow(A const& a, Nat m) { return OperationsType()._pow(a, m); }
-};
-
-template<class A, class X> struct DispatchSymbolicAlgebraOperations
-    : DispatchAlgebraOperators<A,X>
-{
-    typedef A OperationsType;
-    //typedef AlgebraOperations<A,X> OperationsType;
-  public:
-    friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
-    friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }
-    friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
-  public:
-    friend A pos(A const& a) { return OperationsType::_create(Pos(),a); }
-    friend A neg(A const& a) { return OperationsType::_create(Neg(),a); }
-    friend A sqr(A const& a) { return OperationsType::_create(Sqr(),a); }
-    friend A add(A const& a1, A const& a2) { return OperationsType::_create(Add(),a1,a2); }
-    friend A sub(A const& a1, A const& a2) { return OperationsType::_create(Sub(),a1,a2); }
-    friend A mul(A const& a1, A const& a2) { return OperationsType::_create(Mul(),a1,a2); }
-    friend A div(A const& a1, A const& a2) { return OperationsType::_create(Div(),a1,a2); }
-    friend A pow(A const& a, Int n) { return OperationsType::_create(Pow(),a,n); }
-
-    friend A add(A const& a1, X const& x2) { return OperationsType::_create(Add(),a1,x2); }
-    friend A sub(A const& a1, X const& x2) { return OperationsType::_create(Sub(),a1,x2); }
-    friend A mul(A const& a1, X const& x2) { return OperationsType::_create(Mul(),a1,x2); }
-    friend A div(A const& a1, X const& x2) { return OperationsType::_create(Div(),a1,x2); }
-    friend A add(X const& x1, A const& a2) { return OperationsType::_create(Add(),x1,a2); }
-    friend A sub(X const& x1, A const& a2) { return OperationsType::_create(Sub(),x1,a2); }
-    friend A mul(X const& x1, A const& a2) { return OperationsType::_create(Mul(),x1,a2); }
-    friend A div(X const& x1, A const& a2) { return OperationsType::_create(Div(),x1,a2); }
-
-    friend A rec(A const& a) { return OperationsType::_create(Rec(),a); }
-    friend A sqrt(A const& a) { return OperationsType::_create(Sqrt(),a); }
-    friend A exp(A const& a) { return OperationsType::_create(Exp(),a); }
-    friend A log(A const& a) { return OperationsType::_create(Log(),a); }
-    friend A sin(A const& a) { return OperationsType::_create(Sin(),a); }
-    friend A cos(A const& a) { return OperationsType::_create(Cos(),a); }
-    friend A tan(A const& a) { return OperationsType::_create(Tan(),a); }
-    friend A asin(A const& a) { return OperationsType::_create(Asin(),a); }
-    friend A acos(A const& a) { return OperationsType::_create(Acos(),a); }
-    friend A atan(A const& a) { return OperationsType::_create(Atan(),a); }
+    friend A add(A const& a1, X const& x2) { return OperationsType::apply(Add(),a1,x2); }
+    friend A sub(A const& a1, X const& x2) { return OperationsType::apply(Add(),a1,neg(x2)); }
+    friend A mul(A const& a1, X const& x2) { return OperationsType::apply(Mul(),a1,x2); }
+    friend A div(A const& a1, X const& x2) { return OperationsType::apply(Mul(),a1,rec(x2)); }
+    friend A add(X const& x1, A const& a2) { return OperationsType::apply(Add(),a2,x1); }
+    friend A sub(X const& x1, A const& a2) { return OperationsType::apply(Add(),neg(a2),x1); }
+    friend A mul(X const& x1, A const& a2) { return OperationsType::apply(Mul(),a2,x1); }
+    friend A pow(A const& a, Nat m) { return GradedAlgebraOperations<A>::apply(Pow(),a, m); }
 };
 
 template<class A, class X> struct DispatchTranscendentalAlgebraOperations : DispatchAlgebraOperations<A,X> {
@@ -319,28 +246,28 @@ template<class A, class X> struct DispatchTranscendentalAlgebraOperations : Disp
     friend A operator/(A const& a1, A const& a2) { return div(a1,a2); }
     friend A& operator/=(A& a1, A const& a2) { return a1=div(a1,a2); }
     friend A operator/(X const& x1, A const& a2) { return div(x1,a2); }
-    friend A div(A const& a1, A const& a2) { return OperationsType::_div(a1, a2); }
+    friend A div(A const& a1, A const& a2) { return OperationsType::apply(Div(),a1, a2); }
 
-    friend A rec(A const& a) { return OperationsType()._rec(a); }
-    friend A div(X const& x1, A const& a2) { return OperationsType()._mul(rec(a2), x1); }
-    friend A pow(A const& a, Int n) { return OperationsType()._pow(a, n); }
+    friend A rec(A const& a) { return OperationsType::apply(Rec(),a); }
+    friend A div(X const& x1, A const& a2) { return x1*rec(a2); }
+    friend A pow(A const& a, Int n) { return OperationsType::apply(Pow(),a, n); }
 
-    friend A sqrt(A const& a) { return OperationsType()._sqrt(a); }
-    friend A exp(A const& a) { return OperationsType()._exp(a); }
-    friend A log(A const& a) { return OperationsType()._log(a); }
-    friend A sin(A const& a) { return OperationsType()._sin(a); }
-    friend A cos(A const& a) { return OperationsType()._cos(a); }
-    friend A tan(A const& a) { return OperationsType()._tan(a); }
-    friend A asin(A const& a) { return OperationsType()._asin(a); }
-    friend A acos(A const& a) { return OperationsType()._acos(a); }
-    friend A atan(A const& a) { return OperationsType()._atan(a); }
+    friend A sqrt(A const& a) { return OperationsType::apply(Sqrt(),a); }
+    friend A exp(A const& a) { return OperationsType::apply(Exp(),a); }
+    friend A log(A const& a) { return OperationsType::apply(Log(),a); }
+    friend A sin(A const& a) { return OperationsType::apply(Sin(),a); }
+    friend A cos(A const& a) { return OperationsType::apply(Cos(),a); }
+    friend A tan(A const& a) { return OperationsType::apply(Tan(),a); }
+    friend A asin(A const& a) { return OperationsType::apply(Asin(),a); }
+    friend A acos(A const& a) { return OperationsType::apply(Acos(),a); }
+    friend A atan(A const& a) { return OperationsType::apply(Atan(),a); }
 };
 
-template<class A, class X> struct DispatchOrderedAlgebraOperations : DispatchAlgebraOperations<A,X> {
+template<class A, class X> struct DispatchOrderedAlgebraOperations {
     typedef AlgebraOperations<A,X> OperationsType;
-    friend A max(A const& a1, A const& a2) { return OperationsType()._max(a1, a2); }
-    friend A min(A const& a1, A const& a2) { return OperationsType()._min(a1, a2); }
-    friend A abs(A const& a) { return OperationsType()._abs(a); }
+    friend A max(A const& a1, A const& a2) { return OperationsType::apply(Max(),a1,a2); }
+    friend A min(A const& a1, A const& a2) { return OperationsType::apply(Min(),a1,a2); }
+    friend A abs(A const& a) { return OperationsType::apply(Abs(),a); }
 };
 
 

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file enclosure.hpp
@@ -29,44 +30,21 @@
 #define ARIADNE_ENCLOSURE_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "geometry/set_interface.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/drawer_interface.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/drawer_interface.hpp"
 
-#include "function/function_model.hpp"
+#include "../function/function_model.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/paver.hpp"
-
-#ifndef ARIADNE_TAYLOR_SET_HPP
+#include "../geometry/box.hpp"
+#include "../geometry/paver.hpp"
 
 namespace Ariadne {
 
 class ValidatedConstrainedImageSet;
-
-//! \related Enclosure \brief The possible types of method used to draw a nonlinear set.
-enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
-//! \related Enclosure \brief The type of method currently used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DrawingMethod DRAWING_METHOD;
-//! \related Enclosure \brief The accuracy used to draw a set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern uint DRAWING_ACCURACY;
-
-//! \related Enclosure \brief The possible types of method used to discretise a nonlinear set.
-enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
-//! \related Enclosure \brief The type of method currently used to discretise a nonlinear set.
-//! HACK: May be replaced by more advanced functionality in the future.
-extern DiscretisationMethod DISCRETISATION_METHOD;
-
-} // namespace Ariadne
-
-#endif
-
-namespace Ariadne {
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
@@ -81,6 +59,8 @@ class Grid;
 class PavingInterface;
 
 typedef Constraint<ValidatedScalarFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
+
+typedef Dyadic StepSizeType;
 
 struct EnclosureConfiguration {
     ValidatedFunctionModelDPFactory _function_factory;
@@ -190,7 +170,7 @@ class Enclosure
     //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
     Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, FloatDPValue h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
@@ -220,6 +200,8 @@ class Enclosure
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
     Void new_parameter_constraint(ValidatedConstraint c);
 
+    //! \brief Introduces the constraint \f$\tau(s)\leq\gamma(\xi(s))\f$.
+    Void new_state_time_bound(ValidatedScalarFunction gamma);
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
     Void new_positive_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.
@@ -289,26 +271,26 @@ class Enclosure
     Enclosure restriction(const ExactBoxType& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
+    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by subdividing the parameter domain. Does not require constraint propagation,
     //! but may be inefficient.
-    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by first computing affine over-approximations of the set.
-    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using constraint propagation.
-    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using an interior point method to try to find good barrier functions
     //! and using constraint propagation to prove disjointness with cells.
     //! \details Potentially very efficient, but may be unreliable due to the
     //! use of nonlinear programming to find good Lyapounov multipliers for
     //! the constraints.
-    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the

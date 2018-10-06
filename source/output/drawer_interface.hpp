@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file drawer_interface.hpp
@@ -29,7 +30,7 @@
 #define ARIADNE_DRAWER_INTERFACE_HPP
 
 #include <iosfwd>
-#include "utility/writable.hpp"
+#include "../utility/writable.hpp"
 
 namespace Ariadne {
 
@@ -38,6 +39,15 @@ class CanvasInterface;
 struct PlanarProjectionMap;
 typedef PlanarProjectionMap Projection2d;
 class ValidatedConstrainedImageSet;
+
+//! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
+enum class DrawingMethod : std::uint8_t { CURVE, BOX, AFFINE, GRID };
+//! \related TaylorConstrainedImageSet \brief The type of method currently used to draw a set.
+//! HACK: May be replaced by more advanced functionality in the future.
+extern DrawingMethod DRAWING_METHOD;
+//! \related TaylorConstrainedImageSet \brief The accuracy used to draw a set.
+//! HACK: May be replaced by more advanced functionality in the future.
+extern uint DRAWING_ACCURACY;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class DrawerInterface : public WritableInterface

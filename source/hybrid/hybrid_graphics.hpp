@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file hybrid_graphics.hpp
@@ -32,14 +33,14 @@
 #include <string>
 #include <vector>
 
-#include "output/colour.hpp"
-#include "expression/variables.hpp"
-#include "output/graphics_interface.hpp"
-#include "output/graphics.hpp"
+#include "../output/colour.hpp"
+#include "../symbolic/variables.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/graphics.hpp"
 
-#include "expression/expression_set.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "hybrid/hybrid_graphics_interface.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../hybrid/hybrid_graphics_interface.hpp"
 
 namespace Ariadne {
 
@@ -152,43 +153,22 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillStyle& fs) { g.set_fi
 inline HybridFigure& operator<<(HybridFigure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
+inline Void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) { shape.draw(canvas,locations,variables); }
 inline Void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
+
+Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects);
+
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
-template<class SET1>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+inline Void draw(HybridFigure& g) { }
 
-template<class SET1,class SET2>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
+template<class SET, class... CSETS>
+inline Void draw(HybridFigure& g, const Colour& fc1, const SET& set1, CSETS const&... csets) {
+    g.set_fill_colour(fc1); draw(g,set1); draw(g,csets...); }
 
-template<class SET1,class SET2,class SET3>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4,class SET5>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4, const Colour& fc5, const SET5& set5) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5); g.write(filename); }
-
-template<class SET1,class SET2,class SET3,class SET4,class SET5,class SET6>
-Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
-          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
-          const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6) {
-    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
-    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
-    g.set_fill_colour(fc5); draw(g,set5); g.set_fill_colour(fc6); draw(g,set6); g.write(filename); }
+template<class... CSETS>
+Void plot(const char* filename, const Axes2d& axes, CSETS const&... csets) {
+    HybridFigure g;  g.set_axes(axes); draw(g,csets...); g.write(filename); }
 
 } // namespace Ariadne
 

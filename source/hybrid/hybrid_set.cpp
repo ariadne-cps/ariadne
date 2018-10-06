@@ -6,49 +6,52 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "hybrid/hybrid_expression_set.hpp"
-#include "hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_expression_set.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
 
-#include "numeric/real.hpp"
+#include "../numeric/real.hpp"
 
-#include "expression/expression_set.hpp"
-#include "geometry/function_set.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../geometry/function_set.hpp"
 
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_automaton_interface.hpp"
-#include "output/graphics.hpp"
-#include "hybrid/hybrid_graphics.hpp"
-#include "numeric/rounding.hpp"
-#include "expression/assignment.hpp"
-#include "output/graphics_interface.hpp"
-#include <boost/concept_check.hpp>
-#include "geometry/function_set.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
+#include "../output/graphics.hpp"
+#include "../hybrid/hybrid_graphics.hpp"
+#include "../numeric/rounding.hpp"
+#include "../symbolic/assignment.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../geometry/function_set.hpp"
 
 namespace Ariadne {
 
 ExactBoxType over_approximation(RealBox const&);
 ExactBoxType under_approximation(RealBox const&);
 ExactBoxType approximation(RealBox const&);
+HybridExactBox under_approximation(HybridRealBox const& hbx);
+HybridExactBox over_approximation(HybridRealBox const& hbx);
 
 HybridExactBox under_approximation(HybridRealBox const& hbx) {
     return HybridExactBox(hbx.location(),hbx.space(),under_approximation(hbx.euclidean_set()));
@@ -86,7 +89,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
     } else {
-        (*this->_curves_ptr)[ht.discrete_time().get_si()].euclidean_set().insert(flt_time,hpt.point());
+        (*this->_curves_ptr)[static_cast<unsigned int>(ht.discrete_time().get_si())].euclidean_set().insert(flt_time,hpt.point());
     }
 }
 
@@ -115,24 +118,24 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
 struct Orbit<HybridGridCell>::Data {
     Data(const HybridGrid& grid)
         : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreeSet initial;
-    HybridGridTreeSet reach;
-    HybridGridTreeSet intermediate;
-    HybridGridTreeSet final;
+    HybridGridTreePaving initial;
+    HybridGridTreePaving reach;
+    HybridGridTreePaving intermediate;
+    HybridGridTreePaving final;
 };
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set)
+Orbit(const HybridGridTreePaving& initial_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
 }
 
 Orbit<HybridGridCell>::
-Orbit(const HybridGridTreeSet& initial_set,
-      const HybridGridTreeSet& reach_set,
-      const HybridGridTreeSet& intermediate_set,
-      const HybridGridTreeSet& final_set)
+Orbit(const HybridGridTreePaving& initial_set,
+      const HybridGridTreePaving& reach_set,
+      const HybridGridTreePaving& intermediate_set,
+      const HybridGridTreePaving& final_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
@@ -141,28 +144,28 @@ Orbit(const HybridGridTreeSet& initial_set,
     this->_data->final=final_set;
 }
 
-HybridGridTreeSet const&
+HybridGridTreePaving const&
 Orbit<HybridGridCell>::
 initial() const
 {
     return this->_data->initial;
 }
 
-HybridGridTreeSet const&
+HybridGridTreePaving const&
 Orbit<HybridGridCell>::
 reach() const
 {
     return this->_data->reach;
 }
 
-HybridGridTreeSet const&
+HybridGridTreePaving const&
 Orbit<HybridGridCell>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-HybridGridTreeSet const&
+HybridGridTreePaving const&
 Orbit<HybridGridCell>::
 final() const
 {
@@ -187,18 +190,6 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
     return os;
 }
 
-
-
-
-
-
-Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
-    Map<RealVariable,RealInterval> res;
-    for(Nat i=0; i!=b.size(); ++i) {
-        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
-    }
-    return res;
-}
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& x)
     : HybridBasicSet<Point<X>>(q,make_list(x.keys()),Point<X>(x.size()))
@@ -287,7 +278,7 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
     ExactBoxType exbbx=reinterpret_cast<ExactBoxType const&>(bbx);  // FIXME: Should not need to convert to ExactBoxType here
     res.insert(loc,spc,exbbx);
     return res;
-};
+}
 
 OutputStream& HybridBoxSet::write(OutputStream& os) const {
     return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);
@@ -523,7 +514,7 @@ HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const Hybrid
     return res;
 }
 
-template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const {
+template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const {
     if(this->space()==paving.space(this->location())) {
         paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),depth);
     } else {
@@ -532,7 +523,7 @@ template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(Hybr
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
+template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
 
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
@@ -591,221 +582,6 @@ HybridSpaceSetConstIterator<DS,HBS>::increment_loc()
 }
 
 
-
-HybridGridTreeSet::ConstIterator HybridGridTreeSet::begin() const {
-    return ConstIterator(this->_map,this->_hgrid.space(),false);
-}
-
-HybridGridTreeSet::ConstIterator HybridGridTreeSet::end() const {
-    return ConstIterator(this->_map,this->_hgrid.space(),true);
-}
-
-
-Void HybridGridTreeSet::adjoin(const HybridGridCell& hgc) {
-    this->_provide_location(hgc.location()).adjoin(hgc.euclidean_set());
-}
-
-Void HybridGridTreeSet::adjoin(const ListSet<HybridGridCell>& hgcls) {
-    for(ListSet<HybridGridCell>::ConstIterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) {
-        this ->adjoin(*iter);
-    }
-}
-
-Void HybridGridTreeSet::adjoin(const HybridGridTreeSet& hgts) {
-    for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
-        this->_provide_location(_loc_iter->first).adjoin(_loc_iter->second);
-    }
-}
-
-Void HybridGridTreeSet::remove(const HybridGridTreeSet& hgts) {
-    for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
-        this->_provide_location(_loc_iter->first).remove(_loc_iter->second);
-    }
-}
-
-Void HybridGridTreeSet::restrict(const HybridGridTreeSet& hgts) {
-    for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
-        this->_provide_location(_loc_iter->first).restrict(_loc_iter->second);
-    }
-}
-
-Void HybridGridTreeSet::restrict_to_height(Nat h) {
-    for(LocationsIterator _loc_iter=locations_begin(); _loc_iter!=locations_end(); ++_loc_iter) {
-        _loc_iter->second.restrict_to_height(h);
-    }
-}
-
-Void HybridGridTreeSet::adjoin_inner_approximation(const HybridSetInterface& hset, const Int depth) {
-    Set<DiscreteLocation> locations=hset.locations();
-    for(auto location : locations) {
-        RealSpace space = this->space(location);
-        this->_provide_location(location).adjoin_inner_approximation(hset.euclidean_set(location,space),depth);
-    }
-}
-
-Void HybridGridTreeSet::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Int depth) {
-    for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
-            _loc_iter!=hbxs.end(); ++_loc_iter) {
-        DiscreteLocation const& loc=_loc_iter->first;
-        ExpressionSet<ExactBoxType> const& vbx=_loc_iter->second;
-        ARIADNE_ASSERT(vbx.space() == this->space(loc));
-        this->_provide_location(loc).adjoin_inner_approximation(vbx.euclidean_set(),depth);
-    }
-}
-
-Void HybridGridTreeSet::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Int height, const Int depth) {
-    Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
-    for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
-            _loc_iter!=hlocs.end(); ++_loc_iter) {
-        DiscreteLocation loc=*_loc_iter;
-        RealSpace spc=this->space(loc);
-        this->_provide_location(loc).adjoin_lower_approximation(hs.euclidean_set(loc,spc),height,depth);
-    }
-}
-
-Void HybridGridTreeSet::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Int depth) {
-    Set<DiscreteLocation> hlocs=hs.locations();
-    for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
-            _loc_iter!=hlocs.end(); ++_loc_iter) {
-        DiscreteLocation loc=*_loc_iter;
-        RealSpace spc=this->space(loc);
-        this->_provide_location(loc).adjoin_outer_approximation(hs.euclidean_set(loc,spc),depth);
-    }
-}
-
-Void HybridGridTreeSet::adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Int depth) {
-    for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
-            _loc_iter!=hbxs.end(); ++_loc_iter) {
-        DiscreteLocation const& loc=_loc_iter->first;
-        ExpressionSet<ExactBoxType> const& vbx=_loc_iter->second;
-        ARIADNE_ASSERT(vbx.space() == this->space(loc));
-        this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.euclidean_set(),depth);
-    }
-}
-
-
-GridTreeSet& HybridGridTreeSet::operator[](DiscreteLocation q) {
-    return this->_provide_location(q);
-}
-
-const GridTreeSet& HybridGridTreeSet::operator[](DiscreteLocation q) const {
-    ARIADNE_ASSERT_MSG(this->has_location(q),"q="<<q);
-    return const_cast<HybridGridTreeSet*>(this)->_provide_location(q);
-}
-
-Bool HybridGridTreeSet::is_empty() const {
-    for(LocationsConstIterator _loc_iter=this->locations_begin();
-        _loc_iter!=this->locations_end(); ++_loc_iter) {
-        if(!_loc_iter->second.is_empty()) { return false; }
-    }
-    return true;
-}
-
-SizeType HybridGridTreeSet::size() const {
-    SizeType result=0;
-    for(LocationsConstIterator _loc_iter=this->locations_begin(); _loc_iter!=this->locations_end(); ++_loc_iter) {
-        result+=_loc_iter->second.size();
-    }
-    return result;
-}
-
-HybridListSet<ExactBoxType> HybridGridTreeSet::boxes() const {
-    HybridListSet<ExactBoxType> result;
-    for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        result.adjoin(iter->location(),iter->euclidean_set().box());
-    }
-    return result;
-}
-
-Void HybridGridTreeSet::mince(Int depth) {
-    for(LocationsIterator _loc_iter=this->locations_begin();
-        _loc_iter!=this->locations_end(); ++_loc_iter) {
-        _loc_iter->second.mince(depth);
-    }
-}
-
-Void HybridGridTreeSet::recombine() {
-    for(LocationsIterator _loc_iter=this->locations_begin();
-        _loc_iter!=this->locations_end(); ++_loc_iter) {
-        _loc_iter->second.recombine();
-    }
-}
-
-ValidatedLowerKleenean HybridGridTreeSet::separated(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
-    return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.euclidean_set() );
-}
-
-ValidatedLowerKleenean HybridGridTreeSet::overlaps(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
-    return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.euclidean_set() );
-}
-
-ValidatedLowerKleenean HybridGridTreeSet::covers(const HybridExactBox& hbx) const {
-    LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
-    return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.euclidean_set() );
-}
-
-ValidatedLowerKleenean HybridGridTreeSet::inside(const HybridExactBoxes& hbx) const  {
-    for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
-        if( !_loc_iter->second.is_empty() ) {
-            DiscreteLocation const& loc = _loc_iter->first;
-            RealSpace spc=this->space(loc);
-            return this->euclidean_set(loc).inside(hbx.euclidean_set(loc,spc));
-        }
-    }
-    return true;
-}
-
-HybridUpperBoxes HybridGridTreeSet::bounding_box() const {
-    HybridExactBoxes result;
-    for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
-        if( !_loc_iter->second.is_empty() ) {
-            DiscreteLocation const& loc = _loc_iter->first;
-            RealSpace const& spc=this->space(loc);
-            result.insert(loc,spc,cast_exact_box(_loc_iter->second.bounding_box()));
-        }
-    }
-    return result;
-}
-
-Bool subset(const HybridGridTreeSet& hgts1, const HybridGridTreeSet& hgts2) {
-    for( typename HybridGridTreeSet::LocationsConstIterator _loc_iter = hgts1.locations_begin(); _loc_iter != hgts1.locations_end(); ++_loc_iter ) {
-        if( !_loc_iter->second.is_empty() ) {
-            DiscreteLocation const& loc = _loc_iter->first;
-            RealSpace spc=hgts1.space(loc);
-            if(not subset(hgts1.euclidean_set(loc),hgts2.euclidean_set(loc,spc))) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-OutputStream& HybridGridTreeSet::write(OutputStream& os) const {
-    return os << this->_map;
-}
-
-Void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
-    for(LocationsConstIterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
-        if(locations.empty() || locations.contains(loc_iter->first)) {
-            RealSpace const& space=this->space(loc_iter->first);
-            Projection2d projection(space.dimension(),space.index(axis_variables.x_variable()),space.index(axis_variables.y_variable()));
-            loc_iter->second.draw(canvas,projection);
-        }
-    }
-}
-
-
-GridTreeSet& HybridGridTreeSet::_provide_location(const DiscreteLocation& q) {
-    std::map<DiscreteLocation,GridTreeSet>::iterator iter=this->_map.find(q);
-    if(iter==this->_map.end()) {
-        this->_map.insert(std::make_pair(q,GridTreeSet(this->_hgrid[q])));
-        iter=this->_map.find(q);
-    }
-    return iter->second; }
-
-
 template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
 template<> String class_name<Box<RealInterval>>() { return "RealBox"; }
@@ -825,6 +601,6 @@ template class HybridBoxes<ExactIntervalType>;
 template class HybridBox<RealInterval>;
 
 
-template class HybridSpaceSetConstIterator<GridTreeSet, HybridGridCell>;
+template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;
 
 } // namespace Ariadne

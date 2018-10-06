@@ -6,26 +6,27 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/exceptions.hpp"
-#include "algebra/operations.hpp"
+#include "../utility/exceptions.hpp"
+#include "../algebra/operations.hpp"
 
-#include "algebra/series.hpp"
-#include "function/taylor_series.hpp"
+#include "../algebra/series.hpp"
+#include "../function/taylor_series.hpp"
 
 namespace Ariadne {
 
@@ -221,10 +222,8 @@ inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
 }
 
 
-template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
 {
-    typedef typename A::NumericType X;
-
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -238,8 +237,8 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
     auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
-    Series<X> sqrt_series=Series<X>::sqrt(X(1));
-    Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
+    Series<X> sqrt_series=Series<X>(Sqrt(),X(1));
+    Nat d=static_cast<Nat>(integer_cast<Int>((log((1-eps)*tol)/log(eps)+1)));
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
     ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
@@ -255,9 +254,8 @@ template<class A> A NormedAlgebraOperations<A>::_sqrt(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
 {
-    typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -287,9 +285,8 @@ template<class A> A NormedAlgebraOperations<A>::_rec(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
 {
-    typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto tol=cast_exact(x.tolerance());
@@ -320,18 +317,16 @@ template<class A> A NormedAlgebraOperations<A>::_log(const A& x)
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
-template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Exp, const A& x)
 {
-    typedef typename A::NumericType X;
-
     auto avg=x.average();
     auto rad=x.radius();
     auto tol = cast_exact(x.tolerance());
 
     // Scale to unit interval
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(decide(Dyadic(two_exp(sfp))<rad)) { ++sfp; }
-    Dyadic sf=two_exp(sfp);
+    while(decide(Dyadic(pow(two,static_cast<int>(sfp)))<rad)) { ++sfp; }
+    Dyadic sf=pow(two,static_cast<int>(sfp));
     A y = (x-avg)/sf;
     auto yrad=rad*mag((avg-avg)+sf);
 
@@ -365,16 +360,13 @@ template<class A> A NormedAlgebraOperations<A>::_exp(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form x*f(x^2)
-template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Sin, const A& x)
 {
-    typedef typename A::NumericType X;
-    Real const& pi=Ariadne::pi;
     // FIXME: Truncation error may be incorrect
 
     auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
-    auto rng=avg.pm(rad);
     Int n=integer_cast<Int>( round(avg/pi) );
 
     // Range reduce; use sin(x)=sin(x-2*n*pi)=sin((2*n+1)*pi-x)
@@ -408,10 +400,8 @@ template<class A> A NormedAlgebraOperations<A>::_sin(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form f(x^2)
-template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Cos, const A& x)
 {
-    typedef typename A::NumericType X;
-
     auto tol = cast_exact(x.tolerance());
     auto avg=x.average();
     auto rad=x.radius();
@@ -446,12 +436,12 @@ template<class A> A NormedAlgebraOperations<A>::_cos(const A& x)
     return z;
 }
 
-template<class A> A NormedAlgebraOperations<A>::_tan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Tan, const A& x)
 {
     return sin(x)*rec(cos(x));
 }
 
-template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Asin, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -464,7 +454,7 @@ template<class A> A NormedAlgebraOperations<A>::_asin(const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Acos, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
@@ -477,7 +467,7 @@ template<class A> A NormedAlgebraOperations<A>::_acos(const A& x)
 */
 }
 
-template<class A> A NormedAlgebraOperations<A>::_atan(const A& x)
+template<class A> A NormedAlgebraOperations<A>::apply(Atan, const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*

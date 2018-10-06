@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file orbit.hpp
@@ -34,11 +35,11 @@
 #include <map>
 #include <memory>
 
-#include "numeric/numeric.hpp"
-#include "output/graphics_interface.hpp"
-#include "geometry/function_set.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/enclosure.hpp"
+#include "../numeric/numeric.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../geometry/function_set.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/enclosure.hpp"
 
 
 namespace Ariadne {
@@ -73,7 +74,7 @@ typedef Point<ExactNumericType> ExactPoint;
 class InterpolatedCurve;
 class Grid;
 class GridCell;
-class GridTreeSet;
+class GridTreePaving;
 
 
 template<>
@@ -93,17 +94,17 @@ class Orbit<GridCell>
     struct Data;
   public:
     typedef GridCell EnclosureType;
-    typedef GridTreeSet EnclosureListType;
+    typedef GridTreePaving EnclosureListType;
 
     Orbit(const Grid&, const GridCell&);
-    Orbit(const GridTreeSet&);
-    Orbit(const GridTreeSet&, const GridTreeSet&,
-          const GridTreeSet&, const GridTreeSet&);
+    Orbit(const GridTreePaving&);
+    Orbit(const GridTreePaving&, const GridTreePaving&,
+          const GridTreePaving&, const GridTreePaving&);
     Grid const& grid() const;
-    GridTreeSet const& initial() const;
-    GridTreeSet const& reach() const;
-    GridTreeSet const& intermediate() const;
-    GridTreeSet const& final() const;
+    GridTreePaving const& initial() const;
+    GridTreePaving const& reach() const;
+    GridTreePaving const& intermediate() const;
+    GridTreePaving const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

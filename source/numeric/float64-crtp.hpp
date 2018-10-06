@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/float64-crtp.hpp
@@ -30,9 +31,10 @@
 #ifndef ARIADNE_FLOAT64_HPP
 #define ARIADNE_FLOAT64_HPP
 
-#include "utility/module.hpp"
-#include "utility/metaprogramming.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/module.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../numeric/paradigm.hpp"
+#include "../numeric/sign.hpp"
 
 namespace Ariadne {
 
@@ -70,9 +72,6 @@ template<class N> inline N& operator+=(NumberObject<N>& n1, const NumberObject<N
     n1.upcast()=n1.upcast()+n2.upcast(); return n1.upcast(); }
 template<class N> inline N& operator*=(NumberObject<N>& n1, const NumberObject<N>& n2) {
     return n1.upcast()=n1.upcast()*n2.upcast(); return n1.upcast(); }
-
-enum class Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
-enum class Comparison { LESS=-1, EQUAL=0, GREATER=+1 };
 
 class FloatDP : public ScalarObject<FloatDP> {
     volatile double d;

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file nonlinear_programming.hpp
@@ -28,11 +29,11 @@
 #ifndef ARIADNE_NONLINEAR_PROGRAMMING_HPP
 #define ARIADNE_NONLINEAR_PROGRAMMING_HPP
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
-#include "utility/logging.hpp"
-#include "numeric/numeric.hpp"
-#include "utility/tuple.hpp"
+#include "../output/logging.hpp"
+#include "../numeric/numeric.hpp"
+#include "../utility/tuple.hpp"
 
 
 namespace Ariadne {
@@ -57,7 +58,7 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
 class OptimiserInterface {
   public:
     //! \brief Virtual destructor.
-    virtual ~OptimiserInterface() { }
+    virtual ~OptimiserInterface() = default;
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
 
@@ -137,6 +138,9 @@ class OptimiserBase
 class PenaltyFunctionOptimiser
     : public OptimiserBase
 {
+  public:
+    using OptimiserBase::minimise;
+    using OptimiserBase::feasible;
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
     virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorFunction g, ExactBoxType C, ExactVector x, ExactVector y) const;

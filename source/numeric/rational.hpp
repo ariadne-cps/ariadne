@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/rational.hpp
@@ -30,14 +31,14 @@
 #ifndef ARIADNE_RATIONAL_HPP
 #define ARIADNE_RATIONAL_HPP
 
-#include "external/gmp.hpp"
-#include "utility/typedefs.hpp"
-#include "utility/metaprogramming.hpp"
-#include "utility/string.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/arithmetic.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../external/gmp.hpp"
+#include "../utility/typedefs.hpp"
+#include "../utility/metaprogramming.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/arithmetic.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
 
@@ -57,6 +58,7 @@ class Rational
     , DeclareComparisonOperations<Rational,Boolean,Boolean>
     , DefineFieldOperators<Rational>
     , DefineComparisonOperators<Rational,Boolean,Boolean>
+    , DeclareTranscendentalOperations<Real>
 {
   public:
     mpq_t _mpq;
@@ -81,11 +83,31 @@ class Rational
     Rational& operator=(const Rational&);
     Rational& operator=(Rational&&);
     operator Number<ExactTag> () const;
+
+    static Rational inf(Sign sgn);
+    static Rational inf();
+    static Rational nan();
+
     Integer get_num() const;
     Integer get_den() const;
     Integer numerator() const;
     Natural denominator() const;
     friend Rational operator/(Integer const& z1, Integer const& z2);
+
+    friend Real sqrt(Real const&);
+    friend Real exp(Real const&);
+    friend Real log(Real const&);
+    friend Real sin(Real const&);
+    friend Real cos(Real const&);
+    friend Real tan(Real const&);
+    friend Real atan(Real const&);
+
+    friend Sign sgn(Rational const& q);
+
+    friend Bool is_nan(Rational const& q);
+    friend Bool is_inf(Rational const& q);
+    friend Bool is_finite(Rational const& q);
+    friend Bool is_zero(Rational const& q);
 
     friend Comparison cmp(Rational const& q1, Rational const& q2);
     friend Comparison cmp(Rational const& q1, ExactDouble const& d2);
@@ -106,6 +128,8 @@ Rational operator"" _q(long double x);
 
 template<class N, EnableIf<IsBuiltinIntegral<N>>> inline Rational::Rational(N n) : Rational(Int64(n)) { }
 
+OutputStream& write(OutputStream& os, mpz_t const z);
+InputStream& operator>>(InputStream& is, Rational& q1);
 
 
 } // namespace Ariadne

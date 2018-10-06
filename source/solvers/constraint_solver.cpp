@@ -6,66 +6,68 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/tuple.hpp"
-#include "utility/tribool.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/algebra.hpp"
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "function/polynomial.hpp"
-#include "function/function.hpp"
-#include "function/formula.hpp"
-#include "function/procedure.hpp"
-#include "function/constraint.hpp"
-#include "solvers/nonlinear_programming.hpp"
-#include "function/function_mixin.hpp"
-#include "function/taylor_function.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/tuple.hpp"
+#include "../utility/tribool.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/algebra.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../function/polynomial.hpp"
+#include "../function/function.hpp"
+#include "../function/formula.hpp"
+#include "../function/procedure.hpp"
+#include "../function/constraint.hpp"
+#include "../solvers/nonlinear_programming.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/taylor_function.hpp"
 
-#include "solvers/constraint_solver.hpp"
-#include "solvers/solver.hpp"
+#include "../solvers/constraint_solver.hpp"
+#include "../solvers/solver.hpp"
 
 namespace Ariadne {
 
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
 typedef Vector<FloatDPValue> ExactFloatVector;
 
+Bool has_nan(const ExactBoxType& domain);
+
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
-Sign sign(const FloatDP& x) {
-    if(x>0) { return NEGATIVE; }
-    else if(x<0) {  return POSITIVE; }
-    else { return ZERO; }
+inline Sign sign(const FloatDP& x) {
+    if(x>0) { return Sign::NEGATIVE; }
+    else if(x<0) {  return Sign::POSITIVE; }
+    else { return Sign::ZERO; }
 }
 
-Sign sign(const ExactIntervalType& ivl) {
-    if(ivl.lower()>0) { return NEGATIVE; }
-    else if(ivl.upper()<0) {  return POSITIVE; }
-    else { return ZERO; }
+inline Sign sign(const ExactIntervalType& ivl) {
+    if(ivl.lower()>0) { return Sign::NEGATIVE; }
+    else if(ivl.upper()<0) {  return Sign::POSITIVE; }
+    else { return Sign::ZERO; }
 }
 
 
-OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    static const FloatDP inf = Ariadne::inf;
+inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }
@@ -92,8 +94,8 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 {
 
     static const FloatDPValue XSIGMA=0.125_exact;
-    static const FloatDPValue TERR=-1.0_exact*two_exp(-10);
-    static const FloatDP inf = Ariadne::inf;
+    static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
+    static const FloatDP _inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
     ARIADNE_ASSERT(codomain.dimension()>0);
@@ -169,7 +171,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         ARIADNE_LOG(4,"    txg="<<txg<<"\n");
 
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
-        this->hull_reduce(subdomain,txg,ExactIntervalType(0,inf));
+        this->hull_reduce(subdomain,txg,ExactIntervalType(0,_inf));
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(definitely(subdomain.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
@@ -177,7 +179,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         }
 
         for(Nat i=0; i!=m; ++i) {
-            this->box_reduce(subdomain,txg,ExactIntervalType(0,inf),i);
+            this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
             if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
         }
@@ -333,19 +335,19 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     Vector<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
-    const FloatDP size = lower.width().raw() / (1<<MAX_STEPS);
+    const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
     do {
         FloatDPUpperBound ub; FloatDPUpperInterval ivl; FloatDPValue val; ub=val;
 
         // Apply Newton contractor on lower and upper strips
-        if(lower.width().raw()>size) {
+        if(lower.width().raw()>threshold) {
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
             if(definitely(new_lower.upper()<lower.lower())) { lower=UpperIntervalType(lower.lower().raw(),lower.lower().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
-        if(upper.width().raw()>size) {
+        if(upper.width().raw()>threshold) {
             splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
@@ -353,7 +355,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=UpperIntervalType(lower.lower(),upper.upper());
-    } while(lower.width().raw()>size && upper.width().raw()>size);
+    } while(lower.width().raw()>threshold && upper.width().raw()>threshold);
     domain=subdomain;
 
     return definitely(domain.is_empty());
@@ -458,24 +460,6 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFun
 
     return false;
 }
-
-
-
-namespace {
-
-Void compute_monotonicity(UpperBoxType& domain, const EffectiveConstraint& constraint) {
-/*
-    static const Nat n = domain.size();
-
-    // Compute monotone formulae
-    Array<Sign> monotonicity(n);
-    Covector<ExactIntervalType> grad=constraint.function().gradient(domain);
-    for(Nat j=0; j!=n; ++j) {
-        monotonicity[j]=sign(grad[j]);
-    }
-*/
-}
-} // namespace
 
 
 Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const

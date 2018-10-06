@@ -5,12 +5,13 @@ dep/
 obj/
 *.gch
 .DS_Store
-
+.cproject
+.project
+.pydevproject
 .settings
 .idea
 
-source/*/Makefile
-test/Makefile
-wrap/Makefile
-examples/Makefile
-examples/*/Makefile
+source/config.hpp
+
+.pytest_cache
+__pycache__

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file floatdp.hpp
@@ -33,12 +34,12 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "utility/declarations.hpp"
-#include "numeric/operators.hpp"
-#include "numeric/rounding.hpp"
-#include "numeric/sign.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/float.decl.hpp"
+#include "../utility/declarations.hpp"
+#include "../numeric/operators.hpp"
+#include "../numeric/rounding.hpp"
+#include "../numeric/sign.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
 
@@ -69,6 +70,7 @@ double sub_rnd(double x1, double x2);
 double mul_rnd(double x1, double x2);
 double div_rnd(double x1, double x2);
 double fma_rnd(double x1, double x2, double x3);
+double pow_rnd(double x, Nat n);
 double pow_rnd(double x, int n);
 double sqrt_rnd(double x);
 double exp_rnd(double x);
@@ -79,8 +81,18 @@ double tan_rnd(double x);
 double asin_rnd(double x);
 double acos_rnd(double x);
 double atan_rnd(double x);
+double neg_rec_rnd(double x);
+double atan_rnd_series(double x);
 double pi_rnd();
 
+double texp(double x);
+
+double pi_opp();
+double add_opp(double x, double y);
+double sub_opp(double x, double y);
+double mul_opp(double x, double y);
+double div_opp(double x, double y);
+double neg_rec_opp(double x);
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
@@ -125,8 +137,11 @@ class FloatDP {
     DoublePrecision precision() const;
     Void set_precision(DoublePrecision);
   public:
+
     static FloatDP nan(DoublePrecision pr);
+    static FloatDP inf(Sign sgn, DoublePrecision pr);
     static FloatDP inf(DoublePrecision pr);
+
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);
@@ -143,10 +158,17 @@ class FloatDP {
 
     //! \brief Construct from a double number using given rounding
     explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);
-    //! \brief Construct from a number using given rounding
-    explicit FloatDP(FloatDP d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from another FloatDP using given rounding
+
+    explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from an integer number using given rounding
+    explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a dyadic number with given rounding
+    explicit FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a FloatMP using given rounding
+    explicit FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
-    explicit FloatDP(const Rational& q, RoundingModeType rnd, PrecisionType pr);
+    explicit FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr);
     //! \brief Convert to a dyadic number.
     explicit operator Dyadic () const;
     //! \brief Convert to a rational number.
@@ -159,6 +181,7 @@ class FloatDP {
     friend Bool is_nan(FloatDP x) { return std::isnan(x.dbl); }
     friend Bool is_inf(FloatDP x) { return std::isinf(x.dbl); }
     friend Bool is_finite(FloatDP x) { return std::isfinite(x.dbl); }
+    friend Bool is_zero(FloatDP x) { return x.dbl==0.0; }
 
     friend FloatDP next(RoundUpward rnd, FloatDP x) { return add(rnd,x,FloatDP::min(x.precision())); }
     friend FloatDP next(RoundDownward rnd, FloatDP x) { return sub(rnd,x,FloatDP::min(x.precision())); }
@@ -196,32 +219,7 @@ class FloatDP {
     friend FloatDP& imul(RoundingModeType rnd, FloatDP& x1, FloatDP x2);
     friend FloatDP& idiv(RoundingModeType rnd, FloatDP& x1, FloatDP x2);
 
-    // Explcitly rounded operations
-    friend FloatDP nul(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP pos(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP neg(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP hlf(RoundingModeType rnd, FloatDP const& x);
-    friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP div(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3); // x1*x2+x3
-    friend FloatDP pow(RoundingModeType rnd, FloatDP x, Int n);
-    friend FloatDP sqr(RoundingModeType rnd, FloatDP x);
-    friend FloatDP rec(RoundingModeType rnd, FloatDP x);
-    friend FloatDP sqrt(RoundingModeType rnd, FloatDP x);
-    friend FloatDP exp(RoundingModeType rnd, FloatDP x);
-    friend FloatDP log(RoundingModeType rnd, FloatDP x);
-    friend FloatDP sin(RoundingModeType rnd, FloatDP x);
-    friend FloatDP cos(RoundingModeType rnd, FloatDP x);
-    friend FloatDP tan(RoundingModeType rnd, FloatDP x);
-    friend FloatDP asin(RoundingModeType rnd, FloatDP x);
-    friend FloatDP acos(RoundingModeType rnd, FloatDP x);
-    friend FloatDP atan(RoundingModeType rnd, FloatDP x);
     static FloatDP pi(RoundingModeType rnd, PrecisionType pr);
-
-    friend FloatDP med(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP rad(RoundingModeType rnd, FloatDP x1, FloatDP x2);
 
     // Correctly rounded arithmetic
     friend FloatDP sqr(FloatDP x) { return sqr_rnd(x.dbl); }
@@ -273,11 +271,16 @@ class FloatDP {
         FloatDP r=op(x,n); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
+    // Explicitly rounded operations
+    friend FloatDP nul(RoundingModeType rnd, FloatDP x) { return apply(Nul(),rnd,x); }
+    friend FloatDP pos(RoundingModeType rnd, FloatDP x) { return apply(Pos(),rnd,x); }
+    friend FloatDP neg(RoundingModeType rnd, FloatDP x) { return apply(Neg(),rnd,x); }
+    friend FloatDP hlf(RoundingModeType rnd, FloatDP x) { return apply(Hlf(),rnd,x); }
     friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
     friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
     friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
     friend FloatDP div(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
-    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3); // x1*x2+x3
+    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) { return apply(Fma(),rnd,x1,x2,x3); }
     friend FloatDP pow(RoundingModeType rnd, FloatDP x, Int n) { return apply(Pow(),rnd,x,n); }
     friend FloatDP sqr(RoundingModeType rnd, FloatDP x) { return apply(Sqr(),rnd,x); }
     friend FloatDP rec(RoundingModeType rnd, FloatDP x) { return apply(Rec(),rnd,x); }
@@ -289,8 +292,6 @@ class FloatDP {
     friend FloatDP tan(RoundingModeType rnd, FloatDP x) { return apply(Tan(),rnd,x); }
     friend FloatDP atan(RoundingModeType rnd, FloatDP x) { return apply(Atan(),rnd,x); }
 
-    friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
-        return apply(Fma(),rnd,x1,x2,x3); }
     friend FloatDP med(RoundingModeType rnd, FloatDP x1, FloatDP x2) {
         rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
         FloatDP r=hlf(add(rnd,x1,x2)); set_rounding_mode(rounding_mode); return r; }
@@ -351,6 +352,16 @@ class FloatDP {
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, RoundingModeType rnd);
     friend OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, RoundingModeType rnd);
   private:
+    // Rounded arithmetic
+    friend FloatDP pow_rnd(FloatDP x, Int n);
+    friend FloatDP sqrt_rnd(FloatDP x);
+    friend FloatDP exp_rnd(FloatDP x);
+    friend FloatDP log_rnd(FloatDP x);
+    friend FloatDP sin_rnd(FloatDP x);
+    friend FloatDP cos_rnd(FloatDP x);
+    friend FloatDP tan_rnd(FloatDP x);
+    friend FloatDP atan_rnd(FloatDP x);
+
     // Opposite rounded arithmetic
     friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return -t; }
     friend FloatDP neg_opp(FloatDP x) { volatile double t=x.dbl; return -t; }
@@ -364,7 +375,6 @@ class FloatDP {
 };
 
 static const FloatDP inf = std::numeric_limits<double>::infinity();
-
 
 struct Float32 {
     float flt;

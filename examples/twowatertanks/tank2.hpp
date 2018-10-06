@@ -21,13 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
 #include "ariadne.hpp"
 
 
 using namespace Ariadne;
 
-HybridAutomaton getTank2()
+inline HybridAutomaton getTank2()
 {
     RealConstant lambda("lambda",0.02_decimal);
     RealConstant rate("rate",0.3_decimal);

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file utility/macros.hpp
@@ -50,8 +51,8 @@
 
 #define ARIADNE_ASSERT(expression) \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
     } \
@@ -60,8 +61,8 @@
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT_MSG(expression,error) \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
     } \
@@ -75,8 +76,8 @@
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT(expression) \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
     } \
@@ -89,16 +90,16 @@
 
 #define ARIADNE_PRECONDITION_MSG(expression,error)             \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
     } \
 
 #define ARIADNE_PRECONDITION(expression)             \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"); \
         } \
     } \
@@ -124,16 +125,16 @@
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
-        bool result = static_cast<bool>(expression); \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>(expression); \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
     } \
 
 #define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
     { \
-        bool result = static_cast<bool>((expression1) == (expression2));       \
-        if(!result) { \
+        bool assertion_result = static_cast<bool>((expression1) == (expression2));       \
+        if(!assertion_result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
         } \
     } \
@@ -152,7 +153,14 @@
     {                                                                \
         std::cerr << "WARNING: " << msg << "" << std::endl;                \
     }
-                                                                  \
+
+#define ARIADNE_WARN_ONCE(msg)          \
+    static bool first_time=true; \
+    if(first_time) { \
+        first_time=false; \
+        std::cerr << "WARNING: " << msg << "" << std::endl; \
+    } \
+
 #define ARIADNE_ERROR(msg)          \
     {                                                                \
         std::cerr << "ERROR: " << msg << "" << std::endl;                \

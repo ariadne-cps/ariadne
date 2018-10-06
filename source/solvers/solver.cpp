@@ -6,130 +6,48 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "geometry/interval.hpp"
-#include "function/function_model.hpp"
+#include "../geometry/interval.hpp"
+#include "../function/function_model.hpp"
 
-#include "solvers/solver.hpp"
+#include "../solvers/solver.hpp"
 
-#include "utility/logging.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/differential.hpp"
-#include "algebra/algebra.hpp"
-#include "function/taylor_model.hpp"
-#include "function/formula.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
+#include "../output/logging.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/differential.hpp"
+#include "../algebra/algebra.hpp"
+#include "../function/taylor_model.hpp"
+#include "../function/formula.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+
+#include "../algebra/expansion.inl.hpp"
+
+#include "../algebra/evaluate.hpp"
+#include "../algebra/evaluate.tpl.hpp"
 
 namespace Ariadne {
 
 namespace {
-
-Vector<UpperIntervalType> ranges(const Vector<ValidatedTaylorModelDP>& f) {
-    Vector<UpperIntervalType> r(f.size()); for(Nat i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
-}
-
-Vector<ValidatedTaylorModelDP>& clobber(Vector<ValidatedTaylorModelDP>& h) {
-    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
-
-// Compute the Jacobian over an arbitrary domain
-Matrix<ValidatedNumericType>
-jacobian2(const Vector<ValidatedTaylorModelDP>& f, const Vector<ValidatedNumericType>& x)
-{
-    Vector< Differential<ValidatedNumericType> > dx(x.size(), f.size(), 1u);
-    for(Nat i=0; i!=x.size()-f.size(); ++i) {
-        dx[i]=Differential<ValidatedNumericType>::constant(f.size(),1u,x[i]); }
-    for(Nat i=0; i!=f.size(); ++i) {
-        Nat j=i+(x.size()-f.size());
-        dx[j]=Differential<ValidatedNumericType>::variable(f.size(),1u,x[j],i); }
-    Vector< Differential<ValidatedNumericType> > df(f.size(), f.size(), 1u);
-    for(Nat i=0; i!=f.size(); ++i) {
-        df[i]=evaluate(f[i].expansion(),dx);
-    }
-    Matrix<ValidatedNumericType> J=jacobian(df);
-    return J;
-}
-
-// Compute the Jacobian over the unit domain
-Matrix<FloatDPValue>
-jacobian2_value(const Vector<ValidatedTaylorModelDP>& f)
-{
-    const Nat rs=f.size();
-    const Nat fas=f.zero_element().argument_size();
-    const Nat has=fas-rs;
-    Matrix<FloatDPValue> J(rs,rs);
-    MultiIndex a(fas);
-    for(Nat i=0; i!=rs; ++i) {
-        for(Nat j=0; j!=rs; ++j) {
-            a[has+j]=1; const FloatDPValue x=f[i][a]; J[i][j]=x; a[has+j]=0;
-        }
-    }
-    return J;
-}
-
-// Compute the Jacobian over the unit domain
-Matrix<ValidatedNumericType>
-jacobian2_range(const Vector<ValidatedTaylorModelDP>& f)
-{
-    Nat rs=f.size();
-    Nat fas=f.zero_element().argument_size();
-    Nat has=fas-rs;
-    Matrix<ValidatedNumericType> J(rs,rs);
-    for(Nat i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModelDP::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            for(Nat k=0; k!=rs; ++k) {
-                const Nat c=iter->key()[has+k];
-                if(c>0) {
-                    const FloatDPValue& x=iter->data();
-                    if(iter->key().degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=ValidatedNumericType(-1,1)*x*c; }
-                    //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
-                }
-            }
-        }
-    }
-    return J;
-}
-
-
-
-} // namespace
-
-
-static const Bool ALLOW_PARTIAL_FUNCTION = true;
-
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
-
-ValidatedVectorFunctionModelDP operator*(const Matrix<FloatDPValue>& A,const ValidatedVectorFunctionModelDP& v) {
-    ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorFunctionModelDP r(A.row_size(),factory(v).create_zero());
-    for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarFunctionModelDP t=r[i];
-        for(Nat j=0; j!=v.size(); ++j) {
-            t+=FloatDPValue(A[i][j])*v[j];
-        }
-        r[i]=t;
-    }
-    return r;
-}
 
 ValidatedVectorFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorFunctionModelDP& v) {
     ARIADNE_ASSERT(v.size()!=0);
@@ -151,9 +69,12 @@ FloatDPError sup_error(const ValidatedVectorFunctionModelDP& x) {
 }
 
 
+}
 
 
+static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
 
 SolverBase::SolverBase(double max_error, Nat max_steps)

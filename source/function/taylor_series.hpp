@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file taylor_series.hpp
@@ -29,10 +30,10 @@
 #ifndef ARIADNE_TAYLOR_SERIES_HPP
 #define ARIADNE_TAYLOR_SERIES_HPP
 
-#include "numeric/numeric.hpp"
-#include "algebra/series.hpp"
-#include "function/domain.hpp"
-#include "utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/series.hpp"
+#include "../function/domain.hpp"
+#include "../utility/container.hpp"
 
 namespace Ariadne {
 
@@ -50,14 +51,14 @@ template<> class TaylorSeries<FloatDPBounds> {
     Array<FloatDPValue> _expansion;
     FloatDPError _error;
   public:
-    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
+    TaylorSeries(const IntervalDomainType& dom, DegreeType deg) : _domain(dom), _expansion(deg+1u), _error(0u) { }
 
     TaylorSeries(const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree,
                  AnalyticFunction const& function);
 
     template<class OP> TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree);
 
-    DegreeType degree() const { return _expansion.size()-1; }
+    DegreeType degree() const { return _expansion.size()-1u; }
     FloatDPValue const& operator[](DegreeType i) const { return _expansion[i]; }
     Array<FloatDPValue> expansion() const { return _expansion; }
     FloatDPError error() const { return _error; }
@@ -69,7 +70,7 @@ template<> class TaylorSeries<FloatDPBounds> {
 
 template<class OP> inline
 TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)
-    : _domain(domain), _expansion(degree+1), _error(0u)
+    : _domain(domain), _expansion(degree+1u), _error(0u)
 {
     Series<ValidatedNumericType> centre_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(centre));
     Series<ValidatedNumericType> range_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(cast_singleton(domain)));
@@ -86,8 +87,6 @@ TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomai
 inline
 Void TaylorSeries<FloatDPBounds>::sweep(FloatDPValue threshold) {
     for(DegreeType i=0; i<=degree(); ++i) {
-        FloatDPValue ei=_expansion[i];
-        PositiveFloatDPUpperBound pei=mag(ei);
         if(definitely(mag(_expansion[i])<=threshold)) {
             _error+=mag(_expansion[i]);
             _expansion[i]=0;

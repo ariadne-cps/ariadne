@@ -6,50 +6,47 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/stlio.hpp"
-#include "numeric/numeric.hpp"
-#include "expression/space.hpp"
-#include "geometry/point.hpp"
-#include "geometry/box.hpp"
-#include "output/geometry2d.hpp"
-#include "output/graphics.hpp"
-#include "hybrid/discrete_location.hpp"
-#include "geometry/function_set.hpp"
-#include "expression/expression_set.hpp"
-#include "hybrid/hybrid_graphics.hpp"
-
-#ifdef HAVE_GTK_H
-#include <gtk/gtk.h>
-#endif
+#include "../utility/macros.hpp"
+#include "../utility/stlio.hpp"
+#include "../numeric/numeric.hpp"
+#include "../symbolic/space.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/box.hpp"
+#include "../output/geometry2d.hpp"
+#include "../output/graphics.hpp"
+#include "../hybrid/discrete_location.hpp"
+#include "../geometry/function_set.hpp"
+#include "../symbolic/expression_set.hpp"
+#include "../hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 
-static const Int DEFAULT_WIDTH = 800;
-static const Int DEFAULT_HEIGHT = 800;
+static const Nat DEFAULT_WIDTH = 800;
+static const Nat DEFAULT_HEIGHT = 800;
 
-static const Int LEFT_MARGIN = 160;
-static const Int BOTTOM_MARGIN = 40;
-static const Int TOP_MARGIN = 10;
-static const Int RIGHT_MARGIN = 10;
+static const Nat LEFT_MARGIN = 160;
+static const Nat BOTTOM_MARGIN = 40;
+static const Nat TOP_MARGIN = 10;
+static const Nat RIGHT_MARGIN = 10;
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
     return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
@@ -62,13 +59,6 @@ Projection2d projection(const RealSpace& space, const Variables2d& variables) {
     return Projection2d(space.dimension(),x_index,y_index);
 }
 
-
-
-Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
-
-Void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) {
-    shape.draw(canvas,locations,variables);
-}
 
 Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
     for(Nat i=0; i!=objects.size(); ++i) {
@@ -100,8 +90,8 @@ HybridFigure::write(const char* cfilename) const
 Void
 HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    const Int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
-    const Int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Nat canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
+    const Nat canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;
 
     SharedPointer<CanvasInterface> canvas=make_canvas(canvas_width, canvas_height);
 

@@ -6,41 +6,63 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "utility/tuple.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/diagonal_matrix.hpp"
-#include "function/affine.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../utility/tuple.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/diagonal_matrix.hpp"
+#include "../function/affine.hpp"
+#include "../solvers/linear_programming.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/logging.hpp"
-
-static const int verbosity=0;
+#include "../utility/macros.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
 typedef Vector<UpperIntervalType> UpperIntervalVectorType;
 typedef Matrix<UpperIntervalType> UpperIntervalMatrixType;
+
+// Return r[i]=x[i]-c for i=1,...,n
+Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c);
+// Return r[i]=x[i]*y[i] for i=1,...,n
+Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y);
+// Return r[i]=x[i]*y[i] for i=1,...,n
+Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z);
+// Return r[i]=x[i]*y[i]+z for i=1,...,n
+Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const FloatDP& z);
+// Return r[i]=1/y[i] for i=1,...,n
+Vector<FloatDP> erec(const Vector<FloatDP>& v);
+
+Bool is_nan(Vector<FloatDP> const& v);
+
+// Compute R=ADA^T for diagonal D
+Matrix<FloatDP> adat(const Matrix<FloatDP>& A, const Vector<FloatDP>& D);
+
+Bool all_greater(const Vector<FloatDP>& x, const FloatDP& e);
+Bool all_less(const Vector<FloatDP>& x, const FloatDP& e);
+Bool all_greater(const Vector<FloatDP>& x1, const Vector<FloatDP>& x2);
+
+FloatDP compute_mu(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
+                 const Vector<FloatDP>& x, const Vector<FloatDP>& zl, const Vector<FloatDP>& zu);
 
 
 // Return r[i]=x[i]-c for i=1,...,n
@@ -169,7 +191,6 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
 
     FloatDPValue zero;
 
-    const Nat m=A.row_size();
     const Nat n=A.column_size();
 
     // x should be an approximate solution to Ax=b
@@ -235,10 +256,10 @@ InteriorPointSolver::minimise(const Vector<FloatDP>& c,
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
 
-    Bool done;
-    do {
-        done = this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
-    } while(!done);
+    LinearProgramStatus status = LinearProgramStatus::INDETERMINATE_FEASIBILITY;
+    while(status == LinearProgramStatus::INDETERMINATE_FEASIBILITY) {
+        status = this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
+    }
 
     do {
         this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
@@ -322,7 +343,7 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
     Nat step=0;
     while(step++<24) {
         LinearProgramStatus result=this->_feasibility_step(xl,xu,A,b, x,y,zl,zu);
-        if(result==PRIMAL_DUAL_FEASIBLE || result==PRIMAL_FEASIBLE) {
+        if(result==LinearProgramStatus::PRIMAL_DUAL_FEASIBLE || result==LinearProgramStatus::PRIMAL_FEASIBLE) {
             ValidatedKleenean validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
@@ -330,7 +351,7 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
         // NOTE: Must compute y*A first, as A*X may give NaN.
         FloatDPBounds yAX = dot( transpose(Matrix<FloatDPBounds>(A)) * Vector<FloatDPBounds>(y), X );
         if(inconsistent(yb,yAX)) { return false; }
-        if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
+        if(result==LinearProgramStatus::DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
     }
     return indeterminate;
@@ -397,7 +418,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     //   D = 1/( Zu/(Xu-X) + Zl/(X-Xl) )
     DiagonalMatrix<FloatDP> D(erec(ediv(zu,xu-x)+ediv(zl,x-xl)));
     Vector<FloatDP> ryz = ry - ediv(rzl,Vector<FloatDP>(x-xl)) + ediv(rzu,Vector<FloatDP>(xu-x));
-    S=adat(A,D.diagonal());;
+    S=adat(A,D.diagonal());
     ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<inverse(S)<<"\n");
 
     // dzl = (rzl - Zl dx) / (X-Xl)
@@ -406,7 +427,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     // (A D AT) dy = rx + A D ryz
 
     dy = solve(S, Vector<FloatDP>( rx + A * (D * ryz) ) );
-    if(is_nan(dy)) { return DEGENERATE_FEASIBILITY; }
+    if(is_nan(dy)) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
     dx = D * Vector<FloatDP>(transpose(A)*dy - ryz);
     dzl = Vector<FloatDP>(rzl-Zl*dx)/(X-Xl);
     dzu = Vector<FloatDP>(rzu+Zu*dx)/(Xu-X);
@@ -420,7 +441,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     while ( !all_greater(emul(nx-xl,zl),gamma*mu) || !all_greater(emul(xu-nx,zu),gamma*mu) ) {
         alphax=alphax*scale;
         nx=(x-alphax*dx);
-        if(alphax<gamma*mu/4096) { return DEGENERATE_FEASIBILITY; }
+        if(alphax<gamma*mu/4096) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
     }
 
     FloatDP alphaz=1.0;
@@ -429,7 +450,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
         alphaz=alphaz*scale;
         nzl=(zl-alphaz*dzl);
         nzu=(zu-alphaz*dzu);
-        if(alphaz<gamma*mu/4096) { return DEGENERATE_FEASIBILITY; }
+        if(alphaz<gamma*mu/4096) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
         //ARIADNE_LOG(9,"alphaz="<<alphaz<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
     }
     ny=(y-alphaz*dy);
@@ -438,10 +459,10 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     x=nx; y=ny; zl=nzl; zu=nzu;
     ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(transpose(A)*y+(zl-zu)-c)<<"\n");
 
-    if(alphax==1.0 && alphaz==1.0) { return PRIMAL_DUAL_FEASIBLE; }
-    if(alphax==1.0) { return PRIMAL_FEASIBLE; }
-    if(alphaz==1.0) { return DUAL_FEASIBLE; }
-    return INDETERMINATE_FEASIBILITY;
+    if(alphax==1.0 && alphaz==1.0) { return LinearProgramStatus::PRIMAL_DUAL_FEASIBLE; }
+    if(alphax==1.0) { return LinearProgramStatus::PRIMAL_FEASIBLE; }
+    if(alphaz==1.0) { return LinearProgramStatus::DUAL_FEASIBLE; }
+    return LinearProgramStatus::INDETERMINATE_FEASIBILITY;
 }
 
 

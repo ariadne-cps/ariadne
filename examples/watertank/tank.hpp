@@ -27,7 +27,7 @@
 
 using namespace Ariadne;
 
-HybridAutomaton getTank()
+inline HybridAutomaton getTank()
 {
     RealConstant lambda("lambda",0.02_decimal);
     RealConstant rate("rate",0.3_decimal);

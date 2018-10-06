@@ -6,21 +6,21 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 
 namespace Ariadne {
 
@@ -31,9 +31,25 @@ template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return b
 
 
 template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
-template<class U> Interval<U>::Interval(EmptyInterval const&) : Interval(+infty,-infty) { }
+template<class U> Interval<U>::Interval(EmptyInterval const&) {
+    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
+        _l = L(Dyadic::inf(Sign::POSITIVE),L::RawType::get_default_precision());
+        _u = U(Dyadic::inf(Sign::NEGATIVE),U::RawType::get_default_precision());
+    } else {
+        _l = Dyadic::inf(Sign::POSITIVE);
+        _u = Dyadic::inf(Sign::NEGATIVE);
+    }
+}
 template<class U> Interval<U>::Interval(UnitInterval const&) : Interval(-1,+1) { }
-template<class U> Interval<U>::Interval(EntireInterval const&) : Interval(-infty,+infty) { }
+template<class U> Interval<U>::Interval(EntireInterval const&) {
+    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
+        _l = L(Dyadic::inf(Sign::NEGATIVE),L::RawType::get_default_precision());
+        _u = U(Dyadic::inf(Sign::POSITIVE),U::RawType::get_default_precision());
+    } else {
+        _l = Dyadic::inf(Sign::NEGATIVE);
+        _u = Dyadic::inf(Sign::POSITIVE);
+    }
+}
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
 template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
@@ -47,6 +63,7 @@ template<class U> auto Interval<U>::width() const -> WidthType { return cast_pos
 
 template<class U> Interval<U> Interval<U>::empty_interval() { return Interval<U>(EmptyInterval()); }
 template<class U> Interval<U> Interval<U>::unit_interval() { return Interval<U>(-1,+1); }
+template<class U> Interval<U> Interval<U>::biinfinite_interval() { return Interval<U>(EntireInterval()); }
 
 template<class U> auto Interval<U>::is_empty() const -> decltype(declval<L>()>declval<U>()) { return this->_l > this->_u; }
 template<class U> auto Interval<U>::is_bounded() const -> decltype(declval<U>()<declval<L>()) { return Ariadne::is_bounded(*this); }
@@ -196,5 +213,7 @@ inline Interval<FloatValue<DP>> cast_exact_interval(Interval<FloatApproximation<
 inline Interval<FloatValue<MP>> cast_exact_interval(Interval<FloatApproximation<MP>> const& ivl) {
     return reinterpret_cast<Interval<FloatValue<MP>> const&>(ivl); }
 
+inline FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
+inline FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
 
 } // namespace Ariadne

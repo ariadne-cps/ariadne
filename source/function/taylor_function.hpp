@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file taylor_function.hpp
@@ -29,16 +30,16 @@
 #define ARIADNE_TAYLOR_FUNCTION_HPP
 
 #include <iosfwd>
-#include "utility/container.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "function/taylor_model.hpp"
+#include "../utility/container.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../function/taylor_model.hpp"
 
-#include "function/function_interface.hpp"
-#include "function/function_mixin.hpp"
-#include "function/function_model.hpp"
-#include "function/scaled_function_patch.hpp"
+#include "../function/function_interface.hpp"
+#include "../function/function_mixin.hpp"
+#include "../function/function_model.hpp"
+#include "../function/scaled_function_patch.hpp"
 
 namespace Ariadne {
 
@@ -68,6 +69,7 @@ class TaylorFunctionFactory
     : public ScaledFunctionPatchFactory<TaylorModel<ValidatedTag,FloatDP>>
 {
     typedef TaylorModel<ValidatedTag,FloatDP> M;
+    typedef BoxDomainType D;
   public:
     typedef typename M::SweeperType SweeperType;
     using ScaledFunctionPatchFactory<M>::ScaledFunctionPatchFactory;
@@ -76,7 +78,8 @@ class TaylorFunctionFactory
     friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
-
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold_);
 
 } // namespace Ariadne
 

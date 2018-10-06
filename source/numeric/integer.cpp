@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file integer.cpp
@@ -26,18 +27,20 @@
  */
 
 
-
-#include "utility/stdlib.hpp"
+#include "../utility/stdlib.hpp"
 
 #include "integer.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
 
 #include <limits>
 
 namespace Ariadne {
+
+Comparison cmp(Integer const& z1, Integer const& z2);
+Integer make_integer(unsigned long long int n);
 
 uint32_t
 fac(uint8_t n)
@@ -55,12 +58,12 @@ bin(uint8_t n, uint8_t k)
 {
     ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
     for(uint8_t i=1; i<=k; ++i) {
-        r*=(n+1-i);
+        r*=(n+1u-i);
         r/=i;
     }
     return r;
@@ -83,7 +86,7 @@ bin(uint16_t n, uint16_t k)
 {
     ARIADNE_ASSERT(n<16);  // Maximum computable bin(n,n/2) using 16 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint16_t r=1;
@@ -111,7 +114,7 @@ bin(uint32_t n, uint32_t k)
 {
     ARIADNE_ASSERT(n<31);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint32_t r=1;
@@ -141,7 +144,7 @@ bin(uint64_t n, uint64_t k)
 {
     ARIADNE_ASSERT(n<63);  // Maximum computable bin(n,n/2) using 64 bits
                            // Note that this is shorter than the maximum representable factorial
-    if(k>n+1) { ARIADNE_ERROR("bin("<<n<<","<<k<<")\n"); }
+    if(k>n+1) { ARIADNE_FAIL_MSG("bin("<<n<<","<<k<<")\n"); }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k<=n);
     uint64_t r=1;
@@ -169,7 +172,7 @@ Integer::Integer(Nat32 m) {
 
 Integer::Integer(Int32 n) {
     mpz_init(_mpz);
-    mpz_set_ui(_mpz,n.get_si());
+    mpz_set_ui(_mpz,static_cast<long unsigned int>(n.get_si()));
 }
 
 Integer::Integer(Nat64 m) {
@@ -344,13 +347,25 @@ Natural min(Natural const& z1,Natural const& z2) {
     return (z1<z2)?z1:z2;
 }
 
-OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
-    switch(cmp) {
-        case Comparison::LESS: os << "LESS";  break;
-        case Comparison::EQUAL: os << "EQUAL";  break;
-        case Comparison::GREATER: os << "GREATER";  break;
-    }
-    return os;
+
+Bool is_nan(Integer const& z) {
+    return false;
+}
+
+Bool is_inf(Integer const& z) {
+    return false;
+}
+
+Bool is_finite(Integer const& z) {
+    return true;
+}
+
+Bool is_zero(Integer const& z) {
+    return mpz_cmp_si(z._mpz,0)==0;
+}
+
+Sign sgn(Integer const& z) {
+    return static_cast<Sign>(mpz_sgn(z._mpz));
 }
 
 Comparison cmp(Integer const& z1, Integer const& z2) {
@@ -408,6 +423,10 @@ template<> String class_name<Natural>() { return "Natural"; }
 
 Int log2floor(Natural const& z) {
     return mpz_sizeinbase(z._mpz,2)-1;
+}
+
+OutputStream& operator<<(OutputStream& os, Sign s) {
+    return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
 }
 
 

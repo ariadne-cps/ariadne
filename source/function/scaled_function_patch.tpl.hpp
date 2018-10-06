@@ -6,42 +6,43 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef FUNCTION_PATCH_TCC
 #define FUNCTION_PATCH_TCC
 
-#include "function/functional.hpp"
+#include "../function/functional.hpp"
 
 #include <iostream>
 #include <iomanip>
 
-#include "utility/macros.hpp"
-#include "utility/exceptions.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "algebra/multi_index.hpp"
-#include "function/polynomial.hpp"
-#include "algebra/differential.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/exceptions.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../algebra/multi_index.hpp"
+#include "../function/polynomial.hpp"
+#include "../algebra/differential.hpp"
 
-#include "function/function.hpp"
-#include "function/function_mixin.hpp"
+#include "../function/function.hpp"
+#include "../function/function_mixin.hpp"
 
-#include "algebra/evaluate.hpp"
+#include "../algebra/evaluate.hpp"
 
 #define VOLATILE ;
 
@@ -49,11 +50,11 @@ namespace Ariadne {
 
 namespace {
 
-Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision);
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr);
-
-Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision);
-Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr);
+Box<Interval<FloatMPValue>> convert_box(BoxDomainType const& bx, MultiplePrecision pr) {
+    Box<Interval<FloatMPValue>> r(bx.dimension(),Interval<FloatMPValue>(FloatMPValue(pr),FloatMPValue(pr)));
+    for(SizeType i=0; i!=r.dimension(); ++i) { r[i]=convert_interval(bx[i],pr); }
+    return r;
+}
 
 } // namespace
 
@@ -115,29 +116,29 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     return os;
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<RawFloat<PR>> >& exp_repr)
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,RawFloat<PR>> >& exp_repr)
 {
-    const Expansion<RawFloat<PR>>& exp=*exp_repr.pointer;
+    const Expansion<MultiIndex,RawFloat<PR>>& exp=*exp_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "Expansion<Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
-    for(typename Expansion<RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
-        for(SizeType j=0; j!=iter->key().size(); ++j) {
-            os << "," << Nat(iter->key()[j]);
+    os << "Expansion<MultiIndex,Float<PR>>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
+    for(typename Expansion<MultiIndex,RawFloat<PR>>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+        for(SizeType j=0; j!=iter->index().size(); ++j) {
+            os << "," << Nat(iter->index()[j]);
         }
-        os << "," << iter->data();
+        os << "," << iter->coefficient();
     }
     os << ")";
     os.precision(precision); os.flags(flags);
     return os;
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatValue<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatValue<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }
 
-template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<FloatApproximation<PR>> >& exp_repr) {
-    return os << reinterpret_cast<Expansion<RawFloat<PR>>const&>(exp_repr);
+template<class PR> inline OutputStream& operator<<(OutputStream& os, const Representation< Expansion<MultiIndex,FloatApproximation<PR>> >& exp_repr) {
+    return os << reinterpret_cast<Expansion<MultiIndex,RawFloat<PR>>const&>(exp_repr);
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Representation< Vector<X> >& vec_repr)
@@ -200,12 +201,12 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
@@ -316,10 +317,13 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_zero() c
     return ScaledFunctionPatch<M>(this->domain(),this->properties());
 }
 
+//FIXME: Should allow this in code file
+/*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const
 {
     return new ScaledFunctionPatch<M>(*this);
 }
+*/
 
 template<class M> ScaledFunctionPatchFactory<M>* ScaledFunctionPatch<M>::_factory() const
 {
@@ -460,6 +464,8 @@ template<class M> OutputStream& ScaledFunctionPatch<M>::repr(OutputStream& os) c
 }
 
 /*
+static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
+
 template<class M> OutputStream& operator<<(OutputStream& os, const Representation<ScaledFunctionPatch<M>>& frepr)
 {
     ScaledFunctionPatch<M> const& function=*frepr.pointer;
@@ -481,8 +487,8 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
     FloatDP truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
     for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
-        if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
-        else { os << iter->key() << ":" << iter->data() << ","; }
+        if(abs(iter->coefficient())>frepr.threshold) { truncatation_error+=abs(iter->coefficient()); }
+        else { os << iter->index() << ":" << iter->coefficient() << ","; }
     }
     os << "+/-" << truncatation_error << "+/-" << f.error();
     return os;
@@ -491,7 +497,6 @@ template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresen
 
 template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScaledFunctionPatch<M>>& frepr)
 {
-    typedef typename M::RawFloatType F;
     typedef typename M::PropertiesType Prp;
     ScaledFunctionPatch<M> const& f=*frepr.pointer;
     ScaledFunctionPatch<M> tf=f;
@@ -573,7 +578,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<FloatValue<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
                                            const Vector<FloatError<PR>>& e,
                                            PropertiesType prp)
     : _domain(d), _models(f.size(),ModelType(d.size(),prp))
@@ -586,25 +591,25 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<FloatValue<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
                                            PropertiesType prp)
     : VectorScaledFunctionPatch<M>(d,f,Vector<FloatError<PR>>(f.size()),prp)
 {
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<RawFloat<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            const Vector<RawFloat<PR>>& e,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),
+    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),
                            reinterpret_cast<Vector<FloatError<PR>>const&>(e),prp)
 {
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<RawFloat<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
+    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
 {
 }
 
@@ -652,10 +657,13 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(Initia
 }
 
 
+// FIXME: Should be possible to put in code file
+/*
 template<class M> VectorScaledFunctionPatch<M>* VectorScaledFunctionPatch<M>::_clone() const
 {
     return new VectorScaledFunctionPatch<M>(*this);
 }
+*/
 
 template<class M> ScaledFunctionPatchFactory<M>* VectorScaledFunctionPatch<M>::_factory() const
 {
@@ -694,9 +702,9 @@ template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vect
     return p;
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<FloatValue<PR>>> const
+template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<MultiIndex,FloatValue<PR>>> const
 {
-    Vector<Expansion<FloatValue<PR>>> e(this->result_size(),Expansion<FloatValue<PR>>(this->argument_size()));
+    Vector<Expansion<MultiIndex,FloatValue<PR>>> e(this->result_size(),Expansion<MultiIndex,FloatValue<PR>>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
@@ -962,9 +970,9 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
         ScaledFunctionPatch<M> fi=(*this)[i];
-        Polynomial<FloatBounds<PR>> pi=fi.polynomial();
-        Polynomial<FloatApproximation<PR>> api=pi;
-        os << api;
+        Polynomial<FloatBounds<PR>> p_fi=fi.polynomial();
+        Polynomial<FloatApproximation<PR>> ap_fi=p_fi;
+        os << ap_fi;
         if(fi.error().raw()>0.0) { os << "+/-" << fi.error(); }
     }
     os << "]";

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file vector_field.hpp
@@ -30,10 +31,10 @@
 
 #include <memory>
 
-#include "function/function.hpp"
-#include "geometry/set_interface.hpp"
-#include "geometry/grid.hpp"
-#include "expression/expression.decl.hpp"
+#include "../function/function.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../geometry/grid.hpp"
+#include "../symbolic/expression.decl.hpp"
 
 namespace Ariadne {
 
@@ -56,7 +57,7 @@ class VectorField
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
     VectorField(EffectiveVectorFunction const& function) : _function(function) { }
-    virtual ~VectorField() { }
+    virtual ~VectorField() = default;
     virtual VectorField* clone() const { return new VectorField(*this); }
     SizeType dimension() const { return _function.result_size(); }
     RealSpace state_space() const;

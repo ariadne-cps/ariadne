@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file box.hpp
@@ -28,13 +29,13 @@
 #ifndef ARIADNE_BOX_HPP
 #define ARIADNE_BOX_HPP
 
-#include "utility/container.hpp"
+#include "../utility/container.hpp"
 
-#include "numeric/logical.hpp"
-#include "numeric/floatdp.hpp"
-#include "geometry/interval.hpp"
-#include "geometry/point.hpp"
-#include "geometry/set_interface.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/floatdp.hpp"
+#include "../geometry/interval.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/set_interface.hpp"
 
 #include "box.decl.hpp"
 
@@ -104,6 +105,10 @@ class Box
 
     template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
         Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
+        explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
@@ -196,6 +201,8 @@ template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
+
+template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s1, S2 const& s2, S3 const& s3) { return product(product(s1,s2),s3); }
 
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }

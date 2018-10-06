@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file decimal.hpp
@@ -30,9 +31,9 @@
 
 #include <string>
 #include <iostream>
-#include "utility/typedefs.hpp"
-#include "numeric/number.decl.hpp"
-#include "numeric/integer.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/number.decl.hpp"
+#include "../numeric/integer.hpp"
 
 namespace Ariadne {
 
@@ -59,7 +60,7 @@ class Decimal
     //! \brief Convert from a dyadic.
     Decimal(Dyadic const&);
     //! \brief Convert to a rational number.
-    explicit operator Rational () const;
+    operator Rational () const;
     //! \brief Convert to an generic number.
     operator ExactNumber () const;
     //! \brief Unary plus of a decimal value.
@@ -86,16 +87,21 @@ class Decimal
     friend Comparison cmp(Decimal const& d1, Decimal const& d2);
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
+    //! \brief Construct from an integer literal.
+    friend Decimal operator"" _decimal (unsigned long long int n);
     //! \brief Construct from a floating-point literal.
     friend Decimal operator"" _decimal (long double dbl);
-    friend Decimal operator"" _dec (long double dbl);
+    //! \brief Construct from a string literal.
+    friend Decimal operator"" _decimal (const char* str, std::size_t);
 
     void canonicalize();
 };
 Decimal operator"" _dec (unsigned long long int n);
 Decimal operator"" _dec (long double dbl);
+Decimal operator"" _dec (const char* str, std::size_t);
 Decimal operator"" _decimal (unsigned long long int n);
 Decimal operator"" _decimal (long double dbl);
+Decimal operator"" _decimal (const char* str, std::size_t);
 
 
 } // namespace Ariadne

@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file domain.hpp
@@ -28,8 +29,8 @@
 #ifndef ARIADNE_DOMAIN_HPP
 #define ARIADNE_DOMAIN_HPP
 
-#include "geometry/interval.hpp"
-#include "geometry/box.hpp"
+#include "../geometry/interval.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -55,6 +56,8 @@ class EuclideanDomain {
     constexpr RealDomain operator[](SizeType ind) { return RealDomain(); }
     operator BoxDomainType() const { return BoxDomainType(this->dimension(),IntervalDomainType(RealDomain())); }
     friend EuclideanDomain intersection(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { assert(dom1==dom2); return dom1; }
+    friend EuclideanDomain product(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); }
+    friend EuclideanDomain product(EuclideanDomain const& dom1, RealDomain const& dom2) { return EuclideanDomain(dom1.dimension()+dom2.dimension()); }
     friend Bool operator==(EuclideanDomain const& dom1, EuclideanDomain const& dom2) { return dom1.dimension() == dom2.dimension(); }
     friend OutputStream& operator<<(OutputStream& os, EuclideanDomain const& dom) { return os << "R" << dom.dimension(); }
 };
@@ -78,6 +81,8 @@ class UnitBox {
     constexpr UnitInterval operator[](SizeType ind) { return UnitInterval(); }
     operator BoxDomainType() const { return BoxDomainType(this->dimension(),IntervalDomainType(UnitInterval())); }
     friend UnitBox intersection(UnitBox const& dom1, UnitBox const& dom2) { assert(dom1==dom2); return dom1; }
+    friend UnitBox product(UnitBox const& dom1, UnitBox const& dom2) { return UnitBox(dom1.dimension()+dom2.dimension()); }
+    friend UnitBox product(UnitBox const& dom1, UnitInterval const& dom2) { return UnitBox(dom1.dimension()+dom2.dimension()); }
     friend Bool operator==(UnitBox const& dom1, UnitBox const& dom2) { return dom1.dimension() == dom2.dimension(); }
     friend OutputStream& operator<<(OutputStream& os, UnitBox const& dom) { return os << "[-1:+1]^" << dom.dimension(); }
 };
@@ -92,6 +97,7 @@ template<> struct ElementTraits<EuclideanDomain> { template<class X> using Type=
 template<> struct ElementTraits<UnitInterval> { template<class X> using Type=Scalar<X>; };
 template<> struct ElementTraits<UnitBox> { template<class X> using Type=Vector<X>; };
 
+template<class... TS> using CartesianProductType = decltype(product(declval<TS>()...));
 
 } // namespace Ariadne
 

@@ -6,38 +6,39 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "solvers/linear_programming.hpp"
-#include "function/function.hpp"
-#include "function/affine.hpp"
-#include "function/affine_model.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
+#include "../solvers/linear_programming.hpp"
+#include "../function/function.hpp"
+#include "../function/affine.hpp"
+#include "../function/affine_model.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/grid_set.hpp"
-#include "geometry/affine_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/grid_paving.hpp"
+#include "../geometry/affine_set.hpp"
 
-#include "output/graphics_interface.hpp"
-#include "output/geometry2d.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../output/geometry2d.hpp"
 
 
 namespace Ariadne {
@@ -45,8 +46,8 @@ namespace Ariadne {
 typedef Vector<FloatDP> RawFloatVector;
 typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 
-
-
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl);
+Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl);
 
 template<class X>
 struct LinearProgram {
@@ -136,6 +137,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
 {
     if(d==ExactBoxType::unit_box(d.size())) {
         for(Nat i=0; i!=f.size(); ++i) {
+            ARIADNE_ASSERT_MSG(_domain.dimension() == f[i].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<f[i].argument_size()<<").");
             _space_models[i] = affine_model(f[i]);
         }
     }
@@ -146,11 +148,14 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
                      const List<ValidatedAffineConstraint>& c)
     : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),dp)), _constraint_models()
 {
+    ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
+
     if(d==ExactBoxType::unit_box(d.size())) {
         for(Nat i=0; i!=f.size(); ++i) {
             _space_models[i] = affine_model(f[i]);
         }
         for(Nat i=0; i!=c.size(); ++i) {
+            ARIADNE_ASSERT_MSG(_domain.dimension() == c[i].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<c[i].argument_size()<<").");
             _constraint_models.append(ValidatedAffineModelConstraint(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
         }
     } else {
@@ -163,17 +168,21 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
                      const List<ValidatedAffineModelConstraint>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
 {
+    ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
+    for (auto cons : _constraint_models)
+        ARIADNE_ASSERT_MSG(_domain.dimension() == cons.argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<cons.argument_size()<<").");
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f,
                      const List<ValidatedAffineModelConstraint>& c)
-    : _domain(ExactBoxType::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
+    : ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(f[0].argument_size()),f,c)
 {
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f)
     : _domain(ExactBoxType::unit_box(f[0].argument_size())), _space_models(f)
 {
+    ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& h)
@@ -286,7 +295,7 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
         //feasible=SimplexSolver<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     }
-    catch(DegenerateFeasibilityProblemException e) {
+    catch(const DegenerateFeasibilityProblemException& e) {
         feasible=indeterminate;
     }
     return !feasible;
@@ -308,15 +317,15 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 }
 
 
-GridTreeSet
-ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Int d) const {
-    GridTreeSet r(g);
+GridTreePaving
+ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) const {
+    GridTreePaving r(g);
     this->adjoin_outer_approximation_to(r,d);
     return r;
 }
 
 
-Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
 {
 
     // No need to check if cell is already part of the set
@@ -335,7 +344,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
         lp.u[i]=add(up,bx[i].upper().raw(),errors[i].raw());
     }
 
-    Int cell_tree_depth=(cell.depth()-cell.height());
+    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
@@ -443,7 +452,7 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
 
 Void
-ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
+ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
@@ -462,7 +471,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
 
 
 
-Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth)
+Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
 {
     SimplexSolver<FloatDP> lpsolver;
 
@@ -485,11 +494,15 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
         lp.u[i]=bx[i].upper().raw();
     }
 
-    Int cell_tree_depth=(cell.depth()-cell.height());
+    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
     Int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
     ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+
+    if (definitely(not feasible)) {
+        return;
+    }
 
     Bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
@@ -520,7 +533,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
 
 Void
-ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const {
+ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
     SimplexSolver<FloatDP> lpsolver;
@@ -602,7 +615,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     //lp.l[ne+nx+nc]=0;
     lp.l[ne+nx+nc]=-1;
     lp.u[ne+nx+nc]=inf;
-    lp.vt[ne+nx+nc]=LOWER;
+    lp.vt[ne+nx+nc]=Slackness::LOWER;
     lp.p[ne+nx+nc]=ne+nx+nc;
 
 
@@ -616,11 +629,11 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Take x and s variables to be basic, so the initial basis matrix is the
     // identity
     for(Nat i=0; i!=ne; ++i) {
-        lp.vt[i]=LOWER;
+        lp.vt[i]=Slackness::LOWER;
         lp.p[nx+nc+i]=i;
     }
     for(Nat i=0; i!=nx+nc; ++i) {
-        lp.vt[ne+i]=BASIS;
+        lp.vt[ne+i]=Slackness::BASIS;
         lp.p[i]=ne+i;
     }
     lp.B=Matrix<FloatDP>::identity(nx+nc);
@@ -657,7 +670,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     static const Int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const FloatDP inf = Ariadne::inf;
+    static const FloatDP _inf = Ariadne::inf;
 
     const SizeType nx=_domain.size();
     const SizeType ne=2u;
@@ -764,7 +777,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     do {
         ++STEPS;
-        FloatDP cot_theta_max=-inf;
+        FloatDP cot_theta_max=-_inf;
         Nat s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
@@ -774,13 +787,12 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
             // Test variable to enter basis; there are m to test, one for each dimension of the domain
             Nat j=p[k];
             if(j!=last_exiting_variable || true) {
-                Nat j=p[k];
                 Aj=column(A,j);
                 BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
                 Vector<FloatDP> d(np,0.0); // The direction x moves in in changing the basis
-                d[j] = (vt[j]==LOWER ? +1 : -1);
+                d[j] = (vt[j]==Slackness::LOWER ? +1 : -1);
                 for(Nat i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
                 }
@@ -806,7 +818,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
                 if(cross<=0.0 ) {
                     cross=+0.0;
-                    cot_theta=(dot>0.0) ? +inf : -inf;
+                    cot_theta=(dot>0.0) ? +_inf : -_inf;
                 }
 
                 // Allow for equality; in particular, if cot_theta=-infty,
@@ -820,7 +832,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         }
 
         ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of ValidatedAffineConstrainedImageSet.");
-        ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
+        ARIADNE_DEBUG_ASSERT(vt[p[s]]!=Slackness::BASIS);
         ARIADNE_LOG(5,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];
@@ -848,7 +860,7 @@ Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
     try {
         boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
         ARIADNE_LOG(3,"boundary="<<boundary<<"\n");
-    } catch(std::runtime_error& e) {
+    } catch(const std::runtime_error& e) {
         throw e;
     }
 

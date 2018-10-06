@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file float_bounds.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_BOUNDS_HPP
 #define ARIADNE_FLOAT_BOUNDS_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -40,6 +41,7 @@ namespace Ariadne {
 
 template<class F> struct NumericTraits<Bounds<F>> {
     typedef ValidatedNumber GenericType;
+    typedef Bounds<F> OppositeType;
     typedef PositiveBounds<F> PositiveType;
     typedef ValidatedKleenean LessType;
     typedef ValidatedKleenean EqualsType;
@@ -97,6 +99,7 @@ template<class F> class Bounds
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
     Bounds<F>(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
     Bounds<F>(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
+    Bounds<F>(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
     template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr);
     Bounds<F>(Dyadic const& wl, Dyadic const& wu, PrecisionType pr);
@@ -157,6 +160,7 @@ template<class F> class Bounds
     friend Bool inconsistent(Bounds<F> const&, Bounds<F> const&);
     friend Bool refines(Bounds<F> const&, Bounds<F> const&);
     friend Bounds<F> refinement(Bounds<F> const&, Bounds<F> const&);
+    friend Bounds<F> round(Bounds<F> const&);
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }
@@ -185,7 +189,11 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& x) : Bounds<F>(x) { }
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
+    Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
   public:
+    Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
+    Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }
+    Positive<UpperBound<F>> upper() const { return cast_positive(this->Bounds<F>::upper()); }
 };
 
 template<class F> inline PositiveBounds<F> cast_positive(Bounds<F> const& x) {

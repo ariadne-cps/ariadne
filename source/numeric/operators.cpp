@@ -6,32 +6,39 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utility/standard.hpp"
+namespace Ariadne {
+double add(double,double);
+double sub(double,double);
+double mul(double,double);
+double div(double,double);
+}
 
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/integer.hpp"
-#include "numeric/real.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/standard.hpp"
+
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/real.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
-ValidatedKleenean check_sgn(Real r, Effort eff);
 template<class OP, class... AS> class Expression;
 
 template<class Y> class Expression<Sgn,Y> : public LogicalInterface {
@@ -115,6 +122,7 @@ const char* name(const OperatorCode& op) {
         case OperatorCode::GT:   return "gt"; break;
         case OperatorCode::LT:   return "lt"; break;
         case OperatorCode::SUBS:   return "subs"; break;
+        case OperatorCode::HLF:  return "hlf"; break;
         default: return "UNKNOWN";
     }
 }
@@ -174,7 +182,7 @@ OperatorKind kind(OperatorCode op) {
         case OperatorCode::EQ: case OperatorCode::NEQ: case OperatorCode::LEQ: case OperatorCode::GEQ: case OperatorCode::LT: case OperatorCode::GT:
             return OperatorKind::COMPARISON;
         default:
-            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");;
+            ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");
     }
 }
 
@@ -277,8 +285,6 @@ template<> Integer compute(OperatorCode op, const Integer& z, Int n) {
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument and a builtin.");
     }
 }
-
-
 
 } // namespace Ariadne
 

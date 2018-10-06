@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file graphics_interface.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_HPP
 #define ARIADNE_GRAPHICS_INTERFACE_HPP
 
-#include "utility/declarations.hpp"
+#include "../utility/declarations.hpp"
 
 namespace Ariadne {
 
@@ -63,7 +64,7 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 //! \brief Base interface for plotting and drawing classes.
 class FigureInterface {
   public:
-    virtual ~FigureInterface() { };
+    virtual ~FigureInterface() = default;
     virtual FigureInterface& set_projection_map(const PlanarProjectionMap& prj) = 0;
     virtual FigureInterface& set_bounding_box(const ApproximateBoxType& bx) = 0;
     virtual FigureInterface& set_projection(Nat as, Nat ix, Nat iy) = 0;
@@ -93,7 +94,7 @@ Figure& operator<<(Figure& fig, const DrawableInterface& shape);
 class CanvasInterface {
   public:
     //! \brief Destructor
-    virtual ~CanvasInterface() { };
+    virtual ~CanvasInterface() = default;
 
     virtual Void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual Void finalise() = 0;
@@ -137,7 +138,7 @@ class CanvasInterface {
 class DrawableInterface {
   public:
     //! brief Virtual destructor.
-    virtual ~DrawableInterface() { }
+    virtual ~DrawableInterface() = default;
     //! brief Make a dynamically-allocated copy.
     virtual DrawableInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.

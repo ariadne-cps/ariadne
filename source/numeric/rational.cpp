@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file rational.cpp
@@ -27,9 +28,9 @@
 
 
 
-#include "utility/stdlib.hpp"
-#include "utility/macros.hpp"
-#include "utility/typedefs.hpp"
+#include "../utility/stdlib.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/typedefs.hpp"
 
 #include "rational.hpp"
 #include "logical.hpp"
@@ -38,6 +39,7 @@
 #include "integer.hpp"
 #include "dyadic.hpp"
 #include "sign.hpp"
+#include "extended.hpp"
 #include <limits>
 
 #include <limits>
@@ -55,6 +57,53 @@ class InvalidRationalLiteralException {
 // Shortened version of raw float classes sufficient for comparison operator
 class FloatDP { volatile double _dbl; public: double get_d() const { return _dbl; } };
 template<> class Value<FloatDP> { FloatDP _v; public: FloatDP raw() const { return _v; } };
+
+
+    
+template<> class ExtensionOperations<Rational> {
+    friend class Rational;
+    friend class ExtendedOperations<Rational>;
+    
+    static Bool is_nan(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)==0 && mpz_cmp_si(mpq_numref(q._mpq),0)==0; }
+    static Bool is_inf(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)==0 && mpz_cmp_si(mpq_numref(q._mpq),0)!=0; }
+    static Bool is_finite(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)!=0; }
+    static Bool is_zero(Rational const& q) { return mpz_cmp_si(mpq_numref(q._mpq),0)==0 && mpz_cmp_si(mpq_denref(q._mpq),0)!=0; }
+    
+    static Sign sgn(Rational const& q) { 
+        if (is_finite(q)) { return static_cast<Sign>(mpq_cmp_si(q._mpq,0,1)); }
+        else { return static_cast<Sign>(mpz_cmp_si(mpq_numref(q._mpq),0)); } }
+
+    static Void set_nan(Rational& q) { mpz_set_si(mpq_denref(q._mpq),0); mpz_set_si(mpq_numref(q._mpq),0); }
+    static Void set_inf(Rational& q, Sign s) { mpz_set_si(mpq_denref(q._mpq),0); mpz_set_si(mpq_numref(q._mpq),static_cast<Int>(s)); }
+    static Void set_zero(Rational& q) { mpq_set_si(q._mpq,0,1); }
+};
+
+template<> class FiniteOperations<Rational> {
+    friend class ExtendedOperations<Rational>;
+    
+    static Void set(Rational& r, Rational const& q) { mpq_set(r._mpq,q._mpq); }
+    
+    static Void add(Rational& r, Rational const& q1, Rational const& q2) { return mpq_add(r._mpq, q1._mpq, q2._mpq); }
+    static Void sub(Rational& r, Rational const& q1, Rational const& q2) { return mpq_sub(r._mpq, q1._mpq, q2._mpq); }
+    static Void mul(Rational& r, Rational const& q1, Rational const& q2) { return mpq_mul(r._mpq, q1._mpq, q2._mpq); }
+    static Void div(Rational& r, Rational const& q1, Rational const& q2) { return mpq_div(r._mpq, q1._mpq, q2._mpq); }
+
+    static Void pos(Rational& r, Rational const& q) { mpq_set(r._mpq,q._mpq); }
+    static Void neg(Rational& r, Rational const& q) { mpq_neg(r._mpq,q._mpq); }
+    static Void hlf(Rational& r, Rational const& q) { mpq_div_2exp(r._mpq,q._mpq,1u); }
+    static Void sqr(Rational& r, Rational const& q) { mpq_mul(r._mpq,q._mpq,q._mpq); }
+    static Void rec(Rational& r, Rational const& q) { mpq_inv(r._mpq,q._mpq); }
+    
+    static Void max(Rational& r, Rational const& q1, Rational const& q2) { 
+        if(mpq_cmp(q1._mpq,q2._mpq)>=0) { mpq_set(r._mpq,q1._mpq); } else { mpq_set(r._mpq,q2._mpq); } }
+    static Void min(Rational& r, Rational const& q1, Rational const& q2) { 
+        if(mpq_cmp(q1._mpq,q2._mpq)<=0) { mpq_set(r._mpq,q1._mpq); } else { mpq_set(r._mpq,q2._mpq); } }
+    static Void abs(Rational& r, Rational const& q) { mpq_abs(r._mpq,q._mpq); }
+        
+    static Comparison cmp(Rational const& q1, Rational const& q2) { return static_cast<Comparison>(mpq_cmp(q1._mpq,q2._mpq)); }
+    static Boolean eq(Rational const& q1, Rational const& q2) { return mpq_equal(q1._mpq,q2._mpq); }
+};
+
 
 Rational rec(Integer const& z) {
     return Rational(1,z);
@@ -91,35 +140,44 @@ Rational::Rational(Integer const& z) {
 }
 
 Rational::Rational(Dyadic const& f) {
-    mpq_init(_mpq);
-    mpq_set_f(_mpq,f._mpf);
+    mpq_init(this->_mpq);
+    Rational& q=*this;
+    if (is_finite(f)) {
+        mpq_set_f(q._mpq,f._mpf);
+    } else if (is_nan(f)) {
+        ExtensionOperations<Rational>::set_nan(q);
+    } else {
+        ExtensionOperations<Rational>::set_inf(q, f>0 ? Sign::POSITIVE : Sign::NEGATIVE);
+    }
 }
 
 Rational::Rational(Integer const& znum, Integer const& zden) {
     mpq_init(_mpq);
-    mpq_set_num(_mpq,znum._mpz);
     mpq_set_den(_mpq,zden._mpz);
-    mpq_canonicalize(_mpq);
+    if(zden==0) {
+        Integer num = (znum==0) ? 0 : (znum>0)?1:-1;
+        mpq_set_num(_mpq,num._mpz);
+    } else {
+        mpq_set_num(_mpq,znum._mpz);
+        mpq_canonicalize(_mpq);
+    }
 }
 
 Rational::Rational(Int64 n) : Rational(Integer(n)) {
 }
 
 Rational::Rational(ExactDouble const& x) {
-    static bool give_inf_warning=true;
+    mpq_init(this->_mpq);
+    Rational& q=*this;
     Dbl d=x.get_d();
-    if(std::isinf(d)) {
-        if(give_inf_warning) {
-            std::cerr<<"WARNING: Converting Double inf to Rational is not supported by GMP; returning numeric_limits<double>::max()\n";
-            give_inf_warning=false;
-        }
-        const double max=std::numeric_limits<double>::max();
-        d=(d>0?+max:-max);
+    if(std::isfinite(d)) {
+        mpq_set_d(q._mpq,d);
+        mpq_canonicalize(q._mpq);
+    } else if (std::isnan(d)) {
+        ExtensionOperations<Rational>::set_nan(q);
+    } else {
+        ExtensionOperations<Rational>::set_inf(q, d>0 ? Sign::POSITIVE : Sign::NEGATIVE);
     }
-    ARIADNE_ASSERT(std::isfinite(d));
-    mpq_init(_mpq);
-    mpq_set_d(_mpq,d);
-    mpq_canonicalize(_mpq);
 }
 
 Rational::Rational(FloatDP const& x) : Rational(ExactDouble(x.get_d())) {
@@ -167,7 +225,13 @@ mpq_t const& Rational::get_mpq() const {
 }
 
 double Rational::get_d() const {
-    return mpq_get_d(this->_mpq);
+    if (is_finite(*this))
+        return mpq_get_d(this->_mpq);
+    else if (is_nan(*this)) {
+        return std::numeric_limits<double>::quiet_NaN();
+    } else {
+        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
+    }
 }
 
 Integer Rational::get_num() const {
@@ -198,100 +262,70 @@ Rational operator/(Integer const& z1, Integer const& z2) {
     return Rational(z1,z2);
 }
 
-/*
-Rational operator+(Rational const& q) { return pos(q); }
-Rational operator-(Rational const& q) { return neg(q); }
-Rational operator+(Rational const& q1, Rational const& q2) { return add(q1,q2); }
-Rational operator-(Rational const& q1, Rational const& q2) { return sub(q1,q2); }
-Rational operator*(Rational const& q1, Rational const& q2) { return mul(q1,q2); }
-Rational operator/(Rational const& q1, Rational const& q2) { return div(q1,q2); }
 
-Rational& operator+=(Rational& q1, Rational const& q2) {
-    mpq_add(q1._mpq,q1._mpq,q2._mpq);
-    return q1;
+Rational operator+(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::add(r,q1,q2); return r;
 }
 
-Rational& operator-=(Rational& q1, Rational const& q2) {
-    mpq_sub(q1._mpq,q1._mpq,q2._mpq);
-    return q1;
+Rational operator-(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::sub(r,q1,q2); return r;
 }
 
-Rational& operator*=(Rational& q1, Rational const& q2) {
-    mpq_mul(q1._mpq,q1._mpq,q2._mpq);
-    return q1;
+Rational operator*(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::mul(r,q1,q2); return r;
 }
 
-Rational& operator/=(Rational& q1, Rational const& q2) {
-    mpq_div(q1._mpq,q1._mpq,q2._mpq);
-    return q1;
+Rational operator/(Rational& q1, Rational const& q2) {
+    Rational r; ExtendedOperations<Rational>::div(r,q1,q2); return r;
 }
-*/
+
 
 Rational max(Rational const& q1, Rational const& q2) {
-    return q1>q2 ? q1 :  q2;
+    Rational r; ExtendedOperations<Rational>::max(r,q1,q2); return r; 
 }
 
 Rational min(Rational const& q1, Rational const& q2) {
-    return q1<q2 ? q1 :  q2;
+    Rational r; ExtendedOperations<Rational>::min(r,q1,q2); return r; 
 }
 
 Rational abs(Rational const& q) {
-    Rational r;
-    mpq_abs(r._mpq,q._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::abs(r,q); return r; 
 }
 
 Rational nul(Rational const& q) {
-    Rational r; mpq_set_si(r._mpq,0,1u);
-    return r;
+    return Rational(0);
 }
 
 Rational pos(Rational const& q) {
-    Rational r;
-    mpq_set(r._mpq,q._mpq);
-    return r;
+    return q;
 }
 
 Rational neg(Rational const& q) {
-    Rational r;
-    mpq_neg(r._mpq,q._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::neg(r,q); return r; 
 }
 
 Rational sqr(Rational const& q) {
-    Rational r;
-    mpq_mul(r._mpq,q._mpq,q._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::sqr(r,q); return r; 
 }
 
 Rational rec(Rational const& q) {
-    Rational r;
-    mpq_inv(r._mpq,q._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::rec(r,q); return r; 
 }
 
 Rational add(Rational const& q1, Rational const& q2) {
-    Rational r;
-    mpq_add(r._mpq,q1._mpq,q2._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::add(r,q1,q2); return r; 
 }
 
 Rational sub(Rational const& q1, Rational const& q2) {
-    Rational r;
-    mpq_sub(r._mpq,q1._mpq,q2._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::sub(r,q1,q2); return r; 
 }
 
 Rational mul(Rational const& q1, Rational const& q2) {
-    Rational r;
-    mpq_mul(r._mpq,q1._mpq,q2._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::mul(r,q1,q2); return r; 
 }
 
 Rational div(Rational const& q1, Rational const& q2) {
-    Rational r;
-    mpq_div(r._mpq,q1._mpq,q2._mpq);
-    return r;
+    Rational r; ExtendedOperations<Rational>::div(r,q1,q2); return r; 
 }
 
 Rational div(Integer const& z1, Integer const& z2) {
@@ -310,16 +344,49 @@ Rational pow(Rational const& q, Int n) {
 }
 
 Boolean eq(Rational const& q1, Rational const& q2) {
-    return mpq_equal(q1._mpq,q2._mpq);
+    return ExtendedOperations<Rational>::eq(q1,q2);
 }
 
 Boolean lt(Rational const& q1, Rational const& q2) {
-    return mpq_cmp(q1._mpq,q2._mpq)<0;
+    return cmp(q1,q2)<Comparison::EQUAL;
+}
+
+Rational Rational::inf(Sign sgn) {
+    Rational q(sgn==Sign::ZERO ? 0 : sgn==Sign::POSITIVE ? +1 : -1);
+    mpz_set_si(mpq_denref(q._mpq),0);
+    return q;
+}
+
+Rational Rational::inf() {
+    return Rational::inf(Sign::POSITIVE);
+}
+
+Rational Rational::nan() {
+    return Rational::inf(Sign::ZERO);
+}
+
+Bool is_nan(Rational const& q) {
+    return is_zero(q.get_den()) and is_zero(q.get_num());
+}
+
+Bool is_inf(Rational const& q) {
+    return is_zero(q.get_den()) and not is_zero(q.get_num());
+}
+
+Bool is_finite(Rational const& q) {
+    return not is_zero(q.get_den());
+}
+
+Bool is_zero(Rational const& q) {
+    return is_zero(q.get_num()) and not is_zero(q.get_den());
+}
+
+Sign sgn(Rational const& q) {
+    return sgn(q.get_num());
 }
 
 Comparison cmp(Rational const& q1, Rational const& q2) {
-    auto c=mpq_cmp(q1._mpq,q2._mpq);
-    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+    return ExtendedOperations<Rational>::cmp(q1,q2);
 }
 
 Comparison cmp(Rational const& q1, ExactDouble const& x2) {
@@ -413,11 +480,6 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     mpz_clear(num); mpz_clear(den);
     return os;
 }
-
-Comparison cmp(Rational const& q1, FloatDP const& x2) {
-    return cmp(q1,Rational(x2));
-}
-
 
 
 template<> String class_name<Rational>() { return "Rational"; }

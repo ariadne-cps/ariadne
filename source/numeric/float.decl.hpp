@@ -6,27 +6,28 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file numeric/float.decl.hpp
  *  \brief
  */
 
-#include "utility/typedefs.hpp"
-#include "numeric/paradigm.hpp"
+#include "../utility/typedefs.hpp"
+#include "../numeric/paradigm.hpp"
 
 #ifndef ARIADNE_FLOAT_DECL_HPP
 #define ARIADNE_FLOAT_DECL_HPP
@@ -44,8 +45,8 @@ using MP = MultiplePrecision;
 
 template<class F> using PrecisionType = typename F::PrecisionType;
 
-struct DecimalPlaces { int _places; DecimalPlaces(int plc) : _places(plc) { } operator int() const { return _places; } };
-struct DecimalPrecision { uint _figures; operator uint() const { return _figures; } };
+struct DecimalPlaces { Nat _places; DecimalPlaces(Nat plc) : _places(plc) { } operator uint() const { return _places; } };
+struct DecimalPrecision { Nat _figures; operator uint() const { return _figures; } };
 
 template<class X> class Positive;
 
@@ -125,6 +126,9 @@ template<class PR> struct FloatTypedef<ErrorTag,PR> { typedef FloatError<PR> Typ
 template<class PR> struct FloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
 template<class PR, class PRE> struct FloatTypedef<EffectiveTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
 
+template<class P, class PR, class PRE=PR> using FloatType = typename FloatTypedef<P,PR,PRE>::Type;
+
+
 //template<class P, class PR, class PRE=PR> using Float = typename FloatTypedef<P,PR,PRE>::Type;
 //template<class P> using FloatDP=Float<P,DoublePrecision>;
 //template<class P> using FloatMP=Float<P,MultiplePrecision>;
@@ -145,6 +149,8 @@ using PositiveFloatDPBounds = PositiveFloatBounds<DoublePrecision>;
 using PositiveFloatDPBall = PositiveFloatBall<DoublePrecision>;
 using PositiveFloatDPValue = PositiveFloatValue<DoublePrecision>;
 
+using FloatMPDPBall = FloatBall<MultiplePrecision,DoublePrecision>; //!< A ball around a number, with the approximating value represented in multiple precision, and the error in double precision.
+
 using FloatMPApproximation = FloatApproximation<MultiplePrecision>; //!<
 using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>; //!<
 using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>; //!<
@@ -160,17 +166,6 @@ using PositiveFloatMPBall = PositiveFloatBall<MultiplePrecision>;
 using PositiveFloatMPValue = PositiveFloatValue<MultiplePrecision>;
 
 using FloatMDPBall = FloatBall<MultiplePrecision,DoublePrecision>;
-
-template<class P, class PR, class PRE=PR> struct UserFloatTypedef;
-template<class PR> struct UserFloatTypedef<ApproximateTag,PR> { typedef FloatApproximation<PR> Type; };
-template<class PR> struct UserFloatTypedef<LowerTag,PR> { typedef FloatLowerBound<PR> Type; };
-template<class PR> struct UserFloatTypedef<UpperTag,PR> { typedef FloatUpperBound<PR> Type; };
-template<class PR> struct UserFloatTypedef<BoundedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR, class PRE> struct UserFloatTypedef<MetricTag,PR,PRE> { typedef FloatBall<PR,PRE> Type; };
-template<class PR> struct UserFloatTypedef<ExactTag,PR> { typedef FloatValue<PR> Type; };
-template<class PR> struct UserFloatTypedef<ValidatedTag,PR> { typedef FloatBounds<PR> Type; };
-template<class PR> struct UserFloatTypedef<EffectiveTag,PR> { typedef FloatBall<PR> Type; };
-template<class P, class PR, class PRE=PR> using Float = typename UserFloatTypedef<P,PR,PRE>::Type;
 
 template<class X> struct IsFloat : False { };
 template<> struct IsFloat<FloatDP> : True { };
@@ -193,6 +188,13 @@ template<class F> struct IsNumericType<Approximation<F>> : IsNumericType<F> { };
 template<class F> struct IsNumericType<Bounds<F>> : IsNumericType<F> { };
 template<class F, class FE> struct IsNumericType<Ball<F,FE>> : IsNumericType<F> { };
 template<class F> struct IsNumericType<Value<F>> : IsNumericType<F> { };
+
+template<class T> struct NumericTraits;
+
+template<class T> struct NumericTraits<Positive<T>> : public NumericTraits<T> {
+    typedef Positive<typename NumericTraits<T>::GenericType> GenericType;
+    typedef Positive<typename NumericTraits<T>::OppositeType> OppositeType;
+};
 
 } // namespace Ariadne
 

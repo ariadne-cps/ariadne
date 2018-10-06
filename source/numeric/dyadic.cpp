@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file dyadic.cpp
@@ -26,22 +27,70 @@
  */
 
 
-
-#include "utility/stdlib.hpp"
+#include "../utility/stdlib.hpp"
 
 #include "dyadic.hpp"
 
-#include "utility/macros.hpp"
-#include "utility/string.hpp"
-#include "numeric/logical.hpp"
-#include "numeric/twoexp.hpp"
-#include "numeric/builtin.hpp"
-#include "numeric/rational.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/string.hpp"
+#include "../numeric/logical.hpp"
+#include "../numeric/twoexp.hpp"
+#include "../numeric/builtin.hpp"
+#include "../numeric/rational.hpp"
+#include "../numeric/extended.hpp"
 
 #include <limits>
 
 namespace Ariadne {
 
+template<class X> class FiniteOperations;
+template<class X> class ExtensionOperations;
+    
+template<> class ExtensionOperations<Dyadic> {
+    static mp_exp_t const nan_flag = std::numeric_limits<mp_exp_t>::min();
+    
+  public:
+    static Bool is_nan(Dyadic const& x) { return x._mpf[0]._mp_size==0 and x._mpf[0]._mp_exp==nan_flag; }
+    static Bool is_inf(Dyadic const& x) { return x._mpf[0]._mp_size==0 and std::abs(x._mpf[0]._mp_exp)==1; }
+    static Bool is_finite(Dyadic const& x) { return x._mpf[0]._mp_size!=0 || x._mpf[0]._mp_exp==0; }
+    static Bool is_zero(Dyadic const& x) { return x._mpf[0]._mp_size==0 && x._mpf[0]._mp_exp==0; }
+    
+    static Sign sgn(Dyadic const& x) { 
+        if (is_finite(x)) { return static_cast<Sign>(mpf_cmp_si(x._mpf,0)); }
+        else { return (x._mpf[0]._mp_exp==nan_flag) ? Sign::ZERO : (x._mpf[0]._mp_exp>=0) ? Sign::POSITIVE : Sign::NEGATIVE; } }
+
+    static Void set_nan(Dyadic& x) { x._mpf[0]._mp_size=0; x._mpf[0]._mp_exp=nan_flag; }
+    static Void set_inf(Dyadic& x, Sign s) { x._mpf[0]._mp_size=0; 
+        x._mpf[0]._mp_exp = (s==Sign::ZERO ? nan_flag : s==Sign::POSITIVE ? +1 : -1); }
+    static Void set_zero(Dyadic& x) { mpf_set_si(x._mpf,0); }
+};
+
+template<> class FiniteOperations<Dyadic> {
+    friend class ExtendedOperations<Dyadic>;
+
+    static Void set(Dyadic& r, Dyadic const& x) { mpf_set(r._mpf,x._mpf); }
+    
+    static Void add(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_add(r._mpf, x1._mpf, x2._mpf); }
+    static Void sub(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_sub(r._mpf, x1._mpf, x2._mpf); }
+    static Void mul(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_mul(r._mpf, x1._mpf, x2._mpf); }
+    static Void div(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_div(r._mpf, x1._mpf, x2._mpf); }
+
+    static Void pos(Dyadic& r, Dyadic const& x) { mpf_set(r._mpf,x._mpf); }
+    static Void neg(Dyadic& r, Dyadic const& x) { mpf_neg(r._mpf,x._mpf); }
+    static Void hlf(Dyadic& r, Dyadic const& x) { mpf_div_2exp(r._mpf,x._mpf,1u); }
+    static Void rec(Dyadic& r, Dyadic const& x) { assert(false); }
+    static Void pow(Dyadic& r, Dyadic const& x, Nat m) { return mpf_pow_ui(r._mpf, x._mpf, m); }
+    
+    static Void max(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { 
+        if(mpf_cmp(x1._mpf,x2._mpf)>=0) { mpf_set(r._mpf,x1._mpf); } else { mpf_set(r._mpf,x2._mpf); } }
+    static Void min(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { 
+        if(mpf_cmp(x1._mpf,x2._mpf)<=0) { mpf_set(r._mpf,x1._mpf); } else { mpf_set(r._mpf,x2._mpf); } }
+    static Void abs(Dyadic& r, Dyadic const& x) { mpf_abs(r._mpf,x._mpf); }
+        
+    static Comparison cmp(Dyadic const& x1, Dyadic const& x2) { return static_cast<Comparison>(mpf_cmp(x1._mpf,x2._mpf)); }
+};
+
+    
 static const mp_bitcnt_t maximum_precision = 65535;
 
 Dyadic::~Dyadic() {
@@ -57,6 +106,14 @@ Dyadic::Dyadic(mpf_t mpf) {
     mpf_set(_mpf,_mpf);
 }
 
+Dyadic::Dyadic(Integer const& p, Natural q) {
+    ARIADNE_ASSERT(q.get_si()==q);
+    mpf_init2(_mpf,maximum_precision);
+    mpf_set_z(_mpf,p._mpz);
+    mpf_div_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(q.get_si()));
+    //if(q>=0) { mpf_div_2exp(_mpf,_mpf,q); } else { mpf_mul_2exp(_mpf,_mpf,-q); }
+}
+
 Dyadic::Dyadic(Integer const& p, Nat q) {
     mpf_init2(_mpf,maximum_precision);
     mpf_set_z(_mpf,p._mpz);
@@ -68,19 +125,15 @@ Dyadic::Dyadic(Dbl d) : Dyadic(ExactDouble(d)) {
 }
 
 Dyadic::Dyadic(ExactDouble const& x) {
-    static bool give_inf_warning=true;
     Dbl d=x.get_d();
-    if(std::isinf(d)) {
-        if(give_inf_warning) {
-            std::cerr<<"WARNING: Converting Double inf to Dyadic is not supported by GMP; returning numeric_limits<double>::max()\n";
-            give_inf_warning=false;
-        }
-        const double max=std::numeric_limits<double>::max();
-        d=(d>0?+max:-max);
-    }
-    ARIADNE_ASSERT(std::isfinite(d));
     mpf_init2(_mpf,maximum_precision);
-    mpf_set_d(_mpf,d);
+    if(std::isfinite(d)) {
+        mpf_set_d(_mpf,d);
+    } else if(std::isnan(d)) {
+        *this = Dyadic::nan();
+    } else {
+        *this = (d>0) ? Dyadic::inf() : -Dyadic::inf();
+    }
 }
 
 Dyadic::Dyadic(Integer const& z) {
@@ -90,8 +143,8 @@ Dyadic::Dyadic(Integer const& z) {
 
 Dyadic::Dyadic(TwoExp const& w) : Dyadic(1u) {
     const int q=w.exponent();
-    if(q>=0) { mpf_mul_2exp(_mpf,_mpf,q); }
-    else { mpf_div_2exp(_mpf,_mpf,-q); }
+    if(q>=0) { mpf_mul_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(q)); }
+    else { mpf_div_2exp(_mpf,_mpf,static_cast<mp_bitcnt_t>(-q)); }
 }
 
 Dyadic::Dyadic(const Dyadic& x) {
@@ -107,6 +160,34 @@ Dyadic::Dyadic(Dyadic&& x) {
 Dyadic& Dyadic::operator=(const Dyadic& x) {
     mpf_set(_mpf,x._mpf);
     return *this;
+}
+
+Dyadic Dyadic::inf(Sign sgn) {
+    Dyadic x; ExtensionOperations<Dyadic>::set_inf(x,sgn); return x;
+}
+
+Dyadic Dyadic::inf() {
+    Dyadic x; ExtensionOperations<Dyadic>::set_inf(x,Sign::POSITIVE); return x;
+}
+
+Dyadic Dyadic::nan() {
+    Dyadic x; ExtensionOperations<Dyadic>::set_nan(x); return x;
+}
+
+Bool is_nan(const Dyadic& x) {
+    return ExtensionOperations<Dyadic>::is_nan(x);
+}
+
+Bool is_inf(const Dyadic& x) {
+    return ExtensionOperations<Dyadic>::is_inf(x);
+}
+
+Bool is_finite(const Dyadic& x) {
+    return ExtensionOperations<Dyadic>::is_finite(x);
+}
+
+Bool is_zero(const Dyadic& x) {
+    return ExtensionOperations<Dyadic>::is_zero(x);
 }
 
 Dyadic& Dyadic::operator=(Dyadic&& x) {
@@ -127,58 +208,92 @@ mpf_t const& Dyadic::get_mpf() const {
 }
 
 double Dyadic::get_d() const {
-    return mpf_get_d(this->_mpf);
+    if (is_finite(*this))
+        return mpf_get_d(this->_mpf);
+    else if (is_nan(*this)) {
+        return std::numeric_limits<double>::quiet_NaN();
+    } else {
+        return (sgn(*this) == Sign::POSITIVE) ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity();
+    }
 }
 
 Dyadic operator+(TwoExp y) {
-    return +Dyadic(y); 
+    return +Dyadic(y);
 }
 
 Dyadic operator-(TwoExp y) {
     return -Dyadic(y);
 }
 
-
-/*
-Dyadic& operator+=(Dyadic& x1, Dyadic const& x2) {
-    mpf_add(x1._mpf,x1._mpf,x2._mpf);
-    return x1;
+Dyadic operator*(Dyadic x, TwoExp w) {
+    const int q=w.exponent();
+    if(q>=0) { mpf_mul_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(q)); }
+    else { mpf_div_2exp(x._mpf,x._mpf,static_cast<mp_bitcnt_t>(-q)); }
+    return x;
 }
 
-Dyadic& operator-=(Dyadic& x1, Dyadic const& x2) {
-    mpf_sub(x1._mpf,x1._mpf,x2._mpf);
-    return x1;
+Dyadic operator/(Dyadic x, TwoExp w) {
+    return x*rec(w);
 }
 
-Dyadic& operator*=(Dyadic& x1, Dyadic const& x2) {
-    mpf_mul(x1._mpf,x1._mpf,x2._mpf);
-    return x1;
+OutputStream& operator<<(OutputStream& os, TwoExp w) {
+    return os << "2^" <<  w.exponent();
 }
-*/
+
+Dyadic operator+(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::add(r,x1,x2); return r;
+}
+
+Dyadic operator-(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::sub(r,x1,x2); return r;
+}
+
+Dyadic operator*(Dyadic& x1, Dyadic const& x2) {
+    Dyadic r; ExtendedOperations<Dyadic>::mul(r,x1,x2); return r;
+}
 
 Integer round(Dyadic const& x) {
-    Integer r;
-    mpz_set_f(r._mpz,x._mpf);
-    return r;
+    assert(is_finite(x));
+    Integer r; mpz_set_f(r._mpz,x._mpf); return r;
+    Integer z;
+    Dyadic y=x;
+    mpf_mul_2exp(y._mpf,y._mpf,1u);
+    mpf_add_ui(y._mpf,y._mpf,1u);
+    mpf_div_2exp(y._mpf,y._mpf,1u);
+    mpf_floor(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
+}
+
+Integer floor(Dyadic const& x) {
+    assert(is_finite(x));
+    Integer z;
+    Dyadic y(x);
+    mpf_floor(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
+}
+
+Integer ceil(Dyadic const& x) {
+    assert(is_finite(x));
+    Integer z;
+    Dyadic y(x);
+    mpf_ceil(y._mpf,y._mpf);
+    mpz_set_f(z._mpz,y._mpf);
+    return z;
 }
 
 
 Dyadic nul(Dyadic const& x) {
-    Dyadic r;
-    mpf_set_si(r._mpf,0);
-    return r;
+    Dyadic r; mpf_set_si(r._mpf,0); return r;
 }
 
 Dyadic pos(Dyadic const& x) {
-    Dyadic r;
-    mpf_set(r._mpf,x._mpf);
-    return r;
+    return x;
 }
 
 Dyadic neg(Dyadic const& x) {
-    Dyadic r;
-    mpf_neg(r._mpf,x._mpf);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::neg(r,x); return r; 
 }
 
 Dyadic sqr(Dyadic const& x) {
@@ -186,73 +301,77 @@ Dyadic sqr(Dyadic const& x) {
 }
 
 Dyadic add(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r;
-    mpf_add(r._mpf,x1._mpf,x2._mpf);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::add(r,x1,x2); return r; 
 }
 
 Dyadic sub(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r;
-    mpf_sub(r._mpf,x1._mpf,x2._mpf);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::sub(r,x1,x2); return r; 
 }
 
 Dyadic mul(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r;
-    mpf_mul(r._mpf,x1._mpf,x2._mpf);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::mul(r,x1,x2); return r; 
 }
 
 Dyadic hlf(Dyadic const& x) {
-    Dyadic r;
-    mpf_div_2exp(r._mpf,x._mpf,1);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::hlf(r,x); return r; 
+}
+
+
+Dyadic pow(Dyadic const& x, Int n) {
+    assert(n >= 0);
+    return pow(x,static_cast<Nat>(n));
 }
 
 Dyadic pow(Dyadic const& x, Nat m) {
-    unsigned long int lm=m;
-    Dyadic r;
-    mpf_pow_ui(r._mpf,x._mpf,lm);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::pow(r,x,m); return r; 
 }
 
 
 Dyadic abs(Dyadic const& x) {
-    Dyadic r;
-    mpf_abs(r._mpf,x._mpf);
-    return r;
+    Dyadic r; ExtendedOperations<Dyadic>::abs(r,x); return r; 
 }
 
 Dyadic min(Dyadic const& x1,Dyadic const& x2) {
-    return (x1<x2)?x1:x2;
+    Dyadic r; ExtendedOperations<Dyadic>::min(r,x1,x2); return r; 
 }
 
 Dyadic max(Dyadic const& x1,Dyadic const& x2) {
-    return (x1>x2)?x1:x2;
+    Dyadic r; ExtendedOperations<Dyadic>::max(r,x1,x2); return r; 
 }
 
 
 Comparison cmp(Dyadic const& x1, Dyadic const& x2) {
-    auto c=mpf_cmp(x1._mpf,x2._mpf);
-    return c==0 ? Comparison::EQUAL : (c>0?Comparison::GREATER:Comparison::LESS);
+    return ExtendedOperations<Dyadic>::cmp(x1,x2);
+}
+
+Sign sgn(Dyadic const& x) {
+    return ExtensionOperations<Dyadic>::sgn(x);
 }
 
 Boolean eq(Dyadic const& x1, Dyadic const& x2) {
-    return mpf_cmp(x1._mpf,x2._mpf)==0;
+    return cmp(x1,x2)==Comparison::EQUAL;
 }
 
 Boolean lt(Dyadic const& x1, Dyadic const& x2) {
-    return mpf_cmp(x1._mpf,x2._mpf)<0;
+    return cmp(x1,x2)==Comparison::LESS;
 }
 
 
 //   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
-    Rational q;
-    mpq_set_f (q._mpq,x._mpf);
-    os << q.numerator();
-    Int exp = log2floor(q.denominator());
-    if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+    if(is_finite(x)) {
+        Rational q;
+        mpq_set_f (q._mpq,x._mpf);
+        os << q.numerator();
+        Int exp = log2floor(q.denominator());
+        if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+    } else {
+        if(is_nan(x)) {
+            os << "NaN";
+        } else {
+            os << (sgn(x)==Sign::POSITIVE ? "" : "-") << "inf";
+        }
+    }
     return os;
 }
 

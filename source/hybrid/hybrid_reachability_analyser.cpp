@@ -6,23 +6,24 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
-#include "config.h"
+#include "../function/functional.hpp"
+#include "../config.hpp"
 
 #include <string>
 #include <sstream>
@@ -34,48 +35,41 @@
 #include <valarray>
 
 
-#include "utility/exceptions.hpp"
+#include "../utility/exceptions.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
+#include "../algebra/vector.hpp"
+#include "../algebra/matrix.hpp"
 
-#include "geometry/box.hpp"
-#include "geometry/list_set.hpp"
-#include "geometry/grid_set.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/list_set.hpp"
+#include "../geometry/grid_paving.hpp"
 
-#include "solvers/integrator.hpp"
-#include "solvers/solver.hpp"
+#include "../solvers/integrator.hpp"
+#include "../solvers/solver.hpp"
 
-#include "hybrid/hybrid_automaton_interface.hpp"
+#include "../dynamics/reachability_analyser.tpl.hpp"
 
-#include "hybrid/hybrid_time.hpp"
-#include "hybrid/hybrid_space.hpp"
-#include "hybrid/hybrid_orbit.hpp"
-#include "hybrid/hybrid_set.hpp"
-#include "hybrid/hybrid_evolver.hpp"
-#include "hybrid/hybrid_reachability_analyser.hpp"
+#include "../hybrid/hybrid_automaton_interface.hpp"
 
-#include "utility/logging.hpp"
-#include "output/graphics.hpp"
-#include "solvers/linear_programming.hpp"
+#include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_space.hpp"
+#include "../hybrid/hybrid_orbit.hpp"
+#include "../hybrid/hybrid_set.hpp"
+#include "../hybrid/hybrid_paving.hpp"
+#include "../hybrid/hybrid_evolver.hpp"
+#include "../hybrid/hybrid_reachability_analyser.hpp"
 
-#include "hybrid/hybrid_graphics.hpp"
+
+#include "../output/logging.hpp"
+#include "../output/graphics.hpp"
+#include "../solvers/linear_programming.hpp"
+
+#include "../hybrid/hybrid_graphics.hpp"
 
 namespace Ariadne {
 
-static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
-static const double DEFAULT_GRID_LENGTH=0.125;
-
-    /*
-// Resolves possible linking bug in macOS
-template<>
-ReachabilityAnalyser<HybridAutomatonInterface>::
-~ReachabilityAnalyser()
-{
-}
-     */
 
 inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
@@ -90,8 +84,6 @@ inline FloatDPBounds operator*(Integer n1,  const FloatDPValue& x2) {
 inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
     return integer_cast<Nat>(FloatDPApproximation(t,dp)/h);
 }
-
-template<> Nat integer_cast<Nat,Real>(Real const& r);
 
 template<> inline Nat integer_cast<Nat>(FloatDPBounds const& x) {
     return integer_cast<Nat>(FloatDPApproximation(x).raw());
@@ -110,8 +102,6 @@ inline const HybridExactBoxes& cast_exact(const HybridExactBoxes& boxes) {
 }
 
 } // namespace Ariadne
-
-#include "dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
 
@@ -137,16 +127,16 @@ clone() const
 
 
 Void
-HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
-                                                       HybridGridTreeSet& evolve_cells,
-                                                       const HybridGridTreeSet& set,
+HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
+                                                       HybridGridTreePaving& evolve_cells,
+                                                       const HybridGridTreePaving& set,
                                                        const HybridTerminationCriterion& termination,
-                                                       const Int accuracy,
+                                                       const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    HybridGridTreeSet cells=set;
+    HybridGridTreePaving cells=set;
     cells.mince(accuracy);
 
     ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");
@@ -155,7 +145,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
         ARIADNE_LOG(7,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(7,"  adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {
@@ -186,7 +176,7 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
     set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
-    set_outer_overspill_policy(ChainOverspillPolicy::OVERSPILL_ERROR);
+    set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 
 
@@ -225,16 +215,6 @@ HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGr
             "The grid to set has a different hybrid space than the system.");
 
     _grid_ptr = value_ptr;
-}
-
-OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy)
-{
-    switch(policy) {
-        case ChainOverspillPolicy::OVERSPILL_IGNORE: os<<"ignore"; break;
-        case ChainOverspillPolicy::OVERSPILL_WARNING: os<<"warning"; break;
-        case ChainOverspillPolicy::OVERSPILL_ERROR: os<<"error"; break;
-        default: abort();
-    } return os;
 }
 
 } // namespace Ariadne

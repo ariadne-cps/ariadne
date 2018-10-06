@@ -7,19 +7,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file grid_cell.hpp
@@ -34,22 +35,22 @@
 #include <string>
 #include <memory>
 
-#include "utility/tribool.hpp"
-#include "utility/array.hpp"
+#include "../utility/tribool.hpp"
+#include "../utility/array.hpp"
 
-#include "utility/binary_word.hpp"
+#include "../utility/binary_word.hpp"
 
-#include "utility/exceptions.hpp"
-#include "geometry/box.hpp"
-#include "geometry/point.hpp"
-#include "geometry/list_set.hpp"
+#include "../utility/exceptions.hpp"
+#include "../geometry/box.hpp"
+#include "../geometry/point.hpp"
+#include "../geometry/list_set.hpp"
 
-#include "numeric/numeric.hpp"
+#include "../numeric/numeric.hpp"
 
-#include "geometry/set_interface.hpp"
-#include "geometry/paving_interface.hpp"
-#include "algebra/vector.hpp"
-#include "geometry/grid.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../geometry/paving_interface.hpp"
+#include "../algebra/vector.hpp"
+#include "../geometry/grid.hpp"
 
 
 namespace Ariadne {
@@ -308,7 +309,7 @@ class GridOpenCell: public GridAbstractCell {
     //! to which all the neighboring cell will be added, i.e. it is a return parameter.
     //! NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
     Void neighboring_cells( const Nat theHeight, const BinaryWord& theBaseCellWord,
-                            BinaryWord& cellPosition, GridTreeSet& theResultSet ) const;
+                            BinaryWord& cellPosition, GridTreePaving& theResultSet ) const;
 
     //! \brief This method allows to compute the neighboring (to the right) cell of
     //! the base cell given by \a theHeight and \a theBaseCellWord. Here \a cellPosition
@@ -330,7 +331,7 @@ class GridOpenCell: public GridAbstractCell {
     //! it covers the borders. All such open cells are added to the vector \a result. \a cellPosition
     //! is a technical parameter that has to be set to an empty word. Also, this method add the interior
     //! of theCell to the vector \a result.
-    static Void cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
+    static Void cover_cell_and_borders( const GridCell& theCell, const GridTreePaving& theSet,
                                         BinaryWord& cellPosition, std::vector<GridOpenCell>& result );
 
   public:
@@ -360,7 +361,7 @@ class GridOpenCell: public GridAbstractCell {
     Bool operator<(const GridOpenCell& otherCell) const;
 
     //! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
-    GridTreeSet closure() const;
+    GridTreePaving closure() const;
 
     //! \brief Computes the intersection of two GridOpenCell as a list of open cells whoes union
     //! gives the intersection. This is done becase the intersection can no always be represented

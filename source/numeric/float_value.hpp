@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file float_value.hpp
@@ -28,7 +29,7 @@
 #ifndef ARIADNE_FLOAT_VALUE_HPP
 #define ARIADNE_FLOAT_VALUE_HPP
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -43,6 +44,7 @@ namespace Ariadne {
 
 template<class F> struct NumericTraits<Value<F>> {
     typedef ExactNumber GenericType;
+    typedef Value<F> OppositeType;
     typedef PositiveValue<F> PositiveType;
     typedef Boolean LessType;
     typedef Boolean EqualsType;
@@ -59,7 +61,7 @@ template<class F> class Value
     , DispatchComparisonOperations<Value<F>,Boolean>
     , DefineMixedComparisonOperators<Value<F>,ExactNumber,Boolean>
     , DefineMixedComparisonOperators<Value<F>,Rational,Boolean>
-//    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
+    , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Integer,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Int,Boolean>
 //        , public DispatchFloatOperations<Ball<F>>
@@ -169,6 +171,11 @@ template<class F> class Positive<Value<F>> : public Value<F> {
     explicit Positive<Value<F>>(F const& x) : Value<F>(x) { }
     explicit Positive<Value<F>>(Value<F> const& x) : Value<F>(x) { }
   public:
+    friend PositiveBounds<F> operator+(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+        return cast_positive(static_cast<Value<F>const&>(v1)+static_cast<Value<F>const&>(v2)); }
+    friend PositiveBounds<F> operator*(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
+        return cast_positive(static_cast<Value<F>const&>(v1)*static_cast<Value<F>const&>(v2)); }
+
     friend Positive<Value<F>> hlf(Positive<Value<F>> const&);
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
         return pow(Positive<Bounds<F>>(x),m); }

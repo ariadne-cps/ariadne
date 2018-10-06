@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file series.hpp
@@ -28,9 +29,9 @@
 #ifndef ARIADNE_SERIES_HPP
 #define ARIADNE_SERIES_HPP
 
-#include "utility/array.hpp"
-#include "utility/container.hpp"
-#include "numeric/operators.hpp"
+#include "../utility/array.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/operators.hpp"
 
 namespace Ariadne {
 
@@ -41,44 +42,54 @@ template<class X> class SeriesGeneratorInterface {
   public:
     virtual ~SeriesGeneratorInterface() = default;
     //! \brief Compute the \a d-th term of a power series, given centering at \a x and previous terms \a s.
-    virtual X _next(SizeType d, X const& x, List<X>& s) const = 0;
+    virtual X _next(DegreeType d, X const& x, List<X>& s) const = 0;
 };
 
-template<class OP, class X> class SeriesGenerator;
-
-template<class X> class SeriesGenerator<Rec,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { return (deg==0) ? (1/c) : y[deg-1]*(-y[0]); }
+template<class OP, class X> class SeriesGenerator : public SeriesGeneratorInterface<X> {
+    virtual X _next(DegreeType d, X const& c, List<X>& y) const final {
+        OP op; const X* yp=y.begin().operator->(); return next_series_coefficient(op, d, c, yp); }
 };
 
-template<class X> class SeriesGenerator<Sqrt,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? sqrt(c) : ((2*d-3)*(-1/c)/2)/d*y[deg-1]; }
-};
+template<class X> inline X next_series_coefficient(Pow, DegreeType d, X const& c, DegreeType n, X const* y) {
+    return (d==0) ? pow(c,n) : (d>n) ? nul(c) : y[d-1]/c*(n-d+1)/d; }
 
-template<class X> class SeriesGenerator<Exp,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? exp(c) : y[deg-1]/d; }
-};
+template<class X> inline X next_series_coefficient(Pos, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? c : (d==1) ? nul(c)+1 : nul(c); }
 
-template<class X> class SeriesGenerator<Log,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? log(c) : (d==1) ? 1/c : -y[deg-1]*y[1]*(d-1)/d; }
-};
+template<class X> inline X next_series_coefficient(Neg, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? -c : (d==1) ? nul(c)-1 : nul(c); }
 
-template<class X> class SeriesGenerator<Sin,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? sin(c) : (deg==1) ? cos(c) : -y[deg-2]/(d*(d-1)); }
-};
+template<class X> inline X next_series_coefficient(Hlf, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? hlf(c) : (d==1) ? hlf(nul(c)+1) : nul(c); }
 
-template<class X> class SeriesGenerator<Cos,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? cos(c) : (deg==1) ? -sin(c) : -y[deg-2]/(d*(d-1)); }
-};
+template<class X> inline X next_series_coefficient(Sqr, DegreeType d, X const& c, X const* y) {
+    switch(d) { case 0: return sqr(c); case 1: return 2*c; case 2: return nul(c)+1; default: return nul(c); } }
 
-template<class X> class SeriesGenerator<Tan,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { if (deg==0) { return tan(c); } ARIADNE_NOT_IMPLEMENTED; }
-};
+template<class X> inline X next_series_coefficient(Rec, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? rec(c) : y[d-1]*(-y[0]); }
 
-template<class X> class SeriesGenerator<Atan,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { if (deg==0) { return atan(c); } ARIADNE_NOT_IMPLEMENTED; }
-};
+template<class X> inline X next_series_coefficient(Sqrt, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? sqrt(c) : ((2*(Int)d-3)*(-1/c)/2)/d*y[d-1]; }
 
+template<class X> inline X next_series_coefficient(Exp, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? exp(c) : y[d-1]/d; }
 
+template<class X> inline X next_series_coefficient(Log, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? log(c) : (d==1) ? 1/c : -y[d-1]*y[1]*(d-1)/d; }
+
+template<class X> inline X next_series_coefficient(Sin, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? sin(c) : (d==1) ? cos(c) : -y[d-2]/(d*(d-1)); }
+
+template<class X> inline X next_series_coefficient(Cos, DegreeType d, X const& c, X const* y) {
+    return (d==0) ? cos(c) : (d==1) ? -sin(c) : -y[d-2]/(d*(d-1)); }
+
+template<class X> inline X next_series_coefficient(Tan, DegreeType d, X const& c, X const* y) {
+    switch(d) { case 0: return tan(c); case 1: return 1+sqr(y[0]); case 2: return y[0]*y[1];
+        default: { X r=y[0]*y[d-1]; for(DegreeType i=1; i!=d; ++i) { r+=y[i]*y[d-1-i]; } return r/d; } } }
+
+template<class X> inline X next_series_coefficient(Atan, DegreeType d, X const& c, X const* y) {
+    switch(d) { case 0: return atan(c); case 1: return rec(1+sqr(c)); case 2: return -c*sqr(y[1]);
+        default: return -y[1]*((d-2)*y[d-2]+2*(d-1)*c*y[d-1])/d; } }
 
 //! \brief A power series, centred on a value, with unlimited many coefficients.
 template<class X>
@@ -97,16 +108,6 @@ class Series
     const X& operator[](DegreeType n) const;
     const List<X>& coefficients(DegreeType n) const;
     friend OutputStream& operator<<(OutputStream& os, Series<X> const& s) { return s._write(os); }
-
-    static Series<X> rec(const X& x) { return Series<X>(Rec(),x); }
-    static Series<X> sqrt(const X& x) { return Series<X>(Sqrt(),x); }
-    static Series<X> exp(const X& x) { return Series<X>(Exp(),x); }
-    static Series<X> log(const X& x) { return Series<X>(Log(),x); }
-
-    static Series<X> sin(const X& x) { return Series<X>(Sin(),x); }
-    static Series<X> cos(const X& x) { return Series<X>(Cos(),x); }
-    static Series<X> tan(const X& x) { return Series<X>(Tan(),x); }
-    static Series<X> atan(const X& x) { return Series<X>(Atan(),x); }
 };
 
 
@@ -170,13 +171,6 @@ template<class X> Series<X> Series<X>::acos(Nat d, const X& c) {
     Series<X> y(d-1,c*0); y[0]=c; y[1]=X(1);
     y = Ariadne::neg(Ariadne::rec(Ariadne::sqrt(X(1)-Ariadne::sqr(y))));
     return antiderivative(y,Ariadne::acos(c));
-}
-
-template<class X> Series<X> Series<X>::atan(Nat d, const X& c) {
-    if(d==0) { Series<X> y(d,c*0); y[0]=Ariadne::atan(c); return y; }
-    Series<X> y(d-1,c*0); y[0]=c; y[1]=X(1);
-    y = Ariadne::rec(Ariadne::sqrt(X(1)+Ariadne::sqr(y)));
-    return antiderivative(y,Ariadne::atan(c));
 }
 
 template<class X> Series<X> antiderivative(const Series<X>& x, const X& c) {

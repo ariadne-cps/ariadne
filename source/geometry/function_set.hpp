@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file function_set.hpp
@@ -32,19 +33,19 @@
 
 #include <memory>
 
-#include "utility/macros.hpp"
-#include "utility/container.hpp"
-#include "utility/container.hpp"
-#include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "expression/templates.hpp"
-#include "geometry/set_interface.hpp"
-#include "function/function.hpp"
-#include "function/function_model.hpp"
-#include "function/constraint.hpp"
-#include "output/graphics_interface.hpp"
+#include "../utility/macros.hpp"
+#include "../utility/container.hpp"
+#include "../utility/container.hpp"
+#include "../numeric/numeric.hpp"
+#include "../algebra/vector.hpp"
+#include "../symbolic/templates.hpp"
+#include "../geometry/set_interface.hpp"
+#include "../function/function.hpp"
+#include "../function/function_model.hpp"
+#include "../function/constraint.hpp"
+#include "../output/graphics_interface.hpp"
 
-#include "geometry/box.hpp"
+#include "../geometry/box.hpp"
 
 namespace Ariadne {
 
@@ -154,6 +155,7 @@ class BoundedConstraintSet
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
 
+    friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const ConstraintSet& cs2);
     friend BoundedConstraintSet intersection(const ConstraintSet& cs1, const BoundedConstraintSet& bcs2);
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
@@ -234,7 +236,7 @@ class ConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     LowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
 
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
@@ -342,9 +344,9 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
+    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;

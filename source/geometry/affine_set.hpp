@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file affine_set.hpp
@@ -33,13 +34,13 @@
 #include <list>
 #include <iostream>
 
-#include "utility/declarations.hpp"
-#include "utility/logging.hpp"
-#include "utility/container.hpp"
-#include "output/graphics_interface.hpp"
-#include "function/affine.hpp"
-#include "function/affine_model.hpp"
-#include "function/constraint.hpp"
+#include "../utility/declarations.hpp"
+#include "../output/logging.hpp"
+#include "../utility/container.hpp"
+#include "../output/graphics_interface.hpp"
+#include "../function/affine.hpp"
+#include "../function/affine_model.hpp"
+#include "../function/constraint.hpp"
 
 namespace Ariadne {
 
@@ -60,7 +61,6 @@ typedef Constraint<Affine<EffectiveNumericType>,EffectiveNumericType> EffectiveA
 typedef Affine<ValidatedNumericType> ValidatedAffineFunction;
 
 EffectiveAffineConstraint operator<=(const EffectiveNumericType& l, const EffectiveAffine& am);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
 EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumericType& b);
 
@@ -129,9 +129,9 @@ class ValidatedAffineConstrainedImageSet
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);
 
-    Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
-    GridTreeSet outer_approximation(const Grid& g, Int depth) const;
-    Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& g, Nat depth) const;
+    GridTreePaving outer_approximation(const Grid& g, Nat depth) const;
+    Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
 
     List<Point2d> boundary(Nat xc, Nat yc) const;
 
@@ -141,8 +141,8 @@ class ValidatedAffineConstrainedImageSet
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     Void construct_linear_program(LinearProgram<FloatDP>& lp) const;
-    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth);
-    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Int depth);
+    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth);
+    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth);
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {

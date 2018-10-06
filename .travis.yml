@@ -1,0 +1,130 @@
+language: cpp
+
+sudo: enabled
+dist: trusty
+
+branches:
+  only:
+  - master
+  - working
+  - working-ci
+
+matrix:
+  include:
+
+    - name: macOS 10.13 + AppleClang 10 + Python 3
+      os: osx
+      osx_image: xcode10
+      env: COMPILER=clang++ PYTHON=3 
+      
+    - name: macOS 10.13 + GCC 8 + Python 2 [NoCairo, NoGTK]
+      os: osx
+      osx_image: xcode10
+      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
+      
+#    - name: macOS 10.13 + AppleClang 10 + Python 3 [Debug, NoGTK]
+#      os: osx
+#      osx_image: xcode10
+#      env: COMPILER=clang++ PYTHON=3 DEBUG=ON DISABLE_GTK=ON
+
+#    - name: macOS 10.13 + GCC 8 + Python 2 [Debug]
+#      os: osx
+#      osx_image: xcode10
+#      env: COMPILER=g++-8 PYTHON=2 DEBUG=ON
+      
+    - name: Fedora 29 + Clang 7 + Python 3 [NoGTK]
+      os: linux
+      services:
+        - docker
+      env: DOCKER=fedora:29 COMPILER=clang++ PYTHON=3 DISABLE_GTK=ON
+      
+#    - name: openSUSE Tumbleweed + GCC 8 + Python 3 [Debug]
+#      os: linux
+#      services:
+#        - docker
+#      env: DOCKER=opensuse/tumbleweed COMPILER=c++ PYTHON=3 DEBUG=ON
+      
+#    - name: Ubuntu 18.10 + GCC 8 + Python 3
+#      os: linux
+#      services:
+#        - docker
+#      env: DOCKER=ubuntu:cosmic COMPILER=g++-8 PYTHON=3   
+      
+#    - name: Ubuntu 18.04 + Clang 6 + Python 3 [Debug]
+#      os: linux
+#      services:
+#        - docker      
+#      env: DOCKER=ubuntu:bionic COMPILER=clang++-6.0 PYTHON=3 DEBUG=ON
+      
+    - name: Ubuntu 18.04 + GCC 8 + Python 2
+      os: linux
+      services:
+        - docker
+      env: DOCKER=ubuntu:bionic COMPILER=g++-8 PYTHON=2    
+
+    - name: Ubuntu 18.04 + GCC 7 + Python 3 [Debug, Coverage]
+      os: linux
+      services:
+        - docker
+      env: DOCKER=ubuntu:bionic COMPILER=g++-7 PYTHON=3 DEBUG=ON COVERAGE=ON
+
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python'; else PYTHON_LIB=python@2; CMAKE_MACOS_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi 
+      brew cask uninstall --force oclint
+      if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=gtk; else GTK_PKG=""; fi
+      if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
+      brew install gcc@8 $PYTHON_LIB mpfr gmp $GTK_PKG $CAIRO_PKG
+      sudo easy_install pip
+      sudo pip$PYTHON install --upgrade pip
+      sudo pip$PYTHON install coverage pytest
+    fi
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python3'; else PYTHON_LIB=python; fi 
+      docker pull $DOCKER
+      CONTAINER_ID=$(docker run --detach --tty --volume="$PWD":/ariadne --workdir=/ariadne $DOCKER "/bin/bash")
+      SH_PREFIX="docker exec --tty $CONTAINER_ID"
+    fi
+  - |
+    if [[ "$DOCKER" =~ ubuntu ]]; then 
+      $SH_PREFIX apt update
+      if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=libgtk2.0-dev; else GTK_PKG=""; fi
+      if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi     
+      PKG_INSTALL_STRING="apt install -y cmake pkg-config $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $GTK_PKG $CAIRO_PKG libmpfr-dev"
+    fi
+  - |
+    if [[ "$DOCKER" =~ opensuse|fedora ]]; then
+      if [[ "$COMPILER" == "c++" ]]; then COMPILER_PKG=gcc-c++; else COMPILER_PKG="clang gcc-c++"; fi
+      if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=gtk2-devel; else GTK_PKG=""; fi
+      if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo-devel; else CAIRO_PKG=""; fi
+    fi
+  - if [[ "$DOCKER" =~ fedora ]]; then PKG_INSTALL_STRING="dnf install -y make cmake pkg-config $COMPILER_PKG $PYTHON_LIB-devel $GTK_PKG $CAIRO_PKG mpfr-devel"; fi  
+  - if [[ "$DOCKER" =~ opensuse ]]; then PKG_INSTALL_STRING="zypper install -y cmake pkg-config $COMPILER_PKG $PYTHON_LIB-devel python$PYTHON-pip $GTK_PKG $CAIRO_PKG mpfr-devel"; fi  
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX sh -c "$PKG_INSTALL_STRING"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then PIP_INSTALL_STRING="pip$PYTHON install coverage pytest"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then $SH_PREFIX sh -c "$PIP_INSTALL_STRING"; fi
+
+script:
+  - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=$PYTHON $CMAKE_MACOS_PYTHON2_EXTRA_FLAGS"
+  - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCOVERAGE=ON"; fi
+  - if [[ -n "$DEBUG" ]]; then CMAKE_BUILD_TYPE="Debug"; else CMAKE_BUILD_TYPE="Release"; fi
+  - if [[ "$TRAVIS_BRANCH" == master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
+  - CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE"
+  - $SH_PREFIX cmake . $CMAKE_ARGS
+  - if [[ -n "$COVERAGE" ]]; then $SH_PREFIX make tests; else $SH_PREFIX make; fi
+  - $SH_PREFIX ctest -L "primary"
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX make install; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cp -Rf tutorials ~/tutorials'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && cmake . '$CMAKE_ARGS; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && make'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/hybrid_evolution && ./hybrid_evolution_tutorial -v 0 > /dev/null'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && cmake . '$CMAKE_ARGS; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && make'; fi  
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'cd ~/tutorials/rigorous_numerics && ./rigorous_numerics_tutorial > /dev/null'; fi
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'mkdir ~/tutorials/python && cp -Rf python/tutorials/* ~/tutorials/python'; fi    
+  - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'export LD_LIBRARY_PATH=/usr/local/lib && cd ~/tutorials/python && python'$PYTHON' tutorial.py > /dev/null'; fi  
+  
+after_success:
+  - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi

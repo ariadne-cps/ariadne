@@ -6,19 +6,20 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*! \file float_lower_bound.hpp
@@ -28,7 +29,7 @@
 #ifndef FLOAT_LOWER_BOUND_H
 #define FLOAT_LOWER_BOUND_H
 
-#include "utility/macros.hpp"
+#include "../utility/macros.hpp"
 
 #include "number.decl.hpp"
 #include "float.decl.hpp"
@@ -97,14 +98,19 @@ template<class F> class LowerBound
     friend Bool refines(LowerBound<F> const&, LowerBound<F> const&);
     friend LowerBound<F> refinement(LowerBound<F> const&, LowerBound<F> const&);
   public:
-    friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend LowerBound<F> operator*(PositiveBounds<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(mul(down,x2.raw()>=0?x1.lower().raw():x1.upper().raw(),x2.raw())); }
     friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {
         return LowerBound<F>(mul(down,x1.raw(),x1.raw()>=0?x2.lower().raw():x2.upper().raw())); }
-    friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return LowerBound<F>(div(down,x1.raw(),x2.raw())); }
     friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {
         return LowerBound<F>(div(down,x1.raw(),x1.raw()>=0?x2.upper().raw():x2.lower().raw())); }
+    // Needed to prevent ambiguity; useful as implementation is easier than PositiveBounds version.
+    friend LowerBound<F> operator*(PositiveValue<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return LowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend LowerBound<F> operator/(LowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return LowerBound<F>(div(down,x1.raw(),x2.raw())); }
   private: public:
     static Nat output_places;
     RawType _l;
@@ -127,14 +133,19 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     Positive<LowerBound<F>>(PositiveValue<F> const& x) : LowerBound<F>(x) { }
     Positive<LowerBound<F>>(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
   public:
-    friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    // Needed to prevent ambiguity
+    friend PositiveLowerBound<F> operator*(PositiveBounds<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.lower().raw(),x2.raw())); }
     friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveLowerBound<F>(mul(down,x1.raw(),x2.lower().raw())); }
-    friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
-        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
     friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveBounds<F> const& x2) {
         return PositiveLowerBound<F>(div(down,x1.raw(),x2.upper().raw())); }
+    friend PositiveLowerBound<F> operator*(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveValue<F> const& x2) {
+        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
 };
 
 template<class F> inline PositiveLowerBound<F> cast_positive(LowerBound<F> const& x) {

@@ -6,22 +6,23 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  Ariadne is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more detai1ls.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include "../config.hpp"
 #include "stack_trace.hpp"
 
 #ifdef ARIADNE_ENABLE_STACK_TRACE
@@ -37,18 +38,15 @@ namespace Ariadne {
 
 void stack_trace() {
     static const unsigned int CALLSTACK_SIZE = 128;
-    static const unsigned int BACKTRACE_BUFFER_SIZE = 1024;
     int skip=0;
     void *callstack[CALLSTACK_SIZE];
     const int nMaxFrames = sizeof(callstack) / sizeof(callstack[0]);
-    char buffer[BACKTRACE_BUFFER_SIZE];
     int nFrames = backtrace(callstack, nMaxFrames);
     char **symbols = backtrace_symbols(callstack, nFrames);
     assert (symbols != nullptr);
     for (int i = skip; i < nFrames; i++) {
         Dl_info info;
         if (dladdr(callstack[i], &info)) {
-            const char* dli_sname = info.dli_sname;
             char* no_output_buffer = nullptr;
             size_t length;
             int status;

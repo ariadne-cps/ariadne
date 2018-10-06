@@ -76,6 +76,8 @@ template<class X> class Covector
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> Covector(SizeType n, PRS... prs) : _ary(n,X(prs...)) { }
+    template<class XX, class PR, EnableIf<IsConstructible<X,XX,PR>> =dummy> Covector(Covector<XX> const& u, PR pr) : _ary(u.array(),pr) { }
     explicit Covector() : _ary() { }
     explicit Covector(SizeType n) : _ary(n) { }
     explicit Covector(SizeType n, const X& x) : _ary(n,x) { }
@@ -88,7 +90,8 @@ template<class X> class Covector
     const X& at(SizeType j) const { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]"); return _ary[j]; }
     X& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]");  return _ary[j]; }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
-
+    Array<X> const& array() const { return _ary; }
+    
     template<class CVE, EnableIf<IsConvertible<typename CVE::ScalarType,X>> =dummy>
     Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {
         for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }
@@ -120,17 +123,21 @@ template<class V> inline CovectorRange<V> project(const CovectorExpression<V>& v
 
 class ProvideCovectorOperations {
 
+    template<class X> friend Covector<X> operator+(Covector<X> const& u) {
+        Covector<X> r(u.size(),+u.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=+u[i]; } return std::move(r); }
+
     template<class X> friend Covector<NegationType<X>> operator-(Covector<X> const& u) {
         Covector<NegationType<X>> r(u.size(),-u.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=-u[i]; } return std::move(r); }
 
-    template<class X1,class X2> friend Covector<DifferenceType<X1,X2>> operator-(Covector<X1> const& u1, Covector<X2> const& u2) {
-        ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<DifferenceType<X1,X2>> r(u1.size(),u1.zero_element()-u2.zero_element());
-        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]-u2[i]; } return std::move(r); }
-
     template<class X1,class X2> friend Covector<SumType<X1,X2>> operator+(Covector<X1> const& u1, Covector<X2> const& u2) {
         ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<SumType<X1,X2>> r(u1.size(),u1.zero_element()+u2.zero_element());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]+u2[i]; } return std::move(r); }
+
+    template<class X1,class X2> friend Covector<DifferenceType<X1,X2>> operator-(Covector<X1> const& u1, Covector<X2> const& u2) {
+        ARIADNE_PRECONDITION(u1.size()==u2.size()); Covector<DifferenceType<X1,X2>> r(u1.size(),u1.zero_element()-u2.zero_element());
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=u1[i]-u2[i]; } return std::move(r); }
 
     template<class X1,class X2> friend Covector<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Covector<X2> const& u2) {
         Covector<ProductType<X1,X2>> r(u2.size(),s1*u2.zero_element());

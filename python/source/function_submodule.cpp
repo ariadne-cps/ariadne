@@ -282,8 +282,12 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def("gradient", (Covector<FloatDPBounds>(ScalarFunction<P>::*)(const Vector<FloatDPBounds>&)const) &ScalarFunction<P>::gradient);
     }
 
-
     module.def("derivative", (ScalarFunction<P>(ScalarFunction<P>::*)(SizeType)const) &ScalarFunction<P>::derivative);
+
+    module.def("evaluate", (Scalar<FloatDPApproximation>(*)(const ScalarFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
+    if constexpr (not IsSame<P,ApproximateTag>::value) {
+        module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
+    }
 
     export_scalar_function_evaluation(scalar_function_class);
 }
@@ -309,6 +313,10 @@ template<class P> Void export_vector_function(pybind11::module& module)
     // TODO: Put these in C++ API
     // define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>,Number<P>>(module,vector_function_class);
 
+    // FIXME: Define vector function operations for Validated and Approximate
+    if constexpr (IsSame<P,EffectiveTag>::value) {
+        define_vector_algebra_arithmetic<VectorFunction<P>,ScalarFunction<P>>(module,vector_function_class);
+    }
     export_vector_function_evaluation(vector_function_class);
 
     vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorFunction<P>::jacobian);

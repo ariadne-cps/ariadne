@@ -190,6 +190,12 @@ template<class X> struct HasGenericType {
     static const bool value = decltype(test<X>(1))::value;
 };
 
+template<class X> struct HasPrecisionType {
+    template<class XX, class=typename XX::PrecisionType> static std::true_type test(int);
+    template<class XX> static std::false_type test(...);
+    static const bool value = decltype(test<X>(1))::value;
+};
+
 
 // The following class only accepts an exact match as an argument
 template<class T> class SuppressConversions {

@@ -40,45 +40,45 @@ using namespace Ariadne;
 namespace Ariadne {
 
 template<class X>
-X __vgetitem__(const Vector<X>& v, Int i)
+X __vgetitem__(const Vector<X>& v, Nat i)
 {
-    if(i<0) { i+=static_cast<Int>(v.size()); }
+    if(i<0) { i+=static_cast<Nat>(v.size()); }
     ARIADNE_ASSERT_MSG(0<=i && Nat(i)<v.size(),"v="<<v<<" i="<<i);
     return v[static_cast<Nat>(i)];
 }
 
 
 template<class X>
-Vector<X> __vgetslice__(const Vector<X>& v, Int start, Int stop)
+Vector<X> __vgetslice__(const Vector<X>& v, Nat start, Nat stop)
 {
-    if(start<0) { start+=static_cast<Int>(v.size()); }
-    if(stop<0) { stop+=static_cast<Int>(v.size()); }
+    if(start<0) { start+=static_cast<Nat>(v.size()); }
+    if(stop<0) { stop+=static_cast<Nat>(v.size()); }
     ARIADNE_ASSERT(0<=start && start<=stop && Nat(stop)<=v.size());
     return project(v,range(static_cast<Nat>(start),static_cast<Nat>(stop)));
 }
 
 
 template<class X>
-Void __vsetitem__(Vector<X>& v, Int i, const X& x)
+Void __vsetitem__(Vector<X>& v, Nat i, const X& x)
 {
-    if(i<0) { i+=static_cast<Int>(v.size()); }
+    if(i<0) { i+=static_cast<Nat>(v.size()); }
     ARIADNE_ASSERT(0<=i && Nat(i)<v.size());
     v[static_cast<Nat>(i)]=x;
 }
 
 
 template<class X>
-X __cvgetitem__(const Covector<X>& u, Int i)
+X __cvgetitem__(const Covector<X>& u, Nat i)
 {
-    if(i<0) { i+=static_cast<Int>(u.size()); }
+    if(i<0) { i+=static_cast<Nat>(u.size()); }
     ARIADNE_ASSERT_MSG(0<=i && Nat(i)<u.size(),"v="<<u<<" i="<<i);
     return u[static_cast<Nat>(i)];
 }
 
 template<class X>
-Void __cvsetitem__(Covector<X>& u, Int i, const X& x)
+Void __cvsetitem__(Covector<X>& u, Nat i, const X& x)
 {
-    if(i<0) { i+=static_cast<Int>(u.size()); }
+    if(i<0) { i+=static_cast<Nat>(u.size()); }
     ARIADNE_ASSERT(0<=i && Nat(i)<u.size());
     u[static_cast<Nat>(i)]=x;
 }
@@ -207,7 +207,12 @@ template<class X>
 Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
 {
     vector_class.def(pybind11::init<Vector<X>>());
-    vector_class.def(pybind11::init<Nat>());
+    if constexpr (IsDefaultConstructible<X>::value) {
+        vector_class.def(pybind11::init<Nat>()); }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        vector_class.def(pybind11::init<Nat,PR>()); 
+    }
     vector_class.def(pybind11::init<Nat,X>());
     vector_class.def_static("unit",&Vector<X>::unit);
     vector_class.def_static("basis",&Vector<X>::basis);
@@ -234,11 +239,11 @@ Void define_vector_conversion(pybind11::module& module, pybind11::class_<Vector<
 template<class X, class Y>
 Void define_mixed_vector_arithmetic(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
 {
-    vector_class.def("__add__",__add__<Vector<X>,Vector<Y> , Return<Vector<SumType<X,Y>>>>);
-    vector_class.def("__sub__",__sub__<Vector<X>,Vector<Y> , Return<Vector<DifferenceType<X,Y>>> >);
-    vector_class.def("__rmul__",__rmul__<Vector<X>,Y , Return<Vector<ProductType<Y,X>>> >);
-    vector_class.def("__mul__",__mul__<Vector<X>,Y , Return<Vector<ProductType<X,Y>>> >);
-    vector_class.def(__py_div__,__div__<Vector<X>,Y , Return<Vector<QuotientType<X,Y>>> >);
+    vector_class.def("__add__",__add__<Vector<X>,Vector<Y> , Return<Vector<SumType<X,Y>>>>, pybind11::is_operator());
+    vector_class.def("__sub__",__sub__<Vector<X>,Vector<Y> , Return<Vector<DifferenceType<X,Y>>> >, pybind11::is_operator());
+    vector_class.def("__rmul__",__rmul__<Vector<X>,Y , Return<Vector<ProductType<Y,X>>> >, pybind11::is_operator());
+    vector_class.def("__mul__",__mul__<Vector<X>,Y , Return<Vector<ProductType<X,Y>>> >, pybind11::is_operator());
+    vector_class.def(__py_div__,__div__<Vector<X>,Y , Return<Vector<QuotientType<X,Y>>> >, pybind11::is_operator());
     module.def("dot",  &_dot_<Vector<X>,Vector<Y>>);
     // Don't use operators self+other (as below) because of
     // below) because of need to convert result expressions to Vector<R>.
@@ -294,6 +299,7 @@ template<class F> Void define_vector(pybind11::module& module, pybind11::class_<
     vector_class.def(pybind11::init<Vector<Rational>,PR>());
     vector_class.def(pybind11::init<Vector<Bounds<F>>>());
     pybind11::implicitly_convertible<Vector<Bounds<F>>,Vector<Approximation<F>>>();
+    pybind11::implicitly_convertible<Vector<Value<F>>,Vector<Approximation<F>>>();
 }
 
 
@@ -308,22 +314,52 @@ template<class X>
 Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& covector_class)
 {
     covector_class.def(pybind11::init<Covector<X>>());
-    covector_class.def(pybind11::init<Int>());
-    covector_class.def(pybind11::init<Int,X>());
+    if constexpr (IsDefaultConstructible<X>::value) {
+        covector_class.def(pybind11::init<Nat>()); }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        covector_class.def(pybind11::init<Nat,PR>()); 
+    }
+    covector_class.def(pybind11::init<Nat,X>());
     covector_class.def("size", &Covector<X>::size);
     covector_class.def("__len__", &Covector<X>::size);
-    covector_class.def("__setitem__", &__setitem__<Covector<X>,Int,X>);
-    covector_class.def("__getitem__", &__getitem__<Covector<X>,Int>);
+    covector_class.def("__setitem__", &__setitem__<Covector<X>,Nat,X>);
+    covector_class.def("__getitem__", &__getitem__<Covector<X>,Nat>);
     covector_class.def("__str__",&__cstr__<Covector<X>>);
 
-    covector_class.def("__add__",__add__<Covector<X>,Covector<X> , Return<Covector<SumType<X,X>>> >);
-    covector_class.def("__sub__",__sub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >);
-    covector_class.def("__rmul__",__rmul__<Covector<X>,X , Return<Covector<ProductType<X,X>>> >);
-    covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >);
-    covector_class.def(__py_div__,__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >);
+    covector_class.def("__pos__",__pos__<Covector<X> , Return<Covector<X>> >, pybind11::is_operator());
+    covector_class.def("__neg__",__neg__<Covector<X> , Return<Covector<NegationType<X>>> >, pybind11::is_operator());
+    covector_class.def("__add__",__add__<Covector<X>,Covector<X> , Return<Covector<SumType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__radd__",__radd__<Covector<X>,Covector<X> , Return<Covector<SumType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__sub__",__sub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__rsub__",__rsub__<Covector<X>,Covector<X> , Return<Covector<DifferenceType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__rmul__",__rmul__<Covector<X>,X , Return<Covector<ProductType<X,X>>> >, pybind11::is_operator());
+    covector_class.def("__mul__",__mul__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
+    covector_class.def(__py_div__,__div__<Covector<X>,X , Return<Covector<QuotientType<X,X>>> >, pybind11::is_operator());
 
     module.def("transpose", (Covector<X>const&(*)(Vector<X>const&)) &transpose);
     module.def("transpose", (Vector<X>const&(*)(Covector<X>const&)) &transpose);
+
+    covector_class.def(pybind11::init([](pybind11::list const& lst){return Covector<X>(pybind11::cast<Array<X>>(lst));}));
+
+    // Convert from a Python list and properties
+    if constexpr (HasGenericType<X>::value) {
+        typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
+        if constexpr(IsConstructible<Covector<X>,Covector<Y>,PR>::value) {
+            covector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){
+                return Covector<X>(Covector<Y>(pybind11::cast<Array<Y>>(lst)),pr);}));
+        }
+    }
+}
+
+template<class X> 
+Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<X>>& covector_class) {
+}
+
+template<class F> 
+Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<Approximation<F>>>& covector_class) {
+    covector_class.def(pybind11::init<Covector<Bounds<F>>>());
+    pybind11::implicitly_convertible<Covector<Bounds<F>>,Covector<Approximation<F>>>();
 }
 
 template<class X>
@@ -331,7 +367,10 @@ Void export_covector(pybind11::module& module)
 {
     pybind11::class_<Covector<X>> covector_class(module,python_name<X>("Covector").c_str());
     define_covector(module,covector_class);
+    define_covector_conversions(module,covector_class);
 }
+
+
 
 template<class X> class Tag { };
 
@@ -340,8 +379,12 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
 {
     matrix_class.def(pybind11::init<Matrix<X>>());
     if constexpr (IsDefaultConstructible<X>::value) {
-        matrix_class.def(pybind11::init<Int,Int>()); }
-    matrix_class.def(pybind11::init<Int,Int,X>());
+        matrix_class.def(pybind11::init<Nat,Nat>()); }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        matrix_class.def(pybind11::init<Nat,Nat,PR>()); 
+    }
+    matrix_class.def(pybind11::init<Nat,Nat,X>());
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);
@@ -356,6 +399,7 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
 
+    
     if constexpr (HasGenericType<X>::value) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(IsConstructible<Matrix<X>,Matrix<Y>,PR>::value) {
@@ -376,16 +420,19 @@ Void define_matrix_conversion(pybind11::module& module, pybind11::class_<Matrix<
 template<class X, class Y>
 Void define_matrix_arithmetic(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
 {
-    matrix_class.def("__pos__", &__pos__<Matrix<X> , Return<Matrix<X>> >);
-    matrix_class.def("__neg__", &__neg__<Matrix<X> , Return<Matrix<X>> >);
-    matrix_class.def("__add__", &__add__<Matrix<X>,Matrix<Y> , Return<Matrix<SumType<X,Y>>> >);
-    matrix_class.def("__sub__", &__sub__<Matrix<X>,Matrix<Y> , Return<Matrix<DifferenceType<X,Y>>> >);
-    matrix_class.def("__mul__", &__mul__<Matrix<X>,Y , Return<Matrix<ArithmeticType<X,Y>>> >);
-    matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Y , Return<Matrix<ProductType<X,Y>>> >);
-    matrix_class.def(__py_div__, &__div__<Matrix<X>,Y , Return<Matrix<QuotientType<X,Y>>> >);
-    matrix_class.def("__mul__", &__mul__<Matrix<X>,Vector<Y> , Return<Vector<ArithmeticType<X,Y>>> >);
-    matrix_class.def("__mul__", &__mul__<Matrix<X>,Matrix<Y> , Return<Matrix<ArithmeticType<X,Y>>> >);
-    matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Covector<Y> , Return<Covector<ArithmeticType<X,Y>>> >);
+    matrix_class.def("__pos__", &__pos__<Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
+    matrix_class.def("__neg__", &__neg__<Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
+    matrix_class.def("__add__", &__add__<Matrix<X>,Matrix<Y> , Return<Matrix<SumType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__radd__", &__radd__<Matrix<X>,Matrix<Y> , Return<Matrix<SumType<Y,X>>> >, pybind11::is_operator());
+    matrix_class.def("__sub__", &__sub__<Matrix<X>,Matrix<Y> , Return<Matrix<DifferenceType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__rsub__", &__rsub__<Matrix<X>,Matrix<Y> , Return<Matrix<DifferenceType<Y,X>>> >, pybind11::is_operator());
+    matrix_class.def("__mul__", &__mul__<Matrix<X>,Y , Return<Matrix<ArithmeticType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Y , Return<Matrix<ProductType<Y,X>>> >, pybind11::is_operator());
+    matrix_class.def(__py_div__, &__div__<Matrix<X>,Y , Return<Matrix<QuotientType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__mul__", &__mul__<Matrix<X>,Vector<Y> , Return<Vector<ArithmeticType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__mul__", &__mul__<Matrix<X>,Matrix<Y> , Return<Matrix<ArithmeticType<X,Y>>> >, pybind11::is_operator());
+    matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Covector<Y> , Return<Covector<ArithmeticType<Y,X>>> >, pybind11::is_operator());
+    matrix_class.def("__rmul__", &__rmul__<Matrix<X>,Matrix<Y> , Return<Matrix<ArithmeticType<Y,X>>> >, pybind11::is_operator());
 }
 
 template<class X>
@@ -425,7 +472,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("triangular_decomposition",&triangular_decomposition<X>);
     module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
 
-    //pybind11::implicitly_convertible<Matrix<FloatDPApproximation>, Matrix<FloatDPBounds>>();
+    pybind11::implicitly_convertible<Matrix<Value<F>>, Matrix<Bounds<F>>>();
 }
 
 template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<Approximation<F>>>& matrix_class)
@@ -442,7 +489,9 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);
     module.def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms<X>);
 
-//    to_python<Tuple<FloatMatrix,FloatMatrix,PivotMatrix>>();
+    pybind11::implicitly_convertible<Matrix<Bounds<F>>, Matrix<Approximation<F>>>();
+
+    //    to_python<Tuple<FloatMatrix,FloatMatrix,PivotMatrix>>();
 }
 
 template<class X> Void define_matrix(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
@@ -469,20 +518,17 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);
     diagonal_matrix_class.def("__str__",&__cstr__<DiagonalMatrix<X>>);
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
-    diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X> , Return<Vector<X>> >);
-    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >);
-    //diagonal_matrix_class.def("__rmul__", &__mul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
-    diagonal_matrix_class.def("__rmul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<Matrix<X>> >);
-    //diagonal_matrix_class.def("__neg__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>) operator- );
-    //diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator+ );
-    //diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator- );
-    //diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator* );
-    //diagonal_matrix_class.def(__py_div__, (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
-    //diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,Vector<X>)) operator* );
-    //diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,Matrix<X>)) operator* );
-    //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
+    //diagonal_matrix_class.def("__neg__", &__neg__<DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >);
+    diagonal_matrix_class.def("__add__", &__add__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
+    diagonal_matrix_class.def("__sub__", &__sub__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
+    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
+    diagonal_matrix_class.def(__py_div__, &__div__<DiagonalMatrix<X>,DiagonalMatrix<X> , Return<DiagonalMatrix<X>> >, pybind11::is_operator());
+    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Vector<X> , Return<Vector<X>> >, pybind11::is_operator());
+    diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
+    //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
+    diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
+    
+    //module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 
 Void export_pivot_matrix(pybind11::module& module)

@@ -363,6 +363,7 @@ Void export_vector_function_model(pybind11::module& module)
     
     pybind11::class_<ValidatedVectorFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModel");
     vector_function_model_class.def(pybind11::init<ValidatedVectorFunctionModelDP>());
+//    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarFunctionModelDP> ary){return ValidatedVectorFunctionModelDP(Vector<ValidatedScalarFunctionModelDP>(ary));}));
     vector_function_model_class.def(pybind11::init<ValidatedVectorTaylorFunctionModelDP>());
     vector_function_model_class.def("result_size", &ValidatedVectorFunctionModelDP::result_size);
     vector_function_model_class.def("argument_size", &ValidatedVectorFunctionModelDP::argument_size);
@@ -515,6 +516,8 @@ Void export_vector_taylor_function(pybind11::module& module)
     
     pybind11::class_<ValidatedVectorTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorMultivariateTaylorFunctionModel");
     vector_taylor_function_class.def( pybind11::init<ValidatedVectorTaylorFunctionModelDP>());
+//    vector_taylor_function_class.def( pybind11::init<Vector<ValidatedScalarTaylorFunctionModelDP>>());
+    vector_taylor_function_class.def( pybind11::init([](Array<ValidatedScalarTaylorFunctionModelDP> ary){return ValidatedVectorTaylorFunctionModelDP(Vector<ValidatedScalarTaylorFunctionModelDP>(ary));}));
     vector_taylor_function_class.def( pybind11::init< SizeType, ExactBoxType, SweeperDP >());
     vector_taylor_function_class.def( pybind11::init< ExactBoxType,const EffectiveVectorFunction&,SweeperDP >());
     vector_taylor_function_class.def(pybind11::init< ExactBoxType, Vector< Expansion<MultiIndex,FloatDPValue> >, Vector<FloatDPError>, SweeperDP >());

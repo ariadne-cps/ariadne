@@ -73,6 +73,7 @@ More information on the mathematical foundations of %Ariadne can be found on the
 
  - \ref computable_analysis_page
  - \ref topology_page
+ - \ref type_system_page
  - \ref logic_page
  - \ref real_numbers_page
  - \ref linear_algebra_page

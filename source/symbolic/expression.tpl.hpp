@@ -62,26 +62,26 @@ template<class T> struct VariableExpressionNode : public ExpressionNode<T> {
 };
 template<class T, class A=T> struct UnaryExpressionNode : public ExpressionNode<T> {
     Expression<A> arg;
-    UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<T>(op), arg(a) { }
+    UnaryExpressionNode(const Operator& o, Expression<A> const& a) : ExpressionNode<T>(o), arg(a) { }
 };
 template<class T, class A1=T, class A2=A1> struct BinaryExpressionNode : public ExpressionNode<T> {
     Expression<T> arg1; Expression<T> arg2;
 };
 template<class T> struct BinaryExpressionNode<T> : public ExpressionNode<T> {
     Expression<T> arg1; Expression<T> arg2;
-    BinaryExpressionNode(const Operator& op, Expression<T> const& a1, Expression<T> const& a2)
-        : ExpressionNode<T>(op), arg1(a1), arg2(a2) { }
+    BinaryExpressionNode(const Operator& o, Expression<T> const& a1, Expression<T> const& a2)
+        : ExpressionNode<T>(o), arg1(a1), arg2(a2) { }
 };
 template<class T> struct BinaryExpressionNode<typename Logic<T>::Type,T,T> : public ExpressionNode<typename Logic<T>::Type> {
     typedef typename Logic<T>::Type R; typedef T A;
     Expression<A> arg1; Expression<A> arg2;
-    BinaryExpressionNode(const Operator& op, Expression<A> const& a1, Expression<A> const& a2)
-        : ExpressionNode<R>(op), arg1(a1), arg2(a2) { }
+    BinaryExpressionNode(const Operator& o, Expression<A> const& a1, Expression<A> const& a2)
+        : ExpressionNode<R>(o), arg1(a1), arg2(a2) { }
 };
 template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public UnaryExpressionNode<R,A> {
     N num;
-    ScalarExpressionNode(const Operator& op, Expression<R> const& a, N n)
-        : UnaryExpressionNode<R,A>(op,a), num(n) { }
+    ScalarExpressionNode(const Operator& o, Expression<R> const& a, N n)
+        : UnaryExpressionNode<R,A>(o,a), num(n) { }
 };
 
 template<class T> ExpressionNode<T>::~ExpressionNode() { }
@@ -91,9 +91,9 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Expres
 }
 
 
-template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { };
-template<class T> Expression<T>::Expression(const T& c): _root(new ConstantExpressionNode<T>(c)) { };
-template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new NamedConstantExpressionNode<T>(c)) { };
+template<class T> Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { }
+template<class T> Expression<T>::Expression(const T& c): _root(new ConstantExpressionNode<T>(c)) { }
+template<class T> Expression<T>::Expression(const Constant<T>& c): _root(new NamedConstantExpressionNode<T>(c)) { }
 template<class T> Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
 template<class T> Expression<T> Expression<T>::constant(const T& c) {
     return Expression<T>(SharedPointer<const ExpressionNode<T>>(new ConstantExpressionNode<T>(c))); }
@@ -137,6 +137,7 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
             if(rlp) { return join(rlp->arg1.arguments(),rlp->arg2.arguments()); }
             const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_raw_ptr());
             if(strp) { return join(strp->arg1.arguments(),strp->arg2.arguments()); }
+            [[fallthrough]];
         }
         default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
     }
@@ -266,6 +267,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e) {
             if(rlp) { return join(arguments(rlp->arg1),arguments(rlp->arg2)); }
             const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_raw_ptr());
             if(strp) { return join(arguments(strp->arg1),arguments(strp->arg2)); }
+            [[fallthrough]];
         }
         default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
     }

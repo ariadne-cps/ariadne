@@ -84,12 +84,15 @@ class Expression
     Expression();
     //! \brief Construct an expression from a numerical value.
     Expression(const T& c);
+    template<class U, EnableIf<IsConvertible<U,T>> =dummy> Expression(const U& c) : Expression(T(c)) { }
     //! \brief Construct an expression from a named constant.
     Expression(const Constant<T>& c);
     //! \brief Construct an expression from a variable.
     Expression(const Variable<T>& v);
     //! \brief Construct a constant expression from a value.
     static Expression<T> constant(const ValueType& c);
+    //! \brief Construct a constant expression from a named variable value.
+    static Expression<T> constant(const Constant<ValueType>& c);
     //! \brief Construct an expression from a name.
     static Expression<T> variable(const Identifier& c);
 
@@ -127,30 +130,44 @@ class Expression
 //! \name Evaluation and related operations.
 //! \related Expression
 
+template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Valuation<T>& x);
+template<class T> T evaluate(const Expression<T>& e, const Valuation<T>& x);
+
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
-Boolean evaluate(const Expression<Boolean>& e, const StringValuation& q);
-String evaluate(const Expression<String>& e, const StringValuation& q);
-Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
-Real evaluate(const Expression<Real>& e, const Valuation<Real>& q);
-Kleenean evaluate(const Expression<Kleenean>& e, const Valuation<Real>& q);
+template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
+template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
-template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x);
-
+template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Map<Identifier,T>& x);
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class T> T evaluate(const Expression<T>& e, const Map<Identifier,T>& x);
 
 //! \brief Extract the arguments of expression \a e.
 template<class T> Set<Identifier> arguments(const Expression<T>& e);
 
+//! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
+//! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
-template<class T> Bool is_constant(const Expression<T>& e, const typename Expression<T>::ValueType& c);
+template<class T> Bool is_constant(const Expression<T>& e, const SelfType<T>& c);
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable with name \a vn.
 template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn);
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable \a v.
 template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v);
+
+//! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
+Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
+Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically additive in the variables \a vs.
+Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
@@ -166,22 +183,6 @@ Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
 
 //! \brief Given \a sign when the predicate \a p is true.
 Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
-
-//! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
-template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
-
-//! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
-template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
-template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
-
-//! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
-Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the vector expression \a e is syntactically additive in the variables \a vs.
-Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 
 //! \brief Simplify the expression \a e.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);

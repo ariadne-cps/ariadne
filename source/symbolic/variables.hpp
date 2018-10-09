@@ -196,8 +196,6 @@ template<class T> class LetVariable
     friend LetVariable<T> let(const Variable<T>& var) { return LetVariable<T>(var); }
     //! \brief Construct an assignment statement representing the algebraic equation \a var := \a expr.
     inline Assignment<Variable<T>,Expression<T>> operator=(const Expression<T>& expr) const;
-    inline Assignment<Variable<T>,Expression<T>> operator=(const Variable<T>& expr) const;
-    inline Assignment<Variable<T>,Expression<T>> operator=(const T& c) const;
   private:
     explicit LetVariable(const Variable<T>& var) : ExtendedVariable<T>(var,VariableCategory::SIMPLE) { }
 };
@@ -213,7 +211,6 @@ template<class T> class PrimedVariable
     friend PrimedVariable<T> prime(const Variable<T>& var) { return PrimedVariable<T>(var); }
     //! \brief Construct an assignment statement representing the differential equation \a var' := \a expr.
     inline Assignment<PrimedVariable<T>,Expression<T>> operator=(const Expression<T>& e) const;
-    inline Assignment<PrimedVariable<T>,Expression<T>> operator=(const T& c) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var,VariableCategory::PRIMED) { }
 };
@@ -229,7 +226,6 @@ template<class T> class DottedVariable
     friend DottedVariable<Real> dot(const Variable<Real>& var);
     //! \brief Construct an assignment statement representing the differential equation \a dot(var) := \a expr.
     inline Assignment<DottedVariable<T>,Expression<T>> operator=(const Expression<T>& e) const;
-    inline Assignment<DottedVariable<T>,Expression<T>> operator=(const T& c) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var,VariableCategory::DOTTED) { }
 };

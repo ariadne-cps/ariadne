@@ -39,6 +39,8 @@
 #include "logical.hpp"
 #include "builtin.hpp"
 #include "twoexp.hpp"
+#include "integer.hpp"
+#include "dyadic.hpp"
 
 namespace Ariadne {
 
@@ -57,17 +59,18 @@ static_assert(not IsGenericNumericType<FloatValue<MultiplePrecision>>::value,"")
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 //! \sa FloatDP , FloatMP, FloatBall, FloatBounds, FloatApproximation.
 template<class F> class Value
-    : DispatchNumericOperations<Value<F>,Bounds<F>>
-    , DispatchComparisonOperations<Value<F>,Boolean>
+    : public DefineFieldOperators<Value<F>,Bounds<F>>
+    , public DefineComparisonOperators<Value<F>,LessTrait<Value<F>>,EqualsTrait<Value<F>>>
+    , public DefineConcreteGenericOperators<Value<F>>
+   //, DispatchNumericOperations<Value<F>,Bounds<F>>
+    //, DispatchComparisonOperations<Value<F>,Boolean>
     , DefineMixedComparisonOperators<Value<F>,ExactNumber,Boolean>
     , DefineMixedComparisonOperators<Value<F>,Rational,Boolean>
     , DefineMixedComparisonOperators<Value<F>,Dyadic,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Integer,Boolean>
 //    , DefineMixedComparisonOperators<Value<F>,Int,Boolean>
 //        , public DispatchFloatOperations<Ball<F>>
-        , public DispatchFloatOperations<Bounds<F>>
-    , DefineConcreteGenericArithmeticOperators<Value<F>>
-    , DefineConcreteGenericComparisonOperators<Value<F>>
+       // , public DispatchFloatOperations<Bounds<F>>
 {
   protected:
     typedef ExactTag P; typedef typename F::PrecisionType PR;
@@ -111,14 +114,102 @@ template<class F> class Value
 
     template<class FE> FloatBall<PR,Ariadne::PrecisionType<FE>> pm(Error<FE> e) const;
   public:
+    friend Value<F> max(Value<F> const& x1,  Value<F> const& x2) {
+        return Value<F>(max(x1._v,x2._v)); }
+    friend Value<F> min(Value<F> const& x1,  Value<F> const& x2) {
+        return Value<F>(min(x1._v,x2._v)); }
+    friend Value<F> abs(Value<F> const& x) {
+        return Value<F>(abs(x._v)); }
+    friend PositiveLowerBound<F> mig(Value<F> const& x) {
+        return PositiveLowerBound<F>(abs(x._v)); }
+    friend PositiveUpperBound<F> mag(Value<F> const& x) {
+        return PositiveUpperBound<F>(abs(x._v)); }
+
+    friend Value<F> nul(Value<F> const& x) {
+        return Value<F>(nul(x._v)); }
+    friend Value<F> pos(Value<F> const& x) {
+        return Value<F>(pos(x._v)); }
+    friend Value<F> neg(Value<F> const& x) {
+        return Value<F>(neg(x._v)); }
+    friend Value<F> hlf(Value<F> const& x) {
+        return Value<F>(hlf(x._v)); }
+    friend Bounds<F> sqr(Value<F> const& x) {
+        return Bounds<F>(mul(down,x._v,x._v),mul(up,x._v,x._v)); }
+    friend Bounds<F> rec(Value<F> const& x) {
+        return Bounds<F>(rec(down,x._v),rec(up,x._v)); }
+    friend Bounds<F> add(Value<F> const& x1, Value<F> const& x2) {
+        return Bounds<F>(add(down,x1._v,x2._v),add(up,x1._v,x2._v)); }
+    friend Bounds<F> sub(Value<F> const& x1, Value<F> const& x2) {
+        return Bounds<F>(sub(down,x1._v,x2._v),sub(up,x1._v,x2._v)); }
+    friend Bounds<F> mul(Value<F> const& x1, Value<F> const& x2) {
+        return Bounds<F>(mul(down,x1._v,x2._v),mul(up,x1._v,x2._v)); }
+    friend Bounds<F> div(Value<F> const& x1, Value<F> const& x2) {
+        return Bounds<F>(div(down,x1._v,x2._v),div(up,x1._v,x2._v)); }
+
+    template<class PRE> friend Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre);
+    template<class PRE> friend Ball<F,RawFloatType<PRE>> sub(Value<F> const& x1, Value<F> const& x2, PRE pre);
+    template<class PRE> friend Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, Value<F> const& x2, PRE pre);
+    template<class PRE> friend Ball<F,RawFloatType<PRE>> div(Value<F> const& x1, Value<F> const& x2, PRE pre);
+
+    template<class FE> friend Value<F> add(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
+    template<class FE> friend Value<F> sub(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
+    template<class FE> friend Value<F> mul(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
+    template<class FE> friend Value<F> div(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
+
+    friend Value<F> mul(Value<F> const& x, TwoExp y) {
+        Value<F> yv(y,x.precision()); return Value<F>(mul(near,x.raw(),yv.raw())); }
+    friend Value<F> div(Value<F> const& x, TwoExp y) {
+        Value<F> yv(y,x.precision()); return Value<F>(div(near,x.raw(),yv.raw())); }
+
+    friend Bounds<F> pow(Value<F> const& x, Nat m) {
+        return pow(Bounds<F>(x),m); }
+    friend Bounds<F> pow(Value<F> const& x, Int n) {
+        return pow(Bounds<F>(x),n); }
+
+    friend Bounds<F> med(Value<F> const& x1, Value<F> const& x2) {
+        return add(hlf(x1),hlf(x2)); }
+    friend Bounds<F> rad(Value<F> const& x1, Value<F> const& x2) {
+        return sub(hlf(x2),hlf(x1)); }
+
+    friend Bounds<F> sqrt(Value<F> const& x) {
+        return Bounds<F>(sqrt(down,x._v),sqrt(up,x._v)); }
+    friend Bounds<F> exp(Value<F> const& x) {
+        return Bounds<F>(exp(down,x._v),exp(up,x._v)); }
+    friend Bounds<F> log(Value<F> const& x) {
+        return Bounds<F>(log(down,x._v),log(up,x._v)); }
+    friend Bounds<F> sin(Value<F> const& x) {
+        return sin(Bounds<F>(x)); }
+    friend Bounds<F> cos(Value<F> const& x) {
+        return cos(Bounds<F>(x)); }
+    friend Bounds<F> tan(Value<F> const& x) {
+        return tan(Bounds<F>(x)); }
+    friend Bounds<F> asin(Value<F> const& x) {
+        return asin(Bounds<F>(x)); }
+    friend Bounds<F> acos(Value<F> const& x) {
+        return acos(Bounds<F>(x)); }
+    friend Bounds<F> atan(Value<F> const& x) {
+        return Bounds<F>(atan(down,x._v),atan(up,x._v)); }
+
+    friend Boolean eq(Value<F> const& x1, Value<F> const& x2) {
+        return x1._v == x2._v; }
+    friend Boolean lt(Value<F> const& x1, Value<F> const& x2) {
+        return x1._v <  x2._v; }
+
+    friend Bool same(Value<F> const& x1, Value<F> const& x2) {
+        return x1._v==x2._v; }
+
+    friend OutputStream& write(OutputStream& os, Value<F> const& x) {
+        return write(os,x.raw(),Value<F>::output_places,to_nearest); }
+    friend InputStream& read(InputStream& is, Value<F>& x) {
+        auto v = nul(x._v); is >> v; ARIADNE_ASSERT(not is.fail()); x._v=v; return is;}
+
+    friend Integer integer_cast(Value<F> const& x) {
+        Dyadic w(x); Integer z=round(w); ARIADNE_DEBUG_ASSERT(z==w); return z; }
+  public:
     friend Value<F> operator*(Value<F> const&, TwoExp const&);
     friend Value<F> operator/(Value<F> const&, TwoExp const&);
     friend Value<F>& operator*=(Value<F>&, TwoExp const&);
     friend Value<F>& operator/=(Value<F>&, TwoExp const&);
-    friend Error<F> mag(Value<F> const&);
-    friend LowerBound<F> mig(Value<F> const&);
-    friend Bool same(Value<F> const&, Value<F> const&);
-    friend OutputStream& operator<<(OutputStream&, Value<F> const&);
   public:
     friend Comparison cmp(Value<F> const& x1, Rational const& q2) { return cmp(x1.raw(),q2); }
     friend Comparison cmp(Value<F> const& x1, Dyadic const& w2) { return cmp(x1.raw(),w2); }
@@ -176,10 +267,11 @@ template<class F> class Positive<Value<F>> : public Value<F> {
     friend PositiveBounds<F> operator*(PositiveValue<F> const& v1, PositiveValue<F> const& v2) {
         return cast_positive(static_cast<Value<F>const&>(v1)*static_cast<Value<F>const&>(v2)); }
 
-    friend Positive<Value<F>> hlf(Positive<Value<F>> const&);
+    friend Positive<Value<F>> hlf(Positive<Value<F>> const& v) {
+        return cast_positive(hlf(static_cast<Value<F>const&>(v))); }
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
         return pow(Positive<Bounds<F>>(x),m); }
-    friend Positive<Bounds<F>> pow(Positive<Bounds<F>> const& x, Int n) {
+    friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Int n) {
         return pow(Positive<Bounds<F>>(x),n); }
 };
 
@@ -192,6 +284,6 @@ extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatDP>::output_places;
 extern template Ariadne::Nat Ariadne::Value<Ariadne::FloatMP>::output_places;
 
 
-}
+} // namespace Ariadne
 
 #endif

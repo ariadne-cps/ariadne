@@ -1050,6 +1050,22 @@ template<class X> struct ProvideConcreteGenericArithmeticOperators<X,Void> {
     template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
 };
 
+template<class PX> struct ProvidePositiveFieldOperations;
+
+template<class X> struct ProvidePositiveFieldOperations<Positive<X>> {
+    typedef Positive<X> PX;
+    friend PX rec(PX const& x) { return cast_positive(rec(unsign(x))); }
+    friend PX add(PX const& x1, PX const& x2) { return cast_positive(add(unsign(x1),unsign(x2))); }
+    friend PX mul(PX const& x1, PX const& x2) { return cast_positive(mul(unsign(x1),unsign(x2))); }
+    friend PX div(PX const& x1, PX const& x2) { return cast_positive(div(unsign(x1),unsign(x2))); }
+    friend PX pow(PX const& x, Nat m) { return cast_positive(pow(unsign(x),m)); }
+    friend PX pow(PX const& x, Int n) { return cast_positive(pow(unsign(x),n)); }
+    friend PX max(PX const& x1, PX const& x2) { return cast_positive(max(unsign(x1),unsign(x2))); }
+    friend PX max(PX const& x1,  X const& x2) { return cast_positive(max(unsign(x1),x2)); }
+    friend PX max( X const& x1, PX const& x2) { return cast_positive(max(x1,unsign(x2))); }
+    friend PX min(PX const& x1, PX const& x2) { return cast_positive(min(unsign(x1),unsign(x2))); }
+};
+
 
 template<class X, class Y, class R, class LT, class EQ=LT> struct ProvideConvertedComparisonOperations : DefineMixedComparisonOperators<X,Y,LT,EQ> {
     typedef LT GT;

@@ -93,6 +93,8 @@ template<class R, class A> R integer_cast(const A& _a);
 //! \ingroup NumericModule
 //! \brief A modifier declaring that a number is positive.
 template<class X> class Positive;
+template<class X> inline X const& unsign(Positive<X> const& x) { return x; }
+
 
 template<class P=Void> class Number;
 

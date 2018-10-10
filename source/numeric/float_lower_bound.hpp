@@ -48,8 +48,12 @@ template<class F> struct NumericTraits<LowerBound<F>> {
 //! \brief Floating-point lower bounds for real numbers.
 //! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatUpperBound.
 template<class F> class LowerBound
-    : public DispatchDirectedFloatOperations<LowerBound<F>>
-    , public DispatchFloatOperations<Approximation<F>>
+    : public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
+    , public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
+    , public DefineDirectedComparisonOperators<LowerBound<F>,UpperBound<F>,LessTrait<LowerBound<F>>,EqualsTrait<LowerBound<F>>>
+    , public DefineDirectedComparisonOperators<UpperBound<F>,LowerBound<F>,LessTrait<UpperBound<F>>,EqualsTrait<UpperBound<F>>>
+    , public DefineConcreteGenericOperators<LowerBound<F>>
+    , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
     typedef LowerTag P; typedef typename F::PrecisionType PR;
@@ -94,9 +98,80 @@ template<class F> class LowerBound
     RawType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
-    friend Bool same(LowerBound<F> const&, LowerBound<F> const&);
-    friend Bool refines(LowerBound<F> const&, LowerBound<F> const&);
-    friend LowerBound<F> refinement(LowerBound<F> const&, LowerBound<F> const&);
+    friend LowerBound<F> max(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(max(x1._l,x2._l)); }
+    friend LowerBound<F> min(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(min(x1._l,x2._l)); }
+    friend Approximation<F> abs(LowerBound<F> const& x) {
+        return abs(Approximation<F>(x)); }
+
+    friend LowerBound<F> nul(LowerBound<F> const& x) {
+        return LowerBound<F>(pos(x._l)); }
+    friend LowerBound<F> pos(LowerBound<F> const& x) {
+        return LowerBound<F>(pos(x._l)); }
+    friend UpperBound<F> neg(LowerBound<F> const& x) {
+        return UpperBound<F>(neg(x._l)); }
+    friend LowerBound<F> hlf(LowerBound<F> const& x) {
+        return LowerBound<F>(hlf(x._l)); }
+
+    friend LowerBound<F> add(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(add(down,x1._l,x2._l)); }
+    friend Approximation<F> sub(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return UpperBound<F>(sub(near,x1._l,x2._l)); }
+    friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2) {
+        return LowerBound<F>(sub(down,x1._l,x2._u)); }
+
+    friend Approximation<F> pow(LowerBound<F> const& x, Int n) {
+        return pow(Approximation<F>(x),n); }
+
+    friend LowerBound<F> sqrt(LowerBound<F> const& x) {
+        return LowerBound<F>(sqrt(down,x.raw())); }
+    friend PositiveLowerBound<F> exp(LowerBound<F> const& x) {
+        return PositiveLowerBound<F>(exp(down,x.raw())); }
+    friend LowerBound<F> log(PositiveLowerBound<F> const& x) {
+        return LowerBound<F>(log(down,x.raw())); }
+    friend LowerBound<F> atan(LowerBound<F> const& x) {
+        return LowerBound<F>(atan(down,x.raw())); }
+
+    friend PositiveLowerBound<F> max(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(max(x1._l,x2._l)); }
+    friend PositiveLowerBound<F> max(PositiveLowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(max(x1._l,x2._l)); }
+    friend PositiveLowerBound<F> max(LowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(max(x1._l,x2._l)); }
+    friend PositiveLowerBound<F> min(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(min(x1._l,x2._l)); }
+    friend PositiveLowerBound<F> rec(PositiveUpperBound<F> const& x) {
+        return PositiveLowerBound<F>(rec(down,x.raw())); }
+    friend PositiveLowerBound<F> add(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(add(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> mul(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> div(PositiveLowerBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
+    friend PositiveUpperBound<F> rec(PositiveLowerBound<F> const& x);
+    friend PositiveUpperBound<F> div(PositiveUpperBound<F> const& x1, PositiveLowerBound<F> const& x2);
+    friend PositiveLowerBound<F> pow(PositiveLowerBound<F> const& x, Nat m) {
+        return PositiveLowerBound<F>(pow(down,x.raw(),static_cast<int>(m))); }
+
+    friend ValidatedNegatedSierpinskian eq(LowerBound<F> const& x1, UpperBound<F> const& x2) {
+        if(x1._l>x2._u) { return false; }
+        else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); } }
+    friend ValidatedUpperKleenean lt(LowerBound<F> const& x1, UpperBound<F> const& x2) {
+        if(x1._l>=x2._u) { return false; }
+        else { return ValidatedUpperKleenean(LogicalValue::LIKELY); } }
+
+    friend Bool same(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return x1._l==x2._l; }
+    friend Bool refines(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return x1._l>=x2._l; }
+    friend LowerBound<F> refinement(LowerBound<F> const& x1, LowerBound<F> const& x2) {
+        return LowerBound<F>(max(x1._l,x2._l)); }
+
+    friend OutputStream& operator<<(OutputStream& os, LowerBound<F> const& x) {
+        return write(os,x.raw(),Bounds<F>::output_places,downward); }
+    friend InputStream& operator>>(InputStream& is, LowerBound<F>& x) {
+        ARIADNE_NOT_IMPLEMENTED; }
   public:
     friend LowerBound<F> operator*(PositiveBounds<F> const& x1, LowerBound<F> const& x2) {
         return LowerBound<F>(mul(down,x2.raw()>=0?x1.lower().raw():x1.upper().raw(),x2.raw())); }
@@ -120,7 +195,9 @@ template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> co
 template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
 
 template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
-    , public DispatchPositiveDirectedFloatOperations<PositiveLowerBound<F>,PositiveUpperBound<F>>
+    , ProvideDirectedSemiFieldOperators<PositiveLowerBound<F>,PositiveUpperBound<F>>
+    , ProvideDirectedSemiFieldOperators<PositiveUpperBound<F>,PositiveLowerBound<F>>
+    , DefineConcreteGenericOperators<PositiveLowerBound<F>>
 {
     using typename LowerBound<F>::PR;
   public:
@@ -151,6 +228,6 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
 template<class F> inline PositiveLowerBound<F> cast_positive(LowerBound<F> const& x) {
     return PositiveLowerBound<F>(x); }
 
-}
+} // namespace Ariadne
 
 #endif

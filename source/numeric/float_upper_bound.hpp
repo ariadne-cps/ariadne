@@ -48,8 +48,12 @@ template<class F> struct NumericTraits<UpperBound<F>> {
 //! \brief Floating-point upper bounds for real numbers.
 //! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatLowerBound.
 template<class F> class UpperBound
-    : public DispatchDirectedFloatOperations<UpperBound<F>>
-    , public DispatchFloatOperations<Approximation<F>>
+    : public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
+    , public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
+    , public DefineDirectedComparisonOperators<UpperBound<F>,LowerBound<F>,LessTrait<UpperBound<F>>,EqualsTrait<UpperBound<F>>>
+    , public DefineDirectedComparisonOperators<LowerBound<F>,UpperBound<F>,LessTrait<LowerBound<F>>,EqualsTrait<LowerBound<F>>>
+    , public DefineConcreteGenericOperators<UpperBound<F>>
+    , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
     typedef UpperTag P; typedef typename F::PrecisionType PR;
@@ -94,10 +98,85 @@ template<class F> class UpperBound
     RawType const& raw() const { return _u; }
     RawType& raw() { return _u; }
     double get_d() const { return _u.get_d(); }
-  public: // To be removed
-    friend Bool same(UpperBound<F> const&, UpperBound<F> const&);
-    friend Bool refines(UpperBound<F> const&, UpperBound<F> const&);
-    friend UpperBound<F> refinement(UpperBound<F> const&, UpperBound<F> const&);
+  public:
+    friend UpperBound<F> max(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(max(x1._u,x2._u)); }
+    friend UpperBound<F> min(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(min(x1._u,x2._u)); }
+    friend Approximation<F> abs(UpperBound<F> const& x) {
+        return abs(Approximation<F>(x)); }
+
+    friend UpperBound<F> nul(UpperBound<F> const& x) {
+        return UpperBound<F>(pos(x._u)); }
+    friend UpperBound<F> pos(UpperBound<F> const& x) {
+        return UpperBound<F>(pos(x._u)); }
+    friend LowerBound<F> neg(UpperBound<F> const& x) {
+        return LowerBound<F>(neg(x._u)); }
+    friend UpperBound<F> hlf(UpperBound<F> const& x) {
+        return UpperBound<F>(hlf(x._u)); }
+    friend UpperBound<F> sqr(UpperBound<F> const& x) {
+        ARIADNE_ASSERT(false); return UpperBound<F>(mul(up,x._u,x._u)); }
+
+    friend UpperBound<F> add(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(add(up,x1._u,x2._u)); }
+    friend Approximation<F> sub(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(sub(near,x1._u,x2._u)); }
+    friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2) {
+        return UpperBound<F>(sub(up,x1._u,x2._l)); }
+
+    friend Approximation<F> pow(UpperBound<F> const& x, Int n) {
+        return pow(Approximation<F>(x),n); }
+
+    friend UpperBound<F> sqrt(UpperBound<F> const& x) {
+        return UpperBound<F>(sqrt(up,x.raw())); }
+    friend PositiveUpperBound<F> exp(UpperBound<F> const& x) {
+        return PositiveUpperBound<F>(exp(up,x.raw())); }
+    friend UpperBound<F> log(PositiveUpperBound<F> const& x) {
+        return UpperBound<F>(log(up,x.raw())); }
+    friend UpperBound<F> atan(UpperBound<F> const& x) {
+        return UpperBound<F>(atan(up,x.raw())); }
+
+    friend PositiveUpperBound<F> max(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(max(x1._u,x2._u)); }
+    friend PositiveUpperBound<F> max(PositiveUpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(max(x1._u,x2._u)); }
+    friend PositiveUpperBound<F> max(UpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(max(x1._u,x2._u)); }
+    friend PositiveUpperBound<F> min(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(min(x1._u,x2._u)); }
+    friend PositiveUpperBound<F> rec(PositiveLowerBound<F> const& x) {
+        return PositiveUpperBound<F>(rec(up,x.raw())); }
+    friend PositiveUpperBound<F> add(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(add(up,x1.raw(),x2.raw())); }
+    friend PositiveUpperBound<F> mul(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
+    friend PositiveUpperBound<F> div(PositiveUpperBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> rec(PositiveUpperBound<F> const& x);
+    friend PositiveLowerBound<F> div(PositiveLowerBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> pow(PositiveUpperBound<F> const& x, Nat m) {
+        return PositiveUpperBound<F>(pow(up,x._u,static_cast<Int>(m))); }
+
+    friend ValidatedNegatedSierpinskian eq(UpperBound<F> const& x1, LowerBound<F> const& x2) {
+        if(x1._u<x2._l) { return false; }
+        else { return ValidatedNegatedSierpinskian(LogicalValue::INDETERMINATE); } }
+    friend ValidatedLowerKleenean lt(UpperBound<F> const& x1, LowerBound<F> const& x2) {
+        if(x1._u< x2._l) { return true; }
+        else { return ValidatedLowerKleenean(LogicalValue::UNLIKELY); } }
+
+    friend Bool same(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return x1._u==x2._u; }
+    friend Bool refines(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return x1._u <= x2._u; }
+    friend UpperBound<F> refinement(UpperBound<F> const& x1, UpperBound<F> const& x2) {
+        return UpperBound<F>(min(x1._u,x2._u)); }
+
+    friend Integer integer_cast(UpperBound<F> const& x) { return Integer(static_cast<int>(x._u.get_d())); }
+
+    friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
+        return write(os,x.raw(),Bounds<F>::output_places,upward); }
+    friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
+        ARIADNE_NOT_IMPLEMENTED; }
   public:
     friend UpperBound<F> operator*(PositiveBounds<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(mul(up,x2.raw()>=0?x1.upper().raw():x1.lower().raw(),x2.raw())); }
@@ -121,7 +200,9 @@ template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> co
 template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Number<UpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
 
 template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
-    , public DispatchPositiveDirectedFloatOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
+    , ProvideDirectedSemiFieldOperators<PositiveUpperBound<F>,PositiveLowerBound<F>>
+    , ProvideDirectedSemiFieldOperators<PositiveLowerBound<F>,PositiveUpperBound<F>>
+    , DefineConcreteGenericOperators<PositiveUpperBound<F>>
 {
     using typename UpperBound<F>::PR;
   public:
@@ -153,6 +234,6 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
 template<class F> inline PositiveUpperBound<F> cast_positive(UpperBound<F> const& x) {
     return PositiveUpperBound<F>(x); }
 
-}
+} // namespace Ariadne
 
 #endif

@@ -536,13 +536,17 @@ struct CrossingData
     //! during a crossing. e.g. increasing.
     CrossingKind crossing_kind;
     //! \brief The range of times at which the crossing may occur.
-    ExactIntervalType crossing_time_range;
+    UpperIntervalType crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ValidatedScalarMultivariateFunctionModelDP crossing_time;
     //! \brief The time \f$\mu(x)\f$ at which the guard function reaches a maximum or minimum
     //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
     ValidatedScalarMultivariateFunctionModelDP critical_time;
+    //! \brief The range of values of the guard function at the critical time.
+    UpperIntervalType guard_range_at_critical_time;
+    //! \brief The range of values of the guard function at the critical time.
+    UpperBoxType evolve_bounds_at_critical_time;
 };
 OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 

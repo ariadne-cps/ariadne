@@ -160,7 +160,13 @@ inline OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const&
     if(crossing_data.crossing_kind==CrossingKind::TRANSVERSE) {
         os<<",crossing_time_range="<<crossing_data.crossing_time.range();
         os<<",crossing_time_error="<<crossing_data.crossing_time.error();
+    } else if(crossing_data.crossing_kind==CrossingKind::GRAZING) {
+        os<<",critical_time_range="<<crossing_data.critical_time.range();
+        os<<",critical_time_error="<<crossing_data.critical_time.error();
+        os<<",guard_range_at_critical_time="<<crossing_data.guard_range_at_critical_time;
+        os<<",evolve_bounds_at_critical_time="<<crossing_data.evolve_bounds_at_critical_time;
     }
+
     return os;
 }
 
@@ -605,6 +611,7 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     flow_model=restriction(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
+    ARIADNE_LOG(2,"flow_model="<<flow_model<<"\n");
     return flow_model;
 }
 
@@ -781,8 +788,12 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     HybridEnclosure evolve_set_at_critical_time=initial_set;
                     evolve_set_at_critical_time.apply_space_evolve_step(flow,critical_time);
                     ValidatedVectorMultivariateFunctionModelDP identity = factory(critical_time).create_identity();
-                    //ValidatedVectorMultivariateFunctionModelDP::identity(critical_time.domain(),critical_time.sweeper());
-                    UpperIntervalType guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
+                    //ValidatedVectorFunctionModelDP::identity(critical_time.domain(),critical_time.sweeper());
+                    UpperBoxType evolve_bounds_at_critical_time=evolve_set_at_critical_time.bounding_box().euclidean_set();
+                    UpperIntervalType guard_range_at_critical_time
+                        =intersection(apply(guard,evolve_bounds_at_critical_time),evolve_set_at_critical_time.range_of(guard));
+                    // Less accurate version: guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
+                    ARIADNE_LOG(8,"evolve_bounds_at_critical_time="<<evolve_bounds_at_critical_time<<"\n");
                     ARIADNE_LOG(8,"guard_range_at_critical_time="<<guard_range_at_critical_time<<"\n");
                     if(definitely(guard_range_at_critical_time.upper()<0)) {
                         // No crossing
@@ -819,10 +830,14 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                             // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
                             crossings[event]=CrossingData(CrossingKind::GRAZING);
                             crossings[event].critical_time=critical_time;
+                            crossings[event].evolve_bounds_at_critical_time=evolve_bounds_at_critical_time;
+                            crossings[event].guard_range_at_critical_time=guard_range_at_critical_time;
                         }
                     } else {
                         crossings[event]=CrossingData(CrossingKind::GRAZING);
                         crossings[event].critical_time=critical_time;
+                        crossings[event].evolve_bounds_at_critical_time=evolve_bounds_at_critical_time;
+                        crossings[event].guard_range_at_critical_time=guard_range_at_critical_time;
                     }
                 }
                 catch(const SolverException& e) {
@@ -1053,6 +1068,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                     = compose( guard_function, unchecked_compose( flow, join(starting_state_function, elapsed_time_function) ) );
                 ValidatedScalarMultivariateFunctionModelDP maximal_guard_function
                     = compose( guard_function, unchecked_compose( flow, join(starting_state_function, critical_time_function) ) );
+                UpperIntervalType guard_range_at_critical_time = guard_crossing_data.guard_range_at_critical_time;
                 ARIADNE_ASSERT_MSG(starting_state_function.argument_size()==set.parameter_domain().size(),
                                    starting_state_function<<" "<<set);
                 ARIADNE_ASSERT_MSG(critical_time_function.argument_size()==set.parameter_domain().size(),
@@ -1087,10 +1103,10 @@ _apply_guard(List<HybridEnclosure>& sets,
 
                 // Split the set into three components,
                 //   hitting_set: points which hit the guard in the future
-                //   missing_set: points whose trajectories hich miss the guard completely
+                //   missing_set: points whose trajectories miss the guard completely
                 //   past_set: points which would have hit the guard in the past, but do not in the future
-                HybridEnclosure hitting_set=set;
                 HybridEnclosure& missing_set=set;
+                HybridEnclosure hitting_set=set;
                 HybridEnclosure past_set=set;
                 missing_set.new_parameter_constraint( event, maximal_guard_function <= zero );
                 hitting_set.new_parameter_constraint( event, maximal_guard_function >= zero );
@@ -1098,16 +1114,20 @@ _apply_guard(List<HybridEnclosure>& sets,
                 hitting_set.new_parameter_constraint( event, final_guard_function <= zero );
                 past_set.new_parameter_constraint( event, maximal_guard_function >= zero );
                 past_set.new_parameter_constraint( event, critical_time_function <= zero );
-//                hitting_set.reduce();
-//                missing_set.reduce();
-//                past_set.reduce();
-                if(definitely(missing_set.is_empty())) {
+                hitting_set.reduce();
+                missing_set.reduce();
+                past_set.reduce();
+                std::cerr<<"final_guard_range="<<final_guard_function.range()<<"\n";
+                std::cerr<<"maximal_guard_function="<<maximal_guard_function<<"\n";
+                std::cerr<<"final_guard_function="<<final_guard_function<<"\n";
+                std::cerr<<"elapsed_time_function="<<elapsed_time_function<<"\n";
+                std::cerr<<"critical_time_function="<<critical_time_function<<"\n";
+                std::cerr<<"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty()<<"\n";
+                std::cerr<<"hitting_set="<<hitting_set<<"\n";
+                // FIXME: The guard range at the critical time may provide a stronger guarantee of emptiness than maximal_guard_function > zero, but we should ideally not rely on this
+                if(definitely(guard_range_at_critical_time > 0 || missing_set.is_empty())) {
                     // swap out missing set
-                    if (not definitely(hitting_set.is_empty())) {
-                        std::swap(hitting_set,missing_set);
-                    } else {
-                        std::swap(past_set,missing_set);
-                    }
+                    std::swap(hitting_set,missing_set);
                 } else if(not definitely(hitting_set.is_empty())) {
                     sets.append(hitting_set);
                 }
@@ -1255,6 +1275,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     if(verbosity==1 || verbosity==2) { _log_summary(evolution_data,starting_set); }
     ARIADNE_LOG(2,"starting_set: bounding_box="<<starting_set.bounding_box()<<", time_range="<<starting_set.time_function().range()<<"    \n");
+    ARIADNE_LOG(2,"starting_set="<<starting_set<<"    \n");
 
 
     // Compute the bounding box of the enclosure

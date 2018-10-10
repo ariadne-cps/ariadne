@@ -53,7 +53,7 @@ void TestCrossingsIssue::test_crossings()
     /// Build the Hybrid System
     RealConstant v("v",0.1_dec);
     RealConstant L("L",0.00025_dec);
-    RealConstant M("M",0.005_dec);
+    RealConstant M("M",0.004_dec);
 
     /// Create a HybridAutomaton object
     AtomicHybridAutomaton automaton("compute_crossings_issue");
@@ -69,13 +69,13 @@ void TestCrossingsIssue::test_crossings()
     TimeVariable t;
 
     automaton.new_mode(far, {dot(x)=v});
-    automaton.new_mode(close, {dot(x)=v});
+    automaton.new_mode(close, {dot(x)=v/2});
 
     DiscreteEvent comes("comes");
     DiscreteEvent leaves("leaves");
 
-    automaton.new_transition(far,comes,close,{next(x)=x},sqr(x-M)<=sqr(L),EventKind::IMPACT);
-	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L),EventKind::IMPACT);
+    automaton.new_transition(far,comes,close,{next(x)=x+4*M},sqr(x-M)<=sqr(L),EventKind::URGENT);
+//	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L),EventKind::IMPACT);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(automaton);
@@ -85,12 +85,14 @@ void TestCrossingsIssue::test_crossings()
     evolver.configuration().set_maximum_enclosure_radius(0.5);
     evolver.configuration().set_maximum_step_size(0.05);
 
+    evolver.set_function_factory(*make_taylor_function_factory(1e-10));
+
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     Real initial_x(0);
     HybridSet initial_set({automaton|far},{x==initial_x});
 
-    Nat max_n = 3; Real max_t = 0.8_dec;
+    Nat max_n = 3; Real max_t = 0.2_dec;
     HybridTime evolution_time(max_t,max_n);
 
     std::cout << "Computing orbit... " << std::flush;

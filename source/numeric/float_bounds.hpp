@@ -187,8 +187,10 @@ template<class F> class Bounds
 
     friend Bounds<F> add(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(add(down,x1._l,x2._l),add(up,x1._u,x2._u)); } //!<  \f$x_1+x_2\f$
+        //return Bounds<F>(neg(add(up,neg(x1._l),neg(x2._l))),add(up,x1._u,x2._u)); } //!<  \f$x_1+x_2\f$
     friend Bounds<F> sub(Bounds<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(sub(down,x1._l,x2._u),sub(up,x1._u,x2._l)); } //!<  \f$x_1-x_2\f$
+        //return Bounds<F>(sub(down,x1._l,x2._u),sub(up,x1._u,x2._l)); } //!<  \f$x_1-x_2\f$
+        return Bounds<F>(neg(sub(up,x2._u,x1._l)),sub(up,x1._u,x2._l)); } //!<  \f$x_1-x_2\f$
     friend Bounds<F> mul(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Operations<Bounds<F>>::_mul(x1,x2); } //!<  \f$x_1 \times x_2\f$
     friend Bounds<F> div(Bounds<F> const& x1, Bounds<F> const& x2) {

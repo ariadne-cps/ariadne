@@ -251,6 +251,18 @@ class FloatDP {
     friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v*=x2v; return x1; }
     friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v/=x2v; return x1; }
 
+    template<class OP> friend FloatDP apply(OP op, RoundUpward rnd, FloatDP x1, FloatDP x2, FloatDP x3) { return op(x1,x2,x3); }
+    template<class OP> friend FloatDP apply(OP op, RoundUpward rnd, FloatDP x1, FloatDP x2) {
+        if(IsSame<OP,Add>::value and false) { std::cerr<<"  apply(Add,RoundUpward,...)\n"; } return op(x1,x2); }
+    template<class OP> friend FloatDP apply(OP op, RoundUpward rnd, FloatDP x) { return op(x); }
+    template<class OP> friend FloatDP apply(OP op, RoundUpward rnd, FloatDP x, Int n) { return op(x,n); }
+
+    template<class OP, class... XS> friend decltype(auto) apply(OP op, RoundingModeType rnd, XS... xs) {
+        if(IsSame<OP,Add>::value) { std::cerr<<"  apply(Add,RoundingModeType,...)\n"; }
+        auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
+        auto r=op(xs...); FloatDP::set_rounding_mode(old_rnd); return r;
+    }
+/*
     template<class OP> friend FloatDP apply(OP op, RoundingMode64 rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x1,x2,x3); FloatDP::set_rounding_mode(old_rnd); return r;
@@ -270,14 +282,34 @@ class FloatDP {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x,n); FloatDP::set_rounding_mode(old_rnd); return r;
     }
+*/
+//    friend FloatDP add(RoundDownward rnd, FloatDP x1, FloatDP x2) { std::cerr<<"add(RoundDownward,...)\n"; return apply(Add(),rnd,x1,x2); }
+//    friend FloatDP add(RoundToNearest rnd, FloatDP x1, FloatDP x2) { std::cerr<<"add(RoundToNearest,...)\n"; return apply(Add(),rnd,x1,x2); }
+//    friend FloatDP add(RoundUpward rnd, FloatDP x1, FloatDP x2) { std::cerr<<"add(RoundUpward,...)\n"; return apply(Add(),rnd,x1,x2); }
+    friend FloatDP add(RoundDownward rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
+    friend FloatDP add(RoundToNearest rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
+    friend FloatDP add(RoundUpward rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
+    friend FloatDP sub(RoundDownward rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
+    friend FloatDP sub(RoundToNearest rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
+    friend FloatDP sub(RoundUpward rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
+    friend FloatDP mul(RoundDownward rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
+    friend FloatDP mul(RoundToNearest rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
+    friend FloatDP mul(RoundUpward rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
+    friend FloatDP div(RoundDownward rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
+    friend FloatDP div(RoundToNearest rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
+    friend FloatDP div(RoundUpward rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
+    friend FloatDP rec(RoundDownward rnd, FloatDP x) { return apply(Rec(),rnd,x); }
+    friend FloatDP rec(RoundToNearest rnd, FloatDP x) { return apply(Rec(),rnd,x); }
+    friend FloatDP rec(RoundUpward rnd, FloatDP x) { return apply(Rec(),rnd,x); }
 
     // Explicitly rounded operations
     friend FloatDP nul(RoundingModeType rnd, FloatDP x) { return apply(Nul(),rnd,x); }
     friend FloatDP pos(RoundingModeType rnd, FloatDP x) { return apply(Pos(),rnd,x); }
     friend FloatDP neg(RoundingModeType rnd, FloatDP x) { return apply(Neg(),rnd,x); }
     friend FloatDP hlf(RoundingModeType rnd, FloatDP x) { return apply(Hlf(),rnd,x); }
+//    friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { std::cerr<<"add(RoundingModeType,...)\n"; return apply(Add(),rnd,x1,x2); }
     friend FloatDP add(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Add(),rnd,x1,x2); }
-    friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
+friend FloatDP sub(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Sub(),rnd,x1,x2); }
     friend FloatDP mul(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Mul(),rnd,x1,x2); }
     friend FloatDP div(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return apply(Div(),rnd,x1,x2); }
     friend FloatDP fma(RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) { return apply(Fma(),rnd,x1,x2,x3); }

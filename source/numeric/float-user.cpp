@@ -48,6 +48,9 @@
 
 namespace Ariadne {
 
+bool initialise() { set_rounding_upward(); return true; }
+const bool initialised = initialise();
+
 FloatDP set(FloatMP const& x, RoundUpward rnd, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 FloatDP set(FloatMP const& x, RoundDownward rnd, DoublePrecision pr) { return FloatDP(Dyadic(x),rnd,pr); }
 

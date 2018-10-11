@@ -1,4 +1,4 @@
-/***************************************************************************
+  /***************************************************************************
  *            differential_inclusion.cpp
  *
  *  Copyright  2008-18  Luca Geretti, Pieter Collins, Sanja Zivanovic
@@ -334,7 +334,7 @@ template<> ErrorType twoparam_component_error<SingularInput>(C1Norms const& n, P
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(C1Norms const& n, PositiveFloatDPValue const& h) const {
 
     Vector<ErrorType> result(n.dimension(),worstcase_error<A,R>(n,h));
-    
+
     if (_enable_componentwise_error) {
         for (auto j: range(n.dimension()))
             result[j] = min(result[j],component_error<A,R>(n,h,j));

@@ -240,7 +240,7 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
     while(iter!=this->end() && iter->index().degree()<=2) {
-        UniformConstReference<MultiIndex> a=iter->index(); 
+        UniformConstReference<MultiIndex> a=iter->index();
         UniformConstReference<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
@@ -833,6 +833,34 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
     // TODO: This iteration repeats computation of lower-degree terms, so could be made more efficient
     for(SizeType i=0; i<deg+1u; ++i) {
         dphi=dx0+antiderivative(compose(df,dphi),n);
+    }
+    return dphi;
+}
+
+template<class X>
+Vector<Differential<X>>
+_flow(const Vector<Differential<X>>& df, Vector<Differential<X>> const& dx0, Differential<X> const& dt, Vector<Differential<X>> const& a)
+{
+
+template<class X>
+Vector<Differential<X>>
+Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> const& x0, X const& t, Vector<X> const& a)
+{
+    ARIADNE_ASSERT(df.result_size()==x0.size());
+    ARIADNE_ASSERT(df.argument_size()==x0.size()+1u+a.size());
+    const SizeType n=x0.size(); // Number of state variables; also index of time variable
+    const SizeType m=a.size();
+    const SizeType deg=df.degree();
+    const X z=df.zero_element().zero_coefficient();
+    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,x0[i],i);});
+    Differential<X> dt=Differential<X>::variable(n+1u+m,0u,t,n);
+    Vector<Differential<X>> da=Vector<Differential<X>>(m,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,a[i],n+1+i);});
+    Vector<Differential<X>> dta=join(dt,da);
+
+    // TODO: This iteration repeats computation of lower-degree terms, so could be made more efficient
+    Vector<Differential<X>> dphi=Vector<Differential<X>>(n,n+1u+m,0u,z);
+    for(SizeType i=0; i<deg+1u; ++i) {
+        dphi=dx0+antiderivative(compose(df,join(dphi,dta)),n);
     }
     return dphi;
 }

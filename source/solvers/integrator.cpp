@@ -457,23 +457,22 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swpt, Nat verbosity=0) {
+template<class PR> ValidatedVectorMultivariateTaylorFunctionModel<PR> flow_function(const Vector<Differential<FloatBounds<PR>>>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swp) {
     const Nat n=dphi.size();
-    Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,swpt));
-    ValidatedVectorMultivariateTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
+    ValidatedVectorMultivariateTaylorFunctionModel<PR> tphi(n,join(dx,ExactIntervalType(-h,+h)),swp);
 
     for(Nat i=0; i!=n; ++i) {
-        ValidatedTaylorModelDP& model=tphi.model(i);
+        ValidatedTaylorModel<PR>& model=tphi.model(i);
         Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
-        FloatDPError& error=model.error();
+        FloatError<PR>& error=model.error();
         error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
-        Differential<FloatDPBounds>::ConstIterator iter=dphi[i].begin();
+        Differential<FloatBounds<PR>>::ConstIterator iter=dphi[i].begin();
         while(iter!=dphi[i].end()) {
             MultiIndex const a=iter->index();
-            FloatDPBounds coef=iter->coefficient();
-            FloatDPValue x=coef.value();
+            FloatBounds<PR> coef=iter->coefficient();
+            FloatValue<PR> x=coef.value();
             error+=coef.error();
             expansion.append(a,x);
             ++iter;
@@ -603,7 +602,48 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
     return tphi;
 }
 
+
+template<class PR> FloatBounds<PR> cast_singleton(Interval<StepSizeType> ivl, PR pr) {
+    return FloatBounds<PR>(ivl.lower(),ivl.upper(),pr); }
+template<class PR> Vector<FloatBounds<PR>> cast_singleton(ExactBoxType bx, PR pr) {
+    return Vector<FloatBounds<PR>>(bx.dimension(), [&](SizeType i){return FloatBounds<PR>(bx[i].lower(),bx[i].upper());}); }
+template<class PR> Vector<FloatBounds<PR>> cast_singleton(UpperBoxType bx, PR pr) {
+    return Vector<FloatBounds<PR>>(bx.dimension(), [&](SizeType i){return FloatBounds<PR>(bx[i].lower(),bx[i].upper());}); }
+
+template<class PR> ScalarTaylorModel<PR>
+make_taylor_model(Vector<Differential<FloatBounds<PR>>> centre_derivatives, Vector<Differential<FloatBounds<PR>>> derivative_ranges, Sweeper<PR> swp) {
+    Vector<Differential<
+    ARIADNE_ASSERT(centre_derivatives.degree()==derivative_ranges.degree()) {
+
 }
+
+
+// Solve \f$\dt{\phi}(x,t,a)=f(\phi(x,t),t,a)\f$ for x in dx, t in dt, and a in da, assuming x remains in bx.
+ValidatedVectorMultivariateFunctionModelDP
+series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& domx, const Interval<StepSizeType>& domt, const ExactBoxType& doma, const UpperBoxType& bx,
+                 DegreeType deg, Sweeper<DoublePrecision> swp)
+{
+    typedef DoublePrecision PR;
+    typedef FloatBounds<PR> X;
+    PR pr;
+
+    ExactBoxType domxta=product(domx,domt,doma);
+
+    Vector<X> cx(midpoint(domx),pr);
+    X t0(domt.lower(),pr);
+    Vector<X> ca(midpoint(doma),pr);
+    Vector<Differential<X>> cdf=f.differential(join(cx,t0,ca),deg);
+    Vector<Differential<X>> centre_flow_derivatives = flow(cdf, cx,t0,ca);
+
+    Vector<X> bndx=cast_singleton(bx);
+    Vector<X> rngx=cast_singleton(domx,pr);
+    X rngt=cast_singleton(domt,pr);
+    Vector<X> rnga=cast_singleton(doma,pr);
+    Vector<Differential<X>> rngdf=f.differential(join(bndx,rngt,rnga),deg);
+    Vector<Differential<X>> range_flow_derivatives = flow(rngdf, bndx,rngt,rnga);
+}
+
+} // namespace
 
 ValidatedVectorMultivariateFunctionModelDP
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const

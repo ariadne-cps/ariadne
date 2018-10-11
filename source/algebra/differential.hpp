@@ -448,8 +448,12 @@ class Vector< Differential<X> >
 
     //! \brief Compute the differential of the solutions \f$y=h(x)\f$ to \f$f(x,y)=0\f$. Requires \f$f(x0,y0)=0\f$.
     friend Vector<Differential<X>> solve(const Vector<Differential<X> >& df, const Vector<X>& y0) { return _solve(df,y0); }
-    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x0,t) = f(\phi(x0,t)) \f$ at \f$t=0\f$, with respect to the independent variables of
-    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(_0,t) = f(\phi(x_0,t)) \f$ at \f$t=0\f$, with respect to the independent variables \f$(x_0.t)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0.zero_element()); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t) = f(\phi(x_0,t),t) \f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0.t)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, X const& t0) { return _flow(df,x0,t0); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t,a) = f(\phi(x_0,t,a),t,a) \f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t,a)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, X const& t0, const Vector<X>& a) { return _flow(df,x0,t0,a); }
 
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
@@ -458,6 +462,7 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
     static Vector<Differential<X>> _solve(const Vector<Differential<X> >& df, const Vector<X>& y0);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, X const& t0, const Vector<X>& a);
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

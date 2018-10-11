@@ -405,7 +405,7 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
@@ -415,7 +415,7 @@ CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     return make_function(space,results);
 }
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
     RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
@@ -426,7 +426,7 @@ CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
     return make_function(space,results);
 }
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
     RealExpression default_expression;
     DiscreteLocation target=this->target(source,event);
@@ -439,7 +439,7 @@ CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent 
     return make_function(source_space,results);
 }
 
-EffectiveScalarFunction
+EffectiveScalarMultivariateFunction
 CompositeHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
@@ -447,7 +447,7 @@ CompositeHybridAutomaton::invariant_function(DiscreteLocation location, Discrete
     return make_function(space,substitute(invariant,algebraic));
 }
 
-EffectiveScalarFunction
+EffectiveScalarMultivariateFunction
 CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);

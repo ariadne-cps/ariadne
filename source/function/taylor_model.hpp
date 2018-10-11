@@ -92,7 +92,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, ValidatedScalarTaylorFunctionModelDP, ValidatedVectorTaylorFunctionModelDP, TaylorConstrainedImageSet.
+ * See also Expansion, ValidatedScalarMultivariateTaylorFunctionModelDP, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
@@ -129,9 +129,9 @@ class TaylorModel<ValidatedTag,F>
     typedef FloatBounds<PR> ValidatedNumericType;
     typedef FloatApproximation<PR> ApproximateNumericType;
 
-    typedef ValidatedScalarFunction FunctionType;
-    typedef ValidatedScalarFunction ScalarFunctionType;
-    typedef ValidatedVectorFunction VectorFunctionType;
+    typedef ValidatedScalarMultivariateFunction FunctionType;
+    typedef ValidatedScalarMultivariateFunction ScalarFunctionType;
+    typedef ValidatedVectorMultivariateFunction VectorFunctionType;
 
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;

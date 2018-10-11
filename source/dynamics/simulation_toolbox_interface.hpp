@@ -34,8 +34,8 @@
 
 namespace Ariadne {
 
-class ScalarFunction;
-class VectorFunction;
+class ScalarMultivariateFunction;
+class VectorMultivariateFunction;
 
 /*! \brief Tools for analysing dynamical systems by simulation.
  */
@@ -45,9 +45,9 @@ class SimulationToolboxInterface
     typedef FloatDP RealType;
     typedef FloatDP TimeType;
     typedef ExactPoint StateType;
-    typedef ScalarFunction PredicateType;
-    typedef VectorFunction MapType;
-    typedef VectorFunction VectorFieldType;
+    typedef ScalarMultivariateFunction PredicateType;
+    typedef VectorMultivariateFunction MapType;
+    typedef VectorMultivariateFunction VectorFieldType;
   public:
     //! \brief Virtual destructor.
     virtual ~SimulationToolboxInterface() = default;
@@ -56,15 +56,15 @@ class SimulationToolboxInterface
     //! satisfies the constraint, \a false if the point does not satisfy the constraint, and
     //! indeterminate if the point lies on the boundary.
     virtual ValidatedKleenean
-    active(const ScalarFunction& guard,
+    active(const ScalarMultivariateFunction& guard,
            const ExactPoint& state) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     virtual TimeType
-    crossing_time(const ScalarFunction& guard,
-                  const VectorFunction& vector_field,
+    crossing_time(const ScalarMultivariateFunction& guard,
+                  const VectorMultivariateFunction& vector_field,
                   const ExactPoint& initial_state,
                   const TimeType& maximum_time) const = 0;
 
@@ -76,7 +76,7 @@ class SimulationToolboxInterface
     //! \brief Computes the points reached by evolution of the \a initial_state under the flow
     //! given by \a vector_field. The \a step_size gives the time the points should be flowed.
     virtual StateType
-    integration_step(const VectorFunction& vector_field,
+    integration_step(const VectorMultivariateFunction& vector_field,
                      const ExactPoint& initial_state,
                      const TimeType& step_size) const = 0;
 

@@ -79,7 +79,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
-    ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
+    ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
     ExactBoxType bounds(constraints.size());
 
     for(Nat i=0; i!=constraints.size(); ++i) {
@@ -90,7 +90,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 }
 
 
-Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
 
     static const FloatDPValue XSIGMA=0.125_exact;
@@ -125,8 +125,8 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     FloatApproximationVector slack(l); // The slack between the test point and the violated constraints
 
     FloatDPApproximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
-    const ExactBoxType& d=domain; const ValidatedVectorFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
-    ValidatedVectorTaylorFunctionModelDP tfn(d,fn,default_sweeper());
+    const ExactBoxType& d=domain; const ValidatedVectorMultivariateFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
+    ValidatedVectorMultivariateTaylorFunctionModelDP tfn(d,fn,default_sweeper());
 
     point=static_cast<FloatApproximationVector>(midpoint(d));
     for(Nat k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
@@ -156,14 +156,14 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         Vector<FloatDPValue> x_exact=cast_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ValidatedScalarTaylorFunctionModelDP txg=ValidatedScalarTaylorFunctionModelDP::zero(d,default_sweeper());
+        ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
         ValidatedNumericType cnst(0,prec);
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
         }
         for(Nat i=0; i!=m; ++i) {
-            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
+            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
         }
         txg = cnst + txg;
@@ -201,7 +201,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 }
 
 
-Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& codomain) const
+Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
     const FloatDP MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
@@ -302,9 +302,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const Vector<ValidatedP
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
@@ -312,9 +312,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarFu
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFunction& function, const ExactBoxType& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarFunction function, ExactIntervalType bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
@@ -322,9 +322,9 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorFu
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
-    ValidatedScalarFunction derivative=function.derivative(variable);
+    ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
     ARIADNE_LOG(2,"ConstraintSolver::monotone_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
@@ -363,17 +363,17 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& bounds,
                                        FloatApproximationVector centre, FloatApproximationVector multipliers) const
 {
     return this->lyapunov_reduce(domain,function,bounds,cast_exact(centre),cast_exact(multipliers));
 }
 
 
-Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorTaylorFunctionModelDP& function, const ExactBoxType& bounds,
+Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& bounds,
                                        ExactFloatVector centre, ExactFloatVector multipliers) const
 {
-    ValidatedScalarTaylorFunctionModelDP g(function.domain(),default_sweeper());
+    ValidatedScalarMultivariateTaylorFunctionModelDP g(function.domain(),default_sweeper());
     UpperIntervalType C(0);
     for(Nat i=0; i!=function.result_size(); ++i) {
         g += cast_exact(multipliers[i]) * function[i];
@@ -402,7 +402,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBoxType domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
@@ -462,13 +462,13 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarFun
 }
 
 
-Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c) const
+Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c) const
 {
     return d.split();
 }
 
 
-ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorFunction& f, const ExactBoxType& c, const ExactPoint& y) const
+ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

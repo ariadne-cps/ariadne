@@ -311,7 +311,7 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::inside(const ExactBox
 }
 
 
-ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h) {
+ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h) {
     set._space_models=compose(h,set._space_models);
     return set;
 }

@@ -63,11 +63,11 @@ class TestOptimiser
 
     Void test_unconstrained_optimisation() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        EffectiveScalarFunction x0s = sqr(x[0]);
-        EffectiveScalarFunction f(x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0]));
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveScalarMultivariateFunction x0s = sqr(x[0]);
+        EffectiveScalarMultivariateFunction f(x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0]));
         ARIADNE_TEST_PRINT(f);
-        EffectiveVectorFunction g(0u,2u);
+        EffectiveVectorMultivariateFunction g(0u,2u);
         ARIADNE_TEST_PRINT(g);
         ExactBoxType D=ExactBoxType{{-1.0,2.0},{-3.0,5.0}};
         ExactBoxType C=ExactBoxType{};
@@ -81,11 +81,11 @@ class TestOptimiser
     }
 
     Void test_equality_constrained_optimisation() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        EffectiveScalarFunction f=(sqr(x[0])+sqr(x[1]));
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveScalarMultivariateFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
         Real a(1.5); Real b(0.25);
-        EffectiveVectorFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
+        EffectiveVectorMultivariateFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
         ExactIntervalVectorType C={{0.0,0.0}};
         ExactBoxType D=ExactBoxType{{-1.0,2.0},{-3.0,5.0}};
@@ -98,14 +98,14 @@ class TestOptimiser
     }
 
     Void test_constrained_optimisation() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(3);
-        EffectiveScalarFunction x0s = sqr(x[0]);
-        EffectiveScalarFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        EffectiveScalarMultivariateFunction x0s = sqr(x[0]);
+        EffectiveScalarMultivariateFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
         ARIADNE_TEST_PRINT(f);
-        //EffectiveVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
+        //EffectiveVectorMultivariateFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
         ExactBoxType D = ExactBoxType{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
-        EffectiveVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875)};
+        EffectiveVectorMultivariateFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875)};
         ARIADNE_TEST_PRINT(g);
         ExactBoxType C = ExactBoxType{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
@@ -118,14 +118,14 @@ class TestOptimiser
     }
 
     Void test_mixed_constrained_optimisation() {
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(3);
-        EffectiveScalarFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(3);
+        EffectiveScalarMultivariateFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
         ARIADNE_TEST_PRINT(f);
         ExactBoxType D = ExactBoxType{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
-        EffectiveScalarFunction g = x[0]*x[1]-x[0]*Real(1.25);
-        EffectiveVectorFunction h = {Real(1.5)+x[0]+2*x[1]+Real(0.25)*x[0]*x[1]};
-        EffectiveVectorFunction gh=join(g,h);
+        EffectiveScalarMultivariateFunction g = x[0]*x[1]-x[0]*Real(1.25);
+        EffectiveVectorMultivariateFunction h = {Real(1.5)+x[0]+2*x[1]+Real(0.25)*x[0]*x[1]};
+        EffectiveVectorMultivariateFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
         ExactBoxType C = ExactBoxType {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
@@ -137,8 +137,8 @@ class TestOptimiser
 
     Void test_linear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        EffectiveVectorFunction g=EffectiveVectorFunction(1u, 2*x[0]+x[1]);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction g=EffectiveVectorMultivariateFunction(1u, 2*x[0]+x[1]);
         ARIADNE_TEST_PRINT(g);
         ExactBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         ExactBoxType C = ExactBoxType{{-2.0,1.0}};
@@ -152,8 +152,8 @@ class TestOptimiser
 
     Void test_nonlinear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        EffectiveVectorFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
         ARIADNE_TEST_PRINT(g);
         ExactBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         ExactBoxType C = ExactBoxType{{-2.0,1.0}};
@@ -167,8 +167,8 @@ class TestOptimiser
 
     Void test_nonlinear_equality_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
-        EffectiveVectorFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
+        EffectiveVectorMultivariateFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
         ARIADNE_TEST_PRINT(h);
         ExactBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
         ExactBoxType C = ExactBoxType{{0.0,0.0}};
@@ -177,8 +177,8 @@ class TestOptimiser
     }
 
     Void test_feasibility_check() {
-        EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-        ARIADNE_TEST_CONSTRUCT( EffectiveVectorFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
+        EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
+        ARIADNE_TEST_CONSTRUCT( EffectiveVectorMultivariateFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, C, ({{0.0,0.0}}) );
 

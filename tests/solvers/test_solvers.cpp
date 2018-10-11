@@ -63,9 +63,9 @@ class TestSolver
     }
 
     Void test_solve() {
-        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
         ExactIntervalVectorType d({ExactIntervalType(0.0,1.0)});
-        EffectiveVectorFunction f({(x*x+1)*x-1});
+        EffectiveVectorMultivariateFunction f({(x*x+1)*x-1});
         FloatBoundsVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
     }
@@ -74,50 +74,50 @@ class TestSolver
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
         // FIXME: Should be able to use numbers yielding exact results for p,r
-        EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
-        EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
-        EffectiveScalarFunction bb;
+        EffectiveScalarMultivariateFunction aa=EffectiveScalarMultivariateFunction::coordinate(1,0);
+        EffectiveScalarMultivariateFunction a=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction bb;
         ExactIntervalVectorType p,r;
-        EffectiveVectorFunction f;
-        ValidatedVectorFunctionModelDP h;
-        EffectiveVectorFunction e;
+        EffectiveVectorMultivariateFunction f;
+        ValidatedVectorMultivariateFunctionModelDP h;
+        EffectiveVectorMultivariateFunction e;
         FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
         r=ExactIntervalVectorType({ExactIntervalType(-2.0,2.0)});
-        f=EffectiveVectorFunction({x-a});
+        f=EffectiveVectorMultivariateFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        e=EffectiveVectorFunction(1u,aa);
+        e=EffectiveVectorMultivariateFunction(1u,aa);
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
         r=ExactIntervalVectorType({ExactIntervalType(0.25,1.25)});
-        f=EffectiveVectorFunction({(x*x+1)*x-a});
+        f=EffectiveVectorMultivariateFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
+        bb=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
-        e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
+        e=EffectiveVectorMultivariateFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
         p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
         r=ExactIntervalVectorType({ExactIntervalType(0.25,2.0)});
-        f=EffectiveVectorFunction({4*x+x*x-a-4});
+        f=EffectiveVectorMultivariateFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
+        bb=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
-        e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
+        e=EffectiveVectorMultivariateFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
@@ -126,7 +126,7 @@ class TestSolver
         // Should obtain PartialSolutionException
         p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
         r=ExactIntervalVectorType({ExactIntervalType(-1,1)});
-        f=EffectiveVectorFunction({x-2*a});
+        f=EffectiveVectorMultivariateFunction({x-2*a});
         ARIADNE_TEST_PRINT(f);
         try {
             h=solver->implicit(f,p,r);
@@ -142,27 +142,27 @@ class TestSolver
     Void test_scalar_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
-        EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
-        EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction aa=EffectiveScalarMultivariateFunction::coordinate(1,0);
+        EffectiveScalarMultivariateFunction a=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,1);
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1]. There is at most one solution.
         // Uses scalar implicit
         ExactIntervalVectorType p; ExactIntervalType r;
-        EffectiveScalarFunction e,f,s; // s is unscaling functions
-        ValidatedScalarFunctionModelDP h;
+        EffectiveScalarMultivariateFunction e,f,s; // s is unscaling functions
+        ValidatedScalarMultivariateFunctionModelDP h;
 
         ARIADNE_TEST_PRINT(*solver);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
         r=ExactIntervalType(0.25,1.25);
-        f=EffectiveScalarFunction((x*x+1)*x-a);
+        f=EffectiveScalarMultivariateFunction((x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        s=EffectiveScalarFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
+        s=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
-        e=EffectiveScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
+        e=EffectiveScalarMultivariateFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4);
 
@@ -171,9 +171,9 @@ class TestSolver
         // Should obtain PartialSolutionException
         p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
         r=ExactIntervalType(-1,1);
-        f=EffectiveScalarFunction(x-2*a);
+        f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarFunctionModelDP g=ValidatedScalarTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);
@@ -191,24 +191,7 @@ class TestSolver
 #include "algebra/differential.hpp"
 
 Int main(Int argc, const char **argv) {
-/*
-    ExactIntervalVectorType D={{-1,+1},{-1,+1}};
-    ValidatedVectorTaylorFunctionModelDP x=ValidatedVectorTaylorFunctionModelDP::identity(D,ThresholdSweeper(1e-10));
-    ValidatedScalarTaylorFunctionModelDP f=2*x[0]-x[1];
-    std::cerr<<"D="<<D<<"\n";
-    ExactIntervalType D0=D[0];
-    std::cerr<<"f="<<representation(f)<<"\n";
-    Vector<Differential<ExactIntervalType>> dx=Differential<ExactIntervalType>::variables(2,2,1u,D);
-    Differential<ExactIntervalType> dx0=dx[0];
-    std::cerr<<"dx="<<dx<<"\n";
-    std::cerr<<"unscale(dx[0],D[0])="<<unscale(dx0,D[0])<<"\n";
-    ExactIntervalType c(add_ivl(D0.lower()/2,D0.upper()/2));
-    ExactIntervalType r(sub_ivl(D0.upper()/2,D0.lower()/2));
-    std::cerr<<"(dx[0]-c)/r="<<((dx0-c)/r)<<" c="<<c<<" r="<<r<<"\n";
-    std::cerr<<"unscale(dx,D)="<<unscale(dx,D)<<"\n";
-    std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
-    return 0;
-*/
+
     unsigned int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);

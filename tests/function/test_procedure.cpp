@@ -221,7 +221,7 @@ Void TestProcedure::test_derivative()
     auto xs=sqr(x); auto ys=sqr(y);
     Formula<Y> e=sqrt(xs+c*ys)+sin(y/x)*xs*c-ys;
     ARIADNE_TEST_PRINT(e);
-    ScalarFunction<P> f(EuclideanDomain(2),e);
+    ScalarMultivariateFunction<P> f(EuclideanDomain(2),e);
     ARIADNE_TEST_PRINT(f);
     Procedure<Y> p(e);
     ARIADNE_TEST_PRINT(p);

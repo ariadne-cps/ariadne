@@ -40,10 +40,10 @@
 
 namespace Ariadne {
 
-EffectiveVectorFunction auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
-EffectiveVectorFunction dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
-EffectiveVectorFunction reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
-EffectiveScalarFunction constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
+EffectiveVectorMultivariateFunction auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
+EffectiveVectorMultivariateFunction dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
+EffectiveVectorMultivariateFunction reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
+EffectiveScalarMultivariateFunction constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
 
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
@@ -192,7 +192,7 @@ algebraic_sort(const List<RealAssignment>& auxiliary) {
     return sorted_auxiliary;
 }
 
-EffectiveVectorFunction auxiliary_function(
+EffectiveVectorMultivariateFunction auxiliary_function(
     Space<Real> const& space,
     List<RealAssignment> const& sorted_algebraic)
 {
@@ -202,7 +202,7 @@ EffectiveVectorFunction auxiliary_function(
     return make_function(space,results);
 }
 
-EffectiveVectorFunction dynamic_function(
+EffectiveVectorMultivariateFunction dynamic_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     List<DottedRealAssignment> const& differential)
@@ -214,7 +214,7 @@ EffectiveVectorFunction dynamic_function(
     return make_function(space,results);
 }
 
-EffectiveVectorFunction reset_function(
+EffectiveVectorMultivariateFunction reset_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     List<PrimedRealAssignment> const& primed)
@@ -226,7 +226,7 @@ EffectiveVectorFunction reset_function(
     return make_function(space,results);
 }
 
-EffectiveScalarFunction constraint_function(
+EffectiveScalarMultivariateFunction constraint_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     ContinuousPredicate const& constraint,
@@ -680,27 +680,27 @@ EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
     return this->mode(location)._kinds[event];
 }
 
-EffectiveVectorFunction HybridAutomaton::auxiliary_function(DiscreteLocation location) const {
+EffectiveVectorMultivariateFunction HybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
     return Ariadne::auxiliary_function(this->continuous_state_space(location),mode._sorted_auxiliary);
 }
 
-EffectiveVectorFunction HybridAutomaton::dynamic_function(DiscreteLocation location) const {
+EffectiveVectorMultivariateFunction HybridAutomaton::dynamic_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
     return Ariadne::dynamic_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._dynamic);
 }
 
-EffectiveVectorFunction HybridAutomaton::reset_function(DiscreteLocation location, DiscreteEvent event) const {
+EffectiveVectorMultivariateFunction HybridAutomaton::reset_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
     return Ariadne::reset_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._resets[event]);
 }
 
-EffectiveScalarFunction HybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
+EffectiveScalarMultivariateFunction HybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
     return Ariadne::constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._invariants[event],Sign::NEGATIVE);
 }
 
-EffectiveScalarFunction HybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
+EffectiveScalarMultivariateFunction HybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
     return Ariadne::constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],Sign::POSITIVE);
 }

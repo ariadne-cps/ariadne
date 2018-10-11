@@ -40,11 +40,11 @@
 
 namespace Ariadne {
 
-UpperIntervalType apply(ScalarFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
+UpperIntervalType apply(ScalarMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
-Box<UpperIntervalType> apply(VectorFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
+Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
     return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
-Box<UpperIntervalType> image(Box<UpperIntervalType> bx, VectorFunction<ValidatedTag>const& f) {
+Box<UpperIntervalType> image(Box<UpperIntervalType> bx, VectorMultivariateFunction<ValidatedTag>const& f) {
     return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
 
 template class Box<Interval<Real>>;

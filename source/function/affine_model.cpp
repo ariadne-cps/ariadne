@@ -53,7 +53,7 @@ template struct AlgebraOperations<AffineModel<ApproximateTag,FloatMP>>;
 template struct AlgebraOperations<AffineModel<ValidatedTag,FloatDP>>;
 template struct AlgebraOperations<AffineModel<ValidatedTag,FloatMP>>;
 
-template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarFunction<ValidatedTag>&, DoublePrecision);
+template AffineModel<ValidatedTag,FloatDP> affine_model(const ExactBoxType&, const ScalarMultivariateFunction<ValidatedTag>&, DoublePrecision);
 
 } //namespace Ariadne
 

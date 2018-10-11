@@ -154,7 +154,7 @@ ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space)
     List<EffectiveConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
-        EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        EffectiveScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
     }
     return ConstraintSet(constraints);
@@ -205,7 +205,7 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
     List<EffectiveConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
-        EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        EffectiveScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
     }
     return BoundedConstraintSet(domain,constraints);}
@@ -228,13 +228,13 @@ RealExpressionBoundedConstraintSet intersection(RealVariablesBox const& bx, Real
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     RealBox real_domain = RealVariablesBox(set.bounds()).euclidean_set(space);
     ExactBoxType domain=cast_exact_box(ApproximateBoxType(real_domain,dp));
-    ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
+    ValidatedVectorMultivariateFunction identity=ValidatedVectorMultivariateFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);
     //List<ValidatedConstraint> constraints;
     for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
-        ValidatedScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        ValidatedScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         result.new_parameter_constraint(constraint_function <= ExactNumericType(0) );
         //constraints.append( constraint_function <= 0.0 );
     }

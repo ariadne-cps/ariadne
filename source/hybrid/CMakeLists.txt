@@ -13,3 +13,7 @@ add_library(ariadne-hybrid OBJECT
 )
 
 cotire(ariadne-hybrid CONFIGURATIONS None)
+
+if(COVERAGE)
+    target_compile_options(ariadne-hybrid PUBLIC ${COVERAGE_COMPILER_FLAGS})
+endif()

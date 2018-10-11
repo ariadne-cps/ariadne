@@ -49,13 +49,13 @@ class IteratedMap
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
   public:
-    IteratedMap(const EffectiveVectorFunction& f) : _function(f) { }
+    IteratedMap(const EffectiveVectorMultivariateFunction& f) : _function(f) { }
     virtual IteratedMap* clone() const { return new IteratedMap(*this); }
     virtual ~IteratedMap() = default;
-    const EffectiveVectorFunction& function() const { return _function; }
+    const EffectiveVectorMultivariateFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:
-    EffectiveVectorFunction _function;
+    EffectiveVectorMultivariateFunction _function;
 };
 
 inline OutputStream& operator<<(OutputStream& os, const IteratedMap& vf) {

@@ -116,10 +116,10 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
     virtual Void _adjoin(const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) = 0;
     virtual Vector<CanonicalNumericType<P,PR,PRE>> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarFunctionInterface<P>& f) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorFunctionInterface<P>& f) const = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P>& f) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorFunctionInterface<P>& f) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarMultivariateFunctionInterface<P>& f) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorMultivariateFunctionInterface<P>& f) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarMultivariateFunctionInterface<P>& f) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorMultivariateFunctionInterface<P>& f) const = 0;
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
     virtual Void restrict(const DomainType& d) = 0;
 };

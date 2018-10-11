@@ -40,7 +40,7 @@ namespace Ariadne {
 Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
 Void affine_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set, Nat splittings_remaining);
 
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 
 Void SubdivisionDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -82,12 +82,12 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
         return;
     }
 
-    ValidatedVectorFunction fg(2u+set.number_of_constraints(),set.domain());
+    ValidatedVectorMultivariateFunction fg(2u+set.number_of_constraints(),set.domain());
     fg[0]=set.function()[projection.i];
     fg[1]=set.function()[projection.i];
     for(Nat i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }
     Projection2d identity(2, 0,1);
-//    ValidatedVectorFunctionModelDP fg=join(set.state_function(),set.time_function(),set.constraint_function());
+//    ValidatedVectorMultivariateFunctionModelDP fg=join(set.state_function(),set.time_function(),set.constraint_function());
 
     List<ExactBoxType> subdomains;
     List<ExactBoxType> unsplitdomains;

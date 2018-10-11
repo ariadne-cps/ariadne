@@ -43,7 +43,7 @@ namespace Ariadne {
 extern template class Procedure<ApproximateNumber>;
 extern template class Procedure<ValidatedNumber>;
 
-template<class P> Procedure<Number<P>> make_procedure(ScalarFunction<P> const& f) {
+template<class P> Procedure<Number<P>> make_procedure(ScalarMultivariateFunction<P> const& f) {
     typedef Number<P> Y;
     Formula<Y> e=f(Formula<Y>::identity(f.argument_size()));
     return Procedure<Y>(e);

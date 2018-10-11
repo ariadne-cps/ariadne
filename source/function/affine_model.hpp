@@ -86,7 +86,7 @@ class AffineModel<ApproximateTag,F>
     explicit AffineModel(const Affine<Approximation<F>>& affine);
     explicit AffineModel(const Affine<ApproximateNumber>& affine, PrecisionType precision);
 
-    AffineModel(const BoxDomainType& domain, const ApproximateScalarFunction& function, PrecisionType precision);
+    AffineModel(const BoxDomainType& domain, const ApproximateScalarMultivariateFunction& function, PrecisionType precision);
     AffineModel(const TaylorModel<ApproximateTag,F>&);
 
     AffineModel<ApproximateTag,F>& operator=(const CoefficientType& c) {
@@ -125,8 +125,8 @@ class AffineModel<ApproximateTag,F>
   private:
     OutputStream& _write(OutputStream&) const;
   private: public:
-    static AffineModel<P,F> _compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g);
-    static Vector<AffineModel<P,F>> _compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static AffineModel<P,F> _compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static Vector<AffineModel<P,F>> _compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g);
   private:
     CoefficientType _c;
     Covector<CoefficientType> _g;
@@ -203,8 +203,8 @@ class AffineModel<ValidatedTag,F>
   private:
     OutputStream& _write(OutputStream&) const;
   private: public:
-    static AffineModel<P,F> _compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g);
-    static Vector<AffineModel<P,F>> _compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static AffineModel<P,F> _compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g);
+    static Vector<AffineModel<P,F>> _compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g);
   private:
     CoefficientType _c;
     Covector<CoefficientType> _g;
@@ -240,13 +240,13 @@ template<class P, class F> inline Vector<AffineModel<P,F>> affine_models(const V
 
 
 // DEPRECATED
-template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<P>& function, PR precision);
-template<class P, class PR> inline Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision);
+template<class P, class PR> AffineModel<P,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarMultivariateFunction<P>& function, PR precision);
+template<class P, class PR> inline Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorMultivariateFunction<P>& function, PR precision);
 
-template<class PR> inline AffineModel<ValidatedTag,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarFunction<EffectiveTag>& function, PR precision) {
-    return affine_model(domain,ScalarFunction<ValidatedTag>(function),precision); }
-template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<EffectiveTag>& function, PR precision) {
-    return affine_models(domain,VectorFunction<ValidatedTag>(function),precision); }
+template<class PR> inline AffineModel<ValidatedTag,RawFloatType<PR>> affine_model(const BoxDomainType& domain, const ScalarMultivariateFunction<EffectiveTag>& function, PR precision) {
+    return affine_model(domain,ScalarMultivariateFunction<ValidatedTag>(function),precision); }
+template<class PR> inline Vector<AffineModel<ValidatedTag,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorMultivariateFunction<EffectiveTag>& function, PR precision) {
+    return affine_models(domain,VectorMultivariateFunction<ValidatedTag>(function),precision); }
 
 
 template<class P, class F> inline AffineModel<P,F> affine_model(const TaylorModel<P,F>& taylor_model)
@@ -265,7 +265,7 @@ template<class P, class F> Vector<AffineModel<P,F>> affine_models(const Vector<T
     return result;
 }
 
-template<class P, class PR> Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorFunction<P>& function, PR precision)
+template<class P, class PR> Vector<AffineModel<P,RawFloatType<PR>>> affine_models(const BoxDomainType& domain, const VectorMultivariateFunction<P>& function, PR precision)
 {
     typedef RawFloat<PR> F;
     SizeType rs=function.result_size();
@@ -281,11 +281,11 @@ template<class P, class F> Vector<typename AffineModel<P,F>::RangeType> ranges(c
     //Vector<typename AffineModel<P,F>::RangeType> r(f.size(),f.zero_element().range()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
-template<class P, class F> Vector<AffineModel<P,F>> compose(const VectorFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
+template<class P, class F> Vector<AffineModel<P,F>> compose(const VectorMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
     return AffineModel<P,F>::_compose(f,g);
 }
 
-template<class P, class F> AffineModel<P,F> compose(const ScalarFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
+template<class P, class F> AffineModel<P,F> compose(const ScalarMultivariateFunction<P>& f, Vector<AffineModel<P,F>> const& g) {
     return AffineModel<P,F>::_compose(f,g);
 }
 

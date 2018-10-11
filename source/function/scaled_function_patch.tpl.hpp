@@ -434,6 +434,12 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValu
     return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
 
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const -> ValidatedNumber
+{
+    return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+}
+
+
 template<class M> auto ScaledFunctionPatch<M>::gradient(const Vector<NumericType>& x) const -> Covector<NumericType>
 {
     Vector<NumericType> s=unscale(x,this->_domain);
@@ -760,6 +766,11 @@ template<class M> auto VectorScaledFunctionPatch<M>::properties() const -> Prope
     return this->_models.zero_element().properties();
 }
 
+template<class M> auto VectorScaledFunctionPatch<M>::precision() const -> PrecisionType
+{
+    return this->_models.zero_element().precision();
+}
+
 
 template<class M> Void VectorScaledFunctionPatch<M>::set_properties(PropertiesType prp)
 {
@@ -940,6 +951,11 @@ template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<Flo
     return Ariadne::evaluate(f._models,sx);
 }
 
+template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const -> Vector<ValidatedNumber>
+{
+    return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+}
+
 template<class M> auto VectorScaledFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const -> Matrix<NumericType>
 {
     Vector<NumericType> y=unscale(x,this->_domain);
@@ -993,10 +1009,10 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::repr(OutputStream&
 template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,PR,PRE> {
     return CanonicalNumericType<P,PR>(number,this->_properties.precision());
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const {
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
     return ScaledFunctionPatch<M>(domain,function,this->_properties);
 }
-template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const VectorFunctionInterface<P>& function) const {
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const {
     return VectorScaledFunctionPatch<M>(domain,function,this->_properties);
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_zero(const DomainType& domain) const {

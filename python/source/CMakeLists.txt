@@ -41,3 +41,12 @@ add_library(pyariadne-module-obj OBJECT
 cotire(pyariadne-numeric-submodule-obj CONFIGURATIONS None)
 cotire(pyariadne-algebra-submodule-obj CONFIGURATIONS None)
 cotire(pyariadne-extra-submodule-obj CONFIGURATIONS None)
+
+if(COVERAGE)
+    target_compile_options(pyariadne-numeric-submodule-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_compile_options(pyariadne-numeric-module-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_compile_options(pyariadne-algebra-submodule-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_compile_options(pyariadne-algebra-module-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_compile_options(pyariadne-extra-submodule-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_compile_options(pyariadne-module-obj PUBLIC ${COVERAGE_COMPILER_FLAGS})
+endif()

@@ -33,10 +33,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
 endif()
 
-if(COVERAGE)
-    include(CodeCoverage)
-    APPEND_COVERAGE_COMPILER_FLAGS()
-endif()
+set(COVERAGE_COMPILER_FLAGS -O0 --coverage -fprofile-arcs -ftest-coverage)
 
 enable_testing()
 include(CTest)
@@ -164,6 +161,12 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
+
+if(COVERAGE)
+    target_link_libraries(ariadne gcov)
+    target_link_libraries(ariadne-kernel gcov)
+    target_link_libraries(ariadne-core gcov)
+endif()
 
 target_link_libraries(ariadne dl)
 target_link_libraries(ariadne-kernel dl)

@@ -71,21 +71,21 @@ Void TestFunction::test()
 Void TestFunction::test_concept()
 {
 
-    EffectiveScalarFunction sf1(3);
-    EffectiveScalarFunction sf2(3);
-    EffectiveScalarFunction sf3(3);
-    //Vector<EffectiveScalarFunction> ve=join(3,*e1,*e2,*e3);
+    EffectiveScalarMultivariateFunction sf1(3);
+    EffectiveScalarMultivariateFunction sf2(3);
+    EffectiveScalarMultivariateFunction sf3(3);
+    //Vector<EffectiveScalarMultivariateFunction> ve=join(3,*e1,*e2,*e3);
 
-    EffectiveVectorFunction vf=join(sf1,sf2);
+    EffectiveVectorMultivariateFunction vf=join(sf1,sf2);
 
-    EffectiveScalarFunction g(2);
-    EffectiveScalarFunction h=compose(g,vf);
+    EffectiveScalarMultivariateFunction g(2);
+    EffectiveScalarMultivariateFunction h=compose(g,vf);
 
-    EffectiveVectorFunction jf=join(sf1,sf2);
-    //EffectiveScalarFunction cf=combine(sf1,sf2);
+    EffectiveVectorMultivariateFunction jf=join(sf1,sf2);
+    //EffectiveScalarMultivariateFunction cf=combine(sf1,sf2);
 
     //Polynomial<Real> p;
-    //EffectiveScalarFunction pf(p);
+    //EffectiveScalarMultivariateFunction pf(p);
 
     //Vector<FloatDPApproximation> b; Matrix<FloatDPApproximation> A;
     //VectorAffineFunction aff(A,b);
@@ -128,36 +128,36 @@ Void TestFunction::test_vector_univariate_function()
 
 Void TestFunction::test_scalar_function()
 {
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,o,constant(3,1));
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,x,coordinate(3,0));
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,y,coordinate(3,1));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarMultivariateFunction,o,constant(3,1));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarMultivariateFunction,x,coordinate(3,0));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarMultivariateFunction,y,coordinate(3,1));
 
 
-    ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
+    ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,f,(o+x*y));
     ARIADNE_TEST_CONSTRUCT(Vector<FloatDPApproximation>,p,({2.0_approx,3.0_approx,5.0_approx}));
     ARIADNE_TEST_EQUAL(f(p),7.0_approx);
 
     ARIADNE_TEST_PRINT(cos(f));
 
-    EffectiveScalarFunction df=f.derivative(1);
+    EffectiveScalarMultivariateFunction df=f.derivative(1);
     ARIADNE_TEST_PRINT(df);
     ARIADNE_TEST_EQUAL(df(p),2.0_approx);
 }
 
 Void TestFunction::test_vector_function()
 {
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorFunction,id,identity(3));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorMultivariateFunction,id,identity(3));
 
     // Regression tests for element
     ARIADNE_TEST_PRINT(id[0]);
-    const EffectiveVectorFunction& id_const_ref=id;
+    const EffectiveVectorMultivariateFunction& id_const_ref=id;
     ARIADNE_TEST_PRINT(id_const_ref[0]);
-    EffectiveVectorFunction& id_ref=id;
+    EffectiveVectorMultivariateFunction& id_ref=id;
     ARIADNE_TEST_PRINT(id_ref[0]);
 
     Vector<FloatDPApproximation> v={2.0_approx,3.0_approx,5.0_approx};
 
-    ARIADNE_TEST_CONSTRUCT(EffectiveVectorFunction,f,(id));
+    ARIADNE_TEST_CONSTRUCT(EffectiveVectorMultivariateFunction,f,(id));
     ARIADNE_TEST_EQUAL(f(v),v);
     ARIADNE_TEST_EQUAL(f[0](v),v[0]);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
@@ -165,7 +165,7 @@ Void TestFunction::test_vector_function()
     ARIADNE_TEST_EQUAL(f(v)[0],v[1]);
 
     // Regression test for function - vector product
-    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
+    EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(3,1);
 //    EffectiveVector e0={1,0};
     Vector<EffectiveNumber> e0={1,0};
     ARIADNE_TEST_EQUAL((x1*e0)(v)[0],v[1]);
@@ -186,14 +186,14 @@ Void TestFunction::test_differentiation()
     EuclideanDomain dom(2);
     DegreeType deg(3);
 
-    EffectiveScalarFunction z=EffectiveScalarFunction::constant(dom,0);
-    EffectiveScalarFunction o=EffectiveScalarFunction::constant(dom,1);
-    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(dom,0);
-    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(dom,1);
+    EffectiveScalarMultivariateFunction z=EffectiveScalarMultivariateFunction::constant(dom,0);
+    EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(dom,1);
+    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(dom,0);
+    EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(dom,1);
 
-    ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(3*x-2*y+1));
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df0,constant(dom,3));
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,df1,constant(dom,-2));
+    ARIADNE_TEST_CONSTRUCT(EffectiveScalarMultivariateFunction,f,(3*x-2*y+1));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarMultivariateFunction,df0,constant(dom,3));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarMultivariateFunction,df1,constant(dom,-2));
 
     ARIADNE_TEST_CONSTRUCT(Vector<FloatDPBounds>,v,({2.25_exact,1.375_exact}));
     ARIADNE_TEST_CONSTRUCT(Vector<FloatDPApproximation>,va,(v));

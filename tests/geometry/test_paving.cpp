@@ -215,7 +215,7 @@ Void TestPaving::test_approximation() const {
     GridTreePaving grid_set(grid);
     PavingInterface& paving = grid_set;
 
-    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     EffectiveConstrainedImageSet set(EffectiveBoxType(ExactIntervalVectorType({{-1.0,1.0},{-1.0,1.0}})));
     set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
     Nat depth = 2;

@@ -993,10 +993,10 @@ template<class M> OutputStream& VectorScaledFunctionPatch<M>::repr(OutputStream&
 template<class M> auto ScaledFunctionPatchFactory<M>::create(const Number<P>& number) const -> CanonicalNumericType<P,PR,PRE> {
     return CanonicalNumericType<P,PR>(number,this->_properties.precision());
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarFunctionInterface<P>& function) const {
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
     return ScaledFunctionPatch<M>(domain,function,this->_properties);
 }
-template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const VectorFunctionInterface<P>& function) const {
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create(const DomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const {
     return VectorScaledFunctionPatch<M>(domain,function,this->_properties);
 }
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_zero(const DomainType& domain) const {

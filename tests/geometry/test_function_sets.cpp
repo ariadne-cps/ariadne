@@ -58,8 +58,8 @@ class TestConstrainedImageSet
     }
 
     Void test_constructor() {
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
 
         EffectiveBoxType d(3,EffectiveIntervalType(-1,+2));
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
@@ -69,7 +69,7 @@ class TestConstrainedImageSet
     }
 
     Void test_domain() {
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
         EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-1.1),Decimal(+2.1)));
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
@@ -84,9 +84,9 @@ class TestConstrainedImageSet
     }
 
     Void test_geometry() {
-        List<EffectiveScalarFunction> p=EffectiveScalarFunction::coordinates(1);
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> p=EffectiveScalarMultivariateFunction::coordinates(1);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
         ExactBoxType box1(2);
         ExactBoxType box2(2);
         ExactBoxType box3(2);
@@ -130,8 +130,8 @@ class TestConstrainedImageSet
         Real half(0.5);
         EffectiveBoxType d(2,EffectiveIntervalType(-half,+half));
         Real a(1.5); Real b(0.375);
-        EffectiveVectorFunction h={a-x[0]*x[0]-b*x[1],x[0]};
-        EffectiveVectorFunction f=compose(h,h);
+        EffectiveVectorMultivariateFunction h={a-x[0]*x[0]-b*x[1],x[0]};
+        EffectiveVectorMultivariateFunction f=compose(h,h);
         EffectiveConstrainedImageSet set(d,f);
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
@@ -156,8 +156,8 @@ class TestConstrainedImageSet
     }
 
     Void test_separated() {
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
 
         EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-1.1),Decimal(+2.1)));
 //        EffectiveBoxType d(3,EffectiveIntervalType(Decimal(-0.1015625),Decimal(+2.1015625)));
@@ -202,8 +202,8 @@ class TestConstrainedImageSet
     }
 
     Void test_approximation() {
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
-        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(3);
+        List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
 
         EffectiveBoxType d(3,EffectiveIntervalType(-1,+2));
         EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
@@ -219,13 +219,13 @@ class TestConstrainedImageSet
 
 
     Void test_split() {
-        EffectiveScalarFunction o=EffectiveScalarFunction::constant(3,1);
-        EffectiveScalarFunction s0=EffectiveScalarFunction::coordinate(3,0);
-        EffectiveScalarFunction s1=EffectiveScalarFunction::coordinate(3,1);
-        EffectiveScalarFunction s2=EffectiveScalarFunction::coordinate(3,2);
-        EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
-        EffectiveVectorFunction translation;
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(3,1);
+        EffectiveScalarMultivariateFunction s0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction s1=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction s2=EffectiveScalarMultivariateFunction::coordinate(3,2);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveVectorMultivariateFunction translation;
         EffectiveBoxType d(3,EffectiveIntervalType(-1,+1));
         EffectiveConstrainedImageSet set(d,{s0,s1+s2*s2/2});
         set.new_parameter_constraint(s0+Real(0.75)*s1+s2<=Real(0));
@@ -266,7 +266,7 @@ class TestConstrainedImageSet
 
     Void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
-        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(2);
+        List<EffectiveScalarMultivariateFunction> s=EffectiveScalarMultivariateFunction::coordinates(2);
         EffectiveBoxType d={EffectiveIntervalType(-2,1),EffectiveIntervalType(0,2)};
         EffectiveConstrainedImageSet set(d,{s[0],s[1]});
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
@@ -329,10 +329,10 @@ class TestConstrainedImageSet
     }
 
     Void test_draw() {
-        EffectiveScalarFunction s=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction t=EffectiveScalarFunction::coordinate(2,1);
-        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-        EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction s=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
         Nat acc = 2u;
 
         test_draw("ellipse",EffectiveConstrainedImageSet(EffectiveBoxType(2,EffectiveIntervalType(-1,1)),{2*s+t,s+t},{s*s+t*t<=0.75}),acc+1u);

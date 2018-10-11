@@ -104,7 +104,7 @@ FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Formula<ValidatedNum
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedScalarFunction>& x) const -> Result<ValidatedScalarFunction> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedScalarMultivariateFunction>& x) const -> Result<ValidatedScalarMultivariateFunction> {
     return this->_base_evaluate(x); }
 
 template<class F,class D, class C> auto

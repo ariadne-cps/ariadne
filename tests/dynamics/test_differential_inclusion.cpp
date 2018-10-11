@@ -54,7 +54,7 @@ class TestInclusionIntegrator {
     {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
-        List<ValidatedVectorFunctionModelType> flow_functions = integrator.flow(ivp,evolution_time);
+        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivp,evolution_time);
     }
 
     Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,

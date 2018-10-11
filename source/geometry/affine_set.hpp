@@ -127,7 +127,7 @@ class ValidatedAffineConstrainedImageSet
     ValidatedLowerKleenean is_empty() const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
-    friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorFunction const& h);
+    friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
 
     Void adjoin_outer_approximation_to(PavingInterface& g, Nat depth) const;
     GridTreePaving outer_approximation(const Grid& g, Nat depth) const;

@@ -101,7 +101,7 @@ template<class F> void CheckFunctionConcept<F>::check()
     ARIADNE_TEST_CALL(check_integrable_concept());
     ARIADNE_TEST_CALL(check_composable_concept());
 
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Cos,ValidatedScalarFunction>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Cos,ValidatedScalarMultivariateFunction>);
 }
 
 
@@ -213,7 +213,7 @@ template<class F> void CheckFunctionConcept<F>::check_composable_concept()
 
 
 
-template<class VF> class CheckVectorFunctionConcept : CheckVectorConcept<VF>
+template<class VF> class CheckVectorMultivariateFunctionConcept : CheckVectorConcept<VF>
 {
     typedef VF FunctionType;
     void check();
@@ -223,13 +223,13 @@ template<class VF> class CheckVectorFunctionConcept : CheckVectorConcept<VF>
 };
 
 
-template<class F> void CheckVectorFunctionConcept<F>::test()
+template<class F> void CheckVectorMultivariateFunctionConcept<F>::test()
 {
     ARIADNE_TEST_CALL(check_vector_concept());
     ARIADNE_TEST_CALL(check_evaluable_concept());
 }
 
-template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
+template<class F> void CheckVectorMultivariateFunctionConcept<F>::check_evaluable_concept()
 {
     ARIADNE_TEST_STATIC_ASSERT(HasParadigm<F>);
     ARIADNE_TEST_STATIC_ASSERT(HasDomainType<F>);
@@ -744,23 +744,23 @@ void CheckFunctionConcept::check_scalar_function()
 
 void CheckFunctionConcept::check_vector_function()
 {
-    ARIADNE_TEST_NAMED_CONSTRUCT(ExactVectorFunction,f,identity(3));
+    ARIADNE_TEST_NAMED_CONSTRUCT(ExactVectorMultivariateFunction,f,identity(3));
 
     ARIADNE_TEST_CONSTRUCT(ExactFunction,fa0,(f.get(0)));
     ARIADNE_TEST_CONSTRUCT(ExactFunction,fa1,(f[1]));
 
     // Regression tests for element
     ARIADNE_TEST_PRINT(f[0]);
-    const ExactVectorFunction& fcr=f;
+    const ExactVectorMultivariateFunction& fcr=f;
     ARIADNE_TEST_PRINT(fcr[0]);
-    ExactVectorFunction& fr=f;
+    ExactVectorMultivariateFunction& fr=f;
     ARIADNE_TEST_PRINT(fr[0]);
 
     ARIADNE_TEST_EQUAL(f[0](Vector<FloatDPApproximation>{2.0,3.0,5.0}),2.0);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
     ARIADNE_TEST_EQUAL(f[0](Vector<FloatDPApproximation>{2.0,3.0,5.0}),3.0);
 
-    ExactVectorFunction x=ExactVectorFunction::identity(2);
+    ExactVectorMultivariateFunction x=ExactVectorMultivariateFunction::identity(2);
     ExactFunction x0=x[0];
     //ExactFunction fvi=(1-x[0]*x[0]-x[1]/2);
 

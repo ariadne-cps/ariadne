@@ -78,44 +78,44 @@ class Constraint {
     R _upper_bound;
 };
 
-typedef Constraint<RealScalarFunction,Real> RealConstraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
-typedef Constraint<ValidatedScalarFunction,ExactNumber> ValidatedExactConstraint;
+typedef Constraint<RealScalarMultivariateFunction,Real> RealConstraint;
+typedef Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber> EffectiveConstraint;
+typedef Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber> ValidatedConstraint;
+typedef Constraint<ValidatedScalarMultivariateFunction,ExactNumber> ValidatedExactConstraint;
 
 template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
 }
 
-inline EffectiveConstraint operator<=(const EffectiveNumber& c, const EffectiveScalarFunction& f) {
+inline EffectiveConstraint operator<=(const EffectiveNumber& c, const EffectiveScalarMultivariateFunction& f) {
     return EffectiveConstraint(c,f,infinity);
 }
 
-inline EffectiveConstraint operator>=(const EffectiveNumber& c, const EffectiveScalarFunction& f) {
+inline EffectiveConstraint operator>=(const EffectiveNumber& c, const EffectiveScalarMultivariateFunction& f) {
     return EffectiveConstraint(-infinity,f,c);
 }
 
-inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator<=(const EffectiveScalarMultivariateFunction& f, const EffectiveNumber& c) {
     return EffectiveConstraint(-infinity,f,c);
 }
 
-inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator>=(const EffectiveScalarMultivariateFunction& f, const EffectiveNumber& c) {
     return EffectiveConstraint(c,f,infinity);
 }
 
-inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, const EffectiveNumber& c) {
+inline EffectiveConstraint operator==(const EffectiveScalarMultivariateFunction& f, const EffectiveNumber& c) {
     return EffectiveConstraint(f,c);
 }
 
-inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, double c) {
+inline EffectiveConstraint operator<=(const EffectiveScalarMultivariateFunction& f, double c) {
     return f <= Dyadic(c);
 }
 
-inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, double c) {
+inline EffectiveConstraint operator>=(const EffectiveScalarMultivariateFunction& f, double c) {
     return f >= Dyadic(c);
 }
 
-inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, double c) {
+inline EffectiveConstraint operator==(const EffectiveScalarMultivariateFunction& f, double c) {
     return f == Dyadic(c);
 }
 
@@ -125,19 +125,19 @@ inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const Effec
 }
 
 
-inline ValidatedExactConstraint operator<=(const ExactNumber& c, const ValidatedScalarFunction& f) {
+inline ValidatedExactConstraint operator<=(const ExactNumber& c, const ValidatedScalarMultivariateFunction& f) {
     return ValidatedExactConstraint(c,f,ExactNumber(+infty));
 }
 
-inline ValidatedExactConstraint operator<=(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator<=(const ValidatedScalarMultivariateFunction& f, const ExactNumber& c) {
     return ValidatedExactConstraint(-infty,f,c);
 }
 
-inline ValidatedExactConstraint operator>=(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator>=(const ValidatedScalarMultivariateFunction& f, const ExactNumber& c) {
     return ValidatedExactConstraint(c,f,+infty);
 }
 
-inline ValidatedExactConstraint operator==(const ValidatedScalarFunction& f, const ExactNumber& c) {
+inline ValidatedExactConstraint operator==(const ValidatedScalarMultivariateFunction& f, const ExactNumber& c) {
     return ValidatedExactConstraint(c,f,c);
 }
 
@@ -147,16 +147,16 @@ inline ValidatedExactConstraint operator<=(const ValidatedExactConstraint& nc, c
 }
 
 
-inline ValidatedExactConstraint operator<=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+inline ValidatedExactConstraint operator<=(const ValidatedScalarMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2) {
     return (f1-f2) <= ExactNumber(0);
 }
 
-inline ValidatedExactConstraint operator>=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+inline ValidatedExactConstraint operator>=(const ValidatedScalarMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2) {
     return (f1-f2) >= ExactNumber(0);
 }
 
 
-inline ValidatedConstraint operator<=(const ValidatedNumber& c, const ValidatedScalarFunction& f) {
+inline ValidatedConstraint operator<=(const ValidatedNumber& c, const ValidatedScalarMultivariateFunction& f) {
     return ValidatedConstraint(c,f,ExactNumber(+infty));
 }
 

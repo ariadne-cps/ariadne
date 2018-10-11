@@ -47,7 +47,7 @@ RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
 }
 
 FloatApproximationVector
-RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatApproximationVector& x, const FloatDPApproximation& h) const
+RungeKutta4Integrator::step(const ApproximateVectorMultivariateFunction& f, const FloatApproximationVector& x, const FloatDPApproximation& h) const
 {
     FloatApproximationVector k1=f(x);
     FloatApproximationVector k2=f(FloatApproximationVector(x+(h/2)*k1));
@@ -58,7 +58,7 @@ RungeKutta4Integrator::step(const ApproximateVectorFunction& f, const FloatAppro
 }
 
 List< Pair<FloatDPApproximation,FloatApproximationVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunction& f, const FloatApproximationVector& x0, const FloatDPApproximation& tmax) const
+RungeKutta4Integrator::evolve(const ApproximateVectorMultivariateFunction& f, const FloatApproximationVector& x0, const FloatDPApproximation& tmax) const
 {
     static const FloatDPApproximation h(this->_step_size,dp);
 

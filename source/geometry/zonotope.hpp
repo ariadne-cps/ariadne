@@ -204,7 +204,7 @@ class Zonotope
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
     friend Zonotope apply(const Vector<Affine<ExactIntervalType>>& af, const Zonotope& z);
-    friend Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
+    friend Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
     //@}
 
     //@{
@@ -241,7 +241,7 @@ Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
 Zonotope orthogonal_approximation(const Zonotope& z);
 
 Zonotope apply(const Affine<ExactIntervalType>& af, const Zonotope& z);
-Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
+Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
 
 OutputStream& operator<<(OutputStream& os, const Zonotope& z);
 InputStream& operator>>(InputStream& is, Zonotope& z);

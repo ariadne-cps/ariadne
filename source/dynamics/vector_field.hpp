@@ -56,18 +56,18 @@ class VectorField
     typedef Enclosure EnclosureType;
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
-    VectorField(EffectiveVectorFunction const& function) : _function(function) { }
+    VectorField(EffectiveVectorMultivariateFunction const& function) : _function(function) { }
     virtual ~VectorField() = default;
     virtual VectorField* clone() const { return new VectorField(*this); }
     SizeType dimension() const { return _function.result_size(); }
     RealSpace state_space() const;
-    const EffectiveVectorFunction& function() const { return _function; }
+    const EffectiveVectorMultivariateFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
     friend OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
         return os << "VectorField( " << vf.function() << " )"; }
   private:
     List<Identifier> _variable_names;
-    EffectiveVectorFunction _function;
+    EffectiveVectorMultivariateFunction _function;
 };
 
 } // namespace Ariadne

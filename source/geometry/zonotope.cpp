@@ -752,8 +752,8 @@ orthogonal_over_approximation(const Zonotope< ExactIntervalType >& z)
 }
 */
 
-Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
-    std::cerr<<"Zonotope apply(ValidatedVectorFunction,Zonotope)\n";
+Zonotope apply(const ValidatedVectorMultivariateFunction& f, const Zonotope& z) {
+    std::cerr<<"Zonotope apply(ValidatedVectorMultivariateFunction,Zonotope)\n";
     ExactIntervalVectorType zc=z.centre();
     ExactIntervalMatrixType zG=z.generators();
     ExactIntervalVectorType ze=z.error()*ExactIntervalType(-1,+1);

@@ -61,8 +61,8 @@ class DiscreteTransition;
 
 typedef ContinuousPredicate RealPredicate;
 
-EffectiveVectorFunction dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential);
-EffectiveScalarFunction constraint_function(Space<Real>& space, const List<RealAssignment>& algebraic, const RealPredicate& constraint);
+EffectiveVectorMultivariateFunction dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential);
+EffectiveScalarMultivariateFunction constraint_function(Space<Real>& space, const List<RealAssignment>& algebraic, const RealPredicate& constraint);
 
 
 template<class T> class FinitarySet
@@ -242,13 +242,13 @@ class HybridSystem
     HybridSpace state_space() const;
     DimensionType dimension(DiscreteLocation) const;
     RealSpace continuous_state_space(DiscreteLocation) const;
-    EffectiveVectorFunction output_function(DiscreteLocation) const;
-    EffectiveVectorFunction auxiliary_function(DiscreteLocation) const;
-    EffectiveVectorFunction dynamic_function(DiscreteLocation) const;
-    EffectiveVectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
-    EffectiveScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
-    EffectiveScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
-    EffectiveScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveVectorMultivariateFunction output_function(DiscreteLocation) const;
+    EffectiveVectorMultivariateFunction auxiliary_function(DiscreteLocation) const;
+    EffectiveVectorMultivariateFunction dynamic_function(DiscreteLocation) const;
+    EffectiveVectorMultivariateFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarMultivariateFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarMultivariateFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarMultivariateFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 
     //@}
 
@@ -307,15 +307,15 @@ class HybridSystem
     //! \brief The dimension of the state spacec in the given \a location.
     virtual DimensionType dimension(DiscreteLocation location) const;
     //! \brief The output function on Euclidean state space. Used for outputting auxiliary variables.
-    virtual EffectiveVectorFunction output_function(DiscreteLocation location) const;
+    virtual EffectiveVectorMultivariateFunction output_function(DiscreteLocation location) const;
     //! \brief The function defining the differential equation \f$\der{x}=f(x)\f$ valid in the \a location.
-    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual EffectiveVectorMultivariateFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The function defining the reset \f$x'=r(x)\f$ when the \a event occurs in the \a source location.
-    virtual EffectiveVectorFunction reset_function(DiscreteLocation source, DiscreteEvent event) const;
+    virtual EffectiveVectorMultivariateFunction reset_function(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The function defining the guard \f$g(x) \geq 0\f$ for the given \a event to occur in \a location.
-    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarMultivariateFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The function defining the invariant \f$p(x)\leq 0\f$ for continuous evolution to be blocked in \a location.
-    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarMultivariateFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The grid for the state variables in \a location.
     virtual Grid grid(DiscreteLocation location) const;

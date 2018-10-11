@@ -113,34 +113,41 @@ Void TestScalarTaylorFunction::test()
 
 Void TestScalarTaylorFunction::test_concept()
 {
-    const FloatDPValue f={0,pr};
-    const FloatDPBounds i;
-    const Vector<FloatDPValue> vf;
-    const Vector<FloatDPBounds> vi;
-    const ValidatedScalarMultivariateTaylorFunctionModelDP  t;
-    ValidatedScalarMultivariateTaylorFunctionModelDP tr;
+    SizeType k=0;
+    const FloatDPValue w={0,pr};
+    const FloatDPBounds x;
+    const ValidatedNumber y;
+    const Vector<FloatDPValue> vw;
+    const Vector<FloatDPBounds> vx;
+    const Vector<ValidatedNumber> vy;
+    ValidatedScalarMultivariateTaylorFunctionModelDP  stf;
+    ValidatedScalarMultivariateTaylorFunctionModelDP stfr;
 
-    tr=t+f; tr=t-f; tr=t*f; tr=t/f;
-    tr=f+t; tr=f-t; tr=f*t; tr=f/t;
-    tr=t+i; tr=t-i; tr=t*i; tr=t/i;
-    tr=i+t; tr=i-t; tr=i*t; tr=i/t;
-    tr=t+t; tr=t-t; tr=t*t; tr=t/t;
+    stfr=stf+w; stfr=stf-w; stfr=stf*w; stfr=stf/w;
+    stfr=w+stf; stfr=w-stf; stfr=w*stf; stfr=w/stf;
+    stfr=stf+x; stfr=stf-x; stfr=stf*x; stfr=stf/x;
+    stfr=x+stf; stfr=x-stf; stfr=x*stf; stfr=x/stf;
+    stfr=stf+y; stfr=stf-y; stfr=stf*y; stfr=stf/y;
+    stfr=y+stf; stfr=y-stf; stfr=y*stf; stfr=y/stf;
+    stfr=stf+stf; stfr=stf-stf; stfr=stf*stf; stfr=stf/stf;
 
-    tr+=f; tr-=f; tr*=f; tr/=f;
-    tr+=i; tr-=i; tr*=i; tr/=i;
-    tr+=t; tr-=t;
+    stfr+=w; stfr-=w; stfr*=w; stfr/=w;
+    stfr+=x; stfr-=x; stfr*=x; stfr/=x;
+    stfr+=y; stfr-=y; stfr*=y; stfr/=y;
+    stfr+=stf; stfr-=stf;
 
-    tr=pos(tr); tr=neg(tr); tr=sqr(tr);
-    tr=rec(tr); tr=pow(tr,1); tr=pow(tr,-1);
-    tr=exp(t); tr=log(t); tr=sqrt(t);
-    tr=sin(t); tr=cos(t); tr=tan(t);
-    //tr=asin(t); tr=acos(t); tr=atan(t);
-    tr=max(tr,tr); tr=min(tr,tr); tr=abs(tr);
+    stfr=pos(stf); stfr=neg(stf); stfr=sqr(stf);
+    stfr=rec(stf); stfr=pow(stf,1); stfr=pow(stf,-1);
+    stfr=exp(stf); stfr=log(stf); stfr=sqrt(stf);
+    stfr=sin(stf); stfr=cos(stf); stfr=tan(stf);
+    //stfr=asin(stf); stfr=acos(stf); stfr=atan(stf);
+    stfr=max(stf,stfr); stfr=min(stf,stfr); stfr=abs(stfr);
 
-    tr.simplify(); tr.clobber();
+    stfr.simplify(); stfr.clobber();
 
-    t(vi); evaluate(t,vi);
-    t.domain(); t.range(); t.expansion(); t.error();
+    stf(vx); stf(vy); evaluate(stf,vx); unchecked_evaluate(stf,vx); partial_evaluate(stf,k,x);
+    stf(vy); stf(vy); evaluate(stf,vy); unchecked_evaluate(stf,vy); partial_evaluate(stf,k,y);
+    stf.domain(); stf.range(); stf.expansion(); stf.error();
 
 }
 

@@ -160,6 +160,9 @@ template<class M> class ScaledFunctionPatch
     typedef ScalarMultivariateFunction<Paradigm> GenericType;
     typedef Number<Paradigm> GenericNumericType;
     typedef typename M::PropertiesType PropertiesType;
+
+    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -188,8 +191,10 @@ template<class M> class ScaledFunctionPatch
 
     //@{
     //! \name Assignment to constant values.
-    //! \brief Set equal to an interval constant, keeping the same number of arguments.
+    //! \brief Set equal to a constant, keeping the same number of arguments.
     ScaledFunctionPatch<M>& operator=(const NumericType& c) { this->_model=c; return *this; }
+    //! \brief Set equal to a constant, keeping the same number of arguments.
+    ScaledFunctionPatch<M>& operator=(const GenericNumericType c) { this->_model=c; return *this; }
     //@}
 
     //@{
@@ -302,6 +307,7 @@ template<class M> class ScaledFunctionPatch
     FloatBounds<PR> operator()(const Vector<FloatBounds<PR>>& x) const;
     FloatBounds<PR> operator()(const Vector<FloatValue<PR>>& x) const;
     FloatApproximation<PR> operator()(const Vector<FloatApproximation<PR>>& x) const;
+    ValidatedNumber operator()(const Vector<ValidatedNumber>& x) const;
 
     //! \brief Compute an approximation to gradient derivative of the function at the point \a x.
     Covector<NumericType> gradient(const Vector<NumericType>& x) const;
@@ -408,15 +414,24 @@ template<class M> class ScaledFunctionPatch
         VectorScaledFunctionPatch<M> h ( VectorScaledFunctionPatch<M>::identity(f.domain(),f.properties()) );
         h[k] = ScaledFunctionPatch<M>::constant(f.domain(),c,f.properties());
         return g-compose(g,h); }
-
+    friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k, const GenericNumericType& c) {
+        return antiderivative(f,k,NumericType(c,f.precision())); }
+        
     friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
         ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         return ScaledFunctionPatch<M>(remove(f.domain(),k),partial_evaluate(f.model(),k,unscale(c,f.domain()[k]))); }
+    friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const GenericNumericType& c) {
+        ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
+        return partial_evaluate(f,k,NumericType(c,f.precision())); }
     friend NumericType evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) { ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain()); }
         return unchecked_evaluate(f,x); }
+    friend NumericType evaluate(const ScaledFunctionPatch<M>& f, const Vector<GenericNumericType>& x) {
+        return evaluate(f,Vector<NumericType>(x,f.precision())); }
     friend NumericType unchecked_evaluate(const ScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         return evaluate(f.model(),unscale(x,f.domain())); }
+    friend NumericType unchecked_evaluate(const ScaledFunctionPatch<M>& f, const Vector<GenericNumericType>& x) {
+        return unchecked_evaluate(f,Vector<NumericType>(x,f.precision())); }
 
     friend NormType norm(const ScaledFunctionPatch<M>& f) {
         return norm(f.model()); }
@@ -519,6 +534,7 @@ template<class M> class VectorScaledFunctionPatch
 {
     friend class VectorScaledFunctionPatchElementReference<M>;
     typedef BoxDomainType D;
+    typedef BoxDomainType C;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -526,22 +542,25 @@ template<class M> class VectorScaledFunctionPatch
   public:
     typedef D DomainType;
     typedef M ModelType;
+    typedef P Paradigm;
+    typedef PR PrecisionType;
+    typedef PRE ErrorPrecisionType;
     typedef Box<typename ModelType::CodomainType> CodomainType;
     typedef Box<typename ModelType::RangeType> RangeType;
     typedef typename ModelType::ExpansionType ExpansionType;
     typedef typename ModelType::CoefficientType CoefficientType;
     typedef typename ModelType::ErrorType ErrorType;
     typedef typename ModelType::NumericType NumericType;
+    typedef Number<Paradigm> GenericNumericType;
     typedef typename ModelType::NormType NormType;
     typedef typename M::PropertiesType PropertiesType;
-    typedef P Paradigm;
-    typedef PR PrecisionType;
-    typedef PRE ErrorPrecisionType;
 
     typedef FloatApproximation<PR> ApproximateNumericType;
     typedef FloatBounds<PR> ValidatedNumericType;
     typedef FloatValue<PR> ExactNumericType;
 
+    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
 
     //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables.
     VectorScaledFunctionPatch<M>();
@@ -608,6 +627,8 @@ template<class M> class VectorScaledFunctionPatch
     // Data access
     //! \brief The properties used to control approximation of the function model.
     PropertiesType properties() const;
+    //! \brief The precision of the numbers used.
+    PrecisionType precision() const;
     //! \brief Set the properties used to control approximation of the function model.
     Void set_properties(PropertiesType prp);
     //! \brief The data used to define the domain of the Taylor model.
@@ -653,6 +674,7 @@ template<class M> class VectorScaledFunctionPatch
     Vector<ValidatedNumericType> operator()(const Vector<ValidatedNumericType>& x) const;
     Vector<ApproximateNumericType> operator()(const Vector<ApproximateNumericType>& x) const;
     Vector<ValidatedNumericType> operator()(const Vector<ExactNumericType>& x) const;
+    Vector<ValidatedNumber> operator()(const Vector<ValidatedNumber>& x) const;
     //! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x.
     Matrix<NumericType> jacobian(const Vector<NumericType>& x) const;
 
@@ -881,14 +903,23 @@ template<class M> class VectorScaledFunctionPatch
         ARIADNE_ASSERT(decide(contains(tf.domain()[k],c)));
         return VectorScaledFunctionPatch<M>(remove(tf.domain(),k),partial_evaluate(tf.models(),k,unscale(c,tf.domain()[k])));
     }
+    friend VectorScaledFunctionPatch<M> partial_evaluate(const VectorScaledFunctionPatch<M>& tf, SizeType k, const GenericNumericType& c) {
+        return partial_evaluate(tf,k,NumericType(c,tf.precision())); }
+        
     friend Vector<NumericType> evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) {
             ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
         }
         return unchecked_evaluate(f,x);
     }
+    friend Vector<GenericNumericType> evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<GenericNumericType>& x) {
+        return evaluate(f,Vector<NumericType>(x,f.precision()));
+    }
     friend Vector<NumericType> unchecked_evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         return evaluate(f.models(),unscale(x,f.domain()));
+    }
+    friend Vector<GenericNumericType> unchecked_evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<GenericNumericType>& x) {
+        return unchecked_evaluate(f,Vector<NumericType>(x,f.precision()));
     }
 
     friend ScaledFunctionPatch<M> compose(const ScalarMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
@@ -947,7 +978,9 @@ template<class M> class VectorScaledFunctionPatch
         }
         return g;
     }
-
+    friend VectorScaledFunctionPatch<M> antiderivative(const VectorScaledFunctionPatch<M>& f, SizeType k, GenericNumericType c) {
+        return antiderivative(f,k,NumericType(c,f.precision())); 
+    }
     friend NormType norm(const VectorScaledFunctionPatch<M>& f) {
         NormType res=norm(f.zero_element());
         for(SizeType i=1; i!=f.result_size(); ++i) {

@@ -159,21 +159,26 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
-    , public ProvideConcreteGenericArithmeticOperators<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
+    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
+    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
   public:
     typedef ScalarFunction<P,D> GenericType;
+    typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
+    typedef Number<P> GenericNumericType;
     typedef FloatError<PR> NormType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
+
+    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
     clone_on_copy_ptr< ScalarFunctionModelInterface<P,D,PR,PRE> > _ptr;
   public:
@@ -221,6 +226,15 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
         FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D>(f.domain(),factory); }
   public:
   public:
+    friend CanonicalNumericType<P,PR,PRE> evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
+        return f._ptr->_evaluate(x); }
+    friend Number<P> evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<Number<P>>& x) {
+        return f._ptr->_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+    friend CanonicalNumericType<P,PR,PRE> unchecked_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
+        return f._ptr->_unchecked_evaluate(x); }
+    friend Number<P> unchecked_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<Number<P>>& x) {
+        return f._ptr->_unchecked_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+
     friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
         return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
     friend ScalarFunctionModel<P,D,PR,PRE> partial_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
@@ -325,18 +339,7 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
 };
 
 
-/*
-template<class D, class PR, class PRE> inline
-ScalarFunctionModel<ValidatedTag,D,PR,PRE> refinement(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return ScalarFunctionModel<ValidatedTag,D,PR,PRE>(f1._ptr->_refinement(f2)); }
-template<class D, class PR, class PRE> inline
-Boolean inconsistent(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return f1._ptr->_inconsistent(f2); }
-template<class D, class PR, class PRE> inline
-Boolean refines(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f1, const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f2) {
-    return f1._ptr->_refines(f2); }
-*/
-    // FIXME: Should not be needed since ScalarMultivariateFunctionModel has a representation
+// FIXME: Should not be needed since ScalarMultivariateFunctionModel has a representation
 template<class P> inline ScalarMultivariateFunctionModel<P,DoublePrecision> embed(const ScalarMultivariateFunction<P>& f, const IntervalDomainType& d) {
     return embed(ScalarMultivariateFunctionModel<P,DoublePrecision>(f),d); }
 
@@ -399,13 +402,19 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
   public:
     clone_on_copy_ptr< VectorFunctionModelInterface<P,D,PR,PRE> > _ptr;
   public:
+    typedef VectorFunction<P,D> GenericType;
+    typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
     typedef CanonicalCoefficientType<P,PR> CoefficientType;
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
+    typedef Number<P> GenericNumericType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
+
+    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
     inline FunctionModel() : _ptr() { }
     inline FunctionModel(SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> vfp)
@@ -512,8 +521,23 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     friend VectorFunctionModel<P,D,PR,PRE> restriction(const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
         VectorFunctionModelInterface<P,D,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return VectorFunctionModel<P,D,PR,PRE>(rptr); }
 
+    friend Vector<CanonicalNumericType<P,PR,PRE>> evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
+        return f._ptr->_evaluate(x); }
+    friend Vector<Number<P>> evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<Number<P>>& x) {
+        return f._ptr->_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+
     friend Vector<CanonicalNumericType<P,PR,PRE>> unchecked_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
         return f._ptr->_unchecked_evaluate(x); }
+    friend Vector<Number<P>> unchecked_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<Number<P>>& x) {
+        return f._ptr->_unchecked_evaluate(Vector<CanonicalNumericType<P,PR,PRE>>(x,f.precision())); }
+
+    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
+        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
+    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
+        return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
+
+    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionModel<P,D,PR,PRE>& f) {
+        return os <<  f.operator VectorMultivariateFunction<P>(); }
 
     friend ScalarFunctionModel<P,D,PR,PRE> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,D,PR,PRE>& g) {
         ScalarFunctionModelInterface<P,D,PR,PRE> const* fptr = dynamic_cast<ScalarFunctionModelInterface<P,D,PR,PRE> const*>(f.raw_pointer());
@@ -559,20 +583,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         return antiderivative(f,j,CanonicalNumericType<P,PR,PRE>(c,f[0].value().precision()));
     }
 
-    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const CanonicalNumericType<P,PR,PRE>& c) {
-        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_partial_evaluate(j,c)); }
-    friend VectorFunctionModel<P,D,PR,PRE> partial_evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, SizeType j, const Number<P>& c) {
-        return partial_evaluate(f,j,CanonicalNumericType<P,PR,PRE>(c,f.precision())); }
-
-    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionModel<P,D,PR,PRE>& f) {
-        return os <<  f.operator VectorMultivariateFunction<P>(); }
-
 };
-
-template<class P, class D, class PR, class PRE> inline CanonicalNumericType<P,PR,PRE> evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
-    return f(x); }
-template<class P, class D, class PR, class PRE> inline CanonicalNumericType<P,PR,PRE> unchecked_evaluate(const ScalarFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
-    return f._ptr->_unchecked_evaluate(x); }
 
 // FIXME: Implement for Multiple-Precision versions
 template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const ScalarMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
@@ -595,6 +606,8 @@ template<class D, class PR, class PRE> ScalarFunctionModel<ValidatedTag,D,PR,PRE
     return VectorFunctionModel<ValidatedTag,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
 template<class D, class PR, class PRE> VectorFunctionModel<ValidatedTag,D,PR,PRE> unchecked_compose(const VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>& f, const VectorFunctionModel<ValidatedTag,D,PR,PRE>& g) {
     return VectorFunctionModel<ValidatedTag,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
+
+// FIXME: Should be unneeded
 template<class D, class PR, class PRE> ScalarFunctionModel<ValidatedTag,D,PR,PRE> restrict(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f, const D& dom) {
     return ScalarFunctionModel<ValidatedTag,D,PR,PRE>(f._ptr->_restriction(dom)); }
 template<class D, class PR, class PRE> VectorFunctionModel<ValidatedTag,D,PR,PRE> restrict(const VectorFunctionModel<ValidatedTag,D,PR,PRE>& f, const D& dom) {

@@ -340,7 +340,7 @@ Void export_scalar_function_model(pybind11::module& module)
     scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarMultivariateFunctionModelDP>);
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarMultivariateFunctionModelDP>);
 
-    module.def("evaluate", (ValidatedNumericType(*)(const ValidatedScalarMultivariateFunctionModelDP&,const Vector<ValidatedNumericType>&)) &evaluate);
+    module.def("evaluate", &_evaluate_<ValidatedScalarMultivariateFunctionModelDP,Vector<ValidatedNumericType>>);
     module.def("partial_evaluate", &_partial_evaluate_<ValidatedScalarMultivariateFunctionModelDP,SizeType,ValidatedNumericType>);
 
     module.def("compose", _compose_<ValidatedScalarMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP>);

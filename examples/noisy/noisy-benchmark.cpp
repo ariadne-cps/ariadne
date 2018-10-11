@@ -32,7 +32,6 @@
 #include "rossler-attractor.hpp"
 #include "jerk16.hpp"
 #include "dc-dc.hpp"
-#include "harmonic-oscillator.hpp"
 
 #include "noisy-utilities.hpp"
 
@@ -41,7 +40,7 @@ using namespace Ariadne;
 
 int main()
 {
-    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC(),HO()};
+    List<SystemType> systems = {HS(),CR(),LV(),JE(),PI(),J21(),LA(),RA(),J16(),DC()};
 
     for (SystemType s : systems) {
         std::cout << std::get<0>(s) << std::endl;

@@ -29,8 +29,8 @@ namespace Ariadne {
 
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 
-void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
-void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
 void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial, Real evolution_time, double step);
 void run_noisy_system(SystemType system);
 
@@ -53,7 +53,7 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     typedef typename ValidatedVectorMultivariateFunctionModelType::NumericType NumericType;
     typedef typename NumericType::PrecisionType PrecisionType;
@@ -104,10 +104,10 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
     }
 }
 
-void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
-        List<InputApproximation> singleapproximation = {appro};
+        List<InputApproximationKind> singleapproximation = {appro};
         std::cout << appro << std::endl;
         run_single(name,ivp,evolution_time,step,singleapproximation,sweeper,freq,verbosity,draw);
     }
@@ -125,12 +125,12 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     bool draw = false;
     DRAWING_METHOD = DrawingMethod::BOX;
 
-    List<InputApproximation> approximations;
-    approximations.append(InputApproximation::ZERO);
-    approximations.append(InputApproximation::CONSTANT);
-    approximations.append(InputApproximation::AFFINE);
-    approximations.append(InputApproximation::SINUSOIDAL);
-    approximations.append(InputApproximation::PIECEWISE);
+    List<InputApproximationKind> approximations;
+    approximations.append(InputApproximationKind::ZERO);
+    approximations.append(InputApproximationKind::CONSTANT);
+    approximations.append(InputApproximationKind::AFFINE);
+    approximations.append(InputApproximationKind::SINUSOIDAL);
+    approximations.append(InputApproximationKind::PIECEWISE);
 
     run_single(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity,draw);
     //run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity,draw);

@@ -63,10 +63,11 @@ void TestDyadic::test()
 
 void TestDyadic::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5;
-    Dyadic w; Boolean b;
+    Dyadic w, w2; Boolean b;
 
     w=Dyadic(); w=Dyadic(m); w=Dyadic(lm); w=Dyadic(n); w=Dyadic(ln); w=Dyadic(z); w=Dyadic(z);
-    w=m; w=lm; w=n; w=ln; w=z; w=w;
+    w2=Dyadic();
+    w=m; w=lm; w=n; w=ln; w=z; w=w2;
 
     w=+w; w=-w;
     w=w+w; w=w-w; w=w*w;
@@ -163,6 +164,10 @@ void TestDyadic::test_infinity() {
     ExactDouble double_nan(double_inf.get_d()*0.0);
 
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Dyadic(double_max),Dyadic(double_inf));
+
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign::POSITIVE).get_d()==std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_ASSERT(Dyadic::inf(Sign::NEGATIVE).get_d()==-std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_ASSERT(isnan(Dyadic::inf(Sign::ZERO).get_d()));
 
     ARIADNE_TEST_ASSERT(Dyadic(+double_inf)==Dyadic::inf(Sign(+1)));
     ARIADNE_TEST_ASSERT(Dyadic(-double_inf)==Dyadic::inf(Sign(-1)));

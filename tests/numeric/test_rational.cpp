@@ -68,10 +68,11 @@ void TestRational::test()
 
 void TestRational::test_concept() {
     unsigned int m=1; unsigned long int lm=1; int n=-2; long int ln=-2; Integer z=-5; Dyadic w=z;
-    Rational q; Boolean b;
+    Rational q, q2; Boolean b;
 
     q=Rational(); q=Rational(m); q=Rational(lm); q=Rational(n); q=Rational(ln); q=Rational(z); q=Rational(z);
-    q=m; q=lm; q=n; q=ln; q=z; q=q;
+    q2=Rational();
+    q=m; q=lm; q=n; q=ln; q=z; q=q2;
 
     q=+q; q=-q;
     q=q+q; q=q-q; q=q*q; q=q/q;
@@ -135,6 +136,7 @@ void TestRational::test_comparisons() {
 
 void TestRational::test_infinity() {
     Rational qinf=Rational::inf();
+    Rational qninf=Rational::inf(Sign::NEGATIVE);
     Rational qnan=Rational::nan();
 
     ARIADNE_TEST_ASSERT(is_nan(Rational::nan()));
@@ -150,6 +152,10 @@ void TestRational::test_infinity() {
     ARIADNE_TEST_EQUALS(sgn(Rational::inf()), Sign::POSITIVE);
     ARIADNE_TEST_EQUALS(sgn(Rational::nan()), Sign::ZERO);
     ARIADNE_TEST_EQUALS(sgn(-Rational::inf()), Sign::NEGATIVE);
+
+    ARIADNE_TEST_ASSERT(std::isnan(Rational::nan().get_d()));
+    ARIADNE_TEST_EQUAL(Rational::inf(Sign::POSITIVE).get_d(),std::numeric_limits<double>::infinity());
+    ARIADNE_TEST_EQUAL(Rational::inf(Sign::NEGATIVE).get_d(),-std::numeric_limits<double>::infinity());
 
     ARIADNE_TEST_BINARY_PREDICATE(operator==,Rational(2,0),Rational(1,0));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-1,0),Rational(2,0));
@@ -215,6 +221,9 @@ void TestRational::test_infinity() {
     ARIADNE_TEST_EQUALS(max(Rational::inf(Sign(-1)),Rational(-2)),Rational(-2));
     ARIADNE_TEST_EQUALS(max(Rational(-2),Rational::inf(Sign(+1))),Rational::inf(Sign(+1)));
 
+    ARIADNE_TEST_EQUALS(Rational(Dyadic::inf(Sign::POSITIVE)),qinf);
+    ARIADNE_TEST_EQUALS(Rational(Dyadic::inf(Sign::NEGATIVE)),qninf);
+    ARIADNE_TEST_ASSERT(is_nan(Rational(Dyadic::inf(Sign::ZERO))));
 }
 
 void TestRational::test_decimal() {

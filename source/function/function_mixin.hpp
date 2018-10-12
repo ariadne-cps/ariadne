@@ -46,8 +46,10 @@ typedef Algebra<ValidatedNumber> ValidatedAlgebra;
 typedef Algebra<EffectiveNumber> EffectiveAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
-template<class F, class P, class D=BoxDomainType> class ScalarFunctionMixin;
-template<class F, class P, class D=BoxDomainType> class VectorFunctionMixin;
+template<class F, class P, class D> class ScalarFunctionMixin;
+template<class F, class P, class D> class VectorFunctionMixin;
+template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,BoxDomainType>;
+template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,BoxDomainType>;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
@@ -123,7 +125,7 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument<Algebra<ValidatedNumber>>& x) const override;
 
-    virtual Result<ValidatedScalarFunction> _evaluate(const Argument<ValidatedScalarFunction>& x) const override;
+    virtual Result<ValidatedScalarMultivariateFunction> _evaluate(const Argument<ValidatedScalarMultivariateFunction>& x) const override;
 
 };
 

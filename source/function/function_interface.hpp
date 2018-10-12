@@ -48,26 +48,26 @@ template<class P, class D, class C> class FunctionInterface;
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
-template<class P,class D,class C=BoxDomainType>
+//! \sa \ref ScalarMultivariateFunctionInterface
+template<class P,class D>
 class VectorOfFunctionInterface
 {
 };
 
-template<class D> class VectorOfFunctionInterface<ApproximateTag,D,BoxDomainType> {
+template<class D> class VectorOfFunctionInterface<ApproximateTag,D> {
   public:
     virtual ~VectorOfFunctionInterface<ApproximateTag,D>() = default;
     virtual ScalarFunctionInterface<ApproximateTag,D>* _get(SizeType i) const = 0;
 };
 
-template<class D> class VectorOfFunctionInterface<ValidatedTag,D,BoxDomainType>
+template<class D> class VectorOfFunctionInterface<ValidatedTag,D>
     : public virtual VectorOfFunctionInterface<ApproximateTag,D>
 {
   public:
     virtual ScalarFunctionInterface<ValidatedTag,D>* _get(SizeType i) const override = 0;
 };
 
-template<class D> class VectorOfFunctionInterface<EffectiveTag,D,BoxDomainType>
+template<class D> class VectorOfFunctionInterface<EffectiveTag,D>
     : public virtual VectorOfFunctionInterface<ValidatedTag,D>
 {
   public:
@@ -103,7 +103,7 @@ class FunctionInterface<Void,D,C>
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\mathbb{F}^n\rightarrow\mathbb{F}\f$ which can only be evaluated approximately.
-//! \sa \ref VectorFunctionInterface.
+//! \sa \ref VectorMultivariateFunctionInterface.
 template<class D, class C>
 class FunctionInterface<ApproximateTag,D,C>
     : public virtual FunctionInterface<Void,D,C>
@@ -128,7 +128,7 @@ class FunctionInterface<ApproximateTag,D,C>
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\mathbb{I}^n\rightarrow\mathbb{I}\f$ which can be evaluated over intervals.
-//! \sa \ref VectorFunctionInterface.
+//! \sa \ref VectorMultivariateFunctionInterface.
 template<class D, class C>
 class FunctionInterface<ValidatedTag,D,C>
     : public virtual FunctionInterface<ApproximateTag,D,C>
@@ -149,7 +149,7 @@ class FunctionInterface<ValidatedTag,D,C>
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
     virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
 
-    virtual Result<ScalarFunction<ValidatedTag>> _evaluate(const Argument< ScalarFunction<ValidatedTag> >& x) const = 0;
+    virtual Result<ScalarMultivariateFunction<ValidatedTag>> _evaluate(const Argument< ScalarMultivariateFunction<ValidatedTag> >& x) const = 0;
 
     inline Result<FloatDPBounds> _evaluate(const Argument<FloatDPValue>& x) const {
         return this->_evaluate(Argument<FloatDPBounds>(x)); }
@@ -162,7 +162,7 @@ class FunctionInterface<ValidatedTag,D,C>
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
-//! \sa \ref VectorFunctionInterface.
+//! \sa \ref VectorMultivariateFunctionInterface.
 template<class D, class C>
 class FunctionInterface<EffectiveTag,D,C>
     : public virtual FunctionInterface<ValidatedTag,D,C>
@@ -194,22 +194,23 @@ template<class X> class FunctionFactoryInterface;
 
 template<> class FunctionFactoryInterface<ValidatedTag>
 {
+    using P = ValidatedTag;
     typedef BoxDomainType DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
     virtual OutputStream& write(OutputStream& os) const = 0;
-    inline ValidatedScalarFunction create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
-    inline ValidatedVectorFunction create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
-    inline ValidatedScalarFunction create_zero(const BoxDomainType& domain) const;
-    inline ValidatedVectorFunction create_identity(const BoxDomainType& domain) const;
+    inline ScalarMultivariateFunction<P> create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const;
+    inline VectorMultivariateFunction<P> create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const;
+    inline ScalarMultivariateFunction<P> create_zero(const BoxDomainType& domain) const;
+    inline VectorMultivariateFunction<P> create_identity(const BoxDomainType& domain) const;
   private:
-    virtual ScalarFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
-    virtual VectorFunctionInterface<ValidatedTag>* _create(const BoxDomainType& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual ScalarMultivariateFunctionInterface<P>* _create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const = 0;
+    virtual VectorMultivariateFunctionInterface<P>* _create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const = 0;
   public:
-    friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
+    friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<P>& factory) {
         return factory.write(os); }
   public:
-    virtual ~FunctionFactoryInterface<ValidatedTag>() = default;
+    virtual ~FunctionFactoryInterface<P>() = default;
 };
 
 

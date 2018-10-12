@@ -427,7 +427,7 @@ template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
     FloatError<PR> e=nul(r.error());
     ValidatedApproximation<F> clmu=c;
     for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
-        ReferenceType<FloatValue<PR>> rv=riter->coefficient();
+        UniformReference<FloatValue<PR>> rv=riter->coefficient();
         rv=mul_err(rv,clmu,e);
     }
     r.error()*=mag(c);
@@ -441,13 +441,13 @@ struct UnitMultiIndex { SizeType argument_size; SizeType unit_index; };
 
 template<class F> inline Void _incr(TaylorModel<ValidatedTag,F>& r, const MultiIndex& a) {
     for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
-        static_cast<ReferenceType<MultiIndex>>(iter->index())+=a;
+        iter->index()+=a;
     }
 }
 
 template<class F> inline Void _incr(TaylorModel<ValidatedTag,F>& r, SizeType j) {
     for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
-        ++static_cast<ReferenceType<MultiIndex>>(iter->index())[j];
+        ++iter->index()[j];
     }
 }
 
@@ -460,7 +460,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Value<F
     if(r.expansion().empty() || r.expansion().back().index().degree()>0) {
         r.expansion().append(MultiIndex(r.argument_size()),c);
     } else {
-        ReferenceType<FloatValue<PR>> rv=(r.end()-1)->coefficient();
+        UniformReference<FloatValue<PR>> rv=(r.end()-1)->coefficient();
         FloatError<PR>& re=r.error();
         rv=add_err(rv,c,re);
     }
@@ -492,7 +492,7 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<
         r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
     }
 
-    ReferenceType<FloatValue<PR>> rv=(r.end()-1)->coefficient();
+    UniformReference<FloatValue<PR>> rv=(r.end()-1)->coefficient();
     FloatError<PR>& re=r.error();
     rv=add_err(rv,c,re);
 
@@ -604,28 +604,28 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
     typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->index()<yiter->index()) {
-            ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+            UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
             r.expansion().append(xiter->index(),xv);
             ++xiter;
         } else if(yiter->index()<xiter->index()) {
-            ConstReferenceType<FloatValue<PR>> yv=yiter->coefficient();
+            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
             r.expansion().append(yiter->index(),mul_err(yv,c,err));
             ++yiter;
         } else {
-            ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
-            ConstReferenceType<FloatValue<PR>> yv=yiter->coefficient();
+            UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
+            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
             r.expansion().append(xiter->index(),fma_err(xv,clmu,yv,err));
             ++xiter; ++yiter;
         }
     }
 
     while(xiter!=x.end()) {
-        ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
         r.expansion().append(xiter->index(),xv);
         ++xiter;
     }
     while(yiter!=y.end()) {
-        ConstReferenceType<FloatValue<PR>> yv=yiter->coefficient();
+        UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
         r.expansion().append(yiter->index(),mul_err(yv,clmu,err));
         ++yiter;
     }
@@ -651,12 +651,12 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         FloatError<PR> te=nul(r.error()); // trucation error
         FloatError<PR> re=nul(r.error()); // roundoff error
-        ConstReferenceType<MultiIndex> xa=xiter->index();
-        ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<MultiIndex> xa=xiter->index();
+        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
         FloatError<PR> mag_xv=mag(xv);
         for(typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            ConstReferenceType<MultiIndex> ya=yiter->index();
-            ConstReferenceType<FloatValue<PR>> yv=yiter->coefficient();
+            UniformConstReference<MultiIndex> ya=yiter->index();
+            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
             ta=xa+ya;
             FloatValue<PR> tv=mul_no_err(xv,yv);
             if(r.sweeper().discard(ta,tv)) {
@@ -785,7 +785,7 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
         FloatValue<PR> rv=advanced->coefficient();
         ++advanced;
         while(advanced!=end && advanced->index()==current->index()) {
-            ConstReferenceType<FloatValue<PR>> xv=advanced->coefficient();
+            UniformConstReference<FloatValue<PR>> xv=advanced->coefficient();
             rv=add_err(rv,xv,e);
             ++advanced;
         }
@@ -908,10 +908,10 @@ template<class F> auto TaylorModel<ValidatedTag,F>::range() const -> RangeType {
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) const -> RangeType {
     FloatBounds<PR> g(0,0);
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        ConstReferenceType<MultiIndex> a=iter->index();
+        UniformConstReference<MultiIndex> a=iter->index();
         const Nat c=a[j];
         if(c>0) {
-            ConstReferenceType<FloatValue<PR>> x=iter->coefficient();
+            UniformConstReference<FloatValue<PR>> x=iter->coefficient();
             if(a.degree()==1) { g+=x; }
             else { g+=FloatBounds<PR>(-1,1)*x*c; }
         }
@@ -922,8 +922,8 @@ template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) c
 template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Covector<RangeType> {
     Covector<FloatBounds<PR>> g(this->argument_size(),FloatBounds<PR>(0,0));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        ConstReferenceType<MultiIndex> a=iter->index();
-        ConstReferenceType<FloatValue<PR>> x=iter->coefficient();
+        UniformConstReference<MultiIndex> a=iter->index();
+        UniformConstReference<FloatValue<PR>> x=iter->coefficient();
         for(SizeType j=0; j!=this->argument_size(); ++j) {
             const Nat c=a[j];
             if(c>0) {
@@ -1125,8 +1125,8 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embe
 
     // Copy new terms
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
-        ConstReferenceType<MultiIndex> xa=iter->index();
-        ConstReferenceType<FloatValue<PR>> xv=iter->coefficient();
+        UniformConstReference<MultiIndex> xa=iter->index();
+        UniformConstReference<FloatValue<PR>> xv=iter->coefficient();
         for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
         rtm._append(ra,xv);
     }
@@ -1155,8 +1155,8 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_disc
     MultiIndex ra(number_of_kept_variables);
     FloatError<PR> derr=mag(tm.error()); // Magnitude of discarded terms
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        ConstReferenceType<MultiIndex> xa=iter->index();
-        ConstReferenceType<FloatValue<PR>> xv=iter->coefficient();
+        UniformConstReference<MultiIndex> xa=iter->index();
+        UniformConstReference<FloatValue<PR>> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1192,8 +1192,8 @@ template<class F> Void TaylorModel<ValidatedTag,F>::antidifferentiate(SizeType k
 
     FloatError<PR> e=nul(this->error());
     for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        MultiIndexReference xa=xiter->index();
-        ReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<MultiIndex> xa=xiter->index();
+        UniformReference<FloatValue<PR>> xv=xiter->coefficient();
         xa[k]+=1;
         Nat c=xa[k];
         xv=div_err(xv,c,e);
@@ -1220,12 +1220,12 @@ template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
     FloatError<PR>& re=r.error();
     typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin();
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        ConstReferenceType<MultiIndex> xa=xiter->index();
-        ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<MultiIndex> xa=xiter->index();
+        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
         Nat c=xa[k];
         if(c!=0) {
-            MultiIndexReference ra=riter->index();
-            ReferenceType<FloatValue<PR>> rv=riter->coefficient();
+            UniformReference<MultiIndex> ra=riter->index();
+            UniformReference<FloatValue<PR>> rv=riter->coefficient();
             ra=xa; ra[k]-=1;
             rv=mul_err(xv,c,re);
             ++riter;
@@ -1249,8 +1249,8 @@ template<class F> TaylorModel<ValidatedTag,F> derivative(const TaylorModel<Valid
     TaylorModel<ValidatedTag,F> r(x.argument_size(),x.sweeper());
     FloatError<PR>& re=r.error();
     for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        ConstReferenceType<MultiIndex> xa=xiter->index();
-        ConstReferenceType<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<MultiIndex> xa=xiter->index();
+        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
         c=xa[k];
         if(c!=0) {
             ra=xa;
@@ -1384,7 +1384,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // This can be done exactly
     for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         const DegreeType ak=iter->index()[k];
-        ReferenceType<FloatValue<PR>> c=iter->coefficient();
+        UniformReference<FloatValue<PR>> c=iter->coefficient();
         c/=pow(two,ak);
     }
 
@@ -1397,7 +1397,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     Array<TaylorModel<ValidatedTag,F>> ary(deg+1u,TaylorModel<ValidatedTag,F>(as,swp));
     for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
-        ConstReferenceType<FloatValue<PR>> c=iter->coefficient();
+        UniformConstReference<FloatValue<PR>> c=iter->coefficient();
         DegreeType ak=a[k];
         a[k]=0u;
         ary[ak].expansion().append(a,c);
@@ -1495,8 +1495,8 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refi
     while(xiter!=x.end() || yiter!=y.end()) {
         // Can't use const MultiIndex& here since references change as the iterators change
         // We would need to use a smart reference
-        //ConstReferenceType<MultiIndex> xa=xiter->index();
-        //ConstReferenceType<MultiIndex> ya=yiter->index();
+        //UniformConstReference<MultiIndex> xa=xiter->index();
+        //UniformConstReference<MultiIndex> ya=yiter->index();
         if(xiter==x.end()) {
             a=yiter->index();
             yv=yiter->coefficient();
@@ -1683,11 +1683,11 @@ jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f) {
     Matrix<FloatBounds<PR>> J(rs,as);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            ConstReferenceType<MultiIndex> a=iter->index();
+            UniformConstReference<MultiIndex> a=iter->index();
             for(SizeType k=0; k!=as; ++k) {
                 const Nat c=a[k];
                 if(c>0) {
-                    ConstReferenceType<FloatValue<PR>> x=iter->coefficient();
+                    UniformConstReference<FloatValue<PR>> x=iter->coefficient();
                     if(a.degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=FloatBounds<PR>(-1,1)*x*c; }
                 }
@@ -1706,12 +1706,12 @@ jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeTyp
     Matrix<FloatBounds<PR>> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            ConstReferenceType<MultiIndex> a=iter->index();
+            UniformConstReference<MultiIndex> a=iter->index();
             for(SizeType k=0; k!=ps; ++k) {
                 SizeType j=p[k];
                 const Nat c=a[j];
                 if(c>0) {
-                    ConstReferenceType<FloatValue<PR>> x=iter->coefficient();
+                    UniformConstReference<FloatValue<PR>> x=iter->coefficient();
                     if(a.degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=FloatBounds<PR>(-1,1)*x*c; }
                 }
@@ -1771,7 +1771,7 @@ template<class F> Void TaylorModel<ApproximateTag,F>::iadd(const FloatApproximat
     } else if((x._expansion.end()-1)->index().degree()>0) {
         x._expansion.append(MultiIndex(x.argument_size()),c);
     } else {
-        ReferenceType<FloatApproximation<PR>> rv=(x._expansion.end()-1)->coefficient();
+        UniformReference<FloatApproximation<PR>> rv=(x._expansion.end()-1)->coefficient();
         rv+=c;
     }
 }
@@ -1832,7 +1832,7 @@ template<class F> Void TaylorModel<ApproximateTag,F>::ifma(const TaylorModel<App
         ConstIterator yiter=y._expansion.begin();
         ConstIterator riter=r._expansion.begin();
         while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
-            ConstReferenceType<MultiIndex> ra=riter->index();
+            UniformConstReference<MultiIndex> ra=riter->index();
             sa=xiter->index()+yiter->index();
             if(sa==ra) {
                 t._expansion.append(sa,riter->coefficient()+xiter->coefficient()*yiter->coefficient());

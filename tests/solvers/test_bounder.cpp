@@ -42,13 +42,13 @@ class TestBounder
 {
   private:
     std::unique_ptr<BounderInterface> bounder_ptr;
-    EffectiveScalarFunction x, y;
+    EffectiveScalarMultivariateFunction x, y;
   public:
     TestBounder(const BounderInterface& b)
         : bounder_ptr(b.clone())
     {
-        x=EffectiveScalarFunction::coordinate(2,0);
-        y=EffectiveScalarFunction::coordinate(2,1);
+        x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        y=EffectiveScalarMultivariateFunction::coordinate(2,1);
     }
 
     Int test() {
@@ -63,11 +63,11 @@ class TestBounder
     }
 
     Void test_suggested_step_acceptable() {
-        EffectiveVectorFunction f={x,-y};
+        EffectiveVectorMultivariateFunction f={x,-y};
         ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        PositiveFloatDPApproximation hsug=cast_positive(0.25_exact);
+        StepSizeType hsug(0.25);
 
-        PositiveFloatDPValue h;
+        StepSizeType h;
         UpperBoxType B;
         std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
 
@@ -79,11 +79,11 @@ class TestBounder
     }
 
     Void test_suggested_step_not_acceptable() {
-        EffectiveVectorFunction f={x,-y};
+        EffectiveVectorMultivariateFunction f={x,-y};
         ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        PositiveFloatDPApproximation hsug=cast_positive(1.0_exact);
+        StepSizeType hsug(1.0);
 
-        PositiveFloatDPValue h;
+        StepSizeType h;
         UpperBoxType B;
         std::tie(h,B) = bounder_ptr->compute(f,dom,hsug);
 

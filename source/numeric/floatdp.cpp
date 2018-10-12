@@ -625,7 +625,7 @@ double atan_rnd(double x) {
 FloatDP::FloatDP(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())
 {
-    ARIADNE_ASSERT(Dyadic(*this)==w);
+    ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
 }
 
 FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
@@ -633,23 +633,48 @@ FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
 {
 }
 
+FloatDP::FloatDP(Integer const& x, RoundingModeType rnd, PrecisionType pr)
+    : FloatDP(Dyadic(x),rnd,pr)
+{
+}
+
+FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType)
+    : FloatDP(w.get_d())
+{
+    if (is_finite(w)) {
+         RoundingModeType old_rnd=get_rounding_mode();
+         if(rnd==ROUND_UPWARD) {
+             set_rounding_upward();
+             while (Dyadic(dbl)<w) { dbl+=std::numeric_limits<double>::min(); }
+             set_rounding_mode(old_rnd);
+         }
+         if(rnd==ROUND_DOWNWARD) {
+             set_rounding_downward();
+             while (Dyadic(dbl)>w) { dbl-=std::numeric_limits<double>::min(); }
+             set_rounding_mode(old_rnd);
+         }
+     }
+}
+
 FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType)
     : FloatDP(q.get_d())
 {
-    RoundingModeType old_rnd=get_rounding_mode();
-    if(rnd==ROUND_UPWARD) {
-        set_rounding_upward();
-        while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
-        set_rounding_mode(old_rnd);
-    }
-    if(rnd==ROUND_DOWNWARD) {
-        set_rounding_downward();
-        while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
-        set_rounding_mode(old_rnd);
+    if (is_finite(q)) {
+        RoundingModeType old_rnd=get_rounding_mode();
+        if(rnd==ROUND_UPWARD) {
+            set_rounding_upward();
+            while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
+            set_rounding_mode(old_rnd);
+        }
+        if(rnd==ROUND_DOWNWARD) {
+            set_rounding_downward();
+            while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
+            set_rounding_mode(old_rnd);
+        }
     }
 }
 
-FloatDP::FloatDP(FloatDP x, RoundingModeType rnd, PrecisionType)
+FloatDP::FloatDP(FloatDP const& x, RoundingModeType rnd, PrecisionType)
     : FloatDP(x)
 {
 }

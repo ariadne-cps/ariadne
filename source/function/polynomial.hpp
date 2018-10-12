@@ -73,6 +73,11 @@ class Polynomial
     typedef typename Expansion<MultiIndex,X>::Iterator Iterator;
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
 
+    typedef typename Expansion<MultiIndex,X>::IndexReference IndexReference;
+    typedef typename Expansion<MultiIndex,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<MultiIndex,X>::CoefficientReference CoefficientReference;
+    typedef typename Expansion<MultiIndex,X>::CoefficientConstReference CoefficientConstReference;
+
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
     typedef Polynomial<X> SelfType;

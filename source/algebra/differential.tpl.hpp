@@ -240,7 +240,8 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
     while(iter!=this->end() && iter->index().degree()<=2) {
-        ConstReferenceType<MultiIndex> a=iter->index(); ConstReferenceType<X> c=iter->coefficient();
+        UniformConstReference<MultiIndex> a=iter->index(); 
+        UniformConstReference<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
         else { while(a[j]==0) { ++j; } H[i][j]=c; H[j][i]=c; }
@@ -353,7 +354,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        ReferenceType<X> xa=iter->coefficient();
+        UniformReference<X> xa=iter->coefficient();
         xa=+xa;
     }
     return std::move(x);
@@ -363,7 +364,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X> x)
 {
     for(auto iter=x.begin(); iter!=x.end(); ++iter) {
-        ReferenceType<X> xa=iter->coefficient();
+        UniformReference<X> xa=iter->coefficient();
         xa=-xa;
     }
     return std::move(x);
@@ -551,8 +552,8 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     Differential<X> r(zero);
     for(auto iter=x.begin(); iter!=x.end(); ++iter)
     {
-        ConstReferenceType<MultiIndex> j=iter->index();
-        ConstReferenceType<X> c=iter->coefficient();
+        UniformConstReference<MultiIndex> j=iter->index();
+        UniformConstReference<X> c=iter->coefficient();
         Differential<X> t=one;
         for(SizeType k=0; k!=ms; ++k) {
             t=t*val[k][j[k]];

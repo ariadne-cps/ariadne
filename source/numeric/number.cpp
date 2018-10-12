@@ -96,6 +96,8 @@ template class NumberWrapper<FloatDPBounds>;
 template class NumberWrapper<FloatDPBall>;
 template class NumberWrapper<FloatDPValue>;
 
+DyadicBounds::operator ValidatedNumber() const { return ValidatedNumber(new NumberWrapper<FloatDPBounds>(FloatDPBounds(*this,dp))); }
+
 template<> FloatDPApproximation::operator ApproximateNumber() const { return ApproximateNumber(new NumberWrapper<FloatDPApproximation>(*this)); }
 //template<> FloatDPLowerBound::operator ValidatedLowerNumber() const { return ValidatedLowerNumber(new NumberWrapper<FloatDPLowerBound>(*this)); }
 //template<> FloatDPUpperBound::operator ValidatedUpperNumber() const { return ValidatedUpperNumber(new NumberWrapper<FloatDPUpperBound>(*this)); }

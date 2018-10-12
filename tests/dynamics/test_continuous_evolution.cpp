@@ -50,7 +50,7 @@ using namespace Ariadne;
 using namespace std;
 
 /// This function diverges heavily
-struct FailOne : VectorFunctionData<2,2,1> {
+struct FailOne : VectorMultivariateFunctionData<2,2,1> {
     template<class R, class A, class P> static Void
     compute(R& r, const A& x, const P& p) {
           r[0] = 1;
@@ -59,7 +59,7 @@ struct FailOne : VectorFunctionData<2,2,1> {
 };
 
 /// This function diverges heavily
-struct FailTwo : VectorFunctionData<3,3,1> {
+struct FailTwo : VectorMultivariateFunctionData<3,3,1> {
     template<class R, class A, class P> static Void
     compute(R& r, const A& x, const P& p) {
           r[0] = 1;
@@ -118,9 +118,9 @@ Void TestContinuousEvolution::test() const
 
     // Set up the vector field
     Real mu=Dyadic(0.5);
-    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-    EffectiveScalarFunction xp=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction vdp={x,mu*(1-x*x)*xp-x};
+    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+    EffectiveScalarMultivariateFunction xp=EffectiveScalarMultivariateFunction::coordinate(2,1);
+    EffectiveVectorMultivariateFunction vdp={x,mu*(1-x*x)*xp-x};
 
     VectorField vanderpol(vdp);
     ARIADNE_TEST_PRINT(vanderpol);
@@ -178,10 +178,10 @@ Void TestContinuousEvolution::failure_test() const
 
     // Set up the vector field for the first test
     Real p = 200;
-    EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1.0_q);
-    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
-    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction failone={o,-p*y+p};
+    EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1.0_q);
+    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+    EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+    EffectiveVectorMultivariateFunction failone={o,-p*y+p};
     VectorField failone_vf(failone);
 
     VectorFieldEvolver evolverone(failone_vf,integrator);
@@ -216,12 +216,12 @@ Void TestContinuousEvolution::failure_test() const
 
     // Set up the vector field for the second test
     p = Rational(1,10);
-    EffectiveScalarFunction z3=EffectiveScalarFunction::zero(3);
-    EffectiveScalarFunction o3=EffectiveScalarFunction::constant(3,1.0_q);
-    EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(3,0);
-    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
-    EffectiveScalarFunction x2=EffectiveScalarFunction::coordinate(3,1);
-    EffectiveVectorFunction failtwo={o3,x1*x2/p,z3};
+    EffectiveScalarMultivariateFunction z3=EffectiveScalarMultivariateFunction::zero(3);
+    EffectiveScalarMultivariateFunction o3=EffectiveScalarMultivariateFunction::constant(3,1.0_q);
+    EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+    EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(3,1);
+    EffectiveScalarMultivariateFunction x2=EffectiveScalarMultivariateFunction::coordinate(3,1);
+    EffectiveVectorMultivariateFunction failtwo={o3,x1*x2/p,z3};
     VectorField failtwo_vf(failtwo);
 
     VectorFieldEvolver evolvertwo(failtwo_vf,integrator);

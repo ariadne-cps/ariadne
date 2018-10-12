@@ -198,24 +198,6 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real> min(Expression<Real> const& e1, Expression<Real> const& e2);
     //! \related Expression \brief %Real absolute value expression.
     friend Expression<Real> abs(Expression<Real> const& e);
-
-    friend Expression<Real> operator+(Expression<Real> const& e, Real const& c);
-    friend Expression<Real> operator-(Expression<Real> const& e, Real const& c);
-    friend Expression<Real> operator*(Expression<Real> const& e, Real const& c);
-    friend Expression<Real> operator/(Expression<Real> const& e, Real const& c);
-    friend Expression<Real> operator+(Real const& c, Expression<Real> const& e);
-    friend Expression<Real> operator-(Real const& c, Expression<Real> const& e);
-    friend Expression<Real> operator*(Real const& c, Expression<Real> const& e);
-    friend Expression<Real> operator/(Real const& c, Expression<Real> const& e);
-
-    friend Expression<Kleenean> operator<=(Expression<Real> const& e, Real const& c);
-    friend Expression<Kleenean> operator< (Expression<Real> const& e, Real const& c);
-    friend Expression<Kleenean> operator>=(Expression<Real> const& e, Real const& c);
-    friend Expression<Kleenean> operator> (Expression<Real> const& e, Real const& c);
-    friend Expression<Kleenean> operator<=(Real const& c, Expression<Real> const& e);
-    friend Expression<Kleenean> operator< (Real const& c, Expression<Real> const& e);
-    friend Expression<Kleenean> operator>=(Real const& c, Expression<Real> const& e);
-    friend Expression<Kleenean> operator> (Real const& c, Expression<Real> const& e);
 };
 
 

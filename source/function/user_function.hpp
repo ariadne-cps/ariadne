@@ -53,7 +53,7 @@ namespace Ariadne {
 //! \related ScalarUserFunction
 //! \brief Template structure containing scalar function meta-information.
 template<SizeType AS, SizeType PS=0u, DegreeType SM=255u>
-struct ScalarFunctionData
+struct ScalarMultivariateFunctionData
 {
     static SizeType argument_size() { return AS; }
     static SizeType parameter_size() { return PS; }
@@ -69,15 +69,15 @@ struct ScalarFunctionData
 //!
 //! The class F must also define meta-data <c>argument_size(), parameter_size()
 //! and smoothness()</c>. These are most easily defined by inheriting from the
-//! <tt>ScalarFunctionData<AS,PS,SM=SMOOTH></tt> class.
+//! <tt>ScalarMultivariateFunctionData<AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class F> class ScalarUserFunction
-    : public EffectiveScalarFunction
+    : public EffectiveScalarMultivariateFunction
 {
   private:
     class Representation
-        : public ScalarFunctionMixin< Representation, EffectiveTag >
+        : public ScalarMultivariateFunctionMixin< Representation, EffectiveTag >
     {
       private:
         Vector<EffectiveNumericType> _p;
@@ -92,7 +92,7 @@ template<class F> class ScalarUserFunction
         virtual SizeType parameter_size() const { return F::parameter_size(); }
 
 
-        virtual EffectiveScalarFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
 
         virtual Covector<ApproximateNumericType> gradient(const Vector<ApproximateNumericType>& x) const {
             return this->evaluate(Differential<ApproximateNumericType>::variables(1u,x)).gradient(); }
@@ -105,9 +105,9 @@ template<class F> class ScalarUserFunction
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
-    ScalarUserFunction() : EffectiveScalarFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
-    ScalarUserFunction(const Vector<ExactNumericType>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    ScalarUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveScalarFunction(new Representation(p)) { }
+    ScalarUserFunction() : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
+    ScalarUserFunction(const Vector<ExactNumericType>& p) : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
+    ScalarUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveScalarMultivariateFunction(new Representation(p)) { }
 
     SizeType parameter_size() const { return F().parameter_size(); }
     //const Vector<ValidatedNumericType> parameters() const { return _p; }
@@ -118,7 +118,7 @@ template<class F> class ScalarUserFunction
 
 //! \brief A convenience class defining the meta-data of an %Ariadne function.
 template<SizeType RS, SizeType AS, SizeType PS=0u, DegreeType SM=255u>
-class VectorFunctionData
+class VectorMultivariateFunctionData
 {
   public:
     //!
@@ -143,15 +143,15 @@ class VectorFunctionData
 //!
 //! The class F must also define meta-data <c>result_size(), argument_size(), parameter_size()
 //! and smoothness()</c> as static functions. These are most easily defined by inheriting from the
-//! <tt>VectorFunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
+//! <tt>VectorMultivariateFunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class F> class VectorUserFunction
-    : public EffectiveVectorFunction
+    : public EffectiveVectorMultivariateFunction
 {
   private:
     class Representation
-        : public VectorFunctionMixin< Representation, EffectiveTag >
+        : public VectorMultivariateFunctionMixin< Representation, EffectiveTag >
     {
       public:
         Representation(const Vector<EffectiveNumericType>& p) : _p(p) { }
@@ -169,8 +169,8 @@ template<class F> class VectorUserFunction
         virtual Matrix<ValidatedNumericType> jacobian(const Vector<ValidatedNumericType>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumericType>::variables(1u,x))); }
 
-        virtual EffectiveScalarFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
-        virtual EffectiveScalarFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
         // write() method or operator<<.
@@ -180,10 +180,10 @@ template<class F> class VectorUserFunction
         Vector<EffectiveNumericType> _p;
     };
   public:
-    //VectorUserFunction() : VectorFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
-    //VectorUserFunction(const Vector<ApproximateNumericType>& p) : VectorFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    //VectorUserFunction(const Vector<ValidatedNumericType>& p) : VectorFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    VectorUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveVectorFunction(new Representation(p)) { }
+    //VectorUserFunction() : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
+    //VectorUserFunction(const Vector<ApproximateNumericType>& p) : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
+    //VectorUserFunction(const Vector<ValidatedNumericType>& p) : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
+    VectorUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveVectorMultivariateFunction(new Representation(p)) { }
     const Vector<EffectiveNumericType>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
 };
 

@@ -62,23 +62,23 @@ namespace Ariadne {
 //! \brief A hybrid set defined in a single location obtained from a Euclidean set by naming variables.
 template<class EBS>
 class HybridBasicSet
-    : public Pair<DiscreteLocation,ExpressionSet<EBS>>
+    : public Pair<DiscreteLocation,LabelledSet<EBS>>
 {
-    typedef Pair<DiscreteLocation,ExpressionSet<EBS>> Base;
+    typedef Pair<DiscreteLocation,LabelledSet<EBS>> Base;
   public:
     //! \brief The type of the Euclidean set used to describe the hybrid set.
     typedef EBS ContinuousSetType;
 
-    HybridBasicSet() : Base(DiscreteLocation(),ExpressionSet<EBS>(RealSpace(),EBS())) { }
+    HybridBasicSet() : Base(DiscreteLocation(),LabelledSet<EBS>(RealSpace(),EBS())) { }
     //! \brief Construct a set in location \a loc, with variables ordered by \a spc, defined by Euclidean set \a ebs.
-    HybridBasicSet(const DiscreteLocation& loc, const RealSpace& spc, const ContinuousSetType& ebs) : Base(loc,ExpressionSet<EBS>(spc,ebs)) { }
-    HybridBasicSet(const DiscreteLocation& loc, const ExpressionSet<EBS>& exbs) : Base(loc,exbs) { }
+    HybridBasicSet(const DiscreteLocation& loc, const RealSpace& spc, const ContinuousSetType& ebs) : Base(loc,LabelledSet<EBS>(spc,ebs)) { }
+    HybridBasicSet(const DiscreteLocation& loc, const LabelledSet<EBS>& exbs) : Base(loc,exbs) { }
     //! \brief The location the set is contained in.
     const DiscreteLocation& location() const { return this->Base::first; }
     //! \brief A continuous set in terms of named variables in the discrete location.
     const Set<RealVariable> variables() const { return this->Base::second.space().variables(); }
     //! \brief A continuous set in terms of named variables in the discrete location.
-    const ExpressionSet<EBS>& continuous_set() const { return this->Base::second; }
+    const LabelledSet<EBS>& continuous_set() const { return this->Base::second; }
     //! \brief The ordering of variables used to define the set.
     const RealSpace& space() const { return this->Base::second.space(); }
     //! \brief The continuous Euclidean subset.
@@ -140,18 +140,18 @@ template<class EBS> EqualsType<EBS> operator==(const HybridBasicSet<EBS>& hset1,
 //! \brief A hybrid set defined in a single location obtained from a Euclidean set by naming variables.
 template<class EDS>
 class HybridDenotableSet
-    : public Map<DiscreteLocation,ExpressionSet<EDS>>
+    : public Map<DiscreteLocation,LabelledSet<EDS>>
 {
-    typedef Map<DiscreteLocation,ExpressionSet<EDS>> Base;
+    typedef Map<DiscreteLocation,LabelledSet<EDS>> Base;
   public:
     typedef EDS ContinuousSetType;
 
     //! \brief Set the continuous state set in location \a loc to \a vbx.
-    Void insert(const DiscreteLocation& loc, const ExpressionSet<EDS>& eset) {
-        this->Map<DiscreteLocation,ExpressionSet<EDS>>::insert(loc,eset); }
+    Void insert(const DiscreteLocation& loc, const LabelledSet<EDS>& eset) {
+        this->Map<DiscreteLocation,LabelledSet<EDS>>::insert(loc,eset); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
     Void insert(const DiscreteLocation& loc, const RealSpace& spc, const EDS& set) {
-        this->insert(loc,ExpressionSet<EDS>(spc,set)); }
+        this->insert(loc,LabelledSet<EDS>(spc,set)); }
 
     //! \brief The set of discrete locations in which the set is nontrivial.
     Set<DiscreteLocation> locations() const { return this->keys(); }
@@ -205,14 +205,14 @@ template<class IVL> class HybridBox
     typedef typename IVL::UpperBoundType UB;
   public:
     explicit HybridBox<IVL>(const DiscreteLocation& loc, const VariablesBox<IVL>& bx)
-        : HybridBox<IVL>(loc,bx.operator ExpressionSet<Box<IVL>>()) { }
+        : HybridBox<IVL>(loc,bx.operator LabelledSet<Box<IVL>>()) { }
     HybridBox<IVL>(const DiscreteLocation& loc, const List<VariableInterval<UB>>& bnds)
         : HybridBox<IVL>(loc,_make_box(bnds)) { }
     HybridBox<IVL>(const DiscreteLocation& loc, const InitializerList<VariableInterval<UB>>& bnds)
         : HybridBox<IVL>(loc,List<VariableInterval<UB>>(bnds)) { }
     HybridBox<IVL>(const DiscreteLocation& loc, const RealSpace& spc, const Box<IVL>& bx)
         : HybridBasicSet<Box<IVL>>(loc,spc,bx) { }
-    HybridBox<IVL>(const DiscreteLocation& loc, const ExpressionSet<Box<IVL>>& ebx)
+    HybridBox<IVL>(const DiscreteLocation& loc, const LabelledSet<Box<IVL>>& ebx)
         : HybridBasicSet<Box<IVL>>(loc,ebx.space(),ebx.euclidean_set()) { }
 
     Box<IVL> euclidean_set() const {
@@ -226,13 +226,13 @@ template<class IVL> class HybridBox
 
     virtual Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const override;
   private:
-    static ExpressionSet<Box<IVL>> _make_box(List<VariableInterval<UB>> const& bnds) {
+    static LabelledSet<Box<IVL>> _make_box(List<VariableInterval<UB>> const& bnds) {
         RealSpace spc; Box<IVL> bx(bnds.size());
         for(SizeType i=0; i!=bnds.size(); ++i) {
             spc.append(bnds[i].variable());
             bx[i]=bnds[i].interval();
         }
-        return ExpressionSet<Box<IVL>>(spc,bx);
+        return LabelledSet<Box<IVL>>(spc,bx);
     }
 };
 
@@ -241,16 +241,16 @@ template<class IVL> class HybridBox
 //! \details Primarily used to represent bounds for a compact hybrid set.
 template<class IVL> class HybridBoxes
     : public virtual HybridDrawableInterface
-    , public Map<DiscreteLocation,ExpressionSet<Box<IVL>>>
+    , public Map<DiscreteLocation,LabelledSet<Box<IVL>>>
 {
-    typedef Map<DiscreteLocation,ExpressionSet<Box<IVL>>> Base;
+    typedef Map<DiscreteLocation,LabelledSet<Box<IVL>>> Base;
   public:
     //! \brief Set the continuous state set in location \a loc to \a vbx.
     Void insert(const HybridBox<IVL>& hbx) {
-        this->Map<DiscreteLocation,ExpressionSet<Box<IVL>>>::insert(hbx.location(),ExpressionSet<Box<IVL>>(hbx.space(),hbx.euclidean_set())); }
+        this->Map<DiscreteLocation,LabelledSet<Box<IVL>>>::insert(hbx.location(),LabelledSet<Box<IVL>>(hbx.space(),hbx.euclidean_set())); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
     Void insert(const DiscreteLocation& loc, const RealSpace& spc, const Box<IVL>& bx) {
-        this->Base::insert(loc,ExpressionSet<Box<IVL>>(spc,bx)); }
+        this->Base::insert(loc,LabelledSet<Box<IVL>>(spc,bx)); }
 
     bool has_location(DiscreteLocation const& loc) const { return this->Base::has_key(loc); }
 
@@ -263,7 +263,7 @@ template<class IVL> class HybridBoxes
         return this->Base::operator[](loc).euclidean_set(); }
 
     //! \brief The subset of \f$\mathbb{R}^V\f$ obtained by restricting to location \a loc.
-    ExpressionSet<Box<IVL>> const& continuous_set(const DiscreteLocation& loc) const {
+    LabelledSet<Box<IVL>> const& continuous_set(const DiscreteLocation& loc) const {
         return this->Base::operator[](loc); }
     //! \brief The box in Euclidean space \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     Box<IVL> const euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
@@ -272,7 +272,7 @@ template<class IVL> class HybridBoxes
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
 };
 
-//! \ingroup ExpressionSetSubModule
+//! \ingroup LabelledSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridValidatedConstrainedImageSet

@@ -47,8 +47,8 @@ namespace Ariadne {
 class ValidatedConstrainedImageSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
+typedef Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber> EffectiveConstraint;
+typedef Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber> ValidatedConstraint;
 
 class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;
@@ -58,7 +58,9 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
+
+typedef Dyadic StepSizeType;
 
 struct EnclosureConfiguration {
     ValidatedFunctionModelDPFactory _function_factory;
@@ -81,10 +83,10 @@ class Enclosure
     , public ValidatedCompactSetInterface
 {
     ExactBoxType _domain;
-    EffectiveVectorFunction _auxiliary_mapping;
-    ValidatedVectorFunctionModelDP _state_function;
-    ValidatedScalarFunctionModelDP _time_function;
-    ValidatedScalarFunctionModelDP _dwell_time_function;
+    EffectiveVectorMultivariateFunction _auxiliary_mapping;
+    ValidatedVectorMultivariateFunctionModelDP _state_function;
+    ValidatedScalarMultivariateFunctionModelDP _time_function;
+    ValidatedScalarMultivariateFunctionModelDP _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
@@ -97,14 +99,14 @@ class Enclosure
     //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const ExactBoxType& bx, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const EnclosureConfiguration& config);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& sf, const ValidatedScalarMultivariateFunction& tf, const List<ValidatedConstraint>& c, const EnclosureConfiguration& config);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const EnclosureConfiguration& fac);
+    explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& sf, const ValidatedScalarMultivariateFunction tf, const ValidatedVectorMultivariateFunction& g, const ValidatedVectorMultivariateFunction& h, const EnclosureConfiguration& fac);
     //! \brief Construct from an exact singleton constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& fac);
 
@@ -130,26 +132,26 @@ class Enclosure
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     ExactBoxType codomain() const;
     //! \brief The function giving the state \c x in terms of parameters \c s, \f$x=\xi(s)\f$.
-    ValidatedVectorFunctionModelDP const& state_function() const;
+    ValidatedVectorMultivariateFunctionModelDP const& state_function() const;
     //! \brief The function giving the time \c t in terms of parameters \c s, \f$t=\tau(s)\f$.
-    ValidatedScalarFunctionModelDP const& time_function() const;
+    ValidatedScalarMultivariateFunctionModelDP const& time_function() const;
     //! \brief The function giving the auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModelDP const  auxiliary_function() const;
+    ValidatedVectorMultivariateFunctionModelDP const  auxiliary_function() const;
     //! \brief The function giving the state and auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModelDP const  state_auxiliary_function() const;
+    ValidatedVectorMultivariateFunctionModelDP const  state_auxiliary_function() const;
     //! \brief The function giving the state, time and auxiliary variables in terms of parameters \c s.
-    ValidatedVectorFunctionModelDP const  state_time_auxiliary_function() const;
+    ValidatedVectorMultivariateFunctionModelDP const  state_time_auxiliary_function() const;
     //! \brief The function giving the time since the last discrete jump in terms of the parameters \c s.
-    ValidatedScalarFunctionModelDP const& dwell_time_function() const;
+    ValidatedScalarMultivariateFunctionModelDP const& dwell_time_function() const;
     //! \brief The function \c g of the constrants \f$g(s)\in C\f$.
-    ValidatedVectorFunctionModelDP const  constraint_function() const;
+    ValidatedVectorMultivariateFunctionModelDP const  constraint_function() const;
     //! \brief The bounds \c C of the constrants \f$g(s)\in C\f$.
     ExactBoxType const constraint_bounds() const;
     //! \brief The function of parameters \a s giving the \a i<sup>th</sup> state variable.
-    ValidatedScalarFunctionModelDP const  get_function(SizeType i) const;
+    ValidatedScalarMultivariateFunctionModelDP const  get_function(SizeType i) const;
 
     //! \brief Set the auxiliary function.
-    Void set_auxiliary(EffectiveVectorFunction const& aux);
+    Void set_auxiliary(EffectiveVectorMultivariateFunction const& aux);
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     Void new_parameter(ExactIntervalType ivl);
@@ -158,7 +160,7 @@ class Enclosure
     Void new_variable(ExactIntervalType ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    Void substitute(SizeType j, ValidatedScalarFunctionModelDP v);
+    Void substitute(SizeType j, ValidatedScalarMultivariateFunctionModelDP v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     Void substitute(SizeType j, FloatDP c);
 
@@ -166,29 +168,29 @@ class Enclosure
     Void clear_time();
 
     //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
-    Void apply_map(ValidatedVectorFunction r);
+    Void apply_map(ValidatedVectorMultivariateFunction r);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
-    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, FloatDPValue h);
+    Void apply_fixed_evolve_step(ValidatedVectorMultivariateFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
-    Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_space_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
-    Void apply_spacetime_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$.
-    Void apply_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_parameter_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
-    Void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
+    Void apply_finishing_parameter_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction omega);
 
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
-    Void apply_full_reach_step(ValidatedVectorFunctionModelDP phi);
+    Void apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
-    Void apply_spacetime_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
-    Void apply_parameter_reach_step(ValidatedVectorFunctionModelDP phi, ValidatedScalarFunction elps);
+    Void apply_parameter_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    Void apply_reach_step(ValidatedVectorFunction phi, FloatDP h);
+    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, FloatDP h);
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
-    Void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_reach_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
@@ -199,17 +201,17 @@ class Enclosure
     Void new_parameter_constraint(ValidatedConstraint c);
 
     //! \brief Introduces the constraint \f$\tau(s)\leq\gamma(\xi(s))\f$.
-    Void new_state_time_bound(ValidatedScalarFunction gamma);
+    Void new_state_time_bound(ValidatedScalarMultivariateFunction gamma);
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
-    Void new_positive_state_constraint(ValidatedScalarFunction g);
+    Void new_positive_state_constraint(ValidatedScalarMultivariateFunction g);
     //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.
-    Void new_negative_state_constraint(ValidatedScalarFunction g);
+    Void new_negative_state_constraint(ValidatedScalarMultivariateFunction g);
     //! \brief Introduces the constraint \f$h(\xi(s)) = 0\f$.
-    Void new_zero_state_constraint(ValidatedScalarFunction h);
+    Void new_zero_state_constraint(ValidatedScalarMultivariateFunction h);
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
-    Void new_negative_parameter_constraint(ValidatedScalarFunction g);
+    Void new_negative_parameter_constraint(ValidatedScalarMultivariateFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    Void new_zero_parameter_constraint(ValidatedScalarFunction h);
+    Void new_zero_parameter_constraint(ValidatedScalarMultivariateFunction h);
 
     //! \brief The number of negative constraints.
     SizeType number_of_constraints() const;
@@ -223,7 +225,7 @@ class Enclosure
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
-    ValidatedKleenean satisfies(ValidatedScalarFunction g) const;
+    ValidatedKleenean satisfies(ValidatedScalarMultivariateFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
     virtual ValidatedKleenean satisfies(ValidatedConstraint c) const;
@@ -344,7 +346,7 @@ class Enclosure
   private:
     Void _check() const;
     Void _solve_zero_constraints();
-    EffectiveVectorFunction real_function() const;
+    EffectiveVectorMultivariateFunction real_function() const;
   private:
     friend Enclosure product(const Enclosure&, const ExactIntervalType&);
     friend Enclosure product(const Enclosure&, const ExactBoxType&);
@@ -363,9 +365,9 @@ Enclosure product(const Enclosure& set, const ExactBoxType& bx);
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.
-Enclosure apply(const ValidatedVectorFunction& function, const Enclosure& set);
+Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const ValidatedVectorFunctionModelDP& function, const Enclosure& set);
+Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
 
 } //namespace Ariadne
 

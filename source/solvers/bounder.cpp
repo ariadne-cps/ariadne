@@ -28,18 +28,18 @@
 
 namespace Ariadne {
 
-Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);
     const Nat EXPANSION_STEPS=4;
     const Nat REFINEMENT_STEPS=4;
 
-    PositiveFloatDPValue h=cast_exact(hsug);
+    StepSizeType h=hsug;
 
     FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(dom)))).upper();
-    PositiveFloatDPValue hlip = cast_positive(cast_exact(LIPSCHITZ_TOLERANCE/lipschitz));
-    h=cast_positive(min(hlip,h));
+    StepSizeType hlip = static_cast<StepSizeType>(cast_exact(LIPSCHITZ_TOLERANCE/lipschitz));
+    h=min(hlip,h);
 
     UpperBoxType B;
     UpperBoxType V(project(dom,range(f.result_size(),f.argument_size())));
@@ -72,7 +72,7 @@ Pair<PositiveFloatDPValue,UpperBoxType> BounderBase::compute(ValidatedVectorFunc
     return std::make_pair(h,B);
 }
 
-UpperBoxType BounderBase::_initial(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const {
+UpperBoxType BounderBase::_initial(BoxDomainType dom, ValidatedVectorMultivariateFunction f, UpperBoxType arg, StepSizeType h, PositiveFloatDPValue FORMULA_WIDENING) const {
     const PositiveFloatDPValue BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
@@ -82,7 +82,7 @@ UpperBoxType BounderBase::_initial(BoxDomainType dom, ValidatedVectorFunction f,
     return wD + FORMULA_WIDENING*formula(D,V,f,arg,h);
 }
 
-UpperBoxType BounderBase::_refinement(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const {
+UpperBoxType BounderBase::_refinement(BoxDomainType dom, ValidatedVectorMultivariateFunction f, UpperBoxType B, StepSizeType h) const {
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
@@ -91,7 +91,7 @@ UpperBoxType BounderBase::_refinement(BoxDomainType dom, ValidatedVectorFunction
     return D + formula(D,V,f,BV,h);
 }
 
-UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h) const {
+UpperBoxType EulerBounder::formula(BoxDomainType D, BoxDomainType V, ValidatedVectorMultivariateFunction f, UpperBoxType arg, StepSizeType h) const {
     return IntervalDomainType(0,h)*apply(f,arg);
 }
 

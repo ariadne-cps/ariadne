@@ -36,6 +36,7 @@
 #include "../numeric/logical.hpp"
 #include "../numeric/number.hpp"
 #include "../numeric/float.hpp"
+#include "../numeric/dyadic.hpp"
 #include "../numeric/arithmetic.hpp"
 
 #include "interval.decl.hpp"
@@ -179,6 +180,9 @@ template<class U> class Interval
     //! \brief Construct from an interval of a different type using a default precision.
     template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
         explicit Interval(Interval<UU> const& x) : Interval(x,PrecisionType<U>()) { }
+    //! \brief Construct from an interval of a different type using a default precision.
+    template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
+        explicit Interval(NegationType<UU> const& l, UU const& u) : Interval(L(l,PrecisionType<U>()),U(u,PrecisionType<U>())) { }
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.
@@ -331,6 +335,7 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 
 class EmptyInterval { };
+class EntireInterval { };
 
 } // namespace Ariadne
 

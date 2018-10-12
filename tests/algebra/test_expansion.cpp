@@ -49,8 +49,19 @@ template<class F> class TestExpansion
     typedef MultiIndex MI;
     typedef Expansion<MI,F> E;
     typedef Expansion<MI,F> ExpansionType;
-    typedef typename Expansion<MI,F>::Iterator Iterator;
-    typedef typename Expansion<MI,F>::ConstIterator ConstIterator;
+
+    typedef typename Expansion<MI,F>::ValueType ExpansionValueType;
+    typedef typename Expansion<MI,F>::Reference ExpansionReference;
+    typedef typename Expansion<MI,F>::ConstReference ExpansionConstReference;
+    typedef typename Expansion<MI,F>::Pointer ExpansionExpansionPointer;
+    typedef typename Expansion<MI,F>::ConstPointer ExpansionExpansionConstPointer;
+    typedef typename Expansion<MI,F>::Iterator ExpansionIterator;
+    typedef typename Expansion<MI,F>::ConstIterator ExpansionConstIterator;
+
+    typedef typename Expansion<MI,F>::IndexReference ExpansionIndexReference;
+    typedef typename Expansion<MI,F>::IndexConstReference ExpansionIndexConstReference;
+    typedef typename Expansion<MI,F>::CoefficientReference ExpansionCoefficientReference;
+    typedef typename Expansion<MI,F>::CoefficientConstReference ExpansionCoefficientConstReference;
   public:
     PR prec; F zero;
     GradedLess graded_less;
@@ -164,16 +175,16 @@ template<class F> Void TestExpansion<F>::test_iterator_concept()
     ExpansionType e(3,zero);
     const ExpansionType cp(3,zero);
 
-    typename ExpansionType::Iterator iter=e.begin(); iter=e.end(); iter=e.find(a);
-    typename ExpansionType::ConstIterator citer=e.begin(); citer=e.end(); citer=e.find(a);
+    ExpansionIterator iter=e.begin(); iter=e.end(); iter=e.find(a);
+    ExpansionConstIterator citer=e.begin(); citer=e.end(); citer=e.find(a);
     citer=e.begin(); citer=cp.end(); citer=cp.find(a);
 
-    typename ExpansionType::ValueType val=*iter;
-    typename ExpansionType::Reference ref=*iter;
-    typename ExpansionType::ConstReference ncref=*iter;
+    ExpansionValueType val=*iter;
+    ExpansionReference ref=*iter;
+    ExpansionConstReference ncref=*iter;
 
-    typename ExpansionType::ValueType cval=*citer;
-    typename ExpansionType::ConstReference cref=*citer;
+    ExpansionValueType cval=*citer;
+    ExpansionConstReference cref=*citer;
 
     Bool res;
 
@@ -214,7 +225,7 @@ template<class F> Void TestExpansion<F>::test_data_access()
     ARIADNE_TEST_EXECUTE(e.append({0,1,0},5.0));
     ARIADNE_TEST_EXECUTE(e.append({1,0,1},7.0));
 
-    // Test Iterator difference
+    // Test ExpansionIterator difference
     ARIADNE_TEST_PRINT(e.begin());
     ARIADNE_TEST_PRINT(e.end());
     ARIADNE_TEST_EQUAL(e.begin()+static_cast<PointerDifferenceType>(e.number_of_terms()),e.end());
@@ -235,16 +246,13 @@ template<class F> Void TestExpansion<F>::test_data_access()
 
     // The behaviour of iterators is rather odd and not what might be expected
     // A MultiIndex reference assigned to by iter->index() changes its value
-    // when the Iterator is incremented, but a F reference does not.
+    // when the ExpansionIterator is incremented, but a F reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
     {
-        Iterator iter=e.begin();
-#warning
-    //    ConstReferenceType<MultiIndex> aref=iter->index();
-    //    MultiIndexConstReference aref=iter->index();
-        MultiIndexReference aref=iter->index();
-        ConstReferenceType<F> xref=iter->coefficient();
+        ExpansionIterator iter=e.begin();
+        ExpansionIndexReference aref=iter->index();
+        ExpansionCoefficientConstReference xref=iter->coefficient();
         MultiIndex a1=iter->index();
         F x1=iter->coefficient();
         ++iter;
@@ -257,11 +265,9 @@ template<class F> Void TestExpansion<F>::test_data_access()
     }
 
     {
-        ConstIterator citer=e.begin();
-#warning
-//        ConstReferenceType<MultiIndex> caref=citer->index();
-        MultiIndexConstReference caref=citer->index();
-        ConstReferenceType<F> cxref=citer->coefficient();
+        ExpansionConstIterator citer=e.begin();
+        ExpansionIndexConstReference caref=citer->index();
+        ExpansionCoefficientConstReference cxref=citer->coefficient();
         MultiIndex ca1=citer->index();
         F cx1=citer->coefficient();
         ++citer;
@@ -274,16 +280,12 @@ template<class F> Void TestExpansion<F>::test_data_access()
     }
 
     {
-        Iterator iter=e.begin()+2;
-#warning
-    //    ConstReferenceType<MultiIndex> aref=iter->index();
-    //    MultiIndexConstReference aref=iter->index();
-        ExpansionPointer<MultiIndex,F> mptr=iter.operator->();
-    //    ExpansionReference<MultiIndex,F>* mptr=iter.operator->();
-        ExpansionReference<MultiIndex,F> mref=iter.operator*();
-        ExpansionValue<MultiIndex,F> m1val=*iter;
+        ExpansionIterator iter=e.begin()+2;
+        ExpansionPointer mptr=iter.operator->();
+        ExpansionReference mref=iter.operator*();
+        ExpansionValueType m1val=*iter;
         ++iter;
-        ExpansionValue<MultiIndex,F> m2val=*iter;
+        ExpansionValueType m2val=*iter;
         ARIADNE_TEST_ASSERT(m1val==mref);
         ARIADNE_TEST_ASSERT(m1val==*mptr);
         ARIADNE_TEST_ASSERT(m2val!=mref);
@@ -291,21 +293,17 @@ template<class F> Void TestExpansion<F>::test_data_access()
     }
 
     {
-        ConstIterator iter=e.end()-1;
-#warning
-    //    ConstReferenceType<MultiIndex> aref=iter->index();
-    //    MultiIndexConstReference aref=iter->index();
-        ExpansionConstPointer<MultiIndex,F> mptr=iter.operator->();
-    //    ExpansionConstReference<MultiIndex,F>* mptr=iter.operator->();
-        ExpansionConstReference<MultiIndex,F> mref=iter.operator*();
-        ExpansionValue<MultiIndex,F> m1val=*iter;
+        ExpansionConstIterator iter=e.end()-1;
+        ExpansionConstPointer mptr=iter.operator->();
+        ExpansionConstReference mref=iter.operator*();
+        ExpansionValueType m1val=*iter;
         ++iter;
         ARIADNE_TEST_ASSERT(m1val==mref);
         ARIADNE_TEST_ASSERT(m1val==*mptr);
     }
 
     // Test finding of values of iterators
-    Iterator iter=e.begin();
+    ExpansionIterator iter=e.begin();
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EXECUTE(iter=e.find(MultiIndex({1,0,0})));
     ARIADNE_TEST_EQUAL(iter->index(),MultiIndex({1,0,0}));
@@ -314,11 +312,11 @@ template<class F> Void TestExpansion<F>::test_data_access()
 
 
     // Test hand-coded swap of values
-    ARIADNE_TEST_CONSTRUCT(Iterator,iter1,(e.begin()+1));
-    ARIADNE_TEST_CONSTRUCT(Iterator,iter2,(e.begin()+3));
+    ARIADNE_TEST_CONSTRUCT(ExpansionIterator,iter1,(e.begin()+1));
+    ARIADNE_TEST_CONSTRUCT(ExpansionIterator,iter2,(e.begin()+3));
 
     // Perform swap
-    ARIADNE_TEST_CONSTRUCT(typename ExpansionType::ValueType,tmp,(*iter2));
+    ARIADNE_TEST_CONSTRUCT(ExpansionValueType,tmp,(*iter2));
     ARIADNE_TEST_ASSERT(tmp.index()==MultiIndex({1,0,1}));
     ARIADNE_TEST_ASSERT(tmp.coefficient()==7.0);
     ARIADNE_TEST_EXECUTE(*iter2=*iter1);

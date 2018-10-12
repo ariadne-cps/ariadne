@@ -169,7 +169,7 @@ template<class A, class X> struct DeclareTranscendentalAlgebraOperations : Decla
 
 template<class A, class Y> struct DispatchMixedAlgebraNumberOperations;
 
-template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperations {
+template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperators {
     friend X create(Y const& y, A const& a) { return X(y,a.precision()); }
     friend A& operator+=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1+=x2; }
     friend A& operator-=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1-=x2; }
@@ -183,6 +183,17 @@ template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberO
     friend A operator-(Y const& y1, A a2) { return (-a2)+y1; }
     friend A operator*(Y const& y1, A a2) { return a2*y1; }
     friend A operator/(Y const& y1, A a2) { return rec(a2)*y1; }
+};
+
+template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperations : DispatchConcreteGenericAlgebraNumberOperators<A,X,Y> {
+    friend A add(A a1, Y const& y2) { a1+=y2; return std::move(a1); }
+    friend A sub(A a1, Y const& y2) { a1-=y2; return std::move(a1); }
+    friend A mul(A a1, Y const& y2) { a1*=y2; return std::move(a1); }
+    friend A div(A a1, Y const& y2) { a1/=y2; return std::move(a1); }
+    friend A add(Y const& y1, A a2) { return a2+y1; }
+    friend A sub(Y const& y1, A a2) { return (-a2)+y1; }
+    friend A mul(Y const& y1, A a2) { return a2*y1; }
+    friend A div(Y const& y1, A a2) { return rec(a2)*y1; }
 };
 
 

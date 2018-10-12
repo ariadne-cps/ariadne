@@ -5,3 +5,7 @@ add_library(ariadne-symbolic OBJECT
 )
 
 cotire(ariadne-symbolic CONFIGURATIONS None)
+
+if(COVERAGE)
+    target_compile_options(ariadne-symbolic PUBLIC ${COVERAGE_COMPILER_FLAGS})
+endif()

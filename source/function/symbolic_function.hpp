@@ -55,7 +55,7 @@ namespace Ariadne {
 //! A function defined by a formula
 template<class Y>
 struct ScalarFormulaFunction
-    : ScalarFunctionMixin<ScalarFormulaFunction<Y>,InformationTag<Y>>
+    : ScalarMultivariateFunctionMixin<ScalarFormulaFunction<Y>,InformationTag<Y>>
 {
     typedef InformationTag<Y> P;
     SizeType _argument_size;
@@ -66,7 +66,7 @@ struct ScalarFormulaFunction
 
     virtual SizeType argument_size() const final { return _argument_size; }
     virtual SizeOne result_size() const final { return SizeOne(); }
-    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const final { return new ScalarFormulaFunction<Y>(_argument_size,Ariadne::derivative(_formula,j)); }
+    virtual ScalarMultivariateFunctionInterface<P>* _derivative(SizeType j) const final { return new ScalarFormulaFunction<Y>(_argument_size,Ariadne::derivative(_formula,j)); }
     virtual OutputStream& write(OutputStream& os) const final { return os << this->_formula; }
     virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
     template<class X> Void _compute(X& r, const Vector<X>& x) const { r=Ariadne::cached_evaluate(_formula,x); }
@@ -77,7 +77,7 @@ typedef ScalarFormulaFunction<EffectiveNumber> EffectiveScalarFormulaFunction;
 //! A vector function defined by formulae
 template<class Y>
 struct VectorFormulaFunction
-    : VectorFunctionMixin<VectorFormulaFunction<Y>,InformationTag<Y>>
+    : VectorMultivariateFunctionMixin<VectorFormulaFunction<Y>,InformationTag<Y>>
 {
     SizeType _argument_size;
     Vector< Formula<Y> > _formulae;
@@ -102,7 +102,7 @@ struct VectorFormulaFunction
 
 
 //! A constant function f(x)=c
-template<class Y, class D=BoxDomainType>
+template<class Y, class D>
 struct ConstantFunction
     : ScalarFunctionMixin<ConstantFunction<Y,D>,InformationTag<Y>,D>
 {
@@ -135,7 +135,7 @@ struct ConstantFunction
 
 
 //! A coordinate function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=x_i\f$.
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 struct CoordinateFunction
     : ScalarFunctionMixin<CoordinateFunction<P,D>,P,D>
 {
@@ -166,7 +166,7 @@ struct CoordinateFunction
 
 
 //! \brief The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 struct UnaryFunction
     : ScalarFunctionMixin< UnaryFunction<P,D>, P,D >
 {
@@ -212,7 +212,7 @@ template<class P, class D> ScalarFunction<P,D> sin(const ScalarFunction<P,D>& f)
 template<class P, class D> ScalarFunction<P,D> cos(const ScalarFunction<P,D>& f) {
     return ScalarFunction<P,D>(new UnaryFunction<P,D>(OperatorCode::COS,f)); }
 
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 struct BinaryFunction
     : ScalarFunctionMixin< BinaryFunction<P,D>, P,D >
 {
@@ -252,7 +252,7 @@ struct BinaryFunction
 
 
 // \brief The power function \f$(x,n)\mapsto x^n\f$.
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 class GradedFunction
     : public ScalarFunctionMixin< GradedFunction<P,D>, P,D >
 {
@@ -291,17 +291,14 @@ class GradedFunction
     Int _arg2;
 };
 
-typedef ConstantFunction<Real> RealConstantFunction;
-typedef ConstantFunction<EffectiveNumericType> EffectiveConstantFunction;
-typedef CoordinateFunction<EffectiveTag> EffectiveCoordinateFunction;
-typedef UnaryFunction<EffectiveTag> EffectiveUnaryFunction;
-typedef BinaryFunction<EffectiveTag> EffectiveBinaryFunction;
-typedef GradedFunction<EffectiveTag> EffectiveGradedFunction;
-
+template<class P> using UnaryMultivaluedFunction = UnaryFunction<P,BoxDomainType>;
+template<class P> using BinaryMultivaluedFunction = BinaryFunction<P,BoxDomainType>;
+template<class P> using GradedMultivaluedFunction = GradedFunction<P,BoxDomainType>;
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
-template<class P, class D=BoxDomainType> class NonResizableScalarFunction : public ScalarFunction<P,D> {
+template<class P, class D> 
+class NonResizableScalarFunction : public ScalarFunction<P,D> {
   public:
     NonResizableScalarFunction<P,D>& operator=(const ScalarFunction<P,D>& f) {
         ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain()<<"\n\n*this="<<*this<<"\nf="<<f<<"\n\n");
@@ -310,7 +307,7 @@ template<class P, class D=BoxDomainType> class NonResizableScalarFunction : publ
     }
 };
 
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 struct VectorOfScalarFunction
     : VectorFunctionMixin<VectorOfScalarFunction<P,D>,P,D>
     , public virtual VectorOfFunctionInterface<P,D>
@@ -377,8 +374,9 @@ struct VectorOfScalarFunction
 
 };
 
+template<class P> using VectorOfScalarMultivariateFunction = VectorOfScalarFunction<P,BoxDomainType>;
 
-template<class P, class D=BoxDomainType>
+template<class P, class D>
 struct FunctionElement
     : ScalarFunctionMixin<FunctionElement<P,D>,P,D>
 {
@@ -492,7 +490,7 @@ struct ComposedFunction<P,D,BoxDomainType,E>
     Function<P,D,E> _g;
 };
 
-template<class P, class D=BoxDomainType, class C1=BoxDomainType, class C2=BoxDomainType>
+template<class P, class D, class C1, class C2>
 struct JoinedFunction
     : VectorFunctionMixin<JoinedFunction<P,D,C1,C2>,P,D>
 {
@@ -583,15 +581,15 @@ class ProjectedFunction
 // A Lie deriviative \f$\nabla g\cdot f\f$.
 template<class P>
 struct LieDerivativeFunction
-    : ScalarFunctionMixin<LieDerivativeFunction<P>,P>
+    : ScalarMultivariateFunctionMixin<LieDerivativeFunction<P>,P>
 {
     //! \brief Construct the identity function in dimension \a n.
-    LieDerivativeFunction(const ScalarFunction<P>& g, const VectorFunction<P>& f) {
+    LieDerivativeFunction(const ScalarMultivariateFunction<P>& g, const VectorMultivariateFunction<P>& f) {
         ARIADNE_ASSERT(g.argument_size()==f.argument_size());
         ARIADNE_ASSERT(f.result_size()==f.argument_size());
         _g=g; for(SizeType j=0; j!=g.argument_size(); ++j) { _dg[j]=g.derivative(j); } _f=f; }
     SizeType argument_size() const { return _g.argument_size(); }
-    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual ScalarMultivariateFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
 
     template<class X> inline Void _compute(X& r, const Vector<X>& x) const {
@@ -603,9 +601,9 @@ struct LieDerivativeFunction
         }
     }
 
-    ScalarFunction<P> _g;
-    List< ScalarFunction<P> > _dg;
-    VectorFunction<P> _f;
+    ScalarMultivariateFunction<P> _g;
+    Vector< ScalarMultivariateFunction<P> > _dg;
+    VectorMultivariateFunction<P> _f;
 };
 
 

@@ -13,3 +13,7 @@ add_library(ariadne-numeric OBJECT
 )
 
 cotire(ariadne-numeric CONFIGURATIONS None)
+
+if(COVERAGE)
+    target_compile_options(ariadne-numeric PUBLIC ${COVERAGE_COMPILER_FLAGS})
+endif()

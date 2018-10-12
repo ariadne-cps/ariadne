@@ -40,8 +40,8 @@ using BoxDomainType = ExactBoxType;
 
 // Function declarations
 template<class P, class D, class C> class Function;
-template<class P, class D=BoxDomainType> using ScalarFunction = Function<P,D,IntervalDomainType>;
-template<class P, class D=BoxDomainType> using VectorFunction = Function<P,D,BoxDomainType>;
+template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>;
+template<class P, class D> using VectorFunction = Function<P,D,BoxDomainType>;
 template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>;
 template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>;
 
@@ -55,39 +55,41 @@ typedef ScalarUnivariateFunction<ValidatedTag> ValidatedScalarUnivariateFunction
 typedef ScalarUnivariateFunction<EffectiveTag> EffectiveScalarUnivariateFunction;
 typedef EffectiveScalarUnivariateFunction RealScalarUnivariateFunction;
 
-typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
-typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
-typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
-typedef EffectiveScalarFunction RealScalarFunction;
-
-typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
-typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
-typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
-typedef EffectiveVectorFunction RealVectorFunction;
+typedef ScalarMultivariateFunction<ApproximateTag> ApproximateScalarMultivariateFunction;
+typedef ScalarMultivariateFunction<ValidatedTag> ValidatedScalarMultivariateFunction;
+typedef ScalarMultivariateFunction<EffectiveTag> EffectiveScalarMultivariateFunction;
+typedef EffectiveScalarMultivariateFunction RealScalarMultivariateFunction;
 
 typedef VectorUnivariateFunction<ApproximateTag> ApproximateVectorUnivariateFunction;
 typedef VectorUnivariateFunction<ValidatedTag> ValidatedVectorUnivariateFunction;
 typedef VectorUnivariateFunction<EffectiveTag> EffectiveVectorUnivariateFunction;
+typedef EffectiveVectorUnivariateFunction RealVectorUnivariateFunction;
+
+typedef VectorMultivariateFunction<ApproximateTag> ApproximateVectorMultivariateFunction;
+typedef VectorMultivariateFunction<ValidatedTag> ValidatedVectorMultivariateFunction;
+typedef VectorMultivariateFunction<EffectiveTag> EffectiveVectorMultivariateFunction;
+typedef EffectiveVectorMultivariateFunction RealVectorMultivariateFunction;
+
 
 // Function interface declarations
 template<class P, class D, class C> class FunctionInterface;
-template<class P, class D=BoxDomainType> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>;
-template<class P, class D=BoxDomainType> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomainType>;
+template<class P, class D> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>;
+template<class P, class D> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomainType>;
+template<class P> using ScalarMultivariateFunctionInterface = FunctionInterface<P,BoxDomainType,IntervalDomainType>;
+template<class P> using VectorMultivariateFunctionInterface = FunctionInterface<P,BoxDomainType,BoxDomainType>;
 
-typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
-typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
+typedef ScalarMultivariateFunctionInterface<ApproximateTag> ApproximateScalarMultivariateFunctionInterface;
+typedef ScalarMultivariateFunctionInterface<ValidatedTag> ValidatedScalarMultivariateFunctionInterface;
+typedef ScalarMultivariateFunctionInterface<EffectiveTag> EffectiveScalarMultivariateFunctionInterface;
 
-typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
-typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
+typedef VectorMultivariateFunctionInterface<ApproximateTag> ApproximateVectorMultivariateFunctionInterface;
+typedef VectorMultivariateFunctionInterface<ValidatedTag> ValidatedVectorMultivariateFunctionInterface;
+typedef VectorMultivariateFunctionInterface<EffectiveTag> EffectiveVectorMultivariateFunctionInterface;
 
-using ValidatedScalarFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
-using ValidatedVectorFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
-using ValidatedUnivariateScalarFunctionPatch = Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
-using ValidatedUnivariateVectorFunctionPatch = Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
-using ValidatedMultivariateScalarFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
-using ValidatedMultivariateVectorFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
+using ValidatedScalarUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
+using ValidatedVectorUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
+using ValidatedScalarMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
+using ValidatedVectorMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
 
 
 // Function models declarations
@@ -100,13 +102,13 @@ template<class P, class D, class PR, class PRE=PR> using VectorFunctionModelInte
 template<class P, class D, class C, class PR, class PRE=PR> class FunctionModel;
 template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,D,IntervalDomainType,PR,PRE>;
 template<class P, class D, class PR, class PRE=PR> using VectorFunctionModel = FunctionModel<P,D,BoxDomainType,PR,PRE>;
+template<class P, class PR, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,IntervalDomainType,PR,PRE>;
+template<class P, class PR, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,BoxDomainType,PR,PRE>;
+template<class P, class PR, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,BoxDomainType,IntervalDomainType,PR,PRE>;
+template<class P, class PR, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,BoxDomainType,BoxDomainType,PR,PRE>;
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 
-template<class P, class D=BoxDomainType> using ScalarFunctionModelDPInterface = ScalarFunctionModelInterface<P,D,DoublePrecision>;
-template<class P, class D=BoxDomainType> using VectorFunctionModelDPInterface = VectorFunctionModelInterface<P,D,DoublePrecision>;
-template<class P, class D=BoxDomainType> using ScalarFunctionModelDP = ScalarFunctionModel<P,D,DoublePrecision>;
-template<class P, class D=BoxDomainType> using VectorFunctionModelDP = VectorFunctionModel<P,D,DoublePrecision>;
 
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
@@ -133,17 +135,23 @@ template<class P> using CanonicalError64Type = typename FunctionModelTraits<P,Do
 template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
-using ValidatedScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
-using ValidatedVectorFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
+template<class P> using ScalarMultivariateFunctionModelDP = ScalarFunctionModel<P,BoxDomainType,DoublePrecision>;
+template<class P> using VectorMultivariateFunctionModelDP = VectorFunctionModel<P,BoxDomainType,DoublePrecision>;
 
-using ValidatedScalarFunctionModelDP = ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
-using ValidatedVectorFunctionModelDP = VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+template<class P> using ScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<P,BoxDomainType,DoublePrecision>;
+template<class P> using VectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<P,BoxDomainType,DoublePrecision>;
 
-using ApproximateScalarFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
-using ApproximateVectorFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ValidatedScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
+using ValidatedVectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<ValidatedTag,BoxDomainType,DoublePrecision>;
 
-using ApproximateScalarFunctionModelDP = ScalarFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
-using ApproximateVectorFunctionModelDP = VectorFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ValidatedScalarMultivariateFunctionModelDP = ScalarFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+using ValidatedVectorMultivariateFunctionModelDP = VectorFunctionModel<ValidatedTag,BoxDomainType,DoublePrecision>;
+
+using ApproximateScalarMultivariateFunctionModelDPInterface = ScalarFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ApproximateVectorMultivariateFunctionModelDPInterface = VectorFunctionModelInterface<ApproximateTag,BoxDomainType,DoublePrecision>;
+
+using ApproximateScalarMultivariateFunctionModelDP = ScalarFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
+using ApproximateVectorMultivariateFunctionModelDP = VectorFunctionModel<ApproximateTag,BoxDomainType,DoublePrecision>;
 
 template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;

@@ -36,20 +36,6 @@ namespace Ariadne {
 
 /************ Expansion ******************************************************/
 
-template<class T> struct ReferenceTypedef { typedef T& Type; };
-template<class T> using ReferenceType = typename ReferenceTypedef<T>::Type;
-template<class T> using ConstReferenceType = typename ReferenceTypedef<const T>::Type;
-
-template<class T> struct PointerTypedef { typedef T* Type; };
-template<class T> using PointerType = typename PointerTypedef<T>::Type;
-template<class T> using ConstPointerType = typename PointerTypedef<const T>::Type;
-
-template<> struct ReferenceTypedef<MultiIndex> { typedef MultiIndexReference Type; };
-template<> struct ReferenceTypedef<const MultiIndex> { typedef MultiIndexConstReference Type; };
-
-template<> struct PointerTypedef<MultiIndex> { typedef MultiIndexPointer Type; };
-template<> struct PointerTypedef<const MultiIndex> { typedef MultiIndexConstPointer Type; };
-
 
 struct GradedIndexLess {
     template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
@@ -119,10 +105,10 @@ template<class I, class X> class ExpansionReference
 {
   public:
     typedef I IndexType; typedef X CoefficientType;
-    typedef typename UniformList<I>::Reference IndexReference;
-    typedef typename UniformList<X>::Reference CoefficientReference;
-    typedef typename UniformList<I>::ConstReference IndexConstReference;
-    typedef typename UniformList<X>::ConstReference CoefficientConstReference;
+    typedef typename Expansion<I,X>::IndexReference IndexReference;
+    typedef typename Expansion<I,X>::CoefficientReference CoefficientReference;
+    typedef typename Expansion<I,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<I,X>::CoefficientConstReference CoefficientConstReference;
   private:
     IndexReference _a; CoefficientReference _c;
   public:
@@ -143,8 +129,8 @@ template<class I, class X> class ExpansionConstReference
 {
   public:
     typedef I IndexType; typedef X CoefficientType;
-    typedef typename UniformList<I>::ConstReference IndexConstReference;
-    typedef typename UniformList<X>::ConstReference CoefficientConstReference;
+    typedef typename Expansion<I,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<I,X>::CoefficientConstReference CoefficientConstReference;
   private:
     IndexConstReference _a; CoefficientConstReference _c;
   public:
@@ -186,7 +172,7 @@ template<class I, class X> class ExpansionPointer
 {
     ExpansionReference<I,X> _r;
   public:
-    ExpansionPointer(PointerType<I> ap, PointerType<X> cp) : _r(*ap,*cp) { }
+    ExpansionPointer(typename UniformList<I>::Pointer ap, typename UniformList<X>::Pointer cp) : _r(*ap,*cp) { }
     ExpansionPointer(ExpansionReference<I,X>* p) : _r(*p) { }
     ExpansionReference<I,X>& operator*() { return _r; }
     ExpansionReference<I,X>* operator->() { return &_r; }
@@ -196,7 +182,7 @@ template<class I, class X> class ExpansionConstPointer
 {
     ExpansionConstReference<I,X> _r;
   public:
-    ExpansionConstPointer(ConstPointerType<I> ap, ConstPointerType<X> cp) : _r(*ap,*cp) { }
+    ExpansionConstPointer(typename UniformList<I>::ConstPointer ap, typename UniformList<X>::ConstPointer cp) : _r(*ap,*cp) { }
     ExpansionConstPointer(ExpansionConstReference<I,X>* p) : _r(*p) { }
     ExpansionConstReference<I,X>& operator*() { return _r; }
     ExpansionConstReference<I,X>* operator->() { return &_r; }

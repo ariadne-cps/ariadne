@@ -129,20 +129,20 @@ pybind11::class_<RealVariable> export_variables(pybind11::module& module)
     real_variable_class.def("__add__", &__add__<RealVariable,RealExpression>);
     real_variable_class.def("__sub__", &__sub__<RealVariable,RealExpression>);
     real_variable_class.def("__mul__", &__mul__<RealVariable,RealExpression>);
-    real_variable_class.def("__div__", &__div__<RealVariable,RealExpression>);
+    real_variable_class.def(__py_div__, &__div__<RealVariable,RealExpression>);
     //NOTE The following are not required, as they dispatch to __rxxx___(RealVariable,RealExpression)
     //real_variable_class.def("__add__", &__add__<RealVariable,RealVariable>);
     //real_variable_class.def("__sub__", &__sub__<RealVariable,RealVariable>);
     //real_variable_class.def("__mul__", &__mul__<RealVariable,RealVariable>);
-    //real_variable_class.def("__div__", &__div__<RealVariable,RealVariable>);
+    //real_variable_class.def(__py_div__, &__div__<RealVariable,RealVariable>);
     //real_variable_class.def("__add__", &__add__<RealVariable,Real>);
     //real_variable_class.def("__sub__", &__sub__<RealVariable,Real>);
     //real_variable_class.def("__mul__", &__mul__<RealVariable,Real>);
-    //real_variable_class.def("__div__", &__div__<RealVariable,Real>);
+    //real_variable_class.def(__py_div__, &__div__<RealVariable,Real>);
     real_variable_class.def("__radd__", &__radd__<RealVariable,Real>);
     real_variable_class.def("__rsub__", &__rsub__<RealVariable,Real>);
     real_variable_class.def("__rmul__", &__rmul__<RealVariable,Real>);
-    real_variable_class.def("__rdiv__", &__rdiv__<RealVariable,Real>);
+    real_variable_class.def(__py_rdiv__, &__rdiv__<RealVariable,Real>);
     real_variable_class.def("__pow__", &__pow__<RealVariable,Int>);
     real_variable_class.def("__le__", &__le__<RealVariable,RealExpression>);
     real_variable_class.def("__ge__", &__ge__<RealVariable,RealExpression>);
@@ -248,7 +248,7 @@ Void export_expressions(pybind11::module& module)
     real_expression_class.def("__radd__", &__radd__<RealExpression,RealExpression>);
     real_expression_class.def("__rsub__", &__rsub__<RealExpression,RealExpression>);
     real_expression_class.def("__rmul__", &__rmul__<RealExpression,RealExpression>);
-    real_expression_class.def("__rdiv__", &__rdiv__<RealExpression,RealExpression>);
+    real_expression_class.def(__py_rdiv__, &__rdiv__<RealExpression,RealExpression>);
     real_expression_class.def("__le__", &__le__<RealExpression,RealExpression>);
     real_expression_class.def("__ge__", &__ge__<RealExpression,RealExpression>);
     real_expression_class.def("__lt__", &__lt__<RealExpression,RealExpression>);
@@ -293,8 +293,8 @@ Void export_expressions(pybind11::module& module)
     continuous_predicate_class.def("__str__",&__cstr__<ContinuousPredicate>);
 
     module.def("make_function", (RealScalarUnivariateFunction(*)(RealVariable const&, RealExpression const&)) &make_function);
-    module.def("make_function", (RealScalarFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
-    module.def("make_function", (RealVectorFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
+    module.def("make_function", (RealScalarMultivariateFunction(*)(RealSpace const&, RealExpression const&)) &make_function);
+    module.def("make_function", (RealVectorMultivariateFunction(*)(RealSpace const&, Vector<RealExpression> const&)) &make_function);
 
     pybind11::implicitly_convertible<StringVariable,StringExpression>();
     pybind11::implicitly_convertible<IntegerVariable,IntegerExpression>();

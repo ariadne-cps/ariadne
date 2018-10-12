@@ -55,33 +55,33 @@ Void export_slackness(pybind11::module& module)
 Void export_constraint(pybind11::module& module)
 {
     pybind11::class_<EffectiveConstraint> effective_nonlinear_constraint_class(module,"EffectiveConstraint");
-    effective_nonlinear_constraint_class.def(pybind11::init<Real,EffectiveScalarFunction,EffectiveNumericType>());
+    effective_nonlinear_constraint_class.def(pybind11::init<Real,EffectiveScalarMultivariateFunction,EffectiveNumericType>());
     effective_nonlinear_constraint_class.def("__str__",&__cstr__<EffectiveConstraint>);
 
     pybind11::class_<ValidatedConstraint> validated_nonlinear_constraint_class(module,"ValidatedConstraint");
-    validated_nonlinear_constraint_class.def(pybind11::init<ValidatedNumericType,ValidatedScalarFunction,ValidatedNumericType>());
+    validated_nonlinear_constraint_class.def(pybind11::init<ValidatedNumericType,ValidatedScalarMultivariateFunction,ValidatedNumericType>());
     validated_nonlinear_constraint_class.def(pybind11::init<ValidatedConstraint>());
     validated_nonlinear_constraint_class.def(pybind11::init<EffectiveConstraint>());
     validated_nonlinear_constraint_class.def("lower_bound", &ValidatedConstraint::lower_bound);
     validated_nonlinear_constraint_class.def("upper_bound", &ValidatedConstraint::upper_bound);
-    validated_nonlinear_constraint_class.def("function", (const ValidatedScalarFunction&(ValidatedConstraint::*)()const) &ValidatedConstraint::function);
+    validated_nonlinear_constraint_class.def("function", (const ValidatedScalarMultivariateFunction&(ValidatedConstraint::*)()const) &ValidatedConstraint::function);
     validated_nonlinear_constraint_class.def("__str__",&__cstr__<ValidatedConstraint>);
 }
 
 Void export_optimiser_interface(pybind11::module& module)
 {
     pybind11::class_<OptimiserInterface> optimiser_interface_class(module,"OptimiserInterface");
-    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarFunction, ExactBoxType, ValidatedVectorFunction, ExactBoxType)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarFunction, ExactBoxType, ValidatedVectorFunction, ValidatedVectorFunction)const) &OptimiserInterface::minimise);
-    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType)const) &OptimiserInterface::feasible);
-    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ValidatedVectorFunction)const) &OptimiserInterface::feasible);
-    optimiser_interface_class.def("almost_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatApproximationVector, FloatDPApproximation)const) &OptimiserInterface::almost_feasible_point);
-    optimiser_interface_class.def("is_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactFloatVector)const) &OptimiserInterface::is_feasible_point);
-    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
-    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
-    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("minimise", (Vector<ValidatedNumericType>(OptimiserInterface::*)(ValidatedScalarMultivariateFunction, ExactBoxType, ValidatedVectorMultivariateFunction, ValidatedVectorMultivariateFunction)const) &OptimiserInterface::minimise);
+    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType)const) &OptimiserInterface::feasible);
+    optimiser_interface_class.def("feasible", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ValidatedVectorMultivariateFunction)const) &OptimiserInterface::feasible);
+    optimiser_interface_class.def("almost_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatApproximationVector, FloatDPApproximation)const) &OptimiserInterface::almost_feasible_point);
+    optimiser_interface_class.def("is_feasible_point", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactFloatVector)const) &OptimiserInterface::is_feasible_point);
+    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_feasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_infeasibility", (Bool(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,ExactVector,ExactVector)const) &OptimiserInterface::validate_feasibility);
+    optimiser_interface_class.def("validate_infeasibility", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
+    optimiser_interface_class.def("is_infeasibility_certificate", (ValidatedKleenean(OptimiserInterface::*)(ExactBoxType, ValidatedVectorMultivariateFunction, ExactBoxType,FloatBoundsVector)const) &OptimiserInterface::contains_feasible_point);
     //NOTE: Not in C++ API
     //optimiser_interface_class.def("__str__", &__cstr__<OptimiserInterface>);
 }
@@ -109,11 +109,11 @@ Void export_constraint_solver(pybind11::module& module)
 {
     pybind11::class_<ConstraintSolver> constraint_solver_class(module,"ConstraintSolver");
     constraint_solver_class.def(pybind11::init<>());
-    constraint_solver_class.def("hull_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarFunction&,const ExactIntervalType&)const) &ConstraintSolver::hull_reduce);
-    constraint_solver_class.def("box_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarFunction&,const ExactIntervalType&,Nat)const) &ConstraintSolver::box_reduce);
-    constraint_solver_class.def("monotone_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarFunction&,const ExactIntervalType&,Nat)const) &ConstraintSolver::monotone_reduce);
+    constraint_solver_class.def("hull_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarMultivariateFunction&,const ExactIntervalType&)const) &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarMultivariateFunction&,const ExactIntervalType&,Nat)const) &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedScalarMultivariateFunction&,const ExactIntervalType&,Nat)const) &ConstraintSolver::monotone_reduce);
     constraint_solver_class.def("reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const List<ValidatedConstraint>&)const) &ConstraintSolver::reduce);
-    constraint_solver_class.def("reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedVectorFunction&,const ExactBoxType&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("reduce", (Bool(ConstraintSolver::*)(UpperBoxType&,const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &ConstraintSolver::reduce);
 }
 
 

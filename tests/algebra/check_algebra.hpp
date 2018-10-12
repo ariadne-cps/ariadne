@@ -141,7 +141,7 @@ template<class A> bool CheckAlgebraConcept<A>::has_numeric_type()
     ARIADNE_TEST_STATIC_ASSERT(HasNumericType<A>);
     return HasNumericType<A>::value;
 }
-namespace Ariadne { template<> String class_name<EffectiveScalarFunction>() { return "EffectiveScalarFunction"; } }
+namespace Ariadne { template<> String class_name<EffectiveScalarMultivariateFunction>() { return "EffectiveScalarMultivariateFunction"; } }
 template<class A> void CheckAlgebraConcept<A>::check_algebra_concept()
 {
     typedef typename A::NumericType X;

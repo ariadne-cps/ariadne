@@ -37,7 +37,7 @@ template<class ES> class Orbit;
 using ValidatedImageSet = ValidatedConstrainedImageSet;
 
 class FlowTube {
-    ValidatedVectorFunctionModelDP _phi;
+    ValidatedVectorMultivariateFunctionModelDP _phi;
     List<Identifier> _variable_names;
   public:
     SizeType number_of_state_variables() const { return _phi.result_size(); }
@@ -47,8 +47,8 @@ class FlowTube {
     decltype(auto) time_range() const { SizeType n=this->number_of_state_variables(); return _phi.domain()[n]; }
     decltype(auto) initial_time() const { return time_range().lower(); }
     decltype(auto) final_time() const { return time_range().upper(); }
-    ValidatedVectorFunctionModelDP reach_function() const;
-    ValidatedVectorFunctionModelDP final_function() const;
+    ValidatedVectorMultivariateFunctionModelDP reach_function() const;
+    ValidatedVectorMultivariateFunctionModelDP final_function() const;
     ValidatedImageSet initial_set() const;
     ValidatedImageSet reach_set() const;
     ValidatedImageSet final_set() const;

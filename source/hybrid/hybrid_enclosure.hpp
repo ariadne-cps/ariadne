@@ -171,20 +171,20 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const ExactBoxType parameter_domain() const;
     //! \brief The function related to the state space.
-    const ValidatedVectorFunctionModelDP& state_function() const;
+    const ValidatedVectorMultivariateFunctionModelDP& state_function() const;
     //! \brief The function related to time.
-    const ValidatedScalarFunctionModelDP& time_function() const;
+    const ValidatedScalarMultivariateFunctionModelDP& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ValidatedScalarFunctionModelDP& dwell_time_function() const;
+    const ValidatedScalarMultivariateFunctionModelDP& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModelDP auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionModelDP auxiliary_function() const;
     //! \brief The function related to the auxiliary space.
-    const ValidatedVectorFunctionModelDP state_time_auxiliary_function() const;
+    const ValidatedVectorMultivariateFunctionModelDP state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
-    const ValidatedScalarFunctionModelDP function(RealVariable var) const;
+    const ValidatedScalarMultivariateFunctionModelDP function(RealVariable var) const;
 
     //! \brief Set the evolution time function to \a omega.
-    Void set_time_function(const ValidatedScalarFunctionModelDP& omega);
+    Void set_time_function(const ValidatedScalarMultivariateFunctionModelDP& omega);
 
     //! \brief A bounding box for the space.
     UpperBoxType state_bounding_box() const;
@@ -211,23 +211,23 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
+    Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModelDP& phi, const FloatDPValue& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
-    Void apply_space_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
+    Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void apply_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
+    Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    Void apply_finishing_parameter_evolve_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& omega);
+    Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    Void apply_parameter_reach_step(const ValidatedVectorFunctionModelDP& phi, const ValidatedScalarFunctionModelDP& eps);
+    Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    Void apply_full_reach_step(const ValidatedVectorFunctionModelDP& phi);
+    Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
@@ -235,9 +235,9 @@ class HybridEnclosure
     Void set_time(Real tmax);
     //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
-    Void set_time(ValidatedScalarFunction omega);
+    Void set_time(ValidatedScalarMultivariateFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
-    Void bound_time(ValidatedScalarFunction omega);
+    Void bound_time(ValidatedScalarMultivariateFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     Void bound_time(Real tmax);
 
@@ -247,10 +247,10 @@ class HybridEnclosure
     //! \brief Set the current time-step to \f$h\f$. \deprecated
     Void set_step_time(FloatDPValue h);
     //! \brief \deprecated
-    Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
+    Void new_time_step_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction tau);
 
     //! \brief Sets the auxiliary variables and functions.
-    Void set_auxiliary(List<RealVariable> vars, EffectiveVectorFunction aux);
+    Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux);
 
     //! \brief Introduces a new parameter with domain \a ivl.
     Void new_parameter(ExactIntervalType ivl, EnclosureVariableType);
@@ -265,16 +265,16 @@ class HybridEnclosure
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     Void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces the new constraint \f$t\leq\gamma(x)\f$.
-    Void new_state_time_bound(DiscreteEvent e, ValidatedScalarFunction gamma);
+    Void new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
-    Void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
+    Void new_invariant(DiscreteEvent e, ValidatedScalarMultivariateFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
-    Void new_activation(DiscreteEvent e,ValidatedScalarFunction g);
+    Void new_activation(DiscreteEvent e,ValidatedScalarMultivariateFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e.
     //! More precisely, the continuous dynamics is restricted to \f$c(x)\leq0\f$, and the event happens when \f$c(x)\geq0\f$.
-    Void new_guard(DiscreteEvent e, ValidatedScalarFunction g);
+    Void new_guard(DiscreteEvent e, ValidatedScalarMultivariateFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
-    Void new_guard(DiscreteEvent e, ValidatedScalarFunction g, ValidatedScalarFunction ct);
+    Void new_guard(DiscreteEvent e, ValidatedScalarMultivariateFunction g, ValidatedScalarMultivariateFunction ct);
 
 
     //! \brief The dimension of the set. Returns the state-space dimension.
@@ -289,7 +289,7 @@ class HybridEnclosure
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridUpperBoxType bounding_box() const;
     //! \brief Returns an over-approximation to the range of \a g over the set.
-    UpperIntervalType range_of(EffectiveScalarFunction const& g) const;
+    UpperIntervalType range_of(EffectiveScalarMultivariateFunction const& g) const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
     ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
@@ -325,11 +325,11 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    Void _apply_flow(ValidatedVectorFunction phi, FloatDPValue step);
+    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDPValue step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    Void _apply_flow(ValidatedVectorFunction phi, FloatDPValue step, ValidatedScalarFunction elps);
+    Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDPValue step, ValidatedScalarMultivariateFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    Void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void _apply_flow_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction elps);
     Void _check() const; // Check that set is well-formed.
     // Compute constraints of the set
     List<ValidatedConstraint> constraints() const;

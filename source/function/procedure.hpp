@@ -185,7 +185,7 @@ template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X>
 template<class X, class Y> X hessian(Procedure<Y> const& f, Vector<X> const& x, Vector<X> const& s);
 
 // \related Convert a function into a procedure.
-template<class P> Procedure<Number<P>> make_procedure(const ScalarFunction<P>& f);
+template<class P> Procedure<Number<P>> make_procedure(const ScalarMultivariateFunction<P>& f);
 
 
 

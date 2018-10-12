@@ -35,12 +35,13 @@
 #include "../function/domain.hpp"
 #include "../function/function_model.hpp"
 #include "../output/logging.hpp"
+#include "integrator_interface.hpp"
 
 namespace Ariadne {
 
 class BounderInterface {
   public:
-    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const = 0;
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const = 0;
     virtual Void write(OutputStream& os) const = 0;
 
     virtual BounderInterface* clone() const = 0;
@@ -53,17 +54,17 @@ class BounderInterface {
 
 class BounderBase : public BounderInterface, Loggable {
   public:
-    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const;
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const;
   protected:
-    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const = 0;
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorMultivariateFunction f, UpperBoxType B, StepSizeType h) const = 0;
   private:
-    UpperBoxType _initial(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType arg, PositiveFloatDPValue h, PositiveFloatDPValue FORMULA_WIDENING) const;
-    UpperBoxType _refinement(BoxDomainType dom, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
+    UpperBoxType _initial(BoxDomainType dom, ValidatedVectorMultivariateFunction f, UpperBoxType arg, StepSizeType h, PositiveFloatDPValue FORMULA_WIDENING) const;
+    UpperBoxType _refinement(BoxDomainType dom, ValidatedVectorMultivariateFunction f, UpperBoxType B, StepSizeType h) const;
 };
 
 class EulerBounder : public BounderBase {
   protected:
-    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorFunction f, UpperBoxType B, PositiveFloatDPValue h) const;
+    virtual UpperBoxType formula(BoxDomainType D, BoxDomainType V, ValidatedVectorMultivariateFunction f, UpperBoxType B, StepSizeType h) const;
   public:
     virtual Void write(OutputStream& os) const { os << "Euler"; }
     virtual EulerBounder* clone() const { return new EulerBounder(*this); }
@@ -81,7 +82,7 @@ class BounderHandle : public BounderInterface {
     virtual Void write(OutputStream& os) const { _impl->write(os); }
     virtual BounderHandle* clone() const { return new BounderHandle(*this); }
 
-    virtual Pair<PositiveFloatDPValue,UpperBoxType> compute(ValidatedVectorFunction f, BoxDomainType dom, PositiveFloatDPApproximation hsug) const {
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
         return _impl->compute(f,dom,hsug);
     }
 };

@@ -21,37 +21,42 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
 
-d=Float(2.5)
-i=Interval(1.5,1.75)
+def test_calculus():
 
-bx=Box([{1:3},{-1:2},{-3:3}])
+    dp=DoublePrecision()
 
-swp = ThresholdSweeper(1e-8);
+    cy=ValidatedNumber(2)
+    cx=FloatDPBounds(2,dp)
 
-c=ScalarTaylorFunction.constant(bx,1.5,swp)
-x=ScalarTaylorFunction.coordinate(bx,0,swp)
-y=ScalarTaylorFunction.coordinate(bx,1,swp)
-v=VectorTaylorFunction.identity(bx,swp)
-y=v[1]
-t=5+2*x+y
+    bx=ExactBox([{Dyadic(1):3},{-1:2},{-3:3}])
 
-+t; -t; t+t; t-t; t*t; t/t;
-+t; -t; t+t; t-t; t*t;
-t+d; t-d; t*d; t/d;
-d+t; d-t; d*t;
-t+i; t-i; t*i; t/i;
-i+i; i-t; i*t;
+    swp = ThresholdSweeper(dp,1e-8);
 
-derivative(t,0)
-antiderivative(t,0)
+    tc=ValidatedScalarMultivariateTaylorFunctionModel.constant(bx,cast_exact(1.5),swp)
+    tx=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,0,swp)
+    ty=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,1,swp)
+    tid=ValidatedVectorMultivariateTaylorFunctionModel.identity(bx,swp)
+    ty=tid[1]
 
-f=VectorTaylorFunction([x,c,y])
-g=ScalarTaylorFunction(t)
-compose(f,f); compose(g,f)
+    tf=5+2*tx+ty
 
-p=RealVectorFunction.identity(3)
-q=RealScalarFunction.coordinate(3,1)
-compose(p,f); compose(q,f)
+    +tf; -tf; tf+tf; tf-tf; tf*tf; tf/tf;
+    +tf; -tf; tf+tf; tf-tf; tf*tf;
+    tf+cy; tf-cy; tf*cy; tf/cy;
+    cy+tf; cy-tf; cy*tf;
+    tf+cx; tf-cx; tf*cx; tf/cx;
+    cx+cx; cx-tf; cx*tf;
 
+    derivative(tf,0)
+    antiderivative(tf,0)
+
+    vtf=ValidatedVectorMultivariateTaylorFunctionModel([tx,tc,ty])
+    vtf=tid
+    stf=ValidatedScalarMultivariateTaylorFunctionModel(tf)
+    compose(vtf,vtf)
+    compose(stf,vtf)
+
+    vf=EffectiveVectorMultivariateFunction.identity(3)
+    sf=EffectiveScalarMultivariateFunction.coordinate(3,1)
+    compose(sf,vtf); compose(vf,vtf)

@@ -33,10 +33,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
 endif()
 
-if(COVERAGE)
-    include(CodeCoverage)
-    APPEND_COVERAGE_COMPILER_FLAGS()
-endif()
+set(COVERAGE_COMPILER_FLAGS -O0 --coverage -fprofile-arcs -ftest-coverage)
 
 enable_testing()
 include(CTest)
@@ -120,10 +117,10 @@ find_package(PythonLibs)
 if(PYTHONLIBS_FOUND)
     message(STATUS "PythonLibs found: Python bindings will be built.")
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/external/pybind11/CMakeLists.txt)
-        message(STATUS "pybind11 dependency not available, retrieving it...")
+        message(STATUS "pybind11 dependency not available.")
         find_package(Git)
         if(GIT_FOUND)
-            message(STATUS "pybind11 dependency not available, downloading it...")
+            message(STATUS "Downloading it...")
             execute_process(COMMAND git submodule update --init --recursive OUTPUT_QUIET ERROR_QUIET)
             message(STATUS "Downloaded pybind11 dependency successfully.")
         else()
@@ -164,6 +161,12 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
+
+if(COVERAGE)
+    target_link_libraries(ariadne gcov)
+    target_link_libraries(ariadne-kernel gcov)
+    target_link_libraries(ariadne-core gcov)
+endif()
 
 target_link_libraries(ariadne dl)
 target_link_libraries(ariadne-kernel dl)

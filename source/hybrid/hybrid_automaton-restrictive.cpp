@@ -451,7 +451,7 @@ Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteL
 
 
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential)
 {
     RealExpression default_expression;
@@ -899,26 +899,26 @@ CompositionalHybridAutomaton::dimension(DiscreteLocation location) const {
 }
 
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositionalHybridAutomaton::output_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     List<RealExpression> results(algebraic.size(),RealExpression(0.0));
     for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].variable(); }
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    return EffectiveVectorMultivariateFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositionalHybridAutomaton::dynamic_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     List<DottedRealAssignment> differential=this->differential_assignments(location);
     List<RealExpression> results(differential.size(),RealExpression(0.0));
     for(SizeType i=0; i!=differential.size(); ++i) { results[space.index(differential[i].variable().base())]=substitute(differential[i].expression(),algebraic); }
-    return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
+    return EffectiveVectorMultivariateFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
-EffectiveVectorFunction
+EffectiveVectorMultivariateFunction
 CompositionalHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation target=this->target(source,event);
     Space<Real> source_space=this->state_variables(source);
@@ -927,23 +927,23 @@ CompositionalHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEv
     List<PrimedRealAssignment> update=this->update_assignments(source,event);
     List<RealExpression> results(update.size(),RealExpression(0.0));
     for(SizeType i=0; i!=update.size(); ++i) { results[target_space.index(update[i].variable().base())]=update[i].expression(); }
-    return EffectiveVectorFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
+    return EffectiveVectorMultivariateFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
 }
 
-EffectiveScalarFunction
+EffectiveScalarMultivariateFunction
 CompositionalHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     RealExpression invariant=indicator(invariant_predicate(location,event),Sign::NEGATIVE);
-    return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
+    return EffectiveScalarMultivariateFunction(Ariadne::dimension(space),Ariadne::formula(invariant,algebraic,space));
 }
 
-EffectiveScalarFunction
+EffectiveScalarMultivariateFunction
 CompositionalHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     RealExpression guard=indicator(guard_predicate(location,event),Sign::POSITIVE);
-    return EffectiveScalarFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
+    return EffectiveScalarMultivariateFunction(Ariadne::dimension(space),Ariadne::formula(guard,algebraic,space));
 }
 
 

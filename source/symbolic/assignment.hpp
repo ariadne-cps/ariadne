@@ -109,26 +109,14 @@ Variable<T>::operator=(const T& val) const {
 template<class T> inline Assignment<Variable<T>,Expression<T>>
 LetVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment<Variable<T>,Expression<T>>(this->base(),Expression<T>(expr)); }
-template<class T> inline Assignment<Variable<T>,Expression<T>>
-LetVariable<T>::operator=(const Variable<T>& var) const {
-    return this->operator=(Expression<T>(var)); }
-template<class T> inline Assignment<Variable<T>,Expression<T>>
-LetVariable<T>::operator=(const T& cnst) const {
-    return this->operator=(Expression<T>(cnst)); }
 
 template<class T> inline Assignment<PrimedVariable<T>,Expression<T>>
 PrimedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment<PrimedVariable<T>,Expression<T>>(*this,Expression<T>(expr)); }
-template<class T> inline Assignment<PrimedVariable<T>,Expression<T>>
-PrimedVariable<T>::operator=(const T& cnst) const {
-    return this->operator=(Expression<T>(cnst)); }
 
 template<class T> inline Assignment<DottedVariable<T>,Expression<T>>
 DottedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment<DottedVariable<T>,Expression<T>>(*this,expr); }
-template<class T> inline Assignment<DottedVariable<T>,Expression<T>>
-DottedVariable<T>::operator=(const T& cnst) const {
-    return this->operator=(Expression<T>(cnst)); }
 
 template<class T> inline List<Assignment<Variable<T>,Expression<T>>> LetVariables<T>::operator=(const List<Expression<T>>& rhs) {
     return elementwise([](Variable<T>const&l,Expression<T>const&r){return let(l)=r;},this->_lhs,rhs);

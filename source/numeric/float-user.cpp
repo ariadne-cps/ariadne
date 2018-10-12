@@ -127,7 +127,7 @@ template<class F> Value<F>::Value(Integer const& z, PR pr)
 template<class F> Value<F>::Value(Dyadic const& w, PR pr)
     : _v(w,pr)
 {
-    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w,"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
+    ARIADNE_ASSERT_MSG(Dyadic(this->_v)==w || is_nan(w),"Dyadic number "<<w<<" cannot be converted exactly to a floating-point number with precision "<<pr<<"; nearest is "<<(*this));
 }
 
 template<class F> Value<F>::Value(Value<F> const& x, PR pr)

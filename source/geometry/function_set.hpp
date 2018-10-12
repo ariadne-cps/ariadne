@@ -78,13 +78,13 @@ class ConstraintSet
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    ConstraintSet(const EffectiveVectorFunction& g, const RealBox& C);
+    ConstraintSet(const EffectiveVectorMultivariateFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     ConstraintSet(const List<EffectiveConstraint>& c);
     //! \brief The codomain of the set.
     const RealBox codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
-    const EffectiveVectorFunction constraint_function() const;
+    const EffectiveVectorMultivariateFunction constraint_function() const;
     //! \brief The bounds of the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
@@ -121,7 +121,7 @@ class BoundedConstraintSet
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    BoundedConstraintSet(const RealBox& D, const EffectiveVectorFunction& g, const RealBox& C);
+    BoundedConstraintSet(const RealBox& D, const EffectiveVectorMultivariateFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     BoundedConstraintSet(const RealBox& D, const List<EffectiveConstraint>& c);
     //! \brief Construct the box \a D.
@@ -131,7 +131,7 @@ class BoundedConstraintSet
     //! \brief The codomain of the set.
     const RealBox codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
-    const EffectiveVectorFunction constraint_function() const;
+    const EffectiveVectorMultivariateFunction constraint_function() const;
     //! \brief The bounds for the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
@@ -160,7 +160,7 @@ class BoundedConstraintSet
     friend BoundedConstraintSet intersection(const ConstraintSet& cs1, const BoundedConstraintSet& bcs2);
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const RealBox& bx2);
     friend BoundedConstraintSet intersection(const RealBox& bx1, const BoundedConstraintSet& bcs2);
-    friend ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function);
+    friend ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorMultivariateFunction& function);
 };
 
 
@@ -168,27 +168,27 @@ class ConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
     RealBox _domain;
-    EffectiveVectorFunction _function;
+    EffectiveVectorMultivariateFunction _function;
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ConstrainedImageSet(const RealBox& dom) : _domain(dom), _function(EffectiveVectorFunction::identity(dom.size())) { }
+    ConstrainedImageSet(const RealBox& dom) : _domain(dom), _function(EffectiveVectorMultivariateFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorFunction& fn) : _domain(dom), _function(fn) {
+    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorMultivariateFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    ConstrainedImageSet(const RealBox& dom, const EffectiveVectorMultivariateFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a singleton constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief The domain of the set.
     const RealBox& domain() const { return this->_domain; }
     //! \brief The function used to define the mapping from the parameter domain to the space.
-    const EffectiveVectorFunction& function() const { return this->_function; };
+    const EffectiveVectorMultivariateFunction& function() const { return this->_function; };
     //! \brief The bounds for the constraints.
-    const EffectiveVectorFunction constraint_function() const;
+    const EffectiveVectorMultivariateFunction constraint_function() const;
     //! \brief The bounds for the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The function used to define the set.
@@ -201,7 +201,7 @@ class ConstrainedImageSet
     EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
-    Void apply(const EffectiveVectorFunction& h) {
+    Void apply(const EffectiveVectorMultivariateFunction& h) {
         this->_function=compose(h,this->_function);
     }
 
@@ -252,7 +252,7 @@ class ConstrainedImageSet
     OutputStream& write(OutputStream&) const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
-    friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorFunction const& h);
+    friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorMultivariateFunction const& h);
 };
 
 
@@ -265,7 +265,7 @@ class ValidatedConstrainedImageSet
 {
     ExactBoxType _domain;
     ExactBoxType _reduced_domain;
-    ValidatedVectorFunction _function;
+    ValidatedVectorMultivariateFunction _function;
     List< ValidatedConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
@@ -273,21 +273,21 @@ class ValidatedConstrainedImageSet
     //! \brief Construct the box \a dom.
     ValidatedConstrainedImageSet(const ExactBoxType& dom)
         : _domain(dom), _reduced_domain(dom)
-        , _function(static_cast<ValidatedVectorFunction const&>(EffectiveVectorFunction::identity(dom.size()))) { }
+        , _function(static_cast<ValidatedVectorMultivariateFunction const&>(EffectiveVectorMultivariateFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunctionModelDP& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunctionModelDP& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
+    ValidatedConstrainedImageSet(const ExactBoxType& dom, const ValidatedVectorMultivariateFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.
     const ExactBoxType& domain() const { return this->_domain; }
     const ExactBoxType& reduced_domain() const { return this->_reduced_domain; }
     //! \brief The function used to define the set.
-    const ValidatedVectorFunction& function() const { return this->_function; }
+    const ValidatedVectorMultivariateFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
     const List<ValidatedConstraint> constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
@@ -298,7 +298,7 @@ class ValidatedConstrainedImageSet
     Nat number_of_constraints() const { return this->_constraints.size(); };
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
-    Void apply(const ValidatedVectorFunction& h) {
+    Void apply(const ValidatedVectorMultivariateFunction& h) {
         this->_function=compose(h,this->_function);
     }
 
@@ -317,7 +317,7 @@ class ValidatedConstrainedImageSet
     ValidatedConstrainedImageSet* clone() const { return new ValidatedConstrainedImageSet(*this); }
     DimensionType dimension() const { return this->_function.result_size(); }
 
-    ValidatedVectorFunction constraint_function() const;
+    ValidatedVectorMultivariateFunction constraint_function() const;
     ExactBoxType constraint_bounds() const;
 
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
@@ -360,7 +360,7 @@ class ValidatedConstrainedImageSet
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
 
-    friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorFunction const& h);
+    friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
     friend ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);
     friend OutputStream& operator<<(OutputStream&, const ValidatedConstrainedImageSet&);
 };

@@ -123,8 +123,8 @@ Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
-        ConstReferenceType<MultiIndex> j=iter->index();
-        ConstReferenceType<X> c=iter->coefficient();
+        UniformConstReference<MultiIndex> j=iter->index();
+        UniformConstReference<X> c=iter->coefficient();
         t=one;
         for(Nat k=0; k!=e.argument_size(); ++k) {
             for(Nat l=0; l!=j[k]; ++l) {

@@ -391,7 +391,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     ValidatedVectorMultivariateFunctionModelDP evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, PositiveFloatDPValue t) const;
-    ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
+    ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;
     Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
   private:
     Bool must_recondition(Nat step) const;

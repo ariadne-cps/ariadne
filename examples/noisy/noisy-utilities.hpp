@@ -72,7 +72,7 @@ void run_single(String name, DifferentialInclusionIVP const& ivp, Real evolution
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
     ValidatedVectorMultivariateFunctionModelType evolve_function = 
-        partial_evaluate(final_set,final_set.argument_size()-1,NumericType(evolution_time,prec));
+        partial_evaluate(final_set,final_set.result_size(),NumericType(evolution_time,prec));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     std::cout << "score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s" << std::endl;

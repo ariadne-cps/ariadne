@@ -565,95 +565,94 @@ InclusionIntegrator::reach(DifferentialInclusion const& di, BoxDomainType D, Val
     if (this->_approximator->kind() != InputApproximationKind::PIECEWISE) {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DVh = this->_approximator->build_flow_domain(D,di.V(),h);
-        ARIADNE_LOG(6,"DVh:"<<DVh<<"\n");
-        auto w = this->_approximator->build_w_functions(DVh, n, m);
+        auto DHV = this->_approximator->build_flow_domain(D,di.V(),h);
+        ARIADNE_LOG(6,"DHV:"<<DHV<<"\n");
+        auto w = this->_approximator->build_w_functions(DHV, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(di.F(),w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DVh,B);
+        auto phi = this->compute_flow_function(Fw,DHV,B);
         phi = add_errors(phi,e);
         result=build_reach_function(evolve_function, phi, t, new_t);
     } else {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DVh_hlf = this->_approximator->build_flow_domain(D,di.V(),hlf(h));
-        ARIADNE_LOG(6,"DVh_hlf:"<<DVh_hlf<<"\n");
-        auto w_hlf = this->_approximator->build_w_functions(DVh_hlf, n, m);
+        auto DHV_hlf = this->_approximator->build_flow_domain(D,di.V(),hlf(h));
+        ARIADNE_LOG(6,"DHV_hlf:"<<DHV_hlf<<"\n");
+        auto w_hlf = this->_approximator->build_w_functions(DHV_hlf, n, m);
         ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
         auto Fw_hlf = build_Fw(di.F(),w_hlf);
         ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
-        auto phi_hlf = this->compute_flow_function(Fw_hlf,DVh_hlf,B);
+        auto phi_hlf = this->compute_flow_function(Fw_hlf,DHV_hlf,B);
         PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
         auto intermediate_reach=build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
         auto intermediate_evolve=evaluate_evolve_function(intermediate_reach,intermediate_t);
 
         auto D_int = cast_exact_box(intermediate_evolve.range());
 
-        auto DVh=this->_approximator->build_flow_domain(D_int,di.V(),hlf(h));
-        auto w = build_secondhalf_piecewise_w_functions(DVh, n, m);
+        auto DHV=this->_approximator->build_flow_domain(D_int,di.V(),hlf(h));
+        auto w = build_secondhalf_piecewise_w_functions(DHV, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(di.F(), w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DVh,B);
+        auto phi = this->compute_flow_function(Fw,DHV,B);
         phi = add_errors(phi,e);
-        result = build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, m, intermediate_t, new_t);
+        result = build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
     }
     return result;
 }
 
-Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto zero = ValidatedScalarMultivariateFunction::zero(n+2*m+1);
-    auto one = ValidatedScalarMultivariateFunction::constant(n+2*m+1,1_z);
+Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhalf_piecewise_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
+    auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
+    auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+i].upper());
-        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+i);
-        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+m+i);
-        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
+        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
+        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
+        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, SizeType m, PositiveFloatDPValue t,
+        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
-    // Evolve function is e(x,a,2*m) at s; Flow is phi(x,h,b,2*m)
-    // Want (x,a,b,2*m,t):->phi(e(x,a,2*m),b,2*m,t-s))
+    // Evolve function is e(x,a,b) at s; Flow is phi(x,h,b)
+    // Want (x,t,a,b):->phi(e(x,a,b),t-s,b))
 
     SizeType n=evolve_function.result_size();
+    SizeType b=Phi.argument_size()-(n+1);
 
-    SizeType a=evolve_function.argument_size()-n-2*m;
-    SizeType b=Phi.argument_size()-(n+1)-2*m;
+    SizeType a=evolve_function.argument_size()-n-b;
 
     BoxDomainType X=evolve_function.domain()[range(0,n)];
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
-    BoxDomainType PB=Phi.domain()[range(n,n+b)];
-    BoxDomainType PM=Phi.domain()[range(n+b,n+b+2*m)];
+    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XPT = join(X,PA,PB,PM,Tau);
-    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
-    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
-    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
-    ValidatedVectorMultivariateTaylorFunctionModelDP mf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a+b,n+a+b+2*m),swp);
-    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XPT,n+a+b+2*m,swp);
+    BoxDomainType XTP = join(X,Tau,PA,PB);
+    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
+
     ValidatedScalarMultivariateTaylorFunctionModelDP hf=tf-t;
 
-    ValidatedVectorMultivariateTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,mf));
+    ValidatedVectorMultivariateTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af,bf));
 
-    return compose(Phi,join(ef,bf,mf,hf));
+    return compose(Phi,join(ef,hf,bf));
 }
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_function(
         ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t,
         PositiveFloatDPValue new_t) const {
 
-    // Evolve function is e(x,a) at s; flow is phi(x,b,h)
-    // Want (x,a,b,t):->phi(e(x,a),b,t-s))
+    // Evolve function is e(x,a) at s; flow is phi(x,h,b)
+    // Want (x,t,a,b):->phi(e(x,a),t-s,b))
 
     SizeType n=evolve_function.result_size();
 
@@ -662,24 +661,25 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
 
     BoxDomainType X=evolve_function.domain()[range(0,n)];
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
-    BoxDomainType PB=Phi.domain()[range(n,n+b)];
+    BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XPT = join(X,PA,PB,Tau);
-    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(0,n),swp);
-    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n,n+a),swp);
-    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XPT,range(n+a,n+a+b),swp);
-    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XPT,n+a+b,swp);
+    BoxDomainType XTP = join(X,Tau,PA,PB);
+    ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
+    ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
+    ValidatedVectorMultivariateTaylorFunctionModelDP bf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1+a,n+1+a+b),swp);
+
     ValidatedScalarMultivariateTaylorFunctionModelDP hf=tf-t;
 
     ValidatedVectorMultivariateTaylorFunctionModelDP ef=compose(evolve_function,join(xf,af));
 
-    return compose(Phi,join(ef,bf,hf));
+    return compose(Phi,join(ef,hf,bf));
 }
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, PositiveFloatDPValue t) const {
-    return partial_evaluate(reach_function,reach_function.argument_size()-1,t);
+    return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
 ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e) {
@@ -729,7 +729,7 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
 
     for(Nat i=0; i<NUMBER_OF_PICARD_ITERATES; ++i) {
         auto dyn_of_phi = compose(dyn,join(picardPhi,af));
-        picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.argument_size()-1)+x0f;
+        picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.result_size())+x0f;
     }
 
     return picardPhi;
@@ -737,12 +737,13 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
 
 template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
     auto result = D;
+    result = product(result,IntervalDomainType(-h,+h));
     for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
-    return product(result,IntervalDomainType(-h,+h));
+    return result;
 }
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = ValidatedScalarMultivariateFunction::zero(n+1);
@@ -750,61 +751,61 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Zer
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
-        result[i] = ValidatedScalarMultivariateFunction::coordinate(n+m+1,n+i);
+        result[i] = ValidatedScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
     return result;
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto zero = ValidatedScalarMultivariateFunction::zero(n+2*m+1);
-    auto one = ValidatedScalarMultivariateFunction::constant(n+2*m+1,1_z);
-    auto three = ValidatedScalarMultivariateFunction::constant(n+2*m+1,3_z);
-    auto t = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+2*m);
-    auto h = ValidatedScalarMultivariateFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
+    auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
+    auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
+    auto three = ValidatedScalarMultivariateFunction::constant(n+1+2*m,3_z);
+    auto t = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n);
+    auto h = ValidatedScalarMultivariateFunction::constant(n+1+2*m,ExactNumber(DHV[n].upper()));
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+i].upper());
-        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+i);
-        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+m+i);
-        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h);
+        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
+        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
+        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-h/2)/h);
     }
     return result;
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto zero = ValidatedScalarMultivariateFunction::zero(n+2*m+1);
-    auto one = ValidatedScalarMultivariateFunction::constant(n+2*m+1,1_z);
-    auto pgamma = ValidatedScalarMultivariateFunction::constant(n+2*m+1,1.1464_dec);
-    auto gamma = ValidatedScalarMultivariateFunction::constant(n+2*m+1,4.162586_dec);
-    auto t = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+2*m);
-    auto h = ValidatedScalarMultivariateFunction::constant(n+2*m+1,ExactNumber(DVh[n+2*m].upper()));
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
+    auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
+    auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
+    auto pgamma = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
+    auto gamma = ValidatedScalarMultivariateFunction::constant(n+1+2*m,4.162586_dec);
+    auto t = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n);
+    auto h = ValidatedScalarMultivariateFunction::constant(n+1+2*m,ExactNumber(DHV[n].upper()));
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+i].upper());
-        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+i);
-        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+m+i);
-        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h));
+        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
+        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
+        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-h/2)*gamma/h));
     }
     return result;
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const {
-    auto zero = ValidatedScalarMultivariateFunction::zero(n+2*m+1);
-    auto one = ValidatedScalarMultivariateFunction::constant(n+2*m+1,1_z);
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m) const {
+    auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
+    auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DVh[n+i].upper());
-        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+i);
-        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+2*m+1,n+m+i);
-        result[i] = (definitely (DVh[n+i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
+        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
+        auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
+        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }

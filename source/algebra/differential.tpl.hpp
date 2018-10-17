@@ -240,7 +240,7 @@ template<class X> Matrix<X> Differential<X>::half_hessian() const {
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
     while(iter!=this->end() && iter->index().degree()<=2) {
-        UniformConstReference<MultiIndex> a=iter->index(); 
+        UniformConstReference<MultiIndex> a=iter->index();
         UniformConstReference<X> c=iter->coefficient();
         while(a[i]==0) { ++i; j=i+1u; }
         if(a[i]==2) { H[i][i]=c; }
@@ -822,13 +822,11 @@ Vector<Differential<X>>
 Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> const& x0)
 {
     ARIADNE_ASSERT(df.result_size()==df.argument_size());
+    ARIADNE_ASSERT(x0.size()==df.argument_size());
     const SizeType n=df.result_size();
     const SizeType deg=df.degree();
     const X z=df.zero_element().zero_coefficient();
-    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,n+1u,deg+1u,z);
-    for(SizeType i=0; i!=n; ++i) {
-        dx0[i]=Differential<X>::variable(n+1u,deg+1u,x0[i],i);
-    }
+    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u,deg+1u,x0[i],i);});
     Vector<Differential<X>> dphi=Vector<Differential<X>>(n,n+1u,0u,z);
     // TODO: This iteration repeats computation of lower-degree terms, so could be made more efficient
     for(SizeType i=0; i<deg+1u; ++i) {
@@ -837,4 +835,40 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
     return dphi;
 }
 
+template<class X>
+Vector<Differential<X>>
+Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> const& x0, X const& t0, Vector<X> const& a)
+{
+    ARIADNE_ASSERT(df.result_size()==x0.size());
+    ARIADNE_ASSERT(df.argument_size()==x0.size()+1u+a.size());
+    const SizeType n=x0.size(); // Number of state variables; also index of time variable
+    const SizeType m=a.size();
+    const SizeType deg=df.degree();
+
+    Vector<X> t0a=join(t0,a);
+    Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,x0[i],i);});
+    Vector<Differential<X>> dt0a=Vector<Differential<X>>(m+1,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,t0a[i],n+i);});
+
+    return _flow(df,dx0, dt0a);
+}
+
+template<class X>
+Vector<Differential<X>>
+_flow(const Vector<Differential<X>>& df, Vector<Differential<X>> const& dx0, Vector<Differential<X>> const& dt0a)
+{
+    ARIADNE_ASSERT(df.result_size()<df.argument_size()); // f has strictly more arguments since time is an input
+    ARIADNE_ASSERT(df.argument_size()==dx0.result_size()+dt0a.result_size());
+    ARIADNE_ASSERT(dx0.argument_size()==dt0a.argument_size());
+    const SizeType n=df.result_size(); const SizeType m=df.argument_size()-(n+1u);
+    const SizeType deg=min(df.degree()+1u,min(dx0.degree(),dt0a.degree()));
+
+    const X z=dx0.zero_element().zero_coefficient();
+
+    Vector<Differential<X>> dphi=Vector<Differential<X>>(n,n+1u+m,0u,z);
+    for(SizeType i=0; i<deg+1u; ++i) {
+        dphi=dx0+antiderivative(compose(df,join(dphi,dt0a)),n);
+    }
+    return dphi;
+}
+    
 } //namespace Ariadne

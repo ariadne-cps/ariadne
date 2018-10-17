@@ -448,8 +448,21 @@ class Vector< Differential<X> >
 
     //! \brief Compute the differential of the solutions \f$y=h(x)\f$ to \f$f(x,y)=0\f$. Requires \f$f(x0,y0)=0\f$.
     friend Vector<Differential<X>> solve(const Vector<Differential<X> >& df, const Vector<X>& y0) { return _solve(df,y0); }
-    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x0,t) = f(\phi(x0,t)) \f$ at \f$t=0\f$, with respect to the independent variables of
+
+    //! \brief Compute the differential of the autonomous flow \f$ \phi_{,t}(x_0,t) = f(\phi(x_0,t)) \f$, \f$\phi(x_0,t_0)=x_0\f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t)\f$.
     friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t) = f(\phi(x_0,t),t) \f$, \f$\phi(x_0,t_0)=x_0\f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0) { 
+        Vector<X> a(0u,x0.zero_element()); return _flow(df,x0,t0,a); }
+    //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t,a) = f(\phi(x_0,t,a),t,a) \f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t,a)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a) { 
+        return _flow(df,x0,t0,a); }
+
+    //! \brief Given the derivatives of \f$f:\R^{n+1+m}\to\R^n\f$ with respect to \f$x,t,a\f$, 
+    //! and the derivatives of \f$x_0,t,a\f$ with respect to an independent variable \f$u\f$, 
+    //! compute the derivatives of \f$\phi\f$ satisfying \f$\phi_{,t}(x_0,t,a)=f(\phi(x_0,t,a))\f$ and \f$\phi(x_0,t_0,a)=x_0\f$.
+    Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a) {
+        return _flow(df,dx0,dt0a); }
 
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
@@ -458,6 +471,9 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
     static Vector<Differential<X>> _solve(const Vector<Differential<X> >& df, const Vector<X>& y0);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a);
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

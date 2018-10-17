@@ -315,7 +315,7 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
     return r;
 }
 
-template<class X, class Y> SizeType substitute(const Vector<Expression<X>>& e, const List< Assignment< Variable<Y>, Expression<Y> > >& a) {
+template<class X, class Y> Vector<Expression<X>> substitute(const Vector<Expression<X>>& e, const List< Assignment< Variable<Y>, Expression<Y> > >& a) {
     Vector<Expression<X>> r(e.size());
     for(SizeType i=0; i!=e.size(); ++i) {
         r[i]=substitute(e[i],a);
@@ -433,6 +433,85 @@ template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenea
 template<class X> Expression<X> simplify(const Expression<X>& e) {
     return Ariadne::_simplify(e);
 }
+
+
+
+
+template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) {
+    if(e1.op()==e2.op()) {
+        switch(e1.kind()) {
+            case OperatorKind::VARIABLE:
+                return e1.var() < e2.var();
+            case OperatorKind::NULLARY:
+                return decide(e1.val() < e2.val());
+            case OperatorKind::UNARY:
+                return before(e1.arg(),e2.arg());
+            case OperatorKind::BINARY:
+                return identical(e1.arg1(),e2.arg1()) ? before(e1.arg2(),e2.arg2()) : before(e1.arg1(),e2.arg1());
+            default:
+                return false;
+        }
+    } else {
+        return e1.op() < e2.op();
+    }
+}
+
+struct Before {
+    template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return before(std::forward<A1>(a1),std::forward<A2>(a2)); }
+};
+
+
+template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,Before>& cache, uint& count)
+{
+    auto iter=cache.find(e);
+    if (iter!=cache.end()) {
+        if(iter->node_raw_ptr()!=e.node_raw_ptr()) { std::cerr<<"Found duplicate of "<<e<<"\n"; ++count; }
+//        else { std::cerr<<"Found repeat of "<<e<<"\n"; }
+        return *iter; }
+    else {
+        switch(e.kind()) {
+            case OperatorKind::VARIABLE:
+                cache.insert(e); return e;
+            case OperatorKind::NULLARY:
+                std::cerr<<"Found constant "<<e<<"\n"; cache.insert(e); return e;
+            case OperatorKind::UNARY: {
+                auto new_arg = eliminate_common_subexpressions(e.arg(),cache, count);
+                if(new_arg.node_raw_ptr() == e.arg().node_raw_ptr()) {
+                    cache.insert(e); return e;
+                } else {
+                    Expression<T> new_e=make_expression<T>(e.op(),new_arg);
+                    cache.insert(new_e); return new_e;
+                }
+            }
+            case OperatorKind::BINARY: {
+                auto new_arg1 = eliminate_common_subexpressions(e.arg1(),cache, count);
+                auto new_arg2 = eliminate_common_subexpressions(e.arg2(),cache, count);
+                if(new_arg1.node_raw_ptr() == e.arg1().node_raw_ptr() && new_arg2.node_raw_ptr() == e.arg2().node_raw_ptr()) {
+                    cache.insert(e); return e;
+                } else {
+                    Expression<T> new_e=make_expression<T>(e.op(),new_arg1,new_arg2);
+                    cache.insert(new_e); return new_e;
+                }
+            }
+            default:
+                assert(false);
+        }
+    }
+}
+
+template<class T> Void eliminate_common_subexpressions(Expression<T>& e)
+{
+    std::set<Expression<T>,Before> cache; uint count=0;
+    e=eliminate_common_subexpressions(e,cache,count);
+}
+
+template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& es)
+{
+    std::set<Expression<T>,Before> cache; uint count=0;
+    for(SizeType i=0; i!=es.size(); ++i) { es[i]=eliminate_common_subexpressions(es[i],cache,count); }
+}
+
+
 
 template<class T> Bool is_constant(const Expression<T>& e, const SelfType<T>& c) {
     switch(e.op()) {

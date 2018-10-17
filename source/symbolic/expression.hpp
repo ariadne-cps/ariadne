@@ -171,6 +171,8 @@ Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
+template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
+template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
 
 //! \brief Tests whether two expressions are identical.
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);

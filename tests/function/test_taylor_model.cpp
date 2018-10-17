@@ -415,9 +415,11 @@ template<class F> Void TestTaylorModel<F>::test_functions()
         = 1+x/4-(x^2)/32+(x^3)/128-(x^4)*5/2048+(x^5)*7/8192-(x^6)*21/65536+(x^7)*33/262144-(x^8)*429/8388608+(x^9)*715/33554432+e*2431/268435456*2;
     ValidatedTaylorModel<F> expected_log_ophx
         = x/2-(x^2)/4/2+(x^3)/8/3-(x^4)/16/4+(x^5)/32/5-(x^6)/64/6+(x^7)/128/7-(x^8)/256/8+(x^9)/512/9-(x^10)/1024/10+e/1024/10;
-    ARIADNE_TEST_REFINES(rec(ophx),expected_rec_ophx+tolerance);
+    ValidatedTaylorModel<F> expected_log_ophx_coarse_error
+        = x/2-(x^2)/4/2+(x^3)/8/3-(x^4)/16/4+(x^5)/32/5-(x^6)/64/6+(x^7)/128/7-(x^8)/256/8+(x^9)/512/9-(x^10)/1024/10+e/1024/10;
+    ARIADNE_TEST_REFINES(rec(ophx),expected_rec_ophx_coarse_error+tolerance);
     ARIADNE_TEST_REFINES(sqrt(ophx),expected_sqrt_ophx_coarse_error+tolerance);
-    ARIADNE_TEST_REFINES(log(ophx),expected_log_ophx+tolerance);
+    ARIADNE_TEST_REFINES(log(ophx),expected_log_ophx_coarse_error+tolerance);
 
     ARIADNE_TEST_REFINES(sqrt(ophx)*sqrt(ophx),ophx+tolerance*2);
 
@@ -428,7 +430,7 @@ template<class F> Void TestTaylorModel<F>::test_functions()
 
     ARIADNE_TEST_REFINES(3*rec(3*ophx),expected_rec_ophx_coarse_error+tolerance);
     ARIADNE_TEST_REFINES(sqrt(9*ophx)/3,expected_sqrt_ophx_coarse_error+tolerance);
-    ARIADNE_TEST_REFINES(log(3*ophx),expected_log_ophx+log(FloatValue<PR>(3))+tolerance);
+    ARIADNE_TEST_REFINES(log(3*ophx),expected_log_ophx_coarse_error+log(FloatValue<PR>(3))+tolerance);
 
     Nat rn=3; FloatValue<PR> c(2); FloatValue<PR> frn(rn);
     ARIADNE_TEST_PRINT(c);
@@ -549,13 +551,16 @@ template<class F> Void TestTaylorModel<F>::test_recondition()
 
 Int main() {
     ThresholdSweeper<FloatDP> sweeper_dp(dp,1e-8);
-//    TestTaylorModel<FloatDP>(sweeper_dp).test();
+    TestTaylorModel<FloatDP>(sweeper_dp).test();
+
     MultiplePrecision mp(128);
     ThresholdSweeper<FloatMP> sweeper_mp(mp,std::pow(2.0,-64));
     ARIADNE_TEST_PRINT(sweeper_mp.precision());
     ARIADNE_TEST_PRINT(sweeper_mp);
     TestTaylorModel<FloatMP>(sweeper_mp).test();
 
+    RelativeThresholdSweeper<FloatMP> relative_sweeper_mp(mp,std::pow(2.0,-64));
+    TestTaylorModel<FloatMP>(relative_sweeper_mp).test();
 
     return ARIADNE_TEST_FAILURES;
 }

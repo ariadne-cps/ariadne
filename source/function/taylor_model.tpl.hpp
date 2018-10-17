@@ -103,7 +103,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
     F::set_rounding_upward();
     FloatError<PR> te(e.precision());
     while(adv!=end) {
-        if(this->discard(adv->index(),adv->coefficient())) {
+        if(this->_discard(adv->index(),adv->coefficient().raw())) {
             //te+=abs(adv->coefficient());
             te+=cast_positive(abs(adv->coefficient()));
         } else {
@@ -115,8 +115,6 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
     e+=te;
 
     // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
-    // ERROR: test/test_nonlinear_programming.cpp:57: calling test_equality_constrained_optimisation(): std::runtime_error in
-    // source/solvers/nonlinear_programming.cpp:1063: step: Assertion `norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2' failed.
     F::set_rounding_to_nearest();
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
@@ -128,7 +126,7 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
     typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator adv=p.begin();
     typename Expansion<MultiIndex,FloatApproximation<PR>>::Iterator curr=p.begin();
     while(adv!=end) {
-        if(this->discard(adv->index(),adv->coefficient())) {
+        if(this->_discard(adv->index(),adv->coefficient().raw())) {
         } else {
             *curr=*adv;
             ++curr;
@@ -137,6 +135,72 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
     }
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
+
+
+namespace {
+
+template<class I, class X> decltype(auto) norm(Expansion<I,X> const& p) {
+    typedef decltype(mag(declval<X>())) R;
+    R r=mag(p.zero_coefficient());
+    for (auto term : p) { r += mag(term.coefficient()); }
+    return r;
+}
+
+
+} //namespace
+
+
+template<class F>
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatValue<PR>>::Iterator curr=p.begin();
+
+    FloatError<PR> nrm=norm(p)+e;
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->_discard(adv->coefficient().raw(),nrm.raw())) {
+            //te+=abs(adv->coefficient());
+            te+=cast_positive(abs(adv->coefficient()));
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
+
+template<class F>
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const
+{
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatApproximation<PR>>::Iterator curr=p.begin();
+
+    FloatApproximation<PR> nrm=norm(p);
+
+    while(adv!=end) {
+        if(this->_discard(adv->coefficient().raw(),nrm.raw())) {
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
+
 
 template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
     : _expansion(0), _error(0u), _sweeper()
@@ -653,18 +717,15 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
         FloatError<PR> re=nul(r.error()); // roundoff error
         UniformConstReference<MultiIndex> xa=xiter->index();
         UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
-        FloatError<PR> mag_xv=mag(xv);
         for(typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             UniformConstReference<MultiIndex> ya=yiter->index();
             UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
             ta=xa+ya;
             FloatValue<PR> tv=mul_no_err(xv,yv);
-            if(r.sweeper().discard(ta,tv)) {
-                te+=mag_xv*mag(yv);
-            } else {
-                t._append(ta,tv);
-                re+=(xv*yv).error();
-            }
+            // NOTE: Previously, we allowed to discard terms immediately since Sweeper() had a discard methd
+            // if(r.sweeper().discard(ta,tv)) { te+=mag(xv)*mag(yv); }
+            t._append(ta,tv);
+            re+=(xv*yv).error();
         }
         t.error()=te+re;
 
@@ -691,6 +752,8 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
     const FloatError<PR>& xe=x.error();
     const FloatError<PR>& ye=y.error();
     re+=xs*ye+ys*xe+xe*ye;
+
+    r.sweep();
 
     return;
 }

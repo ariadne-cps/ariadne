@@ -28,7 +28,7 @@
 
 namespace Ariadne {
 
-Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const {
+Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const {
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);
@@ -72,26 +72,26 @@ Pair<StepSizeType,UpperBoxType> BounderBase::compute(ValidatedVectorMultivariate
     return std::make_pair(h,B);
 }
 
-UpperBoxType BounderBase::_initial(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h, PositiveFloatDPValue FORMULA_WIDENING) const {
+UpperBoxType EulerBounder::_initial(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h, PositiveFloatDPValue FORMULA_WIDENING) const {
     const PositiveFloatDPValue BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
     BoxDomainType V = project(dom,range(n,p));
     UpperBoxType wD = D + BOX_RADIUS_WIDENING*(D-D.midpoint());
-    return wD + FORMULA_WIDENING*formula(D,V,f,arg,h);
+    return wD + FORMULA_WIDENING*_formula(D,V,f,arg,h);
 }
 
-UpperBoxType BounderBase::_refinement(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const {
+UpperBoxType EulerBounder::_refinement(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const {
     SizeType n = f.result_size();
     SizeType p = f.argument_size();
     BoxDomainType D = project(dom,range(0,n));
     BoxDomainType V = project(dom,range(n,p));
     UpperBoxType BV = product(B,UpperBoxType(V));
-    return D + formula(D,V,f,BV,h);
+    return D + _formula(D,V,f,BV,h);
 }
 
-UpperBoxType EulerBounder::formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h) const {
+UpperBoxType EulerBounder::_formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h) const {
     return IntervalDomainType(0,h)*apply(f,arg);
 }
 

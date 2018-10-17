@@ -54,20 +54,18 @@ class BounderInterface {
 
 class BounderBase : public BounderInterface, Loggable {
   public:
-    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const override;
-  protected:
-    virtual UpperBoxType formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const = 0;
-  private:
-    UpperBoxType _initial(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h, PositiveFloatDPValue FORMULA_WIDENING) const;
-    UpperBoxType _refinement(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const;
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const = 0;
 };
 
 class EulerBounder final : public BounderBase {
-  protected:
-    virtual UpperBoxType formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const override;
   public:
-    virtual Void write(OutputStream& os) const override { os << "Euler"; }
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const override;
+    virtual Void write(OutputStream& os) const override { os << "EulerBounder"; }
     virtual EulerBounder* clone() const override { return new EulerBounder(*this); }
+  private:
+    UpperBoxType _formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const;
+    UpperBoxType _initial(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& arg, StepSizeType const& h, PositiveFloatDPValue FORMULA_WIDENING) const;
+    UpperBoxType _refinement(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const;
 };
 
 class BounderHandle {

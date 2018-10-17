@@ -122,6 +122,9 @@ template class Expression<String>;
 template class Expression<Integer>;
 template class Expression<Real>;
 
+template Bool is_affine_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+template Bool is_additive_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+
 
 Expression<Boolean> operator&&(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(AndOp(),e1,e2); }
@@ -325,70 +328,7 @@ template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
 
-Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return not vs.contains(Variable<Real>(e.var()));
-        case OperatorKind::NULLARY: return true;
-        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(e.arg(),vs);
-        case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
-        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant on "<<vs<<"\n");
-    }
-}
 
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
-    switch(e.op()) {
-        case OperatorCode::CNST: return true;
-        case OperatorCode::VAR: return true;
-        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs);
-        case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
-        case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
-        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
-        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(e.arg(),vs);
-        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<e.op()<<"' for evaluation of affinity in given variables\n");
-    }
-}
-
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs) {
-    for (auto i : range(e.size()))
-        if (not is_affine_in(e[i],vs)) return false;
-    return true;
-}
-
-Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
-    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
-    // with a constant value of 1
-    // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
-    // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
-
-    auto one = Expression<Real>::constant(1);
-    auto zero = Expression<Real>::constant(0);
-
-    for (auto v : vs) {
-        Bool already_found = false;
-        Bool already_found_one = false;
-        for (auto i : range(ev.size())) {
-            const Expression<Real>& e = ev[i];
-            auto der = simplify(derivative(e, v));
-            if (not identical(der,zero)) {
-                if (already_found) {
-                    return false;
-                } else {
-                    already_found = true;
-                    if (identical(der,one)) {
-                        if (already_found_one) {
-                            return false;
-                        } else {
-                            already_found_one = true;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-            }
-        }
-    }
-    return true;
-}
 
 
 Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {

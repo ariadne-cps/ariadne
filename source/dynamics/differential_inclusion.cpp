@@ -32,7 +32,6 @@ namespace Ariadne {
 
 #define ARIADNE_LOG_PRINT(level, expr) { ARIADNE_LOG(level,#expr << "=" << (expr) << "\n"); }
 
-
 DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs)
     : _dynamics(dynamics), _inputs(inputs) {
     ARIADNE_ASSERT_MSG(is_affine_in(Vector<RealExpression>(right_hand_sides(dynamics)),inputs.variables()),"The dynamics " << dynamics << " must be input-affine.\n");

@@ -554,4 +554,58 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
     }
 }
 
+template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable<T>>& vs) {
+    switch(e.kind()) {
+        case OperatorKind::VARIABLE: return not vs.contains(Variable<T>(e.var()));
+        case OperatorKind::NULLARY: return true;
+        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(e.arg(),vs);
+        case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
+        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant on "<<vs<<"\n");
+    }
+}
+
+template<class T> Bool is_affine_in(const Expression<T>& e, const Set<Variable<T>>& vs) {
+    switch(e.op()) {
+        case OperatorCode::CNST: return true;
+        case OperatorCode::VAR: return true;
+        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs);
+        case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
+        case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
+        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
+        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(e.arg(),vs);
+        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<e.op()<<"' for evaluation of affinity in given variables\n");
+    }
+}
+
+template<class T> Bool is_affine_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs) {
+    for (auto i : range(e.size()))
+        if (not is_affine_in(e[i],vs)) return false;
+    return true;
+}
+
+template<class T> Bool is_additive_in(const Vector<Expression<T>>& ev, const Set<Variable<T>>& vs) {
+    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
+    // with a constant multiplier
+    // (FIXME: this simplifies the case of a diagonalisable matrix of constant multipliers)
+
+    for (auto v : vs) {
+        Bool already_found = false;
+        for (auto i : range(ev.size())) {
+            const Expression<Real>& e = ev[i];
+            auto der = simplify(derivative(e, v));
+            if (not identical(der,der.create_zero())) {
+                if (already_found) {
+                    return false;
+                } else {
+                    already_found = true;
+                    if (der.op() != OperatorCode::CNST) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 } // namespace Ariadne

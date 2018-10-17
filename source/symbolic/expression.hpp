@@ -161,13 +161,13 @@ template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn)
 template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v);
 
 //! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
-Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable<T>>& vs);
 //! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_affine_in(const Expression<T>& e, const Set<Variable<T>>& vs);
 //! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the vector expression \a e is syntactically additive in the variables \a vs.
-Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_affine_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
+template<class T> Bool is_additive_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
@@ -216,8 +216,6 @@ Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>&
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 
 //@}
-
-
 
 
 } // namespace Ariadne

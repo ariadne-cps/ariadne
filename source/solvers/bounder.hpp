@@ -54,7 +54,7 @@ class BounderInterface {
 
 class BounderBase : public BounderInterface, Loggable {
   public:
-    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const;
+    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const override;
   protected:
     virtual UpperBoxType formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const = 0;
   private:
@@ -62,12 +62,12 @@ class BounderBase : public BounderInterface, Loggable {
     UpperBoxType _refinement(BoxDomainType const& dom, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const;
 };
 
-class EulerBounder : public BounderBase {
+class EulerBounder final : public BounderBase {
   protected:
-    virtual UpperBoxType formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const;
+    virtual UpperBoxType formula(BoxDomainType const& D, BoxDomainType const& V, ValidatedVectorMultivariateFunction const& f, UpperBoxType const& B, StepSizeType const& h) const override;
   public:
-    virtual Void write(OutputStream& os) const { os << "Euler"; }
-    virtual EulerBounder* clone() const { return new EulerBounder(*this); }
+    virtual Void write(OutputStream& os) const override { os << "Euler"; }
+    virtual EulerBounder* clone() const override { return new EulerBounder(*this); }
 };
 
 class BounderHandle {
@@ -80,14 +80,12 @@ class BounderHandle {
 
     operator BounderInterface const& () const { return *_impl; }
 
-    virtual Void write(OutputStream& os) const { _impl->write(os); }
-    virtual BounderHandle* clone() const { return new BounderHandle(*this); }
+    Void write(OutputStream& os) const { _impl->write(os); }
+    BounderHandle* clone() const { return new BounderHandle(*this); }
 
-    virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const {
+    Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const {
         return _impl->compute(f,dom,hsug);
     }
-
-    virtual ~BounderHandle() = default;
 };
 
 

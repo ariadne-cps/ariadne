@@ -39,11 +39,18 @@
 
 namespace Ariadne {
 
+//! \ingroup SolverModule EvaluationModule
+//! \brief Interface for classes calculating the bounds of a flow.
 class BounderInterface {
   public:
+    //! \brief Compute a pair \f$(h,B)\f$ consisting of a bound \a B for the flow
+    //! of \f$\dt{x}=f(x)\f$ starting in \f$dom\f$  for time step \f$h\leq h_{sug}\f$.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$dom\f$ is the \a state_domain and \f$h_{sug}\f$ is the suggested time step.
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const = 0;
-    virtual Void write(OutputStream& os) const = 0;
 
+  public:
+    virtual Void write(OutputStream& os) const = 0;
     virtual BounderInterface* clone() const = 0;
 
     friend inline OutputStream& operator<<(OutputStream& os, BounderInterface const& bounder) {

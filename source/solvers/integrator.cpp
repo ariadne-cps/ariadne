@@ -67,14 +67,14 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory())
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0)
 }
 
 IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s))
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0);
@@ -90,6 +90,18 @@ const ValidatedFunctionModelDPFactoryInterface&
 IntegratorBase::function_factory() const
 {
     return *this->_function_factory_ptr;
+}
+
+Void
+IntegratorBase::set_bounder(const BounderInterface& bounder)
+{
+    this->_bounder_ptr=BounderPointer(bounder.clone());
+}
+
+const BounderInterface&
+IntegratorBase::bounder() const
+{
+    return *this->_bounder_ptr;
 }
 
 Pair<StepSizeType,UpperBoxType>
@@ -545,7 +557,7 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 Pair<StepSizeType,UpperBoxType>
 TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
 {
-    return this->IntegratorBase::flow_bounds(vf,dx,hmax);
+    return this->bounder().compute(vf,dx,hmax);
 }
 
 Void TaylorSeriesIntegrator::write(OutputStream& os) const {

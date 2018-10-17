@@ -70,8 +70,7 @@ class EulerBounder : public BounderBase {
     virtual EulerBounder* clone() const { return new EulerBounder(*this); }
 };
 
-class BounderHandle : public BounderInterface {
-    friend class BounderFactory;
+class BounderHandle {
   private:
     SharedPointer<BounderInterface> _impl;
   public:
@@ -79,12 +78,16 @@ class BounderHandle : public BounderInterface {
     BounderHandle(BounderHandle const& other) : _impl(other._impl) { }
     BounderHandle& operator=(BounderHandle const& other) { _impl = other._impl; return *this; }
 
+    operator BounderInterface const& () const { return *_impl; }
+
     virtual Void write(OutputStream& os) const { _impl->write(os); }
     virtual BounderHandle* clone() const { return new BounderHandle(*this); }
 
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& dom, StepSizeType const& hsug) const {
         return _impl->compute(f,dom,hsug);
     }
+
+    virtual ~BounderHandle() = default;
 };
 
 

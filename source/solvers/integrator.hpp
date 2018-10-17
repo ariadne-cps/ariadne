@@ -34,6 +34,7 @@
 #include <string>
 
 #include "../solvers/integrator_interface.hpp"
+#include "../solvers/bounder.hpp"
 #include "../function/function_interface.hpp"
 
 #include "../utility/declarations.hpp"
@@ -53,7 +54,8 @@ template<class X> class Polynomial;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelDPFactoryInterface;
-typedef std::shared_ptr<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
+typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
+typedef SharedPointer<const BounderInterface> BounderPointer;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
@@ -100,6 +102,10 @@ class IntegratorBase
     //! \brief Set the class which constructs functions for representing the flow.
     Void set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory);
 
+    //! \brief The class that computes bounds.
+    const BounderInterface& bounder() const;
+    //! \brief Set the class that computes bounds.
+    Void set_bounder(const BounderInterface& bounder);
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
@@ -140,6 +146,7 @@ class IntegratorBase
     double _lipschitz_tolerance;
     StepSizeType _maximum_step_size;
     FunctionFactoryPointer _function_factory_ptr;
+    BounderPointer _bounder_ptr;
 };
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.

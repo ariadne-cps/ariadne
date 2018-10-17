@@ -25,6 +25,7 @@
 #include "differential_inclusion.hpp"
 #include "../function/taylor_function.hpp"
 #include "../solvers/integrator.hpp"
+#include "../solvers/bounder.hpp"
 #include "../algebra/expansion.inl.hpp"
 
 namespace Ariadne {
@@ -349,7 +350,6 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
 InputApproximator
 InputApproximatorFactory::create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const {
-
     switch(kind) {
     case InputApproximationKind::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(di,sweeper)));
     case InputApproximationKind::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(di,sweeper)));
@@ -444,9 +444,11 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
 
         auto D = cast_exact_box(evolve_function.range());
         UpperBoxType B;
-        PositiveFloatDPValue h;
+        StepSizeType h;
 
-        std::tie(h,B)=this->flow_bounds(F,V,D,hsug);
+        BoxDomainType dom = product(D,V);
+
+        std::tie(h,B)=this->flow_bounds(F,dom,static_cast<StepSizeType>(cast_exact(hsug)));
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
         PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
@@ -462,7 +464,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Diffe
             this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximators_to_use.at(i)));
             ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
-            auto current_reach=reach(di,D,evolve_function,B,t,h);
+            auto current_reach=reach(di,D,evolve_function,B,t,PositiveFloatDPValue(h,DoublePrecision()));
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
 
             if (i == 0) {
@@ -709,24 +711,8 @@ ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction
 }
 
 
-Pair<PositiveFloatDPValue,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType V, BoxDomainType D, PositiveFloatDPApproximation hsug) const {
-
-    PositiveFloatDPValue h=cast_exact(hsug);
-    UpperBoxType wD = D + (D-D.midpoint());
-    ExactBoxType DV = product(D,V);
-    UpperBoxType B = wD + 2*IntervalDomainType(0,h)*apply(f,DV);
-    UpperBoxType BV = product(B,UpperBoxType(V));
-
-    while(not refines(D+IntervalDomainType(0,h)*apply(f,BV),B)) {
-        h=hlf(h);
-    }
-
-    for(Nat i=0; i<4; ++i) {
-        B=D+IntervalDomainType(0,h)*apply(f,BV);
-        BV = product(B,UpperBoxType(V));
-    }
-
-    return std::make_pair(h,B);
+Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
+    return EulerBounder().compute(f,dom,hsug);
 }
 
 

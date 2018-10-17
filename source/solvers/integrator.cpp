@@ -28,6 +28,7 @@
 #include <iomanip>
 
 #include "../solvers/integrator.hpp"
+#include "../solvers/bounder.hpp"
 
 #include "../output/logging.hpp"
 #include "../utility/container.hpp"
@@ -66,14 +67,14 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory())
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0)
 }
 
 IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s))
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0);
@@ -91,96 +92,22 @@ IntegratorBase::function_factory() const
     return *this->_function_factory_ptr;
 }
 
-Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& domx, const StepSizeType& hsug) const
+Void
+IntegratorBase::set_bounder(const BounderInterface& bounder)
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorMultivariateFunction vf, ExactBoxType domx, StepSizeType hmax)\n");
-    ARIADNE_ASSERT_MSG(vf.result_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
-    ARIADNE_ASSERT_MSG(vf.argument_size()==domx.size(),"vector_field="<<vf<<", states="<<domx);
-    ARIADNE_ASSERT(hsug>0);
-
-
-    // Set up constants of the method.
-    // TODO: Better estimates of constants
-    const FloatDPValue INITIAL_MULTIPLIER=2.0_exact;
-    const FloatDPValue MULTIPLIER=1.125_exact;
-    const FloatDPValue BOX_RADIUS_WIDENING=0.25_exact;
-    const Nat EXPANSION_STEPS=4;
-    const Nat REDUCTION_STEPS=8;
-    const Nat REFINEMENT_STEPS=4;
-
-    Vector<FloatDPBounds> const& dx=cast_singleton(domx);
-
-    Vector<UpperIntervalType> delta=(domx-midpoint(domx))*BOX_RADIUS_WIDENING;
-
-    // Compute the Lipschitz constant over the initial box
-    FloatDPUpperBound lip = norm(vf.jacobian(dx)).upper();
-    StepSizeType hlip = static_cast<StepSizeType>(cast_exact(this->_lipschitz_tolerance/lip));
-
-    StepSizeType hmax=this->maximum_step_size();
-    StepSizeType h=hsug;
-    StepSizeType hmin=h*(two^-REDUCTION_STEPS);
-    h=max(hmin,min(hmax,min(hlip,h)));
-    ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
-
-    UpperBoxType bx,nbx;
-    Vector<UpperIntervalType> df;
-    UpperIntervalType ih(0,h);
-
-    Bool success=false;
-    while(!success) {
-        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
-        bx=domx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
-        for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
-            df=apply(vf,bx);
-            nbx=domx+delta+ih*df;
-            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
-            if(not definitely(is_bounded(nbx))) {
-                success=false;
-                break;
-            } else if(refines(nbx,bx)) {
-                success=true;
-                break;
-            } else {
-                bx=domx+delta+MULTIPLIER*ih*df;
-            }
-        }
-        if(!success) {
-            h=hlf(h);
-            ih=UpperIntervalType(0,h);
-        }
-    }
-
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    Vector<UpperIntervalType> vfbx;
-    vfbx=apply(vf,bx);
-
-    for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
-        bx=nbx;
-        vfbx=apply(vf,bx);
-        nbx=domx+delta+ih*vfbx;
-        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
-    }
-
-
-    // Check result of operation
-    // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(refines(nbx,bx));
-
-    bx=nbx;
-
-
-    ARIADNE_ASSERT(refines(domx,bx));
-
-    ARIADNE_ASSERT_MSG(refines(domx+ih*apply(vf,bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,bx)<<"\nd+hf(b)="<<(domx+ih*apply(vf,bx))<<"\nb="<<bx<<"\n");
-
-    return std::make_pair(h,bx);
+    this->_bounder_ptr=BounderPointer(bounder.clone());
 }
 
+const BounderInterface&
+IntegratorBase::bounder() const
+{
+    return *this->_bounder_ptr;
+}
 
-
+Pair<StepSizeType,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& domx, const StepSizeType& hsug) const {
+    return EulerBounder().compute(vf,domx,hsug);
+}
 
 
 ValidatedVectorMultivariateFunctionModelDP
@@ -630,7 +557,7 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 Pair<StepSizeType,UpperBoxType>
 TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
 {
-    return this->IntegratorBase::flow_bounds(vf,dx,hmax);
+    return this->bounder().compute(vf,dx,hmax);
 }
 
 Void TaylorSeriesIntegrator::write(OutputStream& os) const {

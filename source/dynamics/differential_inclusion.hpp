@@ -38,6 +38,7 @@
 #include "../function/formula.hpp"
 #include "../symbolic/expression_set.hpp"
 #include "../output/logging.hpp"
+#include "../solvers/integrator_interface.hpp"
 
 namespace Ariadne {
 
@@ -101,6 +102,7 @@ template<class F> PositiveLowerBound<F> dexp(LowerBound<F> const& x) {
 template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
+
 
 class DifferentialInclusion {
 private:
@@ -360,7 +362,7 @@ public:
 class InclusionIntegratorInterface {
   public:
     virtual List<ValidatedVectorMultivariateFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) = 0;
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const = 0;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const = 0;
     virtual ValidatedVectorMultivariateFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
 };
 
@@ -383,7 +385,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
 
     virtual List<ValidatedVectorMultivariateFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) override;
 
-    virtual Pair<ExactTimeStepType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType V, BoxDomainType D, ApproximateTimeStepType hsug) const override;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const override;
     virtual ValidatedVectorMultivariateFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;

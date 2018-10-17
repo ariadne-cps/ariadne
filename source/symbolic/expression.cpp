@@ -217,6 +217,14 @@ Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2) {
 Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2) {
     return e1=e1/e2; }
 
+Expression<Real> add(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Add(),e1,e2); }
+Expression<Real> sub(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Sub(),e1,e2); }
+Expression<Real> mul(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Mul(),e1,e2); }
+Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Div(),e1,e2); }
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
@@ -268,10 +276,17 @@ template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Va
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Expression<Real>& c);
 template Expression<Real> substitute(const Expression<Real>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
+template Vector<Expression<Real>> substitute(const Vector<Expression<Real>>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 
 template Expression<Real> simplify(const Expression<Real>& e);
 template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
+
+template Void eliminate_common_subexpressions(Expression<Real>&);
+template Void eliminate_common_subexpressions(Vector<Expression<Real>>&);
+
+
+
 
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
     switch(e.op()) {

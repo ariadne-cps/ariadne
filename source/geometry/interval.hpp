@@ -316,6 +316,9 @@ FloatDPUpperInterval make_interval(FloatDPBounds const& x);
 FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
 FloatMPUpperInterval make_interval(FloatMPBounds const& x);
 
+template<class UB, class PR> FloatBounds<PR> cast_singleton(Interval<UB> const& ivl, PR pr) {
+    return FloatBounds<PR>(ivl.lower(),ivl.upper(),pr); }
+
 //! \related FloatDPUpperInterval \brief An interval containing the given interval in its interior.
 template<class F> Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl);
 template<class F> Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl);

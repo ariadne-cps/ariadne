@@ -575,7 +575,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
 {
-    Vector<X> r(v1.size()+v2.size()+v3.size());
+    Vector<X> r(v1.size()+v2.size()+v3.size(),v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
@@ -583,9 +583,19 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
 }
 
 template<class X>
+Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2, const Vector<X>& v3)
+{
+    Vector<X> r(v1.size()+1u+v3.size(),v1.zero_element());
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    r[v1.size()]=x2;
+    for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+1u+i]=v3[i]; }
+    return std::move(r);
+}
+
+template<class X>
 Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
 {
-    Vector<X> r(1u+v2.size());
+    Vector<X> r(1u+v2.size(),v2.zero_element());
     r[0u]=x1;
     for(SizeType i=0; i!=v2.size(); ++i) { r[1u+i]=v2[i]; }
     return std::move(r);
@@ -594,7 +604,7 @@ Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
 {
-    Vector<X> r(v1.size()+1u);
+    Vector<X> r(v1.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
     return std::move(r);
@@ -612,7 +622,7 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X>::ScalarType& x3)
 {
-    Vector<X> r(v1.size()+v2.size()+1u);
+    Vector<X> r(v1.size()+v2.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     r[v1.size()+v2.size()]=x3;

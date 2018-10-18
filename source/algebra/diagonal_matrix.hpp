@@ -150,6 +150,7 @@ template<class X> class DiagonalMatrix
     explicit DiagonalMatrix(SizeType n);
     explicit DiagonalMatrix(Array<X>);
     explicit DiagonalMatrix(Vector<X>);
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
     SizeType size() const;
     SizeType row_size() const;
     SizeType column_size() const;
@@ -175,6 +176,11 @@ template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Vector<X> vec)
     : _zero(vec.zero_element()), _ary(vec.array())
+{ }
+
+template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
+DiagonalMatrix<X>::DiagonalMatrix(DiagonalMatrix<Y> const& D, PRS... prs)
+    : _ary(D.diagonal().array(),prs...)
 { }
 
 template<class X> SizeType DiagonalMatrix<X>::size() const {

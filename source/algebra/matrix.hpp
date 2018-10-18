@@ -155,7 +155,7 @@ template<class X> class Matrix
     Matrix(InitializerList<InitializerList<X>> lst);
 
     //! Construct a matrix using initializer lists.
-    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... pr);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... prs);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);

@@ -125,6 +125,7 @@ template class Expression<Real>;
 template Bool before<Real>(Expression<Real> const& e1, Expression<Real> const& e2);
 template Nat count_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
+template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
 
 template Bool is_affine_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 template Bool is_additive_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);

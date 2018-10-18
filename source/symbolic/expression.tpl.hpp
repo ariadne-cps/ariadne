@@ -457,12 +457,12 @@ template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) 
     }
 }
 
-struct Before {
+struct ExpressionComparator {
     template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return before(std::forward<A1>(a1),std::forward<A2>(a2)); }
 };
 
 
-template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,Before>& cache)
+template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,ExpressionComparator>& cache)
 {
     auto iter=cache.find(e);
     if (iter!=cache.end()) {
@@ -507,18 +507,22 @@ template<class T> Expression<T> eliminate_common_subexpressions(const Expression
 
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e)
 {
-    std::set<Expression<T>,Before> cache;
+    std::set<Expression<T>,ExpressionComparator> cache;
     e=eliminate_common_subexpressions(e,cache);
 }
 
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& es)
 {
-    std::set<Expression<T>,Before> cache;
+    std::set<Expression<T>,ExpressionComparator> cache;
     for(SizeType i=0; i!=es.size(); ++i) { es[i]=eliminate_common_subexpressions(es[i],cache); }
 }
 
+struct ExpressionPtrComparator {
+    template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return a1.node_raw_ptr() < a2.node_raw_ptr(); }
+};
 
-template<class T> Void _count_nodes(Expression<T> const& e, std::set<Expression<T>,Before>& cache, Bool const& distinct, Nat& count) {
+
+template<class T, class C> Void _count_nodes(Expression<T> const& e, std::set<Expression<T>,C>& cache, Bool const& distinct, Nat& count) {
 
     auto iter=cache.find(e);
     if (!distinct || iter==cache.end()) {
@@ -544,9 +548,8 @@ template<class T> Void _count_nodes(Expression<T> const& e, std::set<Expression<
 }
 
 
-template<class T> Nat count_nodes(Expression<T> const& e, Bool const& distinct) {
+template<class T, class C> Nat count_nodes(Expression<T> const& e, std::set<Expression<T>,C>& cache, Bool const& distinct) {
     Nat result = 0;
-    std::set<Expression<T>,Before> cache;
 
     _count_nodes(e, cache, distinct, result);
 
@@ -554,11 +557,18 @@ template<class T> Nat count_nodes(Expression<T> const& e, Bool const& distinct) 
 }
 
 template<class T> Nat count_nodes(Expression<T> const& e) {
-    return count_nodes(e,false);
+    std::set<Expression<T>,ExpressionComparator> cache;
+    return count_nodes(e,cache,false);
 }
 
 template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
-    return count_nodes(e,true);
+    std::set<Expression<T>,ExpressionComparator> cache;
+    return count_nodes(e,cache,true);
+}
+
+template<class T> Nat count_distinct_node_ptrs(Expression<T> const& e) {
+    std::set<Expression<T>,ExpressionPtrComparator> cache;
+    return count_nodes(e,cache,true);
 }
 
 

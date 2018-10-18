@@ -182,8 +182,10 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
 
 //! \brief Count the number of nodes in the expression \a e.
 template<class T> Nat count_nodes(const Expression<T>& e);
-//! \brief Count the number of distinct (i.e., having different raw pointer) nodes in the expression \a e.
+//! \brief Count the number of distinct (i.e., having identical representation) nodes in the expression \a e.
 template<class T> Nat count_distinct_nodes(const Expression<T>& e);
+//! \brief Count the number of distinct node pointers in the expression \a e.
+template<class T> Nat count_distinct_node_ptrs(const Expression<T>& e);
 
 //! \brief Returns true if the expressions are mutual negations.
 //!

@@ -1,5 +1,6 @@
 set(EXAMPLES_PDES
     dirichlet
+    acoustic_first_order_pde
 )
 
 foreach(example ${EXAMPLES_PDES})

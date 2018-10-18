@@ -139,10 +139,10 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
 
 namespace {
 
-template<class I, class X> decltype(auto) norm(Expansion<I,X> const& p) {
+template<class I, class X> decltype(auto) radius(Expansion<I,X> const& p) {
     typedef decltype(mag(declval<X>())) R;
     R r=mag(p.zero_coefficient());
-    for (auto term : p) { r += mag(term.coefficient()); }
+    for (auto term : p) { if (term.index().degree() != 0) { r += mag(term.coefficient()); } }
     return r;
 }
 
@@ -157,7 +157,7 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, Flo
     typename Expansion<MultiIndex,FloatValue<PR>>::ConstIterator adv=p.begin();
     typename Expansion<MultiIndex,FloatValue<PR>>::Iterator curr=p.begin();
 
-    FloatError<PR> nrm=norm(p)+e;
+    FloatError<PR> nrm=radius(p)+e;
 
     // FIXME: Not needed, but added to pair with rounding mode change below
     F::set_rounding_upward();
@@ -187,7 +187,7 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>
     typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator adv=p.begin();
     typename Expansion<MultiIndex,FloatApproximation<PR>>::Iterator curr=p.begin();
 
-    FloatApproximation<PR> nrm=norm(p);
+    FloatApproximation<PR> nrm=radius(p);
 
     while(adv!=end) {
         if(this->_discard(adv->coefficient().raw(),nrm.raw())) {
@@ -729,6 +729,8 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
         }
         t.error()=te+re;
 
+        t.sweep();
+
         _add(s,r,t);
         r.expansion().swap(s.expansion());
         r.error()=s.error();
@@ -752,8 +754,6 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
     const FloatError<PR>& xe=x.error();
     const FloatError<PR>& ye=y.error();
     re+=xs*ye+ys*xe+xe*ye;
-
-    r.sweep();
 
     return;
 }

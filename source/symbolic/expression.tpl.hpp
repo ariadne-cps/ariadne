@@ -436,7 +436,6 @@ template<class X> Expression<X> simplify(const Expression<X>& e) {
 
 
 
-
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) {
     if(e1.op()==e2.op()) {
         switch(e1.kind()) {
@@ -446,6 +445,8 @@ template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) 
                 return decide(e1.val() < e2.val());
             case OperatorKind::UNARY:
                 return before(e1.arg(),e2.arg());
+            case OperatorKind::GRADED:
+                return (e1.num() == e2.num() ? before(e1.arg(),e2.arg()) : (e1.num() < e2.num()));
             case OperatorKind::BINARY:
                 return identical(e1.arg1(),e2.arg1()) ? before(e1.arg2(),e2.arg2()) : before(e1.arg1(),e2.arg1());
             default:
@@ -461,21 +462,17 @@ struct Before {
 };
 
 
-template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,Before>& cache, uint& count)
+template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,Before>& cache)
 {
     auto iter=cache.find(e);
     if (iter!=cache.end()) {
-        if(iter->node_raw_ptr()!=e.node_raw_ptr()) { std::cerr<<"Found duplicate of "<<e<<"\n"; ++count; }
-//        else { std::cerr<<"Found repeat of "<<e<<"\n"; }
         return *iter; }
     else {
         switch(e.kind()) {
-            case OperatorKind::VARIABLE:
+            case OperatorKind::VARIABLE: case OperatorKind::NULLARY:
                 cache.insert(e); return e;
-            case OperatorKind::NULLARY:
-                std::cerr<<"Found constant "<<e<<"\n"; cache.insert(e); return e;
             case OperatorKind::UNARY: {
-                auto new_arg = eliminate_common_subexpressions(e.arg(),cache, count);
+                auto new_arg = eliminate_common_subexpressions(e.arg(),cache);
                 if(new_arg.node_raw_ptr() == e.arg().node_raw_ptr()) {
                     cache.insert(e); return e;
                 } else {
@@ -483,9 +480,18 @@ template<class T> Expression<T> eliminate_common_subexpressions(const Expression
                     cache.insert(new_e); return new_e;
                 }
             }
+            case OperatorKind::GRADED: {
+                auto new_arg = eliminate_common_subexpressions(e.arg(),cache);
+                if(new_arg.node_raw_ptr() == e.arg().node_raw_ptr()) {
+                    cache.insert(e); return e;
+                } else {
+                    Expression<T> new_e=make_expression<T>(e.op(),new_arg,e.num());
+                    cache.insert(new_e); return new_e;
+                }
+            }
             case OperatorKind::BINARY: {
-                auto new_arg1 = eliminate_common_subexpressions(e.arg1(),cache, count);
-                auto new_arg2 = eliminate_common_subexpressions(e.arg2(),cache, count);
+                auto new_arg1 = eliminate_common_subexpressions(e.arg1(),cache);
+                auto new_arg2 = eliminate_common_subexpressions(e.arg2(),cache);
                 if(new_arg1.node_raw_ptr() == e.arg1().node_raw_ptr() && new_arg2.node_raw_ptr() == e.arg2().node_raw_ptr()) {
                     cache.insert(e); return e;
                 } else {
@@ -494,23 +500,66 @@ template<class T> Expression<T> eliminate_common_subexpressions(const Expression
                 }
             }
             default:
-                assert(false);
+                abort();
         }
     }
 }
 
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e)
 {
-    std::set<Expression<T>,Before> cache; uint count=0;
-    e=eliminate_common_subexpressions(e,cache,count);
+    std::set<Expression<T>,Before> cache;
+    e=eliminate_common_subexpressions(e,cache);
 }
 
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& es)
 {
-    std::set<Expression<T>,Before> cache; uint count=0;
-    for(SizeType i=0; i!=es.size(); ++i) { es[i]=eliminate_common_subexpressions(es[i],cache,count); }
+    std::set<Expression<T>,Before> cache;
+    for(SizeType i=0; i!=es.size(); ++i) { es[i]=eliminate_common_subexpressions(es[i],cache); }
 }
 
+
+template<class T> Void _count_nodes(Expression<T> const& e, std::set<Expression<T>,Before>& cache, Bool const& distinct, Nat& count) {
+
+    auto iter=cache.find(e);
+    if (!distinct || iter==cache.end()) {
+        cache.insert(e);
+        switch(e.kind()) {
+            case OperatorKind::VARIABLE: case OperatorKind::NULLARY:
+                break;
+            case OperatorKind::UNARY:
+                _count_nodes(e.arg(),cache,distinct,count);
+                break;
+            case OperatorKind::GRADED:
+                _count_nodes(e.arg(),cache,distinct,count);
+                break;
+            case OperatorKind::BINARY:
+                _count_nodes(e.arg1(),cache,distinct,count);
+                _count_nodes(e.arg2(),cache,distinct,count);
+                break;
+            default:
+                abort();
+        }
+        count++;
+    }
+}
+
+
+template<class T> Nat count_nodes(Expression<T> const& e, Bool const& distinct) {
+    Nat result = 0;
+    std::set<Expression<T>,Before> cache;
+
+    _count_nodes(e, cache, distinct, result);
+
+    return result;
+}
+
+template<class T> Nat count_nodes(Expression<T> const& e) {
+    return count_nodes(e,false);
+}
+
+template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
+    return count_nodes(e,true);
+}
 
 
 template<class T> Bool is_constant(const Expression<T>& e, const SelfType<T>& c) {

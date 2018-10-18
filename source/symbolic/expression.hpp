@@ -169,6 +169,9 @@ template<class T> Bool is_affine_in(const Vector<Expression<T>>& e, const Set<Va
 //! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
 template<class T> Bool is_additive_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
 
+//! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
+template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
+
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
@@ -176,6 +179,11 @@ template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
 
 //! \brief Tests whether two expressions are identical.
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
+
+//! \brief Count the number of nodes in the expression \a e.
+template<class T> Nat count_nodes(const Expression<T>& e);
+//! \brief Count the number of distinct (i.e., having different raw pointer) nodes in the expression \a e.
+template<class T> Nat count_distinct_nodes(const Expression<T>& e);
 
 //! \brief Returns true if the expressions are mutual negations.
 //!

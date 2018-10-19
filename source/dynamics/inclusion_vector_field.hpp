@@ -38,8 +38,28 @@
 
 namespace Ariadne {
 
+class NotFormulaFunctionException : public std::runtime_error {
+  public:
+    NotFormulaFunctionException(const String& str) : std::runtime_error(str) { }
+};
+
+class MissingInputException : public std::runtime_error {
+  public:
+    MissingInputException(const String& str) : std::runtime_error(str) { }
+};
+
+class UnusedInputException : public std::runtime_error {
+  public:
+    UnusedInputException(const String& str) : std::runtime_error(str) { }
+};
+
+class FunctionArgumentsMismatchException : public std::runtime_error {
+  public:
+    FunctionArgumentsMismatchException(const String& str) : std::runtime_error(str) { }
+};
+
 class Enclosure;
-//class InclusionVectorFieldEvolver;
+class InclusionVectorFieldEvolver;
 
 //! \brief A vector field in Euclidean space.
 class InclusionVectorField
@@ -52,10 +72,10 @@ class InclusionVectorField
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
     //! \brief The generic type used to compute the system evolution.
-    //typedef InclusionVectorFieldEvolver EvolverType;
+    typedef InclusionVectorFieldEvolver EvolverType;
     typedef Enclosure EnclosureType;
   public:
-    InclusionVectorField(List<DottedRealAssignment> const& dynamics, RealVariablesBox const& inputs);
+    InclusionVectorField(DottedRealAssignments const& dynamics, RealVariableIntervals const& inputs);
     InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
     virtual ~InclusionVectorField() = default;
     virtual InclusionVectorField* clone() const { return new InclusionVectorField(*this); }
@@ -73,6 +93,8 @@ class InclusionVectorField
 
     friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
         return os << "InclusionVectorField( " << vf.function() << ", " << vf.inputs() << " )"; }
+  private:
+    Void _acquire_properties();
   private:
     EffectiveVectorMultivariateFunction _function;
     BoxDomainType _inputs;

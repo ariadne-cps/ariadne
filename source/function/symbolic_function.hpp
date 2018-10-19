@@ -96,6 +96,8 @@ struct VectorFormulaFunction
     template<class X> Void _compute(Vector<X>& r, const Vector<X>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }
 };
 
+typedef VectorFormulaFunction<EffectiveNumber> EffectiveVectorFormulaFunction;
+
 
 //! \brief Returns \a true if the function \a f is syntactically constant in the indices \a is.
 template<class Y> Bool is_constant_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }

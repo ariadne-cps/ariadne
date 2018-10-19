@@ -1,5 +1,6 @@
 add_library(ariadne-dynamics OBJECT
     orbit.cpp
+    inclusion_vector_field.cpp
     differential_inclusion.cpp
     map_evolver.cpp
     vector_field_evolver.cpp

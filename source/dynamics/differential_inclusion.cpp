@@ -48,31 +48,6 @@ BoxDomainType bounds_to_domain_exact(RealVariablesBox const& var_bounds) {
     return Vector<IntervalDomainType>(result);
 }
 
-InclusionVectorField::InclusionVectorField(List<DottedRealAssignment> const& dynamics, RealVariablesBox const& inputs)
-    : InclusionVectorField(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))),bounds_to_domain_exact(inputs))
-{
-    _variable_names = variable_names(left_hand_sides(dynamics));
-}
-
-InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
-    : _function(function), _inputs(inputs)
-{
-    ARIADNE_ASSERT_MSG(function.argument_size() == function.result_size()+inputs.size(),
-            "Incompatible inputs size (" << inputs.size() << ") with the provided function (R^" << function.argument_size() << " -> R^" << function.result_size() << ")");
-
-    List<Identifier> variable_names;
-    for (auto i : range(0,function.result_size()))
-        variable_names.append(Identifier("x"+i));
-
-    _variable_names = variable_names;
-}
-
-
-RealSpace InclusionVectorField::state_space() const
-{
-    return real_space(this->_variable_names);
-}
-
 #define ARIADNE_LOG_PRINT(level, expr) { ARIADNE_LOG(level,#expr << "=" << (expr) << "\n"); }
 
 DifferentialInclusion::DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs)

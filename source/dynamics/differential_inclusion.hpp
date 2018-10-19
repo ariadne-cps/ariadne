@@ -39,6 +39,7 @@
 #include "../symbolic/expression_set.hpp"
 #include "../output/logging.hpp"
 #include "../solvers/integrator_interface.hpp"
+#include "inclusion_vector_field.hpp"
 
 namespace Ariadne {
 
@@ -66,7 +67,8 @@ using ExactTimeStepType = PositiveFloatDPValue;
 Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds);
 Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs);
 Tuple<ValidatedVectorMultivariateFunction,ValidatedVectorMultivariateFunction,Vector<ValidatedVectorMultivariateFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
-BoxDomainType bounds_to_domain(RealVariablesBox const& var_box);
+BoxDomainType bounds_to_domain_exact(RealVariablesBox const& var_box);
+BoxDomainType bounds_to_domain_widened(RealVariablesBox const& var_box);
 
 inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
@@ -137,7 +139,7 @@ private:
     BoxDomainType _X0;
 public:
     DifferentialInclusionIVP(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial)
-        : _di(DifferentialInclusion(dynamics,inputs)), _initial(initial), _X0(bounds_to_domain(initial)) { }
+        : _di(DifferentialInclusion(dynamics,inputs)), _initial(initial), _X0(bounds_to_domain_widened(initial)) { }
     BoxDomainType const& X0() const { return _X0; }
     DifferentialInclusion const& di() const { return _di; }
     RealVariablesBox const& initial() const { return _initial; }

@@ -28,6 +28,8 @@
 
 namespace Ariadne {
 
+typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
+typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
 BoxDomainType input_bounds_to_domain(RealVariableIntervals const& inputs) {
     List<IntervalDomainType> result;
     for (auto input : inputs) {
@@ -36,19 +38,44 @@ BoxDomainType input_bounds_to_domain(RealVariableIntervals const& inputs) {
     return Vector<IntervalDomainType>(result);
 }
 
-Void InclusionVectorField::_acquire_properties() {
+Pair<CoordinateFormulaPair,ExactIntervalType> centered_coordinate_transformation(Nat const& i, ExactIntervalType const& bounds) {
+    if (same(bounds.lower(),-bounds.upper())) return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)},bounds);
+    else return Pair<CoordinateFormulaPair,ExactIntervalType>({i,EffectiveFormula::coordinate(i)+EffectiveFormula::constant(EffectiveNumber(bounds.midpoint()))},ExactIntervalType(cast_exact(bounds.lower()-bounds.midpoint()),cast_exact(bounds.upper()-bounds.midpoint())));
+}
+
+
+Pair<CoordinateFormulaPairs,BoxDomainType> centered_coordinates_transformation(Nat const& dim, BoxDomainType const& inputs) {
+    CoordinateFormulaPairs assignments;
+    BoxDomainType new_bounds(inputs.size());
+    for (auto i : range(inputs.size())) {
+        auto tr = centered_coordinate_transformation(i+dim,inputs[i]);
+        assignments.push_back(tr.first);
+        new_bounds[i] = tr.second;
+    }
+    return Pair<CoordinateFormulaPairs,BoxDomainType>(assignments,new_bounds);
+}
+
+
+Void InclusionVectorField::_acquire_and_assign_properties() {
 
     List<Nat> input_indices;
     for (Nat i : range(this->dimension(),this->dimension()+this->number_of_inputs()))
         input_indices.append(i);
 
-    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(_function.raw_pointer());
+    const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(_function.reference());
 
-    if (ff == nullptr)
-        ARIADNE_THROW(NotFormulaFunctionException,"InclusionVectorField::_acquire_properties","The field function currently must be based on Formula");
+    _is_input_affine = is_affine_in(ff,input_indices);
+    _is_input_additive = is_additive_in(ff,input_indices);
+}
 
-    _is_input_affine = is_affine_in(*ff,input_indices);
-    _is_input_additive = is_additive_in(*ff,input_indices);
+Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
+
+    auto transformation = centered_coordinates_transformation(function.result_size(),inputs);
+
+    const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(function.reference());
+
+    _function = EffectiveVectorFormulaFunction(function.argument_size(),substitute(ff._formulae,transformation.first));
+    _inputs = transformation.second;
 }
 
 InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics, RealVariableIntervals const& inputs)
@@ -79,26 +106,28 @@ InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics
     RealSpace inp_spc(inp_var_list);
     RealSpace spc = var_spc.adjoin(inp_spc);
 
-    _function = make_function(spc,Vector<RealExpression>(right_hand_sides(dynamics)));
-    _inputs = input_bounds_to_domain(inputs);
     _variable_names = variable_names(left_hand_sides(dynamics));
 
-    _acquire_properties();
+    _transform_and_assign(make_function(spc,Vector<RealExpression>(right_hand_sides(dynamics))),input_bounds_to_domain(inputs));
+    _acquire_and_assign_properties();
 }
 
 InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
-    : _function(function), _inputs(inputs)
 {
     if (function.argument_size() != function.result_size()+inputs.size())
         ARIADNE_THROW(FunctionArgumentsMismatchException,"InclusionVectorField(function,inputs) with function="<<function<<" and inputs="<<inputs,
                 "Incompatible inputs size (" << inputs.size() << ") with the provided function (R^" << function.argument_size() << " -> R^" << function.result_size() << ")");
+
+    if (dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer()) == nullptr)
+        ARIADNE_THROW(NotFormulaFunctionException,"InclusionVectorField of EffectiveVectorMultivariateFunction","The function must be constructed from a Formula at the moment.");
 
     List<Identifier> variable_names;
     for (auto i : range(0,function.result_size()))
         variable_names.append(Identifier("x"+i));
     _variable_names = variable_names;
 
-    _acquire_properties();
+    _transform_and_assign(function,inputs);
+    _acquire_and_assign_properties();
 }
 
 

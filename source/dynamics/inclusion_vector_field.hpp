@@ -94,7 +94,8 @@ class InclusionVectorField
     friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
         return os << "InclusionVectorField( " << vf.function() << ", " << vf.inputs() << " )"; }
   private:
-    Void _acquire_properties();
+    Void _transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
+    Void _acquire_and_assign_properties();
   private:
     EffectiveVectorMultivariateFunction _function;
     BoxDomainType _inputs;

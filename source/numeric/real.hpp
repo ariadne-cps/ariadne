@@ -163,8 +163,10 @@ class Real
     ValidatedReal compute(Effort eff) const;
     //! Compute a concrete approximation using double-precision.
     FloatDPBounds get(DoublePrecision pr) const;
+    FloatDPBounds compute_get(DoublePrecision pr) const;
     //! Compute a concrete approximation using the given precision.
     FloatMPBounds get(MultiplePrecision pr) const;
+    FloatMPBounds compute_get(MultiplePrecision pr) const;
     //@}
 
     //@{

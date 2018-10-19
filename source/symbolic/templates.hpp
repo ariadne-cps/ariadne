@@ -41,6 +41,7 @@ template<class Op, class... Args> struct ExpressionTemplate;
 template<class C> struct ExpressionTemplate<Cnst,C> {
     Cnst _op; C _cnst;
     ExpressionTemplate(Cnst o, C c) : _op(o), _cnst(c) { }
+    template<class V> decltype(auto) vist(V const& v) const { return v(_cnst); }
     template<class T> operator T() const { return static_cast<T>(_cnst); }
     template<class... AS> auto operator() (AS... vals) const -> C { return _cnst; }
     friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._cnst; }
@@ -53,9 +54,17 @@ template<class I> struct ExpressionTemplate<Var,I> {
     friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._ind; }
 };
 
+template<> struct ExpressionTemplate<Var> {
+    Var _op;
+    ExpressionTemplate(Var o) : _op(o) { }
+    template<class AS> auto operator() (AS vals) const -> decltype(vals) { return vals; }
+    friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._op; }
+};
+
 template<class O, class A> struct ExpressionTemplate<O,A> {
     O _op; A _arg;
     ExpressionTemplate(O o, A a) : _op(o), _arg(a) { }
+    template<class V> decltype(auto) vist(V const& v) const { return _op(v(_arg)); }
     template<class T> operator T() const { return _op(static_cast<T>(_arg)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...))) {
         return _op(_arg(vals...)); }
@@ -66,6 +75,7 @@ template<class O, class A> struct ExpressionTemplate<O,A> {
 template<class O, class A1, class A2> struct ExpressionTemplate<O,A1,A2> {
     O _op; A1 _arg1; A2 _arg2;
     ExpressionTemplate(O o, A1 a1, A2 a2) : _op(o), _arg1(a1), _arg2(a2) { }
+    template<class V> decltype(auto) vist(V const& v) const { return _op(v(_arg1),v(_arg2)); }
     template<class T> operator T() const { return _op(static_cast<T>(_arg1),static_cast<T>(_arg2)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg1(vals...),_arg2(vals...))) {
         return _op(_arg1(vals...),_arg2(vals...)); }

@@ -167,7 +167,7 @@ template<class O, class... A> inline Real make_real(O o, A... a) {
     return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
 
-inline Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
+Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
 
 // FIXME: Is this necessary?
@@ -365,7 +365,15 @@ FloatDPBounds Real::get(DoublePrecision pr) const {
     return this->_ptr->_compute_get(pr);
 }
 
+FloatDPBounds Real::compute_get(DoublePrecision pr) const {
+    return this->_ptr->_compute_get(pr);
+}
+
 FloatMPBounds Real::get(MultiplePrecision pr) const {
+    return this->_ptr->_compute_get(pr);
+}
+
+FloatMPBounds Real::compute_get(MultiplePrecision pr) const {
     return this->_ptr->_compute_get(pr);
 }
 

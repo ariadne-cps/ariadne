@@ -388,7 +388,7 @@ inline Expression<Real> _simplify(const Expression<Real>& e) {
     return make_expression<R>(e.op(),sarg1,sarg2);
 }
 
-template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
+inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
     typedef Kleenean T;
 
     if( e.kind()==OperatorKind::UNARY ) {
@@ -619,7 +619,7 @@ template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable
         case OperatorKind::NULLARY: return true;
         case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(e.arg(),vs);
         case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
-        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant on "<<vs<<"\n");
+        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant in "<<vs<<"\n");
     }
 }
 

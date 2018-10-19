@@ -53,15 +53,11 @@ template<class X> decltype(auto) mag(Covector<X> const& u) { return norm(transpo
 
 class TestProcedure
 {
-    //static ApproximateFormula o;
-    //static ApproximateFormula x;
-    //static ApproximateFormula y;
     DoublePrecision pr;
   public:
     TestProcedure();
     Void test();
   private:
-    Void test_formula();
     Void test_construct_from_formula();
     Void test_construct_from_expansion();
     Void test_evaluate();
@@ -69,40 +65,19 @@ class TestProcedure
     Void test_derivative();
 };
 
-//ApproximateFormula TestProcedure::o(ApproximateFormula::constant(1.0));
-//ApproximateFormula TestProcedure::x(ApproximateFormula::coordinate(0));
-//ApproximateFormula TestProcedure::y(ApproximateFormula::coordinate(1));
-
-
 TestProcedure::TestProcedure()
 {
 }
 
 Void TestProcedure::test()
 {
-    ARIADNE_TEST_CALL(test_formula());
     ARIADNE_TEST_CALL(test_construct_from_formula());
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
     ARIADNE_TEST_CALL(test_derivative());
-
-
 }
 
-
-Void TestProcedure::test_formula()
-{
-    ApproximateFormula o(ApproximateFormula::constant(1.0));
-    ApproximateFormula t(ApproximateFormula::constant(2.0));
-    ApproximateFormula x(ApproximateFormula::coordinate(0));
-    ApproximateFormula y(ApproximateFormula::coordinate(1));
-
-    ApproximateFormula r(sqrt(pow(x,2)+pow(y,2))/t);
-    ARIADNE_TEST_PRINT(r);
-
-    //Vector<ApproximateFormula> f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
-}
 
 Void TestProcedure::test_construct_from_formula()
 {
@@ -234,9 +209,6 @@ Void TestProcedure::test_derivative()
     ARIADNE_TEST_WITHIN(gradient(p,q),f.gradient(q),8e-16);
     ARIADNE_TEST_EQUALS(hessian(p,q,s),f(ds).hessian().get(0,0));
 }
-
-
-
 
 Int main() {
     TestProcedure().test();

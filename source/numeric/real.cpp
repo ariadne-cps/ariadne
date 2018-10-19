@@ -305,7 +305,9 @@ OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_writ
 Bool same(Real const& r1, Real const& r2) {
     // FIXME: Use symbolic approach
     DoublePrecision pr;
-    return same(FloatDPBounds(r1,pr),FloatDPBounds(r2,pr));
+    FloatDPBounds x1(r1,pr);
+    FloatDPBounds x2(r2,pr);
+    return x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw();
 }
 
 PositiveReal dist(Real const& r1, Real const& r2) { return abs(sub(r1,r2)); }

@@ -502,18 +502,18 @@ template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& as, const Set<Nat>
     return true;
 }
 
-/*
-template<class T> Bool is_additive_in(const Vector<Expression<T>>& ev, const Set<Variable<T>>& vs) {
-    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
+
+template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& as, const Set<Nat>& is) {
+    // We treat the vector of formulas as additive in is if each variable in is appears at most once in all expressions,
     // with a constant multiplier
     // (FIXME: this simplifies the case of a diagonalisable matrix of constant multipliers)
 
-    for (auto v : vs) {
+    for (auto i : is) {
         Bool already_found = false;
-        for (auto i : range(ev.size())) {
-            const Expression<Real>& e = ev[i];
-            auto der = simplify(derivative(e, v));
-            if (not identical(der,der.create_zero())) {
+        for (auto idx : range(as.size())) {
+            const Formula<Y>& a = as[idx];
+            auto der = simplify(derivative(a, i));
+            if (not identical(der,Formula<Y>::zero())) {
                 if (already_found) {
                     return false;
                 } else {
@@ -527,7 +527,7 @@ template<class T> Bool is_additive_in(const Vector<Expression<T>>& ev, const Set
     }
     return true;
 }
-*/
+
 
 } // namespace Ariadne
 

@@ -104,6 +104,20 @@ class TestFormula
         ARIADNE_TEST_ASSERT(is_affine_in(Vector<EffectiveFormula>({y*2+x,x+y}),{0,1}));
     }
 
+    Void test_is_additive_in() {
+        EffectiveFormula u1(EffectiveFormula::coordinate(2));
+        EffectiveFormula u2(EffectiveFormula::coordinate(3));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x+u1,y+u2}),{2,3}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x+u2,y+u1}),{2,3}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x+u1,y}),{2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x,y+u1}),{2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x,y+2*u1}),{2}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<EffectiveFormula>({x+u1,y+2*u2}),{2,3}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<EffectiveFormula>({x+u1,y+u1}),{2}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<EffectiveFormula>({x*u1,y+u2}),{2,3}));
+        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<EffectiveFormula>({x+u1,y+sqr(u2)}),{2,3}));
+    }
+
   public:
     Void test() {
         ARIADNE_TEST_CALL(test_construct());
@@ -111,6 +125,7 @@ class TestFormula
         ARIADNE_TEST_CALL(test_simplify());
         ARIADNE_TEST_CALL(test_is_constant_in());
         ARIADNE_TEST_CALL(test_is_affine_in());
+        ARIADNE_TEST_CALL(test_is_additive_in());
     }
 };
 

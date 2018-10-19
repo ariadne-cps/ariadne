@@ -97,6 +97,15 @@ struct VectorFormulaFunction
 };
 
 
+//! \brief Returns \a true if the function \a f is syntactically constant in the indices \a is.
+template<class Y> Bool is_constant_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }
+//! \brief Returns \a true if the function \a f is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formula,is); }
+//! \brief Returns \a true if the vector function \a f is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formulae,is); }
+//! \brief Returns \a true if the vector function \a f is syntactically additive (possibly with multipliers) in the indices \a is.
+template<class Y> Bool is_additive_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_additive_in(f._formulae,is); }
+
 
 //------------------------ Arithmetic scalar functions  -----------------------------------//
 

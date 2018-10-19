@@ -63,11 +63,18 @@ class TestFormula
     Void test_identical() {
         ARIADNE_TEST_ASSERT(identical(x,x));
         ARIADNE_TEST_ASSERT(identical(ExactFormula::constant(2.0),ExactFormula::constant(2.0)));
-        ARIADNE_TEST_ASSERT(not identical(EffectiveFormula::constant(2.0),EffectiveFormula::constant(2.0)));
+        ARIADNE_TEST_ASSERT(identical(EffectiveFormula::constant(2.0),EffectiveFormula::constant(2.0)));
         ARIADNE_TEST_ASSERT(identical(x*y,y*x));
         ARIADNE_TEST_ASSERT(identical(x+y,y+x));
         ARIADNE_TEST_ASSERT(identical(cos(x),cos(x)));
         ARIADNE_TEST_ASSERT(identical(pow(x,2),pow(x,2)));
+    }
+
+    Void test_simplify() {
+        EffectiveFormula u(EffectiveFormula::coordinate(2));
+        EffectiveFormula simplification = simplify(derivative(-u*x*y+2*x,x.ind()));
+        ARIADNE_TEST_PRINT(simplification);
+        ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
     }
 
     Void test_is_constant_in() {
@@ -101,6 +108,7 @@ class TestFormula
     Void test() {
         ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_identical());
+        ARIADNE_TEST_CALL(test_simplify());
         ARIADNE_TEST_CALL(test_is_constant_in());
         ARIADNE_TEST_CALL(test_is_affine_in());
     }

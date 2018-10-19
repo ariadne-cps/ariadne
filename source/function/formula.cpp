@@ -86,8 +86,14 @@ template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
 template class Formula<ApproximateNumber>;
 template class Formula<ValidatedNumber>;
 template class Formula<EffectiveNumber>;
+template class Formula<ExactNumber>;
 
 template class Formula<FloatDPApproximation>;
 template class Formula<Real>;
+
+template ApproximateNumber compute(OperatorCode op, const ApproximateNumber& x);
+template ValidatedNumber compute(OperatorCode op, const ValidatedNumber& x);
+template EffectiveNumber compute(OperatorCode op, const EffectiveNumber& x);
+template ExactNumber compute(OperatorCode op, const ExactNumber& x);
 
 } // namespace Ariadne

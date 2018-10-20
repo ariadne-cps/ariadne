@@ -241,6 +241,8 @@ template<class Y> Vector<Formula<Y>> substitute(const Vector<Formula<Y>>& av, co
 
 //! \brief Simplify the formula to reduce the number of nodes.
 template<class Y> Formula<Y> simplify(const Formula<Y>& a);
+//! \brief Simplify the formulae to reduce the number of nodes.
+template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a);
 
 //! \brief Tests whether two formulas are identical.
 template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2);
@@ -486,6 +488,15 @@ template<class Y> inline Formula<Y> simplify(const Formula<Y>& a) {
             break;
     }
     return make_formula<Y>(a.op(),sarg1,sarg2);
+}
+
+template<class Y> inline Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a) {
+
+    Vector<Formula<Y>> r(a.size());
+    for(SizeType i=0; i!=a.size(); ++i) {
+        r[i]=simplify(a[i]);
+    }
+    return r;
 }
 
 inline Bool same(EffectiveNumber const& v1, EffectiveNumber const& v2) {

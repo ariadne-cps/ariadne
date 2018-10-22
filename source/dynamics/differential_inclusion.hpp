@@ -64,11 +64,7 @@ using SweeperDP = Sweeper<FloatDP>;
 using ApproximateTimeStepType = PositiveFloatDPApproximation;
 using ExactTimeStepType = PositiveFloatDPValue;
 
-Pair<RealAssignment,RealInterval> centered_variable_transformation(RealVariable const& v, RealInterval const& bounds);
-Pair<RealAssignments,RealVariablesBox> centered_variables_transformation(RealVariablesBox const& inputs);
-Tuple<ValidatedVectorMultivariateFunction,ValidatedVectorMultivariateFunction,Vector<ValidatedVectorMultivariateFunction>,BoxDomainType> expression_to_function(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
-BoxDomainType bounds_to_domain_exact(RealVariablesBox const& var_box);
-BoxDomainType bounds_to_domain_widened(RealVariablesBox const& var_box);
+BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges);
 
 inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
@@ -105,48 +101,6 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
-
-class DifferentialInclusion {
-private:
-    DottedRealAssignments _dynamics;
-    RealVariablesBox _inputs;
-    ValidatedVectorMultivariateFunction _F;
-    ValidatedVectorMultivariateFunction _f_component;
-    Vector<ValidatedVectorMultivariateFunction> _g_components;
-    BoxDomainType _V;
-    Bool _is_input_additive;
-    Bool _has_singular_input;
-public:
-    DifferentialInclusion(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs);
-    DottedRealAssignments const& dynamics() const { return _dynamics; }
-    RealVariablesBox const& inputs() const { return _inputs; }
-    ValidatedVectorMultivariateFunction const& F() const { return _F; }
-    ValidatedVectorMultivariateFunction const& f_component() const { return _f_component; }
-    Vector<ValidatedVectorMultivariateFunction> const& g_components() const { return _g_components; }
-    BoxDomainType const& V() const { return _V; }
-    Bool is_input_additive() const { return _is_input_additive; }
-    Bool has_singular_input() const { return _has_singular_input; }
-    SizeType num_variables() const { return _F.result_size(); }
-    SizeType num_inputs() const { return _V.size(); }
-};
-
-std::ostream& operator << (std::ostream& os, const DifferentialInclusion& di);
-
-class DifferentialInclusionIVP {
-private:
-    DifferentialInclusion _di;
-    RealVariablesBox _initial;
-    BoxDomainType _X0;
-public:
-    DifferentialInclusionIVP(DottedRealAssignments const& dynamics, const RealVariablesBox& inputs, const RealVariablesBox& initial)
-        : _di(DifferentialInclusion(dynamics,inputs)), _initial(initial), _X0(bounds_to_domain_widened(initial)) { }
-    BoxDomainType const& X0() const { return _X0; }
-    DifferentialInclusion const& di() const { return _di; }
-    RealVariablesBox const& initial() const { return _initial; }
-};
-
-std::ostream& operator << (std::ostream& os, const DifferentialInclusionIVP& ivp);
-
 struct C1Norms {
     FloatDPError K;
     Vector<FloatDPError> Kj;
@@ -179,7 +133,7 @@ inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
     return os;
 }
 
-C1Norms compute_norms(DifferentialInclusion const&, PositiveFloatDPValue const&, UpperBoxType const&);
+C1Norms compute_norms(InclusionVectorField const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 enum class InputApproximationKind : std::uint8_t { ZERO, CONSTANT, AFFINE, SINUSOIDAL, PIECEWISE };
 
@@ -259,7 +213,7 @@ class InputApproximatorInterface;
 
 class InputApproximatorFactory {
 public:
-    InputApproximator create(DifferentialInclusion const& di, InputApproximationKind kind, SweeperDP sweeper) const;
+    InputApproximator create(InclusionVectorField const& di, InputApproximationKind kind, SweeperDP sweeper) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -270,10 +224,10 @@ public:
 template<class A, class R>
 class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
-    ApproximationErrorProcessor(DifferentialInclusion const& di) : _di(di), _enable_componentwise_error(false) { }
+    ApproximationErrorProcessor(InclusionVectorField const& ivf) : _ivf(ivf), _enable_componentwise_error(false) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
   private:
-    DifferentialInclusion const& _di;
+    InclusionVectorField const& _ivf;
   protected:
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
@@ -287,10 +241,10 @@ template<class A>
 class ApproximationErrorProcessorFactory {
     typedef ApproximationErrorProcessorInterface<A> Processor;
 public:
-    SharedPointer<Processor> create(DifferentialInclusion const& di) const {
-        if (di.is_input_additive()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(di));
-        else if (di.has_singular_input()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(di));
-        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(di));
+    SharedPointer<Processor> create(InclusionVectorField const& ivf) const {
+        if (ivf.is_input_additive()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(ivf));
+        else if (ivf.number_of_inputs() == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(ivf));
+        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(ivf));
     }
 };
 
@@ -324,11 +278,11 @@ template<class A>
 class InputApproximatorBase : public InputApproximatorInterface {
     friend class InputApproximatorFactory;
   protected:
-    DifferentialInclusion const& _di;
+    InclusionVectorField const& _ivf;
     SweeperDP _sweeper;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
-    InputApproximatorBase(DifferentialInclusion const& di, SweeperDP const& sweeper) :
-        _di(di), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(di)), _kind(A::kind()), _num_params_per_input(num_params_per_input<A>()) { }
+    InputApproximatorBase(InclusionVectorField const& ivf, SweeperDP const& sweeper) :
+        _ivf(ivf), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _kind(A::kind()), _num_params_per_input(num_params_per_input<A>()) { }
   private:
     const InputApproximationKind _kind;
     const Nat _num_params_per_input;
@@ -363,9 +317,9 @@ public:
 
 class InclusionIntegratorInterface {
   public:
-    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) = 0;
+    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T) = 0;
     virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const = 0;
-    virtual ValidatedVectorMultivariateFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
 };
 
 class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
@@ -385,10 +339,10 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
     template<class A, class... AS> InclusionIntegrator& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
 
-    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(DifferentialInclusionIVP const& di_ivp, Real T) override;
+    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T) override;
 
     virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const override;
-    virtual ValidatedVectorMultivariateFunctionModelType reach(DifferentialInclusion const& di, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
+    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
   private:
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t, PositiveFloatDPValue new_t) const;

@@ -246,6 +246,8 @@ template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a);
 
 //! \brief Tests whether two formulas are identical.
 template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2);
+//! \brief Tests whether two vector formulas are identical.
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2);
 
 //! \brief Returns \a true if the formula \a a is syntactically constant in the indices \a is.
 template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is);
@@ -531,6 +533,15 @@ template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2)
         default:
             return false;
     }
+}
+
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2) {
+    if (a1.size() != a2.size()) return false;
+
+    for (auto i : range(a1.size())) {
+        if (not identical(a1[i],a2[i])) return false;
+    }
+    return true;
 }
 
 template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is) {

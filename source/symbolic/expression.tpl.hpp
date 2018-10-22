@@ -130,7 +130,7 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
     switch(e.kind()) {
         case OperatorKind::VARIABLE: return Set<UntypedVariable>{Variable<T>(e.var())};
         case OperatorKind::NULLARY: return Set<UntypedVariable>();
-        case OperatorKind::UNARY: return e.arg().arguments();
+        case OperatorKind::GRADED: case OperatorKind::UNARY: return e.arg().arguments();
         case OperatorKind::BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
         case OperatorKind::COMPARISON: {
             const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_raw_ptr());
@@ -187,7 +187,7 @@ template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
             return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
         default:
             switch(f.kind()) {
-                case OperatorKind::UNARY: return os << f.op() << "(" << f.arg() << ")";
+                case OperatorKind::UNARY: case OperatorKind::GRADED: return os << f.op() << "(" << f.arg() << ")";
                 case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
                 // FIXME: Type-cast comparison arguments correctly
                 case OperatorKind::COMPARISON: return _write_comparison(os,f);
@@ -260,7 +260,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e) {
     switch(e.kind()) {
         case OperatorKind::VARIABLE: return Set<Identifier>{e.var()};
         case OperatorKind::NULLARY: return Set<Identifier>();
-        case OperatorKind::UNARY: return arguments(e.arg());
+        case OperatorKind::UNARY: case OperatorKind::GRADED: return arguments(e.arg());
         case OperatorKind::BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
         case OperatorKind::COMPARISON: {
             const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_raw_ptr());

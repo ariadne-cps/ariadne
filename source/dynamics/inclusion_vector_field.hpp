@@ -26,8 +26,8 @@
  *  \brief Differential inclusion continuous dynamics system class.
  */
 
-#ifndef ARIADNE_VECTOR_FIELD_HPP
-#define ARIADNE_VECTOR_FIELD_HPP
+#ifndef ARIADNE_INCLUSION_VECTOR_FIELD_HPP
+#define ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 
 #include <memory>
 
@@ -75,7 +75,9 @@ class InclusionVectorField
     typedef InclusionVectorFieldEvolver EvolverType;
     typedef Enclosure EnclosureType;
   public:
-    InclusionVectorField(DottedRealAssignments const& dynamics, RealVariableIntervals const& inputs);
+    //! \brief Construct from expressions with dotted \a dynamics and a given range for the \a inputs.
+    InclusionVectorField(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs);
+    //! \brief Construct from a \a function for the dynamics and a given range for the \a inputs.
     InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
     virtual ~InclusionVectorField() = default;
     virtual InclusionVectorField* clone() const { return new InclusionVectorField(*this); }
@@ -85,16 +87,16 @@ class InclusionVectorField
     RealSpace state_space() const;
     Grid grid() const { return Grid(_function.result_size()); }
 
-    //! \brief If the dynamics is affine in the inputs
+    //! \brief If the dynamics is affine in the inputs.
     Bool is_input_affine() const { return _is_input_affine; }
-    //! \brief If the inputs are additive (includes the case of constant multipliers)
+    //! \brief If the inputs are additive (includes the case of constant multipliers).
     Bool is_input_additive() const { return _is_input_additive; }
 
     const EffectiveVectorMultivariateFunction& function() const { return _function; }
     const BoxDomainType& inputs() const { return _inputs; }
-    //! \brief Return the dynamics component obtained by setting the input radius to zero
+    //! \brief Return the dynamics component obtained by setting the input radius to zero.
     const EffectiveVectorMultivariateFunction& noise_independent_component() const { return _noise_independent_component; }
-    //! \brief Return the dynamics components given by the derivatives for each input
+    //! \brief Return the dynamics components given by the derivatives for each input.
     const Vector<EffectiveVectorMultivariateFunction>& input_derivatives() const { return _input_derivatives; }
 
     friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
@@ -114,4 +116,4 @@ class InclusionVectorField
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VECTOR_FIELD_HPP
+#endif // ARIADNE_INCLUSION_VECTOR_FIELD_HPP

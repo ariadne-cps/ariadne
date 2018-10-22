@@ -37,10 +37,12 @@ List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
     return result;
 }
 
-BoxDomainType input_bounds_to_domain(RealVariableIntervals const& inputs) {
+BoxDomainType input_bounds_to_domain(RealVariablesBox const& inputs) {
     List<IntervalDomainType> result;
-    for (auto input : inputs) {
-        result.push_back(cast_exact(IntervalDomainType(input.lower().get_d(),input.upper().get_d())));
+
+    auto vars = inputs.variables();
+    for (auto v : vars) {
+        result.push_back(cast_exact(IntervalDomainType(inputs[v].lower().get_d(),inputs[v].upper().get_d())));
     }
     return Vector<IntervalDomainType>(result);
 }
@@ -137,11 +139,11 @@ Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunc
     _inputs = transformed_inputs;
 }
 
-InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics, RealVariableIntervals const& inputs)
+InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics, RealVariablesBox const& inputs)
 {
     List<RealVariable> dyn_var_list = left_hand_sides(dynamics);
     List<RealVariable> inp_var_list;
-    for (auto input : inputs) { inp_var_list.append(input.variable()); }
+    for (auto var : inputs.variables()) { inp_var_list.append(var); }
 
     Set<UntypedVariable> dyn_arg_set;
     for (auto expr : right_hand_sides(dynamics)) {

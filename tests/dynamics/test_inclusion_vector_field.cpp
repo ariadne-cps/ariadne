@@ -86,6 +86,8 @@ class TestInclusionVectorField {
         InclusionVectorField ivf(dynamics,inputs);
 
         ARIADNE_TEST_PRINT(ivf);
+        ARIADNE_TEST_PRINT(ivf.noise_independent_component());
+        ARIADNE_TEST_PRINT(ivf.input_derivatives());
 
         ARIADNE_TEST_EQUAL(ivf.dimension(),2);
         ARIADNE_TEST_EQUAL(ivf.number_of_inputs(),2);
@@ -101,6 +103,8 @@ class TestInclusionVectorField {
         InclusionVectorField ivf(dynamics,inputs);
 
         ARIADNE_TEST_PRINT(ivf);
+        ARIADNE_TEST_PRINT(ivf.noise_independent_component());
+        ARIADNE_TEST_PRINT(ivf.input_derivatives());
 
         ARIADNE_TEST_EQUAL(ivf.dimension(),2);
         ARIADNE_TEST_EQUAL(ivf.number_of_inputs(),2);
@@ -116,6 +120,8 @@ class TestInclusionVectorField {
         InclusionVectorField ivf(dynamics,inputs);
 
         ARIADNE_TEST_PRINT(ivf);
+        ARIADNE_TEST_PRINT(ivf.noise_independent_component());
+        ARIADNE_TEST_PRINT(ivf.input_derivatives());
 
         ARIADNE_TEST_EQUAL(ivf.dimension(),3);
         ARIADNE_TEST_EQUAL(ivf.number_of_inputs(),1);

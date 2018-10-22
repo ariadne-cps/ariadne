@@ -30,6 +30,7 @@ namespace Ariadne {
 
 typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
 typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
+
 BoxDomainType input_bounds_to_domain(RealVariableIntervals const& inputs) {
     List<IntervalDomainType> result;
     for (auto input : inputs) {
@@ -55,6 +56,33 @@ Pair<CoordinateFormulaPairs,BoxDomainType> centered_coordinates_transformation(N
     return Pair<CoordinateFormulaPairs,BoxDomainType>(assignments,new_bounds);
 }
 
+EffectiveVectorFormulaFunction noise_independent_component(EffectiveVectorFormulaFunction const& function, SizeType num_inputs) {
+
+    CoordinateFormulaPairs substitutions;
+    for (auto i : range(function.result_size(),function.result_size()+num_inputs)) {
+        substitutions.append({i,EffectiveFormula::zero()});
+    }
+
+    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(function._formulae,substitutions)));
+}
+
+Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorFormulaFunction const& function, SizeType num_inputs) {
+
+    Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
+
+    SizeType n = function.result_size();
+
+    for (auto j : range(num_inputs)) {
+        Vector<EffectiveFormula> derivative_formulae(n);
+        for (auto i : range(n)) {
+            derivative_formulae[i] = simplify(derivative(function._formulae[i],n+j));
+        }
+        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
+    }
+
+    return result;
+}
+
 
 Void InclusionVectorField::_acquire_and_assign_properties() {
 
@@ -63,6 +91,9 @@ Void InclusionVectorField::_acquire_and_assign_properties() {
         input_indices.append(i);
 
     const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(_function.reference());
+
+    _noise_independent_component = Ariadne::noise_independent_component(ff,this->number_of_inputs());
+    _input_derivatives = Ariadne::input_derivatives(ff,this->number_of_inputs());
 
     _is_input_affine = is_affine_in(ff,input_indices);
     _is_input_additive = is_additive_in(ff,input_indices);

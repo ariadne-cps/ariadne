@@ -61,7 +61,7 @@ class FunctionArgumentsMismatchException : public std::runtime_error {
 class Enclosure;
 class InclusionVectorFieldEvolver;
 
-//! \brief A vector field in Euclidean space.
+//! \brief A vector field in Euclidean space, with noisy inputs identifying a family of trajectories.
 class InclusionVectorField
 {
   public:
@@ -85,11 +85,17 @@ class InclusionVectorField
     RealSpace state_space() const;
     Grid grid() const { return Grid(_function.result_size()); }
 
+    //! \brief If the dynamics is affine in the inputs
     Bool is_input_affine() const { return _is_input_affine; }
+    //! \brief If the inputs are additive (includes the case of constant multipliers)
     Bool is_input_additive() const { return _is_input_additive; }
 
     const EffectiveVectorMultivariateFunction& function() const { return _function; }
     const BoxDomainType& inputs() const { return _inputs; }
+    //! \brief Return the dynamics component obtained by setting the input radius to zero
+    const EffectiveVectorMultivariateFunction& noise_independent_component() const { return _noise_independent_component; }
+    //! \brief Return the dynamics components given by the derivatives for each input
+    const Vector<EffectiveVectorMultivariateFunction>& input_derivatives() const { return _input_derivatives; }
 
     friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
         return os << "InclusionVectorField( " << vf.function() << ", " << vf.inputs() << " )"; }
@@ -102,6 +108,8 @@ class InclusionVectorField
     List<Identifier> _variable_names;
     Bool _is_input_affine;
     Bool _is_input_additive;
+    EffectiveVectorMultivariateFunction _noise_independent_component;
+    Vector<EffectiveVectorMultivariateFunction> _input_derivatives;
 };
 
 } // namespace Ariadne

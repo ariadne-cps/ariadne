@@ -1,7 +1,7 @@
 /***************************************************************************
- *            differential_inclusion.cpp
+ *            inclusion_vector_field.cpp
  *
- *  Copyright  2008-18  Luca Geretti, Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-18  Luca Geretti
  *
  ****************************************************************************/
 
@@ -31,6 +31,12 @@ namespace Ariadne {
 typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
 typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
 
+List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
+    List<Nat> result;
+    for (Nat i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
+    return result;
+}
+
 BoxDomainType input_bounds_to_domain(RealVariableIntervals const& inputs) {
     List<IntervalDomainType> result;
     for (auto input : inputs) {
@@ -54,6 +60,21 @@ Pair<CoordinateFormulaPairs,BoxDomainType> centered_coordinates_transformation(N
         new_bounds[i] = tr.second;
     }
     return Pair<CoordinateFormulaPairs,BoxDomainType>(assignments,new_bounds);
+}
+
+Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transformed_formulae, BoxDomainType& transformed_inputs) {
+
+    SizeType n = transformed_formulae.size();
+    SizeType m = transformed_inputs.size();
+    for (SizeType j : range(m)) {
+        for (SizeType i : range(n)) {
+            EffectiveFormula der = simplify(derivative(transformed_formulae[i],n+j));
+            if (not identical(der,EffectiveFormula::zero()) and not identical(der,EffectiveFormula::constant(1))) {
+                transformed_inputs[j] = cast_exact(transformed_inputs[j] * der.val());
+                transformed_formulae[i] = simplify(substitute(transformed_formulae[i],n+j,EffectiveFormula::zero())+EffectiveFormula::coordinate(n+j));
+            }
+        }
+    }
 }
 
 EffectiveVectorFormulaFunction noise_independent_component(EffectiveVectorFormulaFunction const& function, SizeType num_inputs) {
@@ -86,9 +107,7 @@ Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorFor
 
 Void InclusionVectorField::_acquire_and_assign_properties() {
 
-    List<Nat> input_indices;
-    for (Nat i : range(this->dimension(),this->dimension()+this->number_of_inputs()))
-        input_indices.append(i);
+    List<Nat> input_indices = Ariadne::input_indices(this->dimension(),this->number_of_inputs());
 
     const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(_function.reference());
 
@@ -101,12 +120,21 @@ Void InclusionVectorField::_acquire_and_assign_properties() {
 
 Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
 
-    auto transformation = centered_coordinates_transformation(function.result_size(),inputs);
-
     const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(function.reference());
 
-    _function = EffectiveVectorFormulaFunction(function.argument_size(),substitute(ff._formulae,transformation.first));
-    _inputs = transformation.second;
+    auto transformation = centered_coordinates_transformation(function.result_size(),inputs);
+    CoordinateFormulaPairs centering_substitution = transformation.first;
+    BoxDomainType transformed_inputs = transformation.second;
+
+    Vector<EffectiveFormula> transformed_formulae = substitute(ff._formulae,centering_substitution);
+
+    List<Nat> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
+    if (is_additive_in(transformed_formulae,input_indices)) {
+        incorporate_additive_inputs_coefficients(transformed_formulae,transformed_inputs);
+    }
+
+    _function = EffectiveVectorFormulaFunction(function.argument_size(),transformed_formulae);
+    _inputs = transformed_inputs;
 }
 
 InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics, RealVariableIntervals const& inputs)

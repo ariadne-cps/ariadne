@@ -78,6 +78,38 @@ class TestInclusionVectorField {
         ARIADNE_TEST_THROWS(InclusionVectorField(dynamics,inputs),FunctionArgumentsMismatchException);
     }
 
+    Void test_dynamics_transformation() {
+        RealVariable x("x"), y("y"), u("u");
+        DottedRealAssignments dynamics={dot(x)=-y,dot(y)=x+2*u};
+        RealVariableIntervals inputs={1<=u<=2};
+
+        InclusionVectorField ivf(dynamics,inputs);
+
+        ARIADNE_TEST_PRINT(ivf);
+
+        const EffectiveVectorFormulaFunction& noise_independent_component = dynamic_cast<const EffectiveVectorFormulaFunction&>(ivf.noise_independent_component().reference());
+        ARIADNE_TEST_PRINT(noise_independent_component);
+
+        EffectiveFormula zero = EffectiveFormula::zero();
+        EffectiveFormula one = EffectiveFormula::constant(1_dec);
+        EffectiveFormula two = EffectiveFormula::constant(2_dec);
+        EffectiveFormula one_point_five = EffectiveFormula::constant(1.5_dec);
+        EffectiveFormula xf = EffectiveFormula::coordinate(0);
+        EffectiveFormula yf = EffectiveFormula::coordinate(1);
+
+        ARIADNE_TEST_ASSERT(identical(noise_independent_component._formulae,{-yf,xf+two*one_point_five}));
+
+        const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(ivf.input_derivatives()[0].reference());
+        ARIADNE_TEST_PRINT(input_derivatives);
+
+        ARIADNE_TEST_ASSERT(identical(input_derivatives._formulae,{zero,one}));
+
+        ARIADNE_TEST_EQUAL(ivf.dimension(),2);
+        ARIADNE_TEST_EQUAL(ivf.number_of_inputs(),1);
+        ARIADNE_TEST_ASSERT(ivf.is_input_affine());
+        ARIADNE_TEST_ASSERT(ivf.is_input_additive());
+    }
+
     Void test_nonaffine_field() {
         RealVariable x("x"), y("y"), u1("u1"), u2("u2");
         DottedRealAssignments dynamics={dot(x)=u1*u2*x*(1-y),dot(y)=u2*y*(x-1)};
@@ -134,6 +166,7 @@ class TestInclusionVectorField {
         ARIADNE_TEST_CALL(test_missing_input());
         ARIADNE_TEST_CALL(test_unused_input());
         ARIADNE_TEST_CALL(test_mismatching_coordinates());
+        ARIADNE_TEST_CALL(test_dynamics_transformation());
         ARIADNE_TEST_CALL(test_nonaffine_field());
         ARIADNE_TEST_CALL(test_nonadditive_field());
         ARIADNE_TEST_CALL(test_additive_field());

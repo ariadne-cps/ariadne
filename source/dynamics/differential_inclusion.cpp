@@ -637,7 +637,13 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
         picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.result_size())+x0f;
     }
 
-    return picardPhi;
+    auto domx = project(domain,range(n));
+    auto domt = Interval<StepSizeType>(static_cast<StepSizeType>(cast_exact(domain[n].lower())),static_cast<StepSizeType>(cast_exact(domain[n].upper())));
+    auto doma = project(domain,range(n+1,dyn.argument_size()));
+
+    auto seriesPhi=series_flow_step(dyn,domx,domt,doma,B,DegreeType(6u),swp);
+
+    return seriesPhi;
 }
 
 template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {

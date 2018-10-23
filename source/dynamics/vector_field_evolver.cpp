@@ -74,7 +74,7 @@ VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
 VectorField::VectorField(EffectiveVectorMultivariateFunction const& function) {
     List<Identifier> variable_names;
     for (auto i : range(0,function.result_size()))
-        variable_names.append(Identifier("x"+i));
+        variable_names.append(Identifier("x"+std::to_string(i)));
 
     _variable_names = variable_names;
     _function = function;

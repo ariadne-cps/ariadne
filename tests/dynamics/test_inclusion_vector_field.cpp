@@ -22,16 +22,18 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dynamics/inclusion_vector_field.hpp"
 
 #include "geometry/box.hpp"
+#include "algebra/vector.hpp"
+#include "algebra/algebra.hpp"
+#include "symbolic/expression_set.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
 #include "function/symbolic_function.hpp"
-#include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
-#include "output/graphics.hpp"
-#include "symbolic/expression_set.hpp"
+
+#include "dynamics/inclusion_vector_field.hpp"
+
 
 #include "../test.hpp"
 
@@ -68,14 +70,14 @@ class TestInclusionVectorField {
     }
 
     Void test_mismatching_coordinates() {
-        EffectiveFormula x = EffectiveFormula::coordinate(0);
-        EffectiveFormula y = EffectiveFormula::coordinate(1);
+        RealVariable x("x"), y("y");
+        DottedRealAssignments dynamics={dot(x)=-y,dot(y)=x};
 
-        EffectiveVectorMultivariateFunction dynamics = EffectiveVectorFormulaFunction(2u,List<EffectiveFormula>({x,y}));
+        EffectiveVectorMultivariateFunction function = make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics)));
 
         BoxDomainType inputs(1,{1,2});
 
-        ARIADNE_TEST_THROWS(InclusionVectorField(dynamics,inputs),FunctionArgumentsMismatchException);
+        ARIADNE_TEST_THROWS(InclusionVectorField(function,inputs),FunctionArgumentsMismatchException);
     }
 
     Void test_dynamics_transformation() {
@@ -92,12 +94,12 @@ class TestInclusionVectorField {
 
         EffectiveFormula zero = EffectiveFormula::zero();
         EffectiveFormula one = EffectiveFormula::constant(1_dec);
-        EffectiveFormula two = EffectiveFormula::constant(2_dec);
+        EffectiveFormula twice = EffectiveFormula::constant(2_dec);
         EffectiveFormula one_point_five = EffectiveFormula::constant(1.5_dec);
         EffectiveFormula xf = EffectiveFormula::coordinate(0);
         EffectiveFormula yf = EffectiveFormula::coordinate(1);
 
-        ARIADNE_TEST_ASSERT(identical(noise_independent_component._formulae,{-yf,xf+two*one_point_five}));
+        ARIADNE_TEST_ASSERT(identical(noise_independent_component._formulae,{-yf,xf+twice*one_point_five}));
 
         const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(ivf.input_derivatives()[0].reference());
         ARIADNE_TEST_PRINT(input_derivatives);

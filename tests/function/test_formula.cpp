@@ -70,6 +70,21 @@ class TestFormula
         ARIADNE_TEST_ASSERT(identical(pow(x,2),pow(x,2)));
     }
 
+    Void test_substitute() {
+        EffectiveFormula f(x+cos(y));
+        EffectiveFormula s(pow(x,2));
+        EffectiveFormula substituted = substitute(f,1,s);
+        ARIADNE_TEST_PRINT(substituted);
+        ARIADNE_TEST_ASSERT(identical(substituted,x+cos(pow(x,2))));
+
+        Vector<EffectiveFormula> f_v({sqrt(pow(x,2)+pow(y,2)), atan(y/x)});
+        List<Pair<Nat,EffectiveFormula>> s_v({{0,x+2},{1,y-1}});
+        Vector<EffectiveFormula> substituted_v = substitute(f_v,s_v);
+        ARIADNE_TEST_PRINT(substituted_v);
+        ARIADNE_TEST_ASSERT(identical(substituted_v[0],sqrt(pow(x+2,2)+pow(y-1,2))));
+        ARIADNE_TEST_ASSERT(identical(substituted_v[1],atan((y-1)/(x+2))));
+    }
+
     Void test_simplify() {
         EffectiveFormula u(EffectiveFormula::coordinate(2));
         EffectiveFormula simplification = simplify(derivative(-u*x*y+2*x,x.ind()));
@@ -122,6 +137,7 @@ class TestFormula
     Void test() {
         ARIADNE_TEST_CALL(test_construct());
         ARIADNE_TEST_CALL(test_identical());
+        ARIADNE_TEST_CALL(test_substitute());
         ARIADNE_TEST_CALL(test_simplify());
         ARIADNE_TEST_CALL(test_is_constant_in());
         ARIADNE_TEST_CALL(test_is_affine_in());

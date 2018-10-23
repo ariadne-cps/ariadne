@@ -48,7 +48,7 @@ class VectorField
     //! \brief The type used to represent time.
     typedef Real TimeType;
     //! \brief The type used to represent real numbers.
-    typedef Real RealType ;
+    typedef Real RealType;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
     //! \brief The generic type used to compute the system evolution.
@@ -56,13 +56,13 @@ class VectorField
     typedef Enclosure EnclosureType;
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
-    VectorField(EffectiveVectorMultivariateFunction const& function) : _function(function) { }
+    VectorField(EffectiveVectorMultivariateFunction const& function);
     virtual ~VectorField() = default;
     virtual VectorField* clone() const { return new VectorField(*this); }
     SizeType dimension() const { return _function.result_size(); }
     RealSpace state_space() const;
     const EffectiveVectorMultivariateFunction& function() const { return _function; }
-    Grid grid() const { return Grid(_function.argument_size()); }
+    Grid grid() const { return Grid(_function.result_size()); }
     friend OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
         return os << "VectorField( " << vf.function() << " )"; }
   private:

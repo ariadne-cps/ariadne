@@ -232,11 +232,22 @@ template<class Y> struct ScalarFormulaNode : public UnaryFormulaNode<Y> {
         : UnaryFormulaNode<Y>(oper,a), cnst(c) { }
 };
 
+//! \brief Substitute all occurrences of index \a i with constant value \a c.
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Y& c);
+//! \brief Substitute all occurrences of indices with formulae \a as into \a a.
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const List<Pair<Nat,Formula<Y>>>& as);
+//! \brief Substitute all occurrences of indices with formulae \a as into \a av.
+template<class Y> Vector<Formula<Y>> substitute(const Vector<Formula<Y>>& av, const List<Pair<Nat,Formula<Y>>>& as);
+
 //! \brief Simplify the formula to reduce the number of nodes.
 template<class Y> Formula<Y> simplify(const Formula<Y>& a);
+//! \brief Simplify the formulae to reduce the number of nodes.
+template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a);
 
 //! \brief Tests whether two formulas are identical.
 template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2);
+//! \brief Tests whether two vector formulas are identical.
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2);
 
 //! \brief Returns \a true if the formula \a a is syntactically constant in the indices \a is.
 template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is);
@@ -381,6 +392,49 @@ template<class X> Formula<X> formula(const Expansion<MultiIndex,X>& e)
     return horner_evaluate(e,identity);
 }
 
+namespace {
+template<class X, class Y> inline const Formula<Y>& _substitute_coordinate(const Nat& ie, const Nat& is, const Formula<Y>& a, const Formula<X>& s) {
+    ARIADNE_ASSERT_MSG(ie!=is,"Cannot substitute formula "<<s<<" for coordinate "<<ie<<"\n");
+    return a; }
+template<class Y> inline const Formula<Y>& _substitute_coordinate(const Nat& ie, const Nat& is, const Formula<Y>& e, const Formula<Y>& s) {
+    return ie==is ? s : e; }
+} // namespace
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Formula<Y>& is) {
+    switch(a.kind()) {
+        case OperatorKind::BINARY: return make_formula<Y>(a.op(),substitute(a.arg1(),i,is),substitute(a.arg2(),i,is));
+        case OperatorKind::UNARY: return make_formula<Y>(a.op(),substitute(a.arg(),i,is));
+        case OperatorKind::GRADED: return make_formula<Y>(a.op(),substitute(a.arg(),i,is),a.num());
+        case OperatorKind::NULLARY: return make_formula<Y>(a.val());
+        case OperatorKind::COORDINATE: return _substitute_coordinate(a.ind(),i,a,is);
+        default: ARIADNE_FAIL_MSG("Cannot substitute "<<is<<" for index "<<i<<" in an unknown formula "<<a<<"\n");
+    }
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Y& c) {
+    return substitute(a,i,Formula<Y>::constant(c));
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Pair<Nat,Formula<Y>>& as) {
+    return substitute(a,as.first,as.second);
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const List<Pair<Nat,Formula<Y>>>& as) {
+    Formula<Y> r=a;
+    for(SizeType i=0; i!=as.size(); ++i) {
+        r=substitute(r,as[i]);
+    }
+    return r;
+}
+
+template<class Y> Vector<Formula<Y>> substitute(const Vector<Formula<Y>>& av, const List<Pair<Nat,Formula<Y>>>& as) {
+    Vector<Formula<Y>> r(av.size());
+    for(SizeType i=0; i!=av.size(); ++i) {
+        r[i]=substitute(av[i],as);
+    }
+    return r;
+}
+
 template<class Y> inline Formula<Y> simplify(const Formula<Y>& a) {
 
     if(a.kind() == OperatorKind::UNARY) {
@@ -438,6 +492,15 @@ template<class Y> inline Formula<Y> simplify(const Formula<Y>& a) {
     return make_formula<Y>(a.op(),sarg1,sarg2);
 }
 
+template<class Y> inline Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a) {
+
+    Vector<Formula<Y>> r(a.size());
+    for(SizeType i=0; i!=a.size(); ++i) {
+        r[i]=simplify(a[i]);
+    }
+    return r;
+}
+
 inline Bool same(EffectiveNumber const& v1, EffectiveNumber const& v2) {
     // FIXME: Use symbolic approach
     DoublePrecision pr;
@@ -470,6 +533,15 @@ template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2)
         default:
             return false;
     }
+}
+
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2) {
+    if (a1.size() != a2.size()) return false;
+
+    for (auto i : range(a1.size())) {
+        if (not identical(a1[i],a2[i])) return false;
+    }
+    return true;
 }
 
 template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is) {

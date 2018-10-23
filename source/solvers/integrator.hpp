@@ -393,6 +393,17 @@ class AffineIntegrator
                     const Vector<ValidatedNumericType>& dom) const;
 };
 
+template<class P> class Sweeper;
+
+ValidatedVectorMultivariateFunctionModelDP
+series_flow_step(const ValidatedVectorMultivariateFunction& f,
+                 const ExactBoxType& domx,
+                 const Interval<StepSizeType>& domt,
+                 const ExactBoxType& doma,
+                 const UpperBoxType& bndbx,
+                 DegreeType deg,
+                 Sweeper<FloatDP> swp);
+
 
 } // namespace Ariadne
 

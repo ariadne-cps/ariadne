@@ -269,7 +269,7 @@ InputApproximatorFactory::create(InclusionVectorField const& ivf, InputApproxima
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSize step_size_)
+InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
@@ -297,12 +297,12 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
     auto n=ivf.dimension();
     auto m=ivf.number_of_inputs();
     auto freq=this->_number_of_steps_between_simplifications;
-    DoublePrecision pr;
 
-    PositiveFloatDPValue hsug(this->_step_size);
+    StepSizeType hsug(this->_step_size);
 
     ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(X0,this->_sweeper);
-    auto t=PositiveFloatDPValue(0.0);
+
+    TimeStepType t;
 
     Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
     Map<InputApproximationKind,Nat> delays;
@@ -325,7 +325,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
     Nat step = 0u;
-    while (possibly(t<FloatDPBounds(tmax,pr))) {
+    while (possibly(t<tmax)) {
 
         if (verbosity == 1)
             std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
@@ -343,10 +343,6 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
             }
         }
 
-        if(possibly(t+hsug>FloatDPBounds(tmax,pr))) {  //FIXME: Check types for timing;
-            hsug=cast_positive(cast_exact((tmax-t).upper()));
-        }
-
         ARIADNE_LOG(4,"n. of parameters="<<evolve_function.argument_size()<<"\n");
 
         auto D = cast_exact_box(evolve_function.range());
@@ -355,10 +351,10 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
 
         BoxDomainType dom = product(D,V);
 
-        std::tie(h,B)=this->flow_bounds(F,dom,static_cast<StepSizeType>(cast_exact(hsug)));
+        std::tie(h,B)=this->flow_bounds(F,dom,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
-        PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
+        TimeStepType new_t=t+h;
 
         ValidatedVectorMultivariateFunctionModelDP reach_function;
         ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
@@ -371,7 +367,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
             this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximators_to_use.at(i)));
             ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
-            auto current_reach=reach(ivf,D,evolve_function,B,t,PositiveFloatDPValue(h,DoublePrecision()));
+            auto current_reach=reach(ivf,D,evolve_function,B,t,h);
             ARIADNE_LOG(5,"new_t: "<< new_t << ", upper bound on time range: " << current_reach.domain()[n].upper() <<"\n");
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
             ARIADNE_LOG(5,"evolve calculated\n");
@@ -462,13 +458,13 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
 }
 
 ValidatedVectorMultivariateFunctionModelType
-InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, PositiveFloatDPValue t, PositiveFloatDPValue h) const {
+InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const {
 
     auto n = ivf.dimension();
     auto m = ivf.number_of_inputs();
     auto F = ivf.function();
     auto V = ivf.inputs();
-    PositiveFloatDPValue new_t=cast_positive(cast_exact((t+h).lower()));
+    TimeStepType new_t=t+h;
 
     ValidatedVectorMultivariateFunctionModelType result;
 
@@ -481,7 +477,7 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(F,w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DHV,B);
+        auto phi = this->compute_flow_function(Fw,DHV,Interval<TimeStepType>(t,t+h),B);
         ARIADNE_LOG(6,"phi:"<<phi<<"\n");
         phi = add_errors(phi,e);
         result=build_reach_function(evolve_function, phi, t, new_t);
@@ -495,8 +491,8 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
         ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
         auto Fw_hlf = build_Fw(F,w_hlf);
         ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
-        auto phi_hlf = this->compute_flow_function(Fw_hlf,DHV_hlf,B);
-        PositiveFloatDPValue intermediate_t=cast_positive(cast_exact((t+hlf(h)).lower()));
+        TimeStepType intermediate_t = t+hlf(h);
+        auto phi_hlf = this->compute_flow_function(Fw_hlf,DHV_hlf,Interval<TimeStepType>(t,intermediate_t),B);
         auto intermediate_reach=build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
         auto intermediate_evolve=evaluate_evolve_function(intermediate_reach,intermediate_t);
 
@@ -507,7 +503,7 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(F, w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DHV,B);
+        auto phi = this->compute_flow_function(Fw,DHV,Interval<TimeStepType>(intermediate_t,new_t),B);
         phi = add_errors(phi,e);
         result = build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
     }
@@ -529,8 +525,8 @@ Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhal
 }
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t,
-        PositiveFloatDPValue new_t) const {
+        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
+        TimeStepType new_t) const {
 
     // Evolve function is e(x,a,b) at s; Flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a,b),t-s,b))
@@ -560,8 +556,8 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf
 }
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, PositiveFloatDPValue t,
-        PositiveFloatDPValue new_t) const {
+        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
+        TimeStepType new_t) const {
 
     // Evolve function is e(x,a) at s; flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a),t-s,b))
@@ -590,7 +586,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
     return compose(Phi,join(ef,hf,bf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, PositiveFloatDPValue t) const {
+ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const {
     return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
@@ -632,7 +628,7 @@ Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVector
 
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::
-compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, UpperBoxType const& B) const {
+compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const {
     auto n=dyn.result_size();
     auto swp=this->_sweeper;
 
@@ -648,7 +644,6 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     }
 
     auto domx = project(domain,range(n));
-    auto domt = Interval<StepSizeType>(static_cast<StepSizeType>(cast_exact(domain[n].lower())),static_cast<StepSizeType>(cast_exact(domain[n].upper())));
     auto doma = project(domain,range(n+1,dyn.argument_size()));
 
     auto seriesPhi=series_flow_step(dyn,domx,domt,doma,B,DegreeType(6u),swp);
@@ -656,9 +651,9 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     return seriesPhi;
 }
 
-template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue t, PositiveFloatDPValue h) const {
+template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, StepSizeType h) const {
     auto result = D;
-    result = product(result,IntervalDomainType(cast_exact(t),cast_exact((t+h).lower())));
+    result = product(result,IntervalDomainType(t,t+h));
     for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;

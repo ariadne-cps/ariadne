@@ -372,8 +372,9 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
             ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
             auto current_reach=reach(ivf,D,evolve_function,B,t,PositiveFloatDPValue(h,DoublePrecision()));
+            ARIADNE_LOG(5,"new_t: "<< new_t << ", upper bound on time range: " << current_reach.domain()[n].upper() <<"\n");
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
-
+            ARIADNE_LOG(5,"evolve calculated\n");
             if (i == 0) {
                 best_reach_function = current_reach;
                 best_evolve_function = current_evolve;
@@ -474,19 +475,21 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
     if (this->_approximator->kind() != InputApproximationKind::PIECEWISE) {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DHV = this->_approximator->build_flow_domain(D,V,h);
+        auto DHV = this->_approximator->build_flow_domain(D,V,t,h);
         ARIADNE_LOG(6,"DHV:"<<DHV<<"\n");
         auto w = this->_approximator->build_w_functions(DHV, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(F,w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
         auto phi = this->compute_flow_function(Fw,DHV,B);
+        ARIADNE_LOG(6,"phi:"<<phi<<"\n");
         phi = add_errors(phi,e);
         result=build_reach_function(evolve_function, phi, t, new_t);
+        ARIADNE_LOG(6,"reach:"<<result<<"\n");
     } else {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DHV_hlf = this->_approximator->build_flow_domain(D,V,hlf(h));
+        auto DHV_hlf = this->_approximator->build_flow_domain(D,V,t,hlf(h));
         ARIADNE_LOG(6,"DHV_hlf:"<<DHV_hlf<<"\n");
         auto w_hlf = this->_approximator->build_w_functions(DHV_hlf, n, m);
         ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
@@ -499,7 +502,7 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
 
         auto D_int = cast_exact_box(intermediate_evolve.range());
 
-        auto DHV=this->_approximator->build_flow_domain(D_int,V,hlf(h));
+        auto DHV=this->_approximator->build_flow_domain(D_int,V,intermediate_t,hlf(h));
         auto w = build_secondhalf_piecewise_w_functions(DHV, n, m);
         ARIADNE_LOG(6,"w:"<<w<<"\n");
         auto Fw = build_Fw(F, w);
@@ -653,9 +656,9 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     return seriesPhi;
 }
 
-template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const {
+template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue t, PositiveFloatDPValue h) const {
     auto result = D;
-    result = product(result,IntervalDomainType(-h,+h));
+    result = product(result,IntervalDomainType(cast_exact(t),cast_exact((t+h).lower())));
     for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;

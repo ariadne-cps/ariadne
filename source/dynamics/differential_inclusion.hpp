@@ -252,7 +252,7 @@ class InputApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const = 0;
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const = 0;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue t, PositiveFloatDPValue h) const = 0;
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
 
@@ -268,7 +268,7 @@ class InputApproximator : public InputApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const override { return _impl->kind(); }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue t, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,t,h); }
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
     virtual ~InputApproximator() = default;
 };
@@ -289,7 +289,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
+    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue t, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
     virtual ~InputApproximatorBase() = default;
 };
@@ -358,9 +358,6 @@ template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproxi
     this->set(attributes...);
     _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
 }
-
-BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h, Nat num_params);
-
 
 } // namespace Ariadne;
 

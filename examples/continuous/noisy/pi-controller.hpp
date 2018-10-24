@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> PI()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,StepSizeType> PI()
 {
     RealVariable v("v"), x("x"), u("u");
     RealExpression dynv = -0.101_dec*(v-20)+1.3203_dec*(x-0.1616_dec)-0.01_dec*pow(v,2);
@@ -38,7 +38,7 @@ inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real
     RealVariablesBox initial={{5<=v<=10},{-e<=x<=+e}};
 
     Real evolution_time=5;
-    double step=1.0/32;
+    StepSizeType step = 0.03125_dy;
 
     return make_tuple("PI",dynamics,inputs,initial,evolution_time,step);
 }

@@ -368,9 +368,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
             ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
             auto current_reach=reach(ivf,D,evolve_function,B,t,h);
-            ARIADNE_LOG(5,"new_t: "<< new_t << ", upper bound on time range: " << current_reach.domain()[n].upper() <<"\n");
             auto current_evolve=evaluate_evolve_function(current_reach,new_t);
-            ARIADNE_LOG(5,"evolve calculated\n");
+
             if (i == 0) {
                 best_reach_function = current_reach;
                 best_evolve_function = current_evolve;
@@ -478,10 +477,8 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
         auto Fw = build_Fw(F,w);
         ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
         auto phi = this->compute_flow_function(Fw,DHV,Interval<TimeStepType>(t,t+h),B);
-        ARIADNE_LOG(6,"phi:"<<phi<<"\n");
         phi = add_errors(phi,e);
         result=build_reach_function(evolve_function, phi, t, new_t);
-        ARIADNE_LOG(6,"reach:"<<result<<"\n");
     } else {
         auto e=this->_approximator->compute_errors(h,B);
         ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
@@ -648,7 +645,10 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
 
     auto seriesPhi=series_flow_step(dyn,domx,domt,doma,B,DegreeType(6u),swp);
 
-    return seriesPhi;
+    ValidatedVectorMultivariateFunctionModelDP seriesPhi_untimed = ValidatedVectorMultivariateTaylorFunctionModelDP(n,seriesPhi.domain(),swp);
+    for (auto i : range(n)) { seriesPhi_untimed[i] = seriesPhi[i]; }
+
+    return seriesPhi_untimed;
 }
 
 template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, StepSizeType h) const {

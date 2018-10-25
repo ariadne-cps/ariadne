@@ -1,5 +1,6 @@
 add_library(ariadne-utility OBJECT
     utility.cpp
+    regular_expression.cpp
 )
 
 if(COVERAGE)

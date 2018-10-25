@@ -54,9 +54,8 @@ using InputStream = std::istream;
 template<class InputIterator>
 OutputStream&
 write_sequence(OutputStream& os, InputIterator first, InputIterator last,
-               char opening='[', char closing=']', char separator=',')
+               char const* separator)
 {
-    os << opening;
     while(first!=last) {
         os << (*first);
         ++first;
@@ -64,8 +63,25 @@ write_sequence(OutputStream& os, InputIterator first, InputIterator last,
             os << separator;
         }
     }
+    return os;
+}
+
+template<class InputIterator>
+OutputStream&
+write_sequence(OutputStream& os, InputIterator first, InputIterator last,
+               char const* opening, char const* closing, char const* separator)
+{
+    os << opening;
+    write_sequence(os,first,last,separator);
     os << closing;
     return os;
+}
+
+template<class InputIterator>
+OutputStream&
+write_sequence(OutputStream& os, InputIterator first, InputIterator last)
+{
+    return write_sequence(os,first,last,"[","]",",");
 }
 
 

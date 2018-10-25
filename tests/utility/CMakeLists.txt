@@ -1,21 +1,17 @@
 set(UNIT_TESTS
-    test_discrete_automaton
-    test_continuous_evolution
-    test_inclusion_vector_field
-    test_differential_inclusion
-    test_discrete_evolution
-    test_reachability_analyser
-)
+    test_regular_expression)
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
     if(COVERAGE)
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
     endif()    
-    target_link_libraries(${TEST} ariadne)
+    target_link_libraries(${TEST} ariadne-core)    
     add_test(${TEST} ${TEST})    
-    set_property(TEST ${TEST} PROPERTY LABELS "dynamics;primary")
+    set_property(TEST ${TEST} PROPERTY LABELS "primary;core;kernel")      
 endforeach()
 
+add_dependencies(tests-core ${UNIT_TESTS})
+add_dependencies(tests-kernel ${UNIT_TESTS})
 add_dependencies(tests-cpp ${UNIT_TESTS})
 add_dependencies(tests ${UNIT_TESTS})

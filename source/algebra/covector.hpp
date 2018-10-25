@@ -69,9 +69,9 @@ template<class X> class Covector
   public:
     typedef X ScalarType;
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
-        Covector(InitializerList<XX> const& lst) : _ary(lst) { }
+        Covector(InitializerList<XX> const& lst) : _ary(Array<XX>(lst)) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
-        explicit Covector(InitializerList<XX> const& lst) : _ary(lst._ary) { }
+        explicit Covector(InitializerList<XX> const& lst) : _ary(Array<XX>(lst)) { }
     template<class XX, EnableIf<IsConvertible<XX,X>> =dummy>
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
@@ -91,7 +91,7 @@ template<class X> class Covector
     X& at(SizeType j) { ARIADNE_PRECONDITION_MSG(j<this->size(),*this<<"["<<j<<"]");  return _ary[j]; }
     X zero_element() const { ARIADNE_DEBUG_ASSERT(not _ary.empty()); return create_zero(_ary[0]); }
     Array<X> const& array() const { return _ary; }
-    
+
     template<class CVE, EnableIf<IsConvertible<typename CVE::ScalarType,X>> =dummy>
     Covector(CovectorExpression<CVE> const& cve) : _ary(cve().size(),cve().zero_element()) {
         for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=cve()[i]; } }

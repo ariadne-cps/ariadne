@@ -46,6 +46,15 @@ namespace Ariadne {
 
 /************  Ints ********************************************************/
 
+class Nat16 {
+    uint16_t _m;
+  public:
+    Nat16() : _m(0u) { }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Nat16(M m) : _m(m) { assert(_m==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Nat16(N n) : _m(n) { assert(n>=0); assert((int64_t)_m==n); }
+    uint16_t get_ui() const { return _m; }
+};
+
 class Nat32 {
     uint32_t _m;
   public:
@@ -65,6 +74,19 @@ class Nat64 {
     uint64_t get_ui() const { return _m; }
 };
 
+class Int16 {
+    int16_t _n;
+  public:
+    Int16() : _n(0) { }
+    template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int16(M m) : _n(static_cast<int16_t>(m)) { assert(_n>=0); assert((uint16_t)_n==m); }
+    template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int16(N n) : _n(n) { assert(_n==n); }
+    int16_t get_si() const { return _n; }
+    friend Bool operator==(Int16 n1, Int16 n2) { return n1._n == n2._n; }
+    friend Bool operator<=(Int16 n1, Int16 n2) { return n1._n <= n2._n; }
+    friend Bool operator< (Int16 n1, Int16 n2) { return n1._n <  n2._n; }
+    friend OutputStream& operator<<(OutputStream& os, Int16 n) { return os << n._n; }
+};
+
 class Int32 {
     int32_t _n;
   public:
@@ -72,6 +94,10 @@ class Int32 {
     template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>> = dummy> Int32(M m) : _n(static_cast<int32_t>(m)) { assert(_n>=0); assert((uint32_t)_n==m); }
     template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
     int32_t get_si() const { return _n; }
+    friend Bool operator==(Int32 n1, Int32 n2) { return n1._n == n2._n; }
+    friend Bool operator<=(Int32 n1, Int32 n2) { return n1._n <= n2._n; }
+    friend Bool operator< (Int32 n1, Int32 n2) { return n1._n <  n2._n; }
+    friend OutputStream& operator<<(OutputStream& os, Int32 n) { return os << n._n; }
 };
 
 class Int64 {

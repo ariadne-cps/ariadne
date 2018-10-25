@@ -76,6 +76,7 @@ template<class T> class List : public std::vector<T> {
     using std::vector<T>::vector;
     List() : std::vector<T>() { }
     List(std::vector<T> const& lst) : std::vector<T>(lst) { }
+    List(std::vector<T>&& lst) : std::vector<T>(lst) { }
     List(T const& t) : std::vector<T>(1u,t) { }
     template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
         List(const std::vector<TT>& l) : std::vector<T>(l.begin(),l.end()) { }
@@ -149,6 +150,8 @@ template<class T> class Set : public std::set<T> {
     template<class TT, EnableIf<IsConstructible<T,TT>> =dummy, DisableIf<IsConvertible<TT,T>> =dummy>
         explicit Set(const std::set<TT>& s) { for(auto x : s) { this->insert(T(x)); } }
     explicit operator List<T> () const { return List<T>(this->begin(),this->end()); }
+    T const& front() const { return *this->begin(); }
+    T const& back() const { return *(--this->end()); }
     bool contains(const T& t) const {
         return this->find(t)!=this->end(); }
     bool subset(const std::set<T>& s) const {
@@ -208,6 +211,9 @@ template<class T> inline std::set<T>& restrict(std::set<T>& r, const std::set<T>
     while(iter!=r.end()) { if(!contains(s,*iter)) { r.erase(iter++); } else { ++iter; } }
     return r; }
 
+template<class T, class F> Set<ResultOf<F(T)>> apply(F const& f, Set<T> const& s) {
+    Set<ResultOf<F(T)>> r; for(auto t : s) { r.insert(f(t)); } return r; }
+
 template<class T> OutputStream& operator<<(OutputStream& os, const std::set<T>& v) {
     bool first=true;
     for(auto x : v) {
@@ -225,8 +231,14 @@ template<class K, class T> class Map : public std::map<K,T> {
     typedef typename std::map<K,T>::const_iterator ConstIterator;
     using std::map<K,T>::map;
     using std::map<K,T>::insert;
+    template<class KK, class TT, EnableIf<IsConvertible<KK,K>> =dummy, EnableIf<IsConvertible<TT,T>> =dummy>
+        Map(const std::map<KK,TT>& m) : std::map<K,T>(m.begin(),m.end()) { }
     T& operator[](K k) { return this->std::map<K,T>::operator[](k); }
     const T& operator[](K k) const { auto iter=this->find(k); assert(iter!=this->end()); return iter->second; }
+    Pair<const K,T>& front() { return *this->begin(); }
+    Pair<K,T> const& front() const { return *this->begin(); }
+    Pair<const K,T>& back() { return *(--this->end()); }
+    Pair<K,T> const& back() const { return *(--this->end()); }
     const T& get(const K& k) const { auto i=this->find(k);
         assert(i!=this->end()); return i->second; }
     bool has_key(const K& k) const {

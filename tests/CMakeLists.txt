@@ -3,6 +3,7 @@ add_custom_target(tests-cpp)
 add_custom_target(tests-core)
 add_custom_target(tests-kernel)
 
+add_subdirectory(utility)
 add_subdirectory(numeric)
 add_subdirectory(algebra)
 add_subdirectory(function)

@@ -41,7 +41,7 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         for (auto appro: approximations) {
             List<InputApproximationKind> singleapproximation = {appro};
@@ -50,7 +50,7 @@ class TestInclusionIntegrator {
         }
     }
 
-    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
@@ -58,7 +58,7 @@ class TestInclusionIntegrator {
     }
 
     Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
-                  const RealVariablesBox& initial, Real evolution_time, double step) const {
+                  const RealVariablesBox& initial, Real evolution_time, StepSizeType step) const {
 
         InclusionVectorField ivf(dynamics,inputs);
 
@@ -95,7 +95,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
     Real evolution_time=1/25_q;
-    double step=1.0/50;
+    StepSizeType step=0.015625_dy;
 
     this->run_test("higgins-selkov",dynamics,inputs,initial,evolution_time,step);
 }
@@ -109,8 +109,8 @@ void TestInclusionIntegrator::test_jet_engine() const {
     Real e1=5/100_q; Real e2=7/100_q;
     RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
 
-    Real evolution_time=1/50_q;
-    double step=1.0/100;
+    Real evolution_time=1/25_q;
+    StepSizeType step=0.015625_dy;
 
     this->run_test("jet-engine",dynamics,inputs,initial,evolution_time,step);
 }
@@ -124,7 +124,7 @@ void TestInclusionIntegrator::test_rossler() const {
     RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
 
     Real evolution_time=1/128_q;
-    double step=1.0/256;
+    StepSizeType step=0.00390625_dy;
 
     this->run_test("rossler",dynamics,inputs,initial,evolution_time,step);
 }

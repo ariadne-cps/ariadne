@@ -150,10 +150,18 @@ class IntegratorBase
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
+
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const = 0;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const = 0;
 
   public:
@@ -199,6 +207,13 @@ class TaylorPicardIntegrator
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -264,6 +279,13 @@ class TaylorSeriesIntegrator
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+              
     using IntegratorBase::flow_step;
 
   private:
@@ -293,6 +315,13 @@ class AffineIntegrator
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;

@@ -148,6 +148,18 @@ class IntegratorInterface
          const Real& final_time) const = 0;
 
 
+    //! \brief Compute the flow of \f$\dt{x}=f(x,t,a)\f$ starting in \f$D\f$ over time interval \f$T\f$ over parameter domain \f$A\f$, 
+    //! assuming the flow remains in \f$B\f$.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a differential_equation, \f$D\f$ is the \a state_domain, \f$T\f$ is the \a time_domain,
+    //! \f$A\f$ is the \a parameter_domain and \f$B\f$ is the \a maximum_time_step.
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const = 0;
+
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, const IntegratorInterface& integrator) {
         integrator.write(os); return os;

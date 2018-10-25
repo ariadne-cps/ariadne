@@ -253,6 +253,13 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 
 }
 
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
 Void TaylorPicardIntegrator::write(OutputStream& os) const {
     os << "TaylorPicardIntegrator"
        << "(maximum_error = " << this->maximum_error()
@@ -681,6 +688,14 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     return tphi;
 }
 
+ValidatedVectorMultivariateFunctionModelDP
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ThresholdSweeper<FloatDP> swp(DP(),this->step_sweep_threshold());
+    DegreeType deg = this->maximum_temporal_order();
+    return Ariadne::series_flow_step(f,D,T,A,B, deg,swp);
+}
+
 Pair<StepSizeType,UpperBoxType>
 TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& hmax) const
 {
@@ -794,6 +809,12 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
         res[i]=res_model;
     }
     return res;
+}
+
+ValidatedVectorMultivariateFunctionModelDP
+AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 Void AffineIntegrator::write(OutputStream& os) const {

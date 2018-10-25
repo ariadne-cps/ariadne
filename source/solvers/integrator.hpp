@@ -112,6 +112,21 @@ class IntegratorBase
                 const ExactBoxType& state_domain,
                 const StepSizeType& maximum_time_step) const;
 
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
+                const ExactBoxType& state_domain,
+                const ExactBoxType& parameter_domain,
+                const StepSizeType& maximum_time_step) const;
+
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& differential_equation,
+                const ExactBoxType& state_domain,
+                const StepSizeType& starting_time,
+                const ExactBoxType& parameter_domain,
+                const StepSizeType& maximum_time_step) const;
+
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
@@ -138,7 +153,7 @@ class IntegratorBase
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              const StepSizeType& suggested_time_step,
+              const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const = 0;
 
   public:

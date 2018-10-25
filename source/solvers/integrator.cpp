@@ -106,8 +106,18 @@ IntegratorBase::bounder() const
 }
 
 Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& domx, const StepSizeType& hsug) const {
-    return EulerBounder().compute(vf,domx,hsug);
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,hsug);
+}
+
+Pair<StepSizeType,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,A,hsug);
+}
+
+Pair<StepSizeType,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,t,A,hsug);
 }
 
 

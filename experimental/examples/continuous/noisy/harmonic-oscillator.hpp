@@ -27,7 +27,7 @@
 using namespace Ariadne;
 
 
-inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,StepSizeType> HO()
+inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> HO()
 {
     RealVariable x("x"), y("y"), u("u");
     DottedRealAssignments dynamics={dot(x)=y+u,dot(y)=-x};
@@ -37,7 +37,7 @@ inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real
     RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
 
     Real evolution_time=3.141592_dec;
-    StepSizeType step(1,6u);
+    double step = 1.0/64;
 
     return make_tuple("HO",dynamics,inputs,initial,evolution_time,step);
 }

@@ -27,11 +27,11 @@
 
 namespace Ariadne {
 
-typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,StepSizeType> SystemType;
+typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
-void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, TimeType evolution_time, StepSizeType step);
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, TimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
 
 
@@ -53,14 +53,14 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     typedef typename ValidatedVectorMultivariateFunctionModelType::NumericType NumericType;
     typedef typename NumericType::PrecisionType PrecisionType;
 
     PrecisionType prec;
 
-    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
+    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
     integrator.verbosity = verbosity;
 
     StopWatch sw;
@@ -104,7 +104,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximationKind> singleapproximation = {appro};
@@ -114,7 +114,7 @@ void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDom
 }
 
 void run_noisy_system(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
-              const RealVariablesBox& initial, Real evolution_time, StepSizeType step) {
+              const RealVariablesBox& initial, Real evolution_time, double step) {
 
     InclusionVectorField ivf(dynamics,inputs);
 

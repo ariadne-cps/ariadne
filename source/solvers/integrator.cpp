@@ -578,7 +578,7 @@ make_taylor_function_model(ExactBoxType domain, Vector<Differential<Bounds<FLT>>
 
 
     // Make the models
-    ValidatedVectorMultivariateTaylorFunctionModel<FLT> tf(n,domain,swp);
+    ValidatedVectorMultivariateTaylorFunctionModel<FLT> tf(m,domain,swp);
 
     for(SizeType i=0; i!=m; ++i) {
         Differential<FloatBounds<PR>> const& dc = scaled_centre_derivatives[i];

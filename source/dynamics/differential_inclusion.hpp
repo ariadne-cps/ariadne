@@ -253,7 +253,7 @@ class InputApproximatorInterface {
     virtual InputApproximationKind kind() const = 0;
     virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, StepSizeType h) const = 0;
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
+    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const = 0;
 };
 
 
@@ -269,7 +269,7 @@ class InputApproximator : public InputApproximatorInterface {
     virtual InputApproximationKind kind() const override { return _impl->kind(); }
     virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, StepSizeType h) const override { return _impl->build_flow_domain(D,V,t,h); }
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
+    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const override { return _impl->build_w_functions(DVh,n,m,h); }
     virtual ~InputApproximator() = default;
 };
 
@@ -290,7 +290,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
     virtual InputApproximationKind kind() const override { return _kind; }
     virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const override { return _processor->process(PositiveFloatDPValue(h,DoublePrecision()),B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, StepSizeType h) const override;
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
+    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const override;
     virtual ~InputApproximatorBase() = default;
 };
 
@@ -348,7 +348,7 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
     ValidatedVectorMultivariateFunctionModelDP evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const;
     ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
-    Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const;
+    Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const;
   private:
     Bool must_recondition(Nat step) const;
 };

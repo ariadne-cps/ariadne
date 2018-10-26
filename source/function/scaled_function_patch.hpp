@@ -1248,6 +1248,7 @@ template<class M> class ScaledFunctionPatchFactory
     ScaledFunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;
     VectorScaledFunctionPatch<M> create_zeros(SizeType result_size, const DomainType& domain) const;
     VectorScaledFunctionPatch<M> create_constants(const DomainType& domain, Vector<Number<P>> const& values) const;
+    VectorScaledFunctionPatch<M> create_projection(const DomainType& domain, Range indices) const;
     VectorScaledFunctionPatch<M> create_identity(const DomainType& domain) const;
     ScalarScaledFunctionPatch<M> create_identity(const IntervalDomainType& domain) const { return this->create_coordinate(BoxDomainType(1u,domain),0u); };
     CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->create(number); }

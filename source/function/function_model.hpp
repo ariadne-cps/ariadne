@@ -83,10 +83,12 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
         return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_constant(dom,c)); }
     ScalarFunctionModel<P,VD,PR,PRE> create_constant(VectorDomainType const& dom, CanonicalNumericType<P,PR,PRE> const& c) const {
         return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_constant(dom,c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create_coordinate(VectorDomainType const& dom, SizeType j) const {
-        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_coordinate(dom,j)); }
-    VectorFunctionModel<P,VD,PR,PRE> create_zeros(SizeType n, VectorDomainType const& dom) const {
-        return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_zeros(n,dom)); }
+    ScalarFunctionModel<P,VD,PR,PRE> create_coordinate(VectorDomainType const& dom, SizeType index) const {
+        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_coordinate(dom,index)); }
+    VectorFunctionModel<P,VD,PR,PRE> create_zeros(SizeType rsize, VectorDomainType const& dom) const {
+        return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_zeros(rsize,dom)); }
+    VectorFunctionModel<P,VD,PR,PRE> create_projection(VectorDomainType const& dom, Range indices) const {
+        return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_projection(dom,indices)); }
     VectorFunctionModel<P,VD,PR,PRE> create_identity(VectorDomainType const& dom) const {
         return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create_identity(dom)); }
 

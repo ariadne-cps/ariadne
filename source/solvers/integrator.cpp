@@ -235,7 +235,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf,
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
-        Bool last_step=(phi.error().raw()<this->maximum_error());
+        Bool last_step=(phi.error().raw()<this->step_maximum_error());
         ValidatedVectorMultivariateFunctionModelDP fphi=compose(vf,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(Nat i=0; i!=nx; ++i) {
@@ -265,7 +265,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+T.dimension()+A.dimension());
     ARIADNE_PRECONDITION(B.dimension()==D.dimension());
     return this->_flow_step(f,D,IntervalDomainType(T),A,B);
-};
+}
 
 ValidatedVectorMultivariateFunctionModelDP
 TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
@@ -300,7 +300,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
-        Bool last_step=(phi.error().raw()<this->maximum_error());
+        Bool last_step=(phi.error().raw()<this->step_maximum_error());
         ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,join(std::move(phi),ta));
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here, 
@@ -312,7 +312,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     }
 
     if(phi.error().raw()>this->step_maximum_error()) {
-        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error()<<"\n");
     }
 
     ValidatedVectorMultivariateFunctionModelDP res=restrict(phi,dom);

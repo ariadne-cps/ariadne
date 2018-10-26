@@ -37,6 +37,9 @@
 #include "../utility/declarations.hpp"
 #include "../numeric/builtin.hpp"
 
+#include "range.hpp"
+#include "slice.hpp"
+
 namespace Ariadne {
 
 /************ Vector *********************************************************/
@@ -82,7 +85,6 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
-class Range;
 template<class X> class VectorRange;
 
 #ifdef SIMPLE_VECTOR_OPERATORS
@@ -280,43 +282,6 @@ class Vector
 };
 
 template<class X> struct IsVector<Vector<X>> : True { };
-
-class Range {
-    SizeType _start; SizeType _stop;
-  public:
-    SizeType operator[](SizeType i) const { return _start+i; }
-    Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
-    SizeType size() const { return this->_stop-this->_start; }
-    SizeType start() const { return this->_start; }
-    SizeType stride() const { return 1u; }
-    SizeType stop() const { return this->_stop; }
-};
-inline Range range(SizeType stop) { return Range(0u,stop); }
-inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
-
-struct RangeIterator {
-    explicit inline RangeIterator(SizeType i) : _i(i) { }
-    inline RangeIterator& operator++() { ++this->_i; return *this; }
-    inline SizeType operator*() const { return this->_i; }
-    friend inline bool operator!=(RangeIterator iter1, RangeIterator iter2) { return iter1._i != iter2._i; }
-  private:
-    SizeType _i;
-};
-inline RangeIterator begin(Range rng) { return RangeIterator(rng.start()); }
-inline RangeIterator end(Range rng) { return RangeIterator(rng.stop()); }
-
-class Slice {
-    SizeType _size; SizeType _start; SizeType _stride;
-  public:
-    Slice(SizeType size, SizeType start, SizeType stride) : _size(size), _start(start), _stride(stride) { }
-    SizeType operator[](SizeType i) { return _start+i*_stride; }
-    SizeType size() const { return this->_size; }
-    SizeType start() const { return this->_start; }
-    SizeType stride() const { return this->_stride; }
-    SizeType stop() const { return this->_start+this->_size*this->_stride; }
-};
-inline Slice slice(SizeType size_, SizeType start, SizeType stride) { return Slice(size_,start,stride); }
-
 
 template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >

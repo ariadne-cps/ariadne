@@ -211,8 +211,13 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
 }
 
 ValidatedVectorMultivariateFunctionModelDP
-TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
+TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
 {
+    ARIADNE_PRECONDITION(vf.result_size()==dx.dimension());
+    ARIADNE_PRECONDITION(vf.argument_size()==dx.dimension());
+    ARIADNE_PRECONDITION(bx.dimension()==dx.dimension());
+    return this->_flow_step(vf,dx,IntervalDomainType(0,h),BoxDomainType(0u),bx);
+
     ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction vf, ExactBoxType dx, StepSizeType h, UpperBoxType bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const Nat nx=dx.size();
@@ -231,7 +236,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool last_step=(phi.error().raw()<this->maximum_error());
-        ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,phi);
+        ValidatedVectorMultivariateFunctionModelDP fphi=compose(vf,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(Nat i=0; i!=nx; ++i) {
             phi[i]=antiderivative(fphi[i],nx)+phi0[i];
@@ -241,7 +246,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     }
 
     if(phi.error().raw()>this->step_maximum_error()) {
-        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<vf<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     ValidatedVectorMultivariateFunctionModelDP res=this->function_factory().create_zeros(nx,dom);
@@ -256,8 +261,69 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 ValidatedVectorMultivariateFunctionModelDP
 TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_PRECONDITION(f.result_size()==D.dimension());
+    ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+T.dimension()+A.dimension());
+    ARIADNE_PRECONDITION(B.dimension()==D.dimension());
+    return this->_flow_step(f,D,IntervalDomainType(T),A,B);
+};
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType D, ExactIntervalType T, ExactBoxType A, UpperBoxType B)\n");
+    ARIADNE_LOG(3," f="<<f);
+    ARIADNE_LOG(3," D="<<D<<" T="<<T<<", A="<<A<<", B="<<B<<"\n");
+    
+    const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
+    
+    const Nat nx=D.size();
+    const Nat na=A.size();
+    
+    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na); 
+    
+    StepSizeType t=static_cast<StepSizeType>(T.lower());
+    StepSizeType h=static_cast<StepSizeType>(T.upper())-t;
+    
+    // Time interval centred on initial time, which will make the antiderivative more efficient
+    ExactIntervalType wT(t-h,t+h);
+    ARIADNE_ASSERT(t==med(wT));
+    
+    ExactBoxType dom=join(D,T,A);
+    ExactBoxType wdom=join(D,wT,A);
+    UpperBoxType const& bx=B;
+    ARIADNE_LOG(7,"dom="<<dom<<", wdom="<<wdom<<"\n");
+
+    ValidatedVectorMultivariateFunctionModelDP phi0=this->function_factory().create_projection(wdom,range(0,nx));
+    ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
+    ValidatedVectorMultivariateFunctionModelDP phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
+    ValidatedVectorMultivariateFunctionModelDP ta=this->function_factory().create_projection(wdom,tarng);
+    
+    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
+        Bool last_step=(phi.error().raw()<this->maximum_error());
+        ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,join(std::move(phi),ta));
+        ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
+        // NOTE: In principle safer to use antiderivative(fphi,nx,t) here, 
+        // but since t is the midpoint of wdom, the (standard) antiderivative works
+        // TODO: Change based antiderivative to be efficient when t is midpoint of domain
+        phi=antiderivative(fphi,nx)+phi0;
+        ARIADNE_LOG(4,"phi="<<phi<<"\n");
+        if(last_step) { break; }
+    }
+
+    if(phi.error().raw()>this->step_maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+    }
+
+    ValidatedVectorMultivariateFunctionModelDP res=restrict(phi,dom);
+    
+    //for(Nat i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
+    //res.sweep();
+    ARIADNE_LOG(4,"res="<<res<<"\n");
+    return res;
+
 }
+
 
 
 Void TaylorPicardIntegrator::write(OutputStream& os) const {

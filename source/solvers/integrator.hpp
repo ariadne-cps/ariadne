@@ -217,6 +217,14 @@ class TaylorPicardIntegrator
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;
+
+  private:
+    ValidatedVectorMultivariateFunctionModelDP
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
 };
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.

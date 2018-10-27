@@ -279,8 +279,6 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximat
     assert(approximations.size()>0);
 }
 
-static const SizeType NUMBER_OF_PICARD_ITERATES=6;
-
 Bool InclusionIntegrator::must_recondition(Nat step) const {
     return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
 }
@@ -622,28 +620,17 @@ Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVector
 
 ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::
 compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const {
-    auto n=dyn.result_size();
-    auto swp=this->_sweeper;
 
-    auto x0f=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(domain,range(n),swp);
-    auto af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(domain,range(n,dyn.argument_size()),swp);
+    auto domx = project(domain,range(dyn.result_size()));
+    auto doma = project(domain,range(dyn.result_size()+1,dyn.argument_size()));
 
-    auto picardPhi=ValidatedVectorMultivariateTaylorFunctionModelDP(n,domain,swp);
-    picardPhi=picardPhi+cast_singleton(B);
-
-    for(Nat i=0; i<NUMBER_OF_PICARD_ITERATES; ++i) {
-        auto dyn_of_phi = compose(dyn,join(picardPhi,af));
-        picardPhi=antiderivative(dyn_of_phi,dyn_of_phi.result_size())+x0f;
-    }
-
-    auto domx = project(domain,range(n));
-    auto doma = project(domain,range(n+1,dyn.argument_size()));
-
-    TaylorSeriesIntegrator integrator(maximum_error=1e-6,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-8, step_sweep_threshold=1e-8,maximum_temporal_order=8);
-    auto seriesPhi=integrator.flow_step(dyn,domx,domt,doma,B);
-    //auto seriesPhi=series_flow_step(dyn,domx,domt,doma,B,DegreeType(6u),swp);
-
-    return seriesPhi;
+    TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-5, step_sweep_threshold=1e-8,maximum_temporal_order=8);
+    auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
+/*
+    TaylorSeriesIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-5, step_sweep_threshold=1e-8,maximum_temporal_order=6);
+    auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
+*/
+    return Phi;
 }
 
 template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, StepSizeType h) const {

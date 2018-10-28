@@ -39,6 +39,11 @@
 
 namespace Ariadne {
 
+class BoundingNotFoundException : public std::runtime_error {
+  public:
+    BoundingNotFoundException(const String& str) : std::runtime_error(str) { }
+};
+
 //! \ingroup SolverModule EvaluationModule
 //! \brief Interface for classes calculating the bounds of a flow.
 class BounderInterface {

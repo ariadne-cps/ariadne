@@ -57,6 +57,7 @@ class TestBounder
         ARIADNE_TEST_CALL(test_DA_mismatch());
         ARIADNE_TEST_CALL(test_suggested_step_acceptable());
         ARIADNE_TEST_CALL(test_suggested_step_not_acceptable());
+        ARIADNE_TEST_CALL(test_unbounded());
         ARIADNE_TEST_CALL(test_time_invariant_with_parameter());
         ARIADNE_TEST_CALL(test_time_variant_without_parameter());
         ARIADNE_TEST_CALL(test_time_variant_with_parameter());
@@ -112,6 +113,14 @@ class TestBounder
         ARIADNE_TEST_PRINT(B);
         ARIADNE_TEST_COMPARE(h,<,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
+    }
+
+    Void test_unbounded() {
+        EffectiveVectorMultivariateFunction f={pow(x,3),-pow(y,5)};
+        ExactBoxType dom={ExactIntervalType(-20.0,20.0),ExactIntervalType(-20.0,20.0)};
+        StepSizeType hsug(10.0);
+
+        ARIADNE_TEST_THROWS(bounder_ptr->compute(f,dom,hsug),BoundingNotFoundException);
     }
 
     Void test_time_invariant_with_parameter() {

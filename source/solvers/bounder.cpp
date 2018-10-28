@@ -55,16 +55,17 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);
+    const StepSizeType MINIMUM_STEP_SIZE(1,20u);
     const Nat EXPANSION_STEPS=4;
     const Nat REFINEMENT_STEPS=4;
 
     StepSizeType h=hsug;
 
-    FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(join(D,IntervalDomainType(t,t+h),A))))).upper();
+    FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(join(D,to_time_bounds(t,t+h),A))))).upper();
     StepSizeType hlip = static_cast<StepSizeType>(cast_exact(LIPSCHITZ_TOLERANCE/lipschitz));
     h=min(hlip,h);
 
-    IntervalDomainType T(t,t+h);
+    IntervalDomainType T = to_time_bounds(t,t+h);
     
     UpperBoxType B=D;
     Bool success=false;
@@ -85,7 +86,10 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
         }
         if(!success) {
             h=hlf(h);
-            T=IntervalDomainType(t,t+h);
+            if (h < MINIMUM_STEP_SIZE)
+                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << "allowed, bounding could not be found.");
+
+            T = to_time_bounds(t,t+h);
         }
     }
 

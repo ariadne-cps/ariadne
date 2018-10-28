@@ -53,13 +53,35 @@ class TestBounder
 
     Int test() {
         ARIADNE_TEST_CALL(test_print_name());
+        ARIADNE_TEST_CALL(test_D_mismatch());
+        ARIADNE_TEST_CALL(test_DA_mismatch());
         ARIADNE_TEST_CALL(test_suggested_step_acceptable());
         ARIADNE_TEST_CALL(test_suggested_step_not_acceptable());
+        ARIADNE_TEST_CALL(test_time_invariant_with_parameter());
+        ARIADNE_TEST_CALL(test_time_variant_without_parameter());
+        ARIADNE_TEST_CALL(test_time_variant_with_parameter());
         return 0;
     }
 
     Void test_print_name() {
         ARIADNE_TEST_PRINT(*bounder_ptr);
+    }
+
+    Void test_D_mismatch() {
+        EffectiveVectorMultivariateFunction f={x,-y};
+        ExactBoxType D={ExactIntervalType(-0.25,0.25)};
+        StepSizeType hsug(0.25);
+
+        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,hsug));
+    }
+
+    Void test_DA_mismatch() {
+        EffectiveVectorMultivariateFunction f={x,-y};
+        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
+        StepSizeType hsug(0.25);
+
+        ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,A,hsug));
     }
 
     Void test_suggested_step_acceptable() {
@@ -75,7 +97,6 @@ class TestBounder
         ARIADNE_TEST_PRINT(B);
         ARIADNE_TEST_EQUAL(h,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
-
     }
 
     Void test_suggested_step_not_acceptable() {
@@ -90,6 +111,66 @@ class TestBounder
         ARIADNE_TEST_PRINT(h);
         ARIADNE_TEST_PRINT(B);
         ARIADNE_TEST_COMPARE(h,<,hsug);
+        ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
+    }
+
+    Void test_time_invariant_with_parameter() {
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction a0=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
+        EffectiveVectorMultivariateFunction f={x0+a0,-x1};
+        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
+        StepSizeType td(1.0);
+        StepSizeType hsug(1.0);
+
+        StepSizeType h;
+        UpperBoxType B;
+
+        std::tie(h,B) = bounder_ptr->compute(f,D,A,hsug);
+
+        ARIADNE_TEST_COMPARE(h,<=,hsug);
+        ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
+    }
+
+    Void test_time_variant_without_parameter() {
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
+        EffectiveVectorMultivariateFunction f={x0,-x1+2*t};
+        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        StepSizeType td(1.0);
+        StepSizeType hsug(1.0);
+
+        StepSizeType h;
+        UpperBoxType B;
+
+        std::tie(h,B) = bounder_ptr->compute(f,D,td,hsug);
+
+        ARIADNE_TEST_COMPARE(h,<=,hsug);
+        ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
+    }
+
+    Void test_time_variant_with_parameter() {
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(4,0);
+        EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(4,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(4,2);
+        EffectiveScalarMultivariateFunction a0=EffectiveScalarMultivariateFunction::coordinate(4,3);
+
+        EffectiveVectorMultivariateFunction f={x0+a0,-x1+2*t};
+        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
+        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
+        StepSizeType td(1.0);
+        StepSizeType hsug(1.0);
+
+        StepSizeType h;
+        UpperBoxType B;
+
+        std::tie(h,B) = bounder_ptr->compute(f,D,td,A,hsug);
+
+        ARIADNE_TEST_COMPARE(h,<=,hsug);
         ARIADNE_TEST_ASSERT(definitely(is_bounded(B)));
     }
 };

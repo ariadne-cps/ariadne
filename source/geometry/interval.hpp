@@ -334,6 +334,11 @@ template<class F> Interval<UpperBound<F>> narrow(Interval<LowerBound<F>> const& 
 Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl);
 Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
 
+inline Interval<FloatDPValue> to_time_bounds(Dyadic const& tl, Dyadic const& tu) {
+    return Interval<FloatDPValue>(FloatDPLowerBound(tl,DoublePrecision()).raw(),FloatDPLowerBound(tu,DoublePrecision()).raw()); }
+inline Interval<FloatDPValue> to_time_bounds(Interval<Dyadic> const& ivl) {
+    return to_time_bounds(ivl.lower(),ivl.upper()); }
+
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 

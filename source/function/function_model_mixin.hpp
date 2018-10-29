@@ -188,12 +188,14 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
         return heap_move(this->upcast().create_zero(domain)); };
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_constant(const VectorDomainType& domain, const Number<P>& value) const override {
         return heap_move(this->upcast().create_constant(domain,value)); };
-    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_coordinate(const VectorDomainType& domain, SizeType j) const override {
-        return heap_move(this->upcast().create_coordinate(domain,j)); };
-    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_zeros(SizeType n, const VectorDomainType& domain) const override {
-        return heap_move(this->upcast().create_zeros(n,domain)); };
+    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_coordinate(const VectorDomainType& domain, SizeType index) const override {
+        return heap_move(this->upcast().create_coordinate(domain,index)); };
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_zeros(SizeType rsize, const VectorDomainType& domain) const override {
+        return heap_move(this->upcast().create_zeros(rsize,domain)); };
     virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_constants(const VectorDomainType& domain, const Vector<Number<P>>& values) const override {
         return heap_move(this->upcast().create_constants(domain,values)); };
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_projection(const VectorDomainType& domain, Range indices) const override {
+        return heap_move(this->upcast().create_projection(domain,indices)); };
     virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_identity(const VectorDomainType& domain) const override {
         return heap_move(this->upcast().create_identity(domain)); };
 };

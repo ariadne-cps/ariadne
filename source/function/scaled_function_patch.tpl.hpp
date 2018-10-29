@@ -1022,16 +1022,19 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_c
     auto concrete_value=this->create(value);
     return ScaledFunctionPatch<M>::constant(domain,concrete_value,this->_properties);
 }
-template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_coordinate(const DomainType& domain, SizeType k) const {
-    return ScaledFunctionPatch<M>::coordinate(domain,k,this->_properties);
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_coordinate(const DomainType& domain, SizeType index) const {
+    return ScaledFunctionPatch<M>::coordinate(domain,index,this->_properties);
 }
-template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_zeros(SizeType n, const DomainType& domain) const {
-    return VectorScaledFunctionPatch<M>(n,domain,this->_properties);
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_zeros(SizeType rsize, const DomainType& domain) const {
+    return VectorScaledFunctionPatch<M>(rsize,domain,this->_properties);
 }
 template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constants(const DomainType& domain, Vector<Number<P>> const& values) const {
     Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values.size(),this->_properties.precision());
     for(SizeType i=0; i!=values.size(); ++i) { concrete_values[i]=values[i]; }
     return VectorScaledFunctionPatch<M>::constant(domain,concrete_values,this->_properties);
+}
+template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_projection(const DomainType& domain, Range indices) const {
+    return VectorScaledFunctionPatch<M>::projection(domain,indices,this->_properties);
 }
 template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_identity(const DomainType& domain) const {
     return VectorScaledFunctionPatch<M>::identity(domain,this->_properties);

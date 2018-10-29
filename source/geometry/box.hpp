@@ -420,6 +420,12 @@ template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltyp
     return v;
 }
 
+template<class I, class PR> inline auto cast_singleton(Box<I> const& bx, PR pr) -> Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> {
+    Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> v(bx.dimension(),pr);
+    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i],pr); }
+    return v;
+}
+
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
     Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 

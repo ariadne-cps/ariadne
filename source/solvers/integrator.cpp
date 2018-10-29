@@ -41,6 +41,7 @@
 #include "../function/function.hpp"
 #include "../function/function_model.hpp"
 #include "../function/formula.hpp"
+#include "../function/scaling.hpp"
 #include "../function/taylor_function.hpp"
 #include "../function/taylor_model.hpp"
 
@@ -105,8 +106,18 @@ IntegratorBase::bounder() const
 }
 
 Pair<StepSizeType,UpperBoxType>
-IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& domx, const StepSizeType& hsug) const {
-    return EulerBounder().compute(vf,domx,hsug);
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,hsug);
+}
+
+Pair<StepSizeType,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const ExactBoxType& A, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,A,hsug);
+}
+
+Pair<StepSizeType,UpperBoxType>
+IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType const& t, const ExactBoxType& A, const StepSizeType& hsug) const {
+    return this->_bounder_ptr->compute(vf,D,t,A,hsug);
 }
 
 
@@ -200,8 +211,13 @@ IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const E
 }
 
 ValidatedVectorMultivariateFunctionModelDP
-TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
+TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
 {
+    ARIADNE_PRECONDITION(vf.result_size()==dx.dimension());
+    ARIADNE_PRECONDITION(vf.argument_size()==dx.dimension());
+    ARIADNE_PRECONDITION(bx.dimension()==dx.dimension());
+    return this->_flow_step(vf,dx,IntervalDomainType(0,h),BoxDomainType(0u),bx);
+
     ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction vf, ExactBoxType dx, StepSizeType h, UpperBoxType bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const Nat nx=dx.size();
@@ -219,8 +235,8 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
-        Bool last_step=(phi.error().raw()<this->maximum_error());
-        ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,phi);
+        Bool last_step=(phi.error().raw()<this->step_maximum_error());
+        ValidatedVectorMultivariateFunctionModelDP fphi=compose(vf,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(Nat i=0; i!=nx; ++i) {
             phi[i]=antiderivative(fphi[i],nx)+phi0[i];
@@ -230,7 +246,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     }
 
     if(phi.error().raw()>this->step_maximum_error()) {
-        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<vf<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     ValidatedVectorMultivariateFunctionModelDP res=this->function_factory().create_zeros(nx,dom);
@@ -241,6 +257,74 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     return res;
 
 }
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_PRECONDITION(f.result_size()==D.dimension());
+    ARIADNE_PRECONDITION(f.argument_size()==D.dimension()+T.dimension()+A.dimension());
+    ARIADNE_PRECONDITION(B.dimension()==D.dimension());
+    return this->_flow_step(f,D,IntervalDomainType(T),A,B);
+}
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType D, ExactIntervalType T, ExactBoxType A, UpperBoxType B)\n");
+    ARIADNE_LOG(3," f="<<f);
+    ARIADNE_LOG(3," D="<<D<<" T="<<T<<", A="<<A<<", B="<<B<<"\n");
+    
+    const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
+    
+    const Nat nx=D.size();
+    const Nat na=A.size();
+    
+    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na); 
+    
+    StepSizeType t=static_cast<StepSizeType>(T.lower());
+    StepSizeType h=static_cast<StepSizeType>(T.upper())-t;
+    
+    // Time interval centred on initial time, which will make the antiderivative more efficient
+    ExactIntervalType wT(t-h,t+h);
+    ARIADNE_ASSERT(t==med(wT));
+    
+    ExactBoxType dom=join(D,T,A);
+    ExactBoxType wdom=join(D,wT,A);
+    UpperBoxType const& bx=B;
+    ARIADNE_LOG(7,"dom="<<dom<<", wdom="<<wdom<<"\n");
+
+    ValidatedVectorMultivariateFunctionModelDP phi0=this->function_factory().create_projection(wdom,range(0,nx));
+    ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
+    ValidatedVectorMultivariateFunctionModelDP phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
+    ValidatedVectorMultivariateFunctionModelDP ta=this->function_factory().create_projection(wdom,tarng);
+    
+    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
+        Bool last_step=(phi.error().raw()<this->step_maximum_error());
+        ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,join(std::move(phi),ta));
+        ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
+        // NOTE: In principle safer to use antiderivative(fphi,nx,t) here, 
+        // but since t is the midpoint of wdom, the (standard) antiderivative works
+        // TODO: Change based antiderivative to be efficient when t is midpoint of domain
+        phi=antiderivative(fphi,nx)+phi0;
+        ARIADNE_LOG(4,"phi="<<phi<<"\n");
+        if(last_step) { break; }
+    }
+
+    if(phi.error().raw()>this->step_maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error()<<"\n");
+    }
+
+    ValidatedVectorMultivariateFunctionModelDP res=restrict(phi,dom);
+    
+    //for(Nat i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
+    //res.sweep();
+    ARIADNE_LOG(4,"res="<<res<<"\n");
+    return res;
+
+}
+
+
 
 Void TaylorPicardIntegrator::write(OutputStream& os) const {
     os << "TaylorPicardIntegrator"
@@ -384,10 +468,9 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<ValidatedDifferential>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swpt, Nat verbosity=0) {
+ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& xh, Sweeper<FloatDP> swp) {
     const Nat n=dphi.size();
-    Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,swpt));
-    ValidatedVectorMultivariateTaylorFunctionModelDP tphi(n,join(dx,ExactIntervalType(-h,+h)),sweeper);
+    ValidatedVectorMultivariateTaylorFunctionModelDP tphi(n,xh,swp);
 
     for(Nat i=0; i!=n; ++i) {
         ValidatedTaylorModelDP& model=tphi.model(i);
@@ -396,7 +479,7 @@ ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Vali
         error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
-        Differential<FloatDPBounds>::ConstIterator iter=dphi[i].begin();
+        typename Differential<FloatDPBounds>::ConstIterator iter=dphi[i].begin();
         while(iter!=dphi[i].end()) {
             MultiIndex const a=iter->index();
             FloatDPBounds coef=iter->coefficient();
@@ -410,6 +493,18 @@ ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Vali
     return tphi;
 }
 
+ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& dx, const StepSizeType& h, Sweeper<FloatDP> swp) {
+    return flow_function(dphi,join(dx,ExactIntervalType(-h,+h)),swp);
+}
+
+ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& dx, const StepSizeType& h, double swpt) {
+    ThresholdSweeper<FloatDP> swp(DP(),swpt);
+    return flow_function(dphi,dx,h,swp);
+}
+
+} // namespace
+
+// DEPRECATED
 ValidatedVectorMultivariateFunctionModelDP
 series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bdx, const StepSizeType& h, const UpperBoxType& bbx,
                  double max_err, double swpt, Nat init_so, Nat init_to, Nat max_so, Nat max_to, Nat verbosity)
@@ -457,10 +552,10 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
     ARIADNE_LOG(7,"dphic="<<dphic<<"\n");
     ARIADNE_LOG(7,"dphid="<<dphid<<"\n");
 
-    Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
+    Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
 
-    ValidatedVectorMultivariateTaylorFunctionModelDP tphi=flow_function(dphi,bdx,h,swpt,verbosity);
+    ValidatedVectorMultivariateTaylorFunctionModelDP tphi=flow_function(dphi,bdx,h,swpt);
     ARIADNE_LOG(5,"phi="<<tphi<<"\n");
 
     FloatDPError old_error=tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
@@ -495,8 +590,8 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
                 Ariadne::flow_iterate(p,h,nfdphic,ntdphic,ndphic);
                 Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
             }
-            Vector<ValidatedDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
-            ValidatedVectorMultivariateTaylorFunctionModelDP ntphi=flow_function(ndphi,bdx,h,swpt,verbosity);
+            Vector<ValidatedDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto);
+            ValidatedVectorMultivariateTaylorFunctionModelDP ntphi=flow_function(ndphi,bdx,h,swpt);
 
             Nat nnnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
             ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");
@@ -521,8 +616,8 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
         Ariadne::flow_iterate(p,h,fdphib,tdphib,dphib);
         Ariadne::flow_iterate(p,h,fdphic,tdphic,dphic);
         Ariadne::flow_iterate(p,h,fdphid,tdphid,dphid);
-        dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
-        tphi=flow_function(dphi,bdx,h,swpt,verbosity);
+        dphi=flow_differential(dphia,dphib,dphic,dphid,so,to);
+        tphi=flow_function(dphi,bdx,h,swpt);
     }
     Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
     ARIADNE_LOG(2,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
@@ -530,7 +625,112 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
     return tphi;
 }
 
+
+
+
+// FIXME: Should not be necessary, as should be able to construct FloatBounds<DP> from (FloatValue<DP>,DP)
+FloatBounds<DoublePrecision> cast_singleton(ExactIntervalType const& ivl, DoublePrecision pr) {
+    return FloatBounds<DoublePrecision>(ivl.lower(),ivl.upper()); }
+
+
+namespace {
+// Compute the midpoint of x, and add the error to e
+template<class F, class FE> Value<F> med(Bounds<F> const& x, Error<FE>& e) {
+    e+=x.error(); return x.value(); }
+} // namespace
+
+
+template<class FLT> ValidatedVectorMultivariateTaylorFunctionModel<FLT>
+make_taylor_function_model(ExactBoxType domain, Vector<Differential<Bounds<FLT>>> centre_derivatives, Vector<Differential<Bounds<FLT>>> derivative_ranges, Sweeper<FLT> swp) {
+    ARIADNE_ASSERT(centre_derivatives.result_size()==derivative_ranges.result_size());
+    ARIADNE_ASSERT(centre_derivatives.argument_size()==domain.dimension());
+    ARIADNE_ASSERT(derivative_ranges.argument_size()==domain.dimension());
+    ARIADNE_ASSERT(centre_derivatives.degree()==derivative_ranges.degree() or centre_derivatives.degree()+1u==derivative_ranges.degree());
+
+    using PR = PrecisionType<FLT>;
+    using X = FloatBounds<PR>;
+
+    const SizeType m=derivative_ranges.result_size();
+    const SizeType n=derivative_ranges.argument_size();
+    const DegreeType deg = derivative_ranges.degree();
+    FloatBounds<PR> z=derivative_ranges.zero_element().zero_coefficient();
+
+    auto scalings = Vector<Differential<FloatBounds<PR>>>(n,[&](SizeType i){return Differential<X>::variable(n,deg,z,i)*rad(domain[i]);});
+    auto scaled_centre_derivatives = compose(centre_derivatives,scalings);
+    auto scaled_derivative_ranges = compose(derivative_ranges,scalings);
+
+
+    // Make the models
+    ValidatedVectorMultivariateTaylorFunctionModel<FLT> tf(m,domain,swp);
+
+    for(SizeType i=0; i!=m; ++i) {
+        Differential<FloatBounds<PR>> const& dc = scaled_centre_derivatives[i];
+        Differential<FloatBounds<PR>> const& dr = scaled_derivative_ranges[i];
+        ValidatedTaylorModel<FLT>& model=tf.model(i);
+
+        Expansion<MultiIndex,FloatDPValue>& expansion=model.expansion();
+        FloatError<PR>& error=model.error();
+        error=0u;
+        expansion.reserve(centre_derivatives[i].expansion().number_of_nonzeros());
+
+        auto riter=dr.begin();
+        FloatBounds<PR> coef;
+
+        // Since coefficients are stored in increasing total degree, can first do centre and then ranges
+        for(auto centre_iter=dc.begin(); centre_iter!=dc.end() && centre_iter->index().degree()<deg; ++centre_iter) {
+            expansion.append(centre_iter->index(),med(centre_iter->coefficient(),error));
+        }
+
+        if(not (dr.expansion().empty() or dr.expansion().back().index().degree()<deg)) {
+            auto range_iter=dr.begin(); while (range_iter->index().degree()<deg) { ++range_iter; }
+            for ( ; range_iter!=dr.end(); ++range_iter) {
+                expansion.append(range_iter->index(),med(range_iter->coefficient(),error));
+            }
+        }
+
+        model.cleanup();
+    }
+    return tf;
 }
+
+
+// Solve \f$\dt{\phi}(x,t,a)=f(\phi(x,t),t,a)\f$ for x in dx, t in dt, and a in da, assuming x remains in bx.
+ValidatedVectorMultivariateFunctionModelDP
+series_flow_step(const ValidatedVectorMultivariateFunction& f,
+                 const ExactBoxType& domx,
+                 const Interval<StepSizeType>& domt,
+                 const ExactBoxType& doma,
+                 const UpperBoxType& bndbx,
+                 DegreeType deg,
+                 Sweeper<FloatDP> swp)
+{
+    typedef DoublePrecision PR;
+    typedef FloatBounds<PR> X;
+    PR pr;
+
+    // Extend time domain from [t:t+h] to [t-h:t+h]
+    auto wide_domt = ExactIntervalType(2*domt.lower()-domt.upper(),domt.upper());
+    ExactBoxType domxta=product(domx,wide_domt,doma);
+
+    Vector<X> cx(midpoint(domx),pr);
+    X t0(domt.lower(),pr);
+    Vector<X> ca(midpoint(doma),pr);
+    Vector<Differential<X>> cdf=f.differential(join(cx,t0,ca),deg);
+    Vector<Differential<X>> centre_flow_derivatives = flow(cdf, cx,t0,ca);
+
+    Vector<X> bndx=cast_singleton(bndbx);
+    Vector<X> rngx=cast_singleton(domx,pr);
+    X rngt=cast_singleton(domt,pr);
+    Vector<X> rnga=cast_singleton(doma,pr);
+    Vector<Differential<X>> rngdf=f.differential(join(bndx,rngt,rnga),deg);
+    Vector<Differential<X>> range_flow_derivatives = flow(rngdf, bndx,rngt,rnga);
+    ValidatedVectorMultivariateFunctionModelDP forwards_backwards_taylor_function_model = make_taylor_function_model(domxta, centre_flow_derivatives, range_flow_derivatives, swp);
+    domxta[domx.size()]=ExactIntervalType(domt);
+    ValidatedVectorMultivariateFunctionModelDP forwards_taylor_function_model=restriction(forwards_backwards_taylor_function_model,domxta);
+    return forwards_taylor_function_model;
+}
+
+
 
 ValidatedVectorMultivariateFunctionModelDP
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dx, const StepSizeType& h, const UpperBoxType& bx) const
@@ -552,6 +752,14 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
     }
 
     return tphi;
+}
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ThresholdSweeper<FloatDP> swp(DP(),this->step_sweep_threshold());
+    DegreeType deg = this->maximum_temporal_order();
+    return Ariadne::series_flow_step(f,D,T,A,B, deg,swp);
 }
 
 Pair<StepSizeType,UpperBoxType>
@@ -667,6 +875,12 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
         res[i]=res_model;
     }
     return res;
+}
+
+ValidatedVectorMultivariateFunctionModelDP
+AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const Interval<StepSizeType>& T, const ExactBoxType& A, const UpperBoxType& B) const
+{
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 Void AffineIntegrator::write(OutputStream& os) const {

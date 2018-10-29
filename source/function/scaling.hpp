@@ -64,6 +64,11 @@ inline Dyadic rad(IntervalDomainType const& ivl) {
 }
 
 template<class T> inline
+T scale(T x, const IntervalDomainType& cd) {
+    return std::move(x)*rad(cd)+med(cd);
+}
+
+template<class T> inline
 T unscale(T x, const IntervalDomainType& d) {
     if(d.lower()==d.upper()) {
         return std::move(x)*0;
@@ -73,13 +78,16 @@ T unscale(T x, const IntervalDomainType& d) {
     }
 }
 
-template<class X> Vector<X> unscale(const Vector<X>& x, const BoxDomainType& d) {
-    Vector<X> r(x);
-    for(SizeType i=0; i!=r.size(); ++i) {
-        r[i]=unscale(x[i],d[i]);
-    }
-    return r;
+template<class X> inline
+Vector<X> scale(const Vector<X>& v, const BoxDomainType& cd) {
+    return Vector<X>(v.size(),[&](SizeType i){return scale(v[i],cd[i]);});
 }
+
+template<class X> inline
+Vector<X> unscale(const Vector<X>& v, const BoxDomainType& d) {
+    return Vector<X>(v.size(),[&](SizeType i){return unscale(v[i],d[i]);});
+}
+
 
 class Scaling {
     IntervalDomainType _codom;
@@ -87,7 +95,7 @@ class Scaling {
     Scaling(IntervalDomainType codom) : _codom(codom) { }
     UnitInterval domain() const { return UnitInterval(); }
     IntervalDomainType codomain() const { return _codom; }
-    template<class X> X operator() (X) const;
+    template<class X> X operator() (X x) const { return scale(std::move(x),_codom); }
 };
 
 class VectorScaling {
@@ -97,7 +105,7 @@ class VectorScaling {
     SizeType size() const { return _codom.dimension(); }
     Scaling operator[] (SizeType i) const { return Scaling(_codom[i]); }
     Box<IntervalDomainType> const& codomain() const { return _codom; }
-    template<class X> Vector<X> operator() (Vector<X> const&) const;
+    template<class X> Vector<X> operator() (Vector<X> const& v) const { return scale(v,_codom); }
 };
 
 class Unscaling {
@@ -106,7 +114,7 @@ class Unscaling {
     Unscaling(IntervalDomainType dom) : _dom(dom) { }
     IntervalDomainType domain() const { return _dom; }
     UnitInterval codomain() const { return UnitInterval(); }
-    template<class X> X operator() (X) const;
+    template<class X> X operator() (X x) const { return unscale(std::move(x),_dom); }
 };
 
 class VectorUnscaling {
@@ -116,19 +124,9 @@ class VectorUnscaling {
     SizeType size() const { return _dom.dimension(); }
     Unscaling operator[] (SizeType i) const { return Unscaling(_dom[i]); }
     Box<IntervalDomainType> const& domain() const { return _dom; }
-    template<class X> Vector<X> operator() (Vector<X> const&) const;
+    template<class X> Vector<X> operator() (Vector<X> const& v) const { return unscale(v,_dom); }
 };
 
-template<class X> X Scaling::operator() (X x) const {
-    auto r=_codom.radius(); auto c=_codom.midpoint();
-    return x*r+c;
-}
-
-template<class X> X Unscaling::operator() (X x) const {
-    return unscale(std::move(x),this->_dom);
-    auto r=_dom.radius(); auto c=_dom.midpoint();
-    return (x-c)/r;
-}
 
 } // namespace Ariadne
 

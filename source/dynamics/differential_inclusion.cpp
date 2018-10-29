@@ -621,7 +621,10 @@ ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction
 
 
 Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
-    return EulerBounder().compute(f,dom,hsug);
+    BoxDomainType D=project(dom,range(0,f.result_size()));
+    BoxDomainType A=project(dom,range(f.result_size(),f.argument_size()));
+
+    return EulerBounder().compute(f,D,A,hsug);
 }
 
 

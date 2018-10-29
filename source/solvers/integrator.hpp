@@ -112,6 +112,21 @@ class IntegratorBase
                 const ExactBoxType& state_domain,
                 const StepSizeType& maximum_time_step) const;
 
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
+                const ExactBoxType& state_domain,
+                const ExactBoxType& parameter_domain,
+                const StepSizeType& maximum_time_step) const;
+
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& differential_equation,
+                const ExactBoxType& state_domain,
+                const StepSizeType& starting_time,
+                const ExactBoxType& parameter_domain,
+                const StepSizeType& maximum_time_step) const;
+
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
@@ -135,10 +150,18 @@ class IntegratorBase
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
+
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              const StepSizeType& suggested_time_step,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const = 0;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const = 0;
 
   public:
@@ -186,7 +209,22 @@ class TaylorPicardIntegrator
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
     using IntegratorBase::flow_step;
+
+  private:
+    ValidatedVectorMultivariateFunctionModelDP
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
 };
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
@@ -249,6 +287,13 @@ class TaylorSeriesIntegrator
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+              
     using IntegratorBase::flow_step;
 
   private:
@@ -278,6 +323,13 @@ class AffineIntegrator
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;

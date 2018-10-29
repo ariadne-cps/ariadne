@@ -216,13 +216,13 @@ class TestIntegrator
 
         EffectiveVectorMultivariateFunction f={o*2,o*3+t};
         ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
-        StepSizeType tk=0.0_x;
+        StepSizeType tk=3.0_x;
         StepSizeType hsug=0.25_x;
         Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,d,tk,ExactBoxType(0u),hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(tk,h),ExactBoxType(0u),B);
-        EffectiveVectorMultivariateFunction expected_flow={x+2*t,y+3*t+t*t/2};
+        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(tk,tk+h),ExactBoxType(0u),B);
+        EffectiveVectorMultivariateFunction expected_flow={x+2*(t-tk),y+3*(t-tk)+t*t/2-tk*tk/2};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -239,14 +239,14 @@ class TestIntegrator
 
         EffectiveVectorMultivariateFunction f={one*2,one*3+t+p};
         ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
-        StepSizeType tk=0.0_x;
+        StepSizeType tk=3.0_x;
         StepSizeType hsug=0.25_x;
         ExactBoxType pd={ExactIntervalType(0.0,1.0)};
         Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,d,tk,pd,hsug);
         StepSizeType h = step_bounds.first;
         UpperBoxType B = step_bounds.second;
-        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(tk,h),pd,B);
-        EffectiveVectorMultivariateFunction expected_flow={x+2*t,y+(p+3)*t+t*t/2};
+        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(tk,tk+h),pd,B);
+        EffectiveVectorMultivariateFunction expected_flow={x+2*(t-tk),y+(p+3)*(t-tk)+t*t/2-tk*tk/2};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);

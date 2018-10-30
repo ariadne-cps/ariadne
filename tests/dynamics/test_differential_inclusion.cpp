@@ -22,8 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dynamics/differential_inclusion.hpp"
-
+#include "../../source/dynamics/inclusion_evolver.hpp"
 #include "algebra/sweeper.hpp"
 #include "solvers/integrator_interface.hpp"
 #include "geometry/box.hpp"
@@ -52,7 +51,7 @@ class TestInclusionIntegrator {
 
     Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
-        auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
+        auto integrator = InclusionEvolver(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
         List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
     }

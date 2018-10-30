@@ -55,7 +55,7 @@ template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
-    auto integrator = InclusionIntegrator(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
+    auto integrator = InclusionEvolver(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
     integrator.verbosity = verbosity;
 
     StopWatch sw;

@@ -22,11 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "differential_inclusion.hpp"
 #include "../function/taylor_function.hpp"
 #include "../solvers/integrator.hpp"
 #include "../solvers/bounder.hpp"
 #include "../algebra/expansion.inl.hpp"
+#include "inclusion_evolver.hpp"
 
 namespace Ariadne {
 
@@ -262,7 +262,7 @@ InputApproximatorFactory::create(InclusionVectorField const& ivf, InputApproxima
 }
 
 
-InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_)
+InclusionEvolver::InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
@@ -272,11 +272,11 @@ InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximat
     assert(approximations.size()>0);
 }
 
-Bool InclusionIntegrator::must_recondition(Nat step) const {
+Bool InclusionEvolver::must_recondition(Nat step) const {
     return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
 }
 
-List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real tmax) {
+List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real tmax) {
 
     ARIADNE_LOG(2,"Dynamics: "<<ivf<<"\n");
     ARIADNE_LOG(2,"Initial: "<<initial<<"\n");
@@ -448,7 +448,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
 }
 
 ValidatedVectorMultivariateFunctionModelType
-InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const {
+InclusionEvolver::reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const {
 
     auto n = ivf.dimension();
     auto m = ivf.number_of_inputs();
@@ -500,7 +500,7 @@ InclusionIntegrator::reach(InclusionVectorField const& ivf, BoxDomainType D, Val
     return result;
 }
 
-Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhalf_piecewise_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+Vector<ValidatedScalarMultivariateFunction> InclusionEvolver::build_secondhalf_piecewise_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -514,7 +514,7 @@ Vector<ValidatedScalarMultivariateFunction> InclusionIntegrator::build_secondhal
     return result;
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf_piecewise_reach_function(
+ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_secondhalf_piecewise_reach_function(
         ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
         TimeStepType new_t) const {
 
@@ -543,7 +543,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf
     return compose(Phi,join(ef,tf,bf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_function(
+ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_reach_function(
         ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
         TimeStepType new_t) const {
 
@@ -572,7 +572,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
     return compose(Phi,join(ef,tf,bf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const {
+ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const {
     return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
@@ -605,7 +605,7 @@ ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction
 }
 
 
-Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
+Pair<StepSizeType,UpperBoxType> InclusionEvolver::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
     BoxDomainType D=project(dom,range(0,f.result_size()));
     BoxDomainType A=project(dom,range(f.result_size(),f.argument_size()));
 
@@ -613,7 +613,7 @@ Pair<StepSizeType,UpperBoxType> InclusionIntegrator::flow_bounds(ValidatedVector
 }
 
 
-ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::
+ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::
 compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const {
 
     auto domx = project(domain,range(dyn.result_size()));

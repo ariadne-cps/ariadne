@@ -259,7 +259,7 @@ Int main(Int argc, const char* argv[]) {
 
     TaylorPicardIntegrator taylor_picard_integrator(
             maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
-            step_maximum_error=1e-8,step_sweep_threshold=1e-12, maximum_temporal_order=16);
+            step_maximum_error=1e-8,step_sweep_threshold=1e-12,minimum_temporal_order=0,maximum_temporal_order=16);
     taylor_picard_integrator.verbosity=verbosity;
     TestIntegrator(taylor_picard_integrator).test();
     ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));

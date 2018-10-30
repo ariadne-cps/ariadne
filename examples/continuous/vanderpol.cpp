@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vanderpol-vectorfield.cpp
+ *            vanderpol.cpp
  *
  *  Copyright  2017  Luca Geretti
  *
@@ -72,9 +72,9 @@ int main()
     fig.set_fill_colour(0.5,0.5,0.5);
     fig.set_fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
-    fig.write("vanderpol-vectorfield");
+    fig.write("vanderpol");
 /*
-    plot("vanderpol-vf",Axes2d(-2.5,x,2.5, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
+    plot("vanderpol",Axes2d(-2.5,x,2.5, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
 
     std::cout << "Discretising orbit" << std::flush;
     Grid grid(2);
@@ -88,6 +88,6 @@ int main()
     std::cout << "done." << std::endl;
 
     // The following currently fails since auxiliary variables are not tracked
-    plot("vanderpol-vf-reach",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), gts);
+    plot("vanderpol-reach",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), gts);
 */
 }

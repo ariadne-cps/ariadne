@@ -626,7 +626,7 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     auto domx = project(domain,range(dyn.result_size()));
     auto doma = project(domain,range(dyn.result_size()+1,dyn.argument_size()));
 
-    TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-5, step_sweep_threshold=1e-8,maximum_temporal_order=8);
+    TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-3, step_sweep_threshold=1e-8, minimum_temporal_order=4, maximum_temporal_order=12);
     auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
 /*
     TaylorSeriesIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-5, step_sweep_threshold=1e-8,maximum_temporal_order=6);

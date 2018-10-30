@@ -181,20 +181,23 @@ class TaylorPicardIntegrator
     double _step_maximum_error;
     double _step_sweep_threshold;
     DegreeType _maximum_temporal_order;
+    DegreeType _minimum_temporal_order;
   public:
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
         : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _maximum_temporal_order(12) { }
+        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _minimum_temporal_order(0), _maximum_temporal_order(12) { }
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
+                           StepMaximumError lerr, StepSweepThreshold lswp, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
+    DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
+    Void set_minimum_temporal_order(Nat m) { this->_minimum_temporal_order=m; }
     DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
+    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model for a single step.
     double step_sweep_threshold() const { return this->_step_sweep_threshold; }
     Void set_step_sweep_threshold(double lt) { _step_sweep_threshold = lt; }

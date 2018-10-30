@@ -68,14 +68,14 @@ inline UpperBoxType operator+(Vector<ExactIntervalType> bx, Vector<FloatDPBounds
 
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
+    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(make_taylor_function_factory()), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0)
 }
 
 IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
+    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(make_taylor_function_factory(s)), _bounder_ptr(new EulerBounder())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0);

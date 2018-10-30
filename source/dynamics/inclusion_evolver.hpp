@@ -208,12 +208,12 @@ template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> Fl
 template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> FloatDPError component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n,h,r_value<A>(),j); }
 
 
-class InputApproximator;
-class InputApproximatorInterface;
+class InclusionApproximatorHandle;
+class InclusionApproximatorInterface;
 
-class InputApproximatorFactory {
+class InclusionApproximatorFactory {
 public:
-    InputApproximator create(InclusionVectorField const& di, InputApproximationKind kind, SweeperDP sweeper) const;
+    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximationKind kind, SweeperDP sweeper) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -248,7 +248,7 @@ public:
     }
 };
 
-class InputApproximatorInterface {
+class InclusionApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const = 0;
     virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const = 0;
@@ -257,26 +257,30 @@ class InputApproximatorInterface {
 };
 
 
-class InputApproximator : public InputApproximatorInterface {
-    friend class InputApproximatorFactory;
+class InclusionApproximatorHandle {
+    friend class InclusionApproximatorFactory;
   private:
-    SharedPointer<InputApproximatorInterface> _impl;
-    InputApproximator(SharedPointer<InputApproximatorInterface> const& impl) : _impl(impl) { }
+    SharedPointer<InclusionApproximatorInterface> _impl;
+    InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface> const& impl) : _impl(impl) { }
   public:
-    InputApproximator(InputApproximator const& other) : _impl(other._impl) { }
-    InputApproximator& operator=(InputApproximator const& other) { _impl = other._impl; return *this; }
+    InclusionApproximatorHandle(InclusionApproximatorHandle const& other) : _impl(other._impl) { }
+    InclusionApproximatorHandle& operator=(InclusionApproximatorHandle const& other) { _impl = other._impl; return *this; }
+
+    operator InclusionApproximatorInterface const& () const { return *_impl; }
+    InclusionApproximatorHandle* clone() const { return new InclusionApproximatorHandle(*this); }
+
   public:
-    virtual InputApproximationKind kind() const override { return _impl->kind(); }
-    virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const override { return _impl->build_flow_domain(D,V,t,new_t); }
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const override { return _impl->build_w_functions(DVh,n,m,h); }
-    virtual ~InputApproximator() = default;
+    InputApproximationKind kind() const { return _impl->kind(); }
+    Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const { return _impl->compute_errors(h,B); }
+    BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const { return _impl->build_flow_domain(D,V,t,new_t); }
+    Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const { return _impl->build_w_functions(DVh,n,m,h); }
+    virtual ~InclusionApproximatorHandle() = default;
 };
 
 
 template<class A>
-class InputApproximatorBase : public InputApproximatorInterface {
-    friend class InputApproximatorFactory;
+class InputApproximatorBase : public InclusionApproximatorInterface {
+    friend class InclusionApproximatorFactory;
   protected:
     InclusionVectorField const& _ivf;
     SweeperDP _sweeper;
@@ -317,7 +321,7 @@ public:
 class InclusionEvolver : public Loggable {
   protected:
     List<InputApproximationKind> _approximations;
-    SharedPointer<InputApproximator> _approximator;
+    SharedPointer<InclusionApproximatorHandle> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     StepSizeType _step_size;
@@ -332,10 +336,10 @@ class InclusionEvolver : public Loggable {
     template<class A, class... AS> InclusionEvolver& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
 
     List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T);
-
+  private:
     Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const;
     ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const;
-  private:
+
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
     ValidatedVectorMultivariateFunctionModelDP evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const;

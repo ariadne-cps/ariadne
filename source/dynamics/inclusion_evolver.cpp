@@ -46,9 +46,9 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
 struct ScheduledApproximator
 {
     Nat step;
-    InputApproximator approximator;
+    InclusionApproximatorHandle approximator;
 
-    ScheduledApproximator(Nat s, InputApproximator a) : step(s), approximator(a) {}
+    ScheduledApproximator(Nat s, InclusionApproximatorHandle a) : step(s), approximator(a) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
@@ -248,14 +248,14 @@ template<class A, class R> Vector<FloatDPError> ApproximationErrorProcessor<A,R>
     return process(norms,h);
 }
 
-InputApproximator
-InputApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximationKind kind, SweeperDP sweeper) const {
+InclusionApproximatorHandle
+InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximationKind kind, SweeperDP sweeper) const {
     switch(kind) {
-    case InputApproximationKind::ZERO : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(ivf,sweeper)));
-    case InputApproximationKind::CONSTANT : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(ivf,sweeper)));
-    case InputApproximationKind::AFFINE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(ivf,sweeper)));
-    case InputApproximationKind::SINUSOIDAL: return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(ivf,sweeper)));
-    case InputApproximationKind::PIECEWISE : return InputApproximator(SharedPointer<InputApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(ivf,sweeper)));
+    case InputApproximationKind::ZERO : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(ivf,sweeper)));
+    case InputApproximationKind::CONSTANT : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(ivf,sweeper)));
+    case InputApproximationKind::AFFINE : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(ivf,sweeper)));
+    case InputApproximationKind::SINUSOIDAL: return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(ivf,sweeper)));
+    case InputApproximationKind::PIECEWISE : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(ivf,sweeper)));
     default:
         ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
     }
@@ -305,8 +305,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
     List<ScheduledApproximator> schedule;
 
-    List<InputApproximator> approximations;
-    InputApproximatorFactory factory;
+    List<InclusionApproximatorHandle> approximations;
+    InclusionApproximatorFactory factory;
     for (auto appro : _approximations)
         approximations.append(factory.create(ivf,appro,_sweeper));
 
@@ -323,7 +323,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
         ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
-        List<InputApproximator> approximators_to_use;
+        List<InclusionApproximatorHandle> approximators_to_use;
         while (!schedule.empty()) {
             auto entry = schedule.back();
             if (entry.step == step) {
@@ -349,13 +349,13 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
         ValidatedVectorMultivariateFunctionModelDP reach_function;
         ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InputApproximator> best;
-        FloatDPApproximation best_volume(0);
+        SharedPointer<InclusionApproximatorHandle> best;
+        FloatDP best_volume(0);
 
         ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
 
         for (auto i : range(approximators_to_use.size())) {
-            this->_approximator = SharedPointer<InputApproximator>(new InputApproximator(approximators_to_use.at(i)));
+            this->_approximator = SharedPointer<InclusionApproximatorHandle>(new InclusionApproximatorHandle(approximators_to_use.at(i)));
             ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
 
             auto current_reach=reach(ivf,D,evolve_function,B,t,h);

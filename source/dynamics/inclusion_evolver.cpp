@@ -30,6 +30,14 @@
 
 namespace Ariadne {
 
+TimeStepType lower_bound(TimeStepType const& t) {
+    return TimeStepType(FloatDPLowerBound(t,DoublePrecision()).raw());
+}
+
+TimeStepType lower_bound(Real const& t) {
+    return TimeStepType(FloatDPLowerBound(t,DoublePrecision()).raw());
+}
+
 BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
@@ -53,7 +61,7 @@ inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& s
     return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
 
 struct ScheduledApproximatorComparator {
-    inline bool operator() (const ScheduledApproximator& sa1, const ScheduledApproximator& sa2) {
+    inline bool operator() (ScheduledApproximator const& sa1, ScheduledApproximator const& sa2) {
         return (sa1.step > sa2.step); }
 };
 
@@ -66,11 +74,11 @@ inline char activity_symbol(SizeType step) {
     }
 }
 
-inline Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<ExactIntervalType>& bx) {
+inline Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag> const& f, Box<ExactIntervalType> const& bx) {
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-inline Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<InputApproximationKind,SizeType>& approximation_global_frequencies) {
+inline Map<InputApproximationKind,FloatDP> convert_to_percentages(Map<InputApproximationKind,SizeType> const& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
@@ -256,7 +264,7 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 InclusionApproximatorHandle
-InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximationKind kind, SweeperDP sweeper) const {
+InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximationKind const& kind, SweeperDP const& sweeper) const {
     switch(kind) {
     case InputApproximationKind::ZERO : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(ivf,sweeper)));
     case InputApproximationKind::CONSTANT : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(ivf,sweeper)));
@@ -283,7 +291,7 @@ Bool InclusionEvolver::must_recondition(Nat step) const {
     return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
 }
 
-List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real tmax) {
+List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& tmax) {
 
     ARIADNE_LOG(2,"Dynamics: "<<ivf<<"\n");
     ARIADNE_LOG(2,"Initial: "<<initial<<"\n");
@@ -311,19 +319,14 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
     }
 
     List<ScheduledApproximator> schedule;
-
-    List<InclusionApproximatorHandle> approximations;
     InclusionApproximatorFactory factory;
-    for (auto appro : _approximations)
-        approximations.append(factory.create(ivf,appro,_sweeper));
-
-    for (auto appro: approximations) {
-        schedule.push_back(ScheduledApproximator(0u,appro));
+    for (auto appro: _approximations) {
+        schedule.push_back(ScheduledApproximator(0u,factory.create(ivf,appro,_sweeper)));
     }
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
     Nat step = 0u;
-    while (possibly(t<TimeStepType(FloatDPUpperBound(tmax,DoublePrecision()).raw()))) {
+    while (possibly(t<lower_bound(tmax))) {
 
         if (verbosity == 1)
             std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
@@ -343,53 +346,43 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
         ARIADNE_LOG(4,"n. of parameters="<<evolve_function.argument_size()<<"\n");
 
-        auto D = cast_exact_box(evolve_function.range());
+        auto domx = cast_exact_box(evolve_function.range());
+
         UpperBoxType B;
         StepSizeType h;
-
-        BoxDomainType dom = product(D,V);
-
-        std::tie(h,B)=this->flow_bounds(F,dom,hsug);
+        std::tie(h,B)=approximators_to_use.at(0).flow_bounds(F,domx,V,hsug);
         ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
 
-        TimeStepType new_t(FloatDPLowerBound(t+h,DoublePrecision()).raw());
+        TimeStepType new_t = lower_bound(t+h);
 
         ValidatedVectorMultivariateFunctionModelDP reach_function;
         ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
-        SharedPointer<InclusionApproximatorHandle> best;
-        FloatDP best_volume(0);
+        InclusionApproximatorHandle best = approximators_to_use.at(0);
+        FloatDP best_volume = FloatDP::inf(DoublePrecision());
 
         ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
 
-        for (auto i : range(approximators_to_use.size())) {
-            this->_approximator = SharedPointer<InclusionApproximatorHandle>(new InclusionApproximatorHandle(approximators_to_use.at(i)));
-            ARIADNE_LOG(5,"checking "<<this->_approximator->kind()<<" approximation\n");
+        for (auto approximator : approximators_to_use) {
+            ARIADNE_LOG(5,"checking "<<approximator.kind()<<" approximation\n");
 
-            auto current_reach=reach(ivf,D,evolve_function,B,t,h);
-            auto current_evolve=evaluate_evolve_function(current_reach,new_t);
+            auto current_reach=approximator.reach(ivf,domx,evolve_function,B,t,h);
+            auto current_evolve=approximator.evolve(current_reach,new_t);
 
-            if (i == 0) {
+            FloatDP current_volume = volume(current_evolve.range());
+            if (current_volume < best_volume) {
+                best = approximator;
+                ARIADNE_LOG(6,"best approximation: " << best.kind() << "\n");
                 best_reach_function = current_reach;
                 best_evolve_function = current_evolve;
-                best = this->_approximator;
-                best_volume = volume(best_evolve_function.range());
-            } else {
-                FloatDP current_volume = volume(current_evolve.range());
-                if (current_volume < best_volume) {
-                    best = this->_approximator;
-                    ARIADNE_LOG(6,"best approximation: " << best->kind() << "\n");
-                    best_reach_function = current_reach;
-                    best_evolve_function = current_evolve;
-                    best_volume = current_volume;
-                }
+                best_volume = current_volume;
             }
         }
 
         if (approximators_to_use.size() > 1)
-            ARIADNE_LOG(4,"chosen approximation: " << best->kind() << "\n");
+            ARIADNE_LOG(4,"chosen approximation: " << best.kind() << "\n");
 
         for (auto appro : approximators_to_use) {
-            if (best->kind() == appro.kind())
+            if (best.kind() == appro.kind())
                 delays[appro.kind()] = 0;
             else
                 delays[appro.kind()]++;
@@ -401,8 +394,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
         ARIADNE_LOG(4,"updated schedule: " << schedule << "\n");
 
-        approximation_global_frequencies[best->kind()] += 1;
-        approximation_local_frequencies[best->kind()] += 1;
+        approximation_global_frequencies[best.kind()] += 1;
+        approximation_local_frequencies[best.kind()] += 1;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -454,76 +447,44 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
     return result;
 }
 
-ValidatedVectorMultivariateFunctionModelType
-InclusionEvolver::reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const {
+template<class A> ValidatedVectorMultivariateFunctionModelType
+InputApproximatorBase<A>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
 
-    auto n = ivf.dimension();
-    auto m = ivf.number_of_inputs();
-    auto F = ivf.function();
-    auto V = ivf.inputs();
-    TimeStepType new_t(FloatDPLowerBound(t+h,DoublePrecision()).raw());
+    TimeStepType new_t = lower_bound(t+h);
 
-    ValidatedVectorMultivariateFunctionModelType result;
+    Interval<TimeStepType> domt(t,new_t);
 
-    if (this->_approximator->kind() != InputApproximationKind::PIECEWISE) {
-        auto e=this->_approximator->compute_errors(h,B);
-        ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DHV = this->_approximator->build_flow_domain(D,V,t,new_t);
-        ARIADNE_LOG(6,"DHV:"<<DHV<<"\n");
-        auto w = this->_approximator->build_w_functions(DHV,n,m,h);
-        ARIADNE_LOG(6,"w:"<<w<<"\n");
-        auto Fw = build_Fw(F,w);
-        ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DHV,Interval<TimeStepType>(t,new_t),B);
-        phi = add_errors(phi,e);
-        result=build_reach_function(evolve_function, phi, t, new_t);
-    } else {
-        TimeStepType intermediate_t(FloatDPLowerBound(t+hlf(h),DoublePrecision()).raw());
+    auto e=this->compute_errors(h,B);
+    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+    auto doma = this->build_parameter_domain(ivf.inputs());
 
-        auto e=this->_approximator->compute_errors(h,B);
-        ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
-        auto DHV_hlf = this->_approximator->build_flow_domain(D,V,t,intermediate_t);
-        ARIADNE_LOG(6,"DHV_hlf:"<<DHV_hlf<<"\n");
-        auto w_hlf = this->_approximator->build_w_functions(DHV_hlf,n,m,h);
-        ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
-        auto Fw_hlf = build_Fw(F,w_hlf);
-        ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
+    auto w = this->build_w_functions(domt,doma,ivf.dimension(),ivf.number_of_inputs());
+    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    auto Fw = build_Fw(ivf.function(),w);
+    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    auto phi = this->compute_flow_function(Fw,domx,domt,doma,B);
+    add_errors(phi,e);
 
-        auto phi_hlf = this->compute_flow_function(Fw_hlf,DHV_hlf,Interval<TimeStepType>(t,intermediate_t),B);
-        auto intermediate_reach=build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
-        auto intermediate_evolve=evaluate_evolve_function(intermediate_reach,intermediate_t);
-
-        auto D_int = cast_exact_box(intermediate_evolve.range());
-
-        auto DHV=this->_approximator->build_flow_domain(D_int,V,intermediate_t,new_t);
-        auto w = build_secondhalf_piecewise_w_functions(DHV,n,m,h);
-        ARIADNE_LOG(6,"w:"<<w<<"\n");
-        auto Fw = build_Fw(F, w);
-        ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-        auto phi = this->compute_flow_function(Fw,DHV,Interval<TimeStepType>(intermediate_t,new_t),B);
-        phi = add_errors(phi,e);
-        result = build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
-    }
-    return result;
+    return this->build_reach_function(evolve_function, phi, t, new_t);
 }
 
-Vector<ValidatedScalarMultivariateFunction> InclusionEvolver::build_secondhalf_piecewise_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<class A> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto Vi = ExactNumber(doma[i].upper());
         auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_secondhalf_piecewise_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
-        TimeStepType new_t) const {
+template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::build_secondhalf_piecewise_reach_function(
+        ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t,
+        TimeStepType const& new_t) const {
 
     // Evolve function is e(x,a,b) at s; Flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a,b),t-s,b))
@@ -550,9 +511,9 @@ ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_secondhalf_pi
     return compose(Phi,join(ef,tf,bf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_reach_function(
-        ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t,
-        TimeStepType new_t) const {
+template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::build_reach_function(
+        ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t,
+        TimeStepType const& new_t) const {
 
     // Evolve function is e(x,a) at s; flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a),t-s,b))
@@ -579,17 +540,16 @@ ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::build_reach_functio
     return compose(Phi,join(ef,tf,bf));
 }
 
-ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const {
+template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const {
     return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
-ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e) {
+Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e) {
     assert(phi.result_size()==e.size());
     ValidatedVectorMultivariateTaylorFunctionModelDP& tphi = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(phi.reference());
     for (auto i : range(e.size())) {
         tphi[i].add_error(e[i]);
     }
-    return phi;
 }
 
 ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w) {
@@ -612,19 +572,13 @@ ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction
 }
 
 
-Pair<StepSizeType,UpperBoxType> InclusionEvolver::flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const {
-    BoxDomainType D=project(dom,range(0,f.result_size()));
-    BoxDomainType A=project(dom,range(f.result_size(),f.argument_size()));
-
-    return EulerBounder().compute(f,D,A,hsug);
+template<class A> Pair<StepSizeType,UpperBoxType> InputApproximatorBase<A>::flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const {
+    return EulerBounder().compute(f,domx,doma,hsug);
 }
 
 
-ValidatedVectorMultivariateFunctionModelDP InclusionEvolver::
-compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const {
-
-    auto domx = project(domain,range(dyn.result_size()));
-    auto doma = project(domain,range(dyn.result_size()+1,dyn.argument_size()));
+template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::
+compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domx, Interval<TimeStepType> const& domt, BoxDomainType const& doma, UpperBoxType const& B) const {
 
     TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-3, step_sweep_threshold=1e-8, minimum_temporal_order=4, maximum_temporal_order=12);
     auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
@@ -635,15 +589,14 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     return Phi;
 }
 
-template<class A> BoxDomainType InputApproximatorBase<A>::build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const {
-    auto result = D;
-    result = product(result,IntervalDomainType(t,new_t));
+template<class A> BoxDomainType InputApproximatorBase<A>::build_parameter_domain(BoxDomainType const& V) const {
+    BoxDomainType result(0u);
     for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;
 }
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = ValidatedScalarMultivariateFunction::zero(n+1);
@@ -651,7 +604,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Zer
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = ValidatedScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
@@ -659,57 +612,96 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Con
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto three = ValidatedScalarMultivariateFunction::constant(n+1+2*m,3_z);
     auto t = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = ValidatedScalarMultivariateFunction::constant(n+1+2*m,ExactNumber(DHV[n].lower()));
-    auto hc = ValidatedScalarMultivariateFunction::constant(n+1+2*m,h);
+    auto tk = ValidatedScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto hc = ValidatedScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto Vi = ExactNumber(doma[i].upper());
         auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
+        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
     }
     return result;
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto pgamma = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
     auto gamma = ValidatedScalarMultivariateFunction::constant(n+1+2*m,4.162586_dec);
     auto t = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = ValidatedScalarMultivariateFunction::constant(n+1+2*m,ExactNumber(DHV[n].lower()));
-    auto hc = ValidatedScalarMultivariateFunction::constant(n+1+2*m,h);
+    auto tk = ValidatedScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto hc = ValidatedScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto Vi = ExactNumber(doma[i].upper());
         auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
+        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
     }
     return result;
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(BoxDomainType DHV, SizeType n, SizeType m, StepSizeType h) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(DHV[n+1+i].upper());
+        auto Vi = ExactNumber(doma[i].upper());
         auto p0 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = ValidatedScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (DHV[n+1+i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
+}
+
+template<> ValidatedVectorMultivariateFunctionModelType
+InputApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+
+    auto n = ivf.dimension();
+    auto m = ivf.number_of_inputs();
+    auto F = ivf.function();
+    auto V = ivf.inputs();
+
+    TimeStepType intermediate_t = lower_bound(t+hlf(h));
+    TimeStepType new_t = lower_bound(t+h);
+
+    Interval<TimeStepType> domt_first(t,intermediate_t);
+    Interval<TimeStepType> domt_second(intermediate_t,new_t);
+    auto doma = this->build_parameter_domain(V);
+
+    auto e=this->compute_errors(h,B);
+    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+
+    auto w_hlf = this->build_w_functions(domt_first,doma,n,m);
+    ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
+    auto Fw_hlf = build_Fw(F,w_hlf);
+    ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
+
+    auto phi_hlf = this->compute_flow_function(Fw_hlf,domx,domt_first,doma,B);
+    auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
+    auto intermediate_evolve=this->evolve(intermediate_reach,intermediate_t);
+
+    auto domx_second = cast_exact_box(intermediate_evolve.range());
+
+    auto w = this->build_secondhalf_piecewise_w_functions(domt_second,doma,n,m);
+    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    auto Fw = build_Fw(F, w);
+    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    auto phi = this->compute_flow_function(Fw,domx_second,domt_second,doma,B);
+    add_errors(phi,e);
+
+    return this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
 }
 
 
@@ -718,14 +710,16 @@ LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variab
     this->verbosity = 0;
 }
 
-ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP f) const {
+ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
     BoxDomainType domain=f.domain();
     BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
-    for(SizeType i=0; i!=f.result_size(); ++i) { f[i].set_error(0); }
+
     ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
-    return embed(f,errors)+embed(domain,error_function);
+    ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
+    for(SizeType i=0; i!=result.result_size(); ++i) { result[i].set_error(0); }
+    return result;
 }
 
 struct IndexedFloatDPError

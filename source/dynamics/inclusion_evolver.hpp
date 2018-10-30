@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential_inclusion.hpp
+ *            inclusion_evolver.hpp
  *
  *  Copyright  2008-18  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file differential_inclusion.hpp
- *  \brief Methods for computing solutions of differential inclusions.
+/*! \file inclusion_evolver.hpp
+ *  \brief Evolver for differential inclusion dynamics.
  */
 
-#ifndef ARIADNE_DIFFERENTIAL_INCLUSION_HPP
-#define ARIADNE_DIFFERENTIAL_INCLUSION_HPP
+#ifndef ARIADNE_INCLUSION_EVOLVER_HPP
+#define ARIADNE_INCLUSION_EVOLVER_HPP
 
 #include "../utility/typedefs.hpp"
 #include "../utility/attribute.hpp"
@@ -313,15 +313,7 @@ public:
     virtual ~LohnerReconditioner() = default;
 };
 
-
-class InclusionIntegratorInterface {
-  public:
-    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T) = 0;
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const = 0;
-    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const = 0;
-};
-
-class InclusionIntegrator : public virtual InclusionIntegratorInterface, public Loggable {
+class InclusionEvolver : public Loggable {
   protected:
     List<InputApproximationKind> _approximations;
     SharedPointer<InputApproximator> _approximator;
@@ -331,17 +323,17 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
   public:
-    InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size);
-    template<class... AS> InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size, AS... attributes);
+    InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size);
+    template<class... AS> InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size, AS... attributes);
   public:
-    InclusionIntegrator& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
-    InclusionIntegrator& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
-    template<class A, class... AS> InclusionIntegrator& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
+    InclusionEvolver& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
+    InclusionEvolver& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
+    template<class A, class... AS> InclusionEvolver& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
 
-    virtual List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T) override;
+    List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T);
 
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const override;
-    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const override;
+    Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const;
+    ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const;
   private:
     ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
@@ -352,12 +344,12 @@ class InclusionIntegrator : public virtual InclusionIntegratorInterface, public 
     Bool must_recondition(Nat step) const;
 };
 
-template<class... AS> InclusionIntegrator::InclusionIntegrator(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_, AS... attributes)
-                : InclusionIntegrator::InclusionIntegrator(approximations, sweeper,step_size_) {
+template<class... AS> InclusionEvolver::InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_, AS... attributes)
+                : InclusionEvolver::InclusionEvolver(approximations, sweeper,step_size_) {
     this->set(attributes...);
     _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
 }
 
 } // namespace Ariadne;
 
-#endif // ARIADNE_DIFFERENTIAL_INCLUSION_HPP
+#endif // ARIADNE_INCLUSION_EVOLVER_HPP

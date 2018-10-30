@@ -273,21 +273,21 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType D, ExactIntervalType T, ExactBoxType A, UpperBoxType B)\n");
     ARIADNE_LOG(3," f="<<f);
     ARIADNE_LOG(3," D="<<D<<" T="<<T<<", A="<<A<<", B="<<B<<"\n");
-    
+
     const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
-    
+
     const Nat nx=D.size();
     const Nat na=A.size();
-    
-    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na); 
-    
+
+    Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na);
+
     StepSizeType t=static_cast<StepSizeType>(T.lower());
     StepSizeType h=static_cast<StepSizeType>(T.upper())-t;
-    
+
     // Time interval centred on initial time, which will make the antiderivative more efficient
     ExactIntervalType wT(t-h,t+h);
     ARIADNE_ASSERT(t==med(wT));
-    
+
     ExactBoxType dom=join(D,T,A);
     ExactBoxType wdom=join(D,wT,A);
     UpperBoxType const& bx=B;
@@ -297,13 +297,13 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
     ValidatedVectorMultivariateFunctionModelDP phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
     ValidatedVectorMultivariateFunctionModelDP ta=this->function_factory().create_projection(wdom,tarng);
-    
+
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool last_step=(phi.error().raw()<this->step_maximum_error());
         ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,join(std::move(phi),ta));
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
-        // NOTE: In principle safer to use antiderivative(fphi,nx,t) here, 
+        // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
         phi=antiderivative(fphi,nx)+phi0;
@@ -316,7 +316,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     }
 
     ValidatedVectorMultivariateFunctionModelDP res=restrict(phi,dom);
-    
+
     //for(Nat i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
     //res.sweep();
     ARIADNE_LOG(4,"res="<<res<<"\n");
@@ -399,10 +399,6 @@ template<class X> Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex&
     e.append(a,c);
 }
 
-
-inline Vector<ValidatedFormula> formula(const ValidatedVectorMultivariateFunction& f) {
-    return f.evaluate(ValidatedFormula::identity(f.argument_size()));
-}
 
 Void flow_init(const Vector<ValidatedProcedure>& p,
                Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y,
@@ -511,8 +507,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxTyp
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
 
-    Vector<ValidatedFormula> ff = formula(f);
-    Vector<ValidatedProcedure> p(ff);
+    Vector<ValidatedProcedure> p(f);
     ARIADNE_LOG(4,"p="<<p<<"\n");
 
     Vector<ValidatedNumericType> dx=cast_singleton(bdx);

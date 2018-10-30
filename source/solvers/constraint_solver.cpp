@@ -307,8 +307,7 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedScalarMu
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
-    Procedure<ValidatedNumber> procedure(formula);
+    Procedure<ValidatedNumber> procedure(function);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -317,8 +316,7 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMu
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBoxType domain, ValidatedScalarMultivariateFunction function, ExactIntervalType bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
-    Vector< Procedure<ValidatedNumber> > procedure(formula);
+    Vector< Procedure<ValidatedNumber> > procedure(function);
     return this->hull_reduce(domain,procedure,bounds);
 }
 

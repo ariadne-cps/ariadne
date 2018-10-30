@@ -55,24 +55,18 @@ template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
-    typedef typename ValidatedVectorMultivariateFunctionModelType::NumericType NumericType;
-    typedef typename NumericType::PrecisionType PrecisionType;
-
-    PrecisionType prec;
-
     auto integrator = InclusionIntegrator(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
     integrator.verbosity = verbosity;
 
     StopWatch sw;
 
     List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
-
     sw.click();
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
     ValidatedVectorMultivariateFunctionModelType evolve_function =
-        partial_evaluate(final_set,final_set.result_size(),NumericType(evolution_time,prec));
+        partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper());
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     std::cout << "score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s" << std::endl;
@@ -121,16 +115,16 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     SizeType freq=12;
     ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
 
-    unsigned int verbosity = 6;
+    unsigned int verbosity = 1;
     bool draw = false;
     DRAWING_METHOD = DrawingMethod::BOX;
 
     List<InputApproximationKind> approximations;
     approximations.append(InputApproximationKind::ZERO);
-    //approximations.append(InputApproximationKind::CONSTANT);
-    //approximations.append(InputApproximationKind::AFFINE);
-    //approximations.append(InputApproximationKind::SINUSOIDAL);
-    //approximations.append(InputApproximationKind::PIECEWISE);
+    approximations.append(InputApproximationKind::CONSTANT);
+    approximations.append(InputApproximationKind::AFFINE);
+    approximations.append(InputApproximationKind::SINUSOIDAL);
+    approximations.append(InputApproximationKind::PIECEWISE);
 
     run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);
     //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);

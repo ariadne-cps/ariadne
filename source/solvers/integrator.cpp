@@ -272,7 +272,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
-        Bool last_step=(phi.error().raw()<this->step_maximum_error());
+        Bool below_maximum_error=(phi.error().raw()<this->step_maximum_error());
         FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
@@ -280,7 +280,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
         phi=antiderivative(fphi,nx)+phi0;
         ARIADNE_LOG(4,"phi="<<phi<<"\n");
-        if(last_step) { break; }
+        if(below_maximum_error && k>=this->_minimum_temporal_order) { break; }
     }
 
     if(phi.error().raw()>this->step_maximum_error()) {
@@ -305,6 +305,7 @@ Void TaylorPicardIntegrator::_write(OutputStream& os) const {
        << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
        << ", step_maximum_error = " << this->step_maximum_error()
        << ", step_sweep_threshold = " << this->step_sweep_threshold()
+       << ", minimum_temporal_order = " << this->minimum_temporal_order()
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << " )";
 }

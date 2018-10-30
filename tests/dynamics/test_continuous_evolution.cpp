@@ -99,7 +99,7 @@ Void TestContinuousEvolution::test() const
 
     // Set up the evaluators
     TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                             step_maximum_error=1e-6,step_sweep_threshold=1e-10,maximum_temporal_order=8);
+                                             step_maximum_error=1e-6,step_sweep_threshold=1e-10,minimum_temporal_order=0,maximum_temporal_order=8);
     // Set up the evaluators
     GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
                                              step_maximum_error=1e-6,step_sweep_threshold=1e-10,
@@ -169,7 +169,7 @@ Void TestContinuousEvolution::failure_test() const
 
     // Set up the evaluators
     TaylorPicardIntegrator integrator(maximum_error=1e-6,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                      step_maximum_error=1e-8,step_sweep_threshold=1e-10,maximum_temporal_order=6);
+                                      step_maximum_error=1e-8,step_sweep_threshold=1e-10,minimum_temporal_order=0,maximum_temporal_order=6);
 
     // Define the initial box
     ExactBoxType initial_box = ExactBoxType{{0.0,0.0},{0.9,0.9}};

@@ -74,7 +74,7 @@ inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
-ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<FloatDPError> const& e);
+Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e);
 
 ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w);
 
@@ -159,12 +159,10 @@ class AffineApproximation : public InputApproximationKindTrait<InputApproximatio
 class SinusoidalApproximation : public InputApproximationKindTrait<InputApproximationKind::SINUSOIDAL> { };
 class PiecewiseApproximation : public InputApproximationKindTrait<InputApproximationKind::PIECEWISE> { };
 
-template<class A> FloatDPError r_value();
-template<> FloatDPError r_value<ZeroApproximation>() { return FloatDPError(0u); }
-template<> FloatDPError r_value<ConstantApproximation>() { return FloatDPError(1u); }
-template<> FloatDPError r_value<AffineApproximation>() { return FloatDPError(5.0/3u); }
-template<> FloatDPError r_value<SinusoidalApproximation>() { return FloatDPError(5.0/4u); }
-template<> FloatDPError r_value<PiecewiseApproximation>() { return FloatDPError(1.3645_upper); }
+template<class A> ErrorType r_value();
+template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); }
+template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
+template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
 
 template<class A> constexpr Nat num_params_per_input();
 template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
@@ -213,7 +211,7 @@ class InclusionApproximatorInterface;
 
 class InclusionApproximatorFactory {
 public:
-    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximationKind kind, SweeperDP sweeper) const;
+    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximationKind const& kind, SweeperDP const& sweeper) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -229,7 +227,7 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
   private:
     InclusionVectorField const& _ivf;
   protected:
-    Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
+    Boolean _enable_componentwise_error; // TODO: remove such option as soon as a paper presenting component-wise error is published
   private:
     Vector<FloatDPError> process(C1Norms const& n, PositiveFloatDPValue const& h) const;
   public:
@@ -251,9 +249,9 @@ public:
 class InclusionApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const = 0;
-    virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const = 0;
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const = 0;
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const = 0;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const = 0;
 };
 
 
@@ -269,17 +267,17 @@ class InclusionApproximatorHandle {
     operator InclusionApproximatorInterface const& () const { return *_impl; }
     InclusionApproximatorHandle* clone() const { return new InclusionApproximatorHandle(*this); }
 
-  public:
     InputApproximationKind kind() const { return _impl->kind(); }
-    Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const { return _impl->compute_errors(h,B); }
-    BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const { return _impl->build_flow_domain(D,V,t,new_t); }
-    Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const { return _impl->build_w_functions(DVh,n,m,h); }
+    Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const { return _impl->flow_bounds(f,domx,doma,hsug); }
+    ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _impl->reach(ivf,D,evolve_function,B,t,h); }
+    ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const { return _impl->evolve(reach_function,t); }
+  public:
     virtual ~InclusionApproximatorHandle() = default;
 };
 
 
 template<class A>
-class InputApproximatorBase : public InclusionApproximatorInterface {
+class InputApproximatorBase : public InclusionApproximatorInterface, Loggable {
     friend class InclusionApproximatorFactory;
   protected:
     InclusionVectorField const& _ivf;
@@ -292,17 +290,27 @@ class InputApproximatorBase : public InclusionApproximatorInterface {
     const Nat _num_params_per_input;
   public:
     virtual InputApproximationKind kind() const override { return _kind; }
-    virtual Vector<ErrorType> compute_errors(StepSizeType h, UpperBoxType const& B) const override { return _processor->process(PositiveFloatDPValue(h,DoublePrecision()),B); }
-    virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, TimeStepType t, TimeStepType new_t) const override;
-    virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const override;
+
+    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const override;
+    virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const override;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const override;
+
     virtual ~InputApproximatorBase() = default;
+  private:
+    Vector<ErrorType> compute_errors(StepSizeType const& h, UpperBoxType const& B) const { return _processor->process(PositiveFloatDPValue(h,DoublePrecision()),B); };
+    BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
+    ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domx, Interval<TimeStepType> const& domt, BoxDomainType const& doma, UpperBoxType const& B) const;
+    ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
+    ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
+    Vector<ValidatedScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
+    Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
 };
 
 
 class Reconditioner {
   public:
     virtual Void simplify(ValidatedVectorMultivariateFunctionModelType& phi) const = 0;
-    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType Phi) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType const& Phi) const = 0;
 };
 
 
@@ -313,7 +321,7 @@ public:
     LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep);
     void set_sweeper(SweeperDP sweeper) { _sweeper = sweeper; }
     void set_number_of_variables_to_keep(Nat num_variables_to_keep) { _number_of_variables_to_keep = num_variables_to_keep; }
-    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType f) const override;
+    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType const& f) const override;
     virtual Void simplify(ValidatedVectorMultivariateFunctionModelType& f) const override;
     virtual ~LohnerReconditioner() = default;
 };
@@ -321,7 +329,6 @@ public:
 class InclusionEvolver : public Loggable {
   protected:
     List<InputApproximationKind> _approximations;
-    SharedPointer<InclusionApproximatorHandle> _approximator;
     SharedPointer<Reconditioner> _reconditioner;
     SweeperDP _sweeper;
     StepSizeType _step_size;
@@ -329,31 +336,19 @@ class InclusionEvolver : public Loggable {
     Nat _number_of_variables_to_keep;
   public:
     InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size);
-    template<class... AS> InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size, AS... attributes);
+    template<class... AS> InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_, AS... attributes)
+                        : InclusionEvolver(approximations, sweeper,step_size_) {
+            this->set(attributes...); _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep)); }
   public:
     InclusionEvolver& set(NumberOfStepsBetweenSimplifications n) { _number_of_steps_between_simplifications=n; return *this; }
     InclusionEvolver& set(NumberOfVariablesToKeep n) { _number_of_variables_to_keep=n; return *this; }
     template<class A, class... AS> InclusionEvolver& set(A a, AS... as) { this->set(a); this->set(as...); return *this; }
 
-    List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real T);
-  private:
-    Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction f, BoxDomainType dom, StepSizeType hsug) const;
-    ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType D, ValidatedVectorMultivariateFunctionModelType evolve_function, UpperBoxType B, TimeStepType t, StepSizeType h) const;
+    List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& T);
 
-    ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domain, Interval<TimeStepType> const& domt, UpperBoxType const& B) const;
-    ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
-    ValidatedVectorMultivariateFunctionModelDP evaluate_evolve_function(ValidatedVectorMultivariateFunctionModelDP reach_function, TimeStepType t) const;
-    ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP evolve_function, ValidatedVectorMultivariateFunctionModelDP Phi, TimeStepType t, TimeStepType new_t) const;
-    Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(BoxDomainType DVh, SizeType n, SizeType m, StepSizeType h) const;
   private:
     Bool must_recondition(Nat step) const;
 };
-
-template<class... AS> InclusionEvolver::InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_, AS... attributes)
-                : InclusionEvolver::InclusionEvolver(approximations, sweeper,step_size_) {
-    this->set(attributes...);
-    _reconditioner.reset(new LohnerReconditioner(_sweeper,_number_of_variables_to_keep));
-}
 
 } // namespace Ariadne;
 

@@ -58,7 +58,7 @@ struct ScheduledApproximator
 };
 
 inline OutputStream& operator<<(OutputStream& os, ScheduledApproximator const& sa) {
-    return os << "(" << sa.step << ":" << sa.approximator.kind() << ")"; }
+    return os << "(" << sa.step << ":" << sa.approximator << ")"; }
 
 struct ScheduledApproximatorComparator {
     inline bool operator() (ScheduledApproximator const& sa1, ScheduledApproximator const& sa2) {
@@ -78,14 +78,14 @@ inline Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag> con
     return apply(f,Box<UpperIntervalType>(bx));
 }
 
-inline Map<InputApproximationKind,FloatDP> convert_to_percentages(Map<InputApproximationKind,SizeType> const& approximation_global_frequencies) {
+inline Map<InclusionApproximatorHandle,FloatDP> convert_to_percentages(Map<InclusionApproximatorHandle,SizeType> const& approximation_global_frequencies) {
 
     SizeType total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InputApproximationKind,FloatDP> result;
+    Map<InclusionApproximatorHandle,FloatDP> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1.0/total_steps*entry.second;
     }
@@ -264,20 +264,17 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 InclusionApproximatorHandle
-InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximationKind const& kind, SweeperDP const& sweeper) const {
-    switch(kind) {
-    case InputApproximationKind::ZERO : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ZeroApproximation>(ivf,sweeper)));
-    case InputApproximationKind::CONSTANT : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<ConstantApproximation>(ivf,sweeper)));
-    case InputApproximationKind::AFFINE : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<AffineApproximation>(ivf,sweeper)));
-    case InputApproximationKind::SINUSOIDAL: return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<SinusoidalApproximation>(ivf,sweeper)));
-    case InputApproximationKind::PIECEWISE : return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InputApproximatorBase<PiecewiseApproximation>(ivf,sweeper)));
-    default:
-        ARIADNE_FAIL_MSG("Unexpected input approximation kind "<<kind<<"\n");
-    }
+InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximation const& approximation, SweeperDP const& sweeper) const {
+    if (approximation.handles(ZeroApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ZeroApproximation>(ivf,sweeper)));
+    if (approximation.handles(ConstantApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ConstantApproximation>(ivf,sweeper)));
+    if (approximation.handles(AffineApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<AffineApproximation>(ivf,sweeper)));
+    if (approximation.handles(SinusoidalApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<SinusoidalApproximation>(ivf,sweeper)));
+    if (approximation.handles(PiecewiseApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<PiecewiseApproximation>(ivf,sweeper)));
+    ARIADNE_FAIL_MSG("Unhandled input approximation kind " << approximation << "\n");
 }
 
 
-InclusionEvolver::InclusionEvolver(List<InputApproximationKind> approximations, SweeperDP sweeper, StepSizeType step_size_)
+InclusionEvolver::InclusionEvolver(List<InputApproximation> approximations, SweeperDP sweeper, StepSizeType step_size_)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
@@ -310,18 +307,18 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
     TimeStepType t;
 
-    Map<InputApproximationKind,SizeType> approximation_global_frequencies, approximation_local_frequencies;
-    Map<InputApproximationKind,Nat> delays;
-    for (auto appro: _approximations) {
-        approximation_global_frequencies[appro] = 0;
-        approximation_local_frequencies[appro] = 0;
-        delays[appro] = 0;
-    }
-
     List<ScheduledApproximator> schedule;
     InclusionApproximatorFactory factory;
     for (auto appro: _approximations) {
         schedule.push_back(ScheduledApproximator(0u,factory.create(ivf,appro,_sweeper)));
+    }
+
+    Map<InclusionApproximatorHandle,SizeType> approximation_global_frequencies, approximation_local_frequencies;
+    Map<InclusionApproximatorHandle,Nat> delays;
+    for (auto entry: schedule) {
+        approximation_global_frequencies[entry.approximator] = 0;
+        approximation_local_frequencies[entry.approximator] = 0;
+        delays[entry.approximator] = 0;
     }
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
@@ -363,7 +360,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
 
         for (auto approximator : approximators_to_use) {
-            ARIADNE_LOG(5,"checking "<<approximator.kind()<<" approximation\n");
+            ARIADNE_LOG(5,"checking "<<approximator<<" approximation\n");
 
             auto current_reach=approximator.reach(ivf,domx,evolve_function,B,t,h);
             auto current_evolve=approximator.evolve(current_reach,new_t);
@@ -371,7 +368,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
             FloatDP current_volume = volume(current_evolve.range());
             if (current_volume < best_volume) {
                 best = approximator;
-                ARIADNE_LOG(6,"best approximation: " << best.kind() << "\n");
+                ARIADNE_LOG(6,"best approximation: " << best << "\n");
                 best_reach_function = current_reach;
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
@@ -379,23 +376,23 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         }
 
         if (approximators_to_use.size() > 1)
-            ARIADNE_LOG(4,"chosen approximation: " << best.kind() << "\n");
+            ARIADNE_LOG(4,"chosen approximation: " << best << "\n");
 
         for (auto appro : approximators_to_use) {
-            if (best.kind() == appro.kind())
-                delays[appro.kind()] = 0;
+            if (best == appro)
+                delays[appro] = 0;
             else
-                delays[appro.kind()]++;
+                delays[appro]++;
 
-            Nat offset = 1u<<delays[appro.kind()];
+            Nat offset = 1u<<delays[appro];
             schedule.push_back(ScheduledApproximator(step+offset,appro));
         }
         std::sort(schedule.begin(),schedule.end(),ScheduledApproximatorComparator());
 
         ARIADNE_LOG(4,"updated schedule: " << schedule << "\n");
 
-        approximation_global_frequencies[best.kind()] += 1;
-        approximation_local_frequencies[best.kind()] += 1;
+        approximation_global_frequencies[best] += 1;
+        approximation_local_frequencies[best] += 1;
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
@@ -405,17 +402,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
             double base = 0;
             double rho = 6.0;
             for (auto appro: approximation_local_frequencies) {
-                SizeType ppi;
-                switch (appro.first) {
-                    case InputApproximationKind::ZERO:
-                        ppi = 0;
-                        break;
-                    case InputApproximationKind::CONSTANT:
-                        ppi = 1;
-                        break;
-                    default:
-                        ppi = 2;
-                }
+                SizeType ppi = appro.first.num_params_per_input();
                 double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
                 base += partial*appro.second/freq;
             }
@@ -426,8 +413,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
             lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
             lreconditioner.simplify(evolve_function);
 
-            for (auto appro: _approximations) {
-                approximation_local_frequencies[appro] = 0;
+            for (auto entry: approximation_local_frequencies) {
+                approximation_local_frequencies[entry.first] = 0;
             }
         }
 
@@ -447,8 +434,18 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
     return result;
 }
 
+template<class A> Bool
+InclusionApproximatorBase<A>::operator==(const InclusionApproximatorInterface& rhs) const {
+    return instance_of<InclusionApproximatorBase<A>>(&rhs);
+}
+
+template<class A> Bool
+InclusionApproximatorBase<A>::operator<(const InclusionApproximatorInterface& rhs) const {
+    return this->index() < rhs.index();
+}
+
 template<class A> ValidatedVectorMultivariateFunctionModelType
-InputApproximatorBase<A>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+InclusionApproximatorBase<A>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
 
     TimeStepType new_t = lower_bound(t+h);
 
@@ -468,7 +465,7 @@ InputApproximatorBase<A>::reach(InclusionVectorField const& ivf, BoxDomainType c
     return this->build_reach_function(evolve_function, phi, t, new_t);
 }
 
-template<class A> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<class A> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -482,7 +479,7 @@ template<class A> Vector<ValidatedScalarMultivariateFunction> InputApproximatorB
     return result;
 }
 
-template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::build_secondhalf_piecewise_reach_function(
+template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximatorBase<A>::build_secondhalf_piecewise_reach_function(
         ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t,
         TimeStepType const& new_t) const {
 
@@ -511,7 +508,7 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBa
     return compose(Phi,join(ef,tf,bf));
 }
 
-template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::build_reach_function(
+template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximatorBase<A>::build_reach_function(
         ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t,
         TimeStepType const& new_t) const {
 
@@ -540,7 +537,7 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBa
     return compose(Phi,join(ef,tf,bf));
 }
 
-template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const {
+template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximatorBase<A>::evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const {
     return partial_evaluate(reach_function,reach_function.result_size(),t);
 }
 
@@ -572,12 +569,12 @@ ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction
 }
 
 
-template<class A> Pair<StepSizeType,UpperBoxType> InputApproximatorBase<A>::flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const {
+template<class A> Pair<StepSizeType,UpperBoxType> InclusionApproximatorBase<A>::flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const {
     return EulerBounder().compute(f,domx,doma,hsug);
 }
 
 
-template<class A> ValidatedVectorMultivariateFunctionModelDP InputApproximatorBase<A>::
+template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximatorBase<A>::
 compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domx, Interval<TimeStepType> const& domt, BoxDomainType const& doma, UpperBoxType const& B) const {
 
     TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-3, step_sweep_threshold=1e-8, minimum_temporal_order=4, maximum_temporal_order=12);
@@ -589,14 +586,14 @@ compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainT
     return Phi;
 }
 
-template<class A> BoxDomainType InputApproximatorBase<A>::build_parameter_domain(BoxDomainType const& V) const {
+template<class A> BoxDomainType InclusionApproximatorBase<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
     for (Nat i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;
 }
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ZeroApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<ZeroApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = ValidatedScalarMultivariateFunction::zero(n+1);
@@ -604,7 +601,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Zer
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<ConstantApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<ConstantApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto result = Vector<ValidatedScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = ValidatedScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
@@ -612,7 +609,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Con
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<AffineApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<AffineApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto three = ValidatedScalarMultivariateFunction::constant(n+1+2*m,3_z);
@@ -631,7 +628,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Aff
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<SinusoidalApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<SinusoidalApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto pgamma = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
@@ -651,7 +648,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Sin
 }
 
 
-template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<PiecewiseApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<ValidatedScalarMultivariateFunction> InclusionApproximatorBase<PiecewiseApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
     auto zero = ValidatedScalarMultivariateFunction::zero(n+1+2*m);
     auto one = ValidatedScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -666,7 +663,7 @@ template<> Vector<ValidatedScalarMultivariateFunction> InputApproximatorBase<Pie
 }
 
 template<> ValidatedVectorMultivariateFunctionModelType
-InputApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+InclusionApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField const& ivf, BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
 
     auto n = ivf.dimension();
     auto m = ivf.number_of_inputs();

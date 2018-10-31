@@ -391,7 +391,7 @@ void export_numbers(pymodule& module)
     // TODO: These exports should be with FloatApproximation
     approximate_number_class.def(init<FloatDPApproximation>());
     approximate_number_class.def(init<FloatMPApproximation>());
-    
+
     define_elementary(module,approximate_number_class);
 
 
@@ -688,6 +688,10 @@ template<class PR> void export_float_bounds(pymodule& module)
 //    float_bounds_class.define_mixed_arithmetic<LowerNumericType>();
 //    float_bounds_class.define_mixed_arithmetic<UpperNumericType>();
 //    float_bounds_class.define_mixed_arithmetic<ValidatedNumericType>();
+
+    module.def("refinement", &_refinement_<FloatBounds<PR>,FloatBounds<PR>>);
+    module.def("refines", &_refines_<FloatBounds<PR>,FloatBounds<PR>>);
+    module.def("inconsistent", &_inconsistent_<FloatBounds<PR>,FloatBounds<PR>>);
 
     implicitly_convertible<FloatValue<PR>,FloatBounds<PR>>();
     implicitly_convertible<FloatBall<PR>,FloatBounds<PR>>();

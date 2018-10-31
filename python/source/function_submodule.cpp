@@ -153,16 +153,34 @@ Void export_polynomials(pybind11::module& module)
     export_polynomial<FloatDPApproximation>(module);
 }
 
-Void export_univariate_function(pybind11::module& module)
+template<class P> Void export_univariate_function(pybind11::module& module)
 {
-    pybind11::class_<EffectiveScalarUnivariateFunction> function_class(module,"EffectiveScalarUnivariateFunction");
-    function_class.def(pybind11::init<EffectiveScalarUnivariateFunction>());
-    function_class.def("__call__", (FloatDPBounds(EffectiveScalarUnivariateFunction::*)(const FloatDPBounds&)const)&EffectiveScalarUnivariateFunction::operator() );
-    function_class.def("__call__", (Differential<FloatDPBounds>(EffectiveScalarUnivariateFunction::*)(const Differential<FloatDPBounds>&)const)&EffectiveScalarUnivariateFunction::operator() );
+    pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
+    function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
+    function_class.def("__call__", (FloatDPBounds(ScalarUnivariateFunction<P>::*)(const FloatDPBounds&)const)&ScalarUnivariateFunction<P>::operator() );
+    function_class.def("__call__", (Differential<FloatDPBounds>(ScalarUnivariateFunction<P>::*)(const
+    Differential<FloatDPBounds>&)const)&ScalarUnivariateFunction<P>::operator() );
+    function_class.def("derivative", &ScalarUnivariateFunction<P>::derivative);
+//    function_class.def("differential", (Differential<FloatDPBounds>(ScalarUnivariateFunction<P>::*)(FloatDPBounds const&, DegreeType)) &ScalarUnivariateFunction<P>::differential);
+//    function_class.def("derivative", (FloatDPBounds(ScalarUnivariateFunction<P>::*)(const FloatDPBounds&)const)&ScalarUnivariateFunction<P>::derivative );
+    module.def("derivative", (FloatDPBounds(*)(const ScalarUnivariateFunction<P>&, const FloatDPBounds&))&derivative );
+    module.def("second_derivative",
+        [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
+    module.def("differential", (Differential<FloatDPBounds>(*)(ScalarUnivariateFunction<P> const&, FloatDPBounds const&, DegreeType)) &differential);
 
-    function_class.def_static("constant", (EffectiveScalarUnivariateFunction(*)(IntervalDomainType,EffectiveNumber)) &EffectiveScalarUnivariateFunction::constant);
-    function_class.def_static("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
+    function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(IntervalDomainType,Number<P>)) &ScalarUnivariateFunction<P>::constant);
+    function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::coordinate);
+    function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::identity);
 
+    define_elementary_algebra<ScalarUnivariateFunction<P>,Number<P>>(module,function_class);
+
+    function_class.def("__str__", &__cstr__<ScalarUnivariateFunction<P>>);
+}
+
+Void export_univariate_functions(pybind11::module& module)
+{
+    export_univariate_function<EffectiveTag>(module);
+    export_univariate_function<ValidatedTag>(module);
 }
 
 template<class C, class F> void def(pybind11::class_<C>& c, const char* n, F const& f) {
@@ -260,8 +278,8 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<EffectiveTag>>());
         pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
     }
-    
-    
+
+
 //FIXME
 //    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
 //    scalar_function_class.def("__le__", &__le__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
@@ -379,7 +397,7 @@ Void function_submodule(pybind11::module& module) {
 
     export_polynomials(module);
 
-    export_univariate_function(module);
+    export_univariate_functions(module);
     export_scalar_functions(module);
     export_vector_functions(module);
 

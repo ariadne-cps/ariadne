@@ -277,6 +277,9 @@ Void export_intervals(pybind11::module& module) {
     export_interval<ApproximateIntervalType>(module,"ApproximateInterval");
     export_interval<DyadicInterval>(module,"DyadicInterval");
     export_interval<RealInterval>(module,"RealInterval");
+
+    module.def("cast_singleton", (FloatDPBounds(*)(Interval<FloatDPUpperBound> const&)) &cast_singleton);
+    module.def("cast_singleton", (FloatMPBounds(*)(Interval<FloatMPUpperBound> const&)) &cast_singleton);
 }
 
 template<class BX> Void export_box(pybind11::module& module, std::string name)

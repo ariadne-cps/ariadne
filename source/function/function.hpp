@@ -308,7 +308,7 @@ Function<P,D,C> derivative(Function<P,D,C> const& f) {
 
 template<class P, class X> Scalar<EvaluateType<P,X>>
 derivative(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
-    return differential(f,x,1u).gradient(); }
+    return differential(f,x,1u).gradient()[0]; }
 
 template<class P, class X> Vector<EvaluateType<P,X>>
 tangent(const VectorUnivariateFunction<P>& f, const Scalar<X>& x) {

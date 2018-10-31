@@ -29,8 +29,8 @@ namespace Ariadne {
 
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, TimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
 
@@ -53,7 +53,7 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     auto integrator = InclusionEvolver(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
     integrator.verbosity = verbosity;
@@ -98,10 +98,10 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
-        List<InputApproximationKind> singleapproximation = {appro};
+        List<InputApproximation> singleapproximation = {appro};
         std::cout << appro << std::endl;
         run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,freq,verbosity,draw);
     }
@@ -119,12 +119,12 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     bool draw = false;
     DRAWING_METHOD = DrawingMethod::BOX;
 
-    List<InputApproximationKind> approximations;
-    approximations.append(InputApproximationKind::ZERO);
-    approximations.append(InputApproximationKind::CONSTANT);
-    approximations.append(InputApproximationKind::AFFINE);
-    approximations.append(InputApproximationKind::SINUSOIDAL);
-    approximations.append(InputApproximationKind::PIECEWISE);
+    List<InputApproximation> approximations;
+    approximations.append(ZeroApproximation());
+    approximations.append(ConstantApproximation());
+    approximations.append(AffineApproximation());
+    approximations.append(SinusoidalApproximation());
+    approximations.append(PiecewiseApproximation());
 
     run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);
     //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);

@@ -274,18 +274,13 @@ InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputAppro
 }
 
 
-InclusionEvolver::InclusionEvolver(List<InputApproximation> approximations, SweeperDP sweeper, StepSizeType step_size_)
+InclusionEvolver::InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size_, Reconditioner const& reconditioner)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
-    , _number_of_steps_between_simplifications(8)
-    , _number_of_variables_to_keep(4)
+    , _reconditioner(reconditioner)
 {
     assert(approximations.size()>0);
-}
-
-Bool InclusionEvolver::must_recondition(Nat step) const {
-    return (step%this->_number_of_steps_between_simplifications == this->_number_of_steps_between_simplifications-1);
 }
 
 List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& tmax) {
@@ -299,7 +294,6 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
     auto n=ivf.dimension();
     auto m=ivf.number_of_inputs();
-    auto freq=this->_number_of_steps_between_simplifications;
 
     StepSizeType hsug(this->_step_size);
 
@@ -397,7 +391,9 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (must_recondition(step)) {
+        if (_reconditioner.must_recondition(step)) {
+
+            auto freq = _reconditioner.number_of_steps_between_simplifications();
 
             double base = 0;
             double rho = 6.0;
@@ -409,16 +405,15 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
             Nat num_variables_to_keep(base);
             ARIADNE_LOG(5,"simplifying to "<<num_variables_to_keep<<" variables\n");
-            LohnerReconditioner& lreconditioner = dynamic_cast<LohnerReconditioner&>(*this->_reconditioner);
-            lreconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
-            lreconditioner.simplify(evolve_function);
+            _reconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
+            _reconditioner.simplify(evolve_function);
 
             for (auto entry: approximation_local_frequencies) {
                 approximation_local_frequencies[entry.first] = 0;
             }
         }
 
-        evolve_function = this->_reconditioner->expand_errors(evolve_function);
+        evolve_function = _reconditioner.expand_errors(evolve_function);
 
         ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
 
@@ -702,23 +697,6 @@ InclusionApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField co
 }
 
 
-LohnerReconditioner::LohnerReconditioner(SweeperDP sweeper, Nat number_of_variables_to_keep_)
-    : _sweeper(sweeper), _number_of_variables_to_keep(number_of_variables_to_keep_) {
-    this->verbosity = 0;
-}
-
-ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
-    BoxDomainType domain=f.domain();
-    BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
-
-    ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
-
-    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
-    ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
-    for(SizeType i=0; i!=result.result_size(); ++i) { result[i].set_error(0); }
-    return result;
-}
-
 struct IndexedFloatDPError
 {
     SizeType index;
@@ -737,6 +715,18 @@ struct IndexedFloatDPErrorComparator
         return (ifl1.value.raw() < ifl2.value.raw());
     }
 };
+
+ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
+    BoxDomainType domain=f.domain();
+    BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
+
+    ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
+
+    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
+    for(SizeType i=0; i!=result.result_size(); ++i) { result[i].set_error(0); }
+    return result;
+}
 
 Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f) const {
     ARIADNE_LOG(6,"simplifying\n");

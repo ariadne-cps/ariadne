@@ -244,7 +244,7 @@ class InclusionApproximatorInterface;
 
 class InclusionApproximatorFactory {
 public:
-    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximation const& approximation, SweeperDP const& sweeper) const;
+    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximation const& approximation) const;
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -328,10 +328,9 @@ class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggabl
     friend class InclusionApproximatorFactory;
   protected:
     InclusionVectorField const& _ivf;
-    SweeperDP _sweeper;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
-    InclusionApproximatorBase(InclusionVectorField const& ivf, SweeperDP const& sweeper) :
-        _ivf(ivf), _sweeper(sweeper), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _num_params_per_input(const_num_params_per_input<A>()) { }
+    InclusionApproximatorBase(InclusionVectorField const& ivf) :
+        _ivf(ivf), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _num_params_per_input(const_num_params_per_input<A>()) { }
   private:
     const Nat _num_params_per_input;
   public:
@@ -372,14 +371,12 @@ class ReconditionerInterface {
 
 
 class LohnerReconditioner : public ReconditionerInterface, public Loggable {
-    SweeperDP _sweeper;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_variables_to_keep;
 public:
-    LohnerReconditioner(SweeperDP sweeper, Nat number_of_steps_between_simplifications_, Nat number_of_variables_to_keep_)
-        : _sweeper(sweeper), _number_of_steps_between_simplifications(number_of_steps_between_simplifications_), _number_of_variables_to_keep(number_of_variables_to_keep_) { }
+    LohnerReconditioner(Nat number_of_steps_between_simplifications_, Nat number_of_variables_to_keep_)
+        : _number_of_steps_between_simplifications(number_of_steps_between_simplifications_), _number_of_variables_to_keep(number_of_variables_to_keep_) { }
     virtual LohnerReconditioner* clone() const override { return new LohnerReconditioner(*this); }
-    Void set_sweeper(SweeperDP sweeper) { _sweeper = sweeper; }
     virtual Void set_number_of_variables_to_keep(Nat num_variables_to_keep) override { _number_of_variables_to_keep = num_variables_to_keep; }
     Void set_number_of_steps_between_simplifications(Nat number_of_steps_between_simplifications) { _number_of_steps_between_simplifications = number_of_steps_between_simplifications; }
     Nat number_of_steps_between_simplifications() const { return _number_of_steps_between_simplifications; }

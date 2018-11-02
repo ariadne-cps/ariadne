@@ -126,7 +126,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(SinusoidalApproximation());
     approximations.append(PiecewiseApproximation());
 
-    LohnerReconditioner reconditioner(sweeper,freq,10000);
+    LohnerReconditioner reconditioner(freq,10000);
 
     run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity,draw);
     //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity,draw);

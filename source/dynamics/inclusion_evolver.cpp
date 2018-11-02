@@ -255,13 +255,13 @@ template<class A, class R> Vector<FloatDPError> ApproximationErrorProcessor<A,R>
 }
 
 InclusionApproximatorHandle
-InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximation const& approximation, SweeperDP const& sweeper) const {
-    if (approximation.handles(ZeroApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ZeroApproximation>(ivf,sweeper)));
-    if (approximation.handles(ConstantApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ConstantApproximation>(ivf,sweeper)));
-    if (approximation.handles(AffineApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<AffineApproximation>(ivf,sweeper)));
-    if (approximation.handles(SinusoidalApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<SinusoidalApproximation>(ivf,sweeper)));
-    if (approximation.handles(PiecewiseApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<PiecewiseApproximation>(ivf,sweeper)));
-    ARIADNE_FAIL_MSG("Unhandled input approximation kind " << approximation << "\n");
+InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximation const& approximation) const {
+    if (approximation.handles(ZeroApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ZeroApproximation>(ivf)));
+    if (approximation.handles(ConstantApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ConstantApproximation>(ivf)));
+    if (approximation.handles(AffineApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<AffineApproximation>(ivf)));
+    if (approximation.handles(SinusoidalApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<SinusoidalApproximation>(ivf)));
+    if (approximation.handles(PiecewiseApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<PiecewiseApproximation>(ivf)));
+    ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation << "\n");
 }
 
 
@@ -295,7 +295,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
     List<ScheduledApproximator> schedule;
     InclusionApproximatorFactory factory;
     for (auto appro: _approximations) {
-        schedule.push_back(ScheduledApproximator(0u,factory.create(ivf,appro,_sweeper)));
+        schedule.push_back(ScheduledApproximator(0u,factory.create(ivf,appro)));
     }
 
     Map<InclusionApproximatorHandle,SizeType> approximation_global_frequencies, approximation_local_frequencies;
@@ -472,6 +472,8 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximat
     // Evolve function is e(x,a,b) at s; Flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a,b),t-s,b))
 
+    auto swp = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(Phi.reference()).properties();
+
     SizeType n=evolve_function.result_size();
     SizeType b=Phi.argument_size()-(n+1);
 
@@ -481,7 +483,6 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximat
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
     BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
-    auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
     BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
@@ -501,6 +502,8 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximat
     // Evolve function is e(x,a) at s; flow is phi(x,h,b)
     // Want (x,t,a,b):->phi(e(x,a),t-s,b))
 
+    auto swp = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(Phi.reference()).properties();
+
     SizeType n=evolve_function.result_size();
 
     SizeType a=evolve_function.argument_size()-n;
@@ -510,7 +513,6 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximat
     BoxDomainType PA=evolve_function.domain()[range(n,n+a)];
     BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
-    auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
     BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
@@ -708,12 +710,15 @@ struct IndexedFloatDPErrorComparator
 };
 
 ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
+
+    ValidatedVectorMultivariateTaylorFunctionModelDP const& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(f.reference());
+
     BoxDomainType domain=f.domain();
     BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
 
-    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
+    ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,tf.properties());
     ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
     for(SizeType i=0; i!=result.result_size(); ++i) { result[i].set_error(0); }
     return result;
@@ -729,6 +734,8 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
     ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
 
     ValidatedVectorMultivariateTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(f.reference());
+
+    auto sweeper = tf.properties();
 
     // Compute effect of error terms, but not of original variables;
     Matrix<FloatDPError> C(m,n);
@@ -793,11 +800,11 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
 
     auto old_domain=f.domain();
     auto new_domain=BoxDomainType(Vector<IntervalDomainType>(keep_indices.size(),[&old_domain,&keep_indices](SizeType j){return old_domain[keep_indices[j]];}));
-    auto projection=ValidatedVectorMultivariateTaylorFunctionModelDP(m,new_domain,this->_sweeper);
-    for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(new_domain,i,this->_sweeper); }
+    auto projection=ValidatedVectorMultivariateTaylorFunctionModelDP(m,new_domain,sweeper);
+    for (auto i : range(new_domain.size())) { projection[keep_indices[i]]=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(new_domain,i,sweeper); }
     for (auto i : range(remove_indices.size())) {
         auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
-        projection[j]=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(new_domain,cj,this->_sweeper); }
+        projection[j]=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(new_domain,cj,sweeper); }
     f=compose(f,projection);
 }
 

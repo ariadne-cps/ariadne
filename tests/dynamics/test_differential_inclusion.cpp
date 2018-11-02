@@ -40,20 +40,20 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity) const
     {
         for (auto appro: approximations) {
-            List<InputApproximationKind> singleapproximation = {appro};
+            List<InputApproximation> singleapproximation = {appro};
             std::cout << appro << std::endl;
-            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
+            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,reconditioner,verbosity);
         }
     }
 
-    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity) const
     {
-        auto integrator = InclusionEvolver(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
-        integrator.verbosity = verbosity;
-        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
+        auto evolver = InclusionEvolver(approximations,sweeper,step,reconditioner);
+        evolver.verbosity = verbosity;
+        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.flow(ivf,initial,evolution_time);
     }
 
     Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
@@ -65,14 +65,11 @@ class TestInclusionIntegrator {
         ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
         unsigned int verbosity = 0;
 
-        List<InputApproximationKind> approximations;
-        approximations.append(InputApproximationKind::ZERO);
-        approximations.append(InputApproximationKind::CONSTANT);
-        approximations.append(InputApproximationKind::AFFINE);
-        approximations.append(InputApproximationKind::SINUSOIDAL);
-        approximations.append(InputApproximationKind::PIECEWISE);
+        LohnerReconditioner reconditioner(freq,10000);
 
-        this->run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity);
+        List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
+
+        this->run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity);
     }
 
   public:

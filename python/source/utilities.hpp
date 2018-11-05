@@ -176,11 +176,14 @@ template<class... AS> auto _sgn_(AS const& ... as) -> decltype(sgn(as...)) { ret
 
 template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 
+template<class F, class... AS> auto __call__(F const& f, AS... as) -> decltype(f(as...)) { return f(as...); }
 template<class... AS> auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
 template<class... AS> auto _partial_evaluate_(AS... as) -> decltype(partial_evaluate(as...)) { return partial_evaluate(as...); }
 template<class... AS> auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
 template<class... AS> auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
 template<class... AS> auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
+
+template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
 template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }
 template<class... AS> auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
@@ -511,7 +514,7 @@ pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module& module,
     return pyclass;
 }
 
- 
+
 } // namespace Ariadne
 
 

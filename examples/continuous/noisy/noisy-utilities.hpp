@@ -53,9 +53,9 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
 
-    auto integrator = InclusionEvolver(approximations,sweeper,static_cast<StepSizeType>(step),reconditioner);
+    auto integrator = InclusionEvolver(approximations,sweeper,static_cast<StepSizeType>(step),approximator_factory,reconditioner);
     integrator.verbosity = verbosity;
 
     StopWatch sw;
@@ -98,12 +98,12 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         std::cout << appro << std::endl;
-        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,reconditioner,verbosity,draw);
+        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,approximator_factory,reconditioner,verbosity,draw);
     }
 }
 
@@ -126,10 +126,19 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(SinusoidalApproximation());
     approximations.append(PiecewiseApproximation());
 
+    InclusionApproximatorFactory approximator_factory(TaylorPicardIntegrator(
+            maximum_error=1e-3,
+            sweep_threshold=1e-8,
+            lipschitz_constant=0.5,
+            step_maximum_error=1e-3,
+            step_sweep_threshold=1e-8,
+            minimum_temporal_order=4,
+            maximum_temporal_order=12));
+
     LohnerReconditioner reconditioner(freq,10000);
 
-    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity,draw);
-    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity,draw);
+    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
+    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
 }
 
 void run_noisy_system(SystemType system) {

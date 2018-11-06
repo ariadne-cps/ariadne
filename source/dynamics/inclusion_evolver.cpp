@@ -337,19 +337,20 @@ template<class A, class R> Vector<FloatDPError> ApproximationErrorProcessor<A,R>
 
 InclusionApproximatorHandle
 InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputApproximation const& approximation) const {
-    if (approximation.handles(ZeroApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ZeroApproximation>(ivf)));
-    if (approximation.handles(ConstantApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ConstantApproximation>(ivf)));
-    if (approximation.handles(AffineApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<AffineApproximation>(ivf)));
-    if (approximation.handles(SinusoidalApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<SinusoidalApproximation>(ivf)));
-    if (approximation.handles(PiecewiseApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<PiecewiseApproximation>(ivf)));
+    if (approximation.handles(ZeroApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ZeroApproximation>(ivf,_integrator)));
+    if (approximation.handles(ConstantApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<ConstantApproximation>(ivf,_integrator)));
+    if (approximation.handles(AffineApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<AffineApproximation>(ivf,_integrator)));
+    if (approximation.handles(SinusoidalApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<SinusoidalApproximation>(ivf,_integrator)));
+    if (approximation.handles(PiecewiseApproximation())) return InclusionApproximatorHandle(SharedPointer<InclusionApproximatorInterface>(new InclusionApproximatorBase<PiecewiseApproximation>(ivf,_integrator)));
     ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation << "\n");
 }
 
 
-InclusionEvolver::InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size_, Reconditioner const& reconditioner)
+InclusionEvolver::InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size_, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner)
     : _approximations(approximations)
     , _sweeper(sweeper)
     , _step_size(step_size_)
+    , _approximator_factory(approximator_factory.clone())
     , _reconditioner(reconditioner)
 {
     assert(approximations.size()>0);
@@ -373,9 +374,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
     TimeStepType t;
 
-    InclusionApproximatorFactory factory;
-
-    InclusionEvolverState state(ivf,_approximations,factory);
+    InclusionEvolverState state(ivf,_approximations,*_approximator_factory);
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
 
@@ -490,7 +489,7 @@ InclusionApproximatorBase<A>::reach(InclusionVectorField const& ivf, BoxDomainTy
     ARIADNE_LOG(6,"w:"<<w<<"\n");
     auto Fw = build_Fw(ivf.function(),w);
     ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-    auto phi = this->compute_flow_function(Fw,domx,domt,doma,B);
+    auto phi = this->_integrator->flow_step(Fw,domx,domt,doma,B);
     add_errors(phi,e);
 
     return this->build_reach_function(evolve_function, phi, t, new_t);
@@ -606,19 +605,6 @@ template<class A> Pair<StepSizeType,UpperBoxType> InclusionApproximatorBase<A>::
     return EulerBounder().compute(f,domx,doma,hsug);
 }
 
-
-template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionApproximatorBase<A>::
-compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domx, Interval<TimeStepType> const& domt, BoxDomainType const& doma, UpperBoxType const& B) const {
-
-    TaylorPicardIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-3, step_sweep_threshold=1e-8, minimum_temporal_order=4, maximum_temporal_order=12);
-    auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
-/*
-    TaylorSeriesIntegrator integrator(maximum_error=1e-3,sweep_threshold=1e-8,lipschitz_constant=0.5, step_maximum_error=1e-5, step_sweep_threshold=1e-8,maximum_temporal_order=6);
-    auto Phi=integrator.flow_step(dyn,domx,domt,doma,B);
-*/
-    return Phi;
-}
-
 template<class A> BoxDomainType InclusionApproximatorBase<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
     for (Nat i=0; i<this->_num_params_per_input; ++i)
@@ -718,7 +704,7 @@ InclusionApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField co
     auto Fw_hlf = build_Fw(F,w_hlf);
     ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
 
-    auto phi_hlf = this->compute_flow_function(Fw_hlf,domx,domt_first,doma,B);
+    auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
     auto intermediate_evolve=this->evolve(intermediate_reach,intermediate_t);
 
@@ -728,7 +714,7 @@ InclusionApproximatorBase<PiecewiseApproximation>::reach(InclusionVectorField co
     ARIADNE_LOG(6,"w:"<<w<<"\n");
     auto Fw = build_Fw(F, w);
     ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
-    auto phi = this->compute_flow_function(Fw,domx_second,domt_second,doma,B);
+    auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);
 
     return this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);

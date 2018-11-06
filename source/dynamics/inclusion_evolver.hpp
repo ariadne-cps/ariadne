@@ -244,8 +244,11 @@ class InclusionApproximatorHandle;
 class InclusionApproximatorInterface;
 
 class InclusionApproximatorFactory {
+    SharedPointer<IntegratorInterface> _integrator;
 public:
+    InclusionApproximatorFactory(IntegratorInterface const& integrator) : _integrator(integrator.clone()) { }
     InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximation const& approximation) const;
+    InclusionApproximatorFactory* clone() const { return new InclusionApproximatorFactory(*this); }
 };
 
 template<class A> class ApproximationErrorProcessorInterface {
@@ -329,9 +332,10 @@ class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggabl
     friend class InclusionApproximatorFactory;
   protected:
     InclusionVectorField const& _ivf;
+    SharedPointer<IntegratorInterface> _integrator;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
-    InclusionApproximatorBase(InclusionVectorField const& ivf) :
-        _ivf(ivf), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _num_params_per_input(const_num_params_per_input<A>()) { }
+    InclusionApproximatorBase(InclusionVectorField const& ivf, SharedPointer<IntegratorInterface> const& integrator) :
+        _ivf(ivf), _integrator(integrator), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _num_params_per_input(const_num_params_per_input<A>()) { }
   private:
     const Nat _num_params_per_input;
   public:
@@ -351,7 +355,6 @@ class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggabl
   private:
     Vector<ErrorType> compute_errors(StepSizeType const& h, UpperBoxType const& B) const { return _processor->process(PositiveFloatDPValue(h,DoublePrecision()),B); };
     BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
-    ValidatedVectorMultivariateFunctionModelType compute_flow_function(ValidatedVectorMultivariateFunction const& dyn, BoxDomainType const& domx, Interval<TimeStepType> const& domt, BoxDomainType const& doma, UpperBoxType const& B) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
     ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
     Vector<ValidatedScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
@@ -412,10 +415,10 @@ class InclusionEvolver : public Loggable {
     List<InputApproximation> _approximations;
     SweeperDP _sweeper;
     StepSizeType _step_size;
+    SharedPointer<InclusionApproximatorFactory> _approximator_factory;
     Reconditioner _reconditioner;
-
   public:
-    InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size, Reconditioner const& reconditioner);
+    InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner);
   public:
     List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& T);
 };

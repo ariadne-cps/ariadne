@@ -65,6 +65,90 @@ struct ScheduledApproximatorComparator {
         return (sa1.step > sa2.step); }
 };
 
+
+class InclusionEvolverState {
+  private:
+    Nat _step;
+    List<ScheduledApproximator> _schedule;
+    Map<InclusionApproximatorHandle,Nat> _approximator_check_delay;
+    Map<InclusionApproximatorHandle,Nat> _approximator_global_optima_count;
+    Map<InclusionApproximatorHandle,Nat> _approximator_local_optima_count;
+  public:
+    InclusionEvolverState(InclusionVectorField const& ivf, List<InputApproximation> const& approximations, InclusionApproximatorFactory const& approximator_factory)
+        : _step(0u)
+    {
+        for (auto appro : approximations) {
+            InclusionApproximatorHandle approximator = approximator_factory.create(ivf,appro);
+            _schedule.push_back(ScheduledApproximator(0u,approximator));
+            _approximator_global_optima_count[approximator] = 0;
+            _approximator_local_optima_count[approximator] = 0;
+            _approximator_check_delay[approximator] = 0;
+        }
+    }
+
+    Nat step() const { return _step; }
+    List<ScheduledApproximator> const& schedule() const { return _schedule; }
+    Map<InclusionApproximatorHandle,Nat> const& check_delay() const { return _approximator_check_delay; }
+    Map<InclusionApproximatorHandle,Nat> const& global_optima_count() const { return _approximator_global_optima_count; }
+    Map<InclusionApproximatorHandle,Nat> const& local_optima_count() const { return _approximator_local_optima_count; }
+
+    Void reset_local_optima_count() {
+        for (auto entry : _approximator_local_optima_count)
+            _approximator_local_optima_count[entry.first] = 0;
+    }
+
+    Void update_with_best(InclusionApproximatorHandle const& best) {
+        for (auto appro : approximators_to_use()) {
+            if (best == appro) _reset_check_delay(appro);
+            else _increase_check_delay(appro);
+
+            Nat offset = 1u<<_approximator_check_delay[appro];
+            _schedule.push_back(ScheduledApproximator(_step+offset,appro));
+        }
+        std::sort(_schedule.begin(),_schedule.end(),ScheduledApproximatorComparator());
+
+        _increase_optima_count(best);
+    }
+
+    Void append_to_schedule(Nat const& step, InclusionApproximatorHandle const& approximator) {
+        _schedule.push_back(ScheduledApproximator(step,approximator));
+    }
+
+    List<InclusionApproximatorHandle> approximators_to_use() const {
+        List<InclusionApproximatorHandle> result;
+        for (auto i = _schedule.size(); i > 0; --i) {
+            auto entry = _schedule[i-1];
+            if (entry.step == _step) {
+                result.push_back(entry.approximator);
+            } else if (entry.step > _step) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    Void next_step() {
+        while (!_schedule.empty()) {
+            auto entry = _schedule.back();
+            if (entry.step == _step) {
+                _schedule.pop_back();
+            } else if (entry.step > _step) {
+                break;
+            }
+        }
+        _step++;
+    }
+
+  private:
+    Void _reset_check_delay(InclusionApproximatorHandle const& approximator) { _approximator_check_delay[approximator] = 0; }
+    Void _increase_check_delay(InclusionApproximatorHandle const& approximator) { _approximator_check_delay[approximator]++; }
+    Void _increase_optima_count(InclusionApproximatorHandle const& approximator) {
+        _approximator_global_optima_count[approximator]++;
+        _approximator_local_optima_count[approximator]++;
+    }
+};
+
+
 inline char activity_symbol(SizeType step) {
     switch (step % 4) {
     case 0: return '\\';
@@ -74,13 +158,10 @@ inline char activity_symbol(SizeType step) {
     }
 }
 
-inline Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag> const& f, Box<ExactIntervalType> const& bx) {
-    return apply(f,Box<UpperIntervalType>(bx));
-}
 
-inline Map<InclusionApproximatorHandle,FloatDP> convert_to_percentages(Map<InclusionApproximatorHandle,SizeType> const& approximation_global_frequencies) {
+inline Map<InclusionApproximatorHandle,FloatDP> convert_to_percentages(Map<InclusionApproximatorHandle,Nat> const& approximation_global_frequencies) {
 
-    SizeType total_steps(0);
+    Nat total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
@@ -292,41 +373,24 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
 
     TimeStepType t;
 
-    List<ScheduledApproximator> schedule;
     InclusionApproximatorFactory factory;
-    for (auto appro: _approximations) {
-        schedule.push_back(ScheduledApproximator(0u,factory.create(ivf,appro)));
-    }
 
-    Map<InclusionApproximatorHandle,SizeType> approximation_global_frequencies, approximation_local_frequencies;
-    Map<InclusionApproximatorHandle,Nat> delays;
-    for (auto entry: schedule) {
-        approximation_global_frequencies[entry.approximator] = 0;
-        approximation_local_frequencies[entry.approximator] = 0;
-        delays[entry.approximator] = 0;
-    }
+    InclusionEvolverState state(ivf,_approximations,factory);
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
-    Nat step = 0u;
+
     while (possibly(t<lower_bound(tmax))) {
 
         if (verbosity == 1)
-            std::cout << "\r[" << activity_symbol(step) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
+            std::cout << "\r[" << activity_symbol(state.step()) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
 
-        ARIADNE_LOG(3,"step#:"<<step<<", t:"<<t<<", hsug:"<<hsug << "\n");
-
-        List<InclusionApproximatorHandle> approximators_to_use;
-        while (!schedule.empty()) {
-            auto entry = schedule.back();
-            if (entry.step == step) {
-                approximators_to_use.push_back(entry.approximator);
-                schedule.pop_back();
-            } else if (entry.step > step) {
-                break;
-            }
-        }
+        ARIADNE_LOG(3,"step#:"<<state.step()<<", t:"<<t<<", hsug:"<<hsug << "\n");
 
         ARIADNE_LOG(4,"n. of parameters="<<evolve_function.argument_size()<<"\n");
+
+        auto approximators_to_use = state.approximators_to_use();
+
+        ARIADNE_LOG(4,"approximators to use="<<approximators_to_use<<"\n");
 
         auto domx = cast_exact_box(evolve_function.range());
 
@@ -342,10 +406,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         InclusionApproximatorHandle best = approximators_to_use.at(0);
         FloatDP best_volume = FloatDP::inf(DoublePrecision());
 
-        ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
-
         for (auto approximator : approximators_to_use) {
-            ARIADNE_LOG(5,"checking "<<approximator<<" approximation\n");
+            ARIADNE_LOG(5,"checking "<<approximator<<" approximator\n");
 
             auto current_reach=approximator.reach(ivf,domx,evolve_function,B,t,h);
             auto current_evolve=approximator.evolve(current_reach,new_t);
@@ -353,7 +415,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
             FloatDP current_volume = volume(current_evolve.range());
             if (current_volume < best_volume) {
                 best = approximator;
-                ARIADNE_LOG(6,"best approximation: " << best << "\n");
+                ARIADNE_LOG(6,"best approximator: " << best << "\n");
                 best_reach_function = current_reach;
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
@@ -361,37 +423,26 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         }
 
         if (approximators_to_use.size() > 1)
-            ARIADNE_LOG(4,"chosen approximation: " << best << "\n");
+            ARIADNE_LOG(4,"chosen approximator: " << best << "\n");
 
-        for (auto appro : approximators_to_use) {
-            if (best == appro)
-                delays[appro] = 0;
-            else
-                delays[appro]++;
-
-            Nat offset = 1u<<delays[appro];
-            schedule.push_back(ScheduledApproximator(step+offset,appro));
-        }
-        std::sort(schedule.begin(),schedule.end(),ScheduledApproximatorComparator());
-
-        ARIADNE_LOG(4,"updated schedule: " << schedule << "\n");
-
-        approximation_global_frequencies[best] += 1;
-        approximation_local_frequencies[best] += 1;
+        state.update_with_best(best);
+        ARIADNE_LOG(4,"updated schedule: " << state.schedule() << "\n");
 
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
-        if (_reconditioner.must_recondition(step)) {
+        result.append(reach_function);
+
+        if (_reconditioner.must_recondition(state.step())) {
 
             auto freq = _reconditioner.number_of_steps_between_simplifications();
 
             double base = 0;
             double rho = 6.0;
-            for (auto appro: approximation_local_frequencies) {
-                SizeType ppi = appro.first.num_params_per_input();
+            for (auto entry: state.local_optima_count()) {
+                SizeType ppi = entry.first.num_params_per_input();
                 double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
-                base += partial*appro.second/freq;
+                base += partial*entry.second/freq;
             }
 
             Nat num_variables_to_keep(base);
@@ -399,23 +450,17 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
             _reconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
             _reconditioner.simplify(evolve_function);
 
-            for (auto entry: approximation_local_frequencies) {
-                approximation_local_frequencies[entry.first] = 0;
-            }
+            state.reset_local_optima_count();
         }
 
         evolve_function = _reconditioner.expand_errors(evolve_function);
-
         ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
 
-        step+=1;
-
+        state.next_step();
         t=new_t;
-        result.append(reach_function);
-
     }
 
-    ARIADNE_LOG(2,"approximation % ="<<convert_to_percentages(approximation_global_frequencies)<<"\n");
+    ARIADNE_LOG(2,"approximation % ="<<convert_to_percentages(state.global_optima_count())<<"\n");
 
     return result;
 }

@@ -365,6 +365,18 @@ InclusionEvolver::InclusionEvolver(List<InputApproximation> const& approximation
     assert(approximations.size()>0);
 }
 
+Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {
+    if (_reconditioner.must_reduce_parameters(state)) {
+        _reconditioner.update_from(state);
+        _reconditioner.reduce_parameters(function);
+        state.reset_local_optima_count();
+    }
+
+    if (_reconditioner.must_incorporate_errors(state)) {
+        function = _reconditioner.incorporate_errors(function);
+    }
+}
+
 List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& tmax) {
 
     ARIADNE_LOG(2,"Dynamics: "<<ivf<<"\n");
@@ -373,9 +385,6 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
     const ValidatedVectorMultivariateFunction& F = ivf.function();
     const BoxDomainType& V = ivf.inputs();
     const BoxDomainType& X0 = initial;
-
-    auto n=ivf.dimension();
-    auto m=ivf.number_of_inputs();
 
     StepSizeType hsug(this->_step_size);
 
@@ -439,30 +448,11 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         reach_function = best_reach_function;
         evolve_function = best_evolve_function;
 
+        ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
+
         result.append(reach_function);
 
-        if (_reconditioner.must_recondition(state.step())) {
-
-            auto freq = _reconditioner.number_of_steps_between_simplifications();
-
-            double base = 0;
-            double rho = 6.0;
-            for (auto entry: state.local_optima_count()) {
-                SizeType ppi = entry.first.num_params_per_input();
-                double partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
-                base += partial*entry.second/freq;
-            }
-
-            Nat num_variables_to_keep(base);
-            ARIADNE_LOG(5,"simplifying to "<<num_variables_to_keep<<" variables\n");
-            _reconditioner.set_number_of_variables_to_keep(num_variables_to_keep);
-            _reconditioner.simplify(evolve_function);
-
-            state.reset_local_optima_count();
-        }
-
-        evolve_function = _reconditioner.expand_errors(evolve_function);
-        ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
+        this->_recondition_and_update(evolve_function,state);
 
         state.next_step();
         t=new_t;
@@ -749,7 +739,31 @@ struct IndexedFloatDPErrorComparator
     }
 };
 
-ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
+Bool LohnerReconditioner::must_reduce_parameters(InclusionEvolverState const& state) const {
+    return (state.step()%_number_of_steps_between_simplifications == _number_of_steps_between_simplifications-1);
+}
+
+Bool LohnerReconditioner::must_incorporate_errors(InclusionEvolverState const& state) const {
+    return true;
+}
+
+Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
+    auto freq = _number_of_steps_between_simplifications;
+    auto n = _number_of_variables;
+    auto m = _number_of_inputs;
+
+    FloatDP npk = 0;
+    FloatDP rho = _ratio_of_parameters_to_keep;
+    for (auto entry: state.local_optima_count()) {
+        SizeType ppi = entry.first.num_params_per_input();
+        FloatDP partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
+        npk += partial*entry.second/freq;
+    }
+
+    _number_of_parameters_to_keep = static_cast<Nat>(round(npk).get_d());
+}
+
+ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::incorporate_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
 
     ValidatedVectorMultivariateTaylorFunctionModelDP const& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(f.reference());
 
@@ -764,14 +778,14 @@ ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(Va
     return result;
 }
 
-Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f) const {
+Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionModelDP& f) const {
     ARIADNE_LOG(6,"simplifying\n");
     ARIADNE_LOG(6,"f="<<f<<"\n");
 
     auto m=f.argument_size();
     auto n=f.result_size();
 
-    ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_variables_to_keep <<"\n");
+    ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_parameters_to_keep <<"\n");
 
     ValidatedVectorMultivariateTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(f.reference());
 
@@ -809,13 +823,13 @@ Void LohnerReconditioner::simplify(ValidatedVectorMultivariateFunctionModelDP& f
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
 
-    if (m <= this->_number_of_variables_to_keep) {
+    if (m <= this->_number_of_parameters_to_keep) {
         ARIADNE_LOG(6, "Insufficient number of variables, not simplifying\n");
         return;
     }
 
-    Nat number_of_variables_to_remove = m - this->_number_of_variables_to_keep;
-    ARIADNE_LOG(6, "Number of variables to remove:" << number_of_variables_to_remove<<"\n");
+    Nat number_of_variables_to_remove = m - this->_number_of_parameters_to_keep;
+    ARIADNE_LOG(6, "Number of parameters to remove:" << _number_of_parameters_to_keep<<"\n");
 
     for (auto j : range(number_of_variables_to_remove)) {
         remove_indices.append(SCe[j].index);

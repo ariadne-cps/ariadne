@@ -360,34 +360,40 @@ class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggabl
     Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
 };
 
+class InclusionEvolverState;
 
 class ReconditionerInterface {
   public:
-    virtual Void simplify(ValidatedVectorMultivariateFunctionModelType& phi) const = 0;
-    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType const& Phi) const = 0;
-    virtual Void set_number_of_variables_to_keep(Nat num_variables_to_keep) = 0;
-    virtual Nat number_of_steps_between_simplifications() const = 0;
-    virtual Bool must_recondition(Nat step) const = 0;
+    virtual Bool must_reduce_parameters(InclusionEvolverState const& state) const = 0;
+    virtual Bool must_incorporate_errors(InclusionEvolverState const& state) const = 0;
+    virtual Void reduce_parameters(ValidatedVectorMultivariateFunctionModelType& phi) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelType incorporate_errors(ValidatedVectorMultivariateFunctionModelType const& Phi) const = 0;
+    virtual Void update_from(InclusionEvolverState const& state) = 0;
+  public:
     virtual ReconditionerInterface* clone() const = 0;
     virtual ~ReconditionerInterface() = default;
 };
 
 
 class LohnerReconditioner : public ReconditionerInterface, public Loggable {
+    Nat _number_of_variables;
+    Nat _number_of_inputs;
     Nat _number_of_steps_between_simplifications;
-    Nat _number_of_variables_to_keep;
+    Nat _number_of_parameters_to_keep;
+    FloatDP _ratio_of_parameters_to_keep;
 public:
-    LohnerReconditioner(Nat number_of_steps_between_simplifications_, Nat number_of_variables_to_keep_)
-        : _number_of_steps_between_simplifications(number_of_steps_between_simplifications_), _number_of_variables_to_keep(number_of_variables_to_keep_) { }
+    LohnerReconditioner(Nat number_of_variables, Nat number_of_inputs, Nat number_of_steps_between_simplifications_, FloatDP ratio_of_parameters_to_keep)
+        : _number_of_variables(number_of_variables),
+          _number_of_inputs(number_of_inputs),
+          _number_of_steps_between_simplifications(number_of_steps_between_simplifications_),
+          _number_of_parameters_to_keep(USHRT_MAX),
+          _ratio_of_parameters_to_keep(ratio_of_parameters_to_keep) { }
     virtual LohnerReconditioner* clone() const override { return new LohnerReconditioner(*this); }
-    virtual Void set_number_of_variables_to_keep(Nat num_variables_to_keep) override { _number_of_variables_to_keep = num_variables_to_keep; }
-    Void set_number_of_steps_between_simplifications(Nat number_of_steps_between_simplifications) { _number_of_steps_between_simplifications = number_of_steps_between_simplifications; }
-    Nat number_of_steps_between_simplifications() const { return _number_of_steps_between_simplifications; }
-    virtual ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType const& f) const override;
-    virtual Void simplify(ValidatedVectorMultivariateFunctionModelType& f) const override;
-    virtual Bool must_recondition(Nat step) const override {
-        return (step%_number_of_steps_between_simplifications == _number_of_steps_between_simplifications-1);
-    }
+    virtual ValidatedVectorMultivariateFunctionModelType incorporate_errors(ValidatedVectorMultivariateFunctionModelType const& f) const override;
+    virtual Void reduce_parameters(ValidatedVectorMultivariateFunctionModelType& f) const override;
+    virtual Bool must_reduce_parameters(InclusionEvolverState const& state) const override;
+    virtual Bool must_incorporate_errors(InclusionEvolverState const& state) const override;
+    virtual Void update_from(InclusionEvolverState const& state) override;
 };
 
 class Reconditioner {
@@ -399,11 +405,13 @@ public:
 
     Reconditioner& operator=(Reconditioner const& other) { _impl = other._impl; return *this; }
 
-    Void simplify(ValidatedVectorMultivariateFunctionModelType& phi) const { _impl->simplify(phi); }
-    ValidatedVectorMultivariateFunctionModelType expand_errors(ValidatedVectorMultivariateFunctionModelType const& Phi) const { return _impl->expand_errors(Phi); }
-    Void set_number_of_variables_to_keep(Nat num_variables_to_keep) { _impl->set_number_of_variables_to_keep(num_variables_to_keep); }
-    Nat number_of_steps_between_simplifications() const { return _impl->number_of_steps_between_simplifications(); }
-    Bool must_recondition(Nat step) const { return _impl->must_recondition(step); }
+    Bool must_reduce_parameters(InclusionEvolverState const& state) const { return _impl->must_reduce_parameters(state); }
+    Bool must_incorporate_errors(InclusionEvolverState const& state) const { return _impl->must_incorporate_errors(state); }
+
+    Void reduce_parameters(ValidatedVectorMultivariateFunctionModelType& phi) const { _impl->reduce_parameters(phi); }
+    ValidatedVectorMultivariateFunctionModelType incorporate_errors(ValidatedVectorMultivariateFunctionModelType const& Phi) const { return _impl->incorporate_errors(Phi); }
+
+    Void update_from(InclusionEvolverState const& state) {_impl->update_from(state); }
 
     virtual ~Reconditioner() = default;
 };
@@ -420,6 +428,8 @@ class InclusionEvolver : public Loggable {
     InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner);
   public:
     List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& T);
+  private:
+    Void _recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state);
 };
 
 } // namespace Ariadne;

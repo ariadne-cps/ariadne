@@ -37,8 +37,8 @@ int main()
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
     MaximumError max_err=1e-6;
+
     GradedTaylorSeriesIntegrator integrator(max_err);
-    //integrator.set_maximum_step_size(0.02);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
@@ -73,21 +73,4 @@ int main()
     fig.set_fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");
-/*
-    plot("vanderpol",Axes2d(-2.5,x,2.5, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
-
-    std::cout << "Discretising orbit" << std::flush;
-    Grid grid(2);
-    GridTreeSet gts(grid);
-
-    for (ListSet<Enclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
-    {
-        std::cout<<"."<<std::flush;
-        it->state_auxiliary_set().adjoin_outer_approximation_to(gts,4);
-    }
-    std::cout << "done." << std::endl;
-
-    // The following currently fails since auxiliary variables are not tracked
-    plot("vanderpol-reach",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), gts);
-*/
 }

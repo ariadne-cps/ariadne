@@ -40,6 +40,7 @@
 #include "../symbolic/expression_set.hpp"
 #include "../output/logging.hpp"
 #include "../solvers/integrator_interface.hpp"
+#include "../solvers/configuration_interface.hpp"
 #include "inclusion_vector_field.hpp"
 
 namespace Ariadne {
@@ -417,20 +418,80 @@ public:
     virtual ~Reconditioner() = default;
 };
 
+class InclusionEvolverConfiguration;
 
 class InclusionEvolver : public Loggable {
+  public:
+    typedef InclusionEvolverConfiguration ConfigurationType;
+    typedef InclusionVectorField SystemType;
   protected:
-    List<InputApproximation> _approximations;
+    SystemType _system;
     SweeperDP _sweeper;
-    StepSizeType _step_size;
-    SharedPointer<InclusionApproximatorFactory> _approximator_factory;
+    SharedPointer<IntegratorInterface> _integrator;
     Reconditioner _reconditioner;
+    SharedPointer<ConfigurationType> _configuration;
   public:
-    InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner);
+    InclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner);
+
+    //@{
+    //! \name Configuration for the class.
+    //! \brief A reference to the configuration controlling the evolution.
+    ConfigurationType& configuration() { return *this->_configuration; }
+    const ConfigurationType& configuration() const { return *this->_configuration; }
+
   public:
-    List<ValidatedVectorMultivariateFunctionModelType> flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& T);
+    List<ValidatedVectorMultivariateFunctionModelType> reach(BoxDomainType const& initial, Real const& T);
   private:
     Void _recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state);
+};
+
+//! \brief Configuration for an InclusionEvolver, essentially for controlling the accuracy of continuous evolution methods.
+class InclusionEvolverConfiguration : public ConfigurationInterface
+{
+  public:
+    typedef FloatDPValue RealType;
+    typedef double RawRealType;
+
+    //! \brief Default constructor gives reasonable values.
+    InclusionEvolverConfiguration();
+
+    virtual ~InclusionEvolverConfiguration() = default;
+
+  private:
+
+    //! \brief The maximum allowable step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    StepSizeType _maximum_step_size;
+
+    //! \brief The maximum allowable radius of a basic set during integration.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType _maximum_enclosure_radius;
+
+    //! \brief Enable reduction of the parameters (true by default).
+    Bool _enable_parameter_reduction;
+
+    //! \brief The approximations allowed in calculating the flow for each step.
+    //! At least one approximation is required.
+    List<InputApproximation> _approximations;
+
+  public:
+
+    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
+    Void maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
+    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+
+    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
+    Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+
+    const Bool& enable_parameter_reduction() const { return _enable_parameter_reduction; }
+    Void enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }
+
+    List<InputApproximation> const& approximations() const { return _approximations; }
+    Void approximations(List<InputApproximation> const& value) { assert(value.size()>0); _approximations = value; }
+
+  public:
+
+    virtual OutputStream& write(OutputStream& os) const;
 };
 
 } // namespace Ariadne;

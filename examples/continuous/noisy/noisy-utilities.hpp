@@ -53,14 +53,16 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
 
-    auto integrator = InclusionEvolver(approximations,sweeper,static_cast<StepSizeType>(step),approximator_factory,reconditioner);
-    integrator.verbosity = verbosity;
+    auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
+    evolver.configuration().approximations(approximations);
+    evolver.configuration().maximum_step_size(step);
+    evolver.verbosity = verbosity;
 
     StopWatch sw;
 
-    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
+    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
@@ -98,12 +100,12 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         std::cout << appro << std::endl;
-        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,approximator_factory,reconditioner,verbosity,draw);
+        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,verbosity,draw);
     }
 }
 
@@ -114,7 +116,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     SizeType period_of_parameter_reduction=12;
     FloatDP ratio_of_parameters_to_keep(6.0);
-    ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
+    double sw_threshold = 1e-8;
+    ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
     unsigned int verbosity = 1;
     bool draw = false;
@@ -127,18 +130,18 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(SinusoidalApproximation());
     approximations.append(PiecewiseApproximation());
 
-    InclusionApproximatorFactory approximator_factory(TaylorPicardIntegrator(
+   TaylorPicardIntegrator integrator(
             maximum_error=1e-3,
-            sweep_threshold=1e-8,
+            sweep_threshold=sw_threshold,
             lipschitz_constant=0.5,
             step_maximum_error=1e-3,
-            step_sweep_threshold=1e-8,
+            step_sweep_threshold=sw_threshold,
             minimum_temporal_order=4,
-            maximum_temporal_order=12));
+            maximum_temporal_order=12);
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
-    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
+    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,draw);
     //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
 }
 

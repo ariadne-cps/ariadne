@@ -294,7 +294,7 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 OutputStream&
 VectorFieldEvolverConfiguration::write(OutputStream& os) const
 {
-    os << "VectorFieldEvolverSettings"
+    os << "VectorFieldEvolverConfiguration"
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_reconditioning=" << enable_reconditioning()

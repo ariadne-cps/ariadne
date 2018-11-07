@@ -74,11 +74,12 @@ class InclusionEvolverState {
     Map<InclusionApproximatorHandle,Nat> _approximator_global_optima_count;
     Map<InclusionApproximatorHandle,Nat> _approximator_local_optima_count;
   public:
-    InclusionEvolverState(InclusionVectorField const& ivf, List<InputApproximation> const& approximations, InclusionApproximatorFactory const& approximator_factory)
+    InclusionEvolverState(InclusionVectorField const& ivf, List<InputApproximation> const& approximations, IntegratorInterface const& integrator)
         : _step(0u)
     {
+        InclusionApproximatorFactory factory(integrator);
         for (auto appro : approximations) {
-            InclusionApproximatorHandle approximator = approximator_factory.create(ivf,appro);
+            InclusionApproximatorHandle approximator = factory.create(ivf,appro);
             _schedule.push_back(ScheduledApproximator(0u,approximator));
             _approximator_global_optima_count[approximator] = 0;
             _approximator_local_optima_count[approximator] = 0;
@@ -355,14 +356,14 @@ InclusionApproximatorFactory::create(InclusionVectorField const& ivf, InputAppro
 }
 
 
-InclusionEvolver::InclusionEvolver(List<InputApproximation> const& approximations, SweeperDP const& sweeper, StepSizeType const& step_size_, InclusionApproximatorFactory const& approximator_factory, Reconditioner const& reconditioner)
-    : _approximations(approximations)
+InclusionEvolver::InclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner)
+    : _system(system)
     , _sweeper(sweeper)
-    , _step_size(step_size_)
-    , _approximator_factory(approximator_factory.clone())
+    , _integrator(integrator.clone())
     , _reconditioner(reconditioner)
+    , _configuration(new ConfigurationType())
 {
-    assert(approximations.size()>0);
+    assert(system.inputs().size >= 0);
 }
 
 Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {
@@ -377,22 +378,22 @@ Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFuncti
     }
 }
 
-List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(InclusionVectorField const& ivf, BoxDomainType const& initial, Real const& tmax) {
+List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
 
-    ARIADNE_LOG(2,"Dynamics: "<<ivf<<"\n");
+    ARIADNE_LOG(2,"System: "<<_system<<"\n");
     ARIADNE_LOG(2,"Initial: "<<initial<<"\n");
 
-    const ValidatedVectorMultivariateFunction& F = ivf.function();
-    const BoxDomainType& V = ivf.inputs();
+    const ValidatedVectorMultivariateFunction& F = _system.function();
+    const BoxDomainType& V = _system.inputs();
     const BoxDomainType& X0 = initial;
 
-    StepSizeType hsug(this->_step_size);
+    StepSizeType hsug(_configuration->maximum_step_size());
 
     ValidatedVectorMultivariateFunctionModelDP evolve_function = ValidatedVectorMultivariateTaylorFunctionModelDP::identity(X0,this->_sweeper);
 
     TimeStepType t;
 
-    InclusionEvolverState state(ivf,_approximations,*_approximator_factory);
+    InclusionEvolverState state(_system,_configuration->approximations(),*_integrator);
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
 
@@ -426,7 +427,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::flow(Inclusio
         for (auto approximator : approximators_to_use) {
             ARIADNE_LOG(5,"checking "<<approximator<<" approximator\n");
 
-            auto current_reach=approximator.reach(ivf,domx,evolve_function,B,t,h);
+            auto current_reach=approximator.reach(_system,domx,evolve_function,B,t,h);
             auto current_evolve=approximator.evolve(current_reach,new_t);
 
             FloatDP current_volume = volume(current_evolve.range());
@@ -860,6 +861,28 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
         auto j=remove_indices[i]; auto cj=old_domain[j].midpoint();
         projection[j]=ValidatedScalarMultivariateTaylorFunctionModelDP::constant(new_domain,cj,sweeper); }
     f=compose(f,projection);
+}
+
+
+InclusionEvolverConfiguration::InclusionEvolverConfiguration()
+{
+    maximum_step_size(1);
+    maximum_enclosure_radius(100.0);
+    enable_parameter_reduction(true);
+    approximations({ZeroApproximation()});
+}
+
+
+OutputStream&
+InclusionEvolverConfiguration::write(OutputStream& os) const
+{
+    os << "InclusionEvolverConfiguration"
+       << ",\n  maximum_step_size=" << maximum_step_size()
+       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  enable_parameter_reduction=" << enable_parameter_reduction()
+       << ",\n  approximations=" << approximations()
+       << "\n)\n";
+    return os;
 }
 
 } // namespace Ariadne;

@@ -135,7 +135,6 @@ class VectorFieldEvolver
   private:
     std::shared_ptr< SystemType > _sys_ptr;
     std::shared_ptr< IntegratorInterface > _integrator;
-    //std::shared_ptr< EvolutionProfiler >  _profiler;
     std::shared_ptr< ConfigurationType > _configuration;
 };
 

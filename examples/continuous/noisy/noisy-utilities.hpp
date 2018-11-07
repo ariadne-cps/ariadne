@@ -112,7 +112,8 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     InclusionVectorField ivf(dynamics,inputs);
 
-    SizeType freq=12;
+    SizeType period_of_parameter_reduction=12;
+    FloatDP ratio_of_parameters_to_keep(6.0);
     ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
 
     unsigned int verbosity = 1;
@@ -135,7 +136,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
             minimum_temporal_order=4,
             maximum_temporal_order=12));
 
-    LohnerReconditioner reconditioner(freq,10000);
+    LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
     run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
     //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);

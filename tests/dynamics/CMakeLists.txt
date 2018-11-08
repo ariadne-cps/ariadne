@@ -1,7 +1,7 @@
 set(UNIT_TESTS
     test_continuous_evolution
     test_inclusion_vector_field
-    test_differential_inclusion
+    test_inclusion_evolver
     test_discrete_evolution
     test_reachability_analyser
 )

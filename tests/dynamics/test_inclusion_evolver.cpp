@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_differential_inclusion.cpp
+ *            test_inclusion_evolver.cpp
  *
  *  Copyright  2008-18 Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
@@ -22,9 +22,9 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../source/dynamics/inclusion_evolver.hpp"
+#include "dynamics/inclusion_evolver.hpp"
 #include "algebra/sweeper.hpp"
-#include "solvers/integrator_interface.hpp"
+#include "solvers/integrator.hpp"
 #include "geometry/box.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
@@ -40,36 +40,51 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity) const
-    {
+    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) const {
+
+        auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
+        evolver.configuration().approximations(approximations);
+        evolver.configuration().maximum_step_size(step);
+        evolver.verbosity = verbosity;
+
+        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
+    }
+
+    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) const {
+
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
             std::cout << appro << std::endl;
-            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,reconditioner,verbosity);
+            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,verbosity,draw);
         }
     }
 
-    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, StepSizeType step, List<InputApproximation> approximations, SweeperDP sweeper, Reconditioner const& reconditioner, unsigned int verbosity) const
-    {
-        auto evolver = InclusionEvolver(approximations,sweeper,step,reconditioner);
-        evolver.verbosity = verbosity;
-        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.flow(ivf,initial,evolution_time);
-    }
-
-    Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
-                  const RealVariablesBox& initial, Real evolution_time, StepSizeType step) const {
+    void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
+                  const RealVariablesBox& initial, Real evolution_time, double step) const {
 
         InclusionVectorField ivf(dynamics,inputs);
 
-        SizeType freq=12;
-        ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
-        unsigned int verbosity = 0;
+        SizeType period_of_parameter_reduction=12;
+        FloatDP ratio_of_parameters_to_keep(6.0);
+        double sw_threshold = 1e-8;
+        ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
-        LohnerReconditioner reconditioner(freq,10000);
+        unsigned int verbosity = 0;
 
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
 
-        this->run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,reconditioner,verbosity);
+        TaylorPicardIntegrator integrator(
+                maximum_error=1e-3,
+                sweep_threshold=sw_threshold,
+                lipschitz_constant=0.5,
+                step_maximum_error=1e-3,
+                step_sweep_threshold=sw_threshold,
+                minimum_temporal_order=4,
+                maximum_temporal_order=12);
+
+        LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
+
+        run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,false);
     }
 
   public:
@@ -91,7 +106,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
     Real evolution_time=1/25_q;
-    StepSizeType step=0.015625_dy;
+    double step=1.0/64;
 
     this->run_test("higgins-selkov",dynamics,inputs,initial,evolution_time,step);
 }
@@ -106,7 +121,7 @@ void TestInclusionIntegrator::test_jet_engine() const {
     RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
 
     Real evolution_time=1/25_q;
-    StepSizeType step=0.015625_dy;
+    double step=1.0/64;
 
     this->run_test("jet-engine",dynamics,inputs,initial,evolution_time,step);
 }
@@ -120,7 +135,7 @@ void TestInclusionIntegrator::test_rossler() const {
     RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
 
     Real evolution_time=1/128_q;
-    StepSizeType step=0.00390625_dy;
+    double step=1.0/256;
 
     this->run_test("rossler",dynamics,inputs,initial,evolution_time,step);
 }

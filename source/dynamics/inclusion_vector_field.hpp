@@ -29,8 +29,6 @@
 #ifndef ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 #define ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 
-#include <memory>
-
 #include "../function/function.hpp"
 #include "../geometry/set_interface.hpp"
 #include "../geometry/grid.hpp"

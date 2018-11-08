@@ -1,6 +1,7 @@
 add_library(ariadne-solvers OBJECT
     solver.cpp
     integrator.cpp
+    inclusion_integrator.cpp
     bounder.cpp
     constraint_solver.cpp
     simplex_algorithm.cpp

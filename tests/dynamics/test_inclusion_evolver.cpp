@@ -40,7 +40,7 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) const {
+    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw) const {
 
         auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
         evolver.configuration().approximations(approximations);
@@ -50,7 +50,7 @@ class TestInclusionIntegrator {
         List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     }
 
-    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, Reconditioner const& reconditioner, unsigned int verbosity, bool draw) const {
+    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw) const {
 
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};

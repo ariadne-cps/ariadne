@@ -28,9 +28,6 @@
 
 namespace Ariadne {
 
-typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
-typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
-
 List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
     List<Nat> result;
     for (Nat i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
@@ -79,45 +76,16 @@ Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transfor
     }
 }
 
-EffectiveVectorFormulaFunction noise_independent_component(EffectiveVectorFormulaFunction const& function, SizeType num_inputs) {
-
-    CoordinateFormulaPairs substitutions;
-    for (auto i : range(function.result_size(),function.result_size()+num_inputs)) {
-        substitutions.append({i,EffectiveFormula::zero()});
-    }
-
-    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(function._formulae,substitutions)));
-}
-
-Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorFormulaFunction const& function, SizeType num_inputs) {
-
-    Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
-
-    SizeType n = function.result_size();
-
-    for (auto j : range(num_inputs)) {
-        Vector<EffectiveFormula> derivative_formulae(n);
-        for (auto i : range(n)) {
-            derivative_formulae[i] = simplify(derivative(function._formulae[i],n+j));
-        }
-        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
-    }
-
-    return result;
-}
-
 
 Void InclusionVectorField::_acquire_and_assign_properties() {
 
     List<Nat> input_indices = Ariadne::input_indices(this->dimension(),this->number_of_inputs());
 
-    const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(_function.reference());
+    _noise_independent_component = Ariadne::noise_independent_component(_function,this->number_of_inputs());
+    _input_derivatives = Ariadne::input_derivatives(_function,this->number_of_inputs());
 
-    _noise_independent_component = Ariadne::noise_independent_component(ff,this->number_of_inputs());
-    _input_derivatives = Ariadne::input_derivatives(ff,this->number_of_inputs());
-
-    _is_input_affine = is_affine_in(ff,input_indices);
-    _is_input_additive = is_additive_in(ff,input_indices);
+    _is_input_affine = is_affine_in(_function,input_indices);
+    _is_input_additive = is_additive_in(_function,input_indices);
 }
 
 Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {

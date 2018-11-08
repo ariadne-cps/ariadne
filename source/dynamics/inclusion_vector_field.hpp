@@ -39,11 +39,6 @@
 
 namespace Ariadne {
 
-class NotFormulaFunctionException : public std::runtime_error {
-  public:
-    NotFormulaFunctionException(const String& str) : std::runtime_error(str) { }
-};
-
 class MissingInputException : public std::runtime_error {
   public:
     MissingInputException(const String& str) : std::runtime_error(str) { }

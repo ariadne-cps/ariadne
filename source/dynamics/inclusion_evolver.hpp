@@ -37,6 +37,7 @@
 #include "../function/domain.hpp"
 #include "../function/function_model.hpp"
 #include "../function/formula.hpp"
+#include "../function/symbolic_function.hpp"
 #include "../symbolic/expression_set.hpp"
 #include "../output/logging.hpp"
 #include "../solvers/integrator_interface.hpp"
@@ -78,7 +79,7 @@ FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
 Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e);
 
-ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w);
+EffectiveVectorMultivariateFunction build_Fw(EffectiveVectorMultivariateFunction const& F, Vector<EffectiveScalarMultivariateFunction> const& w);
 
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return join(join(f1,f2),f3,fs...); }
@@ -133,7 +134,7 @@ inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
     return os;
 }
 
-C1Norms compute_norms(InclusionVectorField const&, PositiveFloatDPValue const&, UpperBoxType const&);
+C1Norms compute_norms(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
     virtual Void write(OutputStream& os) const = 0;
@@ -243,7 +244,7 @@ class InclusionApproximatorFactory {
     SharedPointer<IntegratorInterface> _integrator;
 public:
     InclusionApproximatorFactory(IntegratorInterface const& integrator) : _integrator(integrator.clone()) { }
-    InclusionApproximatorHandle create(InclusionVectorField const& di, InputApproximation const& approximation) const;
+    InclusionApproximatorHandle create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, InputApproximation const& approximation) const;
     InclusionApproximatorFactory* clone() const { return new InclusionApproximatorFactory(*this); }
 };
 
@@ -255,10 +256,11 @@ public:
 template<class A, class R>
 class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
-    ApproximationErrorProcessor(InclusionVectorField const& ivf) : _ivf(ivf), _enable_componentwise_error(false) { }
-    virtual Vector<FloatDPError> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
+    ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) : _f(f), _inputs(inputs), _enable_componentwise_error(false) { }
+    virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
   private:
-    InclusionVectorField const& _ivf;
+    EffectiveVectorMultivariateFunction const& _f;
+    BoxDomainType const& _inputs;
   protected:
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as a paper presenting component-wise error is published
   private:
@@ -272,10 +274,15 @@ template<class A>
 class ApproximationErrorProcessorFactory {
     typedef ApproximationErrorProcessorInterface<A> Processor;
 public:
-    SharedPointer<Processor> create(InclusionVectorField const& ivf) const {
-        if (ivf.is_input_additive()) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(ivf));
-        else if (ivf.number_of_inputs() == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(ivf));
-        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(ivf));
+    SharedPointer<Processor> create(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) const {
+        Nat n = f.result_size();
+        Nat m = inputs.size();
+        ARIADNE_ASSERT_MSG(f.argument_size()-n == m, "ApproximationErrorProcessorFactory was given an incompatible f argument space in respect to the inputs box");
+        Set<Nat> input_idx;
+        for (Nat i : range(n,n+m)) { input_idx.insert(i); }
+        if (is_additive_in(f,input_idx)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(f,inputs));
+        else if (m == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(f,inputs));
+        else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(f,inputs));
     }
 };
 
@@ -286,9 +293,9 @@ class InclusionApproximatorInterface {
     virtual Bool operator<(const InclusionApproximatorInterface& rhs) const = 0;
     virtual Nat index() const = 0;
     virtual Nat num_params_per_input() const = 0;
-    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
+    virtual ValidatedVectorMultivariateFunctionModelType reach(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const = 0;
     virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const = 0;
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const = 0;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const = 0;
 
     friend std::ostream& operator<<(std::ostream& os, const InclusionApproximatorInterface& approximator) { approximator.write(os); return os; }
 };
@@ -315,8 +322,8 @@ class InclusionApproximatorHandle {
 
     friend std::ostream& operator<<(std::ostream& os, const InclusionApproximatorHandle& approximator) { os << *approximator._impl; return os; }
 
-    Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const { return _impl->flow_bounds(f,domx,doma,hsug); }
-    ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _impl->reach(ivf,D,evolve_function,B,t,h); }
+    Pair<StepSizeType,UpperBoxType> flow_bounds(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const { return _impl->flow_bounds(f,domx,doma,hsug); }
+    ValidatedVectorMultivariateFunctionModelType reach(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const { return _impl->reach(f,inputs,D,evolve_function,B,t,h); }
     ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const { return _impl->evolve(reach_function,t); }
   public:
     virtual ~InclusionApproximatorHandle() = default;
@@ -327,18 +334,19 @@ template<class A>
 class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggable {
     friend class InclusionApproximatorFactory;
   protected:
-    InclusionVectorField const& _ivf;
+    EffectiveVectorMultivariateFunction const& _f;
+    BoxDomainType const& _inputs;
     SharedPointer<IntegratorInterface> _integrator;
     SharedPointer<ApproximationErrorProcessorInterface<A>> _processor;
-    InclusionApproximatorBase(InclusionVectorField const& ivf, SharedPointer<IntegratorInterface> const& integrator) :
-        _ivf(ivf), _integrator(integrator), _processor(ApproximationErrorProcessorFactory<A>().create(ivf)), _num_params_per_input(const_num_params_per_input<A>()) { }
+    InclusionApproximatorBase(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, SharedPointer<IntegratorInterface> const& integrator) :
+        _f(f), _inputs(inputs), _integrator(integrator), _processor(ApproximationErrorProcessorFactory<A>().create(f,inputs)), _num_params_per_input(const_num_params_per_input<A>()) { }
   private:
     const Nat _num_params_per_input;
   public:
     virtual Void write(OutputStream& os) const override { os << A(); }
-    virtual ValidatedVectorMultivariateFunctionModelType reach(InclusionVectorField const& ivf, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const override;
+    virtual ValidatedVectorMultivariateFunctionModelType reach(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs, BoxDomainType const& D, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const override;
     virtual ValidatedVectorMultivariateFunctionModelDP evolve(ValidatedVectorMultivariateFunctionModelDP const& reach_function, TimeStepType const& t) const override;
-    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const override;
+    virtual Pair<StepSizeType,UpperBoxType> flow_bounds(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& domx, BoxDomainType const& doma, StepSizeType const& hsug) const override;
 
     virtual Bool operator==(const InclusionApproximatorInterface& rhs) const override;
     virtual Bool operator<(const InclusionApproximatorInterface& rhs) const override;
@@ -353,8 +361,8 @@ class InclusionApproximatorBase : public InclusionApproximatorInterface, Loggabl
     BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
     ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
-    Vector<ValidatedScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
-    Vector<ValidatedScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
+    Vector<EffectiveScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
+    Vector<EffectiveScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
 };
 
 class InclusionEvolverState;

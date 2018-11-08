@@ -47,8 +47,6 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     return Vector<IntervalDomainType>(result);
 }
 
-#define ARIADNE_LOG_PRINT(level, expr) { ARIADNE_LOG(level,#expr << "=" << (expr) << "\n"); }
-
 struct ScheduledApproximator
 {
     Nat step;

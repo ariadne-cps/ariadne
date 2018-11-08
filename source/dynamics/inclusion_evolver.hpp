@@ -75,17 +75,10 @@ inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
 
 FloatDP volume(Vector<ApproximateIntervalType> const& box);
 
-inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
-    return refines(v1,static_cast<Vector<UpperIntervalType>const&>(bx2)); }
-
-Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
-
 Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e);
 
 ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w);
 
-template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
-    return combine(combine(f1,f2),f3,fs...); }
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return join(join(f1,f2),f3,fs...); }
 

@@ -76,18 +76,6 @@ Void incorporate_additive_inputs_coefficients(Vector<EffectiveFormula>& transfor
     }
 }
 
-
-Void InclusionVectorField::_acquire_and_assign_properties() {
-
-    List<Nat> input_indices = Ariadne::input_indices(this->dimension(),this->number_of_inputs());
-
-    _noise_independent_component = Ariadne::noise_independent_component(_function,this->number_of_inputs());
-    _input_derivatives = Ariadne::input_derivatives(_function,this->number_of_inputs());
-
-    _is_input_affine = is_affine_in(_function,input_indices);
-    _is_input_additive = is_additive_in(_function,input_indices);
-}
-
 Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs) {
 
     const EffectiveVectorFormulaFunction& ff = dynamic_cast<const EffectiveVectorFormulaFunction&>(function.reference());
@@ -138,7 +126,6 @@ InclusionVectorField::InclusionVectorField(DottedRealAssignments const& dynamics
     _variable_names = variable_names(left_hand_sides(dynamics));
 
     _transform_and_assign(make_function(spc,Vector<RealExpression>(right_hand_sides(dynamics))),input_bounds_to_domain(inputs));
-    _acquire_and_assign_properties();
 }
 
 InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs)
@@ -156,7 +143,6 @@ InclusionVectorField::InclusionVectorField(EffectiveVectorMultivariateFunction c
     _variable_names = variable_names;
 
     _transform_and_assign(function,inputs);
-    _acquire_and_assign_properties();
 }
 
 
@@ -164,5 +150,19 @@ RealSpace InclusionVectorField::state_space() const
 {
     return real_space(this->_variable_names);
 }
+
+Bool InclusionVectorField::is_input_affine() const {
+    return is_affine_in(_function,input_indices(dimension(),number_of_inputs()));
+}
+
+Bool InclusionVectorField::is_input_additive() const {
+    return is_additive_in(_function,input_indices(dimension(),number_of_inputs()));
+}
+
+EffectiveVectorMultivariateFunction InclusionVectorField::noise_independent_component() const {
+    return Ariadne::noise_independent_component(_function,number_of_inputs()); }
+//! \brief Return the dynamics components given by the derivatives for each input.
+Vector<EffectiveVectorMultivariateFunction> InclusionVectorField::input_derivatives() const {
+    return Ariadne::input_derivatives(_function,number_of_inputs()); }
 
 }

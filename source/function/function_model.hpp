@@ -501,10 +501,18 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         return f1+factory(f1).create(f2); }
     friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorFunctionModel<P,D,PR,PRE>& f1, const VectorMultivariateFunction<P>& f2) {
         return f1-factory(f1).create(f2); }
+    friend inline VectorFunctionModel<P,D,PR,PRE> operator*(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarMultivariateFunction<P>& f2) {
+        return f1*factory(f1).create(f2); }
+    friend inline VectorFunctionModel<P,D,PR,PRE> operator/(const VectorFunctionModel<P,D,PR,PRE>& f1, const ScalarMultivariateFunction<P>& f2) {
+        return f1/factory(f1).create(f2); }
     friend inline VectorFunctionModel<P,D,PR,PRE> operator+(const VectorMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
         return factory(f2).create(f1)+f2; }
     friend inline VectorFunctionModel<P,D,PR,PRE> operator-(const VectorMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
         return factory(f2).create(f1)-f2; }
+    friend inline VectorFunctionModel<P,D,PR,PRE> operator*(const ScalarMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
+        return factory(f2).create(f1)*f2; }
+    friend inline VectorFunctionModel<P,D,PR,PRE> operator/(const ScalarMultivariateFunction<P>& f1, const VectorFunctionModel<P,D,PR,PRE>& f2) {
+        return factory(f2).create(f1)/f2; }
 
 
   public:

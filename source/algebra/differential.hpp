@@ -451,9 +451,11 @@ class Vector< Differential<X> >
 
     //! \brief Compute the differential of the autonomous flow \f$ \phi_{,t}(x_0,t) = f(\phi(x_0,t)) \f$, \f$\phi(x_0,t_0)=x_0\f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t)\f$.
     friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0) { return _flow(df,x0); }
+    //! \brief Compute the differential of the autonomous flow \f$ \phi_{,t}(x_0,t,a) = f(\phi(x_0,t),a) \f$, \f$\phi(x_0,t_0,a)=x_0\f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t,a)\f$.
+    friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a) { return _flow(df,x0,a); }
     //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t) = f(\phi(x_0,t),t) \f$, \f$\phi(x_0,t_0)=x_0\f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t)\f$.
     friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0) {
-        Vector<X> a(0u,x0.zero_element()); return _flow(df,x0,t0,a); }
+        return _flow(df,x0,t0); }
     //! \brief Compute the differential of the flow \f$ \phi_{,t}(x_0,t,a) = f(\phi(x_0,t,a),t,a) \f$ at \f$t=t_0\f$, with respect to the independent variables \f$(x_0,t,a)\f$.
     friend Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a) {
         return _flow(df,x0,t0,a); }

@@ -60,12 +60,12 @@ typedef SharedPointer<const BounderInterface> BounderPointer;
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
 struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute<double>(v) { } };
-struct SpacialOrder : Attribute<Nat> { SpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct TemporalOrder : Attribute<Nat> { TemporalOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MinimumSpacialOrder : Attribute<Nat> { MinimumSpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MinimumTemporalOrder : Attribute<Nat> { MinimumTemporalOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MaximumSpacialOrder : Attribute<Nat> { MaximumSpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MaximumTemporalOrder : Attribute<Nat> { MaximumTemporalOrder(Nat v) : Attribute<Nat>(v) { } };
+struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct TemporalOrder : Attribute<DegreeType> { TemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MinimumSpacialOrder : Attribute<DegreeType> { MinimumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MinimumTemporalOrder : Attribute<DegreeType> { MinimumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 
 static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
@@ -178,7 +178,7 @@ class TaylorPicardIntegrator
 {
     double _step_maximum_error;
     double _step_sweep_threshold;
-    Nat _maximum_temporal_order;
+    DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
@@ -191,8 +191,8 @@ class TaylorPicardIntegrator
         : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
-    Nat maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
+    DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
+    Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model for a single step.
     double step_sweep_threshold() const { return this->_step_sweep_threshold; }
     Void set_step_sweep_threshold(double lt) { _step_sweep_threshold = lt; }
@@ -233,10 +233,10 @@ class TaylorSeriesIntegrator
 {
     double _step_maximum_error;
     double _step_sweep_threshold;
-    Nat _minimum_spacial_order;
-    Nat _minimum_temporal_order;
-    Nat _maximum_spacial_order;
-    Nat _maximum_temporal_order;
+    DegreeType _minimum_spacial_order;
+    DegreeType _minimum_temporal_order;
+    DegreeType _maximum_spacial_order;
+    DegreeType _maximum_temporal_order;
   public:
     //! \brief Constructor.
     TaylorSeriesIntegrator(MaximumError err);
@@ -255,17 +255,17 @@ class TaylorSeriesIntegrator
                            MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in space.
-    Nat minimum_spacial_order() const { return this->_minimum_spacial_order; }
-    Void set_minimum_spacial_order(Nat n) { this->_minimum_spacial_order=n; }
+    DegreeType minimum_spacial_order() const { return this->_minimum_spacial_order; }
+    Void set_minimum_spacial_order(DegreeType n) { this->_minimum_spacial_order=n; }
     //! \brief The order of the method in space.
-    Nat minimum_temporal_order() const { return this->_minimum_temporal_order; }
-    Void set_minimum_temporal_order(Nat m) { this->_minimum_temporal_order=m; }
+    DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
+    Void set_minimum_temporal_order(DegreeType m) { this->_minimum_temporal_order=m; }
     //! \brief The maximum order of the method in time.
-    Nat maximum_spacial_order() const { return this->_maximum_spacial_order; }
-    Void set_maximum_spacial_order(Nat n) { this->_maximum_spacial_order=n; }
+    DegreeType maximum_spacial_order() const { return this->_maximum_spacial_order; }
+    Void set_maximum_spacial_order(DegreeType n) { this->_maximum_spacial_order=n; }
     //! \brief The maximum order of the method in time.
-    Nat maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
+    DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
+    Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model representing a single step.
     double step_sweep_threshold() const { return this->_step_sweep_threshold; }
     Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
@@ -293,7 +293,7 @@ class TaylorSeriesIntegrator
               const Interval<StepSizeType>& time_domain,
               const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
-              
+
     using IntegratorBase::flow_step;
 
   private:
@@ -306,16 +306,16 @@ class TaylorSeriesIntegrator
 class AffineIntegrator
     : public IntegratorBase
 {
-    Nat _spacial_order;
-    Nat _temporal_order;
+    DegreeType _spacial_order;
+    DegreeType _temporal_order;
   public:
     AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
     AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
-    Nat spacial_order() const { return this->_spacial_order; }
+    DegreeType spacial_order() const { return this->_spacial_order; }
     //! \brief The order of the method in time.
-    Nat temporal_order() const { return this->_temporal_order; }
+    DegreeType temporal_order() const { return this->_temporal_order; }
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 

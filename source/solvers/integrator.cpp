@@ -127,7 +127,7 @@ IntegratorBase::flow_to(const ValidatedVectorMultivariateFunction& vf, const Exa
     ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorMultivariateFunction vf, ExactBoxType dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
-    const Nat n=dx0.size(); // Dimension of the state space
+    const SizeType n=dx0.size(); // Dimension of the state space
     ValidatedVectorMultivariateFunctionModelDP flow_function=this->function_factory().create_identity(dx0);
     StepSizeType t=0;
     ValidatedVectorMultivariateFunctionModelDP step_function;
@@ -237,8 +237,8 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
     const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
 
-    const Nat nx=D.size();
-    const Nat na=A.size();
+    const SizeType nx=D.size();
+    const SizeType na=A.size();
 
     Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na);
 
@@ -260,7 +260,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ValidatedVectorMultivariateFunctionModelDP ta=this->function_factory().create_projection(wdom,tarng);
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
-    for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
+    for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool last_step=(phi.error().raw()<this->step_maximum_error());
         ValidatedVectorMultivariateFunctionModelDP fphi=compose(f,join(std::move(phi),ta));
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
@@ -278,7 +278,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
     ValidatedVectorMultivariateFunctionModelDP res=restrict(phi,dom);
 
-    //for(Nat i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
+    //for(SizeType i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
     //res.sweep();
     ARIADNE_LOG(4,"res="<<res<<"\n");
     return res;
@@ -345,12 +345,12 @@ ExactIntervalType forwards_backwards_time_domain(ExactIntervalType domt) {
     return ExactIntervalType(t0-(tf-t0),tf);
 }
 
-template<class F> GradedValidatedDifferential flow(const F& f, const ExactIntervalType& c, Nat M, Nat N) {
-    ValidatedDifferential x=make_differential_variable(1u,M,cast_singleton(c),0u);
+template<class F> GradedValidatedDifferential flow(const F& f, const ExactIntervalType& c, DegreeType so, DegreeType to) {
+    ValidatedDifferential x=make_differential_variable(1u,so,cast_singleton(c),0u);
     GradedValidatedDifferential y=make_graded(x);
     GradedValidatedDifferential t=create_graded(x);
 
-    for(Nat n=0; n!=N; ++n) {
+    for(DegreeType n=0; n!=to; ++n) {
         t=f(y);
         y=antidifferential(t);
     }
@@ -358,7 +358,7 @@ template<class F> GradedValidatedDifferential flow(const F& f, const ExactInterv
     return y;
 }
 
-template<class X> Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex& a1, const Nat a2, const X& c) {
+template<class X> Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex& a1, const DegreeType a2, const X& c) {
     MultiIndex a(a1.size()+1);
     for(SizeType i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
     a[a1.size()]=a2;
@@ -368,13 +368,13 @@ template<class X> Void append_join(Expansion<MultiIndex,X>& e, const MultiIndex&
 
 Void autonomous_flow_init(const Vector<ValidatedProcedure>& p,
                Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y,
-               const Vector<ValidatedNumericType>& x, const Vector<ValidatedNumericType>& r,  Nat so)
+               const Vector<ValidatedNumericType>& x, const Vector<ValidatedNumericType>& r,  DegreeType so)
 {
     GradedValidatedDifferential null;
     y=Vector< GradedValidatedDifferential >(p.result_size(),null);
     fy=Vector< GradedValidatedDifferential >(p.result_size(),null);
     t=List< GradedValidatedDifferential >(p.temporaries_size(),null);
-    for(Nat i=0; i!=y.size(); ++i) {
+    for(SizeType i=0; i!=y.size(); ++i) {
         y[i]=GradedValidatedDifferential(Differential<ValidatedNumericType>::variable(y.size(),so,ValidatedNumericType(0,0),i)*r[i]+x[i]);
     }
 }
@@ -383,7 +383,7 @@ Void autonomous_flow_iterate(const Vector<ValidatedProcedure>& p, StepSizeType h
                   Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y)
 {
     Ariadne::compute(p,fy,t,y);
-    for(Nat i=0; i!=y.size(); ++i) {
+    for(SizeType i=0; i!=y.size(); ++i) {
         y[i]=antidifferential(fy[i]);
         y[i]*=h;
     }
@@ -661,7 +661,8 @@ ValidatedVectorMultivariateTaylorFunctionModelDP flow_function(const Vector<Diff
 // DEPRECATED
 ValidatedVectorMultivariateFunctionModelDP
 autonomous_series_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bdx, const StepSizeType& h, const UpperBoxType& bbx,
-                            double max_err, double swpt, Nat init_so, Nat init_to, Nat max_so, Nat max_to, Nat verbosity)
+                            double max_err, double swpt, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to,
+                            Nat verbosity=0)
 {
     ARIADNE_LOG(2,"autonomous_series_flow_step(f,bdx,h,max_erro,swpt,init_so,init_to,max_so,max_to)\n");
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
@@ -715,7 +716,7 @@ autonomous_series_flow_step(const ValidatedVectorMultivariateFunction& f, const 
     FloatDPError old_error=tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
 
     while(tphi.error().raw()>max_err && (so<max_so || to<max_to) ) {
-        Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
+        SizeType nnz=0; for(SizeType i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
         if( (so<max_so) && ((tphi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
@@ -730,7 +731,7 @@ autonomous_series_flow_step(const ValidatedVectorMultivariateFunction& f, const 
                 autonomous_flow_init(p,nfdphic,ntdphic,ndphic,cx,rdx,nso);
                 autonomous_flow_init(p,nfdphid,ntdphid,ndphid,dx,rdx,nso);
 
-                for(Nat i=0; i!=nto; ++i) {
+                for(DegreeType i=0; i!=nto; ++i) {
                     Ariadne::autonomous_flow_iterate(p,h,nfdphia,ntdphia,ndphia);
                     Ariadne::autonomous_flow_iterate(p,h,nfdphib,ntdphib,ndphib);
                     Ariadne::autonomous_flow_iterate(p,h,nfdphic,ntdphic,ndphic);
@@ -852,7 +853,7 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 ValidatedVectorMultivariateFunctionModelDP
 graded_series_flow_step(const Vector<ValidatedProcedure>& f,
                         const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
-                        double max_err, double swpt, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to, Nat verbosity)
+                        double max_err, double swpt, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to, Nat verbosity=0)
 {
     ARIADNE_LOG(2,"graded_series_flow_step(f,domx,domt,doma,bndx,max_err,swpt,init_so,init_to,max_so,max_to)\n");
     ARIADNE_LOG(3,"f="<<f<<"\n");
@@ -1089,8 +1090,8 @@ Void TaylorSeriesIntegrator::write(OutputStream& os) const {
 
 
 
-template<class X> Void truncate(Differential<X>& x, Nat spacial_order_, Nat temporal_order_) {
-    Nat n=x.argument_size()-1;
+template<class X> Void truncate(Differential<X>& x, DegreeType spacial_order_, DegreeType temporal_order_) {
+    SizeType n=x.argument_size()-1;
     typename Differential<X>::Iterator write_iter=x.begin();
     typename Differential<X>::ConstIterator read_iter=x.begin();
     while(read_iter!=x.end()) {
@@ -1105,8 +1106,8 @@ template<class X> Void truncate(Differential<X>& x, Nat spacial_order_, Nat temp
     x.expansion().resize(static_cast<SizeType>(write_iter-x.begin()));
 }
 
-template<class X> Void truncate(Vector< Differential<X> >& x, Nat spacial_order_, Nat temporal_order_) {
-    for(Nat i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order_,temporal_order_); }
+template<class X> Void truncate(Vector< Differential<X> >& x, DegreeType spacial_order_, DegreeType temporal_order_) {
+    for(DegreeType i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order_,temporal_order_); }
 }
 
 AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, TemporalOrder temporal_order_)
@@ -1124,7 +1125,7 @@ AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, 
                                          join(dom,zero));
     dx[dom.size()]=zero;
     Vector<ValidatedDifferential> dphi = dx;
-    for(Nat i=0; i!=_temporal_order; ++i) {
+    for(DegreeType i=0; i!=_temporal_order; ++i) {
         dphi = antiderivative(f.evaluate(dphi),dom.size())+dx;
     }
     truncate(dphi,this->_spacial_order,this->_temporal_order);
@@ -1142,19 +1143,19 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 
     ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
 
-    const Nat n=dom.size();
+    const SizeType n=dom.size();
     DoublePrecision prec;
     FloatDPError zero_err(prec);
 
     Vector<FloatDPError> err(n,zero_err);
 
     Vector<FloatDPError> rad(n+1,zero_err);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         rad[i] = cast_positive(max(dom[i].upper()-dmid[i].lower(),dmid[i].upper()-dom[i].lower()));
     }
     rad[n] = abs(h);
 
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         for(Expansion<MultiIndex,ValidatedNumericType>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
             UniformConstReference<MultiIndex> a=iter->index();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
@@ -1162,7 +1163,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
                 UniformConstReference<ValidatedNumericType> mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower().raw()<=mid.lower().raw() && mid.upper().raw()<=rng.upper().raw());
                 FloatDPError mag = FloatDPError(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
-                for(Nat j=0; j!=n+1; ++j) { mag *= pow(rad[j],Nat(a[j])); }
+                for(SizeType j=0; j!=n+1u; ++j) { mag *= pow(rad[j],static_cast<DegreeType>(a[j])); }
                 err[i] += mag;
             }
         }
@@ -1172,10 +1173,10 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 
     ValidatedVectorMultivariateFunctionModelDP id = this->function_factory().create_identity(flow_domain);
     ValidatedVectorMultivariateFunctionModelDP res = this->function_factory().create_zeros(n,flow_domain);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         ValidatedScalarMultivariateFunctionModelDP res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
-        for(Nat j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-ValidatedNumericType(midpoint(flow_domain[j]))); }
-        Nat j=mdphi[i].argument_size()-1; { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*id[j]; }
+        for(SizeType j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-ValidatedNumericType(midpoint(flow_domain[j]))); }
+        SizeType j=mdphi[i].argument_size()-1u; { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*id[j]; }
         res_model += FloatDPBounds(-err[i],+err[i]);
         res[i]=res_model;
     }

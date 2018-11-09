@@ -95,7 +95,7 @@ class TestReachabilityAnalyser
 
     static AnalyserType build_analyser(const SystemType& system)
     {
-        TaylorSeriesIntegrator integrator(MaximumError(1e-2));
+        GradedTaylorSeriesIntegrator integrator(MaximumError(1e-2));
 
         EvolverType evolver(system,integrator);
 

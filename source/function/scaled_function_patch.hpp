@@ -416,7 +416,7 @@ template<class M> class ScaledFunctionPatch
         return g-compose(g,h); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k, const GenericNumericType& c) {
         return antiderivative(f,k,NumericType(c,f.precision())); }
-        
+
     friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
         ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         return ScaledFunctionPatch<M>(remove(f.domain(),k),partial_evaluate(f.model(),k,unscale(c,f.domain()[k]))); }
@@ -905,7 +905,7 @@ template<class M> class VectorScaledFunctionPatch
     }
     friend VectorScaledFunctionPatch<M> partial_evaluate(const VectorScaledFunctionPatch<M>& tf, SizeType k, const GenericNumericType& c) {
         return partial_evaluate(tf,k,NumericType(c,tf.precision())); }
-        
+
     friend Vector<NumericType> evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) {
             ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
@@ -979,11 +979,11 @@ template<class M> class VectorScaledFunctionPatch
         return g;
     }
     friend VectorScaledFunctionPatch<M> antiderivative(const VectorScaledFunctionPatch<M>& f, SizeType k, GenericNumericType c) {
-        return antiderivative(f,k,NumericType(c,f.precision())); 
+        return antiderivative(f,k,NumericType(c,f.precision()));
     }
     friend NormType norm(const VectorScaledFunctionPatch<M>& f) {
         NormType res=norm(f.zero_element());
-        for(SizeType i=1; i!=f.result_size(); ++i) {
+        for(SizeType i=0; i!=f.result_size(); ++i) {
             res=max(res,norm(f[i]));
         }
         return res;

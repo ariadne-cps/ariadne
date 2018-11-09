@@ -35,19 +35,19 @@ namespace Ariadne {
 
 struct AntiDiff { };
 
-template<class Op, class A1, class A2=Void, class A3=Void> struct ClosureExpression;
+template<class Op, class... AS> struct ClosureExpression;
 
-template<class Op, class A> struct ClosureExpression<Op,A,Void,Void> {
+template<class Op, class A> struct ClosureExpression<Op,A> {
     const A& arg;
     ClosureExpression(const A& a) : arg(a) { }
 };
 
-template<class Op, class A1, class A2> struct ClosureExpression<Op,A1,A2,Void> {
+template<class Op, class A1, class A2> struct ClosureExpression<Op,A1,A2> {
     const A1& arg1; const A2& arg2;
     ClosureExpression(const A1& a1, const A2& a2) : arg1(a1), arg2(a2) { }
 };
 
-template<class Op, class A1, class A2, class A3> struct ClosureExpression {
+template<class Op, class A1, class A2, class A3> struct ClosureExpression<Op,A1,A2,A3> {
     const A1& arg1; const A2& arg2; const A2& arg3;
     ClosureExpression(const A1& a1, const A2& a2, const A3& a3) : arg1(a1), arg2(a2), arg3(a3) { }
 };
@@ -85,32 +85,40 @@ template<class A> class Graded : public List<A>
     typedef Graded<A> SelfType;
     Graded() : List<A>() { }
     Graded(const A& a) : List<A>(1u,a) { }
-    Graded(const List<A>& l) : List<A>(l) { }
+    Graded(const List<A>& lst) : List<A>(lst) { }
+    Graded<A>(const Graded<A>& a) : List<A>(a) { }
+    Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
+    Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
-    Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1, Ariadne::create_zero((*this)[0]))); }
-    Nat degree() const { return this->size()-1u; }
+    DegreeType degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
+    OutputStream& write(OutputStream& os) const;
+    friend OutputStream& operator<<(OutputStream& os, Graded<A> const& g) { return g.write(os); }
 };
-template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g) {
+
+template<class A> OutputStream& Graded<A>::write(OutputStream& os) const {
+    Graded<A> const& g=*this;
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     os << "(" << g[0] << ")";
-    for(Nat i=1; i<=g.degree(); ++i) {
+    for(DegreeType i=1; i<=g.degree(); ++i) {
         os << " + (" << g[i] << ")*t";
         if(i>1) { os << "^"<<i; }
     }
     os << "}";
     return os;
 }
-template<> inline OutputStream& operator<<(OutputStream& os, const Graded<FloatDP>& g) {
+
+template<> inline OutputStream& Graded<FloatDP>::write(OutputStream& os) const {
+    Graded<FloatDP> const& g=*this;
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     Bool nonzero=false;
     if(g[0]!=0) { os << g[0]; nonzero=true; }
-    for(Nat i=1; i<=g.degree(); ++i) {
+    for(DegreeType i=1; i<=g.degree(); ++i) {
         if(g[i]>0) {
             if(nonzero) { os << "+"; }
             if(g[i]==1) { os << "t"; } else { os << g[i]<<"*t"; }
@@ -126,10 +134,11 @@ template<> inline OutputStream& operator<<(OutputStream& os, const Graded<FloatD
     os << "}";
     return os;
 }
-template<> inline OutputStream& operator<<(OutputStream& os, const Graded<ExactIntervalType>& g) {
+template<> inline OutputStream& Graded<ExactIntervalType>::write(OutputStream& os) const {
+    Graded<ExactIntervalType> const& g=*this;
     if(g.size()==0) { return os << "0"; }
     os << g[0];
-    for(Nat i=1; i<=g.degree(); ++i) {
+    for(DegreeType i=1; i<=g.degree(); ++i) {
         os << "+"<<g[i]<<"*t";
         if(i>1) { os << "^"<<i; }
     }
@@ -159,7 +168,7 @@ template<class A, class B> Graded<A> operator+(const Graded<A>& a, const B& c) {
 template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r*=c; return r;  }
 template<class A> Graded<A> operator*(const Graded<A>& a, Int c) {
-    Graded<A> r(a); if(c==0) { for(Nat i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
+    Graded<A> r(a); if(c==0) { for(DegreeType i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
 
 template<class A> Graded<A> operator+(const GenericNumericType<A>& c, const Graded<A>& a) {
     Graded<A> r(a); r[0]+=c; return r;  }
@@ -204,84 +213,84 @@ template<class A> Graded<A> tan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> atan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 
 template<class A> Void neg(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(-a.back());
 }
 
 template<class A> Void add(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT(r.degree()+1u == a1.degree());
-    ARIADNE_ASSERT(r.degree()+1u == a2.degree());
+    ARIADNE_ASSERT(r.size()+1u == a1.size());
+    ARIADNE_ASSERT(r.size()+1u == a2.size());
     r.append(a1.back()+a2.back());
 }
 
 template<class A> Void sub(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT(r.degree()+1u == a1.degree());
-    ARIADNE_ASSERT(r.degree()+1u == a2.degree());
+    ARIADNE_ASSERT(r.size()+1u == a1.size());
+    ARIADNE_ASSERT(r.size()+1u == a2.size());
     r.append(a1.back()-a2.back());
 }
 
 template<class A> Void mul(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT_MSG(r.degree()+1u == a1.degree(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
-    ARIADNE_ASSERT_MSG(r.degree()+1u == a2.degree(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
+    ARIADNE_ASSERT_MSG(r.size()+1u == a1.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
+    ARIADNE_ASSERT_MSG(r.size()+1u == a2.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
     ARIADNE_ASSERT(compatible(a1[0],a2[0]));
     r.append(create(a1[0]));
-    Nat d = r.degree();
-    for(Nat i=0; i<=d; ++i) {
+    DegreeType d = r.degree();
+    for(DegreeType i=0; i<=d; ++i) {
         r[d] += a1[i]*a2[d-i];
     }
 }
 
 template<class A> Void div(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT(r.degree()+1u == a1.degree());
-    ARIADNE_ASSERT(r.degree()+1u == a2.degree());
+    ARIADNE_ASSERT(r.size()+1u == a1.size());
+    ARIADNE_ASSERT(r.size()+1u == a2.size());
     ARIADNE_ASSERT(compatible(a1[0],a2[0]));
     r.append(create(a1[0]));
-    Nat d = r.degree();
+    DegreeType d = r.degree();
     r[d]+=a1[d];
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         r[d] -= a2[d-i]*r[i];
     }
     r[d]=r[d]/a2[0];
 }
 
 template<class A> Void sqr(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.size() < a.size());
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(create(a[0]));
-    Nat d = r.degree();
-    for(Nat i=0; i<=d; ++i) {
+    DegreeType d = r.degree();
+    for(DegreeType i=0; i<=d; ++i) {
         r[d] += a[i]*a[d-i];
     }
 }
 
 template<class A> Void rec(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(create(a[0]));
-    Nat d = r.degree();
+    DegreeType d = r.degree();
     if(d==0) { r[d]=rec(a[0]); return; }
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         r[d] -= a[d-i]*r[i];
     }
     r[d]=r[d]*r[0];
 }
 
 template<class A> Void sqrt(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(create(a[0]));
-    Nat d = r.degree();
+    DegreeType d = r.degree();
     if(d==0) { r[d]=sqrt(a[0]); return; }
     r[d]=a[d];
-    for(Nat i=1; i!=d; ++i) {
+    for(DegreeType i=1; i!=d; ++i) {
         r[d] -= r[d-i]*r[i];
     }
     r[d]=r[d]/(2*r[0]);
 }
 
 template<class A> Void exp(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(create(a[0]));
-    Nat d = r.degree();
+    DegreeType d = r.degree();
     if(d==0) { r[d]+=exp(a[0]); return; }
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         r[d] += (d-i)*a[d-i]*r[i];
     }
     r[d]/=d;
@@ -289,12 +298,13 @@ template<class A> Void exp(Graded<A>& r, const Graded<A>& a) {
 
 template<class A> Void log(Graded<A>& r, const Graded<A>& a) {
     // y=log x; r=1/x; s=r^2;
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     r.append(create(a[0]));
-    Nat d = r.degree();
+    DegreeType d = r.degree();
     if(d==0) { r[d]=log(a[0]); return; }
     if(d==1) { r[d]=a[d]/a[0];  return; }
     r[d]+=d*a[d];
-    for(Nat i=1; i!=d; ++i) {
+    for(DegreeType i=1; i!=d; ++i) {
         r[d] -= a[d-i]*r[i]*i;
     }
     r[d]=r[d]/a[0];
@@ -310,19 +320,19 @@ template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
     Graded<A>& s=r;
     A z=create(f[0])*0;
     s.append(z);
-    Nat d = s.degree();
+    DegreeType d = s.degree();
     if(d==0) { s[d]=sin(f[0]); return; }
     if(d==1) { s[d]=cos(f[0])*f[1]; return; }
     Graded<A> c(cos(f[0]));
     c.append(-s[0]*f[1]);
-    for(Nat i=2; i!=d; ++i) {
+    for(DegreeType i=2; i!=d; ++i) {
         c.append(z);
-        for(Nat j=0; j!=i; ++j) {
+        for(DegreeType j=0; j!=i; ++j) {
             c.back() -= (i-j)*f[i-j]*s[j];
         }
         c.back()/=i;
     }
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         s[d] += (d-i)*f[d-i]*c[i];
     }
     s[d]/=d;
@@ -334,14 +344,14 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
     // f[n+1](t)=df[n](t)/dt, s[n+1]=ds[n](t)/dt, c[n+1]=dc[n](t)/dt
     // Then s[n]=+Sum_{m=1}^{n} (m*f[m]*c[n-m])/n
     // Then c[n]=-Sum_{m=1}^{n} (m*f[m]*s[n-m])/n
-    Nat d = f.degree();
+    DegreeType d = f.degree();
     A z=create(f[0]);
     ARIADNE_ASSERT(s.size()==0 && c.size()==0);
-    for(Nat i=0; i<=d; ++i) { s.append(z); c.append(z); }
+    for(DegreeType i=0; i<=d; ++i) { s.append(z); c.append(z); }
     s[0]=sin(f[0]);
     c[0]=cos(f[0]);
-    for(Nat i=1; i<=d; ++i) {
-        for(Nat j=1; j<=i; ++j) {
+    for(DegreeType i=1; i<=d; ++i) {
+        for(DegreeType j=1; j<=i; ++j) {
             s[i] += j*f[j]*c[i-j];
             c[i] += j*f[j]*s[i-j];
         }
@@ -351,6 +361,7 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
 }
 
 template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     Graded<A> s;
     Graded<A> c;
     sincos(s,c,a);
@@ -358,6 +369,7 @@ template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
 }
 
 template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.size()+1u == a.size());
     Graded<A> s;
     Graded<A> c;
     sincos(s,c,a);
@@ -378,7 +390,7 @@ template<class A> Void Graded<A>::operator=(const ClosureExpression<AntiDiff,Gra
 }
 
 template<class A> Void antidifferentiate(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.degree() == a.degree());
+    ARIADNE_ASSERT_MSG(r.size() == a.size(),"r="<<r<<", a="<<a<<"\n");
     r.append(a.back()/(r.degree()+1u));
 }
 
@@ -390,7 +402,7 @@ template<class A> ClosureExpression<AntiDiff,Graded<A>> antidifferential(const G
 Pair<List<FloatDP>,FloatDP> inline midpoint_error(const Graded<ExactIntervalType>& x) {
     List<FloatDP> m(x.degree()+1);
     FloatDP e;
-    for(Nat i=0; i<=x.degree(); ++i) {
+    for(DegreeType i=0; i<=x.degree(); ++i) {
         m[i]=midpoint(x[i]).raw();
         e=add(up,e,max(sub(up,m[i],x[i].lower().raw()),sub(up,x[i].upper().raw(),m[i])));
     }
@@ -398,7 +410,7 @@ Pair<List<FloatDP>,FloatDP> inline midpoint_error(const Graded<ExactIntervalType
 }
 
 
-template<class X> Differential<X> make_differential_variable(Nat as, Nat deg, X val, Nat ind) {
+template<class X> Differential<X> make_differential_variable(SizeType as, DegreeType deg, X val, SizeType ind) {
     return Differential<X>::variable(as,deg,val,ind); }
 template<class X> Graded<X> make_graded(const X& val) {
     return Graded<X>(val); }
@@ -409,7 +421,7 @@ template<class X> Graded<X> create_graded(const X&) {
 
 template<class X, class A> Void compute(const Vector<Procedure<X>>& p, Vector<Graded<A>>& r, List<Graded<A>>& t, const Vector<Graded<A>>& a) {
     execute(t,p,a);
-    for(Nat i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
+    for(SizeType i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
 }
 
 } // namespace Ariadne

@@ -115,7 +115,7 @@ Int main(Int argc, const char* argv[])
 
     // Create the analyser classes
 
-    TaylorSeriesIntegrator series_integrator(1e-3);
+    GradedTaylorSeriesIntegrator series_integrator(1e-3);
     series_integrator.set_maximum_spacial_order(6);
     series_integrator.set_maximum_temporal_order(12);
     series_integrator.verbosity=0;

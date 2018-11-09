@@ -72,7 +72,7 @@ class TestHybridEvolver
   private:
     string evolver_name;
     unsigned int evolver_verbosity;
-    std::shared_ptr<TaylorSeriesIntegrator> evolver_integrator;
+    std::shared_ptr<GradedTaylorSeriesIntegrator> evolver_integrator;
     mutable std::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
@@ -80,7 +80,7 @@ class TestHybridEvolver
     TestHybridEvolver(
             const string evolver_name,
             const unsigned int evolver_verbosity,
-            const TaylorSeriesIntegrator& evolver_integrator);
+            const GradedTaylorSeriesIntegrator& evolver_integrator);
     Void test_all() const;
     Void test_flow() const;
     Void test_affine_flow() const;
@@ -112,7 +112,7 @@ class TestHybridEvolver
 TestHybridEvolver::TestHybridEvolver(
         const string ev_name,
         const unsigned int ev_verbosity,
-        const TaylorSeriesIntegrator& ev_integrator)
+        const GradedTaylorSeriesIntegrator& ev_integrator)
     : evolver_name(ev_name)
     , evolver_verbosity(ev_verbosity)
     , evolver_integrator(ev_integrator.clone())
@@ -905,7 +905,7 @@ Int main(Int argc, const char* argv[])
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
 
-    TaylorSeriesIntegrator evolver_integrator(1e-3);
+    GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
     ARIADNE_TEST_CALL(TestHybridEvolver("general",verbosity,evolver_integrator).test_all());
 
     std::cerr<<"INCOMPLETE ";

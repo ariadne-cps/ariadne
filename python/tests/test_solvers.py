@@ -45,6 +45,6 @@ def test_integrators():
     integrator.flow_step(vf,d,h)
 
     vf=ValidatedVectorMultivariateFunction([fo,fx])
-    integrator=TaylorSeriesIntegrator(1e-8)
+    integrator=GradedTaylorSeriesIntegrator(1e-8)
     integrator.flow_step(vf,d,h)
 

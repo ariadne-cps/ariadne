@@ -33,6 +33,8 @@
 
 namespace Ariadne {
 
+template<class R, class A> inline R cast_sign(A&& a) { return static_cast<R>(std::forward<A>(a)); }
+
 struct AntiDiff { };
 
 template<class Op, class... AS> struct ClosureExpression;
@@ -94,7 +96,7 @@ template<class A> class Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op, class N> Void operator=(const ClosureExpression<Op,SelfType,N>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
-    Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1, Ariadne::create_zero((*this)[0]))); }
+    Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
     DegreeType degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
     OutputStream& write(OutputStream& os) const;
@@ -254,7 +256,7 @@ template<class A> Void mul(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a
     r.append(create(a1[0]));
     DegreeType d = r.degree();
     for(DegreeType i=0; i<=d; ++i) {
-        r[d] += a1[i]*a2[d-i];
+        r[d] += a1[i]*a2[cast_sign<DegreeType>(d-i)];
     }
 }
 
@@ -266,7 +268,7 @@ template<class A> Void div(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a
     DegreeType d = r.degree();
     r[d]+=a1[d];
     for(DegreeType i=0; i!=d; ++i) {
-        r[d] -= a2[d-i]*r[i];
+        r[d] -= a2[cast_sign<DegreeType>(d-i)]*r[i];
     }
     r[d]=r[d]/a2[0];
 }
@@ -276,7 +278,7 @@ template<class A> Void sqr(Graded<A>& r, const Graded<A>& a) {
     r.append(create(a[0]));
     DegreeType d = r.degree();
     for(DegreeType i=0; i<=d; ++i) {
-        r[d] += a[i]*a[d-i];
+        r[d] += a[i]*a[cast_sign<DegreeType>(d-i)];
     }
 }
 
@@ -286,7 +288,7 @@ template<class A> Void rec(Graded<A>& r, const Graded<A>& a) {
     DegreeType d = r.degree();
     if(d==0) { r[d]=rec(a[0]); return; }
     for(DegreeType i=0; i!=d; ++i) {
-        r[d] -= a[d-i]*r[i];
+        r[d] -= a[cast_sign<DegreeType>(d-i)]*r[i];
     }
     r[d]=r[d]*r[0];
 }
@@ -298,7 +300,7 @@ template<class A> Void pow(Graded<A>& r, const Graded<A>& a, Int n) {
     DegreeType d = r.degree();
     if(d==0u) { r[d]=pow(a[0],n); return; }
     for(DegreeType i=0; i<d; ++i) {
-        r[d] += ((d-i)*n-i)*a[d-i]*r[i];
+        r[d] += ((d-i)*n-i)*a[cast_sign<DegreeType>(d-i)]*r[i];
     }
     r[d]=r[d]/d/a[0];
 }
@@ -310,7 +312,7 @@ template<class A> Void sqrt(Graded<A>& r, const Graded<A>& a) {
     if(d==0) { r[d]=sqrt(a[0]); return; }
     r[d]=a[d];
     for(DegreeType i=1; i!=d; ++i) {
-        r[d] -= r[d-i]*r[i];
+        r[d] -= r[cast_sign<DegreeType>(d-i)]*r[i];
     }
     r[d]=r[d]/(2*r[0]);
 }
@@ -321,7 +323,7 @@ template<class A> Void exp(Graded<A>& r, const Graded<A>& a) {
     DegreeType d = r.degree();
     if(d==0) { r[d]+=exp(a[0]); return; }
     for(DegreeType i=0; i!=d; ++i) {
-        r[d] += (d-i)*a[d-i]*r[i];
+        r[d] += (d-i)*a[cast_sign<DegreeType>(d-i)]*r[i];
     }
     r[d]/=d;
 }
@@ -335,7 +337,7 @@ template<class A> Void log(Graded<A>& r, const Graded<A>& a) {
     if(d==1) { r[d]=a[d]/a[0];  return; }
     r[d]+=d*a[d];
     for(DegreeType i=1; i!=d; ++i) {
-        r[d] -= a[d-i]*r[i]*i;
+        r[d] -= a[cast_sign<DegreeType>(d-i)]*r[i]*i;
     }
     r[d]=r[d]/a[0];
     r[d]/=d;
@@ -363,7 +365,7 @@ template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
         c.back()/=i;
     }
     for(DegreeType i=0; i!=d; ++i) {
-        s[d] += (d-i)*f[d-i]*c[i];
+        s[d] += (d-i)*f[cast_sign<DegreeType>(d-i)]*c[i];
     }
     s[d]/=d;
 }
@@ -382,8 +384,8 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& a) {
     c[0]=cos(a[0]);
     for(DegreeType i=1; i<=d; ++i) {
         for(DegreeType j=1; j<=i; ++j) {
-            s[i] += j*a[j]*c[i-j];
-            c[i] += j*a[j]*s[i-j];
+            s[i] += j*a[j]*c[cast_sign<DegreeType>(i-j)];
+            c[i] += j*a[j]*s[cast_sign<DegreeType>(i-j)];
         }
         s[i]/=(+i);
         c[i]/=(-i);

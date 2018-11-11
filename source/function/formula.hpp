@@ -312,10 +312,6 @@ template<class Y> inline Formula<Y> Formula<Y>::constant(Int c) {
     return Formula<Y>::constant(Y(c)); }
 
 
-template<class X> using NumericType = typename X::NumericType;
-template<class X> using GenericType = typename X::GenericType;
-template<class X> using GenericNumericType = GenericType<NumericType<X>>;
-
 template<class X, class Y> inline X make_constant(const Y& c, X r) {
     r=c; return std::move(r); }
 

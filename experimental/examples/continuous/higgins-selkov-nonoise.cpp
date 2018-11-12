@@ -38,12 +38,12 @@ int main()
     VectorField dynamics({dot(S)=-S*k1*P*P+k1, dot(P)= S*k1*P*P-k2*P});
 
     MaximumError max_err=0.01;
-    TaylorSeriesIntegrator integrator(max_err);
+    GradedTaylorSeriesIntegrator integrator(max_err);
     std::cout << integrator << std::endl;
     TaylorPicardIntegrator integrator2(max_err);
     std::cout << integrator2 << std::endl;
 
-    VectorFieldEvolver evolver(dynamics,integrator2);
+    VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
     evolver.configuration().maximum_step_size(1.0/50);
     evolver.configuration().maximum_spacial_error(1e-3);

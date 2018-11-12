@@ -176,8 +176,8 @@ class TaylorPicardIntegrator
 {
     double _step_maximum_error;
     double _step_sweep_threshold;
-    DegreeType _maximum_temporal_order;
     DegreeType _minimum_temporal_order;
+    DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)

@@ -120,17 +120,25 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
     unsigned int verbosity = 1;
-    bool draw = false;
+    bool draw = true;
     DRAWING_METHOD = DrawingMethod::BOX;
 
     List<InputApproximation> approximations;
-    approximations.append(ZeroApproximation());
+    //approximations.append(ZeroApproximation());
     approximations.append(ConstantApproximation());
-    approximations.append(AffineApproximation());
+    /*approximations.append(AffineApproximation());
     approximations.append(SinusoidalApproximation());
-    approximations.append(PiecewiseApproximation());
+    approximations.append(PiecewiseApproximation());*/
 
-   TaylorPicardIntegrator integrator(
+    GradedTaylorSeriesIntegrator integrator(
+            maximum_error=1e-3,
+            sweep_threshold=sw_threshold,
+            lipschitz_constant=0.5,
+            step_maximum_error=1e-3,
+            step_sweep_threshold=sw_threshold,
+            maximum_temporal_order=12);
+/*
+    TaylorPicardIntegrator integrator(
             maximum_error=1e-3,
             sweep_threshold=sw_threshold,
             lipschitz_constant=0.5,
@@ -138,6 +146,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
             step_sweep_threshold=sw_threshold,
             minimum_temporal_order=4,
             maximum_temporal_order=12);
+*/
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 

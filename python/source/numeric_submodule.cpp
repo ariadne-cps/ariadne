@@ -83,15 +83,12 @@ Dyadic cast_exact(double d) { return Dyadic(ExactDouble(d)); }
 inline Dyadic operator/(Dyadic x, Two w) { return Dyadic(x/(w^1)); }
 
 
-template<class L> Bool decide(L l) { return Ariadne::decide(l); }
-template<class L> Bool definitely(L l) { return Ariadne::definitely(l); }
-template<class L> Bool possibly(L l) { return Ariadne::possibly(l); }
+template<class L> Bool _decide_(L l) { return decide(l); }
+template<class L> Bool _definitely_(L l) { return definitely(l); }
+template<class L> Bool _possibly_(L l) { return possibly(l); }
+template<class L> Bool _probably_(L l) { return probably(l); }
 
-template<class L> decltype(auto) check(L const& l, Effort const& e) { return l.check(e); }
-template<class L> decltype(auto) operator&(L const& l1, L const& l2) { return l1 and l2; }
-template<class L> decltype(auto) operator|(L const& l1, L const& l2) { return l1 or l2; }
-template<class L> decltype(auto) operator~(L const& l) { return not l; }
-
+template<class L, class E=Effort> auto _check_(L const& l, E const& e) -> decltype(l.check(e)) { return l.check(e); }
 
 template<class OP, class... TS> auto py_apply(TS const& ... ts) -> decltype(OP()(ts...)){ OP op; return op(ts...); }
 
@@ -146,7 +143,6 @@ using pybind11::implicitly_convertible;
 
 template<class P> void export_effective_logical(pymodule& module, std::string name)
 {
-    typedef decltype(declval<LogicalType<P>>().check(declval<Effort>())) CheckType;
     OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
 
     pybind11::class_<LogicalType<P>> logical_class(module,name.c_str());
@@ -154,9 +150,9 @@ template<class P> void export_effective_logical(pymodule& module, std::string na
     logical_class.def(init<LogicalType<P>>());
     logical_class.def("__str__", &__cstr__<LogicalType<P>>);
     logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
-    logical_class.def("check", (CheckType(LogicalType<P>::*)(Effort)) &LogicalType<P>::check);
+    logical_class.def("check", &LogicalType<P>::check);
     define_logical(module,logical_class);
-    module.def("check", (CheckType(*)(LogicalType<P> const&,Effort const&)) &Ariadne::check<LogicalType<P>>);
+    module.def("check", &_check_<LogicalType<P>,Effort>);
 }
 
 template<class P> void export_logical(pymodule& module, std::string name)
@@ -169,10 +165,10 @@ template<class P> void export_logical(pymodule& module, std::string name)
     logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
     define_logical(module,logical_class);
 
-    module.def("decide", (bool(*)(LogicalType<P>)) &decide);
-    module.def("possibly", (bool(*)(LogicalType<P>)) &possibly);
-    module.def("definitely", (bool(*)(LogicalType<P>)) &definitely);
-
+    module.def("decide", (bool(*)(LogicalType<P>)) &_decide_);
+    module.def("probably", (bool(*)(LogicalType<P>)) &_probably_);
+    module.def("possibly", (bool(*)(LogicalType<P>)) &_possibly_);
+    module.def("definitely", (bool(*)(LogicalType<P>)) &_definitely_);
 }
 
 template<> void export_logical<ExactTag>(pymodule& module, std::string name)

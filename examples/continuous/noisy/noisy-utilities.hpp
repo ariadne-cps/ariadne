@@ -142,7 +142,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
     run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,draw);
-    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,approximator_factory,reconditioner,verbosity,draw);
+    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,draw);
 }
 
 void run_noisy_system(SystemType system) {

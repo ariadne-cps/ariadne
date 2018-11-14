@@ -208,9 +208,15 @@ template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }
 
-UpperIntervalType apply(ScalarMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-UpperBoxType image(UpperBoxType bx, ValidatedVectorMultivariateFunction const& f);
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperIntervalType const& x);
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperIntervalType const& x);
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& x);
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& x);
+
+UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateFunction const& f);
+UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f);
+UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f);
+UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f);
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }

@@ -40,12 +40,23 @@
 
 namespace Ariadne {
 
-UpperIntervalType apply(ScalarMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
+UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+UpperBoxType apply(ValidatedVectorUnivariateFunction const& f, UpperIntervalType const& ivl) {
+    return static_cast<UpperBoxType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& bx) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
-Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& bx) {
-    return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
-Box<UpperIntervalType> image(Box<UpperIntervalType> bx, VectorMultivariateFunction<ValidatedTag>const& f) {
-    return static_cast<Box<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& bx) {
+    return static_cast<UpperBoxType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
+
+UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateFunction const& f) {
+    return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f) {
+    return static_cast<UpperBoxType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
+UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f) {
+    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
+UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f) {
+    return static_cast<UpperBoxType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(bx))); }
 
 template class Box<Interval<Real>>;
 template class Box<Interval<FloatDPValue>>;

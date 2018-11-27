@@ -192,10 +192,10 @@ Void export_logicals(pymodule& module) {
     export_effective_logical<EffectiveTag>(module,"Kleenean");
     export_effective_logical<EffectiveUpperTag>(module,"Sierpinskian");
     export_effective_logical<EffectiveLowerTag>(module,"NegatedSierpinskian");
-    export_logical<ValidatedTag>(module,"Tribool");
-    export_logical<UpperTag>(module,"Verified");
-    export_logical<LowerTag>(module,"Falsified");
-    export_logical<ApproximateTag>(module,"Fuzzy");
+    export_logical<ValidatedTag>(module,"ValidatedKleenean");
+    export_logical<UpperTag>(module,"ValidatedUpperKleenean");
+    export_logical<LowerTag>(module,"ValidatedLowerKleenean");
+    export_logical<ApproximateTag>(module,"ApproximateKleenean");
 }
 
 

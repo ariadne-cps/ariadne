@@ -279,20 +279,36 @@ template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, 
     return pyclass;
 }
 
-template<class A> pybind11::class_<A>& define_lattice(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    module.def("abs", &_abs_<A>);
-    module.def("max", &_max_<A,A>);
-    module.def("min", &_min_<A,A>);
+template<class X> pybind11::class_<X>& define_lattice(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    module.def("abs", &_abs_<X>);
+    module.def("max", &_max_<X,X>);
+    module.def("min", &_min_<X,X>);
     return pyclass;
 }
 
-template<class A> pybind11::class_<A>& define_comparisons(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    pyclass.def("__eq__", &__eq__<A,A>);
-    pyclass.def("__ne__", &__ne__<A,A>);
-    pyclass.def("__le__", &__le__<A,A>);
-    pyclass.def("__ge__", &__ge__<A,A>);
-    pyclass.def("__lt__", &__lt__<A,A>);
-    pyclass.def("__gt__", &__lt__<A,A>);
+template<class X> pybind11::class_<X>& define_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    pyclass.def("__eq__", &__eq__<X,X>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<X,X>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<X,X>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<X,X>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<X,X>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<X,X>, pybind11::is_operator());
+    return pyclass;
+}
+
+template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+    pyclass.def("__eq__", &__eq__<X,Y>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<X,Y>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<X,Y>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<X,Y>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<X,Y>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<X,Y>, pybind11::is_operator());
+    pyclass.def("__eq__", &__eq__<Y,X>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<Y,X>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<Y,X>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<Y,X>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<Y,X>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<Y,X>, pybind11::is_operator());
     return pyclass;
 }
 

@@ -636,6 +636,7 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     define_elementary<FloatBall<PR,PRE>>(module,float_ball_class);
     define_lattice<FloatBall<PR,PRE>>(module,float_ball_class);
     define_comparisons<FloatBall<PR,PRE>>(module,float_ball_class);
+    define_mixed_comparisons<FloatBall<PR,PRE>,ValidatedNumber>(module,float_ball_class);
 //    float_ball_class.define_mixed_arithmetic<FloatBall<PR>>();
 //    float_ball_class.define_mixed_arithmetic<ApproximateNumericType>();
 //    float_ball_class.define_mixed_arithmetic<LowerNumericType>();
@@ -680,6 +681,7 @@ template<class PR> void export_float_bounds(pymodule& module)
     define_mixed_arithmetic<FloatBounds<PR>,FloatBall<PR>>(module,float_bounds_class);
     define_elementary<FloatBounds<PR>>(module,float_bounds_class);
     define_comparisons<FloatBounds<PR>>(module,float_bounds_class);
+    define_mixed_comparisons<FloatBounds<PR>,ValidatedNumber>(module,float_bounds_class);
 //    float_bounds_class.define_mixed_arithmetic<ApproximateNumericType>();
 //    float_bounds_class.define_mixed_arithmetic<LowerNumericType>();
 //    float_bounds_class.define_mixed_arithmetic<UpperNumericType>();
@@ -813,6 +815,7 @@ template<class PR> void export_float_approximation(pymodule& module)
     define_elementary<FloatApproximation<PR>>(module,float_approximation_class);
     define_lattice<FloatApproximation<PR>>(module,float_approximation_class);
     define_comparisons<FloatApproximation<PR>>(module,float_approximation_class);
+    define_mixed_comparisons<FloatApproximation<PR>,ApproximateNumber>(module,float_approximation_class);
 
     float_approximation_class.def("__str__", &__cstr__<FloatApproximation<PR>>);
     float_approximation_class.def("__repr__", &__cstr__<FloatApproximation<PR>>);

@@ -443,7 +443,6 @@ void export_numbers(pymodule& module)
 
     define_elementary(module,effective_number_class);
 
-
     pybind11::class_<ExactNumber> exact_number_class(module,(class_name<ExactTag>()+"Number").c_str());
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
@@ -828,6 +827,9 @@ template<class PR> void export_float_approximation(pymodule& module)
     implicitly_convertible<FloatUpperBound<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatLowerBound<PR>,FloatApproximation<PR>>();
     implicitly_convertible<FloatApproximation<PR>,ApproximateNumber>();
+
+    module.def("cast_exact",(FloatValue<PR>const&(*)(FloatApproximation<PR> const&)) &cast_exact);
+//    module.def("cast_exact",(FloatValue<PR>const&(*)(FloatApproximation<PR> const&)) [](FloatApproximation<PR> const&)&cast_exact);
 }
 
 Void export_effort(pymodule& module) {

@@ -286,6 +286,14 @@ template<class X> pybind11::class_<X>& define_lattice(pybind11::module& module, 
     return pyclass;
 }
 
+template<class X, class Y> pybind11::class_<X>& define_mixed_lattice(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+    module.def("max", &_max_<X,Y>);
+    module.def("max", &_max_<Y,X>);
+    module.def("min", &_min_<X,Y>);
+    module.def("min", &_min_<Y,X>);
+    return pyclass;
+}
+
 template<class X> pybind11::class_<X>& define_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass) {
     pyclass.def("__eq__", &__eq__<X,X>, pybind11::is_operator());
     pyclass.def("__ne__", &__ne__<X,X>, pybind11::is_operator());
@@ -393,6 +401,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11:
     pyclass.def("__rsub__", &__rsub__<X,NY>, pybind11::is_operator());
     return pyclass;
 }
+
 
 
 template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {

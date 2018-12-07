@@ -23,7 +23,7 @@
 
 from ariadne import *
 
-def regression_tests():
+def test_regression():
     # New regression tests
     dp = DoublePrecision()
     mp = MultiplePrecision(52)
@@ -32,20 +32,20 @@ def regression_tests():
     Dyadic(1.375)
     FloatDP(1.375,dp)
     FloatMP(1.375,mp)
-    FloatDPValue(1.375)
-    FloatMPValue(1.375)
-
-    FloatDP(1.375)
-    FloatMP(1.375)
-    FloatDPValue(1.375,dp)
-    FloatMPValue(1.375,mp)
+    #FloatDPValue(1.375,dp)
+    #FloatMPValue(1.375,mp)
 
     z=Integer(1)
+    w=Dyadic(1)
+    q=Rational(1)
+
     # Check application of overloaded operators, especially on builtin types, returns the correct value
     assert(type(hlf(1))==Dyadic)
     print("type(rec(1)):",type(rec(1)))
-    print("type(rec(z)):",type(rec(1)))
+    print("type(rec(z)):",type(rec(z)))
+
     assert(type(rec(1))==Rational)
+    assert(type(rec(z))==Rational)
     assert(type(rec(z))==Rational)
     print("type(exp(1)):",type(exp(1)))
     assert(type(exp(1))==Real)
@@ -63,8 +63,56 @@ def regression_tests():
 
     assert(type(FloatDPBounds({1:2},dp))==FloatDPBounds);
 
+def check_arithmetic(x1,x2,r,qr=None):
+    if qr==None: qr=r;
+    assert(type(x1+x2)==type(r));
+    assert(type(x1-x2)==type(r));
+    assert(type(x1*x2)==type(r));
+    assert(type(x1/x2)==type(qr));
+    assert(type(x2+x1)==type(r));
+    assert(type(x2-x1)==type(r));
+    assert(type(x2*x1)==type(r));
+    assert(type(x2/x1)==type(qr));
+    assert(type(max(x1,x2))==type(r))
+    assert(type(min(x1,x2))==type(r))
+    assert(type(max(x2,x1))==type(r))
+    assert(type(min(x2,x1))==type(r))
+
+    assert(type(rec(x2))==type(qr))
+
+
+def types(lst):
+    return [type(val) for val in lst]
+
+def test_algebraic():
+    n=1
+    z=Integer(n)
+    w=Dyadic(z)
+    d=Decimal(w)
+    q=Rational(d)
+    r=Real(q)
+
+    print(types([n,w,max(n,w)]))
+
+    check_arithmetic(n,z,z,q)
+    check_arithmetic(n,w,w,q)
+    check_arithmetic(n,q,q)
+    check_arithmetic(n,r,r)
+    check_arithmetic(z,z,z,q)
+    check_arithmetic(z,w,w,q)
+    check_arithmetic(z,q,q)
+    check_arithmetic(z,r,r)
+    check_arithmetic(w,w,w,q)
+    check_arithmetic(w,q,q)
+    check_arithmetic(w,r,r)
+    check_arithmetic(q,q,q)
+    check_arithmetic(q,r,r)
+    check_arithmetic(r,r,r)
+
+
 
 def test():
+    test_algebraic()
 
     def exact(x): return Dyadic(FloatDPValue(FloatDP(x,DoublePrecision())))
 

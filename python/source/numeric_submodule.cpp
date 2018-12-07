@@ -845,7 +845,7 @@ template<class PR> void export_float_approximation(pymodule& module)
     implicitly_convertible<FloatApproximation<PR>,ApproximateNumber>();
 
     module.def("cast_exact",(FloatValue<PR>const&(*)(FloatApproximation<PR> const&)) &cast_exact);
-//    module.def("cast_exact",(FloatValue<PR>const&(*)(FloatApproximation<PR> const&)) [](FloatApproximation<PR> const&)&cast_exact);
+    module.def("cast_exact",(FloatValue<PR>const&(*)(RawFloat<PR> const&)) &cast_exact);
 }
 
 Void export_effort(pymodule& module) {

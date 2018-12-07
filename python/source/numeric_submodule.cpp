@@ -225,8 +225,6 @@ void export_integer(pymodule& module)
     module.def("pow", &_pow_<Integer,Nat>);
 
     implicitly_convertible<int,Integer>();
-    implicitly_convertible<Integer,ExactNumber>();
-    implicitly_convertible<Integer,ValidatedNumber>();
 }
 
 void export_dyadic(pymodule& module)
@@ -251,8 +249,6 @@ void export_dyadic(pymodule& module)
 
     implicitly_convertible<int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
-    implicitly_convertible<Dyadic,ExactNumber>();
-    implicitly_convertible<Dyadic,ValidatedNumber>();
 
     pybind11::class_<Two> two_class(module,"Two");
     two_class.def("__pow__", &__pow__<Two,Int>);
@@ -277,9 +273,6 @@ void export_decimal(pymodule& module)
     decimal_class.def("__str__", &__cstr__<Decimal>);
     decimal_class.def("__repr__", &__cstr__<Decimal>);
     implicitly_convertible<std::string,Decimal>();
-
-    implicitly_convertible<Decimal,ExactNumber>();
-    implicitly_convertible<Decimal,ValidatedNumber>();
 }
 
 void export_rational(pymodule& module)
@@ -300,13 +293,12 @@ void export_rational(pymodule& module)
     define_arithmetic(module,rational_class);
     define_lattice(module,rational_class);
     define_comparisons(module,rational_class);
+    module.def("rec", &_rec_<Rational>);
 
     implicitly_convertible<int,Rational>();
     implicitly_convertible<Integer,Rational>();
     implicitly_convertible<Dyadic,Rational>();
     implicitly_convertible<Decimal,Rational>();
-    implicitly_convertible<Rational,ExactNumber>();
-    implicitly_convertible<Rational,ValidatedNumber>();
 }
 
 void export_real(pymodule& module)
@@ -464,8 +456,16 @@ void export_numbers(pymodule& module)
     implicitly_convertible<ExactNumber,EffectiveNumber>();
 
     implicitly_convertible<DyadicBounds,ValidatedNumber>();
-    implicitly_convertible<Rational,ExactNumber>();
+
     implicitly_convertible<Real,EffectiveNumber>();
+    implicitly_convertible<Rational,ExactNumber>();
+    implicitly_convertible<Rational,ValidatedNumber>();
+    implicitly_convertible<Decimal,ExactNumber>();
+    implicitly_convertible<Decimal,ValidatedNumber>();
+    implicitly_convertible<Dyadic,ExactNumber>();
+    implicitly_convertible<Dyadic,ValidatedNumber>();
+    implicitly_convertible<Integer,ExactNumber>();
+    implicitly_convertible<Integer,ValidatedNumber>();
 
     implicitly_convertible<Int,ApproximateNumber>();
     implicitly_convertible<Int,ValidatedNumber>();
@@ -901,6 +901,14 @@ Void numeric_submodule(pymodule& module) {
 
     export_builtins(module);
 
+    export_integer(module);
+    export_dyadic(module);
+    export_decimal(module);
+    export_rational(module);
+    export_real(module);
+
+    export_dyadic_bounds(module);
+
     export_numbers(module);
 
     export_rounding_mode(module);
@@ -912,15 +920,5 @@ Void numeric_submodule(pymodule& module) {
     export_user_floats<DoublePrecision>(module);
     export_user_floats<MultiplePrecision>(module);
     export_float_ball<MultiplePrecision,DoublePrecision>(module);
-
-    export_dyadic_bounds(module);
-
-    export_real(module);
-    export_rational(module);
-    export_decimal(module);
-    export_dyadic(module);
-    export_integer(module);
-
-    static_assert(CanDivide<Dyadic,Dyadic>::value);
 }
 

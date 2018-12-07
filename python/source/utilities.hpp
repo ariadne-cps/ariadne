@@ -330,6 +330,14 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
     if constexpr(CanDivide<X,X>::value) {
         pyclass.def(__py_div__, &__div__<X,X>, pybind11::is_operator());
     }
+
+    pyclass.def("__radd__", &__radd__<X,X>, pybind11::is_operator());
+    pyclass.def("__rsub__", &__rsub__<X,X>, pybind11::is_operator());
+    pyclass.def("__rmul__", &__rmul__<X,X>, pybind11::is_operator());
+    if constexpr(CanDivide<X,X>::value) {
+        pyclass.def(__py_rdiv__, &__rdiv__<X,X>, pybind11::is_operator());
+    }
+
     return pyclass;
 }
 

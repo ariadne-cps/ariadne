@@ -645,14 +645,14 @@ template<class PR, class PRE=PR> void export_float_ball(pymodule& module)
     define_mixed_lattice<FloatBall<PR,PRE>,ValidatedNumber>(module,float_ball_class);
     define_comparisons<FloatBall<PR,PRE>>(module,float_ball_class);
     define_mixed_comparisons<FloatBall<PR,PRE>,ValidatedNumber>(module,float_ball_class);
-//    float_ball_class.define_mixed_arithmetic<FloatBall<PR>>();
+//    float_ball_class.define_mixed_arithmetic<FloatBall<PR,PRE>>();
 //    float_ball_class.define_mixed_arithmetic<ApproximateNumericType>();
 //    float_ball_class.define_mixed_arithmetic<LowerNumericType>();
 //    float_ball_class.define_mixed_arithmetic<UpperNumericType>();
 //    float_ball_class.define_mixed_arithmetic<ValidatedNumericType>();
 
-    float_ball_class.def("__str__", &__cstr__<FloatBall<PR>>);
-    float_ball_class.def("__repr__", &__cstr__<FloatBall<PR>>);
+    float_ball_class.def("__str__", &__cstr__<FloatBall<PR,PRE>>);
+    float_ball_class.def("__repr__", &__cstr__<FloatBall<PR,PRE>>);
 }
 
 

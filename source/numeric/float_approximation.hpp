@@ -119,6 +119,9 @@ template<class F> class Approximation
     RawType _a;
 };
 
+template<class PR> Approximation(ApproximateNumber, PR) -> Approximation<RawFloatType<PR>>;
+template<class F> Approximation(F) -> Approximation<F>;
+
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Approximation<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
 template<class PR> template<class D, EnableIf<IsBuiltinFloatingPoint<D>>> inline

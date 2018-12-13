@@ -227,6 +227,8 @@ template<class U> class Interval
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);
 
+template<class L, class U> Interval(L,U) -> Interval<decltype(min(-declval<L>(),declval<U>()))>;
+
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower());
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper());
 template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre());

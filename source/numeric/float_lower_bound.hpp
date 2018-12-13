@@ -116,6 +116,9 @@ template<class F> class LowerBound
     RawType _l;
 };
 
+template<class PR> LowerBound(ValidatedLowerNumber, PR) -> LowerBound<RawFloatType<PR>>;
+template<class F> LowerBound(F) -> LowerBound<F>;
+
 template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
 

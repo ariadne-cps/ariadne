@@ -101,6 +101,10 @@ template<class F> class Error
     static Void set_output_places(Nat p) { output_places=p; }
 };
 
+template<class PR> Error(ValidatedUpperNumber, PR) -> Error<RawFloatType<PR>>;
+template<class F> Error(F) -> Error<F>;
+
+
 }
 
 #endif

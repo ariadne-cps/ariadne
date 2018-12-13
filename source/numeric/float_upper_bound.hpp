@@ -117,6 +117,9 @@ template<class F> class UpperBound
     RawType _u;
 };
 
+template<class PR> UpperBound(ValidatedUpperNumber, PR) -> UpperBound<RawFloatType<PR>>;
+template<class F> UpperBound(F) -> UpperBound<F>;
+
 template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Number<UpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
 

@@ -468,6 +468,8 @@ void export_numbers(pymodule& module)
     implicitly_convertible<Integer,ValidatedNumber>();
 
     implicitly_convertible<Int,ApproximateNumber>();
+    implicitly_convertible<Int,ValidatedLowerNumber>();
+    implicitly_convertible<Int,ValidatedUpperNumber>();
     implicitly_convertible<Int,ValidatedNumber>();
     implicitly_convertible<Int,EffectiveNumber>();
     implicitly_convertible<Int,ExactNumber>();
@@ -869,7 +871,7 @@ template<> Void export_precision<DoublePrecision>(pymodule& module) {
     pybind11::class_<DoublePrecision> precision_class(module,"DoublePrecision");
     precision_class.def(init<>());
     precision_class.def("__str__", &__cstr__<DoublePrecision>);
-//    boost::python::scope().attr("double_precision") = double_precision;
+    module.attr("double_precision") = double_precision;
 }
 
 template<> Void export_precision<MultiplePrecision>(pymodule& module) {
@@ -890,6 +892,27 @@ template<class PR> Void export_user_floats(pymodule& module) {
     export_float_ball<PR>(module);
     export_float_value<PR>(module);
     export_float_error<PR>(module);
+
+    module.def("Value", [](Dyadic const& y, PR pr){return Value(y,pr);});
+    module.def("Value", [](RawFloatType<PR> const& v){return Value(v);});
+
+    if constexpr (IsSame<PR,MultiplePrecision>::value) {
+        module.def("Ball", [](ValidatedNumber const& y, MultiplePrecision pr, DoublePrecision pre){return Ball(y,pr,pre);});
+        module.def("Ball", [](RawFloatType<MultiplePrecision> const& v, RawFloatType<DoublePrecision> const& e){return Ball(v,e);});
+    }
+
+    module.def("Ball", [](ValidatedNumber const& y, PR pr){return Ball(y,pr);});
+    module.def("Ball", [](ValidatedNumber const& y, PR pr, PR pre){return Ball(y,pr,pre);});
+    module.def("Ball", [](RawFloatType<PR> const& v, RawFloatType<PR> const& e){return Ball(v,e);});
+    module.def("Bounds", [](ValidatedNumber const& y, PR pr){return Bounds(y,pr);});
+    module.def("Bounds", [](ValidatedLowerNumber const& yl, ValidatedUpperNumber const& yu, PR pr){return Bounds(yl,yu,pr);});
+    module.def("Bounds", [](RawFloatType<PR> const& l, RawFloatType<PR> const& u){return Bounds(l,u);});
+    module.def("UpperBound", [](ValidatedUpperNumber const& y, PR pr){return UpperBound(y,pr);});
+    module.def("UpperBound", [](RawFloatType<PR> const& u){return UpperBound(u);});
+    module.def("LowerBound", [](ValidatedLowerNumber const& y, PR pr){return LowerBound(y,pr);});
+    module.def("LowerBound", [](RawFloatType<PR> const& l){return LowerBound(l);});
+    module.def("Approximation", [](ApproximateNumber const& y, PR pr){return Approximation(y,pr);});
+    module.def("Approximation", [](RawFloatType<PR> const& a){return Approximation(a);});
 }
 
 

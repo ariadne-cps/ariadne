@@ -183,6 +183,8 @@ template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>
     return os << static_cast<const Vector<I>&>(bx);
 }
 
+template<class I> Box(InitializerList<I>) -> Box<I>;
+
 template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : Vector<I>(ary) { }
 template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : Vector<I>(lst) { }
 

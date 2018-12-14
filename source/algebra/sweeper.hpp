@@ -275,6 +275,14 @@ template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatM
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;
 
+template<class PR> ThresholdSweeper(PR,RawFloatType<PR>) -> ThresholdSweeper<RawFloatType<PR>>;
+template<class PR> RelativeThresholdSweeper(PR,RawFloatType<PR>) -> RelativeThresholdSweeper<RawFloatType<PR>>;
+template<class PR> TrivialSweeper(PR) -> TrivialSweeper<RawFloatType<PR>>;
+template<class PR> NullSweeper(PR) -> NullSweeper<RawFloatType<PR>>;
+template<class PR> AffineSweeper(PR) -> AffineSweeper<RawFloatType<PR>>;
+template<class PR> GradedSweeper(PR,DegreeType) -> GradedSweeper<RawFloatType<PR>>;
+template<class PR> GradedThresholdSweeper(PR,DegreeType,RawFloatType<PR>) -> GradedThresholdSweeper<RawFloatType<PR>>;
+
 } // namespace Ariadne
 
 #endif // ARIADNE_SWEEPER_HPP

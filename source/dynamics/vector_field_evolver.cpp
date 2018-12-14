@@ -105,11 +105,15 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+    return Enclosure(box,this->function_factory());
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+    return Enclosure(box,this->function_factory());
+}
+
+typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
+    return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
 }
 
 

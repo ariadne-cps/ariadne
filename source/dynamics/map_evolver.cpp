@@ -64,6 +64,8 @@ const Bool ENABLE_PREMATURE_TERMINATION = false;
 
 using std::shared_ptr;
 
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+
 class DegenerateCrossingException { };
 
 
@@ -73,6 +75,17 @@ MapEvolver::MapEvolver(const SystemType& system)
 {
 }
 
+typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() const {
+    return ValidatedFunctionModelDPFactory(make_taylor_function_factory());
+}
+
+typename MapEvolver::EnclosureType MapEvolver::enclosure(const ExactBoxType& box) const {
+    return Enclosure(box,this->function_factory());
+}
+
+typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealBox& box) const {
+    return Enclosure(box,this->function_factory());
+}
 
 Orbit<MapEvolver::EnclosureType>
 MapEvolver::

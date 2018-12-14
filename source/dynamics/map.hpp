@@ -37,6 +37,8 @@
 
 namespace Ariadne {
 
+class MapEvolver;
+
 /*! \brief An iterated function system in Euclidean space.
  */
 class IteratedMap
@@ -48,10 +50,15 @@ class IteratedMap
     typedef Real RealType ;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
+    //! \brief The type used to evolve the system
+    typedef MapEvolver EvolverType;
+
   public:
-    IteratedMap(const EffectiveVectorMultivariateFunction& f) : _function(f) { }
+    IteratedMap(const EffectiveVectorMultivariateFunction& f) : _function(f) {
+        ARIADNE_PRECONDITION(f.result_size()==f.argument_size()); }
     virtual IteratedMap* clone() const { return new IteratedMap(*this); }
     virtual ~IteratedMap() = default;
+    DimensionType dimension() const { return this->_function.result_size(); }
     const EffectiveVectorMultivariateFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:

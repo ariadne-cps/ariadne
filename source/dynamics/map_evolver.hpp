@@ -73,6 +73,7 @@ class MapEvolver
     typedef Pair<TerminationType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
+    typedef ValidatedFunctionModelDPFactory FunctionFactoryType;
   public:
 
     //! \brief Default constructor.
@@ -84,12 +85,21 @@ class MapEvolver
     /* \brief Get the internal system. */
     virtual const SystemType& system() const { return *_sys_ptr; }
 
+    //! \brief Make an enclosure from a user set.
+    EnclosureType enclosure(RealBox const&) const;
+
+    //! \brief Make an enclosure from a computed box set.
+    EnclosureType enclosure(ExactBoxType const&) const;
+
     //@{
     //! \name Configuration for the class.
 
     //! \brief A reference to the configuration.
     ConfigurationType& configuration() { return *this->_configuration; }
     const ConfigurationType& configuration() const { return *this->_configuration; }
+
+    //! \brief The class which constructs functions for the enclosures.
+    const FunctionFactoryType function_factory() const;
 
     //@}
 
@@ -111,6 +121,12 @@ class MapEvolver
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true);
         return intermediate; }
+
+
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return std::make_pair(reachable,final); }
+
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,

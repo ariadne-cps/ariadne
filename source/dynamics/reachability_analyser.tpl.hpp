@@ -49,10 +49,6 @@
 #include "../solvers/solver.hpp"
 #include "../geometry/function_set.hpp"
 
-#include "../dynamics/vector_field.hpp"
-
-#include "../dynamics/orbit.hpp"
-#include "../dynamics/vector_field_evolver.hpp"
 #include "../dynamics/reachability_analyser.hpp"
 
 #include "../output/logging.hpp"
@@ -60,6 +56,8 @@
 #include "../solvers/linear_programming.hpp"
 
 namespace Ariadne {
+
+class IteratedMap;
 
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 

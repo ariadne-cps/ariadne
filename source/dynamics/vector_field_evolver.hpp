@@ -74,6 +74,7 @@ class VectorFieldEvolver
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
+    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
@@ -98,6 +99,9 @@ class VectorFieldEvolver
     //! \brief A reference to the configuration controlling the evolution.
     ConfigurationType& configuration() { return *this->_configuration; }
     const ConfigurationType& configuration() const { return *this->_configuration; }
+
+    //! \brief The class which constructs functions for the enclosures.
+    const FunctionFactoryType& function_factory() const;
 
     //@}
 

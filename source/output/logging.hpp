@@ -65,6 +65,7 @@ struct Loggable {
   public:
     Loggable() : verbosity(0),charcode("") { }
     mutable unsigned int verbosity;
+    void set_verbosity(unsigned int v) const { verbosity=v; }
   protected:
     mutable std::string charcode;
 };

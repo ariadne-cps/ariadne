@@ -29,6 +29,8 @@
 #ifndef ARIADNE_ATTRIBUTE_HPP
 #define ARIADNE_ATTRIBUTE_HPP
 
+#include "typedefs.hpp"
+
 namespace Ariadne {
 
 template<class T> class Generator {

@@ -48,11 +48,11 @@ class FigureInterface;
 class CanvasInterface;
 
 struct PlanarProjectionMap {
-    Nat n, i, j;
-    PlanarProjectionMap(Nat nn, Nat ii, Nat jj) : n(nn), i(ii), j(jj) { }
-    Nat argument_size() const { return n; }
-    Nat x_coordinate() const { return i; }
-    Nat y_coordinate() const { return j; }
+    DimensionType n, i, j;
+    PlanarProjectionMap(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) { }
+    DimensionType argument_size() const { return n; }
+    DimensionType x_coordinate() const { return i; }
+    DimensionType y_coordinate() const { return j; }
 };
 inline OutputStream& operator<<(OutputStream& os, const PlanarProjectionMap& p) {
     return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
@@ -67,18 +67,18 @@ class FigureInterface {
     virtual ~FigureInterface() = default;
     virtual FigureInterface& set_projection_map(const PlanarProjectionMap& prj) = 0;
     virtual FigureInterface& set_bounding_box(const ApproximateBoxType& bx) = 0;
-    virtual FigureInterface& set_projection(Nat as, Nat ix, Nat iy) = 0;
+    virtual FigureInterface& set_projection(DimensionType as, DimensionType ix, DimensionType iy) = 0;
     virtual FigureInterface& set_line_style(Bool) = 0;
-    virtual FigureInterface& set_line_width(double) = 0;
-    virtual FigureInterface& set_dot_radius(double) = 0;
+    virtual FigureInterface& set_line_width(Dbl) = 0;
+    virtual FigureInterface& set_dot_radius(Dbl) = 0;
     virtual FigureInterface& set_line_colour(Colour) = 0;
-    virtual FigureInterface& set_fill_opacity(double) = 0;
+    virtual FigureInterface& set_fill_opacity(Dbl) = 0;
     virtual FigureInterface& set_fill_colour(Colour) = 0;
     virtual Bool get_line_style() const = 0;
-    virtual double get_line_width() const = 0;
+    virtual Dbl get_line_width() const = 0;
     virtual Colour get_line_colour() const = 0;
     virtual Bool get_fill_style() const = 0;
-    virtual double get_fill_opacity() const = 0;
+    virtual Dbl get_fill_opacity() const = 0;
     virtual Colour get_fill_colour() const = 0;
     virtual FigureInterface& draw(const DrawableInterface&) = 0;
 };

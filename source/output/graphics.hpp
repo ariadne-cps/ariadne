@@ -40,8 +40,6 @@
 #include "../output/colour.hpp"
 #include "../output/graphics_interface.hpp"
 
-typedef unsigned int Nat;
-
 namespace Ariadne {
 
 typedef ApproximateBoxType GraphicsBoundingBoxType;
@@ -49,29 +47,29 @@ typedef ApproximateBoxType GraphicsBoundingBoxType;
 class ProjectionFunction;
 
 struct LineStyle { explicit LineStyle(Bool ls) : _style(ls) { } operator Bool() const { return this->_style; } private: Bool _style; };
-struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };
-struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } LineColour(double r, double g, double b) : Colour(r,g,b) { } };
+struct LineWidth { explicit LineWidth(Dbl lw) : _width(lw) { } operator Dbl() const { return this->_width; } private: Dbl _width; };
+struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } LineColour(Dbl r, Dbl g, Dbl b) : Colour(r,g,b) { } };
 struct FillStyle { explicit FillStyle(Bool fs) : _style(fs) { } operator Bool() const { return this->_style; } private: Bool _style; };
-struct FillOpacity { explicit FillOpacity(double fo) : _opacity(fo) { } operator double() const { return this->_opacity; } private: double _opacity; };
-struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } FillColour(double r, double g, double b) : Colour(r,g,b) { } };
+struct FillOpacity { explicit FillOpacity(Dbl fo) : _opacity(fo) { } operator Dbl() const { return this->_opacity; } private: Dbl _opacity; };
+struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } FillColour(Dbl r, Dbl g, Dbl b) : Colour(r,g,b) { } };
 
 inline LineStyle line_style(Bool s) { return LineStyle(s); }
-inline LineWidth line_width(double w) { return LineWidth(w); }
+inline LineWidth line_width(Dbl w) { return LineWidth(w); }
 inline LineColour line_colour(const Colour& c) { return LineColour(c); }
-inline LineColour line_colour(double r, double g, double b) { return LineColour(Colour(r,g,b)); }
+inline LineColour line_colour(Dbl r, Dbl g, Dbl b) { return LineColour(Colour(r,g,b)); }
 inline FillStyle fill_style(Bool s) { return FillStyle(s); }
-inline FillOpacity fill_opacity(double o) { return FillOpacity(o); }
+inline FillOpacity fill_opacity(Dbl o) { return FillOpacity(o); }
 inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
-inline FillColour fill_colour(double r, double g, double b) { return FillColour(Colour(r,g,b)); }
+inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,g,b)); }
 
 struct GraphicsProperties {
     GraphicsProperties()
         : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
-    GraphicsProperties(Bool ls, double lw, double dr, Colour lc, Bool fs, Colour fc)
+    GraphicsProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
         : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
-    double dot_radius;
+    Dbl dot_radius;
     Bool line_style;
-    double line_width;
+    Dbl line_width;
     Colour line_colour;
     Bool fill_style;
     Colour fill_colour;
@@ -88,8 +86,10 @@ class Figure
     ~Figure();
     Figure(); //< Deprecated
     Figure(const GraphicsBoundingBoxType& bbx, const PlanarProjectionMap& proj);
-    //! Construct a figure projecting \a bbx onto the (\a i, \i j) coordinates
-    Figure(const GraphicsBoundingBoxType& bbx, Nat ix, Nat iy);
+    //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
+    Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy);
+    //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
+    Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy);
     Figure& set_projection_map(const PlanarProjectionMap&);
     //! Set the restricted region to display coordinates to (\a i, \a j)
     Figure& set_bounding_box(const GraphicsBoundingBoxType&);
@@ -98,31 +98,31 @@ class Figure
     GraphicsBoundingBoxType get_bounding_box() const;
 
     //! Set the displayed coordinates to (\a i, \a j)
-    Figure& set_projection(Nat i, Nat j);
-    Figure& set_projection(Nat as, Nat ix, Nat iy);
+    Figure& set_projection(DimensionType i, DimensionType j);
+    Figure& set_projection(DimensionType as, DimensionType ix, DimensionType iy);
 
     //! Set the radiues to draw points (dots).
-    Figure& set_dot_radius(double);
+    Figure& set_dot_radius(Dbl);
     Figure& set_line_style(Bool);
     //! Set the width to draw lines. A width of 0 means no lines are drawn.
-    Figure& set_line_width(double);
+    Figure& set_line_width(Dbl);
     //! Set the colour draw lines
     Figure& set_line_colour(Colour);
     Figure& set_fill_style(Bool);
     //! Set the colour to fill shapes.
     Figure& set_fill_colour(Colour);
 
-    Figure& set_line_colour(double, double, double);
-    Figure& set_fill_colour(double, double, double);
+    Figure& set_line_colour(Dbl, Dbl, Dbl);
+    Figure& set_fill_colour(Dbl, Dbl, Dbl);
     //! Set the opacity of shapes. An opacity of 0 means no fill.
-    Figure& set_fill_opacity(double);
+    Figure& set_fill_opacity(Dbl);
 
     Bool get_line_style() const;
-    double get_line_width() const;
-    double get_dot_radius() const;
+    Dbl get_line_width() const;
+    Dbl get_dot_radius() const;
     Colour get_line_colour() const;
     Bool get_fill_style() const;
-    double get_fill_opacity() const;
+    Dbl get_fill_opacity() const;
     Colour get_fill_colour() const;
 
     //! Add a set to draw onto the figure.
@@ -132,9 +132,12 @@ class Figure
 
     //! Clear the figure.
     Figure& clear();
+    //! Display the figure.
+    Void display() const;
+    //! Write out to file, using width \a nx pixels, and height \a ny pixels
+    Void write(const Char* filename, Nat nx, Nat ny) const;
     //! Write to \a filename.
-    Void write(const char* filename, Nat nx, Nat ny) const;
-    Void write(const char* filename) const;
+    Void write(const Char* filename) const;
   public:
     struct Data;
   public:

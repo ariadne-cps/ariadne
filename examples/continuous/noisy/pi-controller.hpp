@@ -38,7 +38,7 @@ inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real
     RealVariablesBox initial={{5<=v<=10},{-e<=x<=+e}};
 
     Real evolution_time=5;
-    double step = 1.0/64;
+    double step = 1.0/32;
 
     return make_tuple("PI",dynamics,inputs,initial,evolution_time,step);
 }

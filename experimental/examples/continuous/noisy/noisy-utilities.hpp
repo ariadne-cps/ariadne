@@ -29,8 +29,8 @@ namespace Ariadne {
 
 typedef Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> SystemType;
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw);
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw);
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, TimeType evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw);
 void run_noisy_system(String name, DottedRealAssignments const& dynamics, RealVariablesBox const& inputs, RealVariablesBox const& initial, TimeType evolution_time, double step);
 void run_noisy_system(SystemType system);
 
@@ -53,14 +53,16 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw) {
 
-    auto integrator = InclusionEvolver(approximations,sweeper,step_size=static_cast<StepSizeType>(step),number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
-    integrator.verbosity = verbosity;
+    auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
+    evolver.configuration().approximations(approximations);
+    evolver.configuration().maximum_step_size(step);
+    evolver.verbosity = verbosity;
 
     StopWatch sw;
 
-    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
+    List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     sw.click();
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
@@ -98,12 +100,12 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     }
 }
 
-void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity, bool draw) {
+void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verbosity, bool draw) {
 
     for (auto appro: approximations) {
         List<InputApproximation> singleapproximation = {appro};
         std::cout << appro << std::endl;
-        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,freq,verbosity,draw);
+        run_single(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,verbosity,draw);
     }
 }
 
@@ -112,8 +114,10 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
     InclusionVectorField ivf(dynamics,inputs);
 
-    SizeType freq=12;
-    ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
+    SizeType period_of_parameter_reduction=12;
+    FloatDP ratio_of_parameters_to_keep(6.0);
+    double sw_threshold = 1e-8;
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),sw_threshold);
 
     unsigned int verbosity = 1;
     bool draw = false;
@@ -126,8 +130,22 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     approximations.append(SinusoidalApproximation());
     approximations.append(PiecewiseApproximation());
 
-    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);
-    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity,draw);
+   TaylorPicardIntegrator integrator(
+            maximum_error=1e-3,
+            sweep_threshold=sw_threshold,
+            lipschitz_constant=0.5,
+            step_maximum_error=1e-3,
+            step_sweep_threshold=sw_threshold,
+            minimum_temporal_order=4,
+            maximum_temporal_order=12);
+
+    /*GradedTaylorSeriesIntegrator integrator(MaximumError(1e2),SweepThreshold(1e-8),LipschitzConstant(0.5),
+            StepMaximumError(1e-3),StepSweepThreshold(1e-8),MaximumTemporalOrder(12));*/
+
+    LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
+
+    run_single(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,draw);
+    //run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verbosity,draw);
 }
 
 void run_noisy_system(SystemType system) {

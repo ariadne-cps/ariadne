@@ -43,6 +43,7 @@
 #include "../output/logging.hpp"
 #include "../utility/pointer.hpp"
 #include "../function/affine.hpp"
+#include "../algebra/sweeper.hpp"
 
 namespace Ariadne {
 
@@ -99,7 +100,7 @@ class IntegratorBase
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(MaximumError e, SweepThreshold swp, LipschitzConstant l);
+    IntegratorBase(MaximumError e, Sweeper<FloatDP> sweeper, LipschitzConstant l);
     IntegratorBase(MaximumError e, LipschitzConstant l);
   public:
     //! \brief A threshold for the error estimate of the approximation.
@@ -189,28 +190,28 @@ class TaylorPicardIntegrator
     : public IntegratorBase
 {
     double _step_maximum_error;
-    double _step_sweep_threshold;
+    Sweeper<FloatDP> _sweeper;
     DegreeType _minimum_temporal_order;
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
-        : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*1024)), _minimum_temporal_order(0), _maximum_temporal_order(12) { }
+        : IntegratorBase(err,ThresholdSweeper<FloatDP>(DP(),err/1024),LipschitzConstant(0.5))
+        , _step_maximum_error(err/128), _sweeper(ThresholdSweeper<FloatDP>(DP(),err/1024)), _minimum_temporal_order(0), _maximum_temporal_order(12) { }
 
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
+    TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,sweeper,lip), _step_maximum_error(lerr), _sweeper(sweeper), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
     DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
     Void set_minimum_temporal_order(Nat m) { this->_minimum_temporal_order=m; }
     DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
     Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
-    //! \brief  Set the sweep threshold of the Taylor model for a single step.
-    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
-    Void set_step_sweep_threshold(double lt) { _step_sweep_threshold = lt; }
+    //! \brief  Set the sweep threshold of the Taylor model.
+    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the maximum error of a single step.
     double step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(double e) { _step_maximum_error = e; }
@@ -248,22 +249,22 @@ class TaylorPicardIntegrator
 class TaylorSeriesIntegrator
     : public IntegratorBase
 {
-    double _step_sweep_threshold;
+    Sweeper<FloatDP> _sweeper;
     DegreeType _order;
   public:
     //! \brief Constructor.
     TaylorSeriesIntegrator(MaximumError err, Order order);
 
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
-                           StepSweepThreshold lswp, Order order);
+    TaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                           Order order);
 
     //! \brief The order of the method in space and time.
     DegreeType order() const { return this->_order; }
     Void set_order(DegreeType n) { this->_order=n; }
-    //! \brief  Set the sweep threshold of the Taylor model representing a single step.
-    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
-    Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
+    //! \brief  Set the sweep threshold of the Taylor model.
+    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
@@ -298,7 +299,7 @@ class GradedTaylorSeriesIntegrator
     : public IntegratorBase
 {
     double _step_maximum_error;
-    double _step_sweep_threshold;
+    Sweeper<FloatDP> _sweeper;
     DegreeType _minimum_spacial_order;
     DegreeType _minimum_temporal_order;
     DegreeType _maximum_spacial_order;
@@ -308,15 +309,15 @@ class GradedTaylorSeriesIntegrator
     GradedTaylorSeriesIntegrator(MaximumError err);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5);
+    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip=0.5);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
+    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                           StepMaximumError lerr, MaximumTemporalOrder maxto);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp,
+    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
+                           StepMaximumError lerr,
                            MinimumSpacialOrder minso, MinimumTemporalOrder minto,
                            MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
 
@@ -332,9 +333,9 @@ class GradedTaylorSeriesIntegrator
     //! \brief The maximum order of the method in time.
     DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
     Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
-    //! \brief  Set the sweep threshold of the Taylor model representing a single step.
-    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
-    Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
+    //! \brief  Set the sweep threshold of the Taylor model.
+    Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
+    Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the sweep threshold of the Taylor model.
     double step_maximum_error() const { return this->_step_maximum_error; }
     Void set_step_maximum_error(double e) { _step_maximum_error = e; }

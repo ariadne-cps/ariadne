@@ -115,6 +115,8 @@ template<class U> class Interval
     typedef typename RadiusTrait<U>::Type R;
     typedef typename WidthTrait<U>::Type W;
   public:
+    //! \brief The type returned by the dimension() method.
+    typedef SizeOne DimensionType;
     //! \brief The computational paradigm used by the interval.
     typedef P Paradigm;
     //! \brief The type of the lower bound of the interval.

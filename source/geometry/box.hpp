@@ -63,6 +63,8 @@ class Box
     typedef typename I::WidthType W;
     typedef decltype(max(declval<L>(),declval<U>())) V;
   public:
+    //! \brief The type returned by the dimension() method.
+    typedef SizeType DimensionType;
     //! The type used for a component interval.
     typedef I IntervalType;
     //! The type used for the lower bound of a component interval.

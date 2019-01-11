@@ -42,6 +42,10 @@
 
 namespace Ariadne {
 
+//! \ingroup LinearAlgebraModule
+//! A scalar of type \a X; defined as an alias of \a X.
+template<class X> using Scalar = X;
+
 /************ Vector *********************************************************/
 
 template<class X> class Vector;

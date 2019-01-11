@@ -257,6 +257,15 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(S
     return VectorMultivariateFunction<P>(res);
 }
 
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constant(SizeType as, Vector<NumericType> c) {
+    SizeType rs=c.size();
+    VectorOfScalarFunction<P,BoxDomainType>* res = new VectorOfScalarFunction<P,BoxDomainType>(rs,as);
+    for(SizeType i=0; i!=rs; ++i) {
+        res->_vec[i]=ScalarMultivariateFunction<P>::constant(as,c[i]);
+    }
+    return VectorMultivariateFunction<P>(res);
+}
+
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(SizeType as) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(as);
     for(SizeType j=0; j!=as; ++j) { r.append(coordinate(as,j)); }

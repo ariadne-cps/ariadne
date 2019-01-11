@@ -515,6 +515,10 @@ template<class PR> void export_raw_float(pymodule& module)
 
     define_infinitary(module,raw_float_class);
 
+    raw_float_class.def_static("eps", (F(*)(PR)) &F::eps);
+    raw_float_class.def_static("max", (F(*)(PR)) &F::max);
+    raw_float_class.def_static("min", (F(*)(PR)) &F::min);
+
     raw_float_class.def("__str__", &__cstr__<RawFloat<PR>>);
     raw_float_class.def("__repr__", &__cstr__<RawFloat<PR>>);
 

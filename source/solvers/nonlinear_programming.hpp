@@ -322,6 +322,151 @@ class KrawczykOptimiser
 
 */
 
+<<<<<<< HEAD
+=======
+//-------------------------------------------------------------------------------
+
+class NonlinearMixedOptimiser;
+//! \ingroup OptimisationModule
+//! Solver for non linear programming problems using sequential quadratic
+//! programming.
+class NonlinearSQPOptimiser : public OptimiserBase
+{
+  friend NonlinearMixedOptimiser;
+  public:
+    virtual NonlinearSQPOptimiser *clone() const
+    {
+        return new NonlinearSQPOptimiser(*this);
+    }
+
+    NonlinearSQPOptimiser();
+
+    using OptimiserBase::feasible;
+    using OptimiserBase::minimise;
+
+    //! Struct to serialize data used by algorithm
+    struct StepData;
+    //! Enum for exit status
+    enum class SQPStatus : int8_t
+    {
+      OK              = 1,
+      NOTHING         = 0,
+      NULL_STEP       =-1,
+      QP_NOT_CONV     =-2,
+      QP_SINGULAR     =-3,
+      QP_INFEASIBLE   =-4,
+      NULL_GRADIENT   =-5,
+      UNSAFE_ZONE     =-6,
+      B_SINGULAR      =-7,
+      BFGS_FAILED     =-8,
+      UNSAFE_AND_NULL_GRADIENT = -9
+    };
+
+    //! \brief Compute a \em local optimum of linear programming problem \f$\max
+    //! f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \precondition The domain \f$D\f$ is singleton and has nonempty interior,
+    //! and the codomain \f$C\f$ is nonempty. \return A box \f$X\f$ which
+    //! definitely contains a feasible point, and contains a local optimum.
+    //! @param f objective function
+    //! @param D boundaries on x
+    //! @param g constraints function
+    //! @param C boundaries on g
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f,
+                                                  ExactBoxType D,
+                                                  ValidatedVectorMultivariateFunction g,
+                                                  ExactBoxType C) const;
+
+    virtual ValidatedKleenean
+    feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+
+    //! Take a step on a descendent direction of function f s.t. g
+    Void step(const ApproximateScalarMultivariateFunction &f, const ExactBoxType &D,
+      const ApproximateVectorMultivariateFunction &g, const ExactBoxType &C,
+      StepData &stp) const;
+
+  private:
+    //! Compute Quasi-Newton formula to update an approximation of the Hessian
+    //! @param grd_f_cap
+    //! @param grd_g_cap
+    //! @param s direction vector s (computed as x_new - x)
+    //! @param v Algorithm data serialized
+    Void BFGS(const Vector<FloatDP> &x_cap,
+      const Vector<FloatDP> &grd_f_cap,
+      const Matrix<FloatDP> &grd_g_cap,
+      const struct StepData &v,
+      Matrix<FloatDP>       &B) const;
+
+    //! Method to get the best step length in the right direction. To find the best step length alpha is used a merit function.
+    //! @see merit_function_l1
+    //! @param x current position
+    //! @param p vector direction used as x_new = x + (step-length)*p
+    //! @param grd_f gradient of f on x computed last cycle
+    //! @param g constraints function
+    //! @param g_l lower boundaries on g
+    //! @param g_u upper boundaries on g
+    //! @param lambda Lambda (full-)multipliers computed considering all constraints and boundaries
+    FloatDP linesearch(struct StepData &v,
+                       const std::function<FloatDP(
+                         const Vector<FloatDP>&,
+                         const FloatDP&)> &phi_l1) const;
+
+    void initialize_step_data(ApproximateScalarMultivariateFunction f,
+                              ExactBoxType D,
+                              ApproximateVectorMultivariateFunction g,
+                              ExactBoxType C,
+                              struct StepData &v) const;
+
+    //! Element x Element product between vectors
+    Matrix<FloatDP> prodVec(const Vector<FloatDP> &v1,
+                            const Vector<FloatDP> &v2T) const;
+
+    const Vector<FloatDP>         EMPTY_VEC = Vector<FloatDP>();
+    std::shared_ptr<ASMQPSolver>  qpsolver_ptr;//< Sub-solver QP as shared pointer
+};
+
+
+//-------------------------------------------------------------------------------
+
+//! \ingroup OptimisationModule
+//! Solver for non linear programming problems using sequential quadratic
+//! programming.
+class NonlinearMixedOptimiser : public OptimiserBase
+{
+  public:
+    virtual NonlinearMixedOptimiser *clone() const
+    {
+        return new NonlinearMixedOptimiser(*this);
+    }
+
+    NonlinearMixedOptimiser();
+
+    using OptimiserBase::feasible;
+    using OptimiserBase::minimise;
+
+    //! \brief Compute a \em local optimum of linear programming problem \f$\max
+    //! f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
+    //! \precondition The domain \f$D\f$ is singleton and has nonempty interior,
+    //! and the codomain \f$C\f$ is nonempty. \return A box \f$X\f$ which
+    //! definitely contains a feasible point, and contains a local optimum.
+    virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f,
+                                                  ExactBoxType D,
+                                                  ValidatedVectorMultivariateFunction g,
+                                                  ExactBoxType C) const;
+
+    virtual ValidatedKleenean
+    feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+
+  private:
+    std::shared_ptr<NonlinearInfeasibleInteriorPointOptimiser> nliipo_ptr;
+    std::shared_ptr<NonlinearSQPOptimiser> nlsqp_ptr;
+
+    FloatDP scoringFunction(const ApproximateScalarMultivariateFunction &f,
+                        const ExactBoxType &D,
+                        const ApproximateVectorMultivariateFunction &g,
+                        const ExactBoxType &C,
+                        const RawFloatVector &p) const;
+};
+>>>>>>> 78baf103... Implemented easy mixed optimiser: priority ipm (ipm+sqp)
 
 } // namespace Ariadne
 

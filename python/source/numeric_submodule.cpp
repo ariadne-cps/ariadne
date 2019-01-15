@@ -488,25 +488,36 @@ void export_dyadic_bounds(pymodule& module)
     dyadic_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<DyadicBounds>(pydct);}));
     implicitly_convertible<pybind11::dict,DyadicBounds>();
 
-
     dyadic_bounds_class.def("__str__", &__cstr__<DyadicBounds>);
     dyadic_bounds_class.def("__repr__", &__cstr__<DyadicBounds>);
 
 }
 
+namespace Ariadne {
+const Rounding round_upward = Rounding(upward);
+const Rounding round_downward = Rounding(downward);
+const Rounding round_to_nearest = Rounding(to_nearest);
+}
+
 void export_rounding_mode(pymodule& module) {
     pybind11::class_<Rounding> rounding_mode_class(module,"Rounding");
     rounding_mode_class.def(init<Rounding>());
-//    boost::python::scope().attr("up") = Rounding(up);
-//    boost::python::scope().attr("down") = Rounding(down);
-//    boost::python::scope().attr("near") = Rounding(near);
+    rounding_mode_class.def("__str__", &__cstr__<Rounding>);
+    module.attr("upward") = round_upward;
+    module.attr("downward") = round_downward;
+    module.attr("to_near") = round_to_nearest;
+    module.attr("up") = round_upward;
+    module.attr("down") = round_downward;
+    module.attr("near") = round_to_nearest;
 }
 
 template<class PR> void export_raw_float(pymodule& module)
 {
     typedef RawFloat<PR> F;
-    typedef typename F::RoundingModeType RND;
+
+//    typedef typename F::RoundingModeType RND;
 //    implicitly_convertible<Rounding,RND>();
+    typedef Rounding RND;
 
     pybind11::class_<F> raw_float_class(module,("Float"+numeric_class_tag<PR>()).c_str());
     raw_float_class.def(init<double,PR>());
@@ -550,6 +561,9 @@ template<class PR> void export_raw_float(pymodule& module)
     module.def("abs", &_abs_<F>);
     module.def("max", &_min_<F,F>);
     module.def("min", &_max_<F,F>);
+
+    define_comparisons<F>(module,raw_float_class);
+
 }
 
 template<class PR> void export_float_value(pymodule& module)

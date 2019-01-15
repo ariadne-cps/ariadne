@@ -110,9 +110,46 @@ def test_algebraic():
     check_arithmetic(r,r,r)
 
 
+def check_rounded(x):
+
+    add(up,x,x); add(down,x,x); add(near,x,x);
+    sub(up,x,x); sub(down,x,x); sub(near,x,x);
+    mul(up,x,x); mul(down,x,x); mul(near,x,x);
+    div(up,x,x); div(down,x,x); div(near,x,x);
+
+    nul(up,x); nul(down,x); nul(near,x);
+    pos(up,x); pos(down,x); pos(near,x);
+    neg(up,x); neg(down,x); neg(near,x);
+    hlf(up,x); hlf(down,x); hlf(near,x);
+    sqr(up,x); sqr(down,x); sqr(near,x);
+    rec(up,x); rec(down,x); rec(near,x);
+    fma(up,x,x,x); fma(down,x,x,x); fma(near,x,x,x);
+    pow(up,x,1); pow(down,x,1); pow(near,x,1);
+    sqrt(up,x); sqrt(down,x); sqrt(near,x);
+    exp(up,x); exp(down,x); exp(near,x);
+    log(up,x); log(down,x); log(near,x);
+    sin(up,x); sin(down,x); sin(near,x);
+    cos(up,x); cos(down,x); cos(near,x);
+    tan(up,x); tan(down,x); tan(near,x);
+    atan(up,x); atan(down,x); atan(near,x);
+
+    nul(x); pos(x); neg(x); hlf(x);
+    abs(x); max(x,x); min(x,x);
+    x==x; x!=x; x< x; x> x; x<=x; x>=x;
+
+
+def test_rounded():
+    w=Dyadic(3,1); q=Rational(1,3);
+    dp=DoublePrecision(); FloatDP(w,dp); FloatDP(q,up,dp); FloatDP.eps(dp);
+    mp=MultiplePrecision(128); FloatMP(w,mp); FloatMP(q,up,mp); FloatMP.eps(mp);
+    check_rounded(FloatDP(w,dp))
+    check_rounded(FloatMP(w,mp))
+
+
 
 def test():
     test_algebraic()
+    test_rounded()
 
     def exact(x): return Dyadic(FloatDPValue(FloatDP(x,DoublePrecision())))
 

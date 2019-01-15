@@ -28,11 +28,10 @@ using namespace Ariadne;
 
 inline AtomicHybridAutomaton getController()
 {
-
-    // Declare some constants. Note that system parameters should be given as variables.
+    // Declare some constants
     RealConstant hmin("hmin",5.75_decimal);
     RealConstant hmax("hmax",7.75_decimal);
-    RealConstant delta("delta",0.002_decimal);
+    RealConstant delta("delta",0.02_decimal);
 
     // Declare the shared system variables
     RealVariable height("height");
@@ -43,12 +42,14 @@ inline AtomicHybridAutomaton getController()
     DiscreteEvent e_must_open("must_open");
     DiscreteEvent e_must_close("must_close");
 
+    // Create the controller automaton
     AtomicHybridAutomaton controller("controller");
 
-    // Declare the values the valve can variable can have
+    // Declare the locations for the controller
     AtomicDiscreteLocation rising("rising");
     AtomicDiscreteLocation falling("falling");
 
+    // Instantiate modes for each location; since no dynamics is present, we create an empty list
     controller.new_mode(rising,List<RealAssignment>());
     controller.new_mode(falling,List<RealAssignment>());
 
@@ -58,6 +59,8 @@ inline AtomicHybridAutomaton getController()
     controller.new_invariant(falling,height>=hmin-delta,e_must_open);
     controller.new_invariant(rising,height<=hmax+delta,e_must_close);
 
+    // Specify the transitions, starting from the source location, according to an event, to a target location;
+    // Following those arguments you specify a guard and whether the event is permissive or urgent.
     controller.new_transition(falling,e_can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
     controller.new_transition(rising,e_can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
 

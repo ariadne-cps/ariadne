@@ -158,7 +158,7 @@ template<class X> Void compute(X& r, const Add&, const X& a1, const X& a2) { ret
 template<class X> Void compute(X& r, const Sub&, const X& a1, const X& a2) { return sub(r,a1,a2); }
 template<class X> Void compute(X& r, const Mul&, const X& a1, const X& a2) { return mul(r,a1,a2); }
 template<class X> Void compute(X& r, const Div&, const X& a1, const X& a2) { return div(r,a1,a2); }
-template<class X> Void compute(X& r, const Pow&, const X& a, Int n) { return pow(r,a,n); }
+template<class X> Void compute(X& r, const Pow&, const X& a, const Int& n) { return pow(r,a,n); }
 template<class X> Void compute(X& r, const Sqr&, const X& a) { return sqr(r,a); }
 template<class X> Void compute(X& r, const Sqrt&, const X& a) { return sqrt(r,a); }
 template<class X> Void compute(X& r, const Exp&, const X& a) { return exp(r,a); }
@@ -206,7 +206,7 @@ template<class A> ClosureExpression<Neg,Graded<A>> neg(const Graded<A>& a) {
     return make_expression(Neg(),a); }
 template<class A> ClosureExpression<Sqr,Graded<A>> sqr(const Graded<A>& a) {
     return make_expression(Sqr(),a); }
-template<class A> ClosureExpression<Pow,Graded<A>,Int> pow(const Graded<A>& a, Int n) {
+template<class A> ClosureExpression<Pow,Graded<A>,Int> pow(const Graded<A>& a, const Int& n) {
     return make_expression(Pow(),a,n); }
 template<class A> ClosureExpression<Sqrt,Graded<A>> sqrt(const Graded<A>& a) {
     return make_expression(Sqrt(),a); }

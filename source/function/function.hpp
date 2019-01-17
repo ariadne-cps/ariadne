@@ -113,8 +113,8 @@ template<class P, class D, class C> class FunctionFacade {
 //! \brief Function operations for scalar univariate functions.
 template<class P> class FunctionFacade<P,IntervalDomainType,IntervalDomainType> {
   public:
-    //! \relates Function \brief The derivative of the function at the point \a x.
-    template<class X> Scalar<EvaluateType<P,X>> derivative(X const& x) const;
+    //! \relates Function \brief The slope (derivative) of the function at the point \a x.
+    template<class X> Scalar<EvaluateType<P,X>> slope(X const& x) const;
     //! \relates Function \brief The derivative of the function at the point \a x.
     FunctionExpression<P,IntervalDomainType,IntervalDomainType> operator() (const RealVariable& x) const;
 };
@@ -406,7 +406,7 @@ Function<P,D,C> derivative(Function<P,D,C> const& f) {
     return f.derivative(SizeOne()); }
 
 template<class P, class X> Scalar<EvaluateType<P,X>>
-derivative(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
+slope(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
     return differential(f,x,1u).gradient()[0]; }
 
 template<class P, class X> Vector<EvaluateType<P,X>>
@@ -420,6 +420,16 @@ gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
 template<class P, class X> Matrix<EvaluateType<P,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
+
+template<class P> template<class X> EvaluateType<P,X>
+FunctionFacade<P,IntervalDomainType,IntervalDomainType>::slope(X const& x) const {
+    return Ariadne::slope(static_cast<Function<P,IntervalDomainType,IntervalDomainType>const&>(*this),x);
+}
+
+template<class P> template<class X> Vector<EvaluateType<P,X>>
+FunctionFacade<P,IntervalDomainType,BoxDomainType>::tangent(X const& x) const {
+    return Ariadne::tangent(static_cast<Function<P,IntervalDomainType,BoxDomainType>const&>(*this),x);
+}
 
 template<class P> template<class X> Covector<EvaluateType<P,X>>
 FunctionFacade<P,BoxDomainType,IntervalDomainType>::gradient(Vector<X> const& x) const {

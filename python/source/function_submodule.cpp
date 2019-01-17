@@ -105,9 +105,9 @@ template<class AT, class F> void define_call(pybind11::class_<F>& f) {
     typedef typename F::template Argument<AT> A; typedef ResultOf<F(A)> R; f.def("__call__", (R(F::*)(A const&)const) &F::operator()); }
 
 template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<ScalarUnivariateFunction<P>>& function_class) {
-    typedef ScalarUnivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(derivative(declval<F>(),declval<A>())) R;
-    module.def("derivative", (R(*)(F const&,A const&)) &derivative);
-    function_class.def("derivative", (R(F::*)(A const&)const) &F::derivative);
+    typedef ScalarUnivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(slope(declval<F>(),declval<A>())) R;
+    module.def("slope", (R(*)(F const&,A const&)) &slope);
+    function_class.def("slope", (R(F::*)(A const&)const) &F::slope);
 }
 template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<ScalarMultivariateFunction<P>>& function_class) {
     typedef ScalarMultivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(gradient(declval<F>(),declval<A>())) R;
@@ -224,13 +224,15 @@ template<class P> Void export_univariate_function(pybind11::module& module)
 {
     pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
     function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
-    function_class.def("derivative", &ScalarUnivariateFunction<P>::derivative);
+    function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(SizeOne)const) &ScalarUnivariateFunction<P>::derivative);
+    function_class.def("derivative", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&)) &derivative);
+
     export_function_evaluation(module,function_class);
     if constexpr (not IsSame<P,ApproximateTag>::value) {
-        module.def("derivative", (FloatDPBounds(*)(const ScalarUnivariateFunction<P>&, const FloatDPBounds&))&derivative );
+        module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,1u).gradient()[0]);} );
         module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
     }
-    module.def("derivative", (FloatDPApproximation(*)(const ScalarUnivariateFunction<P>&, const FloatDPApproximation&))&derivative );
+    module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
     module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
 
     function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(IntervalDomainType,Number<P>)) &ScalarUnivariateFunction<P>::constant);

@@ -107,9 +107,18 @@ Void TestFunction::test_scalar_univariate_function()
 
     ARIADNE_TEST_PRINT(cos(f));
 
-    EffectiveScalarUnivariateFunction df=derivative(f);
+    EffectiveScalarUnivariateFunction df;
+    FloatDPApproximation dfp;
+    ARIADNE_TEST_WARN("No ScalarUnivariateFunction<P>::derivative() method.");
+    // df=f.derivative();
+    df=derivative(f);
+    df=f.derivative(SizeOne());
+    df=derivative(f,SizeOne());
+    dfp=f.slope(p);
+    dfp=slope(f,p);
     ARIADNE_TEST_PRINT(df);
     ARIADNE_TEST_EQUAL(df(p),6.0_approx);
+
 }
 
 Void TestFunction::test_vector_univariate_function()
@@ -118,12 +127,22 @@ Void TestFunction::test_vector_univariate_function()
 
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorUnivariateFunction,f,constant(c));
 
-    FloatDPApproximation x=2.0_approx;
+    FloatDPApproximation p=2.0_approx;
 
-    ARIADNE_TEST_EQUAL(f(x)[0],c[0]);
-    ARIADNE_TEST_EQUAL(f[0](x),c[0]);
-    ARIADNE_TEST_EQUAL(f(x)[1],c[1]);
-    ARIADNE_TEST_EQUAL(f[1](x),c[1]);
+    ARIADNE_TEST_EQUAL(f(p)[0],c[0]);
+    ARIADNE_TEST_EQUAL(f[0](p),c[0]);
+    ARIADNE_TEST_EQUAL(f(p)[1],c[1]);
+    ARIADNE_TEST_EQUAL(f[1](p),c[1]);
+
+    EffectiveVectorUnivariateFunction df;
+    Vector<FloatDPApproximation> dfp;
+    //df=f.derivative();
+    df=derivative(f);
+    df=f.derivative(SizeOne());
+    df=derivative(f,SizeOne());
+    dfp=f.tangent(p);
+    dfp=tangent(f,p);
+
 }
 
 Void TestFunction::test_scalar_function()
@@ -142,6 +161,15 @@ Void TestFunction::test_scalar_function()
     EffectiveScalarMultivariateFunction df=f.derivative(1);
     ARIADNE_TEST_PRINT(df);
     ARIADNE_TEST_EQUAL(df(p),2.0_approx);
+
+    Covector<FloatDPApproximation> dfp;
+    SizeType k=0;
+    df=f.derivative(k);
+    df=derivative(f,k);
+    dfp=f.gradient(p);
+    dfp=gradient(f,p);
+
+
 }
 
 Void TestFunction::test_vector_function()

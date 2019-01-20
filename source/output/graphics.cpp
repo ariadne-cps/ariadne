@@ -82,6 +82,11 @@ const Colour cyan=Colour("cyan",0.0,1.0,1.0);
 const Colour magenta=Colour("magenta",1.0,0.0,1.0);
 
 
+OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
+    return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
+        << ", line_style=" << gp.line_style<<", line_width=" << gp.line_width << ", line_colour=" << gp.line_colour
+        << ", fill_style=" << gp.fill_style << ", fill_colour=" << gp.fill_colour << ")"; }
+
 
 inline StringType str(FloatDP x) {
     StringStream ss;
@@ -273,7 +278,10 @@ Figure& Figure::clear() {
 Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
     const Colour& line_colour=properties.line_colour;
     const Colour& fill_colour=properties.fill_colour;
-    canvas.set_fill_opacity(properties.fill_colour.opacity);
+    if (properties.line_style==false) { canvas.set_line_width(0); }
+    else { canvas.set_line_width(properties.line_width); }
+    if (properties.fill_style==false) { canvas.set_fill_opacity(0); }
+    else { canvas.set_fill_opacity(properties.fill_colour.opacity); }
     canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }

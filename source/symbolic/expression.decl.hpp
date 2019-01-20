@@ -101,6 +101,7 @@ template<class UB> class VariableInterval;
 template<class IVL> class VariablesBox;
 using RealInterval = Interval<Real>;
 using RealVariableInterval = VariableInterval<Real>;
+using RealVariableIntervals = List<RealVariableInterval>;
 using RealVariablesBox = VariablesBox<RealInterval>;
 
 

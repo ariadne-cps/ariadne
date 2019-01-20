@@ -48,7 +48,7 @@ template<class P, class D, class C> class FunctionInterface;
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarMultivariateFunctionInterface
+//! \sa \ref ScalarFunctionInterface
 template<class P,class D>
 class VectorOfFunctionInterface
 {

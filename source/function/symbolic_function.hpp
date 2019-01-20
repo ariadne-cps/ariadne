@@ -84,18 +84,30 @@ struct VectorFormulaFunction
 
     VectorFormulaFunction(SizeType as, const List< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
     VectorFormulaFunction(SizeType as, const Vector< Formula<Y> >& f) : _argument_size(as), _formulae(f) { }
-    
+
     ScalarFormulaFunction<Y> operator[](SizeType i) const { return ScalarFormulaFunction(_argument_size,_formulae[i]); }
-    
+
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeType argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<Y>* _get(SizeType i) const { return new ScalarFormulaFunction<Y>(this->_argument_size,this->_formulae[i]); }
-    virtual VectorFormulaFunction<Y>* _derivative(SizeType k) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual VectorFormulaFunction<Y>* _derivative(SizeType k) const {
+        return new VectorFormulaFunction<Y>(this->_argument_size, Vector<Formula<Y>>(this->_formulae.size(),[&](SizeType i){return derivative(this->_formulae[i],k);})); }
     virtual OutputStream& write(OutputStream& os) const { return os << this->_formulae; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
     template<class X> Void _compute(Vector<X>& r, const Vector<X>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }
 };
 
+typedef VectorFormulaFunction<EffectiveNumber> EffectiveVectorFormulaFunction;
+
+
+//! \brief Returns \a true if the function \a f is syntactically constant in the indices \a is.
+template<class Y> Bool is_constant_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }
+//! \brief Returns \a true if the function \a f is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formula,is); }
+//! \brief Returns \a true if the vector function \a f is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formulae,is); }
+//! \brief Returns \a true if the vector function \a f is syntactically additive (possibly with multipliers) in the indices \a is.
+template<class Y> Bool is_additive_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_additive_in(f._formulae,is); }
 
 
 //------------------------ Arithmetic scalar functions  -----------------------------------//
@@ -297,7 +309,7 @@ template<class P> using GradedMultivaluedFunction = GradedFunction<P,BoxDomainTy
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
-template<class P, class D> 
+template<class P, class D>
 class NonResizableScalarFunction : public ScalarFunction<P,D> {
   public:
     NonResizableScalarFunction<P,D>& operator=(const ScalarFunction<P,D>& f) {
@@ -340,8 +352,8 @@ struct VectorOfScalarFunction
         return this->_vec[i].raw_pointer()->_clone(); }
     virtual Void _set(SizeType i, const ScalarFunctionInterface<P,D>* sf) final {
         this->_vec[i]=ScalarFunction<P,D>(sf->_clone()); }
-    virtual VectorFunctionInterface<P,D>* _derivative(ElementIndexType<D> i) const {
-        ARIADNE_NOT_IMPLEMENTED; }
+    virtual VectorFunctionInterface<P,D>* _derivative(ElementIndexType<D> k) const {
+        return new VectorOfScalarFunction<P,D>(Vector<ScalarFunction<P,D>>(this->_vec.size(),[&](SizeType i){return derivative(this->_vec[i],k);})); }
 
     const ScalarFunction<P,D> operator[](SizeType i) const {
         return this->_vec[i]; }
@@ -485,7 +497,7 @@ struct ComposedFunction<P,D,BoxDomainType,E>
         r=_f.evaluate(_g.evaluate(x)); }
 
     ScalarFunction<P,D> operator[](SizeType i) const { return compose(_f[i],_g); }
-        
+
     Function<P,E,C> _f;
     Function<P,D,E> _g;
 };
@@ -506,9 +518,9 @@ struct JoinedFunction
 
     JoinedFunction(Function<P,D,C1> f1, Function<P,D,C2> f2)
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
-    ScalarFunction<P,D> operator[](SizeType i) const { 
+    ScalarFunction<P,D> operator[](SizeType i) const {
         return (i<_f1.result_size()) ? _f1[i] : _f2[i-_f1.result_size()]; }
-        
+
     virtual DomainType const domain() const { return intersection(_f1.domain(),_f2.domain()); }
     virtual CodomainType const codomain() const { return product(_f1.codomain(),_f2.codomain()); }
     virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }

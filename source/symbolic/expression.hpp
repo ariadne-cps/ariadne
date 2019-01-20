@@ -161,19 +161,31 @@ template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn)
 template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v);
 
 //! \brief Returns \a true if the expression \a e is syntactically constant in the variables \a vs.
-Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable<T>>& vs);
 //! \brief Returns \a true if the expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_affine_in(const Expression<T>& e, const Set<Variable<T>>& vs);
 //! \brief Returns \a true if the vector expression \a e is syntactically affine in the variables \a vs.
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
-//! \brief Returns \a true if the vector expression \a e is syntactically additive in the variables \a vs.
-Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+template<class T> Bool is_affine_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
+//! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
+template<class T> Bool is_additive_in(const Vector<Expression<T>>& e, const Set<Variable<T>>& vs);
+
+//! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
+template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
+template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
+template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
 
 //! \brief Tests whether two expressions are identical.
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
+
+//! \brief Count the number of nodes in the expression \a e.
+template<class T> Nat count_nodes(const Expression<T>& e);
+//! \brief Count the number of distinct (i.e., having identical representation) nodes in the expression \a e.
+template<class T> Nat count_distinct_nodes(const Expression<T>& e);
+//! \brief Count the number of distinct node pointers in the expression \a e.
+template<class T> Nat count_distinct_node_ptrs(const Expression<T>& e);
 
 //! \brief Returns true if the expressions are mutual negations.
 //!
@@ -214,8 +226,6 @@ Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>&
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 
 //@}
-
-
 
 
 } // namespace Ariadne

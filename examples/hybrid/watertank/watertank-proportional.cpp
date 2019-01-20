@@ -42,11 +42,14 @@ Int main(Int argc, const char* argv[])
     StringConstant modulated("modulated");
     StringConstant closed("closed");
 
+    // Get the automata and compose them
     HybridAutomaton tank_automaton = getTank();
     HybridAutomaton valve_automaton = getValve();
     CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton});
 
+    // Print the system description on the command line
     cout << watertank_system << endl;
+
     // Compute the system evolution
 
     // Create a GeneralHybridEvolver object
@@ -54,21 +57,25 @@ Int main(Int argc, const char* argv[])
     evolver.verbosity = evolver_verbosity;
 
     // Set the evolution parameters
-    evolver.configuration().set_maximum_enclosure_radius(3.05);
-    evolver.configuration().set_maximum_step_size(0.25);
+    evolver.configuration().set_maximum_enclosure_radius(3.05); // The maximum size of an evolved set before early termination
+    evolver.configuration().set_maximum_step_size(0.25); // The maximum value that can be used as a time step for integration
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     std::cout << "Computing evolution... " << std::flush;
-    Real a_max(0.0);
-    
-    //HybridSet initial_set({valve|closed},{0<=height<=0.0_decimal});
-    HybridSet initial_set({valve|opened},{0.0_decimal<=height<=0.0_decimal});
+
+    // Define the initial set, by supplying the location as a list of locations for each composed automata, and
+    // the continuous set as a list of variable assignments for each variable controlled on that location
+    // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
+    HybridSet initial_set({valve|opened},{height==0});
+    // Define the evolution time: continuous time and maximum number of transitions
     HybridTime evolution_time(80.0,5);
+    // Compute the orbit using upper semantics
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
+    // Plot the trajectory using two different projections
     std::cout << "Plotting trajectory... "<<std::flush;
     Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
     plot("watertank_proportional_t-height",time_height_axes, Colour(0.0,0.5,1.0), orbit);

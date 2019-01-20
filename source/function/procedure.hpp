@@ -94,14 +94,18 @@ public:
 //! manipulations of the function are possible.
 template<class Y>
 class Procedure {
+    typedef Paradigm<Y> P;
   public:
-    explicit Procedure<Y>();
-    explicit Procedure<Y>(const Formula<Y>& f);
+    explicit Procedure<Y>(SizeType as);
+    explicit Procedure<Y>(ScalarMultivariateFunction<P> const& f);
+    explicit Procedure<Y>(SizeType as, const Formula<Y>& f);
     template<class X, EnableIf<IsConvertible<X,Y>> =dummy> explicit Procedure<Y>(const Expansion<MultiIndex,X>& e);
     friend OutputStream& operator<<(OutputStream& os, Procedure<Y> const& p) { return p._write(os); }
   public:
-   template<class X, class YY> friend X evaluate(const Procedure<YY>& p, const Vector<X>& x);
+    SizeType argument_size() const { return this->_argument_size; }
+    template<class X, class YY> friend X evaluate(const Procedure<YY>& p, const Vector<X>& x);
   private: public:
+    SizeType _argument_size;
     List<Y> _constants;
     List<ProcedureInstruction> _instructions;
   public:
@@ -123,18 +127,22 @@ class Procedure {
 //! manipulations of the function are possible.
 template<class Y>
 class Vector<Procedure<Y>> {
+    typedef Paradigm<Y> P;
   public:
-    explicit Vector<Procedure<Y>>(const Vector<Formula<Y>>& f);
+    explicit Vector<Procedure<Y>>(SizeType as, const Vector<Formula<Y>>& f);
+    explicit Vector<Procedure<Y>>(VectorMultivariateFunction<P> const& f);
     explicit Vector<Procedure<Y>>(const Procedure<Y>& p);
     friend OutputStream& operator<<(OutputStream& os, Vector<Procedure<Y>> const& p) { return p._write(os); }
   public:
     SizeType result_size() const { return _results.size(); }
     SizeType temporaries_size() const { return _instructions.size(); }
+    SizeType argument_size() const { return this->_argument_size; }
     Void new_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
     Void new_instruction(OperatorCode o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
     Void new_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
     Void set_return(SizeType i, SizeType a) { _results[i]=a; }
   public:
+    SizeType _argument_size;
     List<Y> _constants;
     List<ProcedureInstruction> _instructions;
     Vector<SizeType> _results;

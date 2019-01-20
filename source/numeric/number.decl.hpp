@@ -59,6 +59,8 @@ template<class X> using EqualsTrait = typename NumericTraits<X>::EqualsType;
 template<class X> using PropertiesType = typename X::PropertiesType;
 template<class X> using GenericType = typename X::GenericType;
 
+template<class X> using GenericNumericType = GenericType<NumericType<X>>;
+
 template<class X> struct IsConcrete : Has<GenericType,X> { };
 
 template<class X> struct IsScalar;

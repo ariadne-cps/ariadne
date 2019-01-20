@@ -63,6 +63,8 @@ class Box
     typedef typename I::WidthType W;
     typedef decltype(max(declval<L>(),declval<U>())) V;
   public:
+    //! \brief The type returned by the dimension() method.
+    typedef SizeType DimensionType;
     //! The type used for a component interval.
     typedef I IntervalType;
     //! The type used for the lower bound of a component interval.
@@ -176,11 +178,14 @@ class Box
     static Box<I> _product(const Box<I>& bx1, const I& ivl2);
 
     static Box<I> _project(const Box<I>& bx, const Array<SizeType>& rng);
+    static Box<I> _project(const Box<I>& bx, const Range& rng);
 };
 
 template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>& bx) {
     return os << static_cast<const Vector<I>&>(bx);
 }
+
+template<class I> Box(InitializerList<I>) -> Box<I>;
 
 template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : Vector<I>(ary) { }
 template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : Vector<I>(lst) { }
@@ -207,13 +212,20 @@ template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s
 template<class I> inline Box<I> remove(const Box<I>& bx, SizeType k) {
     Box<I> rbx(bx.dimension()-1); for(SizeType i=0; i!=k; ++i) { rbx[i]=bx[i]; } for(SizeType i=k; i!=rbx.dimension(); ++i) { rbx[i]=bx[i+1]; } return rbx; }
 
-UpperIntervalType apply(ScalarMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-Box<UpperIntervalType> apply(VectorMultivariateFunction<ValidatedTag>const& f, const Box<UpperIntervalType>& x);
-UpperBoxType image(UpperBoxType bx, ValidatedVectorMultivariateFunction const& f);
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperIntervalType const& x);
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperIntervalType const& x);
+UpperIntervalType apply(ValidatedScalarMultivariateFunction const& f, UpperBoxType const& x);
+UpperBoxType apply(ValidatedVectorMultivariateFunction const& f, UpperBoxType const& x);
+
+UpperIntervalType image(UpperIntervalType const& ivl, ValidatedScalarUnivariateFunction const& f);
+UpperBoxType image(UpperIntervalType const& ivl, ValidatedVectorUnivariateFunction const& f);
+UpperIntervalType image(UpperBoxType const& bx, ValidatedScalarMultivariateFunction const& f);
+UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction const& f);
 
 //! \relates Box \brief Project onto the variables \a rng.
 template<class I> inline Box<I> project(const Box<I> & bx, Array<SizeType> const& rng) { return Box<I>::_project(bx,rng); }
 
+template<class I> inline Box<I> project(const Box<I> & bx, Range const& rng) { return Box<I>::_project(bx,rng); }
 
 template<class I> auto midpoint(const Box<I>& bx) -> typename Box<I>::MidpointType {
     return bx.midpoint();
@@ -418,6 +430,12 @@ template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltyp
     return v;
 }
 
+template<class I, class PR> inline auto cast_singleton(Box<I> const& bx, PR pr) -> Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> {
+    Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> v(bx.dimension(),pr);
+    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i],pr); }
+    return v;
+}
+
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {
     Ariadne::draw(c,p,ApproximateBoxType(*this)); }
 
@@ -519,8 +537,8 @@ template<> class BoxSet<ExactIntervalType>
 };
 
 template<> class BoxSet<ApproximateIntervalType>
-    : public virtual DrawableInterface,
-      public Box<ApproximateIntervalType>
+    : public virtual DrawableInterface
+    , public Box<ApproximateIntervalType>
 {
 
   public:
@@ -533,11 +551,13 @@ template<> class BoxSet<ApproximateIntervalType>
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
-template<> class BoxSet<RealInterval>
-    : public virtual DrawableInterface,
-      public Box<RealInterval>
-{
 
+template<> class BoxSet<RealInterval>
+    : public virtual RegularLocatedSetInterface
+    , public virtual DrawableInterface
+    , public Box<RealInterval>
+{
+    using BoxType = Box<RealInterval>;
   public:
     using Box<RealInterval>::Box;
     BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
@@ -546,6 +566,16 @@ template<> class BoxSet<RealInterval>
     virtual DimensionType dimension() const final { return this->Box<RealInterval>::size(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return this->Box<RealInterval>::draw(c,p); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
+
+    virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->BoxType::separated(DyadicBox(other)); }
+    virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->BoxType::overlaps(DyadicBox(other)); }
+    virtual LowerKleenean covers(const ExactBoxType& other) const final { return this->BoxType::covers(DyadicBox(other)); }
+    virtual LowerKleenean inside(const ExactBoxType& other) const final { return this->BoxType::inside(DyadicBox(other)); }
+    virtual ValidatedLowerKleenean separated(const ExactBoxType& other, Effort eff) const final { return this->BoxType::separated(other); }
+    virtual ValidatedLowerKleenean overlaps(const ExactBoxType& other, Effort eff) const final { return this->BoxType::overlaps(other); }
+    virtual ValidatedLowerKleenean covers(const ExactBoxType& other, Effort eff) const final { return this->BoxType::covers(other); }
+    virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->BoxType::inside(other); }
+    virtual UpperBoxType bounding_box() const final { return UpperBoxType(this->BoxType::bounding_box()); }
 };
 
 

@@ -46,7 +46,7 @@ extern template class Procedure<ValidatedNumber>;
 template<class P> Procedure<Number<P>> make_procedure(ScalarMultivariateFunction<P> const& f) {
     typedef Number<P> Y;
     Formula<Y> e=f(Formula<Y>::identity(f.argument_size()));
-    return Procedure<Y>(e);
+    return Procedure<Y>(f.argument_size(),e);
 }
 
 template<class Y> SizeType _convert(List<ProcedureInstruction>& p, List<Y>& c, const Formula<Y>& f, Map<const Void*,SizeType>& cache) {
@@ -106,21 +106,27 @@ Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<Y>
 
 
 template<class Y>
-Procedure<Y>::Procedure()
+Procedure<Y>::Procedure(SizeType as) : _argument_size(as)
 {
 }
 
 template<class Y>
-Procedure<Y>::Procedure(const Formula<Y>& f)
+Procedure<Y>::Procedure(SizeType as, const Formula<Y>& f) : _argument_size(as)
 {
     Map<const Void*, SizeType> ind;
     _convert(this->_instructions,this->_constants,f, ind);
 }
 
+template<class Y>
+Procedure<Y>::Procedure(const ScalarMultivariateFunction<P>& f)
+    : Procedure<Y>(f.argument_size(),f(Formula<Y>::identity(f.argument_size())))
+{
+}
+
 
 template<class Y> template<class X, EnableIf<IsConvertible<X,Y>>>
 Procedure<Y>::Procedure(const Expansion<MultiIndex,X>& e)
-    : Procedure(horner_evaluate(e,Formula<Y>::identity(e.argument_size())))
+    : Procedure(e.argument_size(),horner_evaluate(e,Formula<Y>::identity(e.argument_size())))
 {
 }
 
@@ -141,8 +147,8 @@ template<class Y> Procedure<Y>& operator+=(Procedure<Y>& f, const Y& c) {
 
 
 template<class Y>
-Vector<Procedure<Y>>::Vector(const Vector<Formula<Y>>& f)
-    : _results(f.size(),0u)
+Vector<Procedure<Y>>::Vector(SizeType as, const Vector<Formula<Y>>& f)
+    : _argument_size(as),  _results(f.size(),0u)
 {
     Map<const Void*, SizeType> ind;
     for(SizeType i=0; i!=f.size(); ++i) {
@@ -151,6 +157,12 @@ Vector<Procedure<Y>>::Vector(const Vector<Formula<Y>>& f)
     for(Nat i=0; i!=f.size(); ++i) {
         this->_results[i]=ind[f[i].node_ptr()];
     }
+}
+
+template<class Y>
+Vector<Procedure<Y>>::Vector(VectorMultivariateFunction<P> const& f)
+    : Vector<Procedure<Y>>(f.argument_size(),f(Formula<Y>::identity(f.argument_size())))
+{
 }
 
 template<class Y>

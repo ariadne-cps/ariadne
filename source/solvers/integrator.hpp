@@ -34,6 +34,7 @@
 #include <string>
 
 #include "../solvers/integrator_interface.hpp"
+#include "../solvers/bounder.hpp"
 #include "../function/function_interface.hpp"
 
 #include "../utility/declarations.hpp"
@@ -53,21 +54,24 @@ template<class X> class Polynomial;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelDPFactoryInterface;
-typedef std::shared_ptr<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
+typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
+typedef SharedPointer<const BounderInterface> BounderPointer;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
 struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
 struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute<double>(v) { } };
-struct SpacialOrder : Attribute<Nat> { SpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct TemporalOrder : Attribute<Nat> { TemporalOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MinimumSpacialOrder : Attribute<Nat> { MinimumSpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MinimumTemporalOrder : Attribute<Nat> { MinimumTemporalOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MaximumSpacialOrder : Attribute<Nat> { MaximumSpacialOrder(Nat v) : Attribute<Nat>(v) { } };
-struct MaximumTemporalOrder : Attribute<Nat> { MaximumTemporalOrder(Nat v) : Attribute<Nat>(v) { } };
+struct Order : Attribute<DegreeType> { Order(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct TemporalOrder : Attribute<DegreeType> { TemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MinimumSpacialOrder : Attribute<DegreeType> { MinimumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MinimumTemporalOrder : Attribute<DegreeType> { MinimumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MaximumSpacialOrder : Attribute<DegreeType> { MaximumSpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
+struct MaximumTemporalOrder : Attribute<DegreeType> { MaximumTemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 
 static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
 static const Generator<StepSweepThreshold> step_sweep_threshold = Generator<StepSweepThreshold>();
+static const Generator<Order> order = Generator<Order>();
 static const Generator<SpacialOrder> spacial_order = Generator<SpacialOrder>();
 static const Generator<TemporalOrder> temporal_order = Generator<TemporalOrder>();
 static const Generator<MinimumTemporalOrder> minimum_temporal_order = Generator<MinimumTemporalOrder>();
@@ -100,10 +104,29 @@ class IntegratorBase
     //! \brief Set the class which constructs functions for representing the flow.
     Void set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory);
 
+    //! \brief The class that computes bounds.
+    const BounderInterface& bounder() const;
+    //! \brief Set the class that computes bounds.
+    Void set_bounder(const BounderInterface& bounder);
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
                 const ExactBoxType& state_domain,
+                const StepSizeType& maximum_time_step) const;
+
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
+                const ExactBoxType& state_domain,
+                const ExactBoxType& parameter_domain,
+                const StepSizeType& maximum_time_step) const;
+
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& differential_equation,
+                const ExactBoxType& state_domain,
+                const StepSizeType& starting_time,
+                const ExactBoxType& parameter_domain,
                 const StepSizeType& maximum_time_step) const;
 
     virtual ValidatedVectorMultivariateFunctionModelDP
@@ -129,10 +152,18 @@ class IntegratorBase
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
+
     virtual ValidatedVectorMultivariateFunctionModelDP
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
-              const StepSizeType& suggested_time_step,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const = 0;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const = 0;
 
   public:
@@ -140,6 +171,7 @@ class IntegratorBase
     double _lipschitz_tolerance;
     StepSizeType _maximum_step_size;
     FunctionFactoryPointer _function_factory_ptr;
+    BounderPointer _bounder_ptr;
 };
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
@@ -148,7 +180,7 @@ class TaylorPicardIntegrator
 {
     double _step_maximum_error;
     double _step_sweep_threshold;
-    Nat _maximum_temporal_order;
+    DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
     TaylorPicardIntegrator(MaximumError err)
@@ -161,8 +193,8 @@ class TaylorPicardIntegrator
         : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
-    Nat maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
+    DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
+    Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
     //! \brief  Set the sweep threshold of the Taylor model for a single step.
     double step_sweep_threshold() const { return this->_step_sweep_threshold; }
     Void set_step_sweep_threshold(double lt) { _step_sweep_threshold = lt; }
@@ -179,54 +211,46 @@ class TaylorPicardIntegrator
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
     using IntegratorBase::flow_step;
+
+  private:
+    ValidatedVectorMultivariateFunctionModelDP
+    _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
+               const ExactBoxType& state_domain,
+               const ExactIntervalType& time_domain,
+               const ExactBoxType& parameter_domain,
+               const UpperBoxType& bounding_box) const;
 };
+
+
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
     : public IntegratorBase
 {
-    double _step_maximum_error;
     double _step_sweep_threshold;
-    Nat _minimum_spacial_order;
-    Nat _minimum_temporal_order;
-    Nat _maximum_spacial_order;
-    Nat _maximum_temporal_order;
+    DegreeType _order;
   public:
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err);
-
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5);
+    TaylorSeriesIntegrator(MaximumError err, Order order);
 
     //! \brief Constructor.
     TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
+                           StepSweepThreshold lswp, Order order);
 
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp,
-                           MinimumSpacialOrder minso, MinimumTemporalOrder minto,
-                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
-
-    //! \brief The order of the method in space.
-    Nat minimum_spacial_order() const { return this->_minimum_spacial_order; }
-    Void set_minimum_spacial_order(Nat n) { this->_minimum_spacial_order=n; }
-    //! \brief The order of the method in space.
-    Nat minimum_temporal_order() const { return this->_minimum_temporal_order; }
-    Void set_minimum_temporal_order(Nat m) { this->_minimum_temporal_order=m; }
-    //! \brief The maximum order of the method in time.
-    Nat maximum_spacial_order() const { return this->_maximum_spacial_order; }
-    Void set_maximum_spacial_order(Nat n) { this->_maximum_spacial_order=n; }
-    //! \brief The maximum order of the method in time.
-    Nat maximum_temporal_order() const { return this->_maximum_temporal_order; }
-    Void set_maximum_temporal_order(Nat m) { this->_maximum_temporal_order=m; }
+    //! \brief The order of the method in space and time.
+    DegreeType order() const { return this->_order; }
+    Void set_order(DegreeType n) { this->_order=n; }
     //! \brief  Set the sweep threshold of the Taylor model representing a single step.
     double step_sweep_threshold() const { return this->_step_sweep_threshold; }
     Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
-    //! \brief  Set the sweep threshold of the Taylor model.
-    double step_maximum_error() const { return this->_step_maximum_error; }
-    Void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
@@ -242,6 +266,87 @@ class TaylorSeriesIntegrator
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
+    using IntegratorBase::flow_step;
+
+  private:
+
+};
+
+
+//! \brief An integrator which computes the Taylor series of the flow function with remainder term.
+class GradedTaylorSeriesIntegrator
+    : public IntegratorBase
+{
+    double _step_maximum_error;
+    double _step_sweep_threshold;
+    DegreeType _minimum_spacial_order;
+    DegreeType _minimum_temporal_order;
+    DegreeType _maximum_spacial_order;
+    DegreeType _maximum_temporal_order;
+  public:
+    //! \brief Constructor.
+    GradedTaylorSeriesIntegrator(MaximumError err);
+
+    //! \brief Constructor.
+    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5);
+
+    //! \brief Constructor.
+    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
+
+    //! \brief Constructor.
+    GradedTaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp,
+                           MinimumSpacialOrder minso, MinimumTemporalOrder minto,
+                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
+
+    //! \brief The order of the method in space.
+    DegreeType minimum_spacial_order() const { return this->_minimum_spacial_order; }
+    Void set_minimum_spacial_order(DegreeType n) { this->_minimum_spacial_order=n; }
+    //! \brief The order of the method in space.
+    DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
+    Void set_minimum_temporal_order(DegreeType m) { this->_minimum_temporal_order=m; }
+    //! \brief The maximum order of the method in time.
+    DegreeType maximum_spacial_order() const { return this->_maximum_spacial_order; }
+    Void set_maximum_spacial_order(DegreeType n) { this->_maximum_spacial_order=n; }
+    //! \brief The maximum order of the method in time.
+    DegreeType maximum_temporal_order() const { return this->_maximum_temporal_order; }
+    Void set_maximum_temporal_order(DegreeType m) { this->_maximum_temporal_order=m; }
+    //! \brief  Set the sweep threshold of the Taylor model representing a single step.
+    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
+    Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
+    //! \brief  Set the sweep threshold of the Taylor model.
+    double step_maximum_error() const { return this->_step_maximum_error; }
+    Void set_step_maximum_error(double e) { _step_maximum_error = e; }
+
+    virtual GradedTaylorSeriesIntegrator* clone() const { return new GradedTaylorSeriesIntegrator(*this); }
+    virtual Void write(OutputStream& os) const;
+
+    virtual Pair<StepSizeType,UpperBoxType>
+    flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
+                const ExactBoxType& state_domain,
+                const StepSizeType& suggested_time_step) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const;
+
     using IntegratorBase::flow_step;
 
   private:
@@ -254,16 +359,16 @@ class TaylorSeriesIntegrator
 class AffineIntegrator
     : public IntegratorBase
 {
-    Nat _spacial_order;
-    Nat _temporal_order;
+    DegreeType _spacial_order;
+    DegreeType _temporal_order;
   public:
     AffineIntegrator(MaximumError maximum_error, TemporalOrder temporal_order);
     AffineIntegrator(MaximumError maximum_error, SpacialOrder spacial_order, TemporalOrder temporal_order);
 
     //! \brief The order of the method in space.
-    Nat spacial_order() const { return this->_spacial_order; }
+    DegreeType spacial_order() const { return this->_spacial_order; }
     //! \brief The order of the method in time.
-    Nat temporal_order() const { return this->_temporal_order; }
+    DegreeType temporal_order() const { return this->_temporal_order; }
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
@@ -271,6 +376,13 @@ class AffineIntegrator
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
               const UpperBoxType& bounding_box) const;
 
     using IntegratorBase::flow_step;

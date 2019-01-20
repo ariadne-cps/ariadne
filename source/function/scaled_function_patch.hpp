@@ -416,7 +416,7 @@ template<class M> class ScaledFunctionPatch
         return g-compose(g,h); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k, const GenericNumericType& c) {
         return antiderivative(f,k,NumericType(c,f.precision())); }
-        
+
     friend ScaledFunctionPatch<M> partial_evaluate(const ScaledFunctionPatch<M>& f, SizeType k, const NumericType& c) {
         ARIADNE_ASSERT(decide(contains(f.domain()[k],c)));
         return ScaledFunctionPatch<M>(remove(f.domain(),k),partial_evaluate(f.model(),k,unscale(c,f.domain()[k]))); }
@@ -905,7 +905,7 @@ template<class M> class VectorScaledFunctionPatch
     }
     friend VectorScaledFunctionPatch<M> partial_evaluate(const VectorScaledFunctionPatch<M>& tf, SizeType k, const GenericNumericType& c) {
         return partial_evaluate(tf,k,NumericType(c,tf.precision())); }
-        
+
     friend Vector<NumericType> evaluate(const VectorScaledFunctionPatch<M>& f, const Vector<NumericType>& x) {
         if(!definitely(contains(f.domain(),x))) {
             ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
@@ -979,11 +979,11 @@ template<class M> class VectorScaledFunctionPatch
         return g;
     }
     friend VectorScaledFunctionPatch<M> antiderivative(const VectorScaledFunctionPatch<M>& f, SizeType k, GenericNumericType c) {
-        return antiderivative(f,k,NumericType(c,f.precision())); 
+        return antiderivative(f,k,NumericType(c,f.precision()));
     }
     friend NormType norm(const VectorScaledFunctionPatch<M>& f) {
         NormType res=norm(f.zero_element());
-        for(SizeType i=1; i!=f.result_size(); ++i) {
+        for(SizeType i=0; i!=f.result_size(); ++i) {
             res=max(res,norm(f[i]));
         }
         return res;
@@ -1248,6 +1248,7 @@ template<class M> class ScaledFunctionPatchFactory
     ScaledFunctionPatch<M> create_coordinate(const DomainType& domain, SizeType index) const;
     VectorScaledFunctionPatch<M> create_zeros(SizeType result_size, const DomainType& domain) const;
     VectorScaledFunctionPatch<M> create_constants(const DomainType& domain, Vector<Number<P>> const& values) const;
+    VectorScaledFunctionPatch<M> create_projection(const DomainType& domain, Range indices) const;
     VectorScaledFunctionPatch<M> create_identity(const DomainType& domain) const;
     ScalarScaledFunctionPatch<M> create_identity(const IntervalDomainType& domain) const { return this->create_coordinate(BoxDomainType(1u,domain),0u); };
     CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const { return this->create(number); }

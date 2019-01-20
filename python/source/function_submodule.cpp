@@ -89,7 +89,6 @@ template<class P, class D, class C> OutputStream& operator<<(OutputStream& os, c
 
 using namespace Ariadne;
 
-typedef FloatDPApproximation F;
 typedef ExactIntervalType I;
 typedef Vector<FloatDPApproximation> FV;
 typedef Vector<ExactIntervalType> IV;
@@ -101,6 +100,74 @@ typedef Vector<ValidatedTaylorModelDP> TMV;
 typedef ValidatedVectorMultivariateTaylorFunctionModelDP TFM;
 typedef ValidatedTaylorModelDP TM;
 
+
+template<class AT, class F> void define_call(pybind11::class_<F>& f) {
+    typedef typename F::template Argument<AT> A; typedef ResultOf<F(A)> R; f.def("__call__", (R(F::*)(A const&)const) &F::operator()); }
+
+template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<ScalarUnivariateFunction<P>>& function_class) {
+    typedef ScalarUnivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(slope(declval<F>(),declval<A>())) R;
+    module.def("slope", (R(*)(F const&,A const&)) &slope);
+    function_class.def("slope", (R(F::*)(A const&)const) &F::slope);
+}
+template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<ScalarMultivariateFunction<P>>& function_class) {
+    typedef ScalarMultivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(gradient(declval<F>(),declval<A>())) R;
+    module.def("gradient", (R(*)(F const&,A const&)) &gradient);
+    function_class.def("gradient", (R(F::*)(A const&)const) &F::gradient);
+}
+template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<VectorUnivariateFunction<P>>& function_class) {
+    typedef VectorUnivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(tangent(declval<F>(),declval<A>())) R;
+    module.def("tangent", (R(*)(F const&,A const&)) &tangent);
+    function_class.def("tangent", (R(F::*)(A const&)const) &F::tangent);
+}
+template<class AT, class P> void define_named_derivatives(pybind11::module& module, pybind11::class_<VectorMultivariateFunction<P>>& function_class) {
+    typedef VectorMultivariateFunction<P> F; typedef typename F::template Argument<AT> A; typedef decltype(jacobian(declval<F>(),declval<A>())) R;
+    module.def("jacobian", (R(*)(F const&,A const&)) &jacobian);
+    function_class.def("jacobian", (R(F::*)(A const&)const) &F::jacobian);
+}
+
+
+template<class F, class T> using ArgumentType = typename F::template Argument<T>;
+
+template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class, ApproximateTag) {
+    define_call<FloatDPApproximation>(function_class);
+    define_call<FloatMPApproximation>(function_class);
+    define_call<Differential<FloatDPApproximation>>(function_class);
+    define_call<Differential<FloatMPApproximation>>(function_class);
+
+    module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPApproximation>>);
+    module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPApproximation>>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatDPApproximation>,DegreeType>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatMPApproximation>,DegreeType>);
+
+    define_named_derivatives<FloatDPApproximation>(module,function_class);
+    define_named_derivatives<FloatMPApproximation>(module,function_class);
+}
+
+template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class, ValidatedTag) {
+    define_call<FloatDPBounds>(function_class);
+    define_call<FloatMPBounds>(function_class);
+    define_call<Differential<FloatDPBounds>>(function_class);
+    define_call<Differential<FloatMPBounds>>(function_class);
+
+    module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatDPBounds>>);
+    module.def("evaluate", _evaluate_<F,ArgumentType<F,FloatMPBounds>>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatDPBounds>,DegreeType>);
+    module.def("differential", _differential_<F,ArgumentType<F,FloatMPBounds>,DegreeType>);
+
+    define_named_derivatives<FloatDPBounds>(module,function_class);
+    define_named_derivatives<FloatMPBounds>(module,function_class);
+
+    export_function_evaluation(module,function_class,ApproximateTag());
+}
+
+template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class, EffectiveTag) {
+    export_function_evaluation(module,function_class,ValidatedTag());
+}
+
+template<class F> Void export_function_evaluation(pybind11::module module, pybind11::class_<F>& function_class)
+{
+    export_function_evaluation(module, function_class, Paradigm<F>());
+}
 
 
 Void export_multi_index(pybind11::module& module)
@@ -153,99 +220,38 @@ Void export_polynomials(pybind11::module& module)
     export_polynomial<FloatDPApproximation>(module);
 }
 
-Void export_univariate_function(pybind11::module& module)
+template<class P> Void export_univariate_function(pybind11::module& module)
 {
-    pybind11::class_<EffectiveScalarUnivariateFunction> function_class(module,"EffectiveScalarUnivariateFunction");
-    function_class.def(pybind11::init<EffectiveScalarUnivariateFunction>());
-    function_class.def("__call__", (FloatDPBounds(EffectiveScalarUnivariateFunction::*)(const FloatDPBounds&)const)&EffectiveScalarUnivariateFunction::operator() );
-    function_class.def("__call__", (Differential<FloatDPBounds>(EffectiveScalarUnivariateFunction::*)(const Differential<FloatDPBounds>&)const)&EffectiveScalarUnivariateFunction::operator() );
+    pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
+    function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
+    function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(SizeOne)const) &ScalarUnivariateFunction<P>::derivative);
+    function_class.def("derivative", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&)) &derivative);
 
-    function_class.def_static("constant", (EffectiveScalarUnivariateFunction(*)(IntervalDomainType,EffectiveNumber)) &EffectiveScalarUnivariateFunction::constant);
-    function_class.def_static("coordinate", (EffectiveScalarUnivariateFunction(*)()) &EffectiveScalarUnivariateFunction::coordinate);
+    export_function_evaluation(module,function_class);
+    if constexpr (not IsSame<P,ApproximateTag>::value) {
+        module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,1u).gradient()[0]);} );
+        module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPBounds& x){return static_cast<FloatDPBounds>(differential(f,x,2u).hessian()[0][0]);} );
+    }
+    module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
+    module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
 
+    function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(IntervalDomainType,Number<P>)) &ScalarUnivariateFunction<P>::constant);
+    function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::coordinate);
+    function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::identity);
+
+    define_elementary_algebra<ScalarUnivariateFunction<P>,Number<P>>(module,function_class);
+
+    function_class.def("__str__", &__cstr__<ScalarUnivariateFunction<P>>);
 }
 
-template<class C, class F> void def(pybind11::class_<C>& c, const char* n, F const& f) {
-    c.def(n,f); }
-template<class A, class F> void def_call(pybind11::class_<F>& f) {
-    typedef ResultOf<F(A)> R; f.def("__call__", (R(F::*)(A const&)const) &F::operator()); }
-template<class A, class F> void def_evaluate(pybind11::class_<F>& f) {
-    typedef ResultOf<F(A)> R; f.def("__call__", (R(*)(F const&, A const&)) &evaluate); }
-template<class A, class F> void def_gradient(pybind11::class_<F>& f) {
-    typedef decltype(declval<F>().gradient(declval<A>())) R; f.def("gradient", (R(F::*)(A const&)const) &F::gradient); }
-template<class A, class F> void def_differential(pybind11::class_<F>& f) {
-    typedef DegreeType D; typedef decltype(declval<F>().differential(declval<A>(),declval<D>())) R;
-    f.def("differential", (R(F::*)(A const&,D)const) &F::differential); }
-
-template<class F, class T> using ArgumentType = typename F::template Argument<T>;
-
-template<class F> Void export_function_evaluation(pybind11::class_<F>& function_class, ApproximateTag) {
-    def_call<ArgumentType<F,FloatDPApproximation>>(function_class);
-    def_call<ArgumentType<F,FloatMPApproximation>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatDPApproximation>>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatMPApproximation>>>(function_class);
-
-    def_evaluate<ArgumentType<F,FloatDPApproximation>>(function_class);
-    def_evaluate<ArgumentType<F,FloatMPApproximation>>(function_class);
-
-    def_differential<ArgumentType<F,FloatDPApproximation>>(function_class);
-    def_differential<ArgumentType<F,FloatMPApproximation>>(function_class);
-}
-
-template<class F> Void export_function_evaluation(pybind11::class_<F>& function_class, ValidatedTag) {
-    export_function_evaluation(function_class,ApproximateTag());
-    def_call<ArgumentType<F,FloatDPBounds>>(function_class);
-    def_call<ArgumentType<F,FloatMPBounds>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatDPBounds>>>(function_class);
-    def_call<ArgumentType<F,Differential<FloatMPBounds>>>(function_class);
-    def_evaluate<ArgumentType<F,FloatDPBounds>>(function_class);
-    def_evaluate<ArgumentType<F,FloatMPBounds>>(function_class);
-    def_differential<ArgumentType<F,FloatDPBounds>>(function_class);
-    def_differential<ArgumentType<F,FloatMPBounds>>(function_class);
-}
-
-template<class F> Void export_function_evaluation(pybind11::class_<F>& function_class, EffectiveTag) {
-    export_function_evaluation(function_class,ValidatedTag());
-}
-
-template<class F> Void export_function_evaluation(pybind11::class_<F>& function_class)
+Void export_univariate_functions(pybind11::module& module)
 {
-    export_function_evaluation(function_class, Paradigm<F>());
+    export_univariate_function<EffectiveTag>(module);
+    export_univariate_function<ValidatedTag>(module);
+    export_univariate_function<ApproximateTag>(module);
 }
 
 
-
-template<class P> Void export_scalar_function_evaluation(pybind11::class_<ScalarMultivariateFunction<P>>& scalar_function_class) {
-    using FP=ScalarMultivariateFunction<P>;
-    export_function_evaluation(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatDPBounds>>(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatMPBounds>>(scalar_function_class);
-}
-
-template<> Void export_scalar_function_evaluation<ApproximateTag>(pybind11::class_<ScalarMultivariateFunction<ApproximateTag>>& scalar_function_class) {
-    using P=ApproximateTag;
-    using FP=ScalarMultivariateFunction<P>;
-    export_function_evaluation(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatDPApproximation>>(scalar_function_class);
-    def_gradient<ArgumentType<FP,FloatMPApproximation>>(scalar_function_class);
-}
-
-Void export_function_evaluation(pybind11::class_<ScalarMultivariateFunction<ApproximateTag>>& scalar_function_class)
-{
-    def_call<Vector<FloatDPApproximation>>(scalar_function_class);
-    def_call<Vector<FloatMPApproximation>>(scalar_function_class);
-    def_call<Vector<Differential<FloatDPApproximation>>>(scalar_function_class);
-    def_call<Vector<Differential<FloatMPApproximation>>>(scalar_function_class);
-
-    def_evaluate<Vector<FloatDPApproximation>>(scalar_function_class);
-    def_evaluate<Vector<FloatMPApproximation>>(scalar_function_class);
-}
-
-template<class P> Void export_vector_function_evaluation(pybind11::class_<VectorMultivariateFunction<P>>& vector_function_class){
-    export_function_evaluation(vector_function_class);
-}
 
 template<class P> Void export_scalar_function(pybind11::module& module)
 {
@@ -260,8 +266,8 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         scalar_function_class.def(pybind11::init<ScalarMultivariateFunction<EffectiveTag>>());
         pybind11::implicitly_convertible<ScalarMultivariateFunction<EffectiveTag>,ScalarMultivariateFunction<ValidatedTag>>();
     }
-    
-    
+
+
 //FIXME
 //    scalar_function_class.def("__eq__", &__eq__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
 //    scalar_function_class.def("__le__", &__le__<Constraint<ScalarMultivariateFunction<P>,Number<P>>,ScalarMultivariateFunction<P>,Number<P>>);
@@ -285,7 +291,7 @@ template<class P> Void export_scalar_function(pybind11::module& module)
         module.def("evaluate", (Scalar<FloatDPBounds>(*)(const ScalarMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
     }
 
-    export_scalar_function_evaluation(scalar_function_class);
+    export_function_evaluation(module,scalar_function_class);
 }
 
 
@@ -313,22 +319,12 @@ template<class P> Void export_vector_function(pybind11::module& module)
     if constexpr (IsSame<P,EffectiveTag>::value) {
         define_vector_algebra_arithmetic<VectorMultivariateFunction<P>,ScalarMultivariateFunction<P>>(module,vector_function_class);
     }
-    export_vector_function_evaluation(vector_function_class);
-
-    vector_function_class.def("jacobian", (Matrix<FloatDPApproximation>(VectorMultivariateFunction<P>::*)(const Vector<FloatDPApproximation>&)const) &VectorMultivariateFunction<P>::jacobian);
-    if constexpr (not IsSame<P,ApproximateTag>::value) {
-        vector_function_class.def("jacobian", (Matrix<FloatDPBounds>(VectorMultivariateFunction<P>::*)(const Vector<FloatDPBounds>&)const) &VectorMultivariateFunction<P>::jacobian);
-    }
+    export_function_evaluation(module,vector_function_class);
 
     vector_function_class.def("__str__", &__cstr__<VectorMultivariateFunction<P>>);
     vector_function_class.def("__repr__", &__crepr__<VectorMultivariateFunction<P>>);
 
     vector_function_class.def_static("identity", (VectorMultivariateFunction<P>(*)(SizeType)) &VectorMultivariateFunction<P>::identity);
-
-    module.def("evaluate", (Vector<FloatDPApproximation>(*)(const VectorMultivariateFunction<P>&,const Vector<FloatDPApproximation>&)) &evaluate);
-    if constexpr (not IsSame<P,ApproximateTag>::value) {
-        module.def("evaluate", (Vector<FloatDPBounds>(*)(const VectorMultivariateFunction<P>&,const Vector<FloatDPBounds>&)) &evaluate);
-    }
 
     module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
     module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const ScalarMultivariateFunction<P>&)) &join);
@@ -337,8 +333,6 @@ template<class P> Void export_vector_function(pybind11::module& module)
 
     module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
     module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
-
-    export_vector_function_evaluation(vector_function_class);
 }
 
 template<class Y, class X> Void export_procedure(pybind11::module& module) {
@@ -379,7 +373,7 @@ Void function_submodule(pybind11::module& module) {
 
     export_polynomials(module);
 
-    export_univariate_function(module);
+    export_univariate_functions(module);
     export_scalar_functions(module);
     export_vector_functions(module);
 

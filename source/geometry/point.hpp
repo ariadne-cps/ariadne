@@ -81,6 +81,8 @@ class Point
     virtual ExactBoxType bounding_box() const;
 };
 
+template<class X> Point(Vector<X>) -> Point<X>;
+
 ExactPoint make_point(const StringType&);
 
 } // namespace Ariadne

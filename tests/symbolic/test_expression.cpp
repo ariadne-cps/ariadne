@@ -117,6 +117,16 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,value);
     }
 
+    Void test_identical() {
+        ARIADNE_TEST_ASSERT(identical(RealExpression(x),RealExpression(x)));
+        ARIADNE_TEST_ASSERT(identical(RealExpression::constant(0),RealExpression::constant(0)));
+        ARIADNE_TEST_ASSERT(identical(RealExpression::constant(2),RealExpression::constant(2)));
+        ARIADNE_TEST_ASSERT(identical(sin(x),sin(x)));
+        ARIADNE_TEST_ASSERT(identical(pow(x,2),pow(x,2)));
+        ARIADNE_TEST_ASSERT(identical(x*y,y*x));
+        ARIADNE_TEST_ASSERT(identical(x+y,y+x));
+    }
+
     Void test_derivative() {
         RealExpression expr = 2*x+y;
         ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
@@ -130,6 +140,99 @@ class TestExpression {
         RealExpression expr = -u*x*y+2*x;
         RealExpression simplification = simplify(derivative(expr,x));
         ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+    }
+
+    Void test_ordering() {
+        ARIADNE_TEST_ASSERT(before(RealExpression(x),RealExpression(y)));
+        ARIADNE_TEST_ASSERT(not before(RealExpression(x),RealExpression(x)));
+        ARIADNE_TEST_ASSERT(before(RealExpression(1),RealExpression(2)));
+        ARIADNE_TEST_ASSERT(not before(RealExpression(5),RealExpression(2)));
+        ARIADNE_TEST_ASSERT(before(pow(x,2),pow(x,3)));
+        ARIADNE_TEST_ASSERT(before(pow(y,2),pow(x,3)));
+        ARIADNE_TEST_ASSERT(before(pow(x,2),pow(x,3)));
+        ARIADNE_TEST_ASSERT(not before(sin(y),sin(x)));
+        ARIADNE_TEST_ASSERT(before(sqrt(x),sin(y)));
+        ARIADNE_TEST_ASSERT(before(x+y,y+x));
+        ARIADNE_TEST_ASSERT(not before(x+y,x+x));
+        ARIADNE_TEST_ASSERT(not before(log(x),rec(x)));
+    }
+
+    Void test_count_nodes() {
+        ARIADNE_TEST_EQUAL(count_nodes(RealExpression(x)),1);
+        ARIADNE_TEST_EQUAL(count_nodes(RealExpression(1)),1);
+        ARIADNE_TEST_EQUAL(count_nodes(2*x),3);
+        ARIADNE_TEST_EQUAL(count_nodes(x+y),3);
+        ARIADNE_TEST_EQUAL(count_nodes(x+sqr(y)),4);
+        ARIADNE_TEST_EQUAL(count_nodes(sin(y)),2);
+        ARIADNE_TEST_EQUAL(count_nodes(pow(y,2)),2);
+        ARIADNE_TEST_EQUAL(count_nodes(pow(x+cos(y),2)+cos(y)),8);
+        ARIADNE_TEST_EQUAL(count_nodes(x+cos(x)+pow(cos(x),2)),8);
+    }
+
+    Void test_count_distinct_nodes() {
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(RealExpression(x)),1);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*exp(x)),3);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*x),2);
+        RealExpression one = 1;
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(one+cos(one)),3);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*y+sqr(x*y)),5);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(x,2)*pow(x,2)),3);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(y,2)+y*y),4);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(x+cos(y),2)+cos(y)),6);
+        ARIADNE_TEST_EQUAL(count_distinct_nodes(x+cos(x)+pow(cos(x),2)),5);
+    }
+
+    Void test_count_distinct_node_ptrs() {
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(RealExpression(x)),1);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*exp(x)),4);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*x),3);
+        RealExpression one = 1;
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(one+cos(one)),3);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*y+sqr(x*y)),8);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(x,2)*pow(x,2)),5);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(y,2)+y*y),6);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(x+cos(y),2)+cos(y)),8);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x+cos(x)+pow(cos(x),2)),8);
+    }
+
+    Void test_eliminate_common_subexpressions() {
+        RealExpression expr1 = x;
+        ARIADNE_TEST_PRINT(expr1);
+        eliminate_common_subexpressions(expr1);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr1),1);
+        RealExpression expr2 = x*exp(x);
+        ARIADNE_TEST_PRINT(expr2);
+        eliminate_common_subexpressions(expr2);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr2),3);
+        RealExpression expr3 = x*x;
+        ARIADNE_TEST_PRINT(expr3);
+        eliminate_common_subexpressions(expr3);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr3),2);
+        RealExpression one = 1;
+        RealExpression expr4 = one+cos(one);
+        ARIADNE_TEST_PRINT(expr4);
+        eliminate_common_subexpressions(expr4);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr4),3);
+        RealExpression expr5 = x*y+sqr(x*y);
+        ARIADNE_TEST_PRINT(expr5);
+        eliminate_common_subexpressions(expr5);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr5),5);
+        RealExpression expr6 = pow(x,2)*pow(x,2);
+        ARIADNE_TEST_PRINT(expr6);
+        eliminate_common_subexpressions(expr6);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr6),3);
+        RealExpression expr7 = pow(y,2)+y*y;
+        ARIADNE_TEST_PRINT(expr7);
+        eliminate_common_subexpressions(expr7);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr7),4);
+        RealExpression expr8 = pow(x+cos(y),2)+cos(y);
+        ARIADNE_TEST_PRINT(expr8);
+        eliminate_common_subexpressions(expr8);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr8),6);
+        RealExpression expr9 = x+cos(x)+pow(cos(x),2);
+        ARIADNE_TEST_PRINT(expr9);
+        eliminate_common_subexpressions(expr9);
+        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr9),5);
     }
 
     Void test_substitute() {
@@ -179,9 +282,9 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u2,y+u1}),{u1,u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y}),{u1}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x,y+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x,y+2*u1}),{u1}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y+2*u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+u1}),{u1}));
-        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x,y+2*u1}),{u1}));
-        ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+2*u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x*u1,y+u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(not is_additive_in(Vector<RealExpression>({x+u1,y+sqr(u2)}),{u1,u2}));
     }
@@ -235,16 +338,22 @@ class TestExpression {
     }
 
     Void test() {
-        test_variables();
-        test_expression();
-        test_assignment();
-        test_parameters();
-        test_derivative();
-        test_simplify();
-        test_substitute();
-        test_scalar_properties();
-        test_vector_properties();
-        test_function();
+        ARIADNE_TEST_CALL(test_variables());
+        ARIADNE_TEST_CALL(test_expression());
+        ARIADNE_TEST_CALL(test_assignment());
+        ARIADNE_TEST_CALL(test_parameters());
+        ARIADNE_TEST_CALL(test_identical());
+        ARIADNE_TEST_CALL(test_derivative());
+        ARIADNE_TEST_CALL(test_simplify());
+        ARIADNE_TEST_CALL(test_ordering());
+        ARIADNE_TEST_CALL(test_count_nodes());
+        ARIADNE_TEST_CALL(test_count_distinct_nodes());
+        ARIADNE_TEST_CALL(test_count_distinct_node_ptrs());
+        ARIADNE_TEST_CALL(test_eliminate_common_subexpressions());
+        ARIADNE_TEST_CALL(test_substitute());
+        ARIADNE_TEST_CALL(test_scalar_properties());
+        ARIADNE_TEST_CALL(test_vector_properties());
+        ARIADNE_TEST_CALL(test_function());
     }
 
 };

@@ -53,6 +53,7 @@
 #include "../dynamics/vector_field.hpp"
 
 #include "../dynamics/orbit.hpp"
+#include "../dynamics/map_evolver.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
 #include "../dynamics/reachability_analyser.hpp"
 
@@ -63,6 +64,9 @@
 #include "../dynamics/reachability_analyser.tpl.hpp"
 
 namespace Ariadne {
+
+template class ReachabilityAnalyser<IteratedMap>;
+template class ReachabilityAnalyserConfiguration<IteratedMap>;
 
 template class ReachabilityAnalyser<VectorField>;
 template class ReachabilityAnalyserConfiguration<VectorField>;

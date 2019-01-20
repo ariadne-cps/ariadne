@@ -22,7 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vanderpol.hpp"
+#include "vanderpol-noisy.hpp"
+
 #include "noisy-utilities.hpp"
 
 using namespace Ariadne;

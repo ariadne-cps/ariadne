@@ -53,15 +53,11 @@ template<class X> decltype(auto) mag(Covector<X> const& u) { return norm(transpo
 
 class TestProcedure
 {
-    //static ApproximateFormula o;
-    //static ApproximateFormula x;
-    //static ApproximateFormula y;
     DoublePrecision pr;
   public:
     TestProcedure();
     Void test();
   private:
-    Void test_formula();
     Void test_construct_from_formula();
     Void test_construct_from_expansion();
     Void test_evaluate();
@@ -69,40 +65,19 @@ class TestProcedure
     Void test_derivative();
 };
 
-//ApproximateFormula TestProcedure::o(ApproximateFormula::constant(1.0));
-//ApproximateFormula TestProcedure::x(ApproximateFormula::coordinate(0));
-//ApproximateFormula TestProcedure::y(ApproximateFormula::coordinate(1));
-
-
 TestProcedure::TestProcedure()
 {
 }
 
 Void TestProcedure::test()
 {
-    ARIADNE_TEST_CALL(test_formula());
     ARIADNE_TEST_CALL(test_construct_from_formula());
     ARIADNE_TEST_CALL(test_construct_from_expansion());
     ARIADNE_TEST_CALL(test_evaluate());
     ARIADNE_TEST_CALL(test_propagate());
     ARIADNE_TEST_CALL(test_derivative());
-
-
 }
 
-
-Void TestProcedure::test_formula()
-{
-    ApproximateFormula o(ApproximateFormula::constant(1.0));
-    ApproximateFormula t(ApproximateFormula::constant(2.0));
-    ApproximateFormula x(ApproximateFormula::coordinate(0));
-    ApproximateFormula y(ApproximateFormula::coordinate(1));
-
-    ApproximateFormula r(sqrt(pow(x,2)+pow(y,2))/t);
-    ARIADNE_TEST_PRINT(r);
-
-    //Vector<ApproximateFormula> f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
-}
 
 Void TestProcedure::test_construct_from_formula()
 {
@@ -119,10 +94,13 @@ Void TestProcedure::test_construct_from_formula()
     Vector<ApproximateFormula> f={sqrt(xs+c*ys), atan(y/x), xs*c-ys};
     ARIADNE_TEST_PRINT(f);
 
-    ApproximateProcedure p0(f[0]);
+    ApproximateProcedure p0(argument_size=2u,f[0]);
+    ARIADNE_TEST_EQUALS(p0.argument_size(),2u);
     ARIADNE_TEST_PRINT(p0);
-    Vector<ApproximateProcedure> p(f);
+    Vector<ApproximateProcedure> p(argument_size=2u,f);
     ARIADNE_TEST_PRINT(p);
+    ARIADNE_TEST_EQUALS(p.result_size(),3u);
+    ARIADNE_TEST_EQUALS(p.argument_size(),2u);
 }
 
 
@@ -152,7 +130,7 @@ Void TestProcedure::test_construct_from_expansion()
 
 Void TestProcedure::test_evaluate()
 {
-    ApproximateProcedure p;
+    ApproximateProcedure p(argument_size=2u);
     p.new_unary_instruction(OperatorCode::IND,0ul);
     p.new_unary_instruction(OperatorCode::IND,1ul);
     p.new_graded_instruction(OperatorCode::POW,0ul,2);
@@ -172,7 +150,7 @@ Void TestProcedure::test_evaluate()
 Void TestProcedure::test_propagate()
 {
     {
-        ValidatedProcedure p;
+        ValidatedProcedure p(argument_size=2);
         p.new_unary_instruction(OperatorCode::IND,0u);
         p.new_unary_instruction(OperatorCode::IND,1u);
         p.new_unary_instruction(OperatorCode::SQR,0u);
@@ -197,7 +175,7 @@ Void TestProcedure::test_propagate()
 
     Vector<ValidatedFormula> ff={sqrt(sqr(x)+sqr(y)),2*x-y};
     ARIADNE_TEST_PRINT(ff);
-    Vector<ValidatedProcedure> pp(ff);
+    Vector<ValidatedProcedure> pp(argument_size=2,ff);
     ARIADNE_TEST_PRINT(pp);
     UpperBoxType xx=ExactBoxType{ {0.125,2.0}, {0.25,3.0} };
     ExactBoxType cc=ExactBoxType{ {1.0,1.0}, {1.0,1.0} };
@@ -223,7 +201,7 @@ Void TestProcedure::test_derivative()
     ARIADNE_TEST_PRINT(e);
     ScalarMultivariateFunction<P> f(EuclideanDomain(2),e);
     ARIADNE_TEST_PRINT(f);
-    Procedure<Y> p(e);
+    Procedure<Y> p(f);
     ARIADNE_TEST_PRINT(p);
 
     X zero(0,dp);
@@ -234,9 +212,6 @@ Void TestProcedure::test_derivative()
     ARIADNE_TEST_WITHIN(gradient(p,q),f.gradient(q),8e-16);
     ARIADNE_TEST_EQUALS(hessian(p,q,s),f(ds).hessian().get(0,0));
 }
-
-
-
 
 Int main() {
     TestProcedure().test();

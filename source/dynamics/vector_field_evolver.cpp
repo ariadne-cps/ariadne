@@ -71,6 +71,15 @@ VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
 {
 }
 
+VectorField::VectorField(EffectiveVectorMultivariateFunction const& function) {
+    List<Identifier> variable_names;
+    for (auto i : range(0,function.result_size()))
+        variable_names.append(Identifier("x"+std::to_string(i)));
+
+    _variable_names = variable_names;
+    _function = function;
+}
+
 RealSpace VectorField::state_space() const
 {
     return real_space(this->_variable_names);
@@ -92,15 +101,19 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-    //ARIADNE_ASSERT_MSG(dynamic_cast<const TaylorPicardIntegrator*>(&i),"Only TaylorPicardIntegrator supported by VectorFieldEvolver\n");
+
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+    return Enclosure(box,this->function_factory());
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory());
+    return Enclosure(box,this->function_factory());
+}
+
+typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
+    return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
 }
 
 

@@ -253,7 +253,7 @@ template<class P> class Number
     friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y.ref()._apply(Pow(),m)); }
     friend Number<SP> pow(Number<P> const& y, Int n) { return Number<SP>(y.ref()._apply(Pow(),n)); }
 
-    friend Positive<Number<SP>> abs(Number<P> const& y) { return Number<SP>(y.ref()._apply(Abs())); }
+    friend Positive<Number<SP>> abs(Number<P> const& y) { return Positive<Number<SP>>(y.ref()._apply(Abs())); }
     friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
     friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
 

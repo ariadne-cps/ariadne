@@ -149,6 +149,9 @@ template<class PR> class FloatValue : public Value<RawFloatType<PR>> {
 };
 */
 
+template<class PR> Value(Dyadic, PR) -> Value<RawFloatType<PR>>;
+template<class F> Value(F) -> Value<F>;
+
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Value<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Dyadic const& y, ExactTag) { return FloatValue<PR>(y,_pr); }
 template<class PR> inline FloatValue<PR> FloatFactory<PR>::create(Integer const& y, ExactTag) { return FloatValue<PR>(y,_pr); }

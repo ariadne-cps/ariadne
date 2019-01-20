@@ -32,6 +32,7 @@
 #include "../function/function.decl.hpp"
 #include "../function/function_interface.hpp"
 
+#include "../algebra/range.hpp"
 #include "../numeric/operators.hpp"
 
 namespace Ariadne {
@@ -145,8 +146,9 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_zero(const VectorDomainType& domain) const = 0;
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_constant(const VectorDomainType& domain, const Number<P>& value) const = 0;
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_coordinate(const VectorDomainType& domain, SizeType index) const = 0;
-    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_zeros(SizeType result_size, const VectorDomainType& domain) const = 0;
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_zeros(SizeType rsize, const VectorDomainType& domain) const = 0;
     virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_constants(const VectorDomainType& domain, const Vector<Number<P>>& values) const = 0;
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_projection(const VectorDomainType& domain, Range indices) const = 0;
     virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create_identity(const VectorDomainType& domain) const = 0;
   public:
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const {
@@ -167,10 +169,12 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
         return ScalarFunctionModel<P,VD,PR,PRE>(_create_constant(domain,Number<P>(value))); }
     ScalarFunctionModel<P,VD,PR,PRE> create_coordinate(const VectorDomainType& domain, SizeType index) const {
         return ScalarFunctionModel<P,VD,PR,PRE>(_create_coordinate(domain,index)); }
-    VectorFunctionModel<P,VD,PR,PRE> create_zeros(SizeType result_size_, const VectorDomainType& domain) const {
-        return VectorFunctionModel<P,VD,PR,PRE>(_create_zeros(result_size_,domain)); }
+    VectorFunctionModel<P,VD,PR,PRE> create_zeros(SizeType rsize, const VectorDomainType& domain) const {
+        return VectorFunctionModel<P,VD,PR,PRE>(_create_zeros(rsize,domain)); }
     VectorFunctionModel<P,VD,PR,PRE> create_constants(const VectorDomainType& domain, const Vector<Number<P>>& values) const {
         return VectorFunctionModel<P,VD,PR,PRE>(_create_constants(domain,values)); }
+    VectorFunctionModel<P,VD,PR,PRE> create_projection(const VectorDomainType& domain, Range indices) const {
+        return VectorFunctionModel<P,VD,PR,PRE>(_create_projection(domain,indices)); }
     VectorFunctionModel<P,VD,PR,PRE> create_identity(const VectorDomainType& domain) const {
         return VectorFunctionModel<P,VD,PR,PRE>(_create_identity(domain)); }
 

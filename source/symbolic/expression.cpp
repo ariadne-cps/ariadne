@@ -122,6 +122,16 @@ template class Expression<String>;
 template class Expression<Integer>;
 template class Expression<Real>;
 
+template Bool before<Real>(Expression<Real> const& e1, Expression<Real> const& e2);
+template Nat count_nodes<Real>(const Expression<Real>& e);
+template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
+template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
+
+template Bool is_constant_in<Real>(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template Bool is_affine_in<Real>(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template Bool is_affine_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+template Bool is_additive_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+
 
 Expression<Boolean> operator&&(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(AndOp(),e1,e2); }
@@ -217,6 +227,14 @@ Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2) {
 Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2) {
     return e1=e1/e2; }
 
+Expression<Real> add(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Add(),e1,e2); }
+Expression<Real> sub(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Sub(),e1,e2); }
+Expression<Real> mul(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Mul(),e1,e2); }
+Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
+    return make_expression<Real>(Div(),e1,e2); }
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
@@ -268,10 +286,17 @@ template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const Va
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Real& c);
 template Expression<Real> substitute(const Expression<Real>& e, const Variable<Real>& v, const Expression<Real>& c);
 template Expression<Real> substitute(const Expression<Real>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
+template Vector<Expression<Real>> substitute(const Vector<Expression<Real>>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 template Expression<Kleenean> substitute(const Expression<Kleenean>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 
 template Expression<Real> simplify(const Expression<Real>& e);
 template Expression<Kleenean> simplify(const Expression<Kleenean>& e);
+
+template Void eliminate_common_subexpressions(Expression<Real>&);
+template Void eliminate_common_subexpressions(Vector<Expression<Real>>&);
+
+
+
 
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
     switch(e.op()) {
@@ -310,70 +335,7 @@ template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
 
-Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return not vs.contains(Variable<Real>(e.var()));
-        case OperatorKind::NULLARY: return true;
-        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(e.arg(),vs);
-        case OperatorKind::BINARY: return is_constant_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs);
-        default: ARIADNE_FAIL_MSG("Cannot evaluate if expression "<<e<<" is constant on "<<vs<<"\n");
-    }
-}
 
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
-    switch(e.op()) {
-        case OperatorCode::CNST: return true;
-        case OperatorCode::VAR: return true;
-        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs);
-        case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
-        case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
-        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
-        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(e.arg(),vs);
-        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<e.op()<<"' for evaluation of affinity in given variables\n");
-    }
-}
-
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs) {
-    for (auto i : range(e.size()))
-        if (not is_affine_in(e[i],vs)) return false;
-    return true;
-}
-
-Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
-    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
-    // with a constant value of 1
-    // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
-    // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
-
-    auto one = Expression<Real>::constant(1);
-    auto zero = Expression<Real>::constant(0);
-
-    for (auto v : vs) {
-        Bool already_found = false;
-        Bool already_found_one = false;
-        for (auto i : range(ev.size())) {
-            const Expression<Real>& e = ev[i];
-            auto der = simplify(derivative(e, v));
-            if (not identical(der,zero)) {
-                if (already_found) {
-                    return false;
-                } else {
-                    already_found = true;
-                    if (identical(der,one)) {
-                        if (already_found_one) {
-                            return false;
-                        } else {
-                            already_found_one = true;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-            }
-        }
-    }
-    return true;
-}
 
 
 Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {

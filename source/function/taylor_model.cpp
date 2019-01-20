@@ -32,6 +32,8 @@ template class Series<FloatMPBounds>;
 
 template class SweeperBase<FloatDP>;
 template class SweeperBase<FloatMP>;
+template class RelativeSweeperBase<FloatDP>;
+template class RelativeSweeperBase<FloatMP>;
 
 template class TaylorModel<ValidatedTag,FloatDP>;
 template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDP>>;

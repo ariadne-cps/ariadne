@@ -37,7 +37,14 @@
 #include "../utility/declarations.hpp"
 #include "../numeric/builtin.hpp"
 
+#include "range.hpp"
+#include "slice.hpp"
+
 namespace Ariadne {
+
+//! \ingroup LinearAlgebraModule
+//! A scalar of type \a X; defined as an alias of \a X.
+template<class X> using Scalar = X;
 
 /************ Vector *********************************************************/
 
@@ -82,7 +89,6 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
-class Range;
 template<class X> class VectorRange;
 
 #ifdef SIMPLE_VECTOR_OPERATORS
@@ -280,43 +286,6 @@ class Vector
 };
 
 template<class X> struct IsVector<Vector<X>> : True { };
-
-class Range {
-    SizeType _start; SizeType _stop;
-  public:
-    SizeType operator[](SizeType i) const { return _start+i; }
-    Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
-    SizeType size() const { return this->_stop-this->_start; }
-    SizeType start() const { return this->_start; }
-    SizeType stride() const { return 1u; }
-    SizeType stop() const { return this->_stop; }
-};
-inline Range range(SizeType stop) { return Range(0u,stop); }
-inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
-
-struct RangeIterator {
-    explicit inline RangeIterator(SizeType i) : _i(i) { }
-    inline RangeIterator& operator++() { ++this->_i; return *this; }
-    inline SizeType operator*() const { return this->_i; }
-    friend inline bool operator!=(RangeIterator iter1, RangeIterator iter2) { return iter1._i != iter2._i; }
-  private:
-    SizeType _i;
-};
-inline RangeIterator begin(Range rng) { return RangeIterator(rng.start()); }
-inline RangeIterator end(Range rng) { return RangeIterator(rng.stop()); }
-
-class Slice {
-    SizeType _size; SizeType _start; SizeType _stride;
-  public:
-    Slice(SizeType size, SizeType start, SizeType stride) : _size(size), _start(start), _stride(stride) { }
-    SizeType operator[](SizeType i) { return _start+i*_stride; }
-    SizeType size() const { return this->_size; }
-    SizeType start() const { return this->_start; }
-    SizeType stride() const { return this->_stride; }
-    SizeType stop() const { return this->_start+this->_size*this->_stride; }
-};
-inline Slice slice(SizeType size_, SizeType start, SizeType stride) { return Slice(size_,start,stride); }
-
 
 template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >
@@ -575,7 +544,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
 {
-    Vector<X> r(v1.size()+v2.size()+v3.size());
+    Vector<X> r(v1.size()+v2.size()+v3.size(),v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
@@ -583,9 +552,19 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
 }
 
 template<class X>
+Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2, const Vector<X>& v3)
+{
+    Vector<X> r(v1.size()+1u+v3.size(),v1.zero_element());
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    r[v1.size()]=x2;
+    for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+1u+i]=v3[i]; }
+    return std::move(r);
+}
+
+template<class X>
 Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
 {
-    Vector<X> r(1u+v2.size());
+    Vector<X> r(1u+v2.size(),v2.zero_element());
     r[0u]=x1;
     for(SizeType i=0; i!=v2.size(); ++i) { r[1u+i]=v2[i]; }
     return std::move(r);
@@ -594,7 +573,7 @@ Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
 {
-    Vector<X> r(v1.size()+1u);
+    Vector<X> r(v1.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
     return std::move(r);
@@ -612,7 +591,7 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X>::ScalarType& x3)
 {
-    Vector<X> r(v1.size()+v2.size()+1u);
+    Vector<X> r(v1.size()+v2.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     r[v1.size()+v2.size()]=x3;

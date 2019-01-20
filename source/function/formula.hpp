@@ -55,6 +55,7 @@ template<class Y> class Formula;
 typedef Formula<ApproximateNumber> ApproximateFormula;
 typedef Formula<ValidatedNumber> ValidatedFormula;
 typedef Formula<EffectiveNumber> EffectiveFormula;
+typedef Formula<ExactNumber> ExactFormula;
 
 template<> inline Real compute(OperatorCode op, const EffectiveNumber& x1, const Real& x2) {
     return compute(op,Real(x1),x2);
@@ -231,6 +232,32 @@ template<class Y> struct ScalarFormulaNode : public UnaryFormulaNode<Y> {
         : UnaryFormulaNode<Y>(oper,a), cnst(c) { }
 };
 
+//! \brief Substitute all occurrences of index \a i with constant value \a c.
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Y& c);
+//! \brief Substitute all occurrences of indices with formulae \a as into \a a.
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const List<Pair<Nat,Formula<Y>>>& as);
+//! \brief Substitute all occurrences of indices with formulae \a as into \a av.
+template<class Y> Vector<Formula<Y>> substitute(const Vector<Formula<Y>>& av, const List<Pair<Nat,Formula<Y>>>& as);
+
+//! \brief Simplify the formula to reduce the number of nodes.
+template<class Y> Formula<Y> simplify(const Formula<Y>& a);
+//! \brief Simplify the formulae to reduce the number of nodes.
+template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a);
+
+//! \brief Tests whether two formulas are identical.
+template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2);
+//! \brief Tests whether two vector formulas are identical.
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2);
+
+//! \brief Returns \a true if the formula \a a is syntactically constant in the indices \a is.
+template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is);
+//! \brief Returns \a true if the formula \a a is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const Formula<Y>& a, const Set<Nat>& is);
+//! \brief Returns \a true if the vector formula \a e is syntactically affine in the indices \a is.
+template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& a, const Set<Nat>& is);
+//! \brief Returns \a true if the vector formula \a a is syntactically additive (possibly with multipliers) in the indices \a is.
+template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& a, const Set<Nat>& is);
+
 template<class Y> inline const Operator& Formula<Y>::op() const {
     return node_ptr()->op; }
 template<class Y> inline OperatorCode Formula<Y>::code() const {
@@ -284,10 +311,6 @@ template<class Y> inline Vector<Formula<Y>> Formula<Y>::identity(Nat n) {
 template<class Y> inline Formula<Y> Formula<Y>::constant(Int c) {
     return Formula<Y>::constant(Y(c)); }
 
-
-template<class X> using NumericType = typename X::NumericType;
-template<class X> using GenericType = typename X::GenericType;
-template<class X> using GenericNumericType = GenericType<NumericType<X>>;
 
 template<class X, class Y> inline X make_constant(const Y& c, X r) {
     r=c; return std::move(r); }
@@ -364,6 +387,215 @@ template<class X> Formula<X> formula(const Expansion<MultiIndex,X>& e)
     for(Nat i=0; i!=identity.size(); ++i) { identity[i]=Formula<X>::coordinate(i); }
     return horner_evaluate(e,identity);
 }
+
+namespace {
+template<class X, class Y> inline const Formula<Y>& _substitute_coordinate(const Nat& ie, const Nat& is, const Formula<Y>& a, const Formula<X>& s) {
+    ARIADNE_ASSERT_MSG(ie!=is,"Cannot substitute formula "<<s<<" for coordinate "<<ie<<"\n");
+    return a; }
+template<class Y> inline const Formula<Y>& _substitute_coordinate(const Nat& ie, const Nat& is, const Formula<Y>& e, const Formula<Y>& s) {
+    return ie==is ? s : e; }
+} // namespace
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Formula<Y>& is) {
+    switch(a.kind()) {
+        case OperatorKind::BINARY: return make_formula<Y>(a.op(),substitute(a.arg1(),i,is),substitute(a.arg2(),i,is));
+        case OperatorKind::UNARY: return make_formula<Y>(a.op(),substitute(a.arg(),i,is));
+        case OperatorKind::GRADED: return make_formula<Y>(a.op(),substitute(a.arg(),i,is),a.num());
+        case OperatorKind::NULLARY: return make_formula<Y>(a.val());
+        case OperatorKind::COORDINATE: return _substitute_coordinate(a.ind(),i,a,is);
+        default: ARIADNE_FAIL_MSG("Cannot substitute "<<is<<" for index "<<i<<" in an unknown formula "<<a<<"\n");
+    }
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Y& c) {
+    return substitute(a,i,Formula<Y>::constant(c));
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Pair<Nat,Formula<Y>>& as) {
+    return substitute(a,as.first,as.second);
+}
+
+template<class Y> Formula<Y> substitute(const Formula<Y>& a, const List<Pair<Nat,Formula<Y>>>& as) {
+    Formula<Y> r=a;
+    for(SizeType i=0; i!=as.size(); ++i) {
+        r=substitute(r,as[i]);
+    }
+    return r;
+}
+
+template<class Y> Vector<Formula<Y>> substitute(const Vector<Formula<Y>>& av, const List<Pair<Nat,Formula<Y>>>& as) {
+    Vector<Formula<Y>> r(av.size());
+    for(SizeType i=0; i!=av.size(); ++i) {
+        r[i]=substitute(av[i],as);
+    }
+    return r;
+}
+
+template<class Y> inline Formula<Y> simplify(const Formula<Y>& a) {
+
+    if(a.kind() == OperatorKind::UNARY) {
+        Formula<Y> sarg=simplify(a.arg());
+        if(sarg.op()==OperatorCode::CNST) {
+            return Formula<Y>(compute(a.op(),sarg.val()));
+        } else {
+            return make_formula<Y>(a.op(),sarg);
+        }
+    }
+
+    if(a.kind() == OperatorKind::GRADED) {
+        Formula<Y> sarg=simplify(a.arg());
+        Formula<Y> one(static_cast<Y>(1));
+        switch(a.op()) {
+            case OperatorCode::POW:
+                switch (a.num()) {
+                case 0: return one;
+                case 1: return sarg;
+                default: return make_formula<Y>(OperatorCode::POW,sarg,a.num());
+                }
+            default:
+                return make_formula<Y>(a.op(),sarg,a.num());
+        }
+    }
+
+    if(a.kind() != OperatorKind::BINARY) { return a; }
+
+    Formula<Y> sarg1=simplify(a.arg1());
+    Formula<Y> sarg2=simplify(a.arg2());
+    Formula<Y> zero(Formula<Y>::zero());
+    Formula<Y> one(static_cast<Y>(1));
+    switch(a.op()) {
+        case OperatorCode::ADD:
+            if(identical(sarg2,zero)) { return sarg1; }
+            if(identical(sarg1,zero)) { return sarg2; }
+            break;
+        case OperatorCode::SUB:
+            if(identical(sarg2,zero)) { return sarg1; }
+            if(identical(sarg1,zero)) { return -sarg2; }
+            break;
+        case OperatorCode::MUL:
+            if(identical(sarg1,zero)) { return zero; }
+            if(identical(sarg2,zero)) { return zero; }
+            if(identical(sarg1,one)) { return sarg2; }
+            if(identical(sarg2,one)) { return sarg1; }
+            break;
+        case OperatorCode::DIV:
+            if(identical(sarg1,zero)) { return sarg1; }
+            if(identical(sarg1,one)) { return rec(sarg2); }
+            if(identical(sarg2,one)) { return sarg1; }
+        default:
+            break;
+    }
+    return make_formula<Y>(a.op(),sarg1,sarg2);
+}
+
+template<class Y> inline Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a) {
+
+    Vector<Formula<Y>> r(a.size());
+    for(SizeType i=0; i!=a.size(); ++i) {
+        r[i]=simplify(a[i]);
+    }
+    return r;
+}
+
+inline Bool same(EffectiveNumber const& v1, EffectiveNumber const& v2) {
+    // FIXME: Use symbolic approach
+    DoublePrecision pr;
+    FloatDPBounds x1(v1,pr);
+    FloatDPBounds x2(v2,pr);
+    return x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw();
+}
+
+template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2)
+{
+    if(a1.node_ptr()==a2.node_ptr()) { return true; }
+    if(a1.op()!=a2.op()) { return false; }
+    switch(a1.kind()) {
+        case OperatorKind::COORDINATE:
+            return a1.ind() == a2.ind();
+        case OperatorKind::NULLARY:
+            return same(a1.val(),a2.val());
+        case OperatorKind::UNARY:
+            return identical(a1.arg(),a2.arg());
+        case OperatorKind::GRADED:
+            return identical(a1.arg(),a2.arg()) && a1.num() == a2.num();
+        case OperatorKind::BINARY:
+            switch(a1.op()) {
+            case OperatorCode::MUL: case OperatorCode::ADD:
+                return (identical(a1.arg1(),a2.arg1()) && identical(a1.arg2(),a2.arg2())) ||
+                       (identical(a1.arg1(),a2.arg2()) && identical(a1.arg2(),a2.arg1()));
+            default:
+                return identical(a1.arg1(),a2.arg1()) && identical(a1.arg2(),a2.arg2());
+            }
+        default:
+            return false;
+    }
+}
+
+template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2) {
+    if (a1.size() != a2.size()) return false;
+
+    for (auto i : range(a1.size())) {
+        if (not identical(a1[i],a2[i])) return false;
+    }
+    return true;
+}
+
+template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is) {
+    switch(a.kind()) {
+        case OperatorKind::COORDINATE: return not is.contains(a.ind());
+        case OperatorKind::NULLARY: return true;
+        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(a.arg(),is);
+        case OperatorKind::BINARY: return is_constant_in(a.arg1(),is) and is_constant_in(a.arg2(),is);
+        default: ARIADNE_FAIL_MSG("Cannot evaluate if formula "<<a<<" is constant in "<<is<<"\n");
+    }
+}
+
+
+template<class Y> Bool is_affine_in(const Formula<Y>& a, const Set<Nat>& is) {
+    switch(a.op()) {
+        case OperatorCode::CNST: return true;
+        case OperatorCode::IND: return true;
+        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(a.arg1(),is) and is_affine_in(a.arg2(),is);
+        case OperatorCode::MUL: return (is_affine_in(a.arg1(),is) and is_constant_in(a.arg2(),is)) or (is_constant_in(a.arg1(),is) and is_affine_in(a.arg2(),is));
+        case OperatorCode::DIV: return (is_affine_in(a.arg1(),is) and is_constant_in(a.arg2(),is));
+        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(a.arg(),is);
+        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(a.arg(),is);
+        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<a.op()<<"' for evaluation of affinity in given indices\n");
+    }
+}
+
+template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& as, const Set<Nat>& is) {
+    for (auto idx : range(as.size()))
+        if (not is_affine_in(as[idx],is)) return false;
+    return true;
+}
+
+
+template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& as, const Set<Nat>& is) {
+    // We treat the vector of formulas as additive in is if each variable in is appears at most once in all expressions,
+    // with a constant multiplier
+    // (FIXME: this simplifies the case of a diagonalisable matrix of constant multipliers)
+
+    for (auto i : is) {
+        Bool already_found = false;
+        for (auto idx : range(as.size())) {
+            const Formula<Y>& a = as[idx];
+            auto der = simplify(derivative(a, i));
+            if (not identical(der,Formula<Y>::zero())) {
+                if (already_found) {
+                    return false;
+                } else {
+                    already_found = true;
+                    if (der.op() != OperatorCode::CNST) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 
 } // namespace Ariadne
 

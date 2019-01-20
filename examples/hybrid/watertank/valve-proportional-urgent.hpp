@@ -28,7 +28,6 @@ using namespace Ariadne;
 
 inline AtomicHybridAutomaton getValve()
 {
-
     // Declare some constants.
     RealConstant K("K",2.0_decimal); // Gain of the proportional controller
     RealConstant Ref("Ref",7.0_decimal); // Reference height
@@ -42,20 +41,22 @@ inline AtomicHybridAutomaton getValve()
     DiscreteEvent finished_opening("finished_opening");
     DiscreteEvent finished_closing("finished_closing");
 
+    // Create a valve automaton
     AtomicHybridAutomaton valve_automaton("valve");
 
-    // Declare the values the valve variable can have
+    // Declare the locations for the valve automaton
     AtomicDiscreteLocation opened("opened");
     AtomicDiscreteLocation modulated("modulated");
     AtomicDiscreteLocation closed("closed");
 
     // Since aperture is a known constant when the valve is open or closed,
-    // specify aperture by an algebraic equation.
-    valve_automaton.new_mode(opened,{let(aperture)=+1.0_decimal});
-    valve_automaton.new_mode(closed,{let(aperture)=0.0_decimal});
+    // specify aperture by an algebraic equation
+    valve_automaton.new_mode(opened,{let(aperture)=1});
+    valve_automaton.new_mode(closed,{let(aperture)=0});
     // Specify the differential equation for when the proportional control is in effect
     valve_automaton.new_mode(modulated,{let(aperture)=K*(Ref-height)});
 
+    // Define the transitions
     valve_automaton.new_transition(modulated,finished_opening,closed,K*(Ref-height)<=0,EventKind::URGENT);
     valve_automaton.new_transition(modulated,finished_closing,opened,K*(Ref-height)>=1,EventKind::URGENT);
     valve_automaton.new_transition(opened,start_modulating,modulated,K*(Ref-height)<=1,EventKind::URGENT);

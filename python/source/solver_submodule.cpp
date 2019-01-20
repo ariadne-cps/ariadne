@@ -135,15 +135,22 @@ Void export_integrators(pybind11::module& module)
     taylor_picard_integrator_class.def(pybind11::init<double>());
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
-    taylor_series_integrator_class.def(pybind11::init<double>());
-    taylor_series_integrator_class.def("maximum_spacial_order",&TaylorSeriesIntegrator::maximum_spacial_order);
-    taylor_series_integrator_class.def("maximum_temporal_order",&TaylorSeriesIntegrator::maximum_temporal_order);
+    taylor_series_integrator_class.def(pybind11::init<double,uint>());
+    taylor_series_integrator_class.def("order",&TaylorSeriesIntegrator::order);
     taylor_series_integrator_class.def("maximum_error",&TaylorSeriesIntegrator::maximum_error);
-    taylor_series_integrator_class.def("maximum_step_size",&TaylorSeriesIntegrator::maximum_step_size);
-    taylor_series_integrator_class.def("set_maximum_spacial_order",&TaylorSeriesIntegrator::set_maximum_spacial_order);
-    taylor_series_integrator_class.def("set_maximum_temporal_order",&TaylorSeriesIntegrator::set_maximum_temporal_order);
+    taylor_series_integrator_class.def("set_order",&TaylorSeriesIntegrator::set_order);
     taylor_series_integrator_class.def("set_maximum_error",&TaylorSeriesIntegrator::set_maximum_error);
-    taylor_series_integrator_class.def("set_maximum_step_size",&TaylorSeriesIntegrator::set_maximum_step_size);
+
+    pybind11::class_<GradedTaylorSeriesIntegrator,IntegratorInterface> graded_taylor_series_integrator_class(module,"GradedTaylorSeriesIntegrator");
+    graded_taylor_series_integrator_class.def(pybind11::init<double>());
+    graded_taylor_series_integrator_class.def("maximum_spacial_order",&GradedTaylorSeriesIntegrator::maximum_spacial_order);
+    graded_taylor_series_integrator_class.def("maximum_temporal_order",&GradedTaylorSeriesIntegrator::maximum_temporal_order);
+    graded_taylor_series_integrator_class.def("maximum_error",&GradedTaylorSeriesIntegrator::maximum_error);
+    graded_taylor_series_integrator_class.def("maximum_step_size",&GradedTaylorSeriesIntegrator::maximum_step_size);
+    graded_taylor_series_integrator_class.def("set_maximum_spacial_order",&GradedTaylorSeriesIntegrator::set_maximum_spacial_order);
+    graded_taylor_series_integrator_class.def("set_maximum_temporal_order",&GradedTaylorSeriesIntegrator::set_maximum_temporal_order);
+    graded_taylor_series_integrator_class.def("set_maximum_error",&GradedTaylorSeriesIntegrator::set_maximum_error);
+    graded_taylor_series_integrator_class.def("set_maximum_step_size",&GradedTaylorSeriesIntegrator::set_maximum_step_size);
 
     pybind11::class_<RungeKutta4Integrator> runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
     runge_kutta_4_integrator_class.def(pybind11::init<double>());

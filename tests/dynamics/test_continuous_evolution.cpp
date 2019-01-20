@@ -101,7 +101,7 @@ Void TestContinuousEvolution::test() const
     TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
                                              step_maximum_error=1e-6,step_sweep_threshold=1e-10,maximum_temporal_order=8);
     // Set up the evaluators
-    TaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
+    GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
                                              step_maximum_error=1e-6,step_sweep_threshold=1e-10,
                                              minimum_spacial_order=1,minimum_temporal_order=4,maximum_spacial_order=3,maximum_temporal_order=8);
 

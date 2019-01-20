@@ -168,6 +168,11 @@ template<class F> class Bounds
     RawType _l, _u;
 };
 
+template<class PR> Bounds(ValidatedNumber, PR) -> Bounds<RawFloatType<PR>>;
+template<class PR> Bounds(ValidatedLowerNumber, ValidatedUpperNumber, PR) -> Bounds<RawFloatType<PR>>;
+template<class F> Bounds(F,F) -> Bounds<F>;
+
+
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Bounds<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Number<ValidatedTag> const& y) { return FloatBounds<PR>(y,_pr); }
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Number<EffectiveTag> const& y) { return FloatBounds<PR>(y,_pr); }

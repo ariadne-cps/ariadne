@@ -75,6 +75,7 @@ struct GraphicsProperties {
     Colour line_colour;
     Bool fill_style;
     Colour fill_colour;
+    friend OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp);
 };
 
 Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);

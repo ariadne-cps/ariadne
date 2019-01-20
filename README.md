@@ -7,7 +7,7 @@
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 
 * This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *release-1.0* repository.
-* The latest internal release is [v1.9.0](https://github.com/ariadne-cps/ariadne/releases/tag/v1.9.0). However, the code in the master branch should always be usable.
+* The latest internal release is [v1.9.2](https://github.com/ariadne-cps/ariadne/releases/tag/v1.9.2). However, the code in the master branch should always be usable.
 
 ### Installation ###
 
@@ -19,7 +19,7 @@ The build system is CMake. The library is tested for compilation using gcc and c
 
 #### Dependencies
 
-The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo (to save into png files) and GTK2 (for window display). Finally, the Python bindings require the Python headers (Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to fetch the dependency, Git must be installed.
+The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo (to save into png files) and GTK2 (for window display). Finally, the Python bindings require the Python headers (either Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to fetch the dependency, Git must be installed.
 
 Finally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
@@ -30,7 +30,7 @@ Aptitude packages: `cmake git libgmp-dev libmpfr-dev libgtk2.0-dev libcairo2-dev
 
 Additional Aptitude package required for the Python interface: `python3-dev` or `python-dev`.
 
-##### OSX
+##### macOS
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
 
 2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake git mpfr gmp gtk cairo`

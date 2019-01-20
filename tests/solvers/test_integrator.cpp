@@ -52,18 +52,10 @@ class TestIntegrator
     typedef Vector<ExactIntervalType> ExactIntervalVectorType;
   private:
     std::unique_ptr<IntegratorInterface> integrator_ptr;
-    EffectiveScalarMultivariateFunction o,x,y,x0,y0,t;
   public:
     TestIntegrator(const IntegratorInterface& i)
         : integrator_ptr(i.clone())
-    {
-        o=EffectiveScalarMultivariateFunction::constant(2,1);
-        x=EffectiveScalarMultivariateFunction::coordinate(2,0);
-        y=EffectiveScalarMultivariateFunction::coordinate(2,1);
-        x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
-        y0=EffectiveScalarMultivariateFunction::coordinate(3,1);
-        t=EffectiveScalarMultivariateFunction::coordinate(3,2);
-    }
+    { }
 
     Int test() {
         ARIADNE_TEST_PRINT(integrator_ptr.operator->());
@@ -73,6 +65,8 @@ class TestIntegrator
         ARIADNE_TEST_CALL(test_linear());
         ARIADNE_TEST_CALL(test_spiral());
         ARIADNE_TEST_CALL(test_logistic());
+        ARIADNE_TEST_CALL(test_time_variant());
+        ARIADNE_TEST_CALL(test_time_variant_with_parameters());
         return 0;
     }
 
@@ -85,6 +79,14 @@ class TestIntegrator
     }
 
     Void test_constant_derivative() {
+
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction y0=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
         EffectiveVectorMultivariateFunction f={o*2,o*3};
         ARIADNE_TEST_PRINT(f);
         ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
@@ -98,6 +100,14 @@ class TestIntegrator
     }
 
     Void test_quadratic_flow() {
+
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction y0=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
         EffectiveVectorMultivariateFunction f={o,x};
         ExactBoxType d={ExactIntervalType(0.0,1.0),ExactIntervalType(-0.5,1.5)};
         StepSizeType h=0.25_x;
@@ -111,6 +121,14 @@ class TestIntegrator
     }
 
     Void test_linear() {
+
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction y0=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
         EffectiveVectorMultivariateFunction f={x,-y};
         ExactBoxType d={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
         StepSizeType h=0.25_x;
@@ -124,6 +142,14 @@ class TestIntegrator
     };
 
     Void test_spiral() {
+
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(3,0);
+        EffectiveScalarMultivariateFunction y0=EffectiveScalarMultivariateFunction::coordinate(3,1);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
+
         Real half(0.5);
         EffectiveVectorMultivariateFunction f={-half*x-y,x-half*y};
         ExactBoxType d={ExactIntervalType(0.75,1.25),ExactIntervalType(-0.25,0.25)};
@@ -139,37 +165,21 @@ class TestIntegrator
 
     };
 
+    // Equation: dx/dt = x*(1-x)
+    // Solution:  x = 1/(1+(1/x0-1)*exp(-t))
     Void test_logistic() {
-        o=EffectiveScalarMultivariateFunction::constant(1,1);
-        x=EffectiveScalarMultivariateFunction::coordinate(1,0);
-        x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
-        t=EffectiveScalarMultivariateFunction::coordinate(2,1);
 
-        EffectiveScalarMultivariateFunction flowf=
-            -1.9364*(x0^6)*(t^12)+0.30657*(x0^5)*(t^12)-18.4777*(x0^8)*(t^11)+10.4865*(x0^7)*(t^11)-3.65151*(x0^6)*(t^11)
-            +0.74626*(x0^5)*(t^11)-0.0792375*(x0^4)*(t^11)+0.00334345*(x0^3)*(t^11)
-            -15.9276*(x0^8)*(t^10)+12.2428*(x0^7)*(t^10)-5.69044*(x0^6)*(t^10)+1.54717*(x0^5)*(t^10)-0.223181*(x0^4)*(t^10)+0.0136828*(x0^3)*(t^10)
-            -0.000190697*(x0^2)*(t^10)+4.93651*(x0^9)*(t^9)-10.28*(x0^8)*(t^9)+11.5009*((x0^7))*(t^9)-7.4244*(x0^6)*(t^9)+2.75346*(x0^5)*(t^9)
-            -0.546434*(x0^4)*(t^9)+0.0484458*(x0^3)*(t^9)-0.00117394*(x0^2)*(t^9)+0.996825*(x0^9)*(t^8)-4.48571*(x0^8)*(t^8)+8.22222*(x0^7)*(t^8)
-            -7.84444*(x0^6)*(t^8)+4.11667*(x0^5)*(t^8)-1.14722*(x0^4)*(t^8)+0.147619*(x0^3)*(t^8)-0.00595238*(x0^2)*(t^8)
-            -(x0^8)*(t^7)+4*(x0^7)*(t^7)-6.33333*(x0^6)*(t^7)+5*(x0^5)*(t^7)-2.025*(x0^4)*(t^7)+0.383333*(x0^3)*(t^7)-0.0251984*(x0^2)*(t^7)
-            +0.000198413*x0*(t^7)+(x0^7)*(t^6)-3.5*(x0^6)*(t^6)+4.66667*(x0^5)*(t^6)-2.91667*(x0^4)*(t^6)+0.836111*(x0^3)*(t^6)-0.0875*(x0^2)*(t^6)
-            +0.00138889*x0*(t^6)-(x0^6)*(t^5)+3*(x0^5)*(t^5)-3.25*(x0^4)*(t^5)+1.5*(x0^3)*(t^5)-0.258333*(x0^2)*(t^5)+0.00833333*x0*(t^5)+(x0^5)*(t^4)
-            -2.5*(x0^4)*(t^4)+2.08333*(x0^3)*(t^4)-0.625*(x0^2)*(t^4)+0.0416667*x0*(t^4)-(x0^4)*(t^3)
-            +2*(x0^3)*(t^3)-1.16667*(x0^2)*(t^3)+0.166667*x0*(t^3)+(x0^3)*(t^2)-1.5*(x0^2)*(t^2)+0.5*x0*(t^2)-(x0^2)*t+x0*t+x0;
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(1,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
+        EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(2,1);
 
-        //EffectiveVectorMultivariateFunction f=(x*(o-x),o);
         EffectiveVectorMultivariateFunction f={x*(o-x)};
-        //ExactIntervalVectorType d=(ExactIntervalType(0.25,0.5),ExactIntervalType(-0.25,0.25));
         ExactBoxType d={ExactIntervalType(0.25,0.5)};
         StepSizeType h=0.5_x;
-        //ExactIntervalVectorType d(1u,ExactIntervalType(-0.125,+0.125));
-        //StepSizeType h=0.125_x;
         ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,h);
         ValidatedVectorMultivariateTaylorFunctionModelDP taylor_flow=dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(flow.reference());
-        //EffectiveVectorMultivariateFunction expected_flow( (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t, y0+t) );
-        //EffectiveVectorMultivariateFunction expected_flow(1u, (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t) );
-        EffectiveVectorMultivariateFunction expected_flow(1u, flowf );
+        EffectiveVectorMultivariateFunction expected_flow={1/(1+(1/x0-1)*exp(-t))};
         ARIADNE_TEST_PRINT(*integrator_ptr);
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
@@ -179,30 +189,96 @@ class TestIntegrator
         ARIADNE_TEST_BINARY_PREDICATE(operator<,taylor_flow.error(),0.01);
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(taylor_flow-expected_flow),0.01+0.004);
     };
+
+    Void test_time_variant() {
+
+        // dx/dt=a*x+b*t+c; x=(x0+b/a*t0+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a
+        // dx/dt=b*t+c; x=x0+c*(t-t0)+b/2*(t^2-t0^2)
+        // dx/dt=c; x=x0+c*(t-t0)
+
+        EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(4,1);
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(4,0);
+        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(4,1);
+        EffectiveScalarMultivariateFunction z=EffectiveScalarMultivariateFunction::coordinate(4,2);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(4,3);
+
+        Rational a=2; Rational b=3; Rational c=5;
+        EffectiveVectorMultivariateFunction f={a*x+b*t+c,b*t+c,c*o};
+        //EffectiveVectorMultivariateFunction f={a*x+b*t,b*t+c};
+        ExactBoxType d={ExactIntervalType(-0.5,1.5),ExactIntervalType(-0.5,2.5),ExactIntervalType(0.0,1.0)};
+        StepSizeType t0=3.0_x;
+        StepSizeType hsug=0.0625_x;
+        Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,d,t0,ExactBoxType(0u),hsug);
+        StepSizeType h = step_bounds.first;
+        UpperBoxType B = step_bounds.second;
+        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,d,Interval<StepSizeType>(t0,t0+h),ExactBoxType(0u),B);
+        EffectiveVectorMultivariateFunction expected_flow={(x+b/a*t0+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a,y+c*(t-t0)+b/2*(t*t-t0*t0),z+c*(t-t0)};
+        ARIADNE_TEST_PRINT(f);
+        ARIADNE_TEST_PRINT(flow);
+        ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
+    };
+
+    Void test_time_variant_with_parameters() {
+        // Equation: dx/dt=a*x+b*t+c;
+        // Solution: x=c*exp(a*t)-b/a*t-b/a^2
+        //     where c=(x0+b/a*t0+b/a^2)/exp(a*t0)
+        //         since dx/dt=a*c*exp(a*t)-b/a
+        //             a*x+b*t=a*c*exp(a*t)-b*t-b/a + b*t
+        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(5,0);
+        EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(5,1);
+        EffectiveScalarMultivariateFunction a=EffectiveScalarMultivariateFunction::coordinate(5,2);
+        EffectiveScalarMultivariateFunction b=EffectiveScalarMultivariateFunction::coordinate(5,3);
+        EffectiveScalarMultivariateFunction c=EffectiveScalarMultivariateFunction::coordinate(5,4);
+        EffectiveVectorMultivariateFunction f={a*x+b*t+c};
+        ExactBoxType domx={ExactIntervalType(0.5_x,1.0_x)};
+        StepSizeType t0=0.0_x;
+        StepSizeType hsug=0.0625_x;
+        ExactBoxType domp={ExactIntervalType{2.0_x,2.5_x},ExactIntervalType{-0.5_x,1.0_x},ExactIntervalType{0.5_x,1.0_x}};
+        Pair<StepSizeType,UpperBoxType> step_bounds = integrator_ptr->flow_bounds(f,domx,t0,domp,hsug);
+        StepSizeType h = step_bounds.first;
+        UpperBoxType B = step_bounds.second;
+        Interval<StepSizeType> domt(t0,t0+h);
+        ValidatedVectorMultivariateFunctionModelDP flow=integrator_ptr->flow_step(f,domx,domt,domp,B);
+        EffectiveVectorMultivariateFunction expected_flow={(x+b/a*(t0)+(b/a+c)/a)*exp(a*(t-t0))-b/a*t-(b/a+c)/a};
+        //   The function below should be zero for phi=expected_flow[0]
+        // EffectiveScalarMultivariateFunction phi_error=derivative(phi,1)-(a*phi+b*t+c);
+
+        ARIADNE_TEST_PRINT(f);
+        ARIADNE_TEST_PRINT(flow);
+        ARIADNE_TEST_PRINT(expected_flow);
+        ARIADNE_TEST_PRINT(flow-expected_flow);
+        ARIADNE_TEST_PRINT(flow.errors());
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
+    }
 };
 
 Int main(Int argc, const char* argv[]) {
     auto verbosity = get_verbosity(argc,argv);
 
-    ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
-    TaylorSeriesIntegrator taylor_series_integrator(
-            maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
-            step_maximum_error=1e-8,step_sweep_threshold=1e-12,
-            minimum_spacial_order=1,minimum_temporal_order=4,
-            maximum_spacial_order=3,maximum_temporal_order=8);
-    taylor_series_integrator.verbosity=verbosity;
-    ARIADNE_TEST_PRINT(taylor_series_integrator);
-    TestIntegrator(taylor_series_integrator).test();
-
-    ARIADNE_TEST_PRINT("Testing TaylorPicardIntegrator");
     TaylorPicardIntegrator taylor_picard_integrator(
             maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
             step_maximum_error=1e-8,step_sweep_threshold=1e-12, maximum_temporal_order=16);
-    ARIADNE_TEST_PRINT(taylor_picard_integrator);
     taylor_picard_integrator.verbosity=verbosity;
     TestIntegrator(taylor_picard_integrator).test();
+    ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));
 
-    ARIADNE_TEST_PRINT("Testing AffineIntegrator");
+    TaylorSeriesIntegrator taylor_series_integrator(
+            maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
+            step_sweep_threshold=1e-12,order=6);
+    taylor_series_integrator.verbosity=verbosity;
+    ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator));
+
+    GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
+            maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
+            step_maximum_error=1e-8,step_sweep_threshold=1e-12,
+            minimum_spacial_order=1,minimum_temporal_order=4,
+            maximum_spacial_order=4,maximum_temporal_order=8);
+    graded_taylor_series_integrator.verbosity=verbosity;
+    ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
+
+    ARIADNE_PRINT_TEST_CASE_TITLE("AffineIntegrator");
     AffineIntegrator affine_integrator(1e-6, 6);
     affine_integrator.verbosity=verbosity;
     //TestIntegrator(affine_integrator).test_affine();

@@ -115,6 +115,8 @@ template<class U> class Interval
     typedef typename RadiusTrait<U>::Type R;
     typedef typename WidthTrait<U>::Type W;
   public:
+    //! \brief The type returned by the dimension() method.
+    typedef SizeOne DimensionType;
     //! \brief The computational paradigm used by the interval.
     typedef P Paradigm;
     //! \brief The type of the lower bound of the interval.
@@ -227,6 +229,8 @@ template<class U> class Interval
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);
 
+template<class L, class U> Interval(L,U) -> Interval<decltype(min(-declval<L>(),declval<U>()))>;
+
 template<class U> inline auto lower_bound(Interval<U> const& ivl) -> decltype(ivl.lower());
 template<class U> inline auto upper_bound(Interval<U> const& ivl) -> decltype(ivl.upper());
 template<class U> inline auto centre(Interval<U> const& ivl) -> decltype(ivl.centre());
@@ -316,6 +320,9 @@ FloatDPUpperInterval make_interval(FloatDPBounds const& x);
 FloatMPBounds cast_singleton(Interval<FloatMPUpperBound> const& ivl);
 FloatMPUpperInterval make_interval(FloatMPBounds const& x);
 
+template<class UB, class PR> FloatBounds<PR> cast_singleton(Interval<UB> const& ivl, PR pr) {
+    return FloatBounds<PR>(ivl.lower(),ivl.upper(),pr); }
+
 //! \related FloatDPUpperInterval \brief An interval containing the given interval in its interior.
 template<class F> Interval<UpperBound<F>> widen(Interval<Value<F>> const& ivl);
 template<class F> Interval<UpperBound<F>> widen(Interval<UpperBound<F>> const& ivl);
@@ -330,6 +337,11 @@ template<class F> Interval<UpperBound<F>> narrow(Interval<LowerBound<F>> const& 
 
 Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl);
 Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl);
+
+inline Interval<FloatDPValue> to_time_bounds(Dyadic const& tl, Dyadic const& tu) {
+    return Interval<FloatDPValue>(FloatDPLowerBound(tl,DoublePrecision()).raw(),FloatDPLowerBound(tu,DoublePrecision()).raw()); }
+inline Interval<FloatDPValue> to_time_bounds(Interval<Dyadic> const& ivl) {
+    return to_time_bounds(ivl.lower(),ivl.upper()); }
 
 //! \related Interval \brief Read from an input stream.
 InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);

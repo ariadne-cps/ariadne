@@ -59,6 +59,7 @@ template<class T> class Expression;
 typedef Expression<Real> RealExpression;
 template<class P, class D, class C> class FunctionExpression;
 
+//! \brief Named (static) constructors for constant and coordinate functions.
 template<class P>
 class FunctionConstructors {
     static_assert(Or<IsSame<P,ApproximateTag>,IsSame<P,ValidatedTag>,IsSame<P,EffectiveTag>>::value,"P must be an information level/paradigm.");
@@ -66,67 +67,81 @@ class FunctionConstructors {
   public:
     typedef Y NumericType;
 
-    static ScalarFunction<P,BoxDomainType> zero(SizeType as);
-    static ScalarFunction<P,BoxDomainType> constant(SizeType as, NumericType c);
-    static ScalarFunction<P,BoxDomainType> coordinate(SizeType as, SizeType j);
-    static List<ScalarFunction<P,BoxDomainType>> coordinates(SizeType ns);
-    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, SizeType as);
-    static VectorFunction<P,BoxDomainType> identity(SizeType ns);
+    //@{
+    //! \name Named (static) constructors
+    static ScalarFunction<P,BoxDomainType> zero(SizeType as); //!< \brief %Constant scalar function zero in \a as arguments.
+    static ScalarFunction<P,BoxDomainType> constant(SizeType as, NumericType c); //!< \brief %Constant scalar function \a c in \a as arguments.
+    static ScalarFunction<P,BoxDomainType> coordinate(SizeType as, SizeType j); //!< \brief %Coordinate function taking \a j -th index in \a as arguments.
+    static List<ScalarFunction<P,BoxDomainType>> coordinates(SizeType ns); //!< \brief All coordinates over \a ns variables.
+    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, SizeType as); //!< \brief The zero function over \a as variables returning a result of size \a rs.
+    static VectorFunction<P,BoxDomainType> constant(SizeType as, Vector<NumericType> c); //!< \brief %Constant vector function \a c in \a as arguments.
+    static VectorFunction<P,BoxDomainType> identity(SizeType ns); //!< \brief The identity over \a ns variables.
 
-    static ScalarFunction<P,BoxDomainType> zero(BoxDomainType dom);
-    static ScalarFunction<P,BoxDomainType> constant(BoxDomainType dom, NumericType c);
-    static ScalarFunction<P,BoxDomainType> coordinate(BoxDomainType dom, SizeType j);
-    static List<ScalarFunction<P,BoxDomainType>> coordinates(BoxDomainType dom);
-    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, BoxDomainType dom);
-    static VectorFunction<P,BoxDomainType> identity(BoxDomainType dom);
+    static ScalarFunction<P,BoxDomainType> zero(BoxDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
+    static ScalarFunction<P,BoxDomainType> constant(BoxDomainType dom, NumericType c); //!< \brief %Constant function \a c over domain \a dom.
+    static ScalarFunction<P,BoxDomainType> coordinate(BoxDomainType dom, SizeType j); //!< \brief %Coordinate function taking \a j -th index over domain \a dom.
+    static List<ScalarFunction<P,BoxDomainType>> coordinates(BoxDomainType dom); //!< \brief %List of all coordinate functions over domain \a dom.
+    static VectorFunction<P,BoxDomainType> zeros(SizeType rs, BoxDomainType dom); //!< \brief Zero function over domain \a dom returning a result of size \a rs.
+    static VectorFunction<P,BoxDomainType> constant(BoxDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
+    static VectorFunction<P,BoxDomainType> identity(BoxDomainType dom); //!< \brief Identity function over domain \a dom.
 
-    static ScalarFunction<P,IntervalDomainType> zero();
-    static ScalarFunction<P,IntervalDomainType> constant(NumericType c);
-    static ScalarFunction<P,IntervalDomainType> coordinate();
-    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs);
-    static ScalarFunction<P,IntervalDomainType> identity();
+    static ScalarFunction<P,IntervalDomainType> zero(); //!< \brief %Constant scalar univariate function zero.
+    static ScalarFunction<P,IntervalDomainType> constant(NumericType c); //!< \brief %Constant scalar univariate function with value \a c.
+    static ScalarFunction<P,IntervalDomainType> coordinate(); //!< \brief %Scalar univariate coordinate function.
+    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs); //!< \brief %Constant vector univariate function zero returning a result of size \a rs.
+    static VectorFunction<P,IntervalDomainType> constant(Vector<NumericType> c); //!< \brief Constant univariate function taking values \a c.
+    static ScalarFunction<P,IntervalDomainType> identity(); //!< \brief %Scalar univariate identity function.
 
-    static ScalarFunction<P,IntervalDomainType> zero(IntervalDomainType dom);
-    static ScalarFunction<P,IntervalDomainType> constant(IntervalDomainType dom, NumericType c);
-    static ScalarFunction<P,IntervalDomainType> coordinate(IntervalDomainType dom, SizeOne);
-    static ScalarFunction<P,IntervalDomainType> coordinate(IntervalDomainType dom);
-    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs, IntervalDomainType dom);
-    static ScalarFunction<P,IntervalDomainType> identity(IntervalDomainType dom);
+    static ScalarFunction<P,IntervalDomainType> zero(IntervalDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
+    static ScalarFunction<P,IntervalDomainType> constant(IntervalDomainType dom, NumericType c); //!< \brief %Constant scalar function \a c over domain \a dom.
+    static ScalarFunction<P,IntervalDomainType> coordinate(IntervalDomainType dom, SizeOne j); //!< \brief %Coordinate function over domain \a dom.
+    static ScalarFunction<P,IntervalDomainType> coordinate(IntervalDomainType dom); //!< \brief %Coordinate function over domain \a dom.
+    static VectorFunction<P,IntervalDomainType> zeros(SizeType rs, IntervalDomainType dom); //!< \brief %Zero vector function over domain \a dom returning a result of size \a rs.
+    static VectorFunction<P,IntervalDomainType> constant(IntervalDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
+    static ScalarFunction<P,IntervalDomainType> identity(IntervalDomainType dom); //!< \brief %Identity function over domain \a dom.
 
-    static VectorFunction<P,BoxDomainType> constant(BoxDomainType dom, Vector<NumericType> c);
-    static VectorFunction<P,IntervalDomainType> constant(IntervalDomainType dom, Vector<NumericType> c);
-    static VectorFunction<P,IntervalDomainType> constant(Vector<NumericType> c);
+    //@}
 
 };
 
 template<class P, class X> using EvaluateType = decltype(declval<ScalarMultivariateFunctionInterface<P>>()._evaluate(declval<Vector<X>>()));
 
+//! \brief Function operations which depend on the scalar/vector nature of the arguments and result.
 template<class P, class D, class C> class FunctionFacade {
 };
 
+//! \brief Function operations for scalar univariate functions.
 template<class P> class FunctionFacade<P,IntervalDomainType,IntervalDomainType> {
   public:
-    template<class X> Scalar<EvaluateType<P,X>> derivative(X const& x) const;
+    //! \relates Function \brief The slope (derivative) of the function at the point \a x.
+    template<class X> Scalar<EvaluateType<P,X>> slope(X const& x) const;
+    //! \relates Function \brief The derivative of the function at the point \a x.
     FunctionExpression<P,IntervalDomainType,IntervalDomainType> operator() (const RealVariable& x) const;
 };
 
+//! \brief Function operations for vector univariate functions.
 template<class P> class FunctionFacade<P,IntervalDomainType,BoxDomainType> {
   public:
+    //! \relates Function \brief The tangent vector of derivatives of the function at the point \a x.
     template<class X> Vector<EvaluateType<P,X>> tangent(X const& x) const;
     FunctionExpression<P,IntervalDomainType,BoxDomainType> operator() (const RealVariable& x) const;
 };
 
+//! \brief Function operations for scalar multivariate functions.
 template<class P> class FunctionFacade<P,BoxDomainType,IntervalDomainType> {
     typedef Number<P> Y;
   public:
+    //! \relates Function \brief The gradient covector of derivatives of the function at the point \a x.
     template<class X> Covector<EvaluateType<P,X>> gradient(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomainType,IntervalDomainType> operator() (const Vector<RealVariable>& x) const;
     //FunctionExpression<P,BoxDomainType,IntervalDomainType> operator() (const Vector<RealExpression>& x) const;
 };
 
+//! \brief Function operations for vector multivariate functions.
 template<class P> class FunctionFacade<P,BoxDomainType,BoxDomainType> {
     typedef Number<P> Y;
   public:
+    //! \relates Function \brief The Jacobian matrix of derivatives of the function at the point \a x.
     template<class X> Matrix<EvaluateType<P,X>> jacobian(Vector<X> const& x) const;
     FunctionExpression<P,BoxDomainType,BoxDomainType> operator() (const Vector<RealVariable>& x) const;
 };
@@ -137,6 +152,7 @@ template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomainTyp
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomainType>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Vector<Number<P>>,Number<P>> { };
 
+//! \brief A mixin which provides Scalar/Vector function methods and friends.
 template<class P, class D, class C> class DispatchFunctionOperations;
 template<class P, class D> class DispatchFunctionOperations<P,D,IntervalDomainType>
     : DispatchTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
@@ -144,7 +160,7 @@ template<class P, class D> class DispatchFunctionOperations<P,D,BoxDomainType>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Vector<Number<P>>,Number<P>> { };
 
 //! \ingroup FunctionModule
-//! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
+//! \brief A generic function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
 template<class P, class D, class C>
 class Function
     : public FunctionConstructors<P>
@@ -157,87 +173,170 @@ class Function
   protected:
     SharedPointer< const FunctionInterface<P,D,C> > _ptr;
   public:
-    typedef P InformationTag;
+    typedef P InformationTag; //!< The type of information (Effective, Validated or Approximate) provided by the function implementation.
     typedef P Paradigm;
-    typedef Y NumericType;
-    typedef D DomainType;
-    typedef C CodomainType;
-    typedef decltype(declval<C>().dimension()) ResultSizeType;
-    typedef decltype(declval<D>().dimension()) ArgumentSizeType;
-    typedef decltype(declval<D>().dimension()) ArgumentIndexType;
+    typedef D DomainType; //!< The type of the domain.
+    typedef C CodomainType; //!< The type of the codomain.
+    typedef Number<P> NumericType; //!< The numeric type required to construct a constant scalar function.
+    typedef typename C::DimensionType ResultSizeType; //!< The type used to descibe the size of an element of the codomain.
+    typedef typename D::DimensionType ArgumentSizeType; //!< The type used to descibe the size of an element of the domain.
+    typedef typename D::DimensionType ArgumentIndexType; //!< The type used to descibe an index into an element of the domain.
 
+    //! \brief The type of an argument to the function whose scalar type is \a Y.
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    //! \brief The type for the result of calling the function whose scalar type is \a Y.
     template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;
 
-    explicit Function(EuclideanDomain dom);
-    explicit Function(ResultSizeType rs, EuclideanDomain dom);
 
+    //@{
+    //! \name User constructors.
+
+    explicit Function(EuclideanDomain dom); //!< \deprecated
+    explicit Function(ResultSizeType rs, EuclideanDomain dom); //!< \deprecated
+
+    //! \brief Construct the zero function with the given domain \a dom and default codomain (Zero-dimensional for a vector function, one-dimensional for a scalar function).
     explicit Function(DomainType dom);
+    //! \brief Construct the zero function with the given domain \a dom and number of result variables \a rs.
     explicit Function(ResultSizeType rs, DomainType dom);
 
+    //! \brief Construct a function with the given domain \a dom and number of result variables \a rs.
     explicit Function(DomainType dom, Result<Formula<Y>>const& e);
+    //! \brief Construct a function each of whose components are \a sf with the given domain \a dom.
     explicit Function(ResultSizeType rs, ScalarFunction<P,D> sf);
 
+    //! \brief Create a vector function from an initializer list of scalar functions.
     Function(InitializerList<ScalarFunction<P,D>> const& lsf);
+    //! \brief Create a vector function from a list of scalar functions.
     Function(List<ScalarFunction<P,D>> const& lsf);
+    //! \brief Create a vector function from a vector of scalar functions.
     Function(Vector<ScalarFunction<P,D>> const& lsf);
+    //@}
 
+    //@{
+    //! \name Prototype constructors.
+
+    //! \brief Construct a zero scalar function with the same domain.
     ScalarFunction<P,D> create_zero() const { return ScalarFunction<P,D>::zero(this->domain()); }
+    //! \brief Construct a scalar constant function with value \a c and the same domain.
     ScalarFunction<P,D> create_constant(NumericType c) const { return ScalarFunction<P,D>::constant(this->domain(),c); }
+    //! \brief Construct the scalar coordinate function for the index \a j.
     ScalarFunction<P,D> create_coordinate(ArgumentIndexType j) const { return ScalarFunction<P,D>::coordinate(this->domain(),j); }
+    //! \brief Construct the vector constant function with values \a c.
     VectorFunction<P,D> create_constant(Vector<NumericType> c) const { return VectorFunction<P,D>::constant(this->domain(),c); }
+    //@}
 
-    Function();
-    explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { }
-    explicit Function(SharedPointer<FunctionInterface<P,D,C>> p) : _ptr(p) { }
-    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }
+    //@{
+    //! \name Handle-interface methods.
+    Function(); //!< \brief Create an invalid (null) function.
+    explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { } //!< \brief Capture a newly-allocated function pointer.
+    explicit Function(SharedPointer<FunctionInterface<P,D,C>> p) : _ptr(p) { } //!< \brief Construct from a managed pointer.
+    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }  //!< \brief Clone from aeference.
+
+    //! \brief Assign from a reference.
     Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {
         _ptr=std::shared_ptr< FunctionInterface<P,D,C> >(f._clone()); return *this; }
-    Function<P,D,C>& operator=(const Result<NumericType>& c) {
-        return (*this)=this->create_constant(c); }
 
+    //! \brief Return a managed (shared) pointer to the underlying interface class.
+    SharedPointer< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
+    //! \brief Return a raw (builtin) pointer to the underlying interface class.
+    const FunctionInterface<P,D,C>* raw_pointer() const  { return _ptr.operator->(); }
+    //! \brief Return a reference to the underlying interface class.
+    const FunctionInterface<P,D,C>& reference() const  { return _ptr.operator*(); }
+    //! \brief Convert to a reference to the underlying interface class.
+    operator const FunctionInterface<P,D,C>& () const { return _ptr.operator*(); }
+
+    //@}
+
+    //@{
+    //! \name Conversions and assignment.
+
+    //! \brief Convert from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
     Function(const Function<PP,D,C>& f)
         : _ptr(std::dynamic_pointer_cast< const FunctionInterface<P,D,C> >(f.managed_pointer())) { }
+    //! \brief Assign from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
         Function<P,D,C>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
 
-    SharedPointer< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
-    const FunctionInterface<P,D,C>* raw_pointer() const  { return _ptr.operator->(); }
-    const FunctionInterface<P,D,C>& reference() const  { return _ptr.operator*(); }
-    operator const FunctionInterface<P,D,C>& () const { return _ptr.operator*(); }
+    //! \brief Set equal to the constant value \a c.
+    Function<P,D,C>& operator=(const Result<NumericType>& c) {
+        return (*this)=this->create_constant(c); }
 
+    //@}
+
+    //@{
+    //! \name Query domain and codomain.
+
+    //! \brief The domain of the function.
     DomainType domain() const {
         return this->reference().domain(); }
+    //! \brief The codomain of the function.
     CodomainType codomain() const {
         return this->reference().codomain(); }
+    //! \brief The number of scalar variables in the argument.
     ArgumentSizeType argument_size() const {
         return this->reference().argument_size(); }
+    //! \brief The number of scalar variables in the result.
     ResultSizeType result_size() const {
         return this->reference().result_size(); }
+    //@}
 
+    //@{
+    //! \name Call/evaluate
+
+    //! \brief Call the function on an argument of concrete scalar type \a X.
     template<class X> auto operator() (const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
+#ifdef DOXYGEN
+    //! \brief Call the function on an argument of concrete scalar type \a X.
+    friend template<class X> auto evaluate (const Function<P,D,C>& f,const Argument<X>& x) const -> decltype(f.reference()._evaluate(x)) {
+        return f(x); }
+#endif
+//! \brief Call the function on an argument of concrete scalar type \a X. \deprecated
     template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
+    //@}
 
     friend VectorFunction<P,D> operator*(ScalarFunction<P,D> const&, Vector<Y> const&);
 
+    //@{
+    //! \name Differential function operations.
+
+    //! \brief The derivative of the function with respect to the \a k -th variable.
     Function<P,D,C> derivative(ElementIndexType<D> k) const {
         return Function<P,D,C>(this->reference()._derivative(k)); }
+    //! \brief The derivative of the function \a f with respect to the \a k -th variable.
     friend Function<P,D,C> derivative(Function<P,D,C> const& f, ElementIndexType<D> k) {
         return f.derivative(k); }
 
+    //! \brief The differential (partial derivatives) of the function at the point \a x, computed to degree \a d.
     template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
         return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }
+    //@}
 
-    Void set(SizeType i, ScalarFunction<P,D>);
+    //@{
+    //! \name Vector (indexing) operations.
+
+    //! \brief Set the \a i -th component of a vector function to \a f.
+    Void set(SizeType i, ScalarFunction<P,D> f);
+    //! \brief Get the \a i -th component of a vector function.
     Function<P,D,IntervalDomainType> get(SizeType i) const;
+    //! \brief Get the \a i -th component of a vector function.
     const Function<P,D,IntervalDomainType> operator[](SizeType i) const;
+    //! \brief Get the components of a specified by \a rng function.
     const Function<P,D,BoxDomainType> operator[](Range rng) const;
+    //! \brief A reference to the \a i -th component of a vector function.
     VectorFunctionElementReference<P,D> operator[](SizeType i);
 
+    //@}
+
+    //@{
+    //! \name Input/output operations.
+
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
+
+    //@}
 };
 
 template<class A> struct AlgebraOperationsBase;
@@ -307,8 +406,8 @@ Function<P,D,C> derivative(Function<P,D,C> const& f) {
     return f.derivative(SizeOne()); }
 
 template<class P, class X> Scalar<EvaluateType<P,X>>
-derivative(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
-    return differential(f,x,1u).gradient(); }
+slope(const ScalarUnivariateFunction<P>& f, const Scalar<X>& x) {
+    return differential(f,x,1u).gradient()[0]; }
 
 template<class P, class X> Vector<EvaluateType<P,X>>
 tangent(const VectorUnivariateFunction<P>& f, const Scalar<X>& x) {
@@ -321,6 +420,16 @@ gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
 template<class P, class X> Matrix<EvaluateType<P,X>>
 jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
     return differential(f,x,1u).jacobian(); }
+
+template<class P> template<class X> EvaluateType<P,X>
+FunctionFacade<P,IntervalDomainType,IntervalDomainType>::slope(X const& x) const {
+    return Ariadne::slope(static_cast<Function<P,IntervalDomainType,IntervalDomainType>const&>(*this),x);
+}
+
+template<class P> template<class X> Vector<EvaluateType<P,X>>
+FunctionFacade<P,IntervalDomainType,BoxDomainType>::tangent(X const& x) const {
+    return Ariadne::tangent(static_cast<Function<P,IntervalDomainType,BoxDomainType>const&>(*this),x);
+}
 
 template<class P> template<class X> Covector<EvaluateType<P,X>>
 FunctionFacade<P,BoxDomainType,IntervalDomainType>::gradient(Vector<X> const& x) const {
@@ -372,7 +481,7 @@ ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariat
 ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
 
 
-
+//! \brief A reference into an element of a vector function.
 template<class P, class D>
 struct VectorFunctionElementReference
     : DispatchFunctionOperations<P,D,IntervalDomainType>
@@ -451,7 +560,26 @@ inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<EffectiveTa
     return jacobian(f,static_cast<Vector<UpperIntervalType>>(x)); }
 */
 
-template<class P> class FunctionFactory;
+//! \brief A class for constructing generic functions with a specific implementation.
+//! \sa Function
+template<class P> class FunctionFactory {
+    SharedPointer< const FunctionFactoryInterface<P> > _ptr;
+  public:
+    FunctionFactory(const FunctionFactoryInterface<P>& ref) : _ptr(ref.clone()) { }
+    FunctionFactory(const FunctionFactoryInterface<P>* ptr) : _ptr(ptr) { }
+    FunctionFactory(SharedPointer< const FunctionFactoryInterface<P> > ptr) : _ptr(ptr) { }
+    //! \brief Create a scalar function equal to \a f over domain \a dom.
+    inline ScalarMultivariateFunction<P> create(const BoxDomainType& dom, const ScalarMultivariateFunctionInterface<P>& f) const;
+    //! \brief Create a vector function equal to \a f over domain \a dom.
+    inline VectorMultivariateFunction<P> create(const BoxDomainType& dom, const VectorMultivariateFunctionInterface<P>& f) const;
+    //! \brief Create a scalar zero function over domain \a dom.
+    inline ScalarMultivariateFunction<P> create_zero(const BoxDomainType& dom) const;
+    //! \brief Create the identity function over domain \a dom.
+    inline VectorMultivariateFunction<P> create_identity(const BoxDomainType& dom) const;
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<P>& factory);
+};
+
 typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
 
 template<>

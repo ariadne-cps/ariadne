@@ -47,6 +47,7 @@ using namespace std;
 using namespace Ariadne;
 
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 
 inline Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 inline Polynomial<FloatDP> p(Nat n, Nat j) { return Polynomial<FloatDP>::variable(n,j); }

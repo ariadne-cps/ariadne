@@ -176,11 +176,14 @@ template<class... AS> auto _sgn_(AS const& ... as) -> decltype(sgn(as...)) { ret
 
 template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 
+template<class F, class... AS> auto __call__(F const& f, AS... as) -> decltype(f(as...)) { return f(as...); }
 template<class... AS> auto _evaluate_(AS... as) -> decltype(evaluate(as...)) { return evaluate(as...); }
 template<class... AS> auto _partial_evaluate_(AS... as) -> decltype(partial_evaluate(as...)) { return partial_evaluate(as...); }
 template<class... AS> auto _unchecked_evaluate_(AS... as) -> decltype(unchecked_evaluate(as...)) { return unchecked_evaluate(as...); }
 template<class... AS> auto _compose_(AS... as) -> decltype(compose(as...)) { return compose(as...); }
 template<class... AS> auto _unchecked_compose_(AS... as) -> decltype(unchecked_compose(as...)) { return unchecked_compose(as...); }
+
+template<class... AS> auto _differential_(AS... as) -> decltype(differential(as...)) { return differential(as...); }
 
 template<class... AS> auto _dot_(AS... as) -> decltype(dot(as...)) { return dot(as...); }
 template<class... AS> auto _join_(AS... as) -> decltype(join(as...)) { return join(as...); }
@@ -276,20 +279,44 @@ template<class A> pybind11::class_<A>& define_logical(pybind11::module& module, 
     return pyclass;
 }
 
-template<class A> pybind11::class_<A>& define_lattice(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    module.def("abs", &_abs_<A>);
-    module.def("max", &_max_<A,A>);
-    module.def("min", &_min_<A,A>);
+template<class X> pybind11::class_<X>& define_lattice(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    module.def("abs", &_abs_<X>);
+    module.def("max", &_max_<X,X>);
+    module.def("min", &_min_<X,X>);
     return pyclass;
 }
 
-template<class A> pybind11::class_<A>& define_comparisons(pybind11::module& module, pybind11::class_<A>& pyclass) {
-    pyclass.def("__eq__", &__eq__<A,A>);
-    pyclass.def("__ne__", &__ne__<A,A>);
-    pyclass.def("__le__", &__le__<A,A>);
-    pyclass.def("__ge__", &__ge__<A,A>);
-    pyclass.def("__lt__", &__lt__<A,A>);
-    pyclass.def("__gt__", &__lt__<A,A>);
+template<class X, class Y> pybind11::class_<X>& define_mixed_lattice(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+    module.def("max", &_max_<X,Y>);
+    module.def("max", &_max_<Y,X>);
+    module.def("min", &_min_<X,Y>);
+    module.def("min", &_min_<Y,X>);
+    return pyclass;
+}
+
+template<class X> pybind11::class_<X>& define_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass) {
+    pyclass.def("__eq__", &__eq__<X,X>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<X,X>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<X,X>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<X,X>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<X,X>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<X,X>, pybind11::is_operator());
+    return pyclass;
+}
+
+template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind11::module& module, pybind11::class_<X>& pyclass, Tag<Y> = Tag<Y>()) {
+    pyclass.def("__eq__", &__eq__<X,Y>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<X,Y>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<X,Y>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<X,Y>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<X,Y>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<X,Y>, pybind11::is_operator());
+    pyclass.def("__eq__", &__eq__<Y,X>, pybind11::is_operator());
+    pyclass.def("__ne__", &__ne__<Y,X>, pybind11::is_operator());
+    pyclass.def("__le__", &__le__<Y,X>, pybind11::is_operator());
+    pyclass.def("__ge__", &__ge__<Y,X>, pybind11::is_operator());
+    pyclass.def("__lt__", &__lt__<Y,X>, pybind11::is_operator());
+    pyclass.def("__gt__", &__gt__<Y,X>, pybind11::is_operator());
     return pyclass;
 }
 
@@ -303,6 +330,14 @@ template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& modul
     if constexpr(CanDivide<X,X>::value) {
         pyclass.def(__py_div__, &__div__<X,X>, pybind11::is_operator());
     }
+
+    pyclass.def("__radd__", &__radd__<X,X>, pybind11::is_operator());
+    pyclass.def("__rsub__", &__rsub__<X,X>, pybind11::is_operator());
+    pyclass.def("__rmul__", &__rmul__<X,X>, pybind11::is_operator());
+    if constexpr(CanDivide<X,X>::value) {
+        pyclass.def(__py_rdiv__, &__rdiv__<X,X>, pybind11::is_operator());
+    }
+
     return pyclass;
 }
 
@@ -374,6 +409,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_monotonic(pybind11:
     pyclass.def("__rsub__", &__rsub__<X,NY>, pybind11::is_operator());
     return pyclass;
 }
+
 
 
 template<class A, class X=typename A::NumericType> pybind11::class_<A>& define_algebra(pybind11::module& module, pybind11::class_<A>& pyclass, Tag<X> = Tag<X>()) {
@@ -511,7 +547,7 @@ pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module& module,
     return pyclass;
 }
 
- 
+
 } // namespace Ariadne
 
 

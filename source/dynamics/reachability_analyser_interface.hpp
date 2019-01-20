@@ -47,6 +47,8 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::EvolverType EvolverType;
     //! \brief The type used to define the elapsed evolution time for the system type.
+    typedef typename EvolverType::EnclosureType EnclosureType;
+    //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::TimeType TimeType;
     //! \brief The type used to describe the state space of the system evolution.
     typedef typename SystemType::StateSpaceType StateSpaceType;

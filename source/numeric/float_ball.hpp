@@ -132,6 +132,10 @@ template<class F, class FE> class Ball
     F _v; FE _e;
 };
 
+template<class PR> Ball(ValidatedNumber, PR) -> Ball<RawFloatType<PR>>;
+template<class PR, class PRE> Ball(ValidatedNumber, PR, PRE) -> Ball<RawFloatType<PR>,RawFloatType<PRE>>;
+template<class F, class FE> Ball(F,FE) -> Ball<F,FE>;
+
 template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F,FE> const& flt) {
     return FloatFactory<PrecisionType<F>>(flt.precision());
 }

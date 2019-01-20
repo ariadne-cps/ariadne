@@ -91,7 +91,7 @@ template<class SYS> class ReachabilityAnalyser
     using typename Interface::SetApproximationType;
     using typename Interface::SafetyCertificateType;
 
-    typedef typename SystemType::EnclosureType EnclosureType;
+    typedef typename Interface::EnclosureType EnclosureType;
     using GridType = typename SetApproximationType::GridType;
     using PavingType = SetApproximationType;
   private:

@@ -41,26 +41,26 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    Void run_each_approximation(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         for (auto appro: approximations) {
             List<InputApproximationKind> singleapproximation = {appro};
             std::cout << appro << std::endl;
-            run_single_test(name,ivp,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
+            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,freq,verbosity);
         }
     }
 
-    Void run_single_test(String name, DifferentialInclusionIVP const& ivp, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
+    Void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximationKind> approximations, SweeperDP sweeper, SizeType freq, unsigned int verbosity) const
     {
         auto integrator = InclusionIntegrator(approximations,sweeper,step_size=step,number_of_steps_between_simplifications=freq,number_of_variables_to_keep=20000);
         integrator.verbosity = verbosity;
-        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivp,evolution_time);
+        List<ValidatedVectorMultivariateFunctionModelType> flow_functions = integrator.flow(ivf,initial,evolution_time);
     }
 
     Void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
                   const RealVariablesBox& initial, Real evolution_time, double step) const {
 
-        DifferentialInclusionIVP ivp(dynamics,inputs,initial);
+        InclusionVectorField ivf(dynamics,inputs);
 
         SizeType freq=12;
         ThresholdSweeperDP sweeper(DoublePrecision(),1e-8);
@@ -73,7 +73,7 @@ class TestInclusionIntegrator {
         approximations.append(InputApproximationKind::SINUSOIDAL);
         approximations.append(InputApproximationKind::PIECEWISE);
 
-        this->run_each_approximation(name,ivp,evolution_time,step,approximations,sweeper,freq,verbosity);
+        this->run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,freq,verbosity);
     }
 
   public:
@@ -137,6 +137,7 @@ void TestInclusionIntegrator::test() const {
 }
 
 int main() {
+
     TestInclusionIntegrator().test();
     return ARIADNE_TEST_FAILURES;
 }

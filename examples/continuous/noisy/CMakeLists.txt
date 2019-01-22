@@ -9,13 +9,13 @@ set(EXAMPLES_CONTINUOUS_NOISY
 	rossler-attractor
 	jerk16
 	dc-dc
-	
+
 	noisy-benchmark
 )
 
 foreach(example ${EXAMPLES_CONTINUOUS_NOISY})
     add_executable(${example} ${example}.cpp)
-    target_link_libraries(${example} ariadne)
+    target_link_libraries(${example} ariadne "${GLPK_LIBRARY}")
 endforeach()
 
 add_custom_target(examples-continuous-noisy)

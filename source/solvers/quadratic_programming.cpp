@@ -492,15 +492,15 @@ ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
 
   if(m_eq>0)
   {
-    IN.resize(m_in,m_in+zSize);
+    IN.resize(m_in,m_in+Z.column_size());
     in.resize(m_in);
     Matrix<FloatDP> BZ = B*Z;
     for(unsigned i=0;i<m_in;++i)
     {
-      for(unsigned j=0;j<zSize;++j)
+      for(unsigned j=0;j<Z.column_size();++j)
         IN[i][j]=BZ[i][j];
       for(unsigned j=0;j<m_in;++j)
-        IN[i][j+zSize]=I[i][j];
+        IN[i][j+Z.column_size()]=I[i][j];
     }
     in = -B*x_bar - b;
   }

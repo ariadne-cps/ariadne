@@ -31,28 +31,48 @@
 
 #include "../utility/declarations.hpp"
 
-#include "../output/logging.hpp"
 #include "../numeric/numeric.hpp"
+#include "../output/logging.hpp"
 #include "../utility/tuple.hpp"
 
+#include "../solvers/quadratic_programming.hpp"
 
 namespace Ariadne {
 
-template<class X, class R> class Constraint;
+template <class X, class R> class Constraint;
 
 class InfeasibleProblemException : public std::runtime_error {
-  public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
+public:
+  InfeasibleProblemException()
+      : std::runtime_error("InfeasibleProblemException") {}
 };
 class IndeterminateFeasibilityException : public std::runtime_error {
-  public: IndeterminateFeasibilityException() : std::runtime_error("IndeterminateFeasibilityException") { }
+public:
+  IndeterminateFeasibilityException()
+      : std::runtime_error("IndeterminateFeasibilityException") {}
 };
-class DegenerateNonlinearFeasibilityProblemException : public std::runtime_error {
-  public: DegenerateNonlinearFeasibilityProblemException() : std::runtime_error("DegenerateNonlinearFeasibilityProblemException") { }
+class DegenerateNonlinearFeasibilityProblemException
+    : public std::runtime_error {
+public:
+  DegenerateNonlinearFeasibilityProblemException()
+      : std::runtime_error("DegenerateNonlinearFeasibilityProblemException") {}
 };
 class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
-  public: NearBoundaryOfFeasibleDomainException() : std::runtime_error("NearBoundaryOfFeasibleDomainException") { }
+public:
+  NearBoundaryOfFeasibleDomainException()
+      : std::runtime_error("NearBoundaryOfFeasibleDomainException") {}
 };
-
+class SQPStatusLeq1Exception : public std::runtime_error {
+public:
+  int st;
+  SQPStatusLeq1Exception(int status)
+      : std::runtime_error("SQPStatusLeq1Exception") {st =status;}
+};
+class BFGSException : public std::runtime_error {
+public:
+  BFGSException()
+      : std::runtime_error("BFGS failed") {}
+};
 //! \ingroup OptimisationModule EvaluationModule
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
@@ -154,9 +174,6 @@ class PenaltyFunctionOptimiser
                                   FloatApproximationVector& x, FloatApproximationVector& y, FloatApproximationVector& z) const;
 };
 
-
-
-
 //! \ingroup OptimisationModule
 //! \brief Solver for linear programming problems using invalid interior point methods.
 //! \details Introduces variables \f$w\f$ and attempts to find \f$x\in D\f$ and \f$w\in C\f$ such that \f$g(x)=w\f$.
@@ -192,7 +209,6 @@ class NonlinearInfeasibleInteriorPointOptimiser
 //    FloatDPApproximation compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
 //                     FloatApproximationVector& w, FloatApproximationVector& x, FloatApproximationVector& y) const;
 };
-
 
 //! \ingroup OptimisationModule
 //! Solver for linear programming problems using interior point methods.
@@ -275,16 +291,15 @@ class ApproximateOptimiser
                           FloatApproximationVector& X, FloatApproximationVector& Lambda) const;
 };
 
-
 /*//! \ingroup OptimisationModule
 //! Solver for linear programming problems using interior point methods.
-//! WARNING: This class currently does not work; maybe there is a problem with the algorithms.
-class KrawczykOptimiser
-    : public OptimiserBase
+//! WARNING: This class currently does not work; maybe there is a problem with
+the algorithms. class KrawczykOptimiser : public OptimiserBase
 {
 
   public:
-    virtual KrawczykOptimiser* clone() const { return new KrawczykOptimiser(*this); }
+    virtual KrawczykOptimiser* clone() const { return new
+KrawczykOptimiser(*this); }
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
@@ -292,7 +307,8 @@ class KrawczykOptimiser
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
   public:
-    //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
+    //! \brief Try to solve the nonlinear constraint problem by applying the
+Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
     ValidatedKleenean minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                      const FloatDPBounds& t0, const FloatBoundsVector& x0, const FloatBoundsVector& y0, const FloatBoundsVector& z0) const;
@@ -322,8 +338,6 @@ class KrawczykOptimiser
 
 */
 
-<<<<<<< HEAD
-=======
 //-------------------------------------------------------------------------------
 
 class NonlinearMixedOptimiser;
@@ -378,6 +392,14 @@ class NonlinearSQPOptimiser : public OptimiserBase
 
     virtual ValidatedKleenean
     feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
+
+    ApproximateVector
+    feasible_point(ExactBoxType domain, ValidatedVectorMultivariateFunction g, ExactBoxType codomain) const;
+
+    //! Take a step on a descendent direction of function f s.t. g
+    Void feasibility_step(const ExactBoxType &D,
+      const ApproximateVectorMultivariateFunction &g, const ExactBoxType &C,
+      StepData &stp) const;
 
     //! Take a step on a descendent direction of function f s.t. g
     Void step(const ApproximateScalarMultivariateFunction &f, const ExactBoxType &D,
@@ -466,7 +488,6 @@ class NonlinearMixedOptimiser : public OptimiserBase
                         const ExactBoxType &C,
                         const RawFloatVector &p) const;
 };
->>>>>>> 78baf103... Implemented easy mixed optimiser: priority ipm (ipm+sqp)
 
 } // namespace Ariadne
 

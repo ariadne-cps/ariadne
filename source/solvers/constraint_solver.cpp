@@ -93,11 +93,29 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
 
+  //std::cerr<<"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n";
+  // std::cerr<<apply(function,domain)<<"\n";
+  NonlinearSQPOptimiser nlsqp;
+  try
+  {
+    auto optimal_x=nlsqp.feasible_point(domain,function,codomain);
+    // std::cerr<<"feasible point: "<<ApproximateVector(optimal_x)<<"\n";
+    return make_pair(true,ExactPoint(cast_exact(optimal_x)));
+  }
+  catch(InfeasibleProblemException ipe)
+  {
+    // std::cerr<<"Is infeasible\n";
+    return make_pair(false,ExactPoint());
+  }
+
+
+
     static const FloatDPValue XSIGMA=0.125_exact;
     static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
     static const FloatDP _inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
+
     ARIADNE_ASSERT(codomain.dimension()>0);
 
     // Make codomain singleton
@@ -112,7 +130,6 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
             bounds[i]=intersection(codomain[i],image[i]);
         }
     }
-
 
     const Nat m=domain.size(); // The total number of variables
     const Nat n=codomain.size(); // The total number of nontrivial constraints
@@ -147,6 +164,8 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
             else { ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n"); return make_pair(indeterminate,cast_exact(point)); }
         }
     }
+
+    std::cerr<<"#{#{#\tt:"<<t<<", y:"<<y<<", x:"<<x<<", z:"<<z<<"\n";
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
 
     if(decide(t<TERR)) {

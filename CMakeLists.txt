@@ -9,7 +9,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
-set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization 
+set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization
                   init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
@@ -20,10 +20,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 
 foreach(WARN ${COMPILER_WARN})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")       
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")
 endforeach()
 foreach(WARN ${COMPILER_DONT_WARN})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${WARN}")       
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${WARN}")
 endforeach()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-template-friend")
@@ -89,7 +89,7 @@ if(GMPXX_FOUND)
     include_directories(SYSTEM ${GMPXX_INCLUDE_DIR})
 else()
     message(WARNING "Unable to find GMPXX. Related functionality will be disabled.")
-endif()    
+endif()
 
 find_package(MPFR)
 if(MPFR_FOUND)
@@ -123,6 +123,26 @@ find_package(Kirk)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 endif()
+
+
+# ND -- 28/12/2018 -- External library dependencies -- begin
+link_directories(/usr/local/include/eigen3)
+
+set(GLPK_INCLUDE_DIRS "/usr/local/include/glpk/include")
+set(GLPK_LIBRARY      "/usr/local/include/glpk/lib/libglpk.so")
+
+if(NOT EXISTS ${GLPK_INCLUDE_DIRS})
+  MESSAGE(ERROR "Cannot find glpk lib in ${GLPK_INCLUDE_DIRS}")
+endif()
+if(NOT EXISTS ${GLPK_LIBRARY})
+  MESSAGE(ERROR "Cannot find glpk lib object in ${GLPK_LIBRARY}")
+endif()
+
+include_directories("${GLPK_INCLUDE_DIRS}")
+
+include_directories("lib/")
+add_subdirectory("lib")
+# ND -- 28/12/2018 -- External library dependencies -- end
 
 add_subdirectory(source)
 add_subdirectory(tests)
@@ -196,7 +216,7 @@ endif()
 if(GMPXX_FOUND)
     target_link_libraries(ariadne ${GMPXX_LIBRARIES})
     target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-    target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})    
+    target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 endif()
 
 if(CAIRO_FOUND)

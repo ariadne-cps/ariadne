@@ -45,7 +45,7 @@ class TestInteriorPointSolver
 
     Void test() {
         ARIADNE_TEST_CALL(test_validate_feasibility());
-        //ARIADNE_TEST_CALL(test_optimization());
+        ARIADNE_TEST_CALL(test_optimization());
         //ARIADNE_TEST_CALL(test_feasibility());
         ARIADNE_TEST_CALL(test_constrained_feasibility());
     }
@@ -113,9 +113,17 @@ Int main(Int argc, const char* argv[])
 
     InteriorPointSolver interior_point_optimiser;
     interior_point_optimiser.verbosity=verbosity;
-    TestInteriorPointSolver(interior_point_optimiser).test();
+    // TestInteriorPointSolver(interior_point_optimiser).test();
+
+    SimplexSolver<FloatDP> siso;
+    FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
+    RawFloatVector b={1.0,1.0};
+    RawFloatVector c={1.0,0.5,-0.75};
+    RawFloatVector xl={0.0,0.0,0.0};
+    RawFloatVector xu={+inf,+inf,3.0};
+
+    ARIADNE_TEST_PRINT(siso.minimise(c,xl,xu,A,b));
 
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
-

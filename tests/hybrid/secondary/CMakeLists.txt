@@ -4,9 +4,9 @@ set(UNIT_TESTS
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
-    target_link_libraries(${TEST} ariadne)       
-    add_test(${TEST} ${TEST})    
-    set_property(TEST ${TEST} PROPERTY LABELS "hybrid;secondary") 
+    target_link_libraries(${TEST} ariadne "${GLPK_LIBRARY}")       
+    add_test(${TEST} ${TEST})
+    set_property(TEST ${TEST} PROPERTY LABELS "hybrid;secondary")
 endforeach()
 
 add_dependencies(tests-cpp ${UNIT_TESTS})

@@ -87,4 +87,44 @@ Int main(Int argc, const char* argv[])
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
     plot("watertank_hysteresis_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
+
+    /*
+    HybridReachabilityAnalyser analyser(watertank_system,evolver);
+
+    HybridBoxes bounding_domain;
+    Box continuous_domain_2d(2,-1.0,10,0,-1.0,2.0);
+    Box continuous_domain_1d(1,-1.0,10.0);
+    bounding_domain.insert(valve|opening,watertank_system.state_space()[valve|opening],continuous_domain_2d);
+    bounding_domain.insert(valve|closing,watertank_system.state_space()[valve|closing],continuous_domain_2d);
+    bounding_domain.insert(valve|opened,watertank_system.state_space()[valve|opened],continuous_domain_1d);
+    bounding_domain.insert(valve|closed,watertank_system.state_space()[valve|closed],continuous_domain_1d);
+    analyser.configuration().set_bounding_domain(bounding_domain);
+    */
+    /*
+    std::shared_ptr<HybridGrid> grid(new HybridGrid(watertank_system.state_auxiliary_space()));
+    analyser.configuration().set_grid(grid);
+    analyser.configuration().set_maximum_grid_depth(3);
+    analyser.configuration().set_lock_to_grid_steps(2);
+    analyser.configuration().set_lock_to_grid_time(80.0);
+	*/
+/*
+    std::cout << "Computing upper reach... " << std::flush;
+    HybridGridTreeSet upper_reach = analyser.upper_reach(initial_set,evolution_time);
+    std::cout << "Plotting reachable sets... " << std::flush;
+    plot("watertank-upper-reach", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
+*/
+
+    std::cout << "Discretising orbit" << std::flush;
+    HybridGrid grid(watertank_system.state_auxiliary_space());
+    HybridGridTreePaving hgts(grid);
+
+    for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    {
+        std::cout<<"."<<std::flush;
+        it->state_auxiliary_set().adjoin_outer_approximation_to(hgts,8);
+    }
+    std::cout << "done." << std::endl;
+
+    plot("watertank-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
+
 }

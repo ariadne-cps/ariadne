@@ -74,6 +74,64 @@ inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) 
     return os << c.bounds().lower() << "<=" << c.function() << "<=" << c.bounds().upper();
 }
 
+// 11032019 - Testing sqp vs. ipm - ND - BEGIN
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible_sqp(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
+{
+    // std::cerr<<"Domain: "<<domain<<"\tConstraints: "<<constraints<<"\n\n";
+    // return __feasible__(domain,constraints);
+    if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
+
+    ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
+    ExactBoxType bounds(constraints.size());
+
+    for(Nat i=0; i!=constraints.size(); ++i) {
+        function[i]=constraints[i].function();
+        bounds[i]=constraints[i].bounds();
+    }
+    return this->feasible_sqp(domain,function,bounds);
+}
+
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible_sqp(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
+{
+    ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
+    // std::cerr<<"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n";
+
+    ARIADNE_ASSERT(codomain.dimension()>0);
+
+    // Make codomain singleton
+    UpperBoxType bounds=codomain;
+    UpperBoxType image=apply(function,domain);
+    ARIADNE_LOG(4,"image="<<image<<"\n");
+    for(Nat i=0; i!=image.size(); ++i) {
+        if(definitely(disjoint(image[i],codomain[i]))) {
+            ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");
+            return make_pair(false,ExactPoint());
+        } else {
+            bounds[i]=intersection(codomain[i],image[i]);
+        }
+    }
+
+    // std::cerr<<"F: "<<function<<"\n\n";
+    //
+    NonlinearSQPOptimiser nlsqp;
+    RawFloatVector optimal_x = cast_raw(midpoint(domain));
+    bool is_feasible = false;
+    try
+    {
+       is_feasible = nlsqp.feasible_point(domain, function, codomain, optimal_x);
+    }
+    catch(InfeasibleQuadraticProgram &ipq)
+    {
+      std::cerr<<"\t[4]\tindeterminate, qp subproblem is infeasible\n";
+      return make_pair(indeterminate, cast_exact(optimal_x));
+    }
+    if(is_feasible)
+      return make_pair(true,cast_exact(optimal_x));
+
+    // std::cerr<<"\t[4]\tNo solution was found!\n";
+    return make_pair(indeterminate, cast_exact(optimal_x));
+}
+// 11032019 - Testing sqp vs. ipm - ND - BEGIN
 
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
@@ -86,13 +144,14 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         function[i]=constraints[i].function();
         bounds[i]=constraints[i].bounds();
     }
-    return this->feasible(domain,function,bounds);
+    auto tmp = this->feasible(domain,function,bounds);
+    // auto tmp = this->feasible_sqp(domain,function,bounds);
+    // std::cerr<<"res: "<<tmp<<"\n";
+    return tmp;
 }
-
 
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
-
     static const FloatDPValue XSIGMA=0.125_exact;
     static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
     static const FloatDP _inf = Ariadne::inf;
@@ -112,8 +171,6 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
             bounds[i]=intersection(codomain[i],image[i]);
         }
     }
-
-
     const Nat m=domain.size(); // The total number of variables
     const Nat n=codomain.size(); // The total number of nontrivial constraints
     const Nat l=(m+n)*2; // The total number of lagrange multipliers
@@ -143,10 +200,18 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(decide(t>=TERR)) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
-            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
-            else { ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n"); return make_pair(indeterminate,cast_exact(point)); }
+            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point))))
+            {
+              return make_pair(true,cast_exact(point));
+            }
+            else
+            {
+              ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n");
+              return make_pair(indeterminate,cast_exact(point));
+            }
         }
     }
+
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
 
     if(decide(t<TERR)) {

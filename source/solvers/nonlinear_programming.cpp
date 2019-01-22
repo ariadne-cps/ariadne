@@ -1053,7 +1053,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
     // Check solution of linear system for residuals
     ARIADNE_DEBUG_ASSERT(norm(D*dw-dy-rw)/max(1.0,norm(rw))<1e-4);
-    ARIADNE_DEBUG_ASSERT(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2);
+    // ARIADNE_DEBUG_ASSERT(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(1.0,norm(rx))<1e-2);
     ARIADNE_DEBUG_ASSERT(norm(-dw+A*dx-ry)/max(1.0,norm(ry))<1e-4);
 
     RawFloatVector dwl = evl-dw;
@@ -2956,8 +2956,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
 
 */
 
-<<<<<<< HEAD
-=======
+
 //----------------------------------------------------------------------------//
 //                  NonlinearSQPOptimiser
 //----------------------------------------------------------------------------//
@@ -2987,15 +2986,25 @@ struct NonlinearSQPOptimiser::StepData
 
   Vector<FloatDP> compose_g(const Vector<FloatDP> &x_cap)
   {
-    Vector<FloatDP> ret((2u*m));
+    // Vector<FloatDP> ret((2u*m));
+    Vector<FloatDP> ret;
     Vector<FloatDP> g_x = cast_raw(g(static_cast<ApproximateVector>(x_cap)));
 
-    unsigned        index = 2u*m;
+    unsigned        index = 0;
 
     for(unsigned i=0;i<m;++i)
     {
-      ret[i]=g_x[i]-w_lb[i];
-      ret[i+m]=w_ub[i]-g_x[i];
+      if(is_inf(w_lb[i]))
+        continue;
+      ret.resize(index+1);
+      ret[index]=g_x[i]-w_lb[i],++index;
+    }
+    for(unsigned i=0;i<m;++i)
+    {
+      if(is_inf(w_ub[i]))
+        continue;
+      ret.resize(index+1);
+      ret[index]=w_ub[i]-g_x[i],++index;
     }
 
     for(unsigned i = 0;i<n;++i)
@@ -3019,24 +3028,56 @@ struct NonlinearSQPOptimiser::StepData
 
   Matrix<FloatDP> compose_grd_g(const Vector<FloatDP> &x_cap)
   {
-    Matrix<FloatDP>           ret((2u*m),n);
+    // Matrix<FloatDP>           ret((2u*m),n);
     FloatApproximationVector  ax(x_cap);
     Vector<FloatDifferential> ddgx = cast_raw(g.differential(ax, 2u));
     Matrix<FloatDP>           grd = ddgx.jacobian();
-    unsigned                  index = 2u*m;
+    // unsigned                  index = 2u*m;
+
+    Matrix<FloatDP>           ret;
+    unsigned                  index=0;
 
     bool                      grd_g_eq_0 = (m>0)?true:false;
 
     for(unsigned i=0;i<m;++i)
     {
+      if(is_inf(w_lb[i]))
+        continue;
+      ret.resize(index+1,n);
       for(unsigned j=0;j<n;++j)
       {
         if(grd_g_eq_0 && grd[i][j]!=0)
           grd_g_eq_0 = false;
-        ret[i][j]=grd[i][j];
-        ret[i+m][j]=-grd[i][j];
+        ret[index][j]=grd[i][j];
       }
+      index++;
     }
+
+    for(unsigned i=0;i<m;++i)
+    {
+      if(is_inf(w_ub[i]))
+        continue;
+      ret.resize(index+1,n);
+      for(unsigned j=0;j<n;++j)
+      {
+        if(grd_g_eq_0 && grd[i][j]!=0)
+          grd_g_eq_0 = false;
+        ret[index][j]=-grd[i][j];
+      }
+      ++index;
+    }
+
+    //
+    // for(unsigned i=0;i<m;++i)
+    // {
+    //   for(unsigned j=0;j<n;++j)
+    //   {
+    //     if(grd_g_eq_0 && grd[i][j]!=0)
+    //       grd_g_eq_0 = false;
+    //     ret[i][j]=grd[i][j];
+    //     ret[i+m][j]=-grd[i][j];
+    //   }
+    // }
 
     for(unsigned i=0;i<n;++i)
     {
@@ -3054,7 +3095,7 @@ struct NonlinearSQPOptimiser::StepData
     }
     if(grd_g_eq_0)
     {
-      ARIADNE_WARN("Gradient line of g is 0");
+      // ARIADNE_WARN("Gradient line of g is 0");
       status = SQPStatus::NULL_GRADIENT;
     }
 
@@ -3066,10 +3107,10 @@ struct NonlinearSQPOptimiser::StepData
   const FloatDP                         tau = 0.5;
   const FloatDP                         epsilon = static_cast<FloatDP>(std::numeric_limits<double>::epsilon());
   const FloatDP                         rtol = sqrt(epsilon);
-  const unsigned                        itmax = 100u;
   const FloatDP                         alpha = 1.0;
 
   // counters
+  unsigned                              itmax = 80u;
   unsigned                              n;
   unsigned                              m;
 
@@ -3095,6 +3136,41 @@ struct NonlinearSQPOptimiser::StepData
   Vector<FloatDP>                       obj_g;
   Vector<FloatDP>                       grd_f;
   Matrix<FloatDP>                       grd_g;
+
+
+  // only for testing
+  SizeType                               active_set_rateo=0;
+
+  void compute_AS_rateo(const Vector<FloatDP> &x_cap)
+  {
+    SizeType lambda_size = 0;
+    Vector<FloatDP> g_x = cast_raw(g(static_cast<ApproximateVector>(x_cap)));
+
+    for(SizeType i=0;i<g_x.size();++i)
+    {
+      if(g_x[i]-w_lb[i]==0)
+      {
+        lambda_size+=1;
+      }
+      else if(w_ub[i]-g_x[i]==0)
+      {
+        lambda_size+=1;
+      }
+    }
+    for(SizeType i=0;i<w_lb.size();++i)
+    {
+      if(x_cap[i]-w_lb[i]==0)
+      {
+        lambda_size+=1;
+      }
+      else if(w_ub[i]-x_cap[i]==0)
+      {
+        lambda_size+=1;
+      }
+    }
+    active_set_rateo+=lambda_size;//(lambda_size/y.size());
+    // std::cerr<<"\tactive_set_rate: "<<active_set_rateo<<"\n";
+  }
 };
 
 void NonlinearSQPOptimiser::initialize_step_data(
@@ -3150,6 +3226,158 @@ void NonlinearSQPOptimiser::initialize_step_data(
     v.B[i][i]=static_cast<FloatDP>(1.0);
 }
 
+
+bool
+NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
+                                      const ValidatedVectorMultivariateFunction g,
+                                      const ExactBoxType codomain,
+                                      RawFloatVector &x) const
+{
+  ARIADNE_LOG(2, "NonlinearSQPOptimiser::feasible_point(D,g,C)\n");
+  ARIADNE_LOG(2, "domain=" << domain << " g=" << g << " codomain=" << codomain << "\n");
+
+  if(decide(check_feasibility(domain,g,codomain,cast_exact(x))))
+  {
+    return true;
+  }
+
+
+  const unsigned  n=domain.size();
+  const unsigned  m=codomain.size();
+  const FloatDP   epsilon = static_cast<FloatDP>(std::sqrt(std::numeric_limits<double>::epsilon()));
+  bool            found = false;
+  Vector<FloatDP> L1(m,+epsilon);
+  Vector<FloatDP> U1(m,-epsilon);
+  const FloatDP   rtol = static_cast<FloatDP>(10e-16); // default of glpk tol
+  Vector<FloatDP> w_lb = cast_raw(codomain.lower_bounds())+L1;
+  Vector<FloatDP> w_ub = cast_raw(codomain.upper_bounds())+U1;
+  Vector<FloatDP> x_lb = cast_raw(domain.lower_bounds());
+  Vector<FloatDP> x_ub = cast_raw(domain.upper_bounds());
+
+  std::vector<unsigned>   w_eq,w_in_ub,w_in_lb;
+  std::vector<unsigned>   x_eq,x_in_ub,x_in_lb;
+
+  for(unsigned i=0;i<m;++i)
+  {
+    if(w_lb[i]==w_ub[i])
+    {
+      w_eq.push_back(i);
+      continue;
+    }
+
+    if(!is_inf(w_lb[i]))
+      w_in_lb.push_back(i);
+    if(!is_inf(w_ub[i]))
+      w_in_ub.push_back(i);
+  }
+  for(unsigned i=0;i<n;++i)
+  {
+    if(x_lb[i]==x_ub[i])
+    {
+      x_eq.push_back(i);
+      continue;
+    }
+    if(!is_inf(x_lb[i]))
+      x_in_lb.push_back(i);
+    if(!is_inf(x_ub[i]))
+      x_in_ub.push_back(i);
+  }
+
+  // sizes
+  const unsigned          m_eq=w_eq.size();
+  const unsigned          n_eq=x_eq.size();
+  const unsigned          m_in_ub=w_in_ub.size();
+  const unsigned          m_in_lb=w_in_lb.size();
+  const unsigned          n_in_ub=x_in_ub.size();
+  const unsigned          n_in_lb=x_in_lb.size();
+  const unsigned          aSize = m_eq+n_eq;
+  const unsigned          bSize = m_in_ub+m_in_lb+n_in_ub+n_in_lb;
+
+  // speed up utility
+  const unsigned          m_in_tot=m_in_lb+m_in_ub;
+  const unsigned          m_in_x_in=m_in_lb+m_in_ub+n_in_lb;
+
+
+  Matrix<FloatDP>         A(aSize,n);
+  Matrix<FloatDP>         B(bSize, n);
+  Vector<FloatDP>         a(aSize);
+  Vector<FloatDP>         b(bSize);
+
+  auto update = [&]() -> void
+  {
+    FloatApproximationVector  ax(x);
+    Vector<FloatDifferential> ddgx = cast_raw(g.differential(ax, 2u));
+    Matrix<FloatDP>           grd = ddgx.jacobian();
+    Vector<FloatDP>           g_x = cast_raw(g(ax));
+    // composing A and a, equalities
+    for(unsigned i=0;i<m_eq;++i)
+    {
+      for(unsigned j=0;j<n;++j)
+      {
+        A[i][j]=grd[w_eq[i]][j];
+      }
+      a[i]=g_x[w_eq[i]]-w_lb[w_eq[i]];
+    }
+    for(unsigned i=0;i<n_eq;++i)
+    {
+      A[i+m_eq][i]=1.0,a[i+m_eq]=x[x_eq[i]]-x_lb[x_eq[i]];
+    }
+
+    // composing B and b, inequalities
+    for(unsigned i=0;i<m_in_lb;++i)
+    {
+      for(unsigned j=0;j<n;++j)
+      {
+        B[i][j]=grd[w_in_lb[i]][j];
+      }
+      b[i]=g_x[w_in_lb[i]]-w_lb[w_in_lb[i]];
+    }
+    for(unsigned i=0;i<m_in_ub;++i)
+    {
+      for(unsigned j=0;j<n;++j)
+      {
+        B[i+m_in_lb][j]=-grd[w_in_ub[i]][j];
+      }
+      b[i+m_in_lb]=w_ub[w_in_ub[i]]-g_x[w_in_ub[i]];
+    }
+    for(unsigned i=0; i<n_in_lb;++i)
+    {
+      B[i+m_in_tot][i]=1.0;
+      b[i+m_in_tot]=x[x_in_lb[i]]-x_lb[x_in_lb[i]];
+    }
+    for(unsigned i=0; i<n_in_ub;++i)
+    {
+      B[i+m_in_x_in][i]=-1.0;
+      b[i+m_in_x_in]=x_ub[x_in_ub[i]]-x[x_in_ub[i]];
+    }
+  };
+
+  update();
+  Vector<FloatDP> p;
+  for(unsigned i=0;i<1;++i)
+  {
+    p = x;
+
+    qpsolver_ptr->feasible_hotstart(p,A,a,B,b,rtol);
+
+    x = x-p;
+
+    if(definitely(check_feasibility(domain,g,codomain,cast_exact(x))))
+    {
+      found = true;
+      break;
+    }
+    if(norm(p)<rtol)
+    {
+      break;
+    }
+    update();
+  }
+
+
+  return found;
+}
+
 ValidatedVector NonlinearSQPOptimiser::minimise(ValidatedScalarMultivariateFunction f,
                                                 ExactBoxType D,
                                                 ValidatedVectorMultivariateFunction g,
@@ -3191,7 +3419,13 @@ ValidatedVector NonlinearSQPOptimiser::minimise(ValidatedScalarMultivariateFunct
   }
 
   ARIADNE_LOG(1,"Algorithm terminated in "+std::to_string(v.iter)+" steps.");
+  // std::cerr<<"ended in "<<v.iter<<" steps.\n";
 
+  // DataStream ds = csv::make_datastream();
+  // // ds.setHeader({""});
+  // ds.open(this->problem_name+"_nlsqp_1" + ".csv");
+  // ds.append<FloatDP>({v.active_set_rateo});
+  // ds.close();
   return ValidatedVector(cast_exact(old_x));
 }
 
@@ -3258,20 +3492,20 @@ Void NonlinearSQPOptimiser::step(
 
     if(st == -2)
     {
-      ARIADNE_WARN("QP solver didn't converge in 200 iterations!");
+      // ARIADNE_WARN("QP solver didn't converge in 200 iterations!");
       v.status = SQPStatus::QP_NOT_CONV;
     }
   }
-  catch(SingularMatrixException s)
+  catch(SingularMatrixException &s)
   {
     v.status = SQPStatus::QP_SINGULAR;
-    ARIADNE_WARN("QP solver failed due to singularity!");
+    // ARIADNE_WARN("QP solver failed due to singularity!");
     return;
   }
-  catch(InfeasibleQuadraticProgram iqp)
+  catch(InfeasibleQuadraticProgram &iqp)
   {
     v.status = SQPStatus::QP_INFEASIBLE;
-    ARIADNE_WARN("QP exited with code: "<<iqp.what());
+    // ARIADNE_WARN("QP exited with code: "<<iqp.what());
     return;
   }
 
@@ -3332,9 +3566,9 @@ Void NonlinearSQPOptimiser::step(
   {
     BFGS(x_cap,grd_f_cap,grd_g_cap,v,v.B);
   }
-  catch(BFGSException bfgse)
+  catch(BFGSException &bfgse)
   {
-    ARIADNE_WARN("BFGS failed!!\n");
+    // ARIADNE_WARN("BFGS failed!!\n");
     v.status = SQPStatus::BFGS_FAILED;
   }
 //----------------------------------------------------------------------------//
@@ -3349,6 +3583,161 @@ Void NonlinearSQPOptimiser::step(
   v.grd_g = grd_g_cap;
 //----------------------------------------------------------------------------//
 
+  // v.compute_AS_rateo(v.x);
+
+}
+
+Void NonlinearSQPOptimiser::feasibility_step(
+    const ExactBoxType &D,
+    const ApproximateVectorMultivariateFunction &g, const ExactBoxType &C,
+    StepData &v) const
+{
+
+//----------------------------------------------------------------------------//
+//  Check First order convergence (objective function has converged and
+//    constraints are satisfied)
+//----------------------------------------------------------------------------//
+  FloatDP         test_g0;
+  bool            test_g1 = true;
+  bool            test_y = true;
+
+  Vector<FloatDP> y_dot_g(v.m);
+
+  for(unsigned i=0;i<v.m;++i)
+  {
+    if(v.obj_g[i]<0)
+    {
+      test_g1=false;
+      break;
+    }
+  }
+
+  for(unsigned i=0;i<v.m;++i)
+  {
+    if(v.y[i]<0)
+    {
+      test_y = false;
+      break;
+    }
+  }
+
+  for(unsigned i=0;i<v.m;++i)
+    y_dot_g[i]=v.y[i]*v.obj_g[i];
+  test_g0 = norm2(y_dot_g);
+
+  if(test_g1 && test_y && test_g0 < v.rtol)
+  {
+    v.status = SQPStatus::OK;
+    return;
+  }
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+//             Compute P direction and x_new
+//----------------------------------------------------------------------------//
+  ARIADNE_LOG(5, "min 0.5 p^T " << v.B << " p + " << v.grd_f << " p\ns.t. " << -v.obj_g
+                                << "<=" << v.grd_g << " p <= " << Vector<FloatDP>(v.obj_g.size(),+inf)
+                                <<" with x = "<<v.x<< "\n");
+
+  // qpsolver_ptr->verbosity=6;
+  Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>> opt;
+  try{
+    int st = 0;
+    opt = qpsolver_ptr->minimise(v.B, v.grd_f, EMPTY_VEC,
+                                 EMPTY_VEC, v.grd_g,
+                                 -v.obj_g, Vector<FloatDP>(v.obj_g.size(),+inf),st,v.x);
+
+    if(st == -2)
+    {
+      // ARIADNE_WARN("QP solver didn't converge in 200 iterations!");
+      v.status = SQPStatus::QP_NOT_CONV;
+    }
+  }
+  catch(SingularMatrixException &s)
+  {
+    v.status = SQPStatus::QP_SINGULAR;
+    // ARIADNE_WARN("QP solver failed due to singularity!");
+    return;
+  }
+  catch(InfeasibleQuadraticProgram &iqp)
+  {
+    v.status = SQPStatus::QP_INFEASIBLE;
+    // ARIADNE_WARN("QP exited with code: "<<iqp.what());
+    return;
+  }
+
+  v.p = std::get<1>(opt);
+  v.y = std::get<2>(opt);
+
+  ARIADNE_LOG(5, "OPT=" << opt << "\n------------------\n");
+
+//----------------------------------------------------------------------------//
+//             Make a step in a descendent direction
+//----------------------------------------------------------------------------//
+  auto phi_l1 = [&v](const Vector<FloatDP> &x, const FloatDP &mu) -> FloatDP
+  {
+    FloatDP           f_x = 0;
+    Vector<FloatDP>   g_x = v.compose_g(x);
+    const unsigned    m = g_x.size();
+
+    Vector<FloatDP> violated_;
+    for (unsigned int i = 0; i < m; ++i) {
+      if (g_x[i] < 0) {
+        violated_.resize(violated_.size() + 1);
+        violated_[violated_.size() - 1] = g_x[i];
+      }
+    }
+    return f_x+norm1(violated_)/mu;
+  };
+
+  FloatDP                   alpha = linesearch(v, phi_l1);
+
+  ARIADNE_LOG(7,"Make a step of size: "<<alpha<<"*"<<v.p<<"\n");
+
+  Vector<FloatDP>           x_cap = v.x+(alpha*v.p);
+
+  Vector<FloatDP>           obj_g_cap = v.compose_g(x_cap);
+
+  FloatApproximationVector  ax_cap(x_cap);
+  Matrix<FloatDP>           grd_g_cap = v.compose_grd_g(x_cap);
+
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+//            Check if the step size is too small (then converged)
+//----------------------------------------------------------------------------//
+  Vector<FloatDP> s = x_cap - v.x;
+  if(norm2(s)<v.rtol*norm2(v.x))
+  {
+    v.status = SQPStatus::NULL_STEP;
+    return;
+  }
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+//                  Compute dumped BFGS formula
+//----------------------------------------------------------------------------//
+  try
+  {
+    BFGS(x_cap,v.grd_f,grd_g_cap,v,v.B);
+  }
+  catch(BFGSException &bfgse)
+  {
+    // ARIADNE_WARN("BFGS failed!!\n");
+    v.status = SQPStatus::BFGS_FAILED;
+  }
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+//                  Update variables
+//----------------------------------------------------------------------------//
+  v.x = x_cap;
+  v.obj_g = obj_g_cap;
+  v.grd_g = grd_g_cap;
+//----------------------------------------------------------------------------//
+
+  //TODO: delete, only testing
+  v.compute_AS_rateo(v.x);
+
 }
 
 FloatDP NonlinearSQPOptimiser::linesearch(struct StepData &v, const std::function<FloatDP(const Vector<FloatDP>&,const FloatDP&)> &phi_l1) const
@@ -3358,7 +3747,7 @@ FloatDP NonlinearSQPOptimiser::linesearch(struct StepData &v, const std::functio
     FloatDP               delta = v.rtol;
     FloatDP               alpha = v.alpha;
     FloatDP               mu = 1 / delta;
-    FloatDP               f_x = v.obj_f;
+    // FloatDP               f_x = v.obj_f;
     Vector<FloatDP>       g_x = v.obj_g;
 
     FloatDP max_so_far = -1.0; //max so far is equal to normInfinite
@@ -3376,7 +3765,7 @@ FloatDP NonlinearSQPOptimiser::linesearch(struct StepData &v, const std::functio
 
     ARIADNE_LOG(6, "Merit function value: " << phi_x_mu << "\n");
 
-    FloatDP D = transpose(v.grd_f) * v.p; // HACK: evaluate now the gradient?
+    FloatDP D = 0;
 
     Vector<FloatDP> violated;
     for (unsigned int i = 0; i < m; ++i) {
@@ -3461,15 +3850,46 @@ ValidatedKleenean NonlinearSQPOptimiser::feasible(ExactBoxType D,
   return indeterminate;
 }
 
+ValidatedKleenean
+NonlinearSQPOptimiser::check_feasibility(
+                  const ExactBoxType& d,
+                  const ValidatedVectorMultivariateFunction& f,
+                  const ExactBoxType& c, const ExactPoint& y) const
+{
+    for(Nat i=0; i!=y.size(); ++i) {
+        if(y[i]<d[i].lower() || y[i]>d[i].upper())
+        {
+          return false;
+        }
+    }
+
+    Vector<FloatDPBounds> fy=f(Vector<FloatDPBounds>(y));
+    ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
+    ValidatedKleenean result=true;
+    for(Nat j=0; j!=fy.size(); ++j) {
+        if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw())
+        {
+          return false;
+        }
+        if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw())
+        {
+          result=indeterminate;
+          break;
+        }
+    }
+    return result;
+}
+
+
 
 //----------------------------------------------------------------------------//
 //                  NonlinearMixedOptimiser
 //----------------------------------------------------------------------------//
 NonlinearMixedOptimiser::NonlinearMixedOptimiser()
 {
-  nliipo_ptr = std::make_shared<NonlinearInfeasibleInteriorPointOptimiser>();
+  nlipm_ptr = std::make_shared<NonlinearInteriorPointOptimiser>();
   nlsqp_ptr = std::make_shared<NonlinearSQPOptimiser>();
-  nliipo_ptr->verbosity=verbosity;
+  nlipm_ptr->verbosity=verbosity;
   nlsqp_ptr->verbosity=verbosity;
 }
 
@@ -3479,97 +3899,89 @@ ValidatedVector NonlinearMixedOptimiser::minimise(ValidatedScalarMultivariateFun
                                                   ValidatedVectorMultivariateFunction g,
                                                   ExactBoxType C) const
 {
-  ARIADNE_ASSERT(f.argument_size()==D.size());
-  ARIADNE_ASSERT(g.argument_size()==D.size());
-  ARIADNE_ASSERT(g.result_size()==C.size());
-
-  static const double VALUE_TOLERANCE=1e-8;
-  static const double STATE_TOLERANCE=1e-8;
-  static const float MU_MIN = 1e-12;
-  static const Nat MAXIMUM_STEPS=24;
-
-  UpperBoxType gD = apply(g, D);
-  if (definitely(disjoint(gD, C))) {
-    throw InfeasibleProblemException();
-  }
-  struct NonlinearInfeasibleInteriorPointOptimiser::StepData  v_iipo;
-  struct NonlinearSQPOptimiser::StepData                      v_sqp;
-  std::vector<Tuple<RawFloatVector,RawFloatVector>>           story;
-
-  FloatApproximationVector& x=cast_approximate(v_iipo.x);
-  FloatApproximationVector& y=cast_approximate(v_iipo.y);
-  C=intersection(C,cast_exact_box(apply(g,D)+UpperIntervalVectorType(C.size(),UpperIntervalType(-1,+1))));
-  FloatApproximationVector oldx=x;
-
-  nliipo_ptr->setup_feasibility(D,g,C,v_iipo);
-  nlsqp_ptr->initialize_step_data(f,D,g,C,v_sqp);
-  v_iipo.x=v_sqp.x;
-  Nat seq = 1;
-  bool not_feasible = false;
-  story.push_back(make_tuple(v_iipo.x,v_iipo.y));
-
-  for(Nat i=0; i!=MAXIMUM_STEPS; ++i) {
-      ARIADNE_LOG(4,"  f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
-      oldx=x;
-      FloatDPApproximation oldfx=f(oldx);
-      try
-      {
-        nliipo_ptr->step(f,D,g,C,v_iipo);
-      }
-      catch(std::runtime_error re)
-      {
-        not_feasible=true;
-        break;
-      }
-
-      if(!probably(feasible(ExactBoxType(v_iipo.x),g,C)))
-      {
-        ARIADNE_LOG(2,"Not feasible point! changing optimiser\n");
-        not_feasible=true;
-        break;
-      }
-
-      if(this->is_infeasibility_certificate(D,g,C,cast_exact(y))) {
-          ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
-          ARIADNE_LOG(2,"infeasible\n");
-          std::cerr<<"EXCEPTION: "<<InfeasibleProblemException().what()<<"\n";
-          throw InfeasibleProblemException();
-      }
-      FloatDPApproximation fx=f(x);
-      if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
-          break;
-      }
-      if(v_iipo.mu<MU_MIN) {
-          break;
-      }
-      if(i==seq)
-      {
-        ARIADNE_LOG(1, "Sequence # "<<seq<<": Recorded point on vector\n");
-        story.push_back(make_tuple(v_iipo.x,v_iipo.y));
-        seq*=2;
-      }
-  }
-  v_sqp.x=v_iipo.x;
-  
-  if(not_feasible)
-  {
-    v_sqp.x = std::get<0>(story.back());
-    // v_sqp.y = std::get<1>(story.back());
-    for(;v_sqp.iter<v_sqp.itmax && not(v_sqp.status == NonlinearSQPOptimiser::SQPStatus::OK || v_sqp.status == NonlinearSQPOptimiser::SQPStatus::NULL_STEP);++v_sqp.iter)
-    {
-      ARIADNE_LOG(4,"  f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
-      nlsqp_ptr->step(f,D,g,C,v_sqp);
-
-      if(v_sqp.iter==seq)
-      {
-        ARIADNE_LOG(1, "Sequence # "<<seq<<": Recorded point on vector\n");
-        story.push_back(make_tuple(v_sqp.x,v_sqp.y));
-        seq*=2;
-      }
-    }
-  }
-  return cast_exact(v_sqp.x);
+	 // return minimise_static(f,D,g,C);
+   return minimise_dynamic(f,D,g,C);
 }
+
+ValidatedVector NonlinearMixedOptimiser::minimise_static(ValidatedScalarMultivariateFunction f,
+                                                  ExactBoxType D,
+                                                  ValidatedVectorMultivariateFunction g,
+                                                  ExactBoxType C) const
+{
+	  ARIADNE_LOG(2,"NonlinearMixedOptimiser::minimise(f,D,g,C)\n");
+	  ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
+	  ValidatedVectorMultivariateFunction h(0,D);
+    NonlinearSQPOptimiser::StepData v;
+    bool run_SQP=false;
+    nlsqp_ptr->initialize_step_data(f,D,g,C,v);
+
+	  UpperBoxType gD = apply(g,D);
+	  if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
+
+	  FloatApproximationVector x = midpoint(D);
+	  FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD),C));
+
+	  FloatApproximationVector kappa(g.result_size(),zero);
+	  FloatApproximationVector lambda(h.result_size(),zero);
+	  FloatDPApproximation mu = one;
+
+
+	  for(Nat i=0; i!=12; ++i) {
+	      nlipm_ptr->minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu);
+	      if(i%3==0 && i<=10) { mu *= 0.25_exact; }
+	  }
+
+    if (!decide(element(x, D))  || !decide(element(g(x),C))) {
+      run_SQP=true;
+    }
+
+    if(run_SQP)
+    {
+      v.x=cast_raw(x);
+      Vector<FloatDP> old_x = v.x;
+      for(;v.iter<v.itmax &&
+        not(v.status == NonlinearSQPOptimiser::SQPStatus::OK ||
+          v.status == NonlinearSQPOptimiser::SQPStatus::NULL_STEP);++v.iter)
+      {
+        nlsqp_ptr->step(f,D,g,C,v);
+
+        if(abs(cast_raw(f(cast_approximate(v.x))))>static_cast<FloatDP>(10e32))
+        {
+          // ARIADNE_WARN("Unsafe zone: Objective function is too big!");
+          v.status=NonlinearSQPOptimiser::SQPStatus::UNSAFE_ZONE;
+          break;
+        }
+        old_x = v.x;
+      }
+      x=cast_approximate(old_x);
+    }
+
+	  return ValidatedVector(cast_exact(x));
+}
+
+
+ValidatedVector NonlinearMixedOptimiser::minimise_dynamic(ValidatedScalarMultivariateFunction f,
+                                                  ExactBoxType D,
+                                                  ValidatedVectorMultivariateFunction g,
+                                                  ExactBoxType C) const
+{
+  ARIADNE_LOG(2,"NonlinearMixedOptimiser::minimise(f,D,g,C)\n");
+  ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
+  if(this->complexity_order>4 && C.size()==0)
+  {
+    return nlsqp_ptr->minimise(f,D,g,C);
+  }
+  else if(this->complexity_order<=4 && C.size()==0)
+  {
+    return nlipm_ptr->minimise(f,D,g,C);
+  }
+  else if(C.size()>5 && !this->active_set_high)
+  {
+    return nlsqp_ptr->minimise(f,D,g,C);
+  }
+  return nlipm_ptr->minimise(f,D,g,C);
+}
+
 
 ValidatedKleenean NonlinearMixedOptimiser::feasible(ExactBoxType D,
                                                     ValidatedVectorMultivariateFunction g,
@@ -3577,6 +3989,5 @@ ValidatedKleenean NonlinearMixedOptimiser::feasible(ExactBoxType D,
 {
   return nlsqp_ptr->feasible(D,g,C);
 }
->>>>>>> 78baf103... Implemented easy mixed optimiser: priority ipm (ipm+sqp)
 
 } // namespace Ariadne

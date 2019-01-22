@@ -7,6 +7,7 @@ add_library(ariadne-solvers OBJECT
     linear_programming.cpp
     nonlinear_programming.cpp
     runge_kutta_integrator.cpp
+    quadratic_programming.cpp
 )
 
 cotire(ariadne-solvers CONFIGURATIONS None)

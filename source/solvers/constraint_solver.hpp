@@ -86,6 +86,10 @@ class ConstraintSolver
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
     virtual Bool reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
 
+    // 11032019 - Testing sqp vs. ipm - ND - BEGIN
+    Pair<ValidatedKleenean,ExactPoint> feasible_sqp(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
+    Pair<ValidatedKleenean,ExactPoint> feasible_sqp(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const;
+    // 11032019 - Testing sqp vs. ipm - ND - END
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
     virtual Pair<ValidatedKleenean,ExactPoint> feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const;

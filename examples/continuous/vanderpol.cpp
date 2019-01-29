@@ -36,14 +36,14 @@ int main()
 
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
-    MaximumError max_err=1e-6;
-    GradedTaylorSeriesIntegrator integrator(max_err);
+    MaximumError max_err=1e-5;
+    TaylorSeriesIntegrator integrator(max_err, Order(6u));
     //integrator.set_maximum_step_size(0.02);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.02);
-    evolver.configuration().maximum_spacial_error(1e-6);
+    evolver.configuration().maximum_step_size(0.03);
+    evolver.configuration().maximum_spacial_error(1e-5);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 

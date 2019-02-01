@@ -148,6 +148,7 @@ template<class P> void export_effective_logical(pymodule& module, std::string na
     pybind11::class_<LogicalType<P>> logical_class(module,name.c_str());
     logical_class.def(init<bool>());
     logical_class.def(init<LogicalType<P>>());
+    logical_class.def("__bool__", [name](LogicalType<P>const&){ARIADNE_THROW(std::runtime_error,"__bool__(self)","Cannot convert logical value of type "<<name<<" to bool");});
     logical_class.def("__str__", &__cstr__<LogicalType<P>>);
     logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
     logical_class.def("check", &LogicalType<P>::check);
@@ -161,6 +162,7 @@ template<class P> void export_logical(pymodule& module, std::string name)
     pybind11::class_<LogicalType<P>> logical_class(module,name.c_str());
     logical_class.def(init<bool>());
     logical_class.def(init<LogicalType<P>>());
+    logical_class.def("__bool__", [name](LogicalType<P>const&){ARIADNE_THROW(std::runtime_error,"__bool__(self)","Cannot convert logical value of type "<<name<<" to bool");});
     logical_class.def("__str__", &__cstr__<LogicalType<P>>);
     logical_class.def("__repr__", &__cstr__<LogicalType<P>>);
     define_logical(module,logical_class);
@@ -176,6 +178,7 @@ template<> void export_logical<ExactTag>(pymodule& module, std::string name)
     typedef ExactTag P;
     OutputStream& operator<<(OutputStream& os, LogicalType<P> l);
     pybind11::class_<LogicalType<P>> logical_class(module,name.c_str());
+    logical_class.def("__bool__", &LogicalType<P>::operator bool);
     logical_class.def(init<bool>());
     logical_class.def(init<LogicalType<P>>());
     logical_class.def("__str__", &__cstr__<LogicalType<P>>);

@@ -5,19 +5,20 @@ set(UNIT_TESTS
     test_logical
     test_number
     test_rational
-    test_real    
+    test_real
     test_rounding
     test_validated_float
+    test_complex
 )
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
     if(COVERAGE)
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
-    endif()    
-    target_link_libraries(${TEST} ariadne-core)    
-    add_test(${TEST} ${TEST})    
-    set_property(TEST ${TEST} PROPERTY LABELS "numeric;primary;core;kernel")      
+    endif()
+    target_link_libraries(${TEST} ariadne-core)
+    add_test(${TEST} ${TEST})
+    set_property(TEST ${TEST} PROPERTY LABELS "numeric;primary;core;kernel")
 endforeach()
 
 add_dependencies(tests-core ${UNIT_TESTS})

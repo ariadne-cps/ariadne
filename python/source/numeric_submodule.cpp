@@ -41,6 +41,8 @@
 #include "numeric/floatmp.hpp"
 #include "numeric/float-user.hpp"
 
+#include "numeric/complex.hpp"
+
 namespace Ariadne {
 
 extern template Nat Error<FloatDP>::output_places;
@@ -339,6 +341,8 @@ void export_real(pymodule& module)
     validated_real_class.def("get", (DyadicBounds(ValidatedReal::*)()const) &ValidatedReal::get);
     validated_real_class.def("get", (FloatDPBounds(ValidatedReal::*)(DoublePrecision)const) &ValidatedReal::get);
     validated_real_class.def("get", (FloatMPBounds(ValidatedReal::*)(MultiplePrecision)const) &ValidatedReal::get);
+
+    module.attr("pi") = pi;
 }
 
 
@@ -936,6 +940,87 @@ template<class PR> Void export_user_floats(pymodule& module) {
     module.def("Approximation", [](RawFloatType<PR> const& a){return Approximation(a);});
 }
 
+namespace Ariadne {
+template<class X> struct PythonName<Complex<X>> {
+    const char* get() const { static const String res = String("Complex")+class_name<X>(); return res.c_str(); }
+};
+template<> struct PythonName<Complex<FloatDPApproximation>> {
+    const char* get() const { return "ComplexFloatDPApproximation"; }
+};
+const Complex<Rational> qi = Complex<Rational>(0,1);
+} // namespace Ariadne
+
+template<class X> Void export_complex(pymodule& module) {
+    typedef Complex<X> Z;
+    pybind11::class_<Z> complex_class(module,python_name<Z>());
+    complex_class.def(init<X>());
+    complex_class.def(init<X,X>());
+    if constexpr (HasGenericType<X>::value) {
+        typedef GenericType<X> Y;
+        typedef PrecisionType<X> PR;
+        complex_class.def(init<Y,Y,PR>());
+        complex_class.def(init<Complex<Y>,PR>());
+        define_mixed_arithmetic<Complex<X>,Complex<Y>>(module,complex_class);
+
+        // FIXME: Below should not be needed
+        complex_class.def(init<Complex<Real>,PR>());
+        define_mixed_arithmetic<Complex<X>,Complex<Real>>(module,complex_class);
+    }
+
+//    define_mixed_arithmetic<Complex<Integer>,X>(module,complex_class);
+
+    complex_class.def("real_part", &Z::real_part);
+    complex_class.def("imaginary_part", &Z::imaginary_part);
+    complex_class.def("modulus", &Z::modulus);
+    complex_class.def("argument", &Z::argument);
+
+    define_arithmetic<Z>(module,complex_class);
+    if constexpr (not IsSame<X,Rational>::value) {
+        module.def("sqrt", _sqrt_<Z>);
+        module.def("exp", _exp_<Z>);
+        module.def("log", _log_<Z>);
+    }
+
+    module.def("abs", _abs_<Z>);
+//    module.def("mag", _mag_<Z>);
+    module.def("arg", _arg_<Z>);
+    module.def("conj", _conj_<Z>);
+
+    complex_class.def("__str__", &__cstr__<Z>);
+//    complex_class.def("__repr__", &__repr__<Z>);
+
+    implicitly_convertible<X,Z>();
+
+    if constexpr (IsSame<X,Real>::value) {
+        complex_class.def(init<Complex<Integer>>());
+        implicitly_convertible<Complex<Integer>,Complex<Real>>();
+        complex_class.def(init<Complex<Rational>>());
+        implicitly_convertible<Complex<Rational>,Complex<Real>>();
+        define_mixed_arithmetic<Complex<Real>,Complex<Integer>>(module,complex_class);
+    }
+    if constexpr (IsSame<X,Rational>::value) {
+        complex_class.def(init<Complex<Integer>>());
+        implicitly_convertible<Complex<Integer>,Complex<Rational>>();
+    }
+
+}
+
+template<> Void export_complex<Integer>(pymodule& module) {
+    pybind11::class_<Complex<Integer>> complex_class(module,"ComplexInteger");
+    complex_class.def("__str__", &__cstr__<Complex<Integer>>);
+    module.attr("i") = Constants::i;
+}
+
+
+Void export_complex_numbers(pymodule& module) {
+    export_complex<Integer>(module);
+    export_complex<Rational>(module);
+    export_complex<Real>(module);
+    export_complex<FloatDPBounds>(module);
+    export_complex<FloatDPApproximation>(module);
+
+}
+
 
 Void numeric_submodule(pymodule& module) {
     export_effort(module);
@@ -964,5 +1049,7 @@ Void numeric_submodule(pymodule& module) {
     export_user_floats<DoublePrecision>(module);
     export_user_floats<MultiplePrecision>(module);
     export_float_ball<MultiplePrecision,DoublePrecision>(module);
+
+    export_complex_numbers(module);
 }
 

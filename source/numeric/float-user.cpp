@@ -1716,6 +1716,8 @@ template<class F> struct Operations<PositiveApproximation<F>> {
         return PositiveApproximation<F>(div(near,x1._a,x2._a)); }
     static PositiveApproximation<F> _pow(PositiveApproximation<F> const& x1, Int n2) {
         return PositiveApproximation<F>(pow(approx,x1._a,n2)); }
+    static PositiveApproximation<F> _sqrt(PositiveApproximation<F> const& x) {
+        return PositiveApproximation<F>(sqrt(approx,x._a)); }
     static Approximation<F> _log(PositiveApproximation<F> const& x) {
         return Approximation<F>(log(approx,x._a)); }
     static PositiveApproximation<F> _max(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
@@ -1771,6 +1773,10 @@ template<class F> struct Operations<PositiveUpperBound<F>> {
 
     static PositiveUpperBound<F> _pow(PositiveUpperBound<F> const& x1, Nat m2) {
         return PositiveUpperBound<F>(pow(up,x1._u,static_cast<Int>(m2)));
+    }
+
+    static PositiveUpperBound<F> _sqrt(PositiveUpperBound<F> const& x) {
+        return PositiveUpperBound<F>(sqrt(up,x._u));
     }
 
     static UpperBound<F> _log(PositiveUpperBound<F> const& x) {
@@ -1846,6 +1852,9 @@ template<class F> struct Operations<PositiveLowerBound<F>> {
         return PositiveLowerBound<F>(pow(down,x1._l,static_cast<Int>(m2)));
     }
 
+    static PositiveLowerBound<F> _sqrt(PositiveLowerBound<F> const& x) {
+        return PositiveLowerBound<F>(sqrt(down,x._l)); }
+
     static LowerBound<F> _log(PositiveLowerBound<F> const& x) {
         return LowerBound<F>(log(down,x._l));
     }
@@ -1901,6 +1910,8 @@ template<class F> struct Operations<PositiveBounds<F>> {
         return PositiveBounds<F>(pow(down,x1._l,static_cast<Int>(m2)),pow(up,x1._u,static_cast<Int>(m2))); }
     static PositiveBounds<F> _pow(PositiveBounds<F> const& x1, Int n2) {
         if(n2>=0) { return _pow(x1,Nat(n2)); } else { return _rec(_pow(x1,Nat(-n2))); } }
+    static PositiveBounds<F> _sqrt(PositiveBounds<F> const& x) {
+        return PositiveBounds<F>(sqrt(down,x._l),sqrt(up,x._u)); }
     static Bounds<F> _log(PositiveBounds<F> const& x) {
         return Bounds<F>(log(down,x._l),log(up,x._u)); }
     static PositiveBounds<F> _max(PositiveBounds<F> const& x1, PositiveBounds<F> const& x2) {

@@ -406,9 +406,8 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-inline Bool operator==(Expansion<MultiIndex,FloatDPValue> const& e1, Expansion<MultiIndex,RawFloatDP> const& e2) {
-    return reinterpret_cast<Expansion<MultiIndex,RawFloatDP>const&>(e1)==e2;
-}
+template<class I, class F> Expansion<I,Value<F>>const& cast_exact(Expansion<I,F> const& e) {
+    return reinterpret_cast<Expansion<I,Value<F>>const&>(e); }
 
 Void TestVectorTaylorFunction::test_constructors()
 {
@@ -423,8 +422,8 @@ Void TestVectorTaylorFunction::test_constructors()
     Real a(1.5); Real b(0.25);
     EffectiveVectorMultivariateFunction henon_function={a-x[0]*x[0]+b*x[1], x[0]*1};
     ARIADNE_TEST_CONSTRUCT(ValidatedVectorMultivariateTaylorFunctionModelDP,henon_model,(domain,henon_function,swp));
-    ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
-    ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
+    ARIADNE_TEST_SAME(henon_model.models()[0].expansion(),cast_exact(expansion[0]))
+    ARIADNE_TEST_SAME(henon_model.models()[1].expansion(),cast_exact(expansion[1]))
 
     Vector<FloatDPBounds> e0(e(2,0),pr); Vector<FloatDPBounds> e1(e(2,1),pr);
 

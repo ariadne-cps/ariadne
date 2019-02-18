@@ -58,6 +58,7 @@ template<class I, class X> class ExpansionIterator;
 template<class I, class X> class ExpansionConstIterator;
 template<class I, class X> class ExpansionValueReference;
 
+template<class CMP> struct IndexComparison;
 struct GradedIndexLess;
 struct LexicographicIndexLess;
 struct ReverseLexicographicIndexLess;
@@ -114,8 +115,6 @@ template<class I, class X> class Expansion {
     Expansion<I,X>& operator=(Expansion<I,X>&&);
     Void swap(Expansion<I,X>&);
 
-    Bool operator==(const Expansion<I,X>& other) const;
-    Bool operator!=(const Expansion<I,X>& other) const;
     Bool same_as(const Expansion<I,X>& e) const;
 
     Bool empty() const;
@@ -200,6 +199,10 @@ public:
 //    Iterator find(const IndexType& a);
 //    ConstIterator find(const IndexType& a) const;
     Void check() const; // Check the expansion is sorted and has unique terms
+
+    EqualityType<X> operator==(const SortedExpansion<I,X,CMP>& other) const;
+    EqualityType<X> operator!=(const SortedExpansion<I,X,CMP>& other) const;
+
 };
 
 

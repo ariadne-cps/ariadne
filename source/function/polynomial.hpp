@@ -116,9 +116,9 @@ class Polynomial
     //! \name Comparisons
 
     //! \brief Equality operator.
-    template<class XX> Bool operator==(const Polynomial<XX>& p) const;
+    template<class XX> EqualityType<X,XX> operator==(const Polynomial<XX>& p) const;
     //! \brief Inequality operator.
-    template<class XX> Bool operator!=(const Polynomial<XX>& p) const;
+    template<class XX> InequalityType<X,XX> operator!=(const Polynomial<XX>& p) const;
     //@}
 
     //@{
@@ -224,6 +224,9 @@ class Polynomial
         friend Polynomial<X> operator-(Polynomial<X> p, const Y& c) {
             X xc=p.value(); xc=c; return p-xc; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
+        friend Polynomial<X> operator*(const Y& c, Polynomial<X> p) {
+            X xc=p.value(); xc=c; return xc*p; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
         friend Polynomial<X> operator*(Polynomial<X> p, const Y& c) {
             X xc=p.value(); xc=c; return p*xc; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
@@ -255,13 +258,13 @@ template<class X> template<class XX> Polynomial<X>::Polynomial(const Polynomial<
 template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<MultiIndex,XX>& e)
     : _expansion(e) { this->cleanup(); }
 
-template<class X> template<class XX> Bool Polynomial<X>::operator==(const Polynomial<XX>& p) const {
+template<class X> template<class XX> EqualityType<X,XX> Polynomial<X>::operator==(const Polynomial<XX>& p) const {
     const_cast<Polynomial<X>*>(this)->cleanup();
     const_cast<Polynomial<XX>&>(p).cleanup();
     return this->_expansion==p._expansion;
 }
 
-template<class X> template<class XX> Bool Polynomial<X>::operator!=(const Polynomial<XX>& p) const {
+template<class X> template<class XX> InequalityType<X,XX> Polynomial<X>::operator!=(const Polynomial<XX>& p) const {
     return !(*this==p);
 }
 

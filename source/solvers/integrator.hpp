@@ -50,7 +50,7 @@ class Real;
 template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
-template<class X> class Polynomial;
+template<class X> class MultivariatePolynomial;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelDPFactoryInterface;

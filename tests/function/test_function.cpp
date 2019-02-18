@@ -84,7 +84,7 @@ Void TestFunction::test_concept()
     EffectiveVectorMultivariateFunction jf=join(sf1,sf2);
     //EffectiveScalarMultivariateFunction cf=combine(sf1,sf2);
 
-    //Polynomial<Real> p;
+    //MultivariatePolynomial<Real> p;
     //EffectiveScalarMultivariateFunction pf(p);
 
     //Vector<FloatDPApproximation> b; Matrix<FloatDPApproximation> A;

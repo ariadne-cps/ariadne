@@ -107,7 +107,7 @@ template<class F> class TestTaylorModel
     typedef PrecisionType<F> PR;
     typedef MultiIndex MI;
     typedef Expansion<MI,F> E;
-    typedef Polynomial<F> P;
+    typedef MultivariatePolynomial<F> P;
     typedef ValidatedTaylorModel<F> T;
     typedef Expansion<MI,F> ExpansionType;
   public:

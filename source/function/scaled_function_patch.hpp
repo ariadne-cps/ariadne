@@ -48,7 +48,7 @@
 
 namespace Ariadne {
 
-template<class X> class Polynomial;
+template<class X> class MultivariatePolynomial;
 
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
@@ -268,7 +268,7 @@ template<class M> class ScaledFunctionPatch
         return cast_exact(gradient/radius); }
 
     //! \brief A polynomial representation.
-    Polynomial<Bounds<F>> polynomial() const;
+    MultivariatePolynomial<Bounds<F>> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ScalarFunctionType<M> function() const;
     //! \brief Cast to a generic function.
@@ -440,7 +440,7 @@ template<class M> class ScaledFunctionPatch
     friend NormType distance(const ScaledFunctionPatch<M>& f1, const ScalarMultivariateFunction<P>& f2) {
         return distance(f1,f1.create(f2)); }
 
-    friend Polynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) { return tfn.polynomial(); }
+    friend MultivariatePolynomial<NumericType> polynomial(const ScaledFunctionPatch<M>& tfn) { return tfn.polynomial(); }
 
 };
 
@@ -696,7 +696,7 @@ template<class M> class VectorScaledFunctionPatch
     static VectorScaledFunctionPatch<M> projection(const BoxDomainType& d, Range js, PropertiesType prp);
 
     //! \brief Convert to an interval polynomial.
-    Vector<Polynomial<FloatBounds<PR>>> polynomials() const;
+    Vector<MultivariatePolynomial<FloatBounds<PR>>> polynomials() const;
     //! \brief The vector of roundoff/truncation errors of each component.
     Vector<ErrorType> const errors() const;
     //! \brief The maximum roundoff/truncation error of the components.
@@ -1000,7 +1000,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
 
-    friend Vector< Polynomial<NumericType> > polynomials(const VectorScaledFunctionPatch<M>& tfn) {
+    friend Vector< MultivariatePolynomial<NumericType> > polynomials(const VectorScaledFunctionPatch<M>& tfn) {
         return tfn.polynomials();
     }
 

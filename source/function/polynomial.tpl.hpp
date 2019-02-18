@@ -32,47 +32,47 @@ template<class X> inline bool is_unit(X const& x) { return decide(x==1); }
 template<class X> inline bool is_positive(X const& x) { return decide(x>=0); }
 
 
-template<class X> Polynomial<X>::Polynomial(SizeType as)
+template<class X> MultivariatePolynomial<X>::MultivariatePolynomial(SizeType as)
     : _expansion(as)
 {
 }
 
 template<class X>
-Polynomial<X>::Polynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
+MultivariatePolynomial<X>::MultivariatePolynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst)
     : _expansion(lst)
 {
     this->cleanup();
 }
 
 
-template<class X> Polynomial<X> Polynomial<X>::create_zero() const {
-    return Polynomial<X>(this->argument_size());
+template<class X> MultivariatePolynomial<X> MultivariatePolynomial<X>::create_zero() const {
+    return MultivariatePolynomial<X>(this->argument_size());
 }
 
 
-template<class X> Polynomial<X> Polynomial<X>::constant(SizeType as, const X& c) {
-    Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r;
+template<class X> MultivariatePolynomial<X> MultivariatePolynomial<X>::constant(SizeType as, const X& c) {
+    MultivariatePolynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r;
 }
 
-template<class X> Polynomial<X> Polynomial<X>::variable(SizeType as, SizeType j) {
-    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
+template<class X> MultivariatePolynomial<X> MultivariatePolynomial<X>::variable(SizeType as, SizeType j) {
+    ARIADNE_ASSERT(j<as); MultivariatePolynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
 }
 
-template<class X> Polynomial<X> Polynomial<X>::coordinate(SizeType as, SizeType j) {
-    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
-}
-
-
-template<class X> Vector<Polynomial<X>> Polynomial<X>::variables(SizeType as) {
-    Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=variable(as,i); } return r;
-}
-
-template<class X> Vector<Polynomial<X>> Polynomial<X>::coordinates(SizeType as) {
-    Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=coordinate(as,i); } return r;
+template<class X> MultivariatePolynomial<X> MultivariatePolynomial<X>::coordinate(SizeType as, SizeType j) {
+    ARIADNE_ASSERT(j<as); MultivariatePolynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
 }
 
 
-template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) {
+template<class X> Vector<MultivariatePolynomial<X>> MultivariatePolynomial<X>::variables(SizeType as) {
+    Vector<MultivariatePolynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=variable(as,i); } return r;
+}
+
+template<class X> Vector<MultivariatePolynomial<X>> MultivariatePolynomial<X>::coordinates(SizeType as) {
+    Vector<MultivariatePolynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=coordinate(as,i); } return r;
+}
+
+
+template<class X> MultivariatePolynomial<X>& MultivariatePolynomial<X>::operator=(const X& x) {
     this->_expansion.clear();
     this->_expansion.append(MultiIndex(this->argument_size()),x);
     return *this;
@@ -80,59 +80,59 @@ template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) {
 
 
 
-template<class X> SizeType Polynomial<X>::argument_size() const { return this->_expansion.argument_size(); }
+template<class X> SizeType MultivariatePolynomial<X>::argument_size() const { return this->_expansion.argument_size(); }
 
-template<class X> SizeType Polynomial<X>::number_of_terms() const { return this->_expansion.number_of_terms(); }
+template<class X> SizeType MultivariatePolynomial<X>::number_of_terms() const { return this->_expansion.number_of_terms(); }
 
-template<class X> DegreeType Polynomial<X>::degree() const {
+template<class X> DegreeType MultivariatePolynomial<X>::degree() const {
     DegreeType deg=0u; for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         deg=std::max(deg,iter->index().degree());
     }
     return deg;
 }
 
-template<class X> const X& Polynomial<X>::value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
+template<class X> const X& MultivariatePolynomial<X>::value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
 
-template<class X> X& Polynomial<X>::operator[](const MultiIndex& a) { return this->_expansion.at(a); }
+template<class X> X& MultivariatePolynomial<X>::operator[](const MultiIndex& a) { return this->_expansion.at(a); }
 
-template<class X> const X& Polynomial<X>::operator[](const MultiIndex& a) const { return this->_expansion.get(a); }
+template<class X> const X& MultivariatePolynomial<X>::operator[](const MultiIndex& a) const { return this->_expansion.get(a); }
 
-template<class X> const Expansion<MultiIndex,X>& Polynomial<X>::expansion() const { return this->_expansion; }
+template<class X> const Expansion<MultiIndex,X>& MultivariatePolynomial<X>::expansion() const { return this->_expansion; }
 
-template<class X> Expansion<MultiIndex,X>& Polynomial<X>::expansion() { return this->_expansion; }
-
-
-
-template<class X> typename Polynomial<X>::Iterator Polynomial<X>::begin() { return this->_expansion.begin(); }
-
-template<class X> typename Polynomial<X>::Iterator Polynomial<X>::end() { return this->_expansion.end(); }
-
-template<class X> typename Polynomial<X>::Iterator Polynomial<X>::find(const MultiIndex& a) { return this->_expansion.find(a); }
-
-template<class X> typename Polynomial<X>::ConstIterator Polynomial<X>::begin() const { return this->_expansion.begin(); }
-
-template<class X> typename Polynomial<X>::ConstIterator Polynomial<X>::end() const { return this->_expansion.end(); }
-
-template<class X> typename Polynomial<X>::ConstIterator Polynomial<X>::find(const MultiIndex& a) const { return this->_expansion.find(a); }
+template<class X> Expansion<MultiIndex,X>& MultivariatePolynomial<X>::expansion() { return this->_expansion; }
 
 
 
-template<class X> Void Polynomial<X>::_append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
+template<class X> typename MultivariatePolynomial<X>::Iterator MultivariatePolynomial<X>::begin() { return this->_expansion.begin(); }
 
-template<class X> Void Polynomial<X>::insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
+template<class X> typename MultivariatePolynomial<X>::Iterator MultivariatePolynomial<X>::end() { return this->_expansion.end(); }
 
-template<class X> Void Polynomial<X>::reserve(SizeType n) { this->_expansion.reserve(n); }
+template<class X> typename MultivariatePolynomial<X>::Iterator MultivariatePolynomial<X>::find(const MultiIndex& a) { return this->_expansion.find(a); }
 
-template<class X> Void Polynomial<X>::erase(Iterator iter) { this->_expansion.erase(iter); }
+template<class X> typename MultivariatePolynomial<X>::ConstIterator MultivariatePolynomial<X>::begin() const { return this->_expansion.begin(); }
 
-template<class X> Void Polynomial<X>::clear() { this->_expansion.clear(); }
+template<class X> typename MultivariatePolynomial<X>::ConstIterator MultivariatePolynomial<X>::end() const { return this->_expansion.end(); }
+
+template<class X> typename MultivariatePolynomial<X>::ConstIterator MultivariatePolynomial<X>::find(const MultiIndex& a) const { return this->_expansion.find(a); }
+
+
+
+template<class X> Void MultivariatePolynomial<X>::_append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
+
+template<class X> Void MultivariatePolynomial<X>::insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
+
+template<class X> Void MultivariatePolynomial<X>::reserve(SizeType n) { this->_expansion.reserve(n); }
+
+template<class X> Void MultivariatePolynomial<X>::erase(Iterator iter) { this->_expansion.erase(iter); }
+
+template<class X> Void MultivariatePolynomial<X>::clear() { this->_expansion.clear(); }
 
 
 
 template<class X>
-Polynomial<X>&
-Polynomial<X>::differentiate(SizeType j) {
-    for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
+MultivariatePolynomial<X>&
+MultivariatePolynomial<X>::differentiate(SizeType j) {
+    for(typename MultivariatePolynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         IndexReference a=iter->index();
         CoefficientReference c=iter->coefficient();
         c*=static_cast<Nat>(a[j]);
@@ -142,9 +142,9 @@ Polynomial<X>::differentiate(SizeType j) {
 }
 
 template<class X>
-Polynomial<X>&
-Polynomial<X>::antidifferentiate(SizeType j) {
-    for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
+MultivariatePolynomial<X>&
+MultivariatePolynomial<X>::antidifferentiate(SizeType j) {
+    for(typename MultivariatePolynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         IndexReference a=iter->index();
         CoefficientReference c=iter->coefficient();
         ++a[j];
@@ -154,9 +154,9 @@ Polynomial<X>::antidifferentiate(SizeType j) {
 }
 
 template<class X>
-Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
-    Polynomial<X> r(this->argument_size());
-    for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
+MultivariatePolynomial<X>& MultivariatePolynomial<X>::truncate(DegreeType d) {
+    MultivariatePolynomial<X> r(this->argument_size());
+    for(typename MultivariatePolynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->index().degree()<=d && decide(iter->coefficient()!=X(0))) {
             r._append(iter->index(),iter->coefficient());
         }
@@ -186,16 +186,16 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
 }
 
 template<class X>
-Void Polynomial<X>::cleanup()
+Void MultivariatePolynomial<X>::cleanup()
 {
-    Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
+    MultivariatePolynomial<X>* self=const_cast<MultivariatePolynomial<X>*>(this);
     self->_expansion.index_sort(IndexComparisonType());
     Iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
     self->_expansion.resize(static_cast<SizeType>(new_end-self->_expansion.begin()));
 }
 
 template<class X>
-Void Polynomial<X>::check() const
+Void MultivariatePolynomial<X>::check() const
 {
     this->_expansion.check();
 }
@@ -203,16 +203,16 @@ Void Polynomial<X>::check() const
 
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Pos, const Polynomial<X>& p) {
-    Polynomial<X> r(p.argument_size());
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Pos, const MultivariatePolynomial<X>& p) {
+    MultivariatePolynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->index()]=+iter->coefficient();
     }
     return r;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Neg, const Polynomial<X>& p) {
-    Polynomial<X> r(p.argument_size());
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Neg, const MultivariatePolynomial<X>& p) {
+    MultivariatePolynomial<X> r(p.argument_size());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->index()]=-iter->coefficient();
     }
@@ -220,17 +220,17 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Neg, con
 }
 
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, Polynomial<X> p, const X& c) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Add, MultivariatePolynomial<X> p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Add, Polynomial<X>& p, const X& c) {
+template<class X> MultivariatePolynomial<X>& AlgebraOperations<MultivariatePolynomial<X>>::iapply(Add, MultivariatePolynomial<X>& p, const X& c) {
     p[MultiIndex(p.argument_size())]+=c;
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const X& c) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Mul, MultivariatePolynomial<X> p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
@@ -241,7 +241,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Pol
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const X& c) {
+template<class X> MultivariatePolynomial<X>& AlgebraOperations<MultivariatePolynomial<X>>::iapply(Mul, MultivariatePolynomial<X>& p, const X& c) {
     if(is_null(c)) {
         p.expansion().clear();
     } else {
@@ -252,10 +252,10 @@ template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, P
     return p;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Add, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    typename Polynomial<X>::IndexComparisonType less;
-    Polynomial<X> r(p1.argument_size());
+    typename MultivariatePolynomial<X>::IndexComparisonType less;
+    MultivariatePolynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
         if (iter1->index()==iter2->index()) {
@@ -280,10 +280,10 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Add, con
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Sub, const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Sub, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    typename Polynomial<X>::IndexComparisonType less;
-    Polynomial<X> r(p1.argument_size());
+    typename MultivariatePolynomial<X>::IndexComparisonType less;
+    MultivariatePolynomial<X> r(p1.argument_size());
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
         if (iter1->index()==iter2->index()) {
@@ -308,9 +308,9 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Sub, con
     return std::move(r);
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, const Polynomial<X>& p1, const Polynomial<X>& p2) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Mul, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1.argument_size());
+    MultivariatePolynomial<X> r(p1.argument_size());
     for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
         for(auto iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
             MultiIndex a=iter1->index()+iter2->index();
@@ -320,7 +320,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, con
     return r;
 }
 
-template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Polynomial<X> p, const Monomial<X>& m) {
+template<class X> MultivariatePolynomial<X> AlgebraOperations<MultivariatePolynomial<X>>::apply(Mul, MultivariatePolynomial<X> p, const MultivariateMonomial<X>& m) {
     if(is_null(m.coefficient())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->index()+=m.index();
@@ -329,7 +329,7 @@ template<class X> Polynomial<X> AlgebraOperations<Polynomial<X>>::apply(Mul, Pol
     return std::move(p);
 }
 
-template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, Polynomial<X>& p, const Monomial<X>& m) {
+template<class X> MultivariatePolynomial<X>& AlgebraOperations<MultivariatePolynomial<X>>::iapply(Mul, MultivariatePolynomial<X>& p, const MultivariateMonomial<X>& m) {
     if(is_null(m.coefficient())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->index()+=m.index();
@@ -340,11 +340,11 @@ template<class X> Polynomial<X>& AlgebraOperations<Polynomial<X>>::iapply(Mul, P
 
 
 
-template<class X> X Polynomial<X>::_evaluate(const Polynomial<X>& p, const Vector<X>& x) {
+template<class X> X MultivariatePolynomial<X>::_evaluate(const MultivariatePolynomial<X>& p, const Vector<X>& x) {
     return horner_evaluate(p._expansion,x);
 }
 
-template<class X> Polynomial<X> Polynomial<X>::_compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q) {
+template<class X> MultivariatePolynomial<X> MultivariatePolynomial<X>::_compose(const MultivariatePolynomial<X>& p, const Vector<MultivariatePolynomial<X>>& q) {
     return evaluate(p,q);
 }
 
@@ -352,13 +352,13 @@ template<class X> Polynomial<X> Polynomial<X>::_compose(const Polynomial<X>& p, 
 
 
 template<class X>
-Polynomial<X>
-Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
+MultivariatePolynomial<X>
+MultivariatePolynomial<X>::_partial_evaluate(const MultivariatePolynomial<X>& x, SizeType k, const X& c)
 {
-    Polynomial<X> r(x.argument_size()-1u);
+    MultivariatePolynomial<X> r(x.argument_size()-1u);
     MultiIndex ra(r.argument_size());
     if(is_null(c)) {
-        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename MultivariatePolynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             IndexConstReference xa=xiter->index();
             MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
@@ -369,10 +369,10 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             }
         }
     } else if(is_unit(c)) {
-        Polynomial<X> s(x.argument_size()-1u);
-        Array< Polynomial<X> > p(x.degree()+1u,Polynomial<X>(x.argument_size()-1u));
+        MultivariatePolynomial<X> s(x.argument_size()-1u);
+        Array< MultivariatePolynomial<X> > p(x.degree()+1u,MultivariatePolynomial<X>(x.argument_size()-1u));
 
-        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename MultivariatePolynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             IndexConstReference xa=xiter->index();
             CoefficientConstReference xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
@@ -387,8 +387,8 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             r+=p[i];
         }
     } else {
-        Polynomial<X> s(x.argument_size()-1u);
-        Array< Polynomial<X> > p(x.degree()+1u,Polynomial<X>(x.argument_size()-1u));
+        MultivariatePolynomial<X> s(x.argument_size()-1u);
+        Array< MultivariatePolynomial<X> > p(x.degree()+1u,MultivariatePolynomial<X>(x.argument_size()-1u));
 
         Array<X> cpowers(x.degree()+1u);
         cpowers[0]=static_cast<X>(1); cpowers[1]=c;
@@ -397,7 +397,7 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
             cpowers[j]=cpowers[j-2]*cpowers[2];
         }
 
-        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename MultivariatePolynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             IndexConstReference xa=xiter->index();
             CoefficientConstReference xv=xiter->coefficient();
             MultiIndex::IndexType xak=xa[k];
@@ -423,12 +423,12 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
 
 /*
 template<class X>
-OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
+OutputStream& operator<<(OutputStream& os, const MultivariatePolynomial<X>& p) {
     if(p.begin()==p.end()) {
         return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
 
     os << "{";
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename MultivariatePolynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         os << (iter==p.begin() ? "" : ",");
         for(SizeType i=0; i!=iter->index().size(); ++i) {
             os << (i==0?" ":",") << Int(iter->index()[i]); }
@@ -438,7 +438,7 @@ OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
 */
 
 template<class X>
-OutputStream& Polynomial<X>::_write(OutputStream& os) const {
+OutputStream& MultivariatePolynomial<X>::_write(OutputStream& os) const {
     List<String> argument_names;
     for(SizeType i=0; i!=this->argument_size(); ++i) {
         StringStream ss;
@@ -449,12 +449,12 @@ OutputStream& Polynomial<X>::_write(OutputStream& os) const {
 }
 
 template<class X>
-OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argument_names) const {
-    const Polynomial<X>& p=*this;
+OutputStream& MultivariatePolynomial<X>::_write(OutputStream& os, List<String> const& argument_names) const {
+    const MultivariatePolynomial<X>& p=*this;
     const std::vector<String>& n=argument_names;
     Bool first_term=true;
     Bool identically_zero=true;
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename MultivariatePolynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->index();
         X v=iter->coefficient();
         if(decide(v!=0)) {

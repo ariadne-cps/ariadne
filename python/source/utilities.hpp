@@ -173,6 +173,10 @@ template<class... AS> auto _max_(AS const& ... as) -> decltype(max(as...)) { ret
 template<class... AS> auto _min_(AS const& ... as) -> decltype(min(as...)) { return min(as...); }
 template<class... AS> auto _abs_(AS const& ... as) -> decltype(abs(as...)) { return abs(as...); }
 template<class... AS> auto _sgn_(AS const& ... as) -> decltype(sgn(as...)) { return sgn(as...); }
+template<class... AS> auto _mag_(AS const& ... as) -> decltype(mag(as...)) { return mag(as...); }
+template<class... AS> auto _mig_(AS const& ... as) -> decltype(mig(as...)) { return mig(as...); }
+template<class... AS> auto _arg_(AS const& ... as) -> decltype(arg(as...)) { return arg(as...); }
+template<class... AS> auto _conj_(AS const& ... as) -> decltype(conj(as...)) { return conj(as...); }
 
 template<class A> auto _log2_(A const& a) -> decltype(log2(a)) { return log2(a); }
 

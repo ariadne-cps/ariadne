@@ -141,7 +141,7 @@ template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F
 }
 
 template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
-    using typename Ball<F,FE>::PRE;
+    using PRE = typename Ball<F,FE>::ErrorPrecisionType;
   public:
     Positive<Ball<F,FE>>() : Bounds<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>

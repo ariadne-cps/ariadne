@@ -76,6 +76,10 @@ template<class T> class List;
 template<class T> class Set;
 template<class K, class T> class Map;
 
+struct SizeOne { operator SizeType() const { return 1u; } };
+struct IndexZero { operator SizeType() const { return 0u; } };
+
+
 } // namespace Ariadne
 
 #endif

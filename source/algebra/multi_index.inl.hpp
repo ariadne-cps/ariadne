@@ -95,6 +95,10 @@ inline Void swap(MultiIndex& a1, MultiIndex& a2) { assert(a1._n==a2._n); for(Siz
 
 
 
+inline Bool GradedLess::operator() (DegreeType const& a1, DegreeType const& a2) const { return a1<a2; }
+inline Bool LexicographicLess::operator()(const DegreeType& a1, const DegreeType& a2) const { return a1<a2; }
+inline Bool ReverseLexicographicLess::operator()(const DegreeType& a1, const DegreeType& a2) const { return a1>a2; }
+
 inline Bool GradedLess::operator() (MultiIndex const& a1, MultiIndex const& a2) const { return graded_less(a1,a2); }
 inline Bool LexicographicLess::operator()(const MultiIndex& a1, const MultiIndex& a2) const { return lexicographic_less(a1,a2); }
 inline Bool ReverseLexicographicLess::operator()(const MultiIndex& a1, const MultiIndex& a2) const { return reverse_lexicographic_less(a1,a2); }

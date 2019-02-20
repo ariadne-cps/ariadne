@@ -47,85 +47,133 @@ namespace Ariadne {
 template<class T> class Array;
 template<class X> class Algebra;
 
+template<class I, class X> class Monomial;
+template<class I, class X> class Polynomial;
+
+template<class X> using UnivariateMonomial = Monomial<UniIndex,X>;
+template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>;
+
+template<class X> using MultivariateMonomial = Monomial<MultiIndex,X>;
+template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
+
+
+template<class I, class Y> using ArgumentOf = typename IndexTraits<I>::template Argument<Y>;
+
+template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
+template<class X, class A> A horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
+
 //! \brief A monomial with index \a I and coefficients of some type \a X.
-template<class X>
-class MultivariateMonomial
-    : public ExpansionValue<MultiIndex,X>
+template<class I, class X>
+class Monomial
+    : public ExpansionValue<I,X>
 {
+  public:
+    Monomial(const I& a, const X& x) : ExpansionValue<I,X>(a,x) { }
+    Monomial(const ExpansionValue<I,X>& v) : ExpansionValue<I,X>(v) { }
+};
+
+template<class I, class X> class PolynomialConstructors {
+};
+
+template<class X> class PolynomialConstructors<UniIndex,X> {
+    typedef UniIndex I;
+  public:
+    static Polynomial<I,X> constant(X const& c) { return Polynomial<I,X>::_constant(SizeOne(),c); }
+    static Polynomial<I,X> coordinate() { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero()); }
+    static Polynomial<I,X> variable() { return Polynomial<I,X>::_coordinate(SizeOne(),IndexZero()); }
+    static Polynomial<I,X> constant(SizeOne as, X const& c) { return Polynomial<I,X>::_constant(as,c); }
+    static Polynomial<I,X> coordinate(SizeOne as, IndexZero j) { return Polynomial<I,X>::_coordinate(as,j); }
+    static Polynomial<I,X> variable(SizeOne as, IndexZero j) { return Polynomial<I,X>::_coordinate(as,j); }
+};
+
+template<class X> class PolynomialConstructors<MultiIndex,X> {
     typedef MultiIndex I;
   public:
-    MultivariateMonomial(const MultiIndex& a, const X& x) : ExpansionValue<I,X>(a,x) { }
-    MultivariateMonomial(const ExpansionValue<I,X>& v) : ExpansionValue<I,X>(v) { }
+    //! \brief Create a constant polynomial in \a as variables with value \a c.
+    static Polynomial<I,X> constant(SizeType as, X const& c) { return Polynomial<I,X>::_constant(as,c); }
+    //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
+    static Polynomial<I,X> coordinate(SizeType as, SizeType j) { return Polynomial<I,X>::_coordinate(as,j); }
+    static Polynomial<I,X> variable(SizeType as, SizeType j) { return Polynomial<I,X>::_coordinate(as,j); }
 };
+
 
 //! \ingroup FunctionModule
 //! \brief A polynomial with coefficients of some type \a X.
-template<class X>
-class MultivariatePolynomial
-    : public DispatchAlgebraOperations<MultivariatePolynomial<X>,X>
+template<class I, class X>
+class Polynomial
+    : public PolynomialConstructors<I,X>
+    , public DispatchAlgebraOperations<Polynomial<I,X>,X>
 {
-    template<class XX> friend class MultivariatePolynomial;
-    friend struct AlgebraOperations<MultivariatePolynomial<X>,X>;
+    template<class II, class XX> friend class Polynomial;
+    friend struct AlgebraOperations<Polynomial<I,X>,X>;
   public:
-    typedef typename Expansion<MultiIndex,X>::ValueType ValueType;
-    typedef typename Expansion<MultiIndex,X>::Reference Reference;
-    typedef typename Expansion<MultiIndex,X>::ConstReference ConstReference;
-    typedef typename Expansion<MultiIndex,X>::Iterator Iterator;
-    typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
+    typedef typename Expansion<I,X>::ValueType ValueType;
+    typedef typename Expansion<I,X>::Reference Reference;
+    typedef typename Expansion<I,X>::ConstReference ConstReference;
+    typedef typename Expansion<I,X>::Iterator Iterator;
+    typedef typename Expansion<I,X>::ConstIterator ConstIterator;
 
-    typedef typename Expansion<MultiIndex,X>::IndexReference IndexReference;
-    typedef typename Expansion<MultiIndex,X>::IndexConstReference IndexConstReference;
-    typedef typename Expansion<MultiIndex,X>::CoefficientReference CoefficientReference;
-    typedef typename Expansion<MultiIndex,X>::CoefficientConstReference CoefficientConstReference;
+    typedef typename Expansion<I,X>::IndexReference IndexReference;
+    typedef typename Expansion<I,X>::IndexConstReference IndexConstReference;
+    typedef typename Expansion<I,X>::CoefficientReference CoefficientReference;
+    typedef typename Expansion<I,X>::CoefficientConstReference CoefficientConstReference;
+
+    typedef typename Expansion<I,X>::IndexInitializerType IndexInitializerType;
+
+    template<class Y> using Argument = typename IndexTraits<I>::template Argument<Y>;
+
+    typedef typename Expansion<I,X>::ArgumentSizeType ArgumentSizeType;
+    typedef typename Expansion<I,X>::VariableIndexType VariableIndexType;
+    typedef I IndexType;
 
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
-    typedef MultivariatePolynomial<X> SelfType;
+    typedef Polynomial<I,X> SelfType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef ReverseLexicographicLess IndexComparisonType;
   public:
     //@{
     //! \name Constructors
 
+    //! \brief The zero polynomial in the default number of variables.
+    explicit Polynomial();
     //! \brief The zero polynomial in \a as variables.
-    explicit MultivariatePolynomial(SizeType as=0u);
+    explicit Polynomial(ArgumentSizeType as);
     //! \brief Copy/conversion constructor.
-    template<class XX> MultivariatePolynomial(const MultivariatePolynomial<XX>& p);
+    template<class XX, EnableIf<IsConvertible<XX,X>> =dummy> Polynomial(const Polynomial<I,XX>& p);
     //! \brief Copy/conversion constructor.
-    template<class XX> explicit MultivariatePolynomial(const Expansion<MultiIndex,XX>& e);
+    template<class XX> explicit Polynomial(const Expansion<I,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
-    MultivariatePolynomial(InitializerList<Pair<InitializerList<DegreeType>,X>> lst);
+    Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.
-    MultivariatePolynomial<X> create_zero() const;
+    Polynomial<I,X> create_zero() const;
 
-    //! \brief Create a constant polynomial in \a as variables with value \a c.
-    static MultivariatePolynomial<X> constant(SizeType as, const X& c);
-    //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
-    static MultivariatePolynomial<X> coordinate(SizeType as, SizeType j);
-    static MultivariatePolynomial<X> variable(SizeType as, SizeType j);
+    using PolynomialConstructors<I,X>::constant;
+    using PolynomialConstructors<I,X>::coordinate;
+
     //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
-    static Vector<MultivariatePolynomial<X>> coordinates(SizeType as);
-    static Vector<MultivariatePolynomial<X>> variables(SizeType as);
+    static Argument<Polynomial<I,X>> coordinates(ArgumentSizeType as);
+    static Argument<Polynomial<I,X>> variables(ArgumentSizeType as);
 
     //! \brief Set equal to a constant.
-    MultivariatePolynomial<X>& operator=(const X& x);
+    Polynomial<I,X>& operator=(const X& x);
     //@{
     //! \name Comparisons
 
     //! \brief Equality operator.
-    template<class XX> EqualityType<X,XX> operator==(const MultivariatePolynomial<XX>& p) const;
+    template<class XX> EqualityType<X,XX> operator==(const Polynomial<I,XX>& p) const;
     //! \brief Inequality operator.
-    template<class XX> InequalityType<X,XX> operator!=(const MultivariatePolynomial<XX>& p) const;
+    template<class XX> InequalityType<X,XX> operator!=(const Polynomial<I,XX>& p) const;
     //@}
 
     //@{
     //! \name Data access
 
     //! \brief The number of variables in the argument of the polynomial.
-    SizeType argument_size() const;
+    ArgumentSizeType argument_size() const;
     //! \brief The number of structural nonzero terms.
     SizeType number_of_terms() const;
     //! \brief The order of the highest term.
@@ -133,13 +181,13 @@ class MultivariatePolynomial
     //! \brief The value of the polynomial at zero.
     const X& value() const;
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
-    X& operator[](const MultiIndex& a);
+    X& operator[](const IndexType& a);
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
-    const X& operator[](const MultiIndex& a) const;
+    const X& operator[](const IndexType& a) const;
     //! \brief A constant reference to the raw data expansion.
-    const Expansion<MultiIndex,X>& expansion() const;
+    const Expansion<I,X>& expansion() const;
     //! \brief A reference to the raw data expansion.
-    Expansion<MultiIndex,X>& expansion();
+    Expansion<I,X>& expansion();
     //@}
 
     //@{
@@ -150,13 +198,13 @@ class MultivariatePolynomial
     //! \brief An Iterator to the end of the list of terms..
     Iterator end();
     //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
-    Iterator find(const MultiIndex& a);
+    Iterator find(const I& a);
     //! \brief A constant Iterator to the beginning of the list of terms.
     ConstIterator begin() const;
     //! \brief A constant Iterator to the end of the list of terms.
     ConstIterator end() const;
     //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
-    ConstIterator find(const MultiIndex& a) const;
+    ConstIterator find(const I& a) const;
     //@}
 
 
@@ -164,7 +212,7 @@ class MultivariatePolynomial
     //! \name Modifying operations
 
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
-    Void insert(const MultiIndex& a, const X& c);
+    Void insert(const IndexType& a, const X& c);
     //! \brief Reserve space for a total of \a n terms.
     Void reserve(SizeType n);
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
@@ -186,116 +234,132 @@ class MultivariatePolynomial
     //! \name Modifying operators
 
     //! \brief Truncate to degree \a d.
-    MultivariatePolynomial<X>& truncate(DegreeType d);
+    Polynomial<I,X>& truncate(DegreeType d);
     //! \brief Differentiate with respect to the \a j<sup>th</sup> variable.
-    MultivariatePolynomial<X>& differentiate(SizeType j);
+    Polynomial<I,X>& differentiate(VariableIndexType j);
     //! \brief Antidifferentiate (integrate) with respect to the \a j<sup>th</sup> variable.
-    MultivariatePolynomial<X>& antidifferentiate(SizeType j);
+    Polynomial<I,X>& antidifferentiate(VariableIndexType j);
     //@}
 
     //@{
     //! \name Related operations
-    friend MultivariatePolynomial<X>& operator*=(MultivariatePolynomial<X>& p, const MultivariateMonomial<X>& m) { return MultivariatePolynomial<X>::_imul(p,m); }
+    friend Polynomial<I,X>& operator*=(Polynomial<I,X>& p, const Monomial<I,X>& m) { return Polynomial<I,X>::_imul(p,m); }
 
+    template<class XX, class A> friend A evaluate(const UnivariateMonomial<XX>& p, const A& v);
     template<class XX, class A> friend A evaluate(const MultivariatePolynomial<XX>& p, const Vector<A>& v);
-    template<class XX> friend MultivariatePolynomial<XX> compose(const MultivariatePolynomial<XX>& p, const Vector<MultivariatePolynomial<XX>>& q);
-    template<class XX> friend MultivariatePolynomial<XX> derivative(MultivariatePolynomial<XX> dx, SizeType k);
-    template<class XX> friend MultivariatePolynomial<XX> antiderivative(MultivariatePolynomial<XX> dx, SizeType k);
-    template<class XX> friend MultivariatePolynomial<XX> truncate(MultivariatePolynomial<XX> dx, DegreeType deg);
+    template<class II, class XX> friend Polynomial<II,XX> compose(const UnivariatePolynomial<XX>& p, const Scalar<Polynomial<II,XX>>& q);
+    template<class II, class XX> friend Polynomial<II,XX> compose(const MultivariatePolynomial<XX>& p, const Vector<Polynomial<II,XX>>& q);
+    template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
+    template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
+    template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
     //@}
 
     Void check() const;
-    static MultivariatePolynomial<X> _compose(const MultivariatePolynomial<X>& p, const Vector<MultivariatePolynomial<X>>& q);
-    static X _evaluate(const MultivariatePolynomial<X>& p, const Vector<X>& vx);
-    static Algebra<X> _evaluate(const MultivariatePolynomial<X>& p, const Vector<Algebra<X>>& va);
-    static MultivariatePolynomial<X> _partial_evaluate(const MultivariatePolynomial<X>& p, SizeType k, const X& c);
+    static Polynomial<I,X> _constant(ArgumentSizeType as, const X& c);
+    static Polynomial<I,X> _coordinate(ArgumentSizeType as, VariableIndexType j);
+    static Polynomial<UniIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<UniIndex,X>>& q);
+    static Polynomial<MultiIndex,X> _compose(const Polynomial<I,X>& p, const ArgumentOf<I,Polynomial<MultiIndex,X>>& q);
+    static X _evaluate(const Polynomial<I,X>& p, const ArgumentOf<I,X>& vx);
+    static Algebra<X> _evaluate(const Polynomial<I,X>& p, const ArgumentOf<I,Algebra<X>>& va);
+    static Polynomial<I,X> _partial_evaluate(const Polynomial<I,X>& p, SizeType k, const X& c);
     OutputStream& _write(OutputStream& os) const;
-    OutputStream& _write(OutputStream& os, List<String> const& names) const;
+    OutputStream& _write(OutputStream& os, typename IndexTraits<I>::NameType const& names) const;
   private:
-    Void _append(const MultiIndex& a, const X& c);
+    Void _append(const IndexType& a, const X& c);
     Iterator _unique_key();
   private:
-    SortedExpansion<MultiIndex,X,ReverseLexicographicIndexLess> _expansion;
+    SortedExpansion<I,X,ReverseLexicographicIndexLess> _expansion;
   private: // FIXME: Put these concrete-generic operations in proper place
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
-        friend MultivariatePolynomial<X> operator+(MultivariatePolynomial<X> p, const Y& c) {
+        friend Polynomial<I,X> operator+(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p+xc; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
-        friend MultivariatePolynomial<X> operator-(MultivariatePolynomial<X> p, const Y& c) {
+        friend Polynomial<I,X> operator-(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p-xc; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
-        friend MultivariatePolynomial<X> operator*(const Y& c, MultivariatePolynomial<X> p) {
+        friend Polynomial<I,X> operator*(const Y& c, Polynomial<I,X> p) {
             X xc=p.value(); xc=c; return xc*p; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
-        friend MultivariatePolynomial<X> operator*(MultivariatePolynomial<X> p, const Y& c) {
+        friend Polynomial<I,X> operator*(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p*xc; }
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy>
-        friend MultivariatePolynomial<X> operator/(MultivariatePolynomial<X> p, const Y& c) {
+        friend Polynomial<I,X> operator/(Polynomial<I,X> p, const Y& c) {
             X xc=p.value(); xc=c; return p/xc; }
 
 };
 
-template<class X> struct AlgebraOperations<MultivariatePolynomial<X>> {
+template<class I, class X> struct AlgebraOperations<Polynomial<I,X>> {
+    typedef I IndexType;
   public:
-    static MultivariatePolynomial<X> apply(Pos, const MultivariatePolynomial<X>& p);
-    static MultivariatePolynomial<X> apply(Neg, const MultivariatePolynomial<X>& p);
-    static MultivariatePolynomial<X> apply(Add, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2);
-    static MultivariatePolynomial<X> apply(Sub, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2);
-    static MultivariatePolynomial<X> apply(Mul, const MultivariatePolynomial<X>& p1, const MultivariatePolynomial<X>& p2);
-    static MultivariatePolynomial<X> apply(Add, MultivariatePolynomial<X> p, const X& c);
-    static MultivariatePolynomial<X> apply(Mul, MultivariatePolynomial<X> p, const X& c);
-    static MultivariatePolynomial<X> apply(Mul, MultivariatePolynomial<X> p, const MultivariateMonomial<X>& m);
-    static MultivariatePolynomial<X>& iapply(Add, MultivariatePolynomial<X>& p, const X& c);
-    static MultivariatePolynomial<X>& iapply(Mul, MultivariatePolynomial<X>& p, const X& c);
-    static MultivariatePolynomial<X>& iapply(Mul, MultivariatePolynomial<X>& p, const MultivariateMonomial<X>& m);
+    static Polynomial<I,X> apply(Nul, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Pos, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Neg, const Polynomial<I,X>& p);
+    static Polynomial<I,X> apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
+    static Polynomial<I,X> apply(Sub, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
+    static Polynomial<I,X> apply(Mul, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2);
+    static Polynomial<I,X> apply(Add, Polynomial<I,X> p, const X& c);
+    static Polynomial<I,X> apply(Mul, Polynomial<I,X> p, const X& c);
+    static Polynomial<I,X> apply(Mul, Polynomial<I,X> p, const Monomial<I,X>& m);
+    static Polynomial<I,X>& iapply(Add, Polynomial<I,X>& p, const X& c);
+    static Polynomial<I,X>& iapply(Mul, Polynomial<I,X>& p, const X& c);
+    static Polynomial<I,X>& iapply(Mul, Polynomial<I,X>& p, const Monomial<I,X>& m);
 
 };
 
 
-template<class X> template<class XX> MultivariatePolynomial<X>::MultivariatePolynomial(const MultivariatePolynomial<XX>& p)
+template<class I, class X> template<class XX, EnableIf<IsConvertible<XX,X>>> Polynomial<I,X>::Polynomial(const Polynomial<I,XX>& p)
     : _expansion(p._expansion) { }
 
-template<class X> template<class XX> MultivariatePolynomial<X>::MultivariatePolynomial(const Expansion<MultiIndex,XX>& e)
+template<class I, class X> template<class XX> Polynomial<I,X>::Polynomial(const Expansion<I,XX>& e)
     : _expansion(e) { this->cleanup(); }
 
-template<class X> template<class XX> EqualityType<X,XX> MultivariatePolynomial<X>::operator==(const MultivariatePolynomial<XX>& p) const {
-    const_cast<MultivariatePolynomial<X>*>(this)->cleanup();
-    const_cast<MultivariatePolynomial<XX>&>(p).cleanup();
+template<class I, class X> template<class XX> EqualityType<X,XX> Polynomial<I,X>::operator==(const Polynomial<I,XX>& p) const {
+    const_cast<Polynomial<I,X>*>(this)->cleanup();
+    const_cast<Polynomial<I,XX>&>(p).cleanup();
     return this->_expansion==p._expansion;
 }
 
-template<class X> template<class XX> InequalityType<X,XX> MultivariatePolynomial<X>::operator!=(const MultivariatePolynomial<XX>& p) const {
+template<class I, class X> template<class XX> InequalityType<X,XX> Polynomial<I,X>::operator!=(const Polynomial<I,XX>& p) const {
     return !(*this==p);
 }
 
-template<class X> inline MultivariatePolynomial<X> partial_evaluate(const MultivariatePolynomial<X>& p, SizeType k, const X& c) {
-    return MultivariatePolynomial<X>::_partial_evaluate(p,k,c); }
+template<class I, class X> inline Polynomial<I,X> partial_evaluate(const Polynomial<I,X>& p, SizeType k, const X& c) {
+    return Polynomial<I,X>::_partial_evaluate(p,k,c); }
+
+template<class X> inline X evaluate(const UnivariatePolynomial<X>& p, const Scalar<X>& v) {
+    return UnivariatePolynomial<X>::_evaluate(p,v); }
 
 template<class X> inline X evaluate(const MultivariatePolynomial<X>& p, const Vector<X>& v) {
     return MultivariatePolynomial<X>::_evaluate(p,v); }
 
-template<class X> inline MultivariatePolynomial<X> compose(const MultivariatePolynomial<X>& p, const Vector<MultivariatePolynomial<X>>& q) {
+template<class I, class X> inline Polynomial<I,X> compose(const UnivariatePolynomial<X>& p, const Polynomial<I,X>& q) {
+    return UnivariatePolynomial<X>::_compose(p,q); }
+
+template<class I, class X> inline Polynomial<I,X> compose(const MultivariatePolynomial<X>& p, const Vector<Polynomial<I,X>>& q) {
     return MultivariatePolynomial<X>::_compose(p,q); }
 
-template<class X> inline Vector<MultivariatePolynomial<X>> compose(const Vector<MultivariatePolynomial<X>>& p, const Vector<MultivariatePolynomial<X>>& q) {
-    return MultivariatePolynomial<X>::_compose(p,q); }
+template<class I, class X> inline Vector<Polynomial<I,X>> compose(const Vector<Polynomial<I,X>>& p, const Vector<Polynomial<I,X>>& q) {
+    return Polynomial<I,X>::_compose(p,q); }
+
+template<class X, class A> inline A evaluate(const UnivariatePolynomial<X>& p, const Scalar<A>& v) {
+    return horner_evaluate(p.expansion(),v); }
 
 template<class X, class A> inline A evaluate(const MultivariatePolynomial<X>& p, const Vector<A>& v) {
     return horner_evaluate(p.expansion(),v); }
 
-template<class X> inline MultivariatePolynomial<X> derivative(MultivariatePolynomial<X> p, SizeType k) {
+template<class I, class X> inline Polynomial<I,X> derivative(Polynomial<I,X> p, SizeType k) {
     p.differentiate(k); return std::move(p); }
 
-template<class X> inline MultivariatePolynomial<X> antiderivative(MultivariatePolynomial<X> p, SizeType k) {
+template<class I, class X> inline Polynomial<I,X> antiderivative(Polynomial<I,X> p, SizeType k) {
     p.antidifferentiate(k); return std::move(p); }
 
-template<class X> inline MultivariatePolynomial<X> truncate(MultivariatePolynomial<X> p, DegreeType deg) {
+template<class I, class X> inline Polynomial<I,X> truncate(Polynomial<I,X> p, DegreeType deg) {
     p.truncate(deg); return std::move(p); }
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const MultivariatePolynomial<X>& p) {
+template<class I, class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<I,X>& p) {
     return p._write(os); }
 
-template<class X> inline Bool compatible(const MultivariatePolynomial<X>& x1, const MultivariatePolynomial<X>& x2) {
+template<class I, class X> inline Bool compatible(const Polynomial<I,X>& x1, const Polynomial<I,X>& x2) {
     return x1.argument_size()==x2.argument_size(); }
 
 template<class F> struct NamedArgumentRepresentation {
@@ -305,39 +369,39 @@ template<class F> struct NamedArgumentRepresentation {
 template<class F> inline NamedArgumentRepresentation<F> named_argument_repr(const F& function, const List<String>& argument_names) {
     NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<MultivariatePolynomial<X>>& repr) {
+template<class I, class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<I,X>>& repr) {
     return repr.function._write(os,repr.argument_names); }
 
-template<class X> inline MultivariatePolynomial<MidpointType<X>> midpoint(const MultivariatePolynomial<X>& p) {
+template<class I, class X> inline MultivariatePolynomial<MidpointType<X>> midpoint(const Polynomial<I,X>& p) {
     return MultivariatePolynomial<MidpointType<X>>(midpoint(p.expansion())); }
 
 
 // Vectorised operations
-template<class X, class A> Vector<A> evaluate(const Vector<MultivariatePolynomial<X>>& p, const Vector<A>& v) {
+template<class I, class X, class A> Vector<A> evaluate(const Vector<Polynomial<I,X>>& p, const Vector<A>& v) {
     Vector<A> r(p.size(),v.zero_element());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=evaluate(p[i],v); }
     return r;
 }
 
-template<class X> Vector<MultivariatePolynomial<X>> derivative(const Vector<MultivariatePolynomial<X>>& p, SizeType j) {
-    Vector<MultivariatePolynomial<X>> r(p.size());
+template<class I, class X> Vector<Polynomial<I,X>> derivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
+    Vector<Polynomial<I,X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
-template<class X> Vector<MultivariatePolynomial<X>> antiderivative(const Vector<MultivariatePolynomial<X>>& p, SizeType j) {
-    Vector<MultivariatePolynomial<X>> r(p.size());
+template<class I, class X> Vector<Polynomial<I,X>> antiderivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
+    Vector<Polynomial<I,X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
-template<class X> Vector<MultivariatePolynomial<X>> truncate(const Vector<MultivariatePolynomial<X>>& p, DegreeType d) {
-    Vector<MultivariatePolynomial<X>> r(p.size());
+template<class I, class X> Vector<Polynomial<I,X>> truncate(const Vector<Polynomial<I,X>>& p, DegreeType d) {
+    Vector<Polynomial<I,X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;
 }
 
-template<class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<MultivariatePolynomial<X>>& p) {
+template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<Polynomial<I,X>>& p) {
     Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
     return r;

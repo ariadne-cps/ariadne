@@ -99,10 +99,8 @@ template<class I, class X> class ExpansionValue
 };
 
 
-template<class I, class X> class ExpansionConstReference;
-
 template<class I, class X> class ExpansionReference;
-template<class I, class X> Void swap(ExpansionReference<I,X>, ExpansionReference<I,X>);
+template<class I, class X> class ExpansionConstReference;
 
 template<class I, class X> class ExpansionReference
 {

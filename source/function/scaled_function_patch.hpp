@@ -48,7 +48,8 @@
 
 namespace Ariadne {
 
-template<class X> class MultivariatePolynomial;
+template<class I, class X> class Polynomial;
+template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;

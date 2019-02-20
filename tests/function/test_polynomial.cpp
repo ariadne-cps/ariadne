@@ -167,6 +167,14 @@ Void TestPolynomial::test_cleanup()
 Void TestPolynomial::test_constructors()
 {
     // Empty polynomial
+    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<FloatDP>,q1,);
+    // Dense polynomial
+    ARIADNE_TEST_CONSTRUCT(UnivariatePolynomial<FloatDP>,q2,({ {0,0.}, {1,0.},{2,5.},{3,2.} }));
+    ARIADNE_TEST_EQUAL(q2[1],0.0);
+    ARIADNE_TEST_EQUAL(q2[2],5.0);
+    ARIADNE_TEST_EQUAL(q2[3],2.0);
+
+    // Empty polynomial
     ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<FloatDP>,p1,(3));
     // Dense polynomial
     ARIADNE_TEST_CONSTRUCT(MultivariatePolynomial<FloatDP>,p2,({ {{0,0,0},0.}, {{1,0,0},0.},{{0,1,0},0.},{{0,0,1},0.}, {{2,0,0},5.},{{1,1,0},2.},{{1,0,1},0.},{{0,2,0},0.},{{0,1,2},3.},{{0,0,2},0.} }));
@@ -245,6 +253,19 @@ Void TestPolynomial::test_arithmetic()
 
     MultivariatePolynomial<FloatDP> x0(3); x0[MultiIndex({1,0,0})]=1.0;
     MultivariatePolynomial<FloatDP> x1(3); x1[MultiIndex({0,1,0})]=1.0;
+    MultivariatePolynomial<FloatDP> x2=MultivariatePolynomial<FloatDP>::coordinate(3,2);
+    UnivariatePolynomial<FloatDP> y=UnivariatePolynomial<FloatDP>::coordinate(SizeOne(),IndexZero());
+    y=UnivariatePolynomial<FloatDP>::coordinate();
+
+    FloatDP w(3);
+    Vector<FloatDP> v({3,5,2});
+
+    ARIADNE_TEST_EQUALS(evaluate(2*x0*x0-1,v),2*v[0]*v[0]-1);
+
+    ARIADNE_TEST_EQUALS(evaluate(2*y*y-1,w),2*w*w-1);
+    ARIADNE_TEST_EQUALS(evaluate(8*y*y*(y*y-1)+1,w),8*w*w*(w*w-1)+1);
+
+    ARIADNE_TEST_EQUALS(compose(2*y*y-1,x0),2*x0*x0-1);
 }
 
 Void TestPolynomial::test_variables()

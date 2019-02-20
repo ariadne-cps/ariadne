@@ -38,11 +38,22 @@
 #include "../utility/macros.hpp"
 
 
-#include "../geometry/interval.hpp"
-
 namespace Ariadne {
 
 /************ Expansion ******************************************************/
+
+inline Void swap(UniIndex& a1, UniIndex& a2) { std::swap(a1,a2); }
+//template<class T> inline Void swap(T& t1, T& t2) { std::swap(t1,t2); }
+
+inline DegreeType degree_of(MultiIndex const& a) { return a.degree(); }
+inline DegreeType degree_of(UniIndex const& a) { return a; }
+
+inline SizeType size_of(MultiIndex const& a) { return a.size(); }
+inline SizeOne size_of(UniIndex const& a) { return SizeOne(); }
+
+inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
+inline SizeOne argument_size_of(UniformList<UniIndex> const& a) { return SizeOne(); }
+
 
 template<class T> using UniformReference = typename UniformList<T>::Reference;
 template<class T> using UniformConstReference = typename UniformList<T>::ConstReference;
@@ -65,16 +76,34 @@ struct ReverseLexicographicIndexLess;
 struct CoefficientLess;
 struct CoefficientIsZero;
 
+template<class I> struct IndexTraits;
+
+template<> struct IndexTraits<UniIndex> {
+    typedef DegreeType InitializerType;
+    typedef SizeOne SizeOfType;
+    typedef IndexZero IndexIntoType;
+    typedef String NameType;
+    template<class Y> using Argument = Scalar<Y>;
+};
+
+template<> struct IndexTraits<MultiIndex> {
+    typedef InitializerList<DegreeType> InitializerType;
+    typedef SizeType SizeOfType;
+    typedef SizeType IndexIntoType;
+    typedef Array<String> NameType;
+    template<class Y> using Argument = Vector<Y>;
+};
+
+template<class I, class X> using ArgumentOfType = typename IndexTraits<I>::template Argumentq<X>;
 
 template<class I, class X> class Expansion;
 
 template<class I, class X> class Expansion {
-    static SizeType size_of(MultiIndex const& a) { return a.size(); }
-    static SizeOne size_of(DegreeType) { return SizeOne(); }
-    using S=decltype(size_of(declval<I>()));
-    static InitializerList<DegreeType> initializer_of(MultiIndex);
-    static DegreeType initializer_of(DegreeType);
-    using IndexInitializerType=decltype(initializer_of(declval<I>()));
+    using S=typename IndexTraits<I>::SizeOfType;
+    using V=typename IndexTraits<I>::IndexIntoType;
+  public:
+    using IndexInitializerType=typename IndexTraits<I>::InitializerType;
+    template<class Y> using Argument = typename IndexTraits<I>::template Argument<Y>;
 
 //    static const SizeType DEFAULT_CAPACITY=16;
   public:
@@ -83,6 +112,7 @@ template<class I, class X> class Expansion {
     X _zero_coefficient;
   public:
     typedef S ArgumentSizeType;
+    typedef V VariableIndexType;
     typedef I IndexType;
     typedef X CoefficientType;
 
@@ -173,7 +203,7 @@ template<class I, class X> class Expansion {
     Bool is_sorted(GradedIndexLess cmp);
 
     OutputStream& write(OutputStream& os) const;
-    OutputStream& write(OutputStream& os, Array<String> const& vars) const;
+    OutputStream& write(OutputStream& os, typename IndexTraits<I>::NameType const& vars) const;
   public:
     friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self.write(os); }
     friend Bool same(Expansion<I,X> const& e1, Expansion<I,X> const& e2) { return e1.same_as(e2); }
@@ -218,7 +248,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, P
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
-    _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
+    _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
     _coefficients = UniformList<X>(0,X(pr));
     _zero_coefficient = X(pr);
 

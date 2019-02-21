@@ -187,6 +187,15 @@ read_sequence(InputStream& is, Container& v,
     return is;
 }
 
+
+template<class TUP, std::size_t N> void write_tuple(std::ostream& os, TUP const& tup, std::integral_constant<std::size_t,N>) {
+    if constexpr (N!=1) {
+        write_tuple(os,tup,std::integral_constant<std::size_t,N-1>());
+        os << ',';
+    }
+    os << std::get<N-1>(tup);
+}
+
 } // namespace Ariadne
 
 
@@ -205,24 +214,10 @@ operator<<(std::ostream &os, const std::pair<S,T>& s)
     return os << '(' << s.first << ',' << s.second << ')';
 }
 
-template<class T0> inline
-std::ostream& operator<<(std::ostream &os, const std::tuple<T0>& s) {
-    return os << '(' << get<0>(s) << ')';
-}
-
-template<class T0, class T1> inline
-std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1>& s) {
-    return os << '(' << get<0>(s) << ',' << get<1>(s) << ')';
-}
-
-template<class T0, class T1, class T2> inline
-std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1,T2>& s) {
-    return os << '(' << get<0>(s) << ',' << get<1>(s) << ',' << get<2>(s)  << ')';
-}
-
-template<class T0, class T1, class T2, class T3> inline
-std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1,T2,T3>& s) {
-    return os << '(' << get<0>(s) << ',' << get<1>(s) << ',' << get<2>(s) << ',' << get<3>(s) << ')';
+template<class... TS> inline
+std::ostream& operator<<(std::ostream& os, std::tuple<TS...> const& tup) {
+    typename std::tuple_size<std::tuple<TS...>>::type sz;
+    os << "("; write_tuple(os,tup,sz); os << ")"; return os;
 }
 
 /*

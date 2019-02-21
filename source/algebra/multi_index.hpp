@@ -40,6 +40,23 @@
 
 namespace Ariadne {
 
+class UniIndex {
+    DegreeType _a;
+  public:
+    UniIndex(DegreeType a=0u) : _a(a) { }
+    UniIndex& operator++() { ++_a; return *this; }
+    UniIndex& operator--() { --_a; return *this; }
+    UniIndex operator+(UniIndex const& other) const { return UniIndex(this->_a+other._a); }
+    short int operator-(UniIndex const& other) const { return (short int)this->_a-(short int)other._a; }
+    UniIndex& operator+=(UniIndex const& other) { this->_a+=other._a; return *this; }
+    template<class D, EnableIf<std::is_integral<D>> = dummy> UniIndex operator+(D d) const { return UniIndex(this->_a+d); }
+    DegreeType& operator[] (IndexZero) { return _a; }
+    DegreeType const& operator[] (IndexZero) const { return _a; }
+    SizeOne size() const { return SizeOne(); }
+    DegreeType degree() const { return _a; }
+    operator DegreeType() const { return _a; }
+};
+
 struct MultiIndexData {
     friend class MultiIndexList;
   public:
@@ -115,14 +132,17 @@ class MultiIndex
 };
 
 struct LexicographicLess {
+    Bool operator() (DegreeType const& a1, DegreeType const& a2) const;
     Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
 
 struct ReverseLexicographicLess {
+    Bool operator() (DegreeType const& a1, DegreeType const& a2) const;
     Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
 
 struct GradedLess {
+    Bool operator() (DegreeType const& a1, DegreeType const& a2) const;
     Bool operator() (MultiIndex const& a1, MultiIndex const& a2) const;
 };
 
@@ -138,8 +158,10 @@ struct MultiIndexReference : public MultiIndexData {
     operator MultiIndex& ();
     operator MultiIndex const& () const;
     MultiIndexReference& operator+=(MultiIndexData const&);
-    friend Void swap(MultiIndexReference, MultiIndexReference);
+    friend Void swap(MultiIndex&, MultiIndex&);
+//    friend Void swap(MultiIndexReference, MultiIndexReference);
 };
+
 
 struct MultiIndexConstReference : public MultiIndexData {
     MultiIndexConstReference(SizeType n, DegreeType const* p);

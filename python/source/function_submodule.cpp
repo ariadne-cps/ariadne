@@ -189,29 +189,29 @@ Void export_multi_index(pybind11::module& module)
 template<class X>
 Void export_polynomial(pybind11::module& module)
 {
-    pybind11::class_< Monomial<X> > monomial_class(module,python_name<X>("Monomial").c_str());
+    pybind11::class_< MultivariateMonomial<X> > monomial_class(module,python_name<X>("MultivariateMonomial").c_str());
     monomial_class.def(pybind11::init<MultiIndex,X>());
-    monomial_class.def("index", (MultiIndex const&(Monomial<X>::*)()const) &Monomial<X>::index);
-    monomial_class.def("coefficient", (X const&(Monomial<X>::*)()const) &Monomial<X>::coefficient);
-    monomial_class.def("__str__", &__cstr__<Monomial<X>>);
+    monomial_class.def("index", (MultiIndex const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::index);
+    monomial_class.def("coefficient", (X const&(MultivariateMonomial<X>::*)()const) &MultivariateMonomial<X>::coefficient);
+    monomial_class.def("__str__", &__cstr__<MultivariateMonomial<X>>);
 
 
-    pybind11::class_< Polynomial<X> > polynomial_class(module,python_name<X>("Polynomial").c_str());
-    polynomial_class.def(pybind11::init< Polynomial<X> >());
+    pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_name<X>("MultivariatePolynomial").c_str());
+    polynomial_class.def(pybind11::init< MultivariatePolynomial<X> >());
     polynomial_class.def(pybind11::init<Nat>());
-    polynomial_class.def_static("constant", (Polynomial<X>(*)(SizeType,X const&)) &Polynomial<X>::constant);
-    polynomial_class.def_static("variable", (Polynomial<X>(*)(SizeType,SizeType)) &Polynomial<X>::variable);
-    polynomial_class.def_static("coordinate", (Polynomial<X>(*)(SizeType,SizeType)) &Polynomial<X>::variable);
+    polynomial_class.def_static("constant", (MultivariatePolynomial<X>(*)(SizeType,X const&)) &MultivariatePolynomial<X>::constant);
+    polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
+    polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
 
-    polynomial_class.def_static("variables", [](Nat as){return Polynomial<X>::variables(as).array();});
+    polynomial_class.def_static("variables", [](Nat as){return MultivariatePolynomial<X>::variables(as).array();});
 
-    polynomial_class.def("argument_size", &Polynomial<X>::argument_size);
-    polynomial_class.def("insert", &Polynomial<X>::insert);
+    polynomial_class.def("argument_size", &MultivariatePolynomial<X>::argument_size);
+    polynomial_class.def("insert", &MultivariatePolynomial<X>::insert);
 
     define_algebra(module,polynomial_class);
-    polynomial_class.def("__str__",&__cstr__<Polynomial<X>>);
+    polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
 
-    export_vector<Polynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
+    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
 }
 
 Void export_polynomials(pybind11::module& module)

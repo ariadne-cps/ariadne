@@ -46,8 +46,6 @@ namespace Ariadne {
 //! \defgroup GeometryModule Geometry Module
 //!  \brief Classes describing sets in Euclidean space.
 
-struct SizeOne { operator SizeType() const { return 1u; } };
-
 enum class SplitPart : char;
 
 enum class SplitPart : char { LOWER, MIDDLE, UPPER };

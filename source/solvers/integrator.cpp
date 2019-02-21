@@ -308,7 +308,7 @@ namespace Ariadne {
 class FormulaFunction;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 typedef Differential<FloatDPBounds> ValidatedDifferential;
-typedef Polynomial<FloatDPBounds> ValidatedPolynomial;
+typedef MultivariatePolynomial<FloatDPBounds> ValidatedMultivariatelynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 

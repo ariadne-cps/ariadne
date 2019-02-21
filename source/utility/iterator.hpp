@@ -105,7 +105,7 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,ForwardTraver
 };
 
 template<class I1, class I2> class PairIterator
-//    : public IteratorFacade<PairIterator<I1,I2>, Monomial<X>, RandomAccessTag, MonomialReference<X>>
+//    : public IteratorFacade<PairIterator<I1,I2>, MultivariateMonomial<X>, RandomAccessTag, MultivariateMonomialReference<X>>
 {
     typedef std::pair<I1*,I2*> Reference;
   public:

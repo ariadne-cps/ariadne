@@ -36,33 +36,36 @@ namespace Ariadne {
 
 /************ Expansion ******************************************************/
 
+template<class T> struct ReferenceTypedef { typedef T& Type; };
+template<class T> using ReferenceType = typename ReferenceTypedef<T>::Type;
+template<class T> using ConstReferenceType = typename ReferenceTypedef<const T>::Type;
 
-struct GradedIndexLess {
+template<class T> struct PointerTypedef { typedef T* Type; };
+template<class T> using PointerType = typename PointerTypedef<T>::Type;
+template<class T> using ConstPointerType = typename PointerTypedef<const T>::Type;
+
+template<> struct ReferenceTypedef<MultiIndex> { typedef MultiIndexReference Type; };
+template<> struct ReferenceTypedef<const MultiIndex> { typedef MultiIndexConstReference Type; };
+
+template<> struct PointerTypedef<MultiIndex> { typedef MultiIndexPointer Type; };
+template<> struct PointerTypedef<const MultiIndex> { typedef MultiIndexConstPointer Type; };
+
+template<class CMP> struct IndexComparison {
     template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
-        return graded_less(m1.index(),m2.index());
+        CMP cmp; return cmp(m1.index(),m2.index());
     }
     template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
-        return graded_less(m.index(),a);
+        CMP cmp; return cmp(m.index(),a);
     }
 };
 
-struct LexicographicIndexLess {
-    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
-        return lexicographic_less(m1.index(),m2.index());
-    }
-    template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
-        return lexicographic_less(m.index(),a);
-    }
-};
+struct IndexLess : public IndexComparison<Less> { };
 
-struct ReverseLexicographicIndexLess {
-    template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
-        return reverse_lexicographic_less(m1.index(),m2.index());
-    }
-    template<class M> bool operator()(M const& m, typename M::IndexType const& a) const {
-        return reverse_lexicographic_less(m.index(),a);
-    }
-};
+struct GradedIndexLess : public IndexComparison<GradedLess> { };
+
+struct LexicographicIndexLess : public IndexComparison<LexicographicLess> { };
+
+struct ReverseLexicographicIndexLess : public IndexComparison<ReverseLexicographicLess> { };
 
 struct CoefficientLess {
     template<class M1, class M2> bool operator()(M1 const& m1, M2 const& m2) const {
@@ -96,10 +99,8 @@ template<class I, class X> class ExpansionValue
 };
 
 
-template<class I, class X> class ExpansionConstReference;
-
 template<class I, class X> class ExpansionReference;
-template<class I, class X> Void swap(ExpansionReference<I,X>, ExpansionReference<I,X>);
+template<class I, class X> class ExpansionConstReference;
 
 template<class I, class X> class ExpansionReference
 {
@@ -140,6 +141,9 @@ template<class I, class X> class ExpansionConstReference
     ExpansionConstReference(const ExpansionValue<I,X>& other) : ExpansionConstReference(other.index(),other.coefficient()) { }
     ExpansionConstReference(const ExpansionReference<I,X>& other) : ExpansionConstReference(other.index(),other.coefficient()) { }
     operator ExpansionValue<I,X>() const { return ExpansionValue<I,X>(_a,_c); }
+    friend Bool same(ExpansionConstReference<I,X> const& ac1, ExpansionConstReference<I,X> const& ac2) {
+        if constexpr (IsConvertible<EqualityType<X>,Bool>::value) { return ac1.index()==ac2.index() && ac1.coefficient()==ac2.coefficient(); }
+        else { return ac1.index()==ac2.index() && same(ac1.coefficient(),ac2.coefficient()); } }
 };
 
 
@@ -205,9 +209,7 @@ template<class I, class X> class ExpansionIterator
     template<class XX> Bool equal(const ExpansionConstIterator<I,XX>& other) const { return this->_cp==other._cp; }
     Void advance(PointerDifferenceType k) { _ap+=k; _cp+=k; }
     template<class XX> PointerDifferenceType distance_to(const ExpansionIterator<I,XX>& other) const { return other._cp - this->_cp; }
-    ExpansionReference<I,X> dereference() const {
-        auto ar=*(this->_ap);
-        return ExpansionReference<I,X>(*_ap,*_cp); }
+    ExpansionReference<I,X> dereference() const { return ExpansionReference<I,X>(*_ap,*_cp); }
     ExpansionPointer<I,X> operator->() { return ExpansionPointer<I,X>(_ap.operator->(),_cp.operator->()); }
     friend OutputStream& operator<<(OutputStream& os, const ExpansionIterator<I,X>& e) {
         return os << "{" << e._ap.operator->() << "," << e._cp.operator->() << "}"; }

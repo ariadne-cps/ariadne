@@ -47,4 +47,9 @@ template class Complex<FloatDPApproximation>;
 template class Complex<FloatMPBounds>;
 template class Complex<FloatMPApproximation>;
 
+template<> String class_name<Complex<FloatDPBounds>>() { return "ComplexFloatDPBounds"; }
+template<> String class_name<Complex<FloatMPBounds>>() { return "ComplexFloatMPBounds"; }
+template<> String class_name<Complex<FloatDPApproximation>>() { return "ComplexFloatDPApproximation"; }
+template<> String class_name<Complex<FloatMPApproximation>>() { return "ComplexFloatMPApproximation"; }
+
 } // namespace Ariadne

@@ -61,7 +61,7 @@ template<class X> class OffsetArray {
     OffsetArray(OffsetArray<X> const& a) : _l(a._l), _u(a._u), _p((new X[_u-_l])-_l) {
         for (IndexType i=_l; i!=_u; ++i) { _p[i]=a._p[i]; } }
     OffsetArray(OffsetArray<X>&& a) : _l(a._l), _u(a._u), _p(a._p) { a._p=nullptr; }
-    OffsetArray& operator=(OffsetArray<X> const& a) { if(this!=&a) { if (_u-_l != a._u-a._l) { delete[] _p-_l; _p=(new X[_u-_l])-_l; }
+    OffsetArray& operator=(OffsetArray<X> const& a) { if(this!=&a) { if (_u-_l != a._u-a._l) { delete[] (_p-_l); _p=(new X[_u-_l])-_l; }
         this->_l=a._l; this->_u=a._u; for (IndexType i=_l; i!=_u; ++i) { _p[i]=a._p[i]; } } return *this; }
     OffsetArray& operator=(OffsetArray<X>&& a) { if(this!=&a) { this->_l=a._l; this->_u=a._u; this->_p=a._p; a._l=0; a._p=nullptr; } return *this; }
 
@@ -86,6 +86,7 @@ struct BiUniIndex {
     SizeOne size() const { return SizeOne(); }
     BiUniIndex& operator--() { --_a; return *this; }
     BiUniIndex& operator++() { ++_a; return *this; }
+    friend Void swap(BiUniIndex& a1, BiUniIndex& a2) { std::swap(a1,a2); }
 };
 
 SizeOne argument_size_of(UniformList<BiUniIndex> const&) { return SizeOne(); }
@@ -98,25 +99,35 @@ template<> struct IndexTraits<BiUniIndex> {
     template<class X> using Argument = Scalar<X>;
 };
 
+template<class X> decltype(auto) properties(Complex<X> const& z) { return properties(z.real_part()); }
+//template<class X> using PropertiesType = decltype(properties(declval<X>()));
+
 template<class X> class UnivariateFourierPolynomial;
 
 //! \brief A \f$2\pi\f$ complex-valued periodic function defined by its Fourier coefficients
 template<class X> class UnivariateFourierPolynomial<Complex<X>>
     : public DispatchAlgebraOperations<UnivariateFourierPolynomial<Complex<X>>,Complex<X>>
 {
+    typedef BiUniIndex I;
     typedef Complex<X> CX;
+    typedef IndexLess CMP;
     typedef typename X::Paradigm P;
     typedef typename X::PrecisionType PR;
     SortedExpansion<BiUniIndex,Complex<X>,IndexLess> _terms;
   public:
     using FourierPolynomialType = UnivariateFourierPolynomial<Complex<X>>;
+    using FourierPolynomialResultType = UnivariateFourierPolynomial<Complex<ArithmeticType<X>>>;
+
+    typedef BiUniIndex IndexType;
+    typedef Complex<X> CoefficientType;
 
     typedef P Paradigm;
     typedef PR PrecisionType;
 
     typedef Complex<X> NumericType;
 
-    UnivariateFourierPolynomial(PR pr) : _terms(SizeOne(),pr) { }
+    template<class... PRS, EnableIf<IsConstructible<Complex<X>,PRS...>> =dummy>
+        UnivariateFourierPolynomial(PRS... prs) : _terms(SizeOne(),CX(prs...)) { }
     UnivariateFourierPolynomial(BiUniIndex dmin, BiUniIndex dmax, std::function<CX(BiUniIndex)> const& g) : _terms(SizeOne(),nul(g(0))) {
         for(BiUniIndex i=dmin; i<=dmax; ++i) { _terms.append(i,g(i)); } }
 
@@ -131,8 +142,10 @@ template<class X> class UnivariateFourierPolynomial<Complex<X>>
     DegreeType degree() const { return std::max(_terms.front().index().degree(),_terms.back().index().degree()); }
     PR precision() const { return _terms.zero_coefficient().precision(); }
     CX const& zero_coefficient() const { return _terms.zero_coefficient(); }
-    CX const& operator[] (SizeType i) const { return _terms[i]; }
-    Expansion<BiUniIndex,CX> const& terms() const { return this->_terms; }
+    CX const& operator[] (IndexType i) const { return _terms[i]; }
+    decltype(auto) operator[] (IndexType i) { return _terms[i]; }
+    SortedExpansion<I,CX,CMP> const& terms() const { return this->_terms; }
+    SortedExpansion<I,CX,CMP>& terms() { return this->_terms; }
 
     MagType<X> sup_norm() const;
     MagType<X> two_norm() const;
@@ -192,6 +205,8 @@ UnivariateFourierPolynomial<Complex<X>>::_evaluate(UnivariateFourierPolynomial<C
     }
     return r;
 }
+
+
 
 
 /*

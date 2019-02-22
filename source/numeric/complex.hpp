@@ -74,22 +74,22 @@ class DefineComplexOperations {
     template<class X1, class X2> friend Complex<ArithmeticType<X1,X2>> div(Complex<X1> const& z1, Complex<X2> const& z2) {
         auto ns=add(sqr(z2._re),sqr(z2._im)); return Complex<ArithmeticType<X1,X2>> ((z1._re*z2._re+z1._im*z2._im)/ns,(z1._im*z2._re-z1._re*z2._im)/ns); } //!< \brief Quotient \a z1÷z2.
 
-    template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<ProductType<X1,X2>> add(Complex<X1> const& z1, X2 const& x2) {
+    template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<SumType<X1,X2>> add(Complex<X1> const& z1, X2 const& x2) {
         return Complex<SumType<X1,X2>>(z1._re+x2, z1._im); }
-    template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<ProductType<X1,X2>> add(X1 const& x1, Complex<X2> const& z2) {
+    template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<SumType<X1,X2>> add(X1 const& x1, Complex<X2> const& z2) {
         return Complex<SumType<X1,X2>>(x1+z2._re, z2._im); }
-    template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<ProductType<X1,X2>> sub(Complex<X1> const& z1, X2 const& x2) {
+    template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<DifferenceType<X1,X2>> sub(Complex<X1> const& z1, X2 const& x2) {
         return Complex<DifferenceType<X1,X2>>(z1._re-x2, z1._im); }
-    template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<ProductType<X1,X2>> sub(X1 const& x1, Complex<X2> const& z2) {
+    template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<DifferenceType<X1,X2>> sub(X1 const& x1, Complex<X2> const& z2) {
         return Complex<DifferenceType<X1,X2>>(x1-z2._re, -z2._im); }
     template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<ProductType<X1,X2>> mul(Complex<X1> const& z1, X2 const& x2) {
         return Complex<ProductType<X1,X2>>(z1._re*x2, z1._im*x2); }
     template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<ProductType<X1,X2>> mul(X1 const& x1, Complex<X2> const& z2) {
         return Complex<ProductType<X1,X2>>(x1*z2._re, x1*z2._im); }
     template<class X1, class X2, DisableIf<IsComplex<X1>> =dummy> friend Complex<QuotientType<X1,X2>> div(X1 const& x1, Complex<X2> const& z2) {
-        auto ns=add(sqr(z2._re),sqr(z2._im)); return Complex<ArithmeticType<X1,X2>> (x1*z2._re/ns,-x1*z2._im/ns); }
+        auto ns=add(sqr(z2._re),sqr(z2._im)); return Complex<QuotientType<X1,X2>> (x1*z2._re/ns,-x1*z2._im/ns); }
     template<class X1, class X2, DisableIf<IsComplex<X2>> =dummy> friend Complex<QuotientType<X1,X2>> div(Complex<X1> const& z1, X2 const& x2) {
-        return Complex<ArithmeticType<X1,X2>>(z1._re/x2, z1._im/x2); }
+        return Complex<QuotientType<X1,X2>>(z1._re/x2, z1._im/x2); }
 
     template<class X1, class X2> friend decltype(auto) operator+(Complex<X1> const& z1, Complex<X2> const& z2) { return add(z1,z2); }
     template<class X1, class X2> friend decltype(auto) operator-(Complex<X1> const& z1, Complex<X2> const& z2) { return sub(z1,z2); }
@@ -102,7 +102,7 @@ class DefineComplexOperations {
     template<class X1, class X2> friend decltype(auto) operator-(X1 const& x1, Complex<X2> const& z2) { return sub(x1,z2); }
     template<class X1, class X2> friend decltype(auto) operator*(Complex<X1> const& z1, X2 const& x2) { return mul(z1,x2); }
     template<class X1, class X2> friend decltype(auto) operator*(X1 const& x1, Complex<X2> const& z2) { return mul(x1,z2); }
-    template<class X1, class X2> friend decltype(auto) operator/(Complex<X1> const& z1, X2 const& x2) { return div(z1,x2); }
+    template<class X1, class X2> friend Complex<QuotientType<X1,X2>> operator/(Complex<X1> const& z1, X2 const& x2) { return div(z1,x2); }
     template<class X1, class X2> friend decltype(auto) operator/(X1 const& x1, Complex<X2> const& z2) { return div(x1,z2); }
 
     //@{
@@ -148,6 +148,7 @@ template<class X> Complex<TranscendentalType<X>> make_complex_from_polar(X const
 template<class X> class Complex
     : DefineComplexOperations
 {
+    static_assert(not IsComplex<X>::value);
   private: public:
     X _re; X _im;
     friend class DefineComplexOperations;
@@ -166,21 +167,30 @@ template<class X> class Complex
 
     Complex(X const& r, X const& th, PolarTag) : _re(exp(r)*cos(th)), _im(exp(r)*sin(th)) { } //!< Construct the number \a exp(r)*(cos(th)+i*sin(th)).
 
-
     template<class Y, EnableIf<IsConvertible<Y,X>> = dummy>
         Complex(Complex<Y> const& z) : Complex(X(z._re),X(z._im)) { }
     template<class Y, EnableIf<IsConvertible<Y,X>> = dummy>
         Complex(Y const& y) : Complex(X(y)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> = dummy>
+        explicit Complex(PRS... prs) : _re(prs...), _im(prs...) { }
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> = dummy>
         Complex(Y const& x, Y const& y, PRS... prs) : _re(x,prs...), _im(y,prs...) { }
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> = dummy>
         Complex(Complex<Y> const& z, PRS... prs) : _re(z.real_part(),prs...), _im(z.imaginary_part(),prs...) { }
+
+    template<class Y, EnableIf<IsAssignable<X,Y>> = dummy>
+        Complex<X>& operator=(Complex<Y> const& z) { this->_re=z._re; this->_im=z._im; return *this; }
+    template<class Y, EnableIf<IsAssignable<X,Y>> = dummy>
+        Complex<X>& operator=(Y const& y) { this->_re=y; this->_im=0; return *this; }
+
     //@}
 
     //@{
     //! \name Extract in Cartesian and polar coordinates
     X const& real_part() const { return _re; } //!< The real part \a x of \a x+iy
     X const& imaginary_part() const { return _im; } //!< The imaginary part \a y of \a x+iy
+
+    decltype(auto) precision() const { if constexpr (HasPrecisionType<X>::value) { return _re.precision(); } else { return Tuple<>(); } }
 
     ModulusType<X> modulus() const { return cast_positive( sqrt(add(sqr(this->_re),sqr(this->_im))) ); } //!< The modulus (absolute value) \f$r=\sqrt{x^2+y^2}\f$ of \f$x+iy\f$.
     ArgumentType<X> argument() const { return atan2(this->_re,this->_im); } //!< The argument (absolute value) \f$\theta=\atan(y/x)\f$ of \f$x+iy\f$.
@@ -201,6 +211,9 @@ template<class X> class Complex
     friend Complex<X>& operator-=(Complex<X>& z1, Complex<X> const& z2) { z1._re-=z2._re; z1._im-=z2._im; return z1; } //!< Inplace minus.
     friend Complex<X>& operator*=(Complex<X>& z1, Complex<X> const& z2) { return z1=mul(z1,z2); } //!< Inplace times.
     friend Complex<X>& operator/=(Complex<X>& z1, Complex<X> const& z2) { return z1=div(z1,z2); } //!< Inplace divides.
+
+    template<class Y, EnableIf<IsSame<ProductType<X,Y>,X>> = dummy> friend Complex<X>& operator*=(Complex<X>& z1, Complex<Y> const& z2) { return z1=mul(z1,z2); } //!< Inplace times.
+
     //@}
 
     //@{
@@ -210,6 +223,15 @@ template<class X> class Complex
 
     //@{
     //! \name Algebraic and transcendental functions
+    friend Complex<X> nul(Complex<X> const& z) { //!< A zero value with the same properties as \a z.
+        return Complex<X>(nul(z._re),nul(z._im)); }
+    friend Complex<X> neg(Complex<X> const& z) { //!< Negation \a -z.
+        return Complex<X>(neg(z._re),neg(z._im)); }
+    friend Complex<X> sqr(Complex<X> const& z) { //!< Square \a z^2.
+        return Complex<X>(sqr(z._re)-sqr(z._im),2*z._re*z._im); }
+    friend Complex<X> hlf(Complex<X> const& z) { //!< Half \a z/2.
+        return Complex<X>(hlf(z._re),hlf(z._im)); }
+/*
     friend Complex<X> add(Complex<X> const& z1, Complex<X> const& z2) {
         return Complex<X> (z1._re+z2._re,z1._im+z2._im); } //!< \brief Sum \a z1+z2.
     friend Complex<X> sub(Complex<X> const& z1, Complex<X> const& z2) {
@@ -218,7 +240,7 @@ template<class X> class Complex
         return Complex<X> (z1._re*z2._re-z1._im*z2._im,z1._re*z2._im+z1._im*z2._re); } //!< \brief Product \a z1×z2.
     friend Complex<X> div(Complex<X> const& z1, Complex<X> const& z2) {
         X ns=add(sqr(z2._re),sqr(z2._im)); return Complex<X> ((z1._re*z2._re+z1._im*z2._im)/ns,(z1._im*z2._re-z1._re*z2._im)/ns); } //!< \brief Quotient \a z1÷z2.
-
+*/
     friend Complex<X> sqrt(Complex<X> const& z) { //!< The square root of \a r, √\a r. Requires \a r ≥ 0.
         auto r=sqrt(z.modulus()); auto th=z.argument()/2; return Complex(r*cos(th),r*sin(th)); }
     friend Complex<X> exp(Complex<X> const& z) {
@@ -233,6 +255,7 @@ template<class X> class Complex
     //! \name Special complex number functions
     friend ModulusType<X> abs(Complex<X> const& z) { return z.modulus(); }
     friend decltype(auto) mag(Complex<X> const& z) { return cast_positive(sqrt(add(sqr(mag(z._re)),sqr(mag(z._im))))); } //!< Absolute value \a |r|.
+    friend decltype(auto) sqr_mag(Complex<X> const& z) { return add(sqr(mag(z._re)),sqr(mag(z._im))); } //!< Square of absolute value \a |r|.
     friend ArgumentType<X> arg(Complex<X> const& z) { return z.argument(); }
     friend Complex<X> conj(Complex<X> const& z) { return Complex<X>(z._re,-z._im); }
     //@}

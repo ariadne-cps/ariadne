@@ -1,6 +1,7 @@
 set(EXAMPLES_PDES
     dirichlet
     acoustic_first_order_pde
+    korteweg_devries
 )
 
 foreach(example ${EXAMPLES_PDES})

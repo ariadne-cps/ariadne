@@ -568,7 +568,7 @@ template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::at(const I&
     ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
-        iter=this->Expansion<I,X>::insert(iter,a,X(0));
+        iter=this->Expansion<I,X>::insert(iter,a,this->zero_coefficient());
     }
     return iter->coefficient();
 }

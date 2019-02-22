@@ -238,6 +238,22 @@ template<class I, class X> class ExpansionConstIterator
 };
 
 template<class I, class X> class ExpansionValueReference {
+  private: public:
+    Expansion<I,X>& _e; I const _a;
+  public:
+    ExpansionValueReference(Expansion<I,X>& e, const I& a) : _e(e), _a(a) { }
+    operator const X& () const { return _e.get(_a); }
+    //operator X& () { return _e.at(_a); }
+    ExpansionValueReference<I,X>& operator=(const X& x) { _e.at(_a)=x; return *this; }
+    ExpansionValueReference<I,X>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
+    ExpansionValueReference<I,X>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
+    ExpansionValueReference<I,X>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
+    ExpansionValueReference<I,X>& operator/=(X const& c) { _e.at(_a)/=c; return *this; }
+};
+
+template<class X> class ExpansionValueReference<MultiIndex,X> {
+    typedef MultiIndex I;
+  private: public:
     Expansion<I,X>& _e; I const& _a;
   public:
     ExpansionValueReference(Expansion<I,X>& e, const I& a) : _e(e), _a(a) { }

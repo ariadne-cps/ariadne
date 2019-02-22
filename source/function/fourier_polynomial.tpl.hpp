@@ -245,13 +245,13 @@ template<class I, class X> Map<I,X> mul(Map<I,X> const& a1, Map<I,X> const& a2) 
 
 template<class X> auto
 UnivariateFourierPolynomial<Complex<X>>::apply(Mul, UnivariateFourierPolynomial<Complex<X>> const& fp1, UnivariateFourierPolynomial<Complex<X>> const& fp2) -> UnivariateFourierPolynomial<Complex<X>> {
-    typedef short int I; typedef unsigned short int J;
+    typedef short int IB; typedef unsigned short int JB;
     PR pr=min(fp1.precision(),fp2.precision());
     X z(pr);
-    I l1=fp1._terms.front().index(); I u1=fp1._terms.back().index();
-    I l2=fp2._terms.front().index(); I u2=fp2._terms.back().index();
-    I l=l1+l2;
-    J n1=static_cast<J>(u1-l1); J n2=static_cast<J>(u2-l2); J n=n1+n2+1u;
+    IB l1=fp1._terms.front().index(); IB u1=fp1._terms.back().index();
+    IB l2=fp2._terms.front().index(); IB u2=fp2._terms.back().index();
+    IB l=l1+l2;
+    JB n1=static_cast<JB>(u1-l1); JB n2=static_cast<JB>(u2-l2); JB n=n1+n2+1u;
     assert(l1<=u1); assert(l2<=u2);
     Array<CX> buf(n,z);
     for (auto term1 : fp1._terms) {
@@ -262,7 +262,7 @@ UnivariateFourierPolynomial<Complex<X>>::apply(Mul, UnivariateFourierPolynomial<
     }
     UnivariateFourierPolynomial<Complex<X>> fpr(pr);
     for (SizeType i=0; i!=buf.size(); ++i) {
-        fpr._terms.append((J)i+l,buf[i]);
+        fpr._terms.append((JB)i+l,buf[i]);
     }
     return fpr;
 }
@@ -277,13 +277,11 @@ UnivariateFourierPolynomial<Complex<X>>::_write (OutputStream& os) const -> Outp
     for (auto term : this->_terms) {
         String c = to_str(term.coefficient());
         if (c[0]!='+' && c[0]!='-') { os << "+"; }
-        os << "(" << c << ")" << "*exp(i*" << term.index() << "*x)";
+        os << "(" << c << ")";
+        if (term.index()!=0) { os << "*exp("; if(term.index()!=1) { os << term.index() << "*"; } os << "i*x)"; }
     }
     return os;
 }
-
-
-
 
 /*
 

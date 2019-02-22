@@ -472,6 +472,7 @@ template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<
 
 
 template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
+    if (f1.domain()!=f2.domain()) { std::cerr << "op(f1,f2)\n  f1="<<f1<<"\n  f2="<<f2<<"\n"; }
     assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
 template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f) {

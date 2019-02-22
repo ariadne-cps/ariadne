@@ -129,7 +129,7 @@ template<class X> Void TestFourierPolynomial<X>::test_univariate() {
     ARIADNE_TEST_WITHIN((2*x*x-CX(1,0,pr))(y),CX(2*cos(2*y)-1,2*sin(2*y)),2*eps);
     ARIADNE_TEST_WITHIN((2*x*x-1)(y),CX(2*cos(2*y)-1,2*sin(2*y)),2*eps);
     ARIADNE_TEST_WITHIN((3*x*x*x-5*x)(y),CX(3*cos(3*y)-5*cos(y),3*sin(3*y)-5*sin(y)),2*eps);
-    ARIADNE_TEST_WITHIN((8*(sqr(x)-1)*sqr(x)+1)(y),CX(8*cos(4*y)-8*cos(2*y)-1,8*sin(4*y)-8*sin(2*y)),2*eps);
+    ARIADNE_TEST_WITHIN((8*(sqr(x)-1)*sqr(x)+1)(y),CX(8*cos(4*y)-8*cos(2*y)+1,8*sin(4*y)-8*sin(2*y)),2*eps);
 
     UnivariatePolynomial<X> p=UnivariatePolynomial<X>::coordinate();
     ARIADNE_TEST_PRINT(p);

@@ -2,6 +2,7 @@ set(UNIT_TESTS
     test_function
     test_polynomial
     test_chebyshev_polynomial
+    test_fourier_polynomial
     test_formula
     test_procedure
     test_taylor_function

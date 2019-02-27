@@ -97,10 +97,20 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
 
 template<class FM, class P, class D, class PR, class PRE> FM ScalarMultivariateFunctionModelMixin<FM,P,D,PR,PRE>::apply(OperatorCode op) const {
     const FM& f=static_cast<const FM&>(*this);
+    // TODO: Sould use compute(op,f) here, but this causes double inclusion of operators.tpl.hpp header
+    // return compute(op,f);
     switch(op) {
+        case OperatorCode::POS: return pos(f);
         case OperatorCode::NEG: return neg(f);
+        case OperatorCode::SQR: return sqr(f);
         case OperatorCode::REC: return rec(f);
+        case OperatorCode::SQRT: return sqrt(f);
         case OperatorCode::EXP: return exp(f);
+        case OperatorCode::LOG: return log(f);
+        case OperatorCode::SIN: return sin(f);
+        case OperatorCode::COS: return cos(f);
+        case OperatorCode::TAN: return tan(f);
+        case OperatorCode::ATAN: return atan(f);
         default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P,D,PR,PRE>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
     }
 }

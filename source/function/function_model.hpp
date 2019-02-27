@@ -336,7 +336,7 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
         return generic_pow(f1,n2); }
 
     template<class OP> static ScalarFunctionModel<P,D,PR,PRE> apply(OP op, const ScalarFunctionModel<P,D,PR,PRE>& f) {
-        ARIADNE_NOT_IMPLEMENTED; }
+        OperatorCode code=OP::code(); return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_apply(code)); }
 
 };
 

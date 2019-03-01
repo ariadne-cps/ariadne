@@ -1,5 +1,7 @@
 set(EXAMPLES_EXPERIMENTAL_HYBRID
 	laser
+    space_rendezvous
+    power_converters
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_HYBRID})

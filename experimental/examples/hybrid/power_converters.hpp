@@ -55,19 +55,19 @@ decltype(auto) make_buck_problem() {
 
     HybridAutomaton buck("buck");
 
-    HybridBoundedConstraintSet initial_set(swtch|open,{V==0,I==0,tau==0});
-//    HybridBoundedConstraintSet initial_set(swtch|open,{0.11_dec<=V<=0.12_dec,1.11_dec<=I<=1.12_dec,0.01<=tau<=0.001});
+    //HybridBoundedConstraintSet initial_set(swtch|open,{V==0,I==0,tau==0});
+    HybridBoundedConstraintSet initial_set(swtch|open,{0.11_dec<=V<=0.12_dec,1.11_dec<=I<=1.12_dec,0.01_dec<=tau<=0.001_dec});
 
     HybridConstraintSet safe_set;
     safe_set.adjoin(swtch|open,{V<=Vref+Verr});
-    safe_set.adjoin(swtch|closed,{V<=Vref+Verr});
-
+ //   safe_set.adjoin(swtch|closed,{V<=Vref+Verr});
+/*
     buck.new_mode(swtch|open, {dot(I)=-V/L, dot(V)=I/C-V/(R*C), dot(tau)=1});
     buck.new_mode(swtch|closed, {dot(I)=(1-V)/L, dot(V)=I/C-V/(R*C), dot(tau)=1});
 
-    buck.new_transition(swtch|closed,open_switch,swtch|open, next({I,V,tau})={I,V,Real(0)}, tau>=(1-D)*T, urgent);
-    buck.new_transition(swtch|open,close_switch,swtch|closed, {next(I)=I,next(V)=V,next(tau)=0}, tau>=D*T, urgent);
-
+    buck.new_transition(swtch|closed,open_switch,swtch|open, next({I,V,tau})={I,V,Real(0)}, tau>=(1-D)*T, EventKind::URGENT);
+    buck.new_transition(swtch|open,close_switch,swtch|closed, {next(I)=I,next(V)=V,next(tau)=0}, tau>=D*T, EventKind::URGENT);
+*/
     return make_problem(initial_set,buck,safe_set);
 }
 

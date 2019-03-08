@@ -606,6 +606,7 @@ template <class X> Tuple<Matrix<X>, unsigned> eigen_null(const Matrix<X> &G) {
   Eigen::FullPivLU<Eigen::MatrixXd> lu(A);
 
   Eigen::MatrixXd A_null_space = lu.kernel();
+<<<<<<< HEAD
   const unsigned n_null = A_null_space.rows();
   const unsigned m_null = A_null_space.cols();
   Matrix<X> G_null_space(n_null, m_null);
@@ -620,6 +621,22 @@ template <class X> Tuple<Matrix<X>, unsigned> eigen_null(const Matrix<X> &G) {
   // lu.rank -> FIX to A(i,:)=[0...0] bug!
   return make_tuple(G_null_space,
                     (infeasible) ? 0u : static_cast<unsigned>(lu.rank()));
+=======
+  const unsigned  n_null = A_null_space.rows();
+  const unsigned  m_null = A_null_space.cols();
+  Matrix<X>       G_null_space(n_null,m_null);
+  bool            infeasible=true;
+  for(unsigned i = 0; i<n_null;++i)
+  {
+    for(unsigned j=0;j<m_null;++j)
+      G_null_space[i][j]=static_cast<X>(A_null_space(i,j));
+    if(infeasible && G_null_space[i][0]!=0)
+      infeasible=false;
+  }
+
+  // lu.rank -> FIX to A(i,:)=[0...0] bug!
+  return make_tuple(G_null_space, (infeasible)?0u:static_cast<unsigned>(lu.rank()));
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 }
 
 template <class X> Matrix<X> eigen_pinv(const Matrix<X> &G) {
@@ -668,4 +685,8 @@ template <class X> Matrix<X> eigen_chol(const Matrix<X> &A) {
 
   return L;
 }
+<<<<<<< HEAD
 } // namespace Ariadne
+=======
+} //namesapce Ariadne
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.

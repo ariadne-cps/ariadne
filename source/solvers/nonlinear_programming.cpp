@@ -3240,10 +3240,18 @@ NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
   {
     return true;
   }
+  //
+  // ValidatedScalarMultivariateFunction tmp_1 = g[0]+100;
+  // for(unsigned i=1;i<g.result_size();++i)
+  //   tmp_1=tmp_1+g[i];
+  // std::cerr<<"tmp_1: "<<tmp_1<<"\n\n";
+  // auto  tmp = g[0];
+  // std::cerr<<"tmp: "<<tmp<<", g1+g1: "<<g[0]+g[0]<<"\n\n";
 
 
   const unsigned  n=domain.size();
   const unsigned  m=codomain.size();
+<<<<<<< HEAD
   const FloatDP   epsilon = static_cast<FloatDP>(std::sqrt(std::numeric_limits<double>::epsilon()));
   bool            found = false;
   Vector<FloatDP> L1(m,+epsilon);
@@ -3251,6 +3259,11 @@ NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
   const FloatDP   rtol = static_cast<FloatDP>(10e-16); // default of glpk tol
   Vector<FloatDP> w_lb = cast_raw(codomain.lower_bounds())+L1;
   Vector<FloatDP> w_ub = cast_raw(codomain.upper_bounds())+U1;
+=======
+  const FloatDP   rtol = static_cast<FloatDP>(10e-16); // default of glpk tol
+  Vector<FloatDP> w_lb = cast_raw(codomain.lower_bounds());
+  Vector<FloatDP> w_ub = cast_raw(codomain.upper_bounds());
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
   Vector<FloatDP> x_lb = cast_raw(domain.lower_bounds());
   Vector<FloatDP> x_ub = cast_raw(domain.upper_bounds());
 
@@ -3353,12 +3366,16 @@ NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
   };
 
   update();
+<<<<<<< HEAD
   Vector<FloatDP> p;
+=======
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
   for(unsigned i=0;i<1;++i)
   {
     p = x;
 
     qpsolver_ptr->feasible_hotstart(p,A,a,B,b,rtol);
+<<<<<<< HEAD
 
     x = x-p;
 
@@ -3366,6 +3383,13 @@ NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
     {
       found = true;
       break;
+=======
+    x = x+p;
+    // std::cerr<<"\t\tnew x: "<<x<<", p: "<<p<<"\n";
+    if(decide(check_feasibility(domain,g,codomain,cast_exact(x))))
+    {
+      return true;
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
     }
     if(norm(p)<rtol)
     {
@@ -3373,9 +3397,13 @@ NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
     }
     update();
   }
+<<<<<<< HEAD
 
 
   return found;
+=======
+  return false;
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 }
 
 ValidatedVector NonlinearSQPOptimiser::minimise(ValidatedScalarMultivariateFunction f,
@@ -3857,16 +3885,21 @@ NonlinearSQPOptimiser::check_feasibility(
                   const ExactBoxType& c, const ExactPoint& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
+<<<<<<< HEAD
         if(y[i]<d[i].lower() || y[i]>d[i].upper())
         {
           return false;
         }
+=======
+        if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
     }
 
     Vector<FloatDPBounds> fy=f(Vector<FloatDPBounds>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     ValidatedKleenean result=true;
     for(Nat j=0; j!=fy.size(); ++j) {
+<<<<<<< HEAD
         if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw())
         {
           return false;
@@ -3876,6 +3909,10 @@ NonlinearSQPOptimiser::check_feasibility(
           result=indeterminate;
           break;
         }
+=======
+        if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
+        if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; break;}
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
     }
     return result;
 }

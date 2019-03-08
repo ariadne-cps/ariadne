@@ -87,6 +87,7 @@ class ASMQPSolver : public Loggable {
   //! \brief Structure used in algorithm to store highly used variables and
   //! constants
   struct StepData;
+<<<<<<< HEAD
 
 public:
   //! \brief Find approximate optimal solution of \f$\min 1/2x^T Q x + x^T d
@@ -110,6 +111,57 @@ public:
   //! case x_bounds = false, xl=xu. If x_bounds = true then starting point x
   //! is the middle between xl and xu, and they are used as bounds (on
   //! constraints)
+=======
+  public:
+    //! \brief Find approximate optimal solution of \f$\min 1/2x^T Q x + x^T d
+    //! \text{ s.t. } l<=Ax<=u; x\geq0\f$. Returns the pair (x,y) where x is the
+    //! optimal point, and y the corresponding dual feasible point.
+    //! @param Q RawFloatMatrix
+    //! @param d RawFloatVector
+    //! @param xl Lower bounds on x. This is considered only if @param x_bounds
+    //! is set to true
+    //! @param xu Upper bounds on x. This is considered only if @param x_bounds
+    //! is set to true
+    //! @param A Matrix<FloatDP>
+    //! @param l RawFloatVector
+    //! @param u RawFloatVector
+    //! @param status Determines the status of solver when exit. It is a
+    //! reference used on an upper level i.e. SQP non linear programming. Only 2
+    //! status are catched here: -2 = QP did not converged in k_max steps; -3 =
+    //! QP failed due to singularity.
+    //! @param x_bounds Determines if xl or xu are used as bounds. If x_bounds =
+    //! false the bounds are not set and starting point x is equal to xl (in
+    //! case x_bounds = false, xl=xu. If x_bounds = true then starting point x
+    //! is the middle between xl and xu, and they are used as bounds (on
+    //! constraints)
+    Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>>
+    minimise(const RawFloatMatrix &Q, const RawFloatVector &d,
+             const RawFloatVector &xl, const RawFloatVector &xu,
+             const Matrix<FloatDP> &A, const RawFloatVector &l,
+             const RawFloatVector &u, int &status,
+             const RawFloatVector x0=Vector<FloatDP>()) const;
+
+
+    //! \brief Verify if the problem is feasible for a such x in Ax=a and Bx>=b with a rtol as tolerance
+    bool feasible(const RawFloatMatrix &A, const RawFloatVector &a,
+                  const RawFloatMatrix &B, const RawFloatVector &b,
+                  const RawFloatVector &x, const FloatDP &rtol) const;
+
+    //! \brief Implement the phase I where a feasible starting point is found. It uses glpk library.
+    void feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
+                           const Vector<FloatDP> &a, const Matrix<FloatDP> &B,
+                           const Vector<FloatDP> &b, const FloatDP &rtol) const;
+    //! \brief Normalize the problem to Ax=a and Bx>=b unifying all the bounds
+    Tuple<Matrix<FloatDP>, Vector<FloatDP>, Matrix<FloatDP>, Vector<FloatDP>>
+    normalize_problem(const Matrix<FloatDP> &A, const Vector<FloatDP> &A_lb,
+     const Vector<FloatDP> &A_ub, const Vector<FloatDP> &x,
+     const Vector<FloatDP> &x_lb, const Vector<FloatDP> &x_ub) const;
+
+  private:
+  const Vector<FloatDP>         EMPTY_VEC = Vector<FloatDP>();
+
+  //! \brief Internal minimise function wich take serialized problem inside v StepData structure
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
   Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>>
   minimise(const RawFloatMatrix &Q, const RawFloatVector &d,
            const RawFloatVector &xl, const RawFloatVector &xu,

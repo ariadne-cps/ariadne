@@ -398,6 +398,7 @@ void ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x,
       }
     }
   }
+<<<<<<< HEAD
   if (!eq_feasible)
     x_bar = eigen_pinv(A) * a;
 
@@ -413,6 +414,26 @@ void ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x,
     Vector<FloatDP> Bx = B * x_bar - b;
     for (unsigned i = 0; i < m_in; ++i) {
       if (Bx[i] < -rtol * (1 + abs(b[i]))) {
+=======
+  if(!eq_feasible)
+    x_bar = eigen_pinv(A)*a;
+
+  if(m_in>0)
+  {
+    if(m_eq>0)
+    {
+      auto nullA = eigen_null(A);
+      Z = std::get<0>(nullA);
+      zSize = std::get<1>(nullA);
+      if(zSize==0)
+      throw InfeasibleQuadraticProgram("A is square and full rank, but x_bar is not feasible");
+    }
+    Vector<FloatDP> Bx = B*x_bar - b;
+    for(unsigned i = 0; i<m_in;++i)
+    {
+      if(Bx[i]<-rtol*(1+abs(b[i])))
+      {
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
         in_feasible = false;
         break;
       }
@@ -459,6 +480,7 @@ void ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x,
     x_lb[i] = 0.0;
   // printVector(x_lb);
   int errnum = 0;
+<<<<<<< HEAD
   Vector<FloatDP> p = lp_min(e, IN, in, x_lb, errnum);
   // bool p_l_rtol = true;
   // FloatDP n2 = norm2(in);
@@ -473,6 +495,22 @@ void ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x,
   // }
   if (errnum != 0) // || !p_l_rtol)
   {
+=======
+  Vector<FloatDP> p = lp_min(e,IN,in,x_lb,errnum);
+  bool p_l_rtol = true;
+  FloatDP n2 = norm2(in);
+  FloatDP tolerance = rtol*(1+n2);
+  for(unsigned i=n-m_eq+1;i<p.size();++i)
+  {
+    if(p[i]>=tolerance)
+    {
+      p_l_rtol=false;
+      break;
+    }
+  }
+  if(errnum!=0 || !p_l_rtol)
+  {
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
     // ARIADNE_WARN("QP subproblem is infeasible!");
     throw InfeasibleQuadraticProgram(std::to_string(errnum));
   }
@@ -488,6 +526,7 @@ void ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x,
   ARIADNE_LOG(4, "Found x feasible: " << x << "\n");
 }
 
+<<<<<<< HEAD
 bool ASMQPSolver::feasible(const RawFloatMatrix &A, const RawFloatVector &a,
                            const RawFloatMatrix &B, const RawFloatVector &b,
                            const RawFloatVector &x, const FloatDP &rtol) const {
@@ -496,6 +535,21 @@ bool ASMQPSolver::feasible(const RawFloatMatrix &A, const RawFloatVector &a,
     Vector<FloatDP> Ax = A * x;
     for (unsigned i = 0; i < a.size(); ++i) {
       if (Ax[i] != a[i]) {
+=======
+bool
+ASMQPSolver::feasible(const RawFloatMatrix &A, const RawFloatVector &a,
+              const RawFloatMatrix &B, const RawFloatVector &b,
+              const RawFloatVector &x,const FloatDP &rtol) const
+{
+  bool ax_eq_a = true,bx_geq_b=true;
+  if(A.row_size()>0)
+  {
+    Vector<FloatDP> Ax = A*x;
+    for(unsigned i = 0; i<a.size();++i)
+    {
+      if(Ax[i]!=a[i])
+      {
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
         ax_eq_a = false;
         break;
       }

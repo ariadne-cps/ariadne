@@ -6,6 +6,7 @@
 
 #include <glpk.h>
 
+<<<<<<< HEAD
 namespace Ariadne {
 class IndefiniteMatrixException : public std::runtime_error {
 public:
@@ -18,6 +19,16 @@ public:
 template <class X>
 Vector<X> lp_min(const Vector<X> &C, const Matrix<X> &A, const Vector<X> &b,
                  const Vector<X> &lb, int &errnum);
+=======
+namespace Ariadne
+{
+  class IndefiniteMatrixException : public std::runtime_error
+  {
+  public:
+    IndefiniteMatrixException(const StringType &what) :
+      std::runtime_error(what){}
+  };
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting.
 // The matrix Q is built up as a composition of elementary Householder
@@ -66,9 +77,26 @@ template <class X> Tuple<Matrix<X>, unsigned> eigen_null(const Matrix<X> &G);
 // Compute the pseudo-inverse matrix operation
 template <class X> Matrix<X> eigen_pinv(const Matrix<X> &G);
 
+<<<<<<< HEAD
 // compute the Cholesky factorization using Eigen library
 template <class X> Matrix<X> eigen_chol(const Matrix<X> &A);
 
 } // namespace Ariadne
+=======
+  // Eigen computation of null space!
+  // @Warning if kernel has dimension 0, return a vector of only 0
+  template<class X> Tuple<Matrix<X>, unsigned>
+  eigen_null(const Matrix<X> &G);
+
+  // Compute the pseudo-inverse matrix operation
+  template<class X> Matrix<X>
+  eigen_pinv(const Matrix<X> &G);
+
+  // compute the Cholesky factorization using Eigen library
+  template<class X> Matrix<X>
+  eigen_chol(const Matrix<X> &A);
+
+} //namespace Ariadne
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 
 #include "impl/AlgebraAddOn.i.hpp"

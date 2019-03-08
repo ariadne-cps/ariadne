@@ -2,6 +2,7 @@
 #include <random>
 
 enum F_TYPE {
+<<<<<<< HEAD
   F_TEST_1 = 0,
   G_TEST_1 = 1,
   F_TEST_2 = 2,
@@ -12,6 +13,17 @@ enum F_TYPE {
   F_TEST_5 = 7,
   F_TEST_6 = 8,
   F_TEST_7 = 9
+=======
+    F_TEST_1 = 0,
+    G_TEST_1 = 1,
+    F_TEST_2 = 2,
+    G_TEST_2 = 3,
+    G_TEST_3 = 4,
+    F_TEST_4 = 5,
+    G_TEST_4 = 6,
+    F_TEST_5 = 7,
+    F_TEST_6 = 8
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 };
 
 template <class X, F_TYPE Y> class FunctionDistribution;

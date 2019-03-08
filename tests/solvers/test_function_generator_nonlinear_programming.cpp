@@ -370,6 +370,7 @@ public:
   }
 };
 
+<<<<<<< HEAD
 Int main(Int argc, const char *argv[]) {
   Nat optimiser_verbosity = get_verbosity(argc, argv);
   int seed = 0;
@@ -387,4 +388,98 @@ Int main(Int argc, const char *argv[]) {
   TestOptimiser(nlmop).test("nlmop", seed);
 
   return ARIADNE_TEST_FAILURES;
+=======
+template<class X>
+void dfs(const Formula<X>& a)
+{
+  switch(a.kind()) {
+      case OperatorKind::UNARY:
+        std::cerr<<"Compute unary: "<<compute(a.op(),Real(1)).get_d()<<"\n";
+      case OperatorKind::SCALAR:
+      case OperatorKind::GRADED:
+      case OperatorKind::COORDINATE:
+      case OperatorKind::NULLARY:
+        std::cerr<<"Found operator "<<a.kind()<<" is "<<a.op()<<"\n";
+
+        return;
+      case OperatorKind::BINARY:
+        dfs(a.arg1());
+        dfs(a.arg2());
+        return;
+      default: ARIADNE_FAIL_MSG("WTF\n");
+    }
+}
+void bfs();
+
+ValidatedVectorMultivariateFunctionModelDP
+forward_backwardCtr(const EffectiveVectorMultivariateFunction& f,
+  const ValidatedVectorMultivariateFunctionModelDP& id,
+  const ValidatedVectorMultivariateFunctionModelDP& h)
+  {
+    auto tmp = make_formula(f);
+
+    std::cerr<<"tmp: "<<tmp<<"\n";
+
+    auto formula = tmp[0];
+
+    std::cerr<<"formula: "<<formula<<"\n";
+
+    Vector<Interval<Value<FloatDP> > > domain = f.domain();
+    Vector<Real> a = {1,1};
+
+    auto evaluation = evaluate(formula,a);
+
+    std::cerr<<evaluate(formula,a)<<"\n";
+
+    dfs(formula);
+
+    return h;
+  }
+
+FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+
+Int main(Int argc, const char *argv[])
+{
+    // Nat optimiser_verbosity = get_verbosity(argc, argv);
+    //
+    // // unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    // unsigned seed = 0;
+    //
+    //
+    // NonlinearSQPOptimiser nlsqp;
+    // nlsqp.verbosity = optimiser_verbosity;
+    // TestOptimiser(nlsqp).test("nlsqp", seed);
+    // // return ARIADNE_TEST_FAILURES;
+    //
+    // NonlinearInteriorPointOptimiser nlipm;
+    // nlipm.verbosity = optimiser_verbosity;
+    // TestOptimiser(nlipm).test("nlipm", seed);
+    // // return ARIADNE_TEST_FAILURES;
+    //
+    //
+    // NonlinearInfeasibleInteriorPointOptimiser nliipm;
+    // nliipm.verbosity = optimiser_verbosity;
+    // TestOptimiser(nliipm).test("nliipm", seed);
+    // // return ARIADNE_TEST_FAILURES;
+    //
+    //
+    // NonlinearMixedOptimiser nlmop;
+    // nlmop.verbosity = optimiser_verbosity;
+    // TestOptimiser(nlmop).test("nlmop",seed);
+
+    std::shared_ptr< SolverBase > solver_ptr=std::shared_ptr<SolverBase>(new IntervalNewtonSolver(1e-8,12));
+    List<EffectiveScalarMultivariateFunction> x = EffectiveScalarMultivariateFunction::coordinates(2);
+
+    ExactBoxType ip = {{1,1},{1,1}};
+    ExactBoxType ix = {{1,1},{1,1}};
+
+    ExactBoxType C(1, ExactIntervalType(-1, 100));
+    ExactBoxType testC(1, ExactIntervalType(-1.01, 100.01));
+
+    EffectiveVectorMultivariateFunction f={x[0] + 2 * (sin(x[1]) + x[0]) - x[1]};
+    ValidatedVectorMultivariateFunctionModelDP id(solver_ptr->function_factory().create_identity(ip));
+    ValidatedVectorMultivariateFunctionModelDP h(solver_ptr->function_factory().create_constants(ip,cast_singleton(ix)));
+    forward_backwardCtr(f,id,h);
+    return ARIADNE_TEST_FAILURES;
+>>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
 }

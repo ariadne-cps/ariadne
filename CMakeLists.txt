@@ -148,7 +148,7 @@ add_subdirectory(source)
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(tutorials)
-add_subdirectory(experimental EXCLUDE_FROM_ALL)
+add_subdirectory(experimental)
 
 find_package(PythonLibs)
 if(PYTHONLIBS_FOUND)

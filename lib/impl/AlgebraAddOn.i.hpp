@@ -677,14 +677,17 @@ eigen_null(const Matrix<X> &G)
   const unsigned  n_null = A_null_space.rows();
   const unsigned  m_null = A_null_space.cols();
   Matrix<X>       G_null_space(n_null,m_null);
+  bool            infeasible=true;
   for(unsigned i = 0; i<n_null;++i)
   {
     for(unsigned j=0;j<m_null;++j)
       G_null_space[i][j]=static_cast<X>(A_null_space(i,j));
+    if(infeasible && G_null_space[i][0]!=0)
+      infeasible=false;
   }
 
   // lu.rank -> FIX to A(i,:)=[0...0] bug!
-  return make_tuple(G_null_space, static_cast<unsigned>(lu.rank()));
+  return make_tuple(G_null_space, (infeasible)?0u:static_cast<unsigned>(lu.rank()));
 }
 
 template<class X> Matrix<X>
@@ -741,5 +744,4 @@ eigen_chol(const Matrix<X> &A)
 
   return L;
 }
-
 } //namesapce Ariadne

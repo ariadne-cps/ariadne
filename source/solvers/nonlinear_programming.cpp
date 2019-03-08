@@ -3190,44 +3190,36 @@ void NonlinearSQPOptimiser::initialize_step_data(
     v.B[i][i]=static_cast<FloatDP>(1.0);
 }
 
-ApproximateVector
-NonlinearSQPOptimiser::feasible_point(ExactBoxType domain,
-                                      ValidatedVectorMultivariateFunction g,
-                                      ExactBoxType codomain) const
+
+bool
+NonlinearSQPOptimiser::feasible_point(const ExactBoxType domain,
+                                      const ValidatedVectorMultivariateFunction g,
+                                      const ExactBoxType codomain,
+                                      RawFloatVector &x) const
 {
   ARIADNE_LOG(2, "NonlinearSQPOptimiser::feasible_point(D,g,C)\n");
   ARIADNE_LOG(2, "domain=" << domain << " g=" << g << " codomain=" << codomain << "\n");
-  // qpsolver_ptr->verbosity=this->verbosity;
 
-  UpperBoxType gD = apply(g, domain);
-  if (definitely(disjoint(gD, codomain))) {
-    throw InfeasibleProblemException();
+  if(decide(check_feasibility(domain,g,codomain,cast_exact(x))))
+  {
+    return true;
   }
+  //
+  // ValidatedScalarMultivariateFunction tmp_1 = g[0]+100;
+  // for(unsigned i=1;i<g.result_size();++i)
+  //   tmp_1=tmp_1+g[i];
+  // std::cerr<<"tmp_1: "<<tmp_1<<"\n\n";
+  // auto  tmp = g[0];
+  // std::cerr<<"tmp: "<<tmp<<", g1+g1: "<<g[0]+g[0]<<"\n\n";
 
   const unsigned  n=domain.size();
   const unsigned  m=codomain.size();
-  const FloatDP   rtol = static_cast<FloatDP>(10e-7); // default of glpk tol
+  const FloatDP   rtol = static_cast<FloatDP>(10e-16); // default of glpk tol
   Vector<FloatDP> w_lb = cast_raw(codomain.lower_bounds());
   Vector<FloatDP> w_ub = cast_raw(codomain.upper_bounds());
   Vector<FloatDP> x_lb = cast_raw(domain.lower_bounds());
   Vector<FloatDP> x_ub = cast_raw(domain.upper_bounds());
-  Vector<FloatDP> x=cast_raw(midpoint(domain));
-  for(unsigned i=0;i<n;++i)
-  {
-    if(is_inf(x_lb[i]) && is_inf(x_ub[i]))
-      x[i]=0;
-    else if(is_inf(x_lb[i]) && not(is_inf(x_ub[i])))
-      x[i]=x_ub[i];
-    else if(not(is_inf(x_lb[i])) && is_inf(x_ub[i]))
-      x[i]=x_lb[i];
-    else
-    {
-      break;
-    }
-  }
 
-  Matrix<FloatDP>         A,B;
-  Vector<FloatDP>         a,b;
   std::vector<unsigned>   w_eq,w_in_ub,w_in_lb;
   std::vector<unsigned>   x_eq,x_in_ub,x_in_lb;
 
@@ -3272,10 +3264,10 @@ NonlinearSQPOptimiser::feasible_point(ExactBoxType domain,
   const unsigned          m_in_x_in=m_in_lb+m_in_ub+n_in_lb;
 
 
-  A.resize(aSize,n);
-  a.resize(aSize);
-  B.resize(bSize,n);
-  b.resize(bSize);
+  Matrix<FloatDP>         A(aSize,n);
+  Matrix<FloatDP>         B(bSize, n);
+  Vector<FloatDP>         a(aSize);
+  Vector<FloatDP>         b(bSize);
 
   auto update = [&]() -> void
   {
@@ -3327,14 +3319,15 @@ NonlinearSQPOptimiser::feasible_point(ExactBoxType domain,
   };
 
   update();
-  for(unsigned i=0;i<10;++i)
+  for(unsigned i=0;i<1;++i)
   {
     Vector<FloatDP> p = x;
     qpsolver_ptr->feasible_hotstart(p,A,a,B,b,rtol);
     x = x+p;
-    if(probably(feasible(ExactBoxType(x),g,codomain)))
+    // std::cerr<<"\t\tnew x: "<<x<<", p: "<<p<<"\n";
+    if(decide(check_feasibility(domain,g,codomain,cast_exact(x))))
     {
-        return ApproximateVector(x);
+      return true;
     }
     if(norm(p)<rtol)
     {
@@ -3342,7 +3335,7 @@ NonlinearSQPOptimiser::feasible_point(ExactBoxType domain,
     }
     update();
   }
-  throw InfeasibleProblemException();
+  return false;
 }
 
 ValidatedVector NonlinearSQPOptimiser::minimise(ValidatedScalarMultivariateFunction f,
@@ -3806,6 +3799,27 @@ ValidatedKleenean NonlinearSQPOptimiser::feasible(ExactBoxType D,
     return true;
   return indeterminate;
 }
+
+ValidatedKleenean
+NonlinearSQPOptimiser::check_feasibility(
+                  const ExactBoxType& d,
+                  const ValidatedVectorMultivariateFunction& f,
+                  const ExactBoxType& c, const ExactPoint& y) const
+{
+    for(Nat i=0; i!=y.size(); ++i) {
+        if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
+    }
+
+    Vector<FloatDPBounds> fy=f(Vector<FloatDPBounds>(y));
+    ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
+    ValidatedKleenean result=true;
+    for(Nat j=0; j!=fy.size(); ++j) {
+        if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
+        if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; break;}
+    }
+    return result;
+}
+
 
 
 //----------------------------------------------------------------------------//

@@ -36,7 +36,6 @@
 #include "../utility/tuple.hpp"
 
 #include "../solvers/quadratic_programming.hpp"
-
 namespace Ariadne {
 
 template <class X, class R> class Constraint;
@@ -393,8 +392,17 @@ class NonlinearSQPOptimiser : public OptimiserBase
     virtual ValidatedKleenean
     feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
-    ApproximateVector
-    feasible_point(ExactBoxType domain, ValidatedVectorMultivariateFunction g, ExactBoxType codomain) const;
+
+    virtual ValidatedKleenean
+    check_feasibility(const ExactBoxType& d,
+                      const ValidatedVectorMultivariateFunction& f,
+                      const ExactBoxType& c, const ExactPoint& y) const;
+
+    bool
+    feasible_point(const ExactBoxType domain,
+                   const ValidatedVectorMultivariateFunction g,
+                   const ExactBoxType codomain,
+                   RawFloatVector &point) const;
 
     //! Take a step on a descendent direction of function f s.t. g
     Void feasibility_step(const ExactBoxType &D,

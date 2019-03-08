@@ -8,7 +8,6 @@
 
 namespace Ariadne
 {
-
   class IndefiniteMatrixException : public std::runtime_error
   {
   public:
@@ -67,7 +66,8 @@ namespace Ariadne
   template<class X> Tuple< Vector<X>, X >
   eigen_eigs(const Matrix<X> &A);
 
-
+  // Eigen computation of null space!
+  // @Warning if kernel has dimension 0, return a vector of only 0
   template<class X> Tuple<Matrix<X>, unsigned>
   eigen_null(const Matrix<X> &G);
 

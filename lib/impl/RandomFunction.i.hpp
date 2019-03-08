@@ -26,7 +26,7 @@ class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
                                                              engine.max_order);
         Ariadne::Int expi = 2;
         std::default_random_engine generator(seed);
-        std::uniform_int_distribution<int> distribution(-1, 1);
+        std::uniform_int_distribution<int> distribution(1, 1);
 
         for (unsigned i = 0; i < size; ++i) {
             for (unsigned j = 0; j < engine.max_order; ++j, expi++)
@@ -437,6 +437,66 @@ class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
             )
             );
         }
+
+        return Ariadne::EffectiveScalarMultivariateFunction(
+            Ariadne::EuclideanDomain(size), Ariadne::simplify(polynomial));
+    }
+
+  private:
+    size_t size;
+    unsigned seed;
+    std::vector<VType> x;
+};
+
+//----------------------------------------------------------------------------//
+//              F_5(X) = sum_i rand(-10,10) * e^(rand(-1,1)*x_i)
+//----------------------------------------------------------------------------//
+
+template <>
+class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
+                           F_TEST_6>
+{
+    using VType = Ariadne::EffectiveFormula;
+    using X = Ariadne::EffectiveScalarMultivariateFunction;
+
+  public:
+    FunctionDistribution(size_t size)
+    {
+        this->size = size;
+        x = std::vector<VType>(size);
+        unsigned i = 0;
+        for (; i < size; ++i)
+            x[i] = VType::coordinate(i);
+    }
+    X operator()(RandomPolynomialEngine &engine, int _seed = -1)
+    {
+        if (_seed == -1)
+            seed = engine.seed;
+
+        Ariadne::Vector<Ariadne::EffectiveFormula> monomials(size *
+                                                             engine.max_order);
+        Ariadne::Int expi = 0;
+        std::default_random_engine generator(seed);
+        std::uniform_int_distribution<int> distribution(1, 1);
+
+        for (unsigned i = 0; i < size; ++i) {
+            for (unsigned j = 0; j < engine.max_order; ++j, expi++)
+            {
+                monomials[engine.max_order * i + j] =
+                    Ariadne::EffectiveFormula::binary(
+                        Ariadne::OperatorCode::MUL,
+                        Ariadne::EffectiveFormula::constant(
+                            distribution(generator)),
+                        Ariadne::EffectiveFormula::graded(
+                            Ariadne::OperatorCode::POW, x[i], expi));
+            }
+            expi = 0;
+        }
+
+        Ariadne::EffectiveFormula polynomial;
+        for (unsigned k = 0; k < size * engine.max_order; ++k)
+            polynomial = Ariadne::EffectiveFormula::binary(
+                Ariadne::OperatorCode::ADD, polynomial, monomials[k]);
 
         return Ariadne::EffectiveScalarMultivariateFunction(
             Ariadne::EuclideanDomain(size), Ariadne::simplify(polynomial));

@@ -75,8 +75,74 @@ inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) 
 }
 
 
+void printscalarFun(ValidatedScalarMultivariateFunction &f)
+{
+  std::cerr<<f<<"\n";
+}
+
+void printscalarFun(ValidatedVectorMultivariateFunction &f)
+{
+  std::cerr<<f<<"\n";
+}
+
+Pair<ValidatedKleenean,ExactPoint> __feasible__(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints)
+{
+  if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
+
+  ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
+  ExactBoxType codomain(constraints.size());
+  ValidatedScalarMultivariateFunction barrier_function(domain.size());
+  EffectiveVectorMultivariateFunction empty_function(0u, domain.size());
+  ExactBoxType empty_box = ExactBoxType{};
+  NonlinearSQPOptimiser nlsqp;
+  NonlinearInteriorPointOptimiser nlipm;
+  nlsqp.verbosity=6;
+
+  Ariadne::EffectiveScalarMultivariateFunction mu(
+    Ariadne::EuclideanDomain(domain.size()),
+    Ariadne::simplify(Ariadne::EffectiveFormula::constant(
+      Real(0.5)
+    )));
+
+  for(Nat i=0; i!=constraints.size(); ++i) {
+      function[i]=constraints[i].function();
+      codomain[i]=constraints[i].bounds();
+      // std::cerr<<"l: "<<codomain[i].lower()<<", u: "<<codomain[i].upper()<<"\n\n";
+      if(codomain[i].lower()==codomain[i].upper())
+      {
+        barrier_function = barrier_function + 1/(2*mu)*pow(function[i],2);
+        continue;
+      }
+      barrier_function = barrier_function - 1/(function[i]);
+
+  }
+
+  UpperBoxType image=apply(function,domain);
+  for(Nat i=0; i!=image.size(); ++i) {
+      if(definitely(disjoint(image[i],codomain[i]))) {
+          return make_pair(false,ExactPoint());
+      }
+  }
+
+  if(decide(nlsqp.check_feasibility(domain,function,codomain,midpoint(domain))))
+  {
+    return make_pair(true,midpoint(domain));
+  }
+
+
+  auto optimal_x = nlsqp.minimise(barrier_function,domain,empty_function,empty_box);
+  // std::cerr<<"Minimum of nlsqp: "<<optimal_x<<"\n";
+  if(decide(nlsqp.check_feasibility(domain,function,codomain,cast_exact(optimal_x))))
+  {
+    return make_pair(true,cast_exact(optimal_x));
+  }
+  return make_pair(indeterminate,cast_exact(optimal_x));
+}
+
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
+
+    // return __feasible__(domain,constraints);
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
     ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
@@ -89,27 +155,8 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     return this->feasible(domain,function,bounds);
 }
 
-
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
-
-  //std::cerr<<"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n";
-  // std::cerr<<apply(function,domain)<<"\n";
-  NonlinearSQPOptimiser nlsqp;
-  try
-  {
-    auto optimal_x=nlsqp.feasible_point(domain,function,codomain);
-    // std::cerr<<"feasible point: "<<ApproximateVector(optimal_x)<<"\n";
-    return make_pair(true,ExactPoint(cast_exact(optimal_x)));
-  }
-  catch(InfeasibleProblemException ipe)
-  {
-    // std::cerr<<"Is infeasible\n";
-    return make_pair(false,ExactPoint());
-  }
-
-
-
     static const FloatDPValue XSIGMA=0.125_exact;
     static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
     static const FloatDP _inf = Ariadne::inf;
@@ -130,6 +177,25 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
             bounds[i]=intersection(codomain[i],image[i]);
         }
     }
+
+    // std::cerr<<"F: "<<function<<"\n\n";
+    //
+    NonlinearSQPOptimiser nlsqp;
+    RawFloatVector optimal_x = cast_raw(midpoint(domain));
+    bool is_feasible = false;
+    try
+    {
+       is_feasible = nlsqp.feasible_point(domain, function, codomain, optimal_x);
+    }
+    catch(InfeasibleQuadraticProgram ipq)
+    {
+      // std::cerr<<"\t[4]\tindeterminate, qp subproblem is infeasible\n";
+      return make_pair(indeterminate, cast_exact(optimal_x));
+    }
+    if(is_feasible)
+      return make_pair(true,cast_exact(optimal_x));
+
+    return make_pair(indeterminate, cast_exact(optimal_x));
 
     const Nat m=domain.size(); // The total number of variables
     const Nat n=codomain.size(); // The total number of nontrivial constraints
@@ -158,14 +224,21 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"    t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
+        // std::cerr<<"t: "<<t<<", TERR: "<<TERR<<"\n";
         if(decide(t>=TERR)) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
-            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point)))) { return make_pair(true,cast_exact(point)); }
-            else { ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n"); return make_pair(indeterminate,cast_exact(point)); }
+            if(definitely(this->check_feasibility(domain,function,codomain,cast_exact(point))))
+            {
+              return make_pair(true,cast_exact(point));
+            }
+            else
+            {
+              ARIADNE_LOG(2,"f(y)="<<fn(cast_exact(y))<<"\n");
+              return make_pair(indeterminate,cast_exact(point));
+            }
         }
     }
 
-    std::cerr<<"#{#{#\tt:"<<t<<", y:"<<y<<", x:"<<x<<", z:"<<z<<"\n";
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
 
     if(decide(t<TERR)) {
@@ -177,11 +250,18 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         // This should be easier than using all constraints separately
         ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
         ValidatedNumericType cnst(0,prec);
+
+        std::cerr<<"--------------------------\nPrima del primo ciclo:\n";
+        std::cerr<<"x_exact: "<<x_exact<<"\n";
+        std::cerr<<"txg: "<<txg<<"\ncnst: "<<cnst<<"\n";
         for(Nat j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
         }
+        std::cerr<<"--------------------------\nPrima del secondo ciclo:\n";
+        std::cerr<<"txg: "<<txg<<"\ncnst: "<<cnst<<"\n";
         for(Nat i=0; i!=m; ++i) {
+          std::cerr<<"i: "<<i<<", ValidatedScalarMultivariateTaylorFunctionModelDP: "<<ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper())<<"\n";
             txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
         }

@@ -136,7 +136,7 @@ class ASMQPSolver : public Loggable
     normalize_problem(const Matrix<FloatDP> &A, const Vector<FloatDP> &A_lb,
      const Vector<FloatDP> &A_ub, const Vector<FloatDP> &x,
      const Vector<FloatDP> &x_lb, const Vector<FloatDP> &x_ub) const;
-     
+
   private:
   const Vector<FloatDP>         EMPTY_VEC = Vector<FloatDP>();
 

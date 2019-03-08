@@ -9,7 +9,8 @@ enum F_TYPE {
     G_TEST_3 = 4,
     F_TEST_4 = 5,
     G_TEST_4 = 6,
-    F_TEST_5 = 7
+    F_TEST_5 = 7,
+    F_TEST_6 = 8
 };
 
 template <class X, F_TYPE Y> class FunctionDistribution;

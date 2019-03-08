@@ -457,19 +457,19 @@ ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
 
   if(m_in>0)
   {
+    if(m_eq>0)
+    {
+      auto nullA = eigen_null(A);
+      Z = std::get<0>(nullA);
+      zSize = std::get<1>(nullA);
+      if(zSize==0)
+      throw InfeasibleQuadraticProgram("A is square and full rank, but x_bar is not feasible");
+    }
     Vector<FloatDP> Bx = B*x_bar - b;
     for(unsigned i = 0; i<m_in;++i)
     {
       if(Bx[i]<-rtol*(1+abs(b[i])))
       {
-        if(m_eq>0)
-        {
-          auto nullA = eigen_null(A);
-          Z = std::get<0>(nullA);
-          zSize = std::get<1>(nullA);
-          if(zSize==0)
-            throw InfeasibleQuadraticProgram("A is square and full rank, but x_bar is not feasible");
-        }
         in_feasible = false;
         break;
       }
@@ -483,7 +483,7 @@ ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
     return;
   }
 
-  // Try to solve the problem of feasible region with Interior Point method
+  // Try to solve the problem of feasible region with Simplex method
   //    position on a vertex of polytope
   for(unsigned i=n-m_eq ;i<m_tot;++i)
     e[i]=1.0;
@@ -524,17 +524,19 @@ ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
   int errnum = 0;
   Vector<FloatDP> p = lp_min(e,IN,in,x_lb,errnum);
   bool p_l_rtol = true;
+  FloatDP n2 = norm2(in);
+  FloatDP tolerance = rtol*(1+n2);
   for(unsigned i=n-m_eq+1;i<p.size();++i)
   {
-    if(p[i]>=rtol*(1+norm2(in)))
+    if(p[i]>=tolerance)
     {
       p_l_rtol=false;
       break;
     }
   }
-  if(errnum!=0)// || !p_l_rtol)
+  if(errnum!=0 || !p_l_rtol)
   {
-    ARIADNE_WARN("QP subproblem is infeasible!");
+    // ARIADNE_WARN("QP subproblem is infeasible!");
     throw InfeasibleQuadraticProgram(std::to_string(errnum));
   }
   if(m_eq>0)
@@ -551,8 +553,6 @@ ASMQPSolver::feasible_hotstart(Vector<FloatDP> &x, const Matrix<FloatDP> &A,
   }
   ARIADNE_LOG(4,"Found x feasible: "<<x<<"\n");
 }
-
-
 
 bool
 ASMQPSolver::feasible(const RawFloatMatrix &A, const RawFloatVector &a,

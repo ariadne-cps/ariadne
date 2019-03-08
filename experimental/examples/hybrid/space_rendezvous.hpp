@@ -36,6 +36,7 @@ decltype(auto) make_space_rendezvous_problem() {
     RealVariable rc("rc");
     RealVariable ux("ux");
     RealVariable uy("uy");
+    RealVariable av("av");
 
     RealConstant mu("mu",3.986e14_dec*3600_dec);
     RealConstant r("r",42164000);
@@ -58,7 +59,7 @@ decltype(auto) make_space_rendezvous_problem() {
     HybridBoundedConstraintSet initial_set(spacecraft|approaching,{t==0,-925<=x<=-875,-425<=y<=-375,vx==0,vy==0});
 
     HybridConstraintSet safe_set;
-    safe_set.adjoin(spacecraft|rendezvous,{x>=-100_dec,y>=x*tan(Ariadne::pi/6u),-y>=x*tan(Ariadne::pi/6u),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
+    safe_set.adjoin(spacecraft|rendezvous,{y>=x*tan(Ariadne::pi/6u),-y>=x*tan(Ariadne::pi/6u),sqrt(sqr(vx)+sqr(vy))<=3.3_dec});
     safe_set.adjoin(spacecraft|aborting,{x<=-0.2_dec,x>=0.2_dec,y<=-0.2_dec,y>=0.2_dec});
 
     auto rc_dyn = sqrt(sqr(r+x)+sqr(y));

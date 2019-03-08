@@ -464,7 +464,7 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
             <<" se="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<sup_norm(starting_set.state_function().errors())<<std::fixed<<std::flush
             <<" l="<<std::left<<starting_set.location()
             <<" e="<<starting_set.previous_events()
-            <<"                      \n"<<std::setprecision(old_precision));
+            <<"\n"<<std::setprecision(old_precision));
     ARIADNE_LOG(4,"\r    \r"<<starting_set<<"\n");
 
 }

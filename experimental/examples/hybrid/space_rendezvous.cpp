@@ -46,17 +46,35 @@ void verify_space_rendezvous() {
 
     GeneralHybridEvolver evolver(system);
     evolver.set_integrator(integrator);
-    evolver.configuration().set_maximum_step_size(8);
+    evolver.configuration().set_maximum_step_size(0.5);
     evolver.verbosity=1;
 
     cout << "\nComputing orbit...\n";
-    HybridTime evolution_time(200.0,3);
+    HybridTime evolution_time(200.0,1);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
-    RealVariable t("t"), x("x"), y("y");
+    StringVariable spacecraft("spacecraft");
+    StringConstant approaching("approaching");
+    StringConstant rendezvous("rendezvous");
+    StringConstant aborting("aborting");
+
+    for (auto reach : orbit.reach()) {
+        if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
+            cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+        }
+        if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach.bounding_box())))) {
+            cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+        }
+    }
+
+    RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
+
+    cout << "\nReach size = " << orbit.reach().size() << "\n";
 
     cout << "\nDrawing orbit...\n";
-    plot("space_rendezvous_x_y",{-1000<=x<=200,-450<=y<=0},Colour(.5,.0,.5),orbit.reach());
+    plot("space_rendezvous_x_y",{-1000<=x<=0,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
+    plot("space_rendezvous_t_vx",{0<=t<=200,-2<=vx<=10_dec},Colour(.5,.0,.5),orbit.reach());
+    plot("space_rendezvous_t_vy",{0<=t<=200,-2<=vy<=10_dec},Colour(.5,.0,.5),orbit.reach());
 }
 
 

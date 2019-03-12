@@ -14,12 +14,12 @@ matrix:
 
     - name: macOS 10.13 + AppleClang 10 + Python 3
       os: osx
-      osx_image: xcode10
+      osx_image: xcode10.1
       env: COMPILER=clang++ PYTHON=3 
       
     - name: macOS 10.13 + GCC 8 + Python 2 [NoCairo, NoGTK]
       os: osx
-      osx_image: xcode10
+      osx_image: xcode10.1
       env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
       
 #    - name: macOS 10.13 + AppleClang 10 + Python 3 [Debug, NoGTK]

@@ -374,7 +374,7 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 
 
 
-#ifdef HAVE_GTK2_H
+#if defined(HAVE_GTK2_H) && defined(HAVE_CAIRO_H)
 
 void paint (GtkWidget *widget, GdkEventExpose *eev, gpointer gdata);
 

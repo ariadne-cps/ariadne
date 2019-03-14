@@ -1469,6 +1469,22 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& func
     return result;
 }
 
+Enclosure recombine(const List<Enclosure>& sets) {
+    ARIADNE_ASSERT(sets.size()>=2);
+
+    SizeType n=sets.size();
+    typedef List<Enclosure>::ConstIterator ConstIterator;
+
+    ConstIterator iter=sets.begin();
+
+
+    for(++iter;iter!=sets.end();++iter) {
+
+    }
+
+    // TODO: deal with constraints, currently dropping all of them
+}
+
 } // namespace Ariadne
 
 

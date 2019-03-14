@@ -369,6 +369,9 @@ Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclo
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
 Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
 
+//! \related Enclosure \brief The recombination of a list of sets into a single enclosure.
+Enclosure recombine(const List<Enclosure>& sets);
+
 } //namespace Ariadne
 
 #endif /* ARIADNE_TAYLOR_SET_HPP */

@@ -351,6 +351,7 @@ class Enclosure
     friend Enclosure product(const Enclosure&, const ExactIntervalType&);
     friend Enclosure product(const Enclosure&, const ExactBoxType&);
     friend Enclosure product(const Enclosure&, const Enclosure&);
+    friend Enclosure recombine(const List<Enclosure>&);
 };
 
 //! \related Enclosure \brief Stream output operator.

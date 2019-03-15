@@ -1469,18 +1469,98 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& func
     return result;
 }
 
+ValidatedVectorMultivariateTaylorFunctionModelDP recombine_with_common_domain(const List<ValidatedVectorMultivariateTaylorFunctionModelDP>& fl) {
+
+    List<ValidatedVectorMultivariateTaylorFunctionModelDP>::ConstIterator iter=fl.begin();
+    auto domain = iter->domain();
+
+    ValidatedTaylorModelDP num_elements = ValidatedTaylorModelDP::constant(domain.size(),fl.size(),iter->properties());
+    ValidatedTaylorModelDP zero = ValidatedTaylorModelDP::zero(domain.size(),iter->properties());
+
+    Vector<ValidatedTaylorModelDP> average_models = iter->models();
+    for(++iter;iter!=fl.end();++iter) {
+        average_models = average_models + iter->models();
+    }
+    average_models = average_models/num_elements;
+
+    Vector<ValidatedTaylorModelDP> result_models = average_models;
+
+    for (SizeType i=0; i<result_models.size();++i) {
+        ErrorType max_distance;
+        for (auto f : fl) {
+            max_distance = max(max_distance,abs(average_models[i]-f.models()[i]).norm());
+        }
+        result_models[i].set_error(result_models[i].error()+max_distance);
+    }
+
+    return ValidatedVectorMultivariateTaylorFunctionModelDP(domain,result_models);
+}
+
+ValidatedScalarMultivariateTaylorFunctionModelDP scalar_recombine_with_common_domain(const List<ValidatedScalarMultivariateTaylorFunctionModelDP>& fl) {
+
+    List<ValidatedScalarMultivariateTaylorFunctionModelDP>::ConstIterator iter=fl.begin();
+    auto domain = iter->domain();
+
+    ValidatedTaylorModelDP num_elements = ValidatedTaylorModelDP::constant(domain.size(),fl.size(),iter->properties());
+    ValidatedTaylorModelDP zero = ValidatedTaylorModelDP::zero(domain.size(),iter->properties());
+
+    ValidatedTaylorModelDP average_model = iter->model();
+    for(++iter;iter!=fl.end();++iter) {
+        average_model = average_model + iter->model();
+    }
+    average_model = average_model/num_elements;
+
+    ValidatedTaylorModelDP result_model = average_model;
+
+        ErrorType max_distance;
+        for (auto f : fl) {
+            max_distance = max(max_distance,abs(average_model-f.model()).norm());
+        }
+        result_model.set_error(result_model.error()+max_distance);
+
+    return ValidatedScalarMultivariateTaylorFunctionModelDP(domain,result_model);
+}
+
 Enclosure recombine(const List<Enclosure>& sets) {
     ARIADNE_ASSERT(sets.size()>=2);
 
-    SizeType n=sets.size();
-    typedef List<Enclosure>::ConstIterator ConstIterator;
+    List<Enclosure>::ConstIterator iter=sets.begin();
 
-    ConstIterator iter=sets.begin();
+    ExactBoxType result_domain=iter->domain();
+    auto auxiliary_mapping=iter->_auxiliary_mapping;
+    const EnclosureConfiguration& configuration=iter->configuration();
 
+    auto first_item_ptr = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(&iter->state_function().reference());
+    if(!first_item_ptr) {
+        ARIADNE_ERROR("Cannot recombine enclosures not given by TaylorFunctions.");
+    }
 
     for(++iter;iter!=sets.end();++iter) {
-
+        result_domain = hull(result_domain,iter->domain());
     }
+
+    List<ValidatedVectorMultivariateTaylorFunctionModelDP> state_function_list;
+    List<ValidatedScalarMultivariateTaylorFunctionModelDP> time_function_list, dwell_time_function_list;
+    for(Enclosure set : sets) {
+        auto state_function = dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(set.state_function().reference());
+        state_function_list.append(ValidatedVectorMultivariateTaylorFunctionModelDP(result_domain,state_function.models()));
+        auto time_function = dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(set.time_function().reference());
+        time_function_list.append(ValidatedScalarMultivariateTaylorFunctionModelDP(result_domain,time_function.model()));
+        auto dwell_time_function = dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(set.dwell_time_function().reference());
+        dwell_time_function_list.append(ValidatedScalarMultivariateTaylorFunctionModelDP(result_domain,dwell_time_function.model()));
+    }
+
+    ValidatedVectorMultivariateFunction result_state_function = recombine_with_common_domain(state_function_list);
+    ValidatedScalarMultivariateFunctionModelDP result_time_function = scalar_recombine_with_common_domain(time_function_list);
+    ValidatedScalarMultivariateFunctionModelDP result_dwell_time_function = scalar_recombine_with_common_domain(dwell_time_function_list);
+
+    Enclosure result(result_domain,result_state_function,configuration);
+
+    result._time_function = result_time_function;
+    result._dwell_time_function = result_dwell_time_function;
+    result._auxiliary_mapping = auxiliary_mapping;
+
+    return result;
 
     // TODO: deal with constraints, currently dropping all of them
 }

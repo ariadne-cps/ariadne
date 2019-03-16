@@ -679,6 +679,31 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
+HybridEnclosure recombine(const List<HybridEnclosure>& enclosures) {
+
+    ARIADNE_ASSERT(enclosures.size() >= 2);
+
+    // ASSUMPTION: the event trace and the current location is the same for all enclosures (i.e., has been checked previously when dispatching for recombination)
+    // Note: it may be worth changing the function signature to operate on Enclosure instead, and also supply all common hybrid data
+
+    const HybridEnclosure& first = enclosures.at(0);
+
+    List<Enclosure> sets;
+
+    for (HybridEnclosure he : enclosures)
+        sets.append(he._set);
+
+    Enclosure recombined_set = recombine(sets);
+
+    HybridEnclosure result(first._location,first.state_space(),recombined_set);
+    result._events = first._events;
+    result._state_space = first._state_space;
+    result._auxiliary_space = first._auxiliary_space;
+    result._variables = first._variables;
+
+    return result;
+}
+
 Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat depth) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();

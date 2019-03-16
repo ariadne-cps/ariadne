@@ -1475,7 +1475,6 @@ ValidatedVectorMultivariateTaylorFunctionModelDP recombine_with_common_domain(co
     auto domain = iter->domain();
 
     ValidatedTaylorModelDP num_elements = ValidatedTaylorModelDP::constant(domain.size(),fl.size(),iter->properties());
-    ValidatedTaylorModelDP zero = ValidatedTaylorModelDP::zero(domain.size(),iter->properties());
 
     Vector<ValidatedTaylorModelDP> average_models = iter->models();
     for(++iter;iter!=fl.end();++iter) {
@@ -1488,7 +1487,7 @@ ValidatedVectorMultivariateTaylorFunctionModelDP recombine_with_common_domain(co
     for (SizeType i=0; i<result_models.size();++i) {
         ErrorType max_distance;
         for (auto f : fl) {
-            max_distance = max(max_distance,abs(average_models[i]-f.models()[i]).norm());
+            max_distance = max(max_distance,(average_models[i]-f.models()[i]).norm());
         }
         result_models[i].set_error(result_models[i].error()+max_distance);
     }
@@ -1512,11 +1511,11 @@ ValidatedScalarMultivariateTaylorFunctionModelDP scalar_recombine_with_common_do
 
     ValidatedTaylorModelDP result_model = average_model;
 
-        ErrorType max_distance;
-        for (auto f : fl) {
-            max_distance = max(max_distance,abs(average_model-f.model()).norm());
-        }
-        result_model.set_error(result_model.error()+max_distance);
+    ErrorType max_distance;
+    for (auto f : fl) {
+        max_distance = max(max_distance,(average_model-f.model()).norm());
+    }
+    //result_model.set_error(result_model.error()+max_distance);
 
     return ValidatedScalarMultivariateTaylorFunctionModelDP(domain,result_model);
 }

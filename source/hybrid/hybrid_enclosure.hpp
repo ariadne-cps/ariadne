@@ -323,6 +323,7 @@ class HybridEnclosure
     //! \brief Write a full representation to an output stream which can be used in a constructor.
     OutputStream& repr(OutputStream&) const;
   private:
+    friend HybridEnclosure recombine(const List<HybridEnclosure>&);
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
     Void _apply_flow(ValidatedVectorMultivariateFunction phi, FloatDPValue step);
@@ -335,6 +336,9 @@ class HybridEnclosure
     List<ValidatedConstraint> constraints() const;
 
 };
+
+//! \related Hybrid Enclosure \brief The recombination of a list of hybrid enclosures into a single hybrid enclosure.
+HybridEnclosure recombine(const List<HybridEnclosure>& enclosures);
 
 ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hbx);
 inline ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }

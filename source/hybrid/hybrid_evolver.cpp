@@ -314,6 +314,23 @@ orbit(const HybridEnclosure& initial,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
+        SizeType recombined_elements = 23u;
+        if (evolution_data.initial_sets.size() > recombined_elements-1u) {
+            std::cout << "recombining..." << std::endl;
+            SizeType num_initial_sets = 0u;
+            List<HybridEnclosure> recombined_list;
+            while (num_initial_sets < evolution_data.initial_sets.size()) {
+                List<HybridEnclosure> to_recombine;
+                for (auto i=num_initial_sets; i<num_initial_sets+recombined_elements;++i) {
+                    if (i<evolution_data.initial_sets.size())
+                        to_recombine.append(evolution_data.initial_sets.at(i));
+                }
+                recombined_list.append(recombine(to_recombine));
+                num_initial_sets += recombined_elements;
+            }
+            evolution_data.initial_sets.clear();
+            evolution_data.initial_sets.append(recombined_list);
+        }
         this->_evolution_in_mode(evolution_data,termination);
     }
     ARIADNE_ASSERT(evolution_data.initial_sets.empty());

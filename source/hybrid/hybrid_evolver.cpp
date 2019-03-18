@@ -465,7 +465,8 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
     UpperIntervalType starting_dwell_time_range=starting_set.dwell_time_range();
     Int old_precision = std::clog.precision();
     ARIADNE_LOG(1,(verbosity==1?"\r":"")
-            <<"#w="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
+            <<"#i="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
+            <<"#w="<<std::setw(4)<<std::left<<evolution_data.working_sets.size()+1u
             <<"#r="<<std::setw(5)<<std::left<<evolution_data.reach_sets.size()
             <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
             <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()

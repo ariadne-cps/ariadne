@@ -28,7 +28,6 @@
 
 namespace Ariadne {
 
-
 // Declare functions and specialisations
 template<class X> LogicType<X> compare(OperatorCode cmp, const X& x1, const X& x2);
 template<> Boolean compare(OperatorCode cmp, const String& s1, const String& s2);
@@ -53,30 +52,6 @@ template<> String compute(OperatorCode op, const String& s, Int n);
 template<> Integer compute(OperatorCode op, const Integer& z, Int n);
 
 
-template<class L> decltype(not declval<L>()) UnaryLogicalOperator::operator()(L&& l) const {
-    switch(this->_code) {
-        case Code::NOT: return not std::forward<L>(l);
-    }
-}
-
-template<class X> X UnaryElementaryOperator::operator()(X&& x) const {
-    switch(this->_code) {
-        case Code::POS: return pos(std::forward<X>(x));
-        case Code::NEG: return neg(std::forward<X>(x));
-        case Code::SQR: return sqr(std::forward<X>(x));
-        case Code::REC: return rec(std::forward<X>(x));
-        case Code::SQRT: return sqrt(std::forward<X>(x));
-        case Code::EXP: return exp(std::forward<X>(x));
-        case Code::LOG: return log(std::forward<X>(x));
-        case Code::SIN: return sin(std::forward<X>(x));
-        case Code::COS: return cos(std::forward<X>(x));
-        case Code::TAN: return tan(std::forward<X>(x));
-        case Code::ASIN: return asin(std::forward<X>(x));
-        case Code::ACOS: return acos(std::forward<X>(x));
-        case Code::ATAN: return atan(std::forward<X>(x));
-        default: assert(false);
-    }
-}
 template<class X> X compute(OperatorCode op, X const& x) {
     switch(op) {
         case OperatorCode::POS: return pos(x);
@@ -109,49 +84,19 @@ template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2&
     }
 }
 
-template<class X> X UnaryLatticeOperator::operator()(X&& x) const {
-    switch(this->_code) {
-        case Code::ABS: return abs(std::forward<X>(x));
-    }
-};
-
-template<class X> LogicType<X> BinaryComparisonOperator::operator()(const X& x1, const X& x2) const {
-    switch(this->_code) {
-        // FIXME: Should be able to use == and != directly
-        case Code::EQ:  return x1<=x2 && x2<=x2;
-        case Code::NEQ: return !(x1<=x2 && x2<=x2);
-        case Code::GT:  return x1> x2;
-        case Code::GEQ: return x1>=x2;
-        case Code::LT:  return x1< x2;
-        case Code::LEQ: return x1<=x2;
-        default: assert(false);
-    }
-}
 
 template<class X> LogicType<X> compare(OperatorCode cmp, const X& x1, const X& x2) {
-    return BinaryComparisonOperator(cmp).operator()(x1,x2);
-}
-
-template<class L> L BinaryLogicalOperator::operator()(L&& l1, L&& l2) const {
-    switch(this->_code) {
-        case Code::AND: return std::forward<L>(l1) && std::forward<L>(l2);
-        case Code::OR: return std::forward<L>(l1) || std::forward<L>(l2);
-        case Code::XOR: return std::forward<L>(l1) ^ std::forward<L>(l2);
-        case Code::IMPL: return !std::forward<L>(l1) || std::forward<L>(l2);
+    switch(cmp) {
+        // FIXME: Should be able to use == and != directly
+        case OperatorCode::EQ:  return x1<=x2 && x2<=x2;
+        case OperatorCode::NEQ: return !(x1<=x2 && x2<=x2);
+        case OperatorCode::GT:  return x1> x2;
+        case OperatorCode::GEQ: return x1>=x2;
+        case OperatorCode::LT:  return x1< x2;
+        case OperatorCode::LEQ: return x1<=x2;
         default: assert(false);
     }
 }
-
-template<class X1, class X2> ArithmeticType<X1,X2> BinaryArithmeticOperator::operator()(X1&& x1, X2&& x2) const {
-    switch(this->_code) {
-        case Code::ADD: return std::forward<X1>(x1)+std::forward<X2>(x2);
-        case Code::SUB: return std::forward<X1>(x1)-std::forward<X2>(x2);
-        case Code::MUL: return std::forward<X1>(x1)*std::forward<X2>(x2);
-        case Code::DIV: return std::forward<X1>(x1)/std::forward<X2>(x2);
-        default: assert(false);
-    }
-}
-
 
 
 template<class X> X compute(OperatorCode op, const X& x, Int n) {

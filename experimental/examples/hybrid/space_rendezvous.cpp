@@ -50,7 +50,7 @@ void verify_space_rendezvous() {
     evolver.verbosity=1;
 
     cout << "\nComputing orbit...\n";
-    HybridTime evolution_time(200.0,1);
+    HybridTime evolution_time(200.0,3);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
     StringVariable spacecraft("spacecraft");

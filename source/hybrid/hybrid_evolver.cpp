@@ -314,7 +314,7 @@ orbit(const HybridEnclosure& initial,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
-        SizeType recombined_elements = 23u;
+        SizeType recombined_elements = 24u;
         if (evolution_data.initial_sets.size() > recombined_elements-1u) {
             std::cout << "recombining..." << std::endl;
             SizeType num_initial_sets = 0u;

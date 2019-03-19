@@ -56,6 +56,8 @@ Real log(Real const&);
 Real sin(Real const&);
 Real cos(Real const&);
 Real tan(Real const&);
+Real asin(Real const&);
+Real acos(Real const&);
 Real atan(Real const&);
 
 template<> struct DispatchingTraits<Integer> { typedef Aware<Integer> AwareOfTypes; };

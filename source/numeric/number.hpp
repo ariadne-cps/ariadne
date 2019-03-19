@@ -233,29 +233,33 @@ template<class P> class Number
     friend Number<P>& operator*=(Number<P>& y1, Number<P> const& y2) { return y1=y1*y2; }
     friend Number<P>& operator/=(Number<P>& y1, Number<NP> const& y2) { return y1=y1/y2; }
 
-    friend Number<P> pos(Number<P> const& y) { return Number<P>(y.ref()._apply(Pos())); }
-    friend Number<NP> neg(Number<P> const& y) { return Number<NP>(y.ref()._apply(Neg())); }
-    friend Number<P> sqr(Number<P> const& y) { return Number<P>(y.ref()._apply(Sqr())); }
-    friend Number<NP> rec(Number<P> const& y) { return Number<NP>(y.ref()._apply(Rec())); }
-    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Add(),&y2.ref())); }
-    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._apply(Sub(),&y2.ref())); }
-    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Mul(),&y2.ref())); }
-    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return Number<P>(y1.ref()._apply(Div(),&y2.ref())); }
+    friend Number<P> nul(Number<P> const& y) { return _apply<P>(Nul(),y); }
+    friend Number<P> pos(Number<P> const& y) { return _apply<P>(Pos(),y); }
+    friend Number<NP> neg(Number<P> const& y) { return _apply<NP>(Neg(),y); }
+    friend Number<P> sqr(Number<P> const& y) { return _apply<P>(Sqr(),y); }
+    friend Number<P> hlf(Number<P> const& y) { return _apply<P>(Hlf(),y); }
+    friend Number<NP> rec(Number<P> const& y) { return _apply<NP>(Rec(),y); }
+    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Add(),y1,y2); }
+    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Sub(),y1,y2); }
+    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Mul(),y1,y2); }
+    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Div(),y1,y2); }
+    friend Number<P> sqrt(Number<P> const& y) { return _apply<P>(Sqrt(),y); }
+    friend Number<P> exp(Number<P> const& y) { return _apply<P>(Exp(),y); }
+    friend Number<P> log(Number<P> const& y) { return _apply<P>(Log(),y); }
+    friend Number<SP> sin(Number<P> const& y) { return _apply<SP>(Sin(),y); }
+    friend Number<SP> cos(Number<P> const& y) { return _apply<SP>(Cos(),y); }
+    friend Number<P> tan(Number<P> const& y) { return _apply<P>(Tan(),y); }
+    friend Number<SP> asin(Number<P> const& y) { return _apply<SP>(Asin(),y); }
+    friend Number<SP> acos(Number<P> const& y) { return _apply<SP>(Acos(),y); }
+    friend Number<P> atan(Number<P> const& y) { return _apply<P>(Atan(),y); }
 
-    friend Number<P> sqrt(Number<P> const& y) { return Number<P>(y.ref()._apply(Sqrt())); }
-    friend Number<P> exp(Number<P> const& y) { return Number<P>(y.ref()._apply(Exp())); }
-    friend Number<P> log(Number<P> const& y) { return Number<P>(y.ref()._apply(Log())); }
-    friend Number<SP> sin(Number<P> const& y) { return Number<SP>(y.ref()._apply(Sin())); }
-    friend Number<SP> cos(Number<P> const& y) { return Number<SP>(y.ref()._apply(Cos())); }
-    friend Number<P> tan(Number<P> const& y) { return Number<P>(y.ref()._apply(Tan())); }
-    friend Number<P> atan(Number<P> const& y) { return Number<P>(y.ref()._apply(Atan())); }
+    friend Number<P> pow(Number<P> const& y, Nat m) { return _apply<P>(Pow(),y,m); }
+    friend Number<SP> pow(Number<P> const& y, Int n) { return _apply<P>(Pow(),y,n); }
 
-    friend Number<P> pow(Number<P> const& y, Nat m) { return Number<P>(y.ref()._apply(Pow(),m)); }
-    friend Number<SP> pow(Number<P> const& y, Int n) { return Number<SP>(y.ref()._apply(Pow(),n)); }
+    friend Positive<Number<SP>> abs(Number<P> const& y) { return Positive<Number<SP>>(_apply<P>(Abs(),y)); }
+    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Max(),y1,y2); }
+    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Min(),y1,y2); }
 
-    friend Positive<Number<SP>> abs(Number<P> const& y) { return Positive<Number<SP>>(y.ref()._apply(Abs())); }
-    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Max(),&y2.ref())); }
-    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return Number<P>(y1.ref()._apply(Min(),&y2.ref())); }
 
     friend LogicalType<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
         return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); }
@@ -269,6 +273,11 @@ template<class P> class Number
     String class_name() const { return this->ref()._class_name(); }
 
     friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }
+  private:
+    template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y) { return Number<RP>(y.ref()._apply(op)); }
+    template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y, Int n) { return Number<RP>(y.ref()._apply(op,n)); }
+    template<class RP, class OP, class P1, class P2> static Number<RP> _apply(OP op, Number<P1> const& y1, Number<P2> const& y2) {
+        return Number<RP>(y1.ref()._apply(op,&y2.ref())); }
 };
 
 

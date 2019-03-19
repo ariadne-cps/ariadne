@@ -62,33 +62,11 @@ class NumberInterface
     virtual NumberInterface* _copy() const = 0;
     virtual NumberInterface* _move() = 0;
 
-    virtual NumberInterface* _apply(Add op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Sub op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Mul op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Div op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Add op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Sub op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Mul op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Div op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(UnaryElementaryOperator op) const = 0;
+    virtual NumberInterface* _apply(BinaryElementaryOperator op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _rapply(BinaryElementaryOperator op, NumberInterface const* y) const = 0;
+    virtual NumberInterface* _apply(GradedElementaryOperator op, Int n) const = 0;
 
-    virtual NumberInterface* _apply(Pos op) const = 0;
-    virtual NumberInterface* _apply(Neg op) const = 0;
-    virtual NumberInterface* _apply(Sqr op) const = 0;
-    virtual NumberInterface* _apply(Rec op) const = 0;
-    virtual NumberInterface* _apply(Pow op, Int n) const = 0;
-    virtual NumberInterface* _apply(Sqrt op) const = 0;
-    virtual NumberInterface* _apply(Exp op) const = 0;
-    virtual NumberInterface* _apply(Log op) const = 0;
-    virtual NumberInterface* _apply(Sin op) const = 0;
-    virtual NumberInterface* _apply(Cos op) const = 0;
-    virtual NumberInterface* _apply(Tan op) const = 0;
-    virtual NumberInterface* _apply(Atan op) const = 0;
-
-    virtual NumberInterface* _apply(Abs op) const = 0;
-    virtual NumberInterface* _apply(Max op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _apply(Min op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Max op, NumberInterface const* y) const = 0;
-    virtual NumberInterface* _rapply(Min op, NumberInterface const* y) const = 0;
 
     virtual Rational _get_q() const = 0;
 

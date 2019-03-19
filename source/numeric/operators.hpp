@@ -153,7 +153,7 @@ const char* symbol(const OperatorCode& op);
 
 
 template<class X> LogicType<X> compare(OperatorCode op, const X& x1, const X& x2);
-//template<class X> X compute(OperatorCode op, const X& x);
+template<class X> X compute(OperatorCode op, const X& x);
 template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
 template<class X> X compute(OperatorCode op, const X& x, Int n);
 template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
@@ -471,13 +471,19 @@ struct UnaryLatticeOperator : OperatorVariant<Abs> { using OperatorVariant::Oper
 struct BinaryLogicalOperator : OperatorVariant<AndOp,OrOp> { using OperatorVariant::OperatorVariant; };
 struct BinaryComparisonOperator : OperatorVariant<Equal,Unequal,Less,Gtr,Leq,Geq> { using OperatorVariant::OperatorVariant; };
 struct BinaryLatticeOperator : OperatorVariant<Max,Min> { using OperatorVariant::OperatorVariant; };
-struct BinaryArithmeticOperator : OperatorVariant<Add,Sub,Mul,Div> { using OperatorVariant::OperatorVariant;
+struct BinaryRingOperator : OperatorVariant<Add,Sub,Mul> { using OperatorVariant::OperatorVariant;
+    template<class X1,class X2> ArithmeticType<X1,X2> operator()(X1&& x1, X2&& x2) const {
+        return this->visit([&x1,&x2](auto op){return static_cast<ArithmeticType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+struct BinaryFieldOperator : OperatorVariant<Add,Sub,Mul,Div> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
         return this->visit([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+using BinaryArithmeticOperator = BinaryFieldOperator;
 struct BinaryElementaryOperator : OperatorVariant<Add,Sub,Mul,Div,Max,Min> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
         return this->visit([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
-struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant; };
+struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
+    template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
+        return this->visit([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
 struct TernaryArithmeticOperator : OperatorVariant<Fma> { using OperatorVariant::OperatorVariant; };
 
 

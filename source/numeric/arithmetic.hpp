@@ -351,6 +351,8 @@ template<class X, class R=X, class PR=R> struct DeclareRingOperations
 template<class X, class R=X> struct DeclareFieldOperations
     : DeclareRingOperations<X,R>, DeclareInplaceFieldOperators<X,R>
 {
+    //! \brief Half \a x/2.
+    friend R hlf(X const& x);
     //! \brief Reciprocal \a 1/x.
     friend R rec(X const& x);
     //! \brief Quotient \a x1/x2. May be implemented in terms of mul() and rec() as <code>mul(x1,rec(x2))</code>.

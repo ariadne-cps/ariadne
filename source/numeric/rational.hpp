@@ -100,6 +100,8 @@ class Rational
     friend Real sin(Real const&);
     friend Real cos(Real const&);
     friend Real tan(Real const&);
+    friend Real asin(Real const&);
+    friend Real acos(Real const&);
     friend Real atan(Real const&);
 
     friend Sign sgn(Rational const& q);

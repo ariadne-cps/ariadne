@@ -43,7 +43,7 @@
 
 using namespace Ariadne;
 
-typedef Algebra<EffectiveNumericType> EffectiveAlgebra;
+typedef ElementaryAlgebra<EffectiveNumericType> EffectiveElementaryAlgebra;
 typedef SymbolicAlgebra<EffectiveNumericType> EffectiveSymbolicAlgebra;
 
 class TestExpression {
@@ -328,10 +328,11 @@ class TestExpression {
         //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
 
-        EffectiveAlgebra ax=RealExpression(x);
-        EffectiveAlgebra ay=RealExpression(y);
-        EffectiveAlgebra az=RealExpression(z);
-        Vector<EffectiveAlgebra> va={ax,ay,az};
+        EffectiveElementaryAlgebra ax=RealExpression(x);
+        EffectiveElementaryAlgebra ay=RealExpression(y);
+        EffectiveElementaryAlgebra az=RealExpression(z);
+        Vector<EffectiveElementaryAlgebra> va={ax,ay,az};
+        ARIADNE_TEST_PRINT(va);
         ARIADNE_TEST_PRINT(f3(va));
         ARIADNE_TEST_PRINT(f3(va).extract<RealExpression>());
         ARIADNE_TEST_EQUALS(evaluate(f3(va).extract<RealExpression>(),tw),evaluate(e3,tw));

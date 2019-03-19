@@ -148,14 +148,16 @@ template<class P> class FunctionFacade<P,BoxDomainType,BoxDomainType> {
 
 template<class P, class D, class C> class DeclareFunctionOperations;
 template<class P, class D> class DeclareFunctionOperations<P,D,IntervalDomainType>
-    : DeclareTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
+    : DeclareElementaryAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
 template<class P, class D> class DeclareFunctionOperations<P,D,BoxDomainType>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Vector<Number<P>>,Number<P>> { };
 
 //! \brief A mixin which provides Scalar/Vector function methods and friends.
 template<class P, class D, class C> class DispatchFunctionOperations;
 template<class P, class D> class DispatchFunctionOperations<P,D,IntervalDomainType>
-    : DispatchTranscendentalAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>> { };
+    : DispatchElementaryAlgebraOperations<Function<P,D,IntervalDomainType>,Number<P>>
+{
+};
 template<class P, class D> class DispatchFunctionOperations<P,D,BoxDomainType>
     : DeclareVectorAlgebraOperators<Function<P,D,BoxDomainType>,Function<P,D,IntervalDomainType>,Vector<Number<P>>,Number<P>> { };
 
@@ -355,6 +357,11 @@ template<class P, class D> struct AlgebraOperations<ScalarFunction<P,D>,Number<P
     using F=ScalarFunction<P,D>;
     using C=Number<P>;
     using Base=AlgebraOperationsBase<ScalarFunction<P,D>>;
+    static ScalarFunction<P,D> apply(BinaryElementaryOperator op, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
+    static ScalarFunction<P,D> apply(UnaryElementaryOperator op, ScalarFunction<P,D> const& f);
+    static ScalarFunction<P,D> apply(BinaryArithmeticOperator op, ScalarFunction<P,D> const& f1, Number<P> const& c2);
+    static ScalarFunction<P,D> apply(GradedElementaryOperator op, ScalarFunction<P,D> const& f, Int n);
+/*
     static ScalarFunction<P,D> apply(Pos, ScalarFunction<P,D> const& f);
     static ScalarFunction<P,D> apply(Neg, ScalarFunction<P,D> const& f);
     static ScalarFunction<P,D> apply(Sqr, ScalarFunction<P,D> const& f);
@@ -378,6 +385,7 @@ template<class P, class D> struct AlgebraOperations<ScalarFunction<P,D>,Number<P
     static ScalarFunction<P,D> apply(Min, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
     static ScalarFunction<P,D> apply(Max, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
     static ScalarFunction<P,D> apply(Abs, ScalarFunction<P,D> const& f);
+*/
 };
 
 template<class P, class D, class C> inline OutputStream&

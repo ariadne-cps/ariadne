@@ -104,7 +104,7 @@ template<class M> class ScaledFunctionPatchCreator;
 template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
     typedef typename M::NumericType NumericType;
   public:
-    template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f);
+    static ScaledFunctionPatch<M> apply(UnaryElementaryOperator op, ScaledFunctionPatch<M> const& f);
     template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2);
     template<class OP> static ScaledFunctionPatch<M> apply(OP op, ScaledFunctionPatch<M> const& f1, NumericType const& c2);
     template<class OP> static ScaledFunctionPatch<M> apply(OP op, NumericType const& c1, ScaledFunctionPatch<M> const& f2);
@@ -396,15 +396,6 @@ template<class M> class ScaledFunctionPatch
         Pair<ModelType,ModelType> models=split(f.model(),j); Pair<BoxDomainType,BoxDomainType> subdomains=split(f.domain(),j);
         return make_pair(ScaledFunctionPatch<M>(subdomains.first,models.first), ScaledFunctionPatch<M>(subdomains.second,models.second)); }
 
-/*
-    friend ScaledFunctionPatch<M>& operator+=(ScaledFunctionPatch<M>& f, const NumericType& c) { f.model()+=c; return f; }
-    friend ScaledFunctionPatch<M>& operator*=(ScaledFunctionPatch<M>& f, const NumericType& c) { f.model()*=c; return f; }
-    friend ScaledFunctionPatch<M> operator-(const ScaledFunctionPatch<M>& f) { return apply(Neg(),f); }
-    friend ScaledFunctionPatch<M> operator+(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Add(),f1,f2); }
-    friend ScaledFunctionPatch<M> operator-(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Sub(),f1,f2); }
-    friend ScaledFunctionPatch<M> operator*(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Mul(),f1,f2); }
-    friend ScaledFunctionPatch<M> operator/(const ScaledFunctionPatch<M>& f1, const ScaledFunctionPatch<M>& f2) { return apply(Div(),f1,f2); }
-*/
     friend ScaledFunctionPatch<M> derivative(const ScaledFunctionPatch<M>& f, SizeType k) {
         return ScaledFunctionPatch<M>(f.domain(),derivative(f.model(),k)/rad(f.domain()[k])); }
     friend ScaledFunctionPatch<M> antiderivative(const ScaledFunctionPatch<M>& f, SizeType k) {
@@ -457,10 +448,10 @@ template<class FP1, class FP2> Void check_function_patch_domain(String const& op
                     op_str<<"((Vector)ScaledFunctionPatch<M> f1, (Vector)ScaledFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
                     ": domains are disjoint");
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_apply(OP op, ScaledFunctionPatch<M> const& f) {
+template<class M> template<class OP> inline ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_apply(OP op, ScaledFunctionPatch<M> const& f) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
+template<class M> template<class OP> inline ScaledFunctionPatch<M> ScaledFunctionPatch<M>::_apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
     check_function_patch_domain(to_str(op),f1,f2);
     if(f1.domain()==f2.domain()) {
         return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
@@ -474,7 +465,7 @@ template<class M> template<class OP> ScaledFunctionPatch<M> ScaledFunctionPatch<
 template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
     assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
-template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f) {
+template<class M> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(UnaryElementaryOperator op, ScaledFunctionPatch<M> const& f) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model()));
 }
 template<class M> template<class OP> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(OP op, ScaledFunctionPatch<M> const& f1, typename M::NumericType const& c2) {

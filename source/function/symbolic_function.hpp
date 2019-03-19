@@ -187,7 +187,7 @@ struct UnaryFunction
     typedef D DomainType;
     typedef ElementSizeType<D> ArgumentSizeType;
 
-    UnaryFunction(const OperatorCode& op, const ScalarFunction<P,D>& arg)
+    UnaryFunction(const UnaryElementaryOperator& op, const ScalarFunction<P,D>& arg)
         : _op(op), _arg(arg) { }
     virtual UnaryFunction<P,D>* clone() const { return new UnaryFunction<P,D>(*this); }
     virtual const DomainType domain() const { return this->_arg.domain(); }
@@ -199,7 +199,7 @@ struct UnaryFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op, _arg, _arg.derivative(j));
+        return compute_derivative(_op.code(), _arg, _arg.derivative(j));
     }
 
     virtual OutputStream& repr(OutputStream& os) const {
@@ -208,9 +208,9 @@ struct UnaryFunction
         return os << _op << '(' << _arg << ')'; }
 
     template<class X> inline Void _compute(X& r, const ElementType<D,X>& x) const {
-        r=compute(_op,_arg.evaluate(x)); }
+        r=_op(_arg.evaluate(x)); }
 
-    OperatorCode _op;
+    UnaryElementaryOperator _op;
     ScalarFunction<P,D> _arg;
 };
 
@@ -232,7 +232,9 @@ struct BinaryFunction
   public:
     typedef D DomainType;
     typedef ElementSizeType<D> ArgumentSizeType;
-    BinaryFunction(OperatorCode op, const ScalarFunction<P,D>& arg1, const ScalarFunction<P,D>& arg2)
+    BinaryFunction(BinaryArithmeticOperator op, const ScalarFunction<P,D>& arg1, const ScalarFunction<P,D>& arg2)
+        : BinaryFunction(BinaryElementaryOperator(op.code()),arg1,arg2) { }
+    BinaryFunction(BinaryElementaryOperator op, const ScalarFunction<P,D>& arg1, const ScalarFunction<P,D>& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) { ARIADNE_ASSERT_MSG(arg1.argument_size()==arg2.argument_size(),"op='"<<op<<"', arg1="<<arg1<<", arg2="<<arg2); }
     virtual BinaryFunction<P,D>* clone() const { return new BinaryFunction<P,D>(*this); }
     virtual const DomainType domain() const {
@@ -246,18 +248,18 @@ struct BinaryFunction
         return static_cast<const ScalarFunctionInterface<P,D>&>(this->derivative(j))._clone(); }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op,_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
+        return compute_derivative(_op.code(),_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
     virtual OutputStream& write(OutputStream& os) const {
-        if(_op==OperatorCode::ADD || _op==OperatorCode::SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
-        else { return os << _arg1 << symbol(_op) << _arg2; } }
+        if(_op.code()==OperatorCode::ADD || _op.code()==OperatorCode::SUB) { return os << '(' << _arg1 << symbol(_op.code()) << _arg2 << ')'; }
+        else { return os << _arg1 << symbol(_op.code()) << _arg2; } }
 
     template<class X> inline Void _compute(X& r, const ElementType<D,X>& x) const {
-        r=compute(_op,_arg1.evaluate(x),_arg2.evaluate(x)); }
+        r=_op(_arg1.evaluate(x),_arg2.evaluate(x)); }
 
-    OperatorCode _op;
+    BinaryElementaryOperator _op;
     ScalarFunction<P,D> _arg1;
     ScalarFunction<P,D> _arg2;
 };
@@ -272,7 +274,7 @@ class GradedFunction
   public:
     typedef D DomainType;
     typedef ElementSizeType<D> ArgumentSizeType;
-    GradedFunction(OperatorCode op, const ScalarFunction<P,D>& arg1, const Int& arg2)
+    GradedFunction(GradedElementaryOperator op, const ScalarFunction<P,D>& arg1, const Int& arg2)
         : _op(op), _arg1(arg1), _arg2(arg2) {  }
     virtual GradedFunction<P,D>* clone() const { return new GradedFunction<P,D>(*this); }
     virtual const DomainType domain() const {
@@ -287,18 +289,18 @@ class GradedFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op, _arg1, _arg1.derivative(j), _arg2);
+        return compute_derivative(_op.code(), _arg1, _arg1.derivative(j), _arg2);
     }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "GF["<<this->argument_size()<<"]("<< *this <<")"; }
     virtual OutputStream& write(OutputStream& os) const {
-        return os << _op << "(" << _arg1 << "," << _arg2 << ")"; }
+        return os << _op.code() << "(" << _arg1 << "," << _arg2 << ")"; }
 
     template<class X> inline Void _compute(X& r, const ElementType<D,X>& x) const {
-        r=compute(_op,_arg1.evaluate(x),_arg2); }
+        r=_op(_arg1.evaluate(x),_arg2); }
 
-    OperatorCode _op;
+    GradedElementaryOperator _op;
     ScalarFunction<P,D> _arg1;
     Int _arg2;
 };

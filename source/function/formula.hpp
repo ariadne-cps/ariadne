@@ -129,7 +129,7 @@ template<class Y> struct AlgebraOperations<Formula<Y>,Y> {
 //! each node being an atomic operation.
 template<class Y>
 class Formula
-    : public DispatchTranscendentalAlgebraOperations<Formula<Y>,Y>
+    : public DispatchElementaryAlgebraOperations<Formula<Y>,Y>
     , public FormulaOperations
 {
     typedef Index I;
@@ -320,6 +320,8 @@ inline Real make_constant(const EffectiveNumber& c, const Real& x) {
 inline Formula<Real> make_constant(const EffectiveNumber& c, const Formula<Real>& x) {
     return Formula<Real>::constant(Real(c)); }
 template<class X, EnableIf<IsSame<X,Real>> =dummy> Algebra<X> make_constant(const EffectiveNumber& c, const Algebra<X>& x) {
+    return make_constant(Real(c),x); }
+template<class X, EnableIf<IsSame<X,Real>> =dummy> ElementaryAlgebra<X> make_constant(const EffectiveNumber& c, const ElementaryAlgebra<X>& x) {
     return make_constant(Real(c),x); }
 
 // Make a constant of type Y with value c based on a prototype vector v

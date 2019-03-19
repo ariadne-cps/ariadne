@@ -98,6 +98,8 @@ class Expression
 
     //! \brief Create the zero element.
     Expression<T> create_zero() const { return Expression<T>::constant(T()); }
+    //! \brief Create a constant element.
+    Expression<T> create_constant(T const& t) const { return Expression<T>::constant(t); }
   public:
     const Operator& op() const;
     OperatorCode code() const;
@@ -112,7 +114,7 @@ class Expression
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
   public:
-    template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,EffectiveNumericType>>> =dummy> operator Algebra<X>() const;
+    template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,EffectiveNumericType>>> =dummy> operator ElementaryAlgebra<X>() const;
   public:
     //! \brief The variables needed to compute the expression.
     Set<UntypedVariable> arguments() const;
@@ -123,6 +125,11 @@ class Expression
     OutputStream& _write(OutputStream& os) const;
   private:
     SharedPointer<const ExpressionNode<T>> _root;
+  public:
+    Void iadd(const T& c) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + c; } }
+    Void imul(const T& c) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) * c; } }
+    Void isma(const T& c, const Expression<T>& x) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + c * x; } }
+    Void ifma(const Expression<T>& x1, const Expression<T>& x2) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + x1 * x2; } }
 };
 
 

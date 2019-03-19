@@ -116,31 +116,12 @@ template<class X> class AlgebraInterface
     //! \brief Fused multiply and add \c r+=x1*x2 .
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
 
-    //! \brief Negation (unary minus).
-    virtual AlgebraInterface<X>* _neg() const = 0;
-    //! \brief Add another algebra element.
-    virtual AlgebraInterface<X>* _add(const AlgebraInterface<X>& x) const = 0;
-    //! \brief Subract another algebra element.
-    virtual AlgebraInterface<X>* _sub(const AlgebraInterface<X>& x) const = 0;
-    //! \brief Add multiply with another algebra element \c r+=c*x .
-    virtual AlgebraInterface<X>* _mul(const AlgebraInterface<X>& x) const = 0;
-
-    virtual AlgebraInterface<X>* _add(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _sub(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _mul(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _div(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _radd(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _rsub(const X& c) const = 0;
-    virtual AlgebraInterface<X>* _rmul(const X& c) const = 0;
-
-    virtual AlgebraInterface<X>* _pow(Nat m) const = 0;
-
     virtual AlgebraInterface<X>* _apply(Neg) const = 0;
-    virtual AlgebraInterface<X>* _apply(Add,AlgebraInterface<X>const&) const = 0;
-    virtual AlgebraInterface<X>* _apply(Sub,AlgebraInterface<X>const&) const = 0;
-    virtual AlgebraInterface<X>* _apply(Mul,AlgebraInterface<X>const&) const = 0;
-    virtual AlgebraInterface<X>* _apply(Add,X const&) const = 0;
-    virtual AlgebraInterface<X>* _apply(Mul,X const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(BinaryRingOperator,AlgebraInterface<X>const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(BinaryFieldOperator,X const&) const = 0;
+    virtual AlgebraInterface<X>* _rapply(BinaryRingOperator,X const&) const = 0;
+    virtual AlgebraInterface<X>* _apply(Pow, Nat m) const = 0;
+
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
@@ -158,14 +139,28 @@ template<class X> class TranscendentalAlgebraInterface
     virtual TranscendentalAlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
     using AlgebraInterface<X>::_apply;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Rec) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Sqrt) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Exp) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Log) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Sin) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Cos) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Tan) const;
-    virtual TranscendentalAlgebraInterface<X>* _apply(Atan) const;
+    virtual TranscendentalAlgebraInterface<X>* _apply(UnaryTranscendentalOperator) const;
+};
+
+//! \brief Interface for a normed unital algebra over a field \a X.
+template<class X> class ElementaryAlgebraInterface
+    : public virtual AlgebraInterface<X>
+{
+  public:
+    typedef typename AlgebraTraits<X>::ValueType ValueType;
+    typedef typename AlgebraTraits<X>::NormType NormType;
+    typedef typename AlgebraTraits<X>::RangeType RangeType;
+  public:
+    // Overrides for AlgebraInterface operations
+    virtual ElementaryAlgebraInterface<X>* _create_copy() const = 0;
+    virtual ElementaryAlgebraInterface<X>* _create_zero() const = 0;
+    virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const = 0;
+
+    using AlgebraInterface<X>::_apply;
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, AlgebraInterface<X> const&) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, X const&) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(UnaryElementaryOperator) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(GradedElementaryOperator, Int) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
@@ -227,7 +222,7 @@ template<class X> class SymbolicAlgebraInterface
     virtual SymbolicAlgebraInterface<X>* _create_zero() const = 0;
 
     using AlgebraInterface<X>::_apply;
-    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) = 0;
+    virtual SymbolicAlgebraInterface<X>* _apply(UnaryElementaryOperator op) = 0;
 };
 
 

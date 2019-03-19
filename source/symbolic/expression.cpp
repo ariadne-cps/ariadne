@@ -42,77 +42,9 @@
 
 namespace Ariadne {
 
-
-template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
-    : public virtual SymbolicAlgebraInterface<Real>
-    , public Expression<Real>
-{
-    typedef Expression<Real> A; typedef Real X;
-  private:
-    static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<SymbolicAlgebraWrapper<A,X>const&>(a)); }
-    static A const& _cast(SymbolicAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
-    static SymbolicAlgebraInterface<X>* _make(A&& a) { return new SymbolicAlgebraWrapper<A,X>(std::move(a)); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
-        return _make(op(_cast(aw1),_cast(ai2))); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, X const& c2) {
-        return _make(op(_cast(aw1),c2)); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw) {
-        return _make(op(_cast(aw))); }
-  public:
-    SymbolicAlgebraWrapper(A const& a) : A(a) { }
-    virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new SymbolicAlgebraWrapper<A>(A()); }
-    virtual SymbolicAlgebraInterface<X>* _create_constant(X const& c) const { return new SymbolicAlgebraWrapper<A>(A::constant(c)); }
-    virtual SymbolicAlgebraInterface<X>* _create_copy() const { return new SymbolicAlgebraWrapper<A>(*this); }
-    virtual SymbolicAlgebraInterface<X>* _neg() const {
-        return _make(-_cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _add(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) + _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) - _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) * _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _add(const X& cnst) const { return _make(_cast(*this) + cnst); }
-    virtual SymbolicAlgebraInterface<X>* _sub(X const& cnst) const { return _make(_cast(*this) - cnst); }
-    virtual SymbolicAlgebraInterface<X>* _mul(X const& cnst) const { return _make(_cast(*this) * cnst); }
-    virtual SymbolicAlgebraInterface<X>* _div(X const& cnst) const { return _make(_cast(*this) / cnst); }
-    virtual SymbolicAlgebraInterface<X>* _radd(X const& cnst) const { return _make(cnst + _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _rsub(X const& cnst) const { return _make(cnst - _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _rmul(X const& cnst) const { return _make(cnst * _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _pow(Nat m) const { return _make(pow(_cast(*this),static_cast<Int>(m))); }
-    virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
-    virtual Void _imul(const X& c) { (*this) = (*this) * c; }
-    virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
-        (*this) = (*this) + c * _cast(x); }
-    virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
-        (*this) = (*this) + _cast(x1) * _cast(x2); }
-    virtual AlgebraInterface<X>* _apply(Neg op) const { return _eval(Minus(),*this); }
-    virtual AlgebraInterface<X>* _apply(Add op, AlgebraInterface<X>const& other) const { return _eval(Plus(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Sub op, AlgebraInterface<X>const& other) const { return _eval(Minus(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Mul op, AlgebraInterface<X>const& other) const { return _eval(Times(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Add op, X const& cnst) const { return _eval(Plus(),*this,cnst); }
-    virtual AlgebraInterface<X>* _apply(Mul op, X const& cnst) const { return _eval(Times(),*this,cnst); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << _cast(*this); }
-    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
-  private:
-    template<class OP> SymbolicAlgebraInterface<X>* _apply(OP op) { return new SymbolicAlgebraWrapper<A>(op(static_cast<A const&>(*this))); }
-};
-
-auto SymbolicAlgebraWrapper<Expression<Real>,Real>::_apply(OperatorCode op) -> SymbolicAlgebraInterface<X>* {
-    switch(op) {
-        case OperatorCode::SQRT: return this->_apply(Sqrt());
-        case OperatorCode::EXP: return this->_apply(Exp());
-        case OperatorCode::LOG: return this->_apply(Log());
-        case OperatorCode::SIN: return this->_apply(Sin());
-        case OperatorCode::COS: return this->_apply(Cos());
-        case OperatorCode::TAN: return this->_apply(Tan());
-        case OperatorCode::ATAN: return this->_apply(Atan());
-        default: ARIADNE_FAIL_MSG("Unknown operator "<<op<<"\n");
-    }
-}
-
 template<> template<>
-Expression<Real>::operator Algebra<Real>() const {
-    return Algebra<Real>(new SymbolicAlgebraWrapper<Expression<Real>,Real>(*this));
+Expression<Real>::operator ElementaryAlgebra<Real>() const {
+    return ElementaryAlgebra<Real>(new ElementaryAlgebraWrapper<Expression<Real>,Real>(*this));
 }
 
 
@@ -233,12 +165,16 @@ Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
+Expression<Real> pos(Expression<Real> const& e) {
+    return make_expression<Real>(Pos(),e); }
 Expression<Real> neg(Expression<Real> const& e) {
     return make_expression<Real>(Neg(),e); }
 Expression<Real> rec(Expression<Real> const& e) {
     return make_expression<Real>(Rec(),e); }
 Expression<Real> sqr(Expression<Real> const& e) {
     return make_expression<Real>(Sqr(),e); }
+Expression<Real> hlf(Expression<Real> const& e) {
+    return make_expression<Real>(Hlf(),e); }
 Expression<Real> sqrt(Expression<Real> const& e) {
     return make_expression<Real>(Sqrt(),e); }
 Expression<Real> exp(Expression<Real> const& e) {
@@ -251,6 +187,10 @@ Expression<Real> cos(Expression<Real> const& e) {
     return make_expression<Real>(Cos(),e); }
 Expression<Real> tan(Expression<Real> const& e) {
     return make_expression<Real>(Tan(),e); }
+Expression<Real> asin(Expression<Real> const& e) {
+    return make_expression<Real>(Asin(),e); }
+Expression<Real> acos(Expression<Real> const& e) {
+    return make_expression<Real>(Acos(),e); }
 Expression<Real> atan(Expression<Real> const& e) {
     return make_expression<Real>(Atan(),e); }
 
@@ -539,11 +479,11 @@ Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& ou
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
     const List<RealVariable>& vars=s.variables();
-    typedef Algebra<Real> RealAlgebra;
-    RealAlgebra az(RealExpression::constant(0));
-    Vector<RealAlgebra> va(vars.size(),az);
-    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
-    RealAlgebra fa=evaluate(f,va);
+    typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
+    RealElementaryAlgebra az(RealExpression::constant(0));
+    Vector<RealElementaryAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealElementaryAlgebra(RealExpression(vars[i])); }
+    RealElementaryAlgebra fa=evaluate(f,va);
     return fa.template extract<RealExpression>();
 }
 

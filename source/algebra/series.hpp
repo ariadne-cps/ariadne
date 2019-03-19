@@ -87,9 +87,19 @@ template<class X> inline X next_series_coefficient(Tan, DegreeType d, X const& c
     switch(d) { case 0: return tan(c); case 1: return 1+sqr(y[0]); case 2: return y[0]*y[1];
         default: { X r=y[0]*y[d-1]; for(DegreeType i=1; i!=d; ++i) { r+=y[i]*y[d-1-i]; } return r/d; } } }
 
+template<class X> inline X next_series_coefficient(Asin, DegreeType d, X const& c, X const* y) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+template<class X> inline X next_series_coefficient(Acos, DegreeType d, X const& c, X const* y) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
 template<class X> inline X next_series_coefficient(Atan, DegreeType d, X const& c, X const* y) {
     switch(d) { case 0: return atan(c); case 1: return rec(1+sqr(c)); case 2: return -c*sqr(y[1]);
         default: return -y[1]*((d-2)*y[d-2]+2*(d-1)*c*y[d-1])/d; } }
+
+template<class X> inline X next_series_coefficient(Abs, DegreeType d, X const& c, X const* y) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
 
 //! \brief A power series, centred on a value, with unlimited many coefficients.
 template<class X>
@@ -110,6 +120,16 @@ class Series
     friend OutputStream& operator<<(OutputStream& os, Series<X> const& s) { return s._write(os); }
 };
 
+template<class X, DegreeType D> class FiniteSeries {
+    X _data[D+1u];
+  private:
+    OutputStream& _write(OutputStream& os) const;
+  public:
+    template<class OP> FiniteSeries<X,D>(OP op, X const& c) {
+        for(DegreeType d=0; d<=D; ++d) { next_series_coefficient(op,d,c,_data); } }
+    const X& operator[](DegreeType n) const { return _data[n]; }
+    friend OutputStream& operator<<(OutputStream& os, FiniteSeries<X,D> const& s) { return s._write(os); }
+};
 
 template<class X> template<class OP> Series<X>::Series(OP op, X const& x)
     : Series(std::make_shared<SeriesGenerator<OP,X>>(),x, nullptr) {
@@ -139,12 +159,12 @@ template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { re
 
 
 class AnalyticFunction {
-    OperatorCode _op_code;
+    UnaryTranscendentalOperator _op;
     std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumericType>> _asg_ptr;
     std::shared_ptr<const SeriesGeneratorInterface<ValidatedNumericType>> _vsg_ptr;
   public:
     template<class OP> explicit AnalyticFunction(OP op)
-        : _op_code(op.code()), _asg_ptr(new SeriesGenerator<OP,ApproximateNumericType>()), _vsg_ptr(new SeriesGenerator<OP,ValidatedNumericType>()) { }
+        : _op(op), _asg_ptr(new SeriesGenerator<OP,ApproximateNumericType>()), _vsg_ptr(new SeriesGenerator<OP,ValidatedNumericType>()) { }
     Series<ApproximateNumericType> series(ApproximateNumericType c) const {
         return Series<ApproximateNumericType>(_asg_ptr,c,nullptr); }
     Series<ValidatedNumericType> series(ValidatedNumericType c) const {
@@ -152,7 +172,7 @@ class AnalyticFunction {
     Series<ValidatedNumericType> series(ExactNumericType c) const {
         return Series<ValidatedNumericType>(_vsg_ptr,c,nullptr); }
     friend OutputStream& operator<<(OutputStream& os, AnalyticFunction const& af) {
-        return os << "AnalyticFunction( " << af._op_code << " )"; }
+        return os << "AnalyticFunction( " << af._op << " )"; }
 };
 
 

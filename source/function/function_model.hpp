@@ -160,7 +160,7 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 //! \brief Generic scalar functions on singleton domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
+    : public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
     , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
 {
@@ -334,6 +334,11 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
         return mul(rec(f2),c1); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Pow, const ScalarFunctionModel<P,D,PR,PRE>& f1, Int n2) {
         return generic_pow(f1,n2); }
+
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return hlf(add(add(f1,f2),abs(sub(f1,f2)))); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return hlf(sub(add(f1,f2),abs(sub(f1,f2)))); }
 
     template<class OP> static ScalarFunctionModel<P,D,PR,PRE> apply(OP op, const ScalarFunctionModel<P,D,PR,PRE>& f) {
         OperatorCode code=OP::code(); return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_apply(code)); }

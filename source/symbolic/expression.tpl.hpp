@@ -47,7 +47,6 @@ struct ExpressionNode {
     explicit ExpressionNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
 
-
 template<class T> struct ConstantExpressionNode : public ExpressionNode<T> {
     T val;
     ConstantExpressionNode(const T& v) : ExpressionNode<T>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }

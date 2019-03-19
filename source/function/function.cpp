@@ -930,7 +930,7 @@ template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<EffectiveTag>
     template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f) {
         auto e=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f.managed_pointer());
         if(e) { return make_formula_function(e->_argument_size,op(e->_formula)); }
-        else { return EffectiveScalarMultivariateFunction(new UnaryMultivaluedFunction<EffectiveTag>(op.code(),f)); }
+        else { return EffectiveScalarMultivariateFunction(new UnaryMultivaluedFunction<EffectiveTag>(op,f)); }
     }
     template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f1, EffectiveScalarMultivariateFunction const& f2) {
         auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
@@ -938,7 +938,7 @@ template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<EffectiveTag>
         if(e1 && e2 && e1->_argument_size==e2->_argument_size) {
             return make_formula_function(e1->_argument_size,op(e1->_formula,e2->_formula));
         }
-        else { return EffectiveScalarMultivariateFunction(new BinaryMultivaluedFunction<EffectiveTag>(op.code(),f1,f2)); }
+        else { return EffectiveScalarMultivariateFunction(new BinaryMultivaluedFunction<EffectiveTag>(op,f1,f2)); }
     }
     template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f1, Number<P> const& c2) {
         auto e1=dynamic_pointer_cast<const EffectiveScalarFormulaFunction>(f1.managed_pointer());
@@ -951,7 +951,7 @@ template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<EffectiveTag>
         else { return op(EffectiveScalarMultivariateFunction::constant(f2.argument_size(),c1),f2); }
     }
     template<class OP> static EffectiveScalarMultivariateFunction apply(OP op, EffectiveScalarMultivariateFunction const& f, Int n) {
-        return EffectiveScalarMultivariateFunction(new GradedMultivaluedFunction<P>(op.code(),f,n));
+        return EffectiveScalarMultivariateFunction(new GradedMultivaluedFunction<P>(op,f,n));
     }
 };
 
@@ -959,7 +959,7 @@ template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<ValidatedTag>
     template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f) {
         auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
         if(fp) { ValidatedScalarMultivariateFunctionModelDP fm(fp); return op(fm); }
-        else { return ValidatedScalarMultivariateFunction(new UnaryMultivaluedFunction<ValidatedTag>(op.code(),f)); }
+        else { return ValidatedScalarMultivariateFunction(new UnaryMultivaluedFunction<ValidatedTag>(op,f)); }
     }
 
     template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f1, ValidatedScalarMultivariateFunction const& f2) {
@@ -968,76 +968,68 @@ template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<ValidatedTag>
         if(f1p && f2p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(f1m,f2m); }
         else if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); return op(f1m,factory(f1m).create(f2)); }
         else if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(factory(f2m).create(f1),f2m); }
-        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f1,f2)); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op,f1,f2)); }
     }
 
     template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedScalarMultivariateFunction const& f1, ValidatedNumber const& c2) {
         auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
         if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m=f1p; return op(f1,c2); }
-        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f1,f1.create_constant(c2))); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op,f1,f1.create_constant(c2))); }
     }
 
     template<class OP> static ValidatedScalarMultivariateFunction apply(OP op, ValidatedNumber const& c1, ValidatedScalarMultivariateFunction const& f2) {
         auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
         if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m=f2p; return op(c1,f2m); }
-        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op.code(),f2.create_constant(c1),f2)); }
+        else { return ValidatedScalarMultivariateFunction(new BinaryMultivaluedFunction<ValidatedTag>(op,f2.create_constant(c1),f2)); }
     }
 
     static ValidatedScalarMultivariateFunction apply(Pow op, ValidatedScalarMultivariateFunction const& f, Int n) {
         auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
         if(fp) { ValidatedScalarMultivariateFunctionModelDP fm=fp; return op(fm,n); }
-        else { return ValidatedScalarMultivariateFunction(new GradedMultivaluedFunction<ValidatedTag>(op.code(),f,n)); }
+        else { return ValidatedScalarMultivariateFunction(new GradedMultivaluedFunction<ValidatedTag>(op,f,n)); }
+    }
+
+    template<class N> static ValidatedScalarMultivariateFunction apply(GradedElementaryOperator op, ValidatedScalarMultivariateFunction const& f, N n) {
+        auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
+        if(fp) { ValidatedScalarMultivariateFunctionModelDP fm=fp; return op(fm,n); }
+        else { return ValidatedScalarMultivariateFunction(new GradedMultivaluedFunction<ValidatedTag>(op,f,n)); }
     }
 };
 
 template<> struct AlgebraOperationsBase<ScalarMultivariateFunction<ApproximateTag>> {
     typedef ApproximateTag P;
     template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f) {
-        return ScalarMultivariateFunction<P>(new UnaryMultivaluedFunction<P>(op.code(),f)); }
+        return ScalarMultivariateFunction<P>(new UnaryMultivaluedFunction<P>(op,f)); }
     template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f1, ScalarMultivariateFunction<P> const& f2) {
-        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f1,f2)); }
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op,f1,f2)); }
     template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f1, Number<P> const& c2) {
-        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f1,f1.create_constant(c2))); }
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op,f1,f1.create_constant(c2))); }
     template<class OP> static ScalarMultivariateFunction<P> apply(OP op, Number<P> const& c1, ScalarMultivariateFunction<P> const& f2) {
-        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op.code(),f2.create_constant(c1),f2)); }
+        return ScalarMultivariateFunction<P>(new BinaryMultivaluedFunction<P>(op,f2.create_constant(c1),f2)); }
     template<class OP> static ScalarMultivariateFunction<P> apply(OP op, ScalarMultivariateFunction<P> const& f, Int n) {
-        return ScalarMultivariateFunction<P>(new GradedMultivaluedFunction<P>(op.code(),f,n)); }
+        return ScalarMultivariateFunction<P>(new GradedMultivaluedFunction<P>(op,f,n)); }
 };
 
 template<class P> struct AlgebraOperationsBase<ScalarUnivariateFunction<P>> {
     typedef IntervalDomainType D;
     template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f) {
-        return ScalarFunction<P,D>(new UnaryFunction<P,D>(op.code(),f)); }
+        return ScalarFunction<P,D>(new UnaryFunction<P,D>(op,f)); }
     template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2) {
-        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f1,f2)); }
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op,f1,f2)); }
     template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, Number<P> const& c2) {
-        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f1,f1.create_constant(c2))); }
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op,f1,f1.create_constant(c2))); }
     template<class OP> static ScalarFunction<P,D> apply(OP op, Number<P> const& c1, ScalarFunction<P,D> const& f2) {
-        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op.code(),f2.create_constant(c1),f2)); }
+        return ScalarFunction<P,D>(new BinaryFunction<P,D>(op,f2.create_constant(c1),f2)); }
     template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f, Int n) {
-        return ScalarFunction<P,D>(new GradedFunction<P,D>(op.code(),f,n)); }
+        return ScalarFunction<P,D>(new GradedFunction<P,D>(op,f,n)); }
 };
 
 template<class P, class D> using FunctionAlgebraOperations = AlgebraOperations<ScalarFunction<P,D>,Number<P>>;
 
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Add op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sub op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Mul op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Div op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Add op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Mul op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Pow op, F const& f, Int n) -> F { return Base::apply(op,f,n); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Pos op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Neg op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sqr op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Rec op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sqrt op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Exp op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Log op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Sin op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Cos op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Tan op, F const& f) -> F { return Base::apply(op,f); }
-template<class P, class D> auto FunctionAlgebraOperations<P,D>::apply(Atan op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto AlgebraOperations<ScalarFunction<P,D>,Number<P>>::apply(BinaryElementaryOperator op, F const& f1, F const& f2) -> F { return Base::apply(op,f1,f2); }
+template<class P, class D> auto AlgebraOperations<ScalarFunction<P,D>,Number<P>>::apply(UnaryElementaryOperator op, F const& f) -> F { return Base::apply(op,f); }
+template<class P, class D> auto AlgebraOperations<ScalarFunction<P,D>,Number<P>>::apply(BinaryArithmeticOperator op, F const& f, C const& c) -> F { return Base::apply(op,f,c); }
+template<class P, class D> auto AlgebraOperations<ScalarFunction<P,D>,Number<P>>::apply(GradedElementaryOperator op, F const& f, Int n) -> F { return Base::apply(op,f,n); }
 
 template struct AlgebraOperations<ScalarMultivariateFunction<ApproximateTag>,Number<ApproximateTag>>;
 template struct AlgebraOperations<ScalarMultivariateFunction<ValidatedTag>,Number<ValidatedTag>>;

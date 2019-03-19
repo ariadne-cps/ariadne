@@ -96,8 +96,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
  */
 template<class F>
 class TaylorModel<ValidatedTag,F>
-    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>>
-    , public DispatchOrderedAlgebraOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>>
+    : public DispatchElementaryAlgebraOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>>
     , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ValidatedTag,F>,CanonicalNumericType<ValidatedTag,typename F::PrecisionType>,ValidatedNumber>
 {
     typedef typename F::PrecisionType PR;
@@ -505,8 +504,7 @@ template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator()
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>
-    : public DispatchTranscendentalAlgebraOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>>
-    , public DispatchOrderedAlgebraOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>>
+    : public DispatchElementaryAlgebraOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>>
     , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<ApproximateTag,F>,FloatApproximation<PrecisionType<F>>,ApproximateNumber>
 {
     typedef typename F::PrecisionType PR;

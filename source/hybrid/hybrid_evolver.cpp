@@ -314,7 +314,7 @@ orbit(const HybridEnclosure& initial,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
-        SizeType recombined_elements = 24u;
+        SizeType recombined_elements = 23u;
         if (evolution_data.initial_sets.size() > recombined_elements-1u) {
             std::cout << "recombining..." << std::endl;
             SizeType num_initial_sets = 0u;
@@ -483,8 +483,6 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
             <<" l="<<std::left<<starting_set.location()
             <<" e="<<starting_set.previous_events()
             <<"\n"<<std::setprecision(old_precision));
-    ARIADNE_LOG(4,"\r    \r"<<starting_set<<"\n");
-
 }
 
 Map<DiscreteEvent,TransitionData>
@@ -1284,7 +1282,7 @@ _evolution_step(EvolutionData& evolution_data,
         return;
     }
 
-    if(verbosity==1 || verbosity==2) { _log_summary(evolution_data,starting_set); }
+    _log_summary(evolution_data,starting_set);
     ARIADNE_LOG(2,"starting_set: bounding_box="<<starting_set.bounding_box()<<", time_range="<<starting_set.time_function().range()<<"    \n");
 
 
@@ -1758,17 +1756,24 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
         temporal_evolution_time=final_time_bounds-time_identity;
-    } else if(possibly(remaining_time_range.lower()<=step_size) && ALLOW_CREEP) {
+    } else if(possibly(remaining_time_range.lower()<=step_size)) {
         // Some of the evolved points can be evolved to the final time in a single step
-        // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
 
-        // Using the final_time as a guide, set the finishing time to closer to the final time.
-        // This method ensures that points do not pass the final time after the transition.
-        result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
-        result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        PositiveFloatDPValue sf={1u,dp};
-        while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = hlf(sf); }
-        temporal_evolution_time= FloatDPBounds(sf)*(final_time_bounds-time_identity);
+        if (ALLOW_CREEP) {
+            // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
+
+            // Using the final_time as a guide, set the finishing time to closer to the final time.
+            // This method ensures that points do not pass the final time after the transition.
+            result.step_kind=StepKind::SPACETIME_DEPENDENT_FINISHING_TIME;
+            result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
+            PositiveFloatDPValue sf={1u,dp};
+            while(possibly(remaining_time_range.upper()*sf>step_size)) { sf = hlf(sf); }
+            temporal_evolution_time= FloatDPBounds(sf)*(final_time_bounds-time_identity);
+        } else {
+            result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
+            result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
+            temporal_evolution_time=FloatDPBounds(step_size);
+        }
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;

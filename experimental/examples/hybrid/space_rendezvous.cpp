@@ -47,6 +47,7 @@ void verify_space_rendezvous() {
     GeneralHybridEvolver evolver(system);
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_step_size(0.5);
+    evolver.configuration().set_enable_subdivisions(false);
     evolver.verbosity=1;
 
     cout << "\nComputing orbit...\n";
@@ -58,23 +59,30 @@ void verify_space_rendezvous() {
     StringConstant rendezvous("rendezvous");
     StringConstant aborting("aborting");
 
+    Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
         if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
             cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+            ++num_ce;
         }
         if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach.bounding_box())))) {
             cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+            ++num_ce;
         }
     }
+    cout << "Number of counterexamples: " << num_ce << std::endl;
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
     cout << "\nReach size = " << orbit.reach().size() << "\n";
 
     cout << "\nDrawing orbit...\n";
-    plot("space_rendezvous_x_y",{-1000<=x<=0,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
-    plot("space_rendezvous_t_vx",{0<=t<=200,-2<=vx<=10_dec},Colour(.5,.0,.5),orbit.reach());
-    plot("space_rendezvous_t_vy",{0<=t<=200,-2<=vy<=10_dec},Colour(.5,.0,.5),orbit.reach());
+    plot("space_rendezvous_x_y",{-1000<=x<=200,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
+    //plot("space_rendezvous_t_x",{0<=t<=200,-1000<=x<=0},Colour(.5,.0,.5),orbit.reach());
+    //plot("space_rendezvous_t_y",{0<=t<=200,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
+    //plot("space_rendezvous_t_vx",{0<=t<=200,-2<=vx<=10_dec},Colour(.5,.0,.5),orbit.reach());
+    //plot("space_rendezvous_t_vy",{0<=t<=200,-2<=vy<=10_dec},Colour(.5,.0,.5),orbit.reach());
+
 }
 
 

@@ -29,6 +29,8 @@
 #ifndef ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 #define ARIADNE_FUNCTION_MODEL_INTERFACE_HPP
 
+#include "../algebra/algebra_interface.hpp"
+
 #include "../function/function.decl.hpp"
 #include "../function/function_interface.hpp"
 
@@ -43,7 +45,7 @@ template<class P, class D, class PR, class PRE> class FunctionModelCreatorInterf
 template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface;
 
 template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>
-    : public virtual FunctionInterface<P,D,IntervalDomainType>
+    : public virtual FunctionInterface<P,D,IntervalDomainType>, public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
@@ -64,7 +66,6 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
 
     virtual NormType const _norm() const = 0;
 
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _apply(OperatorCode op) const = 0;
     virtual CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const = 0;
 
@@ -82,10 +83,14 @@ template<class P, class D, class PR, class PRE> class FunctionModelInterface<P,D
     virtual Boolean _inconsistent(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) const = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _refinement(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) const = 0;
 
+/*
     virtual Void _iadd(const CanonicalNumericType<P,PR,PRE>& c) = 0;
     virtual Void _imul(const CanonicalNumericType<P,PR,PRE>& c) = 0;
     virtual Void _isma(const CanonicalNumericType<P,PR,PRE>& c, const ScalarFunctionModelInterface<P,D,PR,PRE>& f) = 0;
     virtual Void _ifma(const ScalarFunctionModelInterface<P,D,PR,PRE>& f1, const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) = 0;
+*/
+    friend OutputStream& operator<<(OutputStream& os, ScalarFunctionModelInterface<P,D,PR,PRE> const& f) {
+        return os << static_cast<WritableInterface const&>(f); }
 };
 
 

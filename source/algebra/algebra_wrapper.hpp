@@ -47,18 +47,6 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
     friend OutputStream& operator<<(OutputStream& os, AlgebraWrapper<A,X> const& a) { return os << static_cast<A const&>(a); }
 };
 
-template<class X> template<class A> A ElementaryAlgebra<X>::extract() const {
-    AlgebraInterface<X> const* p = this->_ptr.operator->();
-    if constexpr(IsBaseOf<AlgebraInterface<X>,A>::value) {
-        A const* ap=dynamic_cast<A const*>(p);
-        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
-        assert(ap); return *ap; }
-    else {
-        AlgebraWrapper<A,X> const* ap=dynamic_cast<AlgebraWrapper<A,X> const*>(this->_ptr.operator->());
-        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
-        assert(ap); return *ap; }
-}
-
 /*
 template<class A, class X=NumericType<A>> class AlgebraWrapper
     : public virtual AlgebraInterface<X>
@@ -118,39 +106,28 @@ template<class A, class X=NumericType<A>> class SymbolicAlgebraWrapper
 
 
 template<class A, class X> class ElementaryAlgebraWrapper
-    : public virtual ElementaryAlgebraInterface<X>
-    , public AlgebraWrapper<A,X>
+    : public ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>
+    , public A
 {
-  private:
-    static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<ElementaryAlgebraWrapper<A,X>const&>(a)); }
-    static A const& _cast(ElementaryAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
-    static ElementaryAlgebraInterface<X>* _make(A&& a) { return new ElementaryAlgebraWrapper<A,X>(std::move(a)); }
-    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
-        return _make(op(_cast(aw1),_cast(ai2))); }
-    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraWrapper<A,X> const& aw1, X const& c2) {
-        return _make(op(_cast(aw1),c2)); }
-    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, X const& c1, ElementaryAlgebraWrapper<A,X> const& aw2) {
-        return _make(op(c1,_cast(aw2))); }
-    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraWrapper<A,X> const& aw) {
-        return _make(op(_cast(aw))); }
   public:
-    ElementaryAlgebraWrapper(A const& a) : AlgebraWrapper<A,X>(a) { }
-    virtual ElementaryAlgebraInterface<X>* _create_zero() const { return new ElementaryAlgebraWrapper<A,X>(A()); }
-    virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const { return new ElementaryAlgebraWrapper<A,X>(A::constant(c)); }
-    virtual ElementaryAlgebraInterface<X>* _create_copy() const { return new ElementaryAlgebraWrapper<A,X>(*this); }
-
-    using AlgebraWrapper<A,X>::_apply;
-    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator op_, AlgebraInterface<X>const& other) const final {
-        return _eval(op_,*this,other); }
-    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator op_, X const& cnst) const { return _eval(op_,*this,cnst); }
-    virtual ElementaryAlgebraInterface<X>* _apply(BinaryFieldOperator op_, X const& cnst) const { return _eval(op_,*this,cnst); }
-    virtual ElementaryAlgebraInterface<X>* _rapply(BinaryRingOperator op_, X const& cnst) const { return _eval(op_,cnst,*this); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << _cast(*this); }
-    virtual ElementaryAlgebraInterface<X>* _apply(UnaryElementaryOperator op_) const {
-        return new ElementaryAlgebraWrapper<A,X>(op_(static_cast<A const&>(*this))); }
-    virtual ElementaryAlgebraInterface<X>* _apply(GradedElementaryOperator op_, Int n) const {
-        return new ElementaryAlgebraWrapper<A,X>(op_(static_cast<A const&>(*this),n)); }
+    using A::A;
+    using ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>::_apply;
+    using ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>::_rapply;
+    ElementaryAlgebraWrapper(A const& a) : A(a) { }
+    friend OutputStream& operator<<(OutputStream& os, ElementaryAlgebraWrapper<A,X> const& a) { return os << static_cast<A const&>(a); }
 };
+
+template<class X> template<class A> A ElementaryAlgebra<X>::extract() const {
+    ElementaryAlgebraInterface<X> const* p = this->_ptr.operator->();
+    if constexpr(IsBaseOf<ElementaryAlgebraInterface<X>,A>::value) {
+        A const* ap=dynamic_cast<A const*>(p);
+        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
+        assert(ap); return *ap; }
+    else {
+        ElementaryAlgebraWrapper<A,X> const* ap=dynamic_cast<ElementaryAlgebraWrapper<A,X> const*>(this->_ptr.operator->());
+        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
+        assert(ap); return *ap; }
+}
 
 
 

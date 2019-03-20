@@ -76,6 +76,7 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
 {
     typedef ModelNumericType<P,F> X;
     using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
+    static TaylorModel<P,F> apply(Nul,TaylorModel<P,F> const& tm);
     static TaylorModel<P,F> apply(Pos,TaylorModel<P,F> tm);
     static TaylorModel<P,F> apply(Neg,TaylorModel<P,F> tm);
     static TaylorModel<P,F> apply(Add,TaylorModel<P,F> tm, X const& c);
@@ -85,6 +86,10 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
     static TaylorModel<P,F> apply(Mul,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
     static TaylorModel<P,F> apply(Min,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
     static TaylorModel<P,F> apply(Max,TaylorModel<P,F> const& tm1, TaylorModel<P,F> const& tm2);
+    static TaylorModel<P,F> apply(Max,TaylorModel<P,F> const& tm, X const& c);
+    static TaylorModel<P,F> apply(Min,TaylorModel<P,F> const& tm, X const& c);
+    static TaylorModel<P,F> apply(Max,X const& c, TaylorModel<P,F> const& tm);
+    static TaylorModel<P,F> apply(Min,X const& c, TaylorModel<P,F> const& tm);
     static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 

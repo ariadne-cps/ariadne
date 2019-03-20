@@ -48,16 +48,18 @@ template<class R, class A> R dynamic_handle_cast(A a) {
 template<class A, class X> struct AlgebraOperations;
 
 template<class X> struct AlgebraOperations<Algebra<X>,X> {
+    static Algebra<X> apply(UnaryRingOperator op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
     static Algebra<X> apply(BinaryRingOperator op, Algebra<X> a1, Algebra<X> a2) { return Algebra<X>(a1._ptr->_apply(op,*a2._ptr)); }
     static Algebra<X> apply(BinaryFieldOperator op, Algebra<X> a1, X const& c2) { return Algebra<X>(a1._ptr->_apply(op,c2)); }
     static Algebra<X> apply(BinaryRingOperator op, X const& c1, Algebra<X> a2) { return Algebra<X>(a2._ptr->_rapply(op,c1)); }
-    static Algebra<X> apply(Neg op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
-    static Algebra<X> apply(Pow op, Algebra<X> a1, Nat m2) { return Algebra<X>(a1._ptr->_apply(op,m2)); }
+    static Algebra<X> apply(GradedRingOperator op, Algebra<X> a1, Nat m2) { return Algebra<X>(a1._ptr->_apply(op,m2)); }
 };
 
 template<class X> struct AlgebraOperations<ElementaryAlgebra<X>,X> {
     static ElementaryAlgebraInterface<X> const* _upcast(AlgebraInterface<X> const* ap) {
         return dynamic_cast<ElementaryAlgebraInterface<X> const*>(ap); }
+    static ElementaryAlgebraInterface<X> const* _upcast(ElementaryAlgebraInterface<X> const* ap) {
+        return ap; }
     static ElementaryAlgebra<X> apply(BinaryElementaryOperator op, ElementaryAlgebra<X> a1, ElementaryAlgebra<X> a2) {
         return ElementaryAlgebra<X>(_upcast(a1._ptr.operator->())->_apply(op,*a2._ptr)); }
     static ElementaryAlgebra<X> apply(BinaryElementaryOperator op, ElementaryAlgebra<X> a1, X const& c2) {
@@ -103,9 +105,6 @@ template<class X> class Algebra
     Void imul(const X& c) { _ptr->_imul(c); }
     Void isma(const X& c, const Algebra<X>& a) { _ptr->_isma(c,*a._ptr); }
     Void ifma(const Algebra<X>& a1, const Algebra<X>& a2) { _ptr->_ifma(*a1._ptr,*a2._ptr); }
-
-    // DEPRECATED
-    friend Algebra<X> operator+(Algebra<X> const& a1, Int const& c2) { return add(a1,X(c2)); }
 };
 
 //! \brief Generic class for elements of unital algebras.
@@ -135,15 +134,12 @@ template<class X> class ElementaryAlgebra
     template<class A> A extract() const;
     ElementaryAlgebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
     ElementaryAlgebra<X>& operator=(const ElementaryAlgebra<X>& a) { this->_ptr=std::shared_ptr< ElementaryAlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
-    operator const AlgebraInterface<X>& () const { return *this->_ptr; }
+    operator const ElementaryAlgebraInterface<X>& () const { return *this->_ptr; }
     ElementaryAlgebra<X> create() const { return ElementaryAlgebra<X>(this->_ptr->_create_zero()); }
     ElementaryAlgebra<X> clone() const { return ElementaryAlgebra<X>(this->_ptr->_create_copy()); }
     ElementaryAlgebra<X> create_zero() const { return ElementaryAlgebra<X>(this->_ptr->_create_zero()); }
     ElementaryAlgebra<X> create_constant(X const& c) const { return ElementaryAlgebra<X>(this->_ptr->_create_constant(c)); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
-
-    // DEPRECATED
-    friend ElementaryAlgebra<X> operator+(ElementaryAlgebra<X> const& a1, Int const& c2) { return add(a1,X(c2)); }
 };
 
 

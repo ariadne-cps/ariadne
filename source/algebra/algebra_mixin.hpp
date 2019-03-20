@@ -71,6 +71,50 @@ template<class A, class X> class AlgebraMixin
     virtual OutputStream& _write(OutputStream& os) const { return os << *static_cast<A const*>(this); }
 };
 
+template<class A, class X> class ElementaryAlgebraMixin
+    : public virtual ElementaryAlgebraInterface<X>
+{
+    typedef X NumericType;
+  private:
+    static A const& _cast(ElementaryAlgebraMixin<A,X> const& am) {
+        return static_cast<A const&>(am); }
+    static A const& _cast(ElementaryAlgebraInterface<X> const& ai) {
+        return static_cast<A const&>(dynamic_cast<ElementaryAlgebraMixin<A,X>const&>(ai)); }
+    static A* _heap_move(A&& a) { return new A(std::move(a)); }
+    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraMixin<A,X> const& am1, ElementaryAlgebraInterface<X> const& ai2) {
+        ElementaryAlgebraMixin<A,X>const* amp2 = dynamic_cast<ElementaryAlgebraMixin<A,X>const*>(&ai2); assert(amp2);
+        A const& a1=static_cast<A const&>(am1); A const& a2=static_cast<A const&>(*amp2);
+        return new A(op(a1,a2)); }
+    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraMixin<A,X> const& am, X const& c) {
+        A const& a=static_cast<A const&>(am); return new A(op(a,c)); }
+    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, X const& c, ElementaryAlgebraMixin<A,X> const& am) {
+        A const& a=static_cast<A const&>(am); return new A(op(c,a)); }
+    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraMixin<A,X> const& am) {
+        A const& a=static_cast<A const&>(am); return new A(op(a)); }
+    template<class OP> static ElementaryAlgebraInterface<X>* _eval(OP op, ElementaryAlgebraMixin<A,X> const& am, Nat m) {
+        A const& a=static_cast<A const&>(am); return new A(op(a,m)); }
+  public:
+    virtual ElementaryAlgebraInterface<X>* _create_zero() const override {
+        return new A(static_cast<const A&>(*this).A::create_zero()); }
+    virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const override {
+        return new A(static_cast<const A&>(*this).A::create_constant(c)); }
+    virtual ElementaryAlgebraInterface<X>* _create_copy() const override {
+        return new A(static_cast<const A&>(*this)); }
+
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator op, ElementaryAlgebraInterface<X> const& other) const override {
+        return _heap_move(op(_cast(*this),_cast(other))); }
+    virtual ElementaryAlgebraInterface<X>* _apply(UnaryElementaryOperator op) const override {
+        return _heap_move(op(_cast(*this))); }
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(_cast(*this),cnst)); }
+    virtual ElementaryAlgebraInterface<X>* _rapply(BinaryElementaryOperator op, X const& cnst) const override {
+        return _heap_move(op(cnst,_cast(*this))); }
+    virtual ElementaryAlgebraInterface<X>* _apply(GradedElementaryOperator op, Int n) const override {
+        return _heap_move(op(_cast(*this),n)); }
+
+    virtual OutputStream& _write(OutputStream& os) const override { return os << *static_cast<A const*>(this); }
+};
+
 template<class A, class X> class NormedAlgebraMixin
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraMixin<A,X>

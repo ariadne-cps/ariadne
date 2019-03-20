@@ -125,6 +125,27 @@ template<class X> class AlgebraInterface
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
+template<class X> class ElementaryAlgebraInterface
+    : public virtual WritableInterface
+{
+  public:
+    typedef typename AlgebraTraits<X>::ValueType ValueType;
+    typedef typename AlgebraTraits<X>::NormType NormType;
+    typedef typename AlgebraTraits<X>::RangeType RangeType;
+  public:
+    // Overrides for AlgebraInterface operations
+    virtual ElementaryAlgebraInterface<X>* _create_copy() const = 0;
+    virtual ElementaryAlgebraInterface<X>* _create_zero() const = 0;
+    virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const = 0;
+
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, ElementaryAlgebraInterface<X> const&) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, X const&) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _rapply(BinaryElementaryOperator, X const&) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(UnaryElementaryOperator) const = 0;
+    virtual ElementaryAlgebraInterface<X>* _apply(GradedElementaryOperator, Int) const = 0;
+};
+
+//! \brief Interface for a normed unital algebra over a field \a X.
 template<class X> class TranscendentalAlgebraInterface
     : public virtual AlgebraInterface<X>
 {
@@ -140,27 +161,6 @@ template<class X> class TranscendentalAlgebraInterface
 
     using AlgebraInterface<X>::_apply;
     virtual TranscendentalAlgebraInterface<X>* _apply(UnaryTranscendentalOperator) const;
-};
-
-//! \brief Interface for a normed unital algebra over a field \a X.
-template<class X> class ElementaryAlgebraInterface
-    : public virtual AlgebraInterface<X>
-{
-  public:
-    typedef typename AlgebraTraits<X>::ValueType ValueType;
-    typedef typename AlgebraTraits<X>::NormType NormType;
-    typedef typename AlgebraTraits<X>::RangeType RangeType;
-  public:
-    // Overrides for AlgebraInterface operations
-    virtual ElementaryAlgebraInterface<X>* _create_copy() const = 0;
-    virtual ElementaryAlgebraInterface<X>* _create_zero() const = 0;
-    virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const = 0;
-
-    using AlgebraInterface<X>::_apply;
-    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, AlgebraInterface<X> const&) const = 0;
-    virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, X const&) const = 0;
-    virtual ElementaryAlgebraInterface<X>* _apply(UnaryElementaryOperator) const = 0;
-    virtual ElementaryAlgebraInterface<X>* _apply(GradedElementaryOperator, Int) const = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.

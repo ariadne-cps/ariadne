@@ -56,6 +56,9 @@ template<class X> inline X next_series_coefficient(Pow, DegreeType d, X const& c
 template<class X> inline X next_series_coefficient(Pos, DegreeType d, X const& c, X const* y) {
     return (d==0) ? c : (d==1) ? nul(c)+1 : nul(c); }
 
+template<class X> inline X next_series_coefficient(Nul, DegreeType d, X const& c, X const* y) {
+    return nul(c); }
+
 template<class X> inline X next_series_coefficient(Neg, DegreeType d, X const& c, X const* y) {
     return (d==0) ? -c : (d==1) ? nul(c)-1 : nul(c); }
 

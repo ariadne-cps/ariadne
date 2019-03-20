@@ -823,6 +823,11 @@ template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
         auto& r=x; r.imul(c); return std::move(r); }
     static ModelType apply(Max, ModelType const& x, ModelType const& y);
     static ModelType apply(Min, ModelType const& x, ModelType const& y);
+#warning
+    static ModelType apply(Max, ModelType const& x, NumericType const& c);
+    static ModelType apply(Min, ModelType const& x, NumericType const& c);
+    static ModelType apply(Max, NumericType const& c, ModelType const& x);
+    static ModelType apply(Min, NumericType const& c, ModelType const& x);
     static ModelType apply(Abs, ModelType const& x);
 };
 
@@ -1062,6 +1067,18 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
     }
 }
 
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max op, const TaylorModel<ValidatedTag,F>& x, const NumericType& c) {
+    return apply(op, x, x.create_constant(c));
+}
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min op, const TaylorModel<ValidatedTag,F>& x, const NumericType& c) {
+    return apply(op, x, x.create_constant(c));
+}
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max op, const NumericType& c, const TaylorModel<ValidatedTag,F>& x) {
+    return apply(op, x.create_constant(c), x);
+}
+template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min op, const NumericType& c, const TaylorModel<ValidatedTag,F>& x) {
+    return apply(op, x.create_constant(c), x);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

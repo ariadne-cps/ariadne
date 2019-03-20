@@ -156,6 +156,8 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2);
     friend Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2);
 
+    //! \related Expression \brief %Real zero expression.
+    friend Expression<Real> nul(Expression<Real> const& e);
     //! \related Expression \brief %Real unary plus expression.
     //! Equivalent to +\a e.
     friend Expression<Real> pos(Expression<Real> const& e);

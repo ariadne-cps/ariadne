@@ -317,6 +317,11 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_zero() c
     return ScaledFunctionPatch<M>(this->domain(),this->properties());
 }
 
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant(NumericType const& c) const
+{
+    return ScaledFunctionPatch<M>::constant(this->domain(),c,this->properties());
+}
+
 //FIXME: Should allow this in code file
 /*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const

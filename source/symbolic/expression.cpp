@@ -59,6 +59,7 @@ template Nat count_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
 
+template Expression<Real> ElementaryAlgebra<Real>::extract() const;
 
 Expression<Boolean> operator&&(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(AndOp(),e1,e2); }
@@ -165,6 +166,8 @@ Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
+Expression<Real> nul(Expression<Real> const& e) {
+    return make_expression<Real>(Real(0)); }
 Expression<Real> pos(Expression<Real> const& e) {
     return make_expression<Real>(Pos(),e); }
 Expression<Real> neg(Expression<Real> const& e) {

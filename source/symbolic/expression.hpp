@@ -125,11 +125,6 @@ class Expression
     OutputStream& _write(OutputStream& os) const;
   private:
     SharedPointer<const ExpressionNode<T>> _root;
-  public:
-    Void iadd(const T& c) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + c; } }
-    Void imul(const T& c) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) * c; } }
-    Void isma(const T& c, const Expression<T>& x) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + c * x; } }
-    Void ifma(const Expression<T>& x1, const Expression<T>& x2) { if constexpr (IsSame<T,Real>::value) { (*this) = (*this) + x1 * x2; } }
 };
 
 

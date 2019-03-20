@@ -461,9 +461,10 @@ template<class... OPS> class OperatorVariant
 
 struct UnaryLogicalOperator : OperatorVariant<NotOp> { using OperatorVariant::OperatorVariant; };
 struct UnaryComparisonOperator : OperatorVariant<Sgn> { using OperatorVariant::OperatorVariant; };
+struct UnaryRingOperator : OperatorVariant<Neg> { using OperatorVariant::OperatorVariant; };
 struct UnaryArithmeticOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Rec> { using OperatorVariant::OperatorVariant; };
 struct UnaryTranscendentalOperator : OperatorVariant<Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan> { using OperatorVariant::OperatorVariant; };
-struct UnaryElementaryOperator : OperatorVariant<Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs> {
+struct UnaryElementaryOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs> {
     using OperatorVariant::OperatorVariant;
     template<class X> decltype(sin(declval<X>())) operator()(X&& x) const { typedef decltype(sin(x)) R;
         return this->visit([&x](auto op){return static_cast<R>(op(std::forward<X>(x)));}); } };
@@ -481,6 +482,9 @@ using BinaryArithmeticOperator = BinaryFieldOperator;
 struct BinaryElementaryOperator : OperatorVariant<Add,Sub,Mul,Div,Max,Min> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
         return this->visit([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+struct GradedRingOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
+    template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
+        return this->visit([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
 struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
     template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
         return this->visit([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };

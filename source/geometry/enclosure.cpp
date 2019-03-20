@@ -1515,7 +1515,7 @@ ValidatedScalarMultivariateTaylorFunctionModelDP scalar_recombine_with_common_do
     for (auto f : fl) {
         max_distance = max(max_distance,(average_model-f.model()).norm());
     }
-    //result_model.set_error(result_model.error()+max_distance);
+    result_model.set_error(result_model.error()+max_distance);
 
     return ValidatedScalarMultivariateTaylorFunctionModelDP(domain,result_model);
 }

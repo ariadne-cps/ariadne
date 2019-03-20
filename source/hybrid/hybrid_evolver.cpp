@@ -314,7 +314,7 @@ orbit(const HybridEnclosure& initial,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
-        SizeType recombined_elements = 23u;
+/*        SizeType recombined_elements = 24u;
         if (evolution_data.initial_sets.size() > recombined_elements-1u) {
             std::cout << "recombining..." << std::endl;
             SizeType num_initial_sets = 0u;
@@ -330,7 +330,7 @@ orbit(const HybridEnclosure& initial,
             }
             evolution_data.initial_sets.clear();
             evolution_data.initial_sets.append(recombined_list);
-        }
+        }*/
         this->_evolution_in_mode(evolution_data,termination);
     }
     ARIADNE_ASSERT(evolution_data.initial_sets.empty());
@@ -364,7 +364,7 @@ HybridEvolverBase::_create(
     this->_sys_ptr=std::shared_ptr<SystemType>(system.clone());
     this->_function_factory_ptr=std::shared_ptr<FunctionFactoryType>(factory);
     this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
-    this->ALLOW_CREEP=false;
+    this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
     //this->_configuration_ptr=std::shared_ptr<ConfigurationType>(new ConfigurationType());
 }

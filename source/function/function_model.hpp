@@ -121,6 +121,7 @@ template<class FCTRY, class D> class FunctionModelCreator {
     decltype(auto) create(VectorFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
     decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
     decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
+    decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
     decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
 
 //    ScalarFunctionModel<P,D,PR,PRE> const& create(ScalarFunctionModel<P,D,PR,PRE> const& f) const { return f; }
@@ -161,8 +162,8 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     : public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
-    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
+    , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
+    , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
@@ -339,6 +340,24 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
         return hlf(add(add(f1,f2),abs(sub(f1,f2)))); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
         return hlf(sub(add(f1,f2),abs(sub(f1,f2)))); }
+
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const ScalarFunctionModel<P,D,PR,PRE>& f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+        ScalarFunctionModel<P,D,PR,PRE> s2=factory(f1).create_constant(c2); return max(f1,s2); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const ScalarFunctionModel<P,D,PR,PRE>& f1, const CanonicalNumericType<P,PR,PRE>& c2) {
+        ScalarFunctionModel<P,D,PR,PRE> s2=factory(f1).create_constant(c2); return min(f1,s2); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const CanonicalNumericType<P,PR,PRE>& c1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        ScalarFunctionModel<P,D,PR,PRE> s1=factory(f2).create_constant(c1); return max(s1,f2); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const CanonicalNumericType<P,PR,PRE>& c1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        ScalarFunctionModel<P,D,PR,PRE> s1=factory(f2).create_constant(c1); return min(s1,f2); }
+
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const ScalarFunctionModel<P,D,PR,PRE>& f1, const Number<P>& c2) {
+        return max(f1,f1.create_constant(c2)); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const ScalarFunctionModel<P,D,PR,PRE>& f1, const Number<P>& c2) {
+        return min(f1,f1.create_constant(c2)); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const Number<P>& c1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return max(f2.create_constant(c1),f2); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const Number<P>& c1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return min(f2.create_constant(c1),f2); }
 
     template<class OP> static ScalarFunctionModel<P,D,PR,PRE> apply(OP op, const ScalarFunctionModel<P,D,PR,PRE>& f) {
         OperatorCode code=OP::code(); return ScalarFunctionModel<P,D,PR,PRE>(f._ptr->_apply(code)); }

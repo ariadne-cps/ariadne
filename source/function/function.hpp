@@ -341,51 +341,15 @@ class Function
     //@}
 };
 
-template<class A> struct AlgebraOperationsBase;
-
-template<class P, class D> struct AlgebraOperationsBase<ScalarFunction<P,D>> {
-    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f);
-    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f1, Number<P> const& c2);
-    template<class OP> static ScalarFunction<P,D> apply(OP op, Number<P> const& c1, ScalarFunction<P,D> const& f2);
-    template<class OP> static ScalarFunction<P,D> apply(OP op, ScalarFunction<P,D> const& f, Int n);
-};
-
 template<class P, class D> struct AlgebraOperations<ScalarFunction<P,D>,Number<P>>
-    : public AlgebraOperationsBase<ScalarFunction<P,D>>
 {
     using F=ScalarFunction<P,D>;
     using C=Number<P>;
-    using Base=AlgebraOperationsBase<ScalarFunction<P,D>>;
     static ScalarFunction<P,D> apply(BinaryElementaryOperator op, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
     static ScalarFunction<P,D> apply(UnaryElementaryOperator op, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(BinaryArithmeticOperator op, ScalarFunction<P,D> const& f1, Number<P> const& c2);
+    static ScalarFunction<P,D> apply(BinaryElementaryOperator op, ScalarFunction<P,D> const& f1, Number<P> const& c2);
+    static ScalarFunction<P,D> apply(BinaryElementaryOperator op, Number<P> const& c1, ScalarFunction<P,D> const& f2);
     static ScalarFunction<P,D> apply(GradedElementaryOperator op, ScalarFunction<P,D> const& f, Int n);
-/*
-    static ScalarFunction<P,D> apply(Pos, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Neg, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Sqr, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Rec, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Add, ScalarFunction<P,D> const& f, Number<P> const& c);
-    static ScalarFunction<P,D> apply(Mul, ScalarFunction<P,D> const& f, Number<P> const& c);
-    static ScalarFunction<P,D> apply(Add, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Sub, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Mul, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Div, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Pow, ScalarFunction<P,D> const& f, Int n);
-    static ScalarFunction<P,D> apply(Sqrt, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Exp, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Log, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Sin, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Cos, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Tan, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Asin, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Acos, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Atan, ScalarFunction<P,D> const& f);
-    static ScalarFunction<P,D> apply(Min, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Max, ScalarFunction<P,D> const& f1, ScalarFunction<P,D> const& f2);
-    static ScalarFunction<P,D> apply(Abs, ScalarFunction<P,D> const& f);
-*/
 };
 
 template<class P, class D, class C> inline OutputStream&

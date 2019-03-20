@@ -295,6 +295,12 @@ template<class A, class X> struct DispatchLatticeAlgebraOperations {
     friend A max(A const& a1, A const& a2) { return OperationsType::apply(Max(),a1,a2); }
     friend A min(A const& a1, A const& a2) { return OperationsType::apply(Min(),a1,a2); }
     friend A abs(A const& a) { return OperationsType::apply(Abs(),a); }
+
+    friend A max(A const& a1, X const& x2) { return OperationsType::apply(Max(),a1,x2); }
+    friend A min(A const& a1, X const& x2) { return OperationsType::apply(Min(),a1,x2); }
+    friend A max(X const& x1, A const& a2) { return OperationsType::apply(Max(),x1,a2); }
+    friend A min(X const& x1, A const& a2) { return OperationsType::apply(Min(),x1,a2); }
+
 };
 
 template<class A, class X> struct DispatchElementaryAlgebraOperations

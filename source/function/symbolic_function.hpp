@@ -305,9 +305,9 @@ class GradedFunction
     Int _arg2;
 };
 
-template<class P> using UnaryMultivaluedFunction = UnaryFunction<P,BoxDomainType>;
-template<class P> using BinaryMultivaluedFunction = BinaryFunction<P,BoxDomainType>;
-template<class P> using GradedMultivaluedFunction = GradedFunction<P,BoxDomainType>;
+template<class P> using UnaryMultivariateFunction = UnaryFunction<P,BoxDomainType>;
+template<class P> using BinaryMultivariateFunction = BinaryFunction<P,BoxDomainType>;
+template<class P> using GradedMultivariateFunction = GradedFunction<P,BoxDomainType>;
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 

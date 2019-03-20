@@ -1052,6 +1052,24 @@ template<class X> struct ProvideConcreteGenericArithmeticOperators<X,Void> {
     template<class Y, EnableIf<IsGenericScalar<Y>> =dummy> friend decltype(auto) operator/=(X& x, Y const& y) { return x=div(x,factory(x).create(y)); }
 };
 
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericLatticeOperations {
+    friend R max(X const& x, Y const& y) { return max(x,factory(x).create(y)); }
+    friend R min(X const& x, Y const& y) { return min(x,factory(x).create(y)); }
+    friend R max(Y const& y, X const& x) { return max(factory(x).create(y),x); }
+    friend R min(Y const& y, X const& x) { return min(factory(x).create(y),x); }
+};
+
+template<class X, class Y> struct ProvideConcreteGenericLatticeOperations<X,Y,Void> {
+    friend decltype(auto) max(X const& x, Y const& y) { return max(x,factory(x).create(y)); }
+    friend decltype(auto) min(X const& x, Y const& y) { return min(x,factory(x).create(y)); }
+    friend decltype(auto) max(Y const& y, X const& x) { return max(factory(x).create(y),x); }
+    friend decltype(auto) min(Y const& y, X const& x) { return min(factory(x).create(y),x); }
+};
+
+template<class X, class Y=Void, class R=X> struct ProvideConcreteGenericElementaryOperations
+    : ProvideConcreteGenericArithmeticOperations<X,Y,R>, ProvideConcreteGenericLatticeOperations<X,Y,R> {
+};
+
 
 template<class X, class Y, class R, class LT, class EQ=LT> struct ProvideConvertedComparisonOperations : DefineMixedComparisonOperators<X,Y,LT,EQ> {
     typedef LT GT;

@@ -37,22 +37,17 @@ int main()
     VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
     MaximumError max_err=1e-5;
-    TaylorSeriesIntegrator integrator(max_err, Order(6u));
+    TaylorSeriesIntegrator integrator(max_err, Order(5u));
     //integrator.set_maximum_step_size(0.02);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.03);
-    evolver.configuration().maximum_spacial_error(1e-5);
+    evolver.configuration().maximum_step_size(0.02);
+    evolver.configuration().maximum_spacial_error(2e-4);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 
-    Real x0(1.40);
-    Real y0(2.40);
-    Real eps_x0 = 15/100_q;
-    Real eps_y0 = 5/100_q;
-
-    Box<RealInterval> initial_set({{x0-eps_x0,x0+eps_x0},{y0-eps_y0,y0+eps_y0}});
+    Box<RealInterval> initial_set({{1.25_dec,1.55_dec},{2.35_dec,2.45_dec}});
 
     std::cout << "Initial set: " << initial_set << std::endl;
     Real evolution_time(7.0);
@@ -61,6 +56,11 @@ int main()
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
+    for (auto set : orbit.reach()) {
+        if (definitely(set.bounding_box()[1].upper().raw() > 2.75))
+            std::cout << "set with value " << set.bounding_box()[1].upper().raw() << " is unsafe." << std::endl;
+    }
+
     std::cout << "plotting..." << std::endl;
     Box<FloatDPUpperInterval> graphics_box(2);
     graphics_box[0] = FloatDPUpperInterval(-2.5,2.5);
@@ -68,7 +68,7 @@ int main()
     Figure fig=Figure();
     fig.set_bounding_box(graphics_box);
     fig.set_line_colour(0.0,0.0,0.0);
-    fig.set_line_style(false);
+    fig.set_line_style(true);
     fig.set_fill_colour(0.5,0.5,0.5);
     fig.set_fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());

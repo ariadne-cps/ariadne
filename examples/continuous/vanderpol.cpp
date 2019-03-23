@@ -57,8 +57,8 @@ int main()
     std::cout << "done." << std::endl;
 
     for (auto set : orbit.reach()) {
-        if (definitely(set.bounding_box()[1].upper().raw() > 2.75))
-            std::cout << "set with value " << set.bounding_box()[1].upper().raw() << " is unsafe." << std::endl;
+        if (definitely(set.bounding_box()[1].upper().raw() >= 2.75))
+            std::cout << "set with upper value " << set.bounding_box()[1].upper().raw() << " is outside the safe set." << std::endl;
     }
 
     std::cout << "plotting..." << std::endl;

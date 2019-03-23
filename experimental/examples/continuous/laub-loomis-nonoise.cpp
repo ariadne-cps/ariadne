@@ -42,14 +42,14 @@ int main()
                           dot(t)=Real(1.0)
                          });
 
-    MaximumError max_err=1e-3;
+    MaximumError max_err=1e-2;
     TaylorSeriesIntegrator integrator(max_err,Order(3u));
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
     evolver.configuration().maximum_step_size(0.2);
-    evolver.configuration().maximum_spacial_error(1e-3);
-    evolver.verbosity = 1;
+    evolver.configuration().maximum_spacial_error(1e-2);
+    evolver.verbosity = 0;
     std::cout <<  evolver.configuration() << std::endl;
 
     Real x1_0(1.2);
@@ -70,6 +70,11 @@ int main()
     std::cout << "Computing orbit... " << std::flush;
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
+
+    for (auto set : orbit.reach()) {
+        if (definitely(set.bounding_box()[3].upper().raw() >= 4.5))
+            std::cout << "set with upper value " << set.bounding_box()[3].upper().raw() << " is outside the safe set." << std::endl;
+    }
 
     plot("laub-loomis",PlanarProjectionMap(8,7,3),ApproximateBoxType({{1.5,4.5},{1.5,4.5},{1.5,4.5},{1.5,4.5},{1.5,4.5},{1.5,4.5},{1.5,4.5},{0.0,20.0}}), Colour(1.0,0.75,0.5), orbit);
 }

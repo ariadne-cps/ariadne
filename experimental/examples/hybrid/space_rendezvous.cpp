@@ -42,7 +42,7 @@ void verify_space_rendezvous() {
     cout << "initial_constraint_set=" << initial_constraint_set << "\n";
 
     MaximumError max_err=0.01;
-    TaylorSeriesIntegrator integrator(max_err,Order(3u));
+    TaylorSeriesIntegrator integrator(max_err,Order(5u));
 
     GeneralHybridEvolver evolver(system);
     evolver.set_integrator(integrator);
@@ -77,7 +77,7 @@ void verify_space_rendezvous() {
     cout << "\nReach size = " << orbit.reach().size() << "\n";
 
     cout << "\nDrawing orbit...\n";
-    plot("space_rendezvous_x_y",{-1000<=x<=200,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
+    plot("space_rendezvous_x_y",{-1000<=x<=200,-1000<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
     //plot("space_rendezvous_t_x",{0<=t<=200,-1000<=x<=0},Colour(.5,.0,.5),orbit.reach());
     //plot("space_rendezvous_t_y",{0<=t<=200,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
     //plot("space_rendezvous_t_vx",{0<=t<=200,-2<=vx<=10_dec},Colour(.5,.0,.5),orbit.reach());

@@ -136,6 +136,8 @@ class VectorFieldEvolver
                                  const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, Bool reach) const;
 
+    virtual Void _append_initial_set(List<TimedEnclosureType>& working_sets, const TimeStepType& initial_time, const EnclosureType& current_set) const;
+
   private:
     std::shared_ptr< SystemType > _sys_ptr;
     std::shared_ptr< IntegratorInterface > _integrator;

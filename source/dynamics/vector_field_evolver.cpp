@@ -135,6 +135,20 @@ orbit(const EnclosureType& initial_set,
     return orbit;
 }
 
+Void VectorFieldEvolver::
+_append_initial_set(List<TimedEnclosureType>& working_sets,
+                   const TimeStepType& initial_time,
+                   const EnclosureType& current_set) const
+{
+    if (possibly(current_set.bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+        ARIADNE_LOG(2,"initial set too large, splitting\n");
+        Pair<Enclosure,Enclosure> split_sets = current_set.split();
+        if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
+        if(!definitely(split_sets.second.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.second); }
+    } else {
+        working_sets.push_back(make_pair(initial_time,current_set));
+    }
+}
 
 
 Void
@@ -158,7 +172,10 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
         EnclosureType initial_set_model(initial_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        working_sets.push_back(make_pair(initial_time,initial_set_model));
+
+
+        // Append the initial set, possibly splitting it
+        _append_initial_set(working_sets,initial_time,initial_set);
     }
 
 

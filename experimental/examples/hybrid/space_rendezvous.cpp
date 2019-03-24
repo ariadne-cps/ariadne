@@ -41,13 +41,14 @@ void verify_space_rendezvous() {
     BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(initial_location,initial_space);
     cout << "initial_constraint_set=" << initial_constraint_set << "\n";
 
-    MaximumError max_err=0.01;
-    TaylorSeriesIntegrator integrator(max_err,Order(3u));
+    MaximumError max_err=0.001;
+    TaylorSeriesIntegrator integrator(max_err,Order(5u));
 
     GeneralHybridEvolver evolver(system);
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_step_size(0.5);
-    evolver.configuration().set_enable_subdivisions(false);
+    evolver.configuration().set_maximum_enclosure_radius(20.0);
+    evolver.configuration().set_enable_subdivisions(true);
     evolver.verbosity=1;
 
     cout << "\nComputing orbit...\n";
@@ -62,7 +63,7 @@ void verify_space_rendezvous() {
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
         if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
-            cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+            cout << "Found counterexample in location " << reach.location() << " with modulus of velocity " << sqrt(reach.bounding_box().euclidean_set()[3].upper().raw()*reach.bounding_box().euclidean_set()[3].upper().raw()+reach.bounding_box().euclidean_set()[4].upper().raw()*reach.bounding_box().euclidean_set()[4].upper().raw()) << ", unsafe\n";
             ++num_ce;
         }
         if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach.bounding_box())))) {

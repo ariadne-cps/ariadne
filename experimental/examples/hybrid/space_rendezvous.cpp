@@ -48,7 +48,9 @@ void verify_space_rendezvous() {
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_step_size(0.5);
     evolver.configuration().set_enable_subdivisions(false);
-    evolver.verbosity=1;
+    evolver.verbosity=0;
+
+    StopWatch sw;
 
     cout << "\nComputing orbit...\n";
     HybridTime evolution_time(200.0,3);
@@ -59,6 +61,7 @@ void verify_space_rendezvous() {
     StringConstant rendezvous("rendezvous");
     StringConstant aborting("aborting");
 
+    cout << "Checking properties...\n";
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
         if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
@@ -71,6 +74,9 @@ void verify_space_rendezvous() {
         }
     }
     cout << "Number of counterexamples: " << num_ce << std::endl;
+
+    sw.click();
+    std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 

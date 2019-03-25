@@ -1157,7 +1157,7 @@ Enclosure::kuhn_recondition()
         ARIADNE_WARN("Cannot Kuhn reduce an Enclosure which is not given by TaylorFunctions.");
     }
 
-    static const SizeType NUMBER_OF_BLOCKS = 2;
+    static const SizeType NUMBER_OF_BLOCKS = 3;
 
     const SizeType number_of_kept_parameters = (NUMBER_OF_BLOCKS-1)*this->state_dimension();
     const SizeType number_of_discarded_parameters=this->number_of_parameters()-number_of_kept_parameters;

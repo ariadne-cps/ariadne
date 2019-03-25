@@ -47,22 +47,22 @@ int main()
                           dot(x3)=sin(x8)*x4-sin(x7)*cos(x8)*x5-cos(x7)*cos(x8)*x6,
                           dot(x4)=x1*x5-x11*x6-g*sin(x8),
                           dot(x5)=x10*x6+g*cos(x8)*sin(x7),
-                          dot(x6)=x11*x4-x10*x4+g*cos(x8)*cos(x7)-(m*g-10*(x3-1)+3*x6)/m,
+                          dot(x6)=x11*x4-x10*x5+g*cos(x8)*cos(x7)-(m*g-10*(x3-1)+3*x6)/m,
                           dot(x7)=x10+sin(x7)*tan(x8)*x11,
                           dot(x8)=cos(x7)*x11,
                           dot(x9)=sin(x7)/cos(x8)*x11,
-                          dot(x10)=1/Jz*(-x7-x10),
+                          dot(x10)=1/Jx*(-x7-x10),
                           dot(x11)=1/Jy*(-x8-x11),
                           dot(t)=Real(1.0)
                          });
 
-    MaximumError max_err=1e-3;
-    TaylorSeriesIntegrator integrator(max_err,Order(3u));
+    MaximumError max_err=1e-2;
+    TaylorSeriesIntegrator integrator(max_err,Order(2u));
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.025);
-    evolver.configuration().maximum_spacial_error(1e-3);
+    evolver.configuration().maximum_step_size(0.01);
+    evolver.configuration().maximum_spacial_error(1e-2);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 
@@ -77,5 +77,14 @@ int main()
     auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
-    plot("quadrotor",PlanarProjectionMap(12,11,2),ApproximateBoxType({{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,1.5},{0.0,5.0}}), Colour(1.0,0.75,0.5), orbit);
+    for (auto set : orbit.reach()) {
+        if (possibly(set.bounding_box()[2] >= 1.40_dec))
+            std::cout << "height of " << set.bounding_box()[2] << " is over the required bound." << std::endl;
+        if (possibly(set.bounding_box()[11] >= 1) and possibly(set.bounding_box()[2] <= 0.9_dec))
+            std::cout << "height of " << set.bounding_box()[2] << " is below the required bound after 1s." << std::endl;
+        if (possibly(set.bounding_box()[11] >= 5) and possibly(set.bounding_box()[2] <= 0.98_dec or set.bounding_box()[2] >= 1.02_dec))
+            std::cout << "height of " << set.bounding_box()[2] << " is outside the required bounds at 5s." << std::endl;
+    }
+
+    plot("quadrotor",PlanarProjectionMap(12,11,2),ApproximateBoxType({{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{0.0,5.0}}), Colour(1.0,0.75,0.5), orbit);
 }

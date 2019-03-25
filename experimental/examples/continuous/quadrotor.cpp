@@ -24,6 +24,7 @@
 
 #include <cstdarg>
 #include "ariadne.hpp"
+#include "utility/stopwatch.hpp"
 
 using namespace Ariadne;
 
@@ -63,7 +64,7 @@ int main()
     evolver.configuration().maximum_enclosure_radius(1.0);
     evolver.configuration().maximum_step_size(0.01);
     evolver.configuration().maximum_spacial_error(1e-2);
-    evolver.verbosity = 1;
+    evolver.verbosity = 0;
     std::cout <<  evolver.configuration() << std::endl;
 
     Real eps = 0.4_dec;
@@ -73,10 +74,11 @@ int main()
     std::cout << "Initial set: " << initial_set << std::endl;
     Real evolution_time(5.0);
 
-    std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+    StopWatch sw;
 
+    std::cout << "Computing orbit... " << std::endl << std::flush;
+    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
+    std::cout << "Checking properties... " << std::endl << std::flush;
     for (auto set : orbit.reach()) {
         if (possibly(set.bounding_box()[2] >= 1.40_dec))
             std::cout << "height of " << set.bounding_box()[2] << " is over the required bound." << std::endl;
@@ -85,6 +87,8 @@ int main()
         if (possibly(set.bounding_box()[11] >= 5) and possibly(set.bounding_box()[2] <= 0.98_dec or set.bounding_box()[2] >= 1.02_dec))
             std::cout << "height of " << set.bounding_box()[2] << " is outside the required bounds at 5s." << std::endl;
     }
+    sw.click();
+    std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
     plot("quadrotor",PlanarProjectionMap(12,11,2),ApproximateBoxType({{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{0.0,5.0}}), Colour(1.0,0.75,0.5), orbit);
 }

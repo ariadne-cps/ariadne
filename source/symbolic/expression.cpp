@@ -29,14 +29,15 @@
 #include "../algebra/algebra.hpp"
 #include "../algebra/algebra_wrapper.hpp"
 
+#include "../function/formula.hpp"
+#include "../function/formula.tpl.hpp"
+
 #include "../symbolic/constant.hpp"
 #include "../symbolic/variables.hpp"
 #include "../symbolic/expression.hpp"
 #include "../symbolic/assignment.hpp"
 #include "../symbolic/space.hpp"
 #include "../symbolic/valuation.hpp"
-
-#include "../function/formula.hpp"
 
 #include "expression.tpl.hpp"
 

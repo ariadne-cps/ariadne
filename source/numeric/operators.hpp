@@ -450,6 +450,8 @@ template<class... OPS> class OperatorVariant
   public:
     template<class OP, EnableIf<IsOneOf<OP,OPS...>> =dummy> OperatorVariant(OP op) : CodedVariant<OperatorCode,OPS...>(op) { }
     explicit OperatorVariant(OperatorCode code) : CodedVariant<OperatorCode,OPS...>(code) { }
+    OperatorKind kind() const {
+        return this->visit([](auto op){return op.kind();}); }
     template<class... AS> decltype(auto) operator()(AS&& ... as) const {
         return this->visit([&as...](auto op){return op(std::forward<AS>(as)...);}); }
     template<class R, class... AS> R call(AS&& ... as) const {

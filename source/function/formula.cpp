@@ -23,36 +23,164 @@
  */
 
 #include "formula.hpp"
+#include "formula.tpl.hpp"
 
 #include "../numeric/operators.tpl.hpp"
 
 namespace Ariadne {
 
+
+template<class Y> inline Operator Formula<Y>::op() const {
+    return this->_root->visit([](auto fn){return static_cast<Operator>(fn._op);}); }
+template<class Y> inline OperatorCode Formula<Y>::code() const {
+    return this->op().code(); }
+template<class Y> inline OperatorKind Formula<Y>::kind() const {
+    return this->op().kind(); }
+template<class Y> inline const Y& Formula<Y>::val() const {
+    return std::get<ConstantFormulaNode<Y>>(*this->_root)._val; }
+template<class Y> inline const Index& Formula<Y>::ind() const {
+    return std::get<IndexFormulaNode<Y>>(*this->_root)._ind; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg() const {
+    if (std::holds_alternative<GradedFormulaNode<Y>>(*this->_root)) { return std::get<GradedFormulaNode<Y>>(*this->_root)._arg; }
+    if (std::holds_alternative<ScalarFormulaNode<Y>>(*this->_root)) { return std::get<ScalarFormulaNode<Y>>(*this->_root)._arg; }
+    return std::get<UnaryFormulaNode<Y>>(*this->_root)._arg; }
+template<class Y> inline const Int& Formula<Y>::num() const {
+    return std::get<GradedFormulaNode<Y>>(*this->_root)._num; }
+template<class Y> inline const Y& Formula<Y>::cnst() const {
+    return std::get<ScalarFormulaNode<Y>>(*this->_root)._cnst; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg1() const {
+    return std::get<BinaryFormulaNode<Y>>(*this->_root)._arg1; }
+template<class Y> inline const Formula<Y>& Formula<Y>::arg2() const {
+    return std::get<BinaryFormulaNode<Y>>(*this->_root)._arg2; }
+
+
+template<class Y> inline Formula<Y>::Formula() : Formula(Y()) { }
+template<class Y> inline Formula<Y>::Formula(const Y& c) : _root(new FormulaNode<Y>(ConstantFormulaNode<Y>(Cnst(),c))) { }
+template<class Y> inline Formula<Y>& Formula<Y>::operator=(const Y& c) { return *this=Formula<Y>::constant(c); }
+
+template<class Y> inline Formula<Y> Formula<Y>::create_zero() const { return Formula<Y>::constant(static_cast<Y>(0)); }
+template<class Y> inline Formula<Y> Formula<Y>::create_constant(const Y& c) const { return Formula<Y>::constant(c); }
+
+template<class Y> inline Formula<Y> Formula<Y>::zero() {
+    return Formula<Y>(new FormulaNode<Y>(ConstantFormulaNode<Y>(Cnst(),static_cast<Y>(0))),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::constant(const Y& c) {
+    return Formula<Y>(new FormulaNode<Y>(ConstantFormulaNode<Y>(Cnst(),c)),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::coordinate(SizeType j) {
+    return Formula<Y>(new FormulaNode<Y>(IndexFormulaNode<Y>(Var(),Index(j))),PointerTag()); }
+template<class Y> inline Vector<Formula<Y>> Formula<Y>::coordinates(SizeType n) {
+    return Vector<Formula<Y>>(n,[](SizeType i){return Formula<Y>::coordinate(i);}); }
+template<class Y> inline Vector<Formula<Y>> Formula<Y>::identity(SizeType n) {
+    return Formula<Y>::coordinates(n); }
+template<class Y> inline Formula<Y> Formula<Y>::unary(const UnaryElementaryOperator& op, Formula<Y> const& a) {
+    return Formula<Y>(new FormulaNode<Y>(UnaryFormulaNode<Y>(op,a)),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::binary(const BinaryElementaryOperator& op, Formula<Y> const& a1, Formula<Y> const& a2) {
+    return Formula<Y>(new FormulaNode<Y>(BinaryFormulaNode<Y>(op,a1,a2)),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::graded(const GradedElementaryOperator& op, Formula<Y> const& a1, Int n2) {
+    return Formula<Y>(new FormulaNode<Y>(GradedFormulaNode<Y>(op,a1,n2)),PointerTag()); }
+template<class Y> inline Formula<Y> Formula<Y>::scalar(const BinaryElementaryOperator& op, Y const& c1, Formula<Y> const& a2) {
+    return Formula<Y>(new FormulaNode<Y>(ScalarFormulaNode<Y>(op,c1,a2)),PointerTag()); }
+//template<class Y> inline Formula<Y> Formula<Y>::scalar(const BinaryElementaryOperator& op, Formula<Y> const& a1, Y const& c2) {
+//    return Formula<Y>(new FormulaNode<Y>(ScalarFormulaNode<Y>(op,a1,c2)),PointerTag()); }
+
+
+template<class OP, class F, class J> inline decltype(auto) compute_derivative(OP op, F const& f, J j) {
+    return op.derivative(f,derivative(f,j)); }
+template<class F, class J> inline auto compute_derivative(Abs op, F const& f, J j) -> F {
+    ARIADNE_THROW(std::runtime_error,"derivative(abs(f))","Cannot take derivative of non-smooth function"); }
+
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Add, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)+derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Sub, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)-derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Mul, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)*f2+f1*derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Div, F1 const& f1, F2 const& f2, J j) {
+    return (derivative(f1,j)+derivative(f2,j)*(f1/f2))/f2; }
+template<class F1, class F2, class J> inline auto compute_derivative(Max, F1 const& f1, F2 const& f2, J j) -> decltype(max(f1,f2)){
+    ARIADNE_THROW(std::runtime_error,"derivative(max(f1,f2))","Cannot take derivative of non-smooth function."); }
+template<class F1, class F2, class J> inline auto compute_derivative(Min, F1 const& f1, F2 const& f2, J j) -> decltype(min(f1,f2)) {
+    ARIADNE_THROW(std::runtime_error,"derivative(min(f1,f2))","Cannot take derivative of non-smooth function."); }
+
+template<class F, class N, class J> inline decltype(auto) compute_derivative(Pow op, F const& f, N const& n, J j) {
+    return op.derivative(f,derivative(f,j),n); }
+
+
+template<class F, class J> decltype(auto) compute_derivative(UnaryElementaryOperator op, F const& f, J j) {
+    return op.visit([&f,j](auto op){return compute_derivative(op,f,j);}); }
+template<class F1, class F2, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, F1 const& f1, F2 const& f2, J j) {
+    return op.visit([&f1,&f2,j](auto op){return compute_derivative(op,f1,f2,j);}); }
+template<class F, class N, class J> decltype(auto) compute_derivative(GradedElementaryOperator op, F const& f, N n, J j) {
+    return op.visit([&f,j,n](auto op){return compute_derivative(op,f,n,j);}); }
+template<class X, template<class>class A, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, A<X> const& f1, X const& c2, J j) {
+    return compute_derivative(op,f1,A<X>(c2),j); }
+template<class X, template<class>class A, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, X const& c1, A<X> const& f2, J j) {
+    return compute_derivative(op,A<X>(c1),f2,j); }
+
+
+template<class Y, class J> decltype(auto) derivative(Symbolic<Cnst,Y> const& s, J j) {
+    return Symbolic<Cnst,Y>(Y(0)); }
+template<class Y, class J> decltype(auto) derivative(IndexFormulaNode<Y> const& s, J j) {
+    return ConstantFormulaNode<Y>(Y(s._ind==j?1:0)); }
+
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A> const& s, J j) {
+    return compute_derivative(s._op,s._arg,j); }
+template<class OP, class A1, class A2, class J> decltype(auto) derivative(Symbolic<OP,A1,A2> const& s, J j) {
+    return compute_derivative(s._op,s._arg1,s._arg2,j); }
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,A,E<A>> const& s, J j) {
+    return compute_derivative(s._op,E<A>(s._cnst),s._arg,j); }
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,E<A>,A> const& s, J j) {
+    return compute_derivative(s._op,E<A>(s._arg),s._cnst,j); }
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A,Int> const& s, J j) {
+    return compute_derivative(s._op,s._arg,s._num,j); }
+
+
+
 template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
 {
-    const Formula<Y>& f = *this;
-    switch(f.kind()) {
-        case OperatorKind::NULLARY: return Formula<Y>::constant(0);
-        case OperatorKind::COORDINATE: return Formula<Y>::constant(f.ind()==j?1:0);
-        case OperatorKind::UNARY: return compute_derivative(f.op(),f.arg(),derivative(f.arg(),j));
-        case OperatorKind::BINARY: return compute_derivative(f.op(),f.arg1(),derivative(f.arg1(),j),f.arg2(),derivative(f.arg2(),j));
-        case OperatorKind::GRADED: return compute_derivative(f.op(),f.arg(),derivative(f.arg(),j),f.num());
-        default:
-            ARIADNE_THROW(std::runtime_error,"compute_derivative(Formula<Y>)",
-                          "Cannot compute derivative of "<<f<<"\n");
-    }
+    return this->_root->visit([j](auto fn){return static_cast<Formula<Y>>(derivative(fn,j));});
+}
+
+namespace {
+
+template<class Y> void _write_impl(OutputStream& os, ConstantFormulaNode<Y> const& c) { os << c._val; }
+template<class Y> void _write_impl(OutputStream& os, IndexFormulaNode<Y> const& v) { os << v._ind; }
+
+template<class Y> void _write_impl(OutputStream& os, Add, Formula<Y> e1, Formula<Y> e2) {
+    os << e1 << '+' << e2; }
+template<class Y> void _write_impl(OutputStream& os, Sub, Formula<Y> e1, Formula<Y> e2) {
+    os << e1 << '+'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+template<class Y> void _write_impl(OutputStream& os, Mul, Formula<Y> e1, Formula<Y> e2) {
+    switch(e1.op().code()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '*';
+    switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+template<class Y> void _write_impl(OutputStream& os, Div, Formula<Y> e1, Formula<Y> e2) {
+        switch(e1.op()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '/';
+        switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+template<class Y> void _write_impl(OutputStream& os, Max, Formula<Y> e1, Formula<Y> e2) { os << "max" << '(' << e1 << ',' << e2 << ')'; }
+template<class Y> void _write_impl(OutputStream& os, Min, Formula<Y> e1, Formula<Y> e2) { os << "min" << '(' << e1 << ',' << e2 << ')'; }
+
+template<class Y> void _write_impl(OutputStream& os, BinaryFormulaNode<Y> const& s) {
+    s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+template<class Y> void _write_impl(OutputStream& os, UnaryFormulaNode<Y> const& s) {
+    os << s._op << '(' << s._arg << ')'; }
+template<class Y> void _write_impl(OutputStream& os, ScalarFormulaNode<Y> const& s) {
+    os << '('; _write_impl(os,BinaryFormulaNode<Y>(s._op,Formula<Y>(s._cnst),s._arg)); os << ')'; }
+template<class Y> void _write_impl(OutputStream& os, GradedFormulaNode<Y> const& s) {
+    os << s._op << '(' << s._arg << ',' << s._num << ')'; }
 }
 
 //! \brief Write to an output stream
 template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
 {
     const Formula<Y>& f = *this;
+    f.node_ref().visit([&os](auto s){_write_impl(os,s);});
+    return os;
+/*
     switch(f.op()) {
         //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case OperatorCode::CNST:
             os << f.val(); return os;
             //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case OperatorCode::IND:
+        case OperatorCode::IND: case OperatorCode::VAR:
             return os << "x" << f.ind();
         case OperatorCode::ADD:
             return os << f.arg1() << '+' << f.arg2();
@@ -81,6 +209,7 @@ template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
                 default: ARIADNE_FAIL_MSG("Cannot output formula with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
             }
     }
+*/
 }
 
 template class Formula<ApproximateNumber>;
@@ -91,9 +220,14 @@ template class Formula<ExactNumber>;
 template class Formula<FloatDPApproximation>;
 template class Formula<Real>;
 
-template ApproximateNumber compute(OperatorCode op, const ApproximateNumber& x);
-template ValidatedNumber compute(OperatorCode op, const ValidatedNumber& x);
-template EffectiveNumber compute(OperatorCode op, const EffectiveNumber& x);
-template ExactNumber compute(OperatorCode op, const ExactNumber& x);
+template Formula<EffectiveNumber> simplify(Formula<EffectiveNumber> const&);
+template Vector<Formula<EffectiveNumber>> simplify(Vector<Formula<EffectiveNumber>> const&);
+template Formula<EffectiveNumber> substitute(const Formula<EffectiveNumber>& a, const Nat& i, const Formula<EffectiveNumber>& is);
+
+template Bool identical(Formula<EffectiveNumber> const&, Formula<EffectiveNumber> const&);
+
+template Bool identical(Vector<Formula<EffectiveNumber>> const&, Vector<Formula<EffectiveNumber>> const&);
+template Bool is_affine_in(Vector<Formula<EffectiveNumber>> const&, Set<Nat> const&);
+template Bool is_additive_in(Vector<Formula<EffectiveNumber>> const&, Set<Nat> const&);
 
 } // namespace Ariadne

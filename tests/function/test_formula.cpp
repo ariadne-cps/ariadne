@@ -34,6 +34,7 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "function/formula.hpp"
+#include "function/formula.tpl.hpp"
 
 #include "../test.hpp"
 
@@ -48,7 +49,7 @@ class TestFormula
 
   public:
     TestFormula()
-      : two(EffectiveFormula::constant(2.0)),
+      : two(EffectiveFormula::constant(2.0_x)),
         x(EffectiveFormula::coordinate(0)),
         y(EffectiveFormula::coordinate(1)) { }
   private:
@@ -62,8 +63,8 @@ class TestFormula
 
     Void test_identical() {
         ARIADNE_TEST_ASSERT(identical(x,x));
-        ARIADNE_TEST_ASSERT(identical(ExactFormula::constant(2.0),ExactFormula::constant(2.0)));
-        ARIADNE_TEST_ASSERT(identical(EffectiveFormula::constant(2.0),EffectiveFormula::constant(2.0)));
+        ARIADNE_TEST_ASSERT(identical(ExactFormula::constant(2.0_x),ExactFormula::constant(2.0_x)));
+        ARIADNE_TEST_ASSERT(identical(EffectiveFormula::constant(2.0_x),EffectiveFormula::constant(2.0_x)));
         ARIADNE_TEST_ASSERT(identical(x*y,y*x));
         ARIADNE_TEST_ASSERT(identical(x+y,y+x));
         ARIADNE_TEST_ASSERT(identical(cos(x),cos(x)));

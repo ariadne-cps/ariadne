@@ -39,15 +39,17 @@ namespace Ariadne {
 template<class Op, class... Args> struct ExpressionTemplate;
 
 template<class C> struct ExpressionTemplate<Cnst,C> {
-    Cnst _op; C _cnst;
-    ExpressionTemplate(Cnst o, C c) : _op(o), _cnst(c) { }
-    template<class T> operator T() const { return static_cast<T>(_cnst); }
-    template<class... AS> auto operator() (AS... vals) const -> C { return _cnst; }
-    friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._cnst; }
+    Cnst _op; C _val;
+    explicit ExpressionTemplate(C c) : _op(), _val(c) { }
+    ExpressionTemplate(Cnst o, C c) : _op(o), _val(c) { }
+    template<class T> operator T() const { return static_cast<T>(_val); }
+    template<class... AS> auto operator() (AS... vals) const -> C { return _val; }
+    friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._val; }
 };
 
 template<class I> struct ExpressionTemplate<Var,I> {
     Var _op; I _ind;
+    explicit ExpressionTemplate(I i) : _op(), _ind(i) { }
     ExpressionTemplate(Var o, I i) : _op(o), _ind(i) { }
     template<class AS> auto operator() (AS vals) const -> decltype(vals[_ind]) { return vals[_ind]; }
     friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) { return os << expr._ind; }
@@ -74,13 +76,25 @@ template<class O, class A1, class A2> struct ExpressionTemplate<O,A1,A2> {
 };
 
 template<class A, class N> struct ExpressionTemplate<Pow,A,N> {
-    Pow _op; A _arg; N _n;
-    ExpressionTemplate(Pow o, A a, N n) : _op(o), _arg(a), _n(n) { }
-    template<class T> operator T() const { return _op(static_cast<T>(_arg),_n); }
-    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...),_n)) {
-        return _op(_arg(vals...),_n); }
+    typedef Pow O;
+    O _op; A _arg; N _num;
+    ExpressionTemplate(O o, A a, N n) : _op(o), _arg(a), _num(n) { }
+    template<class T> operator T() const { return _op(static_cast<T>(_arg),_num); }
+    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...),_num)) {
+        return _op(_arg(vals...),_num); }
     friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) {
-        return os << expr._op.code() << "(" << expr._arg << "," << expr._n << ")"; }
+        return os << expr._op.code() << "(" << expr._arg << "," << expr._num << ")"; }
+};
+
+template<class A, class N> struct ExpressionTemplate<GradedElementaryOperator,A,N> {
+    typedef GradedElementaryOperator O;
+    O _op; A _arg; N _num;
+    ExpressionTemplate(O o, A a, N n) : _op(o), _arg(a), _num(n) { }
+    template<class T> operator T() const { return _op(static_cast<T>(_arg),_num); }
+    template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_arg(vals...),_num)) {
+        return _op(_arg(vals...),_num); }
+    friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) {
+        return os << expr._op.code() << "(" << expr._arg << "," << expr._num << ")"; }
 };
 
 template<class O, class A1, class A2, class A3> struct ExpressionTemplate<O,A1,A2,A3> {

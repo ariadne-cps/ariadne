@@ -83,7 +83,7 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     , DefineComparisonOperators<UpperInterval<F>,ValidatedKleenean>
     , ProvideConvertedFieldOperations<UpperInterval<F>,Bounds<F>>
     , ProvideConvertedComparisonOperations<UpperInterval<F>,Bounds<F>,UpperInterval<F>,ValidatedKleenean>
-    , ProvideConcreteGenericFieldOperations<UpperInterval<F>,ValidatedNumber>
+    , ProvideConcreteGenericElementaryOperations<UpperInterval<F>,ValidatedNumber>
     , ProvideConcreteGenericComparisonOperations<UpperInterval<F>,ValidatedNumber,ValidatedKleenean>
 {
     typedef typename F::PrecisionType PR; typedef PR PrecisionType;

@@ -24,70 +24,106 @@
 
 #include <cstdarg>
 #include "ariadne.hpp"
+#include "utility/stopwatch.hpp"
 
 using namespace Ariadne;
 
 
 int main()
 {
-
-    RealConstant mu("mu",1.0_dec);
     RealVariable x("x"), y("y");
 
-    VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+    ListSet<Enclosure> reach1, reach2;
 
-    MaximumError max_err=1e-5;
-    TaylorSeriesIntegrator integrator(max_err, Order(5u));
-    //integrator.set_maximum_step_size(0.02);
+    {
+        RealConstant mu("mu",1.0_dec);
+        VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
 
-    VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.02);
-    evolver.configuration().maximum_spacial_error(2e-4);
-    evolver.verbosity = 1;
-    std::cout <<  evolver.configuration() << std::endl;
+        MaximumError max_err = 1e-5;
+        TaylorSeriesIntegrator integrator(max_err, Order(5u));
 
-    Box<RealInterval> initial_set({{1.25_dec,1.55_dec},{2.35_dec,2.45_dec}});
+        VectorFieldEvolver evolver(dynamics, integrator);
+        evolver.configuration().maximum_enclosure_radius(1.0);
+        evolver.configuration().maximum_step_size(0.02);
+        evolver.configuration().maximum_spacial_error(2e-4);
+        evolver.verbosity = 0;
+        std::cout << evolver.configuration() << std::endl;
 
-    std::cout << "Initial set: " << initial_set << std::endl;
-    Real evolution_time(7.0);
+        Box<RealInterval> initial_set({{1.25_dec, 1.55_dec},{2.35_dec, 2.45_dec}});
 
-    std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+        std::cout << "Initial set: " << initial_set << std::endl;
+        Real evolution_time(7.0);
 
-    for (auto set : orbit.reach()) {
-        if (definitely(set.bounding_box()[1].upper().raw() >= 2.75))
-            std::cout << "set with upper value " << set.bounding_box()[1].upper().raw() << " is outside the safe set." << std::endl;
+        StopWatch sw;
+
+        std::cout << "Computing orbit... \n" << std::flush;
+        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+
+        std::cout << "Checking properties... \n" << std::flush;
+
+        for (auto set : orbit.reach()) {
+            if (possibly(set.bounding_box()[1] >= 2.75_dec))
+                std::cout << "set with y=" << set.bounding_box()[1] << " is outside the specification." << std::endl;
+        }
+        sw.click();
+        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+
+        reach1.adjoin(orbit.reach());
     }
+
+    {
+        RealConstant mu("mu",2.0_dec);
+        VectorField dynamics({dot(x)=y, dot(y)= mu*y*(1-sqr(x))-x});
+
+        MaximumError max_err = 1e-5;
+        TaylorSeriesIntegrator integrator(max_err, Order(5u));
+
+        VectorFieldEvolver evolver(dynamics, integrator);
+        evolver.configuration().maximum_enclosure_radius(0.03);
+        evolver.configuration().maximum_step_size(0.04);
+        evolver.configuration().maximum_spacial_error(1e-3);
+        evolver.verbosity = 0;
+        std::cout << evolver.configuration() << std::endl;
+
+        Box<RealInterval> initial_set({{1.55_dec, 1.85_dec},{2.35_dec, 2.45_dec}});
+
+        std::cout << "Initial set: " << initial_set << std::endl;
+        Real evolution_time(8.0);
+
+        StopWatch sw;
+
+        std::cout << "Computing orbit... \n" << std::flush;
+        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+
+        std::cout << "Checking properties... \n" << std::flush;
+
+        SizeType ce=0;
+        for (auto set : orbit.reach()) {
+            if (possibly(set.bounding_box()[1] >= 4)) {
+                std::cout << "set with y=" << set.bounding_box()[1] << " is outside the specification." << std::endl;
+                ++ce;
+            }
+        }
+        sw.click();
+        std::cout << "Number of counterexamples: " << ce << std::endl;
+        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+
+        reach2.adjoin(orbit.reach());
+    }
+
+    DRAWING_METHOD = DrawingMethod::BOX;
 
     std::cout << "plotting..." << std::endl;
     Box<FloatDPUpperInterval> graphics_box(2);
     graphics_box[0] = FloatDPUpperInterval(-2.5,2.5);
-    graphics_box[1] = FloatDPUpperInterval(-3.0,3.0);
+    graphics_box[1] = FloatDPUpperInterval(-4.0,4.0);
     Figure fig=Figure();
     fig.set_bounding_box(graphics_box);
     fig.set_line_colour(0.0,0.0,0.0);
     fig.set_line_style(true);
-    fig.set_fill_colour(0.5,0.5,0.5);
+    fig.set_fill_colour(0.6,0.6,0.6);
+    fig.draw(reach2);
     fig.set_fill_colour(1.0,0.75,0.5);
-    fig.draw(orbit.reach());
-    fig.write("vanderpol-vectorfield");
-/*
-    plot("vanderpol-vf",Axes2d(-2.5,x,2.5, -3.0,y,3.0), Colour(0.0,0.5,1.0), orbit);
-
-    std::cout << "Discretising orbit" << std::flush;
-    Grid grid(2);
-    GridTreeSet gts(grid);
-
-    for (ListSet<Enclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
-    {
-        std::cout<<"."<<std::flush;
-        it->state_auxiliary_set().adjoin_outer_approximation_to(gts,4);
-    }
-    std::cout << "done." << std::endl;
-
-    // The following currently fails since auxiliary variables are not tracked
-    plot("vanderpol-vf-reach",ApproximateBoxType({{-2.1,2.1}, {-3.0,3.0}}), Colour(0.0,0.5,1.0), gts);
-*/
+    fig.draw(reach1);
+    fig.write("vanderpol");
 }

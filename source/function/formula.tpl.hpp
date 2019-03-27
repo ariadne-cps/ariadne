@@ -162,6 +162,94 @@ template<class X, class Y> Vector<X> evaluate(const Vector<Formula<Y>>& f, const
     return cached_evaluate(f,x);
 }
 
+
+
+
+namespace {
+template<class OP, class F, class J> inline decltype(auto) compute_derivative(OP op, F const& f, J j) {
+    return op.derivative(f,derivative(f,j)); }
+template<class F, class J> inline auto compute_derivative(Abs op, F const& f, J j) -> F {
+    ARIADNE_THROW(std::runtime_error,"derivative(abs(f))","Cannot take derivative of non-smooth function"); }
+
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Add, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)+derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Sub, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)-derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Mul, F1 const& f1, F2 const& f2, J j) {
+    return derivative(f1,j)*f2+f1*derivative(f2,j); }
+template<class F1, class F2, class J> inline decltype(auto) compute_derivative(Div, F1 const& f1, F2 const& f2, J j) {
+    return (derivative(f1,j)+derivative(f2,j)*(f1/f2))/f2; }
+template<class F1, class F2, class J> inline auto compute_derivative(Max, F1 const& f1, F2 const& f2, J j) -> decltype(max(f1,f2)){
+    ARIADNE_THROW(std::runtime_error,"derivative(max(f1,f2))","Cannot take derivative of non-smooth function."); }
+template<class F1, class F2, class J> inline auto compute_derivative(Min, F1 const& f1, F2 const& f2, J j) -> decltype(min(f1,f2)) {
+    ARIADNE_THROW(std::runtime_error,"derivative(min(f1,f2))","Cannot take derivative of non-smooth function."); }
+
+template<class F, class N, class J> inline decltype(auto) compute_derivative(Pow op, F const& f, N const& n, J j) {
+    return op.derivative(f,derivative(f,j),n); }
+
+
+template<class F, class J> decltype(auto) compute_derivative(UnaryElementaryOperator op, F const& f, J j) {
+    return op.visit([&f,j](auto op){return compute_derivative(op,f,j);}); }
+template<class F1, class F2, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, F1 const& f1, F2 const& f2, J j) {
+    return op.visit([&f1,&f2,j](auto op){return compute_derivative(op,f1,f2,j);}); }
+template<class F, class N, class J> decltype(auto) compute_derivative(GradedElementaryOperator op, F const& f, N n, J j) {
+    return op.visit([&f,j,n](auto op){return compute_derivative(op,f,n,j);}); }
+template<class X, template<class>class A, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, A<X> const& f1, X const& c2, J j) {
+    return compute_derivative(op,f1,A<X>(c2),j); }
+template<class X, template<class>class A, class J> decltype(auto) compute_derivative(BinaryElementaryOperator op, X const& c1, A<X> const& f2, J j) {
+    return compute_derivative(op,A<X>(c1),f2,j); }
+
+
+template<class Y, class J> decltype(auto) derivative(Symbolic<Cnst,Y> const& s, J j) {
+    return Symbolic<Cnst,Y>(Y(0)); }
+template<class Y, class J> decltype(auto) derivative(IndexFormulaNode<Y> const& s, J j) {
+    return ConstantFormulaNode<Y>(Y(s._ind==j?1:0)); }
+
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A> const& s, J j) {
+    return compute_derivative(s._op,s._arg,j); }
+template<class OP, class A1, class A2, class J> decltype(auto) derivative(Symbolic<OP,A1,A2> const& s, J j) {
+    return compute_derivative(s._op,s._arg1,s._arg2,j); }
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,A,E<A>> const& s, J j) {
+    return compute_derivative(s._op,E<A>(s._cnst),s._arg,j); }
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,E<A>,A> const& s, J j) {
+    return compute_derivative(s._op,E<A>(s._arg),s._cnst,j); }
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A,Int> const& s, J j) {
+    return compute_derivative(s._op,s._arg,s._num,j); }
+
+} // namespace
+
+
+
+namespace {
+
+template<class Y> void _write_impl(OutputStream& os, Add, Formula<Y> e1, Formula<Y> e2) {
+    os << e1 << '+' << e2; }
+template<class Y> void _write_impl(OutputStream& os, Sub, Formula<Y> e1, Formula<Y> e2) {
+    os << e1 << '+'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+template<class Y> void _write_impl(OutputStream& os, Mul, Formula<Y> e1, Formula<Y> e2) {
+    switch(e1.op().code()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '*';
+    switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+template<class Y> void _write_impl(OutputStream& os, Div, Formula<Y> e1, Formula<Y> e2) {
+        switch(e1.op()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '/';
+        switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+
+template<class E1, class E2> void _write_impl(OutputStream& os, Max, E1 const& e1, E2 const& e2) { os << "max" << '(' << e1 << ',' << e2 << ')'; }
+template<class E1, class E2> void _write_impl(OutputStream& os, Min, E1 const& e1, E2 const& e2) { os << "min" << '(' << e1 << ',' << e2 << ')'; }
+
+template<class Y> void _write_impl(OutputStream& os, Symbolic<Cnst,Y> const& c) {
+    os << c._val; }
+template<class I> void _write_impl(OutputStream& os, Symbolic<Var,I> const& v) {
+    os << v._ind; }
+template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A1,A2> const& s) {
+    s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+template<class A> void _write_impl(OutputStream& os, Symbolic<UnaryElementaryOperator,A> const& s) {
+    os << s._op << '(' << s._arg << ')'; }
+template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A,E<A>> const& s) {
+    os << '('; _write_impl(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,E<A>(s._cnst),s._arg)); os << ')'; }
+template<class A, class N> void _write_impl(OutputStream& os, Symbolic<GradedElementaryOperator,A,N> const& s) {
+    os << s._op << '(' << s._arg << ',' << s._num << ')'; }
+}
+
 //! \ingroup FunctionModule
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.

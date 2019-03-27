@@ -43,6 +43,7 @@ template ValidatedProcedure make_procedure(const ValidatedScalarMultivariateFunc
 template EffectiveProcedure make_procedure(const EffectiveScalarMultivariateFunction& f);
 
 template Void _execute(List<FloatDPBounds>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<FloatDPBounds>& x);
+
 template Void _execute(List<Graded<Differential<FloatDPBounds>>>& v, const List<ProcedureInstruction>& p, const List<ValidatedNumber>& c, const Vector<Graded<Differential<FloatDPBounds>>>& x);
 
 template Void _execute<FloatDPApproximation, ApproximateNumber>(List<FloatDPApproximation>&, List<ProcedureInstruction> const&, List<ApproximateNumber> const&, Vector<FloatDPApproximation> const&);

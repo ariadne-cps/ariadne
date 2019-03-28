@@ -55,7 +55,7 @@ int main() {
 
     {
         MaximumError max_err = 2e-3;
-        TaylorSeriesIntegrator integrator(max_err, Order(3u));
+        TaylorSeriesIntegrator integrator(max_err, Order(4u));
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().maximum_enclosure_radius(0.09);
@@ -93,8 +93,14 @@ int main() {
             }
         }
 
+        UpperIntervalType bounds = UpperIntervalType::empty_interval();
+        for (auto set : orbit.final()) {
+            bounds = hull(set.bounding_box()[3],bounds);
+        }
+
         sw.click();
         std::cout << "Number of counterexamples: " << ce << std::endl;
+        std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach1.adjoin(orbit.reach());
@@ -102,7 +108,7 @@ int main() {
 
     {
         MaximumError max_err = 2e-3;
-        TaylorSeriesIntegrator integrator(max_err, Order(3u));
+        TaylorSeriesIntegrator integrator(max_err, Order(4u));
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().maximum_enclosure_radius(0.04);
@@ -140,8 +146,14 @@ int main() {
             }
         }
 
+        UpperIntervalType bounds = UpperIntervalType::empty_interval();
+        for (auto set : orbit.final()) {
+            bounds = hull(set.bounding_box()[3],bounds);
+        }
+
         sw.click();
         std::cout << "Number of counterexamples: " << ce << std::endl;
+        std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach2.adjoin(orbit.reach());
@@ -187,8 +199,14 @@ int main() {
             }
         }
 
+        UpperIntervalType bounds = UpperIntervalType::empty_interval();
+        for (auto set : orbit.final()) {
+            bounds = hull(set.bounding_box()[3],bounds);
+        }
+
         sw.click();
         std::cout << "Number of counterexamples: " << ce << std::endl;
+        std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach3.adjoin(orbit.reach());

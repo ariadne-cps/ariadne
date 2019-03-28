@@ -180,7 +180,7 @@ int main() {
 
         Nat ce = 0;
         for (auto set : orbit.reach()) {
-            if (definitely(set.bounding_box()[3].upper().raw() >= 4.5)) {
+            if (definitely(set.bounding_box()[3].upper().raw() >= 5.0)) {
                 std::cout << "set with value " << set.bounding_box()[3] << " does not respect the specification."
                           << std::endl;
                 ++ce;

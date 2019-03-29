@@ -41,13 +41,15 @@ void verify_space_rendezvous() {
     BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(initial_location,initial_space);
     cout << "initial_constraint_set=" << initial_constraint_set << "\n";
 
-    MaximumError max_err=0.01;
-    TaylorSeriesIntegrator integrator(max_err,Order(5u));
+    MaximumError max_err=1e-3;
+    TaylorSeriesIntegrator integrator(max_err,Order(3u));
 
     GeneralHybridEvolver evolver(system);
     evolver.set_integrator(integrator);
-    evolver.configuration().set_maximum_step_size(0.5);
-    evolver.configuration().set_enable_subdivisions(false);
+    evolver.configuration().set_maximum_enclosure_radius(12.0);
+    evolver.configuration().set_maximum_step_size(1.0);
+    evolver.configuration().set_maximum_spacial_error(1e-3);
+    evolver.configuration().set_enable_subdivisions(true);
     evolver.verbosity=0;
 
     StopWatch sw;

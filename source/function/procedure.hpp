@@ -81,9 +81,9 @@ struct ProcedureInstruction : public ProcedureInstructionVariant {
   public:
     ProcedureInstruction(ProcedureInstructionVariant var) : ProcedureInstructionVariant(var) { }
     ProcedureInstructionVariant const& base() const { return *this; }
-    template<class VIS> decltype(auto) visit(VIS&& vis) const {
+    template<class VIS> decltype(auto) accept(VIS&& vis) const {
         return std::visit(std::forward<VIS>(vis),static_cast<ProcedureInstructionVariant const&>(*this)); }
-    Operator op() const { return visit([](auto s){return Operator(s._op);}); }
+    Operator op() const { return this->accept([](auto s){return Operator(s._op);}); }
     const SizeType& val() const {
         return std::get<ConstantProcedureInstruction>(this->base())._val; }
     const SizeType& ind() const {
@@ -96,7 +96,7 @@ struct ProcedureInstruction : public ProcedureInstructionVariant {
     const Int& num() const { return std::get<GradedProcedureInstruction>(this->base())._num; }
   public:
     friend OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri) {
-        pri.visit([&os](auto s){os<<s;}); return os; }
+        pri.accept([&os](auto s){os<<s;}); return os; }
 };
 
 //! \brief An algorithmic procedure for computing a function.

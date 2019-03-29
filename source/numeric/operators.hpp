@@ -442,19 +442,19 @@ template<class... OPS> class OperatorVariant
     template<class OP, EnableIf<IsOneOf<OP,OPS...>> =dummy> OperatorVariant(OP op) : CodedVariant<OperatorCode,OPS...>(op) { }
     explicit OperatorVariant(OperatorCode code) : CodedVariant<OperatorCode,OPS...>(code) { }
     OperatorKind kind() const {
-        return this->visit([](auto op){return op.kind();}); }
+        return this->accept([](auto op){return op.kind();}); }
     template<class... AS> decltype(auto) operator()(AS&& ... as) const {
-        return this->visit([&as...](auto op){return op(std::forward<AS>(as)...);}); }
+        return this->accept([&as...](auto op){return op(std::forward<AS>(as)...);}); }
     template<class... AS> decltype(auto) call(AS&& ... as) const {
-        return this->visit([&as...](auto op){return op(std::forward<AS>(as)...);}); }
+        return this->accept([&as...](auto op){return op(std::forward<AS>(as)...);}); }
     template<class R, class... AS> R call_as(AS&& ... as) const {
-        return this->visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+        return this->accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
     template<class R, class... AS> friend R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
-        return ops.visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
-    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) { op.visit([&os](auto op_){os << op_;}); return os; }
+        return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) { op.accept([&os](auto op_){os << op_;}); return os; }
 };
 //template<class R, class... OPS, class... AS> R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
-//    return ops.visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+//    return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
 
 
 
@@ -466,27 +466,27 @@ struct UnaryTranscendentalOperator : OperatorVariant<Pos,Neg,Sqr,Hlf,Rec,Sqrt,Ex
 struct UnaryElementaryOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs> {
     using OperatorVariant::OperatorVariant;
     template<class X> decltype(sin(declval<X>())) operator()(X&& x) const { typedef decltype(sin(x)) R;
-        return this->visit([&x](auto op){return static_cast<R>(op(std::forward<X>(x)));}); } };
+        return this->accept([&x](auto op){return static_cast<R>(op(std::forward<X>(x)));}); } };
 struct UnaryLatticeOperator : OperatorVariant<Abs> { using OperatorVariant::OperatorVariant; };
 struct BinaryLogicalOperator : OperatorVariant<AndOp,OrOp> { using OperatorVariant::OperatorVariant; };
 struct BinaryComparisonOperator : OperatorVariant<Equal,Unequal,Less,Gtr,Leq,Geq> { using OperatorVariant::OperatorVariant; };
 struct BinaryLatticeOperator : OperatorVariant<Max,Min> { using OperatorVariant::OperatorVariant; };
 struct BinaryRingOperator : OperatorVariant<Add,Sub,Mul> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> ArithmeticType<X1,X2> operator()(X1&& x1, X2&& x2) const {
-        return this->visit([&x1,&x2](auto op){return static_cast<ArithmeticType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+        return this->accept([&x1,&x2](auto op){return static_cast<ArithmeticType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
 struct BinaryFieldOperator : OperatorVariant<Add,Sub,Mul,Div> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
-        return this->visit([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+        return this->accept([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
 using BinaryArithmeticOperator = BinaryFieldOperator;
 struct BinaryElementaryOperator : OperatorVariant<Add,Sub,Mul,Div,Max,Min> { using OperatorVariant::OperatorVariant;
     template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
-        return this->visit([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+        return this->accept([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
 struct GradedRingOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
     template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
-        return this->visit([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
+        return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
 struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
     template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
-        return this->visit([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
+        return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
 struct TernaryArithmeticOperator : OperatorVariant<Fma> { using OperatorVariant::OperatorVariant; };
 
 

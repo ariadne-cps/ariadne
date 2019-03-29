@@ -130,10 +130,10 @@ template<class T> struct ExpressionNode : public ExpressionVariantType<T> {
 
     ExpressionVariantType<T> const& base() const { return *this; }
 
-    template<class VIS> decltype(auto) visit(VIS&& vis) const {
+    template<class VIS> decltype(auto) accept(VIS&& vis) const {
         return std::visit(std::forward<VIS>(vis),static_cast<ExpressionVariantType<T>const&>(*this)); }
 
-    Operator op() const { return this->visit([](auto s){return Operator(_op_impl(s));}); }
+    Operator op() const { return this->accept([](auto s){return Operator(_op_impl(s));}); }
 };
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
@@ -190,11 +190,11 @@ template<class R> template<class A> const Expression<A>& Expression<R>::cmp2(A*)
 
 
 template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
-    return this->node_ref().visit([](auto s){return _arguments(s);});
+    return this->node_ref().accept([](auto s){return _arguments(s);});
 }
 
 template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
-    this->node_ref().visit([&os](auto e){_write_impl(os,e);}); return os;
+    this->node_ref().accept([&os](auto e){_write_impl(os,e);}); return os;
 /*
     const Expression<T>& f=*this;
     switch(f.op()) {
@@ -269,20 +269,20 @@ Expression<R> make_expression(OP op, const Expression<A1>& e1, Expression<A2> e2
 template<class A> A evaluate(const Expression<A>& e, const Map<Identifier,A>& x);
 
 inline Integer evaluate(const Expression<Integer>& e, const Map<Identifier,String>& x) {
-    return e.node_ref().visit([&x](auto en){return evaluate_as<Integer>(en,x);});
+    return e.node_ref().accept([&x](auto en){return evaluate_as<Integer>(en,x);});
 }
 inline String evaluate(const Expression<String>& e, const Map<Identifier,Integer>& x) {
-    return e.node_ref().visit([&x](auto en){return evaluate_as<String>(en,x);});
+    return e.node_ref().accept([&x](auto en){return evaluate_as<String>(en,x);});
 }
 
 
 template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x) {
     typedef typename Logic<A>::Type R;
-    return e.node_ref().visit([&x](auto en){return evaluate_as<R>(en,x);});
+    return e.node_ref().accept([&x](auto en){return evaluate_as<R>(en,x);});
 }
 
 template<class T> T evaluate(const Expression<T>& e, const Map<Identifier,T>& x) {
-    return e.node_ref().visit([&x](auto en){return evaluate_as<T>(en,x);});
+    return e.node_ref().accept([&x](auto en){return evaluate_as<T>(en,x);});
 }
 
 template<class T> T evaluate(const Expression<T>& e, const Valuation<T>& x) {
@@ -303,7 +303,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e) {
 
 
 template<class T> Bool is_constant_in(const Expression<T>& e, const Set<Variable<T>>& spc) {
-    return e.node_ref().visit([&spc](auto en){return is_constant_in(en,spc);});
+    return e.node_ref().accept([&spc](auto en){return is_constant_in(en,spc);});
 }
 
 
@@ -321,7 +321,7 @@ template<class X, class Y, class OP, class E> Expression<X> _substitute(const Sy
 }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& s) {
-    return e.node_ref().visit([&v,&s](auto en){return _substitute<X>(en,v,s);});
+    return e.node_ref().accept([&v,&s](auto en){return _substitute<X>(en,v,s);});
 }
 
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c) {
@@ -357,7 +357,7 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
 {
     if(e1.node_raw_ptr()==e2.node_raw_ptr()) { return true; }
     if(e1.op()!=e2.op()) { return false; }
-    return e1.node_ref().visit([&e2](auto e1n){return e2.node_ref().visit([&e1n](auto e2n){return _identical_dispatch(e1n,e2n);});});
+    return e1.node_ref().accept([&e2](auto e1n){return e2.node_ref().accept([&e1n](auto e2n){return _identical_dispatch(e1n,e2n);});});
 }
 
 
@@ -400,7 +400,7 @@ template<class OP, class... OPS> Bool _are_inverses(OP op1, OperatorVariant<OPS.
 }
 
 template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> ops1, OperatorVariant<OPS...> ops2) {
-    return ops1.visit([&ops2](auto op1){ return _are_inverses(op1,ops2); });
+    return ops1.accept([&ops2](auto op1){ return _are_inverses(op1,ops2); });
 }
 
 namespace {
@@ -481,21 +481,21 @@ template<class T> inline Expression<T> _simplify_node(const UnaryExpressionNode<
 template<class T> inline Expression<T> _simplify_node(const BinaryExpressionNode<T>& e) {
     Expression<T> sarg1=simplify(e._arg1);
     Expression<T> sarg2=simplify(e._arg2);
-    return e.op().visit([&](auto op){return _simpl(op,sarg1,sarg2);});
+    return e.op().accept([&](auto op){return _simpl(op,sarg1,sarg2);});
 }
 inline Expression<R> _simplify_node(const BinaryExpressionNode<R>& e) {
     Expression<R> sarg1=simplify(e._arg1);
     Expression<R> sarg2=simplify(e._arg2);
-    return e.op().visit([&](auto op){return _simpl(op,sarg1,sarg2);});
+    return e.op().accept([&](auto op){return _simpl(op,sarg1,sarg2);});
 }
 template<class T> inline Expression<T> _simplify_node(const GradedExpressionNode<T>& e) {
     Expression<R> sarg=simplify(e.arg());
-    return e.op().visit([&](auto op){return _simpl(op,sarg,e.num());});
+    return e.op().accept([&](auto op){return _simpl(op,sarg,e.num());});
 }
 
 //inline Expression<Real> _simplify(const Expression<Real>& e) {
 Expression<Real> _simplify(const Expression<Real>& e) {
-    return e.node_ref().visit([](auto en){return _simplify_node(en);});
+    return e.node_ref().accept([](auto en){return _simplify_node(en);});
 }
 
 inline Expression<Kleenean> _simplify(const UnaryExpressionNode<Kleenean,Real>& e) {
@@ -506,7 +506,7 @@ inline Expression<Kleenean> _simplify(const BinaryExpressionNode<Kleenean,Real,R
 }
 
 template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
-    return e.node_ref().visit([](auto en){return _simpliy(en);});
+    return e.node_ref().accept([](auto en){return _simpliy(en);});
 }
 
 } // namespace

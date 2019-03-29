@@ -88,13 +88,13 @@ template<class T> inline Void _write_impl(OutputStream& os, Variable<T> const& v
 
 #warning TODO: Change to allow templated operators here
 template<class A1, class A2, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryLogicalOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryComparisonOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // \s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // \s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } //  { s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } //  { s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class OP, class A> void _write_impl(OutputStream& os, Symbolic<OP,A> const& s) {
     os << s._op << '(' << s._arg << ')'; }
 template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A,E<A>> const& s) {
@@ -103,9 +103,9 @@ template<class A, class N> void _write_impl(OutputStream& os, Symbolic<GradedEle
     os << s._op << '(' << s._arg << ',' << s._num << ')'; }
 
 //template<class A, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A> const& s) {
-//    s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg);}); }
+//    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg);}); }
 //template<class A1, class A2, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
-//    s._op.visit([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+//    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 }
 
 
@@ -134,14 +134,14 @@ template<class F, class N, class J> inline decltype(auto) _derivative_impl(Pow o
 
 #warning Should not need to explicitly use this
 template<class F, class J, class... OPS> decltype(auto) _derivative_impl(UnaryElementaryOperator ops, F const& f, J j) {
-    return ops.visit([&f,j](auto op){return _derivative_impl(op,f,j);}); }
+    return ops.accept([&f,j](auto op){return _derivative_impl(op,f,j);}); }
 
 template<class F, class J, class... OPS> decltype(auto) _derivative_impl(OperatorVariant<OPS...> ops, F const& f, J j) {
-    return ops.visit([&f,j](auto op){return _derivative_impl(op,f,j);}); }
+    return ops.accept([&f,j](auto op){return _derivative_impl(op,f,j);}); }
 template<class F1, class F2, class J, class... OPS> decltype(auto) _derivative_impl(OperatorVariant<OPS...> ops, F1 const& f1, F2 const& f2, J j) {
-    return ops.visit([&f1,&f2,j](auto op){return _derivative_impl(op,f1,f2,j);}); }
+    return ops.accept([&f1,&f2,j](auto op){return _derivative_impl(op,f1,f2,j);}); }
 template<class F, class N, class J> decltype(auto) _derivative_impl(OperatorVariant<Pow> ops, F const& f, N n, J j) {
-    return ops.visit([&f,j,n](auto op){return _derivative_impl(op,f,n,j);}); }
+    return ops.accept([&f,j,n](auto op){return _derivative_impl(op,f,n,j);}); }
 template<class X, template<class>class A, class J, class... OPS> decltype(auto) _derivative_impl(OperatorVariant<OPS...> ops, A<X> const& f1, X const& c2, J j) {
     return _derivative_impl(ops,f1,A<X>(c2),j); }
 template<class X, template<class>class A, class J, class... OPS> decltype(auto) _derivative_impl(OperatorVariant<OPS...> ops, X const& c1, A<X> const& f2, J j) {
@@ -210,13 +210,13 @@ template<class E, class N, class VARS> inline Bool _is_constant_in_graded_impl(P
     return n==0 || is_constant_in(e,vars); }
 
 template<class E, class VARS, class... OPS> Bool _is_constant_in_impl(OperatorVariant<OPS...> ops, E const& e, VARS const& vars) {
-    return ops.visit([&e,&vars](auto op){return _is_constant_in_impl(op,e, vars);}); }
+    return ops.accept([&e,&vars](auto op){return _is_constant_in_impl(op,e, vars);}); }
 template<class E1, class E2, class VARS, class... OPS> Bool _is_constant_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, E2 const& e2, VARS const& vars) {
-    return ops.visit([&e1,&e2,&vars](auto op){return _is_constant_in_impl(op,e1,e2, vars);}); }
+    return ops.accept([&e1,&e2,&vars](auto op){return _is_constant_in_impl(op,e1,e2, vars);}); }
 template<class E, class VARS, class... OPS> Bool _is_constant_in_graded_impl(OperatorVariant<OPS...> ops, E const& e, Int n, VARS const& vars) {
-    return ops.visit([&e,n,&vars](auto op){return _is_constant_in_graded_impl(op,e,n, vars);}); }
+    return ops.accept([&e,n,&vars](auto op){return _is_constant_in_graded_impl(op,e,n, vars);}); }
 template<class OP, class E, class N, class VARS> inline Bool _is_constant_in_graded_impl(GradedElementaryOperator ops, E const& e, N n, VARS const& vars) {
-    return ops.visit([&e,n,&vars](auto op){return _is_constant_in_graded_impl(op,e,n,vars);}); }
+    return ops.accept([&e,n,&vars](auto op){return _is_constant_in_graded_impl(op,e,n,vars);}); }
 
 template<class T, class VARS> inline Bool is_constant_in(Constant<T> const&, VARS const&) {
     return true; }
@@ -251,13 +251,13 @@ template<class E, class N, class VARS> inline Bool _is_affine_in_impl(Pow, E con
     return n2 == 0 || (n2==1 && is_affine_in(e1,vars)) || is_constant_in(e1,vars); }
 
 template<class E, class... OPS, class VARS> Bool _is_affine_in_impl(OperatorVariant<OPS...> ops, E const& e, VARS const& vars) {
-    return ops.visit([&e,&vars](auto op){return _is_affine_in_impl(op,e, vars);}); }
+    return ops.accept([&e,&vars](auto op){return _is_affine_in_impl(op,e, vars);}); }
 template<class E1, class E2, class... OPS, class VARS> Bool _is_affine_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, E2 const& e2, VARS const& vars) {
-    return ops.visit([&e1,&e2,&vars](auto op){return _is_affine_in_impl(op,e1,e2, vars);}); }
+    return ops.accept([&e1,&e2,&vars](auto op){return _is_affine_in_impl(op,e1,e2, vars);}); }
 template<class E, class VARS, class... OPS> Bool _is_affine_in_impl(OperatorVariant<OPS...> ops, E const& e, Int n, VARS const& vars) {
-    return ops.visit([&e,n,&vars](auto op){return _is_affine_in_impl(op,e,n, vars);}); }
+    return ops.accept([&e,n,&vars](auto op){return _is_affine_in_impl(op,e,n, vars);}); }
 template<class OP, class E, class N, class VARS> inline Bool _is_affine_in_impl(GradedElementaryOperator ops, E const& e, N n, VARS const& vars) {
-    return ops.visit([&e,n,&vars](auto op){return _is_affine_in_impl(op,e,n,vars);}); }
+    return ops.accept([&e,n,&vars](auto op){return _is_affine_in_impl(op,e,n,vars);}); }
 
 template<class T, class VARS> constexpr Bool is_affine_in(Constant<T> const&, VARS const& vars) {
     return true; }
@@ -284,11 +284,11 @@ template<class E1, class E2, class VARS> Bool _is_polynomial_in_impl(Min, E1 con
 template<class E, class N, class VARS> Bool _is_polynomial_in_impl(Pow, E const& e, N const& n, VARS const& vars) { return n==0 || (n>0 && is_polynomial_in(e, vars)) || (n<0 && is_constant_in(e,vars)); }
 
 template<class E, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E const& e, VARS const& vars) {
-    return ops.visit([&e,&vars](auto op){return _is_polynomial_in_impl(op,e, vars);}); }
+    return ops.accept([&e,&vars](auto op){return _is_polynomial_in_impl(op,e, vars);}); }
 template<class E1, class E2, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, E2 const& e2, VARS const& vars) {
-    return ops.visit([&e1,&e2,&vars](auto op){return _is_polynomial_in_impl(op,e1,e2, vars);}); }
+    return ops.accept([&e1,&e2,&vars](auto op){return _is_polynomial_in_impl(op,e1,e2, vars);}); }
 template<class E1, class E2, class VARS, class... OPS> Bool _is_polynomial_in_impl(OperatorVariant<OPS...> ops, E1 const& e1, Int n2, VARS const& vars) {
-    return ops.visit([&e1,n2,&vars](auto op){return _is_polynomial_in_impl(op,e1,n2, vars);}); }
+    return ops.accept([&e1,n2,&vars](auto op){return _is_polynomial_in_impl(op,e1,n2, vars);}); }
 
 
 template<class T, class VARS> constexpr Bool is_polynomial_in(Constant<T> const&, VARS const& vars) {

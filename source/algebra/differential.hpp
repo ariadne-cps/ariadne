@@ -290,7 +290,7 @@ decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factor
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
     static Differential<X> apply(UnaryElementaryOperator op, Differential<X> dx) {
-        UnivariateDifferential<X> dop = op.visit([&dx](auto o){return UnivariateDifferential<X>(o,dx.degree(),dx.value());});
+        UnivariateDifferential<X> dop = op.accept([&dx](auto o){return UnivariateDifferential<X>(o,dx.degree(),dx.value());});
         return compose(dop,dx); }
 
     template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {

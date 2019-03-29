@@ -245,9 +245,9 @@ template Void eliminate_common_subexpressions(Vector<Expression<Real>>&);
 
 
 template<class VIS, class A, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A> s) {
-    return s.op().visit([&s,&vis](auto op){return vis(op,s.arg());}); }
+    return s.op().accept([&s,&vis](auto op){return vis(op,s.arg());}); }
 template<class VIS, class A1, class A2, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A1,A2> s) {
-    return s.op().visit([&s,&vis](auto op){return vis(op,s.arg1(),s.arg2());}); }
+    return s.op().accept([&s,&vis](auto op){return vis(op,s.arg1(),s.arg2());}); }
 
 
 namespace {
@@ -274,17 +274,17 @@ Expression<Real> indicator(ConstantExpressionNode<Kleenean> e, Sign sign) {
 Expression<Real> indicator(VariableExpressionNode<Kleenean> e, Sign sign) {
     ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e); }
 Expression<Real> indicator(UnaryExpressionNode<Kleenean> e, Sign sign) {
-    return e.op().visit([&](auto op){return _indicator(op,e.arg(),sign);}); }
+    return e.op().accept([&](auto op){return _indicator(op,e.arg(),sign);}); }
 Expression<Real> indicator(BinaryExpressionNode<Kleenean> e, Sign sign) {
-    return e.op().visit([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+    return e.op().accept([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
 Expression<Real> indicator(UnaryExpressionNode<Kleenean,Real> e, Sign sign) {
-    return e.op().visit([&](auto op){return _indicator(op,e.arg(),sign);}); }
+    return e.op().accept([&](auto op){return _indicator(op,e.arg(),sign);}); }
 Expression<Real> indicator(BinaryExpressionNode<Kleenean,Real,Real> e, Sign sign) {
-    return e.op().visit([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+    return e.op().accept([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
 }
 
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
-    return e.node_ref().visit([&](auto en){return indicator(en,sign);});
+    return e.node_ref().accept([&](auto en){return indicator(en,sign);});
 /*
     switch(e.op()) {
         case OperatorCode::CNST: {
@@ -324,9 +324,8 @@ template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
 template Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& spc);
 
-
 Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
-    return e.node_ref().visit([&spc](auto en){return is_affine_in(en,spc);});
+    return e.node_ref().accept([&spc](auto en){return is_affine_in(en,spc);});
 }
 
 Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& spc) {
@@ -337,7 +336,7 @@ Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& 
 }
 
 Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
-    return e.node_ref().visit([&spc](auto en){return is_polynomial_in(en,spc);});
+    return e.node_ref().accept([&spc](auto en){return is_polynomial_in(en,spc);});
 }
 
 Bool is_constant_in(const Expression<Real>& e, const Variable<Real>& var) { return is_constant_in(e,Set<RealVariable>{var}); }
@@ -352,7 +351,7 @@ inline Bool _is_additive_in(Sub, REcr e1, REcr e2, RVcr var) {
     return is_additive_in(e1,var) && is_constant_in(e2,var); }
 inline Bool _is_additive_in(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
 template<class... OPS> inline Bool _is_additive_in(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
-    return ops.visit([&](auto op){return _is_additive_in(op,e1,e2,var);}); }
+    return ops.accept([&](auto op){return _is_additive_in(op,e1,e2,var);}); }
 
 inline Bool is_additive_in(RCcr c, RVcr var) { return true; }
 inline Bool is_additive_in(RVcr v, RVcr var) { return true; }
@@ -362,7 +361,7 @@ template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr 
 }
 
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& var) {
-    return e.node_ref().visit([&](auto en){return is_additive_in(en,var);});
+    return e.node_ref().accept([&](auto en){return is_additive_in(en,var);});
 }
 
 
@@ -420,9 +419,9 @@ constexpr Bool _opposite(Less,Gtr) { return true; }
 template<class OP1, class OP2> constexpr Bool _opposite(OP1,OP2) { return false; }
 
 Bool opposite(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
-    return ops1.visit([&ops2](auto op1){return ops2.visit([&op1](auto op2){return _opposite(op1,op2);});}); }
+    return ops1.accept([&ops2](auto op1){return ops2.accept([&op1](auto op2){return _opposite(op1,op2);});}); }
 Bool identical(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
-    return ops1.visit([&ops2](auto op1){return ops2.visit([&op1](auto op2){return _identical(op1,op2);});}); }
+    return ops1.accept([&ops2](auto op1){return ops2.accept([&op1](auto op2){return _identical(op1,op2);});}); }
 }
 
 
@@ -448,7 +447,7 @@ Expression<Real> derivative(const Variable<Real>& e, Variable<Real> v) { return 
 
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 {
-    return e.node_ref().visit([&v](auto en){return derivative(en,v);});
+    return e.node_ref().accept([&v](auto en){return derivative(en,v);});
 }
 
 
@@ -474,12 +473,12 @@ const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, 
 {
     const ExpressionNode<Real>* eptr=&e.node_ref();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
-    return insert(cache, eptr, eptr->visit([&](auto en){return _cached_make_formula_impl(en,spc,cache);}));
+    return insert(cache, eptr, eptr->accept([&](auto en){return _cached_make_formula_impl(en,spc,cache);}));
 }
 
 Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& no_cache)
 {
-    return e.node_ref().visit([&](auto en){return _cached_make_formula_impl(en,spc,no_cache);});
+    return e.node_ref().accept([&](auto en){return _cached_make_formula_impl(en,spc,no_cache);});
 }
 
 } // namespace

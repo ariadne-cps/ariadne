@@ -69,7 +69,7 @@ template<class Y> Void _convert_impl(List<ProcedureInstruction>& p, List<Y>& c, 
 
 template<class Y> SizeType _convert(List<ProcedureInstruction>& p, List<Y>& c, const Formula<Y>& f, Map<const Void*,SizeType>& cache) {
     if(cache.has_key(f.node_ptr())) { return cache[f.node_ptr()]; }
-    f.node_ref().visit([&p,&c,&cache](auto s){_convert_impl(p,c,s,cache);});
+    f.node_ref().accept([&p,&c,&cache](auto s){_convert_impl(p,c,s,cache);});
     const SizeType num=p.size()-1;
     cache.insert(f.node_ptr(),num);
     return num;
@@ -84,7 +84,7 @@ Void _write(OutputStream& os, UnaryProcedureInstruction const& s) { os << s._op 
 Void _write(OutputStream& os, BinaryProcedureInstruction const& s) { os << s._op << "(v[" << s._arg1 << "],v[" << s._arg2 << "])"; }
 Void _write(OutputStream& os, GradedProcedureInstruction const& s) { os << s._op << "(v[" << s._arg << "]," << s._num << ")"; }
 Void _write(OutputStream& os, ScalarProcedureInstruction const& s) { os << s._op << "(c[" << s._arg1 << "],v[" << s._arg2 << "])"; }
-Void _write(OutputStream& os, ProcedureInstruction const& pi) { pi.visit([&os](auto s){_write(os,s);}); }
+Void _write(OutputStream& os, ProcedureInstruction const& pi) { pi.accept([&os](auto s){_write(os,s);}); }
 } // namespace
 
 template<class Y>
@@ -193,10 +193,10 @@ namespace {
 template<class X, class OP> Void propagate(X& r, OP op, X const& x1, X const& x2) { r=op(x1,x2); }
 template<class X, class OP> Void propagate(X& r, OP op, X const& x) { r=op(x); }
 
-template<class X> Void propagate(X& r, BinaryElementaryOperator op, X const& x1, X const& x2) { op.visit([&](auto op){r=op(x1,x2);}); }
-template<class X> Void propagate(X& r, UnaryElementaryOperator op, X const& x) { op.visit([&](auto op){r=op(x);}); }
-template<class X, class N> Void propagate(X& r, GradedElementaryOperator op, X const& x, N n) { op.visit([&](auto op){r=op(x,n);}); }
-template<class Y, class X> Void propagate(X& r, BinaryElementaryOperator op, Y const& y1, X const& x2) { op.visit([&](auto op){r=op(y1,x2);}); }
+template<class X> Void propagate(X& r, BinaryElementaryOperator op, X const& x1, X const& x2) { op.accept([&](auto op){r=op(x1,x2);}); }
+template<class X> Void propagate(X& r, UnaryElementaryOperator op, X const& x) { op.accept([&](auto op){r=op(x);}); }
+template<class X, class N> Void propagate(X& r, GradedElementaryOperator op, X const& x, N n) { op.accept([&](auto op){r=op(x,n);}); }
+template<class Y, class X> Void propagate(X& r, BinaryElementaryOperator op, Y const& y1, X const& x2) { op.accept([&](auto op){r=op(y1,x2);}); }
 
 template<class X, class Y> Void _execute_impl(SizeType r, List<X>& v, const ConstantProcedureInstruction& pi, const List<Y>& c, const Vector<X>& x) {
     v[r]=make_constant(c[pi._val],x.zero_element()); }
@@ -217,7 +217,7 @@ template<class X, class Y> Void _execute(List<X>& v, const List<ProcedureInstruc
 {
     ARIADNE_ASSERT(v.size()==p.size());
     for(SizeType i=0; i!=p.size(); ++i) {
-        p[i].visit([i,&v,&c,&x](auto s){return _execute_impl(i,v,s,c,x);});
+        p[i].accept([i,&v,&c,&x](auto s){return _execute_impl(i,v,s,c,x);});
     }
 }
 
@@ -253,13 +253,13 @@ template<class X> Void _backpropagate(X const& r, Leq, X& a1, X& a2) {
     FloatDPValue inf_(inf); restrict(a1,X(-inf_,a2.upper())); restrict(a1,X(a2.lower(),+inf_)); }
 
 template<class X> Void _backpropagate(X const& r, UnaryElementaryOperator op, X& a) {
-    return op.visit([&r,&a](auto op){_backpropagate(r,op,a);}); }
+    return op.accept([&r,&a](auto op){_backpropagate(r,op,a);}); }
 template<class X> Void _backpropagate(X const& r, BinaryElementaryOperator op, X& a1, X& a2) {
-    return op.visit([&r,&a1,&a2](auto op){_backpropagate(r,op,a1,a2);}); }
+    return op.accept([&r,&a1,&a2](auto op){_backpropagate(r,op,a1,a2);}); }
 template<class X> Void _backpropagate(X const& r, GradedElementaryOperator op, X& a1, Int n2) {
-    return op.visit([&r,&a1,n2](auto op){_backpropagate(r,op,a1,n2);}); }
+    return op.accept([&r,&a1,n2](auto op){_backpropagate(r,op,a1,n2);}); }
 template<class X, class Y> Void _backpropagate_cnst(X const& r, BinaryElementaryOperator op, Y const& c1, X& a2) {
-    return op.visit([&r,&c1,&a2](auto op){_backpropagate_cnst(r,op,c1,a2);}); }
+    return op.accept([&r,&c1,&a2](auto op){_backpropagate_cnst(r,op,c1,a2);}); }
 
 template<class X, class Y> Void _backpropagate(SizeType r, Vector<X>& x, List<X>& v, ConstantProcedureInstruction s, List<Y> const& c) { }
 
@@ -283,7 +283,7 @@ template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const L
     SizeType r=p.size();
     while(r!=0u) {
         --r;
-        p[r].visit([r,&x,&v,&c](auto s){_backpropagate(r,x,v,s,c);});
+        p[r].accept([r,&x,&v,&c](auto s){_backpropagate(r,x,v,s,c);});
     }
     // POSTCONDITION: No nan's get propagated to x
 }
@@ -299,14 +299,14 @@ template<class X, class D> void back_gradient(D const& dr, Max, X const& a1, D& 
 template<class X, class D> void back_gradient(D const& dr, Min, X const& a1, D& da1, X const& a2, D& da2) { assert(false); }
 
 template<class X, class D> void back_gradient(D const& dr, BinaryElementaryOperator op, X const& a1, D& da1, X const& a2, D& da2) {
-    op.visit([&dr,&a1,&da1,&a2,&da2](auto op){return back_gradient(dr,op,a1,da1,a2,da2);}); }
+    op.accept([&dr,&a1,&da1,&a2,&da2](auto op){return back_gradient(dr,op,a1,da1,a2,da2);}); }
 
 
 template<class OP, class X, class D> void back_gradient(D const& dr, OP op, X const& a, D& da) { da+=op.derivative(a,dr); }
 template<class X, class D> void back_gradient(D const& dr, Abs op, X const& a, D& da) { assert(false); }
 
 template<class X, class D> void back_gradient(D const& dr, UnaryElementaryOperator op, X const& a, D& da) {
-    op.visit([&dr,&a,&da](auto op){return back_gradient(dr,op,a,da);}); }
+    op.accept([&dr,&a,&da](auto op){return back_gradient(dr,op,a,da);}); }
 
 template<class Y, class X, class D> void back_gradient(D const& dr, Add op, Y const& c1, X const& a2, D& da2) { da2+=dr; }
 template<class Y, class X, class D> void back_gradient(D const& dr, Sub op, Y const& c1, X const& a2, D& da2) { da2-=dr; }
@@ -316,14 +316,14 @@ template<class Y, class X, class D> void back_gradient(D const& dr, Max op, Y co
 template<class Y, class X, class D> void back_gradient(D const& dr, Min op, Y const& c1, X const& a2, D& da2) { assert(false); }
 
 template<class Y, class X, class D> void back_gradient(D const& dr, BinaryElementaryOperator op, Y const& c1, X const& a2, D& da2) {
-    op.visit([&dr,&c1,&a2,&da2](auto op){return back_gradient(dr,op,c1,a2,da2);}); }
+    op.accept([&dr,&c1,&a2,&da2](auto op){return back_gradient(dr,op,c1,a2,da2);}); }
 
 
 template<class N, class X, class D> void back_gradient(D const& dr, Pow op, X const& a, D& da, N n) {
     da+=op.derivative(a,dr,n); }
 
 template<class N, class X, class D> void back_gradient(D const& dr, GradedElementaryOperator op, X const& a, D& da, N n) {
-    op.visit([&dr,&a,&da,n](auto op){return back_gradient(dr,op,a,da,n);}); }
+    op.accept([&dr,&a,&da,n](auto op){return back_gradient(dr,op,a,da,n);}); }
 
 
 
@@ -341,7 +341,7 @@ template<class X, class Y> void back_gradient_impl_(SizeType r, GradedProcedureI
 
 
 template<class X, class Y> void back_gradient_impl(SizeType r, ProcedureInstruction const& pri, Vector<X> const& x, List<Y> const& c, List<X>& v, List<X>& dv, Covector<X>& dfx) {
-    pri.visit([r,&x,&c,&v,&dv,&dfx](auto s){back_gradient_impl_(r,s,x,c,v,dv,dfx);}); }
+    pri.accept([r,&x,&c,&v,&dv,&dfx](auto s){back_gradient_impl_(r,s,x,c,v,dv,dfx);}); }
 
 
 template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X> const& x) {

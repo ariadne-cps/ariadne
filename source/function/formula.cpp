@@ -33,7 +33,7 @@ namespace Ariadne {
 
 
 template<class Y> inline Operator Formula<Y>::op() const {
-    return this->_root->visit([](auto fn){return static_cast<Operator>(fn._op);}); }
+    return this->_root->accept([](auto fn){return static_cast<Operator>(fn._op);}); }
 template<class Y> inline OperatorCode Formula<Y>::code() const {
     return this->op().code(); }
 template<class Y> inline OperatorKind Formula<Y>::kind() const {
@@ -90,14 +90,14 @@ template<class Y> inline Formula<Y> Formula<Y>::scalar(const BinaryElementaryOpe
 
 template<class Y> Formula<Y> Formula<Y>::_derivative(SizeType j) const
 {
-    return this->_root->visit([j](auto fn){return static_cast<Formula<Y>>(derivative(fn,j));});
+    return this->_root->accept([j](auto fn){return static_cast<Formula<Y>>(derivative(fn,j));});
 }
 
 //! \brief Write to an output stream
 template<class Y> OutputStream& Formula<Y>::_write(OutputStream& os) const
 {
     const Formula<Y>& f = *this;
-    f.node_ref().visit([&os](auto s){_write_impl(os,s);});
+    f.node_ref().accept([&os](auto s){_write_impl(os,s);});
     return os;
 /*
     switch(f.op()) {

@@ -54,7 +54,7 @@ class FormulaNode
 {
   public:
     template<class FN> FormulaNode(FN&& fn) : FormulaNodeVariantType<Y>(std::forward<FN>(fn)) { }
-    template<class VIS> decltype(auto) visit(VIS&& vis) const {
+    template<class VIS> decltype(auto) accept(VIS&& vis) const {
         return std::visit(std::forward<VIS>(vis),static_cast<FormulaNodeVariantType<Y> const&>(*this)); }
 
 };
@@ -129,7 +129,7 @@ template<class X, class OP, class... AS> decltype(auto) _cached_evaluate(Symboli
 
 
 template<class X, class Y> X direct_evaluate(const Formula<Y>& f, const Vector<X>& x) {
-    return f.node_ref().visit([&x](auto s){return evaluate(s,x);});
+    return f.node_ref().accept([&x](auto s){return evaluate(s,x);});
 }
 
 
@@ -137,7 +137,7 @@ template<class X, class Y> X direct_evaluate(const Formula<Y>& f, const Vector<X
 template<class X, class Y> const X& cached_evaluate(const Formula<Y>& f, const Vector<X>& x, Map<const Void*,X>& cache) {
     const FormulaNode<Y>* fptr=f.node_ptr();
     if(cache.has_key(fptr)) { return cache.get(fptr); }
-    else { X r=f.node_ref().visit([&x,&cache](auto s){return _cached_evaluate(s,x,cache);}); return insert(cache,fptr,r); }
+    else { X r=f.node_ref().accept([&x,&cache](auto s){return _cached_evaluate(s,x,cache);}); return insert(cache,fptr,r); }
 }
 
 template<class X, class Y> inline X cached_evaluate(const Formula<Y>& f, const Vector<X>& v) {

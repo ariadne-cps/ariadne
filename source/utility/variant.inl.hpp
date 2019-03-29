@@ -165,7 +165,7 @@ decltype(auto) coded_visit(V& v, C code) {
 
 
 
-template<class C, class... TS> template<class V> inline decltype(auto) CodedVariant<C,TS...>::visit(V const& v) const {
+template<class C, class... TS> template<class V> inline decltype(auto) CodedVariant<C,TS...>::accept(V const& v) const {
     return coded_visit<V,C,TS...>(const_cast<V&>(v),this->code());
 }
 

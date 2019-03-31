@@ -397,7 +397,7 @@ template<class X, class Y> Covector<X> gradient(Procedure<Y> const& f, Vector<X>
 
 } // namespace Ariadne
 
-#include "../algebra/fixed_differential.hpp"
+#include "../algebra/fixed_univariate_differential.hpp"
 
 namespace Ariadne {
 

@@ -135,6 +135,7 @@ Matrix<X> outer(const Covector<X>& u) {
 template<class X>
 class FirstDifferential
     : public DispatchTranscendentalAlgebraOperations<FirstDifferential<X>,X>
+    , public DispatchLatticeAlgebraOperations<FirstDifferential<X>,X>
     , public ProvideConcreteGenericArithmeticOperations<FirstDifferential<X>,X>
 {
   public:
@@ -402,7 +403,7 @@ template<class X>
 class SecondDifferential
     : public DispatchTranscendentalAlgebraOperations<SecondDifferential<X>,X>
     , public DispatchLatticeAlgebraOperations<SecondDifferential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperators<SecondDifferential<X>>
+    , public ProvideConcreteGenericArithmeticOperations<SecondDifferential<X>>
 {
   public:
     X _value;
@@ -644,23 +645,6 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
 
 };
 
-
-
-#warning Should be able to automatically generate these operations
-
-template<class X, class P> UnivariateSecondDifferential<X> add(Number<P> y1,UnivariateSecondDifferential<X> dx2) { return y1+dx2; }
-template<class X, class P> UnivariateSecondDifferential<X> sub(Number<P> y1,UnivariateSecondDifferential<X> dx2) { return y1-dx2; }
-template<class X, class P> UnivariateSecondDifferential<X> mul(Number<P> y1,UnivariateSecondDifferential<X> dx2) { return y1*dx2; }
-template<class X, class P> UnivariateSecondDifferential<X> div(Number<P> y1,UnivariateSecondDifferential<X> dx2) { return y1/dx2; }
-
-template<class X, class P> UnivariateSecondDifferential<X> max(Number<P> y1,UnivariateSecondDifferential<X> dx2) { ARIADNE_NOT_IMPLEMENTED; }
-template<class X, class P> UnivariateSecondDifferential<X> min(Number<P> y1,UnivariateSecondDifferential<X> dx2) { ARIADNE_NOT_IMPLEMENTED; }
-template<class X> UnivariateSecondDifferential<X> max(UnivariateSecondDifferential<X>,UnivariateSecondDifferential<X>) { ARIADNE_NOT_IMPLEMENTED; }
-template<class X> UnivariateSecondDifferential<X> min(UnivariateSecondDifferential<X>,UnivariateSecondDifferential<X>) { ARIADNE_NOT_IMPLEMENTED; }
-template<class X> UnivariateSecondDifferential<X> abs(UnivariateSecondDifferential<X>) { ARIADNE_NOT_IMPLEMENTED; }
-
-template<class X, class P> UnivariateSecondDifferential<X> make_constant(Number<P> const& y, UnivariateSecondDifferential<X> r) {
-    r=make_constant(y,r.value()); return std::move(r); }
 
 
 

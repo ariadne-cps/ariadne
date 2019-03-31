@@ -93,7 +93,7 @@ template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
     , public DispatchLatticeAlgebraOperations<Differential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
+    , public ProvideConcreteGenericArithmeticOperations<Differential<X>>
 {
     static_assert(!IsSame<X,FloatDPValue>::value,"");
     typedef Differential<X> SelfType;

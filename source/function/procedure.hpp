@@ -52,13 +52,14 @@ typedef Procedure<EffectiveNumber> EffectiveProcedure;
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
-typedef Symbolic<Cnst,SizeType> ConstantProcedureInstruction;
-typedef Symbolic<Var,SizeType> IndexProcedureInstruction;
-typedef Symbolic<UnaryElementaryOperator,SizeType> UnaryProcedureInstruction;
-typedef Symbolic<UnaryElementaryOperator,SizeType> UnaryProcedureInstruction;
-typedef Symbolic<BinaryElementaryOperator,SizeType,SizeType> BinaryProcedureInstruction;
-typedef Symbolic<GradedElementaryOperator,SizeType,Int> GradedProcedureInstruction;
-
+struct ConstantProcedureInstruction : Symbolic<Cnst,SizeType> { using Symbolic<Cnst,SizeType>::Symbolic; };
+struct IndexProcedureInstruction : Symbolic<Var,SizeType> { using Symbolic<Var,SizeType>::Symbolic; };
+struct UnaryProcedureInstruction : Symbolic<UnaryElementaryOperator,SizeType> {
+    using Symbolic<UnaryElementaryOperator,SizeType>::Symbolic; };
+struct BinaryProcedureInstruction : Symbolic<BinaryElementaryOperator,SizeType,SizeType> {
+    using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::Symbolic; };
+struct GradedProcedureInstruction : Symbolic<GradedElementaryOperator,SizeType,Int> {
+    using Symbolic<GradedElementaryOperator,SizeType,Int>::Symbolic; };
 struct ScalarProcedureInstruction : Symbolic<BinaryElementaryOperator,SizeType,SizeType> {
     using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::Symbolic; };
 
@@ -93,8 +94,7 @@ struct ProcedureInstruction : public ProcedureInstructionVariant {
     const SizeType& arg2() const {  return std::get<BinaryProcedureInstruction>(this->base())._arg2; }
     const Int& num() const { return std::get<GradedProcedureInstruction>(this->base())._num; }
   public:
-    friend OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri) {
-        pri.accept([&os](auto s){os<<s;}); return os; }
+    friend OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri);
 };
 
 //! \brief An algorithmic procedure for computing a function.

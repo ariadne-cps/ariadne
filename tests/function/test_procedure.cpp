@@ -166,9 +166,7 @@ Void TestProcedure::test_propagate()
         UpperBoxType x=ExactBoxType{ {0.25,2.0}, {0.5,3.0} };
         ARIADNE_TEST_PRINT(x);
 
-        std::cerr<<"x="<<x<<"\n";
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
-        std::cerr<<"x="<<x<<"\n";
         ARIADNE_TEST_PRINT(x);
         simple_hull_reduce(x,p,ExactIntervalType(1,1));
         ARIADNE_TEST_PRINT(x);

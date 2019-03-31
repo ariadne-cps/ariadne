@@ -112,6 +112,12 @@ template<class T> Bool Space<T>::contains(const Set<typename Space<T>::VariableT
         if(!this->contains(v)) { return false; } }
     return true; }
 //! \brief The index of the named variable \a v.
+template<class T> SizeType Space<T>::operator[](const typename Space<T>::VariableType& v) const {
+    return this->index(v); }
+//! \brief The index of the named variable \a v.
+template<class T> SizeType Space<T>::operator[](const Identifier& n) const {
+    return this->index(n); }
+//! \brief The index of the named variable \a v.
 template<class T> SizeType Space<T>::index(const typename Space<T>::VariableType& v) const {
     for(Nat i=0; i!=_variables.size(); ++i) {
         if(v.name()==_variables[i]) { return i; } }

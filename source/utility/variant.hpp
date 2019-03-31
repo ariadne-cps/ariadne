@@ -47,6 +47,7 @@ template<class C, class... TS> class CodedVariant {
     template<class V> inline decltype(auto) visit(V const& v) const;
     C code() const { return _code; }
 };
+template<class T, class C, class... TS> bool holds_alternative(CodedVariant<C,TS...> const& var) { return var.code()==T::code(); }
 
 } // namespace Ariadne
 

@@ -30,6 +30,11 @@
 
 namespace Ariadne {
 
+template<class V, class C>
+decltype(auto) coded_visit(V& v, C code) {
+    switch (code) {
+        default: assert(false); } }
+
 template<class V, class C, class T1>
 decltype(auto) coded_visit(V& v, C code) {
     switch (code) {

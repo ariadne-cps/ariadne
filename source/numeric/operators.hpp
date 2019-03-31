@@ -231,7 +231,7 @@ struct Ind : OperatorObject<Ind> {
 };
 
 struct Var : OperatorObject<Var> {
-    static constexpr OperatorCode code() { return OperatorCode::VAR; } static constexpr OperatorKind kind() { return OperatorKind::COORDINATE; }
+    static constexpr OperatorCode code() { return OperatorCode::VAR; } static constexpr OperatorKind kind() { return OperatorKind::VARIABLE; }
 };
 
 struct Plus {
@@ -427,6 +427,8 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     static constexpr OperatorCode code() { return OperatorCode::SGN; }
+    static OperatorKind kind() { assert(false); }
+    template<class A> auto operator()(A&& a) const -> decltype(sgn(a)) { return sgn(a); }
     Kleenean operator()(const Real& a) const;
 };
 
@@ -454,10 +456,16 @@ template<class... OPS> class OperatorVariant
         return this->visit([](auto op){return op.kind();}); }
     template<class... AS> decltype(auto) operator()(AS&& ... as) const {
         return this->visit([&as...](auto op){return op(std::forward<AS>(as)...);}); }
-    template<class R, class... AS> R call(AS&& ... as) const {
+    template<class... AS> decltype(auto) call(AS&& ... as) const {
+        return this->visit([&as...](auto op){return op(std::forward<AS>(as)...);}); }
+    template<class R, class... AS> R call_as(AS&& ... as) const {
         return this->visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+    template<class R, class... AS> friend R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
+        return ops.visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
     friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) { op.visit([&os](auto op_){os << op_;}); return os; }
 };
+//template<class R, class... OPS, class... AS> R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
+//    return ops.visit([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
 
 
 

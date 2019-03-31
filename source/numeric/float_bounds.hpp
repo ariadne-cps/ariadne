@@ -152,6 +152,7 @@ template<class F> class Bounds
     friend Approximation<F> round(Approximation<F> const& x);
     friend Value<F> midpoint(Bounds<F> const& x);
   public:
+    friend ValidatedKleenean sgn(Bounds<F> const&);
     friend PositiveUpperBound<F> mag(Bounds<F> const&);
     friend PositiveLowerBound<F> mig(Bounds<F> const&);
     friend Bool same(Bounds<F> const&, Bounds<F> const&);

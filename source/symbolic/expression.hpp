@@ -101,7 +101,7 @@ class Expression
     //! \brief Create a constant element.
     Expression<T> create_constant(T const& t) const { return Expression<T>::constant(t); }
   public:
-    const Operator& op() const;
+    Operator op() const;
     OperatorCode code() const;
     OperatorKind kind() const;
     const ValueType& val() const;
@@ -121,6 +121,7 @@ class Expression
   public:
     SharedPointer<const ExpressionNode<T>> node_ptr() const { return _root; }
     const ExpressionNode<T>* node_raw_ptr() const { return _root.operator->(); }
+    const ExpressionNode<T>& node_ref() const { return _root.operator*(); }
   private:
     OutputStream& _write(OutputStream& os) const;
   private:
@@ -135,14 +136,14 @@ class Expression
 template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Valuation<T>& x);
 template<class T> T evaluate(const Expression<T>& e, const Valuation<T>& x);
 
-Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
-template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
-template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
-
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class T> LogicType<T> evaluate(const Expression<LogicType<T>>& e, const Map<Identifier,T>& x);
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class T> T evaluate(const Expression<T>& e, const Map<Identifier,T>& x);
+
+Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
+template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
+template<class X> Kleenean evaluate(const Expression<Kleenean>&, const ContinuousValuation<X>&);
 
 //! \brief Extract the arguments of expression \a e.
 template<class T> Set<Identifier> arguments(const Expression<T>& e);
@@ -170,6 +171,7 @@ Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs);
 Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 //! \brief Returns \a true if the vector expression \a e is syntactically additive (possibly with multipliers) in the variables \a vs.
 Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
+Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
 
 //! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
@@ -202,15 +204,13 @@ Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
-Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
-
-const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache);
 
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);

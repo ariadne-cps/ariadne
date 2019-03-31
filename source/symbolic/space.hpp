@@ -87,6 +87,9 @@ template<class T> class Space
     //! \brief Tests if all the variables \a vs is in the space.
     Bool contains(const Set<VariableType>& vs) const;
     //! \brief The index of the named variable \a v.
+    SizeType operator[](const VariableType& v) const;
+    SizeType operator[](const Identifier& n) const;
+    //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const;
     SizeType index(const Identifier& n) const;
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.

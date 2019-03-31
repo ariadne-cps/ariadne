@@ -39,6 +39,8 @@
 #include "../symbolic/space.hpp"
 #include "../symbolic/valuation.hpp"
 
+
+#include "symbolic/templates.tpl.hpp"
 #include "expression.tpl.hpp"
 
 namespace Ariadne {
@@ -117,6 +119,9 @@ Expression<Integer>& operator-=(Expression<Integer>& e1, Expression<Integer> con
 Expression<Integer>& operator*=(Expression<Integer>& e1, Expression<Integer> const& e2) {
     return e1=e1*e2; }
 
+#warning
+Kleenean sgn(Real const& r);
+
 Expression<Kleenean> sgn(Expression<Real> const& e) {
     return make_expression<Kleenean>(Sgn(),e); }
 
@@ -191,10 +196,12 @@ Expression<Real> cos(Expression<Real> const& e) {
     return make_expression<Real>(Cos(),e); }
 Expression<Real> tan(Expression<Real> const& e) {
     return make_expression<Real>(Tan(),e); }
-Expression<Real> asin(Expression<Real> const& e) {
-    return make_expression<Real>(Asin(),e); }
-Expression<Real> acos(Expression<Real> const& e) {
-    return make_expression<Real>(Acos(),e); }
+
+#warning Add asin and acos operators
+//Expression<Real> asin(Expression<Real> const& e) {
+//    return make_expression<Real>(Asin(),e); }
+//Expression<Real> acos(Expression<Real> const& e) {
+//    return make_expression<Real>(Acos(),e); }
 Expression<Real> atan(Expression<Real> const& e) {
     return make_expression<Real>(Atan(),e); }
 
@@ -237,7 +244,48 @@ template Void eliminate_common_subexpressions(Vector<Expression<Real>>&);
 
 
 
+template<class VIS, class A, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A> s) {
+    return s.op().visit([&s,&vis](auto op){return vis(op,s.arg());}); }
+template<class VIS, class A1, class A2, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A1,A2> s) {
+    return s.op().visit([&s,&vis](auto op){return vis(op,s.arg1(),s.arg2());}); }
+
+
+namespace {
+using RE=Expression<Real>; using KE=Expression<Kleenean>;
+
+RE _indicator(Sgn, RE e, Sign sign) { if(sign==Sign::POSITIVE) { return e; } else { return -e; } }
+RE _indicator(Geq, RE e1, RE e2, Sign sign) { if(sign==Sign::POSITIVE) { return e1-e2; } else { return e2-e1; } }
+RE _indicator(Gtr, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,sign); }
+RE _indicator(Leq, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,-sign); }
+RE _indicator(Less, RE e1, RE e2, Sign sign) { return _indicator(Leq(),e1,e2,sign); }
+RE _indicator(Equal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+RE _indicator(Unequal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+
+RE _indicator(AndOp, KE e1, KE e2, Sign sign) { return min(indicator(e1,sign),indicator(e2,sign)); }
+RE _indicator(OrOp, KE e1, KE e2, Sign sign) { return max(indicator(e1,sign),indicator(e2,sign)); }
+RE _indicator(NotOp, KE e, Sign sign) { return neg(indicator(e,sign)); }
+
+Expression<Real> indicator(ConstantExpressionNode<Kleenean> e, Sign sign) {
+    Kleenean value=( sign==Sign::POSITIVE ? e.value() : !e.value() );
+    ValidatedKleenean checked_value = value.check(Effort::get_default());
+    if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
+    else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
+    else { return Expression<Real>::constant(0); } }
+Expression<Real> indicator(VariableExpressionNode<Kleenean> e, Sign sign) {
+    ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e); }
+Expression<Real> indicator(UnaryExpressionNode<Kleenean> e, Sign sign) {
+    return e.op().visit([&](auto op){return _indicator(op,e.arg(),sign);}); }
+Expression<Real> indicator(BinaryExpressionNode<Kleenean> e, Sign sign) {
+    return e.op().visit([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+Expression<Real> indicator(UnaryExpressionNode<Kleenean,Real> e, Sign sign) {
+    return e.op().visit([&](auto op){return _indicator(op,e.arg(),sign);}); }
+Expression<Real> indicator(BinaryExpressionNode<Kleenean,Real,Real> e, Sign sign) {
+    return e.op().visit([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+}
+
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
+    return e.node_ref().visit([&](auto en){return indicator(en,sign);});
+/*
     switch(e.op()) {
         case OperatorCode::CNST: {
             Kleenean value=( sign==Sign::POSITIVE ? e.val() : !e.val() );
@@ -263,6 +311,7 @@ Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
         default:
             ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e);
     }
+*/
 }
 
 
@@ -273,48 +322,68 @@ template Bool is_constant(const Expression<Kleenean>&, const Kleenean&);
 template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
-template Bool is_constant_in<Real>(const Expression<Real>& e, const Set<Variable<Real>>& vs);
+template Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& spc);
 
-Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& vs) {
-    switch(e.op()) {
-        case OperatorCode::CNST: return true;
-        case OperatorCode::VAR: return true;
-        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs);
-        case OperatorCode::MUL: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs)) or (is_constant_in(e.arg1(),vs) and is_affine_in(e.arg2(),vs));
-        case OperatorCode::DIV: return (is_affine_in(e.arg1(),vs) and is_constant_in(e.arg2(),vs));
-        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(e.arg(),vs);
-        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(e.arg(),vs);
-        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<e.op()<<"' for evaluation of affinity in given variables\n");
-    }
+
+Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
+    return e.node_ref().visit([&spc](auto en){return is_affine_in(en,spc);});
 }
 
-Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs) {
-    for (auto i : range(e.size()))
-        if (not is_affine_in(e[i],vs)) return false;
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& spc) {
+    for (auto i : range(e.size())) {
+        if (not is_affine_in(e[i],spc)) return false;
+    }
     return true;
 }
 
-Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& vs) {
-    // We treat the vector of expressions as additive in vs if each variable in vs appears at most once in all expressions,
+Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
+    return e.node_ref().visit([&spc](auto en){return is_polynomial_in(en,spc);});
+}
+
+Bool is_constant_in(const Expression<Real>& e, const Variable<Real>& var) { return is_constant_in(e,Set<RealVariable>{var}); }
+
+namespace {
+typedef Expression<Real> RE; typedef Expression<Real> const& REcr;
+typedef Variable<Real> const& RVcr; typedef Constant<Real> const& RCcr;
+
+inline Bool _is_additive_in(Add, REcr e1, REcr e2, RVcr var) {
+    return (is_additive_in(e1,var) && is_constant_in(e2,var)) || (is_constant_in(e1,var) && is_additive_in(e2,var)); }
+inline Bool _is_additive_in(Sub, REcr e1, REcr e2, RVcr var) {
+    return is_additive_in(e1,var) && is_constant_in(e2,var); }
+inline Bool _is_additive_in(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
+template<class... OPS> inline Bool _is_additive_in(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
+    return ops.visit([&](auto op){return _is_additive_in(op,e1,e2,var);}); }
+
+inline Bool is_additive_in(RCcr c, RVcr var) { return true; }
+inline Bool is_additive_in(RVcr v, RVcr var) { return true; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in(e._op,e._arg1,e._arg2,var); }
+}
+
+Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& var) {
+    return e.node_ref().visit([&](auto en){return is_additive_in(en,var);});
+}
+
+
+Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& spc) {
+    // We treat the vector of expressions as additive in spc if each variable in spc appears at most once in all expressions,
     // with a constant value of 1
     // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
     // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
 
-    auto one = Expression<Real>::constant(1);
-    auto zero = Expression<Real>::constant(0);
-
-    for (auto v : vs) {
+    for (auto v : spc) {
         Bool already_found = false;
         Bool already_found_one = false;
         for (auto i : range(ev.size())) {
             const Expression<Real>& e = ev[i];
             auto der = simplify(derivative(e, v));
-            if (not identical(der,zero)) {
+            if (not is_constant_in(e,v)) {
                 if (already_found) {
                     return false;
                 } else {
                     already_found = true;
-                    if (identical(der,one)) {
+                    if (is_additive_in(e,v)) {
                         if (already_found_one) {
                             return false;
                         } else {
@@ -330,105 +399,96 @@ Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>
     return true;
 }
 
+template<class T, class... TS> struct IndexOf;
+template<class T, class... TS> struct IndexOf<T,T,TS...> { static const SizeType N=0; };
+template<class T, class T0, class... TS> struct IndexOf<T,T0,TS...> { static const SizeType N=IndexOf<T,TS...>::N+1u; };
+template<class T> struct IndexOf<T> { };
+template<class T, class... TS> struct IndexOf<T,Variant<TS...>> : public IndexOf<T,TS...> { };
 
-Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+template<class T, class... TS> constexpr decltype(auto) index_of() { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
+template<class T, class... TS> constexpr decltype(auto) index_of(Variant<TS...>const&) { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
 
-    OperatorCode e1op;
-    OperatorCode e2op;
-    switch(e1.op()) {
-        case OperatorCode::GEQ: case OperatorCode::GT: e1op=OperatorCode::GEQ; break;
-        case OperatorCode::LEQ: case OperatorCode::LT: e1op=OperatorCode::LEQ; break;
-        default: return false;
-    }
-    switch(e2.op()) {
-        case OperatorCode::GEQ: case OperatorCode::GT: e2op=OperatorCode::GEQ; break;
-        case OperatorCode::LEQ: case OperatorCode::LT: e2op=OperatorCode::LEQ; break;
-        default: return false;
-    }
+namespace {
 
-    // Both expressions are <=,<,>=,> comparisons
-    Expression<Real> const& e1arg1=e1.cmp1<Real>();
-    Expression<Real> const& e1arg2=e2.cmp2<Real>();
-    Expression<Real> const& e2arg1=e1.cmp1<Real>();
-    Expression<Real> const& e2arg2=e2.cmp2<Real>();
+template<class OP> constexpr Bool _identical(OP,OP) { return true; }
+template<class OP1, class OP2> constexpr Bool _identical(OP1,OP2) { return false; }
 
-    // Test if the expressions are of the form a1<=a2; a1>=a2 or a1<=a2; a2<=a1
-    if(e1op==e2op) {
-        if(identical(e1arg1,e2arg2) && identical(e1arg2,e2arg1)) { return true; }
-        else { return false; }
-    } else {
-        if(identical(e1arg1,e2arg1) && identical(e1arg2,e2arg2)) { return true; }
-        else { return false; }
-    }
+constexpr Bool _opposite(Geq,Leq) { return true; }
+constexpr Bool _opposite(Leq,Geq) { return true; }
+constexpr Bool _opposite(Gtr,Less) { return true; }
+constexpr Bool _opposite(Less,Gtr) { return true; }
+template<class OP1, class OP2> constexpr Bool _opposite(OP1,OP2) { return false; }
 
+Bool opposite(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
+    return ops1.visit([&ops2](auto op1){return ops2.visit([&op1](auto op2){return _opposite(op1,op2);});}); }
+Bool identical(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
+    return ops1.visit([&ops2](auto op1){return ops2.visit([&op1](auto op2){return _identical(op1,op2);});}); }
 }
 
+
+Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+    auto* e1cp = std::get_if<BinaryExpressionNode<Kleenean,Real>>(&e1.node_ref());
+    auto* e2cp = std::get_if<BinaryExpressionNode<Kleenean,Real>>(&e2.node_ref());
+
+    if (e1cp && e2cp) {
+        if (identical(e1cp->op(),e2cp->op())) {
+            return identical(e1.arg1(),e2.arg2()) && identical(e1.arg2(),e2.arg1());
+        } else if (opposite(e1cp->op(),e2cp->op())) {
+            return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
+        }
+    }
+    return false;
+}
+
+
+namespace {
+Expression<Real> derivative(const Constant<Real>& e, Variable<Real> v) { return Expression<Real>(Real(0)); }
+Expression<Real> derivative(const Variable<Real>& e, Variable<Real> v) { return Expression<Real>(Real(e==v ?1:0)); }
+}
 
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 {
-    /*
-    switch(e.op()) {
-        case OperatorCode::CNST:
-            return Expression<Real>::constant(0);
-        case OperatorCode::VAR:
-            if(e.var()==v.name()) { return Expression<Real>::constant(1); }
-            else { return Expression<Real>::constant(0); }
-        case OperatorCode::ADD:
-            return derivative(e.arg1(),v)+derivative(e.arg2(),v);
-        case OperatorCode::SUB:
-            return derivative(e.arg1(),v)-derivative(e.arg2(),v);
-        case OperatorCode::MUL:
-            return e.arg1()*derivative(e.arg2(),v)+derivative(e.arg1(),v)*e.arg2();
-        case OperatorCode::DIV:
-            return derivative(e.arg1() * rec(e.arg2()),v);
-        case OperatorCode::NEG:
-            return  - derivative(e.arg(),v);
-        case OperatorCode::REC:
-            return  - derivative(e.arg(),v) * rec(sqr(e.arg()));
-        case OperatorCode::SQR:
-            return static_cast<Real>(2) * derivative(e.arg(),v) * e.arg();
-        case OperatorCode::POW:
-            return Expression<Real>::constant(e.num())*make_expression<Real>(OperatorCode::POW,e.arg(),e.num()-1)*derivative(e.arg(),v);
-        case OperatorCode::EXP:
-            return derivative(e.arg(),v) * e.arg();
-        case OperatorCode::LOG:
-            return derivative(e.arg(),v) * rec(e.arg());
-        case OperatorCode::SIN:
-            return derivative(e.arg(),v) * cos(e.arg());
-        case OperatorCode::COS:
-            return -derivative(e.arg(),v) * sin(e.arg());
-        case OperatorCode::TAN:
-            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));*/
-    switch(e.kind()) {
-        case OperatorKind::NULLARY: return Expression<Real>::constant(0);
-        case OperatorKind::VARIABLE: return Expression<Real>::constant(e.var()==v.name()?1:0);
-        case OperatorKind::UNARY: return compute_derivative(e.op().code(),e.arg(),derivative(e.arg(),v));
-        case OperatorKind::BINARY: return compute_derivative(e.op().code(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
-        case OperatorKind::GRADED: return compute_derivative(e.op().code(), e.arg(), derivative(e.arg(),v), e.num());
-        default:
-            ARIADNE_THROW(std::runtime_error,"derivative(Expression<Real> e, Variable<Real> v)",
-                          "Cannot compute derivative of "<<e<<"\n");
-    }
+    return e.node_ref().visit([&v](auto en){return derivative(en,v);});
 }
 
 
 
-const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache)
+namespace {
+typedef Real R; typedef EffectiveNumber Y; typedef Map<Identifier,SizeType> VM; typedef Map<const Void*,Formula<Y>> FM;
+
+const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache);
+Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& cache);
+
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Constant<Real>& e, const SPC& spc, CACHE& cache) {
+    return Formula<Y>::constant(e.value()); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Variable<Real>& e, const SPC& spc, CACHE& cache) {
+    return Formula<Y>::coordinate(spc[e.name()]); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const UnaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache)); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const BinaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg1(),spc,cache),_cached_make_formula(e.arg2(),spc,cache)); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
+
+const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
-    typedef EffectiveNumber Y;
-    const ExpressionNode<Real>* eptr=e.node_ptr().operator->();
+    const ExpressionNode<Real>* eptr=&e.node_ref();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Y>(v[e.var()]) );
-        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Y>(e.val()) );
-        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache)));
-        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
-        case OperatorKind::GRADED: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
-        default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
-    }
+    return insert(cache, eptr, eptr->visit([&](auto en){return _cached_make_formula_impl(en,spc,cache);}));
 }
 
-Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& no_cache)
+{
+    return e.node_ref().visit([&](auto en){return _cached_make_formula_impl(en,spc,no_cache);});
+}
+
+} // namespace
+
+const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache) {
+    return _cached_make_formula(e,spc,cache);
+}
+
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v)
 {
     Map< const Void*, Formula<EffectiveNumber> > cache;
     return cached_make_formula(e,v,cache);
@@ -436,16 +496,10 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Ident
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    typedef EffectiveNumber Y;
-    switch(e.kind()) {
-        case OperatorKind::GRADED: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
-        case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
-        case OperatorKind::UNARY: return make_formula<Y>(e.op(),make_formula(e.arg(),spc));
-        case OperatorKind::NULLARY: return Formula<Y>::constant(e.val());
-        case OperatorKind::VARIABLE: return Formula<Y>::coordinate(spc.index(e.var()));
-        default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
-    }
+    Map<Identifier, SizeType> variable_indices = spc.indices_from_names(); Void* no_cache;
+    return _cached_make_formula(e,variable_indices,no_cache);
 }
+
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var)
 {

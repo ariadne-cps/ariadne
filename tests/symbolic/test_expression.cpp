@@ -41,6 +41,37 @@
 
 #include "../test.hpp"
 
+namespace Ariadne {
+constexpr Pos inverse(Pos) { return Pos(); }
+constexpr Neg inverse(Neg) { return Neg(); }
+constexpr Rec inverse(Rec) { return Rec(); }
+constexpr Sqrt inverse(Sqr) { return Sqrt(); }
+constexpr Sqr inverse(Sqrt) { return Sqr(); }
+constexpr Log inverse(Exp) { return Log(); }
+constexpr Exp inverse(Log) { return Exp(); }
+constexpr Atan inverse(Tan) { return Atan(); }
+constexpr Tan inverse(Atan) { return Tan(); }
+
+template<class OP> using InverseType = decltype(inverse(declval<OP>()));
+
+template<class OP> struct HasInverse {
+    template<class O, class=InverseType<O>> static std::true_type test(int);
+    template<class O> static std::false_type test(...);
+    static const bool value = decltype(test<OP>(1))::value;
+};
+
+
+template<class OP, class... OPS> Bool _are_inverses(OP op1, OperatorVariant<OPS...> ops2) {
+    if constexpr(HasInverse<decltype(op1)>::value) { return decltype(inverse(op1))::code() == ops2.code(); }
+    else { return false; }
+}
+
+template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> ops1, OperatorVariant<OPS...> ops2) {
+    return ops1.visit([&ops2](auto op1){ return _are_inverses(op1,ops2); });
+}
+}
+
+
 using namespace Ariadne;
 
 typedef ElementaryAlgebra<EffectiveNumericType> EffectiveElementaryAlgebra;
@@ -123,23 +154,38 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(identical(RealExpression::constant(2),RealExpression::constant(2)));
         ARIADNE_TEST_ASSERT(identical(sin(x),sin(x)));
         ARIADNE_TEST_ASSERT(identical(pow(x,2),pow(x,2)));
-        ARIADNE_TEST_ASSERT(identical(x*y,y*x));
-        ARIADNE_TEST_ASSERT(identical(x+y,y+x));
+        ARIADNE_TEST_ASSERT(not identical(x*y,y*x));
+        ARIADNE_TEST_ASSERT(not identical(x+y,y+x));
+
+        ARIADNE_TEST_CONSTRUCT(RealExpression,e1,(sin(pow(x,2)+y)*(y/x+1)))
+        ARIADNE_TEST_CONSTRUCT(RealExpression,e2,(sin(pow(x,2)+y)*(y/x+1)));
+        ARIADNE_TEST_ASSERT(identical(e1,e1));
+        ARIADNE_TEST_ASSERT(identical(e1,e2));
     }
 
     Void test_derivative() {
         RealExpression expr = 2*x+y;
+        ARIADNE_TEST_PRINT(derivative(expr,x));
+        ARIADNE_TEST_PRINT(simplify(derivative(expr,x)));
         ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr,x)),RealExpression::constant(2)));
         RealExpression expr2 = pow(x,3);
-        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr2,x)),3*pow(x,2)));
+        ARIADNE_TEST_PRINT(derivative(expr2,x));
+        ARIADNE_TEST_PRINT(simplify(derivative(expr2,x)));
+        ARIADNE_TEST_ASSERT(identical(simplify(derivative(expr2,x)),3*sqr(x)));
     }
 
     Void test_simplify() {
-
         RealVariable u("u");
         RealExpression expr = -u*x*y+2*x;
+        RealExpression ex=x;
         RealExpression simplification = simplify(derivative(expr,x));
         ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(pos(neg(ex))),neg(ex));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(neg(neg(ex))),ex);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(rec(rec(ex))),ex);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(log(exp(ex))),ex);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(exp(log(ex))),ex);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(sqr(sqrt(ex))),ex);
     }
 
     Void test_ordering() {
@@ -278,6 +324,12 @@ class TestExpression {
     Void test_vector_properties()
     {
         RealVariable u1("u1"), u2("u2");
+        ARIADNE_TEST_ASSERT(is_additive_in(u1,u1));
+        ARIADNE_TEST_ASSERT(is_additive_in(x,u1));
+        ARIADNE_TEST_ASSERT(is_additive_in(x+u1,u1));
+        ARIADNE_TEST_ASSERT(is_additive_in(x+u1,u2));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1}),{u1}));
+        ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1}),{u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y+u2}),{u1,u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u2,y+u1}),{u1,u2}));
         ARIADNE_TEST_ASSERT(is_additive_in(Vector<RealExpression>({x+u1,y}),{u1}));

@@ -45,11 +45,12 @@ template<class T> class Constant
     : public T
 {
   public:
+    explicit Constant(const T& value) : T(value), _name("") { }
     explicit Constant(const String& str, const T& value) : T(value), _name(str) { }
     const Identifier& name() const { return _name; }
     const T& value() const { return *this; }
     friend OutputStream& operator<<(OutputStream& os, Constant<T> const& c) {
-        return os << c._name << "(=" << static_cast<T const&>(c) << ")"; }
+        if (c.name().empty()) { return os << c.value(); } else { return os << c._name << "(=" << c.value() << ")"; } }
   private:
     Identifier _name;
 };

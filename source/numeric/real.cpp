@@ -316,6 +316,19 @@ PositiveReal dist(Real const& r1, Real const& r2) { return abs(sub(r1,r2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
+template<class O> struct LogicalWrapper<O,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real> {
+    LogicalWrapper(O o, Real a)
+        : ExpressionTemplate<O,Real>(o,a) { }
+    virtual LogicalValue _check(Effort e) const;
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<ExpressionTemplate<O,Real> const&>(*this); }
+};
+
+template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
+    if(e==0u) { DoublePrecision p; return static_cast<LogicalValue>(this->_op(this->_arg.get(p))); }
+    else { MultiplePrecision p(e*64); return static_cast<LogicalValue>(this->_op(this->_arg.get(p))); }
+}
+
 template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real,Real> {
     LogicalWrapper(O o, Real a1, Real a2)
         : ExpressionTemplate<O,Real,Real>(o,a1,a2) { }
@@ -345,6 +358,8 @@ Quasidecidable operator< (Real const& x1, Real const& x2) { return make_logical<
 Quasidecidable operator> (Real const& x1, Real const& x2) { return make_logical<Kleenean>(Gtr(),x1,x2); }
 Quasidecidable operator<=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Leq(),x1,x2); }
 Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Geq(),x1,x2); }
+
+Kleenean sgn(Real const& x) { return make_logical<Kleenean>(Sgn(),x); }
 
 ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 ValidatedSierpinskian operator!=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }

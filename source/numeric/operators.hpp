@@ -152,17 +152,6 @@ const char* name(const OperatorCode& op);
 const char* symbol(const OperatorCode& op);
 
 
-template<class X> LogicType<X> compare(OperatorCode op, const X& x1, const X& x2);
-template<class X> X compute(OperatorCode op, const X& x);
-template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
-template<class X> X compute(OperatorCode op, const X& x, Int n);
-template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
-
-template<class X> X compute_derivative(OperatorCode op, const X& x);
-template<class X, class D> D compute_derivative(OperatorCode op, const X& x, const D& dx);
-template<class X, class D> D compute_derivative(OperatorCode op, const X& x1, const D& dx1, const X& x2, const D& dx2);
-template<class X, class D> D compute_derivative(OperatorCode op, const X& x, const D& dx, Int n);
-
 template<class OBJ> struct Object { OBJ const& upcast() const { return static_cast<OBJ const&>(*this); } };
 template<class OP> struct OperatorObject : Object<OP> { };
 template<class CMP> struct ComparisonObject : Object<CMP> { };

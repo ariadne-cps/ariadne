@@ -199,7 +199,9 @@ struct UnaryFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op.code(), _arg, _arg.derivative(j));
+        return _op.visit([&](auto op){
+            if constexpr(IsSame<decltype(op),Abs>::value) { assert(false); return _arg.derivative(j); }
+            else { return op.derivative(this->_arg,_arg.derivative(j)); } } );
     }
 
     virtual OutputStream& repr(OutputStream& os) const {
@@ -248,7 +250,9 @@ struct BinaryFunction
         return static_cast<const ScalarFunctionInterface<P,D>&>(this->derivative(j))._clone(); }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op.code(),_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); }
+        return _op.visit([&](auto op){
+            if constexpr(IsSame<decltype(op),Max>::value || IsSame<decltype(op),Min>::value) { assert(false); return _arg1.derivative(j); }
+            else { return op.derivative(_arg1,_arg1.derivative(j),_arg2,_arg2.derivative(j)); } }); }
 
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
@@ -289,7 +293,7 @@ class GradedFunction
     }
 
     virtual ScalarFunction<P,D> derivative(ElementIndexType<D> j) const {
-        return compute_derivative(_op.code(), _arg1, _arg1.derivative(j), _arg2);
+        return _op.visit([&](auto op){ return op.derivative(_arg1, _arg1.derivative(j), _arg2);});
     }
 
     virtual OutputStream& repr(OutputStream& os) const {

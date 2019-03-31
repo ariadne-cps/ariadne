@@ -181,33 +181,6 @@ OutputStream& Vector<Procedure<Y>>::_write(OutputStream& os) const {
 
 template<class OP> struct AlgebraScalar { };
 
-template<class V> decltype(auto) visit(OperatorCode op(), V const& v) {
-    switch(op()) {
-//        case OperatorCode::CNST: { X r=x.zero_element(); r=c[instruction.arg]; v[i]=r; } break;
-        case OperatorCode::SADD:  return v(AlgebraScalar<Add>());
-        case OperatorCode::SSUB:  return v(AlgebraScalar<Sub>());
-        case OperatorCode::SMUL:  return v(AlgebraScalar<Mul>());
-        case OperatorCode::SDIV:  return v(AlgebraScalar<Div>());
-        case Add::code():  return v(Add());
-        case Sub::code():  return v(Sub());
-        case Mul::code():  return v(Mul());
-        case Div::code():  return v(Div());
-        case Pow::code():  return v(Pow());
-        case Abs::code():  return v(Abs());
-        case Pos::code():  return v(Pos());
-        case Neg::code():  return v(Neg());
-        case Rec::code():  return v(Rec());
-        case Sqr::code():  return v(Sqr());
-        case Sqrt::code(): return v(Sqrt());
-        case Exp::code():  return v(Exp());
-        case Log::code():  return v(Log());
-        case Sin::code():  return v(Sin());
-        case Cos::code():  return v(Cos());
-        case Tan::code():  return v(Tan());
-        case Atan::code(): return v(Atan());
-        default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<op());
-    }
-}
 
 
 

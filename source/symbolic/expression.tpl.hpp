@@ -55,9 +55,7 @@ inline String pos(String s) { return s; }
 
 template<> struct OperatorTypedef<String(String)> { typedef OperatorVariant<> Type; };
 
-template<> struct OperatorTypedef<Integer(Integer)> { typedef OperatorVariant<Nul,Pos,Neg> Type; };
-#warning Cannot use Sqr,Abs since they return Natural
-//template<> struct OperatorTypedef<Integer(Integer)> { typedef OperatorVariant<Nul,Pos,Neg,Sqr,Abs> Type; };
+template<> struct OperatorTypedef<Integer(Integer)> { typedef OperatorVariant<Nul,Pos,Neg,Sqr,Abs> Type; };
 template<> struct OperatorTypedef<Integer(Integer,Integer)> { typedef OperatorVariant<Add,Sub,Mul,Max,Min> Type; };
 
 template<> struct OperatorTypedef<Real(Real)> { typedef UnaryElementaryOperator Type; };
@@ -393,13 +391,12 @@ template<class OP> struct HasInverse {
     static const bool value = decltype(test<OP>(1))::value;
 };
 
-
-template<class OP, class... OPS> Bool _are_inverses(OP op1, OperatorVariant<OPS...> ops2) {
+template<class OP, class... OPS> Bool _are_inverses(OP const& op1, OperatorVariant<OPS...> const& ops2) {
     if constexpr(HasInverse<decltype(op1)>::value) { return inverse(op1).code() == ops2.code(); }
     else { return false; }
 }
 
-template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> ops1, OperatorVariant<OPS...> ops2) {
+template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> const& ops1, OperatorVariant<OPS...> const& ops2) {
     return ops1.accept([&ops2](auto op1){ return _are_inverses(op1,ops2); });
 }
 

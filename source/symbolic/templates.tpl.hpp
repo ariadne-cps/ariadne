@@ -36,6 +36,8 @@ template<class R, class OP, class E1, class E2, class V> R _evaluate_as_impl(con
 template<class R, class OP, class E, class N, class V> R _graded_evaluate_as_impl(const OP& op, const E& e, N n, const V& v) {
     return op(evaluate(e,v),n); }
 
+template<class R, class E, class V, class... OPS> R _evaluate_as_impl(const OperatorVariant<OPS...>& op, const E& e, const V& v) {
+    return op.template call_as<R>(evaluate(e,v)); }
 template<class R, class E, class V> R _evaluate_as_impl(const UnaryElementaryOperator& op, const E& e, const V& v) {
     return op.call_as<R>(evaluate(e,v)); }
 template<class R, class E1, class E2, class V> R _evaluate_as_impl(const BinaryElementaryOperator& op, const E1& e1, const E2& e2, const V& v) {
@@ -139,9 +141,10 @@ template<class F1, class F2, class J> inline auto _derivative_impl(Min, F1 const
 template<class F, class N, class J> inline decltype(auto) _derivative_impl(Pow op, F const& f, N const& n, J j) {
     return op.derivative(f,derivative(f,j),n); }
 
-#warning Should not need to explicitly use this
 template<class F, class J, class... OPS> decltype(auto) _derivative_impl(UnaryElementaryOperator ops, F const& f, J j) {
     return ops.accept([&f,j](auto op){return _derivative_impl(op,f,j);}); }
+template<class F1, class F2, class J, class... OPS> decltype(auto) _derivative_impl(BinaryElementaryOperator ops, F2 const& f1, F2 const& f2, J j) {
+    return ops.accept([&f1,&f2,j](auto op){return _derivative_impl(op,f1,f2,j);}); }
 
 template<class F, class J, class... OPS> decltype(auto) _derivative_impl(OperatorVariant<OPS...> ops, F const& f, J j) {
     return ops.accept([&f,j](auto op){return _derivative_impl(op,f,j);}); }

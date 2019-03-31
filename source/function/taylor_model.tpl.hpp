@@ -823,7 +823,7 @@ template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
         auto& r=x; r.imul(c); return std::move(r); }
     static ModelType apply(Max, ModelType const& x, ModelType const& y);
     static ModelType apply(Min, ModelType const& x, ModelType const& y);
-#warning
+// TODO: Should be able to automatically generate these operations
     static ModelType apply(Max, ModelType const& x, NumericType const& c);
     static ModelType apply(Min, ModelType const& x, NumericType const& c);
     static ModelType apply(Max, NumericType const& c, ModelType const& x);

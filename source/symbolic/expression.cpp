@@ -119,9 +119,6 @@ Expression<Integer>& operator-=(Expression<Integer>& e1, Expression<Integer> con
 Expression<Integer>& operator*=(Expression<Integer>& e1, Expression<Integer> const& e2) {
     return e1=e1*e2; }
 
-#warning
-Kleenean sgn(Real const& r);
-
 Expression<Kleenean> sgn(Expression<Real> const& e) {
     return make_expression<Kleenean>(Sgn(),e); }
 

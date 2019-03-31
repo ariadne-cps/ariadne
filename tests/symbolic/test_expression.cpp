@@ -100,6 +100,35 @@ class TestExpression {
         RealExpression(nullptr);
     }
 
+    Void test_write() {
+        ARIADNE_TEST_EQUALS(to_string(+x),"+x");
+        ARIADNE_TEST_EQUALS(to_string(-x),"-x");
+        ARIADNE_TEST_EQUALS(to_string(x+y),"x+y");
+        ARIADNE_TEST_EQUALS(to_string(x-y),"x-y");
+        ARIADNE_TEST_EQUALS(to_string(x*y),"x*y");
+        ARIADNE_TEST_EQUALS(to_string(x/y),"x/y");
+        ARIADNE_TEST_EQUALS(to_string(pos(x)),"+x");
+        ARIADNE_TEST_EQUALS(to_string(neg(x)),"-x");
+        ARIADNE_TEST_EQUALS(to_string(add(x,y)),"x+y");
+        ARIADNE_TEST_EQUALS(to_string(sub(x,y)),"x-y");
+        ARIADNE_TEST_EQUALS(to_string(mul(x,y)),"x*y");
+        ARIADNE_TEST_EQUALS(to_string(div(x,y)),"x/y");
+        ARIADNE_TEST_EQUALS(to_string(add(x,sub(y,z))),"x+y-z");
+        ARIADNE_TEST_EQUALS(to_string(sub(x,add(y,z))),"x-(y+z)");
+        ARIADNE_TEST_EQUALS(to_string(sub(x,sub(y,z))),"x-(y-z)");
+        ARIADNE_TEST_EQUALS(to_string(add(sub(x,y),z)),"x-y+z");
+        ARIADNE_TEST_EQUALS(to_string(sub(add(x,y),z)),"x+y-z");
+        ARIADNE_TEST_EQUALS(to_string(sub(sub(x,y),z)),"x-y-z");
+        ARIADNE_TEST_EQUALS(to_string(add(mul(x,y),z)),"x*y+z");
+        ARIADNE_TEST_EQUALS(to_string(mul(add(x,y),z)),"(x+y)*z");
+        ARIADNE_TEST_EQUALS(to_string(div(x,div(y,z))),"x/(y/z)");
+        ARIADNE_TEST_EQUALS(to_string(div(div(x,y),z)),"x/y/z");
+        ARIADNE_TEST_EQUALS(to_string(sub(x,div(y,z))),"x-y/z");
+        ARIADNE_TEST_EQUALS(to_string(sub(div(x,y),z)),"x/y-z");
+        ARIADNE_TEST_EQUALS(to_string(max(x,sub(y,z))),"max(x,y-z)");
+        ARIADNE_TEST_EQUALS(to_string(sub(x,max(y,z))),"x-max(y,z)");
+    }
+
     Void test_assignment() {
         Real zero(0), one(1);
         RealExpression e(x*y+o);
@@ -393,6 +422,7 @@ class TestExpression {
     Void test() {
         ARIADNE_TEST_CALL(test_variables());
         ARIADNE_TEST_CALL(test_expression());
+        ARIADNE_TEST_CALL(test_write());
         ARIADNE_TEST_CALL(test_assignment());
         ARIADNE_TEST_CALL(test_parameters());
         ARIADNE_TEST_CALL(test_identical());

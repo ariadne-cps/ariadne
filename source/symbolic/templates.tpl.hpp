@@ -63,17 +63,20 @@ template<class R, class OP, class E, class V> R evaluate_as(const Symbolic<OP,E,
 template<class Y, template<class>class E> void _write_impl(OutputStream& os, Add, E<Y> e1, E<Y> e2) {
     os << e1 << '+' << e2; }
 template<class Y, template<class>class E> void _write_impl(OutputStream& os, Sub, E<Y> e1, E<Y> e2) {
-    os << e1 << '+'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+    os << e1 << '-'; switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
 template<class Y, template<class>class E> void _write_impl(OutputStream& os, Mul, E<Y> e1, E<Y> e2) {
     switch(e1.op().code()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '*';
     switch(e2.op().code()) { case Add::code(): case Sub::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
 template<class Y, template<class>class E> void _write_impl(OutputStream& os, Div, E<Y> e1, E<Y> e2) {
-        switch(e1.op()) { case Add::code(): case Sub::code(): case Div::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '/';
-        switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
+    switch(e1.op()) { case Add::code(): case Sub::code(): os << '(' << e1 << ')'; break; default: os << e1; } os << '/';
+    switch(e2.op()) { case Add::code(): case Sub::code(): case Mul::code(): case Div::code(): os << '(' << e2 << ')'; break; default: os << e2; } }
 template<class E1, class E2> void _write_impl(OutputStream& os, Max, E1 const& e1, E2 const& e2) { os << "max" << '(' << e1 << ',' << e2 << ')'; }
 template<class E1, class E2> void _write_impl(OutputStream& os, Min, E1 const& e1, E2 const& e2) { os << "min" << '(' << e1 << ',' << e2 << ')'; }
-
 template<class OP, class E1, class E2> void _write_impl(OutputStream& os, OP op, E1 const& e1, E2 const& e2) { os << op << '(' << e1 << ',' << e2 << ')'; }
+
+template<class E> void _write_impl(OutputStream& os, Pos op, E const& e) { os << '+' << e; }
+template<class E> void _write_impl(OutputStream& os, Neg op, E const& e) { os << '-' << e; }
+template<class OP, class E> void _write_impl(OutputStream& os, OP op, E const& e) { os << op << '(' << e << ')'; }
 
 template<class Y> void _write_impl(OutputStream& os, Symbolic<Cnst,Y> const& c) {
     os << c._val; }
@@ -86,21 +89,27 @@ template<class T> inline Void _write_impl(OutputStream& os, Variable<T> const& v
     os << v; }
 
 
-#warning TODO: Change to allow templated operators here
 template<class A1, class A2, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryLogicalOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryComparisonOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } // \s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
 template<class A1, class A2> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A1,A2> const& s) {
-    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; } //  { s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
-template<class OP, class A> void _write_impl(OutputStream& os, Symbolic<OP,A> const& s) {
-    os << s._op << '(' << s._arg << ')'; }
+    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg1,s._arg2);}); }
+template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,E<A>,A> const& s) {
+    os << '('; _write_impl(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,s._arg,E<A>(s._cnst))); os << ')'; }
 template<class A, template<class>class E> void _write_impl(OutputStream& os, Symbolic<BinaryElementaryOperator,A,E<A>> const& s) {
     os << '('; _write_impl(os,Symbolic<BinaryElementaryOperator,E<A>,E<A>>(s._op,E<A>(s._cnst),s._arg)); os << ')'; }
+template<class A> void _write_impl(OutputStream& os, Symbolic<UnaryElementaryOperator,A> const& s) {
+    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg);}); }
 template<class A, class N> void _write_impl(OutputStream& os, Symbolic<GradedElementaryOperator,A,N> const& s) {
     os << s._op << '(' << s._arg << ',' << s._num << ')'; }
+
+template<class OP, class A1, class A2> void _write_impl(OutputStream& os, Symbolic<OP,A1,A2> const& s) {
+    os << s._op << '(' << s._arg1 << ',' << s._arg2 << ')'; }
+template<class OP, class A> void _write_impl(OutputStream& os, Symbolic<OP,A> const& s) {
+    os << s._op << '(' << s._arg << ')'; }
 
 //template<class A, class... OPS> void _write_impl(OutputStream& os, Symbolic<OperatorVariant<OPS...>,A> const& s) {
 //    s._op.accept([&os,&s](auto op){_write_impl(os,op,s._arg);}); }

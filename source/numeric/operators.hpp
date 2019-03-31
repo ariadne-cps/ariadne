@@ -463,7 +463,7 @@ struct UnaryComparisonOperator : OperatorVariant<Sgn> { using OperatorVariant::O
 struct UnaryRingOperator : OperatorVariant<Neg> { using OperatorVariant::OperatorVariant; };
 struct UnaryArithmeticOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Rec> { using OperatorVariant::OperatorVariant; };
 struct UnaryTranscendentalOperator : OperatorVariant<Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan> { using OperatorVariant::OperatorVariant; };
-struct UnaryElementaryOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan,Abs> {
+struct UnaryElementaryOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Asin,Acos,Atan,Abs> {
     using OperatorVariant::OperatorVariant;
     template<class X> decltype(sin(declval<X>())) operator()(X&& x) const { typedef decltype(sin(x)) R;
         return this->accept([&x](auto op){return static_cast<R>(op(std::forward<X>(x)));}); } };

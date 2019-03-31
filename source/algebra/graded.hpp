@@ -170,6 +170,8 @@ template<class X> Void compute(X& r, const Rec&, const X& a) { return rec(r,a); 
 template<class X> Void compute(X& r, const Sin&, const X& a) { return sin(r,a); }
 template<class X> Void compute(X& r, const Cos&, const X& a) { return cos(r,a); }
 template<class X> Void compute(X& r, const Tan&, const X& a) { return tan(r,a); }
+template<class X> Void compute(X& r, const Asin&, const X& a) { return asin(r,a); }
+template<class X> Void compute(X& r, const Acos&, const X& a) { return acos(r,a); }
 template<class X> Void compute(X& r, const Atan&, const X& a) { return atan(r,a); }
 
 template<class A, class B> Graded<A>& operator+=(Graded<A>& a, const B& c) {
@@ -241,9 +243,12 @@ template<class A> ClosureExpression<Cos,Graded<A>> cos(const Graded<A>& a) {
     return make_expression(Cos(),a); }
 template<class A> ClosureExpression<Tan,Graded<A>> tan(const Graded<A>& a) {
     return make_expression(Tan(),a); }
+template<class A> ClosureExpression<Asin,Graded<A>> asin(const Graded<A>& a) {
+    return make_expression(Asin(),a); }
+template<class A> ClosureExpression<Acos,Graded<A>> acos(const Graded<A>& a) {
+    return make_expression(Acos(),a); }
 template<class A> ClosureExpression<Atan,Graded<A>> atan(const Graded<A>& a) {
     return make_expression(Atan(),a); }
-
 
 template<class A> Void nul(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_ASSERT(r.degree()+1u == a.degree());
@@ -437,6 +442,14 @@ template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
 }
 
 template<class A> Void tan(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class A> Void asin(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class A> Void acos(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 

@@ -52,8 +52,6 @@ typedef Procedure<EffectiveNumber> EffectiveProcedure;
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
-template<class O, class... AS> using Symbolic = ExpressionTemplate<O,AS...>;
-
 typedef Symbolic<Cnst,SizeType> ConstantProcedureInstruction;
 typedef Symbolic<Var,SizeType> IndexProcedureInstruction;
 typedef Symbolic<UnaryElementaryOperator,SizeType> UnaryProcedureInstruction;
@@ -62,7 +60,7 @@ typedef Symbolic<BinaryElementaryOperator,SizeType,SizeType> BinaryProcedureInst
 typedef Symbolic<GradedElementaryOperator,SizeType,Int> GradedProcedureInstruction;
 
 struct ScalarProcedureInstruction : Symbolic<BinaryElementaryOperator,SizeType,SizeType> {
-    using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::ExpressionTemplate; };
+    using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::Symbolic; };
 
 typedef Variant<ConstantProcedureInstruction,IndexProcedureInstruction,
                 UnaryProcedureInstruction,BinaryProcedureInstruction,GradedProcedureInstruction,ScalarProcedureInstruction> ProcedureInstructionVariant;

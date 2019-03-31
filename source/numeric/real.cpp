@@ -63,31 +63,31 @@ template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInter
 
 template<class O, class... AS> struct RealWrapper;
 
-template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, FloatDPBounds {
-    RealWrapper(O o, A a) : ExpressionTemplate<O,A>(o,a)
+template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, Symbolic<O,A>, FloatDPBounds {
+    RealWrapper(O o, A a) : Symbolic<O,A>(o,a)
         , FloatDPBounds(this->_op(this->_arg.get(dp))) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A> const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A> const&>(*this); }
 };
 
-template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, ExpressionTemplate<O,A1,A2>, FloatDPBounds {
-    RealWrapper(O o, A1 a1, A2 a2) : ExpressionTemplate<O,A1,A2>(o,a1,a2)
+template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, Symbolic<O,A1,A2>, FloatDPBounds {
+    RealWrapper(O o, A1 a1, A2 a2) : Symbolic<O,A1,A2>(o,a1,a2)
         , FloatDPBounds(this->_op(this->_arg1.get(dp),this->_arg2.get(dp))) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg1.get(pr),this->_arg2.get(pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A1,A2> const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A1,A2> const&>(*this); }
 };
 
-template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, ExpressionTemplate<Pow,A,N>, FloatDPBounds {
-    RealWrapper(Pow o, A a, N n) : ExpressionTemplate<Pow,A,N>(o,a,n)
+template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, Symbolic<Pow,A,N>, FloatDPBounds {
+    RealWrapper(Pow o, A a, N n) : Symbolic<Pow,A,N>(o,a,n)
         , FloatDPBounds(this->_op(this->_arg.get(dp),n)) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr),this->_num); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<Pow,A,N> const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<Pow,A,N> const&>(*this); }
 };
 
 template<class X> struct RealConstant : RealInterface, FloatDPBounds {
@@ -316,12 +316,12 @@ PositiveReal dist(Real const& r1, Real const& r2) { return abs(sub(r1,r2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
-template<class O> struct LogicalWrapper<O,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real> {
+template<class O> struct LogicalWrapper<O,Real> : virtual LogicalInterface, Symbolic<O,Real> {
     LogicalWrapper(O o, Real a)
-        : ExpressionTemplate<O,Real>(o,a) { }
+        : Symbolic<O,Real>(o,a) { }
     virtual LogicalValue _check(Effort e) const;
     virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<O,Real> const&>(*this); }
+        return os << static_cast<Symbolic<O,Real> const&>(*this); }
 };
 
 template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
@@ -329,12 +329,12 @@ template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
     else { MultiplePrecision p(e*64); return static_cast<LogicalValue>(this->_op(this->_arg.get(p))); }
 }
 
-template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real,Real> {
+template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, Symbolic<O,Real,Real> {
     LogicalWrapper(O o, Real a1, Real a2)
-        : ExpressionTemplate<O,Real,Real>(o,a1,a2) { }
+        : Symbolic<O,Real,Real>(o,a1,a2) { }
     virtual LogicalValue _check(Effort e) const;
     virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<O,Real,Real> const&>(*this); }
+        return os << static_cast<Symbolic<O,Real,Real> const&>(*this); }
 };
 
 template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {

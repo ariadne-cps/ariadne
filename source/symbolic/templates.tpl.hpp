@@ -27,8 +27,6 @@ namespace Ariadne {
 
 template<class T> class Variable;
 
-template<class OP, class... AS> using Symbolic = ExpressionTemplate<OP,AS...>;
-
 namespace {
 
 template<class R, class OP, class E, class V> R _evaluate_as_impl(const OP& op, const E& e, const V& v) {
@@ -157,18 +155,18 @@ template<class X, template<class>class A, class J, class... OPS> decltype(auto) 
     return _derivative_impl(ops,A<X>(c1),f2,j); }
 
 
-template<class Y, class J> decltype(auto) derivative(ExpressionTemplate<Cnst,Y> const& s, J j) {
-    return ExpressionTemplate<Cnst,Y>(Y(0)); }
+template<class Y, class J> decltype(auto) derivative(Symbolic<Cnst,Y> const& s, J j) {
+    return Symbolic<Cnst,Y>(Y(0)); }
 
-template<class OP, class A, class J> decltype(auto) derivative(ExpressionTemplate<OP,A> const& s, J j) {
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A> const& s, J j) {
     return _derivative_impl(s._op,s._arg,j); }
-template<class OP, class A1, class A2, class J> decltype(auto) derivative(ExpressionTemplate<OP,A1,A2> const& s, J j) {
+template<class OP, class A1, class A2, class J> decltype(auto) derivative(Symbolic<OP,A1,A2> const& s, J j) {
     return _derivative_impl(s._op,s._arg1,s._arg2,j); }
-template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(ExpressionTemplate<OP,A,E<A>> const& s, J j) {
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,A,E<A>> const& s, J j) {
     return _derivative_impl(s._op,E<A>(s._cnst),s._arg,j); }
-template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(ExpressionTemplate<OP,E<A>,A> const& s, J j) {
+template<class OP, class A, template<class>class E, class J> decltype(auto) derivative(Symbolic<OP,E<A>,A> const& s, J j) {
     return _derivative_impl(s._op,E<A>(s._arg),s._cnst,j); }
-template<class OP, class A, class J> decltype(auto) derivative(ExpressionTemplate<OP,A,Int> const& s, J j) {
+template<class OP, class A, class J> decltype(auto) derivative(Symbolic<OP,A,Int> const& s, J j) {
     return _derivative_impl(s._op,s._arg,s._num,j); }
 
 } // namespace

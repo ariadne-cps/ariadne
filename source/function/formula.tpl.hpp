@@ -25,24 +25,22 @@
 namespace Ariadne {
 
 
-template<class OP, class... AS> using Symbolic = ExpressionTemplate<OP,AS...>;
-
 template<class Y> using ConstantFormulaNode = Symbolic<Cnst,Y>;
 
-template<class Y> class IndexFormulaNode : public Symbolic<Var,Index> { public: using ExpressionTemplate<Var,Index>::ExpressionTemplate; };
+template<class Y> class IndexFormulaNode : public Symbolic<Var,Index> { public: using Symbolic<Var,Index>::Symbolic; };
 
-template<class Y> using UnaryFormulaNode = ExpressionTemplate<UnaryElementaryOperator,Formula<Y>>;
-template<class Y> using BinaryFormulaNode = ExpressionTemplate<BinaryElementaryOperator,Formula<Y>,Formula<Y>>;
-template<class Y> using GradedFormulaNode = ExpressionTemplate<GradedElementaryOperator,Formula<Y>,Int>;
-template<class Y> using ScalarFormulaNode = ExpressionTemplate<BinaryElementaryOperator,Y,Formula<Y>>;
+template<class Y> using UnaryFormulaNode = Symbolic<UnaryElementaryOperator,Formula<Y>>;
+template<class Y> using BinaryFormulaNode = Symbolic<BinaryElementaryOperator,Formula<Y>,Formula<Y>>;
+template<class Y> using GradedFormulaNode = Symbolic<GradedElementaryOperator,Formula<Y>,Int>;
+template<class Y> using ScalarFormulaNode = Symbolic<BinaryElementaryOperator,Y,Formula<Y>>;
 
-template<class O, class A, template<class>class E> struct ExpressionTemplate<O,A,E<A>> {
+template<class O, class A, template<class>class E> struct Symbolic<O,A,E<A>> {
     O _op; A _cnst; E<A> _arg;
-    ExpressionTemplate(O o, A c, E<A> a) : _op(o), _cnst(c), _arg(a) { }
+    Symbolic(O o, A c, E<A> a) : _op(o), _cnst(c), _arg(a) { }
     template<class T> operator T() const { return _op(static_cast<T>(_cnst),static_cast<T>(_arg)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_cnst,_arg(vals...))) {
         return _op(_cnst(vals...),_arg(vals...)); }
-    friend OutputStream& operator<<(OutputStream& os, ExpressionTemplate expr) {
+    friend OutputStream& operator<<(OutputStream& os, Symbolic expr) {
         return os << expr._op.code() << "(" << expr._arg1 << "," << expr._arg2 << ")"; }
 };
 

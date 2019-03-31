@@ -48,21 +48,21 @@ class LogicalConstant : public LogicalInterface {
 template<class OP, class... ARGS> struct LogicalExpression;
 
 template<class OP, class ARG> struct LogicalExpression<OP,ARG>
-    : virtual LogicalInterface, ExpressionTemplate<OP,ARG>
+    : virtual LogicalInterface, Symbolic<OP,ARG>
 {
-    using ExpressionTemplate<OP,ARG>::ExpressionTemplate;
+    using Symbolic<OP,ARG>::Symbolic;
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg,e)); }
     virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<OP,ARG>const&>(*this); }
+        return os << static_cast<Symbolic<OP,ARG>const&>(*this); }
 };
 
 template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
-    : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
+    : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
 {
-    using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
+    using Symbolic<OP,ARG1,ARG2>::Symbolic;
     virtual LogicalValue _check(Effort e) const { return this->_op(check(this->_arg1,e),check(this->_arg2,e)); }
     virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
+        return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
 };
 
 LogicalHandle::LogicalHandle(LogicalValue l)

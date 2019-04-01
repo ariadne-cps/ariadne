@@ -217,6 +217,7 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 {
 }
 
+
 template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const ScalarFunctionType<M>& f, PropertiesType prp)
     : _domain(d), _model(f.argument_size(),prp)
 {
@@ -225,7 +226,7 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
     } else {
         ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
         Vector<ModelType> x=ModelType::scalings(d,prp);
-        this->_model=f.evaluate(x);
+        this->_model=apply_function_to_models(f,x);
         this->_model.simplify();
     }
 }
@@ -644,7 +645,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", prp="<<prp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<ModelType> x=ModelType::scalings(d,prp);
-    this->_models=f(x);
+    this->_models=apply_function_to_models(f,x);
     ARIADNE_DEBUG_ASSERT(this->argument_size()==f.argument_size());
     ARIADNE_DEBUG_ASSERT_MSG(this->result_size()==f.result_size(),"  f="<<f<<"\n  r="<<*this);
     this->simplify();
@@ -936,7 +937,9 @@ template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<Flo
         ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a definitely an element of tf.domain()="<<f.domain());
     }
     Vector<FloatBounds<PR>> sx=Ariadne::unscale(x,f._domain);
-    return Ariadne::evaluate(f._models,sx);
+#warning
+    return x;
+    //return Ariadne::evaluate(f._models,sx);
 }
 
 template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& y) const

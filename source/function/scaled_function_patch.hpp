@@ -98,6 +98,20 @@ template<class M> class ScaledFunctionPatchCreator;
 
 
 
+#warning
+template<class M> using ScalarMultivariateFunctionType = ScalarFunctionType<M>;
+
+template<class M> Scalar<M> apply_function_to_model(ScalarUnivariateFunction<typename M::Paradigm> const& f, Scalar<M> const& m);
+template<class M> Vector<M> apply_function_to_model(VectorUnivariateFunction<typename M::ParadigmTag> const& f, Scalar<M> const& m);
+template<class M> Scalar<M> apply_function_to_models(ScalarMultivariateFunction<typename M::Paradigm> const& f, Vector<M> const& m);
+template<class M> Vector<M> apply_function_to_models(VectorMultivariateFunction<typename M::Paradigm> const& f, Vector<M> const& m);
+
+template<class M> M apply_function_to_models(ScalarMultivariateFunction<typename M::Paradigm> const& f, Vector<M> const& vm) {
+    return M::apply(f,vm); }
+template<class P, class F> TaylorModel<P,F> apply_function_to_models(ScalarMultivariateFunction<P> const& f, Vector<TaylorModel<P,F>> const& vm) {
+    return f.evaluate(vm); }
+
+
 template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
     typedef typename M::NumericType NumericType;
   public:
@@ -932,7 +946,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend ScaledFunctionPatch<M> compose(const ScalarMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
-        return ScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+        return ScaledFunctionPatch<M>(f.domain(),apply_function_to_models(g,f.models()));
     }
     friend ScaledFunctionPatch<M> compose(const ScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
         if(!subset(f.codomain(),g.domain())) {
@@ -945,10 +959,10 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunction<P>& g, const VectorScaledFunctionPatch<M>& f) {
-        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+        return VectorScaledFunctionPatch<M>(f.domain(),apply_function_to_models(g,f.models()));
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorMultivariateFunctionModel<P,PR,PRE>& g, const VectorScaledFunctionPatch<M>& f) {
-        return VectorScaledFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+        return VectorScaledFunctionPatch<M>(f.domain(),apply_function_to_models(g,f.models()));
     }
     friend VectorScaledFunctionPatch<M> compose(const VectorScaledFunctionPatch<M>& g, const VectorScaledFunctionPatch<M>& f) {
         if(!subset(f.codomain(),g.domain())) {

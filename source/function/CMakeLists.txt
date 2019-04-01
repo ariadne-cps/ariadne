@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME} OBJECT
     affine.cpp
     polynomial.cpp
     chebyshev_polynomial.cpp
+    chebyshev_model.cpp
     formula.cpp
     procedure.cpp
     function.cpp

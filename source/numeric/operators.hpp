@@ -90,6 +90,7 @@ enum class Operator::Kind : char {
     TERNARY,
     GRADED,
     SCALAR,
+    PREDICATE,
     COMPARISON
 };
 
@@ -416,7 +417,7 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     static constexpr OperatorCode code() { return OperatorCode::SGN; }
-    static OperatorKind kind() { assert(false); }
+    static OperatorKind kind() { return OperatorKind::PREDICATE; }
     template<class A> auto operator()(A&& a) const -> decltype(sgn(a)) { return sgn(a); }
     Kleenean operator()(const Real& a) const;
 };

@@ -32,6 +32,7 @@
 #include <iostream>
 #include "../numeric/numeric.hpp"
 #include "../utility/pointer.hpp"
+#include "../utility/exceptions.hpp"
 #include "../numeric/operators.hpp"
 #include "../algebra/algebra_interface.hpp"
 #include "../algebra/operations.hpp"
@@ -122,11 +123,11 @@ template<class X> class ElementaryAlgebra
   public:
     ElementaryAlgebra() : _ptr() { }
     explicit ElementaryAlgebra(AlgebraInterface<X>* p) : _ptr(dynamic_cast<ElementaryAlgebraInterface<X>*>(p)) {
-        if (p && !_ptr) { std::cerr << "ElementaryAlgebra(AlgebraInterface<X>* ap): *ap="<<*p<<"; "<<typeid(p).name()<<", "<<typeid(*p).name()<<"\n"; assert(false); } }
+        if (p && !_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(AlgebraInterface<X>* ap)","*ap="<<*p<<"; "<<typeid(p).name()<<", "<<typeid(*p).name()); } }
     explicit ElementaryAlgebra(std::shared_ptr< AlgebraInterface<X> > p) : _ptr(std::dynamic_pointer_cast<ElementaryAlgebraInterface<X>>(p)) {
-        if (p && !_ptr) { std::cerr << "ElementaryAlgebra(SharedPointer<AlgebraInterface<X>> ap): *ap="<<*p<<"\n"; assert(false); } }
+        if (p && !_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(SharedPointer<AlgebraInterface<X>> ap)","*ap="<<*p); } }
     explicit ElementaryAlgebra(const AlgebraInterface<X>& a) : _ptr(dynamic_cast<BinaryElementaryOperator*>(a._create_copy())) {
-        if (!_ptr) { std::cerr << "ElementaryAlgebra(AlgebraInterface<X> const& ar): ar="<<a<<"\n"; assert(false); } }
+        if (!_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(AlgebraInterface<X> const& ar)","ar="<<a); } }
     explicit ElementaryAlgebra(ElementaryAlgebraInterface<X>* p) : _ptr(p) { }
     explicit ElementaryAlgebra(std::shared_ptr< ElementaryAlgebraInterface<X> > p) : _ptr(p) { }
     ElementaryAlgebra(const ElementaryAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }

@@ -49,6 +49,7 @@ template<class T> class Constant
     explicit Constant(const String& str, const T& value) : T(value), _name(str) { }
     const Identifier& name() const { return _name; }
     const T& value() const { return *this; }
+    const T& val() const { return *this; }
     friend OutputStream& operator<<(OutputStream& os, Constant<T> const& c) {
         if (c.name().empty()) { return os << c.value(); } else { return os << c._name << "(=" << c.value() << ")"; } }
   private:
@@ -62,6 +63,7 @@ template<> class Constant<String>
     explicit Constant(const String& value) : String(value) { }
     const Identifier& name() const { return static_cast<const Identifier&>(static_cast<const String&>(*this)); }
     const String& value() const { return *this; }
+    const String& val() const { return *this; }
 };
 
 } // namespace Ariadne

@@ -58,6 +58,7 @@ template<class Y> inline const Formula<Y>& Formula<Y>::arg2() const {
 
 template<class Y> inline Formula<Y>::Formula() : Formula(Y()) { }
 template<class Y> inline Formula<Y>::Formula(const Y& c) : _root(new FormulaNode<Y>(ConstantFormulaNode<Y>(Cnst(),c))) { }
+template<class Y> inline Formula<Y>::Formula(const Index& i) : _root(new FormulaNode<Y>(IndexFormulaNode<Y>(Var(),i))) { }
 template<class Y> inline Formula<Y>& Formula<Y>::operator=(const Y& c) { return *this=Formula<Y>::constant(c); }
 
 template<class Y> inline Formula<Y> Formula<Y>::create_zero() const { return Formula<Y>::constant(static_cast<Y>(0)); }

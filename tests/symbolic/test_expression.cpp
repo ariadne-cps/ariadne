@@ -41,36 +41,6 @@
 
 #include "../test.hpp"
 
-namespace Ariadne {
-constexpr Pos inverse(Pos) { return Pos(); }
-constexpr Neg inverse(Neg) { return Neg(); }
-constexpr Rec inverse(Rec) { return Rec(); }
-constexpr Sqrt inverse(Sqr) { return Sqrt(); }
-constexpr Sqr inverse(Sqrt) { return Sqr(); }
-constexpr Log inverse(Exp) { return Log(); }
-constexpr Exp inverse(Log) { return Exp(); }
-constexpr Atan inverse(Tan) { return Atan(); }
-constexpr Tan inverse(Atan) { return Tan(); }
-
-template<class OP> using InverseType = decltype(inverse(declval<OP>()));
-
-template<class OP> struct HasInverse {
-    template<class O, class=InverseType<O>> static std::true_type test(int);
-    template<class O> static std::false_type test(...);
-    static const bool value = decltype(test<OP>(1))::value;
-};
-
-
-template<class OP, class... OPS> Bool _are_inverses(OP op1, OperatorVariant<OPS...> ops2) {
-    if constexpr(HasInverse<decltype(op1)>::value) { return decltype(inverse(op1))::code() == ops2.code(); }
-    else { return false; }
-}
-
-template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> ops1, OperatorVariant<OPS...> ops2) {
-    return ops1.visit([&ops2](auto op1){ return _are_inverses(op1,ops2); });
-}
-}
-
 
 using namespace Ariadne;
 
@@ -113,6 +83,8 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(to_string(sub(x,y)),"x-y");
         ARIADNE_TEST_EQUALS(to_string(mul(x,y)),"x*y");
         ARIADNE_TEST_EQUALS(to_string(div(x,y)),"x/y");
+        ARIADNE_TEST_EQUALS(to_string(neg(sub(x,y))),"-(x-y)");
+        ARIADNE_TEST_EQUALS(to_string(sub(neg(x),y)),"-x-y");
         ARIADNE_TEST_EQUALS(to_string(add(x,sub(y,z))),"x+y-z");
         ARIADNE_TEST_EQUALS(to_string(sub(x,add(y,z))),"x-(y+z)");
         ARIADNE_TEST_EQUALS(to_string(sub(x,sub(y,z))),"x-(y-z)");
@@ -204,17 +176,22 @@ class TestExpression {
     }
 
     Void test_simplify() {
+        RealExpression zero(0);
+        RealExpression one(1);
         RealVariable u("u");
         RealExpression expr = -u*x*y+2*x;
         RealExpression ex=x;
-        RealExpression simplification = simplify(derivative(expr,x));
-        ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(derivative(-u*x*y+2*x,x)),-u*y+2);
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(pos(neg(ex))),neg(ex));
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(neg(neg(ex))),ex);
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(rec(rec(ex))),ex);
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(log(exp(ex))),ex);
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(exp(log(ex))),ex);
         ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(sqr(sqrt(ex))),ex);
+        // Regression tests
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(sub(neg(zero),zero)),zero);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(sub(x,x)),zero);
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(div(x,x)),one);
     }
 
     Void test_ordering() {
@@ -233,41 +210,41 @@ class TestExpression {
     }
 
     Void test_count_nodes() {
-        ARIADNE_TEST_EQUAL(count_nodes(RealExpression(x)),1);
-        ARIADNE_TEST_EQUAL(count_nodes(RealExpression(1)),1);
-        ARIADNE_TEST_EQUAL(count_nodes(2*x),3);
-        ARIADNE_TEST_EQUAL(count_nodes(x+y),3);
-        ARIADNE_TEST_EQUAL(count_nodes(x+sqr(y)),4);
-        ARIADNE_TEST_EQUAL(count_nodes(sin(y)),2);
-        ARIADNE_TEST_EQUAL(count_nodes(pow(y,2)),2);
-        ARIADNE_TEST_EQUAL(count_nodes(pow(x+cos(y),2)+cos(y)),8);
-        ARIADNE_TEST_EQUAL(count_nodes(x+cos(x)+pow(cos(x),2)),8);
+        ARIADNE_TEST_EQUALS(count_nodes(RealExpression(x)),1);
+        ARIADNE_TEST_EQUALS(count_nodes(RealExpression(1)),1);
+        ARIADNE_TEST_EQUALS(count_nodes(2*x),3);
+        ARIADNE_TEST_EQUALS(count_nodes(x+y),3);
+        ARIADNE_TEST_EQUALS(count_nodes(x+sqr(y)),4);
+        ARIADNE_TEST_EQUALS(count_nodes(sin(y)),2);
+        ARIADNE_TEST_EQUALS(count_nodes(pow(y,2)),2);
+        ARIADNE_TEST_EQUALS(count_nodes(pow(x+cos(y),2)+cos(y)),8);
+        ARIADNE_TEST_EQUALS(count_nodes(x+cos(x)+pow(cos(x),2)),8);
     }
 
     Void test_count_distinct_nodes() {
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(RealExpression(x)),1);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*exp(x)),3);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*x),2);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(RealExpression(x)),1);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(x*exp(x)),3);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(x*x),2);
         RealExpression one = 1;
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(one+cos(one)),3);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(x*y+sqr(x*y)),5);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(x,2)*pow(x,2)),3);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(y,2)+y*y),4);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(pow(x+cos(y),2)+cos(y)),6);
-        ARIADNE_TEST_EQUAL(count_distinct_nodes(x+cos(x)+pow(cos(x),2)),5);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(one+cos(one)),3);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(x*y+sqr(x*y)),5);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(pow(x,2)*pow(x,2)),3);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(pow(y,2)+y*y),4);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(pow(x+cos(y),2)+cos(y)),6);
+        ARIADNE_TEST_EQUALS(count_distinct_nodes(x+cos(x)+pow(cos(x),2)),5);
     }
 
     Void test_count_distinct_node_ptrs() {
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(RealExpression(x)),1);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*exp(x)),4);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*x),3);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(RealExpression(x)),1);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*exp(x)),4);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*x),3);
         RealExpression one = 1;
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(one+cos(one)),3);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x*y+sqr(x*y)),8);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(x,2)*pow(x,2)),5);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(y,2)+y*y),6);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(pow(x+cos(y),2)+cos(y)),8);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(x+cos(x)+pow(cos(x),2)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(one+cos(one)),3);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*y+sqr(x*y)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(x,2)*pow(x,2)),5);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(y,2)+y*y),6);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(x+cos(y),2)+cos(y)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x+cos(x)+pow(cos(x),2)),8);
     }
 
     Void test_eliminate_common_subexpressions() {
@@ -282,6 +259,8 @@ class TestExpression {
         RealExpression expr3 = x*x;
         ARIADNE_TEST_PRINT(expr3);
         eliminate_common_subexpressions(expr3);
+        eliminate_common_subexpressions(expr3);
+        ARIADNE_TEST_PRINT(expr3);
         ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr3),2);
         RealExpression one = 1;
         RealExpression expr4 = one+cos(one);

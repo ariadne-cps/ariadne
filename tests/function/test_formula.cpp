@@ -65,10 +65,11 @@ class TestFormula
         ARIADNE_TEST_ASSERT(identical(x,x));
         ARIADNE_TEST_ASSERT(identical(ExactFormula::constant(2.0_x),ExactFormula::constant(2.0_x)));
         ARIADNE_TEST_ASSERT(identical(EffectiveFormula::constant(2.0_x),EffectiveFormula::constant(2.0_x)));
-        ARIADNE_TEST_ASSERT(identical(x*y,y*x));
-        ARIADNE_TEST_ASSERT(identical(x+y,y+x));
+        ARIADNE_TEST_ASSERT(not identical(x*y,y*x));
+        ARIADNE_TEST_ASSERT(not identical(x+y,y+x));
         ARIADNE_TEST_ASSERT(identical(cos(x),cos(x)));
         ARIADNE_TEST_ASSERT(identical(pow(x,2),pow(x,2)));
+        ARIADNE_TEST_ASSERT(not identical(pow(x,2),pow(x,3)));
     }
 
     Void test_substitute() {
@@ -82,15 +83,15 @@ class TestFormula
         List<Pair<Nat,EffectiveFormula>> s_v({{0,x+2},{1,y-1}});
         Vector<EffectiveFormula> substituted_v = substitute(f_v,s_v);
         ARIADNE_TEST_PRINT(substituted_v);
-        ARIADNE_TEST_ASSERT(identical(substituted_v[0],sqrt(pow(x+2,2)+pow(y-1,2))));
-        ARIADNE_TEST_ASSERT(identical(substituted_v[1],atan((y-1)/(x+2))));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,substituted_v[0],sqrt(pow(x+2,2)+pow(y-1,2)));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,substituted_v[1],atan((y-1)/(x+2)));
     }
 
     Void test_simplify() {
+        EffectiveFormula z(EffectiveFormula::constant(0));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(sub(neg(z),z)),z);
         EffectiveFormula u(EffectiveFormula::coordinate(2));
-        EffectiveFormula simplification = simplify(derivative(-u*x*y+2*x,x.ind()));
-        ARIADNE_TEST_PRINT(simplification);
-        ARIADNE_TEST_ASSERT(identical(simplification,-u*y+2));
+        ARIADNE_TEST_BINARY_PREDICATE(identical,simplify(derivative(-u*x*y+2*x,x.ind())),-u*y+2);
     }
 
     Void test_is_constant_in() {

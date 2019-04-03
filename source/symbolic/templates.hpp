@@ -42,6 +42,7 @@ template<class C> struct Symbolic<Cnst,C> {
     Cnst _op; C _val;
     explicit Symbolic(C c) : _op(), _val(c) { }
     Symbolic(Cnst o, C c) : _op(o), _val(c) { }
+    C val() const { return _val; }
     template<class T> explicit operator T() const { return static_cast<T>(_val); }
     template<class... AS> auto operator() (AS... vals) const -> C { return _val; }
     friend OutputStream& operator<<(OutputStream& os, Symbolic expr) { return os << expr._val; }
@@ -113,6 +114,11 @@ template<class O, class A1, class A2, class A3> struct Symbolic<O,A1,A2,A3> {
 
 template<class O, class... Args> Symbolic<O,Args...> make_expression_template(O o, Args... as) {
     return Symbolic<O,Args...>(o, as...); }
+
+template<class... SS> class SymbolicVariant : public Variant<SS...> {
+    template<class VIS> decltype(auto) accept(VIS&& vis) const { return std::visit(std::forward<VIS>(vis),static_cast<Variant<SS...>const&>(*this)); }
+};
+
 
 template<class O, class... Args> struct TemporaryExpression;
 

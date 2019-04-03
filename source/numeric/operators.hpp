@@ -490,6 +490,35 @@ struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::
 struct TernaryArithmeticOperator : OperatorVariant<Fma> { using OperatorVariant::OperatorVariant; };
 
 
+
+constexpr Pos inverse(Pos) { return Pos(); }
+constexpr Neg inverse(Neg) { return Neg(); }
+constexpr Rec inverse(Rec) { return Rec(); }
+constexpr Sqrt inverse(Sqr) { return Sqrt(); }
+constexpr Sqr inverse(Sqrt) { return Sqr(); }
+constexpr Log inverse(Exp) { return Log(); }
+constexpr Exp inverse(Log) { return Exp(); }
+constexpr Atan inverse(Tan) { return Atan(); }
+constexpr Tan inverse(Atan) { return Tan(); }
+
+template<class OP> using InverseType = decltype(inverse(declval<OP>()));
+
+namespace {
+template<class OP> struct HasInverse {
+    template<class O, class=InverseType<O>> static std::true_type test(int);
+    template<class O> static std::false_type test(...);
+    static const bool value = decltype(test<OP>(1))::value;
+};
+template<class OP, class... OPS> Bool _are_inverses(OP const& op1, OperatorVariant<OPS...> const& ops2) {
+    if constexpr(HasInverse<decltype(op1)>::value) { return inverse(op1).code() == ops2.code(); }
+    else { return false; }
+}
+} // namespace
+
+template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> const& ops1, OperatorVariant<OPS...> const& ops2) {
+    return ops1.accept([&ops2](auto op1){ return _are_inverses(op1,ops2); });
+}
+
 struct SpecialOperator {
     enum class Code : char { CNST=(char)OperatorCode::CNST, VAR, IND };
     operator Operator() const { return Operator(static_cast<Operator::Code>(_code)); }

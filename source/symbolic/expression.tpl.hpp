@@ -121,6 +121,10 @@ template<class T> inline Var _op_impl(Variable<T> const&) { return Var(); }
 template<class OP, class... AS> inline OP _op_impl(Symbolic<OP,AS...> const& s) { return s._op; }
 }
 
+template<class T, class... TS> struct IndexOf<T,Variant<TS...>> { static const SizeType N=IndexOf<T,TS...>::N; };
+
+template<class T, class VAR> constexpr decltype(auto) variant_index_of() { return IntegralConstant<SizeType,IndexOf<T,VAR>::N>(); }
+
 template<class T> struct ExpressionNode : public ExpressionVariantType<T> {
   public:
     template<class... AS, EnableIf<IsConstructible<ExpressionVariantType<T>,AS...>> =dummy>
@@ -131,6 +135,8 @@ template<class T> struct ExpressionNode : public ExpressionVariantType<T> {
     template<class VIS> decltype(auto) accept(VIS&& vis) const {
         return std::visit(std::forward<VIS>(vis),static_cast<ExpressionVariantType<T>const&>(*this)); }
 
+    template<class EN> static constexpr decltype(auto) index_of() {
+        return variant_index_of<EN,ExpressionVariantType<T>>(); }
     Operator op() const { return this->accept([](auto s){return Operator(_op_impl(s));}); }
 };
 
@@ -193,47 +199,6 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 
 template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
     this->node_ref().accept([&os](auto e){_write_impl(os,e);}); return os;
-/*
-    const Expression<T>& f=*this;
-    switch(f.op()) {
-        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
-        case OperatorCode::CNST:
-            if(auto fp=std::dynamic_pointer_cast<NamedConstantExpressionNode<T>const>(f._root)) { return os << fp->name; }
-            else if(auto afp=std::dynamic_pointer_cast<ConstantExpressionNode<T>const>(f._root)) { os <<
-            "c"<<afp->val; return os; }
-            else { return os << "dcf"; }
-            //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case OperatorCode::VAR:
-            return os << f.var();
-        case OperatorCode::ADD:
-            return os << f.arg1() << '+' << f.arg2();
-        case OperatorCode::SUB:
-            os << f.arg1() << '-';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::MUL:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '*';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::DIV:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '/';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::POW:
-            return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
-        default:
-            switch(f.kind()) {
-                case OperatorKind::UNARY: case OperatorKind::GRADED: return os << f.op() << "(" << f.arg() << ")";
-                case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
-                // FIXME: Type-cast comparison arguments correctly
-                case OperatorKind::COMPARISON: return _write_comparison(os,f);
-                default: ARIADNE_FAIL_MSG("Cannot output expression with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
-            }
-    }
-*/
-    return os;
 }
 
 template<class R> inline
@@ -351,6 +316,7 @@ template<class X, class Y> Vector<Expression<X>> substitute(const Vector<Express
 inline Bool same(Kleenean k1, Kleenean k2) { return definitely(k1==k2); }
 
 
+
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2)
 {
     if(e1.node_raw_ptr()==e2.node_raw_ptr()) { return true; }
@@ -359,179 +325,68 @@ template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e
 }
 
 
-
-/*
-template<class OP1, class OP2> constexpr Bool are_inverses(OP1 op1, OP2 op2) { return false; }
-
-constexpr Bool are_inverses(Pos,Pos) { return true; }
-constexpr Bool are_inverses(Neg,Neg) { return true; }
-constexpr Bool are_inverses(Rec,Rec) { return true; }
-constexpr Bool are_inverses(Sqr,Sqrt) { return true; }
-constexpr Bool are_inverses(Exp,Log) { return true; }
-constexpr Bool are_inverses(Log,Exp) { return true; }
-constexpr Bool are_inverses(Tan,Atan) { return true; }
-constexpr Bool are_inverses(Atan,Tan) { return true; }
-*/
-
-constexpr Pos inverse(Pos) { return Pos(); }
-constexpr Neg inverse(Neg) { return Neg(); }
-constexpr Rec inverse(Rec) { return Rec(); }
-constexpr Sqrt inverse(Sqr) { return Sqrt(); }
-constexpr Sqr inverse(Sqrt) { return Sqr(); }
-constexpr Log inverse(Exp) { return Log(); }
-constexpr Exp inverse(Log) { return Exp(); }
-constexpr Atan inverse(Tan) { return Atan(); }
-constexpr Tan inverse(Atan) { return Tan(); }
-
-template<class OP> using InverseType = decltype(inverse(declval<OP>()));
-
-template<class OP> struct HasInverse {
-    template<class O, class=InverseType<O>> static std::true_type test(int);
-    template<class O> static std::false_type test(...);
-    static const bool value = decltype(test<OP>(1))::value;
-};
-
-template<class OP, class... OPS> Bool _are_inverses(OP const& op1, OperatorVariant<OPS...> const& ops2) {
-    if constexpr(HasInverse<decltype(op1)>::value) { return inverse(op1).code() == ops2.code(); }
-    else { return false; }
-}
-
-template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> const& ops1, OperatorVariant<OPS...> const& ops2) {
-    return ops1.accept([&ops2](auto op1){ return _are_inverses(op1,ops2); });
-}
-
 namespace {
 
 template<class X> inline Expression<X> _simplify(const Expression<X>& e) {
     return e;
 }
 
-template<class T> using C = Constant<T>;
-template<class T> using V = Variable<T>;
-template<class T> using E = Expression<T>;
-
-using R = Real; using RE = E<R>; using REcr=E<R> const&; using RCcr = const C<R>&;
-using K = Kleenean; using KE = E<K>; using KEcr=E<K> const&; using KCcr = const C<K>&;
-
 template<class OP, class A1, class A2> decltype(auto) _simpl(OP op, Constant<A1> a1, Constant<A2> a2) {
     auto r=op(a1.value(),a2.value()); return Constant<decltype(r)>(r); }
 template<class OP, class A> decltype(auto) _simpl(OP op, Constant<A> a) {
     auto r=op(a.value()); return Constant<decltype(r)>(r); }
 
-template<class E> inline RE _simpl(Add op, E const& e1, E const& e2) {
-    if (is_constant(e1,0)) { return e2; }
-    else if (is_constant(e2,0)) { return e1; }
-    else { return op(e1,e2); } }
-template<class E> inline RE _simpl(Sub op, E const& e1, E const& e2) {
-    if (is_constant(e1,0)) { return neg(e2); }
-    else if (is_constant(e2,0)) { return e1; }
-    else { return op(e1,e2); } }
-template<class E> inline RE _simpl(Mul op, E const& e1, E const& e2) {
-    if (is_constant(e1,0) or is_constant(e2,1)) { return e1; }
-    else if (is_constant(e2,0) or is_constant(e1,1)) { return e2; }
-    else { return op(e1,e2); } }
-template<class E> inline RE _simpl(Div op, E const& e1, E const& e2) {
-    if (is_constant(e1,0) or is_constant(e2,1)) { return e1; }
-    else if (is_constant(e1,1)) { return rec(e2); } else { return op(e1,e2); } }
-template<class E> inline RE _simpl(Max op, E const& e1, E const& e2) { return op(e1,e2); }
-template<class E> inline RE _simpl(Min op, E const& e1, E const& e2) { return op(e1,e2); }
-
-template<class E> inline E _simpl(Pow op, E const& e, Int n) {
-    switch (n) {
-        case -1: return rec(e);
-        case 0: return E::constant(1);
-        case 1: return e;
-        case 2: return sqr(e);
-        default: return pow(e,n);
-    }
+template<class E, class T> inline E simplify_variant(const ExpressionVariantType<T>& e) {
+    return e.accept([](auto en){return _simplify_node<E>(en);});
 }
 
-template<class E> inline E _simpl(AndOp op, E const& e1, E const& e2) {
-    if (is_constant(e1,false) or is_constant(e2,true)) { return e1; }
-    else if (is_constant(e1,true) or is_constant(e2,false)) { return e2; }
-    else { return op(e1,e2); } }
-template<class E> inline E _simpl(OrOp op, E const& e1, E const& e2) {
-    if (is_constant(e1,true) or is_constant(e2,false)) { return e1; }
-    else if (is_constant(e1,false) or is_constant(e2,true)) { return e2; }
-    else { return op(e1,e2); } }
-template<class E> inline E _simpl(NotOp op, E const& e) {
-    if (e.op().code() == op.code()) { return e.arg(); }
-    else { return op(e); }
-}
-
-template<class T> inline Expression<T> _simplify_node(const Constant<T>& c) { return c; }
-template<class T> inline Expression<T> _simplify_node(const Variable<T>& v) { return v; }
-
-template<class T> inline Expression<T> _simplify_node(const UnaryExpressionNode<T>& e) {
-    auto op = e._op;
-    auto sarg = simplify(e._arg);
-    if (holds_alternative<Pos>(op)) {
-        return sarg;
-    } else if (auto* cp = std::get_if<Constant<T>>(&sarg.node_ref().base())) {
-        return op(*cp);
-    } else {
-        auto* up = std::get_if<UnaryExpressionNode<T>>(&sarg.node_ref());
-        if (up && are_inverses(op,up->_op)) { return up->_arg; }
-        else { return op(sarg); }
-    }
-}
-template<class T> inline Expression<T> _simplify_node(const BinaryExpressionNode<T>& e) {
-    Expression<T> sarg1=simplify(e._arg1);
-    Expression<T> sarg2=simplify(e._arg2);
-    return e.op().accept([&](auto op){return _simpl(op,sarg1,sarg2);});
-}
-inline Expression<R> _simplify_node(const BinaryExpressionNode<R>& e) {
-    Expression<R> sarg1=simplify(e._arg1);
-    Expression<R> sarg2=simplify(e._arg2);
-    return e.op().accept([&](auto op){return _simpl(op,sarg1,sarg2);});
-}
-template<class T> inline Expression<T> _simplify_node(const GradedExpressionNode<T>& e) {
-    Expression<R> sarg=simplify(e.arg());
-    return e.op().accept([&](auto op){return _simpl(op,sarg,e.num());});
-}
-
-//inline Expression<Real> _simplify(const Expression<Real>& e) {
-Expression<Real> _simplify(const Expression<Real>& e) {
-    return e.node_ref().accept([](auto en){return _simplify_node(en);});
-}
-
-inline Expression<Kleenean> _simplify(const UnaryExpressionNode<Kleenean,Real>& e) {
+template<class E> inline E _simplify_node(const UnaryExpressionNode<Kleenean,Real>& e) {
     return make_expression<Kleenean>(e.op(),simplify(e.arg()));
 }
-inline Expression<Kleenean> _simplify(const BinaryExpressionNode<Kleenean,Real,Real>& e) {
+template<class E> inline E _simplify_node(const BinaryExpressionNode<Kleenean,Real,Real>& e) {
     return make_expression<Kleenean>(e.op(),simplify(e.arg1()),simplify(e.arg2()));
 }
 
-template<class I> inline Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
-    return e.node_ref().accept([](auto en){return _simpliy(en);});
+Expression<Real> _simplify(const Expression<Real>& e) {
+    // Need to dispatch here to allow use of specialisation for UnaryExpressionNode<T>, which correctly handles constants
+    return e.node_ref().accept([](auto en){return _simplify_node<Expression<Real>>(en);});
+}
+
+Expression<Kleenean> _simplify(const Expression<Kleenean>& e) {
+    return e.node_ref().accept([](auto en){return _simplify_node<Expression<Kleenean>>(en);});
 }
 
 } // namespace
 
 template<class X> Expression<X> simplify(const Expression<X>& e) {
-    return Ariadne::_simplify(e);
+    return _simplify(e);
 }
 
 
 
+template<class T> Bool _before(Constant<T> const& c1, Constant<T> const& c2) {
+    return decide(c1<c2); }
+template<class T> Bool _before(Variable<T> const& v1, Variable<T> const& v2) {
+    return v1.name() < v2.name(); }
+template<class OP, class A> Bool _before(Symbolic<OP,A> const& s1, Symbolic<OP,A> const& s2) {
+    if (s1.op().code() == s2.op().code()) { return before(s1.arg(),s2.arg()); }
+    else { return s1.op().code() < s2.op().code(); } }
+template<class OP, class A1, class A2> Bool _before(Symbolic<OP,A1,A2> const& s1, Symbolic<OP,A1,A2> const& s2) {
+    if (s1.op().code() == s2.op().code()) {
+        if (identical(s1.arg1(),s2.arg1())) { return before(s1.arg2(),s2.arg2()); }
+        else { return before(s1.arg1(),s2.arg1()); }
+    } else { return s1.op().code() < s2.op().code(); } }
+template<class OP, class A> Bool _before(Symbolic<OP,A,Int> const& s1, Symbolic<OP,A,Int> const& s2) {
+    if (s1.op().code() == s2.op().code()) {
+        if (s1.num() == s2.num()) { return before(s1.arg(),s2.arg()); }
+        else { return s1.num() < s2.num(); }
+    } else { return s1.op().code() < s2.op().code(); } }
+
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2) {
-    if(e1.op()==e2.op()) {
-        switch(e1.kind()) {
-            case OperatorKind::VARIABLE:
-                return e1.var() < e2.var();
-            case OperatorKind::NULLARY:
-                return decide(e1.val() < e2.val());
-            case OperatorKind::UNARY:
-                return before(e1.arg(),e2.arg());
-            case OperatorKind::GRADED:
-                return (e1.num() == e2.num() ? before(e1.arg(),e2.arg()) : (e1.num() < e2.num()));
-            case OperatorKind::BINARY:
-                return identical(e1.arg1(),e2.arg1()) ? before(e1.arg2(),e2.arg2()) : before(e1.arg1(),e2.arg1());
-            default:
-                return false;
-        }
+    if (e1.node_ref().index() == e2.node_ref().index()) {
+        return e1.node_ref().accept([&e2](auto e1n){return _before(e1n,std::get<decltype(e1n)>(e2.node_ref()));});
     } else {
-        return e1.op() < e2.op();
+        return e1.node_ref().index() < e2.node_ref().index();
     }
 }
 
@@ -539,60 +394,62 @@ struct ExpressionComparator {
     template<class A1, class A2> decltype(auto) operator() (A1&& a1, A2&& a2) const { return before(std::forward<A1>(a1),std::forward<A2>(a2)); }
 };
 
+template<class T, class CMP=ExpressionComparator> using ExpressionSet = std::set<Expression<T>,CMP>;
 
-template<class T> Expression<T> eliminate_common_subexpressions(const Expression<T>& e, std::set<Expression<T>,ExpressionComparator>& cache)
-{
-    auto iter=cache.find(e);
-    if (iter!=cache.end()) {
+template<class T> class CommonSubroutineEliminator {
+    ExpressionSet<T> _cache;
+  public:
+    CommonSubroutineEliminator() : _cache() { }
+    Expression<T> eliminate_common_subexpressions(const Expression<T>& e);
+    Expression<T> operator()(const ConstantExpressionNode<T>&, const Expression<T>& e) { _cache.insert(e); return e; }
+    Expression<T> operator()(const VariableExpressionNode<T>&, const Expression<T>& e) { _cache.insert(e); return e; }
+    Expression<T> operator()(const BinaryExpressionNode<T>& s, const Expression<T>& e) {
+        auto new_arg1 = eliminate_common_subexpressions(s.arg1());
+        auto new_arg2 = eliminate_common_subexpressions(s.arg2());
+        if(new_arg1.node_raw_ptr() == s.arg1().node_raw_ptr() && new_arg2.node_raw_ptr() == s.arg2().node_raw_ptr()) {
+            _cache.insert(e); return e;
+        } else {
+            Expression<T> new_e=make_expression<T>(s.op(),new_arg1,new_arg2);
+            _cache.insert(new_e); return new_e;
+        }
+    }
+    Expression<T> operator()(const UnaryExpressionNode<T>& s, const Expression<T>& e) {
+        auto new_arg = eliminate_common_subexpressions(s.arg());
+        if(new_arg.node_raw_ptr() == s.arg().node_raw_ptr()) {
+            _cache.insert(e); return e;
+        } else {
+            Expression<T> new_e=make_expression<T>(s.op(),new_arg);
+            _cache.insert(new_e); return new_e;
+        }
+    }
+    Expression<T> operator()(const GradedExpressionNode<T>& s, const Expression<T>& e) {
+        auto new_arg = eliminate_common_subexpressions(s.arg());
+        if(new_arg.node_raw_ptr() == s.arg().node_raw_ptr()) {
+            _cache.insert(e); return e;
+        } else {
+            Expression<T> new_e=make_expression<T>(s.op(),new_arg,s.num());
+            _cache.insert(new_e); return new_e;
+        }
+    }
+};
+template<class T> Expression<T> CommonSubroutineEliminator<T>::eliminate_common_subexpressions(const Expression<T>& e) {
+    auto iter=this->_cache.find(e);
+    if (iter!=_cache.end()) {
         return *iter; }
     else {
-        switch(e.kind()) {
-            case OperatorKind::VARIABLE: case OperatorKind::NULLARY:
-                cache.insert(e); return e;
-            case OperatorKind::UNARY: {
-                auto new_arg = eliminate_common_subexpressions(e.arg(),cache);
-                if(new_arg.node_raw_ptr() == e.arg().node_raw_ptr()) {
-                    cache.insert(e); return e;
-                } else {
-                    Expression<T> new_e=make_expression<T>(e.op(),new_arg);
-                    cache.insert(new_e); return new_e;
-                }
-            }
-            case OperatorKind::GRADED: {
-                auto new_arg = eliminate_common_subexpressions(e.arg(),cache);
-                if(new_arg.node_raw_ptr() == e.arg().node_raw_ptr()) {
-                    cache.insert(e); return e;
-                } else {
-                    Expression<T> new_e=make_expression<T>(GradedElementaryOperator(e.op()),new_arg,e.num());
-                    cache.insert(new_e); return new_e;
-                }
-            }
-            case OperatorKind::BINARY: {
-                auto new_arg1 = eliminate_common_subexpressions(e.arg1(),cache);
-                auto new_arg2 = eliminate_common_subexpressions(e.arg2(),cache);
-                if(new_arg1.node_raw_ptr() == e.arg1().node_raw_ptr() && new_arg2.node_raw_ptr() == e.arg2().node_raw_ptr()) {
-                    cache.insert(e); return e;
-                } else {
-                    Expression<T> new_e=make_expression<T>(e.op(),new_arg1,new_arg2);
-                    cache.insert(new_e); return new_e;
-                }
-            }
-            default:
-                abort();
-        }
+        return e.node_ref().accept([&](auto en){return this->operator()(en,e);});
     }
 }
 
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e)
 {
-    std::set<Expression<T>,ExpressionComparator> cache;
-    e=eliminate_common_subexpressions(e,cache);
+    e=CommonSubroutineEliminator<T>().eliminate_common_subexpressions(e);
 }
 
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& es)
 {
-    std::set<Expression<T>,ExpressionComparator> cache;
-    for(SizeType i=0; i!=es.size(); ++i) { es[i]=eliminate_common_subexpressions(es[i],cache); }
+    CommonSubroutineEliminator<T> simplifier;
+    for(SizeType i=0; i!=es.size(); ++i) { es[i]=simplifier.eliminate_common_subexpressions(es[i]); }
 }
 
 struct ExpressionPtrComparator {
@@ -600,53 +457,40 @@ struct ExpressionPtrComparator {
 };
 
 
-template<class T, class C> Void _count_nodes(Expression<T> const& e, std::set<Expression<T>,C>& cache, Bool const& distinct, Nat& count) {
+template<class T, class CMP, Bool distinct> class NodeCounter {
+    ExpressionSet<T,CMP> cache; Nat count;
+  public:
+    NodeCounter() : cache(), count(0u) { }
+    Nat count_nodes (Expression<T> const& e);
+  private: public:
+    Void operator() (ConstantExpressionNode<T> const& e) { }
+    Void operator() (VariableExpressionNode<T> const& e) { }
+    Void operator() (BinaryExpressionNode<T> const& e) { this->count_nodes(e.arg1()); this->count_nodes(e.arg2()); }
+    Void operator() (UnaryExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
+    Void operator() (GradedExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
+};
 
+template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::count_nodes(Expression<T> const& e) -> Nat {
     auto iter=cache.find(e);
     if (!distinct || iter==cache.end()) {
         cache.insert(e);
-        switch(e.kind()) {
-            case OperatorKind::VARIABLE: case OperatorKind::NULLARY:
-                break;
-            case OperatorKind::UNARY:
-                _count_nodes(e.arg(),cache,distinct,count);
-                break;
-            case OperatorKind::GRADED:
-                _count_nodes(e.arg(),cache,distinct,count);
-                break;
-            case OperatorKind::BINARY:
-                _count_nodes(e.arg1(),cache,distinct,count);
-                _count_nodes(e.arg2(),cache,distinct,count);
-                break;
-            default:
-                abort();
-        }
+        e.node_ref().accept(*this);
         count++;
     }
+    return count;
 }
 
-
-template<class T, class C> Nat count_nodes(Expression<T> const& e, std::set<Expression<T>,C>& cache, Bool const& distinct) {
-    Nat result = 0;
-
-    _count_nodes(e, cache, distinct, result);
-
-    return result;
-}
 
 template<class T> Nat count_nodes(Expression<T> const& e) {
-    std::set<Expression<T>,ExpressionComparator> cache;
-    return count_nodes(e,cache,false);
+    return NodeCounter<T,ExpressionComparator,false>().count_nodes(e);
 }
 
 template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
-    std::set<Expression<T>,ExpressionComparator> cache;
-    return count_nodes(e,cache,true);
+    return NodeCounter<T,ExpressionComparator,true>().count_nodes(e);
 }
 
 template<class T> Nat count_distinct_node_ptrs(Expression<T> const& e) {
-    std::set<Expression<T>,ExpressionPtrComparator> cache;
-    return count_nodes(e,cache,true);
+    return NodeCounter<T,ExpressionPtrComparator,true>().count_nodes(e);
 }
 
 

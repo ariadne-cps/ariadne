@@ -130,6 +130,8 @@ class Formula
     Formula();
     //! \brief Construct the constant expression with value \a c.
     Formula(Y const& c);
+    //! \brief Construct the coordinate expression with index \a i.
+    explicit Formula(Index const& i);
     //! \brief Set equal to a constant.
     Formula<Y>& operator=(const Y& c);
     template<class X, EnableIf<IsConstructible<Y,X>> =dummy> Formula<Y>& operator=(const X& c) { return *this=Y(c); }
@@ -188,6 +190,12 @@ template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2);
 //! \brief Tests whether two vector formulas are identical.
 template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2);
 
+//! \brief Returns \a true if the formula \a a is syntactically equal to a constant.
+template<class Y> Bool is_constant(Formula<Y> const& f);
+
+//! \brief Returns \a true if the formula \a a is syntactically equal to the constant \a c.
+template<class Y> Bool is_constant(const Formula<Y>& f, const SelfType<Y>& c);
+
 //! \brief Returns \a true if the formula \a a is syntactically constant in the indices \a is.
 template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is);
 //! \brief Returns \a true if the formula \a a is syntactically affine in the indices \a is.
@@ -223,7 +231,7 @@ template<class X, class Y> inline X make_constant(const Y& c, const Vector<X>& v
 
 template<class X, class Y> X direct_evaluate(const Formula<Y>& f, const Vector<X>& x);
 
-template<class X, class Y> inline X cached_evaluate(const Formula<Y>& f, const Vector<X>& v);
+template<class X, class Y> X cached_evaluate(const Formula<Y>& f, const Vector<X>& v);
 
 template<class X, class Y> Vector<X> cached_evaluate(const Vector<Formula<Y>>& f, const Vector<X>& v);
 

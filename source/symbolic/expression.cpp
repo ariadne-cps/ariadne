@@ -280,33 +280,6 @@ Expression<Real> indicator(BinaryExpressionNode<Kleenean,Real,Real> e, Sign sign
 
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
     return e.node_ref().accept([&](auto en){return indicator(en,sign);});
-/*
-    switch(e.op()) {
-        case OperatorCode::CNST: {
-            Kleenean value=( sign==Sign::POSITIVE ? e.val() : !e.val() );
-            ValidatedKleenean checked_value = value.check(Effort::get_default());
-            if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
-            else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
-            else { return Expression<Real>::constant(0); }
-        }
-        case OperatorCode::VAR:
-            return Expression<Real>(Variable<Real>(e.var()));
-        case OperatorCode::GEQ: case OperatorCode::GT:
-            if(sign==Sign::POSITIVE) { return e.cmp1<Real>()-e.cmp2<Real>(); }
-            else { return e.cmp2<Real>()-e.cmp1<Real>(); }
-        case OperatorCode::LEQ: case OperatorCode::LT:
-            if(sign==Sign::POSITIVE) { return e.cmp2<Real>()-e.cmp1<Real>(); }
-            else { return e.cmp1<Real>()-e.cmp2<Real>(); }
-        case OperatorCode::AND:
-            return min(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case OperatorCode::OR:
-            return max(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case OperatorCode::NOT:
-            return neg(indicator(e.arg(),sign));
-        default:
-            ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e);
-    }
-*/
 }
 
 
@@ -392,15 +365,6 @@ Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>
     }
     return true;
 }
-
-template<class T, class... TS> struct IndexOf;
-template<class T, class... TS> struct IndexOf<T,T,TS...> { static const SizeType N=0; };
-template<class T, class T0, class... TS> struct IndexOf<T,T0,TS...> { static const SizeType N=IndexOf<T,TS...>::N+1u; };
-template<class T> struct IndexOf<T> { };
-template<class T, class... TS> struct IndexOf<T,Variant<TS...>> : public IndexOf<T,TS...> { };
-
-template<class T, class... TS> constexpr decltype(auto) index_of() { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
-template<class T, class... TS> constexpr decltype(auto) index_of(Variant<TS...>const&) { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
 
 namespace {
 

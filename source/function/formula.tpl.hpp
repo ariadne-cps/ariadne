@@ -22,6 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "../symbolic/templates.tpl.hpp"
+
 namespace Ariadne {
 
 
@@ -37,6 +39,7 @@ template<class Y> using ScalarFormulaNode = Symbolic<BinaryElementaryOperator,Y,
 template<class O, class A, template<class>class E> struct Symbolic<O,A,E<A>> {
     O _op; A _cnst; E<A> _arg;
     Symbolic(O o, A c, E<A> a) : _op(o), _cnst(c), _arg(a) { }
+    O op() const { return _op; } A cnst() const { return _cnst; } E<A> arg() const { return _arg; }
     template<class T> operator T() const { return _op(static_cast<T>(_cnst),static_cast<T>(_arg)); }
     template<class... AS> auto operator() (AS... vals) const -> decltype(_op(_cnst,_arg(vals...))) {
         return _op(_cnst(vals...),_arg(vals...)); }
@@ -54,7 +57,7 @@ class FormulaNode
     template<class FN> FormulaNode(FN&& fn) : FormulaNodeVariantType<Y>(std::forward<FN>(fn)) { }
     template<class VIS> decltype(auto) accept(VIS&& vis) const {
         return std::visit(std::forward<VIS>(vis),static_cast<FormulaNodeVariantType<Y> const&>(*this)); }
-
+    FormulaNodeVariantType<Y> const& base() const { return *this; }
 };
 
 
@@ -189,73 +192,16 @@ template<class Y> inline const Formula<Y>& _substitute_coordinate(const Nat& ie,
 } // namespace
 
 template<class Y> Formula<Y> substitute(const Formula<Y>& a, const Nat& i, const Formula<Y>& is) {
-    switch(a.kind()) {
-        case OperatorKind::BINARY: return make_formula<Y>(a.op(),substitute(a.arg1(),i,is),substitute(a.arg2(),i,is));
-        case OperatorKind::UNARY: return make_formula<Y>(a.op(),substitute(a.arg(),i,is));
-        case OperatorKind::GRADED: return make_formula<Y>(a.op(),substitute(a.arg(),i,is),a.num());
-        case OperatorKind::NULLARY: return make_formula<Y>(a.val());
-        case OperatorKind::COORDINATE: case OperatorKind::VARIABLE: return _substitute_coordinate(a.ind(),i,a,is);
-        default: ARIADNE_FAIL_MSG("Cannot substitute "<<is<<" for index "<<i<<" in an unknown formula "<<a<<"\n");
-    }
+    return a.node_ref().accept([&i,&is](auto fn){return _substitute(fn,i,is);});
 }
 
 
+template<class Y> inline Bool is_constant(const Formula<Y>& f, const SelfType<Y>& c) {
+    auto const* cfn = std::get_if<ConstantFormulaNode<Y>>(&f.node_ref()); return cfn && same(cfn->val(),c);
+}
 
 template<class Y> inline Formula<Y> simplify(const Formula<Y>& a) {
-    if(a.kind() == OperatorKind::UNARY) {
-        Formula<Y> sarg=simplify(a.arg());
-        if(sarg.op()==OperatorCode::CNST) {
-            UnaryElementaryOperator uop(a.op());
-            return Formula<Y>(uop(sarg.val()));
-        } else {
-            return make_formula<Y>(a.op(),sarg);
-        }
-    }
-
-    if(a.kind() == OperatorKind::GRADED) {
-        Formula<Y> sarg=simplify(a.arg());
-        Formula<Y> one(static_cast<Y>(1));
-        switch(a.op()) {
-            case OperatorCode::POW:
-                switch (a.num()) {
-                case 0: return one;
-                case 1: return sarg;
-                default: return make_formula<Y>(OperatorCode::POW,sarg,a.num());
-                }
-            default:
-                return make_formula<Y>(a.op(),sarg,a.num());
-        }
-    }
-
-    if(a.kind() != OperatorKind::BINARY) { return a; }
-
-    Formula<Y> sarg1=simplify(a.arg1());
-    Formula<Y> sarg2=simplify(a.arg2());
-    Formula<Y> zero(Formula<Y>::zero());
-    Formula<Y> one(static_cast<Y>(1));
-    switch(a.op()) {
-        case OperatorCode::ADD:
-            if(identical(sarg2,zero)) { return sarg1; }
-            if(identical(sarg1,zero)) { return sarg2; }
-            break;
-        case OperatorCode::SUB:
-            if(identical(sarg2,zero)) { return sarg1; }
-            if(identical(sarg1,zero)) { return -sarg2; }
-            break;
-        case OperatorCode::MUL:
-            if(identical(sarg1,zero)) { return zero; }
-            if(identical(sarg2,zero)) { return zero; }
-            if(identical(sarg1,one)) { return sarg2; }
-            if(identical(sarg2,one)) { return sarg1; }
-            break;
-        case OperatorCode::DIV:
-            if(identical(sarg1,zero)) { return sarg1; }
-            if(identical(sarg1,one)) { return rec(sarg2); }
-            if(identical(sarg2,one)) { return sarg1; }
-        default:
-            break;
-    }
-    return make_formula<Y>(a.op(),sarg1,sarg2);
+    return a.node_ref().accept([](auto fn){return _simplify_node<Formula<Y>>(fn);});
 }
 
 
@@ -270,91 +216,56 @@ inline Bool same(EffectiveNumber const& v1, EffectiveNumber const& v2) {
 
 template<class Y> Bool identical(const Formula<Y>& a1, const Formula<Y>& a2)
 {
-    if(a1.node_ptr()==a2.node_ptr()) { return true; }
-    if(a1.op()!=a2.op()) { return false; }
-    switch(a1.kind()) {
-        case OperatorKind::COORDINATE: case OperatorKind::VARIABLE:
-            return a1.ind() == a2.ind();
-        case OperatorKind::NULLARY:
-            return same(a1.val(),a2.val());
-        case OperatorKind::UNARY:
-            return identical(a1.arg(),a2.arg());
-        case OperatorKind::GRADED:
-            return identical(a1.arg(),a2.arg()) && a1.num() == a2.num();
-        case OperatorKind::BINARY:
-            switch(a1.op()) {
-            case OperatorCode::MUL: case OperatorCode::ADD:
-                return (identical(a1.arg1(),a2.arg1()) && identical(a1.arg2(),a2.arg2())) ||
-                       (identical(a1.arg1(),a2.arg2()) && identical(a1.arg2(),a2.arg1()));
-            default:
-                return identical(a1.arg1(),a2.arg1()) && identical(a1.arg2(),a2.arg2());
-            }
-        default:
-            return false;
-    }
+    return IdenticalSymbolic::identical_variant(a1.node_ref(),a2.node_ref());
 }
 
-template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& a) {
-    return Vector<Formula<Y>>(a.size(),[&a](SizeType i){return simplify(a[i]);});
+template<class Y> Vector<Formula<Y>> simplify(const Vector<Formula<Y>>& f) {
+    return Vector<Formula<Y>>(f.size(),[&f](SizeType i){return simplify(f[i]);});
 }
 
 
-template<class Y> Bool identical(const Vector<Formula<Y>>& a1, const Vector<Formula<Y>>& a2) {
-    if (a1.size() != a2.size()) return false;
-
-    for (auto i : range(a1.size())) {
-        if (not identical(a1[i],a2[i])) return false;
+template<class Y> Bool identical(const Vector<Formula<Y>>& f1, const Vector<Formula<Y>>& f2) {
+    if (f1.size() != f2.size()) { return false; }
+    for (auto i : range(f1.size())) {
+        if (not identical(f1[i],f2[i])) { return false; }
     }
     return true;
 }
 
-template<class Y> Bool is_constant_in(const Formula<Y>& a, const Set<Nat>& is) {
-    switch(a.kind()) {
-        case OperatorKind::COORDINATE: case OperatorKind::VARIABLE: return not is.contains(a.ind());
-        case OperatorKind::NULLARY: return true;
-        case OperatorKind::UNARY: case OperatorKind::SCALAR: case OperatorKind::GRADED: return is_constant_in(a.arg(),is);
-        case OperatorKind::BINARY: return is_constant_in(a.arg1(),is) and is_constant_in(a.arg2(),is);
-        default: ARIADNE_FAIL_MSG("Cannot evaluate if formula "<<a<<" is constant in "<<is<<"\n");
-    }
+template<class Y> Bool is_constant(Formula<Y> const& f) { return f.node_ref().accept([](auto fn){return _is_constant(fn);}); }
+
+template<class Y> Bool is_constant_in(const Formula<Y>& f, const Set<Nat>& is) {
+    return f.node_ref().accept([&is](auto fn){return is_constant_in(fn,is);});
 }
 
 
-template<class Y> Bool is_affine_in(const Formula<Y>& a, const Set<Nat>& is) {
-    switch(a.op()) {
-        case OperatorCode::CNST: return true;
-        case OperatorCode::IND: case OperatorCode::VAR: return true;
-        case OperatorCode::ADD: case OperatorCode::SUB: return is_affine_in(a.arg1(),is) and is_affine_in(a.arg2(),is);
-        case OperatorCode::MUL: return (is_affine_in(a.arg1(),is) and is_constant_in(a.arg2(),is)) or (is_constant_in(a.arg1(),is) and is_affine_in(a.arg2(),is));
-        case OperatorCode::DIV: return (is_affine_in(a.arg1(),is) and is_constant_in(a.arg2(),is));
-        case OperatorCode::POS: case OperatorCode::NEG: return is_affine_in(a.arg(),is);
-        case OperatorCode::POW: case OperatorCode::SQR: case OperatorCode::COS: case OperatorCode::SIN: case OperatorCode::TAN: return is_constant_in(a.arg(),is);
-        default: ARIADNE_FAIL_MSG("Not currently supporting code '"<<a.op()<<"' for evaluation of affinity in given indices\n");
-    }
+template<class Y> Bool is_affine_in(const Formula<Y>& f, const Set<Nat>& is) {
+    return f.node_ref().accept([&is](auto fn){return is_affine_in(fn,is);});
 }
 
-template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& as, const Set<Nat>& is) {
-    for (auto idx : range(as.size()))
-        if (not is_affine_in(as[idx],is)) return false;
+template<class Y> Bool is_affine_in(const Vector<Formula<Y>>& fs, const Set<Nat>& is) {
+    for (auto idx : range(fs.size())) {
+        if (not is_affine_in(fs[idx],is)) { return false; }
+    }
     return true;
 }
 
-
-template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& as, const Set<Nat>& is) {
+template<class Y> Bool is_additive_in(const Vector<Formula<Y>>& fs, const Set<Nat>& is) {
     // We treat the vector of formulas as additive in is if each variable in is appears at most once in all expressions,
     // with a constant multiplier
     // (FIXME: this simplifies the case of a diagonalisable matrix of constant multipliers)
 
     for (auto i : is) {
         Bool already_found = false;
-        for (auto idx : range(as.size())) {
-            const Formula<Y>& a = as[idx];
-            auto der = simplify(derivative(a, i));
-            if (not identical(der,Formula<Y>::zero())) {
+        for (auto idx : range(fs.size())) {
+            const Formula<Y>& f = fs[idx];
+            if (not is_constant_in(f,{i})) {
                 if (already_found) {
                     return false;
                 } else {
                     already_found = true;
-                    if (der.op() != OperatorCode::CNST) {
+                    auto dfi = simplify(derivative(f, i));
+                    if (not is_constant(dfi)) {
                         return false;
                     }
                 }

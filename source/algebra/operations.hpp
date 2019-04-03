@@ -41,6 +41,8 @@ template<class A> class GradedAlgebraOperations {
   private:
     static A _compose(const Series<X>& f, const A& a) { return A::_compose(f,a); }
   public:
+    static A apply(Hlf op, A const& a) {
+        return a/2; }
     static A apply(Sqr op, A const& a) {
         return a*a; }
     static A apply(Div op, A const& a1, A const& a2) {
@@ -56,6 +58,8 @@ template<class A> class GradedAlgebraOperations {
 template<class A> class NormedAlgebraOperations {
     typedef typename A::NumericType X;
   public:
+    static A apply(Hlf, A const& a) {
+        return a/2; }
     static A apply(Sqr, A const& a) {
         return a*a; }
     static A apply(Pow, A const& a, Nat m) {
@@ -167,6 +171,18 @@ template<class A, class X> struct DeclareTranscendentalAlgebraOperations : Decla
     friend A atan(A const& a);
 };
 
+template<class A, class X> struct DeclareLatticeAlgebraOperations {
+    friend A max(A const& a1, A const& a2);
+    friend A min(A const& a1, A const& a2);
+    friend A abs(A const& a);
+};
+
+template<class A, class X> struct DeclareElementaryAlgebraOperations
+    : DeclareTranscendentalAlgebraOperations<A,X>, DeclareLatticeAlgebraOperations<A,X> {
+};
+
+
+
 template<class A, class Y> struct DispatchMixedAlgebraNumberOperations;
 
 template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperators {
@@ -274,11 +290,21 @@ template<class A, class X> struct DispatchTranscendentalAlgebraOperations : Disp
     friend A atan(A const& a) { return OperationsType::apply(Atan(),a); }
 };
 
-template<class A, class X> struct DispatchOrderedAlgebraOperations {
+template<class A, class X> struct DispatchLatticeAlgebraOperations {
     typedef AlgebraOperations<A,X> OperationsType;
     friend A max(A const& a1, A const& a2) { return OperationsType::apply(Max(),a1,a2); }
     friend A min(A const& a1, A const& a2) { return OperationsType::apply(Min(),a1,a2); }
     friend A abs(A const& a) { return OperationsType::apply(Abs(),a); }
+
+    friend A max(A const& a1, X const& x2) { return OperationsType::apply(Max(),a1,x2); }
+    friend A min(A const& a1, X const& x2) { return OperationsType::apply(Min(),a1,x2); }
+    friend A max(X const& x1, A const& a2) { return OperationsType::apply(Max(),x1,a2); }
+    friend A min(X const& x1, A const& a2) { return OperationsType::apply(Min(),x1,a2); }
+
+};
+
+template<class A, class X> struct DispatchElementaryAlgebraOperations
+    : DispatchTranscendentalAlgebraOperations<A,X>, DispatchLatticeAlgebraOperations<A,X> {
 };
 
 

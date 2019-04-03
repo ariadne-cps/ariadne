@@ -1059,6 +1059,13 @@ template<class F> struct Operations<Bounds<F>> {
         else { return indeterminate; }
     }
 
+    //! \related Bounds<F> \brief Sign operator.
+    static LogicalType<ValidatedTag> _sgn(Bounds<F> const& x) {
+        if(x.lower_raw()>0) { return true; }
+        else if(x.upper_raw()<0) { return false; }
+        else { return indeterminate; }
+    }
+
 
     static Bounds<F> _widen(Bounds<F> const& x)
     {
@@ -2057,6 +2064,7 @@ FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound cons
 
 
 
+ValidatedKleenean sgn(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_sgn(x); }
 PositiveFloatDPUpperBound mag(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_mag(x); }
 PositiveFloatDPLowerBound mig(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_mig(x); }
 FloatDPBounds round(FloatDPBounds const& x) { return Operations<FloatDPBounds   >::_round(x); }
@@ -2069,6 +2077,7 @@ Bool inconsistent(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Ope
 FloatDPBounds refinement(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_refinement(x1,x2); }
 
 
+ValidatedKleenean sgn(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_sgn(x); }
 PositiveFloatMPUpperBound mag(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mag(x); }
 PositiveFloatMPLowerBound mig(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mig(x); }
 FloatMPBounds round(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_round(x); }

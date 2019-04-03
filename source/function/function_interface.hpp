@@ -120,7 +120,7 @@ class FunctionInterface<ApproximateTag,D,C>
     virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument< TaylorModel<ApproximateTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
-    virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
+    virtual Result<ElementaryAlgebra<ApproximateNumber>> _evaluate(const Argument< ElementaryAlgebra<ApproximateNumber> >& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;
     virtual FunctionInterface<P,D,C>* _derivative(ElementIndexType<D> i) const = 0;
@@ -147,7 +147,7 @@ class FunctionInterface<ValidatedTag,D,C>
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
-    virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
+    virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument< ElementaryAlgebra<ValidatedNumber> >& x) const = 0;
 
     virtual Result<ScalarMultivariateFunction<ValidatedTag>> _evaluate(const Argument< ScalarMultivariateFunction<ValidatedTag> >& x) const = 0;
 
@@ -175,9 +175,9 @@ class FunctionInterface<EffectiveTag,D,C>
   public:
     using FunctionInterface<WP,D,C>::_evaluate;
     virtual Result<Real> _evaluate(const Argument<Real>& x) const = 0;
-    virtual Result<Algebra<Real>> _evaluate(const Argument<Algebra<Real>>& x) const = 0;
+    virtual Result<ElementaryAlgebra<Real>> _evaluate(const Argument<ElementaryAlgebra<Real>>& x) const = 0;
     virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const = 0;
-    virtual Result<Algebra<EffectiveNumber>> _evaluate(const Argument<Algebra<EffectiveNumber>>& x) const = 0;
+    virtual Result<ElementaryAlgebra<EffectiveNumber>> _evaluate(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const = 0;
     virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
 
     virtual FunctionInterface<P,D,C>* _clone() const = 0;

@@ -92,6 +92,7 @@ template<class A> class Graded : public List<A>
     Graded<A>(const Graded<A>& a) : List<A>(a) { }
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
+    template<class X, EnableIf<IsAssignable<A,X>> =dummy> Graded<A>& operator=(const X& x) { (*this)[0]=x; return *this; }
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op, class N> Void operator=(const ClosureExpression<Op,SelfType,N>& expr);
@@ -152,8 +153,10 @@ template<> inline OutputStream& Graded<ExactIntervalType>::write(OutputStream& o
 }
 */
 
+template<class X> Void compute(X& r, const Nul&, const X& a) { return nul(r,a); }
 template<class X> Void compute(X& r, const Pos&, const X& a) { return pos(r,a); }
 template<class X> Void compute(X& r, const Neg&, const X& a) { return neg(r,a); }
+template<class X> Void compute(X& r, const Hlf&, const X& a) { return hlf(r,a); }
 template<class X> Void compute(X& r, const Add&, const X& a1, const X& a2) { return add(r,a1,a2); }
 template<class X> Void compute(X& r, const Sub&, const X& a1, const X& a2) { return sub(r,a1,a2); }
 template<class X> Void compute(X& r, const Mul&, const X& a1, const X& a2) { return mul(r,a1,a2); }
@@ -167,6 +170,8 @@ template<class X> Void compute(X& r, const Rec&, const X& a) { return rec(r,a); 
 template<class X> Void compute(X& r, const Sin&, const X& a) { return sin(r,a); }
 template<class X> Void compute(X& r, const Cos&, const X& a) { return cos(r,a); }
 template<class X> Void compute(X& r, const Tan&, const X& a) { return tan(r,a); }
+template<class X> Void compute(X& r, const Asin&, const X& a) { return asin(r,a); }
+template<class X> Void compute(X& r, const Acos&, const X& a) { return acos(r,a); }
 template<class X> Void compute(X& r, const Atan&, const X& a) { return atan(r,a); }
 
 template<class A, class B> Graded<A>& operator+=(Graded<A>& a, const B& c) {
@@ -174,36 +179,52 @@ template<class A, class B> Graded<A>& operator+=(Graded<A>& a, const B& c) {
 template<class A, class B> Graded<A>& operator*=(Graded<A>& a, const B& c) {
     a.back()*=c; return a; }
 
-template<class A, class B> Graded<A> operator+(const Graded<A>& a, const B& c) {
+template<class A, class B> Graded<A> operator+(const Graded<A>& a, const B& c) { return add(a,c); }
+template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) { return mul(a,c); }
+
+template<class A> Graded<A> operator+(const GenericNumericType<A>& c, const Graded<A>& a) { return add(c,a); }
+template<class A> Graded<A> operator-(const GenericNumericType<A>& c, const Graded<A>& a) { return sub(c,a); }
+template<class A> Graded<A> operator*(const GenericNumericType<A>& c, const Graded<A>& a) { return mul(c,a); }
+template<class A> Graded<A> operator/(const GenericNumericType<A>& c, const Graded<A>& a) { return div(c,a); }
+
+template<class A> inline ClosureExpression<Pos,Graded<A>> operator+(const Graded<A>& a) { return pos(a); }
+template<class A> inline ClosureExpression<Neg,Graded<A>> operator-(const Graded<A>& a) { return neg(a); }
+template<class A> inline ClosureExpression<Add,Graded<A>,Graded<A>> operator+(const Graded<A>& a1, const Graded<A>& a2) { return add(a1,a2); }
+template<class A> inline ClosureExpression<Sub,Graded<A>,Graded<A>> operator-(const Graded<A>& a1, const Graded<A>& a2) { return sub(a1,a2); }
+template<class A> inline ClosureExpression<Mul,Graded<A>,Graded<A>> operator*(const Graded<A>& a1, const Graded<A>& a2) { return mul(a1,a2); }
+template<class A> inline ClosureExpression<Div,Graded<A>,Graded<A>> operator/(const Graded<A>& a1, const Graded<A>& a2) { return div(a1,a2); }
+
+template<class A, class B> Graded<A> add(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r[0]+=c; return r;  }
-template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) {
+template<class A, class B> Graded<A> mul(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r*=c; return r;  }
-template<class A> Graded<A> operator*(const Graded<A>& a, Int c) {
-    Graded<A> r(a); if(c==0) { for(DegreeType i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
 
-template<class A> Graded<A> operator+(const GenericNumericType<A>& c, const Graded<A>& a) {
+
+template<class A> Graded<A> add(const GenericNumericType<A>& c, const Graded<A>& a) {
     Graded<A> r(a); r[0]+=c; return r;  }
-template<class A> Graded<A> operator-(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> sub(const GenericNumericType<A>& c, const Graded<A>& a) {
     ARIADNE_NOT_IMPLEMENTED; }
-template<class A> Graded<A> operator*(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> mul(const GenericNumericType<A>& c, const Graded<A>& a) {
     Graded<A> r(a); r[0]*=c; return r;  }
-template<class A> Graded<A> operator/(const GenericNumericType<A>& c, const Graded<A>& a) {
+template<class A> Graded<A> div(const GenericNumericType<A>& c, const Graded<A>& a) {
     ARIADNE_NOT_IMPLEMENTED; }
 
-template<class A> ClosureExpression<Neg,Graded<A>> operator-(const Graded<A>& a) {
-    return make_expression(Neg(),a); }
-template<class A> ClosureExpression<Add,Graded<A>,Graded<A>> operator+(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Add,Graded<A>,Graded<A>> add(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Add(),a1,a2); }
-template<class A> ClosureExpression<Sub,Graded<A>,Graded<A>> operator-(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Sub,Graded<A>,Graded<A>> sub(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Sub(),a1,a2); }
-template<class A> ClosureExpression<Mul,Graded<A>,Graded<A>> operator*(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Mul,Graded<A>,Graded<A>> mul(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Mul(),a1,a2); }
-template<class A> ClosureExpression<Div,Graded<A>,Graded<A>> operator/(const Graded<A>& a1, const Graded<A>& a2) {
+template<class A> ClosureExpression<Div,Graded<A>,Graded<A>> div(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Div(),a1,a2); }
+template<class A> ClosureExpression<Nul,Graded<A>> nul(const Graded<A>& a) {
+    return make_expression(Nul(),a); }
 template<class A> ClosureExpression<Pos,Graded<A>> pos(const Graded<A>& a) {
     return make_expression(Pos(),a); }
 template<class A> ClosureExpression<Neg,Graded<A>> neg(const Graded<A>& a) {
     return make_expression(Neg(),a); }
+template<class A> ClosureExpression<Hlf,Graded<A>> hlf(const Graded<A>& a) {
+    return make_expression(Hlf(),a); }
 template<class A> ClosureExpression<Sqr,Graded<A>> sqr(const Graded<A>& a) {
     return make_expression(Sqr(),a); }
 template<class A> ClosureExpression<Pow,Graded<A>,Int> pow(const Graded<A>& a, const Int& n) {
@@ -222,19 +243,31 @@ template<class A> ClosureExpression<Cos,Graded<A>> cos(const Graded<A>& a) {
     return make_expression(Cos(),a); }
 template<class A> ClosureExpression<Tan,Graded<A>> tan(const Graded<A>& a) {
     return make_expression(Tan(),a); }
+template<class A> ClosureExpression<Asin,Graded<A>> asin(const Graded<A>& a) {
+    return make_expression(Asin(),a); }
+template<class A> ClosureExpression<Acos,Graded<A>> acos(const Graded<A>& a) {
+    return make_expression(Acos(),a); }
 template<class A> ClosureExpression<Atan,Graded<A>> atan(const Graded<A>& a) {
     return make_expression(Atan(),a); }
 
-template<class A> Graded<A> abs(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
+template<class A> Void nul(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    r.append(nul(a.back()));
+}
 
 template<class A> Void pos(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT(r.size()+1u <= a.size());
-    r.append(+a.back());
+    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    r.append(pos(a.back()));
 }
 
 template<class A> Void neg(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_ASSERT(r.size()+1u <= a.size());
     r.append(-a.back());
+}
+
+template<class A> Void hlf(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    r.append(hlf(a.back()));
 }
 
 template<class A> Void add(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
@@ -412,8 +445,35 @@ template<class A> Void tan(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
+template<class A> Void asin(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class A> Void acos(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 template<class A> Void atan(Graded<A>& r, const Graded<A>& a) {
     ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
+template<class A> Graded<A> max(const GenericNumericType<A>& c, const Graded<A>& a) {
+    ARIADNE_THROW(std::runtime_error, "max(GenericNumericType<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.");
+}
+template<class A> Graded<A> min(const GenericNumericType<A>& c, const Graded<A>& a) {
+    ARIADNE_THROW(std::runtime_error, "min(GenericNumericType<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.");
+}
+
+template<class A> Graded<A> max(Graded<A> const& ga1, Graded<A> const& ga2) {
+    ARIADNE_THROW(std::runtime_error, "max(Graded<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.")
+}
+template<class A> Graded<A> min(Graded<A> const& ga1, Graded<A> const& ga2) {
+    ARIADNE_THROW(std::runtime_error, "min(Graded<A>,Graded<A>)","Cannot apply non-analytic operation to Graded.")
+}
+template<class A> Graded<A> abs(Graded<A> const& ga) {
+    ARIADNE_THROW(std::runtime_error, "abs(Graded<A>)","Cannot apply non-analytic operation to Graded.")
 }
 
 

@@ -204,6 +204,8 @@ class Real
     friend Real sin(Real const& r); //!< The sine of \a r.
     friend Real cos(Real const& r); //!< The cosine of \a r.
     friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend Real asin(Real const& r); //!< The arc-sine of \a r.
+    friend Real acos(Real const& r); //!< The arc-cosine of \a r.
     friend Real atan(Real const& r); //!< The arc-tangent of \a r.
     //@}
 
@@ -231,6 +233,7 @@ class Real
     friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
     friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
 
+    friend Kleenean sgn(Real const& r); //!< Returns \c true if \a r>0, \c false if \a r<0, and \c indeterminate if \a r==0.
     ValidatedKleenean check_sgn(Real r, Effort eff);
     friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
     friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.

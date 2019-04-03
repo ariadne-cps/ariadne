@@ -276,11 +276,11 @@ namespace Detail {
 template<class OP, class... ARGS> struct LogicalExpression;
 
 template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2>
-    : virtual LogicalInterface, ExpressionTemplate<OP,ARG1,ARG2>
+    : virtual LogicalInterface, Symbolic<OP,ARG1,ARG2>
 {
-    using ExpressionTemplate<OP,ARG1,ARG2>::ExpressionTemplate;
+    using Symbolic<OP,ARG1,ARG2>::Symbolic;
     virtual LogicalValue _check(Effort eff) const { return this->_op(this->_arg1,this->_arg2,eff).repr(); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<OP,ARG1,ARG2>const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<OP,ARG1,ARG2>const&>(*this); }
 };
 
 } // namespace Detail

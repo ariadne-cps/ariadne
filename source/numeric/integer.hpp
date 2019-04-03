@@ -131,6 +131,7 @@ class Integer
 
     friend Int log2floor(Natural const& n);
 
+    friend Dyadic hlf(Integer const& z);
     friend Rational rec(Integer const& z);
     friend Rational div(Integer const& z1, Integer const& z2);
     friend Rational pow(Integer const& z, Int n);

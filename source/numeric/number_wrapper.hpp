@@ -101,7 +101,7 @@ template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
     Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
     Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
-    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();    
+    String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }
 
@@ -122,7 +122,7 @@ template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I c
 template<class X, class I, class OP> struct UnaryOperationMixin : public virtual I {
     static X const& _cast(UnaryOperationMixin<X,I,OP> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply(OP op) const final { return _make_wrapper(pos(_cast(*this))); }
+    virtual I* _apply(OP op) const final { return _make_wrapper(op(_cast(*this))); }
 };
 
 template<class I, class OP> struct BinaryOperationInterface {
@@ -138,47 +138,38 @@ template<class X, class I, class OP, class J=I> struct BinaryOperationMixin : pu
 };
 
 
-template<class X, class I, class AW> struct FieldAware
-    : Operable<X,I,Add,AW>, Operable<X,I,Sub,AW>, Operable<X,I,Mul,AW>, Operable<X,I,Div,AW> {
-};
-template<class X, class I, class AW> struct LatticeAware
-    : Operable<X,I,Max,AW>, Operable<X,I,Min,AW> {
-};
-template<class X, class I, class AW> struct LatticeFieldAware
-    : FieldAware<X,I,AW>, LatticeAware<X,I,AW> {
+template<class X, class I, class AW> struct FieldLatticeAware
+    : Operable<X,I,BinaryElementaryOperator,AW> {
 };
 
-template<class X, class I> struct UnaryOperationsMixin : public virtual I {
+template<class X, class I, class N> struct ElementaryGradedOperationsMixin : public virtual I {
     using I::_apply;
-    static X const& _cast(UnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    static X const& _cast(ElementaryGradedOperationsMixin<X,I,N> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply(Pos op) const final { return _make_wrapper(pos(_cast(*this))); }
-    virtual I* _apply(Neg op) const final { return _make_wrapper(neg(_cast(*this))); }
-    virtual I* _apply(Sqr op) const final { return _make_wrapper(sqr(_cast(*this))); }
-    virtual I* _apply(Rec op) const final { return _make_wrapper(rec(_cast(*this))); }
-    virtual I* _apply(Pow op, Int n) const final { return _make_wrapper(pow(_cast(*this),n)); }
-    virtual I* _apply(Sqrt op) const final { return _make_wrapper(sqrt(_cast(*this))); }
-    virtual I* _apply(Exp op) const final { return _make_wrapper(exp(_cast(*this))); }
-    virtual I* _apply(Log op) const final { return _make_wrapper(log(_cast(*this))); }
-    virtual I* _apply(Sin op) const final { return _make_wrapper(sin(_cast(*this))); }
-    virtual I* _apply(Cos op) const final { return _make_wrapper(cos(_cast(*this))); }
-    virtual I* _apply(Tan op) const final { return _make_wrapper(tan(_cast(*this))); }
-    virtual I* _apply(Atan op) const final { return _make_wrapper(atan(_cast(*this))); }
-    virtual I* _apply(Abs op) const final { return _make_wrapper(abs(_cast(*this))); }
+    virtual I* _apply(GradedElementaryOperator op, N n) const final { return _make_wrapper(op(std::forward<const X>(_cast(*this)),n)); }
+};
+
+template<class X, class I> struct ElementaryUnaryOperationsMixin : public virtual I {
+    using I::_apply;
+    static X const& _cast(ElementaryUnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
+    virtual I* _apply(UnaryElementaryOperator op) const final { return _make_wrapper(op(_cast(*this))); }
 };
 
 
+template<class X, class I, class J=I> struct ElementaryBinaryOperationsMixin : public virtual J {
+    using J::_rapply; using J::_apply;
+    static X const& _cast(ElementaryBinaryOperationsMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    virtual I* _apply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+};
+
+/*
 template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J {
     using J::_rapply; using J::_apply;
     static X const& _cast(AwareFieldMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    virtual I* _apply(Add op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _apply(Sub op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _apply(Mul op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _apply(Div op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Add op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Sub op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Mul op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Div op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _apply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
+    virtual I* _rapply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
 };
 
 template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual J {
@@ -189,20 +180,14 @@ template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual 
     virtual I* _rapply(Max op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
     virtual I* _rapply(Min op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
 };
-
+*/
 
 template<class X, class I, class W> struct SameArithmeticMixin : public virtual I {
     X const& _cast(X const& self) { return self; }
     X const& _cast(I const& other) { return dynamic_cast<Wrapper<X,I>const&>(other); }
     I* _heap_move(X&& x) { return new W(x); }
-    virtual I* _add(I const* other) const final { return _heap_move(add(_cast(*this),_cast(*other))); }
-    virtual I* _sub(I const* other) const final { return _heap_move(sub(_cast(*this),_cast(*other))); }
-    virtual I* _mul(I const* other) const final { return _heap_move(mul(_cast(*this),_cast(*other))); }
-    virtual I* _div(I const* other) const final { return _heap_move(div(_cast(*this),_cast(*other))); }
-    virtual I* _radd(I const* other) const final { return _heap_move(add(_cast(*other),_cast(*this))); }
-    virtual I* _rsub(I const* other) const final { return _heap_move(sub(_cast(*other),_cast(*this))); }
-    virtual I* _rmul(I const* other) const final { return _heap_move(mul(_cast(*other),_cast(*this))); }
-    virtual I* _rdiv(I const* other) const final { return _heap_move(div(_cast(*other),_cast(*this))); }
+    virtual I* _apply(BinaryArithmeticOperator op, I const* other) const final { return _heap_move(op(_cast(*this),_cast(*other))); }
+    virtual I* _rapply(BinaryArithmeticOperator op, I const* other) const final { return _heap_move(op(_cast(*other),_cast(*this))); }
 };
 
 template<class X> class NumberGetterMixin : public virtual NumberInterface {
@@ -285,11 +270,10 @@ template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };
 template<class X> using Awares = typename DispatchingTraits<X>::AwareOfTypes;
 
 template<class X> class NumberMixin
-    : public AwareFieldMixin<X,NumberInterface>
-    , public AwareLatticeMixin<X,NumberInterface>
-    , public UnaryOperationsMixin<X,NumberInterface>
-    , public FieldAware<X,NumberInterface,Awares<X>>
-    , public LatticeAware<X,NumberInterface,Awares<X>>
+    : public ElementaryBinaryOperationsMixin<X,NumberInterface>
+    , public ElementaryUnaryOperationsMixin<X,NumberInterface>
+    , public ElementaryGradedOperationsMixin<X,NumberInterface,Int>
+    , public FieldLatticeAware<X,NumberInterface,Awares<X>>
     , public NumberGetterMixin<X>
 {
   public:

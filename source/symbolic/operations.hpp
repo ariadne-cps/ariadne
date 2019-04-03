@@ -156,12 +156,20 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real>& operator*=(Expression<Real>& e1, Expression<Real> const& e2);
     friend Expression<Real>& operator/=(Expression<Real>& e1, Expression<Real> const& e2);
 
+    //! \related Expression \brief %Real zero expression.
+    friend Expression<Real> nul(Expression<Real> const& e);
     //! \related Expression \brief %Real unary plus expression.
     //! Equivalent to +\a e.
     friend Expression<Real> pos(Expression<Real> const& e);
     //! \related Expression \brief %Real negation expression.
     //! Equivalent to -\a e.
     friend Expression<Real> neg(Expression<Real> const& e);
+    //! \related Expression \brief %Real squaring expression.
+    //! Equivalent to \a e*e.
+    friend Expression<Real> hlf(Expression<Real> const& e);
+    //! \related Expression \brief %Real halving expression.
+    //! Equivalent to \a e/2.
+    friend Expression<Real> sqr(Expression<Real> const& e);
      //! \related Expression \brief %Real addition expression.
     friend Expression<Real> add(Expression<Real> const& e1, Expression<Real> const& e2);
     //! \related Expression \brief %Real subtraction expression.
@@ -172,11 +180,9 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2);
     //! \related Expression \brief %Real integer power expression.
     friend Expression<Real> pow(Expression<Real> const& e, Int n);
-   //! \related Expression \brief %Real reciprocal expression.
+    //! \related Expression \brief %Real reciprocal expression.
     //! Equivalent to 1/\a e.
     friend Expression<Real> rec(Expression<Real> const& e);
-    //! \related Expression \brief %Real square expression.
-    friend Expression<Real> sqr(Expression<Real> const& e);
     //! \related Expression \brief %Real square root expression.
     friend Expression<Real> sqrt(Expression<Real> const& e);
     //! \related Expression \brief %Real exponential expression.
@@ -189,7 +195,11 @@ template<> struct DeclareExpressionOperations<Real> {
     friend Expression<Real> cos(Expression<Real> const& e);
     //! \related Expression \brief %Real tangent expression.
     friend Expression<Real> tan(Expression<Real> const& e);
-    //! \related Expression \brief %Real arctangent expression.
+    //! \related Expression \brief %Real arc-sine expression.
+    friend Expression<Real> asin(Expression<Real> const& e);
+    //! \related Expression \brief %Real arc-cosine expression.
+    friend Expression<Real> acos(Expression<Real> const& e);
+    //! \related Expression \brief %Real arc-tangent expression.
     friend Expression<Real> atan(Expression<Real> const& e);
 
     //! \related Expression \brief Real maximum expression.

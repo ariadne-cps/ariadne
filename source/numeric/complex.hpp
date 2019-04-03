@@ -137,7 +137,7 @@ class DefineComplexOperations {
     template<class X> friend Complex<ArithmeticType<X>> pow(Complex<X> const& z, Int n); //!< \brief Power \a z<sup>n</sup>.
 };
 
-template<class X> using TranscendentalType = decltype(exp(declval<X>()));
+template<class X> using TranscendentalType = decltype(sin(declval<X>()));
 
 template<class X> Complex<TranscendentalType<X>> make_complex_from_polar(X const& r, X const& th) {
     typedef decltype(exp(r)*cos(th)) R; return Complex<R>(exp(r)*cos(th),exp(r)*sin(th)); }

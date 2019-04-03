@@ -129,6 +129,8 @@ class Dyadic
     friend Real sin(Real const&);
     friend Real cos(Real const&);
     friend Real tan(Real const&);
+    friend Real asin(Real const&);
+    friend Real acos(Real const&);
     friend Real atan(Real const&);
 
     //! \brief The sign of the number.

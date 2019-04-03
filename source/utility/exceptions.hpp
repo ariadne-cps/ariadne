@@ -47,6 +47,11 @@ class NotImplemented : public std::logic_error {
     NotImplemented(const String& str) : std::logic_error(str) { }
 };
 
+class BadCast : public std::bad_cast {
+  public:
+    BadCast(const String& str) : std::bad_cast() { }
+};
+
 class DivideByZeroException : public std::runtime_error {
   public:
     DivideByZeroException(const String& str) : std::runtime_error(str) { }

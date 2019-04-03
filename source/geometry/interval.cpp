@@ -106,6 +106,8 @@ FloatDPUpperInterval neg(FloatDPUpperInterval const& ivl) {
     return make_interval(neg(cast_singleton(ivl))); }
 FloatDPUpperInterval sqr(FloatDPUpperInterval const& ivl) {
     return make_interval(sqr(cast_singleton(ivl))); }
+FloatDPUpperInterval hlf(FloatDPUpperInterval const& ivl) {
+    return make_interval(hlf(cast_singleton(ivl))); }
 FloatDPUpperInterval rec(FloatDPUpperInterval const& ivl) {
     return make_interval(rec(cast_singleton(ivl))); }
 

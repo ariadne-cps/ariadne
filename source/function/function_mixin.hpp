@@ -44,6 +44,9 @@ typedef Formula<EffectiveNumber> EffectiveFormula;
 typedef Algebra<ApproximateNumber> ApproximateAlgebra;
 typedef Algebra<ValidatedNumber> ValidatedAlgebra;
 typedef Algebra<EffectiveNumber> EffectiveAlgebra;
+typedef ElementaryAlgebra<ApproximateNumber> ApproximateElementaryAlgebra;
+typedef ElementaryAlgebra<ValidatedNumber> ValidatedElementaryAlgebra;
+typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
 template<class F, class P, class D> class ScalarFunctionMixin;
@@ -55,7 +58,7 @@ template<class T> T* heap_copy(const T& t) { return new T(t); }
 template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
 
 template<class P, class D> ScalarFunctionInterface<P,D>* heap_copy(ScalarFunction<P,D> const& f) { return f.raw_pointer()->_clone(); }
-    
+
 
 template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
@@ -102,7 +105,7 @@ class FunctionMixin<F,ApproximateTag,D,C>
     virtual Result<TaylorModel<ApproximateTag,FloatDP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ApproximateTag,FloatMP>> _evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const override;
     virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument<Formula<ApproximateNumber>>& x) const override;
-    virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument<Algebra<ApproximateNumber>>& x) const override;
+    virtual Result<ElementaryAlgebra<ApproximateNumber>> _evaluate(const Argument<ElementaryAlgebra<ApproximateNumber>>& x) const override;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
@@ -123,7 +126,7 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
-    virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument<Algebra<ValidatedNumber>>& x) const override;
+    virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const override;
 
     virtual Result<ValidatedScalarMultivariateFunction> _evaluate(const Argument<ValidatedScalarMultivariateFunction>& x) const override;
 
@@ -141,9 +144,9 @@ class FunctionMixin<F,EffectiveTag,D,C>
     using FunctionMixin<F,ValidatedTag,D,C>::_evaluate;
     virtual FunctionInterface<EffectiveTag,D,C>* _clone() const override;
     virtual Result<Real> _evaluate(const Argument<Real>& x) const override;
-    virtual Result<Algebra<Real>> _evaluate(const Argument<Algebra<Real>>& x) const override;
+    virtual Result<ElementaryAlgebra<Real>> _evaluate(const Argument<ElementaryAlgebra<Real>>& x) const override;
     virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const override;
-    virtual Result<Algebra<EffectiveNumber>> _evaluate(const Argument<Algebra<EffectiveNumber>>& x) const override;
+    virtual Result<ElementaryAlgebra<EffectiveNumber>> _evaluate(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const override;
     virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const override;
 };
 
@@ -154,7 +157,7 @@ template<class F, class P, class D> class VectorFunctionMixin
     : public FunctionMixin<F,P,D,BoxDomainType>
     , public virtual VectorOfFunctionInterface<P,D>
 {
-    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override { 
+    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override {
         auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 };
 

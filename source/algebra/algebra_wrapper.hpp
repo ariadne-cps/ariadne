@@ -41,9 +41,12 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
 {
   public:
     using A::A;
+    using AlgebraMixin<AlgebraWrapper<A,X>,X>::_apply;
+    using AlgebraMixin<AlgebraWrapper<A,X>,X>::_rapply;
     AlgebraWrapper(A const& a) : A(a) { }
     friend OutputStream& operator<<(OutputStream& os, AlgebraWrapper<A,X> const& a) { return os << static_cast<A const&>(a); }
 };
+
 /*
 template<class A, class X=NumericType<A>> class AlgebraWrapper
     : public virtual AlgebraInterface<X>
@@ -94,10 +97,39 @@ template<class A, class X=NumericType<A>> class SymbolicAlgebraWrapper
     , public AlgebraWrapper<A,X>
 {
     using AlgebraWrapper<A,X>::AlgebraWrapper;
+    using SymbolicAlgebraInterface<X>::_apply;
+    using AlgebraWrapper<A,X>::_apply;
     virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }
     virtual SymbolicAlgebraInterface<X>* _create_copy() const { return new SymbolicAlgebraWrapper<A>(*this); }
-    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
+    virtual SymbolicAlgebraInterface<X>* _apply(UnaryElementaryOperator op) { return new A(op,static_cast<const A&>(*this)); }
 };
+
+
+template<class A, class X> class ElementaryAlgebraWrapper
+    : public ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>
+    , public A
+{
+  public:
+    using A::A;
+    using ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>::_apply;
+    using ElementaryAlgebraMixin<ElementaryAlgebraWrapper<A,X>,X>::_rapply;
+    ElementaryAlgebraWrapper(A const& a) : A(a) { }
+    friend OutputStream& operator<<(OutputStream& os, ElementaryAlgebraWrapper<A,X> const& a) { return os << static_cast<A const&>(a); }
+};
+
+template<class X> template<class A> A ElementaryAlgebra<X>::extract() const {
+    ElementaryAlgebraInterface<X> const* p = this->_ptr.operator->();
+    if constexpr(IsBaseOf<ElementaryAlgebraInterface<X>,A>::value) {
+        A const* ap=dynamic_cast<A const*>(p);
+        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
+        assert(ap); return *ap; }
+    else {
+        ElementaryAlgebraWrapper<A,X> const* ap=dynamic_cast<ElementaryAlgebraWrapper<A,X> const*>(this->_ptr.operator->());
+        if (!ap) { std::cerr << "*p=" << *p << "; " << typeid(p).name() << ", " << typeid(*p).name() << "\n"; }
+        assert(ap); return *ap; }
+}
+
+
 
 } // namespace Ariadne
 

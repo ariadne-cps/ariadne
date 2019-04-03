@@ -59,17 +59,17 @@ class FloatDP { volatile double _dbl; public: double get_d() const { return _dbl
 template<> class Value<FloatDP> { FloatDP _v; public: FloatDP raw() const { return _v; } };
 
 
-    
+
 template<> class ExtensionOperations<Rational> {
     friend class Rational;
     friend class ExtendedOperations<Rational>;
-    
+
     static Bool is_nan(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)==0 && mpz_cmp_si(mpq_numref(q._mpq),0)==0; }
     static Bool is_inf(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)==0 && mpz_cmp_si(mpq_numref(q._mpq),0)!=0; }
     static Bool is_finite(Rational const& q) { return mpz_cmp_si(mpq_denref(q._mpq),0)!=0; }
     static Bool is_zero(Rational const& q) { return mpz_cmp_si(mpq_numref(q._mpq),0)==0 && mpz_cmp_si(mpq_denref(q._mpq),0)!=0; }
-    
-    static Sign sgn(Rational const& q) { 
+
+    static Sign sgn(Rational const& q) {
         if (is_finite(q)) { return static_cast<Sign>(mpq_cmp_si(q._mpq,0,1)); }
         else { return static_cast<Sign>(mpz_cmp_si(mpq_numref(q._mpq),0)); } }
 
@@ -80,9 +80,9 @@ template<> class ExtensionOperations<Rational> {
 
 template<> class FiniteOperations<Rational> {
     friend class ExtendedOperations<Rational>;
-    
+
     static Void set(Rational& r, Rational const& q) { mpq_set(r._mpq,q._mpq); }
-    
+
     static Void add(Rational& r, Rational const& q1, Rational const& q2) { return mpq_add(r._mpq, q1._mpq, q2._mpq); }
     static Void sub(Rational& r, Rational const& q1, Rational const& q2) { return mpq_sub(r._mpq, q1._mpq, q2._mpq); }
     static Void mul(Rational& r, Rational const& q1, Rational const& q2) { return mpq_mul(r._mpq, q1._mpq, q2._mpq); }
@@ -93,13 +93,13 @@ template<> class FiniteOperations<Rational> {
     static Void hlf(Rational& r, Rational const& q) { mpq_div_2exp(r._mpq,q._mpq,1u); }
     static Void sqr(Rational& r, Rational const& q) { mpq_mul(r._mpq,q._mpq,q._mpq); }
     static Void rec(Rational& r, Rational const& q) { mpq_inv(r._mpq,q._mpq); }
-    
-    static Void max(Rational& r, Rational const& q1, Rational const& q2) { 
+
+    static Void max(Rational& r, Rational const& q1, Rational const& q2) {
         if(mpq_cmp(q1._mpq,q2._mpq)>=0) { mpq_set(r._mpq,q1._mpq); } else { mpq_set(r._mpq,q2._mpq); } }
-    static Void min(Rational& r, Rational const& q1, Rational const& q2) { 
+    static Void min(Rational& r, Rational const& q1, Rational const& q2) {
         if(mpq_cmp(q1._mpq,q2._mpq)<=0) { mpq_set(r._mpq,q1._mpq); } else { mpq_set(r._mpq,q2._mpq); } }
     static Void abs(Rational& r, Rational const& q) { mpq_abs(r._mpq,q._mpq); }
-        
+
     static Comparison cmp(Rational const& q1, Rational const& q2) { return static_cast<Comparison>(mpq_cmp(q1._mpq,q2._mpq)); }
     static Boolean eq(Rational const& q1, Rational const& q2) { return mpq_equal(q1._mpq,q2._mpq); }
 };
@@ -281,15 +281,15 @@ Rational operator/(Rational& q1, Rational const& q2) {
 
 
 Rational max(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::max(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::max(r,q1,q2); return r;
 }
 
 Rational min(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::min(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::min(r,q1,q2); return r;
 }
 
 Rational abs(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::abs(r,q); return r; 
+    Rational r; ExtendedOperations<Rational>::abs(r,q); return r;
 }
 
 Rational nul(Rational const& q) {
@@ -301,31 +301,35 @@ Rational pos(Rational const& q) {
 }
 
 Rational neg(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::neg(r,q); return r; 
+    Rational r; ExtendedOperations<Rational>::neg(r,q); return r;
 }
 
 Rational sqr(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::sqr(r,q); return r; 
+    Rational r; ExtendedOperations<Rational>::sqr(r,q); return r;
+}
+
+Rational hlf(Rational const& q) {
+    Rational r; ExtendedOperations<Rational>::hlf(r,q); return r;
 }
 
 Rational rec(Rational const& q) {
-    Rational r; ExtendedOperations<Rational>::rec(r,q); return r; 
+    Rational r; ExtendedOperations<Rational>::rec(r,q); return r;
 }
 
 Rational add(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::add(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::add(r,q1,q2); return r;
 }
 
 Rational sub(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::sub(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::sub(r,q1,q2); return r;
 }
 
 Rational mul(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::mul(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::mul(r,q1,q2); return r;
 }
 
 Rational div(Rational const& q1, Rational const& q2) {
-    Rational r; ExtendedOperations<Rational>::div(r,q1,q2); return r; 
+    Rational r; ExtendedOperations<Rational>::div(r,q1,q2); return r;
 }
 
 Rational div(Integer const& z1, Integer const& z2) {

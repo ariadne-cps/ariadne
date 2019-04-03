@@ -432,7 +432,7 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
 
         return r;
     } else {
-        assert(false);
+        abort();
     }
 }
 

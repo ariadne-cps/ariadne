@@ -92,7 +92,8 @@ template<class X> inline DifferentialFactory<X> factory(Differential<X> const& d
 template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
+    , public DispatchLatticeAlgebraOperations<Differential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<Differential<X>>
 {
     static_assert(!IsSame<X,FloatDPValue>::value,"");
     typedef Differential<X> SelfType;
@@ -254,13 +255,14 @@ class Differential
 
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }
   public:
+/*
     friend Differential<X> min(const Differential<X>& x1, const Differential<X>& x2) {
-        return AlgebraOperations<Differential<X>>::_min(x1,x2); }
+        return AlgebraOperations<Differential<X>>::min(x1,x2); }
     friend Differential<X> max(const Differential<X>& x1, const Differential<X>& x2) {
-        return AlgebraOperations<Differential<X>>::_max(x1,x2); }
+        return AlgebraOperations<Differential<X>>::max(x1,x2); }
     friend Differential<X> abs(const Differential<X>& x) {
-        return AlgebraOperations<Differential<X>>::_abs(x); }
-
+        return AlgebraOperations<Differential<X>>::abs(x); }
+*/
     friend Differential<X> compose(UnivariateDifferential<X> const& x, Differential<X> const& y) {
         return Differential<X>::_compose(x,y); }
     friend Differential<X> compose(Differential<X> const& x, Vector<Differential<X>> const& y) {
@@ -287,6 +289,10 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumeri
 decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factory(x).create(y); }
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
+    static Differential<X> apply(UnaryElementaryOperator op, Differential<X> dx) {
+        UnivariateDifferential<X> dop = op.accept([&dx](auto o){return UnivariateDifferential<X>(o,dx.degree(),dx.value());});
+        return compose(dop,dx); }
+
     template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {
         return compose(UnivariateDifferential<X>(op,dx.degree(),dx.value()),dx); }
     static Differential<X> apply(Pos op, Differential<X> dx);

@@ -44,6 +44,8 @@ template<class X> class UnivariateDifferential;
 //! \brief Arbitrary-order derivatives with respect to a single argument.
 template<class X> class UnivariateDifferential
     : public DispatchTranscendentalAlgebraOperations<UnivariateDifferential<X>,X>
+    , public DispatchLatticeAlgebraOperations<UnivariateDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<UnivariateDifferential<X>>
 {
     Array<X> _ary;
   public:

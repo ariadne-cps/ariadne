@@ -72,7 +72,7 @@ template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<TaylorModel<ApproximateTag,FloatMP>>& x) const -> Result<TaylorModel<ApproximateTag,FloatMP>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Algebra<ApproximateNumber>>& x) const -> Result<Algebra<ApproximateNumber>> {
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ElementaryAlgebra<ApproximateNumber>>& x) const -> Result<ElementaryAlgebra<ApproximateNumber>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<Formula<ApproximateNumber>>& x) const -> Result<Formula<ApproximateNumber>> {
@@ -97,7 +97,7 @@ template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMP>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Algebra<ValidatedNumber>>& x) const -> Result<Algebra<ValidatedNumber>> {
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const -> Result<ElementaryAlgebra<ValidatedNumber>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<Formula<ValidatedNumber>>& x) const -> Result<Formula<ValidatedNumber>> {
@@ -111,13 +111,13 @@ template<class F,class D, class C> auto
 FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<Real>& x) const -> Result<Real> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<Algebra<Real>>& x) const -> Result<Algebra<Real>> {
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<ElementaryAlgebra<Real>>& x) const -> Result<ElementaryAlgebra<Real>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<Formula<Real>>& x) const -> Result<Formula<Real>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
-FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<Algebra<EffectiveNumber>>& x) const -> Result<Algebra<EffectiveNumber>> {
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<ElementaryAlgebra<EffectiveNumber>>& x) const -> Result<ElementaryAlgebra<EffectiveNumber>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<Formula<EffectiveNumber>>& x) const -> Result<Formula<EffectiveNumber>> {

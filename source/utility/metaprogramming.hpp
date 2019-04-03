@@ -35,7 +35,7 @@ namespace Ariadne {
 
 typedef void Void;
 typedef bool Bool;
-
+typedef std::size_t SizeType;
 
 using std::declval;
 
@@ -81,6 +81,19 @@ template<class T> using IsBuiltinSigned = std::is_signed<T>;
 template<class T> using IsBuiltinUnsigned = std::is_unsigned<T>;
 template<class T> using IsBuiltinSignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_signed<T>::value>;
 template<class T> using IsBuiltinUnsignedIntegral = std::integral_constant<bool,std::is_integral<T>::value and std::is_unsigned<T>::value>;
+
+template<class T, class... US> struct IsOneOf;
+template<class T> struct IsOneOf<T> : False { };
+template<class T, class... US> struct IsOneOf<T,T,US...> : True { };
+template<class T, class U0, class... US> struct IsOneOf<T,U0,US...> : IsOneOf<T,US...> { };
+
+template<class T, class... TS> struct IndexOf;
+template<class T, class... TS> struct IndexOf<T,T,TS...> { static const SizeType N=0; };
+template<class T, class T0, class... TS> struct IndexOf<T,T0,TS...> { static const SizeType N=IndexOf<T,TS...>::N+1u; };
+template<class T> struct IndexOf<T> { };
+
+// Returns N, if T is the Nth element of the class list TS...
+template<class T, class... TS> constexpr decltype(auto) index_of() { return IntegralConstant<SizeType,IndexOf<T,TS...>::N>(); }
 
 template<class SIG> using ResultOf = typename std::result_of<SIG>::type;
 
@@ -206,6 +219,7 @@ template<class T> class SuppressConversions {
     template<class TT, EnableIf<IsSame<TT,T>> =dummy> SuppressConversions(TT const& t) : _t(t) { }
     explicit operator T const& () const { return _t; }
 };
+
 } // namespace Ariadne
 
 #endif

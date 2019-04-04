@@ -442,7 +442,7 @@ and
 \f[ \unl{w},\unl{x}\leq 0,\ \ovl{w},\ovl{x}\geq 0 . \f]
 Add a penalty function to obtain
 \f{multline*} f(x) - \mu \sum_{i=1}^{m}\bigl(\log\!|\unl{w}_i|+\log\!|\ovl{w}_i|\bigr) - \mu \sum_{j=1}^{m}\bigl(\log\!|\unl{x}_j|+\log\!|\ovl{x}_j|\bigr) + \frac{1}{2\nu} \sum_{i=1}^{m}(g_i({x})-{w}_i)^2 \\
-    \hspace*{\fill} + \frac{1}{2\nu} \sum_{i=1}^{m}\bigl(( {w}_i+\unl{w}_i-\unl{c}_i)^2+( {w}_i+\ovl{w}_i-\ovl{c}_i)^2\bigr) + \frac{1}{2\nu} \sum_{j=1}^{n}\bigl(({x}_j+\unl{x}_j-\unl{d}_j)^2+({x}_j+\ovl{x}_j-\ovl{d}_j)^2\bigr) \f}
+    \shoveright + \frac{1}{2\nu} \sum_{i=1}^{m}\bigl(( {w}_i+\unl{w}_i-\unl{c}_i)^2+( {w}_i+\ovl{w}_i-\ovl{c}_i)^2\bigr) + \frac{1}{2\nu} \sum_{j=1}^{n}\bigl(({x}_j+\unl{x}_j-\unl{d}_j)^2+({x}_j+\ovl{x}_j-\ovl{d}_j)^2\bigr) \f}
 Finding the critical points of the revised function gives
 \f[ \begin{gathered}
       \nabla_j{f}(x) + \frac{1}{\nu} \sum_{i=1}^{m}(g_i({x})-{w}_i) \nabla_j{g_i}(x) + \frac{1}{\nu}({x}_j+\unl{x}_j-\unl{d}_j)+\frac{1}{\nu}({x}_j+\ovl{x}_j-\ovl{d}_j)= 0; \\
@@ -517,8 +517,8 @@ and
    \end{aligned} \f]
 These equations further simplify to
 \f[ \begin{aligned}
-        S\, &= (H+E+A^TDA) \\[\jot]
-        \delta x &= S^{-1} \bigl(\rho x+A^T(\rho w+D\rho y)\bigr) \\[\jot]
+        S\, &= (H+E+A^TDA) \\[1px]
+        \delta x &= S^{-1} \bigl(\rho x+A^T(\rho w+D\rho y)\bigr) \\[1px]
         \delta w &= A \delta x - \rho y \\
         \delta y &= D \delta w - \rho w
    \end{aligned} \f]
@@ -544,7 +544,7 @@ Note that the conditions are equivalent to minimising the Lagrangian
      \qquad\qquad + \sum_{j=1}^{n} \bigl(  \unl{z}_j({x}_j+\unl{x}_j-\unl{d}_j)\!-\!\mu\log\!|\unl{x}_j| \;+\; \ovl{z}_j({x}_j+\ovl{x}_j-\ovl{d}_j)\!-\!\mu\log\!|\ovl{x}_j| \bigr) \,. \f}
 
 The variables are updated using a Newton step
-\f[ \mathbf{x}' = \mathbf{x} - \alpha \, \mbox{\boldmath $\delta x$ } \f]
+\f[ \mathbf{x}' = \mathbf{x} - \alpha \, \mathbf{\delta x} \f]
 where \f$0<\alpha\leq 1\f$ is such that \f$\unl{w}',\unl{x}',\unl{v}',\unl{z}' < 0\f$ and \f$\ovl{w}',\ovl{x}',\ovl{v}',\ovl{z}'>0\f$.
 To avoid approaching too close to the boundary, we require
 \f[ \unl{w}_i\,\unl{v}_i > \mu \gamma, \quad \ovl{w}_i\,\ovl{v}_i > \mu \gamma, \quad \unl{x}_j\,\unl{z}_j > \mu \gamma, \quad \ovl{x}_j\,\ovl{z}_j > \mu \gamma, \f]

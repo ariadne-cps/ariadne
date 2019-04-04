@@ -12,14 +12,14 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.13 + AppleClang 10 + Python 3
+    - name: macOS 10.14 + AppleClang 10 + Python 3
       os: osx
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       env: COMPILER=clang++ PYTHON=3 
       
-    - name: macOS 10.13 + GCC 8 + Python 2 [NoCairo, NoGTK]
+    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo, NoGTK]
       os: osx
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
       
 #    - name: macOS 10.13 + AppleClang 10 + Python 3 [Debug, NoGTK]
@@ -76,6 +76,7 @@ before_install:
       if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=gtk; else GTK_PKG=""; fi
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
       brew install gcc@8 $PYTHON_LIB mpfr gmp $GTK_PKG $CAIRO_PKG
+      export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
       sudo easy_install pip
       sudo pip$PYTHON install --upgrade pip
       sudo pip$PYTHON install coverage pytest

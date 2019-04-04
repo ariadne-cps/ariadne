@@ -64,7 +64,7 @@ If we set \f$\delta_m=t_{m+1}-t_m\f$, the dwell time in the \f$i^\mathrm{th}\f$ 
 with constraints
 \f[ \begin{aligned}
         \delta_i &\geq 0; \\
-        t-(t_0+\delta_0+\cdots+\delta_n) &\geq 0; \\[\jot]
+        t-(t_0+\delta_0+\cdots+\delta_n) &\geq 0; \\[1px]
         p_m\circ\phi_m(x_m,[0,\delta_{m}]) &\leq 0 \\
         g_{m}\circ\phi(x_{m-1},\delta_{m-1}) &= 0 .
 \end{aligned} \f]
@@ -74,29 +74,29 @@ In the case of two events, both of which are urgent, and maximum time \f$T\f$, w
 \f[ y(t) = \phi_2\bigl(r_2\circ\phi_1\bigl(r_1\circ\phi_0(x_0,\delta_0),\delta_1\bigr),t-(t_0(x_0)+\delta_0+\delta_1)\bigr) \f]
 with constraints
 \f[ \begin{aligned}
-        x_0\in B,\ t,\delta_0,\delta_1 &\in [0,T]; \\[\jot]
-        t-(t_0(x_0)+\delta_0+\delta_1) &\geq 0; \\[\jot]
+        x_0\in B,\ t,\delta_0,\delta_1 &\in [0,T]; \\[1px]
+        t-(t_0(x_0)+\delta_0+\delta_1) &\geq 0; \\[1px]
         g_1\circ\phi_0(x_0,[0,\delta_0]) &\leq 0; \\
-        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[\jot]
+        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[1px]
         g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0),[0,\delta_1]) &\leq 0; \\
         g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0),\delta_1) &= 0.
 \end{aligned} \f]
 
 If we can solve for the crossing time \f$t_1\f$ (equivalently, the dwell time \f$\delta_0\f$) as a function of \f$x_0\f$, then we can eliminate the constraints involving \f$g_1\f$ from the system of equations.
 \f[ \begin{aligned}
-        x_0\in B,\ t,\delta_1 &\in [0,T]; \\[\jot]
-        \delta_0(x_0) &\geq 0; \\[\jot]
-        t-(t_0(x_0)+\delta_0(x_0)+\delta_1) &\geq 0; \\[\jot]
+        x_0\in B,\ t,\delta_1 &\in [0,T]; \\[1px]
+        \delta_0(x_0) &\geq 0; \\[1px]
+        t-(t_0(x_0)+\delta_0(x_0)+\delta_1) &\geq 0; \\[1px]
         g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0(x_0)),[0,\delta_1]) &\leq 0; \\
         g_2\circ\phi_1(r_1\circ\phi_0(x_0,\delta_0(x_0)),\delta_1) &= 0.
 \end{aligned} \f]
 Alternatively, if we can solve for \f$t_2\f$ in terms of \f$x_1\f$, then we can eliminate the constraints involving \f$g_2\f$.
 \f[ \begin{aligned}
-        x_0\in B,\ t,\delta_0 &\in [0,T]; \\[\jot]
-        \delta_1(r_1\circ\phi_0(x_0,\delta_0)) &\geq 0; \\[\jot]
-        t-(t_0+\delta_0+\delta_1(r_1\circ\phi_0(x_0,\delta_0))) &\geq 0; \\[\jot]
+        x_0\in B,\ t,\delta_0 &\in [0,T]; \\[1px]
+        \delta_1(r_1\circ\phi_0(x_0,\delta_0)) &\geq 0; \\[1px]
+        t-(t_0+\delta_0+\delta_1(r_1\circ\phi_0(x_0,\delta_0))) &\geq 0; \\[1px]
         g_1\circ\phi_0(x_0,[0,\delta_0]) &\leq 0; \\
-        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[\jot]
+        g_1\circ\phi_0(x_0,\delta_0) &= 0; \\[1px]
 \end{aligned} \f]
 In general, if we can solve for \f$t_{m+1}\f$ in terms of \f$x_{m}\f$, we have
 \f[ x_{m+1} = \phi_m(x_m,\delta_m(x_m)) = \phi_{m}(x_{m}(x_0,\ldots),\delta_m(x_0,\ldots)) . \f]
@@ -302,13 +302,13 @@ If \f$g\f$ is increasing, then
 \f[\begin{aligned}
  R &= \{ \phi(x,t) \mid g(\phi(x,t)) \leq 0 \} \\
  E &= \{ \phi(x,t) \mid g(\phi(x,t))\leq 0 \wedge t=\varepsilon(x) \} \\
-   &= \{ \phi(x,\varepsilon(x)) \mid g(\phi(x,\varepsilon(x))) \leq 0 \} \\[\jot]
+   &= \{ \phi(x,\varepsilon(x)) \mid g(\phi(x,\varepsilon(x))) \leq 0 \} \\[1px]
  J &= \{ \phi(x,t) \mid g(\phi(x,t))=0 \} \\
 \end{aligned}\f]
 If the crossing time \f$\gamma(t)\f$ is known then
 \f[\begin{aligned}
  R &= \{ \phi(x,t) \mid t\leq\varepsilon(x) \wedge t \leq \gamma(x) \} \\
- E &= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \gamma(x) \} \\[\jot]
+ E &= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \gamma(x) \} \\[1px]
  J &= \{ \phi(x,\gamma(x)) \mid \gamma(x) \leq \varepsilon(x) \}
 \end{aligned}\f]
 In the formula for \f$J\f$, we do not need the constraint \f$\gamma(x)\geq0\f$ since this is implied by the initial constraint \f$g(x)\leq 0\f$.
@@ -316,33 +316,33 @@ In the formula for \f$J\f$, we do not need the constraint \f$\gamma(x)\geq0\f$ s
 If \f$g\f$ is increasing, then the best formulae in terms of the number of constraints are
 \f[\begin{aligned}
  R &= \{ \phi(x,t) \mid g(\phi(x,t)) \leq 0 \} = \{ \phi(x,t) \mid t\leq\varepsilon(x) \wedge t \leq \gamma(x) \} \\
- E &= \{ \phi(x,\varepsilon(x)) \mid g(\phi(x,\varepsilon(x))) \leq 0 \}= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \gamma(x) \} \\[\jot]
+ E &= \{ \phi(x,\varepsilon(x)) \mid g(\phi(x,\varepsilon(x))) \leq 0 \}= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \gamma(x) \} \\[1px]
  J &= \{ \phi(x,\gamma(x)) \mid \gamma(x)\leq \varepsilon(x) \}
 \end{aligned}\f]
 If \f$\varepsilon(x)=h\f$, then
 \f[\begin{aligned}
  R &= \{ \phi(x,t) \mid g(\phi(x,t)) \leq 0 \} = \{ \phi(x,t) \mid t \leq \gamma(x) \} \\
- E &= \{ \phi(x,h) \mid g(\phi(x,h)) \leq 0 \}= \{ \phi(x,h) \mid h \leq \gamma(x) \} \\[\jot]
+ E &= \{ \phi(x,h) \mid g(\phi(x,h)) \leq 0 \}= \{ \phi(x,h) \mid h \leq \gamma(x) \} \\[1px]
  J &= \{ \phi(x,\gamma(x)) \mid \gamma(x)\leq h \}
 \end{aligned}\f]
 
 If \f$g\f$ is convex, then
 \f[\begin{aligned}
- R &= \{ \phi(x,t) \mid t\leq\mu(x) \wedge g(\phi(x,t)) \leq 0 \} \\[\jot]
- E &= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \mu(x) \wedge g(\phi(x,\varepsilon(x))) \leq 0  \} \\[\jot]
+ R &= \{ \phi(x,t) \mid t\leq\mu(x) \wedge g(\phi(x,t)) \leq 0 \} \\[1px]
+ E &= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \mu(x) \wedge g(\phi(x,\varepsilon(x))) \leq 0  \} \\[1px]
  J &= \{ \phi(x,t) \mid g(\phi(x,t)) = 0  \}
 \end{aligned}\f]
 
 If \f$g\f$ is concave, then
 \f[\begin{aligned}
  R &= \{ \phi(x,t) \mid t\leq\mu(x) \wedge g(\phi(x,t)) \leq 0 \} \\
-       &\qquad \cup \{ \phi(x,t) \mid t\geq\mu(x) \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[\jot]
+       &\qquad \cup \{ \phi(x,t) \mid t\geq\mu(x) \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[1px]
    &= \{ \phi(x,t) \mid L_fg(\phi(x,t))\geq0 \wedge g(\phi(x,t)) \leq 0 \} \\
-       &\qquad \cup \{ \phi(x,t) \mid L_fg(\phi(x,t))\leq0 \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[\jot]
+       &\qquad \cup \{ \phi(x,t) \mid L_fg(\phi(x,t))\leq0 \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[1px]
  E &= \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x) \leq \mu(x) \wedge g(\phi(x,\varepsilon(x))) \leq 0  \} \\
-       &\qquad \cup \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x)\geq\mu(x) \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[\jot]
+       &\qquad \cup \{ \phi(x,\varepsilon(x)) \mid \varepsilon(x)\geq\mu(x) \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[1px]
    &= \{ \phi(x,\varepsilon(x)) \mid L_fg(\phi(x,\varepsilon(x)))\geq0 \wedge g(\phi(x,\varepsilon(x))) \leq 0  \} \\
-       &\qquad \cup \{ \phi(x,\varepsilon(x)) \mid L_fg(\phi(x,\varepsilon(x)))\leq0 \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[\jot]
+       &\qquad \cup \{ \phi(x,\varepsilon(x)) \mid L_fg(\phi(x,\varepsilon(x)))\leq0 \wedge g(\phi(x,\mu(x))) \leq 0  \} \\[1px]
  J &= \{ \phi(x,t) \mid t\leq\mu(x) \wedge g(\phi(x,t)) = 0 \}  \\
    &= \{ \phi(x,t) \mid L_fg(\phi(x,t)) \geq 0 \wedge g(\phi(x,t)) = 0 \}
 \end{aligned}\f]
@@ -613,7 +613,7 @@ The <em>saltation map</em> \f$\Psi(x,0)\f$ satisfies
             &= -\dot{\Phi}_2\bigl(r(\Phi_1(x,s(x))),\sigma\bigr)\,s(x) + r(\Phi_1(x,s(x))) \\
             &= -f_2\bigl(\Phi_2\bigl(r(\Phi_1(x,s(x))),\sigma\bigr)\bigr)\,s(x) + \bigr[ r(\Phi_1(x,s(x))) - r(\Phi_1(x,0)) \bigr] + r(\Phi_1(x,0)) \\
             &= -f_2(\zeta)\, s(x) + Dr(\Phi_1(x,\tau))\,f_1(\Phi_1(x,\tau))\,s(x) + r(x) \\
-            &= -f_2(\zeta)\,s(x) + Dr(\eta)\,f(\eta)\,s(x) + r(c) + Dr(\xi)\,(x-c) \\[\jot]
+            &= -f_2(\zeta)\,s(x) + Dr(\eta)\,f(\eta)\,s(x) + r(c) + Dr(\xi)\,(x-c) \\[1px]
 
             &\in r(c) + Dr(\xi)\cdot(x-c) + \bigl(Dr(B_1)\,f(B_1)-f_2(B_2)\bigr)\cdot s(x)
 \end{aligned}\f]
@@ -638,7 +638,7 @@ If \f$s\f$ is an approximation to \f$s(c)\f$, then the evolution \f$\Psi(x,t)\f$
 If the switching time \f$s(x)\f$ is non-smooth or discontinuous, we need to rely on zero-order methods for computing the evolution.
 If the switching time is bounded by \f$[-h,+h]\f$, then the saltation map is given by
 \f[\begin{aligned}
-    \Psi(x,0) &:= \Phi_2\bigl(r(\Phi_1(x,s(x))),-s(x)\bigr) \\[\jot]
+    \Psi(x,0) &:= \Phi_2\bigl(r(\Phi_1(x,s(x))),-s(x)\bigr) \\[1px]
               &\in  r(X+[-h,h]f_1(B_1))+[-h,h]f_2(B_2)
 \end{aligned}\f]
 
@@ -651,7 +651,7 @@ Consider a transition which can occur at any time in the interval \f$[-h,+h\f$].
                                 &=  -t\,\dot{\Phi}_2\bigl(r(\Phi_1(x,t)),\tau\bigr) + r(\Phi_1(x,t)) \\
                                 &=  -t\,f_2\left(\Phi_2\bigl(r(\Phi_1(x,t)),\tau\bigr)\right) + \bigl[ r(\Phi_1(x,t)) - r(\Phi_1(x,0)) \bigr] + r(\Phi_1(x,0)) \\
                                 &= -t\,f_2(\zeta) + t\,Dr(\Phi_1(x,\tau))\,f_1(\Phi_1(x,\tau)) + r(x) \\
-                                &= \bigl(Dr(\eta)\,f_1(\eta)-f_2(\zeta)\bigr)\cdot t + Dr(\xi)\cdot(x-c) + r(c) \\[\jot]
+                                &= \bigl(Dr(\eta)\,f_1(\eta)-f_2(\zeta)\bigr)\cdot t + Dr(\xi)\cdot(x-c) + r(c) \\[1px]
                                 &\in r(c) + Dr(X)\cdot(x-c) + \bigl(Dr(B_1)\,f_1(B_1) - f_2(B_2) \bigr) \cdot t
 \end{aligned} \f]
 If we additionally wish to flow forward a time \f$h\f$, then

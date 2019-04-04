@@ -917,6 +917,106 @@ template<class X> Void truncate(Vector< Differential<X> >& x, DegreeType spacial
     for(DegreeType i=0; i!=x.size(); ++i) { truncate(x[i],spacial_order_,temporal_order_); }
 }
 
+template<class X> inline Vector<Differential<X>> flow_differential(Vector<Differential<X>> const& df, Vector<X> const& x0) {
+    return flow(df,x0); }
+
+
+TaylorPolynomialIntegrator::TaylorPolynomialIntegrator(MaximumError e, LipschitzConstant l, Order o)
+    : IntegratorBase(e,l)
+    , _order(o)
+{
+}
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPolynomialIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+                                      const ExactBoxType& state_domain,
+                                      StepSizeType& suggested_time_step) const
+{
+    std::cerr<<"vector_field="<<"<rs="<<vector_field.result_size()<<",as="<<vector_field.argument_size()<<">"<< vector_field<<"\n";
+
+    StepSizeType const& time_step = suggested_time_step;
+    IntervalDomainType time_domain(0,time_step);
+    IntervalDomainType symmetric_time_domain(-time_step,+time_step);
+
+    SizeType time_index = state_domain.dimension();
+
+    Sweeper<FloatDP> sweeper(ThresholdSweeper<FloatDP>(double_precision, 1e-10));
+
+    Vector<FloatDPBounds> x0 = state_domain.centre();
+    FloatDPBounds t0 = symmetric_time_domain.centre();
+    Vector<FloatDPBounds> x=cast_singleton(state_domain);
+    Vector<FloatDPBounds> wx=2*x-x0;
+    Vector<FloatDPBounds> xt0 = join(x0,t0);
+    Vector<FloatDPBounds> xt = cast_singleton(join(state_domain,time_domain));
+    DegreeType deg=this->_order;
+
+    deg=5;
+
+    Vector<Differential<FloatDPBounds>> df0 = vector_field.differential(x0,deg);
+    Vector<Differential<FloatDPBounds>> df  = vector_field.differential(x,deg);
+
+    FloatDPValue widen(2.0_dy,double_precision);
+    Vector<Differential<FloatDPBounds>> centre_flow_differential = flow_differential(df0, x0);
+    Vector<Differential<FloatDPBounds>> bounds_flow_differential = flow_differential(df, wx);
+
+    Vector<Differential<FloatDPBounds>> widened_bounds_flow_differential = (bounds_flow_differential-centre_flow_differential)*widen+centre_flow_differential;
+
+    std::cerr<<"centre_flow_differential="<<centre_flow_differential<<"\n";
+    ExactBoxType flow_domain = product(state_domain,time_domain);
+    ExactBoxType symmetric_flow_domain = product(state_domain,symmetric_time_domain);
+    ValidatedVectorMultivariateTaylorFunctionModelDP tfm
+        = make_taylor_function_model(symmetric_flow_domain,centre_flow_differential,widened_bounds_flow_differential,sweeper);
+    std::cerr<<"flow_model="<<tfm<<"\n";
+
+    tfm.restrict(flow_domain);
+
+    Vector<FloatDPBounds> flow_range_estimate = cast_singleton(tfm.range());
+    widened_bounds_flow_differential = flow_differential(df, flow_range_estimate);
+    tfm = make_taylor_function_model(symmetric_flow_domain,centre_flow_differential,widened_bounds_flow_differential,sweeper);
+
+
+    const SizeType nx=time_index;
+#warning Simplify construction
+    ValidatedVectorMultivariateTaylorFunctionModelDP phi0(nx,flow_domain,sweeper);
+    for(SizeType i=0; i!=nx; ++i) { phi0[i] = ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(flow_domain,i,sweeper); }
+
+    //ValidatedVectorMultivariateFunctionModelDP phi0=factory(tfm).create_projection(range(0,time_index));
+
+    //std::cerr<<"compose(vector_field,tfm)="<<compose(tfflow_model="<<tfm<<"\n";
+
+    ValidatedVectorMultivariateTaylorFunctionModelDP pic_tfm = phi0 + antiderivative( compose(vector_field, tfm) , time_index, 0);
+
+    tfm=pic_tfm; pic_tfm = phi0 + antiderivative( compose(vector_field, tfm) , time_index, 0);
+
+    auto diff_tfm = pic_tfm-tfm; diff_tfm.clobber();
+    std::cerr<<"\ndiff="<<diff_tfm << "\n\nnorm="<<norm(diff_tfm) << ", e1="<<pic_tfm.error()<<", e0="<<tfm.error()<<"\n";
+    std::cerr<<"refines="<<std::flush; std::cerr<<refines(pic_tfm,tfm)<<std::endl;
+    std::cerr<<"pic_tfm="<<pic_tfm<<"\n";
+    if (refines(pic_tfm,tfm)) {
+        return pic_tfm;
+    } else {
+        auto diff_tfm = pic_tfm-tfm; diff_tfm.clobber();
+        std::cerr<<"\ndiff="<<diff_tfm << "\n\nnorm="<<norm(pic_tfm-tfm) << ", e1="<<pic_tfm.error()<<", e0="<<tfm.error()<<"\n\n";
+        ARIADNE_THROW(std::runtime_error, "TaylorPolynomialIntegrator::flow_step(...)","Test flow function model "<<tfm<<" not verified by Picard iterate "<<pic_tfm<<"\n");
+    }
+}
+
+
+ValidatedVectorMultivariateFunctionModelDP
+TaylorPolynomialIntegrator::flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+            const ExactBoxType& state_domain,
+            const StepSizeType& time_step,
+            const UpperBoxType& bounding_box) const
+{
+    StepSizeType suggested_time_step = time_step;
+    return this->flow_step(vector_field,state_domain,suggested_time_step);
+#warning Check time step has not changed
+}
+
+
+
+
+
 AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, TemporalOrder temporal_order_)
     : IntegratorBase(maximum_error_,lipschitz_constant=0.5), _spacial_order(1u), _temporal_order(temporal_order_) { }
 

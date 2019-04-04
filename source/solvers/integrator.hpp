@@ -280,6 +280,40 @@ class TaylorSeriesIntegrator
 
 };
 
+//! \brief An integrator which computes the Taylor polynomial of the flow function and estimates a high-order remainder term.
+class TaylorPolynomialIntegrator
+    : public IntegratorBase
+{
+    DegreeType _order;
+  public:
+    //! \brief Constructor.
+    TaylorPolynomialIntegrator(MaximumError e, LipschitzConstant l, Order order);
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              StepSizeType& time_step) const override;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& vector_field,
+              const ExactBoxType& state_domain,
+              const StepSizeType& time_step,
+              const UpperBoxType& bounding_box) const override;
+
+    virtual ValidatedVectorMultivariateFunctionModelDP
+    flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
+              const ExactBoxType& state_domain,
+              const Interval<StepSizeType>& time_domain,
+              const ExactBoxType& parameter_domain,
+              const UpperBoxType& bounding_box) const override { ARIADNE_NOT_IMPLEMENTED; }
+
+    virtual TaylorPolynomialIntegrator* clone() const override { return new TaylorPolynomialIntegrator(*this); }
+
+    virtual Void write(OutputStream& os) const override { os << "TaylorPolynomialIntegrator(order="<<this->_order<<")"; }
+};
+
+
+
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class GradedTaylorSeriesIntegrator

@@ -364,9 +364,9 @@ In the Geometry module, we need to solve the following linear programming proble
       &\text{Polyhedron}&\text{Polytope}&\text{Zonotope}\\\hline\hline
       \text{Point} & Ap\leq b & p=Vs;\ 1\!\cdot\!s=1;\ s\geq0 & p=c+Ge;\ -1\leq e\leq1 \\\hline
       \text{Rectangle} & Ax\leq b;\ l\leq x\leq u & x=Vs;\ 1\!\cdot\!s=1;\ l\leq x\leq u;\ s\geq0 & x=c+Ge;\ l\leq x\leq u; \ -1\leq e\leq1 \\\hline
-      \text{Zonotope} & A(c+Ge)\leq b;\ -1\leq e\leq 1 & Vs=c+Ge;\ 1\!\cdot s=1;\ -1\leq e\leq1;\ s\geq0 & c_1+G_1e_1=c_2+G_2e_2;\ -1\leq e_1,e_2\leq1 \\\cline{0-3}
-      \text{Polytope} & AVs\leq b;\ 1\!\cdot\!s=1;\ s\geq0 & V_1s_1=V_2s_2;\ 1\!\cdot s_1=1;\ 1\cdot s_2=1;\ s_1,s_2\geq0 \\\cline{0-2}
-      \text{Polyhedron} & A_1x\leq b_1;\ A_2x\leq b_2 \\\cline{0-1}
+      \text{Zonotope} & A(c+Ge)\leq b;\ -1\leq e\leq 1 & Vs=c+Ge;\ 1\!\cdot s=1;\ -1\leq e\leq1;\ s\geq0 & c_1+G_1e_1=c_2+G_2e_2;\ -1\leq e_1,e_2\leq1 \\\hline
+      \text{Polytope} & AVs\leq b;\ 1\!\cdot\!s=1;\ s\geq0 & V_1s_1=V_2s_2;\ 1\!\cdot s_1=1;\ 1\cdot s_2=1;\ s_1,s_2\geq0 & \\\hline
+      \text{Polyhedron} & A_1x\leq b_1;\ A_2x\leq b_2 & & \\\hline
     \end{array}
 \f]
 We notice that by introducing slack variables, we can convert all problems into a standard linear programming problem with constraints.

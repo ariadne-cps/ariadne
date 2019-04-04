@@ -257,6 +257,7 @@ class TestIntegrator
 Int main(Int argc, const char* argv[]) {
     auto verbosity = get_verbosity(argc,argv);
 
+/*
     TaylorPicardIntegrator taylor_picard_integrator(
             maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
             step_maximum_error=1e-8,step_sweep_threshold=1e-12, maximum_temporal_order=16);
@@ -277,13 +278,22 @@ Int main(Int argc, const char* argv[]) {
             maximum_spacial_order=4,maximum_temporal_order=8);
     graded_taylor_series_integrator.verbosity=verbosity;
     ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
-
+*/
+    TaylorPolynomialIntegrator taylor_polynomial_integrator(
+            maximum_error=1e-6,lipschitz_constant=0.5,order=6);
+            //maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
+            //step_sweep_threshold=1e-12,order=6);
+    taylor_polynomial_integrator.verbosity=verbosity;
+//    TestIntegrator tester(taylor_polynomial_integrator);
+//    tester.test_constant_derivative();
+    ARIADNE_TEST_CLASS("TaylorPolynomialIntegrator",TestIntegrator(taylor_polynomial_integrator));
+/*
     ARIADNE_PRINT_TEST_CASE_TITLE("AffineIntegrator");
     AffineIntegrator affine_integrator(1e-6, 6);
     affine_integrator.verbosity=verbosity;
     //TestIntegrator(affine_integrator).test_affine();
     ARIADNE_TEST_WARN("AffineIntegrator does not work correctly.");
-
+*/
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

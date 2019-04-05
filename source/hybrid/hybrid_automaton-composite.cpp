@@ -245,6 +245,27 @@ Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
             reset.append(reset_iter->second);
         }
     }
+
+    ARIADNE_ASSERT(join(cached_mode._invariants.keys(),cached_mode._guards.keys()) == cached_mode._kinds.keys());
+    ARIADNE_ASSERT(cached_mode._targets.keys() == cached_mode._resets.keys());
+
+    if (cached_mode._kinds.keys() != cached_mode._resets.keys()) {
+        Set<DiscreteEvent> transitions_missing_guards = difference(cached_mode._resets.keys(),cached_mode._kinds.keys());
+        for (DiscreteEvent event : transitions_missing_guards) {
+            ARIADNE_ERROR("Event "<<event<<" in location " << location << " triggers a transition to mode "<<cached_mode._targets[event]<<" with reset "<<cached_mode._resets[event]
+                            << " but no guard is defined.")
+            for (HybridAutomaton const& component : this->_components) {
+                for (DiscreteMode const& mode : component.modes().values()) {
+                        if (mode._kinds.has_key(event)) {
+                            ARIADNE_NOTIFY("  Component " << component.name() << " defines guard " << mode._guards[event] << " for " << event << " in location " << mode.location());
+                    }
+                }
+            }
+        }
+        DiscreteEvent event = *transitions_missing_guards.begin();
+        ARIADNE_THROW(MissingGuardError,"CompositeHybridAutomaton::mode(DiscreteLocation)","Automaton has location "<<location<<" with event "<<event<<" without a guard, but with transition to location "<<cached_mode._targets[event]<<" with resets "<<cached_mode._resets[event]);
+    }
+
     ARIADNE_DEBUG_ASSERT(is_restriction(cached_mode._location,location));
     // TODO: Should we throw an exception here? I think it's worth allowing this to go through...
     if(false and not are_same(cached_mode._location,location)) {

@@ -108,6 +108,11 @@ class UnderspecifiedSystemError : public SystemSpecificationError {
     UnderspecifiedSystemError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+class MissingGuardError : public UnderspecifiedSystemError {
+  public:
+    MissingGuardError(const StringType& what) : UnderspecifiedSystemError(what) { }
+};
+
 class UnderspecifiedDynamicError : public UnderspecifiedSystemError {
   public:
     UnderspecifiedDynamicError(const StringType& what) : UnderspecifiedSystemError(what) { }

@@ -211,7 +211,7 @@ Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vecto
         vector_class.def(pybind11::init<Nat>()); }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
-        vector_class.def(pybind11::init<Nat,PR>()); 
+        vector_class.def(pybind11::init<Nat,PR>());
     }
     vector_class.def(pybind11::init<Nat,X>());
     vector_class.def_static("unit",&Vector<X>::unit);
@@ -318,7 +318,7 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
         covector_class.def(pybind11::init<Nat>()); }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
-        covector_class.def(pybind11::init<Nat,PR>()); 
+        covector_class.def(pybind11::init<Nat,PR>());
     }
     covector_class.def(pybind11::init<Nat,X>());
     covector_class.def("size", &Covector<X>::size);
@@ -352,11 +352,11 @@ Void define_covector(pybind11::module& module, pybind11::class_<Covector<X>>& co
     }
 }
 
-template<class X> 
+template<class X>
 Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<X>>& covector_class) {
 }
 
-template<class F> 
+template<class F>
 Void define_covector_conversions(pybind11::module& module, pybind11::class_<Covector<Approximation<F>>>& covector_class) {
     covector_class.def(pybind11::init<Covector<Bounds<F>>>());
     pybind11::implicitly_convertible<Covector<Bounds<F>>,Covector<Approximation<F>>>();
@@ -382,7 +382,7 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
         matrix_class.def(pybind11::init<Nat,Nat>()); }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
-        matrix_class.def(pybind11::init<Nat,Nat,PR>()); 
+        matrix_class.def(pybind11::init<Nat,Nat,PR>());
     }
     matrix_class.def(pybind11::init<Nat,Nat,X>());
     matrix_class.def("rows", &Matrix<X>::row_size);
@@ -399,7 +399,7 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
 
-    
+
     if constexpr (HasGenericType<X>::value) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(IsConstructible<Matrix<X>,Matrix<Y>,PR>::value) {
@@ -527,7 +527,7 @@ template<class X> Void export_diagonal_matrix(pybind11::module& module)
     diagonal_matrix_class.def("__mul__", &__mul__<DiagonalMatrix<X>,Matrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
     //diagonal_matrix_class.def("__rmul__", &__rmul__<Covector<X>,DiagonalMatrix<X> , Return<Covector<X>> >);
     diagonal_matrix_class.def("__rmul__", &__rmul__<Matrix<X>,DiagonalMatrix<X> , Return<Matrix<X>> >, pybind11::is_operator());
-    
+
     //module.def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 
@@ -537,9 +537,8 @@ Void export_pivot_matrix(pybind11::module& module)
 //    pybind11::implicitly_convertible<PivotMatrix, Matrix<FloatDPValue>>();
 
     pybind11::class_<PivotMatrix> pivot_matrix_class(module,"PivotMatrix");
-//    pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
-//    pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
-
+    pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
+    pivot_matrix_class.def("__repr__",&__cstr__<PivotMatrix>);
 }
 
 

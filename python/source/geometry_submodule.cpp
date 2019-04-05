@@ -555,7 +555,6 @@ Void export_constraint_set(pybind11::module& module)
     bounded_constraint_set_class.def(pybind11::init<BoundedConstraintSet>());
     bounded_constraint_set_class.def(pybind11::init< RealBox, List<EffectiveConstraint> >());
     bounded_constraint_set_class.def("dimension", &BoundedConstraintSet::dimension);
-    bounded_constraint_set_class.def("__str__", &__cstr__<BoundedConstraintSet>);
 
     module.def("intersection", (ConstraintSet(*)(ConstraintSet const&,ConstraintSet const&)) &_intersection_);
     module.def("intersection", (BoundedConstraintSet(*)(ConstraintSet const&, RealBox const&)) &_intersection_);
@@ -581,6 +580,8 @@ Void export_constrained_image_set(pybind11::module& module)
     constrained_image_set_class.def(pybind11::init<ConstrainedImageSet>());
     constrained_image_set_class.def(pybind11::init<BoundedConstraintSet>());
     constrained_image_set_class.def("dimension", &ConstrainedImageSet::dimension);
+    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(Nat)const) &ConstrainedImageSet::split);
+    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);
 //    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("__str__",&__cstr__<ConstrainedImageSet>);
 

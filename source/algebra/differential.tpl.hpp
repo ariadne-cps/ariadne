@@ -652,13 +652,10 @@ Differential<X> Differential<X>::_antiderivative(const Differential<X>& x, SizeT
 }
 
 
-template<class X>
-OutputStream& Differential<X>::_write(OutputStream& os) const
-{
-    Differential<X> const& x=*this;
-    Expansion<MultiIndex,X> e=x.expansion();
+template<class X> OutputStream& write_expansion(OutputStream& os, Differential<X> const& dx) {
+    Expansion<MultiIndex,X> e=dx.expansion();
     //e.graded_sort();
-    os << "SD("<<x.argument_size()<<","<<(uint)x.degree()<<"){";
+    os << "{";
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter!=e.begin()) { os << ","; } os << " ";
         for(SizeType i=0; i!=e.argument_size(); ++i) {
@@ -668,6 +665,15 @@ OutputStream& Differential<X>::_write(OutputStream& os) const
         os << ":" << X(iter->coefficient());
     }
     return os << " }";
+}
+
+template<class X>
+OutputStream& Differential<X>::_write(OutputStream& os) const
+{
+    Differential<X> const& dx=*this;
+    os << "Differential(as="<<dx.argument_size()<<",deg="<<(uint)dx.degree()<<")";
+    write_expansion(os,dx);
+    return os;
 }
 
 
@@ -902,5 +908,16 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X>>& df, Vector<Differe
     }
     return dphi;
 }
+
+
+template<class X>
+OutputStream& Vector<Differential<X>>::_write(OutputStream& os) const
+{
+    Vector<Differential<X>> const& dx=*this;
+    os << "DifferentialVector(rs="<<dx.result_size()<<",as="<<dx.argument_size()<<",deg="<<(uint)dx.degree()<<")";
+    os << "[ "; for(SizeType i=0; i!=this->size(); ++i) { if(i!=0) { os << ", "; } write_expansion(os,dx[i]); } os << " ]";
+    return os;
+}
+
 
 } //namespace Ariadne

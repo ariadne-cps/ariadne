@@ -922,13 +922,16 @@ template<class PR> Void export_user_floats(pymodule& module) {
     module.def("Value", [](RawFloatType<PR> const& v){return Value(v);});
 
     if constexpr (IsSame<PR,MultiplePrecision>::value) {
+        module.def("Ball", [](EffectiveNumber const& y, MultiplePrecision pr, DoublePrecision pre){return Ball(y,pr,pre);});
         module.def("Ball", [](ValidatedNumber const& y, MultiplePrecision pr, DoublePrecision pre){return Ball(y,pr,pre);});
         module.def("Ball", [](RawFloatType<MultiplePrecision> const& v, RawFloatType<DoublePrecision> const& e){return Ball(v,e);});
     }
 
+    module.def("Ball", [](EffectiveNumber const& y, PR pr){return Ball<RawFloatType<PR>>(y,pr);});
     module.def("Ball", [](ValidatedNumber const& y, PR pr){return Ball(y,pr);});
     module.def("Ball", [](ValidatedNumber const& y, PR pr, PR pre){return Ball(y,pr,pre);});
     module.def("Ball", [](RawFloatType<PR> const& v, RawFloatType<PR> const& e){return Ball(v,e);});
+    module.def("Bounds", [](EffectiveNumber const& y, PR pr){return Bounds(y,pr);});
     module.def("Bounds", [](ValidatedNumber const& y, PR pr){return Bounds(y,pr);});
     module.def("Bounds", [](ValidatedLowerNumber const& yl, ValidatedUpperNumber const& yu, PR pr){return Bounds(yl,yu,pr);});
     module.def("Bounds", [](RawFloatType<PR> const& l, RawFloatType<PR> const& u){return Bounds(l,u);});

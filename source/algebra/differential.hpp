@@ -167,6 +167,19 @@ class Differential
     static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
     static Vector<Differential<X>> affine(DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
 
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Differential<X> constant(SizeType as, DegreeType deg, const Y& c, const PR& pr) {
+        return constant(as,deg,X(c,pr)); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Differential<X> variable(SizeType as, DegreeType deg, const Y& v, SizeType j, const PR& pr) {
+        return variable(as,deg,X(v,pr),j); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Vector< Differential<X> > constants(SizeType as, DegreeType deg, const Vector<Y>& c, const PR& pr) {
+        return constants(as,deg,Vector<X>(c,pr)); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Vector< Differential<X> > variables(DegreeType deg, const Vector<Y>& v, const PR& pr) {
+        return variables(deg,Vector<X>(v,pr)); }
+
 //    static UnivariateDifferential<X> identity(DegreeType deg, const Vector<X>& v);
     static Differential<X> identity(DegreeType deg, const X& v); // FIXME: Should use UnivariateDifferentia; required for derivative of UnivariateFunction.
     static Vector<Differential<X>> identity(DegreeType deg, const Vector<X>& v);
@@ -472,6 +485,7 @@ class Vector< Differential<X> >
     Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da) {
         return _flow(df,dx0,da); }
 
+    friend OutputStream& operator<<(OutputStream& os, const Vector<Differential<X> >& x) { return x._write(os); }
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
     static Vector<Differential<X>> _derivative(Vector<Differential<X>> const& x, SizeType k);
@@ -483,6 +497,7 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da);
+    OutputStream& _write(OutputStream& os) const;
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

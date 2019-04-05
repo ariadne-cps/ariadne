@@ -359,12 +359,27 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
 
 //   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
+    static const bool write_decimal = true;
     if(is_finite(x)) {
-        Rational q;
-        mpq_set_f (q._mpq,x._mpf);
-        os << q.numerator();
-        Int exp = log2floor(q.denominator());
-        if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+        if constexpr (write_decimal) {
+            Dyadic w=x;
+            if(w<0) { os << "-"; w=-w; }
+            Integer z=floor(w);
+            os << z << ".";
+            w-=z;
+            while (w!=0) {
+                w*=10;
+                z=floor(w);
+                w-=z;
+                os << z;
+            }
+        } else { // Write p/2^q
+            Rational q;
+            mpq_set_f (q._mpq,x._mpf);
+            os << q.numerator();
+            Int exp = log2floor(q.denominator());
+            if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+        }
     } else {
         if(is_nan(x)) {
             os << "NaN";

@@ -623,7 +623,7 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 }
 
 OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
-    return os << static_cast< Matrix<FloatDPValue> >(pv);
+    return os << "PivotMatrix(" << static_cast< Matrix<Int> >(pv) << ")";
 }
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The

@@ -80,6 +80,21 @@ static const Generator<MinimumSpacialOrder> minimum_spacial_order = Generator<Mi
 static const Generator<MaximumSpacialOrder> maximum_spacial_order = Generator<MaximumSpacialOrder>();
 static const Generator<MaximumTemporalOrder> maximum_temporal_order = Generator<MaximumTemporalOrder>();
 
+typedef ValidatedVectorMultivariateFunctionModelDP FlowStepModelType;
+
+class FlowStepModel : public FlowStepModelType {
+  public:
+    using FlowStepModelType::FlowStepModelType;
+    FlowStepModel(FlowStepModelType const& fsmt) : FlowStepModelType(fsmt) { }
+    friend OutputStream& operator<<(OutputStream& os, FlowStepModel const& flwstpm);
+};
+
+class FlowModel : public List<FlowStepModelType> {
+  public:
+    using List<FlowStepModelType>::List;
+    friend OutputStream& operator<<(OutputStream& os, FlowModel const& flwm);
+};
+
 class IntegratorBase
     : public IntegratorInterface
     , public Loggable
@@ -130,37 +145,37 @@ class IntegratorBase
                 const ExactBoxType& parameter_domain,
                 const StepSizeType& maximum_time_step) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               StepSizeType& suggested_time_step) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_to(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorMultivariateFunctionModelDP>
+    virtual FlowModel
     flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\der{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<ValidatedVectorMultivariateFunctionModelDP>
+    virtual FlowModel
     flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& maximum_time) const;
 
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const = 0;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
@@ -206,13 +221,13 @@ class TaylorPicardIntegrator
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
@@ -222,7 +237,7 @@ class TaylorPicardIntegrator
     using IntegratorBase::flow_step;
 
   private:
-    ValidatedVectorMultivariateFunctionModelDP
+    FlowStepModel
     _flow_step(const ValidatedVectorMultivariateFunction& vector_field_or_differential_equation,
                const ExactBoxType& state_domain,
                const ExactIntervalType& time_domain,
@@ -261,13 +276,13 @@ class TaylorSeriesIntegrator
                 const ExactBoxType& state_domain,
                 const StepSizeType& suggested_time_step) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
@@ -335,13 +350,13 @@ class GradedTaylorSeriesIntegrator
                 const ExactBoxType& state_domain,
                 const StepSizeType& suggested_time_step) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
@@ -373,13 +388,13 @@ class AffineIntegrator
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual Void write(OutputStream& os) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
               const UpperBoxType& bounding_box) const;
 
-    virtual ValidatedVectorMultivariateFunctionModelDP
+    virtual FlowStepModel
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,

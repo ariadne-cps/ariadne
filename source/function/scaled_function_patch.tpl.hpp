@@ -457,15 +457,20 @@ template<class M> auto ScaledFunctionPatch<M>::gradient(const Vector<NumericType
 }
 
 
+template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctionPatch<M> const& fp) {
+    typedef typename ScaledFunctionPatch<M>::PrecisionType PR;
+    MultivariatePolynomial<FloatBounds<PR>> p=fp.polynomial();
+    MultivariatePolynomial<FloatApproximation<PR>> ap=p;
+    os << "{";
+    os << ap;
+    if(fp.error().raw()>0.0) { os << "+/-" << fp.error(); }
+    os << "}";
+    return os;
+}
 
 template<class M> OutputStream& ScaledFunctionPatch<M>::write(OutputStream& os) const {
-    MultivariatePolynomial<FloatBounds<PR>> p=this->polynomial();
-    MultivariatePolynomial<FloatApproximation<PR>> ap=p;
-    os << "FP" << this->domain();
-    os << "(";
-    os << ap;
-    if(this->error().raw()>0.0) { os << "+/-" << this->error(); }
-    os << ")";
+    os << "FunctionPatch(dom=" << this->domain() << ")";
+    write_polynomial(os,*this);
     return os;
 }
 
@@ -986,17 +991,14 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 
 template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream& os) const
 {
-    os << "FP" << this->domain();
-    os << "[";
+    os << "VectorFunctionPatch";
+    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ")";
+    os << "[ ";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
-        ScaledFunctionPatch<M> fi=(*this)[i];
-        MultivariatePolynomial<FloatBounds<PR>> p_fi=fi.polynomial();
-        MultivariatePolynomial<FloatApproximation<PR>> ap_fi=p_fi;
-        os << ap_fi;
-        if(fi.error().raw()>0.0) { os << "+/-" << fi.error(); }
+        write_polynomial(os,(*this)[i]);
     }
-    os << "]";
+    os << " ]";
     return os;
 }
 

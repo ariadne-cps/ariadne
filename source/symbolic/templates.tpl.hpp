@@ -90,7 +90,7 @@ template<class OP, class E> void _write_impl(OutputStream& os, OP op, E const& e
 template<class Y> void _write_impl(OutputStream& os, Symbolic<Cnst,Y> const& c) {
     os << c._val; }
 template<class I> void _write_impl(OutputStream& os, Symbolic<Var,I> const& v) {
-    os << v._ind; }
+    os << "x" << v._ind; }
 
 template<class T> inline Void _write_impl(OutputStream& os, Constant<T> const& c) {
     os << c; }

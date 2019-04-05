@@ -149,6 +149,11 @@
         std::cerr << "DEPRECATED: Function " << #fn << " is deprecated. " << #msg << std::endl; \
     } \
 
+#define ARIADNE_NOTIFY(msg)          \
+    {                                                                \
+        std::cerr << "NOTIFICATION: " << msg << "" << std::endl;                \
+    }
+
 #define ARIADNE_WARN(msg)          \
     {                                                                \
         std::cerr << "WARNING: " << msg << "" << std::endl;                \

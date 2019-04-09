@@ -109,6 +109,7 @@ template<class F> class Approximation
     double get_d() const { return this->_a.get_d(); }
   public:
     friend Bool same(Approximation<F> const&, Approximation<F> const&);
+    friend Bool same(Approximation<F> const& x1, Dyadic const& x2);
     friend PositiveApproximation<F> mag(Approximation<F> const&);
     friend PositiveApproximation<F> mig(Approximation<F> const&);
   public:

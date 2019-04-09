@@ -91,8 +91,9 @@ template<class F> class Error
         return log(x)/cast_positive(log(Bounds<F>(2u,x.precision()))); }
 
     friend Bounds<F> pm(Error<F> const& x) { return Bounds<F>(-x._e,+x._e); }
-    
+
     friend Bool same(Error<F> const& x1, Error<F> const& x2) { return x1._e==x2._e; }
+    friend Bool same(Error<F> const& x1, Dyadic const& x2) { return x1._e==x2; }
     friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }
     friend Error<F> refinement(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
     friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) { return Operations<Error<F>>::_write(os,x); }

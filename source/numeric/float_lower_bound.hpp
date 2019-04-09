@@ -94,6 +94,7 @@ template<class F> class LowerBound
     RawType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
+    friend Bool same(LowerBound<F> const&, Dyadic const&);
     friend Bool same(LowerBound<F> const&, LowerBound<F> const&);
     friend Bool refines(LowerBound<F> const&, LowerBound<F> const&);
     friend LowerBound<F> refinement(LowerBound<F> const&, LowerBound<F> const&);

@@ -117,6 +117,7 @@ template<class F> class Value
     friend Value<F>& operator/=(Value<F>&, TwoExp const&);
     friend Error<F> mag(Value<F> const&);
     friend LowerBound<F> mig(Value<F> const&);
+    friend Bool same(Value<F> const&, Dyadic const&);
     friend Bool same(Value<F> const&, Value<F> const&);
     friend OutputStream& operator<<(OutputStream&, Value<F> const&);
   public:

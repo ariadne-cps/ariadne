@@ -95,6 +95,7 @@ template<class F> class UpperBound
     RawType& raw() { return _u; }
     double get_d() const { return _u.get_d(); }
   public: // To be removed
+    friend Bool same(UpperBound<F> const&, Dyadic const&);
     friend Bool same(UpperBound<F> const&, UpperBound<F> const&);
     friend Bool refines(UpperBound<F> const&, UpperBound<F> const&);
     friend UpperBound<F> refinement(UpperBound<F> const&, UpperBound<F> const&);

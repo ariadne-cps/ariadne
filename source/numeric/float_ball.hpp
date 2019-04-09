@@ -122,7 +122,9 @@ template<class F, class FE> class Ball
   public:
     friend PositiveUpperBound<F> mag(Ball<F,FE> const&);
     friend PositiveLowerBound<F> mig(Ball<F,FE> const&);
+    friend Bool same(Ball<F,FE> const&, Ball<Dyadic> const&);
     friend Bool same(Ball<F,FE> const&, Ball<F,FE> const&);
+    friend Bool models(Ball<F,FE> const&, Dyadic const&);
     friend Bool models(Ball<F,FE> const&, Value<F> const&);
     friend Bool consistent(Ball<F,FE> const&, Ball<F,FE> const&);
     friend Bool inconsistent(Ball<F,FE> const&, Ball<F,FE> const&);

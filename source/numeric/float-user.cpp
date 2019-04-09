@@ -594,6 +594,8 @@ template<class F> struct Operations<Approximation<F>> {
     static ApproximateKleenean _lt(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a< x2._a; }
 
+    static Bool _same(Approximation<F> const& x1, Dyadic const& x2) {
+        return x1._a==x2; }
     static Bool _same(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a==x2._a; }
 
@@ -672,6 +674,10 @@ template<class F> struct Operations<LowerBound<F>> {
     static ValidatedNegatedSierpinskian _lt(LowerBound<F> const& x1, UpperBound<F> const& x2) {
         if(x1._l>=x2._u) { return false; }
         else { return ValidatedNegatedSierpinskian(LogicalValue::LIKELY); }
+    }
+
+    static Bool _same(LowerBound<F> const& x1, Dyadic const& x2) {
+        return x1._l==x2;
     }
 
     static Bool _same(LowerBound<F> const& x1, LowerBound<F> const& x2) {
@@ -772,6 +778,10 @@ template<class F> struct Operations<UpperBound<F>> {
     static ValidatedSierpinskian _lt(UpperBound<F> const& x1, LowerBound<F> const& x2) {
         if(x1._u< x2._l) { return true; }
         else { return ValidatedSierpinskian(LogicalValue::UNLIKELY); }
+    }
+
+    static Bool _same(UpperBound<F> const& x1, Dyadic const& x2) {
+        return x1._u==x2;
     }
 
     static Bool _same(UpperBound<F> const& x1, UpperBound<F> const& x2) {
@@ -1128,6 +1138,12 @@ template<class F> struct Operations<Bounds<F>> {
         else { return indeterminate; }
     }
 
+    static Bool _same(Bounds<F> const& x1, Bounds<Dyadic> const& x2) {
+        return x1._l==x2.lower() && x1._u==x2.upper(); }
+
+    static Bool _models(Bounds<F> const& x1, Dyadic const& x2) {
+        return x1._l<=x2 && x1._u >= x2; }
+
     static Bool _same(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l==x2._l && x1._u==x2._u; }
 
@@ -1382,6 +1398,13 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     static ValidatedKleenean _lt(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Bounds<F>(x1) <  Bounds<F>(x2);
+    }
+
+    static Bool _same(Ball<F,FE> const& x1, Ball<Dyadic,Dyadic> const& x2) {
+        return x1._v==x2.value() && x1._e==x2.error(); }
+
+    static Bool _models(Ball<F,FE> const& x1, Dyadic const& x2) {
+        Dyadic x1v=Dyadic(x1._v); return (x1v>=x2 ? sub(x1v,x2) : sub(x2,x1v)) <= x1._e;
     }
 
     static Bool _same(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
@@ -1721,6 +1744,8 @@ template<class F> struct Operations<PositiveApproximation<F>> {
         return PositiveApproximation<F>(mul(near,x1._a,x2._a)); }
     static PositiveApproximation<F> _div(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(div(near,x1._a,x2._a)); }
+    static PositiveApproximation<F> _pow(PositiveApproximation<F> const& x1, Nat m2) {
+        return PositiveApproximation<F>(pow(approx,x1._a,static_cast<Int>(m2))); }
     static PositiveApproximation<F> _pow(PositiveApproximation<F> const& x1, Int n2) {
         return PositiveApproximation<F>(pow(approx,x1._a,n2)); }
     static PositiveApproximation<F> _sqrt(PositiveApproximation<F> const& x) {

@@ -233,7 +233,8 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
         return PositiveApproximation<F>(mul(near,x1.raw(),x2.raw())); }
     friend PositiveApproximation<F> div(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(div(near,x1.raw(),x2.raw())); }
-    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),m)); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),static_cast<Int>(m))); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Int n) { return PositiveApproximation<F>(pow(near,x.raw(),n)); }
     friend PositiveApproximation<F> sqrt(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqrt(near,x.raw())); }
     friend PositiveApproximation<F> exp(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(exp(near,x.raw())); }
     friend Approximation<F> log(PositiveApproximation<F> const& x) { return Approximation<F>(log(near,x.raw())); }

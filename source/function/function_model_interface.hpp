@@ -49,6 +49,14 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelAlge
 template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterface<P,D,IntervalDomainType,PR,PRE>
     : public virtual ElementaryAlgebraInterface<CanonicalNumericType<P,PR,PRE>>
 {
+    static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
+    typedef IntervalDomainType C;
+    typedef RawFloat<PR> F;
+  public:
+    typedef D DomainType;
+    typedef C CodomainType;
+    typedef typename FunctionModelTraits<P,PR>::RangeType RangeType;
+    typedef FloatError<PR> NormType;
   public:
     virtual CanonicalCoefficientType<P,PRE> const value() const = 0;
 };
@@ -78,7 +86,6 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelInte
   public:
     typedef D DomainType;
     typedef C CodomainType;
-
     typedef typename ElementTraits<CodomainType>::template RangeType<PR> RangeType;
     typedef PositiveFloatUpperBound<PR> NormType;
   public:

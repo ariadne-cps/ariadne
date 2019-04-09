@@ -445,10 +445,15 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<Validated
 }
 
 
+
+template<class M, class V> decltype(auto) model_gradient(const M& f, const V& s) {
+    return gradient(f,s); }
+
 template<class M> auto ScaledFunctionPatch<M>::gradient(const Vector<NumericType>& x) const -> Covector<NumericType>
 {
     Vector<NumericType> s=unscale(x,this->_domain);
-    Covector<NumericType> g=Ariadne::gradient(this->_model,s);
+    Covector<NumericType> g=model_gradient(this->_model,s);
+//    Covector<NumericType> g=this->_model.gradient(s);
     for(SizeType j=0; j!=g.size(); ++j) {
         NumericType rad=convert_interval(this->_domain[j],this->model().precision()).radius();
         g[j]/=rad;

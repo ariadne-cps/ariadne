@@ -121,6 +121,7 @@ template<class F> class TestTaylorModel
   private:
     Void test_concept();
     Void test_constructors();
+    Void test_assign();
     Void test_predicates();
     Void test_approximation();
     Void test_unscale();
@@ -157,6 +158,7 @@ template<class F> Void TestTaylorModel<F>::test()
     FloatBounds<PR>::set_output_places(18);
 
     ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_assign());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
     ARIADNE_TEST_CALL(test_unscale());
@@ -205,8 +207,6 @@ template<class F> Void TestTaylorModel<F>::test_concept()
 
 template<class F> Void TestTaylorModel<F>::test_constructors()
 {
-
-
     ARIADNE_TEST_CONSTRUCT(ExpansionType,raw_expansion,({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} },pr));
     ARIADNE_TEST_CONSTRUCT(F,raw_error,(0.25,pr));
     ARIADNE_TEST_CONSTRUCT(ExpansionType,expansion,(raw_expansion));
@@ -227,6 +227,18 @@ template<class F> Void TestTaylorModel<F>::test_constructors()
     ARIADNE_TEST_EQUALS((tv[{2,1}]),8.0);
 
 }
+
+template<class F> Void TestTaylorModel<F>::test_assign()
+{
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel<F>,tv,(1u,swp));
+    ARIADNE_TEST_ASSIGN(tv,Bounds<F>(1,3,pr));
+    ARIADNE_TEST_EQUALS((tv[{0}]),2);
+    ARIADNE_TEST_SAME(tv.error(),1);
+    ARIADNE_TEST_ASSIGN(tv,Bounds<F>(5,pr));
+    ARIADNE_TEST_EQUALS((tv[{0}]),5);
+    ARIADNE_TEST_SAME(tv.error(),0);
+}
+
 
 template<class F> Void TestTaylorModel<F>::test_predicates()
 {
@@ -277,7 +289,7 @@ template<class F> Void TestTaylorModel<F>::test_unscale()
 
     ExactIntervalType is_singleton(1.0,1.0);
     if(unscale(3*o,is_singleton).codomain()!=is_singleton) {
-        ARIADNE_TEST_WARN("Unscaling over is_singleton domain does not yield constant");
+        ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
 
@@ -535,6 +547,17 @@ template<class F> Void TestTaylorModel<F>::test_compose()
 {
     ARIADNE_TEST_SAME(compose(2-x0*x0-x1/4,{2-x0*x0-x1/4,x0}),-2-(x0^4)-(x1^2)/16+4*(x0^2)+x1-(x0^2)*x1/2-x0/4);
 
+    // Regression test from failure in integration routing
+    if constexpr (IsSame<F,FloatDP>::value) {
+        auto id=ValidatedTaylorModel<F>::coordinates(2,ThresholdSweeper<FloatDP>(double_precision,1e-10));
+        auto s0=id[0];
+        auto s1=id[1];
+        auto x=( 0.3750000000000000 +0.1250000000000000*s0 +0.0292968750000000*s1 +0.0039062500000000*s0*s1 +0.0004577636718750*(s1^2) -0.0019531250000000*(s0^2)*s1 -0.0003967285156250*s0*(s1^2) -0.0000309944152832*(s1^3) -0.0000915527343750*(s0^2)*(s1^2) -0.0000184377034505*s0*(s1^3) -0.0000010803341866*(s1^4) +0.0000305175781250*(s0^3)*(s1^2) +0.0000073115030924*(s0^2)*(s1^3) +0.0000007127722104*s0*(s1^4) +0.0000000334111974*(s1^5) +0.0000019073486328*(s0^3)*(s1^3) +0.0000005215406418*(s0^2)*(s1^4) +0.0000000533492615*s0*(s1^5) +0.0000000020839555*(s1^6) -0.0000004768371582*(s0^4)*(s1^3) -0.0000001241763433*(s0^3)*(s1^4) -0.0000000131704534*(s0^2)*(s1^5) -0.0000000007510809*s0*(s1^6) -0.0000000372529030*(s0^4)*(s1^4) -0.0000000125728548*(s0^3)*(s1^5) -0.0000000017495040*(s0^2)*(s1^6) -0.0000000001205073*s0*(s1^7) +0.0000000074505806*(s0^5)*(s1^4) +0.0000000019790605*(s0^4)*(s1^5) +0.0000000001813735*(s0^3)*(s1^6) +0.0000000006984919*(s0^5)*(s1^5) +0.0000000002758801*(s0^4)*(s1^6) -0.0000000001164153*(s0^6)*(s1^5));
+        auto y=id;
+        y[1]=(y[1]+1)/2;
+
+        ARIADNE_TEST_COMPARE(compose(x,y).error().raw(),<=,1e-8);
+    }
 }
 
 template<class F> Void TestTaylorModel<F>::test_recondition()

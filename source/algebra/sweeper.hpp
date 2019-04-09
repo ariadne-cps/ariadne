@@ -41,6 +41,9 @@ template<class F> class Sweeper;
 template<class F> class SweeperBase;
 template<class I, class X> class Expansion;
 
+
+template<class F> class UnknownError;
+
 template<class F> class SweeperInterface {
     friend class Sweeper<F>;
     friend class SweeperBase<F>;
@@ -86,7 +89,7 @@ template<class F> class Sweeper {
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
-    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p, UnknownError<F>&) const { this->_ptr->_sweep(p); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;

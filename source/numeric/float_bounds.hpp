@@ -156,6 +156,7 @@ template<class F> class Bounds
     friend PositiveUpperBound<F> mag(Bounds<F> const&);
     friend PositiveLowerBound<F> mig(Bounds<F> const&);
     friend Bool same(Bounds<F> const&, Bounds<Dyadic> const&);
+    friend Bool same(Bounds<F> const&, Dyadic const&);
     friend Bool models(Bounds<F> const&, Dyadic const&);
     friend Bool same(Bounds<F> const&, Bounds<F> const&);
     friend Bool models(Bounds<F> const&, Value<F> const&);

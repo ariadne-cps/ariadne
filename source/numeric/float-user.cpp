@@ -1141,6 +1141,9 @@ template<class F> struct Operations<Bounds<F>> {
     static Bool _same(Bounds<F> const& x1, Bounds<Dyadic> const& x2) {
         return x1._l==x2.lower() && x1._u==x2.upper(); }
 
+    static Bool _same(Bounds<F> const& x1, Dyadic const& x2) {
+        return x1._l==x2 && x1._u==x2; }
+
     static Bool _models(Bounds<F> const& x1, Dyadic const& x2) {
         return x1._l<=x2 && x1._u >= x2; }
 
@@ -1402,6 +1405,9 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
 
     static Bool _same(Ball<F,FE> const& x1, Ball<Dyadic,Dyadic> const& x2) {
         return x1._v==x2.value() && x1._e==x2.error(); }
+
+    static Bool _same(Ball<F,FE> const& x1, Dyadic const& x2) {
+        return x1._v==x2 && x1._e==0; }
 
     static Bool _models(Ball<F,FE> const& x1, Dyadic const& x2) {
         Dyadic x1v=Dyadic(x1._v); return (x1v>=x2 ? sub(x1v,x2) : sub(x2,x1v)) <= x1._e;
@@ -1700,6 +1706,9 @@ template<class F> struct Operations<Value<F>> {
 
     static Boolean _lt(Value<F> const& x1, Value<F> const& x2) {
         return x1._v <  x2._v; }
+
+    static Bool _same(Value<F> const& x1, Dyadic const& x2) {
+        return x1._v==x2; }
 
     static Bool _same(Value<F> const& x1, Value<F> const& x2) {
         return x1._v==x2._v; }
@@ -2057,20 +2066,24 @@ PositiveFloatDPApproximation mag(FloatDPApproximation const& x) { return Operati
 PositiveFloatDPApproximation mig(FloatDPApproximation const& x) { return Operations<FloatDPApproximation>::_mig(x); }
 FloatDPApproximation round(FloatDPApproximation const& x) { return Operations<FloatDPApproximation>::_round(x); }
 Bool same(FloatDPApproximation const& x1, FloatDPApproximation const& x2) { return Operations<FloatDPApproximation>::_same(x1,x2); }
+Bool same(FloatDPApproximation const& x1, Dyadic const& x2) { return Operations<FloatDPApproximation>::_same(x1,x2); }
 
 
 PositiveFloatMPApproximation mag(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_mag(x); }
 PositiveFloatMPApproximation mig(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_mig(x); }
 FloatMPApproximation round(FloatMPApproximation const& x) { return Operations<FloatMPApproximation>::_round(x); }
 Bool same(FloatMPApproximation const& x1, FloatMPApproximation const& x2) { return Operations<FloatMPApproximation>::_same(x1,x2); }
+Bool same(FloatMPApproximation const& x1, Dyadic const& x2) { return Operations<FloatMPApproximation>::_same(x1,x2); }
 
 
 
+Bool same(FloatDPLowerBound const& x1, Dyadic const& x2) { return Operations<FloatDPLowerBound>::_same(x1,x2); }
 Bool same(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_same(x1,x2); }
 Bool refines(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_refines(x1,x2); }
 FloatDPLowerBound refinement(FloatDPLowerBound const& x1, FloatDPLowerBound const& x2) { return Operations<FloatDPLowerBound>::_refinement(x1,x2); }
 
 
+Bool same(FloatMPLowerBound const& x1, Dyadic const& x2) { return Operations<FloatMPLowerBound>::_same(x1,x2); }
 Bool same(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_same(x1,x2); }
 Bool refines(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_refines(x1,x2); }
 FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound const& x2) { return Operations<FloatMPLowerBound>::_refinement(x1,x2); }
@@ -2078,11 +2091,13 @@ FloatMPLowerBound refinement(FloatMPLowerBound const& x1, FloatMPLowerBound cons
 
 
 
+Bool same(FloatDPUpperBound const& x1, Dyadic const& x2) { return Operations<FloatDPUpperBound>::_same(x1,x2); }
 Bool same(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_same(x1,x2); }
 Bool refines(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_refines(x1,x2); }
 FloatDPUpperBound refinement(FloatDPUpperBound const& x1, FloatDPUpperBound const& x2) { return Operations<FloatDPUpperBound>::_refinement(x1,x2); }
 
 
+Bool same(FloatMPUpperBound const& x1, Dyadic const& x2) { return Operations<FloatMPUpperBound>::_same(x1,x2); }
 Bool same(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_same(x1,x2); }
 Bool refines(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_refines(x1,x2); }
 FloatMPUpperBound refinement(FloatMPUpperBound const& x1, FloatMPUpperBound const& x2) { return Operations<FloatMPUpperBound>::_refinement(x1,x2); }
@@ -2094,6 +2109,9 @@ PositiveFloatDPUpperBound mag(FloatDPBounds const& x) { return Operations<FloatD
 PositiveFloatDPLowerBound mig(FloatDPBounds const& x) { return Operations<FloatDPBounds>::_mig(x); }
 FloatDPBounds round(FloatDPBounds const& x) { return Operations<FloatDPBounds   >::_round(x); }
 
+Bool same(FloatDPBounds const& x1, DyadicBounds const& x2) { return Operations<FloatDPBounds>::_same(x1,x2); }
+Bool same(FloatDPBounds const& x1, Dyadic const& x2) { return Operations<FloatDPBounds>::_same(x1,x2); }
+Bool models(FloatDPBounds const& x1, Dyadic const& x2) { return Operations<FloatDPBounds>::_models(x1,x2); }
 Bool same(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_same(x1,x2); }
 Bool models(FloatDPBounds const& x1, FloatDPValue const& x2) { return Operations<FloatDPBounds>::_models(x1,x2); }
 Bool refines(FloatDPBounds const& x1, FloatDPBounds const& x2) { return Operations<FloatDPBounds>::_refines(x1,x2); }
@@ -2107,6 +2125,9 @@ PositiveFloatMPUpperBound mag(FloatMPBounds const& x) { return Operations<FloatM
 PositiveFloatMPLowerBound mig(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_mig(x); }
 FloatMPBounds round(FloatMPBounds const& x) { return Operations<FloatMPBounds>::_round(x); }
 
+Bool same(FloatMPBounds const& x1, DyadicBounds const& x2) { return Operations<FloatMPBounds>::_same(x1,x2); }
+Bool same(FloatMPBounds const& x1, Dyadic const& x2) { return Operations<FloatMPBounds>::_same(x1,x2); }
+Bool models(FloatMPBounds const& x1, Dyadic const& x2) { return Operations<FloatMPBounds>::_models(x1,x2); }
 Bool same(FloatMPBounds const& x1, FloatMPBounds const& x2) { return Operations<FloatMPBounds>::_same(x1,x2); }
 Bool models(FloatMPBounds const& x1, FloatMPValue const& x2) { return Operations<FloatMPBounds>::_models(x1,x2); }
 Bool refines(FloatMPBounds const& x1, FloatMPBounds const& x2) { return Operations<FloatMPBounds>::_refines(x1,x2); }
@@ -2119,6 +2140,9 @@ FloatMPBounds refinement(FloatMPBounds const& x1, FloatMPBounds const& x2) { ret
 PositiveFloatDPUpperBound mag(FloatDPBall const& x) { return Operations<FloatDPBall>::_mag(x); }
 PositiveFloatDPLowerBound mig(FloatDPBall const& x) { return Operations<FloatDPBall>::_mig(x); }
 
+Bool same(FloatDPBall const& x1, DyadicBall const& x2) { return Operations<FloatDPBall>::_same(x1,x2); }
+Bool same(FloatDPBall const& x1, Dyadic const& x2) { return Operations<FloatDPBall>::_same(x1,x2); }
+Bool models(FloatDPBall const& x1, Dyadic const& x2) { return Operations<FloatDPBall>::_models(x1,x2); }
 Bool same(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_same(x1,x2); }
 Bool models(FloatDPBall const& x1, FloatDPValue const& x2) { return Operations<FloatDPBall>::_models(x1,x2); }
 Bool refines(FloatDPBall const& x1, FloatDPBall const& x2) { return Operations<FloatDPBall>::_refines(x1,x2); }
@@ -2130,6 +2154,9 @@ FloatDPBall refinement(FloatDPBall const& x1, FloatDPBall const& x2) { return Op
 PositiveFloatMPUpperBound mag(FloatMPBall const& x) { return Operations<FloatMPBall>::_mag(x); }
 PositiveFloatMPLowerBound mig(FloatMPBall const& x) { return Operations<FloatMPBall>::_mig(x); }
 
+Bool same(FloatMPBall const& x1, DyadicBall const& x2) { return Operations<FloatMPBall>::_same(x1,x2); }
+Bool same(FloatMPBall const& x1, Dyadic const& x2) { return Operations<FloatMPBall>::_same(x1,x2); }
+Bool models(FloatMPBall const& x1, Dyadic const& x2) { return Operations<FloatMPBall>::_models(x1,x2); }
 Bool same(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_same(x1,x2); }
 Bool models(FloatMPBall const& x1, FloatMPValue const& x2) { return Operations<FloatMPBall>::_models(x1,x2); }
 Bool refines(FloatMPBall const& x1, FloatMPBall const& x2) { return Operations<FloatMPBall>::_refines(x1,x2); }
@@ -2143,6 +2170,8 @@ FloatDPError mag(FloatDPValue const& x) { return Operations<FloatDPValue>::_mag(
 FloatMPError mag(FloatMPValue const& x) { return Operations<FloatMPValue>::_mag(x); }
 Bool same(FloatDPValue const& x1, FloatDPValue const& x2) { return Operations<FloatDPValue>::_same(x1,x2); }
 Bool same(FloatMPValue const& x1, FloatMPValue const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
+Bool same(FloatDPValue const& x1, Dyadic const& x2) { return Operations<FloatDPValue>::_same(x1,x2); }
+Bool same(FloatMPValue const& x1, Dyadic const& x2) { return Operations<FloatMPValue>::_same(x1,x2); }
 
 
 PositiveFloatDPValue hlf(PositiveFloatDPValue const& x) { return PositiveFloatDPValue(hlf(x._v)); }

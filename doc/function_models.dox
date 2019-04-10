@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*!
 
 \file function_models.dox
 \brief Documentation on polynomial models of functions
@@ -30,21 +30,94 @@
 
 \page function_models_page Function Models
 
-A \em model for a function \f$f:\mathbb{R}^m\rightarrow \mathbb{R}^n\f$ is a polynomial approximation of \f$f\f$ on some domain \f$D\f$.
-A model is described by two parameters, the \em degree and the \em smoothness.
+A \em model for a function \f$f:\mathbb{R}^n\rightarrow \mathbb{R}^m\f$ is an approximation of \f$f\f$ on some domain \f$D\f$.
+A \em validated model describes a set of possibilities for \f$f\f$, such as a ball around some fixed approximation in a function norm, whereas an \em approximate model merely gives an approxmation, with no guarantees on the true value.
 
-Hence the general form of a model of \f$f\f$ with degree \f$d\f$ and smoothness \f$s\f$ is
-\f[
-  f^i(x) \in \sum_{0\leq|\alpha|\leq s} c_{\alpha}\,\interval{a}^{\;\!i}_{\,\alpha}\,x^\alpha
-     + \sum_{s<|\alpha|\leq d} c_\alpha\,a^{i}_{\,\alpha} x^\alpha .
-\f]
-Here, \f$\alpha\f$ is a multi-index \f$(\alpha_1,\ldots,\alpha_m)\f$ with degree \f$|\alpha|=\alpha_1+\cdots+\alpha_m\f$, and \f$x^\alpha := x_1^{\alpha_1}\,x_2^{\alpha_2}\,\cdots\,x_m^{\alpha_m}\f$, and \f$\interval{a}\f$ denotes an interval coefficient, and \f$a\f$ a numerical coefficient. The coefficients \f$c_\alpha\f$ are constants depending on the representation of the model. Taking \f$c_\alpha=1\f$ gives a polynomial model, and taking \f$c_\alpha=\prod_{i=1}^{k} \alpha_i!\f$ gives a model where \f$a^i_{\,\alpha} = D_\alpha f^i(0)\f$ for \f$|\alpha|\leq s\f$.
+A particularly useful approach is to first \em scale or otherwise perform a mapping of \f$D\f$ to a canonical domain, typically \f$[-1\!:\!+1]^n\f$, though for Fourier approximations we may prefer variables in \f$[-\pi\!:\!+\pi]\f$.
+We shall henceforth assume that our function models are defined on a rescaled domain.
 
-The interpretation of \f$s\f$ is that the model contains sufficient information to compute \f$f\f$ and its derivatives up to order \f$s\f$.
 
-If \f$s=-1\f$ then the model is assumed to be \em exact, i.e. a polynomial.
+\section polynomial_models Polynomial Models
+
+A polynomial model represent represents a function \f$f\f$ on \f$X\f$ by in terms of a polynomial over \f$D\f$.
+
+We recall that a polynomial \f$p\f$ in \f$n\f$ variables \f$(x_1,\ldots,x_n)\f$ can be written as
+\f[ p(x) = \sum_{\alpha\in \aleph} c_{\alpha}\,x^{\alpha} . \f]
+Here, \f$\alpha\f$ is a multi-index \f$(\alpha_1,\ldots,\alpha_m)\f$ with degree \f$|\alpha|=\alpha_1+\cdots+\alpha_m\f$, and \f$x^\alpha := x_1^{\alpha_1}\,x_2^{\alpha_2}\,\cdots\,x_m^{\alpha_m}\f$, and \f$\aleph\f$ is a finite set of multi-indices.
+We will write \f$\alpha_i\f$ for the multi-index \f$(\alpha_i)_i=1\f$, \f$(\alpha_i)_j=0,\;i\neq j\f$.
+The coefficients \f$c_\alpha\f$ are constants of a real-number type depending on the representation of the model.
+
+In an \em approximate model, the coefficients are approximate values \f$\tilde{c}_\alpha\f$, typically of some \ref FloatApproximation class.
+The model is then an approximate polynomial \f[ \textstyle \tilde{p}(x) = \sum_{\alpha\in\aleph} \tilde{c}_\alpha x^\alpha \f] such that \f$\tilde{p} \approx f\f$ over \f$D\f$.
+
+There are many kinds of \em validated model.
+
+A simple class of validated models can be described
+\f[ \hat{p}(z) = \sum_\alpha c_\alpha z^\alpha \pm e = p(z)\pm \varepsilon \f]
+which describes the set of continuous functions
+\f[ \textstyle \langle p \pm \varepsilon\rangle = \{ f : D\to\R \mid \forall _{z\in D} | f(z) - p(z) | \leq \varepsilon \} . \f]
+In other words, \f$\hat{p}\f$ is the ball of radius \f$e\f$ around \f$p(z)=\sum_\alpha c_\alpha z^\alpha\f$ in the uniform (\f$L^\infty\f$) norm.
+Note that this model class does not support differentiation, since (here, restricting to one dimension) for any differentiable function \f$e\f$ with \f$\|e\|_\infty\leq \varepsilon\f$, we could have \f$f'(z) = \sum_{\alpha} \alpha c_\alpha z^{\alpha-1} + e'(z)\f$, so the derivative at any point can be made to take an arbitrary value.
+
+We can also consider models in higher differentiability classes by keeping track of higher-order norms.
+For example, we can keep track of error bounds \f$\varepsilon_\alpha\f$ on \f$\partial^\alpha f/\partial z^\alpha\f$ for \f$|\alpha|=1\f$ to obtain a <em>\f$C^1\f$ function model</em>.
+Here, it is also useful to keep track of the error \f$\delta_0\f$ at \f$z=0\f$, since then we have the following bound on the error:
+\f[ \textstyle |f(z)-p(z)| \leq \delta_0 + \sum_i \epsilon_{\alpha_i} z_i , \f]
+
+Alternatively, we can use coefficients which are themselves non-exact:
+\f[ \textstyle \hat{p}(z) = \sum_\alpha \hat{c}_\alpha z^\alpha \f]
+Here there are two distinct interpretations:
+- We can assume that the \f$\hat{c}_\alpha\f$ are bounds (e.g. \ref FloatBounds<PR> Bounds) for some fixed, but unknown value.
+In this case, \f$\langle \hat{p} \rangle\f$ is a set of \em polynomials:
+\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall \alpha\in\aleph,\ \exists c_\alpha \in \hat{c}_\alpha,\ \forall z\in D,\ | f(z) = \sum_\alpha c_\alpha z^\alpha \} , \f]
+- We can assume that the \f$\hat{c}_\alpha\f$ are bounds on the values of a function which may itself depend on \f$z\f$.
+In this case,
+\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall z\in D,\ \forall \alpha\in\aleph,\ \exists c_\alpha\in\hat{c}_\alpha,\ | f(z) = \sum_\alpha c_\alpha z^\alpha \} . \f]
+
+Note that the second interpretation gives more possible choices of \f$f\f$.
+
+\b Example
+
+Consider the polynomial model \f$\hat{p}(z) = [-1:+1]+[2:3]z\f$.
+
+In the first interpretation, \f$\langle \hat{p} \rangle\f$ is the set of affine functions \f$ f(z) = c_0 + c_1 z\f$ where \f$c_0\in[0:1]\f$ and \f$c_1\in[2:4]\f$. In this case, the possible values of \f$\int_{-1}^{+1} f(z) dz\f$ are \f$[0:2]\f$, since
+\f[ \begin{aligned} \textstyle \int_{-1}^{+1} f(z)dz & = \textstyle \int_{-1}^{+1} c_0 + c_1 z dz=[c_0z+c_1\tfrac{1}{2}z^2]_{-1}^{+1}=c_0[z]_{-1}^{+1}+c_1[\tfrac{1}{2}z^2]_{-1}^{+1} \\ &\textstyle =c_0(1-(-1))+c_1(\tfrac{1}{2}-\tfrac{1}{2})=2c_0 \in [0:2] . \end{aligned} \f]
+
+In the second interpretation, \f$\langle \hat{p} \rangle\f$ is the set all functions of the form \f$ f(z) = c_0(z) + c_1(z) z\f$ where for all \f$z\f$, \f$c_0(z)\in[0:1]\f$ and \f$c_1(z)\in[2:4]\f$.
+In this case, \f$\int_{-1}^{+1} f(z) dz\f$ are \f$[-1:+3]\f$.
+The maximum value the integral can take is for \f$f(z)=1+2z\f$ for \f$z\in[-1:0]\f$ and \f$1+4z\f$ for \f$z\in[0:+1]\f$, so
+\f[ \textstyle \int_{-1}^{+1} f(z) dz \leq \int_{-1}^{0} 1+2z\,dz + \int_{0}^{+1} 1+4z\,dz = [z+z^2]_{-1}^{0} + [z+2z^2]_{0}^{+1} = (0-0) + (3-0) = 3 . \f]
+
+
+
+\subsection sweeping Simplification by sweeping
+
+One of the key operations on function models is simplification by \em sweeping, in which small (or high-order) terms are removed by either combining with other terms, or putting into a \em remainder term, such as the error bound.
+
+For a \f$C^0\f$ model \f$p(z)\pm\varepsilon\f$, sweeping yields
+\f[ \textstyle \sum_{\alpha\in\alpha_1} c_\alpha z^\alpha + \sum_{\alpha\in\alpha_2} c_\alpha z^\alpha  \pm \varepsilon \preceq
+     \sum_{\alpha\in\alpha_1} c_\alpha z^\alpha  \pm \bigl( \varepsilon + \sum_{\alpha\in\alpha_2} |c_\alpha| \|z^\alpha\| \bigr) . \f]
+When working on the unit domain, \f$\|z^\alpha\|=1\f$ for all \f$\alpha\f$, so we can take error \f$\varepsilon + \sum_{\alpha\in\alpha_2} |c_\alpha|\f$.
+
+Other model classes can be constructed from these basic building blocks.
+For example, we could consider models which are explicitly represented as a composition, or as a sum of other model classes.
+
+
+For more information on Taylor (polynomial) models, see Berz & Hoffstätter (1998) and Makino & Berz (1999).
+
+
+\section affine_models Affine Models
+
+An affine model represents a function \f$f\f$ on \f$X\f$ by \f$f(x) = b + A (x-c)\f$.
+Given \f$f\f$, an \f$C^1\f$ model can be computed by taking
+\f[ [b] \ni f(c); \quad [A] \ni Df(X) \f]
+
+
+
 
 \section function_operation Function Operations
+
+We say a \f$(d,s)\f$-model is a polynomial of maximum degree \f$d\f$, and differentiability class \f$s\f$.
 
 The following operations on functions are supported:
  - Evaluation: If \f$p\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^m\rightarrow\mathbb{R}^n\f$, then \f$p(c_1,\ldots,c_m)\f$ is an interval.
@@ -68,30 +141,24 @@ The following operations on functions are supported:
  - Reduce: If \f$p:\mathbb{R}^{m}\times\mathbb{R}^{n}\rightarrow\mathbb{R}^{n}\f$ is a \f$(d_1,s_1)\f$-model, \f$d_2\leq d_1\f$ and \f$s_2\leq\min\{d_2,s_1\}\f$, then \f$p\f$ can be reduced to a \f$(d_2,s_2)\f$-model.
 
 
-\section affine_models Affine Models
-
-An affine model represents a function \f$f\f$ on \f$X\f$ by \f$f(x) = b + A (x-c)\f$. 
-Given \f$f\f$, an \f$s=1\f$ model can be computed by taking 
-\f[ [b] \ni f(c); \quad [A] \ni Df(X) \f]
-
 
 
 \section function_model_contractors Theory of Contractors
 
 Consider the equation \f$f_i(x_1,\ldots,x_k)=x_i\f$ for \f$i=1,\ldots,k\f$. A \e contractor is a set-based over-approximation to the \f$f_i\f$ working on a class of set with an \e intersection operation. (Actually, all we require of the intersection operation is that it is an over-approximation to the set-theoretic intersection, and that the intersection of \a X and \a Y is a subset of both \a X and \a Y.)
 
-A contractor is \e monotone if \f$f_i(X_1,\ldots,X_k)\subset f_i(Y_1,\ldots,Y_k)\f$ if \f$X_i \subset Y_i\f$ for all \f$i\f$. 
+A contractor is \e monotone if \f$f_i(X_1,\ldots,X_k)\subset f_i(Y_1,\ldots,Y_k)\f$ if \f$X_i \subset Y_i\f$ for all \f$i\f$.
 Suppose \f$f_i(X_1,\ldots,X_k)=Y_i\subset X_i\f$, and \f$Y_j\subset X_j\f$ for \f$j\neq i\f$. Then \f$f_i(Y_1,\ldots,Y_k)\subset f_i(X_1,\ldots,X_k)\subset Y_i\f$.
 
 
-A system of contractors applies updates \f$X_i'=f_i(X_1,\ldots,X_k)\cap X_i\f$, possibly performing multiple updates simultaneously. 
-If \f$f_i\f$ is monotone and \f$f_i(X_1,\ldots,X_k)\subset X_i\f$ at one stage, then inclusion holds at all stages. 
+A system of contractors applies updates \f$X_i'=f_i(X_1,\ldots,X_k)\cap X_i\f$, possibly performing multiple updates simultaneously.
+If \f$f_i\f$ is monotone and \f$f_i(X_1,\ldots,X_k)\subset X_i\f$ at one stage, then inclusion holds at all stages.
 We can therefore apply contractors \f$f_i\f$ sequentially or in parallel. If for any \f$i\f$, \f$f_i(X_1,\ldots,X_k)\cap X_i = \emptyset\f$, then there is no fixed-point. If for all \f$i\f$, \f$f_i(X_1,\ldots,X_k)\subset X_i\f$, then there is at least one solution in \f$X_1\times\cdots\times X_k\f$.
 
-The Taylor calculus operations are not monotone, since refining an argument may cause terms to be swept into the error. Further, the intersection of two Taylor expressions need not be a subset of either argument due to round-off error. 
+The Taylor calculus operations are not monotone, since refining an argument may cause terms to be swept into the error. Further, the intersection of two Taylor expressions need not be a subset of either argument due to round-off error.
 However, both operations are over-approximations of the exact operations, and this allows us to prove the existence of solutions.
 
-Suppose \f$f_i\f$ are monotone contractors, \f$\hat{f}_i\f$ are non-monotone numerical over-approximations to the \f$f_i\f$, and \f$\sqcap\f$ is an over-approximation to the intersection operator. 
+Suppose \f$f_i\f$ are monotone contractors, \f$\hat{f}_i\f$ are non-monotone numerical over-approximations to the \f$f_i\f$, and \f$\sqcap\f$ is an over-approximation to the intersection operator.
 Consider a system of contractors, \f$X_i'=\hat{f}_i(X_1,\ldots,X_k) \sqcap X_i\f$.
 Suppose that for all \f$i\f$ at some stage of the operation, \f$\hat{f}_i(X_1,\ldots,X_k) \subset X_i\f$. Then the final result contains a solution of \f$f_i(x_1,\ldots,x_k)=x_i;\ i=1,\ldots,k\f$.
 

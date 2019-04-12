@@ -29,17 +29,11 @@ void verify_space_rendezvous() {
     auto system = problem.system;
     HybridConstraintSet safe_set = problem.safe_set;
 
-    cout << "initial_set=" << initial_set << "\n";
-    cout << "system=" << system << "\n";
-    cout << "safe_set=" << safe_set << "\n";
+    std::cout << "Space Rendezvous system:\n" << std::flush;
 
-    cout << "state_space=" << system.state_space() << "\n";
     DiscreteLocation initial_location = initial_set.location();
-    cout << "initial_location=" << initial_location << "\n";
     RealSpace initial_space = system.state_space()[initial_location];
-    cout << "initial_space=" << initial_space << "\n";
     BoundedConstraintSet initial_constraint_set = initial_set.euclidean_set(initial_location,initial_space);
-    cout << "initial_constraint_set=" << initial_constraint_set << "\n";
 
     MaximumError max_err=1e-3;
     TaylorSeriesIntegrator integrator(max_err,Order(3u));
@@ -54,7 +48,7 @@ void verify_space_rendezvous() {
 
     StopWatch sw;
 
-    cout << "\nComputing orbit...\n";
+    cout << "Computing orbit...\n";
     HybridTime evolution_time(200.0,3);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
@@ -75,22 +69,16 @@ void verify_space_rendezvous() {
             ++num_ce;
         }
     }
-    cout << "Number of counterexamples: " << num_ce << std::endl;
+    if (num_ce>0) cout << "Number of counterexamples: " << num_ce << std::endl;
 
     sw.click();
     std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
-    cout << "\nReach size = " << orbit.reach().size() << "\n";
-
-    cout << "\nDrawing orbit...\n";
-    plot("space_rendezvous_x_y",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
-    //plot("space_rendezvous_t_x",{0<=t<=200,-1000<=x<=0},Colour(.5,.0,.5),orbit.reach());
-    //plot("space_rendezvous_t_y",{0<=t<=200,-1000<=y<=0},Colour(.5,.0,.5),orbit.reach());
-    //plot("space_rendezvous_t_vx",{0<=t<=200,-2<=vx<=10_dec},Colour(.5,.0,.5),orbit.reach());
-    //plot("space_rendezvous_t_vy",{0<=t<=200,-2<=vy<=10_dec},Colour(.5,.0,.5),orbit.reach());
-
+    std::cout << "Plotting..." << std::endl;
+    plot("spacerendezvous",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
+    std::cout << "File spacerendezvous.png written." << std::endl;
 }
 
 

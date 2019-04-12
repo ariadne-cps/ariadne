@@ -57,6 +57,8 @@ int main()
                           dot(t)=Real(1.0)
                          });
 
+    std::cout << "Quadrotor system:\n" << std::flush;
+
     MaximumError max_err=1e-2;
     TaylorSeriesIntegrator integrator(max_err,Order(2u));
 
@@ -65,13 +67,11 @@ int main()
     evolver.configuration().maximum_step_size(0.01);
     evolver.configuration().maximum_spacial_error(1e-2);
     evolver.verbosity = 0;
-    std::cout <<  evolver.configuration() << std::endl;
 
     Real eps = 0.4_dec;
 
     Box<RealInterval> initial_set({{-eps,eps},{-eps,eps},{-eps,eps},{-eps,eps},{-eps,eps},{-eps,eps},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}});
 
-    std::cout << "Initial set: " << initial_set << std::endl;
     Real evolution_time(5.0);
 
     StopWatch sw;
@@ -89,6 +89,7 @@ int main()
     }
     sw.click();
     std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
-
+    std::cout << "Plotting..." << std::endl;
     plot("quadrotor",PlanarProjectionMap(12,11,2),ApproximateBoxType({{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{-0.5,1.5},{0.0,5.0}}), Colour(1.0,0.75,0.5), orbit);
+    std::cout << "File quadrotor.png written." << std::endl;
 }

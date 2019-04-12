@@ -51,9 +51,13 @@ int main() {
     Real x7_0(0.45);
     Real t_0(0.0);
 
+    std::cout << "Laub-Loomis system:\n" << std::flush;
+
     ListSet<Enclosure> reach1, reach2, reach3;
 
     {
+        std::cout << "Running for W=0.01...\n" << std::flush;
+
         MaximumError max_err = 2e-3;
         TaylorSeriesIntegrator integrator(max_err, Order(4u));
 
@@ -62,7 +66,6 @@ int main() {
         evolver.configuration().maximum_step_size(0.2);
         evolver.configuration().maximum_spacial_error(1e-3);
         evolver.verbosity = 0;
-        std::cout << evolver.configuration() << std::endl;
 
         Real eps = 1 / 100_q;
 
@@ -75,7 +78,6 @@ int main() {
                                        {x7_0 - eps, x7_0 + eps},
                                        {t_0,        t_0}});
 
-        std::cout << "Initial set: " << initial_set << std::endl;
         Real evolution_time(20.0);
 
         StopWatch sw;
@@ -99,7 +101,7 @@ int main() {
         }
 
         sw.click();
-        std::cout << "Number of counterexamples: " << ce << std::endl;
+        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
         std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
@@ -107,6 +109,8 @@ int main() {
     }
 
     {
+        std::cout << "Running for W=0.05...\n" << std::flush;
+
         MaximumError max_err = 2e-3;
         TaylorSeriesIntegrator integrator(max_err, Order(4u));
 
@@ -115,7 +119,6 @@ int main() {
         evolver.configuration().maximum_step_size(0.2);
         evolver.configuration().maximum_spacial_error(1e-3);
         evolver.verbosity = 0;
-        std::cout << evolver.configuration() << std::endl;
 
         Real eps = 1 / 20_q;
 
@@ -128,7 +131,6 @@ int main() {
                                        {x7_0 - eps, x7_0 + eps},
                                        {t_0,        t_0}});
 
-        std::cout << "Initial set: " << initial_set << std::endl;
         Real evolution_time(20.0);
 
         StopWatch sw;
@@ -152,7 +154,7 @@ int main() {
         }
 
         sw.click();
-        std::cout << "Number of counterexamples: " << ce << std::endl;
+        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
         std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
@@ -160,6 +162,8 @@ int main() {
     }
 
     {
+        std::cout << "Running for W=0.1...\n" << std::flush;
+
         MaximumError max_err = 2e-3;
         TaylorSeriesIntegrator integrator(max_err, Order(4u));
 
@@ -168,7 +172,6 @@ int main() {
         evolver.configuration().maximum_step_size(0.2);
         evolver.configuration().maximum_spacial_error(1e-3);
         evolver.verbosity = 0;
-        std::cout << evolver.configuration() << std::endl;
 
         Real eps = 1 / 10_q;
 
@@ -181,7 +184,6 @@ int main() {
                                        {x7_0 - eps, x7_0 + eps},
                                        {t_0,        t_0}});
 
-        std::cout << "Initial set: " << initial_set << std::endl;
         Real evolution_time(20.0);
 
         StopWatch sw;
@@ -205,14 +207,14 @@ int main() {
         }
 
         sw.click();
-        std::cout << "Number of counterexamples: " << ce << std::endl;
+        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
         std::cout << "Width of final x4: " << bounds.width() << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach3.adjoin(orbit.reach());
     }
 
-    std::cout << "plotting..." << std::endl;
+    std::cout << "Plotting..." << std::endl;
     Box<FloatDPUpperInterval> graphics_box{{1.5,5.0},{1.5,5.0},{1.5,5.0},{1.5,5.0},{1.5,5.0},{1.5,5.0},{1.5,5.0},{0.0,20.0}};
     Figure fig=Figure();
     fig.set_projection_map(PlanarProjectionMap(8,7,3));
@@ -225,5 +227,6 @@ int main() {
     fig.draw(reach2);
     fig.set_fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write("laub-loomis");
+    fig.write("laubloomis");
+    std::cout << "File laubloomis.png written." << std::endl;
 }

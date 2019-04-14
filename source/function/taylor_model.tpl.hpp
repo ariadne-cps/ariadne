@@ -513,17 +513,17 @@ template<class F> Value<F> fma_err(Value<F> const& x, ValidatedApproximation<F> 
     F const& yv=y.raw();
     F& re=e.raw();
     F::set_rounding_to_nearest();
-    F rv=xv+cm*yv;
+    F rv=xv*cm+yv;
     F::set_rounding_upward();
     F u,ml;
-    if(yv>=0) {
+    if(xv>=0) {
         F mcl=-cl;
-        u=cu*yv+xv;
-        ml=mcl*yv-xv;
+        u=xv*cu+yv;
+        ml=xv*mcl-yv;
     } else {
         F mcu=-cu;
-        u=cl*yv+xv;
-        ml=mcu*yv-xv;
+        u=xv*cl+yv;
+        ml=xv*mcu-yv;
     }
     re+=(u+ml)/2;
     return Value<F>(rv);
@@ -813,11 +813,11 @@ template<class P, class F> inline Void _sma(TaylorModel<P,F>& r, const TaylorMod
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->index()<yiter->index()) {
             UniformConstReference<CoefficientType> xv=xiter->coefficient();
-            r.expansion().append(xiter->index(),xv);
+            r.expansion().append(xiter->index(),mul_err(xv,c,err));
             ++xiter;
         } else if(yiter->index()<xiter->index()) {
             UniformConstReference<CoefficientType> yv=yiter->coefficient();
-            r.expansion().append(yiter->index(),mul_err(yv,c,err));
+            r.expansion().append(yiter->index(),yv);
             ++yiter;
         } else {
             UniformConstReference<CoefficientType> xv=xiter->coefficient();
@@ -829,16 +829,16 @@ template<class P, class F> inline Void _sma(TaylorModel<P,F>& r, const TaylorMod
 
     while(xiter!=x.end()) {
         UniformConstReference<CoefficientType> xv=xiter->coefficient();
-        r.expansion().append(xiter->index(),xv);
+        r.expansion().append(xiter->index(),mul_err(xv,clmu,err));
         ++xiter;
     }
     while(yiter!=y.end()) {
         UniformConstReference<CoefficientType> yv=yiter->coefficient();
-        r.expansion().append(yiter->index(),mul_err(yv,clmu,err));
+        r.expansion().append(yiter->index(),yv);
         ++yiter;
     }
 
-    r.error()=x.error()+y.error();
+    r.error()=x.error()*mag(c)+y.error();
     r.error()+=err;
 
     ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
@@ -930,7 +930,7 @@ template<class P, class F> Void TaylorModel<P,F>::isma(const NumericType& c, con
 {
     TaylorModel<P,F>& x=*this;
     TaylorModel<P,F> r=this->create();
-    _sma(r,x,c,y);
+    _sma(r,y,c,x);
     this->swap(r);
     this->sweep();
     ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
@@ -1282,7 +1282,6 @@ compose(const TaylorSeries<typename F::PrecisionType>& ts, const TaylorModel<P,F
 template<class P, class F> TaylorModel<P,F>
 compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
-    using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
     static const DegreeType MAX_DEGREE=20;
     static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;

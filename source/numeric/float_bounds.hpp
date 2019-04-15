@@ -366,6 +366,8 @@ template<class F> class Operations<Bounds<F>> {
     static Bounds<F> _mul(Bounds<F> const& x1, Bounds<F> const& x2);
     static Bounds<F> _div(Bounds<F> const& x1, Bounds<F> const& x2);
 
+    static Bounds<F> _fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> const& x3);
+
     static Bounds<F> _pi(PR pr);
     static Bounds<F> _sin(Bounds<F> const& x);
     static Bounds<F> _cos(Bounds<F> const& x);
@@ -458,6 +460,12 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
     }
     return Bounds<F>(rl,ru);
 }
+
+template<class F> inline auto Operations<Bounds<F>>::_fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> const& x3) -> Bounds<F>
+{
+    return add(mul(x1,x2),x3);
+}
+
 
 }
 

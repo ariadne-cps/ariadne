@@ -92,14 +92,18 @@ class IntersectionException : public std::runtime_error {
 };
 
 template<class P, class F> struct ModelNumericTraits;
+template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>> {
+    typedef Bounds<F> CoefficientType; typedef Error<F> ErrorType;
+    typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
+    typedef Bounds<F> NumericType; typedef F RawFloatType; };
 template<class F> struct ModelNumericTraits<ValidatedTag,F> {
     typedef Value<F> CoefficientType; typedef Error<F> ErrorType;
     typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
-    typedef Bounds<F> NumericType; };
+    typedef Bounds<F> NumericType; typedef F RawFloatType; };
 template<class F> struct ModelNumericTraits<ApproximateTag,F> {
     typedef Approximation<F> CoefficientType; typedef UnknownError<F> ErrorType;
     typedef PositiveApproximation<F> NormType; typedef Interval<Approximation<F>> RangeType;
-    typedef Approximation<F> NumericType; };
+    typedef Approximation<F> NumericType; typedef F RawFloatType; };
 
 template<class P, class F> using ModelNumericType = typename FunctionModelTraits<P,typename F::PrecisionType>::NumericType;
 
@@ -152,13 +156,13 @@ class TaylorModel
     typedef PR PrecisionType;
     typedef PRE ErrorPrecisionType;
 
-    typedef F RawFloatType;
+    typedef typename ModelNumericTraits<P,F>::RawFloatType RawFloatType;
     typedef typename ModelNumericTraits<P,F>::CoefficientType CoefficientType;
     typedef typename ModelNumericTraits<P,F>::ErrorType ErrorType;
     typedef typename ModelNumericTraits<P,F>::NormType NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
-    typedef Sweeper<F> SweeperType;
+    typedef Sweeper<RawFloatType> SweeperType;
 
 
     typedef IntervalDomainType CodomainType;
@@ -170,7 +174,7 @@ class TaylorModel
     //! \brief The computational paradigm.
     typedef ValidatedTag Paradigm;
     //! \brief The properties needed to define the TaylorModel calculus.
-    typedef Sweeper<F> PropertiesType;
+    typedef Sweeper<RawFloatType> PropertiesType;
 
     //! \brief The type used for algebraic operations.
     typedef typename ModelNumericTraits<P,F>::NumericType NumericType;
@@ -320,7 +324,7 @@ class TaylorModel
 
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    F tolerance() const;
+    RawFloatType tolerance() const;
 
 
     //! \brief Set the constant term in the expansion.
@@ -657,7 +661,8 @@ template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<Valid
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
 template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 
-
+template<class F> TaylorModel<ValidatedTag,F> value_coefficients(TaylorModel<ValidatedTag,Bounds<F>> const& tm);
+template<class F> TaylorModel<ValidatedTag,Bounds<F>> exact_coefficients(TaylorModel<ValidatedTag,Bounds<F>> const& tm);
 
 
 } // namespace Ariadne

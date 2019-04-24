@@ -44,6 +44,7 @@
 #include "../algebra/evaluate.hpp"
 #include "../function/domain.hpp"
 #include "../function/scaling.hpp"
+#include "../function/polynomial.hpp"
 
 namespace Ariadne {
 
@@ -162,6 +163,7 @@ class TaylorModel
     typedef typename ModelNumericTraits<P,F>::NormType NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef SortedExpansion<MultiIndex,CoefficientType,ComparisonType> ExpansionType;
+    typedef Polynomial<MultiIndex,CoefficientType> PolynomialType;
     typedef Sweeper<RawFloatType> SweeperType;
 
 
@@ -489,19 +491,6 @@ class TaylorModel
     PropertiesType properties() const { return this->sweeper(); }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
-    //@}
-
-    //@{
-    //! \name Inplace arithmetic operations.
-    //! \brief Add a constant numerical scalar \c r+=c .
-    Void iadd(const NumericType& c);
-    //! \brief Multiply by a numerical scalar \c r*=c .
-    Void imul(const NumericType& c);
-    //! \brief Scalar multiply and add \c r+=c*x .
-    Void isma(const NumericType& c, const TaylorModel<P,F>& x);
-    //! \brief Fused multiply and add \c r+=x1*x2 .
-    Void ifma(const TaylorModel<P,F>& x1, const TaylorModel<P,F>& x2);
-
     //@}
 
     //@{

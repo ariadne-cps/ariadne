@@ -287,7 +287,7 @@ class InclusionIntegrator : public InclusionIntegratorInterface, Loggable {
 
     virtual Nat index() const override { return A().index(); }
 
-    virtual Nat num_params_per_input() const { return _num_params_per_input; }
+    virtual Nat num_params_per_input() const override { return _num_params_per_input; }
 
     virtual ~InclusionIntegrator() = default;
   private:

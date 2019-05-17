@@ -200,4 +200,47 @@ We have
                            &= f(\xi) \, \nabla s(\xi) \cdot(x-c) + y(x,s(c)) \\
                            &\in y(x,s(c)) + \bigl( f(B) \nabla s(B) \bigr) \cdot (x-c)  \end{aligned} \f]
 
+
+
+\section differential_inclusions Differential Inclusions
+
+A \emph{differential inclusion} is a dynamic system of the form
+\f[ \der{x} \in F(t,x) \f]
+where \f$F:\R\times\R^n \rightrightarrows \R^n\f$.
+
+\subsection interval_taylor_model_differential_inclusions Solution using interval Taylor models
+
+We now describe the solution of differential inclusions using interval Taylor models. This approach was first used in Flow* by Chen (2015)[§3.5].
+
+Consider the differential inclusion
+\f[ \der{x} = f(x,v); \quad v(t) \in V \f]
+where (for simplicity) \f$V\f$ is taken to be a compact box, \f$V=\prod_{i=1}^{m} V_i\f$.
+A \em solution is an almost-everywhere differentiable function $\xi:[0,\infty)\to\R^n$, such that for almost all \f$t\f$,
+\f[ \der{\xi}(t) \in \overline{\mathrm{conv}}\bigl( f(\xi(t),V) \bigr) . \f]
+If \f$f(t,x,V)\f$ is everywhere convex, then we can find a measurable \f$\nu:[0,\infty)\to V\f$ such that
+\f[ \der{\xi}(t) = f(\xi(t),\nu(t)) \bigr) . \f]
+
+For simplicity, we henceforth take \f$f(t,x,V)\f$ everywhere convex.
+
+We say an interval Taylor model
+\f[ \hat{\Phi}(x,t) = \sum_{\alpha,k} \hat{C}_{\alpha,k} x^\alpha t^k \f]
+over-approximates the set of solutions of the differential inclusion if
+\f[ \forall \text{ solutions } \xi \text{ of } \der{x}(t)\in F(x(t)), \ \xi \in \hat{\Phi} . \f]
+In other words, there are functions \f$\gamma_{\alpha_k}:[0,h]\to \hat{C}_{\alpha,k} \f$ such that
+\f[ \xi(t) = \sum_{\alpha,k} \gamma_{\alpha,k}(t) \xi(0)^\alpha t^k . \f]
+
+Now suppose \f$\hat{\Phi}\f$ over-approximates the set of solutions.
+Then we claim that
+\f[ \hat{\Phi}'(x,t) := x + \int_0^t f(\hat{\Phi}(x,\tau),V)\,d\tau \f]
+also over-approximates the set of solutions.
+For if \f$\xi\f$ is a solution with \f$\der{\xi}(t) = f(\xi(t),\nu(t)) \text{ a.e.}\f$, then
+\f$\der{\xi}(t) \in f(\hat{\Phi}(\xi(0),t),\nu(t)) \subset f(\hat{\Phi}(\xi(0),t),V) \text{ a.e.}\f$, so
+\f$\xi(t)-\xi(0) \in \int_0^t f(\hat{\Phi}(\xi(0),\tau),V)\,d\tau\f$.
+
+This gives rise to the iterative Picard method for solving differential inclusions, by taking an initial
+\f$\hat{\Phi}_0(x,t) = \hat{B}\f$, where \f$\hat{B}\f$ is a box containing the solution over a time interval \f$[0\!:\!h]\f$.
+
+
+
+
 */

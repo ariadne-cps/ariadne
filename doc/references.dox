@@ -48,7 +48,6 @@ PROFIL/BIAS <a href="http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html">
 
 \section cplusplus_programming C++ Language
 
-1
 Kent G. Budge, James S. Peery, Allen C. Robinson, and Michael K. Won, "C++ and Object-Oriented Numerics",
   <em>Journal of C Language Translation</em> <b>5</b>(32), 1993.
 
@@ -139,6 +138,8 @@ N. S. Nedialkov, K. R. Jackson and G. F. Corliss,
 Piotr Zgliczynski, "C^1 Lohner algorithm", <em>Found. Comput. Math.</em> <b>2</b> (2002), no. 4, 429--465.
 
 \section reachability_references Reachability Analysis and Control
+
+Xin Chen, "Reachability Analysis of Non-Linear Hybrid Systems Using Taylor Models", <em>Ph.D. Thesis</em>, RWTH Aachen  (2015). ISSN 0935–3232.
 
 Pieter Collins, "Continuity and computability of reachable sets",
   <em>Theoretical Comput. Sci.</em> <b>341</b> (2005), 162--195.

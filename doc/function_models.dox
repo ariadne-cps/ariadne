@@ -59,26 +59,50 @@ which describes the set of continuous functions
 In other words, \f$\hat{p}\f$ is the ball of radius \f$e\f$ around \f$p(z)=\sum_\alpha c_\alpha z^\alpha\f$ in the uniform (\f$L^\infty\f$) norm.
 Note that this model class does not support differentiation, since (here, restricting to one dimension) for any differentiable function \f$e\f$ with \f$\|e\|_\infty\leq \varepsilon\f$, we could have \f$f'(z) = \sum_{\alpha} \alpha c_\alpha z^{\alpha-1} + e'(z)\f$, so the derivative at any point can be made to take an arbitrary value.
 
+\subsection higher_order_function_models Higher Order Function Models
+
 We can also consider models in higher differentiability classes by keeping track of higher-order norms.
 For example, we can keep track of error bounds \f$\varepsilon_\alpha\f$ on \f$\partial^\alpha f/\partial z^\alpha\f$ for \f$|\alpha|=1\f$ to obtain a <em>\f$C^1\f$ function model</em>.
 Here, it is also useful to keep track of the error \f$\delta_0\f$ at \f$z=0\f$, since then we have the following bound on the error:
 \f[ \textstyle |f(z)-p(z)| \leq \delta_0 + \sum_i \epsilon_{\alpha_i} z_i , \f]
 
-Alternatively, we can use coefficients which are themselves non-exact:
+\subsection interval_taylor_models Interval Taylor Models
+
+We can construct polynomial models using coefficients which are themselves non-exact:
 \f[ \textstyle \hat{p}(z) = \sum_\alpha \hat{c}_\alpha z^\alpha \f]
 Here there are two distinct interpretations:
-- We can assume that the \f$\hat{c}_\alpha\f$ are bounds (e.g. \ref FloatBounds<PR> Bounds) for some fixed, but unknown value.
+- We can assume that the \f$\hat{c}_\alpha\f$ are bounds (e.g. \link FloatBounds<PR> Bounds<FLT>\endlink) for some fixed, but unknown value.
 In this case, \f$\langle \hat{p} \rangle\f$ is a set of \em polynomials:
-\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall \alpha\in\aleph,\ \exists c_\alpha \in \hat{c}_\alpha,\ \forall z\in D,\ | f(z) = \sum_\alpha c_\alpha z^\alpha \} , \f]
+\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall \alpha\in\aleph,\ \exists c_\alpha \in \hat{c}_\alpha,\ \forall z\in D,\ f(z) = \sum_\alpha c_\alpha z^\alpha \} , \f]
 - We can assume that the \f$\hat{c}_\alpha\f$ are bounds on the values of a function which may itself depend on \f$z\f$.
 In this case,
-\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall z\in D,\ \forall \alpha\in\aleph,\ \exists c_\alpha\in\hat{c}_\alpha,\ | f(z) = \sum_\alpha c_\alpha z^\alpha \} . \f]
-
+\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall z\in D,\ \forall \alpha\in\aleph,\ \exists c_\alpha\in\hat{c}_\alpha,\ f(z) = \sum_\alpha c_\alpha z^\alpha \} , \f]
+or equivalently,
+\f[ \textstyle \langle \hat{p} \rangle = \{ f : D\to\R \mid \forall \alpha\in\aleph,\ \exists \gamma_\alpha:D\to\hat{c}_\alpha,\ f(z) = \sum_\alpha \gamma_\alpha(z) z^\alpha \} . \f]
 Note that the second interpretation gives more possible choices of \f$f\f$.
+
+In both cases, arithmetic can be performed by using interval arithmetic on the coefficients:
+\f[ \begin{aligned} \textstyle (\sum_\alpha \hat{a}_\alpha z^\alpha) + (\sum_\beta \hat{b}_\beta z^\beta) &= \textstyle \sum_{\gamma} \bigl( \hat{a}_\gamma + \hat{b}_\gamma \bigr) z^\gamma \\
+\textstyle (\sum_\alpha \hat{a}_\alpha z^\alpha) \times (\sum_\beta \hat{b}_\beta z^\beta) &= \textstyle \sum_{\gamma} \bigl( \sum_{\alpha+\beta=\gamma} \hat{a}_\alpha \times \hat{b}_\beta \bigr) z^\gamma . \end{aligned} \f]
+and composition by using the addition and multiplication operations so defined.
+However, only the second interpretation allows for the interpretation of analytic functions e.g.
+\f[ \exp(z) \in 1+z+\cdots + \frac{1}{(n-1)!}z^{n-1} + \frac{[0.25\!:\!2.75]}{n!} z^{n} \subset \Bigl(1+\frac{[-2.75\!:\!2.75]}{n!}\Bigr) + z + \cdots + \frac{1}{(n-1)!} z^{n-1} . \f]
+
+In the first interpretation, differentiation can be performed elementwise:
+\f[ \frac{d}{dz} \sum_k \hat{a}_k z^k = \sum_k (k+1) \hat{a}_{k+1} z^k , \f]
+but the second interpretation does not support differentiation, since
+\f[ \frac{d}{dz} \sum_k \alpha_k(z) z^k = \sum_k \bigl( \alpha_k'(z) + (k+1) \alpha_{k+1} \bigr) z^k , \f]
+and \f$\alpha_k'(z)\f$ cannot be bounded.
+
+Integration also differs between the two interpretations. In the first interpretation,
+\f[ \int_a^b \sum_k \hat{c}_k z^k ,dz = \sum_k \tfrac{1}{k+1}\hat{c}_k \bigl[ z^{k+1}\bigr]_a^b = \sum_{k} \tfrac{1}{k+1}\hat{c}_k (b^{k+1}-a^{k+1}) , \f]
+whereas in the second interpretation,
+\f[ \int_a^b \sum_k \hat{c}_k z^k \,dz = \Bigl[{{\sum}_k \tfrac{1}{k+1}\hat{c}_k z^{k+1}}\Bigr]_a^b = \sum_{k} \tfrac{1}{k+1} \bigl(\hat{c}_k b^{k+1}-\hat{c}_k a^{k+1}\bigr) . \f]
+These are different, since the distributive law does not hold for interval arithmetic: in general, \f$(b-a)\hat{c} \subsetneq b\hat{c}-a\hat{c}\f$.
 
 \b Example
 
-Consider the polynomial model \f$\hat{p}(z) = [-1:+1]+[2:3]z\f$.
+Consider the polynomial model \f$\hat{p}(z) = [0:1]+[2:4]z\f$.
 
 In the first interpretation, \f$\langle \hat{p} \rangle\f$ is the set of affine functions \f$ f(z) = c_0 + c_1 z\f$ where \f$c_0\in[0:1]\f$ and \f$c_1\in[2:4]\f$. In this case, the possible values of \f$\int_{-1}^{+1} f(z) dz\f$ are \f$[0:2]\f$, since
 \f[ \begin{aligned} \textstyle \int_{-1}^{+1} f(z)dz & = \textstyle \int_{-1}^{+1} c_0 + c_1 z dz=[c_0z+c_1\tfrac{1}{2}z^2]_{-1}^{+1}=c_0[z]_{-1}^{+1}+c_1[\tfrac{1}{2}z^2]_{-1}^{+1} \\ &\textstyle =c_0(1-(-1))+c_1(\tfrac{1}{2}-\tfrac{1}{2})=2c_0 \in [0:2] . \end{aligned} \f]
@@ -88,6 +112,10 @@ In this case, \f$\int_{-1}^{+1} f(z) dz\f$ are \f$[-1:+3]\f$.
 The maximum value the integral can take is for \f$f(z)=1+2z\f$ for \f$z\in[-1:0]\f$ and \f$1+4z\f$ for \f$z\in[0:+1]\f$, so
 \f[ \textstyle \int_{-1}^{+1} f(z) dz \leq \int_{-1}^{0} 1+2z\,dz + \int_{0}^{+1} 1+4z\,dz = [z+z^2]_{-1}^{0} + [z+2z^2]_{0}^{+1} = (0-0) + (3-0) = 3 . \f]
 
+\b Notation
+
+We henceforth describe a function \f$\hat{p}(z)=\sum_{\alpha} \hat{c}_\alpha z^\alpha\f$ using the first interpretation as a <em>validated polynomial</em>.
+When using the second interpretation, we will instead write \f$\hat{P}(z)=\sum_{\alpha} \hat{C}_\alpha z^\alpha\f$ or \f$[P](z)=\sum_{\alpha} [C]_\alpha z^\alpha\f$, and reserve the terminology <em>interval Taylor model</em> for this case.
 
 
 \subsection sweeping Simplification by sweeping

@@ -29,16 +29,14 @@ using namespace Ariadne;
 
 inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real,double> LA()
 {
-    RealVariable x("x"), y("y"), z("z"), rho("rho");
-    Real beta = 8/3_q;
-    Real sigma = 10;
+    RealVariable x("x"), y("y"), z("z"), sigma("sigma"), rho("rho"), beta("beta");
     DottedRealAssignments dynamics={dot(x)=sigma*(y-x),
                                          dot(y)=x*(rho - z) - y,
                                          dot(z)=x*y - beta*z};
-    RealVariablesBox inputs={28-1/100_q<=rho<=28+1/100_q};
+    RealVariablesBox inputs={10-1/100_q<=sigma<=10+1/100_q,28-1/100_q<=rho<=28+1/100_q,8/3_q-1/100_q<=beta<=8/3_q+1/100_q};
 
     Real e=1/1024_q;
-    RealVariablesBox initial={{1-e<=x<=1+e},{1-e<=y<=1+e},{1-e<=z<=1+e}};
+    RealVariablesBox initial={1-e<=x<=1+e,1-e<=y<=1+e,1-e<=z<=1+e};
 
     Real evolution_time=1;
     double step=1.0/256;

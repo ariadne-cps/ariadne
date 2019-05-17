@@ -86,7 +86,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
                 fig.set_bounding_box(graphics_box);
                 fig.set_projection(n,i,j);
                 fig.set_line_colour(0.0,0.0,0.0);
-                fig.set_line_style(false);
+                fig.set_line_style(true);
                 fig.set_fill_colour(0.5,0.5,0.5);
                 fig.draw(initial);
                 fig.set_fill_colour(1.0,0.75,0.5);
@@ -132,10 +132,9 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
    TaylorPicardIntegrator integrator(
             maximum_error=1e-3,
-            sweep_threshold=sw_threshold,
+            sweeper,
             lipschitz_constant=0.5,
             step_maximum_error=1e-3,
-            step_sweep_threshold=sw_threshold,
             minimum_temporal_order=4,
             maximum_temporal_order=12);
 

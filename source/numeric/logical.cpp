@@ -29,9 +29,11 @@
 #include "../utility/stdlib.hpp"
 #include "../utility/string.hpp"
 #include "../utility/macros.hpp"
+#include "../numeric/sequence.hpp"
 #include "../symbolic/templates.hpp"
 
 #include "logical.hpp"
+#include "integer.hpp"
 
 namespace Ariadne {
 
@@ -140,7 +142,46 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
     return os;
 }
 
+template<> struct LogicalExpression<OrOp,Sequence<LowerKleenean>> : public LogicalInterface {
+    Sequence<LowerKleenean> _seq;
+  public:
+    LogicalExpression(OrOp, Sequence<LowerKleenean> seq) : _seq(seq) { }
+    LogicalValue _check(Effort eff) const {
+        for(Natural k=0u; k!=eff.work(); ++k) {
+            if ( definitely(_seq[k].check(eff)) ) { return LogicalValue::TRUE; }
+        }
+        return LogicalValue::INDETERMINATE;
+    }
+    OutputStream& _write(OutputStream& os) const {
+        return os << "disjunction(" << _seq[0u] << "," << _seq[1u] << "," << _seq[2u] << ",...)";
+    }
+};
+
+
+template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public LogicalInterface {
+    Sequence<UpperKleenean> _seq;
+  public:
+    LogicalExpression(AndOp, Sequence<UpperKleenean> seq) : _seq(seq) { }
+    LogicalValue _check(Effort eff) const {
+        for(Natural k=0u; k!=eff.work(); ++k) {
+            if ( definitely(not _seq[k].check(eff)) ) { return LogicalValue::FALSE; }
+        }
+        return LogicalValue::INDETERMINATE;
+    }
+    OutputStream& _write(OutputStream& os) const {
+        return os << "conjunction(" << _seq[0u] << "," << _seq[1u] << "," << _seq[2u] << ",...)";
+    }
+};
+
 } // namespace Detail
+
+
+LowerKleenean disjunction(Sequence<LowerKleenean> const& l) {
+    return LowerKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
+};
+UpperKleenean conjunction(Sequence<UpperKleenean> const& l) {
+    return UpperKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
+};
 
 Nat Effort::_default = 0u;
 

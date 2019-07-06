@@ -36,15 +36,17 @@
 
 namespace Ariadne {
 
-/*! \defgroup LogicModule Logic Module
+template<class X> class Sequence;
+
+/*! \defgroup LogicalModule Logical Module
  *  \ingroup CoreModules
  *  \brief %Logical classes and functions.
  */
 
-//! \ingroup LogicModule
+//! \ingroup LogicalModule
 //! \brief The amount of work used in performing a calculation or checking a quasidecidable predicate.
 //! \details The Effort should roughly reflect the time needed to perform a computation.
-//! \sa LogicalModule
+//! \sa Accuracy.
 class Effort {
     static Nat _default;
     Nat _m;
@@ -64,6 +66,7 @@ class Effort {
     Effort& operator*=(Nat m) { _m*=m; return *this; }
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
+inline Effort operator""_eff(unsigned long long int e) { Nat m=e; assert(m==e); return Effort(m); }
 
 //! \brief Explicitly declare that a type is %Effective.
 template<class T> using Effective = T;
@@ -225,14 +228,13 @@ class ApproximateKleenean;
 
 class Indeterminate {
   public:
-    operator Sierpinskian() const;
-    operator Kleenean() const;
     operator ValidatedSierpinskian() const;
     operator ValidatedKleenean() const;
     friend Bool decide(Indeterminate const& l, Effort e);
     friend Bool decide(Indeterminate const& l);
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a decidable predicate.
 //! \sa LogicalModule
 class Boolean : public Logical<Boolean,LogicalValue> {
@@ -264,15 +266,16 @@ class Boolean : public Logical<Boolean,LogicalValue> {
 };
 
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a verifyable predicate
 //! over a continuous (uncountable) data type which has no robustly \c false instances,
 //! such as inequality on a Hausdoff space.
-//! \sa LogicalModule
 class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> {
     typedef Logical<Sierpinskian,LogicalHandle,NegatedSierpinskian,Kleenean> Base;
   public:
     explicit Sierpinskian(LogicalPointer l) : Base(l) { }
     explicit Sierpinskian(bool b=true) : Sierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
+    Sierpinskian(Indeterminate) : Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     //! \brief Check the value using effort \a e.
     ValidatedSierpinskian check(Effort e) const;
     //! \brief Check the value of \a s using effort \a e.
@@ -292,20 +295,26 @@ class Sierpinskian : public Logical<Sierpinskian,LogicalHandle,NegatedSierpinski
     friend Kleenean operator||(Kleenean const&, Kleenean const&);
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a falsifyable predicate
 //! over a continuous (uncountable) data type which has no robustly \c true instances,
 //! such as equality on a Hausdoff space.
-//! \sa LogicalModule
 class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> {
     typedef Logical<NegatedSierpinskian,LogicalHandle,Sierpinskian,Kleenean> Base;
   public:
     explicit NegatedSierpinskian(LogicalPointer l) : Base(l) { }
     explicit NegatedSierpinskian(bool b) : NegatedSierpinskian(LogicalHandle(Detail::make_logical_value(b))) { }
+    NegatedSierpinskian(Indeterminate) : NegatedSierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)) { }
+    //! \brief Check the value using effort \a e.
     ValidatedNegatedSierpinskian check(Effort e) const;
-    friend ValidatedNegatedSierpinskian check(NegatedSierpinskian const& l, Effort e);
+    //! \brief Check the value of \a s using effort \a e.
+    friend ValidatedNegatedSierpinskian check(NegatedSierpinskian const& s, Effort e);
 
+    //! \brief Logical negation.
     friend Sierpinskian operator!(NegatedSierpinskian const& l);
+    //! \brief Logical conjunction.
     friend NegatedSierpinskian operator&&(NegatedSierpinskian const& l1, NegatedSierpinskian const& l2);
+    //! \brief Logical disjunction.
     friend NegatedSierpinskian operator||(NegatedSierpinskian const& l1, NegatedSierpinskian const& l2);
 
     friend NegatedSierpinskian const& operator&&(NegatedSierpinskian const& l1, Boolean const&) { return l1; }
@@ -314,11 +323,11 @@ class NegatedSierpinskian : public Logical<NegatedSierpinskian,LogicalHandle,Sie
     friend Kleenean operator||(Kleenean const&, Kleenean const&);
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a quasidecidable predicate
 //! over a continuous (uncountable) data type.
 //! \details A canonical example is (strict) positivity of a real number,
 //! which is undecidable for zero, since positivity cannot be determined from arbitrarily accurate approximations.
-//! \sa LogicalModule
 class Kleenean : public Logical<Kleenean,LogicalHandle> {
     typedef Logical<Kleenean,LogicalHandle> Base;
   public:
@@ -327,6 +336,8 @@ class Kleenean : public Logical<Kleenean,LogicalHandle> {
   public:
     //! \brief Convert from a built-in boolean value, defaulting to \c true.
     Kleenean(bool b=true) : Kleenean(Boolean(b)) { }
+    //! \brief Convert from the %Indeterminate constant value.
+    Kleenean(Indeterminate) : Kleenean(LogicalValue::INDETERMINATE) { }
     //! \brief Convert from a %Boolean constant value. May be checked with effort 0.
     Kleenean(Boolean b) : Kleenean(b.repr()) { }
     //! \brief Convert from a %Sierpinskian predicate.
@@ -348,17 +359,18 @@ class Kleenean : public Logical<Kleenean,LogicalHandle> {
     friend Kleenean operator^(Kleenean const& k1, Kleenean const& k2);
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a verifyable predicate
 //! over a continuous (uncountable) data type.
 //! \details A canonical example is strict positivity of a real number given only lower bounds to its value,
 //! since sufficient accurate lower bounds for a strictly positive number are themselves strictly positive,
 //! but negativity cannot be deduced given only lower bounds to a negative number.
-//! \sa LogicalModule
 class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> {
     typedef Logical<LowerKleenean,LogicalHandle,UpperKleenean> Base;
   public:
     explicit LowerKleenean(LogicalPointer const& l) : Base(l) { }
     LowerKleenean(bool b) : LowerKleenean(Boolean(b)) { }
+    LowerKleenean(Indeterminate) : LowerKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     LowerKleenean(Boolean b) : LowerKleenean(Kleenean(b)) { }
     LowerKleenean(Sierpinskian s) : LowerKleenean(Kleenean(s)) { }
     //! \brief Convert from a %Kleenean predicate.
@@ -374,16 +386,20 @@ class LowerKleenean : public Logical<LowerKleenean,LogicalHandle,UpperKleenean> 
     friend LowerKleenean operator&&(LowerKleenean const& l1, LowerKleenean const& l2);
     //! \brief Logical disjunction.
     friend LowerKleenean operator||(LowerKleenean const& l1, LowerKleenean const& l2);
+
+    //! \brief Disjunction of an infinte sequence of logical values.
+    friend LowerKleenean disjunction(Sequence<LowerKleenean> const& k);
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a falsifyable predicate
 //! over a continuous (uncountable) data type.
-//! \sa LogicalModule
 class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> {
     typedef Logical<UpperKleenean,LogicalHandle,LowerKleenean> Base;
   public:
     explicit UpperKleenean(LogicalPointer const& l) : Base(l) { }
     UpperKleenean(bool b) : UpperKleenean(Kleenean(b)) { }
+    UpperKleenean(Indeterminate) : UpperKleenean(LogicalHandle(LogicalValue::INDETERMINATE)) { }
     UpperKleenean(Boolean b) : UpperKleenean(Kleenean(b)) { }
     UpperKleenean(NegatedSierpinskian ns) : UpperKleenean(Kleenean(ns)) { }
     //! \brief Convert from a %Kleenean predicate.
@@ -399,19 +415,26 @@ class UpperKleenean : public Logical<UpperKleenean,LogicalHandle,LowerKleenean> 
     friend UpperKleenean operator&&(UpperKleenean const& l1, UpperKleenean const& l2);
     //! \brief Logical disjunction.
     friend UpperKleenean operator||(UpperKleenean const& l1, UpperKleenean const& l2);
+
+    //! \brief Conjunction of an infinte sequence of logical values.
+    friend UpperKleenean conjunction(Sequence<UpperKleenean> const& k);
 };
 
+LowerKleenean disjunction(Sequence<LowerKleenean> const& lk);
+UpperKleenean conjunction(Sequence<UpperKleenean> const& uk);
+
+//! \ingroup LogicalModule
 //! \brief A logical class representing the result of a undecidable predicate
 //! over a continuous (uncountable) data type.
 //! \details A canonical example is (strict) positivity of a real number given only a convergent sequence,
 //! since without error bounds we can never know whether a given approximation is sufficiently close to
 //! deduce any properties of the number.
-//! \sa LogicalModule
 class NaiveKleenean : public Logical<NaiveKleenean,LogicalHandle> {
     typedef Logical<NaiveKleenean,LogicalHandle> Base;
   public:
     explicit NaiveKleenean(LogicalPointer const& l) : Base(l) { }
     NaiveKleenean(bool b) : NaiveKleenean(Kleenean(b)) { }
+    NaiveKleenean(Indeterminate i) : NaiveKleenean(Kleenean(i)) { }
     NaiveKleenean(Boolean b) : NaiveKleenean(Kleenean(b)) { }
     NaiveKleenean(Sierpinskian s) : NaiveKleenean(Kleenean(s)) { }
     NaiveKleenean(NegatedSierpinskian ns) : NaiveKleenean(Kleenean(ns)) { }
@@ -436,8 +459,9 @@ class NaiveKleenean : public Logical<NaiveKleenean,LogicalHandle> {
 
 
 
-//! \brief A logical class representing the result of a verifyable predicate.
-//! \sa LogicalModule, Sierpinskian
+//! \sa LogicalModule
+//! \brief A logical class representing the result of a verifyable predicate, checked to some given effort.
+//! \sa Sierpinskian
 class ValidatedSierpinskian : public Logical<ValidatedSierpinskian,LogicalValue,ValidatedNegatedSierpinskian> {
     typedef Logical<ValidatedSierpinskian,LogicalValue,ValidatedNegatedSierpinskian> Base;
   public:
@@ -447,6 +471,9 @@ class ValidatedSierpinskian : public Logical<ValidatedSierpinskian,LogicalValue,
     friend ValidatedSierpinskian check(Sierpinskian const& s, Effort e) { return s.check(e); }
 };
 
+//! \ingroup LogicalModule
+//! \brief A logical class representing the result of a falsifyable predicate, checked using some given effort.
+//! \sa Sierpinskian, NegatedSierpinskian
 class ValidatedNegatedSierpinskian : public Logical<ValidatedNegatedSierpinskian,LogicalValue,ValidatedSierpinskian> {
     typedef Logical<ValidatedNegatedSierpinskian,LogicalValue,ValidatedSierpinskian> Base;
   public:
@@ -456,9 +483,10 @@ class ValidatedNegatedSierpinskian : public Logical<ValidatedNegatedSierpinskian
     friend ValidatedNegatedSierpinskian check(NegatedSierpinskian const& ns, Effort e) { return ns.check(e); }
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing a value of a quasidecidable predicate,
-//! either a Kleenean value \ref Kleenean::check "check"ed using some Effort, or applied directly to a Validated object.
-//! \sa LogicalModule, Kleenean
+//! either a Kleenean value \ref Kleenean::check "check"ed using some \ref Effort, or applied directly to a Validated object.
+//! \sa Kleenean
 class ValidatedKleenean : public Logical<ValidatedKleenean,LogicalValue> {
     typedef Logical<ValidatedKleenean,LogicalValue> Base;
   public:
@@ -472,8 +500,9 @@ class ValidatedKleenean : public Logical<ValidatedKleenean,LogicalValue> {
     friend ValidatedKleenean check(Kleenean const& k, Effort e) { return k.check(e); }
 };
 
-//! \brief A logical class representing the result of a verifyable predicate.
-//! \sa LogicalModule, LowerKleenean
+//! \ingroup LogicalModule
+//! \brief A logical class representing the result of checking a verifyable predicate.
+//! \sa LowerKleenean
 class ValidatedLowerKleenean : public Logical<ValidatedLowerKleenean,LogicalValue,ValidatedUpperKleenean> {
     typedef Logical<ValidatedLowerKleenean,LogicalValue,ValidatedUpperKleenean> Base;
   public:
@@ -486,8 +515,9 @@ class ValidatedLowerKleenean : public Logical<ValidatedLowerKleenean,LogicalValu
     friend ValidatedLowerKleenean check(LowerKleenean const& lk, Effort e) { return lk.check(e); }
 };
 
-//! \brief A logical class representing the result of a falsifyable predicate.
-//! \sa LogicalModule, UpperKleenean
+//! \ingroup LogicalModule
+//! \brief A logical class representing the result of checking a falsifyable predicate.
+//! \sa UpperKleenean
 class ValidatedUpperKleenean : public Logical<ValidatedUpperKleenean,LogicalValue,ValidatedLowerKleenean> {
     typedef Logical<ValidatedUpperKleenean,LogicalValue,ValidatedLowerKleenean> Base;
   public:
@@ -500,10 +530,11 @@ class ValidatedUpperKleenean : public Logical<ValidatedUpperKleenean,LogicalValu
     friend ValidatedUpperKleenean check(UpperKleenean const& uk, Effort e) { return uk.check(e); }
 };
 
+//! \ingroup LogicalModule
 //! \brief A logical class representing a value of an undecidable predicate,
 //! either a NaiveKleenean value \ref NaiveKleenean::check "check"ed using some Effort, or applied directly to an Approximate object.
 //! \details Note that definitely() and possibly() always return \c false and \c true, respectively.
-//! \sa LogicalModule, NaiveKleenean
+//! \sa NaiveKleenean
 class ApproximateKleenean : public Logical<ApproximateKleenean,LogicalValue> {
     typedef Logical<ApproximateKleenean,LogicalValue> Base;
   public:
@@ -516,10 +547,6 @@ class ApproximateKleenean : public Logical<ApproximateKleenean,LogicalValue> {
     ApproximateKleenean(Kleenean k, Effort e) : ApproximateKleenean(k.check(e)) { }
 };
 
-inline Indeterminate::operator Sierpinskian() const {
-    return Sierpinskian(LogicalHandle(LogicalValue::INDETERMINATE)); }
-inline Indeterminate::operator Kleenean() const {
-    return Kleenean(LogicalHandle(LogicalValue::INDETERMINATE)); }
 inline Indeterminate::operator ValidatedSierpinskian() const {
     return ValidatedSierpinskian(LogicalValue::INDETERMINATE); }
 inline Indeterminate::operator ValidatedKleenean() const {

@@ -35,6 +35,14 @@ namespace Ariadne {
 
 class Natural;
 
+class Dyadic; class Rational; class Real;
+template<class Y> struct CompletionTypedef;
+template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
+template<> struct CompletionTypedef<Rational> { typedef Real Type; };
+template<> struct CompletionTypedef<Real> { typedef Real Type; };
+template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
+
+
 //! \brief A function \f$\mathbb{N} \to X\f$.
 template<class X> class Sequence {
     std::function<X(Natural)> _fn;
@@ -42,12 +50,6 @@ template<class X> class Sequence {
     Sequence<X>(std::function<X(Natural)> fn) : _fn(fn) { }
     X operator[](Natural const& n) const { return _fn(n); }
 };
-
-template<class Y> struct CompletionTypedef;
-template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
-template<> struct CompletionTypedef<Rational> { typedef Real Type; };
-template<> struct CompletionTypedef<Real> { typedef Real Type; };
-template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
 
 //! \brief A convergent sequence in \f$X\f$, with no further information about the convergence rate
 template<class X> class ConvergentSequence : public Sequence<X> {

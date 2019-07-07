@@ -296,6 +296,7 @@ struct IndexedFloatDPErrorComparator
 };
 
 Bool LohnerReconditioner::must_reduce_parameters(InclusionEvolverState const& state) const {
+    if (_number_of_steps_between_simplifications == 0) return false;
     return (state.step()%_number_of_steps_between_simplifications == _number_of_steps_between_simplifications-1);
 }
 

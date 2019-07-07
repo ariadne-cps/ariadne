@@ -86,7 +86,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
                 fig.set_bounding_box(graphics_box);
                 fig.set_projection(n,i,j);
                 fig.set_line_colour(0.0,0.0,0.0);
-                fig.set_line_style(false);
+                fig.set_line_style(true);
                 fig.set_fill_colour(0.5,0.5,0.5);
                 fig.draw(initial);
                 fig.set_fill_colour(1.0,0.75,0.5);
@@ -117,7 +117,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     SizeType period_of_parameter_reduction=12;
     FloatDP ratio_of_parameters_to_keep(6.0);
     double sw_threshold = 1e-8;
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),sw_threshold);
+    ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
     unsigned int verbosity = 1;
     bool draw = false;
@@ -132,15 +132,11 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
 
    TaylorPicardIntegrator integrator(
             maximum_error=1e-3,
-            sweep_threshold=sw_threshold,
+            sweeper,
             lipschitz_constant=0.5,
             step_maximum_error=1e-3,
-            step_sweep_threshold=sw_threshold,
             minimum_temporal_order=4,
             maximum_temporal_order=12);
-
-    /*GradedTaylorSeriesIntegrator integrator(MaximumError(1e2),SweepThreshold(1e-8),LipschitzConstant(0.5),
-            StepMaximumError(1e-3),StepSweepThreshold(1e-8),MaximumTemporalOrder(12));*/
 
     LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 

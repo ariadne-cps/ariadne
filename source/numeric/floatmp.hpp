@@ -116,6 +116,8 @@ class FloatMP {
     explicit FloatMP(PrecisionType);
     explicit FloatMP(double, PrecisionType);
     explicit FloatMP(FloatDP const&, PrecisionType);
+    explicit FloatMP(ExactDouble const& x, PrecisionType);
+    explicit FloatMP(TwoExp const& x, PrecisionType);
     explicit FloatMP(Dyadic const&, PrecisionType);
 
     FloatMP(const FloatMP&);
@@ -126,6 +128,7 @@ class FloatMP {
 
     FloatMP(double, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
+
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
     FloatMP(Dyadic const&, RoundingModeType, PrecisionType);
     FloatMP(Rational const&, RoundingModeType, PrecisionType);

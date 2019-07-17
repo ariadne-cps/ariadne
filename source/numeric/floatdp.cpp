@@ -34,6 +34,8 @@
 #include "../config.hpp"
 
 #include "../utility/macros.hpp"
+#include "../numeric/builtin.hpp"
+#include "../numeric/twoexp.hpp"
 #include "../numeric/dyadic.hpp"
 #include "../numeric/decimal.hpp"
 #include "../numeric/rational.hpp"
@@ -621,6 +623,17 @@ double atan_rnd(double x) {
 }
 
 
+
+FloatDP::FloatDP(ExactDouble const& d, PrecisionType)
+    : FloatDP(d.get_d())
+{
+}
+
+FloatDP::FloatDP(TwoExp const& t, PrecisionType)
+    : FloatDP(std::ldexp(1.0,t.exponent()))
+{
+    ARIADNE_ASSERT(Dyadic(*this)==Dyadic(t));
+}
 
 FloatDP::FloatDP(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())

@@ -47,8 +47,13 @@ template<class F> struct NumericTraits<Error<F>> {
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
 template<class F> class Error
-    : public DispatchDirectedFloatOperations<UpperBound<F>>
-    , public DispatchPositiveDirectedNumericOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
+    : public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
+    , public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
+    , public DefineDirectedComparisonOperators<UpperBound<F>,LowerBound<F>,LessTrait<UpperBound<F>>,EqualsTrait<UpperBound<F>>>
+    , public DefineDirectedComparisonOperators<LowerBound<F>,UpperBound<F>,LessTrait<LowerBound<F>>,EqualsTrait<LowerBound<F>>>
+    , public DefineConcreteGenericOperators<UpperBound<F>>
+
+    , public DeclarePositiveDirectedNumericOperations<PositiveUpperBound<F>,PositiveLowerBound<F>>
     , public ProvideConcreteGenericDirectedSemiFieldOperations<PositiveUpperBound<F>,PositiveLowerBound<F>,Nat,Nat>
 {
     using PR=typename F::PrecisionType;
@@ -70,6 +75,7 @@ template<class F> class Error
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Error<F>(M m, PR pr) : _e(m,pr) { }
     explicit Error<F>(UpperBound<F> const& x) : Error<F>(x._u) { }
     explicit Error<F>(ValidatedUpperNumber const& y, PR pr) : Error<F>(UpperBound<F>(y,pr)) { }
+    explicit Error<F>(const ExactDouble& d, PR pr) : Error<F>(UpperBound<F>(d,pr)) { }
     explicit Error<F>(const TwoExp& t, PR pr) : Error<F>(UpperBound<F>(t,pr)) { }
     Error<F>(PositiveValue<F> const& x) : _e(x._v) { }
     Error<F>& operator=(Nat m) { reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }
@@ -82,7 +88,66 @@ template<class F> class Error
     F const& raw() const { return _e; }
     F& raw() { return _e; }
   public:
+    friend Error<F> operator+(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); }
+    friend Error<F> operator*(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); }
+
+    friend Error<F> nul(Error<F> const& x) { return Error<F>(0u,x.precision()); }
+    friend UpperBound<F> pos(Error<F> const& x) { return UpperBound<F>(pos(x._e)); }
+    friend LowerBound<F> neg(Error<F> const& x) { return LowerBound<F>(neg(x._e)); }
+    friend Error<F> add(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); }
+    friend Error<F> mul(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); }
+    friend Error<F> sqr(Error<F> const& x) { return Error<F>(sqr(up,x._e)); }
+    friend Error<F> pow(Error<F> const& x, Nat m) { return Error<F>(pow(up,x._e,static_cast<Int>(m))); }
+    friend Error<F> exp(Error<F> const& x) { return Error<F>(exp(up,x._e)); }
+    friend UpperBound<F> log(Error<F> const& x) { return UpperBound<F>(log(up,x._e)); }
+    friend Error<F> max(Error<F> const& x1, Error<F> const& x2) { return Error<F>(max(x1._e,x2._e)); }
+    friend Error<F> min(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
+    friend Error<F> abs(Error<F> const& x) { return x; }
     friend Error<F> mag(Error<F> const& x) { return x; }
+
+        friend Error<F> operator+(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(add(up,x1._e,x2._v)); }
+        friend Error<F> operator+(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._v,x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, PositiveValue<F> const& x2) { return Error<F>(mul(up,x1._e,x2._v)); }
+        friend Error<F> operator*(PositiveValue<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._v,x2._e)); }
+
+        friend Error<F> operator+(Error<F> const& x1, PositiveBounds<F> const& x2) { return Error<F>(add(up,x1._e,x2._u)); }
+        friend Error<F> operator+(PositiveBounds<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._u,x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, PositiveBounds<F> const& x2) { return Error<F>(mul(up,x1._e,x2._u)); }
+        friend Error<F> operator*(PositiveBounds<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._u,x2._e)); }
+
+        friend Error<F> operator+(Error<F> const& x1, PositiveUpperBound<F> const& x2) { return Error<F>(add(up,x1._e,x2._u)); }
+        friend Error<F> operator+(PositiveUpperBound<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._u,x2._e)); }
+        friend Error<F> operator*(Error<F> const& x1, PositiveUpperBound<F> const& x2) { return Error<F>(mul(up,x1._e,x2._u)); }
+        friend Error<F> operator*(PositiveUpperBound<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._u,x2._e)); }
+
+        friend Error<F> operator/(Error<F> const& x1, PositiveLowerBound<F> const& x2) { return Error<F>(div(up,x1._e,x2._l)); }
+
+        friend Error<F> operator+(Error<F> const& x1, Nat m) { return Error<F>(add(up,x1._e,m)); }
+        friend Error<F> operator*(Error<F> const& x1, Nat m) { return Error<F>(mul(up,x1._e,m)); }
+        friend Error<F> operator/(Error<F> const& x1, Nat m) { return Error<F>(div(up,x1._e,m)); }
+
+        friend Approximation<F> operator-(Error<F> const& x1, Error<F> const& x2) { return Approximation<F>(sub(up,x1._e,x2._e)); }
+        friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2);
+        friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2);
+
+    /*
+    friend PositiveUpperBound<F> operator+(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> add(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> mul(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> max(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+    friend PositiveUpperBound<F> min(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2);
+*/
+    friend Error<F>& operator+=(Error<F>& x1, Error<F> const& x2) { return x1=x1+x2; }
+        friend Error<F>& operator+=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1+x2; }
+        friend Error<F>& operator+=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1+x2; }
+        friend Error<F>& operator+=(Error<F>& x1, PositiveValue<F> const& x2) { return x1=x1+x2; }
+    friend Error<F>& operator*=(Error<F>& x1, Error<F> const& x2) { return x1=x1*x2; }
+        friend Error<F>& operator*=(Error<F>& x1, PositiveUpperBound<F> const& x2) { return x1=x1*x2; }
+        friend Error<F>& operator*=(Error<F>& x1, PositiveBounds<F> const& x2) { return x1=x1*x2; }
+        friend Error<F>& operator*=(Error<F>& x1, PositiveValue<F> const& x2) { return x1=x1*x2; }
+
+  public:
     friend UpperBound<F> operator+(Error<F> const& x) { return UpperBound<F>(+x._e); }
     friend LowerBound<F> operator-(Error<F> const& x) { return LowerBound<F>(-x._e); }
     friend UpperBound<F> operator+(Value<F> const& x1, Error<F> const& x2) { return UpperBound<F>(add(up,x1._v,x2._e)); }
@@ -96,7 +161,14 @@ template<class F> class Error
     friend Bool same(Error<F> const& x1, Dyadic const& x2) { return x1._e==x2; }
     friend Bool refines(Error<F> const& x1, Error<F> const& x2) { return x1._e<=x2._e; }
     friend Error<F> refinement(Error<F> const& x1, Error<F> const& x2) { return Error<F>(min(x1._e,x2._e)); }
-    friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) { return Operations<Error<F>>::_write(os,x); }
+  public:
+    friend Error<F>const& cast_positive(Error<F> const& x) { return x; }
+  public:
+    friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) {
+//        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
+        return write(os,x.raw(),Error<F>::output_places,to_nearest); }
+    friend InputStream& operator>>(InputStream& is, Error<F>& x) {
+        UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is; }
   public:
     static Nat output_places;
     static Void set_output_places(Nat p) { output_places=p; }
@@ -104,6 +176,9 @@ template<class F> class Error
 
 template<class PR> Error(ValidatedUpperNumber, PR) -> Error<RawFloatType<PR>>;
 template<class F> Error(F) -> Error<F>;
+
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
+extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 
 
 }

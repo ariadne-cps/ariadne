@@ -132,7 +132,7 @@ first_order_pde(Matrix<Real> rA, Array<Matrix<Real>> rBs, Array<DiagonalMatrix<R
     auto ddphi = differential(phi,bd,2);
     auto mag_ddphi = mag(ddphi);
 
-    UpperBound<X> error_constant = 2u*sqrt(UpperBound<X>(cndA * max_nrm * mag_ddphi));
+    PositiveUpperBound<X> error_constant = 2u*sqrt(PositiveUpperBound<X>(cndA * max_nrm * mag_ddphi));
     Nat N = log2((error_constant/tolerance).get_d())+1;
 
     SizeType two_pow_N = pow(2,N);

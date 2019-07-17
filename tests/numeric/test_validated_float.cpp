@@ -98,6 +98,7 @@ class TestDirectedFloats
     Void test_conversions();
     Void test_validation();
     Void test_rounded_arithmetic();
+    Void test_comparison();
 };
 
 template<class PR> Void
@@ -107,6 +108,7 @@ TestDirectedFloats<PR>::test()
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_validation());
     ARIADNE_TEST_CALL(test_rounded_arithmetic());
+    ARIADNE_TEST_CALL(test_comparison());
 }
 
 template<class PR> Void
@@ -118,17 +120,33 @@ TestDirectedFloats<PR>::test_concept()
     FloatUpperBoundType ux(1);
     FloatValueType ex(1);
 
+    PositiveFloatLowerBoundType plx(1u);
+    PositiveFloatUpperBoundType pux(1u);
+
     lx=+lx; lx=-ux; lx=lx+lx; lx=lx-ux; lx=lx*m; lx=lx/m;
     ex=nul(lx); lx=pos(lx); lx=neg(ux); lx=hlf(lx);
     lx=add(lx,lx); lx=sub(lx,ux);
     lx=sqrt(lx); lx=exp(lx); lx=log(lx); lx=atan(lx);
     lx=max(lx,lx); lx=min(lx,lx);
 
+    plx=+plx; plx=plx+plx; plx=plx*plx; plx=plx/pux; plx=plx/m;
+    plx=nul(plx); plx=pos(plx); plx=hlf(plx); plx=sqr(plx); plx=rec(pux);
+    plx=add(plx,plx); plx=mul(plx,plx); plx=div(plx,pux);
+    plx=sqrt(plx); plx=exp(lx); lx=log(plx); plx=atan(plx);
+    plx=max(plx,plx); plx=max(plx,lx); plx=max(lx,plx); plx=min(plx,plx);
+
+
     ux=+ux; ux=-lx; ux=ux+ux; ux=ux-lx; ux=ux*m; ux=ux/m;
     ex=nul(ux); ux=pos(ux); ux=neg(lx); ux=hlf(ux);
     ux=add(ux,ux); ux=sub(ux,lx);
     ux=sqrt(ux); ux=exp(ux); ux=log(ux);
     ux=max(ux,ux); ux=min(ux,ux);
+
+    pux=+pux; pux=pux+pux; pux=pux*pux; pux=pux/plx; pux=pux/m;
+    pux=nul(pux); pux=pos(pux); pux=hlf(pux); pux=sqr(pux); pux=rec(plx);
+    pux=add(pux,pux); pux=mul(pux,pux); pux=div(pux,plx);
+    pux=sqrt(pux); pux=exp(lx); lx=log(pux); pux=atan(pux);
+    pux=max(pux,pux); pux=max(pux,lx); pux=max(lx,pux); pux=min(pux,pux);
 }
 
 template<class PR> Void
@@ -189,6 +207,34 @@ TestDirectedFloats<PR>::test_rounded_arithmetic() {
     ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)*PositiveFloatUpperBoundType(fifth,precision)).raw(),>=,third*fifth);
     ARIADNE_TEST_COMPARE((PositiveFloatLowerBoundType(third,precision)/PositiveFloatUpperBoundType(fifth,precision)).raw(),<=,third/fifth);
     ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)/PositiveFloatLowerBoundType(fifth,precision)).raw(),>=,third/fifth);
+}
+
+template<class PR> Void
+TestDirectedFloats<PR>::test_comparison() {
+    {
+        PositiveFloatUpperBoundType one(1u);
+        PositiveFloatUpperBoundType third=one/3u;
+
+        ARIADNE_TEST_ASSERT(definitely(third+third < 1u));
+        ARIADNE_TEST_ASSERT(definitely(third+third <= 1u));
+        ARIADNE_TEST_ASSERT(definitely(5u*third < 2u));
+        ARIADNE_TEST_ASSERT(definitely(5u*third <= 2u));
+        ARIADNE_TEST_ASSERT(possibly(3u*third > 1u));
+        ARIADNE_TEST_ASSERT(possibly(3u*third >= 1u));
+    }
+
+    {
+        PositiveFloatLowerBoundType one(1u);
+        PositiveFloatLowerBoundType two_thirds=one*2u/3u;
+        ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds < 2u));
+        ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds <= 2u));
+        ARIADNE_TEST_ASSERT(definitely(2u*two_thirds > 1u));
+        ARIADNE_TEST_ASSERT(definitely(2u*two_thirds >= 1u));
+        ARIADNE_TEST_ASSERT(possibly(3u*two_thirds < 2u));
+        ARIADNE_TEST_ASSERT(possibly(3u*two_thirds <= 2u));
+    }
+
+
 }
 
 

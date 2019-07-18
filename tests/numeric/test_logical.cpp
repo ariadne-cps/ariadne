@@ -25,10 +25,11 @@
 #include "utility/metaprogramming.hpp"
 #include "numeric/paradigm.hpp"
 #include "numeric/logical.hpp"
+#include "numeric/integer.hpp"
+#include "numeric/sequence.hpp"
 
 #include "../test.hpp"
 
-using namespace std;
 using namespace Ariadne;
 
 
@@ -115,6 +116,7 @@ TestLogical::test()
 {
     ARIADNE_TEST_CALL(test_conversion_to_bool());
     ARIADNE_TEST_CALL(test_conversion());
+    ARIADNE_TEST_CALL(test_disjunction());
 }
 
 Void
@@ -179,6 +181,17 @@ TestLogical::test_conversion()
         ARIADNE_TEST_NOTIFY("decide(...) is throws error on INDETERMINATE value.");
     }
 
+    ARIADNE_TEST_STATIC_ASSERT(Not<IsConvertible<Indeterminate,Boolean>>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Indeterminate,Sierpinskian>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Indeterminate,NegatedSierpinskian>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Indeterminate,Kleenean>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Indeterminate,LowerKleenean>);
+    ARIADNE_TEST_STATIC_ASSERT(IsConvertible<Indeterminate,UpperKleenean>);
+//    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(indeterminate and true),Kleenean>);
+//    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(indeterminate and Boolean(true)),Kleenean>);
+    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(indeterminate and Sierpinskian(true)),Sierpinskian>);
+    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(indeterminate and Kleenean(true)),Kleenean>);
+
     ARIADNE_TEST_CONSTRUCT(LogicalType<ValidatedTag>,vl,(LogicalValue::LIKELY))
     ARIADNE_TEST_EQUAL(definitely(vl),false);
     ARIADNE_TEST_EQUAL(possibly(vl),true);
@@ -189,4 +202,20 @@ TestLogical::test_conversion()
     ARIADNE_TEST_EQUAL(possibly(vl),true);
 }
 
+Void
+TestLogical::test_disjunction()
+{
+    Sequence<LowerKleenean> seq([](Natural n){return n==2 ? LowerKleenean(true) : LowerKleenean(indeterminate);});
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(LowerKleenean, some, disjunction(seq));
+    ARIADNE_TEST_ASSERT(possibly(not some.check(2_eff)));
+    ARIADNE_TEST_ASSERT(definitely(some.check(3_eff)));
+    ARIADNE_TEST_ASSERT(definitely(some.check(4_eff)));
+
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(
+        UpperKleenean, all, conjunction(Sequence<UpperKleenean>([](Natural n){return n==2 ? UpperKleenean(false) : UpperKleenean(indeterminate);})));
+    ARIADNE_TEST_ASSERT(possibly(all.check(2_eff)));
+    ARIADNE_TEST_ASSERT(not possibly(all.check(3_eff)));
+    ARIADNE_TEST_ASSERT(definitely(not all.check(4_eff)));
+
+}
 

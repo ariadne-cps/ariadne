@@ -30,7 +30,10 @@
 #include <string>
 
 #include "config.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
+#include "numeric/float.decl.hpp"
 #include "numeric/float.hpp"
 
 #include "../test.hpp"
@@ -61,15 +64,160 @@ template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
 } // namespace Ariadne
 
+
 template<class PR>
 class TestFloats
 {
+    typedef double Double;
+  protected:
+    Nat m; Int n; Double ad; ExactDouble ed;
+    Integer z; Dyadic w; Decimal d; Rational q; Real r;
+  public:
+    TestFloats();
   public:
     static Rational to_rational(FloatType<ApproximateTag,PR> x) { return Rational(x.raw()); }
     static Rational to_rational(FloatType<LowerTag,PR> x) { return Rational(x.raw()); }
     static Rational to_rational(FloatType<UpperTag,PR> x) { return Rational(x.raw()); }
     static Rational to_rational(FloatType<ExactTag,PR> x) { return Rational(x.raw()); }
 };
+
+template<class PR>
+TestFloats<PR>::TestFloats()
+    : m(1), n(1), ad(1.0), ed(1.0), z(1), w(1), d(1.0), q(1), r(1)
+{
+}
+
+template<class PR>
+class TestFloatApproximation
+    : public TestFloats<PR>
+{
+    typedef FloatType<ApproximateTag,PR> FloatApproximationType;
+
+    using TestFloats<PR>::m,TestFloats<PR>::n,TestFloats<PR>::ad,TestFloats<PR>::ed;
+    using TestFloats<PR>::z,TestFloats<PR>::w,TestFloats<PR>::d,TestFloats<PR>::q;
+  private:
+    PR precision;
+  public:
+    TestFloatApproximation(PR prec) : precision(prec) { };
+    Void test();
+  private:
+    Void test_concept();
+    Void test_arithmetic();
+    Void test_comparison();
+};
+
+
+template<class PR> Void
+TestFloatApproximation<PR>::test()
+{
+    ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_comparison());
+}
+
+template<class PR> Void
+TestFloatApproximation<PR>::test_concept()
+{
+    typedef DoublePrecision PRE; PRE pre;
+    PR pr=precision;
+
+    FloatApproximation<PR>::set_output_places(17);
+    FloatApproximationType ax(pr);
+    FloatApproximationType rx(pr);
+
+    // Constructors
+    FloatApproximationType(0u,pr); FloatApproximationType(0,pr); FloatApproximationType(0.0,pr);
+    FloatApproximationType(Integer(0),pr); FloatApproximationType(Dyadic(0),pr); FloatApproximationType(Rational(0),pr);
+
+    rx=FloatApproximationType(RawFloat<PR>(pr));
+    rx=FloatApproximationType(FloatValue<PR>(pr)); FloatApproximationType(FloatBall<PR,PRE>(pr,pre)); FloatApproximationType(FloatBounds<PR>(pr));
+    rx=FloatApproximationType(FloatUpperBound<PR>(pr)); rx=FloatApproximationType(FloatLowerBound<PR>(pr));
+    rx=FloatApproximationType(FloatApproximation<PR>(pr));
+
+    // Assignment
+    rx=m; rx=n; rx=ad; rx=ed; rx=z; rx=w; rx=q;
+
+    // ExactTag operations
+    rx=nul(ax); rx=pos(ax); rx=neg(ax); rx=hlf(ax); rx=sqr(ax); rx=rec(ax);
+
+    rx=operator+(ax); rx=operator-(ax); rx=operator+(ax,ax); rx=operator-(ax,ax); rx=operator*(ax,ax); rx=operator/(ax,ax);
+
+    // Arithmetic
+    rx=add(ax,ax);
+    rx=sub(ax,ax);
+    rx=mul(ax,ax);
+    rx=div(ax,ax);
+    rx=pow(ax,m);
+    rx=pow(ax,n);
+
+    // Order
+    rx=max(ax,ax); rx=min(ax,ax); rx=abs(ax);
+
+    // Transcendental functions
+    rx=sqrt(ax);
+    rx=exp(ax);
+    rx=log(ax);
+    rx=sin(ax);
+    rx=cos(ax);
+    rx=tan(ax);
+    rx=atan(ax);
+}
+
+template<class PR> Void
+TestFloatApproximation<PR>::test_arithmetic()
+{
+    RawFloat<PR> third(Rational(1,3),near,precision);
+    RawFloat<PR> fifth(Rational(1,5),near,precision);
+    RawFloat<PR> seventh(Rational(1,7),near,precision);
+
+    ARIADNE_TEST_SAME(max(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(third));
+    ARIADNE_TEST_SAME(min(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(fifth));
+    ARIADNE_TEST_SAME(abs(FloatApproximation<PR>(neg(third))),FloatApproximation<PR>(third));
+
+    ARIADNE_TEST_SAME(mag(FloatApproximation<PR>(neg(third))),PositiveFloatApproximation<PR>(third));
+    ARIADNE_TEST_SAME(mig(FloatApproximation<PR>(neg(third))),PositiveFloatApproximation<PR>(third));
+
+    ARIADNE_TEST_SAME(operator+(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(add(near,third,fifth)));
+    ARIADNE_TEST_SAME(operator-(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(sub(near,third,fifth)));
+    ARIADNE_TEST_SAME(operator*(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(mul(near,third,fifth)));
+    ARIADNE_TEST_SAME(operator/(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(div(near,third,fifth)));
+
+    ARIADNE_TEST_SAME(nul(FloatApproximation<PR>(third)),FloatApproximation<PR>(nul(third)));
+    ARIADNE_TEST_SAME(pos(FloatApproximation<PR>(third)),FloatApproximation<PR>(pos(third)));
+    ARIADNE_TEST_SAME(neg(FloatApproximation<PR>(third)),FloatApproximation<PR>(neg(third)));
+    ARIADNE_TEST_SAME(hlf(FloatApproximation<PR>(third)),FloatApproximation<PR>(hlf(third)));
+    ARIADNE_TEST_SAME(add(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(add(near,third,fifth)));
+    ARIADNE_TEST_SAME(sub(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(sub(near,third,fifth)));
+    ARIADNE_TEST_SAME(mul(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(mul(near,third,fifth)));
+    ARIADNE_TEST_SAME(div(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth)),FloatApproximation<PR>(div(near,third,fifth)));
+    ARIADNE_TEST_SAME(fma(FloatApproximation<PR>(third),FloatApproximation<PR>(fifth),FloatApproximation<PR>(seventh)),
+                          FloatApproximation<PR>(fma(near,third,fifth,seventh)));
+    ARIADNE_TEST_SAME(pow(FloatApproximation<PR>(fifth),3),FloatApproximation<PR>(pow(near,fifth,3)));
+}
+
+inline bool same(LogicalValue l1, LogicalValue l2) { return static_cast<uchar>(l1) == static_cast<uchar>(l2); }
+
+inline bool same(ApproximateKleenean ak1, ApproximateKleenean ak2) {
+    return same(reinterpret_cast<LogicalValue const&>(ak1),reinterpret_cast<LogicalValue const&>(ak2)); }
+
+template<class PR> Void
+TestFloatApproximation<PR>::test_comparison()
+{
+    PR pr=precision;
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)==FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)!=FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)< FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)> FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)<=FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-2,pr)>=FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)==FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)!=FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)< FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)> FloatApproximation<PR>(-1,pr),ApproximateKleenean(false));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)<=FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+    ARIADNE_TEST_SAME(FloatApproximation<PR>(-1,pr)>=FloatApproximation<PR>(-1,pr),ApproximateKleenean(true));
+}
+
 
 
 template<class PR>
@@ -237,7 +385,7 @@ TestDirectedFloats<PR>::test_comparison() {
 }
 
 
-template<class PR>
+template<class PR, class PRE=PR>
 class TestFloatBall
     : public TestFloats<PR>
 {
@@ -246,12 +394,14 @@ class TestFloatBall
     typedef FloatType<LowerTag,PR> FloatLowerBoundType;
     typedef FloatType<UpperTag,PR> FloatUpperBoundType;
     typedef FloatType<BoundedTag,PR> FloatBoundsType;
-    typedef FloatType<MetricTag,PR> FloatBallType;
+    typedef FloatBall<PR,PRE> FloatBallType;
     typedef FloatType<ExactTag,PR> FloatValueType;
   private:
-    PR precision;
+    PR precision; PRE error_precision;
+    static PRE _make_error_precision(PR const& pr) { if constexpr (IsSame<PR,PRE>::value) { return pr; } else { return PRE(); } }
   public:
-    TestFloatBall(PR prec) : precision(prec) { };
+    TestFloatBall(PR prec) : precision(prec), error_precision(_make_error_precision(prec)) { };
+    TestFloatBall(PR prec, PRE err_prec) : precision(prec), error_precision(err_prec) { };
     Void test();
   private:
     using TestFloats<PR>::to_rational;
@@ -262,26 +412,24 @@ class TestFloatBall
     Void test_rounded_arithmetic();
 };
 
-template<class PR> Void
-TestFloatBall<PR>::test()
+template<class PR, class PRE> Void
+TestFloatBall<PR,PRE>::test()
 {
     ARIADNE_TEST_CALL(test_precision());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_rounded_arithmetic());
 }
 
-template<class PR> Void
-TestFloatBall<PR>::test_conversions()
+template<class PR, class PRE> Void
+TestFloatBall<PR,PRE>::test_conversions()
 {
     Rational one=1;
     Rational third=one/3;
 }
 
-template<class PR> Void
-TestFloatBall<PR>::test_precision()
+template<class PR, class PRE> Void
+TestFloatBall<PR,PRE>::test_precision()
 {
-    PR error_precision=precision;
-
     FloatBallType mx(Rational(1),precision);
     ARIADNE_TEST_EQUALS(mx.value().precision(),precision);
     ARIADNE_TEST_EQUALS(mx.error().precision(),error_precision);
@@ -309,8 +457,14 @@ TestFloatBall<PR>::test_precision()
     ARIADNE_TEST_EQUALS((mx/2).precision(),precision);
 }
 
-template<class PR> Void
-TestFloatBall<PR>::test_rounded_arithmetic()
+// TODO: Move to FloatBall if necessary
+template<class F, class FE> Bool models(Ball<F,FE> x, Rational y) {
+    return abs(Dyadic(x.value())-y) <= Dyadic(x.error_raw()); }
+template<class F, class FE> Bool models(Ball<F,FE> x, Value<F> v) {
+    return abs(Dyadic(x.value())-Dyadic(v)) <= Dyadic(x.error_raw()); }
+
+template<class PR, class PRE> Void
+TestFloatBall<PR,PRE>::test_rounded_arithmetic()
 {
     Rational one=1;
     Rational three=3;
@@ -828,18 +982,227 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
     ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
 }
 
+template<class PR>
+class TestFloatValue
+{
+    using PRE=DoublePrecision;
+    typedef RawFloat<PR> RawFloatType;
+    typedef FloatBounds<PR> FloatBoundsType;
+    typedef FloatBall<PR,PRE> FloatBallType;
+    typedef FloatValue<PR> FloatValueType;
+  private:
+    PR precision;
+  public:
+    TestFloatValue(PR prec) : precision(prec) { }
+    Void test();
+  private:
+    Void test_concept();
+    Void test_operations();
+    Void test_predicates();
+};
+
+template<class PR> Void
+TestFloatValue<PR>::test()
+{
+    ARIADNE_TEST_CALL(test_operations());
+    ARIADNE_TEST_CALL(test_predicates());
+}
+
+template<class PR> Void
+TestFloatValue<PR>::test_concept()
+{
+    FloatValue<DoublePrecision>::set_output_places(17);
+
+    PR pr=precision;
+    PRE pre;
+
+    Boolean b;
+    Nat m=1u;
+    Int n=1;
+    Integer z=1;
+    Dyadic w=1;
+    ExactDouble d(1.0);
+    TwoExp t(0);
+    RawFloatType f(pr);
+    FloatValueType vx(pr);
+    FloatValueType rx(pr);
+    FloatBoundsType rbx(pr);
+
+    // Constructors
+    rx=FloatValueType(m,pr); rx=FloatValueType(n,pr); rx=FloatValueType(z,pr); rx=FloatValueType(w,pr);
+    rx=FloatValueType(d,pr); rx=FloatValueType(t,pr);
+    rx=FloatValueType(pr); rx=FloatValueType(f);
+
+    // Assignment
+    rx=m; rx=n; rx=z; rx=w; rx=d; rx=t;
+
+    // Arithmetic operators
+    rx=operator+(vx); rx=operator-(vx); rx=t*vx; rx=vx*t; rx=vx/t;
+    rbx=operator+(vx,vx); rbx=operator-(vx,vx); rbx=operator*(vx,vx); rbx=operator/(vx,vx);
+
+    // Exact operations
+    rx=nul(vx); rx=pos(vx); rx=neg(vx); rx=hlf(vx);
+    rx=mul(vx,t); rx=div(vx,t);
+
+    FloatBall<PR,PRE> rmx=add(vx,vx,pre); rmx=sub(vx,vx,pre); rmx=mul(vx,vx,pre); rmx=div(vx,vx,pre);
+
+    // Arithmetic
+    rbx=add(vx,vx); rbx=sub(vx,vx); rbx=mul(vx,vx); rbx=div(vx,vx);
+    rbx=sqr(vx); rbx=rec(vx); rbx=pow(vx,m); rbx=pow(vx,n);
+
+    // Order
+    rx=max(vx,vx); rx=min(vx,vx); rx=abs(vx);
+
+    // Comparisons
+    b=(vx==vx); b=(vx!=vx); b=(vx<=vx); b=(vx>=vx); b=(vx< vx); b=(vx> vx);
+}
+
+template<class PR> Void
+TestFloatValue<PR>::test_operations()
+{
+    PR pr=precision;
+    DoublePrecision pre;
+    FloatValueType vr(pr);
+
+    Nat m(5);
+    Int n(-3);
+    TwoExp t(-12);
+    Dyadic w(-3,1u);
+    FloatValueType vx(w,pr);
+    Dyadic w1(-3,1u), w2(5,2u);
+    FloatValueType vx1(w1,pr), vx2(w2,pr);
+
+    ARIADNE_TEST_EQUALS(vx,w);
+
+    ARIADNE_TEST_EQUALS(FloatValueType(RawFloatType(1.25,pr)),1.25_dy);
+
+    ARIADNE_TEST_EQUALS(FloatValueType(3u,pr),3.0_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(-5,pr),-5.0_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(ExactDouble(1.25),pr),1.25_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(TwoExp(-3),pr),0.125_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(Integer(-23),pr),-23.0_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(Dyadic(-23,3u),pr),-2.875_dy);
+
+
+    ARIADNE_TEST_EQUALS((vr=3u),3.0_dy);
+    ARIADNE_TEST_EQUALS((vr=-5),-5.0_dy);
+    ARIADNE_TEST_EQUALS((vr=Integer(-23)),-23.0_dy);
+    ARIADNE_TEST_EQUALS((vr=TwoExp(-3)),0.125_dy);
+    ARIADNE_TEST_EQUALS((vr=Dyadic(-23,3u)),-2.875_dy);
+
+    ARIADNE_TEST_EQUALS(FloatValueType(w,pr).operator Dyadic(),w);
+    ARIADNE_TEST_EQUALS(FloatValueType(w,pr).operator Rational(),w);
+
+    ARIADNE_TEST_EQUALS(nul(vx),nul(w));
+    ARIADNE_TEST_EQUALS(pos(vx),pos(w));
+    ARIADNE_TEST_EQUALS(neg(vx),neg(w));
+    ARIADNE_TEST_EQUALS(hlf(vx),hlf(w));
+
+    ARIADNE_TEST_EQUALS(mul(vx,t),mul(w,t));
+    ARIADNE_TEST_EQUALS(div(vx,t),w/t);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,sqr(vx),sqr(w));
+    ARIADNE_TEST_BINARY_PREDICATE(models,rec(vx),rec(w));
+
+//    ARIADNE_TEST_BINARY_PREDICATE(models,sqr(vx,pre),sqr(w));
+//    ARIADNE_TEST_BINARY_PREDICATE(models,rec(vx,pre),rec(w));
+
+    ARIADNE_TEST_EQUALS(max(vx1,vx2),max(w1,w2));
+    ARIADNE_TEST_EQUALS(min(vx1,vx2),min(w1,w2));
+    ARIADNE_TEST_EQUALS(abs(vx),abs(w));
+    ARIADNE_TEST_EQUALS(mig(vx).raw(),abs(w));
+    ARIADNE_TEST_EQUALS(mag(vx).raw(),abs(w));
+    ARIADNE_TEST_SAME(mag(vx),PositiveFloatUpperBound<PR>(abs(w),pr));
+    ARIADNE_TEST_SAME(mig(vx),PositiveFloatLowerBound<PR>(abs(w),pr));
+
+    ARIADNE_TEST_EQUALS(t*vx,t*w);
+    ARIADNE_TEST_EQUALS(vx*t,w*t);
+    ARIADNE_TEST_EQUALS(vx/t,w/t);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,vx1+vx2,w1+w2);
+    ARIADNE_TEST_BINARY_PREDICATE(models,vx1-vx2,w1-w2);
+    ARIADNE_TEST_BINARY_PREDICATE(models,vx1*vx2,w1*w2);
+    ARIADNE_TEST_BINARY_PREDICATE(models,vx1/vx2,w1/w2);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,add(vx1,vx2),add(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,sub(vx1,vx2),sub(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,mul(vx1,vx2),mul(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,div(vx1,vx2),div(w1,w2));
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,add(vx1,vx2,pre),add(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,sub(vx1,vx2,pre),sub(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,mul(vx1,vx2,pre),mul(w1,w2));
+    ARIADNE_TEST_BINARY_PREDICATE(models,div(vx1,vx2,pre),div(w1,w2));
+
+
+    ARIADNE_TEST_SAME(add(vx1,vx2,pre),FloatBallType(add(w1,w2),pr,pre));
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(vx,m),pow(w,m));
+    ARIADNE_TEST_BINARY_PREDICATE(models,pow(vx,n),pow(Rational(w),n));
+
+//    friend Bounds<F> med(Value<F> const& x1, Value<F> const& x2);
+//    friend Bounds<F> rad(Value<F> const& x1, Value<F> const& x2);
+
+    ARIADNE_TEST_BINARY_PREDICATE(models,sqr(sqrt(abs(vx))),abs(w));
+    ARIADNE_TEST_BINARY_PREDICATE(models,log(exp(vx)),w);
+    ARIADNE_TEST_BINARY_PREDICATE(models,exp(log(abs(vx))),abs(w));
+    ARIADNE_TEST_BINARY_PREDICATE(models,atan(tan(vx)),w);
+    ARIADNE_TEST_BINARY_PREDICATE(models,tan(atan(vx)),w);
+
+    ARIADNE_TEST_SAME(sin(vx),sin(FloatBounds<PR>(vx)));
+    ARIADNE_TEST_SAME(cos(vx),cos(FloatBounds<PR>(vx)));
+    ARIADNE_TEST_SAME(tan(vx),tan(FloatBounds<PR>(vx)));
+    ARIADNE_TEST_SAME(atan(vx),atan(FloatBounds<PR>(vx)));
+
+//    ARIADNE_TEST_SAME(shft(vx,n),shft(w,n));
+    ARIADNE_TEST_EQUALS(integer_cast(FloatValue<PR>(Dyadic(2),pr)),Integer(2));
+    ARIADNE_TEST_FAIL(integer_cast(FloatValue<PR>(Dyadic(7,2u),pr)));
+}
+
+template<class PR> Void
+TestFloatValue<PR>::test_predicates()
+{
+    PR pr=precision;
+    ARIADNE_TEST_BINARY_PREDICATE(eq,FloatValue<PR>(-1,pr),FloatValue<PR>(-1,pr));
+    ARIADNE_TEST_BINARY_PREDICATE(not eq,FloatValue<PR>(-1,pr),FloatValue<PR>(-2,pr));
+    ARIADNE_TEST_BINARY_PREDICATE(lt,FloatValue<PR>(-2,pr),FloatValue<PR>(-1,pr));
+    ARIADNE_TEST_BINARY_PREDICATE(not lt,FloatValue<PR>(-2,pr),FloatValue<PR>(-2,pr));
+    ARIADNE_TEST_BINARY_PREDICATE(not lt,FloatValue<PR>(-1,pr),FloatValue<PR>(-2,pr));
+
+    Dyadic w(3,1u);
+    Integer zl(1), zu(2);
+    Dyadic wl(5,2u), wu(7,2u);
+    Rational ql(4,3), qu(5,3);
+
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),w),cmp(w,w));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),zl),cmp(w,zl));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),zu),cmp(w,zu));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),wl),cmp(w,wl));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),wu),cmp(w,wu));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),ql),cmp(w,ql));
+    ARIADNE_TEST_EQUALS(cmp(FloatValue<PR>(w,pr),qu),cmp(w,qu));
+}
+
+
 Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
+    TestFloatApproximation<DoublePrecision>(dp).test();
+    TestFloatApproximation<MultiplePrecision>(MultiplePrecision(128)).test();
+
     TestDirectedFloats<DoublePrecision>(dp).test();
     TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128)).test();
 
-    TestFloatBall<DoublePrecision>(dp).test();
-    TestFloatBall<MultiplePrecision>(MultiplePrecision(128)).test();
-
     TestFloatBounds<DoublePrecision>(dp).test();
     TestFloatBounds<MultiplePrecision>(MultiplePrecision(128)).test();
+
+    TestFloatBall<DoublePrecision,DoublePrecision>(dp).test();
+    TestFloatBall<MultiplePrecision>(MultiplePrecision(128)).test();
+    TestFloatBall<MultiplePrecision,DoublePrecision>(MultiplePrecision(128)).test();
+
+    TestFloatValue<DoublePrecision>(dp).test();
+    TestFloatValue<MultiplePrecision>(MultiplePrecision(128)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

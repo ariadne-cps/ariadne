@@ -35,17 +35,11 @@
 #include "float.decl.hpp"
 
 #include "float_operations.hpp"
+#include "float_traits.hpp"
+
 #include "float_factory.hpp"
 
 namespace Ariadne {
-
-template<class F> struct NumericTraits<Bounds<F>> {
-    typedef ValidatedNumber GenericType;
-    typedef Bounds<F> OppositeType;
-    typedef PositiveBounds<F> PositiveType;
-    typedef ValidatedKleenean LessType;
-    typedef ValidatedKleenean EqualsType;
-};
 
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -110,7 +104,7 @@ template<class F> class Bounds
         Bounds<F>(Bounds<FF> const& x, PR pr) : Bounds<F>(F(x.lower_raw(),downward,pr),F(x.upper_raw(),upward,pr)) { }
     Bounds<F>(const Bounds<F>& x, PR pr) : _l(x._l,down,pr), _u(x._u,up,pr) { }
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Bounds<F>(N n, PR pr) : Bounds<F>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Bounds<F>(N n, PR pr) : _l(n,down,pr), _u(n,up,pr) { }
     Bounds<F>(ExactDouble const& d, PR pr) : _l(d,pr), _u(d,pr) { }
         Bounds<F>(TwoExp const& t, PR pr) : _l(t,pr), _u(t,pr) { }
         Bounds<F>(const Integer& z, PR pr) : _l(z,down,pr), _u(z,up,pr) { }
@@ -139,7 +133,6 @@ template<class F> class Bounds
 
     friend Value<F> value(Bounds<F> const& x) { return x.value(); }
     friend Error<F> error(Bounds<F> const& x) { return x.error(); }
-
 
     RawType const& lower_raw() const { return _l; }
     RawType const& upper_raw() const { return _u; }
@@ -285,6 +278,12 @@ template<class F> class Bounds
     RawType _l, _u;
 };
 
+template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : Bounds<F>(x.lower_raw(),x.upper_raw()) { }
+
+template<class FE> inline Bounds<FE> make_bounds(Error<FE> const& e) { return pm(e); }
+Value<FloatDP> midpoint(Bounds<FloatDP> const& x); // DEPRECATED
+
+
 template<class PR> Bounds(ValidatedNumber, PR) -> Bounds<RawFloatType<PR>>;
 template<class PR> Bounds(ValidatedLowerNumber, ValidatedUpperNumber, PR) -> Bounds<RawFloatType<PR>>;
 template<class F> Bounds(F,F) -> Bounds<F>;
@@ -360,246 +359,99 @@ extern template Ariadne::Nat Ariadne::Bounds<Ariadne::FloatMP>::output_places;
 template<class F> class Operations<Bounds<F>> {
     typedef PrecisionType<F> PR;
   public:
-    static Bounds<F> _mul(Bounds<F> const& x1, Bounds<F> const& x2) {
-        const F& x1l=x1._l; const F& x1u=x1._u;
-        const F& x2l=x2._l; const F& x2u=x2._u;
-        F rl,ru;
-        if(x1l>=0) {
-            if(x2l>=0) {
-                rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
-            } else if(x2u<=0) {
-                rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2u);
-            } else {
-                rl=mul(down,x1u,x2l); ru=mul(up,x1u,x2u);
-            }
-        }
-        else if(x1u<=0) {
-            if(x2l>=0) {
-                rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2l);
-            } else if(x2u<=0) {
-                rl=mul(down,x1u,x2u); ru=mul(up,x1l,x2l);
-            } else {
-                rl=mul(down,x1l,x2u); ru=mul(up,x1l,x2l);
-            }
-        } else {
-            if(x2l>=0) {
-                rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2u);
-            } else if(x2u<=0) {
-                rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2l);
-            } else {
-                rl=min(mul(down,x1u,x2l),mul(down,x1l,x2u));
-                ru=max(mul(up,x1l,x2l),mul(up,x1u,x2u));
-            }
-        }
-        return Bounds<F>(rl,ru);
-    }
+    static Bounds<F> _mul(Bounds<F> const& x1, Bounds<F> const& x2);
+    static Bounds<F> _div(Bounds<F> const& x1, Bounds<F> const& x2);
 
-    static Bounds<F> _div(Bounds<F> const& x1, Bounds<F> const& x2) {
-        const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
-        const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
-        F rl,ru;
+    static Bounds<F> _pi(PR pr);
+    static Bounds<F> _sin(Bounds<F> const& x);
+    static Bounds<F> _cos(Bounds<F> const& x);
 
-        // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
-        if(x2l>0) {
-            if(x1l>=0) {
-                rl=div(down,x1l,x2u); ru=div(up,x1u,x2l);
-            } else if(x1u<=0) {
-                rl=div(down,x1l,x2l); ru=div(up,x1u,x2u);
-            } else {
-                rl=div(down,x1l,x2l); ru=div(up,x1u,x2l);
-            }
-        }
-        else if(x2u<0) {
-            if(x1l>=0) {
-                rl=div(down,x1u,x2u); ru=div(up,x1l,x2l);
-            } else if(x1u<=0) {
-                rl=div(down,x1u,x2l); ru=div(up,x1l,x2u);
-            } else {
-                rl=div(down,x1u,x2u); ru=div(up,x1l,x2u);
-            }
-        }
-        else {
-            //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-            PR pr=max(x1.precision(),x2.precision());
-            rl=-F::inf(pr);
-            ru=+F::inf(pr);
-        }
-        return Bounds<F>(rl,ru);
-    }
+    static Bounds<F> _trunc(Bounds<F> const& x);
+    static Bounds<F> _trunc(Bounds<F> const& x, Nat n);
 
-    static Bounds<F> _pi(PR pr) {
-        return Bounds<F>(F::pi(down,pr),F::pi(up,pr));
-    }
+    // Mixed Bounded - Exact operations
+    static Bounds<F> _add(Bounds<F> const& x1, Value<F> const& x2);
+    static Bounds<F> _add(Value<F> const& x1, Bounds<F> const& x2);
+    static Bounds<F> _sub(Bounds<F> const& x1, Value<F> const& x2);
+    static Bounds<F> _sub(Value<F> const& x1, Bounds<F> const& x2);
+    static Bounds<F> _mul(Bounds<F> const& x1, Value<F> const& x2);
+    static Bounds<F> _mul(Value<F> const& x1, Bounds<F> const& x2);
+    static Bounds<F> _div(Bounds<F> const& x1, Value<F> const& x2);
+    static Bounds<F> _div(Value<F> const& x1, Bounds<F> const& x2);
 
-    static Bounds<F> _sin(Bounds<F> const& x) {
-        return cos(x-hlf(_pi(x.precision())));
-    }
-
-    static Bounds<F> _cos(Bounds<F> const& x) {
-        ARIADNE_ASSERT(x.lower_raw()<=x.upper_raw());
-        typename F::RoundingModeType rnd = F::get_rounding_mode();
-        PR prec=x.precision();
-
-        const F one(1,prec);
-        const Value<F> two(2,prec);
-        const Bounds<F> pi_val=_pi(prec);
-        const Bounds<F> two_pi_val=2*pi_val;
-        if(x.error().raw()>two_pi_val.lower().raw()) { return Bounds<F>(-one,+one); }
-
-        Value<F> n(round(div(near,x.value_raw(),(two_pi_val.value_raw()))));
-        Bounds<F> y=x-two*(n*pi_val);
-
-        ARIADNE_ASSERT(y.lower_raw()<=pi_val.upper_raw());
-        ARIADNE_ASSERT(y.upper_raw()>=-pi_val.upper_raw());
-
-        F rl,ru;
-        if(y.lower_raw()<=-pi_val.lower_raw()) {
-            if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
-            else { rl=-one; ru=+one; }
-        } else if(y.lower_raw()<=0.0) {
-            if(y.upper_raw()<=0.0) { rl=cos(down,y.lower_raw()); ru=cos(up,y.upper_raw()); }
-            else if(y.upper_raw()<=pi_val.lower_raw()) { rl=cos(down,max(-y.lower_raw(),y.upper_raw())); ru=+one; }
-            else { rl=-one; ru=+one; }
-        } else if(y.lower_raw()<=pi_val.upper_raw()) {
-            if(y.upper_raw()<=pi_val.lower_raw()) { rl=cos(down,y.upper_raw()); ru=cos(up,y.lower_raw()); }
-            else if(y.upper_raw()<=two_pi_val.lower_raw()) { rl=-one; ru=cos(up,min(y.lower_raw(),sub(down,two_pi_val.lower_raw(),y.upper_raw()))); }
-            else { rl=-one; ru=+one; }
-        } else {
-            assert(false);
-        }
-
-        F::set_rounding_mode(rnd);
-        return Bounds<F>(rl,ru);
-    }
-
-    static Bounds<F> _trunc(Bounds<F> const& x) {
-        typename F::RoundingModeType rm=F::get_rounding_mode();
-        const double& xl=x.lower_raw().get_d();
-        const double& xu=x.upper_raw().get_d();
-        // Use machine epsilon instead of minimum to move away from zero
-        const float fm=std::numeric_limits<float>::epsilon();
-        volatile float tu=xu;
-        if(tu<xu) { F::set_rounding_upward(); tu+=fm; }
-        volatile float tl=xl;
-        if(tl>xl) { F::set_rounding_downward(); tl-=fm; }
-        F::set_rounding_mode(rm);
-        assert(tl<=xl); assert(tu>=xu);
-        return Bounds<F>(double(tl),double(tu));
-    }
-
-    static Bounds<F> _trunc(Bounds<F> const& x, Nat n) {
-        Bounds<F> _e=Bounds<F>(std::pow(2.0,52-(Int)n));
-        Bounds<F> y=x+_e; return y-_e;
-    }
-
-    // Mixed BoundedTag - ExactTag operations
-    static Bounds<F> _add(Bounds<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(add(down,x1._l,x2._v),add(up,x1._u,x2._v));
-    }
-
-    static Bounds<F> _add(Value<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(add(down,x1._v,x2._l),add(down,x1._v,x2._u));
-    }
-
-    static Bounds<F> _sub(Bounds<F> const& x1, Value<F> const& x2) {
-        return Bounds<F>(sub(down,x1._l,x2._v),sub(up,x1._u,x2._v));
-    }
-
-    static Bounds<F> _sub(Value<F> const& x1, Bounds<F> const& x2) {
-        return Bounds<F>(sub(down,x1._v,x2._u),sub(up,x1._v,x2._l));
-    }
-
-    static Bounds<F> _mul(Bounds<F> const& x1, Value<F> const& x2) {
-        const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
-        const F& x2v=x2.raw();
-        F rl,ru;
-        if(x2v>=0.0) {
-            rl=mul(down,x1l,x2v); ru=mul(up,x1u,x2v);
-        } else {
-            rl=mul(down,x1u,x2v); ru=mul(up,x1l,x2v);
-        }
-        return Bounds<F>(rl,ru);
-    }
-
-    static Bounds<F> _mul(Value<F> const& x1, Bounds<F> const& x2) {
-        const F& x1v=x1.raw();
-        const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
-        F rl,ru;
-        if(x1v>=0.0) {
-            rl=mul(down,x1v,x2l); ru=mul(up,x1v,x2u);
-        } else {
-            rl=mul(down,x1v,x2u); ru=mul(up,x1v,x2l);
-        }
-        return Bounds<F>(rl,ru);
-    }
-
-    static Bounds<F> _div(Bounds<F> const& x1, Value<F> const& x2) {
-        const F& x1l=x1.lower_raw();
-        const F& x1u=x1.upper_raw();
-        const F& x2v=x2.raw();
-        F rl,ru;
-        if(x2v>0) {
-            rl=div(down,x1l,x2v); ru=div(up,x1u,x2v);
-        } else if(x2v<0) {
-            rl=div(down,x1u,x2v); ru=div(up,x1l,x2v);
-        } else {
-            //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, FloatValue x2)","x1="<<x1<<", x2="<<x2);
-            auto pr=min(x1.precision(),x2.precision());
-            rl=-F::inf(pr);
-            ru=+F::inf(pr);
-        }
-        return Bounds<F>(rl,ru);
-    }
-
-    static Bounds<F> _div(Value<F> const& x1, Bounds<F> const& x2) {
-        const F& x1v=x1.raw();
-        const F& i2l=x2.lower_raw();
-        const F& i2u=x2.upper_raw();
-        F rl,ru;
-        if(i2l<=0 && i2u>=0) {
-            //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatValue const& x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-            auto pr=min(x1.precision(),x2.precision());
-            rl=-F::inf(pr);
-            ru=+F::inf(pr);
-        } else if(x1v>=0) {
-            rl=div(down,x1v,i2u); ru=div(up,x1v,i2l);
-        } else {
-            rl=div(down,x1v,i2l); ru=div(up,x1v,i2u);
-        }
-        return Bounds<F>(rl,ru);
-    }
-
-    static OutputStream& _write(OutputStream& os, const Bounds<F>& x) {
-        os << '{';
-        write(os,x.lower().raw(),Bounds<F>::output_places,downward);
-        os << ':';
-        write(os,x.upper().raw(),Bounds<F>::output_places,upward);
-        os << '}';
-        return os;
-
-    }
-
-    static InputStream& _read(InputStream& is, Bounds<F>& x) {
-        char cl,cm,cr;
-        F _l,_u;
-        auto rnd=F::get_rounding_mode();
-        is >> cl;
-        F::set_rounding_downward();
-        is >> _l;
-        is >> cm;
-        F::set_rounding_upward();
-        is >> _u;
-        is >> cr;
-        F::set_rounding_mode(rnd);
-        ARIADNE_ASSERT(not is.fail());
-        ARIADNE_ASSERT(cl=='[' || cl=='(');
-        ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
-        ARIADNE_ASSERT(cr==']' || cr==')');
-        x._l=_l; x._u=_u;
-        return is;
-    }
+    static OutputStream& _write(OutputStream& os, const Bounds<F>& x);
+    static InputStream& _read(InputStream& is, Bounds<F>& x);
 };
 
+
+template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
+{
+    const F& x1l=x1._l; const F& x1u=x1._u;
+    const F& x2l=x2._l; const F& x2u=x2._u;
+    F rl,ru;
+    if(x1l>=0) {
+        if(x2l>=0) {
+            rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
+        } else if(x2u<=0) {
+            rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2u);
+        } else {
+            rl=mul(down,x1u,x2l); ru=mul(up,x1u,x2u);
+        }
+    }
+    else if(x1u<=0) {
+        if(x2l>=0) {
+            rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2l);
+        } else if(x2u<=0) {
+            rl=mul(down,x1u,x2u); ru=mul(up,x1l,x2l);
+        } else {
+            rl=mul(down,x1l,x2u); ru=mul(up,x1l,x2l);
+        }
+    } else {
+        if(x2l>=0) {
+            rl=mul(down,x1l,x2u); ru=mul(up,x1u,x2u);
+        } else if(x2u<=0) {
+            rl=mul(down,x1u,x2l); ru=mul(up,x1l,x2l);
+        } else {
+            rl=min(mul(down,x1u,x2l),mul(down,x1l,x2u));
+            ru=max(mul(up,x1l,x2l),mul(up,x1u,x2u));
+        }
+    }
+    return Bounds<F>(rl,ru);
+}
+
+template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, Bounds<F> const& x2) -> Bounds<F>
+{
+    const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
+    const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
+    F rl,ru;
+
+    // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
+    if(x2l>0) {
+        if(x1l>=0) {
+            rl=div(down,x1l,x2u); ru=div(up,x1u,x2l);
+        } else if(x1u<=0) {
+            rl=div(down,x1l,x2l); ru=div(up,x1u,x2u);
+        } else {
+            rl=div(down,x1l,x2l); ru=div(up,x1u,x2l);
+        }
+    }
+    else if(x2u<0) {
+        if(x1l>=0) {
+            rl=div(down,x1u,x2u); ru=div(up,x1l,x2l);
+        } else if(x1u<=0) {
+            rl=div(down,x1u,x2l); ru=div(up,x1l,x2u);
+        } else {
+            rl=div(down,x1u,x2u); ru=div(up,x1l,x2u);
+        }
+    }
+    else {
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
+        PR pr=max(x1.precision(),x2.precision());
+        rl=-F::inf(pr);
+        ru=+F::inf(pr);
+    }
+    return Bounds<F>(rl,ru);
+}
 
 }
 

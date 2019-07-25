@@ -29,22 +29,14 @@
 #ifndef ARIADNE_FLOAT_APPROXIMATION_HPP
 #define ARIADNE_FLOAT_APPROXIMATION_HPP
 
-#include "../utility/macros.hpp"
-
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_traits.hpp"
 #include "float_operations.hpp"
 
 namespace Ariadne {
-
-template<class F> struct NumericTraits<Approximation<F>> {
-    typedef ApproximateNumber GenericType;
-    typedef PositiveApproximation<F> PositiveType;
-    typedef Approximation<F> OppositeType;
-    typedef Fuzzy LessType;
-    typedef Fuzzy EqualsType;
-};
 
 //! \ingroup NumericModule
 //! \brief Floating point number approximations to real numbers supporting approxiamate arithmetic.
@@ -195,6 +187,8 @@ template<class F> class Approximation
   public:
     RawType _a;
 };
+
+template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : Approximation<F>(x.value_raw()) { }
 
 template<class PR> Approximation(ApproximateNumber, PR) -> Approximation<RawFloatType<PR>>;
 template<class F> Approximation(F) -> Approximation<F>;

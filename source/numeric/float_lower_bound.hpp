@@ -29,20 +29,14 @@
 #ifndef FLOAT_LOWER_BOUND_H
 #define FLOAT_LOWER_BOUND_H
 
-#include "../utility/macros.hpp"
-
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
-namespace Ariadne {
+#include "float_traits.hpp"
+#include "float_operations.hpp"
 
-template<class F> struct NumericTraits<LowerBound<F>> {
-    typedef ValidatedLowerNumber GenericType;
-    typedef UpperBound<F> OppositeType;
-    typedef PositiveLowerBound<F> PositiveType;
-    typedef ValidatedUpperKleenean LessType;
-    typedef ValidatedNegatedSierpinskian EqualsType;
-};
+namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
@@ -152,6 +146,9 @@ template<class F> class LowerBound
     friend UpperBound<F> neg(LowerBound<F> const& x);
     friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2);
   public:
+    friend Approximation<F> rec(LowerBound<F> const& x); //< DEPRECATED: Needed only for Operations template
+    friend Approximation<F> rec(UpperBound<F> const& x); //< DEPRECATED: Needed only for Operations template
+  public:
     friend LowerBound<F> operator*(PositiveBounds<F> const& x1, LowerBound<F> const& x2) {
         return LowerBound<F>(mul(down,x2.raw()>=0?x1.lower().raw():x1.upper().raw(),x2.raw())); }
     friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {
@@ -169,6 +166,8 @@ template<class F> class LowerBound
     static Nat output_places;
     RawType _l;
 };
+
+template<class F> template<class FE> LowerBound<F>::LowerBound(Ball<F,FE> const& x) : LowerBound<F>(x.lower_raw()) { }
 
 template<class PR> LowerBound(ValidatedLowerNumber, PR) -> LowerBound<RawFloatType<PR>>;
 template<class F> LowerBound(F) -> LowerBound<F>;

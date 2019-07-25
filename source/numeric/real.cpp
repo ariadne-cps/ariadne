@@ -35,11 +35,11 @@
 #include "integer.hpp"
 #include "rational.hpp"
 
+#include "twoexp.hpp"
 #include "dyadic.hpp"
 #include "decimal.hpp"
 
-#include "float.hpp"
-#include "float-user.hpp"
+#include "float_bounds.hpp"
 
 #include "real_interface.hpp"
 #include "number_wrapper.hpp"

@@ -29,31 +29,24 @@
 #ifndef ARIADNE_FLOAT_VALUE_HPP
 #define ARIADNE_FLOAT_VALUE_HPP
 
-#include "../utility/macros.hpp"
-
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
+#include "float_traits.hpp"
 #include "float_operations.hpp"
 
-#include "logical.hpp"
-#include "builtin.hpp"
-#include "twoexp.hpp"
 #include "integer.hpp"
 #include "dyadic.hpp"
 
 namespace Ariadne {
 
-template<class F> struct NumericTraits<Value<F>> {
-    typedef ExactNumber GenericType;
-    typedef Value<F> OppositeType;
-    typedef PositiveValue<F> PositiveType;
-    typedef Boolean LessType;
-    typedef Boolean EqualsType;
-};
-
 static_assert(not IsGenericNumericType<FloatValue<DoublePrecision>>::value,"");
 static_assert(not IsGenericNumericType<FloatValue<MultiplePrecision>>::value,"");
+
+extern const FloatDPValue infty;
+
+FloatDPValue operator"" _exact(long double lx);
 
 //! \ingroup NumericModule
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
@@ -80,7 +73,7 @@ template<class F> class Value
     explicit Value<F>(PrecisionType pr) : _v(0.0,pr) { }
     explicit Value<F>(RawType const& v) : _v(v) { }
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(ExactDouble(n),pr) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(Integer(n),pr) { }
     Value<F>(const ExactDouble& d, PR pr);
     Value<F>(const TwoExp& t, PR pr);
     Value<F>(const Integer& z, PR pr);
@@ -152,9 +145,9 @@ template<class F> class Value
     template<class FE> friend Value<F> mul(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
     template<class FE> friend Value<F> div(Value<F> const& x1, Value<F> const& x2, Error<FE>& e);
 
-    friend Value<F> mul(Value<F> const& x, TwoExp y) {
+    friend Value<F> mul(Value<F> const& x, TwoExp const& y) {
         Value<F> yv(y,x.precision()); return Value<F>(mul(near,x.raw(),yv.raw())); }
-    friend Value<F> div(Value<F> const& x, TwoExp y) {
+    friend Value<F> div(Value<F> const& x, TwoExp const& y) {
         Value<F> yv(y,x.precision()); return Value<F>(div(near,x.raw(),yv.raw())); }
 
     friend Bounds<F> pow(Value<F> const& x, Nat m) {

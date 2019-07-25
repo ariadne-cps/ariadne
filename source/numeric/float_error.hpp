@@ -30,19 +30,18 @@
 #define ARIADNE_FLOAT_ERROR_HPP
 
 #include "../utility/macros.hpp"
+#include "../utility/metaprogramming.hpp"
 
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
-namespace Ariadne {
+#include "float_traits.hpp"
+#include "float_operations.hpp"
 
-template<class F> struct NumericTraits<Error<F>> {
-    typedef PositiveValidatedUpperNumber GenericType;
-    typedef Error<F> PositiveType;
-    typedef PositiveLowerBound<F> OppositeType;
-    typedef ValidatedLowerKleenean LessType;
-    typedef ValidatedNegatedSierpinskian EqualsType;
-};
+#include "float_upper_bound.hpp"
+
+namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for positive real numbers, suitable for use as an upper bound for an error in a metric space.
@@ -64,7 +63,8 @@ template<class F> class Error
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Error<F>(PositiveBounds<F> const& x) : _e(x._u) { }
+    Error<F>(PositiveValue<F> const& x);
+    Error<F>(PositiveBounds<F> const& x);
     Error<F>(PositiveUpperBound<F> const& x) : _e(x._u) { }
     operator PositiveUpperBound<F> const& () const { return reinterpret_cast<PositiveUpperBound<F>const&>(*this); }
     operator PositiveUpperBound<F>& () { return reinterpret_cast<PositiveUpperBound<F>&>(*this); }
@@ -77,7 +77,6 @@ template<class F> class Error
     explicit Error<F>(ValidatedUpperNumber const& y, PR pr) : Error<F>(UpperBound<F>(y,pr)) { }
     explicit Error<F>(const ExactDouble& d, PR pr) : Error<F>(UpperBound<F>(d,pr)) { }
     explicit Error<F>(const TwoExp& t, PR pr) : Error<F>(UpperBound<F>(t,pr)) { }
-    Error<F>(PositiveValue<F> const& x) : _e(x._v) { }
     Error<F>& operator=(Nat m) { reinterpret_cast<UpperBound<F>&>(*this)=m; return *this; }
     Error<F>& operator=(ValidatedErrorNumber y) { return *this=cast_positive(y.get(this->precision())); }
     operator ValidatedErrorNumber() const;

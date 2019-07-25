@@ -35,16 +35,9 @@
 #include "float.decl.hpp"
 
 #include "float_operations.hpp"
+#include "float_traits.hpp"
 
 namespace Ariadne {
-
-template<class F, class FE> struct NumericTraits<Ball<F,FE>> {
-    typedef ValidatedNumber GenericType;
-    typedef Ball<F,FE> OppositeType;
-    typedef PositiveBall<F,FE> PositiveType;
-    typedef ValidatedKleenean LessType;
-    typedef ValidatedKleenean EqualsType;
-};
 
 template<class PRE, class PR, EnableIf<IsDefaultConstructible<PRE>> = dummy> inline
     PRE _error_precision(PR const&) { return PRE(); }
@@ -79,6 +72,7 @@ template<class F, class FE> class Ball
     explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
+    Ball<F,FE>(Value<F> const& x, PRE pre);
     Ball<F,FE>(Bounds<F> const& x, PRE pre);
     Ball<F,FE>(LowerBound<F> const& lower, UpperBound<F> const& upper) = delete;
 

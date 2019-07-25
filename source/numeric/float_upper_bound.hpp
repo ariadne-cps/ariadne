@@ -29,20 +29,14 @@
 #ifndef ARIADNE_FLOAT_UPPER_BOUND_HPP
 #define ARIADNE_FLOAT_UPPER_BOUND_HPP
 
-#include "../utility/macros.hpp"
-
+#include "logical.decl.hpp"
 #include "number.decl.hpp"
 #include "float.decl.hpp"
 
-namespace Ariadne {
+#include "float_traits.hpp"
+#include "float_operations.hpp"
 
-template<class F> struct NumericTraits<UpperBound<F>> {
-    typedef ValidatedUpperNumber GenericType;
-    typedef LowerBound<F> OppositeType;
-    typedef PositiveUpperBound<F> PositiveType;
-    typedef ValidatedLowerKleenean LessType;
-    typedef ValidatedNegatedSierpinskian EqualsType;
-};
+namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for real numbers.
@@ -115,13 +109,8 @@ template<class F> class UpperBound
     friend UpperBound<F> hlf(UpperBound<F> const& x) {
         return UpperBound<F>(hlf(x._u)); }
 
-    friend UpperBound<F> rec(LowerBound<F> const& x) {
-        return UpperBound<F>(rec(up,x.raw())); }
-
     friend UpperBound<F> add(UpperBound<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(add(up,x1._u,x2._u)); }
-//    friend Approximation<F> sub(UpperBound<F> const& x1, UpperBound<F> const& x2) {
-//        return UpperBound<F>(sub(near,x1._u,x2._u)); }
     friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2) {
         return UpperBound<F>(sub(up,x1._u,x2._l)); }
 
@@ -155,6 +144,9 @@ template<class F> class UpperBound
     friend LowerBound<F> neg(UpperBound<F> const& x);
     friend LowerBound<F> sub(LowerBound<F> const& x1, UpperBound<F> const& x2);
   public:
+    friend Approximation<F> rec(UpperBound<F> const& x);
+    friend Approximation<F> rec(LowerBound<F> const& x);
+  public:
     friend UpperBound<F> operator*(PositiveBounds<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(mul(up,x2.raw()>=0?x1.upper().raw():x1.lower().raw(),x2.raw())); }
     friend UpperBound<F> operator*(UpperBound<F> const& x1, PositiveBounds<F> const& x2) {
@@ -172,6 +164,8 @@ template<class F> class UpperBound
     static Nat output_places;
     RawType _u;
 };
+
+template<class F> template<class FE> UpperBound<F>::UpperBound(Ball<F,FE> const& x) : UpperBound<F>(x.upper_raw()) { }
 
 template<class PR> UpperBound(ValidatedUpperNumber, PR) -> UpperBound<RawFloatType<PR>>;
 template<class F> UpperBound(F) -> UpperBound<F>;

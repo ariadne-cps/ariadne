@@ -31,6 +31,7 @@
 #include "../utility/module.hpp"
 #include "../numeric/paradigm.hpp"
 
+#include "casts.hpp"
 #include "number.hpp"
 #include "logical.hpp"
 #include "integer.hpp"

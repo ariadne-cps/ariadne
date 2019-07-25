@@ -10,7 +10,14 @@ add_library(ariadne-numeric OBJECT
     complex.cpp
     floatdp.cpp
     floatmp.cpp
-    float-user.cpp
+    float_approximation.cpp
+    float_lower_bound.cpp
+    float_upper_bound.cpp
+    float_bounds.cpp
+    float_ball.cpp
+    float_value.cpp
+    float_error.cpp
+    float_literals.cpp
 )
 
 cotire(ariadne-numeric CONFIGURATIONS None)

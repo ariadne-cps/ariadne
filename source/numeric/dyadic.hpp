@@ -39,6 +39,7 @@
 
 #include "../numeric/logical.hpp"
 #include "../numeric/integer.hpp"
+#include "../numeric/twoexp.hpp"
 #include "../numeric/arithmetic.hpp"
 
 namespace Ariadne {

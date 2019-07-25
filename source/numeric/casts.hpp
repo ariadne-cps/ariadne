@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float-user.hpp
+ *            casts.hpp
  *
  *  Copyright 2008-17  Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float.hpp
- *  \brief Inclusion header for floating-point numbers.
+/*! \file casts.hpp
+ *  \brief Inclusion header for casting between different kinds of information.
  */
 
-#ifndef ARIADNE_FLOAT_USER_HPP
-#define ARIADNE_FLOAT_USER_HPP
+#ifndef ARIADNE_CASTS_HPP
+#define ARIADNE_CASTS_HPP
 
 #include "../utility/macros.hpp"
 
@@ -35,9 +35,6 @@
 #include "float.decl.hpp"
 #include "floatdp.hpp"
 #include "floatmp.hpp"
-#include "float-raw.hpp"
-
-#include "float_operations.hpp"
 
 #include "float_approximation.hpp"
 #include "float_lower_bound.hpp"
@@ -47,82 +44,7 @@
 #include "float_value.hpp"
 #include "float_error.hpp"
 
-#include "float_factory.hpp"
-
 namespace Ariadne {
-
-template<class F> Approximation<F>::Approximation(LowerBound<F> const& x) : Approximation<F>(x.raw()) { }
-template<class F> Approximation<F>::Approximation(UpperBound<F> const& x) : Approximation<F>(x.raw()) { }
-template<class F> Approximation<F>::Approximation(Bounds<F> const& x) : Approximation<F>(x.value_raw()) { }
-template<class F> Approximation<F>::Approximation(Value<F> const& x) : Approximation<F>(x.raw()) { }
-template<class F> Approximation<F>::Approximation(Error<F> const& x) : Approximation<F>(x.raw()) { }
-
-template<class F> LowerBound<F>::LowerBound(Bounds<F> const& x) : LowerBound<F>(x.lower_raw()) { }
-template<class F> LowerBound<F>::LowerBound(Value<F> const& x) : LowerBound<F>(x.raw()) { }
-
-template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x) : UpperBound<F>(x.upper_raw()) { }
-template<class F> UpperBound<F>::UpperBound(Value<F> const& x) : UpperBound<F>(x.raw()) { }
-template<class F> UpperBound<F>::UpperBound(Error<F> const& x) : UpperBound<F>(x.raw()) { }
-
-template<class F> Bounds<F>::Bounds(Value<F> const& x) : Bounds<F>(x.raw(),x.raw()) { }
-template<class F> Bounds<F>::Bounds(LowerBound<F> const& lower, UpperBound<F> const& upper) : Bounds<F>(lower.raw(),upper.raw()) { }
-
-template<class F, class FE> Ball<F,FE>::Ball(Bounds<F> const& x) : _v(x.value_raw()) , _e(x.error_raw(),up,_error_precision<PRE>(x.precision())) { }
-template<class F, class FE> Ball<F,FE>::Ball(Value<F> const& x) : _v(x.raw()), _e(_error_precision<PRE>(x.precision())) { }
-template<class F, class FE> Ball<F,FE>::Ball(Value<F> const& value, Error<FE> const& error) : Ball<F,FE>(value.raw(),error.raw()) { }
-
-template<class F> template<class FE> Approximation<F>::Approximation(Ball<F,FE> const& x) : Approximation<F>(x.value_raw()) { }
-template<class F> template<class FE> LowerBound<F>::LowerBound(Ball<F,FE> const& x) : LowerBound<F>(x.lower_raw()) { }
-template<class F> template<class FE> UpperBound<F>::UpperBound(Ball<F,FE> const& x) : UpperBound<F>(x.upper_raw()) { }
-template<class F> template<class FE> Bounds<F>::Bounds(Ball<F,FE> const& x) : Bounds<F>(x.lower_raw(),x.upper_raw()) { }
-
-
-
-template<class F> inline LowerBound<F> const Bounds<F>::lower() const {
-    return LowerBound<F>(lower_raw()); }
-template<class F> inline UpperBound<F> const Bounds<F>::upper() const {
-    return UpperBound<F>(upper_raw()); }
-template<class F> inline const Value<F> Bounds<F>::value() const {
-    return Value<F>(med(near,this->_l,this->_u)); }
-template<class F> inline const Error<F> Bounds<F>::error() const {
-    RawFloat<PR> _v=med(near,this->_l,this->_u); return Error<F>(max(sub(up,this->_u,_v),sub(up,_v,this->_l))); }
-
-
-
-template<class F, class FE> inline LowerBound<F> const Ball<F,FE>::lower() const {
-    return LowerBound<F>(lower_raw()); }
-template<class F, class FE> inline UpperBound<F> const Ball<F,FE>::upper() const {
-    return UpperBound<F>(upper_raw()); }
-template<class F, class FE> inline const Value<F> Ball<F,FE>::value() const {
-    return Value<F>(this->_v); }
-template<class F, class FE> inline const Error<FE> Ball<F,FE>::error() const {
-    return Error<FE>(this->_e); }
-
-
-template<class F> Bounds<F> Bounds<F>::pm(Error<F> const& e) const {
-    return Bounds<F>(sub(down,this->_l,e._e),add(up,this->_u,e._e)); }
-template<class F, class FE> Ball<F,FE> Ball<F,FE>::pm(Error<FE> const& e) const {
-    return Ball<F,FE>(this->_v,add(up,this->_e,e._e)); }
-template<class F> template<class FE> inline Ball<F,FE> Value<F>::pm(Error<FE> const& e) const {
-    return Ball<F,FE>(*this,e); }
-
-
-template<class FE> inline Bounds<FE> make_bounds(Error<FE> const& e) { return pm(e); }
-
-inline Value<FloatDP> midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
-
-
-extern const FloatDPValue infty;
-
-// Literals operation
-FloatDPValue operator"" _exact(long double lx);
-FloatDPError operator"" _error(long double lx);
-FloatDPBall operator"" _near(long double lx);
-FloatDPUpperBound operator"" _upper(long double lx);
-FloatDPLowerBound operator"" _lower(long double lx);
-FloatDPApproximation operator"" _approx(long double lx);
-
-
 
 template<class F> inline Value<F> const& cast_exact(F const& x) { return reinterpret_cast<Value<F> const&>(x); }
 template<class F> inline Value<F> const& cast_exact(Approximation<F> const& x) { return reinterpret_cast<Value<F> const&>(x); }

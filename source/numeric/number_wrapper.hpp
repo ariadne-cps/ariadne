@@ -37,10 +37,18 @@
 #include "number_interface.hpp"
 
 #include "number.hpp"
+
 #include "logical.hpp"
+#include "builtin.hpp"
 #include "floatdp.hpp"
 #include "floatmp.hpp"
-#include "float-user.hpp"
+#include "float_value.hpp"
+#include "float_ball.hpp"
+#include "float_bounds.hpp"
+#include "float_upper_bound.hpp"
+#include "float_lower_bound.hpp"
+#include "float_approximation.hpp"
+#include "float_error.hpp"
 
 #include "../symbolic/templates.hpp"
 #include "../numeric/operators.hpp"
@@ -59,12 +67,6 @@ template<class X> inline X const* extract(NumberInterface const* y) {
 
 inline OutputStream& operator<<(OutputStream& os, NumberInterface const& y) { return y._write(os); }
 
-inline OutputStream& operator<<(OutputStream& os, Comparison c) {
-    return os << ( (c==Comparison::EQUAL) ? "EQUAL" : (c==Comparison::LESS) ? "LESS" : "GREATER" );
-}
-inline OutputStream& operator<<(OutputStream& os, Sign s) {
-    return os << ( (s==Sign::ZERO) ? "ZERO" : (s==Sign::NEGATIVE) ? "NEGATIVE" : "POSITIVE" );
-}
 
 // FIXME: Should test for other potential infinities
 inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {

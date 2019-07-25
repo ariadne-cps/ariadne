@@ -526,6 +526,15 @@ PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2) { return c
 PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2) { return cast_positive(div(cast_real(plr1),cast_real(pur2))); }
 PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2) { return cast_positive(div(cast_real(pur1),cast_real(plr2))); }
 
+LowerReal mul(LowerReal lr1, PositiveReal pr2) { return mul(cast_real(lr1),make_signed(pr2)); }
+UpperReal mul(UpperReal ur1, PositiveReal pr2) { return mul(cast_real(ur1),make_signed(pr2)); }
+LowerReal mul(PositiveReal pr1, LowerReal lr2) { return mul(make_signed(pr1),cast_real(lr2)); }
+UpperReal mul(PositiveReal pr1, UpperReal ur2) { return mul(make_signed(pr1),cast_real(ur2)); }
+LowerReal div(LowerReal lr1, PositiveReal pr2) { return div(cast_real(lr1),make_signed(pr2)); }
+UpperReal div(UpperReal ur1, PositiveReal pr2) { return div(cast_real(ur1),make_signed(pr2)); }
+LowerReal div(PositiveReal pr1, UpperReal ur2) { return div(make_signed(pr1),cast_real(ur2)); }
+UpperReal div(PositiveReal pr1, LowerReal lr2) { return div(make_signed(pr1),cast_real(lr2)); }
+
 
 static_assert(IsConstructible<FloatDP,Dyadic,FloatDP::RoundingModeType,FloatDP::PrecisionType>::value,"");
 static_assert(IsConstructible<FloatMP,Dyadic,FloatMP::RoundingModeType,FloatMP::PrecisionType>::value,"");

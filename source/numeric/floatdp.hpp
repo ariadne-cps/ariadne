@@ -166,6 +166,8 @@ class FloatDP {
     explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a dyadic number with given rounding
     explicit FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a decimal number with given rounding
+    explicit FloatDP(Decimal const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a FloatMP using given rounding
     explicit FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding

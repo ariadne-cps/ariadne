@@ -35,6 +35,7 @@
 #include "floatmp.hpp"
 #include "floatdp.hpp"
 #include "dyadic.hpp"
+#include "decimal.hpp"
 #include "rational.hpp"
 
 namespace Ariadne {
@@ -120,6 +121,9 @@ FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, MultiplePrecision pr) {
         }
     }
 }
+
+FloatMP::FloatMP(Decimal const& dec, RoundingModeType rnd, MultiplePrecision pr)
+    : FloatMP(Rational(dec),rnd,pr) { }
 
 FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);

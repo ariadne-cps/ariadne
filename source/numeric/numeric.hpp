@@ -35,6 +35,7 @@
 #include "../utility/declarations.hpp"
 
 #include "../numeric/logical.hpp"
+#include "../numeric/builtin.hpp"
 #include "../numeric/integer.hpp"
 #include "../numeric/rational.hpp"
 #include "../numeric/decimal.hpp"
@@ -42,6 +43,8 @@
 #include "../numeric/float.hpp"
 #include "../numeric/real.hpp"
 #include "../numeric/number.hpp"
+
+#include "../numeric/casts.hpp"
 
 namespace Ariadne {
 

@@ -341,7 +341,8 @@ class LowerReal
     friend LowerReal neg(UpperReal const& r); //!< Negative \a -r.
     friend LowerReal hlf(LowerReal const& r); //!< Half \a r÷2.
     friend LowerReal add(LowerReal const& r1, LowerReal const& r2); //!< \brief Sum \a r1+r2.
-    friend LowerReal sub(LowerReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+    friend LowerReal sub(LowerReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+    friend UpperReal sub(UpperReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
 
     friend NaiveReal mul(LowerReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
     friend NaiveReal div(LowerReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
@@ -350,6 +351,12 @@ class LowerReal
 
     //@{
     //! \name Named arithmetical functions on positive numbers
+    friend LowerReal mul(LowerReal const& r1, PositiveReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend LowerReal mul(PositiveReal const& r1, LowerReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend LowerReal div(LowerReal const& r1, PositiveReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend LowerReal div(PositiveReal const& r1, UpperReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend UpperReal div(PositiveReal const& r1, LowerReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+
     friend PositiveLowerReal add(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Addition \a r1+r2 preserves positivity.
     friend PositiveLowerReal mul(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
     friend PositiveLowerReal div(PositiveLowerReal const& r1, PositiveUpperReal const& r2); //!< Division \a r1÷r2 preserves positivity.
@@ -438,7 +445,8 @@ class UpperReal
     friend UpperReal neg(LowerReal const& r); //!< Negative \a -r.
     friend UpperReal hlf(UpperReal const& r); //!< Half \a r÷2.
     friend UpperReal add(UpperReal const& r1, UpperReal const& r2); //!< \brief Sum \a r1+r2.
-    friend UpperReal sub(UpperReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+    friend UpperReal sub(UpperReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+    friend LowerReal sub(LowerReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
 
     friend NaiveReal mul(UpperReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
     friend NaiveReal mul(UpperReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
@@ -447,6 +455,12 @@ class UpperReal
 
     //@{
     //! \name Named arithmetical functions on positive numbers
+    friend UpperReal mul(UpperReal const& r1, PositiveReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend UpperReal mul(PositiveReal const& r1, UpperReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend UpperReal div(UpperReal const& r1, PositiveReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend UpperReal div(PositiveReal const& r1, LowerReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend LowerReal div(PositiveReal const& r1, UpperReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+
     friend PositiveUpperReal add(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Addition \a r1+r2 preserves positivity.
     friend PositiveUpperReal mul(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
     friend PositiveUpperReal div(PositiveUpperReal const& r1, PositiveLowerReal const& r2); //!< Division \a r1÷r2 preserves positivity.
@@ -648,7 +662,7 @@ class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowe
 {
   public:
     using LowerReal::LowerReal;
-    PositiveLowerReal(LowerReal r) : LowerReal(r) { }
+    explicit PositiveLowerReal(LowerReal r) : LowerReal(r) { }
     PositiveFloatDPLowerBound get(DoublePrecision pr) const;
     PositiveFloatMPLowerBound get(MultiplePrecision pr) const;
   public:
@@ -666,7 +680,7 @@ class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUppe
 {
   public:
     using UpperReal::UpperReal;
-    PositiveUpperReal(UpperReal r) : UpperReal(r) { }
+    explicit PositiveUpperReal(UpperReal r) : UpperReal(r) { }
     PositiveFloatDPUpperBound get(DoublePrecision pr) const;
     PositiveFloatMPUpperBound get(MultiplePrecision pr) const;
   public:
@@ -689,8 +703,8 @@ PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
 
 PositiveReal cast_positive(Real const& x);
 
-LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
-UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
+//LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
+//UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
 
 ValidatedKleenean check_sgn(Real r, Effort eff);
 

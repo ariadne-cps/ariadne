@@ -905,9 +905,6 @@ template class Matrix<Real>;
 template PositiveFloatDPUpperBound sup_norm(const Matrix<FloatDPBounds>& A);
 template FloatDPUpperBound log_norm(const Matrix<FloatDPBounds>& A);
 
-template Matrix<FloatDPValue>const& cast_exact(const Matrix<FloatDPApproximation>& mx);
-template Matrix<FloatMPValue>const& cast_exact(const Matrix<FloatMPApproximation>& mx);
-
 template class Matrix<Dyadic>;
 
 template class Matrix<Rational>;

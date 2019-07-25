@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include "numeric/logical.hpp"
+#include "numeric/builtin.hpp"
 #include "numeric/real.hpp"
 
 #include "numeric/integer.hpp"
@@ -39,6 +40,7 @@
 #include "numeric/float_lower_bound.hpp"
 #include "numeric/float_bounds.hpp"
 #include "numeric/float_value.hpp"
+#include "numeric/float_error.hpp"
 
 #include "numeric/complex.hpp"
 

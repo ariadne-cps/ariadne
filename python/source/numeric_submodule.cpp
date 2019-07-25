@@ -39,9 +39,11 @@
 #include "numeric/real.hpp"
 #include "numeric/floatdp.hpp"
 #include "numeric/floatmp.hpp"
-#include "numeric/float-user.hpp"
-
+#include "numeric/float.hpp"
 #include "numeric/complex.hpp"
+
+#include "numeric/casts.hpp"
+
 
 namespace Ariadne {
 

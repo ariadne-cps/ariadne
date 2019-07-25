@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_validated_float.cpp
+ *            test_float_bounds.cpp
  *
  *  Copyright  2006-14  Alberto Casagrande, Pieter Collins
  *
@@ -30,263 +30,23 @@
 #include <string>
 
 #include "config.hpp"
+#include "numeric/builtin.hpp"
+#include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 #include "numeric/float.decl.hpp"
-#include "numeric/float-user.hpp"
+
+#include "numeric/float_bounds.hpp"
+
+#include "numeric/float_lower_bound.hpp"
+#include "numeric/float_upper_bound.hpp"
+#include "numeric/float_value.hpp"
+#include "numeric/float_error.hpp"
 
 #include "../test.hpp"
+#include "test_floats.hpp"
 
 using namespace Ariadne;
 using namespace std;
-
-namespace Ariadne {
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator==(FloatDP const& x, Q const& q) { return Rational(x)==q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator!=(FloatDP const& x, Q const& q) { return Rational(x)!=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator<=(FloatDP const& x, Q const& q) { return Rational(x)<=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator>=(FloatDP const& x, Q const& q) { return Rational(x)>=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator< (FloatDP const& x, Q const& q) { return Rational(x)< q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator> (FloatDP const& x, Q const& q) { return Rational(x)> q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator==(FloatMP const& x, Q const& q) { return Rational(x)==q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator!=(FloatMP const& x, Q const& q) { return Rational(x)!=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator<=(FloatMP const& x, Q const& q) { return Rational(x)<=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator>=(FloatMP const& x, Q const& q) { return Rational(x)>=q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator< (FloatMP const& x, Q const& q) { return Rational(x)< q; }
-template<class Q, EnableIf<IsSame<Q,Rational>> =dummy> Bool operator> (FloatMP const& x, Q const& q) { return Rational(x)> q; }
-
-template<class F> Bool models(LowerBound<F> x, Rational q) { return x.raw() <= q; }
-template<class F> Bool models(UpperBound<F> x, Rational q) { return x.raw() >= q; }
-template<class F> Bool models(Bounds<F> x, Rational q) { return x.lower_raw() <= q and x.upper_raw() >= q; }
-template<class F> Bool models(Ball<F> x, Rational q) { return x.error_raw() >= abs(Rational(x.value_raw())-q); }
-
-template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
-template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
-} // namespace Ariadne
-
-template<class PR>
-class TestFloats
-{
-  public:
-    static Rational to_rational(FloatType<ApproximateTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(FloatType<LowerTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(FloatType<UpperTag,PR> x) { return Rational(x.raw()); }
-    static Rational to_rational(FloatType<ExactTag,PR> x) { return Rational(x.raw()); }
-};
-
-
-template<class PR>
-class TestDirectedFloats
-    : public TestFloats<PR>
-{
-    typedef FloatType<ApproximateTag,PR> FloatApproximationType;
-    typedef FloatType<LowerTag,PR> FloatLowerBoundType;
-    typedef FloatType<UpperTag,PR> FloatUpperBoundType;
-    typedef FloatType<BoundedTag,PR> FloatBoundsType;
-    typedef FloatType<MetricTag,PR> FloatBallType;
-    typedef FloatType<ExactTag,PR> FloatValueType;
-
-    typedef PositiveFloatLowerBound<PR> PositiveFloatLowerBoundType;
-    typedef PositiveFloatUpperBound<PR> PositiveFloatUpperBoundType;
-
-  private:
-    PR precision;
-  public:
-    TestDirectedFloats(PR prec) : precision(prec) { };
-    Void test();
-  private:
-    Void test_concept();
-    Void test_precision();
-    Void test_conversions();
-    Void test_validation();
-    Void test_rounded_arithmetic();
-};
-
-template<class PR> Void
-TestDirectedFloats<PR>::test()
-{
-    ARIADNE_TEST_CALL(test_precision());
-    ARIADNE_TEST_CALL(test_conversions());
-    ARIADNE_TEST_CALL(test_validation());
-    ARIADNE_TEST_CALL(test_rounded_arithmetic());
-}
-
-template<class PR> Void
-TestDirectedFloats<PR>::test_concept()
-{
-    Nat m;
-    FloatApproximationType ax(1);
-    FloatLowerBoundType lx(1);
-    FloatUpperBoundType ux(1);
-    FloatValueType ex(1);
-
-    lx=+lx; lx=-ux; lx=lx+lx; lx=lx-ux; lx=lx*m; lx=lx/m;
-    ex=nul(lx); lx=pos(lx); lx=neg(ux); lx=hlf(lx);
-    lx=add(lx,lx); lx=sub(lx,ux);
-    lx=sqrt(lx); lx=exp(lx); lx=log(lx); lx=atan(lx);
-    lx=max(lx,lx); lx=min(lx,lx);
-
-    ux=+ux; ux=-lx; ux=ux+ux; ux=ux-lx; ux=ux*m; ux=ux/m;
-    ex=nul(ux); ux=pos(ux); ux=neg(lx); ux=hlf(ux);
-    ux=add(ux,ux); ux=sub(ux,lx);
-    ux=sqrt(ux); ux=exp(ux); ux=log(ux);
-    ux=max(ux,ux); ux=min(ux,ux);
-}
-
-template<class PR> Void
-TestDirectedFloats<PR>::test_precision()
-{
-    FloatLowerBoundType lx(Rational(1),precision);
-    ARIADNE_TEST_EQUALS(max(lx,lx).precision(),precision);
-    ARIADNE_TEST_EQUALS(min(lx,lx).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx+lx).precision(),precision);
-    ARIADNE_TEST_EQUALS(exp(lx).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx+2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx*2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx/2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx+2).precision(),precision);
-    ARIADNE_TEST_EQUALS((lx-2).precision(),precision);
-}
-
-template<class PR> Void
-TestDirectedFloats<PR>::test_conversions()
-{
-    Rational one=1;
-    Rational four_thirds=4*one/3;
-    Rational five_thirds=5*one/3;
-    Rational neg_five_thirds=-5*one/3;
-
-    ValidatedLowerNumber l(four_thirds);
-    ValidatedUpperNumber u(five_thirds);
-
-    ARIADNE_TEST_COMPARE(FloatBoundsType(l,u,precision).lower().raw(),<=,four_thirds);
-    ARIADNE_TEST_COMPARE(FloatBoundsType(l,u,precision).upper().raw(),>=,five_thirds);
-
-    ARIADNE_TEST_COMPARE(FloatLowerBoundType(five_thirds,precision).raw(),<=,five_thirds);
-    ARIADNE_TEST_COMPARE(FloatLowerBoundType(neg_five_thirds,precision).raw(),<=,neg_five_thirds);
-    ARIADNE_TEST_COMPARE(FloatUpperBoundType(five_thirds,precision).raw(),>=,five_thirds);
-    ARIADNE_TEST_COMPARE(FloatUpperBoundType(neg_five_thirds,precision).raw(),>=,neg_five_thirds);
-}
-
-template<class PR> Void
-TestDirectedFloats<PR>::test_validation() {
-    Rational one=1;
-    Rational two_=2;
-    ARIADNE_TEST_ASSERT(refines(FloatLowerBoundType(one,precision),FloatLowerBoundType(-one,precision)));
-    ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-one,precision),FloatUpperBoundType(+one,precision)));
-    ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(-two_,precision),FloatUpperBoundType(-one,precision)));
-//    ARIADNE_TEST_ASSERT(refines(rec(FloatUpperBoundType(-two,precision)),rec(FloatUpperBoundType(-one,precision))));
-}
-
-template<class PR> Void
-TestDirectedFloats<PR>::test_rounded_arithmetic() {
-    Rational one=1;
-    Rational third=one/3;
-    Rational fifth=one/3;
-    ARIADNE_TEST_COMPARE((FloatLowerBoundType(third,precision)+FloatLowerBoundType(fifth,precision)).raw(),<=,third+fifth);
-    ARIADNE_TEST_COMPARE((FloatLowerBoundType(third,precision)-FloatUpperBoundType(fifth,precision)).raw(),<=,third-fifth);
-    ARIADNE_TEST_ASSERT(refines(FloatUpperBoundType(third+fifth,precision),FloatUpperBoundType(third,precision)+FloatUpperBoundType(fifth,precision)));
-    ARIADNE_TEST_ASSERT(refines(FloatLowerBoundType(third+fifth,precision),FloatLowerBoundType(third,precision)+FloatLowerBoundType(fifth,precision)));
-    ARIADNE_TEST_COMPARE((PositiveFloatLowerBoundType(third,precision)*PositiveFloatLowerBoundType(fifth,precision)).raw(),<=,third*fifth);
-    ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)*PositiveFloatUpperBoundType(fifth,precision)).raw(),>=,third*fifth);
-    ARIADNE_TEST_COMPARE((PositiveFloatLowerBoundType(third,precision)/PositiveFloatUpperBoundType(fifth,precision)).raw(),<=,third/fifth);
-    ARIADNE_TEST_COMPARE((PositiveFloatUpperBoundType(third,precision)/PositiveFloatLowerBoundType(fifth,precision)).raw(),>=,third/fifth);
-}
-
-
-template<class PR>
-class TestFloatBall
-    : public TestFloats<PR>
-{
-    typedef RawFloat<PR> RawFloatType;
-    typedef FloatType<ApproximateTag,PR> FloatApproximationType;
-    typedef FloatType<LowerTag,PR> FloatLowerBoundType;
-    typedef FloatType<UpperTag,PR> FloatUpperBoundType;
-    typedef FloatType<BoundedTag,PR> FloatBoundsType;
-    typedef FloatType<MetricTag,PR> FloatBallType;
-    typedef FloatType<ExactTag,PR> FloatValueType;
-  private:
-    PR precision;
-  public:
-    TestFloatBall(PR prec) : precision(prec) { };
-    Void test();
-  private:
-    using TestFloats<PR>::to_rational;
-    Void test_concept();
-    Void test_precision();
-    Void test_conversions();
-    Void test_validation();
-    Void test_rounded_arithmetic();
-};
-
-template<class PR> Void
-TestFloatBall<PR>::test()
-{
-    ARIADNE_TEST_CALL(test_precision());
-    ARIADNE_TEST_CALL(test_conversions());
-    ARIADNE_TEST_CALL(test_rounded_arithmetic());
-}
-
-template<class PR> Void
-TestFloatBall<PR>::test_conversions()
-{
-    Rational one=1;
-    Rational third=one/3;
-}
-
-template<class PR> Void
-TestFloatBall<PR>::test_precision()
-{
-    PR error_precision=precision;
-
-    FloatBallType mx(Rational(1),precision);
-    ARIADNE_TEST_EQUALS(mx.value().precision(),precision);
-    ARIADNE_TEST_EQUALS(mx.error().precision(),error_precision);
-    ARIADNE_TEST_EQUALS(max(mx,mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(min(mx,mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(abs(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx+mx).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx-mx).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx*mx).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx/mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(sqrt(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(exp(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(log(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(sin(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(cos(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(tan(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS(atan(mx).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx+2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx-2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx*2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx/2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx+2).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx-2).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx*2).precision(),precision);
-    ARIADNE_TEST_EQUALS((mx/2).precision(),precision);
-}
-
-template<class PR> Void
-TestFloatBall<PR>::test_rounded_arithmetic()
-{
-    Rational one=1;
-    Rational three=3;
-    Rational five=5;
-    Rational six=6;
-    Rational third=one/three;
-    Rational fifth=one/five;
-
-    ARIADNE_TEST_BINARY_PREDICATE(models,FloatBallType(third,precision)+FloatBallType(fifth,precision),third+fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,FloatBallType(third,precision)-FloatBallType(fifth,precision),third-fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,FloatBallType(third,precision)*FloatBallType(fifth,precision),third*fifth);
-    ARIADNE_TEST_BINARY_PREDICATE(models,FloatBallType(third,precision)/FloatBallType(fifth,precision),third/fifth);
-//    ARIADNE_TEST_BINARY_PREDICATE(models,1/FloatBallType(three,precision)/FloatBallType(fifth,precision),1/three);
-
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(FloatBallType(three/five,precision),4u),pow(three/five,4u));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(FloatBallType(three/five,precision),4),pow(three/five,4));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(FloatBallType(three/five,precision),-4),pow(three/five,-4));
-    ARIADNE_TEST_BINARY_PREDICATE(models,pow(FloatBallType(three/five,precision),-7),pow(three/five,-7));
-}
-
-
 
 template<class PR>
 class TestFloatBounds
@@ -783,15 +543,10 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
     ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
 }
 
+
 Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
-
-    TestDirectedFloats<DoublePrecision>(dp).test();
-    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128)).test();
-
-    TestFloatBall<DoublePrecision>(dp).test();
-    TestFloatBall<MultiplePrecision>(MultiplePrecision(128)).test();
 
     TestFloatBounds<DoublePrecision>(dp).test();
     TestFloatBounds<MultiplePrecision>(MultiplePrecision(128)).test();

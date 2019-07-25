@@ -26,6 +26,7 @@
 #include "config.hpp"
 
 #include "numeric/logical.hpp"
+#include "numeric/builtin.hpp"
 #include "numeric/real.hpp"
 
 #include "numeric/integer.hpp"
@@ -33,6 +34,7 @@
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 
+#include "numeric/float_literals.hpp"
 #include "numeric/float_bounds.hpp"
 
 namespace Ariadne {

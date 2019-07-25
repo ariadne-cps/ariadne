@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_error.tpl.hpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -23,31 +23,34 @@
  */
 
 
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
+#ifndef ARIADNE_FLOAT_ERROR_TPL_HPP
+#define ARIADNE_FLOAT_ERROR_TPL_HPP
 
-#include "float_approximation.hpp"
-#include "float_lower_bound.hpp"
-#include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
-#include "float_ball.hpp"
-#include "float_value.hpp"
 #include "float_error.hpp"
+
+#include "float_value.hpp"
+#include "float_bounds.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
-}
+template<class F> Nat Error<F>::output_places = 3;
 
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
+template<class F> Error<F>::Error(PositiveBounds<F> const& x)
+    : _e(x._u) { }
+
+template<class F> Error<F>::Error(Positive<Value<F>> const& x)
+    : _e(x._v) { }
+
+template<class F> struct Operations<Error<F>> {
+    static OutputStream& _write(OutputStream& os, Error<F> const& x) {
+        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward);
+    }
+    static InputStream& _read(InputStream& is, Error<F>& x) {
+        UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is;
+    }
+};
+
 
 } // namespace Ariadne
+
+#endif

@@ -34,7 +34,17 @@
 #include "floatdp.hpp"
 #include "floatmp.hpp"
 
-#include "float-raw.hpp"
-#include "float-user.hpp"
+#include "float_approximation.hpp"
+#include "float_lower_bound.hpp"
+#include "float_upper_bound.hpp"
+#include "float_bounds.hpp"
+#include "float_ball.hpp"
+#include "float_value.hpp"
+#include "float_error.hpp"
+
+#include "float_bounds.inl.hpp"
+#include "float_ball.inl.hpp"
+
+#include "float_literals.hpp"
 
 #endif

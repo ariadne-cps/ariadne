@@ -79,6 +79,8 @@ class Int64;
 
 class ExactDouble;
 
+class TwoExp;
+
 class Dyadic;
 class Decimal;
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_lower_bound.tpl.hpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -23,31 +23,28 @@
  */
 
 
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
+#ifndef ARIADNE_FLOAT_LOWER_BOUND_TPL_HPP
+#define ARIADNE_FLOAT_LOWER_BOUND_TPL_HPP
 
-#include "float_approximation.hpp"
 #include "float_lower_bound.hpp"
-#include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
-#include "float_ball.hpp"
+
 #include "float_value.hpp"
-#include "float_error.hpp"
+#include "float_bounds.hpp"
+#include "float_upper_bound.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
+template<class F> LowerBound<F>::LowerBound(LowerBound<F> const& x, PR pr) : _l(x._l,downward,pr) {}
+
+template<class F> LowerBound<F>::LowerBound(Bounds<F> const& x) : LowerBound<F>(x.lower_raw()) { }
+template<class F> LowerBound<F>::LowerBound(Value<F> const& x) : LowerBound<F>(x.raw()) { }
+
+template<class F> LowerBound<F>::LowerBound(Real const& r, PR pr) : LowerBound(r.get(pr)) {}
+template<class F> LowerBound<F>::LowerBound(ValidatedLowerNumber const& y, PR pr) : LowerBound(y.get(LowerTag(),pr)) {}
+template<class F> LowerBound<F>::operator ValidatedLowerNumber() const {
+    ARIADNE_NOT_IMPLEMENTED; //return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
 }
 
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
-
 } // namespace Ariadne
+
+#endif

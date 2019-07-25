@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_value.cpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,32 +22,29 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
-
-#include "float_approximation.hpp"
-#include "float_lower_bound.hpp"
-#include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
-#include "float_ball.hpp"
 #include "float_value.hpp"
-#include "float_error.hpp"
+#include "float_value.tpl.hpp"
+
+#include "floatdp.hpp"
+#include "floatmp.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
+const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
+
+FloatValue<DoublePrecision> operator"" _exact(long double lx) {
+    double x=lx;
+    assert(x==lx);
+    return FloatValue<DoublePrecision>(x);
 }
 
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
+template class Value<FloatDP>;
+template class Operations<Value<FloatDP>>;
+template class Value<FloatMP>;
+template class Operations<Value<FloatMP>>;
+
+template<> String class_name<Value<FloatDP>>() { return "FloatDPValue"; }
+template<> String class_name<Value<FloatMP>>() { return "FloatMPValue"; }
+
 
 } // namespace Ariadne

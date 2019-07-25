@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_literals.hpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,32 +22,25 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*! \file float_literals.hpp
+ *  \brief Inclusion header for floating-point extended literals.
+ */
 
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
+#ifndef ARIADNE_FLOAT_LITERALS_HPP
+#define ARIADNE_FLOAT_LITERALS_HPP
 
-#include "float_approximation.hpp"
-#include "float_lower_bound.hpp"
-#include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
-#include "float_ball.hpp"
-#include "float_value.hpp"
-#include "float_error.hpp"
+#include "float.decl.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
-}
+ExactDouble operator"" _x(long double lx);
 
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
+FloatDPError operator"" _error(long double lx);
+FloatDPBall operator"" _near(long double lx);
+FloatDPUpperBound operator"" _upper(long double lx);
+FloatDPLowerBound operator"" _lower(long double lx);
+FloatDPApproximation operator"" _approx(long double lx);
 
 } // namespace Ariadne
+
+#endif

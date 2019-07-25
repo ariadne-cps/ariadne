@@ -29,7 +29,6 @@
 #include "config.hpp"
 #include "numeric/numeric.hpp"
 #include "numeric/float.hpp"
-#include "numeric/float-user.hpp"
 #include "algebra/vector.hpp"
 
 #include "../test.hpp"

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_upper_bound.cpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,32 +22,20 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
-
-#include "float_approximation.hpp"
-#include "float_lower_bound.hpp"
 #include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
-#include "float_ball.hpp"
-#include "float_value.hpp"
-#include "float_error.hpp"
+#include "float_upper_bound.tpl.hpp"
+
+#include "floatdp.hpp"
+#include "floatmp.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
-}
+template class UpperBound<FloatDP>;
+template class Operations<UpperBound<FloatDP>>;
+template class UpperBound<FloatMP>;
+template class Operations<UpperBound<FloatMP>>;
 
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
+template<> String class_name<UpperBound<FloatDP>>() { return "FloatDPUpperBound"; }
+template<> String class_name<UpperBound<FloatMP>>() { return "FloatMPUpperBound"; }
 
 } // namespace Ariadne

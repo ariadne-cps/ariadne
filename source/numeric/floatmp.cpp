@@ -30,9 +30,12 @@
 
 #include "../utility/module.hpp"
 #include "logical.hpp"
+#include "builtin.hpp"
+#include "twoexp.hpp"
 #include "floatmp.hpp"
 #include "floatdp.hpp"
 #include "dyadic.hpp"
+#include "decimal.hpp"
 #include "rational.hpp"
 
 namespace Ariadne {
@@ -78,8 +81,15 @@ FloatMP::FloatMP(MultiplePrecision pr, NoInit) {
     mpfr_init2(_mpfr,pr);
 }
 
-FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
+FloatMP::FloatMP(ExactDouble const& d, MultiplePrecision pr) : FloatMP(d.get_d(),get_rounding_mode(),pr) {
+}
 
+FloatMP::FloatMP(TwoExp const& t, MultiplePrecision pr) {
+    mpfr_init2(_mpfr,pr);
+    mpfr_set_ui_2exp(_mpfr,1u,t.exponent(),near);
+}
+
+FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
 }
 
 FloatMP::FloatMP(double d, RoundingModeType rnd, MultiplePrecision pr) {
@@ -111,6 +121,9 @@ FloatMP::FloatMP(Dyadic const& w, RoundingModeType rnd, MultiplePrecision pr) {
         }
     }
 }
+
+FloatMP::FloatMP(Decimal const& dec, RoundingModeType rnd, MultiplePrecision pr)
+    : FloatMP(Rational(dec),rnd,pr) { }
 
 FloatMP::FloatMP(Rational const& q, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);

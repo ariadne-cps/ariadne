@@ -1,7 +1,7 @@
 /***************************************************************************
- *            complex.cpp
+ *            float_ball.inl.hpp
  *
- *  Copyright 2019     Pieter Collins
+ *  Copyright 2008-17  Pieter Collins
  *
  ****************************************************************************/
 
@@ -23,31 +23,13 @@
  */
 
 
-#include "rational.hpp"
-#include "real.hpp"
-#include "complex.hpp"
+#ifndef ARIADNE_FLOAT_BALL_INL_HPP
+#define ARIADNE_FLOAT_BALL_INL_HPP
 
-#include "float_approximation.hpp"
-#include "float_lower_bound.hpp"
-#include "float_upper_bound.hpp"
-#include "float_bounds.hpp"
 #include "float_ball.hpp"
-#include "float_value.hpp"
-#include "float_error.hpp"
 
 namespace Ariadne {
 
-namespace Constants {
-const Complex<Integer> i = Complex<Integer>(0,1);
-}
-
-//template class Complex<Rational>;
-template class Complex<Real>;
-//template class Complex<FloatDPBall>;
-template class Complex<FloatDPBounds>;
-template class Complex<FloatDPApproximation>;
-//template class Complex<FloatMPBall>;
-template class Complex<FloatMPBounds>;
-template class Complex<FloatMPApproximation>;
-
 } // namespace Ariadne
+
+#endif

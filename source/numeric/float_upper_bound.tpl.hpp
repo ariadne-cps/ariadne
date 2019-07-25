@@ -1,0 +1,51 @@
+/***************************************************************************
+ *            float_upper_bound.tpl.hpp
+ *
+ *  Copyright 2008-17  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This file is part of Ariadne.
+ *
+ *  Ariadne is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Ariadne is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
+#ifndef ARIADNE_FLOAT_UPPER_BOUND_TPL_HPP
+#define ARIADNE_FLOAT_UPPER_BOUND_TPL_HPP
+
+#include "float_upper_bound.hpp"
+
+#include "float_error.hpp"
+#include "float_value.hpp"
+#include "float_bounds.hpp"
+#include "float_lower_bound.hpp"
+
+namespace Ariadne {
+
+template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x) : UpperBound<F>(x.upper_raw()) { }
+template<class F> UpperBound<F>::UpperBound(Value<F> const& x) : UpperBound<F>(x.raw()) { }
+template<class F> UpperBound<F>::UpperBound(Error<F> const& x) : UpperBound<F>(x.raw()) { }
+
+template<class F> UpperBound<F>::UpperBound(UpperBound<F> const& x, PR pr) : _u(x._u,upward,pr) {}
+template<class F> UpperBound<F>::UpperBound(Real const& r, PR pr) : UpperBound(r.get(pr)) {}
+template<class F> UpperBound<F>::UpperBound(ValidatedUpperNumber const& y, PR pr) : UpperBound(y.get(UpperTag(),pr)) {}
+template<class F> UpperBound<F>::operator ValidatedUpperNumber() const {
+    ARIADNE_NOT_IMPLEMENTED; // return ValidatedUpperNumber(new NumberWrapper<UpperBound<F>>(*this));}
+}
+
+} // namespace Ariadne
+
+#endif

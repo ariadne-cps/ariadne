@@ -34,6 +34,8 @@
 #include "../config.hpp"
 
 #include "../utility/macros.hpp"
+#include "../numeric/builtin.hpp"
+#include "../numeric/twoexp.hpp"
 #include "../numeric/dyadic.hpp"
 #include "../numeric/decimal.hpp"
 #include "../numeric/rational.hpp"
@@ -622,6 +624,17 @@ double atan_rnd(double x) {
 
 
 
+FloatDP::FloatDP(ExactDouble const& d, PrecisionType)
+    : FloatDP(d.get_d())
+{
+}
+
+FloatDP::FloatDP(TwoExp const& t, PrecisionType)
+    : FloatDP(std::ldexp(1.0,t.exponent()))
+{
+    ARIADNE_ASSERT(Dyadic(*this)==Dyadic(t));
+}
+
 FloatDP::FloatDP(Dyadic const& w, PrecisionType)
     : FloatDP(w.get_d())
 {
@@ -638,7 +651,7 @@ FloatDP::FloatDP(Integer const& x, RoundingModeType rnd, PrecisionType pr)
 {
 }
 
-FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType)
+FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(w.get_d())
 {
     if (is_finite(w)) {
@@ -656,7 +669,12 @@ FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType)
      }
 }
 
-FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType)
+FloatDP::FloatDP(Decimal const& dec, RoundingModeType rnd, PrecisionType pr)
+    : FloatDP(Rational(dec),rnd,pr)
+{
+}
+
+FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(q.get_d())
 {
     if (is_finite(q)) {

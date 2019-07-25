@@ -1,13 +1,17 @@
 set(UNIT_TESTS
-    test_dyadic
-    test_float
-    test_integer
     test_logical
-    test_number
+    test_integer
+    test_dyadic
     test_rational
     test_real
+    test_number
     test_rounding
-    test_validated_float
+    test_float
+    test_float_approximation
+    test_float_lower_upper_bound
+    test_float_bounds
+    test_float_ball
+    test_float_value
     test_complex
 )
 

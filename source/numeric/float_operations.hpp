@@ -60,8 +60,6 @@ template<class PX, class QPX=OppositeTrait<PX>> struct DeclarePositiveDirectedFl
     : DeclarePositiveDirectedNumericOperations<PX,QPX>
     , DeclareMixedDirectedSemifieldOperators<PX,QPX,GenericTrait<PX>,GenericTrait<QPX>>
 {
-    friend OutputStream& operator<<(OutputStream&, PX const&);
-    friend InputStream& operator>>(InputStream&, PX&);
 };
 
 template<class PX> struct DeclarePositiveFloatOperations

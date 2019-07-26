@@ -57,6 +57,13 @@ template<class X> class ConvergentSequence : public Sequence<X> {
     ConvergentSequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
     ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
+
+//! An alternating sequence in a partially-ordered space (X,,≤), satisfying \f$x_n \in [x_{n-1},x_{n-2}]\f$.
+template<class X> class AlternatingSequence : public ConvergentSequence<X> {
+  public:
+    explicit AlternatingSequence(Sequence<X> const& seq) : ConvergentSequence<X>(seq) { }
+};
+
 //! \brief An increasing sequence in a partially-ordered space (X,≤).
 template<class X> class IncreasingSequence : public Sequence<X> {
   public:
@@ -70,7 +77,7 @@ template<class X> class DecreasingSequence : public Sequence<X> {
     DecreasingSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
 
-//! \brief A fast-converging Cauchy sequence in a metric space (X,d), satisfying \c d(x<sub>m</sub>,x<sub>n</sub>) ≤ 2<sup>min(m,n)</sup>.
+//! \brief A fast-converging Cauchy sequence in a metric space (X,d), satisfying \f$ d(x_m,x_n) \leq 2^{-min(m,n)}\f$.
 template<class X> class FastCauchySequence : public Sequence<X> {
   public:
     FastCauchySequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }

@@ -31,6 +31,8 @@
 #define ARIADNE_EXPRESSION_TEMPLATES_HPP
 
 #include "../numeric/operators.hpp"
+#include "../numeric/integer.hpp"
+#include "../numeric/sequence.hpp"
 
 namespace Ariadne {
 
@@ -117,6 +119,40 @@ template<class O, class... Args> Symbolic<O,Args...> make_expression_template(O 
 
 template<class... SS> class SymbolicVariant : public Variant<SS...> {
     template<class VIS> decltype(auto) accept(VIS&& vis) const { return std::visit(std::forward<VIS>(vis),static_cast<Variant<SS...>const&>(*this)); }
+};
+
+struct While { };
+struct Iterate { };
+struct IfThnEls { };
+
+template<class C, class A> struct Symbolic<IfThnEls,C,A> {
+    IfThnEls _op; C _cnd; A _atru; A _afls;
+    Symbolic(IfThnEls op, C cnd, A atru, A afls) : _op(op), _cnd(cnd), _atru(atru), _afls(afls) { }
+    template<class... VS> decltype(auto) operator () (VS... vals) const {
+        if(_cnd(vals...)) { return  _atr(vals...); } else { return _afls(vals...); } }
+    friend OutputStream& operator<<(OutputStream& os, Symbolic expr) {
+        return os << "while(" << expr._cnd << ") { " << expr._fn << "}";
+    }
+};
+template<class C, class F> struct Symbolic<While,C,F> {
+    While _op; C _cnd; F _fn;
+    Symbolic(While op, C cnd, F fn) : _op(op), _cnd(cnd), _fn(fn) { }
+    template<class S> S& operator () (S& s) const {
+        while(_cnd(s)) { s=_fn(s); } return s; }
+    friend OutputStream& operator<<(OutputStream& os, Symbolic expr) {
+        return os << "while(" << expr._cnd << ") { " << expr._fn << "}";
+    }
+};
+
+template<class F> struct Symbolic<Iterate,F> {
+    F _fn;
+    Symbolic(Iterate op, F fn) : _fn(fn) { }
+    template<class S> Sequence<S> operator () (S const& s) const {
+        // TODO: Use cache so that sequence does not always have to be recomputed
+        return Sequence<S>([&](Natural const& n){ S t=s; for(Natural i=0u; i!=n; ++i) { t=_fn(t); } return t; }); }
+    friend OutputStream& operator<<(OutputStream& os, Symbolic expr) {
+        return os << "iterate(f)" << expr._cnd << ") { " << expr._fn << "}";
+    }
 };
 
 

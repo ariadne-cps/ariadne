@@ -105,7 +105,7 @@ void TestReal::test()
 
 void TestReal::test_concept() {
     Real x,y;
-    x=Real(); x=Real(1); x=Real(1.0_exact);
+    x=Real(); x=Real(1); x=Real(1.0_x);
     x=Real(1);
     y=+x; y=-x; y=x+x; y=x-x; y=x*x; y=x/x;
     y=pow(x,2u); y=pow(x,2);
@@ -131,7 +131,7 @@ void TestReal::test_constructors() {
     ARIADNE_TEST_EQUALS(xv.upper().get(dp).raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
     ARIADNE_TEST_EQUALS(xz.get(dp),1);
-    ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
+    ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_x));
     ARIADNE_TEST_EQUALS(xe.get(dp),1.5);
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
     ARIADNE_TEST_COMPARE(Rational(xn.lower().get(dp).raw()),<,Rational(11,10));

@@ -42,6 +42,7 @@
 #include "float_bounds.hpp"
 
 #include "real_interface.hpp"
+#include "sequence.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
@@ -90,31 +91,31 @@ template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, 
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<Pow,A,N> const&>(*this); }
 };
 
-template<class X> struct RealConstant : RealInterface, FloatDPBounds {
+template<class X> struct RealWrapper<Cnst,X> : RealInterface, FloatDPBounds {
     X _c;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp), _c(x) { }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp), _c(x) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
-template<> struct RealConstant<FloatDPBounds> : RealInterface, FloatDPBounds {
+template<> struct RealWrapper<Cnst,FloatDPBounds> : RealInterface, FloatDPBounds {
     typedef FloatDPBounds X;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp) { }
-    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<DyadicBounds>(*this)); }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
+    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<FloatDPBounds const&>(*this)); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
 };
 
-template<> struct RealConstant<EffectiveNumber> : RealInterface, FloatDPBounds {
+template<> struct RealWrapper<Cnst,EffectiveNumber> : RealInterface, FloatDPBounds {
     typedef EffectiveNumber X;
     X _c;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp) { }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
@@ -155,6 +156,8 @@ template<> struct RealLimit<DyadicBounds> : RealInterface {
     Sequence<DyadicBounds> _seq;
   public:
     RealLimit(ConvergentSequence<DyadicBounds> const& seq) : _seq(seq) { }
+    virtual ValidatedReal _compute(Effort eff) const {
+        Nat n = eff.work()+1u; return _seq[n]; }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
         return FloatDPBounds(_seq[0u],pr); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
@@ -169,16 +172,18 @@ template<class O, class... A> inline Real make_real(O o, A... a) {
 
 Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
+Real::Real(ConvergentSequence<DyadicBounds> const& seq) : Real(std::make_shared<RealLimit<DyadicBounds>>(seq)) { }
+Real::Real(FastCauchySequence<Dyadic> const& seq) : Real(std::make_shared<RealLimit<Dyadic>>(seq)) { }
 
 // FIXME: Is this necessary?
 Real::Real(double l, double a, double u)
-    : Real(std::make_shared<RealConstant<FloatDPBounds>>(FloatDPBounds(l,u)))
+    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(l,u)))
 {
 }
 
 // FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(std::make_shared<RealConstant<FloatDPBounds>>(FloatDPBounds(x)))
+    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(x)))
 {
 }
 
@@ -203,18 +208,18 @@ template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<P
 template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
 
-Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
-Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
+Real::Real(std::uint64_t m, Void*) : Real(Integer(m)) { }
+Real::Real(std::int64_t n, Void*) : Real(Integer(n)) { }
 
-Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
-Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d)) { }
+Real::Real() : Real(Integer(0)) { }
+Real::Real(ExactDouble d) : Real(std::make_shared<RealWrapper<Cnst,ExactDouble>>(d)) { }
 //Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
-Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
-Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
-Real::Real(Decimal const& d) : Real(std::make_shared<RealConstant<Decimal>>(d)) { }
-Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
-Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
-Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { }
+Real::Real(Integer const& z) : Real(std::make_shared<RealWrapper<Cnst,Integer>>(z)) { }
+Real::Real(Dyadic const& w) : Real(std::make_shared<RealWrapper<Cnst,Dyadic>>(w)) { }
+Real::Real(Decimal const& d) : Real(std::make_shared<RealWrapper<Cnst,Decimal>>(d)) { }
+Real::Real(Rational const& q) : Real(std::make_shared<RealWrapper<Cnst,Rational>>(q)) { }
+Real::Real(EffectiveNumber q) : Real(std::make_shared<RealWrapper<Cnst,EffectiveNumber>>(q)) { }
+Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDPValue)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }

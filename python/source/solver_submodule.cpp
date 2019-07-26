@@ -126,6 +126,8 @@ Void export_integrators(pybind11::module& module)
     pybind11::class_<FlowStepModel> flow_step_model_class(module,"FlowStepModel");
     flow_step_model_class.def("__str__", &__cstr__<FlowStepModel>);
     pybind11::class_<FlowModel> flow_model_class(module,"FlowModel");
+    flow_model_class.def("__len__",(SizeType(FlowModel::*)()const)&FlowModel::size);
+    flow_model_class.def("__getitem__",&__getitem__<FlowModel,SizeType>);
     flow_model_class.def("__str__", &__cstr__<FlowModel>);
 
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");

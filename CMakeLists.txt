@@ -102,10 +102,15 @@ else()
     message(WARNING "Unable to find GTK2. You will not be able to use graphics windows.")
 endif()
 
-
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
+
+find_package(Kirk)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  add_definitions(-Wno-non-template-friend)
+endif()
 
 add_subdirectory(source)
 add_subdirectory(tests)

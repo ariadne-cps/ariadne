@@ -248,9 +248,10 @@ Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
 
     ARIADNE_ASSERT(join(cached_mode._invariants.keys(),cached_mode._guards.keys()) == cached_mode._kinds.keys());
     ARIADNE_ASSERT(cached_mode._targets.keys() == cached_mode._resets.keys());
+    ARIADNE_ASSERT(subset(cached_mode._guards.keys(),cached_mode._resets.keys()));
 
-    if (cached_mode._kinds.keys() != cached_mode._resets.keys()) {
-        Set<DiscreteEvent> transitions_missing_guards = difference(cached_mode._resets.keys(),cached_mode._kinds.keys());
+    if (cached_mode._guards.keys() != cached_mode._resets.keys()) {
+        Set<DiscreteEvent> transitions_missing_guards = difference(cached_mode._resets.keys(),cached_mode._guards.keys());
         for (DiscreteEvent event : transitions_missing_guards) {
             ARIADNE_ERROR("Event "<<event<<" in location " << location << " triggers a transition to mode "<<cached_mode._targets[event]<<" with reset "<<cached_mode._resets[event]
                             << " but no guard is defined.")

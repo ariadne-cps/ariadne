@@ -164,10 +164,7 @@ void kirk_ariadne_apx_eff(const kirk_real_t * real, kirk_apx_t * apt, kirk_eff_t
     FloatMP ariadne_midpoint=ariadne_bounds.value().raw();
     FloatMP ariadne_error=hlf(sub(up,ariadne_bounds.upper_raw(),ariadne_bounds.lower_raw()));
     FloatDP ariadne_radius(Dyadic(ariadne_error),up,double_precision);
-//    FloatMPError ariadne_error(ariadne_bounds.error());
-//    FloatDPError ariadne_double_error(ariadne_error.raw(),DoublePrecision());
-    double ariadne_double_radius=ariadne_radius.get_d();
-    mpfr_ptr centre = &ariadne_midpoint.raw().get_mpfr();
+    const mpfr_t& centre = ariadne_midpoint.raw().get_mpfr();
     kirk_bound_t radius = to_kirk_bound_t(ariadne_radius);
     kirk_apx_set(apt,centre,&radius);
 }

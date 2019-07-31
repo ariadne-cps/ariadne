@@ -178,10 +178,10 @@ template<> struct LogicalExpression<AndOp,Sequence<UpperKleenean>> : public Logi
 
 LowerKleenean disjunction(Sequence<LowerKleenean> const& l) {
     return LowerKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<OrOp,Sequence<LowerKleenean>>>(OrOp(),l))) ;
-};
+}
 UpperKleenean conjunction(Sequence<UpperKleenean> const& l) {
     return UpperKleenean(LogicalHandle(std::make_shared<Detail::LogicalExpression<AndOp,Sequence<UpperKleenean>>>(AndOp(),l)));
-};
+}
 
 Nat Effort::_default = 0u;
 

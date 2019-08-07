@@ -231,7 +231,7 @@ InclusionIntegrator<A>::operator<(const InclusionIntegratorInterface& rhs) const
     return this->index() < rhs.index();
 }
 
-template<class A> ValidatedVectorMultivariateFunctionModelType
+template<class A> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
 
     TimeStepType new_t = lower_bound(t+h);
@@ -249,7 +249,10 @@ InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivar
     auto phi = this->_integrator->flow_step(Fw,domx,domt,doma,B);
     add_errors(phi,e);
 
-    return this->build_reach_function(evolve_function, phi, t, new_t);
+    List<ValidatedVectorMultivariateFunctionModelType> result;
+    result.append(this->build_reach_function(evolve_function, phi, t, new_t));
+
+    return result;
 }
 
 template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<A>::build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
@@ -438,8 +441,10 @@ template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<Piece
     return result;
 }
 
-template<> ValidatedVectorMultivariateFunctionModelType
+template<> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+
+    List<ValidatedVectorMultivariateFunctionModelType> result;
 
     auto n = _f.result_size();
     auto m = _inputs.size();
@@ -461,6 +466,9 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
 
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
+
+    result.append(intermediate_reach);
+
     auto intermediate_evolve=this->evolve(intermediate_reach,intermediate_t);
 
     auto domx_second = cast_exact_box(intermediate_evolve.range());
@@ -472,7 +480,9 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);
 
-    return this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t);
+    result.append(this->build_secondhalf_piecewise_reach_function(intermediate_evolve, phi, intermediate_t, new_t));
+
+    return result;
 }
 
 } // namespace Ariadne;

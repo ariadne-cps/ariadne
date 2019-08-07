@@ -231,8 +231,9 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
 
         TimeStepType new_t = lower_bound(t+h);
 
-        ValidatedVectorMultivariateFunctionModelDP reach_function;
-        ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
+        List<ValidatedVectorMultivariateFunctionModelDP> reach_functions;
+        List<ValidatedVectorMultivariateFunctionModelDP> best_reach_functions;
+        ValidatedVectorMultivariateFunctionModelDP best_evolve_function;
         InclusionIntegratorHandle best = approximators_to_use.at(0);
         FloatDP best_volume = FloatDP::inf(DoublePrecision());
 
@@ -240,13 +241,13 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
             ARIADNE_LOG(5,"checking "<<approximator<<" approximator\n");
 
             auto current_reach=approximator.reach(domx,evolve_function,B,t,h);
-            auto current_evolve=approximator.evolve(current_reach,new_t);
+            auto current_evolve=approximator.evolve(current_reach.at(current_reach.size()-1u),new_t);
 
             FloatDP current_volume = volume(current_evolve.range());
             if (current_volume < best_volume) {
                 best = approximator;
                 ARIADNE_LOG(6,"best approximator: " << best << "\n");
-                best_reach_function = current_reach;
+                best_reach_functions = current_reach;
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
             }
@@ -258,12 +259,12 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
         state.update_with_best(best);
         ARIADNE_LOG(4,"updated schedule: " << state.schedule() << "\n");
 
-        reach_function = best_reach_function;
+        reach_functions = best_reach_functions;
         evolve_function = best_evolve_function;
 
         ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
 
-        result.append(reach_function);
+        result.concatenate(reach_functions);
 
         this->_recondition_and_update(evolve_function,state);
 

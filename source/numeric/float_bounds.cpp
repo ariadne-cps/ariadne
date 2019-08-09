@@ -45,13 +45,6 @@ template<> String class_name<Bounds<FloatDP>>() { return "FloatDPBounds"; }
 template<> String class_name<Bounds<FloatMP>>() { return "FloatMPBounds"; }
 
 
-template<> Int integer_cast<Int,FloatDPBounds>(FloatDPBounds const& x) {
-    return std::round((x.lower().get_d()+x.upper().get_d())/2); }
-
-template<> Int integer_cast<Int,FloatMPBounds>(FloatMPBounds const& x) {
-    return std::round((x.lower().get_d()+x.upper().get_d())/2); }
-
-
 template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(OutputStream& os, const FloatBounds<MultiplePrecision>& x)
 {
     static const double log2ten = 3.3219280948873621817;

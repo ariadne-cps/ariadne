@@ -134,6 +134,14 @@ template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x, Nat n) 
     Bounds<F> y=x+_e; return y-_e;
 }
 
+template<class F> auto Operations<Bounds<F>>::_cast_integer(Bounds<F> const& x) -> Integer {
+    Integer z=round(static_cast<Dyadic>(x.value()));
+    ARIADNE_ASSERT_MSG(x.lower_raw()<=z && z<=x.upper_raw(),"cast_integer(Bounds<"<<class_name<F>()<<"> const& x): "
+                            "x="<<x<<" does model any integer values.");
+    return z;
+}
+
+
 template<class F> auto Operations<Bounds<F>>::_write(OutputStream& os, Bounds<F> const& x) -> OutputStream& {
     os << '{';
     write(os,x.lower().raw(),Bounds<F>::output_places,downward);

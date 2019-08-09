@@ -70,7 +70,6 @@
 
 namespace Ariadne {
 
-
 inline Real operator-(Real const& r1, Rational const& q2) {
     return r1-Real(q2);
 }
@@ -81,16 +80,8 @@ inline FloatDPBounds operator*(Integer n1,  const FloatDPValue& x2) {
     return x1*x2;
 }
 
-inline DiscreteTimeType div_floor(Real const& t, ExactNumericType h) {
-    return integer_cast<Nat>(FloatDPApproximation(t,dp)/h);
-}
-
-template<> inline Nat integer_cast<Nat>(FloatDPBounds const& x) {
-    return integer_cast<Nat>(FloatDPApproximation(x).raw());
-}
-
-inline Nat compute_time_steps(HybridTime time, HybridTime lock_to_grid_time) {
-    return integer_cast<Nat>(time.continuous_time()/lock_to_grid_time.continuous_time());
+inline Natural compute_time_steps(HybridTime time, HybridTime lock_to_grid_time) {
+    return cast_positive(round(time.continuous_time()/lock_to_grid_time.continuous_time()));
 }
 
 inline String itoa(Nat m) {

@@ -201,9 +201,6 @@ template<class F, class FE> class Ball
     friend Ball<F,FE> trunc(Ball<F,FE> const& x, Nat n) {
         return Operations<Ball<F,FE>>::_trunc(x,n); }
 
-    friend Integer integer_cast(Ball<F,FE> const& x) {
-        return Integer(static_cast<int>(x.value_raw().get_d())); }
-
     friend auto is_zero(Ball<F,FE> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
         else if(x.lower_raw()==0.0 && x.upper_raw()==0.0) { return true; }
@@ -223,6 +220,9 @@ template<class F, class FE> class Ball
         return x1._l>=x2._l && x1._u <= x2._u; }
     friend Ball<F,FE> refinement(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Ball<F,FE>(refinement(Bounds<F>(x1),Bounds<F>(x2)),x1.error_precision()); }
+
+    friend Integer cast_integer(Ball<F,FE> const& x) {
+        return Operations<Ball<F,FE>>::_cast_integer(x); }
 
     friend OutputStream& operator<<(OutputStream& os, Ball<F,FE> const& x) { return Operations<Ball<F,FE>>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, Ball<F,FE>& x) { return Operations<Ball<F,FE>>::_read(is,x); }
@@ -468,6 +468,8 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     static Ball<F,FE> _refinement(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Ball<F,FE>(refinement(Bounds<F>(x1),Bounds<F>(x2)));
     }
+
+    static Integer _cast_integer(Ball<F,FE> const& x);
 
     static OutputStream& _write(OutputStream& os, Ball<F,FE> const& x);
 

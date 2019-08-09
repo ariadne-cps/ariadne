@@ -151,6 +151,9 @@ TestDirectedFloats<PR>::test_conversions()
     ARIADNE_TEST_COMPARE(FloatLowerBoundType(neg_five_thirds,precision).raw(),<=,neg_five_thirds);
     ARIADNE_TEST_COMPARE(FloatUpperBoundType(five_thirds,precision).raw(),>=,five_thirds);
     ARIADNE_TEST_COMPARE(FloatUpperBoundType(neg_five_thirds,precision).raw(),>=,neg_five_thirds);
+
+    ARIADNE_TEST_EQUALS(cast_integer(FloatUpperBound<PR>(Dyadic(5,2u),precision)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatLowerBound<PR>(Dyadic(11,2u),precision)),Integer(2));
 }
 
 template<class PR> Void
@@ -180,8 +183,10 @@ TestDirectedFloats<PR>::test_rounded_arithmetic() {
 
 template<class PR> Void
 TestDirectedFloats<PR>::test_comparison() {
+    PR pr=precision;
+
     {
-        PositiveFloatUpperBoundType one(1u);
+        PositiveFloatUpperBoundType one(1u,pr);
         PositiveFloatUpperBoundType third=one/3u;
 
         ARIADNE_TEST_ASSERT(definitely(third+third < 1u));

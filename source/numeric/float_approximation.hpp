@@ -176,6 +176,9 @@ template<class F> class Approximation
     friend Bool same(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a==x2._a; }
 
+    friend Integer cast_integer(Approximation<F> const& x) {
+        return round(static_cast<Dyadic>(x._a)); }
+
     friend OutputStream& operator<<(OutputStream& os, Approximation<F> const& x) {
         return write(os,x.raw(),Approximation<F>::output_places,to_nearest); }
     friend InputStream& operator>>(InputStream& is, Approximation<F>& x) {

@@ -256,6 +256,12 @@ class Real
         //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
     //@}
 
+    //@{
+    //! Rounding operations.
+    friend Integer round(Real const& r);
+        //< Round to a "nearby" integer. This integer <em>need not</em> be the <em>closest</em> integer.
+    //@}
+
 
     //@{
     //! \name Operations on the representation.

@@ -377,6 +377,10 @@ class FloatDP {
     friend FloatDP pow_opp(FloatDP x, int n);
 };
 
+template<class R, class A> R integer_cast(const A& a);
+template<> Nat integer_cast<Nat,FloatDP>(FloatDP const&);
+template<> Int integer_cast<Int,FloatDP>(FloatDP const&);
+
 static const FloatDP inf = std::numeric_limits<double>::infinity();
 
 struct Float32 {

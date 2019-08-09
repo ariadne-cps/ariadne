@@ -64,6 +64,7 @@ class TestFloatValue
     Void test();
   private:
     Void test_concept();
+    Void test_conversions();
     Void test_operations();
     Void test_predicates();
 };
@@ -71,6 +72,7 @@ class TestFloatValue
 template<class PR> Void
 TestFloatValue<PR>::test()
 {
+    ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_operations());
     ARIADNE_TEST_CALL(test_predicates());
 }
@@ -122,6 +124,13 @@ TestFloatValue<PR>::test_concept()
 
     // Comparisons
     b=(vx==vx); b=(vx!=vx); b=(vx<=vx); b=(vx>=vx); b=(vx< vx); b=(vx> vx);
+}
+
+template<class PR> Void
+TestFloatValue<PR>::test_conversions()
+{
+    ARIADNE_TEST_EQUALS(cast_integer(FloatValue<PR>(Dyadic(2),precision)),Integer(2));
+    ARIADNE_TEST_FAIL(cast_integer(FloatValue<PR>(Dyadic(7,2u),precision)));
 }
 
 template<class PR> Void
@@ -222,8 +231,6 @@ TestFloatValue<PR>::test_operations()
     ARIADNE_TEST_SAME(atan(vx),atan(FloatBounds<PR>(vx)));
 
 //    ARIADNE_TEST_SAME(shft(vx,n),shft(w,n));
-    ARIADNE_TEST_EQUALS(integer_cast(FloatValue<PR>(Dyadic(2),pr)),Integer(2));
-    ARIADNE_TEST_FAIL(integer_cast(FloatValue<PR>(Dyadic(7,2u),pr)));
 }
 
 template<class PR> Void

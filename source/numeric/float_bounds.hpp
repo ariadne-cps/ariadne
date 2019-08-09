@@ -240,8 +240,8 @@ template<class F> class Bounds
     friend Bounds<F> trunc(Bounds<F> const& x, Nat n) {
         return Operations<Bounds<F>>::_trunc(x,n); }
 
-    friend Integer integer_cast(Bounds<F> const& x) {
-        return Integer(static_cast<int>(x.value_raw().get_d())); }
+    friend Integer cast_integer(Bounds<F> const& x) {
+        return Operations<Bounds<F>>::_cast_integer(x); }
 
     friend auto is_zero(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>0.0 || x.upper_raw()<0.0) { return false; }
@@ -368,6 +368,8 @@ template<class F> class Operations<Bounds<F>> {
 
     static Bounds<F> _trunc(Bounds<F> const& x);
     static Bounds<F> _trunc(Bounds<F> const& x, Nat n);
+
+    static Integer _cast_integer(Bounds<F> const& x);
 
     // Mixed Bounded - Exact operations
     static Bounds<F> _add(Bounds<F> const& x1, Value<F> const& x2);

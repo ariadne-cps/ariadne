@@ -254,13 +254,16 @@ Dyadic operator*(Dyadic& x1, Dyadic const& x2) {
 
 Integer round(Dyadic const& x) {
     assert(is_finite(x));
-    Integer r; mpz_set_f(r._mpz,x._mpf); return r;
     Integer z;
     Dyadic y=x;
     mpf_mul_2exp(y._mpf,y._mpf,1u);
-    mpf_add_ui(y._mpf,y._mpf,1u);
+    if(y>=0) {
+        mpf_add_ui(y._mpf,y._mpf,1u);
+    } else {
+        mpf_sub_ui(y._mpf,y._mpf,1u);
+    }
     mpf_div_2exp(y._mpf,y._mpf,1u);
-    mpf_floor(y._mpf,y._mpf);
+    // mpf_trunc(y._mpf,y._mpf); // Not needed since mpf_set_f truncates
     mpz_set_f(z._mpz,y._mpf);
     return z;
 }

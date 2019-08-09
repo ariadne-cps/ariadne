@@ -389,6 +389,34 @@ Sign sgn(Rational const& q) {
     return sgn(q.get_num());
 }
 
+Integer round(Rational const& q) {
+    assert(is_finite(q));
+
+    Integer num=q.numerator();
+    Integer den=q.denominator();
+    mpz_mul_2exp(num._mpz,num._mpz,1u);
+    if (num>=0) { mpz_add(num._mpz,num._mpz,den._mpz); } else { mpz_sub(num._mpz,num._mpz,den._mpz); }
+    mpz_mul_2exp(den._mpz,den._mpz,1u);
+    Integer& res=num;
+    mpz_tdiv_q(res._mpz,num._mpz,den._mpz);
+    return res;
+}
+
+Integer ceil(Rational const& q) {
+    assert(is_finite(q));
+    Integer res;
+    mpz_cdiv_q(res._mpz,mpq_numref(q._mpq),mpq_denref(q._mpq));
+    return res;
+}
+
+Integer floor(Rational const& q) {
+    assert(is_finite(q));
+    Integer res;
+    mpz_fdiv_q(res._mpz,mpq_numref(q._mpq),mpq_denref(q._mpq));
+    return res;
+}
+
+
 Comparison cmp(Rational const& q1, Rational const& q2) {
     return ExtendedOperations<Rational>::cmp(q1,q2);
 }

@@ -87,6 +87,10 @@ TestFloatBall<PR,PRE>::test_conversions()
 {
     Rational one=1;
     Rational third=one/3;
+
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBall<PR,PRE>(FloatBounds<PR>(2,3,precision))),Integer(3));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBall<PR,PRE>(FloatBounds<PR>(2.25_dy,3.25_dy,precision))),Integer(3));
+    ARIADNE_TEST_FAIL(cast_integer(FloatBall<PR,PRE>(FloatBounds<PR>(2.625_dy,2.875_dy,precision))));
 }
 
 template<class PR, class PRE> Void

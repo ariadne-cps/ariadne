@@ -159,6 +159,7 @@ class Integer
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> friend inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
 */
   public:
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> N get() const;
     long int get_si() const;
     mpz_t const& get_mpz() const;
   private:
@@ -172,6 +173,12 @@ class Integer
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
 Integer operator"" _z(unsigned long long int n);
+
+template<class N, EnableIf<IsBuiltinIntegral<N>>> inline N Integer::get() const {
+    N n=static_cast<N>(this->get_si()); ARIADNE_ASSERT(Integer(n)==*this); return n; }
+
+template<class R, class A> R integer_cast(const A& a) {
+    return cast_integer(a).template get<R>(); }
 
 template<> class Positive<Integer> : public Integer {
   public:

@@ -780,8 +780,8 @@ FloatDP FloatDP::inf(PrecisionType pr) { return FloatDP::inf(Sign::POSITIVE,pr);
 FloatDP FloatDP::nan(PrecisionType pr) { return FloatDP::inf(Sign::ZERO,pr); }
 
 template<class R, class A> R integer_cast(A const&);
-template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return x.dbl; }
-template<> Int integer_cast<Int,FloatDP>(FloatDP const& x) { return x.dbl; }
+template<> Nat integer_cast<Nat,FloatDP>(FloatDP const& x) { return static_cast<Nat>(x.dbl); }
+template<> Int integer_cast<Int,FloatDP>(FloatDP const& x) { return static_cast<Int>(x.dbl); }
 
 
 Comparison cmp(FloatDP x1, Rational const& q2) {

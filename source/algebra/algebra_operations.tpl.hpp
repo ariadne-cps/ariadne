@@ -238,7 +238,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
     Series<X> sqrt_series=Series<X>(Sqrt(),X(1));
-    Nat d=static_cast<Nat>(integer_cast<Int>((log((1-eps)*tol)/log(eps)+1)));
+    Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);
 
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)*mag(sqrt_series[d]);
     ARIADNE_DEBUG_ASSERT(0<=trunc_err.raw());
@@ -300,7 +300,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
     auto eps=mag(rad/avg);
     ARIADNE_DEBUG_ASSERT(decide(eps<1));
 
-    Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
+    Nat d=integer_cast<Nat>(log((1-eps)*tol)/log(eps)+1);
     auto trunc_err=pow(eps,d)/cast_positive(1-eps)/d;
 
     A y=x/avg-X(1);

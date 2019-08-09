@@ -39,17 +39,4 @@ template class Operations<Approximation<FloatMP>>;
 template<> String class_name<Approximation<FloatDP>>() { return "FloatDPApproximation"; }
 template<> String class_name<Approximation<FloatMP>>() { return "FloatMPApproximation"; }
 
-
-template<> Nat integer_cast<Nat,FloatDPApproximation>(FloatDPApproximation const& x) {
-    return std::round(x.get_d()); }
-
-template<> Int integer_cast<Int,FloatDPApproximation>(FloatDPApproximation const& x) {
-    return std::round(x.get_d()); }
-
-template<> Nat integer_cast<Nat,FloatMPApproximation>(FloatMPApproximation const& x) {
-    return std::round(x.get_d()); }
-
-template<> Int integer_cast<Int,FloatMPApproximation>(FloatMPApproximation const& x) {
-    return std::round(x.get_d()); }
-
 } // namespace Ariadne

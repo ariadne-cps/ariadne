@@ -61,7 +61,6 @@ class IteratedMap;
 
 OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
-template<> Nat integer_cast<Nat,Real>(Real const& r);
 
 
 template<class SYS>
@@ -403,8 +402,8 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
 
 
-inline Nat compute_time_steps(Real time, Real lock_to_grid_time) {
-    return integer_cast<Nat>(time/lock_to_grid_time);
+inline Natural compute_time_steps(Real time, Real lock_to_grid_time) {
+    return cast_positive(round(time/lock_to_grid_time));
 }
 
 
@@ -421,13 +420,13 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    Nat time_steps=compute_time_steps(time,lock_to_grid_time);
+    Natural time_steps=compute_time_steps(time,lock_to_grid_time);
     TimeType remainder_time=time-(time_steps*lock_to_grid_time);
     ARIADNE_LOG(3,"real_time="<<time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
-    for(Nat i=0; i!=time_steps; ++i) {
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+    for(Natural i=0u; i!=time_steps; ++i) {
+        ARIADNE_LOG(3,"computing "<<i+1u<<"-th reachability step...\n");
         evolve_cells=this->_upper_evolve(evolve_cells,lock_to_grid_time,grid_depth,*_evolver);
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
@@ -459,16 +458,16 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     PavingType reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach size ="<<reach_cells.size()<<"\n");
     TimeType lock_to_grid_time = this->_configuration->lock_to_grid_time();
-    Nat time_steps=compute_time_steps(time,lock_to_grid_time);
+    Natural time_steps=compute_time_steps(time,lock_to_grid_time);
     TimeType remainder_time=time-time_steps*lock_to_grid_time;
 
     ARIADNE_LOG(3,"time="<<time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     PavingType found_cells(grid), accumulated_evolve_cells(grid);
-    for(Nat i=0; i!=time_steps; ++i) {
+    for(Natural i=0u; i!=time_steps; ++i) {
         if(verbosity==1) { std::clog << "i=" << i << "\n"; }
         accumulated_evolve_cells.adjoin(found_cells);
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+        ARIADNE_LOG(3,"computing "<<i+1u<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_depth,*_evolver);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
@@ -511,14 +510,14 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     PavingType reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach="<<reach_cells<<"\n");
     TimeType lock_to_grid_time = this->_configuration->lock_to_grid_time();
-    Nat time_steps=compute_time_steps(time,lock_to_grid_time);
+    Natural time_steps=compute_time_steps(time,lock_to_grid_time);
     TimeType remainder_time=time-time_steps*lock_to_grid_time;
     ARIADNE_LOG(3,"time="<<time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
     PavingType found_cells(grid);
-    for(Nat i=0; i!=time_steps; ++i) {
-        ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
+    for(Natural i=0u; i!=time_steps; ++i) {
+        ARIADNE_LOG(3,"computing "<<i+1u<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_depth,*_evolver);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");

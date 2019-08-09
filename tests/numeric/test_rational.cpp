@@ -48,6 +48,7 @@ class TestRational
     void test_literal();
     void test_conversions();
     void test_arithmetic();
+    void test_rounding();
     void test_comparisons();
     void test_infinity();
 
@@ -60,6 +61,7 @@ void TestRational::test()
     ARIADNE_TEST_CALL(test_literal());
     ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_rounding());
     ARIADNE_TEST_CALL(test_comparisons());
     ARIADNE_TEST_CALL(test_infinity());
 
@@ -121,6 +123,29 @@ void TestRational::test_arithmetic() {
     ARIADNE_TEST_EQUAL(Rational(-4,5)-Rational(-2,7),Rational(-18,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)*Rational(-2,7),Rational(-8,35));
     ARIADNE_TEST_EQUAL(Rational(4,5)/Rational(-2,7),Rational(-14,5));
+}
+
+void TestRational::test_rounding() {
+    ARIADNE_TEST_EQUALS(round(Rational(0)),Integer(0));
+    ARIADNE_TEST_EQUALS(round(Rational(3)),Integer(3));
+    ARIADNE_TEST_EQUALS(round(Rational(-11,4)),Integer(-3));
+    ARIADNE_TEST_EQUALS(round(Rational(-10,4)),Integer(-3));
+    ARIADNE_TEST_EQUALS(round(Rational(-9,4)),Integer(-2));
+    ARIADNE_TEST_EQUALS(round(Rational(9,4)),Integer(2));
+    ARIADNE_TEST_EQUALS(round(Rational(10,4)),Integer(3));
+    ARIADNE_TEST_EQUALS(round(Rational(11,4)),Integer(3));
+
+    ARIADNE_TEST_EQUALS(ceil(Rational(-13,4)),Integer(-3));
+    ARIADNE_TEST_EQUALS(ceil(Rational(-12,4)),Integer(-3));
+    ARIADNE_TEST_EQUALS(ceil(Rational(0,4)),Integer(0));
+    ARIADNE_TEST_EQUALS(ceil(Rational(12,4)),Integer(3));
+    ARIADNE_TEST_EQUALS(ceil(Rational(13,4)),Integer(4));
+
+    ARIADNE_TEST_EQUALS(floor(Rational(-13,4)),Integer(-4));
+    ARIADNE_TEST_EQUALS(floor(Rational(-12,4)),Integer(-3));
+    ARIADNE_TEST_EQUALS(floor(Rational(0,4)),Integer(0));
+    ARIADNE_TEST_EQUALS(floor(Rational(12,4)),Integer(3));
+    ARIADNE_TEST_EQUALS(floor(Rational(13,4)),Integer(3));
 }
 
 void TestRational::test_comparisons() {

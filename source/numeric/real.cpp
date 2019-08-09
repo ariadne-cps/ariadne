@@ -107,7 +107,7 @@ template<> struct RealWrapper<Cnst,FloatDPBounds> : RealInterface, FloatDPBounds
     RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<FloatDPBounds const&>(*this)); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(FloatMP(this->lower_raw(),down,pr),FloatMP(this->upper_raw(),up,pr)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
 };
 
@@ -372,6 +372,12 @@ Kleenean operator< (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator> (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+
+Integer round(Real const& r) {
+    DyadicBounds wb=r.compute(Effort(0)).get();
+    Dyadic wc=hlf(wb.lower()+wb.upper());
+    return round(wc);
+}
 
 template<> Int integer_cast<Int,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }
 template<> Nat integer_cast<Nat,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }

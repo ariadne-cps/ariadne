@@ -142,8 +142,6 @@ class Dyadic
     friend Integer round(Dyadic const&);
     //! \brief Round up to the nearest higher integer.
     friend Integer ceil(Dyadic const&);
-    //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 
     //! \brief Tests whether the value is NaN (not-a-number).
     friend Bool is_nan(Dyadic const& w);
@@ -153,6 +151,9 @@ class Dyadic
     friend Bool is_finite(Dyadic const& w);
     //! \brief Tests whether the value is zero.
     friend Bool is_zero(Dyadic const& w);
+
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };
 
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }

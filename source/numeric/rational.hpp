@@ -105,6 +105,9 @@ class Rational
     friend Real atan(Real const&);
 
     friend Sign sgn(Rational const& q);
+    friend Integer floor(Rational const&);
+    friend Integer round(Rational const&);
+    friend Integer ceil(Rational const&);
 
     friend Bool is_nan(Rational const& q);
     friend Bool is_inf(Rational const& q);

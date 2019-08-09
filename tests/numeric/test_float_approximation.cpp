@@ -57,6 +57,7 @@ class TestFloatApproximation
     Void test();
   private:
     Void test_concept();
+    Void test_conversions();
     Void test_arithmetic();
     Void test_comparison();
 };
@@ -65,6 +66,7 @@ class TestFloatApproximation
 template<class PR> Void
 TestFloatApproximation<PR>::test()
 {
+    ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_comparison());
 }
@@ -115,6 +117,16 @@ TestFloatApproximation<PR>::test_concept()
     rx=cos(ax);
     rx=tan(ax);
     rx=atan(ax);
+}
+
+template<class PR> Void
+TestFloatApproximation<PR>::test_conversions()
+{
+    PR pr=precision;
+    ARIADNE_TEST_EQUALS(cast_integer(FloatApproximation<PR>(Dyadic(-3,1u),pr)),Integer(-2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatApproximation<PR>(Dyadic(2),pr)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatApproximation<PR>(Dyadic(3,1u),pr)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatApproximation<PR>(Dyadic(7,2u),pr)),Integer(2));
 }
 
 template<class PR> Void

@@ -97,6 +97,14 @@ template<class F> template<class FE> inline Ball<F,FE> Value<F>::pm(Error<FE> co
     return Ball<F,FE>(*this,e); }
 
 
+template<class F, class FE> Integer Operations<Ball<F,FE>>::_cast_integer(Ball<F,FE> const& x) {
+    Dyadic w=static_cast<Dyadic>(x.value_raw());
+    Integer r=round(w);
+    ARIADNE_ASSERT_MSG(abs(w-r)<=x.error_raw(),"cast_integer(Ball<"<<class_name<F>()<<","<<class_name<FE>()<<"> const& x): "
+                                                    "x="<<x<<"does not model an integer.")
+    return r;
+}
+
 template<class F, class FE> InputStream& Operations<Ball<F,FE>>::_read(InputStream& is, Ball<F,FE>& x) {
     static const char pmstr[] = "\u00b1";
     char cpm[3];

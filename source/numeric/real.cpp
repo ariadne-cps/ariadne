@@ -379,10 +379,6 @@ Integer round(Real const& r) {
     return round(wc);
 }
 
-template<> Int integer_cast<Int,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }
-template<> Nat integer_cast<Nat,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }
-
-
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }
 

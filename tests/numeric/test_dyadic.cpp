@@ -113,6 +113,18 @@ void TestDyadic::test_conversions() {
     ARIADNE_TEST_EQUAL(Dyadic(Integer(-3)),Dyadic(-3,0u));
     ARIADNE_TEST_EQUAL(Dyadic(Dyadic(-13)),Dyadic(-13));
     ARIADNE_TEST_EQUAL(Dyadic(Dyadic(-13,3u)),Dyadic(-13,3u));
+
+    ARIADNE_TEST_EQUAL(round(Dyadic(-11,2u)),Integer(-3));
+    ARIADNE_TEST_EQUAL(round(Dyadic(-10,2u)),Integer(-3));
+    ARIADNE_TEST_EQUAL(round(Dyadic(-9,2u)),Integer(-2));
+    ARIADNE_TEST_EQUAL(round(Dyadic(-2,2u)),Integer(-1));
+    ARIADNE_TEST_EQUAL(round(Dyadic(-1,2u)),Integer(0));
+    ARIADNE_TEST_EQUAL(round(Dyadic(0,2u)),Integer(0));
+    ARIADNE_TEST_EQUAL(round(Dyadic(1,2u)),Integer(0));
+    ARIADNE_TEST_EQUAL(round(Dyadic(2,2u)),Integer(1));
+    ARIADNE_TEST_EQUAL(round(Dyadic(9,2u)),Integer(2));
+    ARIADNE_TEST_EQUAL(round(Dyadic(10,2u)),Integer(3));
+    ARIADNE_TEST_EQUAL(round(Dyadic(11,2u)),Integer(3));
 }
 
 void TestDyadic::test_arithmetic() {

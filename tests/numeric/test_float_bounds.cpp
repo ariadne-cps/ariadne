@@ -62,6 +62,7 @@ class TestFloatBounds
   private:
     Void test_concept();
     Void test_constructors();
+    Void test_conversions();
     Void test_input();
     Void test_class();
     Void test_comparison();
@@ -82,6 +83,7 @@ TestFloatBounds<PR>::test()
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_input());
     ARIADNE_TEST_CALL(test_class());
+    ARIADNE_TEST_CALL(test_conversions());
     ARIADNE_TEST_CALL(test_comparison());
     ARIADNE_TEST_CALL(test_precision());
     ARIADNE_TEST_CALL(test_correct_rounded_arithmetic());
@@ -174,6 +176,17 @@ TestFloatBounds<PR>::test_precision()
 
     ARIADNE_TEST_EQUALS(abs(FloatBoundsType(-1,2,precision)).lower().precision(),precision);
 
+}
+
+template<class PR> Void
+TestFloatBounds<PR>::test_conversions()
+{
+    PR pr=precision;
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(2),pr)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(1),Dyadic(2),pr)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(5,2u),Dyadic(2),pr)),Integer(2));
+    ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(7,2u),Dyadic(9,2u),pr)),Integer(2));
+    ARIADNE_TEST_FAIL(cast_integer(FloatBounds<PR>(Dyadic(9,2u),Dyadic(11,2u),pr)));
 }
 
 
@@ -443,6 +456,9 @@ template<class PR> Void TestFloatBounds<PR>::test_comparison() {
     ivl1ref=FloatBoundsType(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;
     ARIADNE_TEST_ASSERT(ivl1ref.lower_raw()==RawFloatType(5.25));
+
+    Dyadic w(7,1u); std::cerr<<"\nw="<<w<<", round(w)="<<round(w)<<"\n\n";
+
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_aliasing() {

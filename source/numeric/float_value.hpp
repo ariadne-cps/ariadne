@@ -192,8 +192,8 @@ template<class F> class Value
     friend InputStream& operator>>(InputStream& is, Value<F>& x) {
         auto v = nul(x._v); is >> v; ARIADNE_ASSERT(not is.fail()); x._v=v; return is;}
 
-    friend Integer integer_cast(Value<F> const& x) {
-        Dyadic w(x); Integer z=round(w); ARIADNE_DEBUG_ASSERT(z==w); return z; }
+    friend Integer cast_integer(Value<F> const& x) {
+        Dyadic w(x); Integer z=round(w); ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer"); return z; }
   public:
     friend Value<F> operator*(TwoExp const&, Value<F> const&);
     friend Value<F> operator*(Value<F> const&, TwoExp const&);

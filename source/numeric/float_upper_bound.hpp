@@ -134,7 +134,8 @@ template<class F> class UpperBound
     friend UpperBound<F> refinement(UpperBound<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(min(x1._u,x2._u)); }
 
-    friend Integer integer_cast(UpperBound<F> const& x) { return Integer(static_cast<int>(x._u.get_d())); }
+    friend Integer cast_integer(UpperBound<F> const& x) {
+        return ceil(static_cast<Dyadic>(x._u)); }
 
     friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
         return write(os,x.raw(),Bounds<F>::output_places,upward); }

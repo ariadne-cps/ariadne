@@ -94,6 +94,10 @@ using DyadicBounds = Bounds<Dyadic>;
 
 template<class R, class A> R integer_cast(const A& _a);
 
+Integer round(Dyadic const&);
+Integer floor(Dyadic const&);
+Integer ceil(Dyadic const&);
+
 //! \ingroup NumericModule
 //! \brief A modifier declaring that a number is positive.
 template<class X> class Positive;

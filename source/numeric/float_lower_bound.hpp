@@ -138,6 +138,9 @@ template<class F> class LowerBound
     friend LowerBound<F> refinement(LowerBound<F> const& x1, LowerBound<F> const& x2) {
         return LowerBound<F>(max(x1._l,x2._l)); }
 
+    friend Integer cast_integer(LowerBound<F> const& x) {
+        return floor(static_cast<Dyadic>(x._l)); }
+
     friend OutputStream& operator<<(OutputStream& os, LowerBound<F> const& x) {
         return write(os,x.raw(),Bounds<F>::output_places,downward); }
     friend InputStream& operator>>(InputStream& is, LowerBound<F>& x) {

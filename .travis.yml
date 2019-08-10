@@ -12,15 +12,15 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.14 + AppleClang 10 + Python 3
+    - name: macOS 10.14 + AppleClang 10 + Python 3 [NoGTK]
       os: osx
       osx_image: xcode11
-      env: COMPILER=clang++ PYTHON=3 
+      env: COMPILER=clang++ PYTHON=3 DISABLE_GTK=ON
       
-    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo, NoGTK]
-      os: osx
-      osx_image: xcode11
-      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
+#    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo, NoGTK]
+#      os: osx
+#      osx_image: xcode11
+#      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
       
 #    - name: macOS 10.13 + AppleClang 10 + Python 3 [Debug, NoGTK]
 #      os: osx

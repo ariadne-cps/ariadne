@@ -1,9 +1,5 @@
 add_subdirectory(source)
 
-if(COVERAGE)
-    set(GCOV_LIBRARIES gcov)
-endif()
-
 add_library(pyariadne MODULE
     $<TARGET_OBJECTS:pyariadne-module-obj>
     $<TARGET_OBJECTS:pyariadne-numeric-submodule-obj>

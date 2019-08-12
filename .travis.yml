@@ -30,9 +30,9 @@ matrix:
       os: linux
       env: COMPILER=g++-8 PYTHON=2
 
-    - name: Ubuntu 18.04 + GCC 8 + Python 3 [Coverage]
+    - name: Ubuntu 18.04 + GCC 7 + Python 3 [Coverage]
       os: linux
-      env: COMPILER=g++-8 PYTHON=3 COVERAGE=ON
+      env: COMPILER=g++ PYTHON=3 COVERAGE=ON
 
 before_install:
   - |

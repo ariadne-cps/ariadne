@@ -59,9 +59,8 @@ before_install:
 
 script:
   - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=$PYTHON $CMAKE_MACOS_PYTHON2_EXTRA_FLAGS"
-  - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS CMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"; else CMAKE_ARGS="$CMAKE_ARGS CMAKE_BUILD_TYPE=Release"; fi
+  - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"; else CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release"; fi
   - if [[ "$TRAVIS_BRANCH" == master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
-  - echo $CMAKE_ARGS
   - cmake . $CMAKE_ARGS
   - if [[ -n "$COVERAGE" ]]; then make tests; else make; fi
   - ctest -L "primary"

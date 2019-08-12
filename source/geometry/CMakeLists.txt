@@ -15,5 +15,5 @@ add_library(ariadne-geometry OBJECT
 cotire(ariadne-geometry CONFIGURATIONS None)
 
 if(COVERAGE)
-    target_compile_options(ariadne-geometry PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-geometry PUBLIC coverage_config)
 endif()

@@ -7,7 +7,7 @@ branches:
   only:
   - master
   - working
-  - working-ci
+  - ci
 
 matrix:
   include:
@@ -128,4 +128,10 @@ script:
   - if [[ -z "$COVERAGE" ]]; then $SH_PREFIX sh -c 'export LD_LIBRARY_PATH=/usr/local/lib && cd ~/tutorials/python && python'$PYTHON' tutorial.py > /dev/null'; fi  
   
 after_success:
-  - if [[ -n "$COVERAGE" ]]; then bash <(curl -s https://codecov.io/bash); fi
+  - |
+    if [[ -n "$COVERAGE" ]]; then
+      lcov --directory . --capture --output-file coverage.info
+      lcov --remove coverage.info '/usr/*' --output-file coverage.info
+      lcov --list coverage.info
+      bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+    fi

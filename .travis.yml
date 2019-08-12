@@ -53,7 +53,7 @@ before_install:
       if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=libgtk2.0-dev; else GTK_PKG=""; fi
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi
       sudo apt update
-      sudo apt install -y cmake pkg-config $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $GTK_PKG $CAIRO_PKG libmpfr-dev
+      sudo apt install -y cmake pkg-config lcov $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $GTK_PKG $CAIRO_PKG libmpfr-dev
       sudo pip$PYTHON install coverage pytest
     fi
 

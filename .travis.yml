@@ -77,7 +77,7 @@ script:
       make
       ./rigorous_numerics_tutorial > /dev/null
       mkdir ~/tutorials/python
-      cp -Rf python/tutorials/* ~/tutorials/python
+      cp -Rf python/tutorials ~/tutorials/python
       export LD_LIBRARY_PATH=/usr/local/lib
       cd ~/tutorials/python
       python$PYTHON tutorial.py > /dev/null

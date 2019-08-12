@@ -22,6 +22,4 @@ add_library(ariadne-numeric OBJECT
 
 cotire(ariadne-numeric CONFIGURATIONS None)
 
-if(COVERAGE)
-    target_link_libraries(ariadne-numeric PUBLIC coverage_config)
-endif()
+target_link_libraries(ariadne-numeric PUBLIC coverage_config)

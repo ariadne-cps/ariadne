@@ -7,5 +7,5 @@ add_library(ariadne-symbolic OBJECT
 cotire(ariadne-symbolic CONFIGURATIONS None)
 
 if(COVERAGE)
-    target_compile_options(ariadne-symbolic PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-symbolic PUBLIC coverage_config)
 endif()

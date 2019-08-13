@@ -11,5 +11,5 @@ add_library(ariadne-algebra OBJECT
 cotire(ariadne-algebra CONFIGURATIONS None)
 
 if(COVERAGE)
-    target_compile_options(ariadne-algebra PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-algebra PUBLIC coverage_config)
 endif()

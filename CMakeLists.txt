@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
+message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(Ariadne VERSION 1.9)
 
@@ -17,6 +18,7 @@ set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
+
 foreach(WARN ${COMPILER_WARN})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")       
 endforeach()
@@ -33,7 +35,17 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1")
 endif()
 
-set(COVERAGE_COMPILER_FLAGS -O0 --coverage -fprofile-arcs -ftest-coverage)
+option(COVERAGE "Enable coverage reporting" OFF)
+add_library(coverage_config INTERFACE)
+if(COVERAGE)
+    message(STATUS "Enabled coverage reporting")
+    target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+        target_link_options(coverage_config INTERFACE --coverage)
+    else()
+        target_link_libraries(coverage_config INTERFACE --coverage)
+    endif()
+endif()
 
 enable_testing()
 include(CTest)
@@ -167,12 +179,6 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-hybrid>
 )
 
-if(COVERAGE)
-    target_link_libraries(ariadne gcov)
-    target_link_libraries(ariadne-kernel gcov)
-    target_link_libraries(ariadne-core gcov)
-endif()
-
 target_link_libraries(ariadne dl)
 target_link_libraries(ariadne-kernel dl)
 target_link_libraries(ariadne-core dl)
@@ -180,6 +186,12 @@ target_link_libraries(ariadne-core dl)
 target_link_libraries(ariadne ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+
+if(COVERAGE)
+    target_link_libraries(ariadne coverage_config)
+    target_link_libraries(ariadne-kernel coverage_config)
+    target_link_libraries(ariadne-core coverage_config)
+endif()
 
 if(GMPXX_FOUND)
     target_link_libraries(ariadne ${GMPXX_LIBRARIES})

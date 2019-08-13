@@ -14,5 +14,5 @@ add_library(ariadne-function OBJECT
 cotire(ariadne-function CONFIGURATIONS None)
 
 if(COVERAGE)
-    target_compile_options(ariadne-function PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-function PUBLIC coverage_config)
 endif()

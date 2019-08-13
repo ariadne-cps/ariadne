@@ -60,7 +60,7 @@ before_install:
     fi
 
 script:
-  - echo $NPROC
+  - echo "Running on $($NPROC) threads ..."
   - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=$PYTHON $CMAKE_PYTHON2_EXTRA_FLAGS"
   - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"; else CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release"; fi
   - if [[ "$TRAVIS_BRANCH" == master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
@@ -73,11 +73,11 @@ script:
       cp -Rf tutorials ~/tutorials
       cd ~/tutorials/hybrid_evolution
       cmake . $CMAKE_ARGS
-      make
+      make -j $($NPROC)
       ./hybrid_evolution_tutorial -v 0 > /dev/null
       cd ~/tutorials/rigorous_numerics
       cmake . $CMAKE_ARGS
-      make
+      make -j $($NPROC)
       ./rigorous_numerics_tutorial > /dev/null
       mkdir ~/tutorials/python
       cd $TRAVIS_BUILD_DIR

@@ -49,7 +49,7 @@ before_install:
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python3'; else PYTHON_LIB=python; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --config-dir)/libpython2.7.so -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
+      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python3'; else PYTHON_LIB=python; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --configdir)/libpython2.7.so -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
       if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=libgtk2.0-dev; else GTK_PKG=""; fi
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi
       sudo apt update

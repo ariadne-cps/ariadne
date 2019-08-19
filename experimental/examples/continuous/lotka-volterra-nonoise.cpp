@@ -27,27 +27,6 @@
 
 using namespace Ariadne;
 
-inline char activity_symbol(SizeType step) {
-    switch (step % 4) {
-    case 0: return '\\';
-    case 1: return '|';
-    case 2: return '/';
-    default: return '-';
-    }
-}
-
-void discretize(GridTreePaving& hgts, Ariadne::Orbit<Ariadne::Enclosure>& orbit, unsigned precision)
-{
-  int oSize=orbit.reach().size();
-  std::cerr<<"\n";
-  int index=1;
-  for (ListSet<Enclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++,index++)
-  {
-      std::cerr << "\r[" << activity_symbol(static_cast<unsigned>(index)) << "] " << static_cast<int>((index*100)/oSize) << "% " << std::flush;
-      it->state_auxiliary_set().adjoin_outer_approximation_to(hgts,precision);
-  }
-  fprintf(stderr,"\n");
-}
 
 int main()
 {
@@ -85,26 +64,4 @@ int main()
     std::cout << "done." << std::endl;
 
     plot("lotka-volterra",ApproximateBoxType({{0.5,1.5}, {0.5,1.5}}), Colour(1.0,0.75,0.5), orbit);
-
-
-    std::cout << "Discretising orbit" << std::flush;
-    Grid grid(2);
-    GridTreePaving gts(grid);
-
-    for(unsigned i=2;i<=7;++i)
-    {
-      auto h = gts;
-      clock_t s_time = clock();
-      // run code
-      discretize(h,orbit,i);
-      // End time
-      clock_t e_time = clock();
-      float elapsed_time =static_cast<float>(e_time - s_time) / CLOCKS_PER_SEC;
-      std::cout << "instance "<<i<<" in "<<elapsed_time<<" sec" << std::endl;
-      char title[32];
-      sprintf(title,"%d",i);
-      plot(title,ApproximateBoxType({{0.75,1.25}, {0.75,1.25}}), Colour(0.0,0.6,1.0), h);
-    }
-    std::cout << "done." << std::endl;
-
 }

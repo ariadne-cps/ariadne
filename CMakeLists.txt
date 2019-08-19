@@ -118,15 +118,12 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
-<<<<<<< HEAD
 find_package(Kirk)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 endif()
 
-=======
->>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 
 # ND -- 28/12/2018 -- External library dependencies -- begin
 link_directories(/usr/local/include/eigen3)
@@ -151,7 +148,7 @@ add_subdirectory(source)
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(tutorials)
-add_subdirectory(experimental)
+add_subdirectory(experimental EXCLUDE_FROM_ALL)
 
 find_package(PythonLibs)
 if(PYTHONLIBS_FOUND)

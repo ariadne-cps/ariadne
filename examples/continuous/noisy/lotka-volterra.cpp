@@ -30,32 +30,5 @@ using namespace Ariadne;
 
 int main()
 {
-    // run_noisy_system(LV());
-    auto tmp = LV();
-
-    auto dynamics = std::get<1>(tmp);
-
-    MaximumError max_err=1e-6;
-    TaylorSeriesIntegrator integrator(max_err);
-    //integrator.set_maximum_step_size(0.02);
-
-    VectorFieldEvolver evolver(dynamics,integrator);
-
-    evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.02);
-    evolver.configuration().maximum_spacial_error(1e-6);
-    evolver.verbosity = 1;
-    std::cout <<  evolver.configuration() << std::endl;
-
-    // RealVariablesBox initial={{x==1.2_dec},{y==1.1_dec}};
-    Real x0(1.2_dec);
-    Real y0(1.1_dec);
-    Box<RealInterval> initial_set({{x0,x0},{y0,y0}});
-    std::cout << "Initial set: " << initial_set << std::endl;
-
-    auto evolution_time = std::get<4>(tmp);
-
-    std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+    run_noisy_system(LV());
 }

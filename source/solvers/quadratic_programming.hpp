@@ -38,18 +38,31 @@
 
 #include "AlgebraAddOn.hpp"
 
+<<<<<<< HEAD
 namespace Ariadne {
+=======
+namespace Ariadne
+{
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 
 template <class X> class Vector;
 template <class X> class Matrix;
 template <class X> class Affine;
 
 enum class QuadraticProgramStatus : std::uint8_t {
+<<<<<<< HEAD
   INDETERMINATE_FEASIBILITY = 0,
   PRIMAL_FEASIBLE = 1,
   DUAL_FEASIBLE = 2,
   PRIMAL_DUAL_FEASIBLE = 3,
   DEGENERATE_FEASIBILITY = 4
+=======
+    INDETERMINATE_FEASIBILITY = 0,
+    PRIMAL_FEASIBLE = 1,
+    DUAL_FEASIBLE = 2,
+    PRIMAL_DUAL_FEASIBLE = 3,
+    DEGENERATE_FEASIBILITY = 4
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 };
 
 // class DegenerateFeasibilityProblemException : public std::runtime_error
@@ -64,6 +77,7 @@ enum class QuadraticProgramStatus : std::uint8_t {
 
 class InfeasibleStartingPoint : std::runtime_error {
 public:
+<<<<<<< HEAD
   InfeasibleStartingPoint(const StringType &what) : std::runtime_error(what) {}
 };
 
@@ -79,10 +93,32 @@ struct UnboundedQuadraticProgram : std::runtime_error {
 struct InfeasibleQuadraticProgram : std::runtime_error {
   InfeasibleQuadraticProgram(const StringType &what)
       : std::runtime_error(what) {}
+=======
+  InfeasibleStartingPoint(const StringType &what) : std::runtime_error(what){}
+};
+
+struct SingularQuadraticProgram : std::runtime_error {
+    SingularQuadraticProgram(const StringType &what)
+        : std::runtime_error(what){};
+};
+
+struct UnboundedQuadraticProgram : std::runtime_error {
+    UnboundedQuadraticProgram(const StringType &what) : std::runtime_error(what)
+    {
+    }
+};
+
+struct InfeasibleQuadraticProgram : std::runtime_error {
+    InfeasibleQuadraticProgram(const StringType &what)
+        : std::runtime_error(what)
+    {
+    }
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 };
 
 //! \ingroup OptimisationModule
 //! Solver for quadratic programming problems using active set methods.
+<<<<<<< HEAD
 class ASMQPSolver : public Loggable {
   //! \brief Structure used in algorithm to store highly used variables and
   //! constants
@@ -112,6 +148,12 @@ public:
   //! is the middle between xl and xu, and they are used as bounds (on
   //! constraints)
 =======
+=======
+class ASMQPSolver : public Loggable
+{
+  //! \brief Structure used in algorithm to store highly used variables and constants
+  struct StepData;
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
   public:
     //! \brief Find approximate optimal solution of \f$\min 1/2x^T Q x + x^T d
     //! \text{ s.t. } l<=Ax<=u; x\geq0\f$. Returns the pair (x,y) where x is the
@@ -161,6 +203,7 @@ public:
   const Vector<FloatDP>         EMPTY_VEC = Vector<FloatDP>();
 
   //! \brief Internal minimise function wich take serialized problem inside v StepData structure
+<<<<<<< HEAD
 >>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
   Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>>
   minimise(const RawFloatMatrix &Q, const RawFloatVector &d,
@@ -214,6 +257,37 @@ private:
   //! \brief null space method to solve the eq problem relative to KKT condition
   //! system
   void null_space(struct StepData &v) const;
+=======
+  Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>>
+  _minimise(struct StepData &v, int &status) const;
+
+  //! Initialize step data and include phase I using feasible_hotstart function
+  void
+  initialize_step_data(const Matrix<FloatDP> &H, const Vector<FloatDP> &d,
+                       const Matrix<FloatDP> &A, const Vector<FloatDP> &a,
+                       const Matrix<FloatDP> &B, const Vector<FloatDP> &b,
+                       const Vector<FloatDP> &x,
+                       struct StepData &v) const;
+
+  //! Linesearch to find
+  FloatDP
+  linesearch(struct StepData &v) const;
+
+
+    //! \brief Perform a step of the optimization of \f$\min 1/2x^T Q x + x^T d
+    //! \text{ s.t. } Ax>=l; x_l \leq x\leq x_u\f$. Returns true if a full ASMQP
+    //! step is taken. In this case, the problem remains feasible (up to
+    //! roundoff error).
+    //! @param v Serialized StepData structure
+    QuadraticProgramStatus
+    _minimisation_step(struct StepData &v) const;
+
+
+    //! \brief null space method to solve the eq problem relative to KKT condition system
+    void
+    null_space(struct StepData &v) const;
+
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 };
 
 } // namespace Ariadne

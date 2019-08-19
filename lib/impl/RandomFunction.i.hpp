@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 template <>
 class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
 <<<<<<< HEAD
@@ -71,6 +72,13 @@ private:
   std::vector<VType> x;
   std::vector<float> generator_bounds;
 =======
+=======
+//----------------------------------------------------------------------------//
+//                F_1(X) = sum_i sum_j rand(-100,100)*x_i^j
+//----------------------------------------------------------------------------//
+template <>
+class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
                            F_TEST_1>
 {
     using VType = Ariadne::EffectiveFormula;
@@ -514,7 +522,10 @@ class FunctionDistribution<Ariadne::EffectiveScalarMultivariateFunction,
     size_t size;
     unsigned seed;
     std::vector<VType> x;
+<<<<<<< HEAD
 >>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
+=======
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
 };
 
 //----------------------------------------------------------------------------//

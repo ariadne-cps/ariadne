@@ -485,6 +485,7 @@ class NonlinearMixedOptimiser : public OptimiserBase
                                                   ExactBoxType D,
                                                   ValidatedVectorMultivariateFunction g,
                                                   ExactBoxType C) const;
+<<<<<<< HEAD
     virtual Vector<ValidatedNumericType> minimise_static(ValidatedScalarMultivariateFunction f,
                                                   ExactBoxType D,
                                                   ValidatedVectorMultivariateFunction g,
@@ -493,11 +494,18 @@ class NonlinearMixedOptimiser : public OptimiserBase
                                                   ExactBoxType D,
                                                   ValidatedVectorMultivariateFunction g,
                                                   ExactBoxType C) const;
+=======
+
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
     virtual ValidatedKleenean
     feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
 
   private:
+<<<<<<< HEAD
     std::shared_ptr<NonlinearInteriorPointOptimiser> nlipm_ptr;
+=======
+    std::shared_ptr<NonlinearInfeasibleInteriorPointOptimiser> nliipo_ptr;
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
     std::shared_ptr<NonlinearSQPOptimiser> nlsqp_ptr;
 
     FloatDP scoringFunction(const ApproximateScalarMultivariateFunction &f,

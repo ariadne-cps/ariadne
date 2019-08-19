@@ -145,10 +145,77 @@ Pair<ValidatedKleenean,ExactPoint> __feasible__(const ExactBoxType& domain, cons
   return make_pair(indeterminate,cast_exact(optimal_x));
 }
 
+void printscalarFun(ValidatedScalarMultivariateFunction &f)
+{
+  std::cerr<<f<<"\n";
+}
+
+void printscalarFun(ValidatedVectorMultivariateFunction &f)
+{
+  std::cerr<<f<<"\n";
+}
+
+Pair<ValidatedKleenean,ExactPoint> __feasible__(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints)
+{
+  if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
+
+  ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
+  ExactBoxType codomain(constraints.size());
+  ValidatedScalarMultivariateFunction barrier_function(domain.size());
+  EffectiveVectorMultivariateFunction empty_function(0u, domain.size());
+  ExactBoxType empty_box = ExactBoxType{};
+  NonlinearSQPOptimiser nlsqp;
+  NonlinearInteriorPointOptimiser nlipm;
+  nlsqp.verbosity=6;
+
+  Ariadne::EffectiveScalarMultivariateFunction mu(
+    Ariadne::EuclideanDomain(domain.size()),
+    Ariadne::simplify(Ariadne::EffectiveFormula::constant(
+      Real(0.5)
+    )));
+
+  for(Nat i=0; i!=constraints.size(); ++i) {
+      function[i]=constraints[i].function();
+      codomain[i]=constraints[i].bounds();
+      // std::cerr<<"l: "<<codomain[i].lower()<<", u: "<<codomain[i].upper()<<"\n\n";
+      if(codomain[i].lower()==codomain[i].upper())
+      {
+        barrier_function = barrier_function + 1/(2*mu)*pow(function[i],2);
+        continue;
+      }
+      barrier_function = barrier_function - 1/(function[i]);
+
+  }
+
+  UpperBoxType image=apply(function,domain);
+  for(Nat i=0; i!=image.size(); ++i) {
+      if(definitely(disjoint(image[i],codomain[i]))) {
+          return make_pair(false,ExactPoint());
+      }
+  }
+
+  if(decide(nlsqp.check_feasibility(domain,function,codomain,midpoint(domain))))
+  {
+    return make_pair(true,midpoint(domain));
+  }
+
+
+  auto optimal_x = nlsqp.minimise(barrier_function,domain,empty_function,empty_box);
+  // std::cerr<<"Minimum of nlsqp: "<<optimal_x<<"\n";
+  if(decide(nlsqp.check_feasibility(domain,function,codomain,cast_exact(optimal_x))))
+  {
+    return make_pair(true,cast_exact(optimal_x));
+  }
+  return make_pair(indeterminate,cast_exact(optimal_x));
+}
+
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
 
+<<<<<<< HEAD
 >>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
+=======
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
     // return __feasible__(domain,constraints);
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
@@ -162,6 +229,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     return this->feasible_sqp(domain,function,bounds);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible_sqp(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
@@ -228,11 +296,16 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
 >>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.
+=======
+Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
+{
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
     static const FloatDPValue XSIGMA=0.125_exact;
     static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
     static const FloatDP _inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
+
     ARIADNE_ASSERT(codomain.dimension()>0);
 
     // Make codomain singleton
@@ -267,6 +340,26 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     if(is_feasible)
       return make_pair(true,cast_exact(optimal_x));
 
+<<<<<<< HEAD
+=======
+    // std::cerr<<"F: "<<function<<"\n\n";
+    //
+    NonlinearSQPOptimiser nlsqp;
+    RawFloatVector optimal_x = cast_raw(midpoint(domain));
+    bool is_feasible = false;
+    try
+    {
+       is_feasible = nlsqp.feasible_point(domain, function, codomain, optimal_x);
+    }
+    catch(InfeasibleQuadraticProgram ipq)
+    {
+      // std::cerr<<"\t[4]\tindeterminate, qp subproblem is infeasible\n";
+      return make_pair(indeterminate, cast_exact(optimal_x));
+    }
+    if(is_feasible)
+      return make_pair(true,cast_exact(optimal_x));
+
+>>>>>>> 681346c6af58fdfff85dfaa109ead700efe84d85
     return make_pair(indeterminate, cast_exact(optimal_x));
 
 >>>>>>> Small fixes. Implemented temporary __feasible__ function to test barrier method.

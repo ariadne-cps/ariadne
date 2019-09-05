@@ -75,10 +75,9 @@ class TestInclusionIntegrator {
 
         TaylorPicardIntegrator integrator(
                 maximum_error=1e-3,
-                sweep_threshold=sw_threshold,
+                sweeper,
                 lipschitz_constant=0.5,
                 step_maximum_error=1e-3,
-                step_sweep_threshold=sw_threshold,
                 minimum_temporal_order=4,
                 maximum_temporal_order=12);
 

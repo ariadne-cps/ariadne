@@ -97,12 +97,13 @@ Void TestContinuousEvolution::test() const
     double step_size(0.5);
     double enclosure_radius(0.25);
 
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8);
+
     // Set up the evaluators
-    TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                             step_maximum_error=1e-6,step_sweep_threshold=1e-10,minimum_temporal_order=0,maximum_temporal_order=8);
+    TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweeper,lipschitz_constant=0.5,
+                                             step_maximum_error=1e-6,minimum_temporal_order=0,maximum_temporal_order=8);
     // Set up the evaluators
-    GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                             step_maximum_error=1e-6,step_sweep_threshold=1e-10,
+    GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweeper,lipschitz_constant=0.5,step_maximum_error=1e-6,
                                              minimum_spacial_order=1,minimum_temporal_order=4,maximum_spacial_order=3,maximum_temporal_order=8);
 
     IntegratorInterface& integrator=picard_integrator;
@@ -167,9 +168,11 @@ Void TestContinuousEvolution::failure_test() const
     double step_size(0.01);
     double enclosure_radius(0.25);
 
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8);
+
     // Set up the evaluators
-    TaylorPicardIntegrator integrator(maximum_error=1e-6,sweep_threshold=1e-8,lipschitz_constant=0.5,
-                                      step_maximum_error=1e-8,step_sweep_threshold=1e-10,minimum_temporal_order=0,maximum_temporal_order=6);
+    TaylorPicardIntegrator integrator(maximum_error=1e-6,sweeper,lipschitz_constant=0.5,
+                                      step_maximum_error=1e-8,minimum_temporal_order=0,maximum_temporal_order=6);
 
     // Define the initial box
     ExactBoxType initial_box = ExactBoxType{{0.0,0.0},{0.9,0.9}};

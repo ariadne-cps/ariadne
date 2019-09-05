@@ -557,14 +557,6 @@ FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>
     return restriction(make_taylor_function_model(dphi,join(domx,wdt,doma),swp),join(domx,domt,doma));
 }
 
-<<<<<<< HEAD
-FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, double swpt) {
-    ThresholdSweeper<FloatDP> swp(DP(),swpt);
-    return flow_function(dphi,domx,domt,doma,swp);
-}
-
-=======
->>>>>>> Make integrator accept a generic Sweeper<FloatDP>
 } // namespace
 
 
@@ -626,11 +618,8 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     Vector<ValidatedDifferential> dphi=Ariadne::flow_differential(dphic,dphib,so,to,verbosity);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
 
-<<<<<<< HEAD
-    FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,swpt);
-=======
-    ValidatedVectorMultivariateTaylorFunctionModelDP tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
->>>>>>> Make integrator accept a generic Sweeper<FloatDP>
+    FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
+
     ARIADNE_LOG(5,"phi="<<tphi<<"\n");
 
     return tphi;
@@ -872,19 +861,9 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     DegreeType max_to=this->maximum_temporal_order();
 
     Vector<ValidatedProcedure> p(f);
-<<<<<<< HEAD
-    FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
-        max_err,swpt, init_so,init_to,max_so,max_to, this->verbosity);
 
-/*
-    ThresholdSweeper<FloatDP> swp(DP(),this->step_sweep_threshold());
-    DegreeType deg = this->maximum_temporal_order();
-    FlowStepModelType tphi=Ariadne::series_flow_step(f,domx,domt,doma,bndx,deg,swp,this->verbosity);
-*/
-=======
-    ValidatedVectorMultivariateFunctionModelDP tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
+    FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
         max_err,this->sweeper(), init_so,init_to,max_so,max_to, this->verbosity);
->>>>>>> Make integrator accept a generic Sweeper<FloatDP>
 
     if(tphi.error().raw()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"GradedTaylorSeriesIntegrator::flow_step",

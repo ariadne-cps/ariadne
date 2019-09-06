@@ -219,7 +219,7 @@ public:
 template<class A, class R>
 class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
-    ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) : _f(f), _inputs(inputs), _enable_componentwise_error(false) { }
+    ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) : _f(f), _inputs(inputs), _enable_componentwise_error(true) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
   private:
     EffectiveVectorMultivariateFunction const& _f;

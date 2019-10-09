@@ -6,7 +6,7 @@ set(UNIT_TESTS
     test_nonlinear_programming
     test_quadratic_programming
     test_solvers
-    test_function_generator_nonlinear_programming
+    test_sequential_quadratic_programming
 )
 
 foreach(TEST ${UNIT_TESTS})
@@ -14,7 +14,7 @@ foreach(TEST ${UNIT_TESTS})
     if(COVERAGE)
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
     endif()
-    target_link_libraries(${TEST} ariadne-kernel DataStream "${GLPK_LIBRARY}")
+    target_link_libraries(${TEST} ariadne-kernel "${GLPK_LIBRARY}")
     add_test(${TEST} ${TEST})
     set_property(TEST ${TEST} PROPERTY LABELS "solvers;primary;kernel")
 endforeach()

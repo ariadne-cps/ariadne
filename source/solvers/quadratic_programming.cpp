@@ -57,6 +57,7 @@ void printMatrix(const Matrix<FloatDP> &mt) {
   std::cout << "\n";
 }
 //----------------------------------------------------------------------------//
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
 
 struct ASMQPSolver::StepData {
   friend std::ostream &operator<<(std::ostream &out,
@@ -675,4 +676,7 @@ FloatDP ASMQPSolver::linesearch(struct StepData &v) const {
   }
   return alpha;
 }
+
+#endif
+
 } // namespace Ariadne

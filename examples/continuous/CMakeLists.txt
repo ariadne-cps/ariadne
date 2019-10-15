@@ -4,7 +4,7 @@ set(EXAMPLES_CONTINUOUS
 
 foreach(example ${EXAMPLES_CONTINUOUS})
     add_executable(${example} ${example}.cpp)
-    target_link_libraries(${example} ariadne "${GLPK_LIBRARY}")
+    target_link_libraries(${example} ariadne)
 endforeach()
 
 add_dependencies(examples ${EXAMPLES_CONTINUOUS})

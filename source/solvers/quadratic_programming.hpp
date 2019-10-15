@@ -44,6 +44,9 @@ template <class X> class Vector;
 template <class X> class Matrix;
 template <class X> class Affine;
 
+// need eigen3 to run
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
+
 enum class QuadraticProgramStatus : std::uint8_t {
   INDETERMINATE_FEASIBILITY = 0,
   PRIMAL_FEASIBLE = 1,
@@ -163,6 +166,8 @@ private:
   //! system
   void null_space(struct StepData &v) const;
 };
+
+#endif
 
 } // namespace Ariadne
 

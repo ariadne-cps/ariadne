@@ -8,7 +8,7 @@ foreach(TEST ${UNIT_TESTS})
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
     endif()
     add_test(${TEST} ${TEST})
-    target_link_libraries(${TEST} ariadne-kernel "${GLPK_LIBRARY}") 
+    target_link_libraries(${TEST} ariadne-kernel) 
     set_property(TEST ${TEST} PROPERTY LABELS "output;primary;kernel")
 endforeach()
 

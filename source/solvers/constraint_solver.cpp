@@ -74,6 +74,8 @@ inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) 
     return os << c.bounds().lower() << "<=" << c.function() << "<=" << c.bounds().upper();
 }
 
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
+
 // 11032019 - Testing sqp vs. ipm - ND - BEGIN
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible_sqp(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
@@ -132,7 +134,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible_sqp(const ExactBox
     return make_pair(indeterminate, cast_exact(optimal_x));
 }
 // 11032019 - Testing sqp vs. ipm - ND - BEGIN
-
+#endif
 Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }

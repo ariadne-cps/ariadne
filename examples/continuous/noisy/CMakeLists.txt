@@ -15,7 +15,7 @@ set(EXAMPLES_CONTINUOUS_NOISY
 
 foreach(example ${EXAMPLES_CONTINUOUS_NOISY})
     add_executable(${example} ${example}.cpp)
-    target_link_libraries(${example} ariadne "${GLPK_LIBRARY}")
+    target_link_libraries(${example} ariadne)
 endforeach()
 
 add_custom_target(examples-continuous-noisy)

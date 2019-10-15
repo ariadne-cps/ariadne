@@ -1565,14 +1565,38 @@ ValidatedVector NonlinearInteriorPointOptimiser::minimise(
     throw InfeasibleProblemException();
   }
 
-  FloatApproximationVector x = midpoint(D);
+  FloatApproximationVector x   = midpoint(D);
+  Vector<FloatDP>          v_x = cast_raw(midpoint(D));
+  Vector<FloatDP>          lb  = cast_raw(D.lower_bounds());
+  Vector<FloatDP>          ub  = cast_raw(D.upper_bounds());
+  for (unsigned i = 0; i < x.size(); ++i)
+  {
+    if (is_inf(lb[i]) && is_inf(ub[i]))
+      v_x[i] = 0;
+    else if (is_inf(lb[i]) && not(is_inf(ub[i])))
+      v_x[i] = ub[i];
+    else if (not(is_inf(lb[i])) && is_inf(ub[i]))
+      v_x[i] = lb[i];
+    else
+    {
+      break;
+    }
+  }
+  // v_x = Vector<FloatDP>(x.size(), 2.0); //--> activate only for problem s394
+  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
+  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
+  // v_x = Vector<FloatDP>(x.size(), 0.0); // --> activate only for problem optprloc
+  // v_x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
+  // v_x = Vector<FloatDP>(x.size(), 1.0); //--> activate only for problem mistake
+  // v_x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+  x                          = cast_approximate(v_x);
   FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD), C));
 
   FloatApproximationVector kappa(g.result_size(), zero);
   FloatApproximationVector lambda(h.result_size(), zero);
   FloatDPApproximation     mu = one;
 
-  for (Nat i = 0; i != 12; ++i)
+  for (Nat i = 0; i != 500; ++i)
   {
     this->minimisation_step(f, D, g, C, h, x, w, kappa, lambda, mu);
     if (i % 3 == 0 && i <= 10)
@@ -1619,9 +1643,9 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   ARIADNE_LOG(7, "lambda=" << lambda << "\n");
   ARIADNE_LOG(7, "mu=" << mu << "\n");
 
-  FloatApproximationVector      slack(2 * n);
-  FloatApproximationVectorRange slackl(slack, range(0, n));
-  FloatApproximationVectorRange slacku(slack, range(n, 2 * n));
+  // FloatApproximationVector      slack(2 * n);
+  // FloatApproximationVectorRange slackl(slack, range(0, n));
+  // FloatApproximationVectorRange slacku(slack, range(n, 2 * n));
 
   FloatApproximationDifferential ddfx =
       f.evaluate(FloatApproximationDifferential::variables(2, x));
@@ -1674,6 +1698,7 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   // for equality constraints relative to other constraints
   static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
 
+  std::cout<<"d: "<<d<<", x: "<<x<<"\nc: "<<x<<", w: "<<w<<"\n---------------\n";
   // Compute the residuals and contributions from slack in x and w
   //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] *
   //   lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
@@ -1687,7 +1712,6 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
     rx[i] += mu * (nuu - nul);
     D[i] = mu * (nuu * nuu + nul * nul);
   }
-
   //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
   FloatApproximationVector         rw = -kappa;
   FloatApproximationDiagonalMatrix C(m);
@@ -3583,9 +3607,12 @@ dyt="<<dyt<<" dz="<<dz<<"\n\n");
 //                  NonlinearSQPOptimiser
 //----------------------------------------------------------------------------//
 
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
+
 NonlinearSQPOptimiser::NonlinearSQPOptimiser()
 {
   qpsolver_ptr = std::make_shared<ASMQPSolver>();
+  // qpsolver_ptr->verbosity=5;
 }
 
 //----------------------------------------------------------------------------//
@@ -3733,7 +3760,7 @@ struct NonlinearSQPOptimiser::StepData
   const FloatDP alpha = 1.0;
 
   // counters
-  unsigned itmax = 80u;
+  unsigned itmax = 500u;
   unsigned n;
   unsigned m;
 
@@ -3818,6 +3845,15 @@ void NonlinearSQPOptimiser::initialize_step_data(
       break;
     }
   }
+  // v.x = Vector<FloatDP>(v.n, 2.0); //--> activate only for problem s394
+  // v.x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
+  // v.x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
+  // v.x = Vector<FloatDP>(v.n, 0.0); // --> activate only for problem optprloc
+  // v.x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
+  // v.x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0}; // --> activate only for problem badbal
+  // v.x = Vector<FloatDP>(v.n, 1.0); //--> activate only for problem mistake
+  // v.x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+
   // v.p               = Vector<FloatDP>::zero(v.n);
   v.B      = Matrix<FloatDP>::zero(v.n, v.n);
   v.f      = f;
@@ -4018,6 +4054,7 @@ ValidatedVector NonlinearSQPOptimiser::minimise(
          not(v.status == SQPStatus::OK || v.status == SQPStatus::NULL_STEP);
        ++v.iter)
   {
+    // std::cout<<"active_set_rateo: "<<v.active_set_rateo<<"\n";
     step(f, D, g, C, v);
     // if(v.status==SQPStatus::QP_NOT_CONV || v.status==SQPStatus::QP_SINGULAR
     // ||
@@ -4039,13 +4076,7 @@ ValidatedVector NonlinearSQPOptimiser::minimise(
 
   ARIADNE_LOG(1,
               "Algorithm terminated in " + std::to_string(v.iter) + " steps.");
-  // std::cerr<<"ended in "<<v.iter<<" steps.\n";
 
-  // DataStream ds = csv::make_datastream();
-  // // ds.setHeader({""});
-  // ds.open(this->problem_name+"_nlsqp_1" + ".csv");
-  // ds.append<FloatDP>({v.active_set_rateo});
-  // ds.close();
   return ValidatedVector(cast_exact(old_x));
 }
 
@@ -4111,7 +4142,7 @@ Void NonlinearSQPOptimiser::step(const ApproximateScalarMultivariateFunction &f,
                                 << Vector<FloatDP>(v.obj_g.size(), +inf)
                                 << " with x = " << v.x << "\n");
 
-  // qpsolver_ptr->verbosity=6;
+  // qpsolver_ptr->verbosity=2;
   Tuple<FloatDP, Vector<FloatDP>, Vector<FloatDP>> opt;
   try
   {
@@ -4368,7 +4399,7 @@ Void NonlinearSQPOptimiser::feasibility_step(
   //----------------------------------------------------------------------------//
 
   // TODO: delete, only testing
-  v.compute_AS_rateo(v.x);
+  // v.compute_AS_rateo(v.x);
 }
 
 FloatDP NonlinearSQPOptimiser::linesearch(
@@ -4535,11 +4566,28 @@ NonlinearMixedOptimiser::NonlinearMixedOptimiser()
   nlsqp_ptr->verbosity = verbosity;
 }
 
+struct NonlinearMixedOptimiser::StepData
+{
+  SizeType                          it  = 0;
+  SizeType                          itO = 1;
+  NonlinearMixedOptimiser::Strategy strategy;
+  // sqp step data
+  struct NonlinearSQPOptimiser::StepData sqpStepData;
+
+  // ipm step data (this should be encapsulated in an other struct!)
+  ApproximateVectorMultivariateFunction h;
+  FloatApproximationVector              x;
+  FloatApproximationVector              w;
+  FloatApproximationVector              kappa;
+  FloatApproximationVector              lambda;
+  FloatDPApproximation                  mu;
+};
+
 ValidatedVector NonlinearMixedOptimiser::minimise(
     ValidatedScalarMultivariateFunction f, ExactBoxType D,
     ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
-  // return minimise_static(f,D,g,C);
+  // return minimise_static(f, D, g, C);
   return minimise_dynamic(f, D, g, C);
 }
 
@@ -4549,70 +4597,11 @@ ValidatedVector NonlinearMixedOptimiser::minimise_static(
 {
   ARIADNE_LOG(2, "NonlinearMixedOptimiser::minimise(f,D,g,C)\n");
   ARIADNE_LOG(3, "f=" << f << " D=" << D << " g=" << g << " C=" << C << "\n");
-  ValidatedVectorMultivariateFunction h(0, D);
-  NonlinearSQPOptimiser::StepData     v;
-  bool                                run_SQP = false;
-  nlsqp_ptr->initialize_step_data(f, D, g, C, v);
-
-  UpperBoxType gD = apply(g, D);
-  if (definitely(disjoint(gD, C)))
-  {
-    throw InfeasibleProblemException();
-  }
-
-  FloatApproximationVector x = midpoint(D);
-  FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD), C));
-
-  FloatApproximationVector kappa(g.result_size(), zero);
-  FloatApproximationVector lambda(h.result_size(), zero);
-  FloatDPApproximation     mu = one;
-
-  for (Nat i = 0; i != 12; ++i)
-  {
-    nlipm_ptr->minimisation_step(f, D, g, C, h, x, w, kappa, lambda, mu);
-    if (i % 3 == 0 && i <= 10)
-    {
-      mu *= 0.25_exact;
-    }
-  }
-
-  if (!decide(element(x, D)) || !decide(element(g(x), C)))
-  {
-    run_SQP = true;
-  }
-
-  if (run_SQP)
-  {
-    v.x                   = cast_raw(x);
-    Vector<FloatDP> old_x = v.x;
-    for (; v.iter < v.itmax &&
-           not(v.status == NonlinearSQPOptimiser::SQPStatus::OK ||
-               v.status == NonlinearSQPOptimiser::SQPStatus::NULL_STEP);
-         ++v.iter)
-    {
-      nlsqp_ptr->step(f, D, g, C, v);
-
-      if (abs(cast_raw(f(cast_approximate(v.x)))) > static_cast<FloatDP>(10e32))
-      {
-        // ARIADNE_WARN("Unsafe zone: Objective function is too big!");
-        v.status = NonlinearSQPOptimiser::SQPStatus::UNSAFE_ZONE;
-        break;
-      }
-      old_x = v.x;
-    }
-    x = cast_approximate(old_x);
-  }
-
-  return ValidatedVector(cast_exact(x));
-}
-
-ValidatedVector NonlinearMixedOptimiser::minimise_dynamic(
-    ValidatedScalarMultivariateFunction f, ExactBoxType D,
-    ValidatedVectorMultivariateFunction g, ExactBoxType C) const
-{
-  ARIADNE_LOG(2, "NonlinearMixedOptimiser::minimise(f,D,g,C)\n");
-  ARIADNE_LOG(3, "f=" << f << " D=" << D << " g=" << g << " C=" << C << "\n");
   if (this->complexity_order > 4 && C.size() == 0)
+  {
+    return nlsqp_ptr->minimise(f, D, g, C);
+  }
+  else if (this->complexity_order > 4 && D.size() > 15)
   {
     return nlsqp_ptr->minimise(f, D, g, C);
   }
@@ -4627,10 +4616,216 @@ ValidatedVector NonlinearMixedOptimiser::minimise_dynamic(
   return nlipm_ptr->minimise(f, D, g, C);
 }
 
+ValidatedVector NonlinearMixedOptimiser::minimise_dynamic(
+    ValidatedScalarMultivariateFunction f, ExactBoxType D,
+    ValidatedVectorMultivariateFunction g, ExactBoxType C) const
+{
+  StepData stepData;
+
+  ValidatedVectorMultivariateFunction h(0, D);
+
+  UpperBoxType gD = apply(g, D);
+  if (definitely(disjoint(gD, C)))
+  {
+    throw InfeasibleProblemException();
+  }
+
+  FloatApproximationVector x   = midpoint(D);
+  Vector<FloatDP>          v_x = cast_raw(midpoint(D));
+  Vector<FloatDP>          lb  = cast_raw(D.lower_bounds());
+  Vector<FloatDP>          ub  = cast_raw(D.upper_bounds());
+  for (unsigned i = 0; i < x.size(); ++i)
+  {
+    if (is_inf(lb[i]) && is_inf(ub[i]))
+      v_x[i] = 0;
+    else if (is_inf(lb[i]) && not(is_inf(ub[i])))
+      v_x[i] = ub[i];
+    else if (not(is_inf(lb[i])) && is_inf(ub[i]))
+      v_x[i] = lb[i];
+    else
+    {
+      break;
+    }
+  }
+  // v_x = Vector<FloatDP>(x.size(), 2.0); //--> activate only for problem s394
+  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
+  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
+  // v_x = Vector<FloatDP>(x.size(), 0.0); // --> activate only for problem optprloc
+  // v_x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0};// --> activate only for problem badbal
+  // v_x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
+  // v_x = Vector<FloatDP>(x.size(), 1.0); //--> activate only for problem mistake
+  // v_x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+  x                          = cast_approximate(v_x);
+  FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD), C));
+
+  FloatApproximationVector kappa(g.result_size(), zero);
+  FloatApproximationVector lambda(h.result_size(), zero);
+  FloatDPApproximation     mu = one;
+
+  stepData.x      = x;
+  stepData.w      = w;
+  stepData.kappa  = kappa;
+  stepData.lambda = lambda;
+  stepData.mu     = mu;
+
+  nlsqp_ptr->initialize_step_data(f, D, g, C, stepData.sqpStepData);
+
+  change_strategy(stepData);
+  change_strategy(stepData);
+
+  ARIADNE_LOG(
+      1, "Launching NonlinearMixedOptimiser::minimise_dynamic with policy "
+             << (stepData.strategy == NonlinearMixedOptimiser::Strategy::SQP
+                     ? "SQP"
+                     : "IPM")
+             << "\n");
+  minimise_with_strategy(f, D, g, C, h, stepData);
+
+  if (stepData.strategy == NonlinearMixedOptimiser::Strategy::SQP)
+  {
+    return cast_exact(stepData.sqpStepData.x);
+  }
+  else
+  {
+    return cast_exact(stepData.x);
+  }
+}
+
 ValidatedKleenean NonlinearMixedOptimiser::feasible(
     ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const
 {
   return nlsqp_ptr->feasible(D, g, C);
 }
+
+Void NonlinearMixedOptimiser::minimise_with_strategy(
+    const ApproximateScalarMultivariateFunction &f, const ExactBoxType &d,
+    const ApproximateVectorMultivariateFunction &g, const ExactBoxType &c,
+    const ApproximateVectorMultivariateFunction &h,
+    struct NonlinearMixedOptimiser::StepData &   stepData) const
+{
+  ARIADNE_LOG(2, "Making  " << stepData.itO << " steps with policy "
+                            << (stepData.strategy ==
+                                        NonlinearMixedOptimiser::Strategy::SQP
+                                    ? "SQP"
+                                    : "IPM")
+                            << "\n");
+  for (SizeType i = 0; i < stepData.itO; i++, stepData.it++)
+  {
+    step(f, d, g, c, h, stepData);
+  }
+
+  change_strategy(stepData);
+
+  ARIADNE_LOG(
+      2, "Obtained new function vlaues: "
+             << (stepData.strategy == NonlinearMixedOptimiser::Strategy::SQP
+                     ? f(cast_approximate(stepData.sqpStepData.x))
+                     : f(stepData.x))
+             << "\n");
+
+  // convergence checks
+  if (stepData.it > 500 ||
+      (stepData.sqpStepData.status == NonlinearSQPOptimiser::SQPStatus::OK ||
+       stepData.sqpStepData.status ==
+           NonlinearSQPOptimiser::SQPStatus::NULL_STEP))
+  {
+    return;
+  }
+  // nothing happened
+  stepData.itO = stepData.itO * 2;
+  minimise_with_strategy(f, d, g, c, h, stepData);
+}
+
+NonlinearMixedOptimiser::Strategy
+NonlinearMixedOptimiser::lookup_policy(struct StepData &stepData) const
+{
+  return (stepData.sqpStepData.active_set_rateo > 10)
+             ? NonlinearMixedOptimiser::Strategy::IPM
+             : NonlinearMixedOptimiser::Strategy::SQP;
+}
+
+Void NonlinearMixedOptimiser::change_strategy(
+    struct NonlinearMixedOptimiser::StepData &stepData) const
+{
+  // Check what is the best strategy
+  Strategy choice = lookup_policy(stepData);
+
+  // Check if strategy is changed, if so then reinitialize the new solver
+  if (choice != stepData.strategy)
+  {
+    if (choice == NonlinearMixedOptimiser::Strategy::SQP)
+    {
+
+      stepData.sqpStepData.x = cast_raw(stepData.x);
+
+      stepData.sqpStepData.B =
+          Matrix<FloatDP>::zero(stepData.sqpStepData.n, stepData.sqpStepData.n);
+
+      stepData.sqpStepData.status = NonlinearSQPOptimiser::SQPStatus::NOTHING;
+      stepData.sqpStepData.iter   = 0u;
+
+      stepData.sqpStepData.obj_g =
+          stepData.sqpStepData.compose_g(stepData.sqpStepData.x);
+      stepData.sqpStepData.grd_g =
+          stepData.sqpStepData.compose_grd_g(stepData.sqpStepData.x);
+
+      stepData.sqpStepData.y =
+          100 * Vector<FloatDP>::one(stepData.sqpStepData.obj_g.size());
+
+      for (unsigned i = 0; i < stepData.sqpStepData.n; ++i)
+      {
+        stepData.sqpStepData.B[i][i] = static_cast<FloatDP>(1.0);
+      }
+    }
+    else
+    {
+
+      stepData.x = cast_approximate(stepData.sqpStepData.x);
+
+      FloatApproximationVector kappa(stepData.kappa.size(), zero);
+      FloatApproximationVector lambda(stepData.lambda.size(), zero);
+      FloatDPApproximation     mu = one;
+
+      stepData.kappa  = kappa;
+      stepData.lambda = lambda;
+      stepData.mu     = mu;
+    }
+  }
+  stepData.strategy = choice;
+}
+
+Void NonlinearMixedOptimiser::step(
+    const ApproximateScalarMultivariateFunction &f, const ExactBoxType &D,
+    const ApproximateVectorMultivariateFunction &g, const ExactBoxType &C,
+    const ApproximateVectorMultivariateFunction &h,
+    struct NonlinearMixedOptimiser::StepData &   stepData) const
+{
+  if (stepData.strategy == NonlinearMixedOptimiser::Strategy::IPM)
+  {
+
+    nlipm_ptr->minimisation_step(f, D, g, C, h, stepData.x, stepData.w,
+                                 stepData.kappa, stepData.lambda, stepData.mu);
+  }
+  else
+  {
+    nlsqp_ptr->step(f, D, g, C, stepData.sqpStepData);
+    stepData.sqpStepData.compute_AS_rateo(stepData.sqpStepData.x);
+    ARIADNE_LOG(4, "SQP active set rateo: "
+                       << stepData.sqpStepData.active_set_rateo << "\n");
+    // if(v.status==SQPStatus::QP_NOT_CONV || v.status==SQPStatus::QP_SINGULAR
+    // ||
+    //    v.status==SQPStatus::QP_INFEASIBLE ||
+    //    v.status==SQPStatus::NULL_GRADIENT || v.status==SQPStatus::B_SINGULAR
+    //    ||v.status==SQPStatus::BFGS_FAILED) break;
+    if (abs(cast_raw(f(cast_approximate(stepData.sqpStepData.x)))) >
+        static_cast<FloatDP>(10e32))
+    {
+      // ARIADNE_WARN("Unsafe zone: Objective function is too big!");
+      stepData.sqpStepData.status =
+          NonlinearSQPOptimiser::SQPStatus::UNSAFE_ZONE;
+    }
+  }
+}
+#endif
 
 } // namespace Ariadne

@@ -114,6 +114,39 @@ else()
     message(WARNING "Unable to find GTK2. You will not be able to use graphics windows.")
 endif()
 
+# ND -- 28/12/2018 -- External library dependencies -- begin
+find_package(Eigen3)
+if(EIGEN3_FOUND)
+    set(HAVE_EIGEN3_H ON)
+    include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
+else()
+    message(WARNING "Unable to find Eigen3. Related functionality will be disabled.")
+endif()
+
+find_package(GLPK)
+if(GLPK_FOUND)
+    set(HAVE_GLPK_H ON)
+    include_directories(SYSTEM ${GLPK_INCLUDE_DIR})
+else()
+    message(WARNING "Unable to find GLPK. Related functionality will be disabled.")
+endif()
+
+# set(GLPK_INCLUDE_DIRS "/usr/local/include/glpk/include")
+# set(GLPK_LIBRARY      "/usr/local/include/glpk/lib/libglpk.so")
+
+# if(NOT EXISTS ${GLPK_INCLUDE_DIRS})
+#   MESSAGE(ERROR "Cannot find glpk lib in ${GLPK_INCLUDE_DIRS}")
+# endif()
+# if(NOT EXISTS ${GLPK_LIBRARY})
+#   MESSAGE(ERROR "Cannot find glpk lib object in ${GLPK_LIBRARY}")
+# endif()
+
+# include_directories("${GLPK_INCLUDE_DIRS}")
+
+include_directories("lib/")
+add_subdirectory("lib")
+# ND -- 28/12/2018 -- External library dependencies -- end
+
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
@@ -124,25 +157,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_definitions(-Wno-non-template-friend)
 endif()
 
-
-# ND -- 28/12/2018 -- External library dependencies -- begin
-link_directories(/usr/local/include/eigen3)
-
-set(GLPK_INCLUDE_DIRS "/usr/local/include/glpk/include")
-set(GLPK_LIBRARY      "/usr/local/include/glpk/lib/libglpk.so")
-
-if(NOT EXISTS ${GLPK_INCLUDE_DIRS})
-  MESSAGE(ERROR "Cannot find glpk lib in ${GLPK_INCLUDE_DIRS}")
-endif()
-if(NOT EXISTS ${GLPK_LIBRARY})
-  MESSAGE(ERROR "Cannot find glpk lib object in ${GLPK_LIBRARY}")
-endif()
-
-include_directories("${GLPK_INCLUDE_DIRS}")
-
-include_directories("lib/")
-add_subdirectory("lib")
-# ND -- 28/12/2018 -- External library dependencies -- end
 
 add_subdirectory(source)
 add_subdirectory(tests)
@@ -228,6 +242,12 @@ if(GTK2_FOUND)
     target_link_libraries(ariadne ${GTK2_LIBRARIES})
     target_link_libraries(ariadne-kernel ${GTK2_LIBRARIES})
 endif()
+
+if(GLPK_FOUND)
+    target_link_libraries(ariadne ${GLPK_LIBRARIES})
+    target_link_libraries(ariadne-kernel ${GLPK_LIBRARIES})
+endif()
+
 
 install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")

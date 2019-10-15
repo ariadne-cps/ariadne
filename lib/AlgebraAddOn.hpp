@@ -1,23 +1,32 @@
 #pragma once
-// C++ program to demostrate working of Guassian Elimination
-// method
+
 #include <bits/stdc++.h>
+
+#if defined HAVE_EIGEN3_H
 #include <eigen3/Eigen/Dense>
+#endif
 
+#if defined HAVE_GLPK_H
 #include <glpk.h>
+#endif
 
-namespace Ariadne {
-class IndefiniteMatrixException : public std::runtime_error {
+namespace Ariadne
+{
+class IndefiniteMatrixException : public std::runtime_error
+{
 public:
-  IndefiniteMatrixException(const StringType &what)
-      : std::runtime_error(what) {}
+  IndefiniteMatrixException(const StringType &what) : std::runtime_error(what)
+  {
+  }
 };
 
+#if defined HAVE_GLPK_H
 //  perform simplex algorithm to find minimum with only lower constriants
 //    using glpk library
 template <class X>
 Vector<X> lp_min(const Vector<X> &C, const Matrix<X> &A, const Vector<X> &b,
                  const Vector<X> &lb, int &errnum);
+#endif
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting.
 // The matrix Q is built up as a composition of elementary Householder
@@ -55,7 +64,7 @@ Tuple<Vector<X>, X> power_eigs(const Matrix<X> &A, const unsigned itmax = 100);
 template <class X>
 Tuple<Vector<X>, X> inverse_power_eigs(const Matrix<X> &A, const X &mu,
                                        const unsigned itmax = 100);
-
+#if defined         HAVE_EIGEN3_H
 // Eigen computation of eigenvalues
 template <class X> Tuple<Vector<X>, X> eigen_eigs(const Matrix<X> &A);
 
@@ -68,6 +77,7 @@ template <class X> Matrix<X> eigen_pinv(const Matrix<X> &G);
 
 // compute the Cholesky factorization using Eigen library
 template <class X> Matrix<X> eigen_chol(const Matrix<X> &A);
+#endif
 
 } // namespace Ariadne
 

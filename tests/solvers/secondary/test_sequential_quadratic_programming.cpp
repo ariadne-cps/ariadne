@@ -46,41 +46,33 @@ class TestOptimiser
 private:
   std::unique_ptr<OptimiserInterface> optimiser;
   // DoublePrecision                     pr;
-
+  /*
+   * -> near boundary feasible region exception
+   ** -> x not contained in D
+   */
 public:
   TestOptimiser(const OptimiserInterface &opt) : optimiser(opt.clone()) {}
   Void test()
   {
-    ARIADNE_TEST_CALL(benchmark_allinit());  //*
-    // ARIADNE_TEST_CALL(benchmark_extrasim()); //*
-    // ARIADNE_TEST_CALL(benchmark_hs54());
+    // ARIADNE_TEST_CALL(benchmark_allinit());     //**
+    // ARIADNE_TEST_CALL(benchmark_extrasim());
+    // ARIADNE_TEST_CALL(benchmark_hs54());        //**
     // ARIADNE_TEST_CALL(benchmark_booth());
     // ARIADNE_TEST_CALL(benchmark_himmelbc());
-    // ARIADNE_TEST_CALL(benchmark_hs44()); //*
+    // ARIADNE_TEST_CALL(benchmark_hs44());
     // ARIADNE_TEST_CALL(benchmark_s394());
     // ARIADNE_TEST_CALL(benchmark_dualc2());
-    // ARIADNE_TEST_CALL(benchmark_loadbal());
-    // ARIADNE_TEST_CALL(benchmark_mistake());
-    // ARIADNE_TEST_CALL(benchmark_ssnlbeam());
-    // ARIADNE_TEST_CALL(benchmark_optprloc());
-    // ARIADNE_TEST_CALL(benchmark_eigminc());
-    // ARIADNE_TEST_CALL(benchmark_smmpsf());
-    // ARIADNE_TEST_CALL(benchmark_reading3());
-    // ARIADNE_TEST_CALL(benchmark_dittert());
+    // ARIADNE_TEST_CALL(benchmark_loadbal());     //*
+    // ARIADNE_TEST_CALL(benchmark_mistake());     //*
+    // ARIADNE_TEST_CALL(benchmark_ssnlbeam());    //*
+    // ARIADNE_TEST_CALL(benchmark_optprloc());    //**
+    // ARIADNE_TEST_CALL(benchmark_eigminc());     //*
+    // ARIADNE_TEST_CALL(benchmark_smmpsf());      //*
+    // ARIADNE_TEST_CALL(benchmark_reading3());    //*
+    // ARIADNE_TEST_CALL(benchmark_dittert());     //*
+    // ARIADNE_TEST_CALL(benchmark_avion2());
+    // ARIADNE_TEST_CALL(benchmark_degenlpa());
   }
-
-  /*
-  Results from AmplOnline with LOQO:
-
-  LOQO 7.03: optimal solution (11 iterations, 11 evaluations)
-  primal objective 1.000000008
-  dual objective 1
-  f = 1
-
-  x = 7.97704e-09
-  y = 1
-  */
-  Void benchmark_extrasim();
 
   /*
   Results from AmplOnline with LOQO:
@@ -97,6 +89,19 @@ public:
     4   2
   */
   Void benchmark_allinit();
+
+  /*
+  Results from AmplOnline with LOQO:
+
+  LOQO 7.03: optimal solution (11 iterations, 11 evaluations)
+  primal objective 1.000000008
+  dual objective 1
+  f = 1
+
+  x = 7.97704e-09
+  y = 1
+  */
+  Void benchmark_extrasim();
 
   /*
     Precision test-case:
@@ -372,11 +377,14 @@ public:
   */
   Void benchmark_reading3();
 
-
   /*
     Cannot run with n > 300 variables on ampl demo version
   */
   Void benchmark_dittert();
+
+  Void benchmark_degenlpa();
+
+  Void benchmark_avion2();
 };
 
 #include "benchmark/benchmark.hpp"
@@ -385,22 +393,29 @@ Int main(Int argc, const char *argv[])
 {
   Nat optimiser_verbosity = get_verbosity(argc, argv);
 
+  std::cout << "NonlinearInteriorPointOptimiser\n";
   NonlinearInteriorPointOptimiser nlo;
   nlo.verbosity = optimiser_verbosity;
   TestOptimiser(nlo).test();
-  return ARIADNE_TEST_FAILURES;
+  // return ARIADNE_TEST_FAILURES;
 
-  #if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
+  // NonlinearInfeasibleInteriorPointOptimiser nlio;
+  // nlio.verbosity = optimiser_verbosity;
+  // TestOptimiser(nlio).test();
+  // return ARIADNE_TEST_FAILURES;
 
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
+
+  std::cout << "NonlinearSQPOptimiser\n";
   NonlinearSQPOptimiser nlsqp;
   nlsqp.verbosity = optimiser_verbosity;
   TestOptimiser(nlsqp).test();
-  // // return ARIADNE_TEST_FAILURES;
+  // return ARIADNE_TEST_FAILURES;
 
-
+  std::cout << "NonlinearMixedOptimiser\n";
   NonlinearMixedOptimiser nlhop;
   nlhop.verbosity = optimiser_verbosity;
   TestOptimiser(nlhop).test();
-  return ARIADNE_TEST_FAILURES;
-  #endif
+  // return ARIADNE_TEST_FAILURES;
+#endif
 }

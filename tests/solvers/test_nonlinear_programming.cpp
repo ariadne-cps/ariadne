@@ -59,7 +59,7 @@ public:
   {
     // ARIADNE_TEST_CALL(test_feasibility_check());
     // ARIADNE_TEST_CALL(test_unconstrained_optimisation());
-    // ARIADNE_TEST_CALL(test_constrained_optimisation()); //example of failure
+    ARIADNE_TEST_CALL(test_constrained_optimisation()); //example of failure
     // of Active set methods for quadratic progamming used in sequential
     // quadratic programming
     // ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
@@ -77,7 +77,7 @@ public:
     // ARIADNE_TEST_CALL(test_8());
     // ARIADNE_TEST_CALL(test_9());
     // ARIADNE_TEST_CALL(test_10());
-    ARIADNE_TEST_CALL(temp_test());
+    // ARIADNE_TEST_CALL(temp_test());
   }
 
   Void test_unconstrained_optimisation()
@@ -619,7 +619,7 @@ Int main(Int argc, const char *argv[])
 {
   Nat optimiser_verbosity = get_verbosity(argc, argv);
 
-#if defined HAVE_EIGEN3_H defined HAVE_GLPK_H
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
 
   NonlinearSQPOptimiser nlsqp;
   nlsqp.verbosity = optimiser_verbosity;
@@ -634,10 +634,10 @@ Int main(Int argc, const char *argv[])
   //
   // return ARIADNE_TEST_FAILURES;
 
-  NonlinearMixedOptimiser nlhop;
-  nlhop.verbosity = optimiser_verbosity;
-  TestOptimiser(nlhop).test();
-  return ARIADNE_TEST_FAILURES;
+  // NonlinearMixedOptimiser nlhop;
+  // nlhop.verbosity = optimiser_verbosity;
+  // TestOptimiser(nlhop).test();
+  // return ARIADNE_TEST_FAILURES;
 
   NonlinearInteriorPointOptimiser nlo;
   nlo.verbosity = optimiser_verbosity;

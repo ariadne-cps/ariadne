@@ -32,7 +32,12 @@ Void TestOptimiser::benchmark_s394()
       pow(x[10], 2) + pow(x[11], 2) + pow(x[12], 2) + pow(x[13], 2) +
       pow(x[14], 2) + pow(x[15], 2) + pow(x[16], 2) + pow(x[17], 2) +
       pow(x[18], 2) + pow(x[19], 2)};
-  ExactBoxType      C            = {{1, 1.001}};
+
+  ExactBoxType C = {{1, 1.001}};
+
+  optimiser->initial_guess     = Vector<FloatDP>(x.size(), 2.0);
+  optimiser->use_initial_guess = true;
+
   float             elapsed_time = 0;
   clock_t           s_time       = clock();
   FloatBoundsVector x_optimal    = optimiser->minimise(f, D, g, C);

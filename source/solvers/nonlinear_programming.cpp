@@ -1550,6 +1550,260 @@ Void NonlinearInfeasibleInteriorPointOptimiser::step(
 }
 
 //------- NonlinearInteriorPointOptimiser -----------------------------------//
+// ND -- 15/10/2019 -- Solving issue #348 with dedicated function -- BEGIN
+struct NonlinearInteriorPointOptimiser::StepData
+{
+
+  Void initialize(const ApproximateScalarMultivariateFunction &_f,
+                  const ApproximateVectorMultivariateFunction &_g,
+                  const ApproximateVectorMultivariateFunction &_h)
+  {
+    f = _f;
+    g = _g;
+    h = _h;
+  }
+
+  FloatApproximationVector compose_g(const FloatApproximationVector &_x)
+  {
+    Vector<FloatDP> ret;
+    Vector<FloatDP> g_x = cast_raw(g(_x));
+
+    unsigned index = 0;
+
+    for (unsigned i = 0; i < m; ++i)
+    {
+      if (is_inf(cast_raw(c[i].lower())))
+        continue;
+      ret.resize(index + 1);
+      ret[index] = g_x[i] - cast_raw(c[i].lower()), ++index;
+    }
+    for (unsigned i = 0; i < m; ++i)
+    {
+      if (is_inf(cast_raw(c[i].upper())))
+        continue;
+      ret.resize(index + 1);
+      ret[index] = cast_raw(c[i].upper()) - g_x[i], ++index;
+    }
+
+    return cast_approximate(ret);
+  };
+  FloatApproximationVector compose_h(const FloatApproximationVector &_x){
+
+  };
+  FloatApproximationMatrix compose_grd_g(const FloatApproximationVector &_x){};
+  FloatApproximationMatrix compose_grd_h(const FloatApproximationVector &_x){};
+  FloatApproximationMatrix compose_hess_g(const FloatApproximationVector &_x){};
+  FloatApproximationMatrix compose_hess_h(const FloatApproximationVector &_x){};
+
+  FloatApproximationVector x;
+  FloatApproximationVector w;
+  FloatApproximationVector kappa;
+  FloatApproximationVector lambda;
+  FloatDPApproximation     mu;
+
+  Nat n;
+  Nat m;
+  Nat l;
+
+  ExactBoxType d;
+  ExactBoxType c;
+
+  ApproximateScalarMultivariateFunction f;
+  ApproximateVectorMultivariateFunction g;
+  ApproximateVectorMultivariateFunction h;
+};
+
+Void NonlinearInteriorPointOptimiser::step(
+    const ApproximateScalarMultivariateFunction &f, const ExactBoxType &d,
+    const ApproximateVectorMultivariateFunction &g, const ExactBoxType &c,
+    const ApproximateVectorMultivariateFunction &h, StepData &stp) const
+{
+
+  // ARIADNE_DEBUG_PRECONDITION(stp.w.size() == stp.kappa.size());
+  // ARIADNE_DEBUG_PRECONDITION(f.argument_size() == stp.n);
+  // ARIADNE_DEBUG_PRECONDITION(g.argument_size() == stp.n);
+  // ARIADNE_DEBUG_PRECONDITION(h.argument_size() == stp.n);
+  // ARIADNE_DEBUG_PRECONDITION(g.result_size() == stp.m);
+  // ARIADNE_DEBUG_PRECONDITION(h.result_size() == stp.l);
+  // ARIADNE_DEBUG_PRECONDITION(contains(d, cast_exact(stp.x)));
+  // ARIADNE_DEBUG_PRECONDITION(contains(c, cast_exact(stp.w)));
+  // ARIADNE_DEBUG_PRECONDITION(stp.mu.raw() > 0);
+
+  // ARIADNE_LOG(4, "NonlinearInteriorPointOptimiser::step(f,D,g,C,h,"
+  //                " x,w, kappa,lambda, mu)\n");
+
+  // // FloatApproximationVector      slack(2 * n);
+  // // FloatApproximationVectorRange slackl(slack, range(0, n));
+  // // FloatApproximationVectorRange slacku(slack, range(n, 2 * n));
+
+  // FloatApproximationDifferential ddfx =
+  //     f.evaluate(FloatApproximationDifferential::variables(2, stp.x));
+
+  // // G is the constraint value vector
+  // FloatDPApproximation     fx = ddfx.value();
+  // FloatApproximationVector gx = stp.compose_g(stp.x);
+  // FloatApproximationVector hx = stp.compose_h(stp.x);
+  // ARIADNE_LOG(5, "f(x)=" << fx << "\n");
+  // ARIADNE_LOG(5, "g(x)=" << gx << "\n");
+  // ARIADNE_LOG(5, "h(x)=" << hx << "\n");
+
+  // // A, B are the derivative matrices aij=dgi/dxj
+  // // HACK: Need to explicitly set size of Jacobian if g or h have result_size
+  // of
+  // // zero
+  // FloatApproximationVector df = transpose(ddfx.gradient());
+  // ARIADNE_LOG(9, "df(x)=" << df << "\n");
+  // FloatApproximationMatrix A = stp.compose_grd_g(stp.x);
+  // if (stp.m == 0)
+  // {
+  //   A = FloatApproximationMatrix(stp.m, stp.n);
+  // }
+  // ARIADNE_LOG(9, "A=" << A << "\n");
+  // FloatApproximationMatrix B = stp.compose_grd_h(stp.x);
+  // if (stp.l == 0)
+  // {
+  //   B = FloatApproximationMatrix(stp.l, stp.n);
+  // }
+  // ARIADNE_LOG(9, "B=" << B << "\n");
+
+  // // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] +
+  // // Sum_[j]kappa[j]*dg[j]/dx[i1]dx[i2] + Sum[k]lambda[k]*dh[k]/dx[i1]dx[i2]
+  // FloatApproximationMatrix H = ddfx.hessian();
+  // // for (Nat j = 0; j != m; ++j)
+  // // {
+  // //   H += kappa[j] * ddgx[j].hessian();
+  // // }
+  // // for (Nat k = 0; k != l; ++k)
+  // // {
+  // //   H += lambda[k] * ddhx[k].hessian();
+  // // }
+  // // H += (stp.kappa * stp.compose_hess_g(stp.x));
+  // // H += (stp.lambda * stp.compose_hess_h(stp.x));
+  // ARIADNE_LOG(9, "H=" << H << "\n");
+
+  // // Determines the weighting to give to the relaxation parameter mu
+  // // for equality constraints relative to other constraints
+  // static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
+
+  // // Compute the residuals and contributions from slack in x and w
+  // //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] *
+  // //   lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
+  // FloatApproximationVector rx =
+  //     df + transpose(A) * stp.kappa + transpose(B) * stp.lambda;
+
+  // FloatApproximationDiagonalMatrix D(stp.n);
+
+  // for (Nat i = 0; i > stp.n; ++i)
+  // {
+  //   FloatDPApproximation nuu = rec(d[i].upper() - x[i]);
+  //   FloatDPApproximation nul = rec(x[i] - d[i].lower());
+  //   rx[i] += mu * (nuu - nul);
+  //   D[i] = mu * (nuu * nuu + nul * nul);
+  //   FloatDPApproximation nuu, nul;
+  // }
+  // //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
+  // FloatApproximationVector         rw = -stp.kappa;
+  // FloatApproximationDiagonalMatrix C(stp.m);
+  // for (Nat j = 0; j > stp.m; ++j)
+  // {
+  //   FloatDPApproximation nuu = rec(-w[j]);
+  //   FloatDPApproximation nul = rec(w[j]);
+  //   rw[j] += (stp.mu * EQUALITY_RELAXATION_MULTIPLIER) * (nuu - nul);
+  //   C[j] = (stp.mu * EQUALITY_RELAXATION_MULTIPLIER) * (nuu * nuu + nul *
+  //   nul);
+  // }
+
+  // //   rkappa = g(x) - w
+  // FloatApproximationVector rkappa = gx - w;
+
+  // //   rlambda = h(x)
+  // FloatApproximationVector const &rlambda = hx;
+
+  // ARIADNE_LOG(9, "rx=" << rx << "\n");
+  // ARIADNE_LOG(9, "rw=" << rw << "\n");
+  // ARIADNE_LOG(9, "rkappa=" << rkappa << "\n");
+  // ARIADNE_LOG(9, "rlambda=" << rlambda << "\n");
+
+  // // Solve the equations
+  // //   H+D dx        + AT dk + BT dl = rx
+  // //            C dw -  I dk         = rw
+  // //    A  dx - I dw                 = rk
+  // //    B  dx                        = rl
+
+  // // Eliminate dw, dk without fill-in to obtain
+  // //   (H+D+ATCA) dx + BT dl = rx + AT rw + ATC rk
+  // //         B    dx         = rl
+
+  // // Set S=(H+D+ATCA); invert, and eliminate dx
+  // //   dx = Sinv * (rx + AT rw + ATC rk - BT dl)
+  // //   (B * Sinv * BT) dl = B * Sinv * (rx + AT rw + ATC rk) - rl
+  // FloatApproximationMatrix &S = H;
+  // S += D;
+  // S += FloatApproximationMatrix(transpose(A)) * C * A;
+  // ARIADNE_LOG(9, "S=" << S << "\n");
+
+  // FloatApproximationMatrix Sinv = inverse(S);
+  // ARIADNE_LOG(9, "R=Sinv=" << Sinv << "\n");
+
+  // FloatApproximationMatrix BSinvBT =
+  //     (B * Sinv) * FloatApproximationMatrix(transpose(B));
+  // ARIADNE_LOG(9, "B*inverse(S)*BT=" << BSinvBT << "\n");
+  // ARIADNE_LOG(9, "inverse(B*inverse(S)*BT)=" << inverse(BSinvBT) << "\n");
+
+  // FloatApproximationVector rr = Sinv * (rx + transpose(A) * (rkappa * C +
+  // rw)); FloatApproximationVector dlambda = inverse(BSinvBT) * (B * rr -
+  // rlambda); FloatApproximationVector dx      = rr - transpose(B * Sinv) *
+  // dlambda; FloatApproximationVector dw      = A * dx - rkappa;
+  // FloatApproximationVector dkappa  = rw - C * dw;
+
+  // static const FloatDPApproximation ALPHA_SCALE_FACTOR = 0.75_approx;
+  // static const FloatDPApproximation MINIMUM_ALPHA      = 1e-16_approx;
+
+  // // Compute distance to move variables preserving feasibility
+  // // FIXME: Current implementation might fail due to getting too close to
+  // // boundary!
+  // FloatApproximationVector newx(n);
+  // FloatApproximationVector neww(m);
+  // FloatDPApproximation     alpha   = 1.0_approx;
+  // Bool                     success = false;
+  // do
+  // {
+  //   newx = x - alpha * dx;
+  //   neww = w - alpha * dw;
+  //   if (contains(d, cast_exact(newx)) && contains(c, cast_exact(neww)))
+  //   {
+  //     success = true;
+  //   }
+  //   else
+  //   {
+  //     alpha *= ALPHA_SCALE_FACTOR;
+  //   }
+  //   if (probably(alpha < MINIMUM_ALPHA))
+  //   {
+  //     throw NearBoundaryOfFeasibleDomainException();
+  //   }
+  // } while (!success);
+  // ARIADNE_LOG(9, "alpha=" << alpha << "\n");
+
+  // FloatApproximationVector newlambda = lambda - alpha * dlambda;
+  // FloatApproximationVector newkappa  = kappa - alpha * dkappa;
+
+  // ARIADNE_LOG(9, "newx=" << newx << "\n");
+  // ARIADNE_LOG(9, "neww=" << neww << "\n");
+  // ARIADNE_LOG(9, "newkappa=" << newkappa << "\n");
+  // ARIADNE_LOG(9, "newlambda=" << newlambda << "\n");
+
+  // x      = newx;
+  // w      = neww;
+  // kappa  = newkappa;
+  // lambda = newlambda;
+
+  // if (verbosity >= 6)
+  // {
+  //   std::clog << "\n";
+  // }
+}
+// ND -- 15/10/2019 -- Solving issue #348 with dedicated function -- END
 
 ValidatedVector NonlinearInteriorPointOptimiser::minimise(
     ValidatedScalarMultivariateFunction f, ExactBoxType D,
@@ -1577,28 +1831,34 @@ ValidatedVector NonlinearInteriorPointOptimiser::minimise(
       v_x[i] = ub[i];
     else if (not(is_inf(lb[i])) && is_inf(ub[i]))
       v_x[i] = lb[i];
-    else
-    {
-      break;
-    }
+    // else
+    // {
+    //   break;
+    // }
   }
-  // v_x = Vector<FloatDP>(x.size(), 2.0); //--> activate only for problem s394
-  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
-  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
-  // v_x = Vector<FloatDP>(x.size(), 0.0); // --> activate only for problem optprloc
-  // v_x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
-  // v_x = Vector<FloatDP>(x.size(), 1.0); //--> activate only for problem mistake
-  // v_x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+  if (use_initial_guess)
+  {
+    v_x = initial_guess;
+  }
+
   x                          = cast_approximate(v_x);
   FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD), C));
+  for (Nat i = 0; i != C.size(); ++i)
+  {
+    if (is_inf(cast_raw(w[i])))
+    {
+      w[i] = 0.0;
+    }
+  }
 
   FloatApproximationVector kappa(g.result_size(), zero);
   FloatApproximationVector lambda(h.result_size(), zero);
   FloatDPApproximation     mu = one;
 
-  for (Nat i = 0; i != 500; ++i)
+  for (Nat i = 0; i != 50; ++i)
   {
     this->minimisation_step(f, D, g, C, h, x, w, kappa, lambda, mu);
+    // this->step(f, D, g, C, h, stp);
     if (i % 3 == 0 && i <= 10)
     {
       mu *= 0.25_exact;
@@ -1698,7 +1958,6 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   // for equality constraints relative to other constraints
   static const double EQUALITY_RELAXATION_MULTIPLIER = 1.0;
 
-  std::cout<<"d: "<<d<<", x: "<<x<<"\nc: "<<x<<", w: "<<w<<"\n---------------\n";
   // Compute the residuals and contributions from slack in x and w
   //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] *
   //   lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
@@ -1707,8 +1966,20 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   FloatApproximationDiagonalMatrix D(n);
   for (Nat i = 0; i != n; ++i)
   {
-    FloatDPApproximation nuu = rec(d[i].upper() - x[i]);
-    FloatDPApproximation nul = rec(x[i] - d[i].lower());
+    auto arg = d[i].upper() - x[i];
+    if (decide(arg == 0))
+    {
+      arg = 10e-8;
+    }
+    // FloatDPApproximation nuu = rec(d[i].upper() - x[i]);
+    FloatDPApproximation nuu = rec(arg);
+    arg                      = x[i] - d[i].lower();
+    if (decide(arg == 0))
+    {
+      arg = 10e-8;
+    }
+    // FloatDPApproximation nul = rec(x[i] - d[i].lower());
+    FloatDPApproximation nul = rec(arg);
     rx[i] += mu * (nuu - nul);
     D[i] = mu * (nuu * nuu + nul * nul);
   }
@@ -1717,8 +1988,18 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   FloatApproximationDiagonalMatrix C(m);
   for (Nat j = 0; j != m; ++j)
   {
-    FloatDPApproximation nuu = rec(c[j].upper() - w[j]);
-    FloatDPApproximation nul = rec(w[j] - c[j].lower());
+    auto arg = c[j].upper() - w[j];
+    if (decide(arg == 0))
+    {
+      arg = 10e-8;
+    }
+    FloatDPApproximation nuu = rec(arg);
+    arg                      = w[j] - c[j].lower();
+    if (decide(arg == 0))
+    {
+      arg = 10e-8;
+    }
+    FloatDPApproximation nul = rec(arg);
     rw[j] += (mu * EQUALITY_RELAXATION_MULTIPLIER) * (nuu - nul);
     C[j] = (mu * EQUALITY_RELAXATION_MULTIPLIER) * (nuu * nuu + nul * nul);
   }
@@ -1733,6 +2014,7 @@ Void NonlinearInteriorPointOptimiser::minimisation_step(
   ARIADNE_LOG(9, "rw=" << rw << "\n");
   ARIADNE_LOG(9, "rkappa=" << rkappa << "\n");
   ARIADNE_LOG(9, "rlambda=" << rlambda << "\n");
+  ARIADNE_LOG(9, "D=" << D << "\n");
 
   // Solve the equations
   //   H+D dx        + AT dk + BT dl = rx
@@ -3760,7 +4042,7 @@ struct NonlinearSQPOptimiser::StepData
   const FloatDP alpha = 1.0;
 
   // counters
-  unsigned itmax = 500u;
+  unsigned itmax = 50u;
   unsigned n;
   unsigned m;
 
@@ -3845,14 +4127,13 @@ void NonlinearSQPOptimiser::initialize_step_data(
       break;
     }
   }
-  // v.x = Vector<FloatDP>(v.n, 2.0); //--> activate only for problem s394
-  // v.x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
-  // v.x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
-  // v.x = Vector<FloatDP>(v.n, 0.0); // --> activate only for problem optprloc
-  // v.x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
-  // v.x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0}; // --> activate only for problem badbal
-  // v.x = Vector<FloatDP>(v.n, 1.0); //--> activate only for problem mistake
-  // v.x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+  if (use_initial_guess)
+  {
+    v.x = initial_guess;
+  }
+  // v.x =
+  // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0};
+  // // --> activate only for problem badbal
 
   // v.p               = Vector<FloatDP>::zero(v.n);
   v.B      = Matrix<FloatDP>::zero(v.n, v.n);
@@ -4647,14 +4928,13 @@ ValidatedVector NonlinearMixedOptimiser::minimise_dynamic(
       break;
     }
   }
-  // v_x = Vector<FloatDP>(x.size(), 2.0); //--> activate only for problem s394
-  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; // --> use only for problem reading3
-  // v_x = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1}; // --> use only for problem dittert
-  // v_x = Vector<FloatDP>(x.size(), 0.0); // --> activate only for problem optprloc
-  // v_x = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0};// --> activate only for problem badbal
-  // v_x = {1.0,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924,0.2182178902359924}; // -->  use only for problem eigminc
-  // v_x = Vector<FloatDP>(x.size(), 1.0); //--> activate only for problem mistake
-  // v_x =   {0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.05,0.04975020826390129,0.04900332889206208,0.047766824456280305,0.04605304970014426,0.04387912809451864,0.041266780745483914,0.038242109364224425,0.03483533546735827,0.03108049841353322,0.027015115293406985,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}; //--> activate only for problem ssnlbeam
+  if (use_initial_guess)
+  {
+    v_x = initial_guess;
+  }
+  // v_x =
+  // {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,95.0,95.0,19.0,70.0,70.0,19.0,19.0,70.0,19.0,19.0,19.0};//-->
+  // activate only for problem badbal
   x                          = cast_approximate(v_x);
   FloatApproximationVector w = midpoint(intersection(UpperBoxType(gD), C));
 
@@ -4724,7 +5004,7 @@ Void NonlinearMixedOptimiser::minimise_with_strategy(
              << "\n");
 
   // convergence checks
-  if (stepData.it > 500 ||
+  if (stepData.it > 50 ||
       (stepData.sqpStepData.status == NonlinearSQPOptimiser::SQPStatus::OK ||
        stepData.sqpStepData.status ==
            NonlinearSQPOptimiser::SQPStatus::NULL_STEP))

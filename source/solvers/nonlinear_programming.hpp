@@ -98,9 +98,11 @@ public:
 class OptimiserInterface
 {
 public:
-  std::string problem_name;
-  unsigned    complexity_order;
-  bool        active_set_high = false;
+  std::string     problem_name;
+  unsigned        complexity_order;
+  bool            active_set_high = false;
+  Vector<FloatDP> initial_guess;
+  bool            use_initial_guess = false;
   //! \brief Virtual destructor.
   virtual ~OptimiserInterface() = default;
   //! \brief Create a dynamically-allocated copy.
@@ -346,6 +348,15 @@ public:
   virtual ValidatedKleenean feasible(ExactBoxType                        D,
                                      ValidatedVectorMultivariateFunction g,
                                      ExactBoxType C) const;
+
+  // ND -- 15/10/2019 -- Solving issue #348 with dedicated function -- BEGIN
+  struct StepData;
+  //! Take a step on a descendent direction of function f s.t. g
+  Void
+  step(const ApproximateScalarMultivariateFunction &f, const ExactBoxType &D,
+       const ApproximateVectorMultivariateFunction &g, const ExactBoxType &C,
+       const ApproximateVectorMultivariateFunction &h, StepData &stp) const;
+  // ND -- 15/10/2019 -- Solving issue #348 with dedicated function -- END
 
   //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in
   //! D\f$ using a nonlinear feasibility test, hotstarting the method with the

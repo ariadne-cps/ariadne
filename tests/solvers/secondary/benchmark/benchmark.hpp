@@ -15,3 +15,5 @@
 #include"s394/s394.i.hpp"
 #include"smmpsf/smmpsf.i.hpp"
 #include"ssnlbeam/ssnlbeam.i.hpp"
+#include"avion2/avion2.i.hpp"
+#include"degenlpa/degenlpa.i.hpp"

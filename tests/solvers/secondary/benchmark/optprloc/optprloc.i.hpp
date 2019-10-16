@@ -208,6 +208,9 @@ Void TestOptimiser::benchmark_optprloc()
       {-inf, 0.0001},
   };
 
+  optimiser->initial_guess     = Vector<FloatDP>(x.size(), 0.0);
+  optimiser->use_initial_guess = true;
+
   float             elapsed_time = 0;
   clock_t           s_time       = clock();
   FloatBoundsVector x_optimal    = optimiser->minimise(f, D, g, C);

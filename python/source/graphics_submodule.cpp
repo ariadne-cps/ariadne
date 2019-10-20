@@ -59,7 +59,6 @@ Void export_figure(pybind11::module& module)
     figure_class.def("draw",(Figure&(Figure::*)(const RealBox&))&Figure::draw, reference_internal);
     figure_class.def("draw",(Figure&(Figure::*)(const ApproximateBoxType&))&Figure::draw, reference_internal);
     figure_class.def("clear",&Figure::clear, reference_internal);
-    figure_class.def("display",&Figure::display);
     figure_class.def("write",(Void(Figure::*)(const char*)const)&Figure::write);
     figure_class.def("write",(Void(Figure::*)(const char*,Nat,Nat)const)&Figure::write);
 }

@@ -106,14 +106,6 @@ else()
     message(WARNING "Unable to find Cairo. You will not be able to use graphics.")
 endif()
 
-find_package(GTK2)
-if(GTK2_FOUND)
-    set(HAVE_GTK2_H ON)
-    include_directories(SYSTEM ${GTK2_INCLUDE_DIRS})
-else()
-    message(WARNING "Unable to find GTK2. You will not be able to use graphics windows.")
-endif()
-
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/source)
@@ -202,11 +194,6 @@ endif()
 if(CAIRO_FOUND)
     target_link_libraries(ariadne ${CAIRO_LIBRARIES})
     target_link_libraries(ariadne-kernel ${CAIRO_LIBRARIES})
-endif()
-
-if(GTK2_FOUND)
-    target_link_libraries(ariadne ${GTK2_LIBRARIES})
-    target_link_libraries(ariadne-kernel ${GTK2_LIBRARIES})
 endif()
 
 install(TARGETS ariadne DESTINATION lib)

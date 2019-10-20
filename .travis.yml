@@ -12,15 +12,15 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.14 + AppleClang 10 + Python 3 [NoGTK]
+    - name: macOS 10.14 + AppleClang 10 + Python 3
       os: osx
       osx_image: xcode11
-      env: COMPILER=clang++ PYTHON=3 DISABLE_GTK=ON
+      env: COMPILER=clang++ PYTHON=3
       
-#    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo, NoGTK]
+#    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo]
 #      os: osx
 #      osx_image: xcode11
-#      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON DISABLE_GTK=ON
+#      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON
 
     - name: Ubuntu 18.04 + Clang 6 + Python 3
       os: linux
@@ -40,9 +40,8 @@ before_install:
       NPROC="sysctl -n hw.ncpu"
       if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python'; else PYTHON_LIB=python@2; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
       brew cask uninstall --force oclint
-      if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=gtk; else GTK_PKG=""; fi
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
-      brew install gcc@8 $PYTHON_LIB mpfr gmp $GTK_PKG $CAIRO_PKG
+      brew install gcc@8 $PYTHON_LIB mpfr gmp $CAIRO_PKG
       export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
       sudo easy_install pip
       sudo pip$PYTHON install --upgrade pip
@@ -52,10 +51,9 @@ before_install:
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       NPROC=nproc
       if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python3'; else PYTHON_LIB=python; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --configdir)/libpython2.7.so -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
-      if [[ -z "$DISABLE_GTK" ]]; then GTK_PKG=libgtk2.0-dev; else GTK_PKG=""; fi
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi
       sudo apt update
-      sudo apt install -y cmake pkg-config lcov $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $GTK_PKG $CAIRO_PKG libmpfr-dev
+      sudo apt install -y cmake pkg-config lcov $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $CAIRO_PKG libmpfr-dev
       sudo pip$PYTHON install coverage pytest
     fi
 

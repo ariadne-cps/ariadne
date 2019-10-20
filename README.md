@@ -35,6 +35,12 @@ Additional Aptitude package required for the Python interface: `python3-dev` or 
 
 2. Install Homebrew from http://brew.sh/ . Homebrew packages required: `cmake git mpfr gmp cairo`
 
+For Cairo support, you may need to set up a permanent variable for the path of pkgconfig by adding the following line in your `~\.bash_profile`:
+
+```
+export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
+```
+
 #### Building
 
 To build the library in a clean way, it is preferable that you set up a build subdirectory:

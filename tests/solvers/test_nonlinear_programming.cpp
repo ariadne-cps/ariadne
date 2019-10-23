@@ -41,11 +41,6 @@
 using namespace std;
 using namespace Ariadne;
 
-#define M_PI 3.14159265358979323846 /* pi */
-#define RED "\033[1;31m\n"
-#define GREEN "\033[1;32m\n"
-#define WHITE "\033[0m\n"
-
 class TestOptimiser
 {
 private:

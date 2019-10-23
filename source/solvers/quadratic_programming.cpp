@@ -553,6 +553,8 @@ ASMQPSolver::_minimise(struct StepData &v, int &caller_staus) const {
 
   FloatDP f_obj = ((0.5 * (transpose(v.x) * v.H * v.x)) + transpose(v.x) * v.d);
 
+  std::cout<<"\tSize of working set at optimum: "<<v.W.size()<<"\n";
+
   return make_tuple(f_obj, v.x, lambda);
 }
 

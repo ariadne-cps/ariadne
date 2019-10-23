@@ -1,13 +1,7 @@
 #pragma once
 
-#include <bits/stdc++.h>
-
 #if defined HAVE_EIGEN3_H
 #include <eigen3/Eigen/Dense>
-#endif
-
-#if defined HAVE_GLPK_H
-#include <glpk.h>
 #endif
 
 namespace Ariadne
@@ -20,13 +14,6 @@ public:
   }
 };
 
-#if defined HAVE_GLPK_H
-//  perform simplex algorithm to find minimum with only lower constriants
-//    using glpk library
-template <class X>
-Vector<X> lp_min(const Vector<X> &C, const Matrix<X> &A, const Vector<X> &b,
-                 const Vector<X> &lb, int &errnum);
-#endif
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting.
 // The matrix Q is built up as a composition of elementary Householder
@@ -81,4 +68,4 @@ template <class X> Matrix<X> eigen_chol(const Matrix<X> &A);
 
 } // namespace Ariadne
 
-#include "impl/AlgebraAddOn.i.hpp"
+#include "eigen3_interface.impl.hpp"

@@ -114,7 +114,7 @@ else()
     message(WARNING "Unable to find GTK2. You will not be able to use graphics windows.")
 endif()
 
-# ND -- 28/12/2018 -- External library dependencies -- begin
+# ND -- 28/12/2018 -- External library dependencies -- BEGIN
 find_package(Eigen3)
 if(EIGEN3_FOUND)
     set(HAVE_EIGEN3_H ON)
@@ -130,22 +130,7 @@ if(GLPK_FOUND)
 else()
     message(WARNING "Unable to find GLPK. Related functionality will be disabled.")
 endif()
-
-# set(GLPK_INCLUDE_DIRS "/usr/local/include/glpk/include")
-# set(GLPK_LIBRARY      "/usr/local/include/glpk/lib/libglpk.so")
-
-# if(NOT EXISTS ${GLPK_INCLUDE_DIRS})
-#   MESSAGE(ERROR "Cannot find glpk lib in ${GLPK_INCLUDE_DIRS}")
-# endif()
-# if(NOT EXISTS ${GLPK_LIBRARY})
-#   MESSAGE(ERROR "Cannot find glpk lib object in ${GLPK_LIBRARY}")
-# endif()
-
-# include_directories("${GLPK_INCLUDE_DIRS}")
-
-include_directories("lib/")
-add_subdirectory("lib")
-# ND -- 28/12/2018 -- External library dependencies -- end
+# ND -- 28/12/2018 -- External library dependencies -- END
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR}/source/config.hpp)
 
@@ -243,11 +228,17 @@ if(GTK2_FOUND)
     target_link_libraries(ariadne-kernel ${GTK2_LIBRARIES})
 endif()
 
+# ND -- 22/10/2019 -- GLPK and Eigen3 library -- BEGIN
 if(GLPK_FOUND)
-    target_link_libraries(ariadne ${GLPK_LIBRARIES})
-    target_link_libraries(ariadne-kernel ${GLPK_LIBRARIES})
+    target_link_libraries(ariadne ${GLPK_LIBRARIES} glpk_interface)
+    target_link_libraries(ariadne-kernel ${GLPK_LIBRARIES} glpk_interface)
 endif()
 
+if(EIGEN3_FOUND)
+    target_link_libraries(ariadne eigen3_interface)
+    target_link_libraries(ariadne-kernel eigen3_interface)
+endif()
+# ND -- 22/10/2019 -- GLPK and Eigen3 library -- END
 
 install(TARGETS ariadne DESTINATION lib)
 install(DIRECTORY source/ DESTINATION include/ariadne FILES_MATCHING PATTERN "*.hpp")

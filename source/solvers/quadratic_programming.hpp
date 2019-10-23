@@ -36,7 +36,9 @@
 #include "../utility/tuple.hpp"
 #include "linear_programming.hpp"
 
-#include "AlgebraAddOn.hpp"
+#include "../external/eigen3_interface.hpp"
+#include "../external/glpk_interface.hpp"
+
 
 namespace Ariadne {
 

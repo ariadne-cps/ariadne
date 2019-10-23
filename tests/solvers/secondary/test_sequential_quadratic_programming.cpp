@@ -51,25 +51,27 @@ private:
    ** -> x not contained in D
    */
 public:
-  TestOptimiser(const OptimiserInterface &opt) : optimiser(opt.clone()) {}
+  TestOptimiser(const OptimiserInterface& opt)
+    : optimiser(opt.clone())
+  {}
   Void test()
   {
-    // ARIADNE_TEST_CALL(benchmark_allinit());     //**
+    ARIADNE_TEST_CALL(benchmark_allinit());
     // ARIADNE_TEST_CALL(benchmark_extrasim());
-    // ARIADNE_TEST_CALL(benchmark_hs54());        //**
+    // ARIADNE_TEST_CALL(benchmark_hs54()); //**
     // ARIADNE_TEST_CALL(benchmark_booth());
     // ARIADNE_TEST_CALL(benchmark_himmelbc());
     // ARIADNE_TEST_CALL(benchmark_hs44());
     // ARIADNE_TEST_CALL(benchmark_s394());
     // ARIADNE_TEST_CALL(benchmark_dualc2());
-    // ARIADNE_TEST_CALL(benchmark_loadbal());     //*
-    // ARIADNE_TEST_CALL(benchmark_mistake());     //*
-    // ARIADNE_TEST_CALL(benchmark_ssnlbeam());    //*
-    // ARIADNE_TEST_CALL(benchmark_optprloc());    //**
-    // ARIADNE_TEST_CALL(benchmark_eigminc());     //*
-    // ARIADNE_TEST_CALL(benchmark_smmpsf());      //*
-    // ARIADNE_TEST_CALL(benchmark_reading3());    //*
-    // ARIADNE_TEST_CALL(benchmark_dittert());     //*
+    // ARIADNE_TEST_CALL(benchmark_loadbal());  //*
+    // ARIADNE_TEST_CALL(benchmark_mistake());  //*
+    // ARIADNE_TEST_CALL(benchmark_ssnlbeam()); //*
+    // ARIADNE_TEST_CALL(benchmark_optprloc()); //**
+    // ARIADNE_TEST_CALL(benchmark_eigminc());  //*
+    // ARIADNE_TEST_CALL(benchmark_smmpsf());   //*
+    // ARIADNE_TEST_CALL(benchmark_reading3()); //*
+    // ARIADNE_TEST_CALL(benchmark_dittert());  //*
     // ARIADNE_TEST_CALL(benchmark_avion2());
     // ARIADNE_TEST_CALL(benchmark_degenlpa());
   }
@@ -387,16 +389,19 @@ public:
   Void benchmark_avion2();
 };
 
+#if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
 #include "benchmark/benchmark.hpp"
+#endif
 
-Int main(Int argc, const char *argv[])
+Int
+main(Int argc, const char* argv[])
 {
   Nat optimiser_verbosity = get_verbosity(argc, argv);
 
-  std::cout << "NonlinearInteriorPointOptimiser\n";
-  NonlinearInteriorPointOptimiser nlo;
-  nlo.verbosity = optimiser_verbosity;
-  TestOptimiser(nlo).test();
+  // std::cout << "NonlinearInteriorPointOptimiser\n";
+  // NonlinearInteriorPointOptimiser nlo;
+  // nlo.verbosity = optimiser_verbosity;
+  // TestOptimiser(nlo).test();
   // return ARIADNE_TEST_FAILURES;
 
   // NonlinearInfeasibleInteriorPointOptimiser nlio;
@@ -410,7 +415,7 @@ Int main(Int argc, const char *argv[])
   NonlinearSQPOptimiser nlsqp;
   nlsqp.verbosity = optimiser_verbosity;
   TestOptimiser(nlsqp).test();
-  // return ARIADNE_TEST_FAILURES;
+  return ARIADNE_TEST_FAILURES;
 
   std::cout << "NonlinearMixedOptimiser\n";
   NonlinearMixedOptimiser nlhop;

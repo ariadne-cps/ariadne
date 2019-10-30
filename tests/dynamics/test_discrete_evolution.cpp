@@ -111,7 +111,7 @@ Void TestMapEvolver::test() const
 
     // Set up the evaluators
     MapEvolver evolver(henon);
-    evolver.configuration().maximum_enclosure_radius(enclosure_radius);
+    evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
 
     // Compute the reachable sets
     ListSet<EnclosureType> evolve_set,reach_set;
@@ -123,6 +123,7 @@ Void TestMapEvolver::test() const
 
     // Print the intial, evolve and reach sets
     Figure fig;
+    fig.set_bounding_box({{-4,2},{-3,3}});
     fig << line_style(true) << fill_colour(cyan) << reach_set;
     fig << fill_colour(yellow) << evolve_set;
     fig << fill_colour(blue) << initial_set;

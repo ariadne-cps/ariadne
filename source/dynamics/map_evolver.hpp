@@ -162,10 +162,22 @@ class MapEvolverConfiguration : public ConfigurationInterface
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType _maximum_enclosure_radius;
 
+    //! \brief Allow subdivisions in upper evolution.
+    Bool _enable_subdivisions;
+
+    //! \brief Allow premature termination of lower evolution.
+    Bool _enable_premature_termination;
+
   public:
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+    const Bool& enable_subdivisions() const { return _enable_subdivisions; }
+    Void set_enable_subdivisions(const Bool value) { _enable_subdivisions = value; }
+
+    const Bool& enable_premature_termination() const { return _enable_premature_termination; }
+    Void set_enable_premature_termination(const Bool value) { _enable_premature_termination = value; }
 
   public:
 

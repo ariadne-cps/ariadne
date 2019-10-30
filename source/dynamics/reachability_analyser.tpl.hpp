@@ -736,6 +736,7 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
     set_lock_to_grid_time(1);
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
+    set_bounding_domain(BoundingDomainType(_analyser.system().dimension(),{-1,+1}));
     set_grid(Grid(_analyser.system().dimension()));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }

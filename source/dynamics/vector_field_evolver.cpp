@@ -288,10 +288,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
-    maximum_step_size(1);
-    maximum_enclosure_radius(100.0);
-    enable_reconditioning(true);
-    maximum_spacial_error(1e-2);
+    set_maximum_step_size(1);
+    set_maximum_enclosure_radius(100.0);
+    set_enable_reconditioning(true);
+    set_maximum_spacial_error(1e-2);
 }
 
 

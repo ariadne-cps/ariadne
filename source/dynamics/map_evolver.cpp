@@ -57,10 +57,12 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 namespace Ariadne {
 
-// Allow subdivisions in upper evolution
-const Bool ENABLE_SUBDIVISIONS = false;
-// Allow premature termination of lower evolution
-const Bool ENABLE_PREMATURE_TERMINATION = false;
+// The maximum allowable radius of a basic set.
+MapEvolverConfiguration::RealType DEFAULT_MAXIMUM_ENCLOSURE_RADIUS = 100;
+// Allow subdivisions in upper evolution.
+const Bool DEFAULT_ENABLE_SUBDIVISIONS = false;
+// Allow premature termination of lower evolution.
+const Bool DEFAULT_ENABLE_PREMATURE_TERMINATION = false;
 
 using std::shared_ptr;
 
@@ -140,7 +142,7 @@ _evolution(EnclosureListType& final_sets,
         FloatDPUpperBound initial_set_radius=initial_enclosure.bounding_box().radius();
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
-        } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
+        } else if(semantics == Semantics::UPPER && this->_configuration->enable_subdivisions()
                   && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
@@ -148,7 +150,7 @@ _evolution(EnclosureListType& final_sets,
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
-        } else if(semantics == Semantics::LOWER && ENABLE_PREMATURE_TERMINATION && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
+        } else if(semantics == Semantics::LOWER && this->_configuration->enable_premature_termination() && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             ARIADNE_WARN("Terminating lower evolution at time " << initial_time
                          << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {
@@ -213,7 +215,9 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 MapEvolverConfiguration::MapEvolverConfiguration()
 {
-    maximum_enclosure_radius(100.0);
+    set_maximum_enclosure_radius(DEFAULT_MAXIMUM_ENCLOSURE_RADIUS);
+    set_enable_subdivisions(DEFAULT_ENABLE_SUBDIVISIONS);
+    set_enable_premature_termination(DEFAULT_ENABLE_PREMATURE_TERMINATION);
 }
 
 

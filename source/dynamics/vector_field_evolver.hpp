@@ -176,17 +176,17 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
   public:
 
     const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
+    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
+    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
-    Void enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
+    Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
 
   public:
 

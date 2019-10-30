@@ -41,9 +41,9 @@ int main()
     //integrator.set_maximum_step_size(0.02);
 
     VectorFieldEvolver evolver(dynamics,integrator);
-    evolver.configuration().maximum_enclosure_radius(1.0);
-    evolver.configuration().maximum_step_size(0.02);
-    evolver.configuration().maximum_spacial_error(1e-6);
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(0.02);
+    evolver.configuration().set_maximum_spacial_error(1e-6);
     evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 

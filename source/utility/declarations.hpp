@@ -98,6 +98,7 @@ template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
+template<class X> class ElementaryAlgebra;
 
 template<class X> class Point;
 

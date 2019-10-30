@@ -33,13 +33,16 @@
 
 namespace Ariadne {
 
+template<class X> class DifferentialFactory;
+
 //! \ingroup DifferentiationModule
 //! \brief A class representing the value and derivative of a scalar quantity
 //! depending on a single argument.
 template<class X>
 class UnivariateFirstDifferential
     : public DispatchTranscendentalAlgebraOperations<UnivariateFirstDifferential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperators<UnivariateFirstDifferential<X>>
+    , public DispatchLatticeAlgebraOperations<UnivariateFirstDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<UnivariateFirstDifferential<X>>
 {
   public:
     X _value;
@@ -105,6 +108,8 @@ class UnivariateFirstDifferential
     //! \brief Set all coefficients to zero.
     Void clear() { this->_value=0; this->_gradient=0; }
   public:
+    friend DifferentialFactory<X> factory(UnivariateFirstDifferential<X> const& dx) {
+        return DifferentialFactory<X>(dx.value().precision()); }
     friend OutputStream& operator<<(OutputStream& os, const UnivariateFirstDifferential<X>& x) {
         os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
         os << x._value << "; " << x._gradient;
@@ -222,6 +227,8 @@ template<class X> struct AlgebraOperations<UnivariateFirstDifferential<X>,X> {
 template<class X>
 class UnivariateSecondDifferential
     : public DispatchTranscendentalAlgebraOperations<UnivariateSecondDifferential<X>,X>
+    , public DispatchLatticeAlgebraOperations<UnivariateSecondDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<UnivariateSecondDifferential<X>>
 {
   public:
     X _value;
@@ -258,6 +265,8 @@ class UnivariateSecondDifferential
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     UnivariateSecondDifferential<X>& operator=(const X& c) {
         _value=c; _gradient=nul(c); _half_hessian=nul(c); return *this; }
+    template<class W, EnableIf<IsAssignable<X,W>> =dummy>
+        UnivariateSecondDifferential<X>& operator=(const W& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static UnivariateSecondDifferential<X> constant(const X& c) {
@@ -297,6 +306,9 @@ class UnivariateSecondDifferential
     //! \brief Set all coefficients to zero.
     Void clear() { (*this)=nul(this->_value); }
   public:
+    friend DifferentialFactory<X> factory(UnivariateSecondDifferential<X> const& dx) {
+        return DifferentialFactory<X>(dx.value().precision()); }
+
     friend UnivariateSecondDifferential<X> compose(UnivariateSecondDifferential<X> const& df, UnivariateSecondDifferential<X> dg) {
         dg._half_hessian *= df._gradient;
         dg._half_hessian += df._half_hessian * sqr(dg._gradient);
@@ -310,29 +322,12 @@ class UnivariateSecondDifferential
         return os << " }";
     }
   public:
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator+(UnivariateSecondDifferential<X> x, const R& c) { x._value+=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator+(R const& c, UnivariateSecondDifferential<X> x) { x._value+=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator-(UnivariateSecondDifferential<X> x, const R& c) { x._value-=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator-(R const& c, UnivariateSecondDifferential<X> x) { x._value-=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator*(UnivariateSecondDifferential<X> x, const R& c) {
-            x._value*=c; x._gradient*=c; x._half_hessian*=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator*(R const& c, UnivariateSecondDifferential<X> x) {
-            x._value*=c; x._gradient*=c; x._half_hessian*=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator/(UnivariateSecondDifferential<X> x, const R& c) {
-            x._value/=c; x._gradient/=c; x._half_hessian/=c; return std::move(x); }
-    template<class R> friend EnableIfNumericType<R,UnivariateSecondDifferential<X>>
-        operator/(R const& c, UnivariateSecondDifferential<X> x) {
-            x._value/=c; x._gradient/=c; x._half_hessian/=c; return std::move(x); }
-  public:
-    friend UnivariateSecondDifferential<X> abs(const UnivariateSecondDifferential<X>& x) {
-        return AlgebraOperations<UnivariateSecondDifferential<X>,X>::apply(Abs(),x); }
+    typedef Number<Paradigm<X>> Y;
+    friend UnivariateSecondDifferential<X> max(const UnivariateSecondDifferential<X>& x1, const Y& c2) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> min(const UnivariateSecondDifferential<X>& x1, const Y& c2) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> max(const Y& c1, const UnivariateSecondDifferential<X>& x2) { ARIADNE_NOT_IMPLEMENTED; }
+    friend UnivariateSecondDifferential<X> min(const Y& c1, const UnivariateSecondDifferential<X>& x2) { ARIADNE_NOT_IMPLEMENTED; }
+
     friend decltype(auto) operator>=(const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y) {
         return x._value>=y._value; }
     friend decltype(auto) operator<=(const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y) {
@@ -378,13 +373,13 @@ template<class X> struct AlgebraOperations<UnivariateSecondDifferential<X>,X> {
         return UnivariateSecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian); }
 
     static UnivariateSecondDifferential<X> apply(Min, const UnivariateSecondDifferential<X>& x1, const UnivariateSecondDifferential<X>& x2) {
-        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(decide(x1.value()==x2.value())) {
             ARIADNE_THROW(std::runtime_error,"min(UnivariateSecondDifferential<X> x1, UnivariateSecondDifferential<X> x2)","x1[0]==x2[0]"); }
-        return x1.value()<x2.value() ? x1 : x2; }
+        return decide(x1.value()<x2.value()) ? x1 : x2; }
     static UnivariateSecondDifferential<X> apply(Max, const UnivariateSecondDifferential<X>& x1,const UnivariateSecondDifferential<X>& x2) {
-        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(x1.value()==x2.value()) {
+        ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2); if(decide(x1.value()==x2.value())) {
             ARIADNE_THROW(std::runtime_error,"max(UnivariateSecondDifferential<X> x1, UnivariateSecondDifferential<X> x2)","x1[0]==x2[0]"); }
-        return x1.value()>x2.value() ? x1 : x2; }
+        return decide(x1.value()>x2.value()) ? x1 : x2; }
     static UnivariateSecondDifferential<X> apply(Abs, const UnivariateSecondDifferential<X>& x) {
         if(decide(x.value()==0)) {
             ARIADNE_THROW(std::runtime_error,"abs(UnivariateSecondDifferential<X> x)","x[0]==0"); }
@@ -432,7 +427,6 @@ template<class X> struct AlgebraOperations<UnivariateSecondDifferential<X>,X> {
         X atan_val = atan(x._value); X atan_deriv = rec(1+sqr(x._value)); X atan_second_deriv = -2*x._value*sqr(atan_deriv);
         return UnivariateSecondDifferential<X>( atan_val, atan_deriv*x._gradient, atan_deriv*x._half_hessian+hlf(atan_second_deriv)*sqr(x._gradient) ); }
 };
-
 
 
 

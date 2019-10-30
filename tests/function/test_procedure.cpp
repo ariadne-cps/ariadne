@@ -114,6 +114,8 @@ Void TestProcedure::test_construct_from_expansion()
         Procedure<ApproximateNumber> p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<FloatDPApproximation> x({2.0,3.0},pr);
+        ARIADNE_TEST_PRINT(simple_evaluate(e,x));
+        ARIADNE_TEST_PRINT(evaluate(p,x));
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
@@ -130,15 +132,15 @@ Void TestProcedure::test_construct_from_expansion()
 
 Void TestProcedure::test_evaluate()
 {
-    ApproximateProcedure p(argument_size=2u);
-    p.new_unary_instruction(OperatorCode::IND,0ul);
-    p.new_unary_instruction(OperatorCode::IND,1ul);
-    p.new_graded_instruction(OperatorCode::POW,0ul,2);
-    p.new_unary_instruction(OperatorCode::SQR,1ul);
-    p.new_binary_instruction(OperatorCode::ADD,2ul,3ul);
+    ApproximateProcedure p(2);
+    p.new_instruction(Var(),0ul);
+    p.new_instruction(Var(),1ul);
+    p.new_instruction(Pow(),0ul,2);
+    p.new_instruction(Sqr(),1ul);
+    p.new_instruction(Add(),2ul,3ul);
     p.new_constant(9.0);
-    p.new_scalar_instruction(OperatorCode::SMUL,0ul,4ul);
-    p.new_unary_instruction(OperatorCode::SQRT,5ul);
+    p.new_instruction_scalar(Mul(),0ul,4ul);
+    p.new_instruction(Sqrt(),5ul);
     ARIADNE_TEST_PRINT(p);
 
     Vector<FloatDPApproximation> x({3.0,4.0},pr);
@@ -150,15 +152,15 @@ Void TestProcedure::test_evaluate()
 Void TestProcedure::test_propagate()
 {
     {
-        ValidatedProcedure p(argument_size=2);
-        p.new_unary_instruction(OperatorCode::IND,0u);
-        p.new_unary_instruction(OperatorCode::IND,1u);
-        p.new_unary_instruction(OperatorCode::SQR,0u);
-        p.new_unary_instruction(OperatorCode::SQR,1u);
-        p.new_binary_instruction(OperatorCode::ADD,2u,3u);
+        ValidatedProcedure p(2);
+        p.new_instruction(Var(),0u);
+        p.new_instruction(Var(),1u);
+        p.new_instruction(Sqr(),0u);
+        p.new_instruction(Sqr(),1u);
+        p.new_instruction(Add(),2u,3u);
         p.new_constant(1.125_decimal);
-        p.new_scalar_instruction(OperatorCode::SMUL,0ul,4ul);
-        p.new_unary_instruction(OperatorCode::SQRT,5u);
+        p.new_instruction_scalar(Mul(),0ul,4ul);
+        p.new_instruction(Sqrt(),5u);
         ARIADNE_TEST_PRINT(p);
 
         UpperBoxType x=ExactBoxType{ {0.25,2.0}, {0.5,3.0} };

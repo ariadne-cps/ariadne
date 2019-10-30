@@ -152,6 +152,8 @@ class FloatDP {
     //! \brief Convert from a built-in double-precision floating-point number.
     FloatDP(double x) : dbl(x) { }
     explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
+    explicit FloatDP(ExactDouble const& x, DoublePrecision);
+    explicit FloatDP(TwoExp const& x, DoublePrecision);
     explicit FloatDP(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     FloatDP(const FloatDP& x) : dbl(x.dbl) { }
@@ -159,12 +161,13 @@ class FloatDP {
     //! \brief Construct from a double number using given rounding
     explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from another FloatDP using given rounding
-
     explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from an integer number using given rounding
     explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a dyadic number with given rounding
     explicit FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from a decimal number with given rounding
+    explicit FloatDP(Decimal const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a FloatMP using given rounding
     explicit FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a rational number with given rounding
@@ -208,10 +211,10 @@ class FloatDP {
     friend FloatDP operator-(FloatDP x) { volatile double xv=x.dbl; return -xv; }
 
     // Explcitly rounded lattice operations
-    friend FloatDP max(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP min(RoundingModeType rnd, FloatDP x1, FloatDP x2);
-    friend FloatDP abs(RoundingModeType rnd, FloatDP x);
-    friend FloatDP mag(RoundingModeType rnd, FloatDP x);
+    friend FloatDP max(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return std::max(x1.dbl,x2.dbl); }
+    friend FloatDP min(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return std::min(x1.dbl,x2.dbl); }
+    friend FloatDP abs(RoundingModeType rnd, FloatDP x) { return std::fabs(x.dbl); }
+    friend FloatDP mag(RoundingModeType rnd, FloatDP x) { return std::fabs(x.dbl); }
 
     // Explicitly rounded inplace operations
     friend FloatDP& iadd(RoundingModeType rnd, FloatDP& x1, FloatDP x2);
@@ -373,6 +376,10 @@ class FloatDP {
     friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
     friend FloatDP pow_opp(FloatDP x, int n);
 };
+
+template<class R, class A> R integer_cast(const A& a);
+template<> Nat integer_cast<Nat,FloatDP>(FloatDP const&);
+template<> Int integer_cast<Int,FloatDP>(FloatDP const&);
 
 static const FloatDP inf = std::numeric_limits<double>::infinity();
 

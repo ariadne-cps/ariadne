@@ -31,6 +31,7 @@
 
 #include "../utility/typedefs.hpp"
 #include "../utility/attribute.hpp"
+#include "../numeric/numeric.hpp"
 #include "../algebra/sweeper.hpp"
 #include "../algebra/algebra.hpp"
 #include "../function/domain.hpp"

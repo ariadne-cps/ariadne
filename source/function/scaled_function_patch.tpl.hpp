@@ -317,6 +317,11 @@ template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_zero() c
     return ScaledFunctionPatch<M>(this->domain(),this->properties());
 }
 
+template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::create_constant(NumericType const& c) const
+{
+    return ScaledFunctionPatch<M>::constant(this->domain(),c,this->properties());
+}
+
 //FIXME: Should allow this in code file
 /*
 template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_clone() const
@@ -361,25 +366,25 @@ inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2); 
 inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2); }
 inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2); }
 
-template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Polynomial<Bounds<F>>
+template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> MultivariatePolynomial<Bounds<F>>
 {
     Bounds<F> zero(0,this->model().precision());
 
-    Vector<Polynomial<Bounds<F>> > pid=Polynomial<NumericType>::coordinates(this->argument_size());
+    Vector<MultivariatePolynomial<Bounds<F>> > pid=MultivariatePolynomial<NumericType>::coordinates(this->argument_size());
     return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Bounds<F>(-this->error(),+this->error());
 
-    Polynomial<Bounds<F>> z(this->argument_size());
-    Polynomial<Bounds<F>> p;//=Ariadne::polynomial(this->model());
+    MultivariatePolynomial<Bounds<F>> z(this->argument_size());
+    MultivariatePolynomial<Bounds<F>> p;//=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<Bounds<F>> > s(this->argument_size(),z);
+    Vector<MultivariatePolynomial<Bounds<F>> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         auto domj=convert_interval(this->domain()[j],this->precision());
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
-            s[j]=Polynomial<Bounds<F>>::constant(this->argument_size(),zero);
+            s[j]=MultivariatePolynomial<Bounds<F>>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->properties()));
-            s[j]=(Polynomial<Bounds<F>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(MultivariatePolynomial<Bounds<F>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -452,15 +457,20 @@ template<class M> auto ScaledFunctionPatch<M>::gradient(const Vector<NumericType
 }
 
 
+template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctionPatch<M> const& fp) {
+    typedef typename ScaledFunctionPatch<M>::PrecisionType PR;
+    MultivariatePolynomial<FloatBounds<PR>> p=fp.polynomial();
+    MultivariatePolynomial<FloatApproximation<PR>> ap=p;
+    os << "{";
+    os << ap;
+    if(fp.error().raw()>0.0) { os << "+/-" << fp.error(); }
+    os << "}";
+    return os;
+}
 
 template<class M> OutputStream& ScaledFunctionPatch<M>::write(OutputStream& os) const {
-    Polynomial<FloatBounds<PR>> p=this->polynomial();
-    Polynomial<FloatApproximation<PR>> ap=p;
-    os << "FP" << this->domain();
-    os << "(";
-    os << ap;
-    if(this->error().raw()>0.0) { os << "+/-" << this->error(); }
-    os << ")";
+    os << "FunctionPatch(dom=" << this->domain() << ")";
+    write_polynomial(os,*this);
     return os;
 }
 
@@ -522,8 +532,8 @@ template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRep
     truncated_function.simplify(ThresholdSweeper<F>(frepr.precision(),frepr.threshold));
     FloatError<PR> truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
-    Polynomial<FloatValue<PR>> polynomial_function = midpoint(validated_polynomial_function);
+    MultivariatePolynomial<FloatBounds<PR>> validated_polynomial_function=polynomial(truncated_function);
+    MultivariatePolynomial<FloatValue<PR>> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -699,9 +709,9 @@ template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::ide
 }
 
 
-template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vector<Polynomial<FloatBounds<PR>>>
+template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vector<MultivariatePolynomial<FloatBounds<PR>>>
 {
-    Vector<Polynomial<FloatBounds<PR>> > p(this->result_size(),Polynomial<FloatBounds<PR>>(this->argument_size()));
+    Vector<MultivariatePolynomial<FloatBounds<PR>> > p(this->result_size(),MultivariatePolynomial<FloatBounds<PR>>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<ScaledFunctionPatch<M>>((*this)[i]).polynomial();
     }
@@ -981,17 +991,14 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 
 template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream& os) const
 {
-    os << "FP" << this->domain();
-    os << "[";
+    os << "VectorFunctionPatch";
+    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ")";
+    os << "[ ";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
-        ScaledFunctionPatch<M> fi=(*this)[i];
-        Polynomial<FloatBounds<PR>> p_fi=fi.polynomial();
-        Polynomial<FloatApproximation<PR>> ap_fi=p_fi;
-        os << ap_fi;
-        if(fi.error().raw()>0.0) { os << "+/-" << fi.error(); }
+        write_polynomial(os,(*this)[i]);
     }
-    os << "]";
+    os << " ]";
     return os;
 }
 

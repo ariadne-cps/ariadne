@@ -46,8 +46,6 @@ namespace Ariadne {
 //! \defgroup GeometryModule Geometry Module
 //!  \brief Classes describing sets in Euclidean space.
 
-struct SizeOne { operator SizeType() const { return 1u; } };
-
 enum class SplitPart : char;
 
 enum class SplitPart : char { LOWER, MIDDLE, UPPER };
@@ -85,7 +83,7 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     , DefineComparisonOperators<UpperInterval<F>,ValidatedKleenean>
     , ProvideConvertedFieldOperations<UpperInterval<F>,Bounds<F>>
     , ProvideConvertedComparisonOperations<UpperInterval<F>,Bounds<F>,UpperInterval<F>,ValidatedKleenean>
-    , ProvideConcreteGenericFieldOperations<UpperInterval<F>,ValidatedNumber>
+    , ProvideConcreteGenericElementaryOperations<UpperInterval<F>,ValidatedNumber>
     , ProvideConcreteGenericComparisonOperations<UpperInterval<F>,ValidatedNumber,ValidatedKleenean>
 {
     typedef typename F::PrecisionType PR; typedef PR PrecisionType;

@@ -33,6 +33,7 @@
 
 #include "../utility/container.hpp"
 #include "../algebra/vector.hpp"
+#include "../symbolic/templates.hpp"
 
 #include "../numeric/operators.hpp"
 
@@ -51,39 +52,49 @@ typedef Procedure<EffectiveNumber> EffectiveProcedure;
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);
 
-/*
-struct ProcedureInstruction {
-    explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o), arg(a) { }
-    explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o), arg1(a1), arg2(a2) { }
-    explicit ProcedureInstruction(OperatorCode o, SizeType a, Int n) : op(o), arg(a), np(n) { }
-    OperatorCode op;
-    union {
-        struct { SizeType arg; Int np; };
-        struct { SizeType arg1; SizeType arg2; };
-    };
-};
-*/
+struct ConstantProcedureInstruction : Symbolic<Cnst,SizeType> { using Symbolic<Cnst,SizeType>::Symbolic; };
+struct IndexProcedureInstruction : Symbolic<Var,SizeType> { using Symbolic<Var,SizeType>::Symbolic; };
+struct UnaryProcedureInstruction : Symbolic<UnaryElementaryOperator,SizeType> {
+    using Symbolic<UnaryElementaryOperator,SizeType>::Symbolic; };
+struct BinaryProcedureInstruction : Symbolic<BinaryElementaryOperator,SizeType,SizeType> {
+    using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::Symbolic; };
+struct GradedProcedureInstruction : Symbolic<GradedElementaryOperator,SizeType,Int> {
+    using Symbolic<GradedElementaryOperator,SizeType,Int>::Symbolic; };
+struct ScalarProcedureInstruction : Symbolic<BinaryElementaryOperator,SizeType,SizeType> {
+    using Symbolic<BinaryElementaryOperator,SizeType,SizeType>::Symbolic; };
 
-struct UnaryGradedArgs { SizeType arg; Int np; };
-struct BinaryArgs { SizeType arg1; SizeType arg2; };
+typedef Variant<ConstantProcedureInstruction,IndexProcedureInstruction,
+                UnaryProcedureInstruction,BinaryProcedureInstruction,GradedProcedureInstruction,ScalarProcedureInstruction> ProcedureInstructionVariant;
 
-union UnionArgs {
-    UnaryGradedArgs ug;
-    BinaryArgs b;
-};
-
-struct ProcedureInstruction {
-    explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o) { args.ug.arg = a; }
-    explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o) { args.b.arg1 = a1; args.b.arg2 = a2; }
-    explicit ProcedureInstruction(OperatorCode o, SizeType a, Int n) : op(o) { args.ug.arg = a; args.ug.np = n; }
-    OperatorCode op;
-private:
-    UnionArgs args;
-public:
-    const SizeType& arg() const { return args.ug.arg; }
-    const SizeType& arg1() const { return args.b.arg1; }
-    const Int& np() const { return args.ug.np; }
-    const SizeType& arg2() const { return args.b.arg2; }
+struct ProcedureInstruction : public ProcedureInstructionVariant {
+    explicit ProcedureInstruction(Cnst o, SizeType c)
+        : ProcedureInstructionVariant(ConstantProcedureInstruction(o,c)) { }
+    explicit ProcedureInstruction(Var o, SizeType i)
+        : ProcedureInstructionVariant(IndexProcedureInstruction(o,i)) { }
+    explicit ProcedureInstruction(UnaryElementaryOperator o, SizeType a)
+        : ProcedureInstructionVariant(UnaryProcedureInstruction(o,a)) { }
+    explicit ProcedureInstruction(BinaryElementaryOperator o, SizeType a1, SizeType a2)
+        : ProcedureInstructionVariant(BinaryProcedureInstruction(o,a1,a2)) { }
+    explicit ProcedureInstruction(GradedElementaryOperator o, SizeType a, Int n)
+        : ProcedureInstructionVariant(GradedProcedureInstruction(o,a,n)) { }
+  public:
+    ProcedureInstruction(ProcedureInstructionVariant var) : ProcedureInstructionVariant(var) { }
+    ProcedureInstructionVariant const& base() const { return *this; }
+    template<class VIS> decltype(auto) accept(VIS&& vis) const {
+        return std::visit(std::forward<VIS>(vis),static_cast<ProcedureInstructionVariant const&>(*this)); }
+    Operator op() const { return this->accept([](auto s){return Operator(s._op);}); }
+    const SizeType& val() const {
+        return std::get<ConstantProcedureInstruction>(this->base())._val; }
+    const SizeType& ind() const {
+        return std::get<IndexProcedureInstruction>(this->base())._ind; }
+    const SizeType& arg() const {
+        if (auto uptr=std::get_if<UnaryProcedureInstruction>(&this->base())) { return uptr->_arg; }
+        else { return std::get<GradedProcedureInstruction>(this->base())._arg; } }
+    const SizeType& arg1() const {  return std::get<BinaryProcedureInstruction>(this->base())._arg1; }
+    const SizeType& arg2() const {  return std::get<BinaryProcedureInstruction>(this->base())._arg2; }
+    const Int& num() const { return std::get<GradedProcedureInstruction>(this->base())._num; }
+  public:
+    friend OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri);
 };
 
 //! \brief An algorithmic procedure for computing a function.
@@ -110,10 +121,13 @@ class Procedure {
     List<ProcedureInstruction> _instructions;
   public:
     Void new_constant(Y const& c) { _constants.append(c); }
-    Void new_unary_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
-    Void new_binary_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
-    Void new_scalar_instruction(OperatorCode o, SizeType c1, SizeType a2) { _instructions.append(ProcedureInstruction(o,c1,a2)); }
-    Void new_graded_instruction(OperatorCode o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    Void new_instruction(Cnst o, SizeType c) { _instructions.append(ProcedureInstruction(o,c)); }
+    Void new_instruction(Var o, SizeType i) { _instructions.append(ProcedureInstruction(o,i)); }
+    Void new_instruction(UnaryElementaryOperator o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
+    Void new_instruction(BinaryElementaryOperator o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    Void new_instruction_scalar(BinaryElementaryOperator o, SizeType c1, SizeType a2) {
+        _instructions.append(ProcedureInstruction(ProcedureInstructionVariant(ScalarProcedureInstruction(o,c1,a2)))); }
+    Void new_instruction(GradedElementaryOperator o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
   private:
     OutputStream& _write(OutputStream& os) const;
 };
@@ -137,9 +151,9 @@ class Vector<Procedure<Y>> {
     SizeType result_size() const { return _results.size(); }
     SizeType temporaries_size() const { return _instructions.size(); }
     SizeType argument_size() const { return this->_argument_size; }
-    Void new_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
-    Void new_instruction(OperatorCode o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
-    Void new_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    Void new_instruction(UnaryElementaryOperator o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
+    Void new_instruction(GradedElementaryOperator o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    Void new_instruction(BinaryElementaryOperator o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
     Void set_return(SizeType i, SizeType a) { _results[i]=a; }
   public:
     SizeType _argument_size;

@@ -623,7 +623,7 @@ template<class X> PivotMatrix::operator Matrix<X> () const {
 }
 
 OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
-    return os << static_cast< Matrix<FloatDPValue> >(pv);
+    return os << "PivotMatrix(" << static_cast< Matrix<Int> >(pv) << ")";
 }
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The
@@ -904,9 +904,6 @@ template class Matrix<Real>;
 
 template PositiveFloatDPUpperBound sup_norm(const Matrix<FloatDPBounds>& A);
 template FloatDPUpperBound log_norm(const Matrix<FloatDPBounds>& A);
-
-template Matrix<FloatDPValue>const& cast_exact(const Matrix<FloatDPApproximation>& mx);
-template Matrix<FloatMPValue>const& cast_exact(const Matrix<FloatMPApproximation>& mx);
 
 template class Matrix<Dyadic>;
 

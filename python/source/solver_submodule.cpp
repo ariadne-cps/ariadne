@@ -86,15 +86,15 @@ class IntegratorWrapper
         return this->get_override("maximum_error")(); }
     Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
-    ValidatedVectorMultivariateFunctionModelDP flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
+    FlowStepModel flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
         return this->get_override("flow_step")(vf,D,h); }
-    ValidatedVectorMultivariateFunctionModelDP flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
+    FlowStepModel flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
-    ValidatedVectorMultivariateFunctionModelDP flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
+    FlowStepModel flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow_to")(vf,D,tf); }
-    List<ValidatedVectorMultivariateFunctionModelDP> flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
+    FlowModel flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
         return this->get_override("flow")(vf,D,t0,tf); }
-    List<ValidatedVectorMultivariateFunctionModelDP> flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
+    FlowModel flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow")(vf,D,tf); }
     Void write(OutputStream& os) const {
         this->get_override("write")(os); }
@@ -123,12 +123,24 @@ Void export_solvers(pybind11::module& module)
 
 Void export_integrators(pybind11::module& module)
 {
+    pybind11::class_<FlowStepModel> flow_step_model_class(module,"FlowStepModel");
+    flow_step_model_class.def("__str__", &__cstr__<FlowStepModel>);
+    pybind11::class_<FlowModel> flow_model_class(module,"FlowModel");
+    // Use a lambda here to prevent errors when using Clang/GCC
+    flow_model_class.def("__len__",[](FlowModel const& fm){return fm.size();});
+    // NOTE: The export below gives 'ValueError: vector::reserve' at runtime when compiled using Clang
+    // flow_model_class.def("__len__",&FlowModel::size);
+    // NOTE: The export below produces 'internal compiler error: in fold_convert_loc' with GCC
+    // flow_model_class.def("__len__",(SizeType(FlowModel::*)()const)&FlowModel::size);
+    flow_model_class.def("__getitem__",&__getitem__<FlowModel,SizeType>);
+    flow_model_class.def("__str__", &__cstr__<FlowModel>);
+
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");
     integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
-    integrator_interface_class.def("flow_step",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_step",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_to",(ValidatedVectorMultivariateFunctionModelDP(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
-    integrator_interface_class.def("flow",(List<ValidatedVectorMultivariateFunctionModelDP>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
+    integrator_interface_class.def("flow_step",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_step",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_to",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
+    integrator_interface_class.def("flow",(FlowModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");

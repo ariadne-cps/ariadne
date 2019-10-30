@@ -275,6 +275,9 @@ const RoundApproximately approx = RoundApproximately(); //!< Round exact answer 
 
 using RoundApprox = RoundApproximately;
 
+inline OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
+    return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
+
 } // namespace Ariadne
 
 #endif // ARIADNE_ROUNDING_HPP

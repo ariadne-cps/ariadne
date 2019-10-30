@@ -32,8 +32,10 @@
 #include <iostream>
 #include "../numeric/numeric.hpp"
 #include "../utility/pointer.hpp"
+#include "../utility/exceptions.hpp"
 #include "../numeric/operators.hpp"
 #include "../algebra/algebra_interface.hpp"
+#include "../algebra/operations.hpp"
 
 namespace Ariadne {
 
@@ -42,9 +44,39 @@ template<class R, class A> R dynamic_handle_cast(A a) {
     return R(std::dynamic_pointer_cast<RP>(a.pointer()));
 }
 
+
+
+template<class A, class X> struct AlgebraOperations;
+
+template<class X> struct AlgebraOperations<Algebra<X>,X> {
+    static Algebra<X> apply(UnaryRingOperator op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
+    static Algebra<X> apply(BinaryRingOperator op, Algebra<X> a1, Algebra<X> a2) { return Algebra<X>(a1._ptr->_apply(op,*a2._ptr)); }
+    static Algebra<X> apply(BinaryFieldOperator op, Algebra<X> a1, X const& c2) { return Algebra<X>(a1._ptr->_apply(op,c2)); }
+    static Algebra<X> apply(BinaryRingOperator op, X const& c1, Algebra<X> a2) { return Algebra<X>(a2._ptr->_rapply(op,c1)); }
+    static Algebra<X> apply(GradedRingOperator op, Algebra<X> a1, Nat m2) { return Algebra<X>(a1._ptr->_apply(op,m2)); }
+};
+
+template<class X> struct AlgebraOperations<ElementaryAlgebra<X>,X> {
+    static ElementaryAlgebraInterface<X> const* _upcast(AlgebraInterface<X> const* ap) {
+        return dynamic_cast<ElementaryAlgebraInterface<X> const*>(ap); }
+    static ElementaryAlgebraInterface<X> const* _upcast(ElementaryAlgebraInterface<X> const* ap) {
+        return ap; }
+    static ElementaryAlgebra<X> apply(BinaryElementaryOperator op, ElementaryAlgebra<X> a1, ElementaryAlgebra<X> a2) {
+        return ElementaryAlgebra<X>(_upcast(a1._ptr.operator->())->_apply(op,*a2._ptr)); }
+    static ElementaryAlgebra<X> apply(BinaryElementaryOperator op, ElementaryAlgebra<X> a1, X const& c2) {
+        return  ElementaryAlgebra<X>(_upcast(a1._ptr.operator->())->_apply(op,c2)); }
+    static ElementaryAlgebra<X> apply(BinaryElementaryOperator op, X const& c1, ElementaryAlgebra<X> a2) {
+        return ElementaryAlgebra<X>(_upcast(a2._ptr.operator->())->_rapply(op,c1)); }
+    static ElementaryAlgebra<X> apply(UnaryElementaryOperator op, ElementaryAlgebra<X> a) {
+        return ElementaryAlgebra<X>(_upcast(a._ptr.operator->())->_apply(op)); }
+    static ElementaryAlgebra<X> apply(GradedElementaryOperator op, ElementaryAlgebra<X> a1, Int n2) {
+        return ElementaryAlgebra<X>(_upcast(a1._ptr.operator->())->_apply(op,n2)); }
+};
+
+
 //! \brief Generic class for elements of unital algebras.
 template<class X> class Algebra
-    : public DeclareMixedArithmeticOperators<Algebra<X>,Int>
+    : public DispatchAlgebraOperations<Algebra<X>,X>
 {
   private:
   public:
@@ -74,76 +106,42 @@ template<class X> class Algebra
     Void imul(const X& c) { _ptr->_imul(c); }
     Void isma(const X& c, const Algebra<X>& a) { _ptr->_isma(c,*a._ptr); }
     Void ifma(const Algebra<X>& a1, const Algebra<X>& a2) { _ptr->_ifma(*a1._ptr,*a2._ptr); }
-
-    friend Algebra<X> pos(Algebra<X> const& a) { return Algebra<X>(a); }
-    friend Algebra<X> neg(Algebra<X> const& a) { return Algebra<X>(a._ptr->_neg()); }
-    friend Algebra<X> add(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_add(*a2._ptr)); }
-    friend Algebra<X> sub(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_sub(*a2._ptr)); }
-    friend Algebra<X> mul(Algebra<X> const& a1, Algebra<X> const& a2) { return Algebra<X>(a1._ptr->_mul(*a2._ptr)); }
-    friend Algebra<X> add(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_add(c2)); }
-    friend Algebra<X> sub(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_sub(c2)); }
-    friend Algebra<X> mul(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_mul(c2)); }
-    friend Algebra<X> div(Algebra<X> const& a1, X const& c2) { return Algebra<X>(a1._ptr->_div(c2)); }
-    friend Algebra<X> add(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_radd(c1)); }
-    friend Algebra<X> sub(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_rsub(c1)); }
-    friend Algebra<X> mul(X const& c1, Algebra<X> const& a2) { return Algebra<X>(a2._ptr->_rmul(c1)); }
-
-    friend Algebra<X> operator+(Algebra<X> const& a) { return pos(a); }
-    friend Algebra<X> operator-(Algebra<X> const& a) { return neg(a); }
-    friend Algebra<X> operator+(Algebra<X> const& a1, Algebra<X> const& a2) { return add(a1,a2); }
-    friend Algebra<X> operator-(Algebra<X> const& a1, Algebra<X> const& a2) { return sub(a1,a2); }
-    friend Algebra<X> operator*(Algebra<X> const& a1, Algebra<X> const& a2) { return mul(a1,a2); }
-    friend Algebra<X> operator+(Algebra<X> const& a1, X const& c2) { return add(a1,c2); }
-    friend Algebra<X> operator-(Algebra<X> const& a1, X const& c2) { return sub(a1,c2); }
-    friend Algebra<X> operator*(Algebra<X> const& a1, X const& c2) { return mul(a1,c2); }
-    friend Algebra<X> operator/(Algebra<X> const& a1, X const& c2) { return div(a1,c2); }
-    friend Algebra<X> operator+(X const& c1, Algebra<X> const& a2) { return add(c1,a2); }
-    friend Algebra<X> operator-(X const& c1, Algebra<X> const& a2) { return sub(c1,a2); }
-    friend Algebra<X> operator*(X const& c1, Algebra<X> const& a2) { return mul(c1,a2); }
-    friend Algebra<X>& operator+=(Algebra<X>& a1, X const& c2) { return a1=add(a1,c2); }
-    friend Algebra<X>& operator-=(Algebra<X>& a1, X const& c2) { return a1=sub(a1,c2); }
-    friend Algebra<X>& operator*=(Algebra<X>& a1, X const& c2) { return a1=mul(a1,c2); }
-    friend Algebra<X>& operator/=(Algebra<X>& a1, X const& c2) { return a1=div(a1,c2); }
-    friend Algebra<X>& operator+=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=add(a1,a2); }
-    friend Algebra<X>& operator-=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=sub(a1,a2); }
-    friend Algebra<X>& operator*=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=mul(a1,a2); }
-    friend Algebra<X> sqr(Algebra<X> const& a) { return mul(a,a); }
-    friend Algebra<X> pow(Algebra<X> const& a, Nat m) { return Algebra<X>(a._ptr->_pow(m)); }
-
-    // DEPRECATED
-    friend Algebra<X> operator+(Algebra<X> const& a1, Int const& c2) { return add(a1,X(c2)); }
-
-    friend Algebra<X> operator/(Algebra<X> const& a1, Algebra<X> const& a2) { return mul(a1,rec(a2)); }
-    friend Algebra<X> operator/(X const& c1, Algebra<X> const& a2) { return mul(c1,rec(a2)); }
-    friend Algebra<X>& operator/=(Algebra<X>& a1, Algebra<X> const& a2) { return a1=div(a1,a2); }
-    friend Algebra<X> pow(Algebra<X> const& a, Int n) {
-        return n>=0 ? pow(a,Nat(n)) : rec(pow(a,Nat(-n))); }
-
-    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, Algebra<X> a2) { return Algebra<X>(a1._ptr->_apply(op,*a2._ptr)); }
-    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a1, X c2) { return Algebra<X>(a1._ptr->_apply(op,c2)); }
-    template<class OP> friend Algebra<X> apply(OP op, Algebra<X> a) {
-        TranscendentalAlgebraInterface<X> const* tap=dynamic_cast<TranscendentalAlgebraInterface<X>const*>(a._ptr.operator->());
-        if(!tap) { ARIADNE_THROW(std::runtime_error,"apply(OP,Algebra<X>)","a="<<a<<" does not support transcendental operations."); }
-        return Algebra<X>(tap->_apply(op)); }
-    friend Algebra<X> apply(Neg op, Algebra<X> a) { return Algebra<X>(a._ptr->_apply(op)); }
 };
 
-template<class X> Algebra<X> rec(const Algebra<X>& a) { return apply(Rec(),a); }
-template<class X> Algebra<X> sqrt(const Algebra<X>& a) { return apply(Sqrt(),a); }
-template<class X> Algebra<X> exp(const Algebra<X>& a) { return apply(Exp(),a); }
-template<class X> Algebra<X> log(const Algebra<X>& a) { return apply(Log(),a); }
-template<class X> Algebra<X> sin(const Algebra<X>& a) { return apply(Sin(),a); }
-template<class X> Algebra<X> cos(const Algebra<X>& a) { return apply(Cos(),a); }
-template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
-template<class X> Algebra<X> atan(const Algebra<X>& a) { return apply(Atan(),a); }
-
-// FIXME: Eliminate use of clone with std::dynamic_pointer_cast
-template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {
-    std::shared_ptr<TranscendentalAlgebraInterface<X> const> tap
-        = std::dynamic_pointer_cast<TranscendentalAlgebraInterface<X>const>(a._ptr);
-    if(!tap) { ARIADNE_FAIL_MSG("Cannot apply operator "<<op<<" to "<<a<<"\n"); }
-    return Algebra<X>(tap->_apply(op));
-}
+//! \brief Generic class for elements of unital algebras.
+template<class X> class ElementaryAlgebra
+    : public DispatchElementaryAlgebraOperations<ElementaryAlgebra<X>,X>
+{
+  private:
+  public:
+    std::shared_ptr< ElementaryAlgebraInterface<X> > _ptr;
+    std::shared_ptr< ElementaryAlgebraInterface<X> > pointer() const { return _ptr; }
+  public:
+    typedef X ScalarType;
+    typedef typename X::Paradigm Paradigm;
+    typedef typename X::NumericType NumericType;
+  public:
+    ElementaryAlgebra() : _ptr() { }
+    explicit ElementaryAlgebra(AlgebraInterface<X>* p) : _ptr(dynamic_cast<ElementaryAlgebraInterface<X>*>(p)) {
+        if (p && !_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(AlgebraInterface<X>* ap)","*ap="<<*p<<"; "<<typeid(p).name()<<", "<<typeid(*p).name()); } }
+    explicit ElementaryAlgebra(std::shared_ptr< AlgebraInterface<X> > p) : _ptr(std::dynamic_pointer_cast<ElementaryAlgebraInterface<X>>(p)) {
+        if (p && !_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(SharedPointer<AlgebraInterface<X>> ap)","*ap="<<*p); } }
+    explicit ElementaryAlgebra(const AlgebraInterface<X>& a) : _ptr(dynamic_cast<BinaryElementaryOperator*>(a._create_copy())) {
+        if (!_ptr) { ARIADNE_THROW(BadCast,"ElementaryAlgebra(AlgebraInterface<X> const& ar)","ar="<<a); } }
+    explicit ElementaryAlgebra(ElementaryAlgebraInterface<X>* p) : _ptr(p) { }
+    explicit ElementaryAlgebra(std::shared_ptr< ElementaryAlgebraInterface<X> > p) : _ptr(p) { }
+    ElementaryAlgebra(const ElementaryAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
+    ElementaryAlgebra(const ElementaryAlgebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
+    template<class A> A extract() const;
+    ElementaryAlgebra<X>& operator=(const X& c) { return *this = this->create_constant(c); }
+    ElementaryAlgebra<X>& operator=(const ElementaryAlgebra<X>& a) { this->_ptr=std::shared_ptr< ElementaryAlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }
+    operator const ElementaryAlgebraInterface<X>& () const { return *this->_ptr; }
+    ElementaryAlgebra<X> create() const { return ElementaryAlgebra<X>(this->_ptr->_create_zero()); }
+    ElementaryAlgebra<X> clone() const { return ElementaryAlgebra<X>(this->_ptr->_create_copy()); }
+    ElementaryAlgebra<X> create_zero() const { return ElementaryAlgebra<X>(this->_ptr->_create_zero()); }
+    ElementaryAlgebra<X> create_constant(X const& c) const { return ElementaryAlgebra<X>(this->_ptr->_create_constant(c)); }
+    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+};
 
 
 
@@ -233,7 +231,7 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra(const SymbolicAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
     SymbolicAlgebra(const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_create_copy()) { }
     //! \brief Create the representation of the operator \a op applied to \a a.
-    SymbolicAlgebra(OperatorCode op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
+    SymbolicAlgebra(UnaryElementaryOperator op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
     SymbolicAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_create_copy()); return *this; }

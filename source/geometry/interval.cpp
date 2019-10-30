@@ -106,6 +106,8 @@ FloatDPUpperInterval neg(FloatDPUpperInterval const& ivl) {
     return make_interval(neg(cast_singleton(ivl))); }
 FloatDPUpperInterval sqr(FloatDPUpperInterval const& ivl) {
     return make_interval(sqr(cast_singleton(ivl))); }
+FloatDPUpperInterval hlf(FloatDPUpperInterval const& ivl) {
+    return make_interval(hlf(cast_singleton(ivl))); }
 FloatDPUpperInterval rec(FloatDPUpperInterval const& ivl) {
     return make_interval(rec(cast_singleton(ivl))); }
 
@@ -124,8 +126,9 @@ FloatDPUpperInterval pow(FloatDPUpperInterval const& ivl, Int n) {
     return make_interval(pow(cast_singleton(ivl),n)); }
 
 FloatDPUpperInterval sqrt(FloatDPUpperInterval const& ivl) {
+    // Defining sqrt(I)=hull{x:x^2 in I}, if I=[a,b] with b>=0, then sqrt(I)=[-sqrt(b),+sqrt(b)]
     if(ivl.upper().raw()<0) { return FloatDPUpperInterval::empty_interval(); }
-    else { FloatDPUpperBound u=sqrt(ivl.upper()); return FloatDPUpperInterval(-u,+u); } }
+    else { FloatDP u=sqrt(up,ivl.upper().raw()); return FloatDPUpperInterval(-u,+u); } }
 FloatDPUpperInterval exp(FloatDPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 FloatDPUpperInterval log(FloatDPUpperInterval const& ivl) {

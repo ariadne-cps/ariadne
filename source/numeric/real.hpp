@@ -120,8 +120,8 @@ class Real
     //! \name Constructors
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
     explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
-    //explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
-    //explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \c |w_m-w_n|\leq2<sup>min(m,n)</sup>.
+    explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
+    explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \c |w_m-w_n|\leq2<sup>min(m,n)</sup>.
     //@}
 
     //@{
@@ -204,6 +204,8 @@ class Real
     friend Real sin(Real const& r); //!< The sine of \a r.
     friend Real cos(Real const& r); //!< The cosine of \a r.
     friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend Real asin(Real const& r); //!< The arc-sine of \a r.
+    friend Real acos(Real const& r); //!< The arc-cosine of \a r.
     friend Real atan(Real const& r); //!< The arc-tangent of \a r.
     //@}
 
@@ -231,6 +233,7 @@ class Real
     friend Kleenean operator<=(Real const& r1, Real const& r2); //!< Comparison \c leq.
     friend Kleenean operator>=(Real const& r1, Real const& r2); //!< Comparison .
 
+    friend Kleenean sgn(Real const& r); //!< Returns \c true if \a r>0, \c false if \a r<0, and \c indeterminate if \a r==0.
     ValidatedKleenean check_sgn(Real r, Effort eff);
     friend Boolean operator>(Real const& r1, Pair<Real,Real> lu); //!< Given \a l<u, returns \a true if r>l and \a false if r<u.
     friend Boolean nondeterministic_greater(Real const& r, Rational const& a, Rational const& b); //!< Given \a a<b, returns \a true if r>a and \a false if r<b.
@@ -251,6 +254,12 @@ class Real
     friend Real limit(FastCauchySequence<Real> const& rs);
         //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
         //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+    //@}
+
+    //@{
+    //! Rounding operations.
+    friend Integer round(Real const& r);
+        //< Round to a "nearby" integer. This integer <em>need not</em> be the <em>closest</em> integer.
     //@}
 
 
@@ -338,7 +347,8 @@ class LowerReal
     friend LowerReal neg(UpperReal const& r); //!< Negative \a -r.
     friend LowerReal hlf(LowerReal const& r); //!< Half \a r÷2.
     friend LowerReal add(LowerReal const& r1, LowerReal const& r2); //!< \brief Sum \a r1+r2.
-    friend LowerReal sub(LowerReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+    friend LowerReal sub(LowerReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+    friend UpperReal sub(UpperReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
 
     friend NaiveReal mul(LowerReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
     friend NaiveReal div(LowerReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
@@ -347,6 +357,12 @@ class LowerReal
 
     //@{
     //! \name Named arithmetical functions on positive numbers
+    friend LowerReal mul(LowerReal const& r1, PositiveReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend LowerReal mul(PositiveReal const& r1, LowerReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend LowerReal div(LowerReal const& r1, PositiveReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend LowerReal div(PositiveReal const& r1, UpperReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend UpperReal div(PositiveReal const& r1, LowerReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+
     friend PositiveLowerReal add(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Addition \a r1+r2 preserves positivity.
     friend PositiveLowerReal mul(PositiveLowerReal const& r1, PositiveLowerReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
     friend PositiveLowerReal div(PositiveLowerReal const& r1, PositiveUpperReal const& r2); //!< Division \a r1÷r2 preserves positivity.
@@ -435,7 +451,8 @@ class UpperReal
     friend UpperReal neg(LowerReal const& r); //!< Negative \a -r.
     friend UpperReal hlf(UpperReal const& r); //!< Half \a r÷2.
     friend UpperReal add(UpperReal const& r1, UpperReal const& r2); //!< \brief Sum \a r1+r2.
-    friend UpperReal sub(UpperReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
+    friend UpperReal sub(UpperReal const& r1, LowerReal const& r2); //!< \brief Difference \a r1-r2.
+    friend LowerReal sub(LowerReal const& r1, UpperReal const& r2); //!< \brief Difference \a r1-r2.
 
     friend NaiveReal mul(UpperReal const& r1, UpperReal const& r2) = delete; //!< \brief \em No multiplication operator, since non-monotone!
     friend NaiveReal mul(UpperReal const& r1, LowerReal const& r2) = delete; //!< \brief \em No division operator, since non-monotone!
@@ -444,6 +461,12 @@ class UpperReal
 
     //@{
     //! \name Named arithmetical functions on positive numbers
+    friend UpperReal mul(UpperReal const& r1, PositiveReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend UpperReal mul(PositiveReal const& r1, UpperReal const& r2); //!< Multiplication \a r1×r2 preserves monotonicity.
+    friend UpperReal div(UpperReal const& r1, PositiveReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend UpperReal div(PositiveReal const& r1, LowerReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+    friend LowerReal div(PositiveReal const& r1, UpperReal const& r2); //!< Division \a r1÷r2 preserves monotonicity.
+
     friend PositiveUpperReal add(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Addition \a r1+r2 preserves positivity.
     friend PositiveUpperReal mul(PositiveUpperReal const& r1, PositiveUpperReal const& r2); //!< Multiplication \a r1×r2 preserves positivity.
     friend PositiveUpperReal div(PositiveUpperReal const& r1, PositiveLowerReal const& r2); //!< Division \a r1÷r2 preserves positivity.
@@ -645,7 +668,7 @@ class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowe
 {
   public:
     using LowerReal::LowerReal;
-    PositiveLowerReal(LowerReal r) : LowerReal(r) { }
+    explicit PositiveLowerReal(LowerReal r) : LowerReal(r) { }
     PositiveFloatDPLowerBound get(DoublePrecision pr) const;
     PositiveFloatMPLowerBound get(MultiplePrecision pr) const;
   public:
@@ -663,7 +686,7 @@ class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUppe
 {
   public:
     using UpperReal::UpperReal;
-    PositiveUpperReal(UpperReal r) : UpperReal(r) { }
+    explicit PositiveUpperReal(UpperReal r) : UpperReal(r) { }
     PositiveFloatDPUpperBound get(DoublePrecision pr) const;
     PositiveFloatMPUpperBound get(MultiplePrecision pr) const;
   public:
@@ -686,8 +709,8 @@ PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2);
 
 PositiveReal cast_positive(Real const& x);
 
-LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
-UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
+//LowerReal add(LowerReal const& lr1, UpperReal const& ur2);
+//UpperReal add(UpperReal const& ur1, LowerReal const& lr2);
 
 ValidatedKleenean check_sgn(Real r, Effort eff);
 

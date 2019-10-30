@@ -92,7 +92,8 @@ template<class X> inline DifferentialFactory<X> factory(Differential<X> const& d
 template<class X>
 class Differential
     : public DispatchTranscendentalAlgebraOperations<Differential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperators<Differential<X>>
+    , public DispatchLatticeAlgebraOperations<Differential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<Differential<X>>
 {
     static_assert(!IsSame<X,FloatDPValue>::value,"");
     typedef Differential<X> SelfType;
@@ -165,6 +166,19 @@ class Differential
     //! \brief A vector of \a rs affine differentials of degree \a deg in \a as arguments with values \a v[i] and gradients \a G[i][j].
     static Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
     static Vector<Differential<X>> affine(DegreeType deg, const Vector<X>& v, const Matrix<X>& G);
+
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Differential<X> constant(SizeType as, DegreeType deg, const Y& c, const PR& pr) {
+        return constant(as,deg,X(c,pr)); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Differential<X> variable(SizeType as, DegreeType deg, const Y& v, SizeType j, const PR& pr) {
+        return variable(as,deg,X(v,pr),j); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Vector< Differential<X> > constants(SizeType as, DegreeType deg, const Vector<Y>& c, const PR& pr) {
+        return constants(as,deg,Vector<X>(c,pr)); }
+    template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy>
+    static Vector< Differential<X> > variables(DegreeType deg, const Vector<Y>& v, const PR& pr) {
+        return variables(deg,Vector<X>(v,pr)); }
 
 //    static UnivariateDifferential<X> identity(DegreeType deg, const Vector<X>& v);
     static Differential<X> identity(DegreeType deg, const X& v); // FIXME: Should use UnivariateDifferentia; required for derivative of UnivariateFunction.
@@ -254,13 +268,14 @@ class Differential
 
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }
   public:
+/*
     friend Differential<X> min(const Differential<X>& x1, const Differential<X>& x2) {
-        return AlgebraOperations<Differential<X>>::_min(x1,x2); }
+        return AlgebraOperations<Differential<X>>::min(x1,x2); }
     friend Differential<X> max(const Differential<X>& x1, const Differential<X>& x2) {
-        return AlgebraOperations<Differential<X>>::_max(x1,x2); }
+        return AlgebraOperations<Differential<X>>::max(x1,x2); }
     friend Differential<X> abs(const Differential<X>& x) {
-        return AlgebraOperations<Differential<X>>::_abs(x); }
-
+        return AlgebraOperations<Differential<X>>::abs(x); }
+*/
     friend Differential<X> compose(UnivariateDifferential<X> const& x, Differential<X> const& y) {
         return Differential<X>::_compose(x,y); }
     friend Differential<X> compose(Differential<X> const& x, Vector<Differential<X>> const& y) {
@@ -287,6 +302,10 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumeri
 decltype(auto) operator+(Differential<X> const& x, Y const& y) { return x+factory(x).create(y); }
 
 template<class X> struct AlgebraOperations<Differential<X>> : GradedAlgebraOperations<Differential<X>> {
+    static Differential<X> apply(UnaryElementaryOperator op, Differential<X> dx) {
+        UnivariateDifferential<X> dop = op.accept([&dx](auto o){return UnivariateDifferential<X>(o,dx.degree(),dx.value());});
+        return compose(dop,dx); }
+
     template<class OP> static Differential<X> apply(OP op, Differential<X> dx) {
         return compose(UnivariateDifferential<X>(op,dx.degree(),dx.value()),dx); }
     static Differential<X> apply(Pos op, Differential<X> dx);
@@ -466,6 +485,7 @@ class Vector< Differential<X> >
     Vector<Differential<X>> flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da) {
         return _flow(df,dx0,da); }
 
+    friend OutputStream& operator<<(OutputStream& os, const Vector<Differential<X> >& x) { return x._write(os); }
   public:
     static Vector<Differential<X>> _compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y);
     static Vector<Differential<X>> _derivative(Vector<Differential<X>> const& x, SizeType k);
@@ -477,6 +497,7 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da);
+    OutputStream& _write(OutputStream& os) const;
 };
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>

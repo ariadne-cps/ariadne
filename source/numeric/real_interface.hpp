@@ -22,9 +22,17 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef ARIADNE_REAL_INTERFACE_HPP
+#define ARIADNE_REAL_INTERFACE_HPP
+
 #include <iosfwd>
 
 namespace Ariadne {
+
+class Real;
+class ValidatedReal;
+
+class Dyadic;
 
 class DoublePrecision;
 class MultiplePrecision;
@@ -61,3 +69,5 @@ class ValidatedRealInterface {
 };
 
 } // namespace Ariadne
+
+#endif /* ARIADNE_REAL_INTERFACE_HPP */

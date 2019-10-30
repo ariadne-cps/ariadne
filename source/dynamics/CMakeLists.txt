@@ -2,6 +2,7 @@ add_library(ariadne-dynamics OBJECT
     orbit.cpp
     inclusion_vector_field.cpp
     differential_inclusion.cpp
+    first_order_pde.cpp
     map_evolver.cpp
     vector_field_evolver.cpp
     reachability_analyser.cpp
@@ -10,5 +11,5 @@ add_library(ariadne-dynamics OBJECT
 cotire(ariadne-dynamics CONFIGURATIONS None)
 
 if(COVERAGE)
-    target_compile_options(ariadne-dynamics PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-dynamics PUBLIC coverage_config)
 endif()

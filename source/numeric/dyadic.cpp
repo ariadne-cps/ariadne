@@ -45,22 +45,22 @@ namespace Ariadne {
 
 template<class X> class FiniteOperations;
 template<class X> class ExtensionOperations;
-    
+
 template<> class ExtensionOperations<Dyadic> {
     static mp_exp_t const nan_flag = std::numeric_limits<mp_exp_t>::min();
-    
+
   public:
     static Bool is_nan(Dyadic const& x) { return x._mpf[0]._mp_size==0 and x._mpf[0]._mp_exp==nan_flag; }
     static Bool is_inf(Dyadic const& x) { return x._mpf[0]._mp_size==0 and std::abs(x._mpf[0]._mp_exp)==1; }
     static Bool is_finite(Dyadic const& x) { return x._mpf[0]._mp_size!=0 || x._mpf[0]._mp_exp==0; }
     static Bool is_zero(Dyadic const& x) { return x._mpf[0]._mp_size==0 && x._mpf[0]._mp_exp==0; }
-    
-    static Sign sgn(Dyadic const& x) { 
+
+    static Sign sgn(Dyadic const& x) {
         if (is_finite(x)) { return static_cast<Sign>(mpf_cmp_si(x._mpf,0)); }
         else { return (x._mpf[0]._mp_exp==nan_flag) ? Sign::ZERO : (x._mpf[0]._mp_exp>=0) ? Sign::POSITIVE : Sign::NEGATIVE; } }
 
     static Void set_nan(Dyadic& x) { x._mpf[0]._mp_size=0; x._mpf[0]._mp_exp=nan_flag; }
-    static Void set_inf(Dyadic& x, Sign s) { x._mpf[0]._mp_size=0; 
+    static Void set_inf(Dyadic& x, Sign s) { x._mpf[0]._mp_size=0;
         x._mpf[0]._mp_exp = (s==Sign::ZERO ? nan_flag : s==Sign::POSITIVE ? +1 : -1); }
     static Void set_zero(Dyadic& x) { mpf_set_si(x._mpf,0); }
 };
@@ -69,7 +69,7 @@ template<> class FiniteOperations<Dyadic> {
     friend class ExtendedOperations<Dyadic>;
 
     static Void set(Dyadic& r, Dyadic const& x) { mpf_set(r._mpf,x._mpf); }
-    
+
     static Void add(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_add(r._mpf, x1._mpf, x2._mpf); }
     static Void sub(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_sub(r._mpf, x1._mpf, x2._mpf); }
     static Void mul(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { return mpf_mul(r._mpf, x1._mpf, x2._mpf); }
@@ -80,17 +80,17 @@ template<> class FiniteOperations<Dyadic> {
     static Void hlf(Dyadic& r, Dyadic const& x) { mpf_div_2exp(r._mpf,x._mpf,1u); }
     static Void rec(Dyadic& r, Dyadic const& x) { assert(false); }
     static Void pow(Dyadic& r, Dyadic const& x, Nat m) { return mpf_pow_ui(r._mpf, x._mpf, m); }
-    
-    static Void max(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { 
+
+    static Void max(Dyadic& r, Dyadic const& x1, Dyadic const& x2) {
         if(mpf_cmp(x1._mpf,x2._mpf)>=0) { mpf_set(r._mpf,x1._mpf); } else { mpf_set(r._mpf,x2._mpf); } }
-    static Void min(Dyadic& r, Dyadic const& x1, Dyadic const& x2) { 
+    static Void min(Dyadic& r, Dyadic const& x1, Dyadic const& x2) {
         if(mpf_cmp(x1._mpf,x2._mpf)<=0) { mpf_set(r._mpf,x1._mpf); } else { mpf_set(r._mpf,x2._mpf); } }
     static Void abs(Dyadic& r, Dyadic const& x) { mpf_abs(r._mpf,x._mpf); }
-        
+
     static Comparison cmp(Dyadic const& x1, Dyadic const& x2) { return static_cast<Comparison>(mpf_cmp(x1._mpf,x2._mpf)); }
 };
 
-    
+
 static const mp_bitcnt_t maximum_precision = 65535;
 
 Dyadic::~Dyadic() {
@@ -254,13 +254,16 @@ Dyadic operator*(Dyadic& x1, Dyadic const& x2) {
 
 Integer round(Dyadic const& x) {
     assert(is_finite(x));
-    Integer r; mpz_set_f(r._mpz,x._mpf); return r;
     Integer z;
     Dyadic y=x;
     mpf_mul_2exp(y._mpf,y._mpf,1u);
-    mpf_add_ui(y._mpf,y._mpf,1u);
+    if(y>=0) {
+        mpf_add_ui(y._mpf,y._mpf,1u);
+    } else {
+        mpf_sub_ui(y._mpf,y._mpf,1u);
+    }
     mpf_div_2exp(y._mpf,y._mpf,1u);
-    mpf_floor(y._mpf,y._mpf);
+    // mpf_trunc(y._mpf,y._mpf); // Not needed since mpf_set_f truncates
     mpz_set_f(z._mpz,y._mpf);
     return z;
 }
@@ -293,7 +296,7 @@ Dyadic pos(Dyadic const& x) {
 }
 
 Dyadic neg(Dyadic const& x) {
-    Dyadic r; ExtendedOperations<Dyadic>::neg(r,x); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::neg(r,x); return r;
 }
 
 Dyadic sqr(Dyadic const& x) {
@@ -301,19 +304,19 @@ Dyadic sqr(Dyadic const& x) {
 }
 
 Dyadic add(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r; ExtendedOperations<Dyadic>::add(r,x1,x2); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::add(r,x1,x2); return r;
 }
 
 Dyadic sub(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r; ExtendedOperations<Dyadic>::sub(r,x1,x2); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::sub(r,x1,x2); return r;
 }
 
 Dyadic mul(Dyadic const& x1, Dyadic const& x2) {
-    Dyadic r; ExtendedOperations<Dyadic>::mul(r,x1,x2); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::mul(r,x1,x2); return r;
 }
 
 Dyadic hlf(Dyadic const& x) {
-    Dyadic r; ExtendedOperations<Dyadic>::hlf(r,x); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::hlf(r,x); return r;
 }
 
 
@@ -323,20 +326,20 @@ Dyadic pow(Dyadic const& x, Int n) {
 }
 
 Dyadic pow(Dyadic const& x, Nat m) {
-    Dyadic r; ExtendedOperations<Dyadic>::pow(r,x,m); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::pow(r,x,m); return r;
 }
 
 
 Dyadic abs(Dyadic const& x) {
-    Dyadic r; ExtendedOperations<Dyadic>::abs(r,x); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::abs(r,x); return r;
 }
 
 Dyadic min(Dyadic const& x1,Dyadic const& x2) {
-    Dyadic r; ExtendedOperations<Dyadic>::min(r,x1,x2); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::min(r,x1,x2); return r;
 }
 
 Dyadic max(Dyadic const& x1,Dyadic const& x2) {
-    Dyadic r; ExtendedOperations<Dyadic>::max(r,x1,x2); return r; 
+    Dyadic r; ExtendedOperations<Dyadic>::max(r,x1,x2); return r;
 }
 
 
@@ -359,12 +362,27 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
 
 //   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
+    static const bool write_decimal = true;
     if(is_finite(x)) {
-        Rational q;
-        mpq_set_f (q._mpq,x._mpf);
-        os << q.numerator();
-        Int exp = log2floor(q.denominator());
-        if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+        if constexpr (write_decimal) {
+            Dyadic w=x;
+            if(w<0) { os << "-"; w=-w; }
+            Integer z=floor(w);
+            os << z << ".";
+            w-=z;
+            while (w!=0) {
+                w*=10;
+                z=floor(w);
+                w-=z;
+                os << z;
+            }
+        } else { // Write p/2^q
+            Rational q;
+            mpq_set_f (q._mpq,x._mpf);
+            os << q.numerator();
+            Int exp = log2floor(q.denominator());
+            if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+        }
     } else {
         if(is_nan(x)) {
             os << "NaN";
@@ -390,5 +408,10 @@ Dyadic make_dyadic(unsigned long long int n) {
 }
 
 template<> String class_name<Dyadic>() { return "Dyadic"; }
+
+
+Dyadic hlf(Integer const& n) {
+    return hlf(Dyadic(n));
+}
 
 } // namespace Ariadne

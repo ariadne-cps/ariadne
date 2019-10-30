@@ -350,7 +350,9 @@ o=8 # Temporal order
 f=ValidatedVectorMultivariateTaylorFunctionModel.identity(b,swp)
 f=ValidatedVectorMultivariateFunction.identity(1)
 integrator=GradedTaylorSeriesIntegrator(1e-8)
+
 phis=integrator.flow(f,d,h)
+assert(len(phis)==1)
 phi=phis[0]
 print("phi:",phi,type(phi))
 print()
@@ -361,9 +363,9 @@ print("phi.domain():",phi.domain(),", h:",h)
 phi0h=partial_evaluate(phi,1,FloatDPBounds(h,pr))
 dd=phi0h.codomain()
 phi=integrator.flow(f,dd,h)[0]
+print("phi:",phi)
 tr=ValidatedScalarMultivariateTaylorFunctionModel.coordinate([{0:2*h}],0,swp)-h
 tr=ValidatedScalarMultivariateFunctionModel(tr)
-print(type(phi0),type(tr))
 phi1=compose(phi,combine(phi0h,tr))
 print("phi0:",phi0)
 print("phi1:",phi1)

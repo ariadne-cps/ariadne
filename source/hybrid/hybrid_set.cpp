@@ -30,6 +30,7 @@
 #include "../hybrid/hybrid_paving.hpp"
 
 #include "../numeric/real.hpp"
+#include "../numeric/casts.hpp"
 
 #include "../symbolic/expression_set.hpp"
 #include "../geometry/function_set.hpp"

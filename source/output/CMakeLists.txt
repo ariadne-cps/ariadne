@@ -11,5 +11,5 @@ else()
 endif()
 
 if(COVERAGE)
-    target_compile_options(ariadne-output PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-output PUBLIC coverage_config)
 endif()

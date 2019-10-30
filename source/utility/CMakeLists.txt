@@ -3,5 +3,5 @@ add_library(ariadne-utility OBJECT
 )
 
 if(COVERAGE)
-    target_compile_options(ariadne-utility PUBLIC ${COVERAGE_COMPILER_FLAGS})
+    target_link_libraries(ariadne-utility PUBLIC coverage_config)
 endif()

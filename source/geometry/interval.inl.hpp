@@ -25,8 +25,8 @@
 namespace Ariadne {
 
 template<class M> inline M make_split_point(M const& m) { return m; }
-template<class F> inline Value<F> make_split_point(Approximation<F> const& am) { return cast_exact(am); }
-template<class F> inline Value<F> make_split_point(Bounds<F> const& vm) { return vm.value(); }
+template<class F> inline Value<F> make_split_point(Approximation<F> const& am) { return reinterpret_cast<Value<F>const&>(am); }
+template<class F> inline Value<F> make_split_point(Bounds<F> const& bm) { return bm.value(); }
 template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return bm.value(); }
 
 

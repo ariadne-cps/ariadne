@@ -57,14 +57,6 @@ template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X cons
     _indices.reserve(cap); _coefficients.reserve(cap);
 }
 
-inline DegreeType degree_of(MultiIndex const& a) { return a.degree(); }
-inline DegreeType degree_of(DegreeType const& a) { return a; }
-
-inline SizeType size_of(MultiIndex const& a) { return a.size(); }
-inline SizeOne size_of(DegreeType const& a) { return SizeOne(); }
-
-inline SizeType argument_size_of(UniformList<MultiIndex> const& as) { return as.argument_size(); }
-inline SizeOne argument_size_of(UniformList<DegreeType> const& a) { return SizeOne(); }
 /*
 template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
     : Expansion( Expansion(size_of(lst.begin()->first),nul(lst.begin()->second),std::max(DEFAULT_CAPACITY,lst.size()) ) )
@@ -81,7 +73,7 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 }
 */
 
-template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(0)
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(ArgumentSizeType())
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
@@ -278,18 +270,50 @@ template<class I, class X> const X& Expansion<I,X>::get(const I& a) const {
     else { return iter->coefficient(); }
 }
 
-template<class I, class X> Bool Expansion<I,X>::operator==(const Expansion<I,X>& other) const {
+
+template<class I, class X, class CMP> EqualityType<X,X> SortedExpansion<I,X,CMP>::operator==(const SortedExpansion<I,X,CMP>& other) const {
+    SortedExpansion<I,X,CMP> const& e1=*this; SortedExpansion<I,X,CMP> const& e2=other; CMP less;
+    if(e1.argument_size()!=e2.argument_size()) { return false; }
+    EqualityType<X,X> r=true;
+    auto iter1 = e1.begin(); auto iter2 = e2.begin();
+    while (iter1!=e1.end() && iter2!=e2.end()) {
+        if (iter1->index()==iter2->index()) {
+            r = r && (iter1->coefficient()==iter2->coefficient());
+            ++iter1; ++iter2;
+        } else if (less(*iter1,*iter2)) {
+            r = r && (iter1->coefficient()==0);
+            ++iter1;
+        } else if (less(*iter2,*iter1)) {
+            r = r && (0==iter2->coefficient());
+            ++iter2;
+        } else {
+             r = r && (iter1->coefficient()==0) && (0==iter2->coefficient());
+        }
+    }
+    while (iter1!=e1.end()) {
+        r = r && (iter1->coefficient()==0);
+        ++iter1;
+    }
+    while (iter2!=e2.end()) {
+        r = r && (0==iter2->coefficient());
+        ++iter2;
+    }
+    return r;
+}
+
+
+template<class I, class X> Bool Expansion<I,X>::same_as(const Expansion<I,X>& other) const {
     auto iter1=this->begin();
     auto iter2=other.begin();
     auto end1=this->end();
     auto end2=other.end();
 
-    if(this->size()!=other.size()) { return false; }
-    if(this->argument_size()!=other.argument_size()) { return false; }
+    if (this->size()!=other.size()) { return false; }
+    if (this->argument_size()!=other.argument_size()) { return false; }
 
     while(true) {
-        if(iter1!=end1 && iter2!=end2) {
-            if(!decide(*iter1 == *iter2)) { return false; }
+        if (iter1!=end1 && iter2!=end2) {
+            if (!same(*iter1,*iter2)) { return false; }
             ++iter1; ++iter2;
         } else if (iter1==end1 && iter2==end2) {
             return true;
@@ -297,14 +321,6 @@ template<class I, class X> Bool Expansion<I,X>::operator==(const Expansion<I,X>&
             return false;
         }
     }
-}
-
-template<class I, class X> Bool Expansion<I,X>::operator!=(const Expansion<I,X>& other) const {
-    return !(*this==other);
-}
-
-template<class I, class X> Bool Expansion<I,X>::same_as(const Expansion<I,X>& other) const {
-    return (*this==other);
 }
 
 template<class I, class X> auto Expansion<I,X>::insert(Iterator pos, const I& a, const X& c) -> Iterator {
@@ -415,12 +431,6 @@ template<class I, class X> ExpansionConstIterator<I,X> Expansion<I,X>::find(cons
     return iter;
 }
 
-template<class CMP> struct IndexComparison {
-    CMP cmp;
-    template<class M1, class M2> auto operator()(M1 const& m1, M2 const& m2) -> decltype(cmp(m1.index(),m2.index())) {
-        return cmp(m1.index(),m2.index()); }
-};
-
 template<class I, class X> Void Expansion<I,X>::index_sort(ReverseLexicographicLess) {
     std::sort(this->begin(),this->end(),IndexComparison<ReverseLexicographicLess>());
 }
@@ -453,18 +463,20 @@ template<class I, class X> Bool Expansion<I,X>::is_sorted(GradedIndexLess) {
     return std::is_sorted(this->begin(),this->end(),GradedIndexLess());
 }
 
-template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeType before_size, Expansion<MultiIndex,X> const& x, SizeType after_size)
+template<class I, class X> Expansion<MultiIndex,X> Expansion<I,X>::_embed(SizeType before_size, Expansion<I,X> const& x, SizeType after_size)
 {
-    SizeType old_size=x.argument_size();
+    ArgumentSizeType old_size=x.argument_size();
     SizeType new_size=before_size+old_size+after_size;
     Expansion<MultiIndex,X> r(new_size, x.zero_coefficient(), x.capacity());
-    MultiIndex old_index(old_size);
+    IndexType old_index(old_size);
     MultiIndex new_index(new_size);
-    for(typename Expansion<MultiIndex,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
+    for(typename Expansion<I,X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->index();
-        for(SizeType j=0; j!=old_size; ++j) {
-            SizeType aj=old_index[j];
-            new_index[j+before_size]=aj;
+        static_assert(IsSame<I,MultiIndex>::value or IsSame<I,UniIndex>::value);
+        if constexpr (IsSame<I,MultiIndex>::value) {
+            for(SizeType j=0; j!=old_size; ++j) { new_index[j+before_size]=old_index[j]; }
+        } else {
+            new_index[before_size]=old_index;
         }
         r.append(new_index,iter->coefficient());
     }
@@ -486,8 +498,23 @@ template<class I, class X> OutputStream& Expansion<I,X>::write(OutputStream& os)
     return os;
 }
 
+
+inline OutputStream& _write(OutputStream& os, UniIndex const& a, String const& name, bool first_factor) {
+    if (a!=0) { if (!first_factor) { os << "*"; } os << name; if (a!=1) { os << "^" << a; } } return os;
+}
+
+inline OutputStream& _write(OutputStream& os, MultiIndex const& a, Array<String> const& names, bool first_factor) {
+    for(SizeType j=0; j!=a.size(); ++j) {
+        if(a[j]!=0) {
+            if(first_factor) { first_factor=false; } else { os <<"*"; }
+            os<<names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
+        }
+    }
+    return os;
+}
+
 template<class I, class X>
-OutputStream& Expansion<I,X>::write(OutputStream& os, const Array<String>& variable_names) const
+OutputStream& Expansion<I,X>::write(OutputStream& os, const typename IndexTraits<I>::NameType& variable_names) const
 {
     const Expansion<I,X>& p=*this;
     ARIADNE_ASSERT(p.argument_size()==variable_names.size());
@@ -504,12 +531,7 @@ OutputStream& Expansion<I,X>::write(OutputStream& os, const Array<String>& varia
             bool first_factor=true;
             if(decide(v<0)) { os<<"-"; }
             if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); first_factor=false; }
-            for(SizeType j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) {
-                    if(first_factor) { first_factor=false; } else { os <<"*"; }
-                    os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
-                }
-            }
+            _write(os,a,variable_names,first_factor);
         }
     }
     return os;

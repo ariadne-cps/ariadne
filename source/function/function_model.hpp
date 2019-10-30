@@ -121,6 +121,7 @@ template<class FCTRY, class D> class FunctionModelCreator {
     decltype(auto) create(VectorFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
     decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
     decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
+    decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
     decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
 
 //    ScalarFunctionModel<P,D,PR,PRE> const& create(ScalarFunctionModel<P,D,PR,PRE> const& f) const { return f; }
@@ -160,9 +161,9 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 //! \brief Generic scalar functions on singleton domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
-    , public ProvideConcreteGenericArithmeticOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
+    : public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
+    , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,D,PR,PRE>,ScalarMultivariateFunction<P>>
+    , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     typedef IntervalDomainType C;
@@ -221,7 +222,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     inline Void set_error(Nat e) { return this->_ptr->set_error(ErrorType(e,this->error().precision())); }
     inline Void clobber() { return this->_ptr->clobber(); }
 
-    inline ScalarFunctionModel<P,D,PR,PRE> apply(Operator op) const { return ScalarFunctionModel<P,D,PR,PRE>(this->_ptr->_apply(op)); }
+//    inline ScalarFunctionModel<P,D,PR,PRE> apply(UnaryElementaryOperator op) const { return ScalarFunctionModel<P,D,PR,PRE>(this->_ptr->_apply(op)); }
     inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
   public:
     friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D> factory(ScalarFunctionModel<P,D,PR,PRE> const& f) {
@@ -283,6 +284,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
 };
 
 template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>> {
+
+/*
     static ScalarFunctionModel<P,D,PR,PRE> apply(Nul, ScalarFunctionModel<P,D,PR,PRE> f) {
         f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return std::move(f); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Neg, ScalarFunctionModel<P,D,PR,PRE> f) {
@@ -311,32 +314,45 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
     static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
         return mul(rec(std::move(f2)),c1); }
 
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return add(f1,s2); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        return add(f1,neg(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        CanonicalNumericType<P,PR,PRE> s2=factory(f1).create(c2); return mul(f1,s2); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, ScalarFunctionModel<P,D,PR,PRE> f1, const Number<P>& c2) {
-        return mul(f1,rec(c2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Add, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        return add(f2,c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        return add(neg(f2),c1); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        return mul(f2,c1); }
-
     static ScalarFunctionModel<P,D,PR,PRE> apply(Rec, const ScalarFunctionModel<P,D,PR,PRE>& f) {
         return f.apply(Rec()); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
         return mul(f1,rec(f2)); }
-    static ScalarFunctionModel<P,D,PR,PRE> apply(Div, const Number<P>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        return mul(rec(f2),c1); }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Pow, const ScalarFunctionModel<P,D,PR,PRE>& f1, Int n2) {
         return generic_pow(f1,n2); }
 
-    template<class OP> static ScalarFunctionModel<P,D,PR,PRE> apply(OP op, const ScalarFunctionModel<P,D,PR,PRE>& f) {
-        ARIADNE_NOT_IMPLEMENTED; }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Abs, const ScalarFunctionModel<P,D,PR,PRE>& f) {
+        return f.apply(Abs()); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Max, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return hlf(add(add(f1,f2),abs(sub(f1,f2)))); }
+    static ScalarFunctionModel<P,D,PR,PRE> apply(Min, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
+        return hlf(sub(add(f1,f2),abs(sub(f1,f2)))); }
+*/
+
+    typedef ScalarFunctionModel<P,D,PR,PRE> FM; typedef CanonicalNumericType<P,PR,PRE> X;
+    typedef ScalarFunctionModelInterface<P,D,PR,PRE> FMI;
+
+    static FM apply(BinaryElementaryOperator op, const FM& f1, const FM& f2) {
+        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,*f2._ptr))); }
+    static FM apply(BinaryElementaryOperator op, const FM& f1, const X& c2) {
+        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,c2))); }
+    static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
+        return FM(&dynamic_cast<FMI&>(*f2._ptr->_rapply(op,c1))); }
+    static FM apply(UnaryElementaryOperator op, const FM& f) {
+        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op))); }
+    static FM apply(GradedElementaryOperator op, const FM& f, Int n) {
+        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op,n))); }
+
+/*
+    static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
+        FM s1=factory(f2).create_constant(c1); return op(s1,f2); }
+
+    static FM apply(BinaryElementaryOperator op, const FM& f1, const Number<P>& c2) {
+        return op(f1,f1.create_constant(c2)); }
+    static FM apply(BinaryElementaryOperator, const Number<P>& c1, const FM& f2) {
+        return op(f2.create_constant(c1),f2); }
+
+*/
 
 };
 

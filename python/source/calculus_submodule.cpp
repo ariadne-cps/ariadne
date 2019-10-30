@@ -435,7 +435,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("codomain", &F::codomain);
     scalar_taylor_function_class.def("range", &F::range);
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModelDP&(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const)&ValidatedScalarMultivariateTaylorFunctionModelDP::model);
-    scalar_taylor_function_class.def("polynomial", (Polynomial<ValidatedNumericType>(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const)&ValidatedScalarMultivariateTaylorFunctionModelDP::polynomial);
+    scalar_taylor_function_class.def("polynomial", (MultivariatePolynomial<ValidatedNumericType>(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const)&ValidatedScalarMultivariateTaylorFunctionModelDP::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const)&ValidatedScalarMultivariateTaylorFunctionModelDP::number_of_nonzeros);
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ValidatedScalarMultivariateTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ValidatedScalarMultivariateTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
@@ -458,7 +458,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("__call__", (FloatDPBounds(ValidatedScalarMultivariateTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarMultivariateTaylorFunctionModelDP::operator());
     scalar_taylor_function_class.def("gradient", (Covector<FloatDPBounds>(ValidatedScalarMultivariateTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedScalarMultivariateTaylorFunctionModelDP::gradient);
     scalar_taylor_function_class.def("function", (ValidatedScalarMultivariateFunction(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::function);
-    scalar_taylor_function_class.def("polynomial", (Polynomial<FloatDPBounds>(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::polynomial);
+    scalar_taylor_function_class.def("polynomial", (MultivariatePolynomial<FloatDPBounds>(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::polynomial);
     scalar_taylor_function_class.def("restriction", &_restriction_<F,D>);
     module.def("restrict", &_restriction_<F,D>);
 //    scalar_taylor_function_class.def("extension",&_extension_<F,D>);
@@ -547,7 +547,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     vector_taylor_function_class.def("__call__", (Vector<FloatDPApproximation>(ValidatedVectorMultivariateTaylorFunctionModelDP::*)(const Vector<FloatDPApproximation>&)const) &ValidatedVectorMultivariateTaylorFunctionModelDP::operator());
     vector_taylor_function_class.def("__call__", (Vector<FloatDPBounds>(ValidatedVectorMultivariateTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorMultivariateTaylorFunctionModelDP::operator());
      vector_taylor_function_class.def("jacobian", (Matrix<FloatDPBounds>(ValidatedVectorMultivariateTaylorFunctionModelDP::*)(const Vector<FloatDPBounds>&)const) &ValidatedVectorMultivariateTaylorFunctionModelDP::jacobian);
-    vector_taylor_function_class.def("polynomials", (Vector< Polynomial<FloatDPBounds> >(ValidatedVectorMultivariateTaylorFunctionModelDP::*)()const) &ValidatedVectorMultivariateTaylorFunctionModelDP::polynomials);
+    vector_taylor_function_class.def("polynomials", (Vector< MultivariatePolynomial<FloatDPBounds> >(ValidatedVectorMultivariateTaylorFunctionModelDP::*)()const) &ValidatedVectorMultivariateTaylorFunctionModelDP::polynomials);
     vector_taylor_function_class.def("function", (ValidatedVectorMultivariateFunction(ValidatedVectorMultivariateTaylorFunctionModelDP::*)()const) &ValidatedVectorMultivariateTaylorFunctionModelDP::function);
 
     vector_taylor_function_class.def_static("constant",(ValidatedVectorMultivariateTaylorFunctionModelDP(*)(const ExactBoxType&, const Vector<ValidatedNumericType>&,SweeperDP))&ValidatedVectorMultivariateTaylorFunctionModelDP::constant);

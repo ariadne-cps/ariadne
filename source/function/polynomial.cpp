@@ -31,28 +31,40 @@
 
 namespace Ariadne {
 
-template class Polynomial<FloatDP>;
-template class Polynomial<FloatDPApproximation>;
-template class Polynomial<FloatDPBounds>;
-template class Polynomial<UpperIntervalType>;
+template class Polynomial<UniIndex,FloatDP>;
+template class Polynomial<UniIndex,FloatDPApproximation>;
+template class Polynomial<UniIndex,FloatDPBounds>;
+template class Polynomial<UniIndex,FloatMPApproximation>;
+template class Polynomial<UniIndex,FloatMPBounds>;
 
-template struct AlgebraOperations<Polynomial<FloatDP>>;
-template struct AlgebraOperations<Polynomial<FloatDPApproximation>>;
-template struct AlgebraOperations<Polynomial<FloatDPBounds>>;
-// template struct AlgebraOperations<Polynomial<UpperIntervalType>>;
+template struct AlgebraOperations<Polynomial<UniIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<UniIndex,FloatDPApproximation>>;
+template struct AlgebraOperations<Polynomial<UniIndex,FloatDPBounds>>;
+template struct AlgebraOperations<Polynomial<UniIndex,FloatMPApproximation>>;
+template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 
-template<> Void Polynomial<FloatDPValue>::cleanup() { }
+template class Polynomial<MultiIndex,FloatDP>;
+template class Polynomial<MultiIndex,FloatDPApproximation>;
+template class Polynomial<MultiIndex,FloatDPBounds>;
+template class Polynomial<MultiIndex,UpperIntervalType>;
 
-template Polynomial<FloatDPValue>::Polynomial(SizeType);
-template Expansion<MultiIndex,FloatDPValue>& Polynomial<FloatDPValue>::expansion();
-template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&) const;
-template OutputStream& Polynomial<FloatDPValue>::_write(OutputStream&, List<String> const&) const;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
+// template struct AlgebraOperations<Polynomial<MultiIndex,UpperIntervalType>>;
+
+template<> Void Polynomial<MultiIndex,FloatDPValue>::cleanup() { }
+
+template Polynomial<MultiIndex,FloatDPValue>::Polynomial(SizeType);
+template Expansion<MultiIndex,FloatDPValue>& MultivariatePolynomial<FloatDPValue>::expansion();
+template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&) const;
+template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&, Array<String> const&) const;
 
 
-template class Polynomial<FloatMPApproximation>;
-template class Polynomial<FloatMPBounds>;
-template struct AlgebraOperations<Polynomial<FloatMPApproximation>>;
-template struct AlgebraOperations<Polynomial<FloatMPBounds>>;
+template class Polynomial<MultiIndex,FloatMPApproximation>;
+template class Polynomial<MultiIndex,FloatMPBounds>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPApproximation>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPBounds>>;
 
 } //namespace Ariadne
 

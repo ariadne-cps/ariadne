@@ -23,7 +23,7 @@
 
 /*!
 
-\file references.dox
+\f`ile references.dox
 \brief References to the scientific literature
 
 
@@ -36,6 +36,7 @@
 
 Boost Interval Library <a href="http://www.boost.org/libs/numeric/interval/doc/interval.htm">http://www.boost.org/libs/numeric/interval/doc/interval.htm</a>
 
+COSY Infinity <a href=https://bt.pa.msu.edu/index_cosy.htm>href=https://bt.pa.msu.edu/index_cosy.htm</a>
 
 XSC <a href="http://www.math.uni-wuppertal.de/~xsc/">http://www.math.uni-wuppertal.de/~xsc/</a>
 
@@ -47,7 +48,6 @@ PROFIL/BIAS <a href="http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html">
 
 \section cplusplus_programming C++ Language
 
-1
 Kent G. Budge, James S. Peery, Allen C. Robinson, and Michael K. Won, "C++ and Object-Oriented Numerics",
   <em>Journal of C Language Translation</em> <b>5</b>(32), 1993.
 
@@ -58,6 +58,7 @@ Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkhauser, 1991, ISBN 3-
 Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
 
 \section interval_references Interval Arithmetic
+
 Ramon E. Moore, <em>Methods and applications of interval analysis</em>,
   SIAM Studies in Applied Mathematics, 2.
 Society for Industrial and Applied Mathematics (SIAM), Philadelphia, Pa., 1979. xi+190 pp. ISBN 0-89871-161-4
@@ -80,6 +81,16 @@ A. Neumaier, "The wrapping effect, ellipsoid arithmetic, stability and confidenc
 
 Florian Loitsch, "Printing Floating-Point Numbers Quickly and Accurately with Integers"
   <em>Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation</em>, 2010.
+
+
+\section function_calculus_references Function Calculi (including Taylor models)
+
+M. Berz and G. Hoffstätter, "Computation and Application of Taylor Polynomials with Interval Remainder Bounds",
+  <em>Reliable Computing</em> <b>4</b> (1998) 83-97.
+
+K. Makino and M. Berz, "Efficient Control of the Dependency Problem Based on Taylor Model Methods",
+  <em>Reliable Computing</em> <b>5</b> (1999) 3-12.
+
 
 \section linear_programming_references Linear Programming
 
@@ -127,6 +138,8 @@ N. S. Nedialkov, K. R. Jackson and G. F. Corliss,
 Piotr Zgliczynski, "C^1 Lohner algorithm", <em>Found. Comput. Math.</em> <b>2</b> (2002), no. 4, 429--465.
 
 \section reachability_references Reachability Analysis and Control
+
+Xin Chen, "Reachability Analysis of Non-Linear Hybrid Systems Using Taylor Models", <em>Ph.D. Thesis</em>, RWTH Aachen  (2015). ISSN 0935–3232.
 
 Pieter Collins, "Continuity and computability of reachable sets",
   <em>Theoretical Comput. Sci.</em> <b>341</b> (2005), 162--195.

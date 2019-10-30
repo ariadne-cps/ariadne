@@ -41,6 +41,8 @@
 #include "../algebra/vector.hpp"
 #include "../algebra/matrix.hpp"
 #include "../algebra/operations.hpp"
+#include "../algebra/algebra_mixin.hpp"
+
 #include "../function/domain.hpp"
 
 #include "../function/function_interface.hpp"
@@ -56,13 +58,21 @@ template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> usi
 template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>
     : public virtual ScalarFunctionModelInterface<P,D,PR,PRE>
     , public ScalarFunctionMixin<FM,P,D>
+    , public ElementaryAlgebraMixin<FM,CanonicalNumericType<P,PR,PRE>>
 {
     typedef FloatError<PR> NormType;
-  public:
-    FM apply(OperatorCode op) const;
+    typedef CanonicalNumericType<P,PR,PRE> X;
   public:
     ScalarFunctionModelInterface<P,D,PR,PRE>* _clone() const override {
         return new FM(static_cast<const FM&>(*this)); }
+
+    ScalarFunctionModelInterface<P,D,PR,PRE>* _create_copy() const override {
+        return new FM(static_cast<const FM&>(*this)); }
+    ScalarFunctionModelInterface<P,D,PR,PRE>* _create_zero() const override {
+        return new FM(factory(static_cast<FM const&>(*this)).create_zero()); }
+    ScalarFunctionModelInterface<P,D,PR,PRE>* _create_constant(CanonicalNumericType<P,PR,PRE> const& c) const override {
+        return new FM(factory(static_cast<FM const&>(*this)).create_constant(c)); }
+
     NormType const _norm() const override {
         return norm(static_cast<const FM&>(*this)); }
     ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const override {
@@ -71,8 +81,6 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         return new FM(antiderivative(static_cast<const FM&>(*this),j,c)); }
      ScalarFunctionModelInterface<P,D,PR,PRE>* _restriction(const BoxDomainType& d) const override {
         return new FM(restriction(static_cast<const FM&>(*this),d)); }
-    ScalarFunctionModelInterface<P,D,PR,PRE>* _apply(OperatorCode op) const override {
-        return new FM(this->apply(op)); }
     CanonicalNumericType<P,PR,PRE> _unchecked_evaluate(const Vector<CanonicalNumericType<P,PR,PRE>>& x) const override {
         return unchecked_evaluate(static_cast<const FM&>(*this),x); }
     ScalarFunctionModelInterface<P,D,PR,PRE>* _partial_evaluate(SizeType j, const CanonicalNumericType<P,PR,PRE>& c) const override {
@@ -85,25 +93,10 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
         ARIADNE_ASSERT(dynamic_cast<const FM*>(&f)); return inconsistent(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f)); }
     ScalarFunctionModelInterface<P,D,PR,PRE>* _refinement(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) const override {
         ARIADNE_ASSERT(dynamic_cast<const FM*>(&f)); return new FM(refinement(static_cast<const FM&>(*this),dynamic_cast<const FM&>(f))); }
-    Void _iadd(const CanonicalNumericType<P,PR,PRE>& c) override {
-        static_cast<FM&>(*this)+=c; }
-    Void _imul(const CanonicalNumericType<P,PR,PRE>& c) override {
-        static_cast<FM&>(*this)*=c; }
-    Void _isma(const CanonicalNumericType<P,PR,PRE>& c, const ScalarFunctionModelInterface<P,D,PR,PRE>& f) override {
-        static_cast<FM&>(*this)+=c*dynamic_cast<const FM&>(f); }
-    Void _ifma(const ScalarFunctionModelInterface<P,D,PR,PRE>& f1, const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) override {
-        static_cast<FM&>(*this)+=dynamic_cast<const FM&>(f1)*dynamic_cast<const FM&>(f2); }
-};
 
-template<class FM, class P, class D, class PR, class PRE> FM ScalarMultivariateFunctionModelMixin<FM,P,D,PR,PRE>::apply(OperatorCode op) const {
-    const FM& f=static_cast<const FM&>(*this);
-    switch(op) {
-        case OperatorCode::NEG: return neg(f);
-        case OperatorCode::REC: return rec(f);
-        case OperatorCode::EXP: return exp(f);
-        default: ARIADNE_FAIL_MSG("ScalarFunctionModel<P,D,PR,PRE>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
-    }
-}
+    OutputStream& _write(OutputStream& os) const override {
+        return os << static_cast<FM const&>(*this); }
+};
 
 
 template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>

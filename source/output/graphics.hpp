@@ -132,10 +132,8 @@ class Figure
 
     //! Clear the figure.
     Figure& clear();
-    //! Clear the figure.
-    Void display() const;
-    Void write(const char* filename, Nat nx, Nat ny) const;
     //! Write to \a filename.
+    Void write(const char* filename, Nat nx, Nat ny) const;
     Void write(const char* filename) const;
   public:
     struct Data;

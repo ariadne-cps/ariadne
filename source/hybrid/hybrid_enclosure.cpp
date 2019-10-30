@@ -621,7 +621,7 @@ OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c) {
     if(tcf == nullptr) {
         auto ecf = tcf->error();
         const_cast<ScaledFunctionPatch<ValidatedTaylorModelDP>&>(*tcf).clobber();
-        auto pcf = Polynomial<FloatDPApproximation>(tcf->polynomial());
+        auto pcf = MultivariatePolynomial<FloatDPApproximation>(tcf->polynomial());
         return os << c.lower_bound() << "<=" << pcf << "+/-" << ecf << "<=" << c.upper_bound();
     }
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();

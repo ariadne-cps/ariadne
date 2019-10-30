@@ -47,7 +47,6 @@ template<class F> class TestExpansion
 {
     typedef PrecisionType<F> PR;
     typedef MultiIndex MI;
-    typedef Expansion<MI,F> E;
     typedef Expansion<MI,F> ExpansionType;
 
     typedef typename Expansion<MI,F>::ValueType ExpansionValueType;
@@ -336,18 +335,18 @@ template<class F> Void TestExpansion<F>::test_equality()
     Expansion<MI,F> e1(2,zero),e2(2,zero);
     e1.append(a,1.0); e1.append(b,2.0);
     e2.append(a,1.0); e2.append(b,3.0);
-    ARIADNE_TEST_COMPARE(e1,!=,e2);
+    ARIADNE_TEST_BINARY_PREDICATE(!same, e1,e2);
     e2.clear(); e2.append(a,1.0); e2.append(b,2.0);
-    ARIADNE_TEST_EQUAL(e1,e2);
+    ARIADNE_TEST_BINARY_PREDICATE(same, e1,e2);
     e1.clear(); e1.append(b,2.0);
     e2.clear(); e2.append(a,0.0); e2.append(b,2.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by explicit zeros are considered nonequal."); }
+    if(!same(e1,e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by explicit zeros are considered not same."); }
     e1.clear(); e1.append(a,-0.0);
     e1.clear(); e1.append(a,+0.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by +0 versus -0 coefficients are considered nonequal."); }
+    if(!same(e1,e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by +0 versus -0 coefficients are considered not same."); }
     e1.clear(); e1.append(a,1.0); e1.append(b,2.0);
     e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
-    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by order of set operators are considered nonequal."); }
+    if(!same(e1,e2)) { ARIADNE_TEST_NOTIFY("Expansion<MI,F> objects differing by order of set operators are considered not same."); }
 }
 
 template<class F> Void TestExpansion<F>::test_sort()
@@ -424,9 +423,9 @@ template<class F> Void TestExpansion<F>::test_constructors()
     ARIADNE_TEST_EQUAL(p3[MultiIndex({0,0})],2.0);
 
     // Unordered indices
-    ARIADNE_TEST_COMPARE(E({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}, prec),!=,E({{{0,0},2.0}, {{1,0},3.0}, {{0,1},11.0}, {{3,0},7.0}, {{1,2},5.0}}, prec));
+    ARIADNE_TEST_BINARY_PREDICATE(!same,ExpansionType({{{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0}}, prec),ExpansionType({{{0,0},2.0}, {{1,0},3.0}, {{0,1},11.0}, {{3,0},7.0}, {{1,2},5.0}}, prec));
     // Repeated indices; do not sum in expansion class
-    ARIADNE_TEST_COMPARE(E({{{1,0},2.0}, {{1,0},3.0}, {{0,2},7.0}}, prec),!=,E({{{1,0},5.0}, {{0,2},7.0}}, prec));
+    ARIADNE_TEST_BINARY_PREDICATE(!same,ExpansionType({{{1,0},2.0}, {{1,0},3.0}, {{0,2},7.0}}, prec),ExpansionType({{{1,0},5.0}, {{0,2},7.0}}, prec));
 
     // Regression tests for expansions with only preces
     ARIADNE_TEST_CONSTRUCT(ExpansionType,pr2,({{{},0.0}},prec));
@@ -455,9 +454,9 @@ template<class F> Void TestExpansion<F>::test_find()
 template<class F> Void TestExpansion<F>::test_embed()
 {
     ARIADNE_TEST_CONSTRUCT(ExpansionType,e,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(0,e,2),ExpansionType({ {{1,2,0,0},5.0}, {{0,0,0,0},2.0}, {{1,0,0,0},3.0}, {{3,0,0,0},7.0}, {{0,1,0,0},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(1,e,0),ExpansionType({ {{0,1,2},5.0}, {{0,0,0},2.0}, {{0,1,0},3.0}, {{0,3,0},7.0}, {{0,0,1},11.0} }));
-    ARIADNE_TEST_EQUAL(embed(1,e,2),ExpansionType({ {{0,1,2,0,0},5.0}, {{0,0,0,0,0},2.0}, {{0,1,0,0,0},3.0}, {{0,3,0,0,0},7.0}, {{0,0,1,0,0},11.0} }));
+    ARIADNE_TEST_SAME_AS(embed(0,e,2),ExpansionType({ {{1,2,0,0},5.0}, {{0,0,0,0},2.0}, {{1,0,0,0},3.0}, {{3,0,0,0},7.0}, {{0,1,0,0},11.0} }));
+    ARIADNE_TEST_SAME_AS(embed(1,e,0),ExpansionType({ {{0,1,2},5.0}, {{0,0,0},2.0}, {{0,1,0},3.0}, {{0,3,0},7.0}, {{0,0,1},11.0} }));
+    ARIADNE_TEST_SAME_AS(embed(1,e,2),ExpansionType({ {{0,1,2,0,0},5.0}, {{0,0,0,0,0},2.0}, {{0,1,0,0,0},3.0}, {{0,3,0,0,0},7.0}, {{0,0,1,0,0},11.0} }));
 
 }
 

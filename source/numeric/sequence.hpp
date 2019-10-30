@@ -35,6 +35,14 @@ namespace Ariadne {
 
 class Natural;
 
+class Dyadic; class Rational; class Real;
+template<class Y> struct CompletionTypedef;
+template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
+template<> struct CompletionTypedef<Rational> { typedef Real Type; };
+template<> struct CompletionTypedef<Real> { typedef Real Type; };
+template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
+
+
 //! \brief A function \f$\mathbb{N} \to X\f$.
 template<class X> class Sequence {
     std::function<X(Natural)> _fn;
@@ -43,18 +51,19 @@ template<class X> class Sequence {
     X operator[](Natural const& n) const { return _fn(n); }
 };
 
-template<class Y> struct CompletionTypedef;
-template<> struct CompletionTypedef<Dyadic> { typedef Real Type; };
-template<> struct CompletionTypedef<Rational> { typedef Real Type; };
-template<> struct CompletionTypedef<Real> { typedef Real Type; };
-template<class Y> using CompletionType = typename CompletionTypedef<Y>::Type;
-
 //! \brief A convergent sequence in \f$X\f$, with no further information about the convergence rate
 template<class X> class ConvergentSequence : public Sequence<X> {
   public:
     ConvergentSequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
     ConvergentSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
+
+//! An alternating sequence in a partially-ordered space (X,,≤), satisfying \f$x_n \in [x_{n-1},x_{n-2}]\f$.
+template<class X> class AlternatingSequence : public ConvergentSequence<X> {
+  public:
+    explicit AlternatingSequence(Sequence<X> const& seq) : ConvergentSequence<X>(seq) { }
+};
+
 //! \brief An increasing sequence in a partially-ordered space (X,≤).
 template<class X> class IncreasingSequence : public Sequence<X> {
   public:
@@ -68,7 +77,7 @@ template<class X> class DecreasingSequence : public Sequence<X> {
     DecreasingSequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
 };
 
-//! \brief A fast-converging Cauchy sequence in a metric space (X,d), satisfying \c d(x<sub>m</sub>,x<sub>n</sub>) ≤ 2<sup>min(m,n)</sup>.
+//! \brief A fast-converging Cauchy sequence in a metric space (X,d), satisfying \f$ d(x_m,x_n) \leq 2^{-min(m,n)}\f$.
 template<class X> class FastCauchySequence : public Sequence<X> {
   public:
     FastCauchySequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }

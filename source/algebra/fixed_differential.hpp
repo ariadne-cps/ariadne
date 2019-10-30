@@ -135,6 +135,8 @@ Matrix<X> outer(const Covector<X>& u) {
 template<class X>
 class FirstDifferential
     : public DispatchTranscendentalAlgebraOperations<FirstDifferential<X>,X>
+    , public DispatchLatticeAlgebraOperations<FirstDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<FirstDifferential<X>,X>
 {
   public:
     X _value;
@@ -400,6 +402,8 @@ class Vector< FirstDifferential<X> >
 template<class X>
 class SecondDifferential
     : public DispatchTranscendentalAlgebraOperations<SecondDifferential<X>,X>
+    , public DispatchLatticeAlgebraOperations<SecondDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<SecondDifferential<X>>
 {
   public:
     X _value;
@@ -435,6 +439,8 @@ class SecondDifferential
     SecondDifferential<X>& operator=(const X& c) {
         _value=c; for(SizeType j=0; j!=this->argument_size(); ++j) { _gradient[j]=_zero;
             for(SizeType k=0; k!=this->argument_size(); ++k) { _half_hessian[j][k]=_zero; } } return *this; }
+    template<class W, EnableIf<IsAssignable<X,W>> =dummy>
+        SecondDifferential<X>& operator=(const W& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static SecondDifferential<X> constant(SizeType as, const X& c) {
@@ -638,6 +644,9 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
     }
 
 };
+
+
+
 
 
 

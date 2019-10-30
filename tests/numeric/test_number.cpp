@@ -25,8 +25,16 @@
 #include "numeric/builtin.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/rational.hpp"
-#include "numeric/float-user.hpp"
 #include "numeric/number.hpp"
+
+#include "numeric/floatdp.hpp"
+#include "numeric/float_value.hpp"
+#include "numeric/float_ball.hpp"
+#include "numeric/float_bounds.hpp"
+#include "numeric/float_upper_bound.hpp"
+#include "numeric/float_lower_bound.hpp"
+#include "numeric/float_approximation.hpp"
+#include "numeric/float_error.hpp"
 
 #include "../test.hpp"
 
@@ -50,7 +58,7 @@ void TestNumbers::test()
 Void
 TestNumbers::test_float_value_behaviour()
 {
-    ExactNumber y(FloatDPValue(0,dp)); 
+    ExactNumber y(FloatDPValue(0,dp));
     try {
         y = y+y;
         ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> within ExactNumber yield "<<y.class_name());
@@ -58,14 +66,14 @@ TestNumbers::test_float_value_behaviour()
         ARIADNE_TEST_NOTIFY("Binary operations on FloatValue<DP> give error:\n    "<<e.what());
     }
 }
-    
+
 Void
 TestNumbers::test_operations()
 {
     Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
     ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
-    
+
     Dyadic w2(2);
     Dyadic w3(3);
     Rational q2(2);
@@ -120,7 +128,7 @@ template<class Y> class TestNumber
 
 Int main() {
     TestNumbers().test();
-    
+
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 

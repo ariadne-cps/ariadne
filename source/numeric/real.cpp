@@ -35,13 +35,14 @@
 #include "integer.hpp"
 #include "rational.hpp"
 
+#include "twoexp.hpp"
 #include "dyadic.hpp"
 #include "decimal.hpp"
 
-#include "float.hpp"
-#include "float-user.hpp"
+#include "float_bounds.hpp"
 
 #include "real_interface.hpp"
+#include "sequence.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
@@ -63,58 +64,58 @@ template<> struct ValidatedRealWrapper<DyadicBounds> : public ValidatedRealInter
 
 template<class O, class... AS> struct RealWrapper;
 
-template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, ExpressionTemplate<O,A>, FloatDPBounds {
-    RealWrapper(O o, A a) : ExpressionTemplate<O,A>(o,a)
+template<class O, class A> struct RealWrapper<O,A> : virtual RealInterface, Symbolic<O,A>, FloatDPBounds {
+    RealWrapper(O o, A a) : Symbolic<O,A>(o,a)
         , FloatDPBounds(this->_op(this->_arg.get(dp))) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A> const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A> const&>(*this); }
 };
 
-template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, ExpressionTemplate<O,A1,A2>, FloatDPBounds {
-    RealWrapper(O o, A1 a1, A2 a2) : ExpressionTemplate<O,A1,A2>(o,a1,a2)
+template<class O, class A1, class A2> struct RealWrapper<O,A1,A2> : virtual RealInterface, Symbolic<O,A1,A2>, FloatDPBounds {
+    RealWrapper(O o, A1 a1, A2 a2) : Symbolic<O,A1,A2>(o,a1,a2)
         , FloatDPBounds(this->_op(this->_arg1.get(dp),this->_arg2.get(dp))) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg1.get(pr),this->_arg2.get(pr)); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,A1,A2> const&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<O,A1,A2> const&>(*this); }
 };
 
-template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, ExpressionTemplate<Pow,A,N>, FloatDPBounds {
-    RealWrapper(Pow o, A a, N n) : ExpressionTemplate<Pow,A,N>(o,a,n)
+template<class A, class N> struct RealWrapper<Pow,A,N> : virtual RealInterface, Symbolic<Pow,A,N>, FloatDPBounds {
+    RealWrapper(Pow o, A a, N n) : Symbolic<Pow,A,N>(o,a,n)
         , FloatDPBounds(this->_op(this->_arg.get(dp),n)) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {  return static_cast<FloatDPBounds>(*this); }
-    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr),this->_n); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<Pow,A,N> const&>(*this); }
+    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {  return this->_op(this->_arg.get(pr),this->_num); }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<Symbolic<Pow,A,N> const&>(*this); }
 };
 
-template<class X> struct RealConstant : RealInterface, FloatDPBounds {
+template<class X> struct RealWrapper<Cnst,X> : RealInterface, FloatDPBounds {
     X _c;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp), _c(x) { }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp), _c(x) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
 
-template<> struct RealConstant<FloatDPBounds> : RealInterface, FloatDPBounds {
+template<> struct RealWrapper<Cnst,FloatDPBounds> : RealInterface, FloatDPBounds {
     typedef FloatDPBounds X;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp) { }
-    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<DyadicBounds>(*this)); }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
+    virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(static_cast<FloatDPBounds const&>(*this)); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
-    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(FloatMP(this->lower_raw(),down,pr),FloatMP(this->upper_raw(),up,pr)); }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<FloatDPBounds const&>(*this); }
 };
 
-template<> struct RealConstant<EffectiveNumber> : RealInterface, FloatDPBounds {
+template<> struct RealWrapper<Cnst,EffectiveNumber> : RealInterface, FloatDPBounds {
     typedef EffectiveNumber X;
     X _c;
   public:
-    RealConstant(X const& x) : FloatDPBounds(x,dp) { }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }
@@ -155,6 +156,8 @@ template<> struct RealLimit<DyadicBounds> : RealInterface {
     Sequence<DyadicBounds> _seq;
   public:
     RealLimit(ConvergentSequence<DyadicBounds> const& seq) : _seq(seq) { }
+    virtual ValidatedReal _compute(Effort eff) const {
+        Nat n = eff.work()+1u; return _seq[n]; }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const {
         return FloatDPBounds(_seq[0u],pr); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const {
@@ -167,18 +170,20 @@ template<class O, class... A> inline Real make_real(O o, A... a) {
     return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
 
-inline Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
+Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
+Real::Real(ConvergentSequence<DyadicBounds> const& seq) : Real(std::make_shared<RealLimit<DyadicBounds>>(seq)) { }
+Real::Real(FastCauchySequence<Dyadic> const& seq) : Real(std::make_shared<RealLimit<Dyadic>>(seq)) { }
 
 // FIXME: Is this necessary?
 Real::Real(double l, double a, double u)
-    : Real(std::make_shared<RealConstant<FloatDPBounds>>(FloatDPBounds(l,u)))
+    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(l,u)))
 {
 }
 
 // FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(std::make_shared<RealConstant<FloatDPBounds>>(FloatDPBounds(x)))
+    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(x)))
 {
 }
 
@@ -203,18 +208,18 @@ template<class PR> FloatLowerBound<PR>::Float(Real const& x) : FloatLowerBound<P
 template<class PR> FloatApproximation<PR>::Float(Real const& x) : FloatApproximation<PR>(x.approx()) { }
 */
 
-Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
-Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
+Real::Real(std::uint64_t m, Void*) : Real(Integer(m)) { }
+Real::Real(std::int64_t n, Void*) : Real(Integer(n)) { }
 
-Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
-Real::Real(ExactDouble d) : Real(std::make_shared<RealConstant<ExactDouble>>(d)) { }
+Real::Real() : Real(Integer(0)) { }
+Real::Real(ExactDouble d) : Real(std::make_shared<RealWrapper<Cnst,ExactDouble>>(d)) { }
 //Real::Real(ExactDouble d) : Real(Dyadic(d)) { }
-Real::Real(Integer const& z) : Real(std::make_shared<RealConstant<Integer>>(z)) { }
-Real::Real(Dyadic const& w) : Real(std::make_shared<RealConstant<Dyadic>>(w)) { }
-Real::Real(Decimal const& d) : Real(std::make_shared<RealConstant<Decimal>>(d)) { }
-Real::Real(Rational const& q) : Real(std::make_shared<RealConstant<Rational>>(q)) { }
-Real::Real(EffectiveNumber q) : Real(std::make_shared<RealConstant<EffectiveNumber>>(q)) { }
-Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { }
+Real::Real(Integer const& z) : Real(std::make_shared<RealWrapper<Cnst,Integer>>(z)) { }
+Real::Real(Dyadic const& w) : Real(std::make_shared<RealWrapper<Cnst,Dyadic>>(w)) { }
+Real::Real(Decimal const& d) : Real(std::make_shared<RealWrapper<Cnst,Decimal>>(d)) { }
+Real::Real(Rational const& q) : Real(std::make_shared<RealWrapper<Cnst,Rational>>(q)) { }
+Real::Real(EffectiveNumber q) : Real(std::make_shared<RealWrapper<Cnst,EffectiveNumber>>(q)) { }
+Real::Real(FloatDPValue x) : Real(Dyadic(x.get_d())) { ARIADNE_DEPRECATED("Real::Real(FloatDPValue)","Use Real([Exact]Double) or Real(Dyadic) instead."); }
 
 
 Real add(Real const& x1, Real const& x2) { return make_real(Add(),x1,x2); }
@@ -235,6 +240,8 @@ Real log(Real const& x) { return make_real(Log(),x); }
 Real sin(Real const& x) { return make_real(Sin(),x); }
 Real cos(Real const& x) { return make_real(Cos(),x); }
 Real tan(Real const& x) { return make_real(Tan(),x); }
+Real asin(Real const& x) { return make_real(Asin(),x); }
+Real acos(Real const& x) { return make_real(Acos(),x); }
 Real atan(Real const& x) { return make_real(Atan(),x); }
 
 PositiveReal abs(Real const& x) { return PositiveReal(make_real(Abs(),x)); }
@@ -314,12 +321,25 @@ PositiveReal dist(Real const& r1, Real const& r2) { return abs(sub(r1,r2)); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
-template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real,Real> {
-    LogicalWrapper(O o, Real a1, Real a2)
-        : ExpressionTemplate<O,Real,Real>(o,a1,a2) { }
+template<class O> struct LogicalWrapper<O,Real> : virtual LogicalInterface, Symbolic<O,Real> {
+    LogicalWrapper(O o, Real a)
+        : Symbolic<O,Real>(o,a) { }
     virtual LogicalValue _check(Effort e) const;
     virtual OutputStream& _write(OutputStream& os) const {
-        return os << static_cast<ExpressionTemplate<O,Real,Real> const&>(*this); }
+        return os << static_cast<Symbolic<O,Real> const&>(*this); }
+};
+
+template<class O> LogicalValue LogicalWrapper<O,Real>::_check(Effort e) const {
+    if(e==0u) { DoublePrecision p; return static_cast<LogicalValue>(this->_op(this->_arg.get(p))); }
+    else { MultiplePrecision p(e*64); return static_cast<LogicalValue>(this->_op(this->_arg.get(p))); }
+}
+
+template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, Symbolic<O,Real,Real> {
+    LogicalWrapper(O o, Real a1, Real a2)
+        : Symbolic<O,Real,Real>(o,a1,a2) { }
+    virtual LogicalValue _check(Effort e) const;
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<Symbolic<O,Real,Real> const&>(*this); }
 };
 
 template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {
@@ -344,6 +364,8 @@ Quasidecidable operator> (Real const& x1, Real const& x2) { return make_logical<
 Quasidecidable operator<=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Leq(),x1,x2); }
 Quasidecidable operator>=(Real const& x1, Real const& x2) { return make_logical<Kleenean>(Geq(),x1,x2); }
 
+Kleenean sgn(Real const& x) { return make_logical<Kleenean>(Sgn(),x); }
+
 ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 ValidatedSierpinskian operator!=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator< (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
@@ -351,9 +373,11 @@ Kleenean operator> (Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
-template<> Int integer_cast<Int,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }
-template<> Nat integer_cast<Nat,Real>(Real const& r) { return std::round(r.get(dp).get_d()); }
-
+Integer round(Real const& r) {
+    DyadicBounds wb=r.compute(Effort(0)).get();
+    Dyadic wc=hlf(wb.lower()+wb.upper());
+    return round(wc);
+}
 
 template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }
@@ -508,6 +532,15 @@ PositiveLowerReal mul(PositiveLowerReal plr1, PositiveLowerReal plr2) { return c
 PositiveUpperReal mul(PositiveUpperReal pur1, PositiveUpperReal pur2) { return cast_positive(mul(cast_real(pur1),cast_real(pur2))); }
 PositiveLowerReal div(PositiveLowerReal plr1, PositiveUpperReal pur2) { return cast_positive(div(cast_real(plr1),cast_real(pur2))); }
 PositiveUpperReal div(PositiveUpperReal pur1, PositiveLowerReal plr2) { return cast_positive(div(cast_real(pur1),cast_real(plr2))); }
+
+LowerReal mul(LowerReal lr1, PositiveReal pr2) { return mul(cast_real(lr1),make_signed(pr2)); }
+UpperReal mul(UpperReal ur1, PositiveReal pr2) { return mul(cast_real(ur1),make_signed(pr2)); }
+LowerReal mul(PositiveReal pr1, LowerReal lr2) { return mul(make_signed(pr1),cast_real(lr2)); }
+UpperReal mul(PositiveReal pr1, UpperReal ur2) { return mul(make_signed(pr1),cast_real(ur2)); }
+LowerReal div(LowerReal lr1, PositiveReal pr2) { return div(cast_real(lr1),make_signed(pr2)); }
+UpperReal div(UpperReal ur1, PositiveReal pr2) { return div(cast_real(ur1),make_signed(pr2)); }
+LowerReal div(PositiveReal pr1, UpperReal ur2) { return div(make_signed(pr1),cast_real(ur2)); }
+UpperReal div(PositiveReal pr1, LowerReal lr2) { return div(make_signed(pr1),cast_real(lr2)); }
 
 
 static_assert(IsConstructible<FloatDP,Dyadic,FloatDP::RoundingModeType,FloatDP::PrecisionType>::value,"");

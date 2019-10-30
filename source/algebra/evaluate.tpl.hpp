@@ -112,6 +112,37 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
     return t;
 }
 
+template<class X, class Y> Y horner_evaluate(const Expansion<UniIndex,X>& e, const Y& x)
+{
+    typedef typename Expansion<UniIndex,X>::ConstIterator ConstIterator;
+    if(e.number_of_nonzeros()==0) { return nul(x); }
+
+    ConstIterator iter=e.begin();
+    ConstIterator end=e.end();
+    DegreeType na=iter->index(); // The values of the next multi-index
+    X c=iter->coefficient();
+    Y r=nul(x);
+    r=c;
+    DegreeType a=na; // The values of the next multi-index
+    ++iter;
+    while(iter!=end) {
+        na=iter->index();
+        c=iter->coefficient();
+        // Since terms are ordered in reverse,
+        // previous index must have higher value
+        assert(a>na);
+        // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
+        // Omit zero terms where possible
+        for(SizeType ii=na; ii!=a; ++ii) {
+            r=r*x;
+        }
+        r=r+c;
+        a=na;
+        ++iter;
+    }
+    return r;
+}
+
 template<class X, class Y>
 Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {

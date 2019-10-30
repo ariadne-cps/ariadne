@@ -28,9 +28,12 @@
 #include "../numeric/float.hpp"
 #include "../geometry/interval.hpp"
 
+#include <utility>
 
 namespace Ariadne {
-//    template class Expansion<DegreeType,FloatDP>;
+
+    template class Expansion<UniIndex,FloatDP>;
+    template class Expansion<UniIndex,FloatDPApproximation>;
 
     template class Expansion<MultiIndex,double>;
     template class Expansion<MultiIndex,Dyadic>;

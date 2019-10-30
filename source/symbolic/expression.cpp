@@ -29,6 +29,9 @@
 #include "../algebra/algebra.hpp"
 #include "../algebra/algebra_wrapper.hpp"
 
+#include "../function/formula.hpp"
+#include "../function/formula.tpl.hpp"
+
 #include "../symbolic/constant.hpp"
 #include "../symbolic/variables.hpp"
 #include "../symbolic/expression.hpp"
@@ -36,83 +39,15 @@
 #include "../symbolic/space.hpp"
 #include "../symbolic/valuation.hpp"
 
-#include "../function/formula.hpp"
 
+#include "symbolic/templates.tpl.hpp"
 #include "expression.tpl.hpp"
 
 namespace Ariadne {
 
-
-template<> class SymbolicAlgebraWrapper<Expression<Real>,Real>
-    : public virtual SymbolicAlgebraInterface<Real>
-    , public Expression<Real>
-{
-    typedef Expression<Real> A; typedef Real X;
-  private:
-    static A const& _cast(AlgebraInterface<X> const& a) { return static_cast<A const&>(dynamic_cast<SymbolicAlgebraWrapper<A,X>const&>(a)); }
-    static A const& _cast(SymbolicAlgebraWrapper<A,X> const& a) { return static_cast<A const&>(a); }
-    static SymbolicAlgebraInterface<X>* _make(A&& a) { return new SymbolicAlgebraWrapper<A,X>(std::move(a)); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, AlgebraInterface<X> const& ai2) {
-        return _make(op(_cast(aw1),_cast(ai2))); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw1, X const& c2) {
-        return _make(op(_cast(aw1),c2)); }
-    template<class OP> static SymbolicAlgebraInterface<X>* _eval(OP op, SymbolicAlgebraWrapper<A,X> const& aw) {
-        return _make(op(_cast(aw))); }
-  public:
-    SymbolicAlgebraWrapper(A const& a) : A(a) { }
-    virtual SymbolicAlgebraInterface<X>* _create_zero() const { return new SymbolicAlgebraWrapper<A>(A()); }
-    virtual SymbolicAlgebraInterface<X>* _create_constant(X const& c) const { return new SymbolicAlgebraWrapper<A>(A::constant(c)); }
-    virtual SymbolicAlgebraInterface<X>* _create_copy() const { return new SymbolicAlgebraWrapper<A>(*this); }
-    virtual SymbolicAlgebraInterface<X>* _neg() const {
-        return _make(-_cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _add(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) + _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _sub(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) - _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _mul(AlgebraInterface<X> const& other) const {
-        return _make(_cast(*this) * _cast(other)); }
-    virtual SymbolicAlgebraInterface<X>* _add(const X& cnst) const { return _make(_cast(*this) + cnst); }
-    virtual SymbolicAlgebraInterface<X>* _sub(X const& cnst) const { return _make(_cast(*this) - cnst); }
-    virtual SymbolicAlgebraInterface<X>* _mul(X const& cnst) const { return _make(_cast(*this) * cnst); }
-    virtual SymbolicAlgebraInterface<X>* _div(X const& cnst) const { return _make(_cast(*this) / cnst); }
-    virtual SymbolicAlgebraInterface<X>* _radd(X const& cnst) const { return _make(cnst + _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _rsub(X const& cnst) const { return _make(cnst - _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _rmul(X const& cnst) const { return _make(cnst * _cast(*this)); }
-    virtual SymbolicAlgebraInterface<X>* _pow(Nat m) const { return _make(pow(_cast(*this),static_cast<Int>(m))); }
-    virtual Void _iadd(const X& c) { (*this) = (*this) + c; }
-    virtual Void _imul(const X& c) { (*this) = (*this) * c; }
-    virtual Void _isma(const X& c, const AlgebraInterface<X>& x) {
-        (*this) = (*this) + c * _cast(x); }
-    virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
-        (*this) = (*this) + _cast(x1) * _cast(x2); }
-    virtual AlgebraInterface<X>* _apply(Neg op) const { return _eval(Minus(),*this); }
-    virtual AlgebraInterface<X>* _apply(Add op, AlgebraInterface<X>const& other) const { return _eval(Plus(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Sub op, AlgebraInterface<X>const& other) const { return _eval(Minus(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Mul op, AlgebraInterface<X>const& other) const { return _eval(Times(),*this,other); }
-    virtual AlgebraInterface<X>* _apply(Add op, X const& cnst) const { return _eval(Plus(),*this,cnst); }
-    virtual AlgebraInterface<X>* _apply(Mul op, X const& cnst) const { return _eval(Times(),*this,cnst); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << _cast(*this); }
-    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op);
-  private:
-    template<class OP> SymbolicAlgebraInterface<X>* _apply(OP op) { return new SymbolicAlgebraWrapper<A>(op(static_cast<A const&>(*this))); }
-};
-
-auto SymbolicAlgebraWrapper<Expression<Real>,Real>::_apply(OperatorCode op) -> SymbolicAlgebraInterface<X>* {
-    switch(op) {
-        case OperatorCode::SQRT: return this->_apply(Sqrt());
-        case OperatorCode::EXP: return this->_apply(Exp());
-        case OperatorCode::LOG: return this->_apply(Log());
-        case OperatorCode::SIN: return this->_apply(Sin());
-        case OperatorCode::COS: return this->_apply(Cos());
-        case OperatorCode::TAN: return this->_apply(Tan());
-        case OperatorCode::ATAN: return this->_apply(Atan());
-        default: ARIADNE_FAIL_MSG("Unknown operator "<<op<<"\n");
-    }
-}
-
 template<> template<>
-Expression<Real>::operator Algebra<Real>() const {
-    return Algebra<Real>(new SymbolicAlgebraWrapper<Expression<Real>,Real>(*this));
+Expression<Real>::operator ElementaryAlgebra<Real>() const {
+    return ElementaryAlgebra<Real>(new ElementaryAlgebraWrapper<Expression<Real>,Real>(*this));
 }
 
 
@@ -127,11 +62,7 @@ template Nat count_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
 
-template Bool is_constant_in<Real>(const Expression<Real>& e, const Set<Variable<Real>>& vs);
-template Bool is_affine_in<Real>(const Expression<Real>& e, const Set<Variable<Real>>& vs);
-template Bool is_affine_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
-template Bool is_additive_in<Real>(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
-
+template Expression<Real> ElementaryAlgebra<Real>::extract() const;
 
 Expression<Boolean> operator&&(Expression<Boolean> const& e1, Expression<Boolean> const& e2) {
     return make_expression<Boolean>(AndOp(),e1,e2); }
@@ -238,12 +169,18 @@ Expression<Real> div(Expression<Real> const& e1, Expression<Real> const& e2) {
 Expression<Real> pow(Expression<Real> const& e, Int n) {
     return make_expression<Real>(Pow(),e,n); }
 
+Expression<Real> nul(Expression<Real> const& e) {
+    return make_expression<Real>(Real(0)); }
+Expression<Real> pos(Expression<Real> const& e) {
+    return make_expression<Real>(Pos(),e); }
 Expression<Real> neg(Expression<Real> const& e) {
     return make_expression<Real>(Neg(),e); }
 Expression<Real> rec(Expression<Real> const& e) {
     return make_expression<Real>(Rec(),e); }
 Expression<Real> sqr(Expression<Real> const& e) {
     return make_expression<Real>(Sqr(),e); }
+Expression<Real> hlf(Expression<Real> const& e) {
+    return make_expression<Real>(Hlf(),e); }
 Expression<Real> sqrt(Expression<Real> const& e) {
     return make_expression<Real>(Sqrt(),e); }
 Expression<Real> exp(Expression<Real> const& e) {
@@ -256,6 +193,10 @@ Expression<Real> cos(Expression<Real> const& e) {
     return make_expression<Real>(Cos(),e); }
 Expression<Real> tan(Expression<Real> const& e) {
     return make_expression<Real>(Tan(),e); }
+Expression<Real> asin(Expression<Real> const& e) {
+    return make_expression<Real>(Asin(),e); }
+Expression<Real> acos(Expression<Real> const& e) {
+    return make_expression<Real>(Acos(),e); }
 Expression<Real> atan(Expression<Real> const& e) {
     return make_expression<Real>(Atan(),e); }
 
@@ -298,32 +239,47 @@ template Void eliminate_common_subexpressions(Vector<Expression<Real>>&);
 
 
 
+template<class VIS, class A, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A> s) {
+    return s.op().accept([&s,&vis](auto op){return vis(op,s.arg());}); }
+template<class VIS, class A1, class A2, class... OPS> decltype(auto) visit_symbolic(VIS vis, Symbolic<OperatorVariant<OPS...>,A1,A2> s) {
+    return s.op().accept([&s,&vis](auto op){return vis(op,s.arg1(),s.arg2());}); }
+
+
+namespace {
+using RE=Expression<Real>; using KE=Expression<Kleenean>;
+
+RE _indicator(Sgn, RE e, Sign sign) { if(sign==Sign::POSITIVE) { return e; } else { return -e; } }
+RE _indicator(Geq, RE e1, RE e2, Sign sign) { if(sign==Sign::POSITIVE) { return e1-e2; } else { return e2-e1; } }
+RE _indicator(Gtr, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,sign); }
+RE _indicator(Leq, RE e1, RE e2, Sign sign) { return _indicator(Geq(),e1,e2,-sign); }
+RE _indicator(Less, RE e1, RE e2, Sign sign) { return _indicator(Leq(),e1,e2,sign); }
+RE _indicator(Equal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+RE _indicator(Unequal op, RE e1, RE e2, Sign sign) { ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << op(e1,e2)); }
+
+RE _indicator(AndOp, KE e1, KE e2, Sign sign) { return min(indicator(e1,sign),indicator(e2,sign)); }
+RE _indicator(OrOp, KE e1, KE e2, Sign sign) { return max(indicator(e1,sign),indicator(e2,sign)); }
+RE _indicator(NotOp, KE e, Sign sign) { return neg(indicator(e,sign)); }
+
+Expression<Real> indicator(ConstantExpressionNode<Kleenean> e, Sign sign) {
+    Kleenean value=( sign==Sign::POSITIVE ? e.value() : !e.value() );
+    ValidatedKleenean checked_value = value.check(Effort::get_default());
+    if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
+    else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
+    else { return Expression<Real>::constant(0); } }
+Expression<Real> indicator(VariableExpressionNode<Kleenean> e, Sign sign) {
+    ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e); }
+Expression<Real> indicator(UnaryExpressionNode<Kleenean> e, Sign sign) {
+    return e.op().accept([&](auto op){return _indicator(op,e.arg(),sign);}); }
+Expression<Real> indicator(BinaryExpressionNode<Kleenean> e, Sign sign) {
+    return e.op().accept([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+Expression<Real> indicator(UnaryExpressionNode<Kleenean,Real> e, Sign sign) {
+    return e.op().accept([&](auto op){return _indicator(op,e.arg(),sign);}); }
+Expression<Real> indicator(BinaryExpressionNode<Kleenean,Real,Real> e, Sign sign) {
+    return e.op().accept([&](auto op){return _indicator(op,e.arg1(),e.arg2(),sign);}); }
+}
+
 Expression<Real> indicator(Expression<Kleenean> e, Sign sign) {
-    switch(e.op()) {
-        case OperatorCode::CNST: {
-            Kleenean value=( sign==Sign::POSITIVE ? e.val() : !e.val() );
-            ValidatedKleenean checked_value = value.check(Effort::get_default());
-            if(definitely(checked_value)) { return Expression<Real>::constant(+1); }
-            else if(not possibly(checked_value)) {  return Expression<Real>::constant(-1); }
-            else { return Expression<Real>::constant(0); }
-        }
-        case OperatorCode::VAR:
-            return Expression<Real>(Variable<Real>(e.var()));
-        case OperatorCode::GEQ: case OperatorCode::GT:
-            if(sign==Sign::POSITIVE) { return e.cmp1<Real>()-e.cmp2<Real>(); }
-            else { return e.cmp2<Real>()-e.cmp1<Real>(); }
-        case OperatorCode::LEQ: case OperatorCode::LT:
-            if(sign==Sign::POSITIVE) { return e.cmp2<Real>()-e.cmp1<Real>(); }
-            else { return e.cmp1<Real>()-e.cmp2<Real>(); }
-        case OperatorCode::AND:
-            return min(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case OperatorCode::OR:
-            return max(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case OperatorCode::NOT:
-            return neg(indicator(e.arg(),sign));
-        default:
-            ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e);
-    }
+    return e.node_ref().accept([&](auto en){return indicator(en,sign);});
 }
 
 
@@ -334,108 +290,163 @@ template Bool is_constant(const Expression<Kleenean>&, const Kleenean&);
 template Bool is_variable(const Expression<Real>&, const Variable<Real>&);
 template Bool identical(const Expression<Real>&, const Expression<Real>&);
 
+template Bool is_constant_in(const Expression<Real>& e, const Set<Variable<Real>>& spc);
+
+Bool is_affine_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
+    return e.node_ref().accept([&spc](auto en){return is_affine_in(en,spc);});
+}
+
+Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& spc) {
+    for (auto i : range(e.size())) {
+        if (not is_affine_in(e[i],spc)) return false;
+    }
+    return true;
+}
+
+Bool is_polynomial_in(const Expression<Real>& e, const Set<Variable<Real>>& spc) {
+    return e.node_ref().accept([&spc](auto en){return is_polynomial_in(en,spc);});
+}
+
+Bool is_constant_in(const Expression<Real>& e, const Variable<Real>& var) { return is_constant_in(e,Set<RealVariable>{var}); }
+
+namespace {
+typedef Expression<Real> RE; typedef Expression<Real> const& REcr;
+typedef Variable<Real> const& RVcr; typedef Constant<Real> const& RCcr;
+
+inline Bool _is_additive_in(Add, REcr e1, REcr e2, RVcr var) {
+    return (is_additive_in(e1,var) && is_constant_in(e2,var)) || (is_constant_in(e1,var) && is_additive_in(e2,var)); }
+inline Bool _is_additive_in(Sub, REcr e1, REcr e2, RVcr var) {
+    return is_additive_in(e1,var) && is_constant_in(e2,var); }
+inline Bool _is_additive_in(Variant<Mul,Div,Max,Min>, REcr e1, REcr e2, RVcr var) { return false; }
+template<class... OPS> inline Bool _is_additive_in(OperatorVariant<OPS...> const& ops, REcr e1, REcr e2, RVcr var) {
+    return ops.accept([&](auto op){return _is_additive_in(op,e1,e2,var);}); }
+
+inline Bool is_additive_in(RCcr c, RVcr var) { return true; }
+inline Bool is_additive_in(RVcr v, RVcr var) { return true; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE> const&, RVcr var) { return false; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,Int> const&, RVcr var) { return false; }
+template<class OP> inline Bool is_additive_in(Symbolic<OP,RE,RE> const& e, RVcr var) { return _is_additive_in(e._op,e._arg1,e._arg2,var); }
+}
+
+Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& var) {
+    return e.node_ref().accept([&](auto en){return is_additive_in(en,var);});
+}
 
 
+Bool is_additive_in(const Vector<Expression<Real>>& ev, const Set<Variable<Real>>& spc) {
+    // We treat the vector of expressions as additive in spc if each variable in spc appears at most once in all expressions,
+    // with a constant value of 1
+    // (FIXME: this simplifies the case of a constant multiplier, for which would need to rescale the variable)
+    // (FIXME: more generally, this simplifies the case of a diagonalisable matrix of constant multipliers)
+
+    for (auto v : spc) {
+        Bool already_found = false;
+        Bool already_found_one = false;
+        for (auto i : range(ev.size())) {
+            const Expression<Real>& e = ev[i];
+            auto der = simplify(derivative(e, v));
+            if (not is_constant_in(e,v)) {
+                if (already_found) {
+                    return false;
+                } else {
+                    already_found = true;
+                    if (is_additive_in(e,v)) {
+                        if (already_found_one) {
+                            return false;
+                        } else {
+                            already_found_one = true;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+namespace {
+
+template<class OP> constexpr Bool _identical(OP,OP) { return true; }
+template<class OP1, class OP2> constexpr Bool _identical(OP1,OP2) { return false; }
+
+constexpr Bool _opposite(Geq,Leq) { return true; }
+constexpr Bool _opposite(Leq,Geq) { return true; }
+constexpr Bool _opposite(Gtr,Less) { return true; }
+constexpr Bool _opposite(Less,Gtr) { return true; }
+template<class OP1, class OP2> constexpr Bool _opposite(OP1,OP2) { return false; }
+
+Bool opposite(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
+    return ops1.accept([&ops2](auto op1){return ops2.accept([&op1](auto op2){return _opposite(op1,op2);});}); }
+Bool identical(BinaryComparisonOperator ops1, BinaryComparisonOperator ops2) {
+    return ops1.accept([&ops2](auto op1){return ops2.accept([&op1](auto op2){return _identical(op1,op2);});}); }
+}
 
 
 Bool opposite(Expression<Kleenean> e1, Expression<Kleenean> e2) {
+    auto* e1cp = std::get_if<BinaryExpressionNode<Kleenean,Real>>(&e1.node_ref());
+    auto* e2cp = std::get_if<BinaryExpressionNode<Kleenean,Real>>(&e2.node_ref());
 
-    OperatorCode e1op;
-    OperatorCode e2op;
-    switch(e1.op()) {
-        case OperatorCode::GEQ: case OperatorCode::GT: e1op=OperatorCode::GEQ; break;
-        case OperatorCode::LEQ: case OperatorCode::LT: e1op=OperatorCode::LEQ; break;
-        default: return false;
+    if (e1cp && e2cp) {
+        if (identical(e1cp->op(),e2cp->op())) {
+            return identical(e1.arg1(),e2.arg2()) && identical(e1.arg2(),e2.arg1());
+        } else if (opposite(e1cp->op(),e2cp->op())) {
+            return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
+        }
     }
-    switch(e2.op()) {
-        case OperatorCode::GEQ: case OperatorCode::GT: e2op=OperatorCode::GEQ; break;
-        case OperatorCode::LEQ: case OperatorCode::LT: e2op=OperatorCode::LEQ; break;
-        default: return false;
-    }
-
-    // Both expressions are <=,<,>=,> comparisons
-    Expression<Real> const& e1arg1=e1.cmp1<Real>();
-    Expression<Real> const& e1arg2=e2.cmp2<Real>();
-    Expression<Real> const& e2arg1=e1.cmp1<Real>();
-    Expression<Real> const& e2arg2=e2.cmp2<Real>();
-
-    // Test if the expressions are of the form a1<=a2; a1>=a2 or a1<=a2; a2<=a1
-    if(e1op==e2op) {
-        if(identical(e1arg1,e2arg2) && identical(e1arg2,e2arg1)) { return true; }
-        else { return false; }
-    } else {
-        if(identical(e1arg1,e2arg1) && identical(e1arg2,e2arg2)) { return true; }
-        else { return false; }
-    }
-
+    return false;
 }
 
+
+namespace {
+Expression<Real> derivative(const Constant<Real>& e, Variable<Real> v) { return Expression<Real>(Real(0)); }
+Expression<Real> derivative(const Variable<Real>& e, Variable<Real> v) { return Expression<Real>(Real(e==v ?1:0)); }
+}
 
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v)
 {
-    /*
-    switch(e.op()) {
-        case OperatorCode::CNST:
-            return Expression<Real>::constant(0);
-        case OperatorCode::VAR:
-            if(e.var()==v.name()) { return Expression<Real>::constant(1); }
-            else { return Expression<Real>::constant(0); }
-        case OperatorCode::ADD:
-            return derivative(e.arg1(),v)+derivative(e.arg2(),v);
-        case OperatorCode::SUB:
-            return derivative(e.arg1(),v)-derivative(e.arg2(),v);
-        case OperatorCode::MUL:
-            return e.arg1()*derivative(e.arg2(),v)+derivative(e.arg1(),v)*e.arg2();
-        case OperatorCode::DIV:
-            return derivative(e.arg1() * rec(e.arg2()),v);
-        case OperatorCode::NEG:
-            return  - derivative(e.arg(),v);
-        case OperatorCode::REC:
-            return  - derivative(e.arg(),v) * rec(sqr(e.arg()));
-        case OperatorCode::SQR:
-            return static_cast<Real>(2) * derivative(e.arg(),v) * e.arg();
-        case OperatorCode::POW:
-            return Expression<Real>::constant(e.num())*make_expression<Real>(OperatorCode::POW,e.arg(),e.num()-1)*derivative(e.arg(),v);
-        case OperatorCode::EXP:
-            return derivative(e.arg(),v) * e.arg();
-        case OperatorCode::LOG:
-            return derivative(e.arg(),v) * rec(e.arg());
-        case OperatorCode::SIN:
-            return derivative(e.arg(),v) * cos(e.arg());
-        case OperatorCode::COS:
-            return -derivative(e.arg(),v) * sin(e.arg());
-        case OperatorCode::TAN:
-            return derivative(e.arg(),v) * (static_cast<Real>(1)-sqr(e.arg()));*/
-    switch(e.kind()) {
-        case OperatorKind::NULLARY: return Expression<Real>::constant(0);
-        case OperatorKind::VARIABLE: return Expression<Real>::constant(e.var()==v.name()?1:0);
-        case OperatorKind::UNARY: return derivative(e.op(),e.arg(),derivative(e.arg(),v));
-        case OperatorKind::BINARY: return derivative(e.op(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
-        case OperatorKind::GRADED: return derivative(e.op(), e.arg(), derivative(e.arg(),v), e.num());
-        default:
-            ARIADNE_THROW(std::runtime_error,"derivative(Expression<Real> e, Variable<Real> v)",
-                          "Cannot compute derivative of "<<e<<"\n");
-    }
+    return e.node_ref().accept([&v](auto en){return derivative(en,v);});
 }
 
 
 
-const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<EffectiveNumber> >& cache)
+namespace {
+typedef Real R; typedef EffectiveNumber Y; typedef Map<Identifier,SizeType> VM; typedef Map<const Void*,Formula<Y>> FM;
+
+const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache);
+Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& cache);
+
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Constant<Real>& e, const SPC& spc, CACHE& cache) {
+    return Formula<Y>::constant(e.value()); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const Variable<Real>& e, const SPC& spc, CACHE& cache) {
+    return Formula<Y>::coordinate(spc[e.name()]); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const UnaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache)); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const BinaryExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg1(),spc,cache),_cached_make_formula(e.arg2(),spc,cache)); }
+template<class SPC,class CACHE> Formula<Y> _cached_make_formula_impl(const GradedExpressionNode<R>& e, const SPC& spc, CACHE& cache) {
+    return make_formula<Y>(e.op(),_cached_make_formula(e.arg(),spc,cache),e.num()); }
+
+const Formula<EffectiveNumber>& _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache)
 {
-    typedef EffectiveNumber Y;
-    const ExpressionNode<Real>* eptr=e.node_ptr().operator->();
+    const ExpressionNode<Real>* eptr=&e.node_ref();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Y>(v[e.var()]) );
-        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Y>(e.val()) );
-        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache)));
-        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg1(),v,cache),cached_make_formula(e.arg2(),v,cache)) );
-        case OperatorKind::GRADED: return insert( cache, eptr, make_formula<Y>(e.op(),cached_make_formula(e.arg(),v,cache),e.num()) );
-        default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
-    }
+    return insert(cache, eptr, eptr->accept([&](auto en){return _cached_make_formula_impl(en,spc,cache);}));
 }
 
-Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+Formula<EffectiveNumber> _cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Void*& no_cache)
+{
+    return e.node_ref().accept([&](auto en){return _cached_make_formula_impl(en,spc,no_cache);});
+}
+
+} // namespace
+
+const Formula<EffectiveNumber>& cached_make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& spc, Map< const Void*, Formula<EffectiveNumber> >& cache) {
+    return _cached_make_formula(e,spc,cache);
+}
+
+Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v)
 {
     Map< const Void*, Formula<EffectiveNumber> > cache;
     return cached_make_formula(e,v,cache);
@@ -443,16 +454,10 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Ident
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc)
 {
-    typedef EffectiveNumber Y;
-    switch(e.kind()) {
-        case OperatorKind::GRADED: return make_formula<Y>(e.op(),make_formula(e.arg(),spc),e.num());
-        case OperatorKind::BINARY: return make_formula<Y>(e.op(),make_formula(e.arg1(),spc),make_formula(e.arg2(),spc));
-        case OperatorKind::UNARY: return make_formula<Y>(e.op(),make_formula(e.arg(),spc));
-        case OperatorKind::NULLARY: return Formula<Y>::constant(e.val());
-        case OperatorKind::VARIABLE: return Formula<Y>::coordinate(spc.index(e.var()));
-        default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
-    }
+    Map<Identifier, SizeType> variable_indices = spc.indices_from_names(); Void* no_cache;
+    return _cached_make_formula(e,variable_indices,no_cache);
 }
+
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var)
 {
@@ -490,11 +495,11 @@ Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& ou
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s) {
     const List<RealVariable>& vars=s.variables();
-    typedef Algebra<Real> RealAlgebra;
-    RealAlgebra az(RealExpression::constant(0));
-    Vector<RealAlgebra> va(vars.size(),az);
-    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealAlgebra(RealExpression(vars[i])); }
-    RealAlgebra fa=evaluate(f,va);
+    typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
+    RealElementaryAlgebra az(RealExpression::constant(0));
+    Vector<RealElementaryAlgebra> va(vars.size(),az);
+    for(SizeType i=0; i!=va.size(); ++i) { va[i]=RealElementaryAlgebra(RealExpression(vars[i])); }
+    RealElementaryAlgebra fa=evaluate(f,va);
     return fa.template extract<RealExpression>();
 }
 

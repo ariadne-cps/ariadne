@@ -30,9 +30,13 @@
 #define ARIADNE_OPERATORS_HPP
 
 #include <iostream>
+#include <cassert>
 
 #include "logical.decl.hpp"
 #include "number.decl.hpp"
+
+#include "utility/variant.hpp"
+#include "utility/variant.inl.hpp"
 
 namespace Ariadne {
 
@@ -43,22 +47,54 @@ typedef int Int;
 
 typedef std::ostream OutputStream;
 
+template<class X> struct Logic;
+template<> struct Logic<String> { typedef Boolean Type; };
+template<> struct Logic<Integer> { typedef Boolean Type; };
+template<> struct Logic<Real> { typedef Kleenean Type; };
+template<class X> using LogicType = typename Logic<X>::Type;
 
-enum class OperatorKind : char {
+template<class X1, class X2> using RingType = DifferenceType<ProductType<X1,X2>,ProductType<X2,X1>>;
+template<class X1, class X2> using FieldType = DifferenceType<QuotientType<X1,X2>,QuotientType<X2,X1>>;
+template<class X> using TranscendentalType = decltype(sin(declval<X>()));
+
+
+class Operator {
+  public:
+    enum class Code : char;
+    enum class Kind : char;
+    friend Kind get_kind(Code);
+  private:
+    Code _code;
+    Kind _kind;
+  public:
+    Operator(Code c, Kind k) : _code(c), _kind(k) { }
+    Operator(Code c) : _code(c), _kind(get_kind(_code)) { }
+    template<class OP> Operator(const OP& op) : _code(op.code()), _kind(op.kind()) { }
+
+    operator Code () const { return _code; }
+    Code code() const { return _code; }
+    Kind kind() const { return _kind; }
+};
+
+using OperatorCode=Operator::Code;
+using OperatorKind=Operator::Kind;
+
+
+
+enum class Operator::Kind : char {
     VARIABLE,
     COORDINATE,
     NULLARY,
     UNARY,
     BINARY,
     TERNARY,
-    SCALAR,
     GRADED,
+    SCALAR,
+    PREDICATE,
     COMPARISON
 };
 
-OutputStream& operator<<(OutputStream& os, const OperatorKind& knd);
-
-enum class OperatorCode : char {
+enum class Operator::Code : char {
     CNST,  // A constant value
     VAR,   // A named variable
     IND,   // A numbered index
@@ -68,6 +104,7 @@ enum class OperatorCode : char {
     DIV,   // Division
     FMA,   // Fused multiply-and-add
     POW,   // Integer power
+    ROOT,   // Integer root
     NUL,   // Zero
     POS,   // Unary plus
     NEG,   // Unary negation
@@ -84,9 +121,9 @@ enum class OperatorCode : char {
     ACOS,   // ArcCosine
     ATAN,   // ArcTangent
     SADD,  // Addition of a scalar constant
-    SSUB,  // Subtraction from a scalar constant
+    SSUB,   // Scalar Subtraction
     SMUL,  // Multiplication by a scalar constant
-    SDIV,  // Division into a scalar constant
+    SDIV,   // Scalar Division
     SFMA,   // Fused multiply-and-add with scalar constants
     ABS,   // Absolute value
     MAX,   // Maximum
@@ -99,51 +136,22 @@ enum class OperatorCode : char {
     ITOR,   // Conversion of Int to Real
     PUSH,
     PULL,
-    EQ=-1,    // Equal
-    NEQ=-2,   // Not equal
-    GEQ=-3,   // Greater or equal
-    LEQ=-4,   // Less or equal
-    GT=-5,    // Greater than
-    LT=-6,    // Less than
+    EQ=-6,    // Equal
+    NEQ=-5,   // Not equal
+    GEQ=-4,   // Greater or equal
+    LEQ=-3,   // Less or equal
+    GT=-2,    // Greater than
+    LT=-1,    // Less than
     SGN=-7,   // Compare with zero
     SUBS=-8,   // Compare as a subset
     DISJ=-9    // Compare disjointness
 };
 
+OutputStream& operator<<(OutputStream& os, const OperatorKind& knd);
 OutputStream& operator<<(OutputStream&, const OperatorCode& op);
 const char* name(const OperatorCode& op);
 const char* symbol(const OperatorCode& op);
 
-OperatorKind kind(OperatorCode op);
-
-class Operator {
-    OperatorCode _code;
-    OperatorKind _kind;
-  public:
-    Operator(OperatorCode c, OperatorKind k) : _code(c), _kind(k) { }
-    Operator(OperatorCode c) : _code(c), _kind(Ariadne::kind(_code)) { }
-    template<class OP> Operator(const OP& op) : _code(op.code()), _kind(op.kind()) { }
-
-    operator OperatorCode () const { return _code; }
-    OperatorCode code() const { return _code; }
-    OperatorKind kind() const { return _kind; }
-};
-
-template<class X> struct Logic;
-template<> struct Logic<String> { typedef Boolean Type; };
-template<> struct Logic<Integer> { typedef Boolean Type; };
-template<> struct Logic<Real> { typedef Kleenean Type; };
-template<class X> using LogicType = typename Logic<X>::Type;
-
-template<class X> LogicType<X> compare(OperatorCode op, const X& x1, const X& x2);
-template<class X> X compute(OperatorCode op, const X& x);
-template<class X1, class X2> X2 compute(OperatorCode op, const X1& x1, const X2& x2);
-template<class X> X compute(OperatorCode op, const X& x, Int n);
-
-template<class X> X derivative(OperatorCode op, const X& x);
-template<class X, class D> D derivative(OperatorCode op, const X& x, const D& dx);
-template<class X, class D> D derivative(OperatorCode op, const X& x1, const D& dx1, const X& x2, const D& dx2);
-template<class X, class D> D derivative(OperatorCode op, const X& x, const D& dx, Int n);
 
 template<class OBJ> struct Object { OBJ const& upcast() const { return static_cast<OBJ const&>(*this); } };
 template<class OP> struct OperatorObject : Object<OP> { };
@@ -151,6 +159,7 @@ template<class CMP> struct ComparisonObject : Object<CMP> { };
 
 template<class OP> inline OutputStream& operator<<(OutputStream& os, OperatorObject<OP> const& op) {
     return os << op.upcast().code(); }
+
 template<class CMP> inline OutputStream& operator<<(OutputStream& os, ComparisonObject<CMP> const& cmp) {
     return os << cmp.upcast().code(); }
 
@@ -212,7 +221,7 @@ struct Ind : OperatorObject<Ind> {
 };
 
 struct Var : OperatorObject<Var> {
-    static constexpr OperatorCode code() { return OperatorCode::VAR; } static constexpr OperatorKind kind() { return OperatorKind::COORDINATE; }
+    static constexpr OperatorCode code() { return OperatorCode::VAR; } static constexpr OperatorKind kind() { return OperatorKind::VARIABLE; }
 };
 
 struct Plus {
@@ -281,6 +290,11 @@ struct Pow : OperatorObject<Pow> {
     template<class A, class N> auto operator()(A&& a, N&& n) const -> decltype(pow(a,n)) { return pow(a,n); }
     template<class X, class N> X derivative(const X& a, N n) const { return n*pow(a,n-1); }
     template<class X,class D, class N> D derivative(const X& a, const D& d, N n) const { return derivative(a,n)*d; }
+};
+struct Root : OperatorObject<Root> {
+    OperatorCode code() const { return OperatorCode::ROOT; } OperatorKind kind() const { return OperatorKind::GRADED; }
+    template<class A, class N> friend auto root(A&& a, N&& n) -> decltype(exp(log(a)/n)) { return exp(log(a)/n); }
+    template<class A, class N> auto operator()(A&& a, N&& n) const -> decltype(root(a,n)) { return root(a,n); }
 };
 struct Fma : OperatorObject<Fma> {
     static constexpr OperatorCode code() { return OperatorCode::FMA; } static constexpr OperatorKind kind() { return OperatorKind::TERNARY; }
@@ -403,10 +417,116 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     static constexpr OperatorCode code() { return OperatorCode::SGN; }
+    static OperatorKind kind() { return OperatorKind::PREDICATE; }
+    template<class A> auto operator()(A&& a) const -> decltype(sgn(a)) { return sgn(a); }
     Kleenean operator()(const Real& a) const;
 };
 
 
+/*
+template<class OP> struct CodedOperator {
+    typedef OP CodeType;
+    operator Operator() const { return Operator(static_cast<Operator::Code>(_code)); }
+    CodeType code() const { return _code; }
+  protected:
+    CodeType _code;
+};
+struct SpecialOperator : CodedOperator<SpecialOperator::Code> {
+    enum class Code : char;
+};
+*/
+
+template<class... OPS> class OperatorVariant
+    : public CodedVariant<OperatorCode, OPS...>
+{
+  public:
+    template<class OP, EnableIf<IsOneOf<OP,OPS...>> =dummy> OperatorVariant(OP op) : CodedVariant<OperatorCode,OPS...>(op) { }
+    explicit OperatorVariant(OperatorCode code) : CodedVariant<OperatorCode,OPS...>(code) { }
+    OperatorKind kind() const {
+        return this->accept([](auto op){return op.kind();}); }
+    template<class... AS> decltype(auto) operator()(AS&& ... as) const {
+        return this->accept([&as...](auto op){return op(std::forward<AS>(as)...);}); }
+    template<class... AS> decltype(auto) call(AS&& ... as) const {
+        return this->accept([&as...](auto op){return op(std::forward<AS>(as)...);}); }
+    template<class R, class... AS> R call_as(AS&& ... as) const {
+        return this->accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+    template<class R, class... AS> friend R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
+        return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+    friend OutputStream& operator<<(OutputStream& os, OperatorVariant<OPS...> const& op) { op.accept([&os](auto op_){os << op_;}); return os; }
+};
+//template<class R, class... OPS, class... AS> R evaluate_as(OperatorVariant<OPS...>const& ops, AS&& ... as) {
+//    return ops.accept([&as...](auto op){return static_cast<R>(op(std::forward<AS>(as)...));}); }
+
+
+
+struct UnaryLogicalOperator : OperatorVariant<NotOp> { using OperatorVariant::OperatorVariant; };
+struct UnaryComparisonOperator : OperatorVariant<Sgn> { using OperatorVariant::OperatorVariant; };
+struct UnaryRingOperator : OperatorVariant<Neg> { using OperatorVariant::OperatorVariant; };
+struct UnaryArithmeticOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Rec> { using OperatorVariant::OperatorVariant; };
+struct UnaryTranscendentalOperator : OperatorVariant<Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Atan> { using OperatorVariant::OperatorVariant; };
+struct UnaryElementaryOperator : OperatorVariant<Nul,Pos,Neg,Sqr,Hlf,Rec,Sqrt,Exp,Log,Sin,Cos,Tan,Asin,Acos,Atan,Abs> {
+    using OperatorVariant::OperatorVariant;
+    template<class X> decltype(sin(declval<X>())) operator()(X&& x) const { typedef decltype(sin(x)) R;
+        return this->accept([&x](auto op){return static_cast<R>(op(std::forward<X>(x)));}); } };
+struct UnaryLatticeOperator : OperatorVariant<Abs> { using OperatorVariant::OperatorVariant; };
+struct BinaryLogicalOperator : OperatorVariant<AndOp,OrOp> { using OperatorVariant::OperatorVariant; };
+struct BinaryComparisonOperator : OperatorVariant<Equal,Unequal,Less,Gtr,Leq,Geq> { using OperatorVariant::OperatorVariant; };
+struct BinaryLatticeOperator : OperatorVariant<Max,Min> { using OperatorVariant::OperatorVariant; };
+struct BinaryRingOperator : OperatorVariant<Add,Sub,Mul> { using OperatorVariant::OperatorVariant;
+    template<class X1,class X2> ArithmeticType<X1,X2> operator()(X1&& x1, X2&& x2) const {
+        return this->accept([&x1,&x2](auto op){return static_cast<ArithmeticType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+struct BinaryFieldOperator : OperatorVariant<Add,Sub,Mul,Div> { using OperatorVariant::OperatorVariant;
+    template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
+        return this->accept([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+using BinaryArithmeticOperator = BinaryFieldOperator;
+struct BinaryElementaryOperator : OperatorVariant<Add,Sub,Mul,Div,Max,Min> { using OperatorVariant::OperatorVariant;
+    template<class X1,class X2> QuotientType<X1,X2> operator()(X1&& x1, X2&& x2) const {
+        return this->accept([&x1,&x2](auto op){return static_cast<QuotientType<X1,X2>>(op(std::forward<X1>(x1),std::forward<X2>(x2)));}); } };
+struct GradedRingOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
+    template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
+        return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
+struct GradedElementaryOperator : OperatorVariant<Pow> { using OperatorVariant::OperatorVariant;
+    template<class X,class N> decltype(pow(declval<X>(),declval<N>())) operator()(X&& x, N const& n) const {
+        return this->accept([&x,&n](auto op){return static_cast<decltype(pow(declval<X>(),declval<N>()))>(op(std::forward<X>(x),n));}); } };
+struct TernaryArithmeticOperator : OperatorVariant<Fma> { using OperatorVariant::OperatorVariant; };
+
+
+
+constexpr Pos inverse(Pos) { return Pos(); }
+constexpr Neg inverse(Neg) { return Neg(); }
+constexpr Rec inverse(Rec) { return Rec(); }
+constexpr Sqrt inverse(Sqr) { return Sqrt(); }
+constexpr Sqr inverse(Sqrt) { return Sqr(); }
+constexpr Log inverse(Exp) { return Log(); }
+constexpr Exp inverse(Log) { return Exp(); }
+constexpr Atan inverse(Tan) { return Atan(); }
+constexpr Tan inverse(Atan) { return Tan(); }
+
+template<class OP> using InverseType = decltype(inverse(declval<OP>()));
+
+namespace {
+template<class OP> struct HasInverse {
+    template<class O, class=InverseType<O>> static std::true_type test(int);
+    template<class O> static std::false_type test(...);
+    static const bool value = decltype(test<OP>(1))::value;
+};
+template<class OP, class... OPS> Bool _are_inverses(OP const& op1, OperatorVariant<OPS...> const& ops2) {
+    if constexpr(HasInverse<decltype(op1)>::value) { return inverse(op1).code() == ops2.code(); }
+    else { return false; }
+}
+} // namespace
+
+template<class... OPS> Bool are_inverses(OperatorVariant<OPS...> const& ops1, OperatorVariant<OPS...> const& ops2) {
+    return ops1.accept([&ops2](auto op1){ return _are_inverses(op1,ops2); });
+}
+
+struct SpecialOperator {
+    enum class Code : char { CNST=(char)OperatorCode::CNST, VAR, IND };
+    operator Operator() const { return Operator(static_cast<Operator::Code>(_code)); }
+    Code code() const { return _code; }
+  private:
+    Code _code;
+};
 class UnaryOperator {
     OperatorCode _op;
   public:

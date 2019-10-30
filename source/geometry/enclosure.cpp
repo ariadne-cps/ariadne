@@ -1226,6 +1226,8 @@ Enclosure::kuhn_recondition()
     ValidatedScalarMultivariateTaylorFunctionModelDP const& dwell_time=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_dwell_time_function.reference());
     new_set._dwell_time_function=ValidatedScalarMultivariateTaylorFunctionModelDP(new_domain,Ariadne::recondition(dwell_time.model(),discarded_parameters,number_of_error_parameters));
 
+    new_set._auxiliary_mapping=this->_auxiliary_mapping;
+
     (*this)=new_set;
 
     this->_check();

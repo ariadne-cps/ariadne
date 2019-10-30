@@ -14,6 +14,5 @@
 
 #cmakedefine HAVE_GMPXX_H
 #cmakedefine HAVE_CAIRO_H
-#cmakedefine HAVE_GTK2_H
 
 #endif /* ARIADNE_CONFIG_HPP */

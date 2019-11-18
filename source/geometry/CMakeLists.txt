@@ -2,6 +2,7 @@ add_library(ariadne-geometry OBJECT
     point.cpp
     interval.cpp
     box.cpp
+    zonotope.cpp
     curve.cpp
     function_set.cpp
     binary_tree.cpp

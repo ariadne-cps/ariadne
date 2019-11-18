@@ -84,14 +84,23 @@ struct DiagonalMatrixOperations {
         return std::move(A);
     }
 
-    template<class X> friend Matrix<X> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
+    template<class X1, class X2> friend Matrix<X1>& operator*=(Matrix<X1>& A, DiagonalMatrix<X2> const& D) {
         ARIADNE_PRECONDITION(A.column_size()==D.size());
         for(SizeType j=0; j!=A.column_size(); ++j) {
             for(SizeType i=0; i!=A.row_size(); ++i) {
                 A.at(i,j)*=D.at(j,j);
             }
         }
-        return std::move(A);
+        return A;
+    }
+
+    template<class X> friend Matrix<ProductType<X,X>> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
+        ARIADNE_PRECONDITION(A.column_size()==D.size());
+        if constexpr (IsSame<X,ProductType<X,X>>::value) {
+            A*=D; return std::move(A);
+        } else {
+            Matrix<ProductType<X,X>> R(A); R*=D; return std::move(R);
+        }
     }
 
     template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Matrix<X> A) {

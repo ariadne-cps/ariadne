@@ -159,6 +159,8 @@ template<class X> class DiagonalMatrix
     explicit DiagonalMatrix(SizeType n);
     explicit DiagonalMatrix(Array<X>);
     explicit DiagonalMatrix(Vector<X>);
+    template<class G, EnableIf<IsInvocableReturning<X,G,SizeType>> =dummy>
+        DiagonalMatrix(SizeType n, G const& g) : _ary(n,g) { }
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> explicit DiagonalMatrix(DiagonalMatrix<Y> const&, PRS...);
     SizeType size() const;
     SizeType row_size() const;

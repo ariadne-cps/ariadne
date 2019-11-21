@@ -34,6 +34,8 @@
 #include "vector.hpp"
 #include "covector.hpp"
 
+#include "pivot_matrix.hpp"
+
 namespace Ariadne {
 
 template<class T> using InitializerList = InitializerList<T>;
@@ -160,6 +162,9 @@ template<class X> class Matrix
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
 
+    template<class G, EnableIf<IsInvocableReturning<X,G,SizeType,SizeType>> =dummy>
+        Matrix(SizeType m, SizeType n, G const& g);
+
     //@{
     //! \name Static constructors
 
@@ -185,6 +190,8 @@ template<class X> class Matrix
     template<class M> Matrix<X>& operator+=(const M& A);
     template<class M> Matrix<X>& operator-=(const M& A);
 
+    //! \brief The number of rows and columns of the matrix.
+    Pair<SizeType,SizeType> size() const;
     //! \brief The number of rows of the matrix.
     SizeType row_size() const;
     //! \brief The number of columns of the matrix.
@@ -240,20 +247,6 @@ template<class X> OutputStream& operator<<(OutputStream& os, Matrix<X> const& A)
 template<class M, EnableIf<IsMatrixExpression<M>> =dummy> OutputStream& operator<<(OutputStream& os, M const& A);
 
 /************ Combinatorial Matrices *********************************************************/
-
-class PivotMatrix {
-    Array<SizeType> _ary;
-  public:
-    PivotMatrix(SizeType n=0u) : _ary(n) {
-        for(SizeType i=0; i!=n; ++i) { _ary[i]=i; } }
-    SizeType size() const { return _ary.size(); }
-    SizeType const& operator[](SizeType i) const { return _ary[i]; }
-    SizeType& operator[](SizeType i) { return _ary[i]; }
-    template<class X> operator Matrix<X> () const;
-};
-OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv);
-template<class X> Vector<X> operator*(PivotMatrix, Vector<X>);
-template<class X> Matrix<X> operator*(PivotMatrix, Matrix<X>);
 
 template<class X> struct PLUMatrix {
     PivotMatrix P; Matrix<X> LU;
@@ -837,10 +830,22 @@ template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,
 Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
     typename InitializerList<InitializerList<double>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
+        if (row_iter->size()!=this->column_size()) { std::cerr << "cs="<<this->column_size()<<" i="<<i<<" ris="<<row_iter->size()<<"\n"; }
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
         typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
             this->at(i,j)=X(ExactDouble(*col_iter),prs...);
+        }
+    }
+}
+
+template<class X> template<class G, EnableIf<IsInvocableReturning<X,G,SizeType,SizeType>>>
+Matrix<X>::Matrix(SizeType m, SizeType n, G const& g)
+    : Matrix(m,n, Uninitialised())
+{
+    for (SizeType i=0; i!=m; ++i) {
+        for (SizeType j=0; j!=n; ++j) {
+            new (&(*this)[i][j]) X(g(i,j));
         }
     }
 }
@@ -884,10 +889,15 @@ template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b);
 template<class X> Vector<X> gs_solve(Matrix<X> const& A, Vector<X> const& b, Vector<X> iX);
 template<class X> Void gs_step(Matrix<X> const& A, Vector<X> const& b, Vector<X>& iX);
 
-// Compute an LU decomposition
+//! \brief Compute an LU-factorisation, of the form \f$PA=LU\f$, where \f$P\f$ is a pivot matrix,
+//!   \f$L\f$ is a square unit lower-triangular matrix, and \f$U\f$ is an upper-triangular matrix.
+//! \relates Matrix<X>
 template<class X> Tuple< PivotMatrix, Matrix<X>, Matrix<X> > triangular_decomposition(const Matrix<X>& A);
-// Compute an QR decomposition
-template<class X> Tuple< Matrix<X>, Matrix<X> > orthogonal_decomposition(const Matrix<X>& A);
+//! \brief Compute a QR-factorisation with optional column pivoting, selecting the orthogonal column of maximum norm at each stage.
+//! The result is a product \f$QR=AP\f$ where \f$Q\f$ is an orthogonal matrix (ortho<em>normal</em> columns),
+//! \f$R\f$ is upper-triangular, and \f$P\f$ is a column pivot matrix.
+//! \relates Matrix<X>
+template<class X> Tuple< Matrix<X>, Matrix<X>, PivotMatrix > orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting=true);
 
 template<class X> using RowNormType = decltype(abs(declval<X>())+abs(declval<X>()));
 

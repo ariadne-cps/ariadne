@@ -31,10 +31,13 @@
 
 #include "../test.hpp"
 
+#include "utility/metaprogramming.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "algebra/covector.hpp"
+
+#include "algebra/pivot_matrix.tpl.hpp"
 
 namespace Ariadne {
 typedef Matrix<FloatDPApproximation> FloatApproximationMatrix;
@@ -169,6 +172,15 @@ TestMatrix::test_misc()
     ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr))*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{1.,3.},{2.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr));
     ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*transpose(FloatApproximationMatrix({{5.,7.},{8.,6.}},pr)),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,8.},{7.,6.}},pr));
     ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))*FloatApproximationVector({5.,7.},pr),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr)*FloatApproximationVector({5.,7.},pr));
+
+    ARIADNE_TEST_PRINT(FloatApproximationMatrix(3,4,[](SizeType i, SizeType j){ return i*5+j;}));
+
+    // QR factorization
+    FloatApproximationMatrix A({{4,3,7,-2},{1,5,-2,6},{-11,13,0,10}},pr);
+    PivotMatrix P; FloatApproximationMatrix Q,R;
+    make_ltuple(Q,R,P)=orthogonal_decomposition(A,true);
+    ARIADNE_TEST_WITHIN(norm(Q*R-A*P),0,1e-12);
+
 }
 
 Int main() {

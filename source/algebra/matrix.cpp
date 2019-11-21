@@ -603,28 +603,10 @@ triangular_multiplier(const Matrix<X>& A)
     return T;
 }
 
-
-template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
-{
-    const SizeType n=pv.size();
-    Array<SizeType> perm(n); for(Nat i=0; i!=n; ++i) { perm[i]=i; }
-    for(SizeType i=0; i!=n; ++i) {
-        std::swap(perm[i],perm[pv[i]]);
-    }
-    Matrix<X> P(n,n);
-    for(SizeType i=0; i!=n; ++i) {
-        P[i][perm[i]]=1;
-    }
-    return P;
-}
-
-template<class X> PivotMatrix::operator Matrix<X> () const {
-    return pivot_matrix<X>(this->_ary);
-}
-
 OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
     return os << "PivotMatrix(" << static_cast< Matrix<Int> >(pv) << ")";
 }
+
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The
 // matrix Q is built up as a composition of elementary Householder
@@ -749,6 +731,40 @@ template<class X>
 Tuple< Matrix<X>, Matrix<X> >
 orthogonal_decomposition(const Matrix<X>& A)
 {
+    PivotMatrix P;
+    Matrix<X> Q,R;
+    make_ltuple(Q,R,P)=orthogonal_decomposition(A,false);
+    return make_tuple(Q,R);
+}
+
+
+/*
+template<class X>
+Tuple< Matrix<X>, Matrix<X> >
+orthogonal_decomposition(const Matrix<X>& A)
+    SizeType m=A.row_size();
+    SizeType n=A.column_size();
+    X z=A.zero_element();
+    Matrix<X> Q(m,m,z);
+    Matrix<X> R(m,n,z);
+
+    for (SizeType k=0; k!=std::min(m,n); ++k) {
+        for (SizeType j=0; j!=k; ++j) { for(SizeType i=0; i!=m; ++i) { R[j][k]+=A[i][k]*Q[i][j]; } }
+        for (SizeType i=0; i!=m; ++i) { Q[i][k]=A[i][k]; for (SizeType j=0; j!=k; ++j) { Q[i][k]-=R[j][k]*Q[i][j]; } }
+
+        for(SizeType i=0; i!=m; ++i) { R[k][k]+=sqr(Q[i][k]); } R[k][k]=sqrt(R[k][k]);
+        for(SizeType i=0; i!=m; ++i) { Q[i][k]=Q[i][k]/R[k][k]; }
+    }
+    for (SizeType k=std::min(m,n); k<n; ++k) {
+        for (SizeType j=0; j!=m; ++j) { for(SizeType i=0; i!=m; ++i) { R[j][k]+=A[i][k]*Q[i][j]; } }
+    }
+    return std::make_tuple(Q,R);
+}
+
+template<class X>
+Tuple< Matrix<X>, Matrix<X> >
+orthogonal_decomposition(const Matrix<X>& A)
+{
     SizeType m=A.row_size();
     SizeType n=A.column_size();
     X z=A.zero_element();
@@ -814,6 +830,7 @@ orthogonal_decomposition(const Matrix<X>& A)
 
     return make_tuple(O,R);
 }
+*/
 
 
 template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
@@ -874,6 +891,7 @@ template Vector<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Vect
 template Matrix<FloatDPBounds> gs_solve(const Matrix<FloatDPBounds>&, const Matrix<FloatDPBounds>&);
 template Matrix<MidpointType<FloatDPBounds>> midpoint(Matrix<FloatDPBounds> const&);
 template Tuple<PivotMatrix,Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> triangular_decomposition(Matrix<FloatDPBounds> const&);
+template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>,PivotMatrix> orthogonal_decomposition(Matrix<FloatDPBounds> const&, bool);
 template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposition(Matrix<FloatDPBounds> const&);
 
 template class Matrix<FloatDPValue>;
@@ -885,7 +903,8 @@ template class Matrix<FloatMPValue>;
 template Matrix<FloatMPApproximation> inverse(const Matrix<FloatMPApproximation>&);
 template Vector<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Vector<FloatMPApproximation>&);
 template Matrix<FloatMPApproximation> solve(const Matrix<FloatMPApproximation>&, const Matrix<FloatMPApproximation>&);
-template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
+template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
+template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>,PivotMatrix> orthogonal_decomposition(Matrix<FloatMPApproximation> const&, bool);
 template Tuple<Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> orthogonal_decomposition(Matrix<FloatMPApproximation> const&);
 template Vector<FloatMPApproximation> row_norms(Matrix<FloatMPApproximation> const&);
 
@@ -897,7 +916,8 @@ template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
-template Tuple<PivotMatrix,Matrix<FloatMPApproximation>,Matrix<FloatMPApproximation>> triangular_decomposition(Matrix<FloatMPApproximation> const&);
+template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
+template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>,PivotMatrix> orthogonal_decomposition(Matrix<FloatMPBounds> const&, bool);
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposition(Matrix<FloatMPBounds> const&);
 
 template class Matrix<Real>;

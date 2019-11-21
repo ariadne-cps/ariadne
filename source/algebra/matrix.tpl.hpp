@@ -46,6 +46,10 @@ template<class X> Matrix<X> Matrix<X>::identity(SizeType n) {
 }
 
 
+template<class X> Pair<SizeType,SizeType> Matrix<X>::size() const {
+    return std::make_pair(this->_rs,this->_cs);
+}
+
 template<class X> Void Matrix<X>::resize(SizeType m, SizeType n) {
     if(m*n != _rs*_cs) { _ary.resize(m*n); } _rs=m; _cs=n;
 }
@@ -140,6 +144,44 @@ template<class X> decltype(declval<X>()+mag(declval<X>())) log_norm(Matrix<X> co
         r=max(r,t);
     }
     return r;
+}
+
+template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
+{
+    const SizeType n=pv.size();
+    Array<SizeType> perm(n); for(Nat i=0; i!=n; ++i) { perm[i]=i; }
+    for(SizeType i=0; i!=n; ++i) {
+        std::swap(perm[i],perm[pv[i]]);
+    }
+    Matrix<X> P(n,n);
+    for(SizeType i=0; i!=n; ++i) {
+        P[i][perm[i]]=1;
+    }
+    return P;
+}
+
+template<class X> PivotMatrix::operator Matrix<X> () const {
+    return pivot_matrix<X>(this->_ary);
+}
+
+template<class X> Matrix<X> operator*(PivotMatrix P, Matrix<X> A) {
+    ARIADNE_PRECONDITION(P.size()==A.row_size());
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            std::swap(A[i][j],A[P[i]][j]);
+        }
+    }
+    return A;
+}
+
+template<class X> Matrix<X> operator*(Matrix<X> A, PivotMatrix P) {
+    ARIADNE_PRECONDITION(A.column_size()==P.size());
+    for(SizeType j=0; j!=A.column_size(); ++j) {
+        for(SizeType i=0; i!=A.row_size(); ++i) {
+            std::swap(A[i][j],A[i][P[j]]);
+        }
+    }
+    return A;
 }
 
 

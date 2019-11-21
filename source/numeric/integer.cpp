@@ -317,6 +317,12 @@ Integer rem(Integer const& z1, Integer const& z2) {
     return r;
 }
 
+Integer operator%(Integer const& z1, Integer const& z2) {
+    Integer r;
+    mpz_cdiv_r(r._mpz,z1._mpz,z2._mpz);
+    return r;
+}
+
 Integer pow(Integer const& z, Nat m) {
     unsigned long int lm=m;
     Integer r;

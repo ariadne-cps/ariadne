@@ -47,6 +47,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 
 class Zonotope;
+class ValidatedAffineConstrainedImageSet;
 template<class BS> class ListSet;
 
 template<class X> class Affine;
@@ -81,10 +82,11 @@ class Zonotope
     : public ValidatedCompactSetInterface
     , public DrawableInterface
 {
+    typedef FloatDP X; typedef FloatDP XE;
   private:
-    Vector<FloatDP> _centre;
-    Matrix<FloatDP> _generators;
-    Vector<FloatDP> _error;
+    Vector<Value<X>> _centre;
+    Matrix<Value<X>> _generators;
+    Vector<Error<XE>> _error;
   public:
     //@{
     //! \name Constructors and destructors
@@ -98,40 +100,46 @@ class Zonotope
     explicit Zonotope(DimensionType d, SizeType m);
 
     /*! \brief Construct from centre and generators. */
-    explicit Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G);
+    explicit Zonotope(const Vector<X>& c, const Matrix<X>& G);
     /*! \brief Construct from centre, generators, and a uniform error term. */
-    explicit Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G, const Vector<FloatDP>& e);
+    explicit Zonotope(const Vector<X>& c, const Matrix<X>& G, const Vector<X>& e);
 
     /*! \brief Construct from centre, generators, and a uniform error term. */
-    explicit Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPValue>& G, const Vector<FloatDPError>& e);
+    explicit Zonotope(const Vector<Value<X>>& c, const Matrix<Value<X>>& G, const Vector<Error<XE>>& e);
 
     /*! \brief Construct from centre and generators. */
-    explicit Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPValue>& G);
+    explicit Zonotope(const Vector<Value<X>>& c, const Matrix<Value<X>>& G);
     /*! \brief Construct from interval centre and a generator matrix. */
-    explicit Zonotope(const Vector<FloatDPBounds>& c, const Matrix<FloatDPValue>& G);
+    explicit Zonotope(const Vector<Bounds<X>>& c, const Matrix<Value<X>>& G);
     /*! \brief Construct from centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPBounds>& G);
+    explicit Zonotope(const Vector<Value<X>>& c, const Matrix<Bounds<X>>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<FloatDPBounds>& c, const Matrix<FloatDPBounds>& G);
+    explicit Zonotope(const Vector<Bounds<X>>& c, const Matrix<Bounds<X>>& G);
+    /*! \brief Construct from an interval centre, a generator matrix, and a uniform error term. */
+    explicit Zonotope(const Vector<Bounds<X>>& c, const Matrix<Value<X>>& G, const Vector<Error<XE>>& e);
 
-
-    /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
-    template<class XX> explicit Zonotope(DimensionType d, SizeType m, const XX* ptr);
 
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(InitializerList< std::tuple<FloatDP,InitializerList<FloatDP>,FloatDP> > lst);
+    explicit Zonotope(InitializerList< std::tuple<X,InitializerList<X>,X> > lst);
 
 
+    /*! \brief Convert from a point. */
+    Zonotope(const Point<Value<X>>& pt);
+    Zonotope(const Point<Bounds<X>>& pt);
     /*! \brief Convert from a box. */
-    Zonotope(const ExactBoxType& r);
+    Zonotope(const Box<Interval<UpperBound<X>>>& bx);
     /*! \brief Copy constructor. */
     Zonotope(const Zonotope& z);
     /*! \brief Copy assignment operator. */
     Zonotope& operator=(const Zonotope& z);
     /*! \brief Cloning operator. */
     Zonotope* clone() const;
+
+    /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
+    explicit operator ValidatedAffineConstrainedImageSet () const;
+
     //@}
 
 
@@ -150,16 +158,16 @@ class Zonotope
     SizeType number_of_generators() const;
 
     /*! \brief The domain. */
-    Vector<ExactIntervalType> domain() const;
+    Box<ExactIntervalType> domain() const;
 
     /*! \brief The centre. */
-    const Vector<FloatDP>& centre() const;
+    const Vector<Value<X>>& centre() const;
 
     /*! \brief The matrix of principle directions. */
-    const Matrix<FloatDP>& generators() const;
+    const Matrix<Value<X>>& generators() const;
 
     /*! \brief The uniform error bound. */
-    const Vector<FloatDP>& error() const;
+    const Vector<Error<XE>>& error() const;
 
     /*! \brief A bounding box for the set. */
     UpperBoxType bounding_box() const;
@@ -168,7 +176,7 @@ class Zonotope
     PositiveFloatDPUpperBound radius() const;
 
     /*! \brief Test if the set contains a point. */
-    ValidatedKleenean contains(const ExactPoint& pt) const;
+    ValidatedLowerKleenean contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
     ValidatedLowerKleenean separated(const ExactBoxType& bx) const;
@@ -179,15 +187,37 @@ class Zonotope
 
 
     //@{
-    //! \name Geometric binary predicates
-    /*! \brief Tests disjointness of \a z and \a r. */
-    friend ValidatedLowerKleenean separated(const Zonotope& z, const ExactBoxType& r);
-    /*! \brief Tests if \a z and \a r intersect. */
-    friend ValidatedLowerKleenean overlaps(const Zonotope& z, const ExactBoxType& r);
-    /*! \brief Tests inclusion of \a z in \a r. */
-    friend ValidatedLowerKleenean inside(const Zonotope& z, const ExactBoxType& r);
-    /*! \brief Tests disjointness of \a r and \a z. */
-    friend ValidatedLowerKleenean separated(const ExactBoxType& r, const Zonotope& z);
+    //! \name Geometric predicates
+
+    /*! \brief Test if \a z is empty. Always returns \c false. */
+    friend ValidatedKleenean empty(const Zonotope& z) { return false; }
+    /*! \brief Test if \a z is bounded. Always returns \c true. */
+    friend ValidatedKleenean is_bounded(const Zonotope& z) { return true; }
+    /*! \brief An upper bound for the radius of \a z. */
+    friend PositiveFloatDPUpperBound radius(const Zonotope& z) { return z.radius(); }
+    /*! \brief A bounding box for the \a z. */
+    friend UpperBoxType bounding_box(const Zonotope& z);
+
+    /*! \brief Test if the z contains a point. */
+    friend ValidatedLowerKleenean contains(const Zonotope& z, const ExactPoint& pt) { return z.contains(pt); }
+    /*! \brief Tests inclusion of \a z in \a bx. */
+    friend ValidatedLowerKleenean inside(const Zonotope& z, const ExactBoxType& bx) { return z.inside(bx); }
+    /*! \brief Tests disjointness of \a z and \a bx. */
+    friend ValidatedLowerKleenean separated(const Zonotope& z, const ExactBoxType& bx) { return z.separated(bx); }
+    /*! \brief Tests disjointness of \a bx and \a z. */
+    friend ValidatedLowerKleenean separated(const ExactBoxType& bx, const Zonotope& z) { return z.separated(bx); }
+    /*! \brief Tests disjointness of \a bx and \a z. */
+    friend ValidatedLowerKleenean separated(const Zonotope& z1, const Zonotope& z2) { return _separated(z1,z2); }
+    //@}
+
+
+
+    //@{
+    //! \name Geometric operations
+
+    /*! \brief The Cartesian product of two zonotopes. */
+    friend Zonotope product(const Zonotope& z1, const Zonotope& z2) { return _product(z1,z2); }
+    friend Zonotope product(const Zonotope& z1, const Interval<UpperBound<X>>& ivl2) { return _product(z1,ivl2); }
     //@}
 
     //@{
@@ -197,66 +227,59 @@ class Zonotope
     /*! \brief Compute an over-approximation of the zonotope \a z. */
     friend Zonotope over_approximation(const Zonotope& z);
     /*! \brief Compute an over-approximation of the zonotope \a z without a uniform error term. */
-    friend Zonotope error_free_over_approximation(const Zonotope&);
+    friend Zonotope error_free_over_approximation(const Zonotope& z) { return _error_free_over_approximation(z); }
     /*! \brief Compute an over-approximation of the zonotope \a z by a non-coordinate aligned orthotope. */
-    friend Zonotope orthogonal_over_approximation(const Zonotope&);
+    friend Zonotope orthogonal_over_approximation(const Zonotope& z) { return _orthogonal_over_approximation(z); }
     /*! \brief Compute an over-approximation of a zonotope \a z with nonsingular generator matrix. */
-    friend Zonotope nonsingular_over_approximation(const Zonotope&);
-    /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
-    friend Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
+    friend Zonotope nonsingular_over_approximation(const Zonotope& z) { return _nonsingular_over_approximation(z); }
+    /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a blocks blocks of \a d generators. */
+    friend Zonotope cascade_over_approximation(const Zonotope& z, SizeType blocks) { return _cascade_over_approximation(z,blocks); }
+
+    /*! \brief Split into smaller subsets. */
+    friend ListSet<Zonotope> split(const Zonotope& z);
+
     //@}
 
     //@{
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
-    friend Zonotope apply(const Vector<Affine<ExactIntervalType>>& af, const Zonotope& z);
-    friend Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
+    friend Zonotope apply(const Vector<Affine<ExactIntervalType>>& af, const Zonotope& z) { return _apply_affine(af,z); }
+    friend Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z) { return _apply(f,z); }
+    friend Zonotope image(const Zonotope& z, const VectorMultivariateFunction<ValidatedTag>& f) { return _apply(f,z); }
     //@}
 
     //@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */
     OutputStream& write(OutputStream& os) const;
+    /*! \brief Write to an output stream. */
+    friend OutputStream& operator<<(OutputStream& os, const Zonotope& z) { return z.write(os); }
     /*! \brief Draw on a canvas. */
     Void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}
+  private:
+    static Zonotope _apply_affine(const Vector<Affine<ExactIntervalType>>& f, const Zonotope& z);
+    static Zonotope _apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
+
+    static Zonotope _product(const Zonotope& z1, const Zonotope& z2);
+    static Zonotope _product(const Zonotope& z1, const Interval<UpperBound<X>>& ivl2);
+
+    static ListSet<Zonotope> _split(const Zonotope& z);
+
+    static ValidatedLowerKleenean _separated(const Zonotope& z1, const Zonotope& z2);
+
+    static Zonotope _approximation(const Zonotope& z);
+    static Zonotope _over_approximation(const Zonotope& z);
+    static Zonotope _error_free_over_approximation(const Zonotope&);
+    static Zonotope _orthogonal_over_approximation(const Zonotope&);
+    static Zonotope _nonsingular_over_approximation(const Zonotope&);
+    static Zonotope _cascade_over_approximation(const Zonotope& z, SizeType blocks);
+    static Zonotope _orthogonal_approximation(const Zonotope& z);
 };
 
 
-ValidatedKleenean empty(const Zonotope& z);
-ValidatedKleenean is_bounded(const Zonotope& z);
-PositiveFloatDPUpperBound radius(const Zonotope& z);
-UpperBoxType bounding_box(const Zonotope& z);
 
 
-ValidatedKleenean contains(const Zonotope& z, const ExactPoint& pt);
-ValidatedLowerKleenean separated(const Zonotope& z, const ExactBoxType& r);
-ValidatedLowerKleenean overlaps(const Zonotope& z, const ExactBoxType& r);
-ValidatedLowerKleenean inside(const Zonotope& z, const ExactBoxType& r);
-
-ValidatedLowerKleenean separated(const Zonotope& z1, const Zonotope& z2);
-
-ListSet<Zonotope> split(const Zonotope& z);
-
-Zonotope approximation(const Zonotope& z);
-Zonotope over_approximation(const Zonotope& z);
-Zonotope error_free_over_approximation(const Zonotope&);
-Zonotope orthogonal_over_approximation(const Zonotope&);
-Zonotope nonsingular_over_approximation(const Zonotope&);
-Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
-Zonotope orthogonal_approximation(const Zonotope& z);
-
-Zonotope apply(const Affine<ExactIntervalType>& af, const Zonotope& z);
-Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
-
-OutputStream& operator<<(OutputStream& os, const Zonotope& z);
-
-
-template<class X> inline
-Zonotope::Zonotope(DimensionType d, SizeType m, const X* ptr)
-    : _centre(d,ptr), _generators(d,m,ptr+d), _error(d)
-{
-}
 
 
 } // namespace Ariadne

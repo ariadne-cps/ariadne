@@ -34,9 +34,11 @@
 #include "../utility/array.hpp"
 #include "../numeric/floatdp.hpp"
 #include "../numeric/float_bounds.hpp"
+#include "../numeric/float_error.hpp"
 #include "../algebra/vector.hpp"
 #include "../algebra/matrix.hpp"
 #include "../algebra/diagonal_matrix.hpp"
+#include "../algebra/pivot_matrix.tpl.hpp"
 #include "../function/function.hpp"
     #include "../algebra/algebra.hpp"
     #include "../function/formula.hpp"
@@ -55,9 +57,12 @@ Vector<FloatDP> const& cast_raw(Vector<FloatDPValue> const& v) { return reinterp
 Vector<FloatDP> const& cast_raw(Vector<FloatDPError> const& v) { return reinterpret_cast<Vector<FloatDP>const&>(v); }
 Matrix<FloatDP> const& cast_raw(Matrix<FloatDPValue> const& v) { return reinterpret_cast<Matrix<FloatDP>const&>(v); }
 
+template<class X> Vector<Bounds<X>> pm(Vector<Error<X>> const& ve) { return Vector<Bounds<X>>(ve.size(),[&ve](SizeType i){return pm(ve[i]);}); }
+
 Matrix<FloatDPApproximation>& cast_approximate(Matrix<FloatDP>& A) { return reinterpret_cast<Matrix<FloatDPApproximation>&>(A); }
 Matrix<FloatDPApproximation> const& cast_approximate(Matrix<FloatDP> const& A) { return reinterpret_cast<Matrix<FloatDPApproximation>const&>(A); }
 
+Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& e) { return reinterpret_cast<Vector<FloatDPValue>const&>(e); }
 DiagonalMatrix<FloatDPValue> const& cast_exact(DiagonalMatrix<FloatDPError> const& D) { return reinterpret_cast<DiagonalMatrix<FloatDPValue>const&>(D); }
 
 inline Vector<FloatDP> add(RoundApproximately,const Vector<FloatDP>& v1, const Vector<FloatDP>& v2) { return v1+v2; }
@@ -100,17 +105,15 @@ FloatDP add(FloatDP::RoundingModeType, FloatDP, FloatDP);
 FloatDP sub(FloatDP::RoundingModeType, FloatDP, FloatDP);
 FloatDP mul(FloatDP::RoundingModeType, FloatDP, FloatDP);
 
-Void
-accumulate(FloatDP& value, FloatDP& error, SizeType n, const FloatDP* aptr, const FloatDP* bptr)
+
+Vector<FloatDPError>
+errors(const Vector<FloatDPBounds>& pt)
 {
-    FloatDP vl=value.raw();
-    FloatDP vu=value.raw();
-    for(SizeType i=0; i!=n; ++i) {
-        vl=add(down,vl,mul(down,aptr[i],bptr[i]));
-        vu=add(up,vu,mul(up,aptr[i],bptr[i]));
+    Vector<FloatDPError> result(pt.size());
+    for(SizeType i=0; i!=pt.size(); ++i) {
+        result[i]=pt[i].error();
     }
-    value=hlf(add(near,vl,vu));
-    error=max(sub(up,vu,value),sub(up,value,vl));
+    return result;
 }
 
 Vector<PositiveFloatDPUpperBound>
@@ -118,7 +121,7 @@ row_norms(const Matrix<FloatDPBounds>& A)
 {
     SizeType const m=A.row_size();
     SizeType const n=A.column_size();
-    Vector<PositiveFloatDPUpperBound> e(m);
+    Vector<PositiveFloatDPUpperBound> e(m,mag(A.zero_element()));
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             e[i]+=mag(A[i][j]);
@@ -151,17 +154,6 @@ row_errors(const Matrix<FloatDPBounds>& A)
     }
     return e;
 }
-
-Vector<FloatDPError>
-errors(const Vector<FloatDPBounds>& pt)
-{
-    Vector<FloatDPError> result(pt.size());
-    for(SizeType i=0; i!=pt.size(); ++i) {
-        result[i]=pt[i].error();
-    }
-    return result;
-}
-
 
 Vector<FloatDPError>
 row_errors(const Vector<FloatDPBounds>& b, const Matrix<FloatDPBounds>& A)
@@ -211,30 +203,30 @@ Zonotope::Zonotope(DimensionType d, SizeType m)
 {
 }
 
-Zonotope::Zonotope(InitializerList< Tuple<FloatDP,InitializerList<FloatDP>,FloatDP> > lst)
+Zonotope::Zonotope(InitializerList< Tuple<X,InitializerList<X>,X> > lst)
     : _centre(lst.size()), _generators(lst.size(),lst.size()==0?0u:std::get<1>(*lst.begin()).size()), _error(lst.size())
 {
-    for(InitializerList< Tuple<FloatDP,InitializerList<FloatDP>,FloatDP> >::const_iterator aff_iter=lst.begin();
+    for(InitializerList< Tuple<X,InitializerList<X>,X> >::const_iterator aff_iter=lst.begin();
         aff_iter!=lst.end(); ++aff_iter)
     {
         SizeType i=static_cast<SizeType>(aff_iter-lst.begin()); // Cast needed to change signed to unsigned
-        this->_centre[i]=std::get<0>(*aff_iter);
+        this->_centre[i]=static_cast<Value<X>>(std::get<0>(*aff_iter));
         for(SizeType j=0; j!=_generators.column_size(); ++j) {
-            this->_generators[i][j]=*(std::get<1>(*aff_iter).begin()+j);
+            this->_generators[i][j]=static_cast<Value<X>>(*(std::get<1>(*aff_iter).begin()+j));
         }
-        this->_error[i]=std::get<2>(*aff_iter);
-        ARIADNE_ASSERT(this->_error[i]>=0);
+        this->_error[i]=static_cast<Error<XE>>(std::get<2>(*aff_iter));
+        ARIADNE_ASSERT(this->_error[i].raw()>=0);
     }
 }
 
 
-Zonotope::Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G)
+Zonotope::Zonotope(const Vector<X>& c, const Matrix<X>& G)
     : _centre(c), _generators(G), _error(c.size(),c.zero_element().precision())
 {
     assert(c.size()==G.row_size());
 }
 
-Zonotope::Zonotope(const Vector<FloatDP>& c, const Matrix<FloatDP>& G, const Vector<FloatDP>& e)
+Zonotope::Zonotope(const Vector<X>& c, const Matrix<X>& G, const Vector<X>& e)
     : _centre(c), _generators(G), _error(e)
 {
     assert(c.size()==G.row_size());
@@ -250,32 +242,54 @@ Zonotope::Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPValue>& G,
 
 
 Zonotope::Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPValue>& G)
-    : _centre(cast_raw(c)), _generators(cast_raw(G)), _error(c.size(),FloatDP(double_precision))
+    : _centre(cast_raw(c)), _generators(cast_raw(G)), _error(c.size(),X(double_precision))
 {
     assert(c.size()==G.row_size());
 }
 
 
 Zonotope::Zonotope(const Vector<FloatDPBounds>& c, const Matrix<FloatDPValue>& G)
-    : _centre(cast_raw(midpoint(c))), _generators(cast_raw(G)), _error(cast_raw(errors(c)))
+    : _centre(midpoint(c)), _generators(G), _error(errors(c))
 {
     assert(c.size()==G.row_size());
 }
 
 
 Zonotope::Zonotope(const Vector<FloatDPValue>& c, const Matrix<FloatDPBounds>& G)
-    : _centre(cast_raw(c)), _generators(cast_raw(midpoint(G))), _error(cast_raw(row_errors(G)))
+    : _centre(c), _generators(cast_raw(midpoint(G))), _error(cast_raw(row_errors(G)))
 {
     assert(c.size()==G.row_size());
 }
 
 
 Zonotope::Zonotope(const Vector<FloatDPBounds>& c, const Matrix<FloatDPBounds>& G)
-    : _centre(cast_raw(midpoint(c))), _generators(cast_raw(midpoint(G))), _error(cast_raw(row_errors(c,G)))
+    : _centre(midpoint(c)), _generators(midpoint(G)), _error(row_errors(c,G))
 {
     assert(c.size()==G.row_size());
 }
 
+Zonotope::Zonotope(const Vector<FloatDPBounds>& c, const Matrix<FloatDPValue>& G, const Vector<FloatDPError>& e)
+    : _centre(midpoint(c)), _generators(G), _error(e+errors(c))
+{
+    assert(c.size()==G.row_size());
+}
+
+
+
+Zonotope::Zonotope(const Point<Bounds<X>>& pt)
+    : _centre(pt.dimension(),[&pt](SizeType i){return pt[i].value();}), _generators(pt.dimension(),0), _error(pt.dimension(),[&pt](SizeType i){return pt[i].error();})
+{
+}
+
+Zonotope::Zonotope(const UpperBoxType& bx)
+    : _centre(bx.dimension(),[&bx](SizeType i){return cast_exact(bx[i].centre());})
+    , _generators(bx.dimension(),bx.dimension())
+    , _error(bx.dimension())
+{
+    for(SizeType i=0; i!=this->dimension(); ++i) {
+        this->_generators[i][i]=cast_exact(bx[i].radius());
+    }
+}
 
 
 Zonotope::Zonotope(const Zonotope& z)
@@ -306,7 +320,7 @@ Bool
 operator==(const Zonotope& z1, const Zonotope& z2)
 {
     return (z1._centre==z2._centre) && (z1._generators==z2._generators)
-        && (z1._error==z2._error);
+        && (cast_raw(z1._error)==cast_raw(z2._error));
 }
 
 DimensionType
@@ -323,31 +337,26 @@ Zonotope::number_of_generators() const
 }
 
 
-const Vector<FloatDP>&
-Zonotope::centre() const
+auto Zonotope::centre() const -> const Vector<Value<X>>&
 {
     return this->_centre;
 }
 
-
-const Matrix<FloatDP>&
-Zonotope::generators() const
+auto Zonotope::generators() const -> const Matrix<Value<X>>&
 {
     return this->_generators;
 }
 
-
-const Vector<FloatDP>&
-Zonotope::error() const
+auto Zonotope::error() const -> const Vector<Error<XE>>&
 {
     return this->_error;
 }
 
 
-Vector<ExactIntervalType>
+Box<ExactIntervalType>
 Zonotope::domain() const
 {
-    return Vector<ExactIntervalType>(this->number_of_generators(),ExactIntervalType(-1,1));
+    return Box<ExactIntervalType>(this->number_of_generators(),ExactIntervalType(-1,1));
 }
 
 
@@ -355,13 +364,7 @@ UpperBoxType
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
-//    std::cerr<<"zD="<<z.domain()<<"\n";
-//    std::cerr<<"zc="<<cast_exact(z.centre())<<"\n";
-//    std::cerr<<"zG="<<cast_exact(z.generators())<<"\n";
-//    std::cerr<<"ze"<<cast_exact(z.error())*ExactIntervalType(-1,1)<<"\n";
-//    std::cerr<<"zG*E"<<cast_exact(z.generators())*z.domain()<<"\n";
-    UpperBoxType b=cast_exact(z.centre())+(cast_exact(z.generators())*z.domain())+cast_exact(z.error())*ExactIntervalType(-1,1);
-//    std::cerr<<"bb="<<b<<"\n";
+    UpperBoxType b=UpperBoxType(z.centre()+(z.generators()*cast_singleton(z.domain()))+pm(z.error()));
     return b;
 }
 
@@ -372,68 +375,6 @@ Zonotope::radius() const
     return Ariadne::radius(this->bounding_box());
 }
 
-ValidatedKleenean
-Zonotope::contains(const ExactPoint& pt) const
-{
-    return Ariadne::contains(*this,pt);
-}
-
-ValidatedLowerKleenean
-Zonotope::separated(const ExactBoxType& bx) const
-{
-    return Ariadne::separated(*this,ExactBoxType(bx));
-}
-
-
-ValidatedLowerKleenean
-Zonotope::inside(const ExactBoxType& bx) const
-{
-    return Ariadne::inside(*this,ExactBoxType(bx));
-}
-
-
-
-OutputStream&
-Zonotope::write(OutputStream& os) const
-{
-    return os << *this;
-}
-
-
-
-
-
-ValidatedKleenean
-empty(const Zonotope& z)
-{
-    return false;
-}
-
-
-ValidatedKleenean
-is_bounded(const Zonotope& z)
-{
-    return true;
-}
-
-
-
-
-PositiveFloatDPUpperBound
-radius(const Zonotope& z)
-{
-    return Ariadne::radius(z.bounding_box());
-}
-
-
-
-
-
-
-
-
-
-
 UpperBoxType
 bounding_box(const Zonotope& z)
 {
@@ -442,59 +383,93 @@ bounding_box(const Zonotope& z)
 
 
 
-ListSet< Zonotope >
-split(const Zonotope& z)
+
+
+
+
+
+
+
+
+
+
+template<class X> decltype(auto) properties(X const& x) { return x.precision(); }
+
+template<class X> Matrix<X> tensor_product(const Matrix<X>& A1, const Matrix<X>& A2) {
+    SizeType m1=A1.row_size(); SizeType m2=A2.row_size(); SizeType n1=A1.column_size(); SizeType n2=A2.column_size();
+    X z=max(A1.zero_element(),A2.zero_element());
+    Matrix<X> R(m1+m2,n1+n2,z);
+    R[range(0,m1)][range(0,n1)]=A1;
+    R[range(m1,m1+m2)][range(n1,n1+n2)]=A2;
+    return R;
+}
+
+
+Zonotope
+Zonotope::_product(const Zonotope& z1, const Zonotope& z2)
 {
-    // FIXME: Not quite guarenteed to give an over-approximation
+    return Zonotope(join(z1.centre(),z2.centre()),tensor_product(z1.generators(),z2.generators()),join(z1.error(),z2.error()));
+}
+
+Zonotope
+Zonotope::_product(const Zonotope& z1, const Interval<UpperBound<X>>& ivl2)
+{
+    return _product(z1,Box<Interval<UpperBound<X>>>(1u,ivl2));
+}
+
+ListSet< Zonotope >
+Zonotope::_split(const Zonotope& z)
+{
     ListSet< Zonotope  > result;
 
+    auto pr=z.centre().zero_element().precision();
     DimensionType d=z.dimension();
     SizeType m=z.number_of_generators();
-    Vector<FloatDP> const& c=z.centre();
-    Matrix<FloatDP> const& G=z.generators();
-    Vector<FloatDP> const& e=z.error();
+    Vector<Value<X>> const& c=z.centre();
+    Matrix<Value<X>> const& G=z.generators();
+    Vector<Error<XE>> const& e=z.error();
 
-    Array<FloatDP> norms(m,0);
+    Array<PositiveUpperBound<X>> norms(m,PositiveUpperBound<X>(pr));
     for(SizeType j=0; j!=m; ++j) {
-        norms[j]=norm(Vector<FloatDP>(column(G,j)));
+        norms[j]=norm(Vector<Value<X>>(column(G,j)));
     }
 
-    FloatDP max_norm=0;
+    PositiveUpperBound<X> max_norm(pr);
     SizeType longest_generator=0;
     for(SizeType j=0; j<m; ++j) {
-        if(norms[j]>max_norm) {
+        if(norms[j].raw()>max_norm.raw()) {
             max_norm=norms[j];
             longest_generator=j;
         }
     }
     for(SizeType k=0; k<d; ++k) {
-        if(e[k]>max_norm) {
+        if(e[k].raw()>max_norm.raw()) {
             max_norm=e[k];
             longest_generator=m+k;
         }
     }
 
     if(longest_generator<m) {
-        Matrix<FloatDP> new_generators=z.generators();
+        Matrix<Value<X>> new_generators=z.generators();
         SizeType j=longest_generator;
         for(SizeType i=0; i!=d; ++i) {
-            new_generators[i][j]=div(up,new_generators[i][j],2);
+            new_generators[i][j]=hlf(new_generators[i][j]);
         }
 
-        Vector<FloatDP> v=column(new_generators,j);
-        Vector<FloatDP> new_centre=sub(approx,c,v);
+        Vector<Value<X>> v=column(new_generators,j);
+        Vector<Bounds<X>> new_centre=c-v;
         result.adjoin(Zonotope(new_centre,new_generators,e));
-        new_centre=add(approx,c,v);
+        new_centre=c+v;
         result.adjoin(Zonotope(new_centre,new_generators,e));
     } else {
         SizeType k=longest_generator-m;
-        Vector<FloatDP> new_centre = z.centre();
-        const Matrix<FloatDP>& new_generators = z.generators();
-        Vector<FloatDP> new_error=e;
-        new_error[k]=div(up,new_error[k],2);
-        new_centre[k]=add(approx,z.centre()[k],new_error[k]);
+        Vector<Bounds<X>> new_centre = z.centre();
+        const Matrix<Value<X>>& new_generators = z.generators();
+        Vector<Error<XE>> new_error=e;
+        new_error[k]=hlf(new_error[k]);
+        new_centre[k]=z.centre()[k]+cast_exact(new_error[k]);
         result.adjoin(Zonotope(new_centre,new_generators,new_error));
-        new_centre[k]=sub(approx,z.centre()[k],new_error[k]);
+        new_centre[k]=z.centre()[k]-cast_exact(new_error[k]);
         result.adjoin(Zonotope(new_centre,new_generators,new_error));
     }
     return result;
@@ -503,23 +478,6 @@ split(const Zonotope& z)
 
 
 
-
-Zonotope::Zonotope(const ExactBoxType& r)
-    : _centre(r.size()), _generators(r.size(),r.size()), _error(r.size())
-{
-    SizeType d=r.size();
-    Vector<FloatDP>& c=this->_centre;
-    Matrix<FloatDP>& G=this->_generators;
-    Vector<FloatDP>& e=this->_error;
-    for(SizeType i=0; i!=d; ++i) {
-        c[i]=med(approx,r[i].lower().raw(),r[i].upper().raw());
-        for(SizeType j=0; j!=d; ++j) {
-            G[i][j]=0;
-        }
-        G[i][i]=rad(up,r[i].lower().raw(),r[i].upper().raw());
-        e[i]=0;
-    }
-}
 
 
 
@@ -541,8 +499,8 @@ over_approximation(const Zonotope& z)
 }
 
 
-Zonotope
-error_free_over_approximation(const Zonotope& z)
+
+Zonotope Zonotope::_error_free_over_approximation(const Zonotope& z)
 {
     SizeType d=z.dimension();
     SizeType m=z.number_of_generators();
@@ -550,15 +508,15 @@ error_free_over_approximation(const Zonotope& z)
     // Count number of nonzero error values
     SizeType e=0;
     for(SizeType i=0; i!=d; ++i) {
-        if(z.error()[i]!=0) { ++e; }
+        if(possibly(z.error()[i]>0)) { ++e; }
     }
-    Matrix<FloatDP> nG(d,m+e);
-    project(nG,range(0,d),range(0,m))=z.generators();
+    Matrix<Value<X>> nG(d,m+e);
+    nG[range(0,d)][range(0,m)]=z.generators();
 
     SizeType j=m;
     for(SizeType i=0; i!=d; ++i) {
-        if(z.error()[i]!=0) {
-            nG[i][j]=z.error()[i];
+        if(possibly(z.error()[i]>0)) {
+            nG[i][j]=cast_exact(z.error()[i]);
             ++j;
         }
     }
@@ -569,21 +527,20 @@ error_free_over_approximation(const Zonotope& z)
 
 
 
-Zonotope
-orthogonal_over_approximation(const Zonotope& z)
+Zonotope Zonotope::_orthogonal_over_approximation(const Zonotope& z)
 {
     //assert(iz.size()==iz.number_of_generators());
     Zonotope ez=error_free_over_approximation(z);
 
-    const Vector<FloatDPValue>& c=cast_exact(ez.centre());
-    const Matrix<FloatDPValue>& G=cast_exact(ez.generators());
+    const Vector<FloatDPValue>& c=ez.centre();
+    const Matrix<FloatDPValue>& G=ez.generators();
 
-    const Matrix<FloatDPApproximation> aG=cast_approximate(G);
+    const Matrix<FloatDPApproximation> aG=G;
+    PivotMatrix P;
     Matrix<FloatDPApproximation> aQ,aR;
-    make_ltuple(aQ,aR)=orthogonal_decomposition(aG);
-    Matrix<FloatDPValue> Q=cast_exact(Q);
-    Matrix<FloatDPValue> Qinv=transpose(Q);
-
+    make_ltuple(aQ,aR,P)=orthogonal_decomposition(aG,true);
+    Matrix<FloatDPValue> Q=cast_exact(aQ);
+    Matrix<FloatDPBounds> Qinv=inverse(Q); // Don't use transpose as Q is not exactly orthogonal!
     Matrix<FloatDPBounds> iR=Qinv*G;
     DiagonalMatrix<FloatDPValue> D(cast_exact(row_norms(iR)));
 
@@ -592,8 +549,7 @@ orthogonal_over_approximation(const Zonotope& z)
     return Zonotope(c,nG);
 }
 
-Zonotope
-cascade_over_approximation(const Zonotope& z, SizeType cs)
+Zonotope Zonotope::_cascade_over_approximation(const Zonotope& z, SizeType cs)
 {
     using namespace std;
 
@@ -604,71 +560,73 @@ cascade_over_approximation(const Zonotope& z, SizeType cs)
     SizeType d=z.dimension();
     SizeType nb=z.number_of_generators()/z.dimension(); // number of generator blocks
 
-    const Matrix<FloatDP>& G=z.generators();
-    Array<FloatDP> norms(nb);
+    const Matrix<Value<X>>& G=z.generators();
+    Array<PositiveUpperBound<X>> norms(nb);
     for(SizeType i=0; i!=nb; ++i) {
-        Matrix<FloatDP> PG=Matrix<FloatDP>(project(G,range(0,d),range(i*d,(i+1)*d)));
+        Matrix<Value<X>> PG=Matrix<Value<X>>(G[range(0,d)][range(i*d,(i+1)*d)]);
         norms[i]=norm(PG);
     }
 
     // Compute the new number of blocks
     SizeType nnb=cs;
-    FloatDP sum=0;
+    PositiveUpperBound<X> sum(z.centre().zero_element().precision());
     for(SizeType i=nb-1; i!=0; --i) {
-        sum=add(approx,sum,norms[i]);
-        if(sum>norms[i-1]) {
+        sum+=norms[i];
+        if(sum.raw()>norms[i-1].raw()) {
             nnb=i;
         }
     }
     nnb=min(nnb,cs);
     // Reduce generators
-    Matrix<FloatDP> rG(d,d*nnb);
-    project(rG,range(0,d),range(0,d*(nnb-1)))=project(G,range(0,d),range(0,d*(nnb-1)));
+    // TODO: Is this correct?
+    Matrix<FloatDPValue> rG(d,d*nnb);
+    rG[range(0,d)][range(0,d*(nnb-1))]=G[range(0,d)][range(0,d*(nnb-1))];
     for(SizeType i=0; i!=d; ++i) {
-        FloatDP& err=rG[i][d*(nnb-1)+i];
+        UpperBound<X> err=rG[i][d*(nnb-1)+i];
         for(SizeType j=d*(nnb-1); j!=G.column_size(); ++j) {
-            err=add(up,err,abs(G[i][j]));
+            err+=abs(G[i][j]);
         }
+        rG[i][d*(nnb-1)+i]=cast_exact(err);
     }
     return Zonotope(z.centre(),rG);
 }
 
 
+/*
 Zonotope
 orthogonal_approximation(const Zonotope& z)
 {
 
-    Vector<FloatDP> c=z.centre();
-    Matrix<FloatDP> J=z.generators();
-    Vector<FloatDP> e=z.error();
+    Vector<X> c=z.centre();
+    Matrix<X> J=z.generators();
+    Vector<X> e=z.error();
 
     const SizeType m=J.row_size();
     const SizeType n=J.column_size();
 
-    Matrix<FloatDP> G(m,m+m);
+    Matrix<X> G(m,m+m);
 
-    Matrix< FloatDP > Q;
-    Matrix< FloatDP > R;
+    Matrix<X> Q;
+    Matrix<X> R;
     make_ltuple(cast_approximate(Q),cast_approximate(R))=orthogonal_decomposition(cast_approximate(J));
 
     ARIADNE_ASSERT(norm(FloatMatrix(Q*R-J))<1e-8);
 
     for(SizeType i=0; i!=m;++i) {
-        FloatDP a=0;
+        X a=0;
         for(SizeType j=i; j!=n; ++j) {
             a+=abs(R[i][j]);
         }
         for(SizeType k=0; k!=m; ++k) {
-            FloatDP b=Q[k][i]*a;
+            X b=Q[k][i]*a;
             G[k][i]=b;
         }
     }
 
     for(SizeType i=0; i!=m; ++i) { G[i][m+i]=e[i]; }
     return Zonotope(c,G);
-// Choose
 }
-
+*/
 
 /*
 
@@ -685,7 +643,7 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
 
     QRMatrix< ExactIntervalType > QR(oaz.generators());
     ExactPoint< ExactIntervalType > c(oaz.centre());
-    Matrix<FloatDP> G(z.size(),z.number_of_generators());
+    Matrix<X> G(z.size(),z.number_of_generators());
 
     Matrix< ExactIntervalType > q=QR.Q();
     Matrix< ExactIntervalType > r=QR.R();
@@ -711,7 +669,7 @@ orthogonal_over_approximation(const Zonotope<ExactIntervalType,R>& z)
 
     QRMatrix< ExactIntervalType > QR(oaz.generators());
     ExactPoint< ExactIntervalType > c(oaz.centre());
-    Matrix<FloatDP> G(z.size(),z.number_of_generators());
+    Matrix<X> G(z.size(),z.number_of_generators());
 
     Matrix< ExactIntervalType > q=QR.Q();
     Matrix< ExactIntervalType > r=QR.R();
@@ -737,7 +695,7 @@ orthogonal_over_approximation(const Zonotope< ExactIntervalType >& z)
 
     QRMatrix< ExactIntervalType > QR(oaz.generators());
     ExactPoint< ExactIntervalType > c(oaz.centre());
-    Matrix<FloatDP> G(z.size(),z.number_of_generators());
+    Matrix<X> G(z.size(),z.number_of_generators());
 
     Matrix< ExactIntervalType > q=QR.Q();
     Matrix< ExactIntervalType > r=QR.R();
@@ -756,19 +714,17 @@ orthogonal_over_approximation(const Zonotope< ExactIntervalType >& z)
 }
 */
 
-Zonotope apply(const ValidatedVectorMultivariateFunction& f, const Zonotope& z) {
+Zonotope Zonotope::_apply(const ValidatedVectorMultivariateFunction& f, const Zonotope& z) {
     DoublePrecision pr;
-    Vector<FloatDPBounds> zc=cast_exact(z.centre());
-    Matrix<FloatDPValue> zG=cast_exact(z.generators());
-    Vector<FloatDPBounds> ze=cast_exact(z.error())*FloatDPBounds(-1,+1);
+    Vector<FloatDPBounds> zc=z.centre();
+    Matrix<FloatDPValue> zG=z.generators();
+    Vector<FloatDPBounds> ze=pm(z.error());
     Vector<FloatDPBounds> zb=cast_singleton(z.bounding_box());
 
     Vector<FloatDPBounds> fc=f(zc);
     Matrix<FloatDPBounds> fJb=jacobian(f,zb);
 
     Matrix<FloatDPBounds> fJbzG=fJb*zG;
-
-    std::cerr<<"  fJb="<<fJb<<"\n";
 
     RawFloatVector nzc = cast_raw(midpoint(fc));
     RawFloatMatrix nzG = cast_raw(midpoint(fJbzG));
@@ -777,9 +733,7 @@ Zonotope apply(const ValidatedVectorMultivariateFunction& f, const Zonotope& z) 
 
     Vector<FloatDPBounds> nzE=(fc-Vector<FloatDPBounds>(nzc)) + (fJbzG-Matrix<FloatDPBounds>(nzG))*zE + fJb*ze;
 
-    Vector<FloatDP> nze(nzE.size()); for(SizeType i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper().raw(); }
-    std::cerr<<"  nzE="<<nzE<<"\n";
-    std::cerr<<"  nze="<<nze<<"\n";
+    Vector<X> nze(nzE.size()); for(SizeType i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper().raw(); }
 
     return Zonotope(nzc,nzG,nze);
 }
@@ -787,9 +741,10 @@ Zonotope apply(const ValidatedVectorMultivariateFunction& f, const Zonotope& z) 
 
 
 
-OutputStream&
-operator<<(OutputStream& os, const Zonotope& z)
+OutputStream& Zonotope::write(OutputStream& os) const
 {
+    const Zonotope& z = *this;
+
     os << "[";
     for(SizeType i=0; i!=z.dimension(); ++i) {
             os << (i==0 ? '(' : ',') << z.centre()[i];
@@ -817,60 +772,45 @@ operator<<(OutputStream& os, const Zonotope& z)
 
 
 ValidatedLowerKleenean
-inside(const Zonotope& z, const ExactBoxType& bx)
+Zonotope::inside(const ExactBoxType& bx) const
 {
-    // FIXME: Avoid casting 'indeterminate'
-    return z.bounding_box().inside(bx) || ValidatedKleenean(indeterminate);
+    return this->bounding_box().inside(bx);
 }
-
-namespace {
 
 /* Set up constrained linear program Ax=b, l\leq x\leq u.
  * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
  */
-ValidatedKleenean
-disjoint(const Zonotope& z, const ExactBoxType& bx)
+ValidatedLowerKleenean
+Zonotope::separated(const ExactBoxType& bx) const
 {
+    const Zonotope& z = *this;
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
     SizeType d=z.dimension();
     SizeType ng=z.number_of_generators();
-    Vector<UpperIntervalType> ebx=bx+UpperIntervalType(-1,1)*cast_exact(z.error());
-    const Vector<FloatDP>& zc=z.centre();
-    const Matrix<FloatDP>& zG=z.generators();
-    Matrix<FloatDP> A(d,d+ng);
-    Vector<FloatDP> b(d);
-    Vector<FloatDP> xl(d+ng);
-    Vector<FloatDP> xu(d+ng);
+    Vector<UpperIntervalType> ebx=bx+pm(z.error());
+    const Vector<FloatDPValue>& zc=z.centre();
+    const Matrix<FloatDPValue>& zG=z.generators();
+    Matrix<FloatDPValue> A(d,d+ng);
+    Vector<FloatDPValue> b(d);
+    Vector<FloatDPValue> xl(d+ng);
+    Vector<FloatDPValue> xu(d+ng);
 
-    project(A,range(0,d),range(0,d))=Matrix<FloatDP>::identity(d);
-    project(A,range(0,d),range(d,d+ng))=zG;
+    A[range(0,d)][range(0,d)]=Matrix<FloatDPValue>::identity(d);
+    A[range(0,d)][range(d,d+ng)]=zG;
     b=zc;
     for(SizeType j=0; j!=d; ++j) {
-        xl[j]=ebx[j].lower().raw();
-        xu[j]=ebx[j].upper().raw();
+        xl[j]=cast_exact(ebx[j].lower());
+        xu[j]=cast_exact(ebx[j].upper());
     }
     for(SizeType j=0; j!=ng; ++j) {
         xl[d+j]=-1;
         xu[d+j]=+1;
     }
 
-    return ! SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
-}
-
+    return ! SimplexSolver<FloatDPValue>().feasible(xl,xu,A,b);
 }
 
 
-ValidatedLowerKleenean
-separated(const Zonotope& z, const ExactBoxType& bx)
-{
-    return disjoint(z,bx);
-}
-
-ValidatedLowerKleenean
-overlaps(const Zonotope& z, const ExactBoxType& bx)
-{
-    return !disjoint(z,bx);
-}
 
 /* Set up constrained linear program Ax=b, l\leq x\leq u.
  * Here, A=[z1.G,z2.G], b=z1.c-z2.c, l=[-o,-o], u=[+o,+o]
@@ -878,45 +818,49 @@ overlaps(const Zonotope& z, const ExactBoxType& bx)
  * the \a b vector.
  */
 ValidatedLowerKleenean
-separated(const Zonotope& z1, const Zonotope& z2)
+Zonotope::_separated(const Zonotope& z1, const Zonotope& z2)
 {
     ARIADNE_ASSERT(z1.dimension()==z2.dimension());
     SizeType d=z1.dimension();
     SizeType ng1=z1.number_of_generators();
     SizeType ng2=z2.number_of_generators();
-    const Vector<FloatDP>& c1=z1.centre();
-    const Matrix<FloatDP>& G1=z1.generators();
-    const Vector<FloatDP>& c2=z2.centre();
-    const Matrix<FloatDP>& G2=z2.generators();
+    const Vector<FloatDPValue>& c1=z1.centre();
+    const Matrix<FloatDPValue>& G1=z1.generators();
+    const Vector<FloatDPValue>& c2=z2.centre();
+    const Matrix<FloatDPValue>& G2=z2.generators();
 
-    Matrix<FloatDP> A(d,ng1+ng2);
-    Vector<FloatDP> b(c1-c2);
-    Vector<FloatDP> xl(ng1+ng2,FloatDP(-1.0,dp));
-    Vector<FloatDP> xu(ng1+ng2,FloatDP(+1.0,dp));
+    Matrix<FloatDPValue> A(d,ng1+ng2,dp);
+    Vector<FloatDPValue> b(cast_exact(c1-c2));
+    Vector<FloatDPValue> xl(ng1+ng2,FloatDPValue(-1.0_exact,dp));
+    Vector<FloatDPValue> xu(ng1+ng2,FloatDPValue(+1.0_exact,dp));
 
-    project(A,range(0,d),range(0,ng1))=G1;
-    project(A,range(0,d),range(ng1,ng1+ng2))=G2;
+    A[range(0,d)][range(0,ng1)]=G1;
+    A[range(0,d)][range(ng1,ng1+ng2)]=G2;
 
-    return ! SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
+    return ! SimplexSolver<FloatDPValue>().feasible(xl,xu,A,b);
 }
 
 
 /* Set up LP problem to solve \f$c+Gs=p\f$; \f$-1<=s<=1\f$.
  */
-ValidatedKleenean
-contains(const Zonotope& z, const ExactPoint& pt)
+ValidatedLowerKleenean
+Zonotope::contains(const ExactPoint& pt) const
 {
-    //std::clog << "Zonotope::contains(const Vector<FloatDP>& )" << std::endl;
+    //std::clog << "Zonotope::contains(const Vector<X>& )" << std::endl;
+    const Zonotope& z = *this;
     assert(z.dimension()==pt.dimension());
+    DimensionType d=z.dimension();
     SizeType m=z.number_of_generators();
 
-    const Matrix<FloatDP>& A=z.generators();
-    //FIXME: Incorrect if c-p is not computed exactly, or if e!=0.
-    Vector<FloatDP> b=sub(approx,cast_raw(pt),z.centre());
-    Vector<FloatDP> xl(m,-1.0);
-    Vector<FloatDP> xu(m,1.0);
+    Matrix<Value<X>> A(d,m+d,z.generators().zero_element());
+    A[range(0,d)][range(0,m)]=z.generators();
+    Vector<Bounds<X>> r=(pt-z.centre());
+    Vector<Value<X>> b(d,z.centre().zero_element());
+    for(SizeType i=0; i!=d; ++i) { b[i]=r[i].value(); A[i][m+i]=cast_exact(r[i].error()+z.error()[i]); }
+    Vector<Value<X>> xl(m, -1,dp);
+    Vector<Value<X>> xu(m, +1,dp);
 
-    ValidatedKleenean result=SimplexSolver<FloatDP>().feasible(xl,xu,A,b);
+    ValidatedKleenean result=SimplexSolver<FloatDPValue>().feasible(xl,xu,A,b);
     return result;
 }
 
@@ -931,9 +875,9 @@ Void Zonotope::draw(CanvasInterface& c, const Projection2d& p) const {
     const Zonotope& z=*this;
     SizeType ix=p.x_coordinate(); SizeType iy=p.y_coordinate();
 
-    const Vector<FloatDP>& zc=z.centre();
-    const Matrix<FloatDP>& zg=z.generators();
-    const Vector<FloatDP>& ze=z.error();
+    const Vector<X>& zc=cast_raw(z.centre());
+    const Matrix<X>& zg=cast_raw(z.generators());
+    const Vector<XE>& ze=cast_raw(z.error());
 
     double eps=1.0/(1ul<<31);
     Point2d pc(zc[ix],zc[iy]);

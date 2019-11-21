@@ -155,10 +155,10 @@ template<class F> class Bounds
         return Bounds<F>(max(x1.lower_raw(),x2.lower_raw()),max(x1.upper_raw(),x2.upper_raw())); }
     friend Bounds<F> min(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(min(x1.lower_raw(),x2.lower_raw()),min(x1.upper_raw(),x2.upper_raw())); }
-    friend Bounds<F> abs(Bounds<F> const& x) {
-        if(x.lower_raw()>=0) { return Bounds<F>(x.lower_raw(),x.upper_raw());}
-        else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
-        else { return Bounds<F>(F(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
+    friend PositiveBounds<F> abs(Bounds<F> const& x) {
+        if(x.lower_raw()>=0) { return PositiveBounds<F>(x.lower_raw(),x.upper_raw());}
+        else if(x.upper_raw()<=0) { return PositiveBounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
+        else { return PositiveBounds<F>(F(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
     friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
         return PositiveLowerBound<F>(max(0,max(x._l,neg(x._u)))); }
     friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
@@ -310,6 +310,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& x) : Bounds<F>(x) { }
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
+    Positive<Bounds<F>>(Positive<Value<F>> const& x) : Bounds<F>(x,x) { }
     Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
   public:
     Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
@@ -347,6 +348,9 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     friend PositiveBounds<F> abs(PositiveBounds<F> const& x) { return PositiveBounds<F>(abs(x._l),abs(x._u)); }
 
     friend Bounds<F> const& cast_unsigned(PositiveBounds<F> const& x) { return x; }
+  public: // FIXME: Hacks to handle ambiguities
+    template<class Y, EnableIf<IsConvertible<Y,ValidatedNumber>> =dummy> friend Bounds<F> operator*(PositiveBounds<F> const& x, Y const& y) { return cast_unsigned(x)*y; }
+    friend PositiveBounds<F>& operator+=(PositiveBounds<F>& x, Positive<ValidatedNumber> const& y) { static_cast<Bounds<F>&>(x)+=static_cast<ValidatedNumber const&>(y); return x; }
 };
 
 template<class F> inline PositiveBounds<F> cast_positive(Bounds<F> const& x) {

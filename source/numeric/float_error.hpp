@@ -91,6 +91,7 @@ template<class F> class Error
     friend Error<F> operator*(Error<F> const& x1, Error<F> const& x2) { return Error<F>(mul(up,x1._e,x2._e)); }
 
     friend Error<F> nul(Error<F> const& x) { return Error<F>(0u,x.precision()); }
+    friend Error<F> hlf(Error<F> const& x) { return Error<F>(hlf(x._e)); }
     friend UpperBound<F> pos(Error<F> const& x) { return UpperBound<F>(pos(x._e)); }
     friend LowerBound<F> neg(Error<F> const& x) { return LowerBound<F>(neg(x._e)); }
     friend Error<F> add(Error<F> const& x1, Error<F> const& x2) { return Error<F>(add(up,x1._e,x2._e)); }

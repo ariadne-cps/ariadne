@@ -103,8 +103,8 @@ template<class F> class Value
         return Value<F>(max(x1._v,x2._v)); }
     friend Value<F> min(Value<F> const& x1,  Value<F> const& x2) {
         return Value<F>(min(x1._v,x2._v)); }
-    friend Value<F> abs(Value<F> const& x) {
-        return Value<F>(abs(x._v)); }
+    friend PositiveValue<F> abs(Value<F> const& x) {
+        return PositiveValue<F>(abs(x._v)); }
     friend PositiveLowerBound<F> mig(Value<F> const& x) {
         return PositiveLowerBound<F>(abs(x._v)); }
     friend PositiveUpperBound<F> mag(Value<F> const& x) {
@@ -255,6 +255,10 @@ template<class F> class Positive<Value<F>> : public Value<F> {
     friend Positive<Value<F>> nul(Positive<Value<F>> const& x) { return PositiveValue<F>(nul(x._v)); }
     friend Positive<Value<F>> pos(Positive<Value<F>> const& x) { return PositiveValue<F>(pos(x._v)); }
     friend Positive<Value<F>> hlf(Positive<Value<F>> const& x) { return PositiveValue<F>(hlf(x._v)); }
+    friend Positive<Value<F>> max(Positive<Value<F>> const& x1, Positive<Value<F>> const& x2) { return PositiveValue<F>(max(x1._v,x2._v)); }
+    friend Positive<Value<F>> max(Value<F> const& x1, Positive<Value<F>> const& x2) { return PositiveValue<F>(max(x1._v,x2._v)); }
+    friend Positive<Value<F>> max(Positive<Value<F>> const& x1, Value<F> const& x2) { return PositiveValue<F>(max(x1._v,x2._v)); }
+    friend Positive<Value<F>> min(Positive<Value<F>> const& x1, Positive<Value<F>> const& x2) { return PositiveValue<F>(min(x1._v,x2._v)); }
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Nat m) {
         return pow(Positive<Bounds<F>>(x),m); }
     friend Positive<Bounds<F>> pow(Positive<Value<F>> const& x, Int n) {

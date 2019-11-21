@@ -197,12 +197,28 @@ template<class F, class A> struct IsInvocable<F,A> {
     static const bool value = decltype(test<F,A>(1))::value;
 };
 
+template<class F, class A1, class A2> struct IsInvocable<F,A1,A2> {
+    template<class FF, class AA1, class AA2, class=decltype(std::declval<FF>()(std::declval<AA1>(),std::declval<AA2>()))>
+        static std::true_type test(int);
+    template<class FF, class AA1, class AA2>
+        static std::false_type test(...);
+    static const bool value = decltype(test<F,A1,A2>(1))::value;
+};
+
 template<class R, class F, class A> struct IsInvocableReturning<R,F,A> {
     template<class RR, class FF, class AA, class=decltype(std::declval<RR>()=std::declval<FF>()(std::declval<AA>()))>
         static std::true_type test(int);
     template<class RR, class FF, class AA>
         static std::false_type test(...);
     static const bool value = decltype(test<R,F,A>(1))::value;
+};
+
+template<class R, class F, class A1, class A2> struct IsInvocableReturning<R,F,A1,A2> {
+    template<class RR, class FF, class AA1, class AA2, class=decltype(std::declval<RR>()=std::declval<FF>()(std::declval<AA1>(),std::declval<AA2>()))>
+        static std::true_type test(int);
+    template<class RR, class FF, class AA1, class AA2>
+        static std::false_type test(...);
+    static const bool value = decltype(test<R,F,A1,A2>(1))::value;
 };
 
 template<class X> struct HasGenericType {

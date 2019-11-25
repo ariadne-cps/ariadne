@@ -409,6 +409,7 @@ template<class BX> Void export_box(pybind11::module& module, std::string name)
     }
 
     box_class.def("dimension", (DimensionType(BX::*)()const) &BX::dimension);
+    box_class.def("__getitem__", &__getitem__<BX,SizeType,IntervalType>);
     box_class.def("centre", (typename BX::CentreType(BX::*)()const) &BX::centre);
     box_class.def("radius", (typename BX::RadiusType(BX::*)()const) &BX::radius);
     box_class.def("separated", (SeparatedType(BX::*)(const BX&)const) &BX::separated);

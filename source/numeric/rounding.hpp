@@ -176,27 +176,37 @@ inline rounding_mode_t FloatDP::get_rounding_mode() { return 0 }
 
 #endif
 
+
+/************  Import MPFR rounding mode controls *******************/
+
+#include <mpfr.h>
+
 /************  Publicly-accessible rounding-mode changing *******************/
 
 namespace Ariadne {
 
+//@{
 //! \ingroup NumericModule
-//! \brief The integral type used to represent the rounding mode.
-typedef unsigned short RoundingModeType;
+//! \name Rounding mode control
+
+//! \brief The rounding mode type used for builtin floating-point objects such as FloatDP. \ingroup NumericModule
+typedef rounding_mode_t BuiltinRoundingModeType;
+//! \brief The rounding mode type used for multiple-precision floating-point objects such as FloatMP. \ingroup NumericModule
+typedef mpfr_rnd_t MPFRRoundingModeType;
 
 //! \brief The floating-point environment value for rounding arithmetic to the nearest exactly-representable value.
-extern const RoundingModeType ROUND_TO_NEAREST;
+extern const BuiltinRoundingModeType ROUND_TO_NEAREST;
 //! \brief The floating-point environment value for upwards-rounded arithmetic.
-extern const RoundingModeType ROUND_DOWNWARD;
+extern const BuiltinRoundingModeType ROUND_DOWNWARD;
 //! \brief The floating-point environment value for downwards-rounded arithmetic.
-extern const RoundingModeType ROUND_UPWARD;
+extern const BuiltinRoundingModeType ROUND_UPWARD;
 //! \brief The floating-point environment value for rounding arithmetic to zero.
-extern const RoundingModeType ROUND_TOWARD_ZERO;
+extern const BuiltinRoundingModeType ROUND_TOWARD_ZERO;
 
 //! \brief Set the builtin rounding mode. \ingroup NumericModule
-void set_rounding_mode(RoundingModeType rnd);
-//! \brief Get the current rounding mode \ingroup NumericModule
-RoundingModeType get_rounding_mode();
+void set_rounding_mode(BuiltinRoundingModeType rnd);
+//! \brief Get the current rounding mode. \ingroup NumericModule
+BuiltinRoundingModeType get_rounding_mode();
 
 //! \brief Set the rounding mode to nearest. \ingroup NumericModule
 void set_rounding_to_nearest();
@@ -210,16 +220,9 @@ void set_rounding_toward_zero();
 //! \brief Set the rounding mode to the expected default rounding mode.
 void set_default_rounding();
 
-} // namespace Ariadne;
 
-#include <mpfr.h>
-
-namespace Ariadne {
-
-typedef mpfr_rnd_t RoundingModeMP;
-
-typedef RoundingModeType BuiltinRoundingModeType;
-typedef RoundingModeMP MPFRRoundingModeType;
+//! \brief The rounding mode type used for multiple-precision floating-point objects such as FloatMP. \ingroup NumericModule
+typedef mpfr_rnd_t MPFRRoundingModeType;
 
 //! \brief Tag class for downward rounding. Constants \ref downward, \ref down. \ingroup NumericModule
 struct RoundDownward {
@@ -277,6 +280,8 @@ using RoundApprox = RoundApproximately;
 
 inline OutputStream& operator<<(OutputStream& os, Rounding const& rnd) {
     return os << ( rnd._rbp == ROUND_TO_NEAREST ? "near" : (rnd._rbp == ROUND_DOWNWARD ? "down" : "up") ); }
+
+//@}
 
 } // namespace Ariadne
 

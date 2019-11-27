@@ -49,18 +49,24 @@ typedef FloatDP RawFloatDP;
 class Rational;
 enum class Comparison : char;
 
+//! \ingroup NumericModule
+//! \brief The precision of a FloatDP object. Since this is fixed, the class is only a tag; all objects are equal.
+//! \relates FloatDP
 class DoublePrecision {
+    //! \brief .
     friend constexpr DoublePrecision max(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
+    //! \brief .
     friend constexpr DoublePrecision min(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
-    friend constexpr bool operator<=(DoublePrecision, DoublePrecision) { return true; }
-    friend constexpr bool operator==(DoublePrecision, DoublePrecision) { return true; }
+    //! \brief .
+    friend constexpr Bool operator<=(DoublePrecision, DoublePrecision) { return true; }
+    //! \brief Compare the two precisions for equality. Always \c true.
+    friend constexpr Bool operator==(DoublePrecision, DoublePrecision) { return true; }
+    //! \brief .
     friend OutputStream& operator<<(OutputStream& os, DoublePrecision) { return os << "DoublePrecision()"; }
 };
 using DP = DoublePrecision;
 static const DoublePrecision double_precision = DoublePrecision();
 static const DoublePrecision dp = DP();
-
-using RoundingMode64 = RoundingModeType;
 
 // Correctly rounded functions
 double sqr_rnd(double x);
@@ -95,7 +101,7 @@ double div_opp(double x, double y);
 double neg_rec_opp(double x);
 
 //! \ingroup NumericModule
-//! \brief Floating point numbers (double precision) using approxiamate arithmetic.
+//! \brief Floating point numbers (double precision) using rounded arithmetic.
 //! \details
 //! The \c %FloatDP class represents floating-point numbers.
 //! Unless otherwise mentioned, operations on floating-point numbers are performed approximately, with no guarantees
@@ -111,15 +117,17 @@ double neg_rec_opp(double x);
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%FloatDP(3.25)</c> is represented exactly, <c>%FloatDP(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %FloatDP from a string literal may be supported.
-//! \sa Real, FloatDPValue, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
+//! \sa FloatMP, Real, FloatDPValue, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
 class FloatDP {
   public:
     volatile double dbl;
   public:
     typedef RawTag Paradigm;
     typedef FloatDP NumericType;
+    //! \brief The type representing the precision of the number.
     typedef DoublePrecision PrecisionType;
-    typedef RoundingMode64 RoundingModeType;
+    //! \brief The type representing the rounding modes available for arithmetic.
+    typedef BuiltinRoundingModeType RoundingModeType;
   public:
     static const RoundingModeType ROUND_TO_NEAREST = Ariadne::ROUND_TO_NEAREST;
     static const RoundingModeType ROUND_DOWNWARD = Ariadne::ROUND_DOWNWARD;
@@ -254,22 +262,22 @@ class FloatDP {
     friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v*=x2v; return x1; }
     friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v/=x2v; return x1; }
 
-    template<class OP> friend FloatDP apply(OP op, RoundingMode64 rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
+    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x1,x2,x3); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend FloatDP apply(OP op, RoundingMode64 rnd, FloatDP x1, FloatDP x2) {
+    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x1,x2); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend FloatDP apply(OP op, RoundingMode64 rnd, FloatDP x) {
+    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x); FloatDP::set_rounding_mode(old_rnd); return r;
     }
 
-    template<class OP> friend FloatDP apply(OP op, RoundingMode64 rnd, FloatDP x, Int n) {
+    template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x, Int n) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
         FloatDP r=op(x,n); FloatDP::set_rounding_mode(old_rnd); return r;
     }

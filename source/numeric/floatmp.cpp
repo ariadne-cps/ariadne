@@ -744,7 +744,7 @@ FloatMP div_opp(FloatMP const& x, FloatMP const& y);
 
 namespace {
 
-mpfr_rnd_t to_mpfr_rnd_t(RoundingModeType rnd) {
+mpfr_rnd_t to_mpfr_rnd_t(rounding_mode_t rnd) {
     switch (rnd) {
         case ROUND_TO_NEAREST:  return MPFR_RNDN;
         case ROUND_DOWNWARD:    return MPFR_RNDD;

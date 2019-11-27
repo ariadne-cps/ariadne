@@ -34,6 +34,7 @@
 
 namespace Ariadne {
 
+//! \brief A wrapper for the standard string class.
 class String : public std::string {
   public:
     using std::string::string;

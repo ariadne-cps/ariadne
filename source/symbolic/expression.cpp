@@ -60,7 +60,7 @@ template class Expression<Real>;
 template Bool before<Real>(Expression<Real> const& e1, Expression<Real> const& e2);
 template Nat count_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
-template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
+template Nat count_distinct_node_pointers<Real>(const Expression<Real>& e);
 
 template Expression<Real> ElementaryAlgebra<Real>::extract() const;
 

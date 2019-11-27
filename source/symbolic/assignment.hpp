@@ -55,14 +55,20 @@ typedef Set<UntypedVariable> VariableSet;
 typedef Set<Variable<Real>> RealVariableSet;
 
 
-//! \ingroup ExpressionModule
-//! \brief An assignment statement.
+//! \ingroup SymbolicModule
+//! \brief An assignment statement of the form \f$v:=e\f$.
+//!   \tparam LHS The variable to be assigned to (left-hand-side). May be an extended variable (e.g. <code>dot(v)</code>)
+//!   \tparam RHS The expression to be assigned (right-hand-side).
+//! \see Variable, Expression
 template<class LHS, class RHS>
 class Assignment
 {
   public:
-    Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
+    //! \brief Construct the assignment \c v=e.
+    Assignment(const LHS& v, const RHS& e) : lhs(v), rhs(e) { }
+    //! \brief The variable on the left-hand side.
     const LHS& variable() const { return this->lhs; }
+    //! \brief The expression on the right-hand side.
     const RHS& expression() const { return this->rhs; }
     const LHS& left_hand_side() const { return this->lhs; }
     const RHS& right_hand_side() const { return this->rhs; }

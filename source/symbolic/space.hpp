@@ -46,18 +46,21 @@ template<class T> class Space;
 template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc);
 
 class Real;
+
+//! \brief A space defined as a list of real variables.
+//! \relates Space
 typedef Space<Real> RealSpace;
 
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! \brief A space defined as a list of named variables of type \a T.
-//!   Allows conversion between Euclidean space \f$\mathbb{R}^n\f$ and a space defined by named variables.
-//!  \details \sa Variable
+//!   Allows conversion between the space \a T<sup>n</sup> and a space defined by named variables.
+//! \details \see Variable
 template<class T> class Space
 {
   public:
     typedef Variable<T> VariableType;
   public:
-    //! \brief The trivial space \f$\R^0\f$.
+    //! \brief The trivial space \f$T^0\f$.
     Space();
     Space(const List<VariableType>& vl);
     Space(const List<Identifier>& vl);

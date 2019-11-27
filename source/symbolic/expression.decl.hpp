@@ -48,6 +48,10 @@ template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 template<class LHS,class RHS> class Assignment;
 
+using StringConstant = Constant<String>;
+using IntegerConstant = Constant<Integer>;
+using RealConstant = Constant<Real>;
+
 using BooleanVariable = Variable<Boolean>;
 using KleeneanVariable = Variable<Kleenean>;
 using StringVariable = Variable<String>;

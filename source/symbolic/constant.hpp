@@ -34,22 +34,23 @@
 
 namespace Ariadne {
 
-template<class T> class Constant;
-typedef Constant<String> StringConstant;
-typedef Constant<Integer> IntegerConstant;
-typedef Constant<Real> RealConstant;
-
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! A named constant of type \a T.
+//! \see Variable, Expression
 template<class T> class Constant
     : public T
 {
   public:
+    //! The constant with value \a value, displayed as the value itself.
     explicit Constant(const T& value) : T(value), _name("") { }
-    explicit Constant(const String& str, const T& value) : T(value), _name(str) { }
+    //! The constant with name \a name and value \a value.
+    explicit Constant(const Identifier& name, const T& value) : T(value), _name(name) { }
+    //! The name of the constant.
     const Identifier& name() const { return _name; }
+    //! The value of the constant.
     const T& value() const { return *this; }
     const T& val() const { return *this; }
+    //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Constant<T> const& c) {
         if (c.name().empty()) { return os << c.value(); } else { return os << c._name << "(=" << c.value() << ")"; } }
   private:
@@ -61,10 +62,17 @@ template<> class Constant<String>
 {
   public:
     explicit Constant(const String& value) : String(value) { }
-    const Identifier& name() const { return static_cast<const Identifier&>(static_cast<const String&>(*this)); }
+    const Identifier& name() const { return static_cast<const Identifier&>(static_cast<const std::string&>(*this)); }
     const String& value() const { return *this; }
     const String& val() const { return *this; }
 };
+
+//@{
+//! \related Constant \name Type synonyms.
+using StringConstant = Constant<String>; //!< .
+using IntegerConstant = Constant<Integer>; //!< \brief .
+using RealConstant = Constant<Real>; //!< .
+//@}
 
 } // namespace Ariadne
 

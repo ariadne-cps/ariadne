@@ -488,7 +488,7 @@ template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
     return NodeCounter<T,ExpressionComparator,true>().count_nodes(e);
 }
 
-template<class T> Nat count_distinct_node_ptrs(Expression<T> const& e) {
+template<class T> Nat count_distinct_node_pointers(Expression<T> const& e) {
     return NodeCounter<T,ExpressionPtrComparator,true>().count_nodes(e);
 }
 

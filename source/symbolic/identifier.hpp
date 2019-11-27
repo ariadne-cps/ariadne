@@ -33,17 +33,17 @@
 
 namespace Ariadne {
 
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! \brief A class representing the name of a variable.
 //! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
 //! \sa Variable
-class Identifier : public String
+class Identifier : public std::string
 {
   public:
-    Identifier() : String() { }
-    Identifier(const char* cstr) : String(cstr) { }
+    Identifier() : std::string() { }
+    Identifier(const char* cstr) : std::string(cstr) { }
     //! \brief Construct an identifier from a standard string.
-    Identifier(const std::string& str) : String(str) { }
+    Identifier(const std::string& str) : std::string(str) { }
 };
 
 } // namespace Ariadne

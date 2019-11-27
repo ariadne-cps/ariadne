@@ -279,7 +279,12 @@ void export_decimal(pymodule& module)
     decimal_class.def(init<double>());
     decimal_class.def("__str__", &__cstr__<Decimal>);
     decimal_class.def("__repr__", &__cstr__<Decimal>);
-    implicitly_convertible<std::string,Decimal>();
+    define_arithmetic(module,decimal_class);
+    define_lattice(module,decimal_class);
+    define_comparisons(module,decimal_class);
+    implicitly_convertible<int,Decimal>();
+    implicitly_convertible<Integer,Decimal>();
+    implicitly_convertible<Dyadic,Decimal>();
 }
 
 void export_rational(pymodule& module)

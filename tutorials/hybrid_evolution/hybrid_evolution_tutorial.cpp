@@ -22,6 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <ariadne.hpp>
 
 namespace Ariadne {
@@ -34,16 +35,14 @@ template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
 }
 
-typedef GeneralHybridEvolver HybridEvolverType;
-
 // The automaton has two modes, both
 // with two variables, room_temperature and time_of_day
 // The dynamics is given by the differential equations
-//   dot(T) = K(T_ext(t) - T(t)) + P delta(q(t) = On) \f$
+//   \f$ dot(T) = K(T_ext(t) - T(t)) + P delta(q(t) = On) \f$
 // where
-//   T_ext(t) = T_av - T_amp \cos(2 pi t)
+//   \f$ T_ext(t) = Tav - Tamp \cos(2 pi t) \f$
 // is the external temperature and
-//   q(t) in {On,Off}
+//   \f$  q(t) in {On,Off} \f$
 // is the discrete state of the heater.
 //
 // The parameters are the insulation coefficient K, the average
@@ -65,18 +64,19 @@ typedef GeneralHybridEvolver HybridEvolverType;
 // System paramters
 //   Heating power P
 //   Thermal coefficient K
-//   Average external temperature Te
-//   Amplitude of external temperature fluctuations Ta
+//   Average external temperature Tav
+//   Amplitude of external temperature fluctuations Tamp
 //   Temperature at which the heater is turned off Toff
 //   Temperature below which the heater may be turned on Tonact
 //   Temperature below which the heater must be turned on Toninv
 
 
 
-inline CompositeHybridAutomaton create_heating_system()
+//! [create_heating_system]
+CompositeHybridAutomaton create_heating_system()
 {
-    // Set the system dynamic parameters
-    RealConstant P("P",4.0_decimal);
+    //! Set the system dynamic parameters
+    RealConstant P("P",4.0_decimal); //!< The power \c P.
     RealConstant K("K",1.0_decimal);
     RealConstant Tav("Tav",16.0_decimal);
     RealConstant Tamp("Tamp",8.0_decimal);
@@ -124,10 +124,10 @@ inline CompositeHybridAutomaton create_heating_system()
 //! [create_heating_system]
 
 //! [create_evolver]
-inline HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
+GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& heating_system)
 {
     // Create a GeneralHybridEvolver object
-    HybridEvolverType evolver(heating_system);
+    GeneralHybridEvolver evolver(heating_system);
 
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
@@ -140,7 +140,7 @@ inline HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_
 //! [create_evolver]
 
 //! [simulate_evolution]
-inline Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+Void simulate_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
     StringVariable clock("clock");
     StringVariable heating("heating");
@@ -179,7 +179,7 @@ inline Void simulate_evolution(const CompositeHybridAutomaton& heating_system,co
 
 
 //! [compute_evolution]
-inline Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
     StringVariable clock("clock");
     StringVariable heating("heating");
@@ -237,7 +237,7 @@ inline Void compute_evolution(const CompositeHybridAutomaton& heating_system,con
 }
 //! [compute_evolution]
 
-inline Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
+Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object
@@ -307,7 +307,7 @@ using namespace Ariadne::HeatingSystemTutorial;
 
 
 //! [main]
-Int main(Int argc, const char* argv[])
+Int main(Int argc, const Char* argv[])
 {
     Nat verbosity=1;
     if(argc>1) {
@@ -319,7 +319,7 @@ Int main(Int argc, const char* argv[])
     cout << heating_system << "\n";
 
     // Create the analyser classes
-    HybridEvolverType evolver=create_evolver(heating_system);
+    GeneralHybridEvolver evolver=create_evolver(heating_system);
     evolver.verbosity = verbosity;
     cout << evolver << "\n";
 

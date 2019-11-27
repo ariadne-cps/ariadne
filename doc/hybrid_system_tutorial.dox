@@ -28,8 +28,6 @@
 
 \page hybrid_system_tutorial_page Tutorial on Analysing Hybrid Systems
 
-\dontinclude examples/hybrid_system_tutorial.cpp
-
 In this tutorial, we show how to use %Ariadne to model and analyse a hybrid automaton model of a simple heating system.
 
 \section tutorial_system_model The Hybrid Automaton Model
@@ -45,13 +43,11 @@ The system is described by three parameters, the heater power \f$P\f$, the insul
 
 The heater is turned on whenever the temperature falls below \f$T_{\textsc{On}}\f$, and is turned off whenever the temperature rises above \f$T_{\textsc{Off}}\f$.
 
-
-
 \section tutorial_building_system Building the Ariadne Hybrid Automaton
 
 Define a function to create the hybrid automaton
 
-\snippet examples/hybrid_system_tutorial.cpp create_heating_system
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp create_heating_system
 
 This function first defines the constants which are used by the system.
 It then defines the discrete variable "heating" describing the mode of the system,
@@ -70,22 +66,22 @@ Finally, the complete heating system is described by composition.
 
 The following function creates a HybridEvolver object, which is a class which can compute system evolution.
 
-\snippet examples/hybrid_system_tutorial.cpp create_evolver
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp create_evolver
 
 We now compute an approximate simulation of the evolution of the system.
 
-\snippet examples/hybrid_system_tutorial.cpp simulate_evolution
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp simulate_evolution
 
 We now compute a rigorous simulation of the evolution of the system, and over-approximation of a larger flow-tube.
 
-\snippet examples/hybrid_system_tutorial.cpp compute_evolution
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp compute_evolution
 
 In each case we first define the intial set and evolution time, and then compute trajectories using the \c Evolver object up to the evolution time. The computed dynamics are written to standard output and to a file, and the attained sets are plotted.
 
 
 \section tutorial_main Main function
 
-\snippet examples/hybrid_system_tutorial.cpp main
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp main
 */
 
 /*!

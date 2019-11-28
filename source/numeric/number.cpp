@@ -135,4 +135,12 @@ inline Bool refines(Number<UpperTag> const& y1, Number<UpperTag> const& y2) {
 Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y) {
     return y; }
 
+
+template<> String class_name<ApproximateNumber>() { return "ApproximateNumber"; }
+template<> String class_name<ValidatedLowerNumber>() { return "ValidatedLowerNumber"; }
+template<> String class_name<ValidatedUpperNumber>() { return "ValidatedUpperNumber"; }
+template<> String class_name<ValidatedNumber>() { return "ValidatedNumber"; }
+template<> String class_name<EffectiveNumber>() { return "EffectiveNumber"; }
+template<> String class_name<ExactNumber>() { return "ExactNumber"; }
+
 } // namespace Ariadne

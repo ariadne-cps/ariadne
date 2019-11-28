@@ -356,7 +356,7 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_arithmetic(pybind11
         pyclass.def(__py_div__, &__div__<X,Y>, pybind11::is_operator());
     }
     if constexpr(CanDivide<Y,X>::value) {
-        pyclass.def("__py_rdiv__", &__rdiv__<X,Y>, pybind11::is_operator());
+        pyclass.def(__py_rdiv__, &__rdiv__<X,Y>, pybind11::is_operator());
     }
     return pyclass;
 }

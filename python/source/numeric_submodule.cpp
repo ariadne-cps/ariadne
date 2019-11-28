@@ -378,9 +378,19 @@ FloatMPLowerBound get(ValidatedLowerNumber const& n, MultiplePrecision const& pr
 FloatDPApproximation get(ApproximateNumber const& n, DoublePrecision const& pr) { return n.get(ApproximateTag(),pr); }
 FloatMPApproximation get(ApproximateNumber const& n, MultiplePrecision const& pr) { std::cerr<<"get(AN,MP)\n";return n.get(ApproximateTag(),pr); }
 
+
+template<class X, class Y> void implicitly_convertible_to() {
+    if constexpr(IsConvertible<Y,ApproximateNumber>::value) { implicitly_convertible<X,ApproximateNumber>(); }
+    if constexpr(IsConvertible<Y,ValidatedLowerNumber>::value) { implicitly_convertible<X,ValidatedLowerNumber>(); }
+    if constexpr(IsConvertible<Y,ValidatedUpperNumber>::value) { implicitly_convertible<X,ValidatedUpperNumber>(); }
+    if constexpr(IsConvertible<Y,ValidatedNumber>::value) { implicitly_convertible<X,ValidatedNumber>(); }
+    if constexpr(IsConvertible<Y,EffectiveNumber>::value) { implicitly_convertible<X,EffectiveNumber>(); }
+    if constexpr(IsConvertible<Y,ExactNumber>::value) { implicitly_convertible<X,ExactNumber>(); }
+}
+
 void export_numbers(pymodule& module)
 {
-    pybind11::class_<ApproximateNumber> approximate_number_class(module,(class_name<ApproximateTag>()+"Number").c_str());
+    pybind11::class_<ApproximateNumber> approximate_number_class(module,class_name<ApproximateNumber>().c_str());
     approximate_number_class.def(init<double>());
     approximate_number_class.def(init<Rational>());
     approximate_number_class.def(init<Real>());
@@ -401,27 +411,27 @@ void export_numbers(pymodule& module)
     define_lattice(module,approximate_number_class);
 
 
-    pybind11::class_<ValidatedLowerNumber> lower_number_class(module,(class_name<LowerTag>()+"Number").c_str());
-    lower_number_class.def(init<ValidatedNumber>());
-    lower_number_class.def("get", (FloatDPLowerBound(*)(ValidatedLowerNumber const&, DoublePrecision const&)) &get);
-    lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, MultiplePrecision const&)) &get);
-    lower_number_class.def("__str__", &__cstr__<ValidatedLowerNumber>);
-    lower_number_class.def("__repr__", &__cstr__<ValidatedLowerNumber>);
+    pybind11::class_<ValidatedLowerNumber> validated_lower_number_class(module,(class_name<ValidatedLowerNumber>()).c_str());
+    validated_lower_number_class.def(init<ValidatedNumber>());
+    validated_lower_number_class.def("get", (FloatDPLowerBound(*)(ValidatedLowerNumber const&, DoublePrecision const&)) &get);
+    validated_lower_number_class.def("get", (FloatMPLowerBound(*)(ValidatedLowerNumber const&, MultiplePrecision const&)) &get);
+    validated_lower_number_class.def("__str__", &__cstr__<ValidatedLowerNumber>);
+    validated_lower_number_class.def("__repr__", &__cstr__<ValidatedLowerNumber>);
 
-    define_monotonic(module,lower_number_class);
-
-
-    pybind11::class_<ValidatedUpperNumber> upper_number_class(module,(class_name<UpperTag>()+"Number").c_str());
-    upper_number_class.def(init<ValidatedNumber>());
-    upper_number_class.def("get", (FloatDPUpperBound(*)(ValidatedUpperNumber const&, DoublePrecision const&)) &get);
-    upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, MultiplePrecision const&)) &get);
-    upper_number_class.def("__str__", &__cstr__<ValidatedUpperNumber>);
-    upper_number_class.def("__repr__", &__cstr__<ValidatedUpperNumber>);
-
-    define_monotonic(module,upper_number_class);
+    define_monotonic(module,validated_lower_number_class);
 
 
-    pybind11::class_<ValidatedNumber> validated_number_class(module,(class_name<ValidatedTag>()+"Number").c_str());
+    pybind11::class_<ValidatedUpperNumber> validated_upper_number_class(module,class_name<ValidatedUpperNumber>().c_str());
+    validated_upper_number_class.def(init<ValidatedNumber>());
+    validated_upper_number_class.def("get", (FloatDPUpperBound(*)(ValidatedUpperNumber const&, DoublePrecision const&)) &get);
+    validated_upper_number_class.def("get", (FloatMPUpperBound(*)(ValidatedUpperNumber const&, MultiplePrecision const&)) &get);
+    validated_upper_number_class.def("__str__", &__cstr__<ValidatedUpperNumber>);
+    validated_upper_number_class.def("__repr__", &__cstr__<ValidatedUpperNumber>);
+
+    define_monotonic(module,validated_upper_number_class);
+
+
+    pybind11::class_<ValidatedNumber> validated_number_class(module,class_name<ValidatedNumber>().c_str());
     validated_number_class.def(init<Rational>());
     validated_number_class.def(init<Real>());
     validated_number_class.def(init<DyadicBounds>());
@@ -441,7 +451,7 @@ void export_numbers(pymodule& module)
     validated_number_class.def(init<FloatDPBounds>());
     validated_number_class.def(init<FloatMPBounds>());
 
-    pybind11::class_<EffectiveNumber> effective_number_class(module,(class_name<EffectiveTag>()+"Number").c_str());
+    pybind11::class_<EffectiveNumber> effective_number_class(module,class_name<EffectiveNumber>().c_str());
     effective_number_class.def(init<Rational>());
     effective_number_class.def(init<Real>());
     effective_number_class.def(init<ExactNumber>());
@@ -453,7 +463,7 @@ void export_numbers(pymodule& module)
 
     define_elementary(module,effective_number_class);
 
-    pybind11::class_<ExactNumber> exact_number_class(module,(class_name<ExactTag>()+"Number").c_str());
+    pybind11::class_<ExactNumber> exact_number_class(module,class_name<ExactNumber>().c_str());
     exact_number_class.def(init<Rational>());
     exact_number_class.def(init<ExactNumber>());
     exact_number_class.def("get", (FloatDPBounds(*)(ExactNumber const&, DoublePrecision const&)) &get);
@@ -465,30 +475,26 @@ void export_numbers(pymodule& module)
     implicitly_convertible<ValidatedNumber,ApproximateNumber>();
     implicitly_convertible<ValidatedNumber,ValidatedLowerNumber>();
     implicitly_convertible<ValidatedNumber,ValidatedUpperNumber>();
+    implicitly_convertible<EffectiveNumber,ApproximateNumber>();
+    implicitly_convertible<EffectiveNumber,ValidatedLowerNumber>();
+    implicitly_convertible<EffectiveNumber,ValidatedUpperNumber>();
     implicitly_convertible<EffectiveNumber,ValidatedNumber>();
+    implicitly_convertible<ExactNumber,ApproximateNumber>();
+    implicitly_convertible<ExactNumber,ValidatedLowerNumber>();
+    implicitly_convertible<ExactNumber,ValidatedUpperNumber>();
     implicitly_convertible<ExactNumber,ValidatedNumber>();
     implicitly_convertible<ExactNumber,EffectiveNumber>();
 
     implicitly_convertible<DyadicBounds,ValidatedNumber>();
 
-    implicitly_convertible<Real,EffectiveNumber>();
-    implicitly_convertible<Rational,ExactNumber>();
-    implicitly_convertible<Rational,ValidatedNumber>();
-    implicitly_convertible<Decimal,ExactNumber>();
-    implicitly_convertible<Decimal,ValidatedNumber>();
-    implicitly_convertible<Dyadic,ExactNumber>();
-    implicitly_convertible<Dyadic,ValidatedNumber>();
-    implicitly_convertible<Integer,ExactNumber>();
-    implicitly_convertible<Integer,ValidatedNumber>();
+    implicitly_convertible_to<Real,EffectiveNumber>();
+    implicitly_convertible_to<Rational,ExactNumber>();
+    implicitly_convertible_to<Decimal,ExactNumber>();
+    implicitly_convertible_to<Dyadic,ExactNumber>();
+    implicitly_convertible_to<Integer,ExactNumber>();
+    implicitly_convertible_to<Int,ExactNumber>();
 
-    implicitly_convertible<Int,ApproximateNumber>();
-    implicitly_convertible<Int,ValidatedLowerNumber>();
-    implicitly_convertible<Int,ValidatedUpperNumber>();
-    implicitly_convertible<Int,ValidatedNumber>();
-    implicitly_convertible<Int,EffectiveNumber>();
-    implicitly_convertible<Int,ExactNumber>();
-
-    implicitly_convertible<double,ApproximateNumber>();
+    implicitly_convertible_to<double,ApproximateNumber>();
 }
 
 

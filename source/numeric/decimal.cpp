@@ -131,6 +131,15 @@ Decimal sqr(Decimal const& d)
     return Decimal(sqr(d._p),2u*d._q);
 }
 
+Decimal hlf(Decimal const& d)
+{
+    if (rem(d._p,2)==0) {
+        return Decimal(quot(d._p,2),d._q);
+    } else {
+        return Decimal(5*d._p,d._q+1u);
+    }
+}
+
 Decimal abs(Decimal const& d)
 {
     return Decimal(abs(d._p),d._q);

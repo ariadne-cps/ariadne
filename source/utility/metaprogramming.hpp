@@ -179,6 +179,12 @@ template<class A1, class A2> struct CanDivide {
     static const bool value = decltype(test<A1,A2>(1))::value;
 };
 
+template<class A> struct CanHalve {
+    template<class AA, class=decltype(hlf(std::declval<AA>()))> static std::true_type test(int);
+    template<class AA> static std::false_type test(...);
+    static const bool value = decltype(test<A>(1))::value;
+};
+
 //template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class F, class... AS> struct IsInvocable;
 template<class R, class F, class... AS> struct IsInvocableReturning;

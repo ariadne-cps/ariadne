@@ -229,9 +229,13 @@ void export_integer(pymodule& module)
     define_arithmetic(module,integer_class);
     define_lattice(module,integer_class);
     define_comparisons(module,integer_class);
+    module.def("sqr", &_sqr_<Integer>);
     module.def("pow", &_pow_<Integer,Nat>);
 
     implicitly_convertible<int,Integer>();
+
+    pybind11::class_<Natural,Integer> natural_class(module,"Natural");
+
 }
 
 void export_dyadic(pymodule& module)
@@ -252,6 +256,7 @@ void export_dyadic(pymodule& module)
     define_arithmetic(module,dyadic_class);
     define_lattice(module,dyadic_class);
     define_comparisons(module,dyadic_class);
+    module.def("sqr", &_sqr_<Dyadic>);
     module.def("hlf", &_hlf_<Dyadic>);
 
     implicitly_convertible<int,Dyadic>();
@@ -282,6 +287,10 @@ void export_decimal(pymodule& module)
     define_arithmetic(module,decimal_class);
     define_lattice(module,decimal_class);
     define_comparisons(module,decimal_class);
+    module.def("sqr", &_sqr_<Decimal>);
+    if constexpr (IsInvocable<Hlf,Decimal>::value) {
+        module.def("hlf", &_hlf_<Decimal>);
+    }
     implicitly_convertible<int,Decimal>();
     implicitly_convertible<Integer,Decimal>();
     implicitly_convertible<Dyadic,Decimal>();
@@ -305,6 +314,8 @@ void export_rational(pymodule& module)
     define_arithmetic(module,rational_class);
     define_lattice(module,rational_class);
     define_comparisons(module,rational_class);
+    module.def("hlf", &_hlf_<Rational>);
+    module.def("sqr", &_sqr_<Rational>);
     module.def("rec", &_rec_<Rational>);
 
     implicitly_convertible<int,Rational>();
@@ -315,6 +326,8 @@ void export_rational(pymodule& module)
 
 void export_real(pymodule& module)
 {
+    Real r; hlf(r);
+    static_assert(CanHalve<Real>::value);
     pybind11::class_<Real> real_class(module,"Real");
     real_class.def(init<int>());
     real_class.def(init<Integer>());

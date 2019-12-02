@@ -324,7 +324,7 @@ struct Neg : OperatorObject<Neg> {
     template<class X> X derivative(const X& a) const { return nul(a)-1; }
     template<class X,class D> D derivative(const X& a, const D& d) const { return -d; }
 };
-struct Hlf : OperatorObject<Neg> {
+struct Hlf : OperatorObject<Hlf> {
     static constexpr OperatorCode code() { return OperatorCode::HLF; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(hlf(a)) { return hlf(a); }
     template<class X> X derivative(const X& a) const { return hlf(a); }

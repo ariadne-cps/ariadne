@@ -77,6 +77,8 @@ class Decimal
     friend Rational operator/(Decimal const& d1, Decimal const& d2);
     //! \brief Squared value of a decimal.
     friend Decimal sqr(Decimal const& d);
+    //! \brief Half the value of a decimal.
+    friend Decimal hlf(Decimal const& d);
     //! \brief Absolute value of a decimal.
     friend Decimal abs(Decimal const& d);
     //! \brief Maximum of two decimal values.

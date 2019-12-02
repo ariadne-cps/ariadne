@@ -46,7 +46,9 @@ namespace Ariadne {
 template<class X> class Vector;
 template<class X> class Matrix;
 
-class Zonotope;
+template<class P, class X, class XE=X> class Zonotope;
+template<class X, class XE=X> using ValidatedZonotope=Zonotope<ValidatedTag,X,XE>;
+
 class ValidatedAffineConstrainedImageSet;
 template<class BS> class ListSet;
 
@@ -76,13 +78,13 @@ class Figure;
  * ith element, and the ith component of the kth generator is given by the
  * (kd+i)th element.
  */
-
-
-class Zonotope
+template<class X, class XE> class Zonotope<ValidatedTag,X,XE>
     : public ValidatedCompactSetInterface
     , public DrawableInterface
 {
-    typedef FloatDP X; typedef FloatDP XE;
+    typedef ValidatedTag P;
+    typedef typename X::PrecisionType PR;
+    typedef typename XE::PrecisionType PRE;
   private:
     Vector<Value<X>> _centre;
     Matrix<Value<X>> _generators;
@@ -102,7 +104,7 @@ class Zonotope
     /*! \brief Construct from centre and generators. */
     explicit Zonotope(const Vector<X>& c, const Matrix<X>& G);
     /*! \brief Construct from centre, generators, and a uniform error term. */
-    explicit Zonotope(const Vector<X>& c, const Matrix<X>& G, const Vector<X>& e);
+    explicit Zonotope(const Vector<X>& c, const Matrix<X>& G, const Vector<XE>& e);
 
     /*! \brief Construct from centre, generators, and a uniform error term. */
     explicit Zonotope(const Vector<Value<X>>& c, const Matrix<Value<X>>& G, const Vector<Error<XE>>& e);
@@ -122,7 +124,7 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(InitializerList< std::tuple<X,InitializerList<X>,X> > lst);
+    explicit Zonotope(InitializerList< std::tuple<X,InitializerList<X>,XE> > lst);
 
 
     /*! \brief Convert from a point. */

@@ -262,6 +262,10 @@ template<> Matrix<FloatDPBounds> inverse<>(const Matrix<FloatDPValue>& A) {
     return lu_inverse(Matrix<FloatDPBounds>(A));
 }
 
+template<> Matrix<FloatMPBounds> inverse<>(const Matrix<FloatMPValue>& A) {
+    return lu_inverse(Matrix<FloatMPBounds>(A));
+}
+
 template<> Matrix<FloatDPBounds> inverse<FloatDPBounds>(const Matrix<FloatDPBounds>& A) {
     try {
         return lu_inverse(A);
@@ -802,6 +806,7 @@ template Tuple<Matrix<FloatDPBounds>,Matrix<FloatDPBounds>> orthogonal_decomposi
 
 template class Matrix<FloatDPValue>;
 
+template class Matrix<FloatMP>;
 template class Matrix<FloatMPApproximation>;
 template class Matrix<FloatMPBounds>;
 template class Matrix<FloatMPValue>;
@@ -822,6 +827,7 @@ template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
+template Matrix<MidpointType<FloatMPBounds>> midpoint(Matrix<FloatMPBounds> const&);
 template Tuple<PivotMatrix,Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> triangular_decomposition(Matrix<FloatMPBounds> const&);
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>,PivotMatrix> orthogonal_decomposition(Matrix<FloatMPBounds> const&, bool);
 template Tuple<Matrix<FloatMPBounds>,Matrix<FloatMPBounds>> orthogonal_decomposition(Matrix<FloatMPBounds> const&);

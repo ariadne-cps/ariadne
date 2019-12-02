@@ -117,6 +117,7 @@ class InteriorPointSolver
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds Type; };
+template<> struct RigorousNumericsTraits<FloatMPValue> { typedef FloatMPBounds Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).

@@ -112,6 +112,10 @@ class Box
     template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
         explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
 
+    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
+    template<class G, EnableIf<IsInvocableReturning<I,G,SizeType>> =dummy>
+        explicit Box(SizeType n, G const& g) : Vector<I>(n,g) { }
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.

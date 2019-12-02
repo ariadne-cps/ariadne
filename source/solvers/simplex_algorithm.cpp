@@ -41,6 +41,18 @@ static const unsigned int verbosity=0;
 
 namespace Ariadne {
 
+struct Infinity {
+    Sign _sgn;
+    Infinity(Sign s=Sign::POSITIVE) : _sgn(s) { }
+    Infinity operator-() const { return Infinity(-_sgn); }
+    operator Rational() { return Rational::inf(_sgn); }
+    operator FloatDP() const { return FloatDP::inf(_sgn,dp); }
+    operator FloatDPValue() const { return FloatDPValue(FloatDP(*this)); }
+    operator FloatDPApproximation() const { return FloatDPApproximation(FloatDP(*this)); }
+    operator FloatMPValue() const { return FloatMPValue(FloatMP::inf(_sgn,MP(0))); }
+};
+static const Infinity infnty = Infinity();
+
 template<class X1, class X2, EnableIf<IsSame<X1,RawFloatDP>> =dummy, EnableIf<IsSame<X2,FloatDPValue>> =dummy>
     bool operator<(X1 x1, X2 x2) { return x1<x2.raw(); }
 
@@ -262,7 +274,7 @@ compute_vt(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, c
         vt[p[k]]=Slackness::BASIS;
     }
     for(SizeType k=m; k!=n; ++k) {
-        if(definitely(xl[p[k]]==X(-inf))) {
+        if(definitely(xl[p[k]]==X(-infnty))) {
             vt[p[k]] = Slackness::UPPER;
         } else {
             vt[p[k]] = Slackness::LOWER;
@@ -563,6 +575,7 @@ Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
     const FloatDPValue CUTOFF_THRESHOLD_DP(Ariadne::CUTOFF_THRESHOLD);
+    const Dyadic CUTOFF_THRESHOLD_Q2(Ariadne::CUTOFF_THRESHOLD);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -577,7 +590,7 @@ compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, co
         for(SizeType i=0; i!=m; ++i) {
             z[j]-=y[i]*A[i][j];
         }
-        if(decide(abs(z[j])<CUTOFF_THRESHOLD_DP)) {
+        if(decide(abs(z[j])<CUTOFF_THRESHOLD_Q2)) {
             //z[j]=0;
         }
     }
@@ -676,7 +689,7 @@ Pair<SizeType,XX>
 compute_rt(const Array<SizeType>& p, const Vector<XX>& x, const Vector<XX>& d)
 {
     const SizeType m=d.size();
-    XX t=inf;
+    XX t=infnty;
     SizeType r=m;
     for(SizeType k=0; k!=m; ++k) {
         if(d[k] < -CUTOFF_THRESHOLD && x[p[k]] >= CUTOFF_THRESHOLD) {
@@ -695,7 +708,7 @@ template<class X, class XX>
 Pair<SizeType,XX>
 compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<XX>& x, const Vector<XX>& d, const SizeType s)
 {
-    const X inf_=X(Ariadne::inf);
+    const X inf_=X(Ariadne::infnty);
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -740,7 +753,7 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
 {
     typedef FloatDP X;
     typedef RigorousNumericType<X> XX;
-    const X inf_=Ariadne::inf;
+    const X inf_=Ariadne::infnty;
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -904,7 +917,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
 {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    static const X _inf = X(Ariadne::inf);
+    static const X _inf = X(Ariadne::infnty);
 
     ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
@@ -1116,7 +1129,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; xl="<<xl<<" xu="<<xu<<"\n  vt="<<vt<<"\n");
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    static const X _inf = X(Ariadne::inf);
+    static const X _inf = X(Ariadne::infnty);
 
     Vector<X> cc(n);
     Vector<X> ll(xl);
@@ -1128,7 +1141,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
 
     Bool infeasible=false;
     for(SizeType j=0; j!=n; ++j) {
-        // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=xl[j] to x[j]>=-inf.
+        // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=xl[j] to x[j]>=-infnty.
         if(decide(x[j]<xl[j])) { cc[j]=-1; ll[j]=-_inf; infeasible=true; }
         else if(decide(x[j]>xu[j])) { cc[j]=+1; uu[j]=+_inf; infeasible=true; }
         else { cc[j]=0; }
@@ -1487,6 +1500,7 @@ template class SimplexSolver<FloatDPApproximation>;
 template class SimplexSolver<FloatDPValue>;
 template class SimplexSolver<Rational>;
 
+template class SimplexSolver<FloatMPValue>;
 
 } // namespace Ariadne
 

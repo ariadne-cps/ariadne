@@ -314,6 +314,17 @@ Void export_points(pybind11::module& module) {
     export_point<FloatDPValue>(module,"ExactPoint");
 }
 
+template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
+}
+
+template<> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<UpperIntervalType>& interval_class) {
+    define_arithmetic(module,interval_class);
+    define_transcendental(module,interval_class);
+
+    define_mixed_arithmetic(module,interval_class,Tag<ValidatedNumber>());
+
+}
+
 template<class IVL> Void export_interval(pybind11::module& module, std::string name) {
     typedef IVL IntervalType;
     typedef typename IntervalType::LowerBoundType LowerBoundType;
@@ -337,6 +348,8 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
         interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
     }
+
+    export_interval_arithmetic(module,interval_class);
 
     if constexpr (HasEquality<IVL,IVL>::value) {
         interval_class.def("__eq__",  &__eq__<IVL,IVL , Return<EqualityType<IVL,IVL>> >);

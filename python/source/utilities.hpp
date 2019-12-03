@@ -324,7 +324,6 @@ template<class X, class Y> pybind11::class_<X>& define_mixed_comparisons(pybind1
     return pyclass;
 }
 
-
 template<class X> pybind11::class_<X>& define_arithmetic(pybind11::module& module, pybind11::class_<X>& pyclass) {
     pyclass.def("__pos__", &__pos__<X>, pybind11::is_operator());
     pyclass.def("__neg__", &__neg__<X>, pybind11::is_operator());
@@ -374,9 +373,7 @@ pybind11::class_<X>& define_inplace_arithmetic(pybind11::module& module, pybind1
 template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& module, pybind11::class_<X>& pyclass) {
     module.def("neg", &_neg_<X>);
     module.def("sqr", &_sqr_<X>);
-    if constexpr(CanHalve<X>::value) {
-        module.def("hlf", &_hlf_<X>);
-    }
+    module.def("hlf", &_hlf_<X>);
     module.def("rec", &_rec_<X>);
     module.def("pow", &_pow_<X,Int>);
     module.def("sqrt", &_sqrt_<X>);

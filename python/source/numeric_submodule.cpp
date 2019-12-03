@@ -327,7 +327,6 @@ void export_rational(pymodule& module)
 void export_real(pymodule& module)
 {
     Real r; hlf(r);
-    static_assert(CanHalve<Real>::value);
     pybind11::class_<Real> real_class(module,"Real");
     real_class.def(init<int>());
     real_class.def(init<Integer>());

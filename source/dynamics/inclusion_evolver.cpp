@@ -179,7 +179,7 @@ InclusionEvolver::InclusionEvolver(SystemType const& system, SweeperDP const& sw
     , _reconditioner(reconditioner)
     , _configuration(new ConfigurationType())
 {
-    assert(system.inputs().size() >= 0);
+    assert(system.inputs().size() > 0);
 }
 
 Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {

@@ -50,7 +50,7 @@ template<class F> class Approximation
     , public DefineComparisonOperators<Approximation<F>,LessTrait<Approximation<F>>,EqualsTrait<Approximation<F>>>
 {
   protected:
-    typedef ApproximateTag P; typedef typename F::PrecisionType PR;
+    typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef ApproximateTag Paradigm;
     typedef Approximation<F> NumericType;
@@ -73,6 +73,9 @@ template<class F> class Approximation
         Approximation<F>(const Real& r, PR pr); // : _a(r.get(pr)) { }
         Approximation<F>(const Approximation<F>& x, PR pr) : _a(x.raw(),near,pr) { }
     Approximation<F>(const ApproximateNumber& y, PR pr); // : _a(y.get(ApproximateTag(),pr)) { }
+
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        Approximation<F>(const Approximation<FF>& x, PR pr) : _a(x.raw(),near,pr) { }
 
     Approximation<F>(Error<F> const& x); // FIXME: Remove
     Approximation<F>(Value<F> const& x);

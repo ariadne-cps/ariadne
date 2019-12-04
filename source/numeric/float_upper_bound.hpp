@@ -50,7 +50,7 @@ template<class F> class UpperBound
     , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
-    typedef UpperTag P; typedef typename F::PrecisionType PR;
+    typedef UpperTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef UpperTag Paradigm;
     typedef UpperBound<F> NumericType;
@@ -73,6 +73,8 @@ template<class F> class UpperBound
         UpperBound<F>(const Real& r, PR pr);
     UpperBound<F>(const UpperBound<F>& x, PR pr);
     UpperBound<F>(const ValidatedUpperNumber& y, PR pr);
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        UpperBound<F>(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
 
     UpperBound<F>(Bounds<F> const& x);
     template<class FE> UpperBound<F>(Ball<F,FE> const& x);

@@ -195,8 +195,8 @@ template<class X, class I, class W> struct SameArithmeticMixin : public virtual 
 template<class X> class NumberGetterMixin : public virtual NumberInterface {
   public:
   //  operator X const& () const { return static_cast<NumberMixin<X>const&>(*this); }
-    static X const& _cast(NumberGetterMixin<X> const& self) { return static_cast<NumberMixin<X>const&>(self); }
-    static X& _cast(NumberGetterMixin<X>& self) { return static_cast<NumberMixin<X>&>(self); }
+    static X const& _cast(NumberGetterMixin<X> const& self) { return static_cast<NumberWrapper<X>const&>(static_cast<NumberMixin<X>const&>(self)); }
+    static X& _cast(NumberGetterMixin<X>& self) { return static_cast<NumberWrapper<X>&>(static_cast<NumberMixin<X>&>(self)); }
 
     typedef Paradigm<X> P;
     friend class Number<P>;

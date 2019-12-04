@@ -38,7 +38,7 @@ def test_solvers():
 
 def test_integrators():
     d=ExactBox([{-1:+1},{-1:+1}])
-    h=Dyadic(0.25)
+    h=Dyadic(exact(0.25))
 
     vf=EffectiveVectorMultivariateFunction([fo,fx])
     integrator=TaylorPicardIntegrator(1e-8)

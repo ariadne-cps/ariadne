@@ -176,7 +176,7 @@ template<class P> class Number
     // Construct from a builtin integer
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(FloatType<P,DoublePrecision>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Dyadic(x)) { }
 
     // Construct from a type which is convertible to Real.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,

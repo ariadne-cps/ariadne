@@ -50,7 +50,7 @@ template<class F> class LowerBound
     , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
-    typedef LowerTag P; typedef typename F::PrecisionType PR;
+    typedef LowerTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef LowerTag Paradigm;
     typedef LowerBound<F> NumericType;
@@ -73,6 +73,8 @@ template<class F> class LowerBound
         LowerBound<F>(const Real& r, PR pr);
     LowerBound<F>(const LowerBound<F>& x, PR pr);
     LowerBound<F>(const ValidatedLowerNumber& y, PR pr);
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        LowerBound<F>(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
 
     LowerBound<F>(Bounds<F> const& x);
     template<class FE> LowerBound<F>(Ball<F,FE> const& x);

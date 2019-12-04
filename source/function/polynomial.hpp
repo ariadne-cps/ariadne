@@ -348,13 +348,13 @@ template<class X, class A> inline A evaluate(const MultivariatePolynomial<X>& p,
     return horner_evaluate(p.expansion(),v); }
 
 template<class I, class X> inline Polynomial<I,X> derivative(Polynomial<I,X> p, SizeType k) {
-    p.differentiate(k); return std::move(p); }
+    p.differentiate(k); return p; }
 
 template<class I, class X> inline Polynomial<I,X> antiderivative(Polynomial<I,X> p, SizeType k) {
-    p.antidifferentiate(k); return std::move(p); }
+    p.antidifferentiate(k); return p; }
 
 template<class I, class X> inline Polynomial<I,X> truncate(Polynomial<I,X> p, DegreeType deg) {
-    p.truncate(deg); return std::move(p); }
+    p.truncate(deg); return p; }
 
 template<class I, class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<I,X>& p) {
     return p._write(os); }

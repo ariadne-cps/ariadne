@@ -173,7 +173,7 @@ template<class X> SymmetricMatrix<X> SymmetricMatrix<X>::identity(SizeType n) {
     for(SizeType i=0; i!=n; ++i) {
         S[i][i]=1;
     }
-    return std::move(S);
+    return S;
 }
 
 template<class X> inline SizeType SymmetricMatrix<X>::size() const {
@@ -245,7 +245,7 @@ template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
             A[j][i]=S.at(i,j);
         }
     }
-    return std::move(A);
+    return A;
 }
 
 
@@ -260,7 +260,7 @@ template<class X> SymmetricMatrix<X> operator+(SymmetricMatrix<X> const& S1, Sym
     for(SizeType i=0; i!=n*(n-1)/2; ++i) {
         R._ary[i]=S1._ary[i]+S2._ary[i];
     }
-    return std::move(R);
+    return R;
 }
 
 template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
@@ -276,7 +276,7 @@ template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
             }
         }
     }
-    return std::move(S);
+    return S;
 }
 
 template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
@@ -292,7 +292,7 @@ template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
             }
         }
     }
-    return std::move(S);
+    return S;
 }
 
 

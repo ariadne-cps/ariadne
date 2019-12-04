@@ -213,7 +213,7 @@ template<class X, class Y> X make_constant(const Y& c, X r);
 template<class X, class Y> X make_constant(const Y& c, const Vector<X>& v);
 
 template<class X, class Y> inline X make_constant(const Y& c, X r) {
-    r=c; return std::move(r); }
+    r=c; return r; }
 
 inline Real make_constant(const EffectiveNumber& c, const Real& x) {
     return Real(c); }

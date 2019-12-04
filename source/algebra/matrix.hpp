@@ -339,7 +339,7 @@ template<class M1, class M2> struct MatrixMatrixProduct {
     SizeType column_size() const { return _A2.column_size(); }
     ScalarType zero_element() const { return _A1.zero_element()*_A2.zero_element(); }
     ScalarType at(SizeType i, SizeType j) const { ScalarType r=this->zero_element();
-        for(SizeType k=0; k!=_A1.row_size(); ++k) { r+=_A1.at(i,k)*_A2.at(k,j); } return std::move(r); }
+        for(SizeType k=0; k!=_A1.row_size(); ++k) { r+=_A1.at(i,k)*_A2.at(k,j); } return r; }
 };
 template<class M1,class M2> struct IsMatrixExpression<MatrixMatrixProduct<M1,M2>> : True { };
 
@@ -351,7 +351,7 @@ template<class M1, class V2> struct MatrixVectorProduct {
     SizeType size() const { return _A1.row_size(); }
     ScalarType zero_element() const { return _A1.zero_element()*_v2.zero_element(); }
     ScalarType operator[](SizeType i) const { ScalarType r=this->zero_element();
-        for(SizeType j=0; j!=_v2.size(); ++j) { r+=_A1.at(i,j)*_v2.at(j); } return std::move(r); }
+        for(SizeType j=0; j!=_v2.size(); ++j) { r+=_A1.at(i,j)*_v2.at(j); } return r; }
 };
 template<class M1,class V2> struct IsVectorExpression<MatrixVectorProduct<M1,V2>> : True { };
 
@@ -632,7 +632,7 @@ template<class X0, class X1, class X2> Void _mul_assign(Matrix<X0>& A0, Matrix<X
 struct ProvideMatrixOperations {
 
     template<class X> friend inline Matrix<X> operator+(Matrix<X> A) {
-        return std::move(A);
+        return A;
     }
 
     template<class X> friend inline Matrix<X> operator-(Matrix<X> A) {
@@ -641,7 +641,7 @@ struct ProvideMatrixOperations {
                 A[i][j]=-A[i][j];
             }
         }
-        return std::move(A);
+        return A;
     }
 
     template<class X1, class X2> friend inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
@@ -653,7 +653,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]+A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
@@ -665,7 +665,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]-A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
@@ -675,7 +675,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=s1*A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
@@ -685,7 +685,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]*s2;
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
@@ -695,7 +695,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]/s2;
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A1, X2 const& s2) {
@@ -730,7 +730,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
@@ -742,7 +742,7 @@ struct ProvideMatrixOperations {
                 v0.at(i)+=A1.at(i,j)*v2.at(j);
             }
         }
-        return std::move(v0);
+        return v0;
     }
 
     template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) {
@@ -754,7 +754,7 @@ struct ProvideMatrixOperations {
                 u0.at(j)+=u1.at(i)*A2.at(i,j);
             }
         }
-        return std::move(u0);
+        return u0;
     }
 
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Transpose<Matrix<X2>> const& A2) {
@@ -768,7 +768,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2) {
@@ -782,7 +782,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> const& v2) {
@@ -794,7 +794,7 @@ struct ProvideMatrixOperations {
                 v0.at(i)+=A1T.at(j,i)*v2.at(j);
             }
         }
-        return std::move(v0);
+        return v0;
     }
 
     template<class X> friend inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {

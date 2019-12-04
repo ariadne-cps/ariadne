@@ -77,6 +77,9 @@ class Grid {
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
 
+    //! Copy assignment. Copies a reference to the grid data.
+    Grid& operator=(const Grid& g);
+
     //! The underlying dimension of the grid.
     DimensionType dimension() const;
 

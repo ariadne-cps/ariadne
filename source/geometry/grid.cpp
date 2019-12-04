@@ -59,6 +59,11 @@ Grid::Grid(const Grid& gr)
 {
 }
 
+Grid& Grid::operator=(const Grid& gr)
+{
+    this->_data=gr._data; return *this;
+}
+
 Grid::Grid(Nat d)
     : _data(new Data())
 {

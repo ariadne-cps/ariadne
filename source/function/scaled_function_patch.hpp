@@ -1167,6 +1167,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
  public:
     VectorScaledFunctionPatchElementReference(VectorScaledFunctionPatch<M>& c, SizeType i) : _c(&c), _i(i) { }
     operator ScalarScaledFunctionPatch<M> () const { return this->_c->get(this->_i); }
+    VectorScaledFunctionPatchElementReference<M>(const VectorScaledFunctionPatchElementReference<M>& x) = default;
     Void operator=(const VectorScaledFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     Void operator=(const ScalarScaledFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
     ScalarScaledFunctionPatch<M> element() const { return this->_c->get(this->_i); }

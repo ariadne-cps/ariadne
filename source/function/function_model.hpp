@@ -189,7 +189,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
     FunctionModel(const SharedPointer<const FunctionModelInterface<P,D,C,PR,PRE>> p) : _ptr(p->_clone()) { }
     FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
-    FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
+    FunctionModel& operator=(const FunctionModel<P,D,C,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
+        FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
     FunctionModel(const Function<P,D,C>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,D,C,PR,PRE>*>(f.raw_pointer()->_clone())) { }
     operator Function<P,D,C>() const { return Function<P,D,C>(this->_ptr->_clone()); }
     operator FunctionModelInterface<P,D,C,PR,PRE>& () { return *_ptr; }
@@ -287,23 +288,23 @@ template<class P, class D, class PR, class PRE> struct AlgebraOperations<ScalarF
 
 /*
     static ScalarFunctionModel<P,D,PR,PRE> apply(Nul, ScalarFunctionModel<P,D,PR,PRE> f) {
-        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return std::move(f); }
+        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(0)); return f; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Neg, ScalarFunctionModel<P,D,PR,PRE> f) {
-        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(-1)); return std::move(f); }
+        f._ptr->_imul(CanonicalNumericType<P,PR,PRE>(-1)); return f; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(+1),f2); return std::move(f1); }
+        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(+1),f2); return f1; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
-        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(-1),f2); return std::move(f1); }
+        f1._ptr->_isma(CanonicalNumericType<P,PR,PRE>(-1),f2); return f1; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const ScalarFunctionModel<P,D,PR,PRE>& f1, const ScalarFunctionModel<P,D,PR,PRE>& f2) {
         ScalarFunctionModel<P,D,PR,PRE> r=factory(f1).create_zero(); r._ptr->_ifma(f1,f2); return r; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Add, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
-        f1._ptr->_iadd(c2); return std::move(f1); }
+        f1._ptr->_iadd(c2); return f1; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
-        f1._ptr->_imul(c2); return std::move(f1); }
+        f1._ptr->_imul(c2); return f1; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Add, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        f2._ptr->_iadd(c1); return std::move(f2); }
+        f2._ptr->_iadd(c1); return f2; }
     static ScalarFunctionModel<P,D,PR,PRE> apply(Mul, const CanonicalNumericType<P,PR,PRE>& c1, ScalarFunctionModel<P,D,PR,PRE> f2) {
-        f2._ptr->_imul(c1); return std::move(f2); }
+        f2._ptr->_imul(c1); return f2; }
 
     static ScalarFunctionModel<P,D,PR,PRE> apply(Sub, ScalarFunctionModel<P,D,PR,PRE> f1, const CanonicalNumericType<P,PR,PRE>& c2) {
         return add(std::move(f1),neg(c2)); }
@@ -447,6 +448,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline explicit FunctionModel(FunctionModelInterface<P,D,C,PR,PRE>* p) : _ptr(p) { }
     inline FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
     inline FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
+    inline FunctionModel& operator=(const FunctionModel<P,D,C,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
     inline operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
     inline operator Function<P,D,C> () const { return Function<P,D,C>(*_ptr); }
     inline const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }

@@ -235,7 +235,7 @@ template<> template<class IVL> inline VariablesBox<IVL> Variables<Real>::in(cons
     ARIADNE_PRECONDITION(this->size()==bx.size());
     Map<RealVariable,IVL> bnds;
     for(SizeType i=0; i!=this->size(); ++i) { bnds.insert((*this)[i],bx[i]); }
-    return std::move(bnds);
+    return bnds;
 }
 
 //! \ingroup ExpressionSetSubModule

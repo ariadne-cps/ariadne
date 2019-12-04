@@ -356,11 +356,11 @@ class TaylorModel<ValidatedTag,F>
     Void differentiate(SizeType k);
 
     friend TaylorModel<ValidatedTag,F> unscale(TaylorModel<ValidatedTag,F> tm, IntervalDomainType const& dom) {
-        tm.unscale(dom); return std::move(tm); }
+        tm.unscale(dom); return tm; }
     friend TaylorModel<ValidatedTag,F> antiderivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
-        tm.antidifferentiate(k); return std::move(tm); }
+        tm.antidifferentiate(k); return tm; }
     friend TaylorModel<ValidatedTag,F> derivative(TaylorModel<ValidatedTag,F> tm, SizeType k) {
-        tm.differentiate(k); return std::move(tm); }
+        tm.differentiate(k); return tm; }
     //@}
 
     //@{
@@ -637,7 +637,7 @@ class TaylorModel<ApproximateTag,F>
     Void differentiate(SizeType k);
 
     friend TaylorModel<ApproximateTag,F> unscale(TaylorModel<ApproximateTag,F> tm, const IntervalDomainType& dom) {
-        tm.unscale(dom); return std::move(tm); }
+        tm.unscale(dom); return tm; }
 
     //@}
 
@@ -688,15 +688,15 @@ class TaylorModel<ApproximateTag,F>
     Void ifma(const TaylorModel<ApproximateTag,F>& x1, const TaylorModel<ApproximateTag,F>& x2);
 
 /*
-    friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> x) { x.imul(-1); return std::move(x); }
+    friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> x) { x.imul(-1); return x; }
     friend TaylorModel<ApproximateTag,F>& operator+=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.iadd(c); return x; }
     friend TaylorModel<ApproximateTag,F>& operator*=(TaylorModel<ApproximateTag,F>& x, NumericType const& c) { x.imul(c); return x; }
     friend TaylorModel<ApproximateTag,F> operator+(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
-        TaylorModel<ApproximateTag,F> r=x1; r.isma(+1,x2); return std::move(r); }
+        TaylorModel<ApproximateTag,F> r=x1; r.isma(+1,x2); return r; }
     friend TaylorModel<ApproximateTag,F> operator-(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
-        TaylorModel<ApproximateTag,F> r=x1; r.isma(-1,x2); return std::move(r); }
+        TaylorModel<ApproximateTag,F> r=x1; r.isma(-1,x2); return r; }
     friend TaylorModel<ApproximateTag,F> operator*(TaylorModel<ApproximateTag,F> const& x1, TaylorModel<ApproximateTag,F> const& x2) {
-        TaylorModel<ApproximateTag,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
+        TaylorModel<ApproximateTag,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return r; }
 
     template<class FF> friend TaylorModel<ApproximateTag,FF> max(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
     template<class FF> friend TaylorModel<ApproximateTag,FF> min(const TaylorModel<ApproximateTag,FF>& x, const TaylorModel<ApproximateTag,FF>& y);
@@ -732,7 +732,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
     ARIADNE_ASSERT(tm1.size()==tm2.size());
     Vector<TaylorModel<ValidatedTag,F>> r(tm1.size());
     for(SizeType i=0; i!=tm1.size(); ++i) { r[i]=refinement(tm1[i],tm2[i]); }
-    return std::move(r);
+    return r;
 }
 
 
@@ -748,26 +748,26 @@ template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<Ta
 template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {
     Vector<TaylorModel<ValidatedTag,F>> r(tf.size(),ValidatedTaylorModel<F>::zero(tf.zero_element().argument_size()-1u,tf.zero_element().sweeper()));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
-    return std::move(r);
+    return r;
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> compose(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<TaylorModel<ValidatedTag,F>>& tg) {
     Vector<TaylorModel<ValidatedTag,F>> r(tf.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<IntervalDomainType>& dom) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(x[i],dom[i]); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> compose(const VectorUnscaling& u, const Vector<TaylorModel<P,F>>& g) {
     ARIADNE_ASSERT_MSG(u.size()==g.size(),"u="<<u.domain()<<", g="<<g);
     Vector<TaylorModel<P,F>> r(u.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(u[i],g[i]); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> compose(const Vector<TaylorModel<P,F>>& x,
@@ -779,13 +779,13 @@ template<class P, class F> Vector<TaylorModel<P,F>> compose(const Vector<TaylorM
 template<class P, class F> Vector<TaylorModel<P,F>> antiderivative(const Vector<TaylorModel<P,F>>& x, SizeType k) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) { r[i]=antiderivative(x[i],k); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> derivative(const Vector<TaylorModel<P,F>>& x, SizeType k) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) { r[i]=derivative(x[i],k); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> combine(const Vector<TaylorModel<P,F>>& x1, const Vector<TaylorModel<P,F>>& x2) {
@@ -795,27 +795,27 @@ template<class P, class F> Vector<TaylorModel<P,F>> combine(const Vector<TaylorM
 template<class F> Vector<TaylorModel<ValidatedTag,F>> embed(SizeType as1, const Vector<TaylorModel<ValidatedTag,F>>& x2, SizeType as3) {
     Vector<TaylorModel<ValidatedTag,F>> r(x2.size());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<TaylorModel<P,F>> split(const Vector<TaylorModel<P,F>>& x, SizeType j, SplitPart h) {
     Vector<TaylorModel<P,F>> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) { r[i]=split(x[i],j,h); }
-    return std::move(r);
+    return r;
 }
 
 template<class P, class F> Vector<typename TaylorModel<P,F>::RangeType> ranges(const Vector<TaylorModel<P,F>>& f) {
-    Vector<typename TaylorModel<P,F>::RangeType> r(f.size()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return std::move(r);
+    Vector<typename TaylorModel<P,F>::RangeType> r(f.size()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
 template<class P, class F> Vector<typename TaylorModel<P,F>::ErrorType> errors(const Vector<TaylorModel<P,F>>& h) {
     Vector<typename TaylorModel<P,F>::ErrorType> e(h.size()); for(SizeType i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
 
 template<class P, class F> Vector<typename TaylorModel<P,F>::NormType> norms(const Vector<TaylorModel<P,F>>& h) {
-    Vector<NormType> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return std::move(r); }
+    Vector<NormType> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
 
 template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector<TaylorModel<P,F>>& h) {
-    typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return std::move(r);
+    typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return r;
 }
 
 template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y);

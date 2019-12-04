@@ -171,7 +171,7 @@ template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordin
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
-    return std::move(r);
+    return r;
 }
 
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
@@ -271,7 +271,7 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constan
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(SizeType as) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(as);
     for(SizeType j=0; j!=as; ++j) { r.append(coordinate(as,j)); }
-    return std::move(r);
+    return r;
 }
 
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(SizeType n) {

@@ -513,10 +513,10 @@ InputStream& operator>>(InputStream& is, FloatMP& x) {
 }
 
 //Integer floor(FloatMP const& x) {
-//    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDD); return std::move(z);
+//    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDD); return z;
 //}
 //Integer ceil(FloatMP const& x) {
-//    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDU); return std::move(z);
+//    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDU); return z;
 //}
 
 FloatMP floor(FloatMP const& x) {

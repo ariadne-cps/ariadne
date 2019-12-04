@@ -48,7 +48,7 @@ class Projection
     template<class X> Vector<X> operator() (Vector<X> const& v) const {
         Vector<X> r(this->result_size(),v.zero_element());
         for(SizeType i=0; i!=this->result_size(); ++i) { r[i]=v[this->_ind[i]]; }
-        return std::move(r); }
+        return r; }
     friend OutputStream& operator<<(OutputStream& os, Projection const& prj) {
         return os << "Projection("<<prj._ind<<")"; }
 };

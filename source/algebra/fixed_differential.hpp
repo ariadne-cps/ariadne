@@ -261,22 +261,22 @@ template<class X> struct AlgebraOperations<FirstDifferential<X>,X> {
         return FirstDifferential<X>(-x._value,-x._gradient); }
 
     static FirstDifferential<X> apply(Add, FirstDifferential<X> x, const FirstDifferential<X>& y) {
-        x._value+=y._value; x._gradient+=y._gradient; return std::move(x); }
+        x._value+=y._value; x._gradient+=y._gradient; return x; }
     static FirstDifferential<X> apply(Sub, FirstDifferential<X> x, const FirstDifferential<X>& y) {
-        x._value-=y._value; x._gradient-=y._gradient; return std::move(x); }
+        x._value-=y._value; x._gradient-=y._gradient; return x; }
     static FirstDifferential<X> apply(Mul, const FirstDifferential<X>& x, const FirstDifferential<X>& y) {
         return FirstDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient); }
     static FirstDifferential<X> apply(Div, const FirstDifferential<X>& x, const FirstDifferential<X>& y) {
         return FirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value); }
 
     static FirstDifferential<X> apply(Add, FirstDifferential<X> x, const X& c) {
-        x._value+=c; return std::move(x); }
+        x._value+=c; return x; }
     static FirstDifferential<X> apply(Sub, FirstDifferential<X> x, const X& c) {
-        x._value-=c; return std::move(x); }
+        x._value-=c; return x; }
     static FirstDifferential<X> apply(Mul, FirstDifferential<X> x, const X& c) {
-        x._value*=c; x._gradient*=c; return std::move(x); }
+        x._value*=c; x._gradient*=c; return x; }
     static FirstDifferential<X> apply(Div, FirstDifferential<X> x, const X& c) {
-        x._value/=c; x._gradient/=c; return std::move(x); }
+        x._value/=c; x._gradient/=c; return x; }
 
 
     static FirstDifferential<X> apply(Min, const FirstDifferential<X>& x1, const FirstDifferential<X>& x2) {
@@ -539,9 +539,9 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
         return SecondDifferential<X>(-x._value,-x._gradient,-x._half_hessian); }
 
     static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const SecondDifferential<X>& y) {
-        x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return std::move(x); }
+        x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return x; }
     static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const SecondDifferential<X>& y) {
-        x._value -= y._value; x._gradient -= y._gradient; x._half_hessian -= y._half_hessian; return std::move(x); }
+        x._value -= y._value; x._gradient -= y._gradient; x._half_hessian -= y._half_hessian; return x; }
     static SecondDifferential<X> apply(Mul, SecondDifferential<X> x, const SecondDifferential<X>& y) {
         x._half_hessian *= y._value;
         x._half_hessian += x._value * y._half_hessian;
@@ -550,19 +550,19 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
         x._gradient *= y._value;
         x._gradient += x._value * y._gradient;
         x._value *= y._value;
-        return std::move(x);
+        return x;
     }
     static SecondDifferential<X> apply(Div, const SecondDifferential<X>& x, SecondDifferential<X> y) {
         return mul(x,rec(std::move(y))); }
 
     static SecondDifferential<X> apply(Add, SecondDifferential<X> x, const X& c) {
-        x._value+=c; return std::move(x); }
+        x._value+=c; return x; }
     static SecondDifferential<X> apply(Sub, SecondDifferential<X> x, const X& c) {
-        x._value-=c; return std::move(x); }
+        x._value-=c; return x; }
     static SecondDifferential<X> apply(Mul, SecondDifferential<X> x, const X& c) {
-        x._value*=c; x._gradient*=c; x._half_hessian*=c; return std::move(x); }
+        x._value*=c; x._gradient*=c; x._half_hessian*=c; return x; }
     static SecondDifferential<X> apply(Div, SecondDifferential<X> x, const X& c) {
-        x._value/=c; x._gradient/=c; x._half_hessian/=c; return std::move(x); }
+        x._value/=c; x._gradient/=c; x._half_hessian/=c; return x; }
 
     static SecondDifferential<X> apply(Min, const SecondDifferential<X>& x1, const SecondDifferential<X>& x2) {
         ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);

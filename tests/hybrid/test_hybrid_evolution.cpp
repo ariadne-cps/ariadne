@@ -49,10 +49,6 @@ using namespace Ariadne;
 using namespace std;
 
 
-EffectiveScalarMultivariateFunction c=EffectiveScalarMultivariateFunction::constant(2,1);
-EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
-EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(2,1);
-
 Colour reach_set_colour(0.25,0.25,0.50);
 Colour intermediate_set_colour(0.50,0.50,0.75);
 Colour final_set_colour(0.75,0.75,1.00);

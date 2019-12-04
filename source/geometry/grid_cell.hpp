@@ -232,6 +232,9 @@ class GridCell : public GridAbstractCell {
     //! but not to the original space!
     GridCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
 
+    //! \brief Copy constructor.
+    GridCell( const GridCell & otherCell );
+
     //! \brief Allows to split the given cell into two sub-cells. When isRight == true
     //! then we return the right sub-cell, otherwise the left one */
     GridCell split(Bool isRight) const;
@@ -343,6 +346,9 @@ class GridOpenCell: public GridAbstractCell {
     //! via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
     //! but not to the original space!
     GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
+
+    //! \brief Copy constructor.
+    GridOpenCell( const GridOpenCell & otherCell );
 
     //! \brief Allows to split the given cell into two sub-cells. When isRight == true
     //! then we return the right sub-cell, if false then the left one, otherwise the middle one */
@@ -474,6 +480,9 @@ inline GridCell::GridCell(const Grid& theGrid, const Nat theHeight, const Binary
                     GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
 }
 
+inline GridCell::GridCell(const GridCell & otherCell ) : GridAbstractCell(otherCell) {
+}
+
 inline GridCell& GridCell::operator=(const GridCell & otherCell ) {
     GridAbstractCell::operator=(otherCell);
     return *this;
@@ -508,6 +517,9 @@ inline GridOpenCell::GridOpenCell() : GridAbstractCell( Grid(), 0, BinaryWord(),
 
 inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) :
                     GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
+}
+
+inline GridOpenCell::GridOpenCell(const GridOpenCell & otherCell ) : GridAbstractCell(otherCell) {
 }
 
 inline GridOpenCell& GridOpenCell::operator=(const GridOpenCell & otherCell ) {

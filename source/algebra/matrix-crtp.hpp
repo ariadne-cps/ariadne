@@ -108,7 +108,7 @@ template<class X> inline Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
 template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n) {
     Matrix<X> A(n,n,X(0));
     for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1u; }
-    return std::move(A);
+    return A;
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Matrix<X>& A) {

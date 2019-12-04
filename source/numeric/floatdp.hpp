@@ -165,6 +165,8 @@ class FloatDP {
     explicit FloatDP(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     FloatDP(const FloatDP& x) : dbl(x.dbl) { }
+    //! \brief Copy assignment.
+    FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 
     //! \brief Construct from a double number using given rounding
     explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);

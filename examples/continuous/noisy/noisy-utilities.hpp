@@ -71,7 +71,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
 
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
-    ValidatedVectorMultivariateFunctionModelType evolve_function = 
+    ValidatedVectorMultivariateFunctionModelType evolve_function =
         partial_evaluate(final_set,final_set.result_size(),NumericType(evolution_time,prec));
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
@@ -96,7 +96,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
                 fig.set_fill_colour(1.0,0.75,0.5);
                 for (auto set : reverse(reach_sets)) { fig.draw(set); }
                 fig.draw(evolve_set);
-                char num_char[7] = "";
+                char num_char[64] = "";
                 if (n > 2) sprintf(num_char,"[%lu,%lu]",i,j);
                 fig.write((name+num_char).c_str());
             }

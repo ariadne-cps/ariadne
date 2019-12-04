@@ -55,33 +55,33 @@ struct DiagonalMatrixOperations {
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))+=A2.at(i,i); }
-        return std::move(A1);
+        return A1;
     }
 
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator-(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))-=A2.at(i,i); }
-        return std::move(A1);
+        return A1;
     }
 
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=A2.at(i,i); }
-        return std::move(A1);
+        return A1;
     }
 
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
         if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
         ARIADNE_PRECONDITION(A1.size()==A2.size());
         for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
-        return std::move(A1);
+        return A1;
     }
 
     template<class X> friend Matrix<X> operator+(Matrix<X> A, DiagonalMatrix<X> const& D) {
         ARIADNE_PRECONDITION(A.row_size()==D.size() && A.column_size()==D.size());
         for(SizeType i=0; i!=D.size(); ++i) { A.at(i,i)+=D.at(i,i); }
-        return std::move(A);
+        return A;
     }
 
     template<class X> friend Matrix<X> operator*(Matrix<X> A, DiagonalMatrix<X> const& D) {
@@ -91,7 +91,7 @@ struct DiagonalMatrixOperations {
                 A.at(i,j)*=D.at(j,j);
             }
         }
-        return std::move(A);
+        return A;
     }
 
     template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Matrix<X> A) {
@@ -101,7 +101,7 @@ struct DiagonalMatrixOperations {
                 A.at(i,j)*=D.at(i,i);
             }
         }
-        return std::move(A);
+        return A;
     }
 
     template<class X> friend Matrix<X> operator*(DiagonalMatrix<X> const& D, Transpose<Matrix<X>> const& A) {
@@ -112,7 +112,7 @@ struct DiagonalMatrixOperations {
                 R.at(i,j)=D.at(i,i)*A.at(i,j);
             }
         }
-        return std::move(A);
+        return R;
     }
 
     template<class X> friend Vector<X> operator*(DiagonalMatrix<X> const& D, Vector<X> v) {
@@ -120,7 +120,7 @@ struct DiagonalMatrixOperations {
         for(SizeType i=0; i!=v.size(); ++i) {
             v.at(i)*=D.at(i,i);
         }
-        return std::move(v);
+        return v;
     }
 
     template<class X> friend Vector<X> operator*(Vector<X> v, DiagonalMatrix<X> const& D) {
@@ -128,7 +128,7 @@ struct DiagonalMatrixOperations {
         for(SizeType i=0; i!=v.size(); ++i) {
             v.at(i)*=D.at(i,i);
         }
-        return std::move(v);
+        return v;
     }
 
     template<class X> friend Vector<X> operator/(Vector<X> v, DiagonalMatrix<X> const& D) {
@@ -136,7 +136,7 @@ struct DiagonalMatrixOperations {
         for(SizeType i=0; i!=v.size(); ++i) {
             v.at(i)/=D.at(i,i);
         }
-        return std::move(v);
+        return v;
     }
 };
 
@@ -227,7 +227,7 @@ template<class X> Vector<X> DiagonalMatrix<X>::diagonal () const {
 template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {
     Matrix<X> A(this->row_size(),this->column_size(),this->zero_element());
     for(SizeType i=0; i!=this->size(); ++i) { A[i][i]=this->_ary[i]; }
-    return std::move(A);
+    return A;
 }
 
 template<class X> OutputStream& DiagonalMatrix<X>::write(OutputStream& os) const {

@@ -823,7 +823,7 @@ template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
             R.at(i,j)=midpoint(A.at(i,j));
         }
     }
-    return std::move(R);
+    return R;
 }
 
 template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
@@ -833,7 +833,7 @@ template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
             R.at(i,j)=cast_singleton(A.at(i,j));
         }
     }
-    return std::move(R);
+    return R;
 }
 
 

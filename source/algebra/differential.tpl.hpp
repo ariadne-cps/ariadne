@@ -357,7 +357,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X
         UniformReference<X> xa=iter->coefficient();
         xa=+xa;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -367,7 +367,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X
         UniformReference<X> xa=iter->coefficient();
         xa=-xa;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -381,7 +381,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, Differential<X
     } else {
         x.begin()->coefficient()+=c;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -394,7 +394,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X
             iter->coefficient()*=c;
         }
     }
-    return std::move(x);
+    return x;
 }
 
 

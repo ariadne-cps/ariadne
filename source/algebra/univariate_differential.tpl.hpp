@@ -55,14 +55,14 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::constant(DegreeType d, X const& c) {
     UnivariateDifferential r(d);
     r[0]=c;
-    return std::move(r);
+    return r;
 }
 
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::variable(DegreeType d, X const& c) {
     UnivariateDifferential r(d);
     r[0]=c;
     if(d>=1) { r[1]=1; }
-    return std::move(r);
+    return r;
 }
 
 template<class X> DegreeType UnivariateDifferential<X>::degree() const {

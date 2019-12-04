@@ -23,7 +23,7 @@
  */
 
 /*! \file algebra/vector-crtp.hpp
- *  \brief 
+ *  \brief
  */
 
 
@@ -242,7 +242,7 @@ template<class V1, class V2> inline auto join(const VectorExpression<V1>& ve1, c
     Vector<X0> r(v1.size()+v2.size());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    return std::move(r);
+    return r;
 }
 */
 
@@ -272,7 +272,7 @@ Vector<ScalarType<V1>> join(const VectorExpression<V1>& ve1, const VectorExpress
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
-    return std::move(r);
+    return r;
 }
 
 template<class V1, class X2, EnableIf<IsSame<ScalarType<V1>,X2>> =dummy>
@@ -284,7 +284,7 @@ Vector<ScalarType<V1>> join(const VectorExpression<V1>& ve1, const ScalarObject<
     Vector<X0> r(v1.size()+1u);
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
-    return std::move(r);
+    return r;
 }
 
 template<class V1, class V2, class X3, EnableIf<AreSame<ScalarType<V1>,ScalarType<V2>,X3>> =dummy>
@@ -297,7 +297,7 @@ Vector<ScalarType<V1>> join(const VectorExpression<V1>& ve1, const VectorExpress
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     r[v1.size()+v2.size()]=x3;
-    return std::move(r);
+    return r;
 }
 
 template<class X> struct Covector {

@@ -147,10 +147,10 @@ template<class X> UnivariateDifferential<X> create_zero(const UnivariateDifferen
 
 template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
     static UnivariateDifferential<X> apply(Pos, UnivariateDifferential<X> x) {
-        return std::move(x); }
+        return x; }
 
     static UnivariateDifferential<X> apply(Neg, UnivariateDifferential<X> x) {
-        for(DegreeType i=0; i<=x.degree(); ++i) { x[i]=-x[i]; } return std::move(x); }
+        for(DegreeType i=0; i<=x.degree(); ++i) { x[i]=-x[i]; } return x; }
 
     static UnivariateDifferential<X> apply(Sqr, const UnivariateDifferential<X>& dx) {
         return apply(Mul(),dx,dx); }
@@ -177,10 +177,10 @@ template<class X> struct AlgebraOperations<UnivariateDifferential<X>,X> {
         return x1*rec(x2); }
 
     static UnivariateDifferential<X> apply(Add, UnivariateDifferential<X> x, X const& c) {
-        x[0]+=c; return std::move(x); }
+        x[0]+=c; return x; }
 
     static UnivariateDifferential<X> apply(Mul, UnivariateDifferential<X> x, X const& c) {
-        for(DegreeType i=0; i<=x.degree(); ++i) { x[i]*=c; } return std::move(x); }
+        for(DegreeType i=0; i<=x.degree(); ++i) { x[i]*=c; } return x; }
 
     template<class OP> static UnivariateDifferential<X> apply(OP op, const UnivariateDifferential<X>& dx) {
         return compose(UnivariateDifferential<X>(op,dx.degree(),dx[0]),dx); }

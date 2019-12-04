@@ -180,7 +180,7 @@ template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Array<SizeType
     for(SizeType i=0; i!=rng.size(); ++i) {
         res[i]=bx[rng[i]];
     }
-    return std::move(res);
+    return res;
 }
 
 template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Range& rng)
@@ -189,7 +189,7 @@ template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Range& rng)
     for(SizeType i=0; i!=rng.size(); ++i) {
         res[i]=bx[rng[i]];
     }
-    return std::move(res);
+    return res;
 }
 
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const Box<I>& bx2)

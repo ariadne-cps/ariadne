@@ -115,7 +115,7 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
         r.expansion().append(ra,xc);
     }
     r.cleanup();
-    return std::move(r);
+    return r;
 }
 
 template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f, Projection const& prj) {

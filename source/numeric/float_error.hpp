@@ -164,8 +164,7 @@ template<class F> class Error
     friend Error<F>const& cast_positive(Error<F> const& x) { return x; }
   public:
     friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) {
-//        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
-        return write(os,x.raw(),Error<F>::output_places,to_nearest); }
+        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
     friend InputStream& operator>>(InputStream& is, Error<F>& x) {
         UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is; }
   public:

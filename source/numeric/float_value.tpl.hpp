@@ -34,7 +34,7 @@
 
 namespace Ariadne {
 
-template<class F> Nat Value<F>::output_places = 16;
+template<class F> Nat Value<F>::output_places = 17;
 
 template<class F> Value<F>::Value(ExactDouble const& d, PR pr)
     : _v(d,pr)

@@ -456,6 +456,8 @@ inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
 
 
 String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
+    // zdgts is the number of places allocated for the integer part (currently unused)
+    // fdgts is the number of places allocated for the fractional part (currently unused)
     char fmt[16];
     std::strcpy(fmt,"%.");
     std::sprintf(fmt+2, "%d", fdgts);
@@ -464,15 +466,17 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
     char cstr[buf_size];
     // uint buf_size = zdgts+fdgts+8;
     mpfr_snprintf(cstr,buf_size,fmt,rnd,x);
+    if(fdgts==0) { std::strcat(cstr,"."); }
     cstr[1023]='\0';
     return String(cstr);
 }
 
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
-    static const double log2ten = 3.3219280948873621817;
-    int pdgts = std::ceil(x.precision()/log2ten);
+    //static const double log2ten = 3.3219280948873621817;
+    //int pdgts = std::ceil(x.precision()/log2ten);
+    int edgts = log10floor(x)+1;
     int zdgts = std::max(log10floor(x),0)+1;
-    int fdgts = pdgts-zdgts;
+    int fdgts = std::max(static_cast<int>(figs)-edgts,0);
     return print(x._mpfr,zdgts,fdgts,rnd);
 }
 

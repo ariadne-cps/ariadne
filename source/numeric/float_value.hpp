@@ -188,7 +188,7 @@ template<class F> class Value
         return x1._v==x2._v; }
 
     friend OutputStream& operator<<(OutputStream& os, Value<F> const& x) {
-        return write(os,x.raw(),Value<F>::output_places,to_nearest); }
+        return write(os,x.raw(),DecimalPrecision{Value<F>::output_places},to_nearest); }
     friend InputStream& operator>>(InputStream& is, Value<F>& x) {
         auto v = nul(x._v); is >> v; ARIADNE_ASSERT(not is.fail()); x._v=v; return is;}
 

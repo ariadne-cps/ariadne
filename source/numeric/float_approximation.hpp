@@ -183,7 +183,7 @@ template<class F> class Approximation
         return round(static_cast<Dyadic>(x._a)); }
 
     friend OutputStream& operator<<(OutputStream& os, Approximation<F> const& x) {
-        return write(os,x.raw(),Approximation<F>::output_places,to_nearest); }
+        return write(os,x.raw(),DecimalPrecision{Approximation<F>::output_places},to_nearest); }
     friend InputStream& operator>>(InputStream& is, Approximation<F>& x) {
         is >> x._a; return is; }
   public:

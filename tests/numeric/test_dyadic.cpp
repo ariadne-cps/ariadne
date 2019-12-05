@@ -107,6 +107,12 @@ void TestDyadic::test_literal() {
 //    ARIADNE_TEST_EQUALS(-_2^-4,Dyadic(-1,4u));
 //    ARIADNE_TEST_EQUALS(5*_2^-4,Dyadic(5,4u));
 //    ARIADNE_TEST_EQUALS(5/_2^4,Dyadic(5,4u));
+
+    ARIADNE_TEST_PRINT(Dyadic(7,2u));
+    ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(FractionWriter()));
+    ARIADNE_TEST_PRINT(Dyadic(7,2u));
+    ARIADNE_TEST_EXECUTE(std::cout<<DecimalWriter()(Dyadic(7,2u)));
+
 }
 
 void TestDyadic::test_conversions() {

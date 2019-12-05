@@ -37,6 +37,9 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
+#include "../utility/handle.hpp"
+#include "../utility/writable.hpp"
+
 #include "../numeric/logical.hpp"
 #include "../numeric/integer.hpp"
 #include "../numeric/twoexp.hpp"
@@ -61,6 +64,13 @@ class Dyadic
     , DefineRingOperators<Dyadic>
     , DefineComparisonOperators<Dyadic,Boolean,Boolean>
 {
+    static Writer<Dyadic> _default_writer;
+  public:
+//    template<class W, EnableIf<IsBaseOf<WriterInterface<Dyadic>,W>> =dummy> static Void set_default_writer(W w) {
+//        _default_writer=std::make_shared<W>(std::move(w)); }
+//    static Void set_default_writer(Writer<Dyadic> w) { _default_writer=w.managed_pointer(); }
+    static Void set_default_writer(Writer<Dyadic> w) { _default_writer=w; }
+    static Writer<Dyadic> default_writer() { return _default_writer; }
   public:
     mpf_t _mpf;
   public:
@@ -155,6 +165,17 @@ class Dyadic
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Dyadic const& x);
 };
+
+class DecimalWriter : public WriterInterface<Dyadic> {
+    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+};
+class FractionWriter : public WriterInterface<Dyadic> {
+    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+};
+template<> class RepresentationWriter<Dyadic> : public WriterInterface<Dyadic> {
+    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+};
+
 
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }

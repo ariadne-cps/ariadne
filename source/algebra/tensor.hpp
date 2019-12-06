@@ -43,9 +43,10 @@ template<class T> class TensorRow {
     T& operator[] (SizeType j) { return _t[Array<SizeType>({_i,j})]; }
 };
 
+//! \ingroup LinearAlgebraModule
 //! \brief A rank-\a N tensor with elements of type \a X.
-//!   TODO: Also provide a version which is not templated on rank.
 template<SizeType N, class X> class Tensor {
+//   TODO: Also provide a version which is not templated on rank.
     Array<SizeType> _ns;
     Array<X> _a;
   public:

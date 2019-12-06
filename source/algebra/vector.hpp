@@ -287,6 +287,9 @@ class Vector
 
 template<class X> struct IsVector<Vector<X>> : True { };
 
+//! \ingroup LinearAlgebraModule
+//! A view into a subvector of a vector of class \a V.
+//! \see Vector, Range
 template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >
 {

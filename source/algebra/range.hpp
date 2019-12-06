@@ -33,18 +33,20 @@
 
 namespace Ariadne {
 
+//! \ingroup LinearAlgebraModule
+//! \brief A range of integer values from a \em start value up to, but not including, a \em stop value.
 class Range {
     SizeType _start; SizeType _stop;
   public:
-    SizeType operator[](SizeType i) const { return _start+i; }
-    Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
-    SizeType size() const { return this->_stop-this->_start; }
-    SizeType start() const { return this->_start; }
-    SizeType stride() const { return 1u; }
-    SizeType stop() const { return this->_stop; }
+    Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { } //!< .
+    SizeType operator[](SizeType i) const { return _start+i; } //!< .
+    SizeType size() const { return this->_stop-this->_start; } //!< .
+    SizeType start() const { return this->_start; } //!< .
+    SizeType stop() const { return this->_stop; } //!< .
+    SizeType stride() const { return 1u; } //!< Always equal to \a 1.
 };
-inline Range range(SizeType stop) { return Range(0u,stop); }
-inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
+inline Range range(SizeType stop) { return Range(0u,stop); } //!< \relates Range
+inline Range range(SizeType start, SizeType stop) { return Range(start,stop); } //!< \relates Range
 
 struct RangeIterator {
     explicit inline RangeIterator(SizeType i) : _i(i) { }

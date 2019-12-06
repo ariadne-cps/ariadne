@@ -49,7 +49,7 @@ namespace Ariadne {
 typedef unsigned int uint;
 
 //! Internal name for output stream.
-typedef OutputStream OutputStream;
+typedef std::ostream OutputStream;
 
 //! Internal name for void type.
 typedef void Void;
@@ -60,6 +60,9 @@ typedef bool Bool;
 typedef int Int;
 //! Internal name for builtin unsigned integers.
 typedef uint Nat;
+
+//! Internal name for standard size type, used for sizes of containers.
+typedef std::size_t SizeType;
 
 // A class containing an exact double-precision value
 class ExactDouble;

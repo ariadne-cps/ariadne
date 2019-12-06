@@ -38,11 +38,6 @@ namespace Ariadne {
 
 template<class X> class Sequence;
 
-/*! \defgroup LogicalModule Logical Module
- *  \ingroup CoreModules
- *  \brief %Logical classes and functions.
- */
-
 //! \ingroup LogicalModule
 //! \brief The amount of work used in performing a calculation or checking a quasidecidable predicate.
 //! \details The Effort should roughly reflect the time needed to perform a computation.

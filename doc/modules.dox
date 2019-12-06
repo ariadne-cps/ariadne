@@ -85,7 +85,7 @@ namespace Ariadne {
 
 /*!\defgroup LogicalModule Logical Module
  * \ingroup CoreModules
- * \brief Logical types.
+ * \brief Logical types, including \ref Boolean, \ref Sierpinskian and \ref Kleenean types.
  * \details In this module, we define %Ariadne's base logical types.
  * The main classes are \ref Ariadne::Boolean "Boolean",
  * \ref Ariadne::Sierpinskian "Sierpinskian", and \ref Ariadne::Kleenean "Kleenean".
@@ -247,8 +247,8 @@ See the page \ref numeric_page for more information.
 /*!
  * \defgroup LinearAlgebraModule Linear Algebra Module
  * \ingroup CoreModules
- * \brief %Vector, matrix and tensor classes, solution of linear equations,
- * LU and QR factorisation and singular value decomposition.
+ * \brief \ref Vector "Vector<X>", \ref Matrix "Matrix<X>" and \ref Tensor "Tensor<N,X>" classes,
+ * solution of linear equations, LU and QR factorisation and singular value decomposition.
  *
  * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector"
  * and \ref Ariadne::Matrix "Matrix".
@@ -400,7 +400,7 @@ See the page \ref numeric_page for more information.
  */
 
 /*!\defgroup OptimisationSubModule Optimisation Submodule
- * \ingroup CoreModules
+ * \ingroup SolverModule
  * \brief Classes and functions for solving linear and nonlinear programming problems.
  *
  * The LinearProgram class supports construction and solution of linear

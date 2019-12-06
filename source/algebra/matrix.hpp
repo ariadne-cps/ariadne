@@ -208,9 +208,9 @@ template<class X> class Matrix
     //! \brief C-style constant subscripting operator.
     const X& operator[][](SizeType i, SizeType j) const;
     //! \brief C-style range subscripting operator.
-    X& operator[][](Range is, Range js);
+    MatrixRange<Matrix<X>>& operator[][](Range is, Range js);
     //! \brief C-style constant subscripting operator.
-    const X& operator[][](Range i, Range js) const;
+    const MatrixRange<Matrix<X>>& operator[][](Range i, Range js) const;
 #else
     MatrixRow<const Matrix<X>> operator[](SizeType i) const;
     MatrixRow<Matrix<X>> operator[](SizeType i);
@@ -366,6 +366,9 @@ template<class M1, class X2> struct MatrixScalarQuotient {
 };
 template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X2>> : True { };
 
+//! \ingroup LinearAlgebraModule
+//! \brief A view into a submatrix of a matrix of class \a M.
+//! \see Matrix, Range
 template<class M> struct MatrixRange
     : public MatrixContainer< MatrixRange<M> >
 {

@@ -38,8 +38,6 @@
 
 namespace Ariadne {
 
-typedef SizeType SizeType;
-
 
 Bool BinaryTreeNode::has_enabled() const {
     if( is_leaf() ) {

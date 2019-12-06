@@ -39,8 +39,6 @@
 
 namespace Ariadne {
 
-typedef OutputStream OutputStream;
-typedef Bool Bool;
 typedef Vector<FloatDPValue> ExactFloatVector;
 class HybridGridTreePaving;
 

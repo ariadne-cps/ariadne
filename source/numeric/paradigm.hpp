@@ -121,7 +121,7 @@ constexpr ParadigmCode null(ParadigmCode p) {
 
 
 //! \defgroup ParadigmSubModule Computational Paradigms
-//!   \ingroup LogicModule
+//!   \ingroup LogicalModule
 //! \brief Tag classes describing the information provided by a type.
 //! \details In order to indicate the kind of guarantees on the approximation provided by a concrete object,
 //!   every type in %Ariadne has an associated Paradigm tag.

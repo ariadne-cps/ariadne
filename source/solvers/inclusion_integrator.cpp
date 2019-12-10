@@ -242,7 +242,7 @@ InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivar
     ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
     auto doma = this->build_parameter_domain(_inputs);
 
-    auto w = this->build_w_functions(domt,doma,_f.result_size(),_inputs.size());
+    auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
     ARIADNE_LOG(6,"w:"<<w<<"\n");
     auto Fw = build_Fw(_f,w);
     ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
@@ -372,7 +372,7 @@ template<class A> BoxDomainType InclusionIntegrator<A>::build_parameter_domain(B
     return result;
 }
 
-template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<ZeroApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ZeroApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::zero(n+1);
@@ -380,7 +380,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<ZeroA
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<ConstantApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<ConstantApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(0,m))
         result[i] = EffectiveScalarMultivariateFunction::coordinate(n+1+m,n+1+i);
@@ -388,7 +388,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<Const
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<AffineApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<AffineApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto three = EffectiveScalarMultivariateFunction::constant(n+1+2*m,3_z);
@@ -407,7 +407,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<Affin
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<SinusoidalApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<SinusoidalApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto pgamma = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
@@ -427,7 +427,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<Sinus
 }
 
 
-template<> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrator<PiecewiseApproximation>::build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const {
+template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<PiecewiseApproximation>(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) {
     auto zero = EffectiveScalarMultivariateFunction::zero(n+1+2*m);
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
 
@@ -459,7 +459,7 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto e=this->compute_errors(h,B);
     ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
 
-    auto w_hlf = this->build_w_functions(domt_first,doma,n,m);
+    auto w_hlf = build_w_functions<PiecewiseApproximation>(domt_first,doma,n,m);
     ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
     auto Fw_hlf = build_Fw(_f,w_hlf);
     ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");

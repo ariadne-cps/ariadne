@@ -200,6 +200,8 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind
     return os;
 }
 
+template<class A> Vector<EffectiveScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m);
+
 class InclusionIntegratorHandle;
 class InclusionIntegratorInterface;
 
@@ -295,7 +297,6 @@ class InclusionIntegrator : public InclusionIntegratorInterface, Loggable {
     BoxDomainType build_parameter_domain(BoxDomainType const& V) const;
     ValidatedVectorMultivariateFunctionModelDP build_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
     ValidatedVectorMultivariateFunctionModelDP build_secondhalf_piecewise_reach_function(ValidatedVectorMultivariateFunctionModelDP const& evolve_function, ValidatedVectorMultivariateFunctionModelDP const& Phi, TimeStepType const& t, TimeStepType const& new_t) const;
-    Vector<EffectiveScalarMultivariateFunction> build_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
     Vector<EffectiveScalarMultivariateFunction> build_secondhalf_piecewise_w_functions(Interval<TimeStepType> const& domt, BoxDomainType const& doma, SizeType n, SizeType m) const;
 };
 

@@ -141,7 +141,7 @@ template<class F1, class F2, class J> inline decltype(auto) _derivative_impl(Sub
 template<class F1, class F2, class J> inline decltype(auto) _derivative_impl(Mul, F1 const& f1, F2 const& f2, J j) {
     return derivative(f1,j)*f2+f1*derivative(f2,j); }
 template<class F1, class F2, class J> inline decltype(auto) _derivative_impl(Div, F1 const& f1, F2 const& f2, J j) {
-    return (derivative(f1,j)+derivative(f2,j)*(f1/f2))/f2; }
+    return (derivative(f1,j)-derivative(f2,j)*(f1/f2))/f2; }
 template<class F1, class F2, class J> inline auto _derivative_impl(Max, F1 const& f1, F2 const& f2, J j) -> decltype(max(f1,f2)){
     ARIADNE_THROW(std::runtime_error,"derivative(max(f1,f2))","Cannot take derivative of non-smooth function."); }
 template<class F1, class F2, class J> inline auto _derivative_impl(Min, F1 const& f1, F2 const& f2, J j) -> decltype(min(f1,f2)) {

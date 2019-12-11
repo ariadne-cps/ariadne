@@ -241,7 +241,7 @@ template<class T> PythonRepresentation<T> python_representation(const T& t) {
 template<class T> std::string __repr__(const T& t) {
     std::stringstream ss; ss << python_representation(t); return ss.str();}
 
-} // namespace Ariadne
+} // namespace Ariadnelist
 
 
 template<class T>
@@ -559,7 +559,7 @@ pybind11::class_<VA>& define_vector_algebra_arithmetic(pybind11::module& module,
 #include "algebra/vector.hpp"
 
 template<class X>
-void export_vector(pybind11::module& module, std::string name) {
+pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std::string name) {
     using namespace Ariadne;
 
     pybind11::class_<Vector<X>> vector_class(module, name.c_str());
@@ -598,6 +598,8 @@ void export_vector(pybind11::module& module, std::string name) {
     module.def("join", &_join_<Vector<X>,X>);
     module.def("join", &_join_<X,Vector<X>>);
     module.def("join", [](X const& x1, X const& x2){return Vector<X>({x1,x2});});
+
+    return vector_class;
 }
 
 

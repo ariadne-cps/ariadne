@@ -464,6 +464,11 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<
     return make_formula(e,Space<Real>({var}));
 }
 
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Variable<Real>& var)
+{
+    return make_formula(e,Space<Real>({var}));
+}
+
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc)
 {
     Vector<Formula<EffectiveNumber>> res(e.size());

@@ -51,6 +51,8 @@ typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 template<class F, class P, class D, class C> class FunctionMixin { };
 template<class F, class P, class D> class ScalarFunctionMixin;
 template<class F, class P, class D> class VectorFunctionMixin;
+template<class F, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<F,P,IntervalDomainType>;
+template<class F, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<F,P,IntervalDomainType>;
 template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,BoxDomainType>;
 template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,BoxDomainType>;
 

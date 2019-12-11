@@ -54,6 +54,54 @@ namespace Ariadne {
 
 //! A function defined by a formula
 template<class Y>
+struct ScalarUnivariateFormulaFunction
+    : ScalarUnivariateFunctionMixin<ScalarUnivariateFormulaFunction<Y>,InformationTag<Y>>
+{
+    typedef InformationTag<Y> P;
+    Formula<Y> _formula;
+
+    ScalarUnivariateFormulaFunction(const Formula<Y>& f) : _formula(f) { }
+    operator Formula<Y>() const { return _formula; }
+
+    virtual SizeOne argument_size() const final { return SizeOne(); }
+    virtual SizeOne result_size() const final { return SizeOne(); }
+    virtual ScalarUnivariateFunctionInterface<P>* _derivative(SizeOne j) const final {
+        return new ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(_formula,0)); }
+    virtual OutputStream& write(OutputStream& os) const final { return os << this->_formula; }
+    virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_formula<<")"; }
+    template<class X> Void _compute(X& r, const X& x) const { r=Ariadne::evaluate(_formula,Vector<X>({x})); }
+};
+
+typedef ScalarUnivariateFormulaFunction<EffectiveNumber> EffectiveScalarUnivariateFormulaFunction;
+
+
+//! A function defined by a formula
+template<class Y>
+struct VectorUnivariateFormulaFunction
+    : VectorUnivariateFunctionMixin<VectorUnivariateFormulaFunction<Y>,InformationTag<Y>>
+{
+    typedef InformationTag<Y> P;
+    Vector<Formula<Y>> _formulae;
+
+    VectorUnivariateFormulaFunction(const List< Formula<Y> >& f) : _formulae(f) { }
+    VectorUnivariateFormulaFunction(const Vector< Formula<Y> >& f) : _formulae(f) { }
+
+    ScalarUnivariateFormulaFunction<Y> operator[](SizeType i) const { return ScalarUnivariateFormulaFunction(_formulae[i]); }
+
+    virtual SizeType result_size() const { return this->_formulae.size(); }
+    virtual SizeOne argument_size() const { return SizeOne(); }
+    virtual ScalarUnivariateFormulaFunction<Y>* _get(SizeType i) const { return new ScalarUnivariateFormulaFunction<Y>(this->_formulae[i]); }
+    virtual VectorUnivariateFormulaFunction<Y>* _derivative(SizeOne k) const {
+        return new VectorUnivariateFormulaFunction<Y>(Vector<Formula<Y>>(this->_formulae.size(),[&](SizeType i){return derivative(this->_formulae[i],k);})); }
+    virtual OutputStream& write(OutputStream& os) const { return os << this->_formulae; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "VectorUnivariateFormulaFunction("<<this->result_size()<<","<<this->_formulae<<")"; }
+    template<class X> Void _compute(Vector<X>& r, const X& x) const { r=Ariadne::evaluate(this->_formulae,Vector<X>({x})); }
+};
+
+typedef VectorUnivariateFormulaFunction<EffectiveNumber> EffectiveVectorUnivariateFormulaFunction;
+
+//! A function defined by a formula
+template<class Y>
 struct ScalarFormulaFunction
     : ScalarMultivariateFunctionMixin<ScalarFormulaFunction<Y>,InformationTag<Y>>
 {

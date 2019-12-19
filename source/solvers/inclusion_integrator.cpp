@@ -244,7 +244,7 @@ InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivar
 
     auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
     ARIADNE_LOG(6,"w:"<<w<<"\n");
-    auto Fw = build_Fw(_f,w);
+    auto Fw = substitute_v_with_w(_f, w);
     ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
     auto phi = this->_integrator->flow_step(Fw,domx,domt,doma,B);
     add_errors(phi,e);
@@ -341,7 +341,7 @@ Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorTyp
     }
 }
 
-EffectiveVectorMultivariateFunction build_Fw(EffectiveVectorMultivariateFunction const& F, Vector<EffectiveScalarMultivariateFunction> const& w) {
+EffectiveVectorMultivariateFunction substitute_v_with_w(EffectiveVectorMultivariateFunction const& F, Vector<EffectiveScalarMultivariateFunction> const& w) {
 
     auto n = F.result_size();
     auto m = w.size();
@@ -461,7 +461,7 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
 
     auto w_hlf = build_w_functions<PiecewiseApproximation>(domt_first,doma,n,m);
     ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
-    auto Fw_hlf = build_Fw(_f,w_hlf);
+    auto Fw_hlf = substitute_v_with_w(_f, w_hlf);
     ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
 
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
@@ -475,7 +475,7 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
 
     auto w = this->build_secondhalf_piecewise_w_functions(domt_second,doma,n,m);
     ARIADNE_LOG(6,"w:"<<w<<"\n");
-    auto Fw = build_Fw(_f, w);
+    auto Fw = substitute_v_with_w(_f, w);
     ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
     auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);

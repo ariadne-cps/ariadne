@@ -30,42 +30,45 @@
 
 namespace Ariadne {
 
-template<class A> constexpr ErrorType r_value();
-template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); }
-template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
-template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
+template<> FloatDPError wstar_multiplier<ZeroApproximation>() { return FloatDPError(0u); }
+template<> FloatDPError wstar_multiplier<ConstantApproximation>() { return FloatDPError(1u); }
+template<> FloatDPError wstar_multiplier<AffineApproximation>() { return FloatDPError(5.0/3u); }
+template<> FloatDPError wstar_multiplier<SinusoidalApproximation>() { return FloatDPError(1.3645_upper); }
+template<> FloatDPError wstar_multiplier<PiecewiseApproximation>() { return FloatDPError(5.0/4u); }
 
-ErrorType zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
-ErrorType zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
-ErrorType oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
-ErrorType oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
-template<class R> ErrorType twoparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
-template<class R> ErrorType twoparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
+FloatDPError vstar(BoxDomainType const& inputs) {
+    FloatDPError result(0u);
+    for (auto i : range(0,inputs.size())) {
+        result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper())));
+    }
+    return result;
+}
 
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n,h); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n,h); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n,h,r_value<A>()); }
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n,h,j); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n,h,j); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n,h,r_value<A>(),j); }
+ErrorType zeroparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
+ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
+template<class R> ErrorType twoparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
+
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n, vstar(inputs), wstar<A>(inputs), h, j); }
 
 
-C1Norms::C1Norms(FloatDPError const& K_,Vector<FloatDPError> const& Kj_,FloatDPError const& pK_,Vector<FloatDPError> const& pKj_,
-             FloatDPError const& L_,Vector<FloatDPError> const& Lj_,FloatDPError const& pL_,Vector<FloatDPError> const& pLj_,
-             FloatDPError const& H_,Vector<FloatDPError> const& Hj_,FloatDPError const& pH_,Vector<FloatDPError> const& pHj_,
-             FloatDPError const& expLambda_,FloatDPError const& expL_)
- : K(K_), Kj(Kj_), pK(pK_), pKj(pKj_), L(L_), Lj(Lj_), pL(pL_), pLj(pLj_), H(H_), Hj(Hj_), pH(pH_), pHj(pHj_), expLambda(expLambda_), expL(expL_) {
+ErrorNorms::ErrorNorms(FloatDPError const& K_, Vector<FloatDPError> const& Kj_, FloatDPError const& pK_, Vector<FloatDPError> const& pKj_,
+                       FloatDPError const& L_, Vector<FloatDPError> const& Lj_, FloatDPError const& pL_, Vector<FloatDPError> const& pLj_,
+                       FloatDPError const& H_, Vector<FloatDPError> const& Hj_, FloatDPError const& pH_, Vector<FloatDPError> const& pHj_,
+                       FloatDPUpperBound const& Lambda_, FloatDPError const& expLambda_, FloatDPError const& expL_)
+ : K(K_), Kj(Kj_), pK(pK_), pKj(pKj_), L(L_), Lj(Lj_), pL(pL_), pLj(pLj_), H(H_), Hj(Hj_), pH(pH_), pHj(pHj_), Lambda(Lambda_), expLambda(expLambda_), expL(expL_) {
     _dimension = Kj.size();
     assert(Kj.size() == _dimension and pKj.size() == _dimension and Lj.size() == _dimension and pKj.size() == _dimension and Hj.size() == _dimension && pHj.size() == _dimension);
 }
 
-Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError>
-C1Norms::values() const {
-    return std::tie(this->K,this->Kj,this->pK,this->pKj,this->L,this->Lj,this->pL,this->pLj,this->H,this->Hj,this->pH,this->pHj,this->expLambda,this->expL);
+Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPUpperBound,FloatDPError,FloatDPError>
+ErrorNorms::values() const {
+    return std::tie(this->K,this->Kj,this->pK,this->pKj,this->L,this->Lj,this->pL,this->pLj,this->H,this->Hj,this->pH,this->pHj,this->Lambda,this->expLambda,this->expL);
 }
 
 
-C1Norms
+ErrorNorms
 compute_norms(EffectiveVectorMultivariateFunction const& noise_independent_component, Vector<EffectiveVectorMultivariateFunction> const& input_derivatives, BoxDomainType const& inputs, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
     auto n = noise_independent_component.result_size();
@@ -139,69 +142,55 @@ compute_norms(EffectiveVectorMultivariateFunction const& noise_independent_compo
     FloatDPError expLambda = (possibly(Lambda>0)) ? FloatDPError(dexp(Lambda*h)) : FloatDPError(1u,pr);
     FloatDPError expL = cast_positive(exp(L*h));
 
-    return C1Norms(K,Kj,pK,pKj,L,Lj,pL,pLj,H,Hj,pH,pHj,expLambda,expL);
+    return ErrorNorms(K, Kj, pK, pKj, L, Lj, pL, pLj, H, Hj, pH, pHj, Lambda, expLambda, expL);
 }
 
-ErrorType zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return min(n.pK*n.expLambda*h,
-               (n.K*2u+n.pK)*h); }
-ErrorType zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return min(n.pK*n.expL*h,
-               (n.Kj[j]*2u+n.pKj[j])*h); }
+ErrorType zeroparam_component_error(ErrorNorms const& n,  FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return min(n.pK*n.expLambda*h, min(n.pKj[j]*n.expL*h*v, (n.Kj[j]*2u+n.pKj[j]*v)*h));
+}
 
-ErrorType oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) {
-    return pow(h,2u)*((n.K+n.pK)*n.pL/3u +
-                      n.pK*2u*(n.L+n.pL)*n.expLambda); }
-ErrorType oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) {
-    return n.pLj[j]*(n.K+n.pK)*pow(h,2u)/3u +
-           ((n.Lj[j]+n.pLj[j])*2u*n.pK)*cast_positive(cast_exact((n.L*n.expL*h+1u-n.expL)/pow(n.L,2u))); }
+ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return pow(h,2u)*(n.pLj[j]*v*(n.K+v*n.pK)/2u + (n.Lj[j]+n.pLj[j])*(v+w)*n.pK*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
-template<> ErrorType twoparam_worstcase_error<AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return ((r*r+1u)*n.pL*n.pK +
-            (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda +
-            (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u)
-           )/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
-template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return (n.H*(n.K+n.pK)/2u +
-            (pow(n.L,2u)+n.H*(n.K+r*n.pK))*n.expLambda
-           )/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
-template<> ErrorType twoparam_worstcase_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r) {
-    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+pow(r,2u)*2u*n.pL)*n.pL)*n.expLambda +
-            (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) +
-                           (n.pH*n.pK+pow(n.pL,2u))*8u*(r*r+1u))
-           )*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
-
-template<> ErrorType twoparam_component_error<AffineInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (pow(h,2u)*(pow(r,2u)+1u)*n.pK*n.pLj[j]/2u +
-            pow(h,3u)*(n.K+n.pK)*(r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
-            n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L,3u))) +
-                                                 (n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)+2u-h*n.L*2u)-2u)/pow(n.L,3u))))
-           )/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
-template<> ErrorType twoparam_component_error<AdditiveInputs>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (n.Hj[j]*(n.K+n.pK)/2u +
-            (n.Lj[j]*n.L+n.Hj[j]*(n.K+r*n.pK))*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L*h,3u)))/2u
-           )*n.pK*pow(h,3u)/4u*(r+1u)/cast_positive(+1u-h*n.Lj[j]/2u); }
-template<> ErrorType twoparam_component_error<SingularInput>(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j) {
-    return (pow(h,3u)*(n.K+n.pK)/24u*((r+1u)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u) +
-                                      (n.pHj[j]*n.pK+n.pL+n.pLj[j])*(pow(r,2u)+1u)*8u) +
-            n.pK*(r+1u)*((n.Lj[j]*n.L+r*n.pL*n.Lj[j]+n.Hj[j]*(n.K+r*n.pK))/2u*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)*3u+4u-h*n.L*5u)+h*n.L-4u)/pow(n.L,3u))) +
-                         (n.pLj[j]*n.L+r*n.pL*n.pLj[j]+n.pHj[j]*(n.K+r*n.pK))*r*cast_positive(cast_exact((n.expL*(pow(h*n.L,2u)+2u-h*n.L*2u)-2u)/pow(n.L,3u))))
-           )/cast_positive(1u-h*n.Lj[j]/2u-h*r*n.pLj[j]); }
-
-
-template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(C1Norms const& n, PositiveFloatDPValue const& h) const {
-
-    Vector<ErrorType> result(n.dimension(),worstcase_error<A,R>(n,h));
-    
-    if (_enable_componentwise_error) {
-        for (auto j: range(n.dimension()))
-            result[j] = min(result[j],component_error<A,R>(n,h,j));
+template<> ErrorType twoparam_component_error<AffineInputs>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return (pow(h,2u)*(pow(v,2u)+pow(w,2u))*n.pK*n.pLj[j]/2u +
+            pow(h,3u)*(n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
+            n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
+            n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
+template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return (n.Hj[j]*(n.K+v)/8u +
+            (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/pow(cast_exact(n.Lambda*h),3u))
+           )*pow(h,3u)*(v+w)/cast_positive(+1u-h*n.Lj[j]/2u); }
+template<> ErrorType twoparam_component_error<SingularInput>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return (pow(h,3u)*((n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u) +
+            (pow(v,2)+pow(w,2))*8u*((n.K+w*n.pK)*n.pHj[j]*n.pK + (n.K+v*n.pK)*n.pL*n.pLj[j]))/24u +
+            n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
+            n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
+template<> ErrorType twoparam_component_error<DualInputs>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
+    ErrorType acc(0u);
+    for (auto l : range(0,n.Lj.size())) {
+        acc += n.pLj[l]*(n.K+w*n.pK)*n.pLj[j]+n.pKj[l]*n.pHj[j]*(n.K+v*n.pK);
     }
+    return (pow(h,3u)*(pow(v,2)+pow(w,2))*4u/6u*acc +
+            pow(h,3u)*(n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
+            n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
+            n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
+
+template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorNorms const& n, PositiveFloatDPValue const& h) const {
+
+    Vector<ErrorType> result(n.dimension());
+
+    for (auto j: range(n.dimension()))
+        result[j] = component_error<A,R>(n,_inputs,h,j);
+
     return result;
 }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
-    C1Norms norms = compute_norms(Ariadne::noise_independent_component(_f,_inputs.size()),Ariadne::input_derivatives(_f,_inputs.size()),_inputs,h,B);
+    ErrorNorms norms = compute_norms(Ariadne::noise_independent_component(_f, _inputs.size()), Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
     ARIADNE_LOG(7,"norms: " << norms << "\n");
     Set<Nat> input_idx;
     for (Nat i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }

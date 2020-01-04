@@ -85,39 +85,40 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
-struct C1Norms {
-    FloatDPError K;
-    Vector<FloatDPError> Kj;
-    FloatDPError pK;
-    Vector<FloatDPError> pKj;
-    FloatDPError L;
-    Vector<FloatDPError> Lj;
-    FloatDPError pL;
-    Vector<FloatDPError> pLj;
-    FloatDPError H;
-    Vector<FloatDPError> Hj;
-    FloatDPError pH;
-    Vector<FloatDPError> pHj;
-    FloatDPError expLambda;
-    FloatDPError expL;
+struct ErrorNorms {
+    FloatDPError K; // K
+    Vector<FloatDPError> Kj; // K[j]
+    FloatDPError pK; // K'
+    Vector<FloatDPError> pKj; // K'[j]
+    FloatDPError L; // L
+    Vector<FloatDPError> Lj; // L[j]
+    FloatDPError pL; // L'
+    Vector<FloatDPError> pLj; // L'[j]
+    FloatDPError H; // H
+    Vector<FloatDPError> Hj; // H[j]
+    FloatDPError pH; // H'
+    Vector<FloatDPError> pHj; // H'[j]
+    FloatDPUpperBound Lambda; // Lambda
+    FloatDPError expLambda; // e^(Lambda*h - 1) / (Lambda*h)
+    FloatDPError expL; // e^(L*h)
 
-    C1Norms(FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,Vector<FloatDPError> const&,FloatDPError const&,FloatDPError const&);
-    Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,FloatDPError> values() const;
+    ErrorNorms(FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPUpperBound const&, FloatDPError const&, FloatDPError const&);
+    Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPUpperBound,FloatDPError,FloatDPError> values() const;
 
     SizeType dimension() const { return _dimension; }
 private:
     SizeType _dimension;
 };
 
-inline std::ostream& operator << (std::ostream& os, const C1Norms& n) {
+inline std::ostream& operator << (std::ostream& os, const ErrorNorms& n) {
     os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", Kj'=" << n.Kj <<
           ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", Lj'=" << n.Lj <<
           ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", Hj'=" << n.Hj <<
-          ", expLambda=" << n.expLambda << ", expL=" << n.expL;
+          ", Lambda=" << n.Lambda << ", expLambda=" << n.expLambda << ", expL=" << n.expL;
     return os;
 }
 
-C1Norms compute_norms(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+ErrorNorms compute_norms(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
     virtual Void write(OutputStream& os) const = 0;
@@ -180,20 +181,33 @@ template<> constexpr Nat const_num_params_per_input<AffineApproximation>() { ret
 template<> constexpr Nat const_num_params_per_input<SinusoidalApproximation>() { return 2u; }
 template<> constexpr Nat const_num_params_per_input<PiecewiseApproximation>() { return 2u; }
 
-enum class InputsRelationKind : std::uint8_t { AFFINE, SINGULAR, ADDITIVE};
+enum class InputsRelationKind : std::uint8_t { AFFINE, SINGULAR, DUAL, ADDITIVE};
 
 template<InputsRelationKind R> struct InputsRelationKindTrait {
     static InputsRelationKind kind() { return R; }
 };
 
+FloatDPError vstar(BoxDomainType const& inputs);
+
+template<class A> FloatDPError wstar_multiplier();
+
+template<class A> FloatDPError wstar(BoxDomainType const& inputs) {
+    FloatDPError result(0u);
+    for (auto i : range(0,inputs.size()))
+        result = max(result,wstar_multiplier<A>()*FloatDPError(abs(inputs[i]).upper()));
+    return result;
+}
+
 class AffineInputs : public InputsRelationKindTrait<InputsRelationKind::AFFINE> { };
 class SingularInput : public InputsRelationKindTrait<InputsRelationKind::SINGULAR> { };
+class DualInputs : public InputsRelationKindTrait<InputsRelationKind::DUAL> { };
 class AdditiveInputs : public InputsRelationKindTrait<InputsRelationKind::ADDITIVE> { };
 
 inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind) {
     switch (kind) {
         case InputsRelationKind::AFFINE: os << "AFFINE"; break;
         case InputsRelationKind::SINGULAR: os << "SINGULAR"; break;
+        case InputsRelationKind::DUAL: os << "DUAL"; break;
         case InputsRelationKind::ADDITIVE: os << "ADDITIVE"; break;
         default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
     }
@@ -221,15 +235,14 @@ public:
 template<class A, class R>
 class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
-    ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs) : _f(f), _inputs(inputs), _enable_componentwise_error(true) { }
+    ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs)
+        : _f(f), _inputs(inputs) { }
     virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
   private:
     EffectiveVectorMultivariateFunction const& _f;
     BoxDomainType const& _inputs;
-  protected:
-    Boolean _enable_componentwise_error; // TODO: remove such option as soon as a paper presenting component-wise error is published
   private:
-    Vector<ErrorType> process(C1Norms const& n, PositiveFloatDPValue const& h) const;
+    Vector<ErrorType> process(ErrorNorms const& n, PositiveFloatDPValue const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };
@@ -246,7 +259,8 @@ public:
         Set<Nat> input_idx;
         for (Nat i : range(n,n+m)) { input_idx.insert(i); }
         if (is_additive_in(f,input_idx)) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AdditiveInputs>(f,inputs));
-        else if (m == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(f,inputs));
+        else if (m == 1) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,SingularInput>(f, inputs));
+        else if (m == 2) return SharedPointer<Processor>(new ApproximationErrorProcessor<A,DualInputs>(f, inputs));
         else return SharedPointer<Processor>(new ApproximationErrorProcessor<A,AffineInputs>(f,inputs));
     }
 };

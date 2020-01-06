@@ -146,7 +146,7 @@ compute_norms(EffectiveVectorMultivariateFunction const& noise_independent_compo
 }
 
 ErrorType zeroparam_component_error(ErrorNorms const& n,  FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return min(n.pK*n.expLambda*h, min(n.pKj[j]*n.expL*h*v, (n.Kj[j]*2u+n.pKj[j]*v)*h));
+    return min(n.pK*n.expL*h*v, min( (n.Kj[j]*2u+n.pKj[j]*v)*h, n.pK*v*n.expLambda*h));
 }
 
 ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
@@ -154,7 +154,7 @@ ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, F
 
 template<> ErrorType twoparam_component_error<AffineInputs>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
     return (pow(h,2u)*(pow(v,2u)+pow(w,2u))*n.pK*n.pLj[j]/2u +
-            pow(h,3u)*(n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
+            pow(h,3u)*(v+w)*((n.K+v*n.pK)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K)/6u)+n.L*n.pLj[j]*(n.K+w*n.pK)/6u) +
             n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
             n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
            )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
@@ -163,7 +163,7 @@ template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorNorms const& 
             (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/pow(cast_exact(n.Lambda*h),3u))
            )*pow(h,3u)*(v+w)/cast_positive(+1u-h*n.Lj[j]/2u); }
 template<> ErrorType twoparam_component_error<SingularInput>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return (pow(h,3u)*((n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K+n.L*n.pLj[j])*4u) +
+    return (pow(h,3u)*((n.K+v*n.pK)*(v+w)*(n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K*(n.K+v*n.pK)+n.L*n.pLj[j]*(n.K+w*n.pK))*4u +
             (pow(v,2)+pow(w,2))*8u*((n.K+w*n.pK)*n.pHj[j]*n.pK + (n.K+v*n.pK)*n.pL*n.pLj[j]))/24u +
             n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
             n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))

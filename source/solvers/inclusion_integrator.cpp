@@ -44,10 +44,16 @@ FloatDPError vstar(BoxDomainType const& inputs) {
     return result;
 }
 
+ErrorType zeroparam_worstcase_error(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h);
+ErrorType oneparam_worstcase_error(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h);
+template<class R> ErrorType twoparam_worstcase_error(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h);
 ErrorType zeroparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
 ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
 template<class R> ErrorType twoparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j);
 
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType worstcase_error(ErrorNorms const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n,wstar_multiplier<A>(),h); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType worstcase_error(ErrorNorms const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n,wstar_multiplier<A>(),h); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(ErrorNorms const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n,wstar_multiplier<A>(),h); }
 template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
 template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
 template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(ErrorNorms const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n, vstar(inputs), wstar<A>(inputs), h, j); }
@@ -145,12 +151,33 @@ compute_norms(EffectiveVectorMultivariateFunction const& noise_independent_compo
     return ErrorNorms(K, Kj, pK, pKj, L, Lj, pL, pLj, H, Hj, pH, pHj, Lambda, expLambda, expL);
 }
 
+ErrorType zeroparam_worstcase_error(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return min(n.pK*n.expLambda*h, (n.K*2u+n.pK)*h); }
 ErrorType zeroparam_component_error(ErrorNorms const& n,  FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
     return min(n.pK*n.expL*h*v, min( (n.Kj[j]*2u+n.pKj[j]*v)*h, n.pK*v*n.expLambda*h));
 }
 
+ErrorType oneparam_worstcase_error(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
 ErrorType oneparam_component_error(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
     return pow(h,2u)*(n.pLj[j]*v*(n.K+v*n.pK)/2u + (n.Lj[j]+n.pLj[j])*(v+w)*n.pK*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
+
+template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return ((r*r+1u)*n.pL*n.pK +
+            (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda +
+            (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u)
+           )/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
+template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return (n.H*(n.K+n.pK)/2u +
+            (pow(n.L,2u)+n.H*(n.K+r*n.pK))*n.expLambda
+           )/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
+template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+pow(r,2u)*2u*n.pL)*n.pL)*n.expLambda +
+            (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) +
+                           (n.pH*n.pK+pow(n.pL,2u))*8u*(r*r+1u))
+           )*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
+template<> ErrorType twoparam_worstcase_error<DualInputs>(ErrorNorms const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+    return twoparam_worstcase_error<AffineInputs>(n, r, h); }
 
 template<> ErrorType twoparam_component_error<AffineInputs>(ErrorNorms const& n, FloatDPError const& v, FloatDPError const& w, PositiveFloatDPValue const& h, SizeType j) {
     return (pow(h,2u)*(pow(v,2u)+pow(w,2u))*n.pK*n.pLj[j]/2u +
@@ -181,10 +208,16 @@ template<> ErrorType twoparam_component_error<DualInputs>(ErrorNorms const& n, F
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorNorms const& n, PositiveFloatDPValue const& h) const {
 
-    Vector<ErrorType> result(n.dimension());
+    Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,h));
 
+    Vector<ErrorType> result_componentwise(n.dimension());
     for (auto j: range(n.dimension()))
-        result[j] = component_error<A,R>(n,_inputs,h,j);
+        result_componentwise[j] = component_error<A,R>(n,_inputs,h,j);
+
+    Vector<ErrorType> result(n.dimension());
+    for (auto j: range(n.dimension())) {
+        result[j] = min(result_worstcase[j],result_componentwise[j]);
+    }
 
     return result;
 }

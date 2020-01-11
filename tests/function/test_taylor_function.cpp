@@ -292,8 +292,8 @@ Void TestScalarTaylorFunction::test_antiderivative()
     ValidatedScalarMultivariateTaylorFunctionModelDP c = ValidatedScalarMultivariateTaylorFunctionModelDP::constant(s.domain(),2.0_exact,swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP h=compose(g,ValidatedVectorMultivariateTaylorFunctionModelDP({c,s}));
 
-    Vector<ExactIntervalType> hdom=h.domain();
-    Vector<FloatDPBounds> domv(reinterpret_cast<Vector<FloatDPBounds>const&>(hdom));
+    ExactBoxType hdom=h.domain();
+    Vector<FloatDPBounds> domv(cast_singleton(hdom));
     ARIADNE_ASSERT(definitely(mag(h(domv))<FloatDPValue(1e-8)));
 
 }

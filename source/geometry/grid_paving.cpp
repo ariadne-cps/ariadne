@@ -234,7 +234,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theHeight, co
     //1. Extend the base cell in the given dimension (dim) by it's half width. This way
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
-    Vector<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
+    Box<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
     const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
@@ -367,7 +367,7 @@ OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
 //NOTE: In this method first works with the boxes on the lattice, to make
 //      computation exact, and then maps them to the original space.
 ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) {
-    Vector<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
+    Box<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
     ExactBoxType openCellBoxInLattice( theGrid.dimension() );
 
     //Go through all the dimensions, and double the box size in the positive axis direction.

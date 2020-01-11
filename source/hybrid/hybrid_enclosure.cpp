@@ -561,7 +561,7 @@ HybridEnclosure::uniform_error_recondition()
 {
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
-    ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    ExactBoxType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
     this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
     this->_check();
 }
@@ -600,7 +600,7 @@ Void
 HybridEnclosure::_check() const
 {
     //this->_set.check();
-    const ExactIntervalVectorType& reduced_domain = this->_set.reduced_domain();
+    const ExactBoxType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->state_function().domain(),"function domain");
     for(Nat i=0; i!=this->_set.constraints().size(); ++i) {

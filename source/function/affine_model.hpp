@@ -172,7 +172,7 @@ class AffineModel<ValidatedTag,F>
         AffineModel<ValidatedTag,F> res(n,prec); res._g[j]=1;  return res; }
 
     static AffineModel<ValidatedTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
-    static Vector<AffineModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, PrecisionType precision);
+    static Vector<AffineModel<ValidatedTag,F>> scalings(const BoxDomainType& codom, PrecisionType precision);
 
     SizeType argument_size() const { return this->_g.size(); }
     PrecisionType precision() const { return this->_c.precision(); }

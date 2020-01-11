@@ -219,7 +219,7 @@ class TaylorModel<ValidatedTag,F>
     static Vector<TaylorModel<ValidatedTag,F>> coordinates(SizeType as, SweeperType swp);
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
-    static Vector<TaylorModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, SweeperType swp);
+    static Vector<TaylorModel<ValidatedTag,F>> scalings(const BoxDomainType& codom, SweeperType swp);
     //@}
 
     //@{

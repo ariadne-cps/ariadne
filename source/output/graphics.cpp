@@ -291,8 +291,6 @@ Void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const ExactBoxType& bx) { return os << static_cast<const ExactIntervalVectorType&>(bx); }
-
 Void Figure::_paint_all(CanvasInterface& canvas) const
 {
     ApproximateBoxType bounding_box=this->_data->bounding_box;

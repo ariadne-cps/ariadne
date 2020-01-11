@@ -329,8 +329,8 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     FloatDPValue splitpoint;
     UpperIntervalType lower=domain[variable];
     UpperIntervalType upper=domain[variable];
-    Vector<UpperIntervalType> slice=domain;
-    Vector<UpperIntervalType> subdomain=domain;
+    Box<UpperIntervalType> slice=domain;
+    Box<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
     const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
@@ -377,7 +377,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
         g += cast_exact(multipliers[i]) * function[i];
         C += cast_exact(multipliers[i]) * bounds[i];
     }
-    Covector<UpperIntervalType> dg = gradient_range(g,domain);
+    Covector<UpperIntervalType> dg = gradient_range(g,cast_vector(domain));
     C -= g(centre);
 
     UpperBoxType new_domain(domain);
@@ -413,7 +413,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     RawFloatDP u=interval.upper().raw();
     ExactIntervalType subinterval;
     UpperIntervalType new_interval(interval);
-    Vector<UpperIntervalType> slice=domain;
+    Box<UpperIntervalType> slice=domain;
 
     static const Nat MAX_SLICES=(1<<3);
     const Nat n=MAX_SLICES;

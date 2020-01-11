@@ -122,7 +122,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 }
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation< ExactBoxType >& bx) {
-    return os << PythonRepresentation< Vector<ExactIntervalType> >(bx.reference()); }
+    return os << PythonRepresentation< Vector<ExactIntervalType> >(cast_vector(bx.reference())); }
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Sweeper<FloatDP>>& repr) {
     const Sweeper<FloatDP>& swp=repr.reference();
@@ -231,9 +231,9 @@ Void export_validated_taylor_model(pybind11::module& module)
     typedef ValidatedTaylorModelDP ModelType;
     typedef NumericType<ModelType> NumericType;
     typedef GenericType<NumericType> GenericNumericType;
-    
+
     Tag<GenericNumericType> generic_number_tag;
-    
+
     pybind11::class_<ValidatedTaylorModelDP> taylor_model_class(module,"ValidatedTaylorModelDP");
     taylor_model_class.def(pybind11::init<ValidatedTaylorModelDP>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
@@ -251,13 +251,13 @@ Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def("sweep", (ValidatedTaylorModelDP&(ValidatedTaylorModelDP::*)()) &ValidatedTaylorModelDP::sweep, pybind11::return_value_policy::reference);
     taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModelDP,MultiIndex,FloatDPValue>);
     taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModelDP,MultiIndex,FloatDPValue>);
-    
+
     define_elementary_algebra(module,taylor_model_class);
     define_inplace_algebra(module,taylor_model_class);
     define_mixed_arithmetic(module, taylor_model_class, generic_number_tag);
-    
+
     define_lattice(module,taylor_model_class);
-    
+
 
     taylor_model_class.def("__str__", &__cstr__<ValidatedTaylorModelDP>);
 
@@ -277,7 +277,7 @@ Void export_validated_taylor_model(pybind11::module& module)
 Void export_approximate_taylor_model(pybind11::module& module)
 {
     typedef ApproximateTaylorModelDP ModelType;
-    
+
     pybind11::class_<ModelType> taylor_model_class(module,"ApproximateTaylorModelDP");
     taylor_model_class.def(pybind11::init<ModelType>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
@@ -293,11 +293,11 @@ Void export_approximate_taylor_model(pybind11::module& module)
     taylor_model_class.def("sweep", (ModelType&(ModelType::*)()) &ModelType::sweep, pybind11::return_value_policy::reference);
     taylor_model_class.def("__getitem__", &__getitem__<ModelType,MultiIndex,FloatDPApproximation>);
     taylor_model_class.def("__setitem__",&__setitem__<ModelType,MultiIndex,FloatDPApproximation>);
-    
+
     define_elementary_algebra(module,taylor_model_class);
     define_inplace_algebra(module,taylor_model_class);
     define_lattice(module,taylor_model_class);
-    
+
     taylor_model_class.def("__str__",&__cstr__<ModelType>);
 
     taylor_model_class.def_static("constant",(ModelType(*)(SizeType, const ApproximateNumericType&,SweeperDP))&ModelType::constant);
@@ -356,7 +356,7 @@ Void export_vector_function_model(pybind11::module& module)
 {
     //using VectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
     //using ScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
-    
+
     pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModel");
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateFunctionModelDP>());
 //    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarMultivariateFunctionModelDP> ary){return ValidatedVectorMultivariateFunctionModelDP(Vector<ValidatedScalarMultivariateFunctionModelDP>(ary));}));
@@ -375,7 +375,7 @@ Void export_vector_function_model(pybind11::module& module)
     // NOTE: Not all operations are exported in C++ API.
     //define_vector_algebra_arithmetic<VectorMultivariateFunctionModelType,ScalarMultivariateFunctionModelType,NumericType>(module,vector_function_model_class);
     //define_vector_arithmetic<VectorMultivariateFunctionModelType,ScalarMultivariateFunctionModelType>(module,vector_function_model_class);
-    
+
     vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorMultivariateFunctionModelDP>);
     vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorMultivariateFunctionModelDP>);
     //export_vector_function_model.def(pybind11::module& module, "__repr__",&__repr__<ValidatedVectorMultivariateFunctionModelDP>);
@@ -411,7 +411,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     using GenericFunctionType = ScalarMultivariateFunction<ValidatedTag>;
     using NumericType = NumericType<FunctionModelType>;
     using GenericNumericType = GenericType<NumericType>;
-    
+
     typedef ValidatedScalarMultivariateTaylorFunctionModelDP F;
     typedef ValidatedVectorMultivariateTaylorFunctionModelDP VF;
     typedef typename F::DomainType D;
@@ -439,14 +439,14 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("number_of_nonzeros", (SizeType(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const)&ValidatedScalarMultivariateTaylorFunctionModelDP::number_of_nonzeros);
     scalar_taylor_function_class.def("__getitem__", &__getitem__<ValidatedScalarMultivariateTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
     scalar_taylor_function_class.def("__setitem__",&__setitem__<ValidatedScalarMultivariateTaylorFunctionModelDP,MultiIndex,FloatDPValue>);
-    
+
     define_elementary_algebra(module,scalar_taylor_function_class);
     define_inplace_algebra(module,scalar_taylor_function_class);
     define_mixed_arithmetic(module,scalar_taylor_function_class,generic_number_tag);
     define_mixed_arithmetic(module,scalar_taylor_function_class,generic_function_tag);
     define_transcendental(module,scalar_taylor_function_class);
     define_lattice(module,scalar_taylor_function_class);
-    
+
     scalar_taylor_function_class.def("__str__", &__cstr__<F>);
     scalar_taylor_function_class.def("__repr__", &__crepr__<F>);
 
@@ -496,20 +496,20 @@ Void export_vector_taylor_function(pybind11::module& module)
     //using VectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
     using ScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
     using NumericType = NumericType<ScalarMultivariateFunctionModelType>;
-    
+
     typedef SizeType I;
     typedef ValidatedScalarMultivariateFunction SFN;
     typedef ValidatedVectorMultivariateFunction VFN;
     typedef ValidatedScalarMultivariateTaylorFunctionModelDP SF;
     typedef ValidatedVectorMultivariateTaylorFunctionModelDP VF;
     typedef typename VF::DomainType D;
-    typedef typename D::ScalarType Di;
+    typedef typename D::IntervalType Di;
     typedef typename VF::NumericType X;
     typedef Vector<X> VX;
 
     Tag<ValidatedScalarMultivariateFunctionModelDP> scalar_taylor_function_tag;
     Tag<Vector<NumericType>> number_vector_tag;
-    
+
     pybind11::class_<ValidatedVectorMultivariateTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorMultivariateTaylorFunctionModel");
     vector_taylor_function_class.def( pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
 //    vector_taylor_function_class.def( pybind11::init<Vector<ValidatedScalarMultivariateTaylorFunctionModelDP>>());
@@ -540,7 +540,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     //FIXME: Not completely defined in C++ API
     //define_inplace_vector_arithmetic(module,vector_taylor_function_class, scalar_taylor_function_tag);
     define_inplace_mixed_vector_arithmetic(module,vector_taylor_function_class, number_vector_tag);
-    
+
     vector_taylor_function_class.def("__str__", &__cstr__<ValidatedVectorMultivariateTaylorFunctionModelDP>);
     vector_taylor_function_class.def("__repr__", &__crepr__<ValidatedVectorMultivariateTaylorFunctionModelDP>);
     vector_taylor_function_class.def("clobber", (Void(ValidatedVectorMultivariateTaylorFunctionModelDP::*)()) &ValidatedVectorMultivariateTaylorFunctionModelDP::clobber);

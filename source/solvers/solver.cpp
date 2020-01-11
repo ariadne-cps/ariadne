@@ -191,7 +191,7 @@ SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
         }
 
         //std::cerr<<"  Splitting "<<bx<<"\n";
-        Pair< Vector<ExactIntervalType>, Vector<ExactIntervalType> > splt=split(bx);
+        Pair< Box<ExactIntervalType>, Box<ExactIntervalType> > splt=split(bx);
         r.adjoin(this->solve_all(f,splt.first));
         r.adjoin(this->solve_all(f,splt.second));
     }

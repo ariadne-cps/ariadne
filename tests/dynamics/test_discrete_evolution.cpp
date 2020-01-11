@@ -97,7 +97,7 @@ Void TestMapEvolver::test() const
     // Function evaluation sanity check
     ARIADNE_TEST_PRINT(initial_box);
     ARIADNE_TEST_PRINT(image(initial_box,henon));
-    ARIADNE_TEST_PRINT(jacobian_range(henon,initial_box));
+    ARIADNE_TEST_PRINT(jacobian_range(henon,cast_vector(initial_box)));
 
 
 

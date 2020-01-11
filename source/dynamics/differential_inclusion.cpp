@@ -30,6 +30,8 @@
 
 namespace Ariadne {
 
+template<class I> decltype(auto) inline norm(Box<I> const& bx) { return norm(cast_vector(bx)); }
+
 BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
@@ -84,15 +86,6 @@ inline Map<InputApproximationKind,FloatDP> convert_to_percentages(const Map<Inpu
 
     return result;
 }
-
-FloatDP volume(Vector<ApproximateIntervalType> const& box) {
-    FloatDP result = 1.0;
-    for (auto i: range(box.size())) {
-        result *= box[i].width().raw();
-    }
-    return result;
-}
-
 
 C1Norms::C1Norms(FloatDPError const& K_,Vector<FloatDPError> const& Kj_,FloatDPError const& pK_,Vector<FloatDPError> const& pKj_,
              FloatDPError const& L_,Vector<FloatDPError> const& Lj_,FloatDPError const& pL_,Vector<FloatDPError> const& pLj_,
@@ -239,7 +232,7 @@ template<> ErrorType twoparam_component_error<SingularInput>(C1Norms const& n, P
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(C1Norms const& n, PositiveFloatDPValue const& h) const {
 
     Vector<ErrorType> result(n.dimension(),worstcase_error<A,R>(n,h));
-    
+
     if (_enable_componentwise_error) {
         for (auto j: range(n.dimension()))
             result[j] = min(result[j],component_error<A,R>(n,h,j));
@@ -363,7 +356,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
         ValidatedVectorMultivariateFunctionModelDP reach_function;
         ValidatedVectorMultivariateFunctionModelDP best_reach_function, best_evolve_function;
         SharedPointer<InputApproximator> best;
-        FloatDP best_volume(0);
+        FloatDPApproximation best_volume(0);
 
         ARIADNE_LOG(4,"n. of approximations to use="<<approximators_to_use.size()<<"\n");
 
@@ -380,8 +373,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionIntegrator::flow(Inclu
                 best = this->_approximator;
                 best_volume = volume(best_evolve_function.range());
             } else {
-                FloatDP current_volume = volume(current_evolve.range());
-                if (current_volume < best_volume) {
+                FloatDPApproximation current_volume = volume(current_evolve.range());
+                if (decide(current_volume < best_volume)) {
                     best = this->_approximator;
                     ARIADNE_LOG(6,"best approximation: " << best->kind() << "\n");
                     best_reach_function = current_reach;
@@ -543,7 +536,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_secondhalf
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB);
+    BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
     ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
@@ -574,7 +567,7 @@ ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator::build_reach_func
 
     auto swp=this->_sweeper;
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB);
+    BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
     ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);

@@ -1675,7 +1675,7 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F
     return result;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::scalings(const Vector<IntervalDomainType>& d, SweeperType swp)
+template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::scalings(const BoxDomainType& d, SweeperType swp)
 {
     Vector<TaylorModel<ValidatedTag,F>> result(d.size(),TaylorModel<ValidatedTag,F>::zero(d.size(),swp));
     for(SizeType i=0; i!=d.size(); ++i) {

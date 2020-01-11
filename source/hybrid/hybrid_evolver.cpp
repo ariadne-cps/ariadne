@@ -612,7 +612,7 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     ValidatedVectorMultivariateFunctionModelDP flow_model=integrator.flow_step(dynamic,initial_box,step_size);
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
-    ExactIntervalVectorType flow_domain=flow_model.domain();
+    ExactBoxType flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
     flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
     flow_model=restrict(flow_model,flow_domain);
@@ -676,7 +676,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
-    ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+    ExactBoxType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
     ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
     UpperBoxType flow_bounds=flow.range();
     for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin();
@@ -1354,7 +1354,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ValidatedLowerKleenean starting_set_empty=starting_set_copy.is_empty();
 
     if(definitely(starting_set_empty)) {
-        ExactIntervalVectorType reduced_domain=starting_set.continuous_set().reduced_domain();
+        ExactBoxType reduced_domain=starting_set.continuous_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
@@ -1681,7 +1681,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
     ExactBoxType state_domain = cast_exact_box(initial_set.state_bounding_box());
     ExactIntervalType time_domain = cast_exact_interval(initial_set.time_range()+ExactIntervalType(zero,step_size));
-    ExactBoxType statetime_domain = join(state_domain,time_domain);
+    ExactBoxType statetime_domain = product(state_domain,time_domain);
 
     //ValidatedVectorMultivariateFunctionModelDP space_coordinates=this->function_factory().create_identity(space_domain);
     ValidatedScalarMultivariateFunctionModelDP time_coordinate=this->function_factory().create_coordinate(statetime_domain,n);
@@ -1897,7 +1897,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
         EffectiveVectorMultivariateFunction dynamic=this->system().dynamic_function(initial_set.location());
-        ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+        ExactBoxType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
         ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
         ValidatedScalarMultivariateFunctionModelDP zero_function=factory(flow).create_zero();
         ValidatedVectorMultivariateFunctionModelDP identity_function=factory(flow).create_identity();

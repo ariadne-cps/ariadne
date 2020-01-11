@@ -70,10 +70,8 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges);
 inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 
-FloatDP volume(Vector<ApproximateIntervalType> const& box);
-
 inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2) {
-    return refines(v1,static_cast<Vector<UpperIntervalType>const&>(bx2)); }
+    return refines(v1,cast_vector(bx2)); }
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
@@ -85,6 +83,8 @@ template<class F1, class F2, class F3, class... FS> decltype(auto) combine(F1 co
     return combine(combine(f1,f2),f3,fs...); }
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return join(join(f1,f2),f3,fs...); }
+template<class F1, class F2, class F3, class... FS> decltype(auto) product(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
+    return product(product(f1,f2),f3,fs...); }
 
 //! \brief The function dexp(x)=(exp(x)-1)/x.
 //! Note that the function is positive and monotone increasing.

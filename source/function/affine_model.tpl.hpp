@@ -392,7 +392,7 @@ template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scali
     return r;
 }
 
-template<class F> Vector<AffineModel<ValidatedTag,F>> AffineModel<ValidatedTag,F>::scalings(const Vector<IntervalDomainType>& codom, PrecisionType pr)
+template<class F> Vector<AffineModel<ValidatedTag,F>> AffineModel<ValidatedTag,F>::scalings(const BoxDomainType& codom, PrecisionType pr)
 {
     SizeType n=codom.size();
     Vector<AffineModel<ValidatedTag,F>> r(n,AffineModel<ValidatedTag,F>(n,pr));

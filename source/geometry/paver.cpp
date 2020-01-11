@@ -60,7 +60,7 @@ UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) 
 
 
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
-    PositiveFloatDPUpperBound res=bx.zero_element().width();
+    PositiveFloatDPUpperBound res(0u,double_precision);
     for(Nat i=0; i!=bx.size(); ++i) {
         if(definitely(bx[i].lower()>bx[i].upper())) { return cast_positive(-infty); }
         res+=bx[i].width();
@@ -69,7 +69,7 @@ PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
 }
 
 PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
-    PositiveFloatDPUpperBound res=bx.zero_element().width();
+    PositiveFloatDPUpperBound res(0u,double_precision);
     for(Nat i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
@@ -77,7 +77,7 @@ PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vec
 }
 
 PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
-    PositiveFloatDPUpperBound res=bx.zero_element().width();
+    PositiveFloatDPUpperBound res(0u,double_precision);
     for(Nat i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
@@ -602,7 +602,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
     GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(f,d)),p.grid());
-    ExactBoxType r=cast_exact_box(apply(g,d)+UpperBoxType(g.result_size(),UpperIntervalType(-1,1)));
+    ExactBoxType r=cast_exact_box(widen(apply(g,d),1));
     ExactBoxType rc=intersection(r,c);
 
     ExactPoint y=midpoint(d);
@@ -634,7 +634,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
                                                    const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c, Nat e)
 {
     GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(g,d)),p.grid());
-    ExactBoxType rc=intersection(cast_exact_box(apply(g,d)+UpperBoxType(g.result_size(),UpperIntervalType(-1,1))),c);
+    ExactBoxType rc=intersection(cast_exact_box(widen(apply(g,d),1)),c);
 
     ExactPoint y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;

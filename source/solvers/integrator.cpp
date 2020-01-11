@@ -987,7 +987,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
         }
     }
 
-    ExactBoxType flow_domain = join(dom,ExactIntervalType(0,h));
+    ExactBoxType flow_domain = product(dom,ExactIntervalType(0,h));
 
     FlowStepModelType id = this->function_factory().create_identity(flow_domain);
     FlowStepModelType res = this->function_factory().create_zeros(n,flow_domain);

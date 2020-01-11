@@ -61,12 +61,12 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
 
     StepSizeType h=hsug;
 
-    FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(join(D,to_time_bounds(t,t+h),A))))).upper();
+    FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(product(D,to_time_bounds(t,t+h),A))))).upper();
     StepSizeType hlip = static_cast<StepSizeType>(cast_exact(LIPSCHITZ_TOLERANCE/lipschitz));
     h=min(hlip,h);
 
     IntervalDomainType T = to_time_bounds(t,t+h);
-    
+
     UpperBoxType B=D;
     Bool success=false;
     while(!success) {
@@ -109,13 +109,13 @@ UpperBoxType EulerBounder::_formula(ValidatedVectorMultivariateFunction const& f
     UpperIntervalType const& rT=reinterpret_cast<UpperIntervalType const&>(T);
     UpperBoxType const& rA=reinterpret_cast<UpperBoxType const&>(A);
     UpperIntervalType const rH=rT-T.lower();
-        
+
     const bool is_autonomous = (f.argument_size() == D.dimension()+A.dimension());
-    UpperBoxType dom = is_autonomous ? join(B,rA) : join(B,rT,rA);
-    
+    UpperBoxType dom = is_autonomous ? product(B,rA) : product(B,rT,rA);
+
     UpperBoxType wD = (INITIAL_BOX_WIDENING!=1) ? D : D + INITIAL_BOX_WIDENING*(D-D.midpoint());
-    
-    return wD+(VECTOR_WIDENING*rH)*apply(f,dom);
+
+    return wD+(VECTOR_WIDENING*rH)*cast_vector(apply(f,dom));
 }
 
 } // namespace Ariadne;

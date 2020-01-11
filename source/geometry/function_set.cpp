@@ -102,7 +102,7 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, dom);
+    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius().upper().raw();
@@ -137,7 +137,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, dom);
+    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius().upper().raw();
@@ -587,7 +587,7 @@ ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
     DoublePrecision prec;
-    const Vector<ExactIntervalType> D=approximation(this->domain());
+    const Box<ExactIntervalType> D=approximation(this->domain());
     Vector<FloatDPValue> m=midpoint(D);
     Matrix<FloatDPValue> G=cast_exact(jacobian(this->_function,m));
     Vector<FloatDPValue> h=cast_exact(this->_function.evaluate(m)-G*m);
@@ -803,7 +803,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
 
 Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
-    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,domain);
+    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,cast_vector(domain));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -952,7 +952,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     DoublePrecision prec;
 
-    Vector<ExactIntervalType> domain = this->domain();
+    Box<ExactIntervalType> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
@@ -1014,7 +1014,7 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
 {
     DoublePrecision prec;
 
-    Vector<ExactIntervalType> domain = this->domain();
+    Box<ExactIntervalType> domain = this->domain();
 
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraint> constraint_models;

@@ -97,6 +97,9 @@ inline UpperIntervalType dot(Vector<UpperIntervalType> const& bx1, Vector<ExactI
     return dot(bx1,Vector<UpperIntervalType>(bx2));
 }
 
+template<class X1, class IVL2> inline decltype(auto) dot(Vector<X1> const& x1, Box<IVL2> const& bx2) {
+    return dot(x1,cast_vector(bx2)); }
+
 template<class X> inline
 DiagonalMatrix<X> diagonal_matrix(const Vector<X>& v) {
     return DiagonalMatrix<X>(v.array());
@@ -697,7 +700,7 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Ex
     // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
 
     // Compute y.C
-    UpperIntervalType yC = dot(UpperIntervalVectorType(y),UpperIntervalVectorType(C));
+    UpperIntervalType yC = dot(y,cast_vector(C));
 
     // Compute Taylor estimate of y g(X)
     ValidatedVectorMultivariateTaylorFunctionModelDP tg(D,g,default_sweeper());
@@ -705,10 +708,10 @@ validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Ex
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperIntervalType tygD = apply(tyg,D);
 
-    UpperIntervalMatrixType dgD = jacobian_range(g,D);
-    UpperIntervalVectorType ydgD = transpose(dgD) * UpperIntervalVectorType(y);
+    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
+    UpperIntervalVectorType ydgD = transpose(dgD) * y;
 
-    UpperIntervalType ygx = dot(UpperIntervalVectorType(y),apply(g,UpperIntervalVectorType(x)));
+    UpperIntervalType ygx = dot(y,apply(g,UpperIntervalVectorType(x)));
 
     UpperIntervalType ygD = ygx;
     for(Nat i=0; i!=x.size(); ++i) {
@@ -855,7 +858,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     FloatApproximationVector& y=cast_approximate(v.y);
 
     ApproximateScalarMultivariateFunction f(D);
-    ExactBoxType R=intersection(cast_exact_box(apply(g,D)+UpperBoxType(C.size(),UpperIntervalType(-1,+1))),C);
+    ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -2151,8 +2154,8 @@ check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBo
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperIntervalType tygD = UpperIntervalType(tyg(cast_singleton(D)));
 
-    UpperIntervalMatrixType dgD = jacobian_range(g,D);
-    UpperIntervalVectorType ydgD = transpose(dgD) * UpperIntervalVectorType(y);
+    UpperIntervalMatrixType dgD = jacobian_range(g,cast_vector(D));
+    UpperIntervalVectorType ydgD = transpose(dgD) * y;
 
     FloatDPBounds ygx = dot(y,gx);
 

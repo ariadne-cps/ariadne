@@ -885,7 +885,7 @@ Enclosure::splitting_subdomains_zeroth_order() const
 Nat
 Enclosure::splitting_index_zeroth_order() const
 {
-    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(this->state_function(),this->reduced_domain());
+    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(this->state_function(),cast_vector(this->reduced_domain()));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -1083,7 +1083,7 @@ uniform_error_recondition()
             }
         }
 
-        ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+        ExactBoxType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
         this->_time_function = embed(this->_time_function,new_variables);
         this->_dwell_time_function = embed(this->_dwell_time_function,new_variables);
     }

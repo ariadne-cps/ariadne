@@ -297,7 +297,7 @@ class TestAffineSet
         ExactFloatVector& o=offsets;
         Polytope2d expected_set({{0.0,0.0}});
         Vector< Affine<ValidatedNumericType> > a;
-        Vector<ExactIntervalType> dom;
+        ExactBoxType dom;
         figure.clear();
         figure.set_bounding_box(ExactBoxType{{-1.0,+15.0},{-1.0,+15.0}});
         figure.set_fill_colour(0.5,1.0,1.0);

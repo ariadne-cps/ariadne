@@ -37,7 +37,7 @@ template<class I> decltype(declval<I>().is_empty()) Box<I>::is_empty() const
 {
     const Box<I>& bx=*this;
     decltype(declval<I>().is_empty()) res=false;
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         res=res || bx[i].is_empty();
         if(definitely(res)) { return true; }
     }
@@ -49,7 +49,7 @@ template<class I> decltype(declval<I>().is_bounded()) Box<I>::is_bounded() const
 {
     const Box<I>& bx=*this;
     decltype(declval<I>().is_bounded()) res=true;
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         res=res && bx[i].is_bounded();
     }
     return res;
@@ -60,7 +60,7 @@ template<class I> decltype(declval<I>().is_bounded()) Box<I>::is_bounded() const
 template<class I> SizeType irmax(const Box<I>& bx) {
     SizeType imw(0);
     auto mw=bx[0].width();
-    for(SizeType i=1; i!=bx.size(); ++i) {
+    for(SizeType i=1; i!=bx.dimension(); ++i) {
         if(decide(bx[i].width()>mw)) { imw=i; mw=bx[i].width(); }
     }
     return imw;
@@ -70,7 +70,7 @@ template<class I> SizeType irmax(const Box<I>& bx) {
 template<class I> Box<I> Box<I>::split(SizeType k, SplitPart lmu) const
 {
     const Box<I>& bx=*this;
-    ARIADNE_ASSERT(k<bx.size());
+    ARIADNE_ASSERT(k<bx.dimension());
     Box<I> r(bx);
     r[k]=Ariadne::split(bx[k],lmu);
     return r;
@@ -79,7 +79,7 @@ template<class I> Box<I> Box<I>::split(SizeType k, SplitPart lmu) const
 template<class I> Pair< Box<I>, Box<I> > Box<I>::split(SizeType k) const
 {
     const Box<I>& bx=*this;
-    ARIADNE_ASSERT(k<bx.size());
+    ARIADNE_ASSERT(k<bx.dimension());
     Pair< Box<I>, Box<I> > r(bx,bx);
     auto c=bx[k].midpoint();
     r.first[k].set_upper(c);
@@ -104,8 +104,8 @@ template<class I> Box<I> Box<I>::bounding_box() const {
 template<class I> typename Box<I>::MidpointType Box<I>::midpoint() const
 {
     const Box<I>& bx=*this;
-    MidpointType r(bx.size());
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    MidpointType r(bx.dimension());
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         r[i]=bx[i].midpoint();
     }
     return r;
@@ -113,8 +113,8 @@ template<class I> typename Box<I>::MidpointType Box<I>::midpoint() const
 
 template<class I> typename Box<I>::CentreType Box<I>::centre() const {
     const Box<I>& bx=*this;
-    CentreType r(bx.size());
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    CentreType r(bx.dimension());
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         r[i]=bx[i].centre();
     }
     return r;
@@ -123,8 +123,8 @@ template<class I> typename Box<I>::CentreType Box<I>::centre() const {
 template<class I> typename Box<I>::VertexType Box<I>::lower_bounds() const
 {
     const Box<I>& bx=*this;
-    VertexType r(bx.size());
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    VertexType r(bx.dimension());
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         r[i]=bx[i].lower();
     }
     return r;
@@ -133,8 +133,8 @@ template<class I> typename Box<I>::VertexType Box<I>::lower_bounds() const
 template<class I> typename Box<I>::VertexType Box<I>::upper_bounds() const
 {
     const Box<I>& bx=*this;
-    VertexType r(bx.size());
-    for(SizeType i=0; i!=bx.size(); ++i) {
+    VertexType r(bx.dimension());
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         r[i]=bx[i].upper();
     }
     return r;
@@ -145,7 +145,7 @@ template<class I> typename Box<I>::RadiusType Box<I>::radius() const
     const Box<I>& bx=*this;
     ARIADNE_ASSERT(bx.dimension()>0);
     decltype(declval<I>().radius()) r=bx[0].radius();
-    for(SizeType i=1; i!=bx.size(); ++i) {
+    for(SizeType i=1; i!=bx.dimension(); ++i) {
         r=max(r,bx[i].radius());
     }
     return r;
@@ -173,6 +173,10 @@ template<class I> typename Box<I>::RadiusType Box<I>::measure() const
     return r;
 }
 
+template<class I> typename Box<I>::RadiusType Box<I>::volume() const
+{
+    return this->measure();
+}
 
 template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Array<SizeType>& rng)
 {
@@ -194,37 +198,47 @@ template<class I> Box<I> Box<I>::_project(const Box<I>& bx, const Range& rng)
 
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const Box<I>& bx2)
 {
-    Box<I> r(bx1.size()+bx2.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    Box<I> r(bx1.dimension()+bx2.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         r[i]=bx1[i];
     }
-    for(SizeType i=0; i!=bx2.size(); ++i) {
-        r[i+bx1.size()]=bx2[i];
+    for(SizeType i=0; i!=bx2.dimension(); ++i) {
+        r[i+bx1.dimension()]=bx2[i];
+    }
+    return r;
+}
+
+template<class I> Box<I> Box<I>::_product(const I& ivl1, const Box<I>& bx2)
+{
+    Box<I> r(1u+bx2.dimension());
+    r[0]=ivl1;
+    for(SizeType i=0; i!=bx2.dimension(); ++i) {
+        r[i+1]=bx2[i];
     }
     return r;
 }
 
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const I& ivl2)
 {
-    Box<I> r(bx1.size()+1u);
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    Box<I> r(bx1.dimension()+1u);
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         r[i]=bx1[i];
     }
-    r[bx1.size()]=ivl2;
+    r[bx1.dimension()]=ivl2;
     return r;
 }
 
 template<class I> Box<I> Box<I>::_product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3)
 {
-    Box<I> r(bx1.size()+bx2.size()+bx3.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    Box<I> r(bx1.dimension()+bx2.dimension()+bx3.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         r[i]=bx1[i];
     }
-    for(SizeType i=0; i!=bx2.size(); ++i) {
-        r[i+bx1.size()]=bx2[i];
+    for(SizeType i=0; i!=bx2.dimension(); ++i) {
+        r[i+bx1.dimension()]=bx2[i];
     }
-    for(SizeType i=0; i!=bx3.size(); ++i) {
-        r[i+bx1.size()+bx2.size()]=bx3[i];
+    for(SizeType i=0; i!=bx3.dimension(); ++i) {
+        r[i+bx1.dimension()+bx2.dimension()]=bx3[i];
     }
     return r;
 }

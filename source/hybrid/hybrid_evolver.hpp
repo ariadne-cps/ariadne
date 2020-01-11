@@ -563,7 +563,7 @@ OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 //! \details Assumes that the starting set and time is given as a subset of \f$\{ \xi(s); \tau(s) \mid s\in D\}\f$
 //! where \f$s\in D\f$ is a parameter, \f$x=\xi(s)\f$ is the state corresponding to parameter \f$s\f$, and \f$t=\tau(s)\f$
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
-//! typically only defined over a singleton set of space and time.
+//! typically only defined over a bounded set of space and time.
 //! \relates TimingData
 enum class StepKind : std::uint8_t {
     CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.

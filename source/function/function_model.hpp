@@ -158,7 +158,7 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
 };
 
 //! \ingroup FunctionModelSubModule
-//! \brief Generic scalar functions on singleton domains.
+//! \brief Generic scalar functions on bounded domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>
 //    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     : public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
@@ -412,7 +412,7 @@ template<class P, class D, class PR, class PRE> class VectorFunctionModelElement
 };
 
 //! \ingroup FunctionModelSubModule
-//! \brief Generic vector functions on singleton domains.
+//! \brief Generic vector functions on bounded domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomainType,PR,PRE>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");

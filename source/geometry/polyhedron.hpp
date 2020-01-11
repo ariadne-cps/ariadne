@@ -108,7 +108,7 @@ class Polyhedron
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
     virtual ValidatedKleenean empty() const;
 
-    //! \brief Tests if the polyhedron is singleton. (Not currently implemented.)
+    //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
     virtual ValidatedKleenean is_bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)

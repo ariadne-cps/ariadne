@@ -107,7 +107,7 @@ class Enclosure
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
     explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& sf, const ValidatedScalarMultivariateFunction tf, const ValidatedVectorMultivariateFunction& g, const ValidatedVectorMultivariateFunction& h, const EnclosureConfiguration& fac);
-    //! \brief Construct from an exact singleton constraint \a set.
+    //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& fac);
 
     //! \brief Create a dynamically-allocated copy.
@@ -242,7 +242,7 @@ class Enclosure
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.
     FloatDPError radius() const;
-    //! \brief Returns \c true if the set is definitely singleton.
+    //! \brief Returns \c true if the set is definitely bounded.
     ValidatedLowerKleenean is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.

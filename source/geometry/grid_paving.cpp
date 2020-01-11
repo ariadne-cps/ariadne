@@ -2550,7 +2550,7 @@ Void GridTreePaving::adjoin_inner_approximation( const OpenSetInterface& theSet,
     const Nat height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBoxType, theGrid );
 
     //Compute the height of the smallest primary cell that encloses the box
-    //Note that, since we will need to adjoin inner approximation singleton by
+    //Note that, since we will need to adjoin inner approximation bounded by
     //the theBoundingBoxType, it is enough to take this cell's height and not to
     //go higher. Remember that the inner approximations consists of the cells
     //that are subsets of the set theSet Adjoin the inner approximation with

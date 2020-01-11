@@ -1469,7 +1469,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 if(possibly(evolve_set_time_range.upper()>timing_data.final_time)) {
                     evolve_set.bound_time(timing_data.final_time);
                 }
-                // Only continue evolution if the time-singleton evolve set is nonempty;
+                // Only continue evolution if the time-bounded evolve set is nonempty;
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
                 if(!definitely(evolve_set.is_empty())) {

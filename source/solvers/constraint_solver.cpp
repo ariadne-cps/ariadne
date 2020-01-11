@@ -100,7 +100,7 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
     ARIADNE_ASSERT(codomain.dimension()>0);
 
-    // Make codomain singleton
+    // Make codomain bounded
     UpperBoxType bounds=codomain;
     UpperBoxType image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");

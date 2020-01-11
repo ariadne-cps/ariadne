@@ -98,7 +98,7 @@ class SetInterfaceBase
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class BoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -169,7 +169,7 @@ class ClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class CompactSetInterface
     : public virtual BoundedSetInterface,
       public virtual ClosedSetInterface
@@ -224,7 +224,7 @@ class LocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class RegularLocatedSetInterface
     : public virtual RegularSetInterface,
       public virtual LocatedSetInterface
@@ -251,7 +251,7 @@ class ValidatedLocatedSetInterface;
 class ValidatedRegularLocatedSetInterface;
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class ValidatedBoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -303,7 +303,7 @@ class ValidatedClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class ValidatedCompactSetInterface
     : public virtual ValidatedBoundedSetInterface,
       public virtual ValidatedClosedSetInterface
@@ -350,7 +350,7 @@ class ValidatedLocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class ValidatedRegularLocatedSetInterface
     : public virtual ValidatedRegularSetInterface,
       public virtual ValidatedLocatedSetInterface
@@ -369,7 +369,7 @@ class EuclideanSpace
   public:
     //! \brief The canonical type used for bounding sets in the space.
     typedef ExactBoxType BoundingDomainType;
-    //! \brief The interface satisified by singleton sets in the space.
+    //! \brief The interface satisified by bounded sets in the space.
     typedef BoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
     typedef OvertSetInterface OvertSetInterfaceType;

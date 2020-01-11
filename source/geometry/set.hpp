@@ -49,7 +49,7 @@ class SetBase
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for singleton sets.
+//! \brief Handle class for bounded sets.
 class BoundedSet
     : public Handle<BoundedSetInterface>
 {
@@ -96,7 +96,7 @@ class ClosedSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for compact (closed and singleton) sets.
+//! \brief Handle class for compact (closed and bounded) sets.
 class CompactSet
     : public Handle<CompactSetInterface>
 {
@@ -138,7 +138,7 @@ class LocatedSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Handle class for singleton regular sets.
+//! \brief Handle class for bounded regular sets.
 class RegularLocatedSet
     : public Handle<RegularLocatedSetInterface>
 {

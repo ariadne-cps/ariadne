@@ -52,7 +52,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     typedef typename SystemType::TimeType TimeType;
     //! \brief The type used to describe the state space of the system evolution.
     typedef typename SystemType::StateSpaceType StateSpaceType;
-    //! \brief The type used to describe the interface for singleton sets in the state space.
+    //! \brief The type used to describe the interface for bounded sets in the state space.
     typedef typename StateSpaceType::BoundingDomainType BoundingDomainType;
     //! \brief The type used to describe the interface for overt sets in the state space, which are used as initial sets for lower reachability analysis.
     typedef typename StateSpaceType::OvertSetInterfaceType OvertSetInterfaceType;

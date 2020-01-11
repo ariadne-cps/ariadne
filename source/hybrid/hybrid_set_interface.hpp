@@ -60,7 +60,7 @@ class HybridSetInterfaceBase
     virtual SetInterfaceBase* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for singleton sets in a hybrid space.
+//! \brief Interface for bounded sets in a hybrid space.
 class HybridBoundedSetInterface
     : public virtual HybridSetInterfaceBase
 {
@@ -110,7 +110,7 @@ class HybridClosedSetInterface
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for compact (closed and singleton) sets in a hybrid space.
+//! \brief Interface for compact (closed and bounded) sets in a hybrid space.
 class HybridCompactSetInterface
     : public virtual HybridBoundedSetInterface
     , public virtual HybridClosedSetInterface
@@ -146,7 +146,7 @@ class HybridLocatedSetInterface
     virtual LocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Complete set interface for singleton regular sets in a hybrid space.
+//! \brief Complete set interface for bounded regular sets in a hybrid space.
 class HybridRegularLocatedSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface
@@ -166,7 +166,7 @@ inline OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& 
 
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class HybridValidatedBoundedSetInterface
     : public virtual HybridSetInterfaceBase {
   public:
@@ -218,7 +218,7 @@ class HybridValidatedClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class HybridValidatedCompactSetInterface
     : public virtual HybridValidatedBoundedSetInterface,
       public virtual HybridValidatedClosedSetInterface
@@ -255,7 +255,7 @@ class HybridValidatedLocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class HybridValidatedRegularLocatedSetInterface
     : public virtual HybridValidatedRegularSetInterface,
       public virtual HybridValidatedLocatedSetInterface

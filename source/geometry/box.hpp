@@ -140,7 +140,7 @@ class Box
 
     //! \brief Test if the box is empty.
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    //! \brief Test if the box is singleton.
+    //! \brief Test if the box is bounded.
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
     //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.

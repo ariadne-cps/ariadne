@@ -68,7 +68,7 @@ class HybridSpace
   public:
     //! \brief The canonical type used for bounding sets in the space.
     typedef HybridExactBoxes BoundingDomainType;
-    //! \brief The interface satisified by singleton sets in the space.
+    //! \brief The interface satisified by bounded sets in the space.
     typedef HybridBoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
     typedef HybridOvertSetInterface OvertSetInterfaceType;

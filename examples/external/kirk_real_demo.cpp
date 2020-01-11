@@ -1,7 +1,7 @@
 /***************************************************************************
  *            examples/external/kirk_real_demo.cpp
  *
- *  Copyright 2017  Pieter Collins, Franz Brausse
+ *  Copyright  2017-20  Pieter Collins, Franz Brausse
  *
  ****************************************************************************/
 

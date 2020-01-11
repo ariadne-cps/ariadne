@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential_inclusion.hpp
  *
- *  Copyright  2008-18  Luca Geretti, Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 

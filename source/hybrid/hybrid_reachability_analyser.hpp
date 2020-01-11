@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_reachability_analyser.hpp
  *
- *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

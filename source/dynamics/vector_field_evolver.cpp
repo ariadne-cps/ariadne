@@ -1,7 +1,7 @@
 /***************************************************************************
  *            vector_field_evolver.cpp
  *
- *  Copyright  2008  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

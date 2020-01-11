@@ -1,7 +1,7 @@
 /***************************************************************************
  *            solver_interface.hpp
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

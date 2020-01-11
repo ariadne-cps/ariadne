@@ -1,7 +1,7 @@
 /***************************************************************************
  *            point.tpl.hpp
  *
- *  Copyright 2008--18  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            real_calculus.cpp
  *
- *  Copyright 2017  Pieter Collins
+ *  Copyright  2017-20  Pieter Collins
  *      (Based on joint work with M. Konecny, N. Mueller and M. Ziegler)
  *
  ****************************************************************************/

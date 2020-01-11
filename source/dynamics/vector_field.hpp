@@ -1,7 +1,7 @@
 /***************************************************************************
  *            vector_field.hpp
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

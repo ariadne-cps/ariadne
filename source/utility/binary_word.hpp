@@ -1,7 +1,7 @@
 /***************************************************************************
  *            binary_word.hpp
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *
  ****************************************************************************/
 

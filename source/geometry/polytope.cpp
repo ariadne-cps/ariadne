@@ -1,7 +1,7 @@
 /****************************************************************************
  *            polytope.cpp
  *
- *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

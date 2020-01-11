@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-restrictive.cpp
  *
- *  Copyright  2010-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2010-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

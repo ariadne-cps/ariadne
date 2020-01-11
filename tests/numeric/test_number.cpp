@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_number.cpp
  *
- *  Copyright  2016  Alberto Casagrande, Pieter Collins
+ *  Copyright  2016-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

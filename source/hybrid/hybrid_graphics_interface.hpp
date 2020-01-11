@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_graphics_interface.hpp
  *
- *  Copyright 2009-17  Davide Bresolin, Pieter Collins
+ *  Copyright  2009-20  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 

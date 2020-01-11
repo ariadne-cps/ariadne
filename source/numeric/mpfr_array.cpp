@@ -2,7 +2,7 @@
 
 Modified from mpfr_init -- Copyright 1999, 2001, 2002, 2004, 2006 Free Software Foundation, Inc.
 
-Copyright 2007--17 Pieter Collins, Maastricht University
+Copyright  2007-20  Pieter Collins, Maastricht University
 
 This file is intended to become part of the MPFR Library.
 

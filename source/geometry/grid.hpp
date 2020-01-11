@@ -1,7 +1,7 @@
 /***************************************************************************
  *            grid.hpp
  *
- *  Copyright  2008-9  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/

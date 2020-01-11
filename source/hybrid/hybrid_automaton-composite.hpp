@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-composite.hpp
  *
- *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

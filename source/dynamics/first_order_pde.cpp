@@ -1,7 +1,7 @@
 /***************************************************************************
  *            first_order_pde.cpp
  *
- *  Copyright 2018  Pieter Collins, Svetlana Selivanova
+ *  Copyright  2018-20  Pieter Collins, Svetlana Selivanova
  *
  ****************************************************************************/
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            discrete_location.cpp
  *
- *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

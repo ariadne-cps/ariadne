@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_vector.cpp
  *
- *  Copyright  2006  Pieter Collins, Alberto Casagrande
+ *  Copyright  2006-20  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 

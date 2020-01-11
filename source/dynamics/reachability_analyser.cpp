@@ -1,7 +1,7 @@
 /***************************************************************************
  *            reachability_analyser.cpp
  *
- *  Copyright  2006-11  Alberto Casagrande, Pieter Collins, Davide Bresolin
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
  ****************************************************************************/
 

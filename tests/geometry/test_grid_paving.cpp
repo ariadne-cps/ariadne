@@ -2,7 +2,7 @@
  *            test_grid_paving.cpp
  *
  *
- *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/

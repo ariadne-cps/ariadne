@@ -1,7 +1,7 @@
 /***************************************************************************
  *            interval.decl.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

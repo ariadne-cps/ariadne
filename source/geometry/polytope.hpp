@@ -1,7 +1,7 @@
 /****************************************************************************
  *            polytope.hpp
  *
- *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

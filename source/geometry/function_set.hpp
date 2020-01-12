@@ -50,10 +50,12 @@
 namespace Ariadne {
 
 
+class ImageSet;
 class ConstraintSet;
 class BoundedConstraintSet;
 class ConstrainedImageSet;
 
+typedef ImageSet EffectiveImageSet;
 typedef ConstraintSet EffectiveConstraintSet;
 typedef BoundedConstraintSet EffectiveBoundedConstraintSet;
 typedef ConstrainedImageSet EffectiveConstrainedImageSet;
@@ -67,6 +69,11 @@ class PavingInterface;
 
 class Drawer;
 
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of a box \f$D\f$ under a function \f$f\f$.
+//! \see ConstrainedImageSet
+class ImageSet { };
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
@@ -164,6 +171,10 @@ class BoundedConstraintSet
 };
 
 
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
+//! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
+//! \see ValidatedConstrainedImageSet
 class ConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {

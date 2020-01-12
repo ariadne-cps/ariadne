@@ -41,8 +41,9 @@ namespace Ariadne {
 class HybridAutomatonInterface;
 class HybridGridTreePaving;
 
-/*! \brief A class for performing reachability analysis on a hybrid system.
- */
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
+//! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyserInterface
     : public virtual ReachabilityAnalyserInterface<HybridAutomatonInterface>
     , public Loggable
@@ -70,6 +71,7 @@ class HybridReachabilityAnalyserInterface
 };
 
 
+//! \relates HybridReachabilityAnalyserInterface
 //! \brief Factory for hybrid reachability analyser interface classes.
 class HybridReachabilityAnalyserFactoryInterface
     : public ReachabilityAnalyserFactoryInterface<HybridAutomatonInterface>

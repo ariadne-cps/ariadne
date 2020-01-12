@@ -35,7 +35,8 @@ namespace Ariadne {
 
 typedef Integer DiscreteTimeType;
 
-//! \ingroup SystemModule
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time
 //! and an integer \a discrete_time.
 //!

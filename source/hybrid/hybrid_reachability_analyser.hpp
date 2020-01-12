@@ -75,6 +75,7 @@ using HybridReachabilityAnalyserConfiguration = ReachabilityAnalyserConfiguratio
 template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
 
 //! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyser
     : public ReachabilityAnalyser<HybridAutomatonInterface>

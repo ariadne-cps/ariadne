@@ -72,10 +72,11 @@ template<> class ListSet<HybridEnclosure>;
 
 enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
+//! \ingroup HybridSetSubModule
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.
-//! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
-//! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\hat{t}(s)\f$.
+//! The set is represented as the image of a box \f$D\f$ under a function model \f$\xi(s)=\hat{f}(s)\f$, under the constraints
+//! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\tau(s)=\hat{t}(s)\f$.
 //!
 //! In other words,
 //! \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
@@ -212,23 +213,22 @@ class HybridEnclosure
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon)\f$ and \f$\tau'(s)=\tau(s)+\epsilon\f$
     Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$
     Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
+    //! \brief Apply the reach step \f$\xi'(s) = \phi(\xi(s),t-\tau(s))\f$ and \f$\tau'(s)=\tau(s)+t\f$ for \f$0<=t<=\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
+    //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$
     Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
+    //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$
     Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega);
-    //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
+    //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$ and \f$t \leq \epsilon(s)\f$, assuming \f$\epsilon(s) \leq h\f$ throughout.
     Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
+    //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$.
     Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi);
-
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
     //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.

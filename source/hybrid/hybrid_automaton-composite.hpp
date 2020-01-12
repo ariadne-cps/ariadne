@@ -58,6 +58,7 @@ class CompositeHybridAutomaton;
 
 
 //! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
 //! \brief A hybrid automaton, formed by running a finite number of HybridAutomaton classes in parallel.
 //!
 //! \sa \ref HybridAutomaton

@@ -44,6 +44,23 @@ using BoxDomainType = ExactBoxType;
 template<class P, class D, class C> class Function;
 
 //@{
+//! \name Type shorthands
+template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>; //!< . \ingroup FunctionModule
+template<class P, class D> using VectorFunction = Function<P,D,BoxDomainType>; //!< . \ingroup FunctionModule
+template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>; //!< . \ingroup FunctionModule
+template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>; //!< . \ingroup FunctionModule
+
+template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomainType,IntervalDomainType>; //!< . \ingroup FunctionModule
+template<class P> using VectorUnivariateFunction = Function<P,IntervalDomainType,BoxDomainType>; //!< . \ingroup FunctionModule
+template<class P> using ScalarMultivariateFunction = Function<P,BoxDomainType,IntervalDomainType>; //!< . \ingroup FunctionModule
+template<class P> using VectorMultivariateFunction = Function<P,BoxDomainType,BoxDomainType>; //!< . \ingroup FunctionModule
+
+template<class D, class C> using ApproximateFunction = Function<ApproximateTag,D,C>; //!< . \ingroup FunctionModule
+template<class D, class C> using ValidatedFunction = Function<ValidatedTag,D,C>; //!< . \ingroup FunctionModule
+template<class D, class C> using EffectiveFunction = Function<EffectiveTag,D,C>; //!< . \ingroup FunctionModule
+//@}
+
+//@{
 //! \relates Function
 //! \name Type shorthands
 template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>; //!< .
@@ -86,8 +103,11 @@ using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< .
 using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< .
 //@}
 
-// Function interface declarations
+//! \ingroup FunctionModule
+//! \brief An interface for generic functions.
+//! \see Function
 template<class P, class D, class C> class FunctionInterface;
+
 //@{
 //! \relates FunctionInterface
 //! \name Type shorthands

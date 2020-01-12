@@ -79,7 +79,7 @@ A basic solution then satisfies
 The most general form of the linear programming problem is
 \f[ \text{(GCP)} \qquad \min cx \text{ s.t. } b_L \leq A_Cx \leq b_U;\ A_E = b_E;\ d_L\leq x\leq d_U . \f]
 Define auxiliary variables \f$w = w_C = A_C x\f$, and \f$w_E=A_E x = b_E\f$.
-The primal and auxiliary variables can be either \emph basic , \emph lower, \emph upper  or \emph fixed.
+The primal and auxiliary variables can be either \em basic , \em lower, \em upper  or \em fixed.
 A lower or upper variable satisfies \f$x_N=d_{L/U}\f$ or \f$w_N=b_{L/U}\f$, and a fixed variable satisfies \f$w_E=b_E\f$ (alternatively, \f$w=b_L=b_U\f$.
 
 After the introduction of auxiliary variables, the system can be written in the form (CP) above, with equations

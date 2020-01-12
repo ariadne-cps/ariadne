@@ -23,7 +23,7 @@
 
 
 /*! \file constraint_satisfaction.dox
- *  \brief Documentation on nonlinear programming
+ *  \brief Documentation on solving constraint feasibility problems.
  */
 
 namespace Ariadne {
@@ -32,7 +32,8 @@ namespace Ariadne {
 
 \page constraint_satisfaction_page Constraint Satisfaction
 
-\todo This page has yes to be written. See the documentation on the \ref ConstraintSolverInterface for information.
+\todo This page has yes to be written. See the documentation on the \ref Ariadne::ConstraintSolverInterface "ConstraintSolverInterface" for information.
+
 
  */
 

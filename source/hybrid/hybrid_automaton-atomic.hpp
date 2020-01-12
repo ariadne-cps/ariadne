@@ -43,6 +43,7 @@ class AtomicDiscreteLocation : public StringConstant {
 };
 
 //! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
 //! \brief A hybrid automaton, comprising continuous-time behaviour
 //! at each discrete mode, coupled by instantaneous discrete transitions.
 //!  The state space is given by a hybrid set.
@@ -59,10 +60,9 @@ class AtomicDiscreteLocation : public StringConstant {
 //! and a %Set giving an invariants which must be satisified at
 //! all times.
 //!
-//! The discrete time behaviour is specified by %AtomicDiscreteTransition
-//! objects.
-//! Each discrete transition represents an jump from a \a source
-//! mode to a \a target mode.
+//! The discrete time behaviour is specified by atomic discrete
+//! transition. Each discrete transition represents an jump from
+//! a \a source mode to a \a target mode.
 //! There can be at most one discrete transition in an automaton
 //! with the same event and source.
 //!
@@ -71,8 +71,6 @@ class AtomicDiscreteLocation : public StringConstant {
 //! An unforced transition may occur at any time it is activated,
 //! but is only forced to occur if the continuous evolution is
 //! blocked by an invariant.
-//!
-//! \sa \ref AtomicDiscreteMode, \ref AtomicDiscreteTransition, \ref CompositeHybridAutomaton
 class AtomicHybridAutomaton
     : public HybridAutomaton
 {

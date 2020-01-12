@@ -41,7 +41,7 @@ namespace Ariadne {
 //! \ingroup NumericModule
 //! \brief Floating point number approximations to real numbers supporting approxiamate arithmetic.
 //! \details
-//! The \c %Approximation<F> class represents approximate floating-point numbers.
+//! The \c Approximation<F> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, FloatDP , FloatMP, FloatValue, FloatBall, FloatBounds.
 template<class F> class Approximation

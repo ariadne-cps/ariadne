@@ -67,7 +67,7 @@ struct InfeasibleLinearProgram : std::runtime_error {
 
 
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
     : public Loggable
@@ -119,11 +119,19 @@ template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
-//! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
-enum class Slackness : std::int8_t { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
+//! \ingroup OptimisationSubModule
+//! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
+//! \see SimplexSolver
+enum class Slackness : std::int8_t {
+    LOWER=-1, //!< .
+    BASIS=0,  //!< .
+    UPPER=+1, //!< .
+    FIXED=+2  //!< .
+};
+
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using the simplex algorithm.
 template<class X>
 class SimplexSolver

@@ -36,15 +36,16 @@ namespace Ariadne {
 template<class ES> class ListSet;
 template<class ES> class Orbit;
 
+//! \ingroup DynamicsModule
 //! \brief The semantics used to determine the trajectories of the system.
-//! \relates EvolverInterface
+//! \see EvolverInterface
 enum class Semantics : std::uint8_t {
     LOWER, //!< Under-approximation with trajectories terminating at spacial discontinuities.
     UPPER  //!< Over-approximations with all possibilities included as spacial discontinuities.
 };
 
 
-//! \ingroup EvaluationModule
+//! \ingroup DynamicsModule
 //! \brief Interface for evolving a dynamic system.
 //! \sa HybridEvolverInterface
 //! \sa ReachabilityAnalyserInterface

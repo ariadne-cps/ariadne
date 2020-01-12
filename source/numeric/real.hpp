@@ -121,7 +121,7 @@ class Real
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
     explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
     explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
-    explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \c |w_m-w_n|\leq2<sup>min(m,n)</sup>.
+    explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \f$|w_m-w_n|\leq 2 ^\min(m,n)\f$.
     //@}
 
     //@{
@@ -203,7 +203,7 @@ class Real
     friend Real log(Real const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
     friend Real sin(Real const& r); //!< The sine of \a r.
     friend Real cos(Real const& r); //!< The cosine of \a r.
-    friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend Real tan(Real const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r).
     friend Real asin(Real const& r); //!< The arc-sine of \a r.
     friend Real acos(Real const& r); //!< The arc-cosine of \a r.
     friend Real atan(Real const& r); //!< The arc-tangent of \a r.
@@ -249,11 +249,11 @@ class Real
     friend Real limit(ConvergentSequence<DyadicBounds> const& qbs);
         //!< Create a real number from a sequence of dyadic bounds whose width converges to 0.
     friend Real limit(FastCauchySequence<Dyadic> const& qs);
-        //!< Create a real number from a sequence of dyadic numbers \em q<sub>n</sub> for which
-        //!< <em>|q<sub>n<sub>1</sub></sub>-q<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+        //!< Create a real number from a sequence of dyadic numbers \f$q_n\f$ for which
+        //!< \f$|q_{n_1}-q_{n_2}|\leq 2^{\min(n_1,n_2)}\f$
     friend Real limit(FastCauchySequence<Real> const& rs);
-        //!< The limit of a sequence of real numbers \em r<sub>n</sub> for which
-        //!< <em>|r<sub>n<sub>1</sub></sub>-r<sub>n<sub>2</sub></sub>|≤<em>2<sup>-min</sup><sup>(n<sub>1</sub>,n<sub>2</sub>)</sup></em>
+        //!< The limit of a sequence of real numbers \f$r_n\f$ for which
+        //!< \f$|r_{n_1}-r_{n_2}|\leq 2^{\min(n_1,n_2)}\f$
     //@}
 
     //@{
@@ -598,7 +598,7 @@ class NaiveReal
     friend NaiveReal log(NaiveReal const& r); //!< The natural logarithm of \a r. Requires \a r ≥ 0.
     friend NaiveReal sin(NaiveReal const& r); //!< The sine of \a r.
     friend NaiveReal cos(NaiveReal const& r); //!< The cosine of \a r.
-    friend NaiveReal tan(NaiveReal const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r) \f$.
+    friend NaiveReal tan(NaiveReal const& r); //!< The tangent of \a r, sin(\a r)/cos(\a r).
     friend NaiveReal atan(NaiveReal const& r); //!< The arc-tangent of \a r.
     //@}
 
@@ -716,6 +716,9 @@ ValidatedKleenean check_sgn(Real r, Effort eff);
 
 class ValidatedRealInterface;
 
+//! \ingroup NumericModule
+//! \brief A generic class representing rigorous bounds on a real number.
+//! \see Real
 class ValidatedReal {
     SharedPointer<ValidatedRealInterface> _ptr;
   public:
@@ -724,11 +727,43 @@ class ValidatedReal {
     Dyadic error();
     Dyadic lower();
     Dyadic upper();
+    //! \brief Get dyadic bounds for the number.
+    //! \details It is not always clear how this function can be implemented,
+    //!   and it may be removed or modified in future versions.
     DyadicBounds get() const;
+    //! \brief Get the bounds for the number, representing in double precision.
     FloatDPBounds get(DoublePrecision) const;
-    FloatMPBounds get(MultiplePrecision) const;
+    //! \brief Get the bounds for the number, representing to precision \a pr.
+    //! Note that increasing the accuracy typically does not yield arbitrarily
+    //! tight bounds, as the object is already an approximation to finite accuracy.
+    FloatMPBounds get(MultiplePrecision pr) const;
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream&, ValidatedReal const&);
 };
+
+class ApproximateRealInterface;
+
+//! \ingroup NumericModule
+//! \brief A generic class representing an approximation to a real number
+//! of unknown accuracy.
+//! \see Real, ValidatedReal
+class ApproximateReal {
+    SharedPointer<ApproximateRealInterface> _ptr;
+  public:
+    ApproximateReal(DyadicApproximation const&);
+    //! \brief Get a dyadic approximation to the number.
+    DyadicApproximation get() const;
+    //! \brief Get the approximation to the number, converting to double-precision.
+    FloatDPApproximation get(DoublePrecision) const;
+    //! \brief Get the approximation to the number, converting to a representation
+    //! with precision \a pr.
+    //! Note that increasing the precision typically does not yield arbitrarily
+    //! accurate approximation, as the object already has some error.
+    FloatMPApproximation get(MultiplePrecision pr) const;
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream&, ApproximateReal const&);
+};
+
 
 } // namespace Ariadne
 

@@ -1,0 +1,86 @@
+/***************************************************************************
+ *            hybrid_evolution_tutorial.dox
+ *
+ *  Copyright  2004-20  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*!
+
+\file hybrid_evolution_tutorial.dox
+\brief Tutorial on %Ariadne's features for analysing hybrid systems.
+
+\page hybrid_evolution_tutorial_page Tutorial on Analysing Hybrid Systems
+
+In this tutorial, we show how to use %Ariadne to model and analyse a hybrid automaton model of a simple heating system.
+
+\section tutorial_system_model The Hybrid Automaton Model
+
+The system represents a heating system used to control the temperature in a room. The temperature is affected by to the external temperature, which is assumed to vary sinusoidally, and is controlled by a heater which may either be on or off. The heater is turned on whenever the temperature falls below a certain threshold, and is turned off whenever the temperature rises above a certain threshold.
+
+The system has two discrete modes, \f$\textsc{On}\f$ and \f$\textsc{Off}\f$, representing the state of the heater. There are three events, \f$\textsc{TurnOn}\f$, \f$\textsc{TurnOff}\f$ and \f$\textsc{Midnight}\f$; the first two representing switching the heater, and the last being a reset of the clock at the beginning of a new day.
+
+The system has two continuous variables, \em temperature \f$T\f$ and \em time-of-day \f$\tau\f$.
+The system is described by three parameters, the heater power \f$P\f$, the insulation level \f$K\f$, the average external temperature \f$T_\mathrm{av}\f$, the amplitude of the external temperature fluctuations \f$T_\mathrm{amp}\f$.
+
+\f[ \dot{T} = P + K(T_\mathrm{av} + T_\mathrm{amp}\cos(2\pi t) - T); \quad \dot{t}=1. \f]
+
+The heater is turned on whenever the temperature falls below \f$T_{\textsc{On}}\f$, and is turned off whenever the temperature rises above \f$T_{\textsc{Off}}\f$.
+
+\section tutorial_building_system Building the Ariadne Hybrid Automaton
+
+Define a function to create the hybrid automaton
+
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp create_heating_system
+
+This function first defines the constants which are used by the system.
+It then defines the discrete variable "heating" describing the mode of the system,
+two discrete state labels, and the discrete events which occur during the evolution.
+It then declares the system variables \c T and \c C describing the temperature and the clock state.
+
+The function then constructs the system itself.
+The modes of the \c heating systems are described in terms of their discrete state and dynamics,
+and the discrete transitions by providing guards and resets.
+The \c clock systems is described similarly.
+Finally, the complete heating system is described by composition.
+
+
+
+\section tutorial_hybrid_system_evolution Computing the Continuous Evolution
+
+The following function creates a HybridEvolver object, which is a class which can compute system evolution.
+
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp create_evolver
+
+We now compute an approximate simulation of the evolution of the system.
+
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp simulate_evolution
+
+We now compute a rigorous simulation of the evolution of the system, and over-approximation of a larger flow-tube.
+
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp compute_evolution
+
+In each case we first define the intial set and evolution time, and then compute trajectories using the \c Evolver object up to the evolution time. The computed dynamics are written to standard output and to a file, and the attained sets are plotted.
+
+
+\section tutorial_main Main function
+
+\snippet tutorials/hybrid_evolution/hybrid_evolution_tutorial.cpp main
+
+*/

@@ -792,7 +792,11 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = source/prototyping/ \
-                         source/experimental/
+                         source/experimental/ \
+                         source/algebra/vector-crtp.hpp \
+                         source/algebra/vector-sfinae.hpp \
+                         source/algebra/matrix-crtp.hpp \
+                         source/algebra/matrix-sfinae.hpp \
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -825,8 +829,9 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/examples/ \
-                         @CMAKE_CURRENT_SOURCE_DIR@/tutorials/
+EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/tutorials/rigorous_numerics/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/tutorials/hybrid_evolution/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/python/tutorials/
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and

@@ -58,7 +58,7 @@ template<class X> struct FeasibilityState {
 };
 
 
-//! \ingroup EvaluationModule OptimisationModule
+//! \ingroup OptimisationSubModule
 //! \brief A class for finding solutions of systems of constraints of the form \f$g(y) \leq c\f$.
 class ConstraintSolverInterface {
   public:
@@ -73,7 +73,7 @@ class ConstraintSolverInterface {
 
 
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! \brief A class for finding solutions of systems of constraints of the form \f$g(y) \leq c\f$.
 class ConstraintSolver
     : public ConstraintSolverInterface, public Loggable

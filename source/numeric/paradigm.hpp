@@ -120,7 +120,7 @@ constexpr ParadigmCode null(ParadigmCode p) {
 
 
 
-//! \defgroup ParadigmSubModule Computational Paradigms
+//! \defgroup ParadigmSubModule Computational paradigms
 //!   \ingroup LogicalModule
 //! \brief Tag classes describing the information provided by a type.
 //! \details In order to indicate the kind of guarantees on the approximation provided by a concrete object,
@@ -247,6 +247,7 @@ template<class P1, class P2=P1> struct ParadigmTraits;
 //@{
 //! \ingroup ParadigmSubModule
 //! \name Information traits
+//! \nosubgrouping
 
 #ifdef DOXYGEN
 //! \brief Traits class describing information levels

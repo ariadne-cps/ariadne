@@ -428,12 +428,14 @@ template<class M> struct MatrixRows {
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRows<const Matrix<X>> Matrix<X>::operator[](Range is) const {
     return MatrixRows<const Matrix<X>>(*this,is);
 }
 template<class X> inline MatrixRows<Matrix<X>> Matrix<X>::operator[](Range is) {
     return MatrixRows<Matrix<X>>(*this,is);
 }
+#endif
 
 template<class M1, class M2, EnableIf<And<IsMatrixExpression<M1>,IsMatrixExpression<M2>>>> inline
 auto operator==(M1 const& A1, M2 const& A2) -> decltype(declval<ScalarType<M1>>()==declval<ScalarType<M2>>()) {
@@ -478,13 +480,14 @@ template<class X> inline Void Matrix<X>::_check_data_access(SizeType i, SizeType
     ARIADNE_PRECONDITION_MSG(i<this->row_size()&&j<this->column_size(),"A="<<*this<<" i="<<i<<" j="<<j);
 }
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRow<const Matrix<X>> Matrix<X>::operator[](SizeType i) const {
     return MatrixRow<const Matrix<X>>(*this,i);
 }
-
 template<class X> inline MatrixRow<Matrix<X>> Matrix<X>::operator[](SizeType i) {
     return MatrixRow<Matrix<X>>(*this,i);
 }
+#endif
 
 template<class X> inline SizeType Matrix<X>::row_size() const {
     return this->_rs;

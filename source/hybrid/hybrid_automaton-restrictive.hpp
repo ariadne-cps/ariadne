@@ -130,7 +130,11 @@ OutputStream& operator<<(OutputStream& os, const RestrictiveDiscreteMode& mode);
 
 Set<Identifier> names(const Set<RealVariable>& v);
 
-class HybridSystem
+//! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
+//! \brief A hybrid system defined using purely restrictive operations.
+//! \details Trivially compositional by definition.
+class RestrictiveHybridAutomaton
 //    : public virtual HybridAutomatonInterface
 //    , public Loggable
 : public Loggable
@@ -164,14 +168,14 @@ class HybridSystem
 
   public:
     //! \brief  Constructor.
-    HybridSystem();
+    RestrictiveHybridAutomaton();
 
     //! \brief  Destructor.
-    virtual ~HybridSystem() = default;
+    virtual ~RestrictiveHybridAutomaton() = default;
     //! \brief Construct dynamically-allocated copy.
-    virtual HybridSystem* clone() const;
+    virtual RestrictiveHybridAutomaton* clone() const;
 
-    friend HybridSystem compose(const List<HybridSystem>& components);
+    friend RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);
 
     //@{
     //! \name Methods for building the automaton.
@@ -358,11 +362,11 @@ class HybridSystem
     static List<RealAssignment> _order_algebraic_assignments(const List<RealAssignment>&);
 };
 
-inline OutputStream& operator<<(OutputStream& os, const HybridSystem& hs) {
+inline OutputStream& operator<<(OutputStream& os, const RestrictiveHybridAutomaton& hs) {
     return hs.write(os);
 }
 
-HybridSystem compose(const List<HybridSystem>& components);
+RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);
 
 } // namespace Ariadne
 

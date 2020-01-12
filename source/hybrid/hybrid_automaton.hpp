@@ -183,6 +183,7 @@ inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 
 
 //! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
 //! \brief A hybrid automaton, comprising continuous-time behaviour
 //! at each discrete mode, coupled by instantaneous discrete transitions.
 //!  The state space is given by a hybrid set.
@@ -420,7 +421,7 @@ class HybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
-    //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
+    //!    \param kind is a label indicating whether the transition is permissive, urgent, or an impact etc.
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,

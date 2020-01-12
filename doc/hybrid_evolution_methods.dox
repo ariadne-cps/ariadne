@@ -346,7 +346,7 @@ If \f$g\f$ is concave, then
  J &= \{ \phi(x,t) \mid t\leq\mu(x) \wedge g(\phi(x,t)) = 0 \}  \\
    &= \{ \phi(x,t) \mid L_fg(\phi(x,t)) \geq 0 \wedge g(\phi(x,t)) = 0 \}
 \end{aligned}\f]
-Note that \f$\mu(x)\f$ is <em>required</em> for \f$R\f$ and \f$E\f$, but not for \f$J\f$. Also, is is </em>required</em> to split \f$R\f$ and \f$E\f$ into two separate sets.
+Note that \f$\mu(x)\f$ is <em>required</em> for \f$R\f$ and \f$E\f$, but not for \f$J\f$. Also, is is <em>required</em> to split \f$R\f$ and \f$E\f$ into two separate sets.
 
 By creeping up to the zero set and maximum set of a concave predicate, it may be possible to obtain \f$\mu(x)\leq \varepsilon(x)\f$, in which case we can simplify \f$E\f$ to a single set with a single constraint:
 \f[\begin{aligned}

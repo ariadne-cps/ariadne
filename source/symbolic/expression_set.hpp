@@ -89,7 +89,7 @@ template<class C, class P> decltype(auto) all(C const& c, P const& p) {
     R r=true; for(auto e:c) { r=r and p(e); if(definitely(not r)) { return r; } } return r;
 }
 
-//! \ingroup ExpressionSetSubModule
+//! \ingroup SymbolicModule
 //! \brief An interval range for a real variable.
 template<class UB> class VariableInterval {
     typedef decltype(-declval<UB>()) LB;

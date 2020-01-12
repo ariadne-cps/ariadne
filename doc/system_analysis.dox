@@ -43,11 +43,11 @@ namespace Ariadne {
 Analysis of dynamic systems in %Ariadne is performed via \em evaluator classes, which perform certain tasks.
 %Ariadne currently supports three kinds of evaluators:
  - \ref EvolverInterface "Evolver" Compute time evolution.
- - \ref DiscretiserInterface "Discretiser" Discreteise sets and orbits on a grid.
+ - \ref PaverInterface "Paver" Discreteise sets and orbits on a grid.
  - \ref ReachabilityAnalyserInterface "ReachabilityAnalyser" Compute finite- and infinite-time reachable sets on a grid.
 
 System evolution is performed starting from an initial point or set of points. There are a number of ways of defining initial sets in %Ariadne, but the most general is using the \ref ImageSet class. Commonly used sets are provided for convenience, such as \ref Box and \ref Polytope classes.
-For analysing hybrid systems, a \ref HybridImageSet class is also provided.
+For analysing hybrid systems, a \ref HybridEnclosure class is also provided.
 
 Safety specifications are also defined by means of sets. The \ref ConstraintSet class is the most general way of given a specification, but the \ref Box and \ref Polyhedron classes can also be used. For hybrid systems, a \ref HybridEnclosure is also provided.
 
@@ -80,12 +80,13 @@ Reachability analysis in %Ariadne is performed using the ReachabilityAnalyserInt
     Compute the set of states which the system can reach at times up to and including the specified time from the given initial set.
  - \ref ReachabilityAnalyserInterface::upper_reach "upper_reach(system, initial_set, time)":
     Compute the set of all states which the system can reach from the given initial set.
- - <c>\ref ReachabilityAnalyserInterface::chain_reach "chain_reach(system, initial_set)"</c>:
+ - <c>\ref ReachabilityAnalyserInterface::outer_chain_reach "outer_chain_reach(system, initial_set)"</c>:
     Compute an over-approximation to the set of all states which the system can reach from the given initial set.
 
- - <c>\ref ReachabilityAnalyserInterface::viable "viable(system, bounding_set)"</c>:
+ - <c>"viable(system, bounding_set)</c>:
     Compute the set of states for which the evolution remains in the bounding set for all times.
- - <c>\ref ReachabilityAnalyserInterface::verify "verify(system, initial_set, bounding_set)"</c>:
+    (NOT CURRENTLY SUPPORTED)
+ - <c>\ref ReachabilityAnalyserInterface::verify_safety "verify_safety(system, initial_set, safe_set)"</c>:
     Attempts to decide whether any evolution starting in the initial set remains in the bounding set for all times.
 
 The \c evolve, \c reach and \c viable operators each come in two flavours \c lower_ and \c upper_ , representing different "semantics of evolution". Hence \c lower_evolve computes a lower-approximation to the evolution, and \c upper_evolve computes an outer approximation. An outer approximation to the reachable set is also called \c chain_reach or \c chainreach, since the approximations need not converge to the reachable set itself.
@@ -106,10 +107,6 @@ All evolution methods rely on a number of core components:
 Additionally, for hybrid systems, we may wish to use different evolution methods, approximations or even different representations of sets in different modes of the system.
 
 In the current version of %Ariadne, different "plugin" classes can be used to provide different services. Each plugin is packaged to provide related services, which are combined in the evolution. The exact services provided by the plugins are not currently stable.
-
-Core evolution paramters which are common to (most) evolution routines are given in the class \c EvolutionParameters.
-
-\sa \ref EvolutionParameters
 
 
 

@@ -93,19 +93,6 @@ OutputStream& operator<<(OutputStream& os, const CrossingKind& crk) {
     } return os;
 }
 
-OutputStream& operator<<(OutputStream& os, const DirectionKind& dir) {
-    switch(dir) {
-        case DirectionKind::POSITIVE: os<<"POSITIVE"; break;
-        case DirectionKind::NEGATIVE: os<<"NEGATIVE"; break;
-        case DirectionKind::INCREASING: os<<"INCREASING"; break;
-        case DirectionKind::DECREASING: os<<"DECREASING"; break;
-        case DirectionKind::CONVEX: os<<"CONVEX"; break;
-        case DirectionKind::CONCAVE: os<<"CONCAVE"; break;
-        case DirectionKind::INDETERMINATE: os<<"INDETERMINATE"; break;
-        default: os << "UNKNOWN"; break;
-    } return os;
-}
-
 OutputStream& operator<<(OutputStream& os, const StepKind& stpk) {
     switch(stpk) {
         case StepKind::CONSTANT_EVOLUTION_TIME: os<<"CONSTANT_EVOLUTION_TIME"; break;

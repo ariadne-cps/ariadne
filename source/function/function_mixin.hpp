@@ -37,6 +37,8 @@ typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDiff
 typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
 typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
 typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
+typedef TaylorModel<ApproximateTag,FloatMP> ApproximateTaylorModelMP;
+typedef TaylorModel<ValidatedTag,FloatMP> ValidatedTaylorModelMP;
 
 typedef Formula<ApproximateNumber> ApproximateFormula;
 typedef Formula<ValidatedNumber> ValidatedFormula;

@@ -891,7 +891,7 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
 
 template<class X>
 Vector<Differential<X>>
-Vector<Differential<X>>::_flow(const Vector<Differential<X>>& df, Vector<Differential<X>> const& dx0, Vector<Differential<X>> const& dt0a)
+Vector<Differential<X>>::_flow(const Vector<Differential<X>>& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a)
 {
     ARIADNE_ASSERT(df.result_size()==dx0.result_size());
     ARIADNE_ASSERT(df.argument_size()==dx0.result_size()+dt0a.result_size());

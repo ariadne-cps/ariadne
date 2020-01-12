@@ -77,6 +77,7 @@ struct EnclosureConfiguration {
 };
 
 
+//! \ingroup BasicSetSubModule
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
@@ -180,11 +181,11 @@ class Enclosure
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
     Void apply_finishing_parameter_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction omega);
 
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq h\f$.
     Void apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq\epsilon(s)\f$.
     Void apply_parameter_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
@@ -361,7 +362,7 @@ Enclosure product(const Enclosure& set, const ExactIntervalType& ivl);
 //! \related Enclosure \brief The Cartesian product of a constrained image set with a box.
 Enclosure product(const Enclosure& set, const ExactBoxType& bx);
 //! \related Enclosure \brief The Cartesian product of two constrained image sets.
-//! \precondition The time function of each set is constant with the same value.
+//! \pre The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.

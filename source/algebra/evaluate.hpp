@@ -40,6 +40,7 @@ class ReverseLexicographicKeyLess;
 //! \brief Evaluate a power series on an algebra using Horner's rule.
 template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
 
+//! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using Horner's rule.
 template<class X, class A> A horner_evaluate(const Expansion<DegreeType,X>& e, const A& y);
 

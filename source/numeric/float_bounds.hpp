@@ -217,12 +217,12 @@ template<class F> class Bounds
     friend Bounds<F> atan(Bounds<F> const& x) {
         return Bounds<F>(atan(down,x._l),atan(up,x._u)); }
 
-    //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; }
         else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; }
         else { return indeterminate; } }
-    //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()< x2.lower_raw()) { return true; }
         else if(x1.lower_raw()>=x2.upper_raw()) { return false; }

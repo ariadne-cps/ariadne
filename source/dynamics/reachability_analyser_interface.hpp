@@ -36,7 +36,7 @@ namespace Ariadne {
 
 template<class SPC> struct SafetyCertificate;
 
-//! \ingroup EvaluationModule
+//! \ingroup DynamicsModule
 //! \brief Interface for computing (chain) reachable sets of a dynamic system.
 //!
 //! \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink

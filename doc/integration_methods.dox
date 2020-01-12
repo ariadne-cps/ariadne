@@ -204,7 +204,7 @@ We have
 
 \section differential_inclusions Differential Inclusions
 
-A \emph{differential inclusion} is a dynamic system of the form
+A <em>differential inclusion</em> is a dynamic system of the form
 \f[ \der{x} \in F(t,x) \f]
 where \f$F:\R\times\R^n \rightrightarrows \R^n\f$.
 
@@ -215,7 +215,7 @@ We now describe the solution of differential inclusions using interval Taylor mo
 Consider the differential inclusion
 \f[ \der{x} = f(x,v); \quad v(t) \in V \f]
 where (for simplicity) \f$V\f$ is taken to be a compact box, \f$V=\prod_{i=1}^{m} V_i\f$.
-A \em solution is an almost-everywhere differentiable function $\xi:[0,\infty)\to\R^n$, such that for almost all \f$t\f$,
+A \em solution is an almost-everywhere differentiable function \f$\xi:[0,\infty)\to\R^n\f$, such that for almost all \f$t\f$,
 \f[ \der{\xi}(t) \in \overline{\mathrm{conv}}\bigl( f(\xi(t),V) \bigr) . \f]
 If \f$f(t,x,V)\f$ is everywhere convex, then we can find a measurable \f$\nu:[0,\infty)\to V\f$ such that
 \f[ \der{\xi}(t) = f(\xi(t),\nu(t)) \bigr) . \f]

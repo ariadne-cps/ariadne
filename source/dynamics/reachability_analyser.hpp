@@ -68,7 +68,7 @@ template<> struct SafetyCertificate<EuclideanSpace> {
     GridTreePaving safe_set;
 };
 
-//! \ingroup AnalysisModule
+//! \ingroup DynamicsModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 template<class SYS> class ReachabilityAnalyser
     : public ReachabilityAnalyserInterface<SYS>

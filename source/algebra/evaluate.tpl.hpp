@@ -42,6 +42,8 @@ namespace Ariadne {
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
+template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& x);
+
 template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
 {
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;

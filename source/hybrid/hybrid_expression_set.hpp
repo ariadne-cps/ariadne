@@ -55,7 +55,7 @@
 namespace Ariadne {
 
 
-//! \ingroup ExpressionSetSubModule
+//! \ingroup SymbolicModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a box in a single location.
 //! \details Does not assume a canonical order of the real variables.

@@ -213,13 +213,14 @@ template<class X> inline const X* SymmetricMatrix<X>::begin() const {
     return this->_ary.begin();
 }
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRow<const SymmetricMatrix<X>> SymmetricMatrix<X>::operator[](SizeType i) const {
     return MatrixRow<const SymmetricMatrix<X>>(*this,i);
 }
-
 template<class X> inline MatrixRow<SymmetricMatrix<X>> SymmetricMatrix<X>::operator[](SizeType i) {
     return MatrixRow<SymmetricMatrix<X>>(*this,i);
 }
+#endif
 
 template<class X> inline X SymmetricMatrix<X>::zero_element() const {
     return X();

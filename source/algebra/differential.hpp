@@ -492,7 +492,7 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a);
-    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a);
     OutputStream& _write(OutputStream& os) const;
 };
 

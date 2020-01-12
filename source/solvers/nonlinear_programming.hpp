@@ -53,7 +53,7 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
   public: NearBoundaryOfFeasibleDomainException() : std::runtime_error("NearBoundaryOfFeasibleDomainException") { }
 };
 
-//! \ingroup OptimisationModule EvaluationModule
+//! \ingroup OptimisationSubModule EvaluationModule
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
   public:
@@ -69,7 +69,7 @@ class OptimiserInterface {
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const = 0;
-    //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \fD\f$ is bounded with nonempty interior.
+    //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \f$D\f$ is bounded with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const = 0;
 
@@ -96,7 +96,7 @@ class OptimiserInterface {
                                               ExactVector y) const = 0;
 };
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Common routines for nonlinear minimisation
 class OptimiserBase
     : public OptimiserInterface
@@ -128,7 +128,7 @@ class OptimiserBase
                                               ExactVector lambda) const;
 };
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! \brief Solver for feasibility problems based on a penalty-function approach
 //!
 //! For the feasibility problem \f$x\in D,\ g(x)\in C,\ h(x)=0\f$ where \f$D\f$ is bounded and \f$D,C\f$ have nonempty interiors.
@@ -157,7 +157,7 @@ class PenaltyFunctionOptimiser
 
 
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! \brief Solver for linear programming problems using invalid interior point methods.
 //! \details Introduces variables \f$w\f$ and attempts to find \f$x\in D\f$ and \f$w\in C\f$ such that \f$g(x)=w\f$.
 //!   The dual variables \f$y\f$ are unconstrained Lagrange multipliers for \f$y\cdot(g(x)-w)=0\f$.
@@ -174,7 +174,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
     struct StepData;
 
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
-    //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
+    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
@@ -194,7 +194,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
 };
 
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
 class NonlinearInteriorPointOptimiser
     : public OptimiserBase
@@ -206,7 +206,7 @@ class NonlinearInteriorPointOptimiser
     using OptimiserBase::feasible;
 
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
-    //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
+    //! \pre The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
@@ -276,7 +276,7 @@ class ApproximateOptimiser
 };
 
 
-/*//! \ingroup OptimisationModule
+/*//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
 //! WARNING: This class currently does not work; maybe there is a problem with the algorithms.
 class KrawczykOptimiser

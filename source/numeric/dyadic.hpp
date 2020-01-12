@@ -209,6 +209,9 @@ template<> class Ball<Dyadic,Dyadic> {
     friend OutputStream& operator<<(OutputStream& os, DyadicBall y) { return os << "[" << y._v << ":" << y._e << "]"; }
 };
 
+using DyadicApproximation = Approximation<Dyadic>;
+
+template<> class Approximation<Dyadic>;
 
 inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
 inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }

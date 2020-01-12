@@ -394,7 +394,7 @@ template<class X, class R=X> class DeclareTranscendentalOperations
     friend X sin(X const& x);
     //! \brief The cosine of \a x.
     friend X cos(X const& x);
-    //! \brief The tangent of \a x, sin(\a x)/cos(\a x) \f$.
+    //! \brief The tangent of \a x, sin(\a x)/cos(\a x).
     friend X tan(X const& x);
 };
 

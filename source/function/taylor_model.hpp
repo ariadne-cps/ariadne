@@ -51,15 +51,27 @@ template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
 
+/*
+//@{
+//! \name Template shorthands and type synonyms for Taylor models
+template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< . \ingroup FunctionModelSubModule
+template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< . \ingroup FunctionModelSubModule
+using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< . \ingroup FunctionModelSubModule
+using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< . \ingroup FunctionModelSubModule
+using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< . \ingroup FunctionModelSubModule
+using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< . \ingroup FunctionModelSubModule
+//@}
+*/
+
 //@{
 //! \relates TaylorModel
-//! \name Type synonyms
-template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< .
-template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< .
-using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< .
-using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< .
-using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< .
-using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< .
+//! \name Template shorthands and type synonyms for Taylor models
+template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< Alias
+template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< Alias
+using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< Alias
+using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< Alias
+using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< Alias
+using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< Alias
 //@}
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
@@ -98,7 +110,9 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
     static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 
-
+//! \ingroup FunctionModels
+//! \brief A class representing polynomial approximation to a function on the unit box.
+template<class P, class F> class TaylorModel;
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
@@ -510,7 +524,7 @@ template<class F> template<class A> auto TaylorModel<ValidatedTag,F>::operator()
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F><IntervalDomainType>.
+ * See also Expansion, Polynomial, TaylorModel<ValidatedTag,F>.
  */
 template<class F>
 class TaylorModel<ApproximateTag,F>

@@ -195,7 +195,7 @@ class TestConstrainedImageSet
 
 
         // Regression test
-        EffectiveConstrainedImageSet quadratic_set(EffectiveBoxType(ExactIntervalVectorType({{-1.0,1.0},{-1.0,1.0}})));
+        EffectiveConstrainedImageSet quadratic_set(EffectiveBoxType({{-1.0,1.0},{-1.0,1.0}}));
         quadratic_set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
         ExactBoxType box{{0.750000,1.00000},{0.00000,0.250000}};
         ARIADNE_TEST_ASSERT(not definitely(set.separated(box).check(Effort::get_default())));

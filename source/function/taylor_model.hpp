@@ -50,12 +50,17 @@ namespace Ariadne {
 template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
-template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>;
-template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>;
-using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>;
-using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>;
-using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>;
-using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>;
+
+//@{
+//! \relates TaylorModel
+//! \name Type synonyms
+template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< .
+template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< .
+using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< .
+using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< .
+using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< .
+using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< .
+//@}
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
 

@@ -28,7 +28,7 @@ fy=EffectiveScalarMultivariateFunction.coordinate(2,1)
 
 def test_solvers():
     f=ValidatedVectorMultivariateFunction([fx+fy,fy])
-    b=ExactBox([{-1:+1},{-1:+1}])
+    b=ExactBoxType([{-1:+1},{-1:+1}])
 
     solver=IntervalNewtonSolver(1e-8,12)
     solver.solve(f,b)
@@ -37,7 +37,7 @@ def test_solvers():
     solver.solve(f,b)
 
 def test_integrators():
-    d=ExactBox([{-1:+1},{-1:+1}])
+    d=ExactBoxType([{-1:+1},{-1:+1}])
     h=Dyadic(exact(0.25))
 
     vf=EffectiveVectorMultivariateFunction([fo,fx])

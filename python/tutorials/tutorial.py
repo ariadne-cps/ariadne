@@ -163,7 +163,7 @@ print(evaluate(f,(FloatDPBoundsVector([4,3,0],dpr))))
 ###############################################################################
 
 # Create a box to act as the domain of a Taylor function
-d=ExactBox([{4:7},{1:6},{-1:+1}])
+d=ExactBoxType([{4:7},{1:6},{-1:+1}])
 print("d:",d)
 
 # Create a sweeper to control the accuracy of a Taylor function
@@ -172,11 +172,11 @@ swp=ThresholdSweeper(pr,1e-8)
 print("swp:",swp)
 
 # Create the scalar Taylor model representing the function x1 on the domain d
-t1=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,1,swp)
+t1=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,1,swp)
 print("t1:",t1,"\n")
 
 # Create all Taylor variables on the domain dom
-t=[ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,i,swp) for i in range(0,3)]
+t=[ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,i,swp) for i in range(0,3)]
 print("t[0]:",t[0])
 print("t[1]:",t[1])
 print("t[2]:",t[2])
@@ -190,11 +190,11 @@ print("tx:",tx,"\nty:",ty,"\ntz:",tz,"\n")
 
 # Make a shorthand for constructing Taylor expressions
 def t(d,j):
-    return ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,j,swp)
+    return ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,j,swp)
 
-#Create a ValidatedScalarMultivariateTaylorFunctionModel from a Polynomial
+#Create a ValidatedScalarMultivariateTaylorFunctionModelDP from a Polynomial
 p=EffectiveScalarMultivariateFunction.coordinate(3,0)
-tp=ValidatedScalarMultivariateTaylorFunctionModel(d,p,swp)
+tp=ValidatedScalarMultivariateTaylorFunctionModelDP(d,p,swp)
 print("p:",p,"\ntp: ",tp,"\n")
 
 # The domain D of tx.
@@ -210,7 +210,7 @@ tx.range()
 +tx; -tx; tx+ty; tx-ty; tx*ty; tx/ty;
 
 # Define some constants
-n=int(3); c=FloatDPValue(Dyadic(1.5),pr); b=FloatDPBounds(Dyadic(1.25),Dyadic(1.75),pr)
+n=int(3); c=FloatDPValue(Dyadic(exact(1.5)),pr); b=FloatDPBounds(Dyadic(exact(1.25)),Dyadic(exact(1.75)),pr)
 
 # Mixed arithmetic
 tx+c; tx-c; tx*c; tx/c;
@@ -225,8 +225,8 @@ tx+=c; tx-=c; tx*=c; tx/=c;
 tx+=b; tx-=b; tx*=b; tx/=b;
 
 # Reset tx,ty
-tx=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,0,swp);
-ty=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,1,swp);
+tx=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,0,swp);
+ty=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,1,swp);
 
 # Comparison functions
 min(tx,ty); max(tx,ty); abs(tx);
@@ -246,14 +246,14 @@ print()
 # Non-arithmetic functions
 
 # Restrict to a subdomain
-d1=ExactBox([{-1:1},{-1:1}])
-d2=ExactBox([{dy(-0.125):dy(0.125)},{dy(0.5):dy(0.75)}])
+d1=ExactBoxType([{-1:1},{-1:1}])
+d2=ExactBoxType([{dy(-0.125):dy(0.125)},{dy(0.5):dy(0.75)}])
 w=t(d1,0)*t(d1,1)
 rw=restrict(w,d2)
 print("restrict(w,d2):",rw)
 
 # Embed the domain of x in a space of higher dimension
-d=ExactBox([{-1:+1}])
+d=ExactBoxType([{-1:+1}])
     #ex=embed(x,d)
     #print("embed(x,d):",ex)
 
@@ -266,16 +266,16 @@ print("combine(tx,ty):",tg)
 print
 
 # Function composition
-d=ExactBox([{4:7},{1:6},{-1:1}])
-th=ValidatedVectorMultivariateTaylorFunctionModel.identity(d,swp)
+d=ExactBoxType([{4:7},{1:6},{-1:1}])
+th=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(d,swp)
 cd=th.codomain()
 
 ##f=VectorFunction.affine(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
 f=EffectiveVectorMultivariateFunction(2,3)
 g=EffectiveScalarMultivariateFunction.coordinate(3,0)
 
-tg=ValidatedScalarMultivariateTaylorFunctionModel(cd,g,swp)
-tf=ValidatedVectorMultivariateTaylorFunctionModel(cd,f,swp)
+tg=ValidatedScalarMultivariateTaylorFunctionModelDP(cd,g,swp)
+tf=ValidatedVectorMultivariateTaylorFunctionModelDP(cd,f,swp)
 
 # Compose an scalar multivariate function and a vector Taylor function
 compose(g,th)
@@ -301,24 +301,24 @@ print()
 # Solution of parameterised algebraic equations
 
 # Compute the solution h to the vector equation f(x,h(x))=0
-d=ExactBox([{-1:+1},{-1:+1},{-1:+1}])
+d=ExactBoxType([{-1:+1},{-1:+1},{-1:+1}])
 x=EffectiveScalarMultivariateFunction.coordinate(3,0)
 y0=EffectiveScalarMultivariateFunction.coordinate(3,1)
 y1=EffectiveScalarMultivariateFunction.coordinate(3,2)
 f=join(x+4*y0+y1,y0+y1)
 slv=IntervalNewtonSolver(1e-8,6)
 print("f:",f)
-h=slv.implicit(f,ExactBox([{-1:+1}]),ExactBox([{-1:+1},{-1:+1}]))
+h=slv.implicit(f,ExactBoxType([{-1:+1}]),ExactBoxType([{-1:+1},{-1:+1}]))
 print("implicit(f):",h)
 
 # Compute the solution h to the scalar equation g(x,h(x))=0
 # with f(x,y)=4+x-y^2, so y=sqrt(4+x)
-d=ExactBox([{-1:+1},{-1:+1}])
+d=ExactBoxType([{-1:+1},{-1:+1}])
 x=EffectiveScalarMultivariateFunction.coordinate(2,0)
 y=EffectiveScalarMultivariateFunction.coordinate(2,1)
 g=x-4*y+y*y
 print("g:",g)
-h=slv.implicit(g, ExactBox([{-1:+1}]),ExactInterval({-1:+1}))
+h=slv.implicit(g, ExactBoxType([{-1:+1}]),ExactIntervalType({-1:+1}))
 print("implicit(g):",h)
 print()
 
@@ -343,11 +343,11 @@ print("antiderivative(f,1):",if1)
 print()
 
 # Compute the flow of the Taylor function f starting in the domain D for time interval [-h,+h]
-b=ExactBox([{-4:4}])
-d=ExactBox([{-1:+1}])
+b=ExactBoxType([{-4:4}])
+d=ExactBoxType([{-1:+1}])
 h=1/two
 o=8 # Temporal order
-f=ValidatedVectorMultivariateTaylorFunctionModel.identity(b,swp)
+f=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(b,swp)
 f=ValidatedVectorMultivariateFunction.identity(1)
 integrator=GradedTaylorSeriesIntegrator(1e-8)
 
@@ -364,8 +364,8 @@ phi0h=partial_evaluate(phi,1,FloatDPBounds(h,pr))
 dd=phi0h.codomain()
 phi=integrator.flow(f,dd,h)[0]
 print("phi:",phi)
-tr=ValidatedScalarMultivariateTaylorFunctionModel.coordinate([{0:2*h}],0,swp)-h
-tr=ValidatedScalarMultivariateFunctionModel(tr)
+tr=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate([{0:2*h}],0,swp)-h
+tr=ValidatedScalarMultivariateFunctionModelDP(tr)
 phi1=compose(phi,combine(phi0h,tr))
 print("phi0:",phi0)
 print("phi1:",phi1)
@@ -388,14 +388,14 @@ print("refinement(x1,x2):",y)
 print()
 
 # Set up algebraic equation
-d1=ExactBox([{-1:1}])
-d2=ExactInterval(-1,1)
+d1=ExactBoxType([{-1:1}])
+d2=ExactIntervalType(-1,1)
 d=product(d1,d2)
-x=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,0,swp)
-y=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d,1,swp)
+x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,0,swp)
+y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d,1,swp)
 f=x-4*y+y*y
-i=ValidatedVectorMultivariateTaylorFunctionModel.identity(d1,swp)
-h=ValidatedScalarMultivariateTaylorFunctionModel.constant(d1,FloatDPBounds(-1,+1,pr),swp)
+i=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(d1,swp)
+h=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(d1,FloatDPBounds(-1,+1,pr),swp)
 
 # Newton contractor to solve f(x,h(x))=0 for scalar f
 df1 = derivative(f,1).range()
@@ -406,17 +406,17 @@ print()
 
 
 # Set up differential equation
-b=ExactBox([{-1:1},{-1:1}])
-o=ValidatedScalarMultivariateTaylorFunctionModel.constant(b,1,swp)
-x=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(b,0,swp)
-y=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(b,1,swp)
+b=ExactBoxType([{-1:1},{-1:1}])
+o=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(b,1,swp)
+x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(b,0,swp)
+y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(b,1,swp)
 f=join(o,x) # [dot(x),dot(y)]=[1,x]
-d=ExactBox([{0:dy(0.125)},{0:dy(0.125)}])
+d=ExactBoxType([{0:dy(0.125)},{0:dy(0.125)}])
 h=Dyadic(exact(0.5))
-d0=product(d,ExactInterval(-h,+h))
-x0=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d0,0,swp)
-y0=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d0,1,swp)
-t=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(d0,2,swp)
+d0=product(d,ExactIntervalType(-h,+h))
+x0=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d0,0,swp)
+y0=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d0,1,swp)
+t=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(d0,2,swp)
 phi=join(x0,y0)
 
 # Picard operator to solve dot(phi)(x,t) = f(phi(x,t))

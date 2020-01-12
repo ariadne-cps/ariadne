@@ -52,7 +52,7 @@ inline Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivar
 
 namespace {
 
-UpperIntervalType emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
+UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector& z) {
     UpperIntervalType r=make_interval(mul(x[0],z[0]));
     for(Nat i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
     return r;
@@ -287,7 +287,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(6,"new_domain="<<new_domain);
 
 
-    domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0));
+    domwdth = average_scaled_width(new_domain,RawFloatDPVector(new_domain.size(),1.0));
     bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
     if(definitely(bbox.disjoint(cell_box)) || definitely(codomain.disjoint(apply(g,new_domain)))) {
@@ -403,7 +403,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         char ch; std::cin >> ch;
         at=0;
         ay=midpoint(d);
-        ax=FloatApproximationVector(x.size(),one/x.size());
+        ax=FloatDPApproximationVector(x.size(),one/x.size());
     }
     ax = FloatDPApproximation(1-XSIGMA)*ax + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size());
 
@@ -508,9 +508,9 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     FloatDPValue t{pr};
     ExactPoint z(x.size());
 
-    FloatApproximationVector& ax=reinterpret_cast<FloatApproximationVector&>(x);
-    FloatApproximationVector& ay=reinterpret_cast<FloatApproximationVector&>(y);
-    FloatApproximationVector& az=reinterpret_cast<FloatApproximationVector&>(z);
+    FloatDPApproximationVector& ax=reinterpret_cast<FloatDPApproximationVector&>(x);
+    FloatDPApproximationVector& ay=reinterpret_cast<FloatDPApproximationVector&>(y);
+    FloatDPApproximationVector& az=reinterpret_cast<FloatDPApproximationVector&>(z);
     FloatDPApproximation& at=reinterpret_cast<FloatDPApproximation&>(t);
 
     if(r.superset(b)) {

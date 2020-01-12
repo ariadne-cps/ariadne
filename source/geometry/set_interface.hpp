@@ -261,6 +261,7 @@ class ValidatedBoundedSetInterface
     //! \brief Returns a bounding box for the set.
     virtual UpperBoxType bounding_box() const = 0;
 };
+
 //! \ingroup GeometryModule SetInterfaceSubModule
 //! \brief Interface for overt sets, for which intersection with an open box is verifiable.
 class ValidatedOvertSetInterface

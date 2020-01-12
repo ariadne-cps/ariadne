@@ -152,6 +152,7 @@ namespace Ariadne {
 \defgroup NumericModule Numeric Module
 \ingroup CoreModules
 \brief Numerical types, including \ref Integer, \ref Dyadic,  \ref Decimal, \ref Rational and \ref Real types,
+generic types \ref Number "Number<P>",
 double/multiple precision floating-point types \ref FloatDP and \ref FloatMP,
 and correctly-rounded types \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
 \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>".

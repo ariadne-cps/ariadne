@@ -73,7 +73,7 @@ class TestOptimiser
         ExactBoxType C=ExactBoxType{};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
         FloatDPValue required_accuracy(1e-8);
@@ -87,12 +87,12 @@ class TestOptimiser
         Real a(1.5); Real b(0.25);
         EffectiveVectorMultivariateFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
-        ExactIntervalVectorType C={{0.0,0.0}};
+        ExactBoxType C={{0.0,0.0}};
         ExactBoxType D=ExactBoxType{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         FloatDPValue required_accuracy(1e-7);
-        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
     }
@@ -110,7 +110,7 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
 
-        FloatBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
         ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
         FloatDPValue required_accuracy(1e-6);
@@ -130,7 +130,7 @@ class TestOptimiser
         ExactBoxType C = ExactBoxType {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
 
-        FloatBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
+        FloatDPBoundsVector x_optimal=optimiser->minimise(f,D,gh,C);
         FloatDPValue required_accuracy(1e-8);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
@@ -179,21 +179,21 @@ class TestOptimiser
     Void test_feasibility_check() {
         EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
         ARIADNE_TEST_CONSTRUCT( EffectiveVectorMultivariateFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
-        ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
-        ARIADNE_TEST_CONSTRUCT( ExactIntervalVectorType, C, ({{0.0,0.0}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactBoxType, C, ({{0.0,0.0}}) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X1, ({{0.30,0.40},{0.60,0.70}},pr) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X1, ({{0.30,0.40},{0.60,0.70}},pr) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X2, ({{0.30,0.40},{0.65,0.65}},pr) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X2, ({{0.30,0.40},{0.65,0.65}},pr) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
 
-        ARIADNE_TEST_CONSTRUCT( FloatBoundsVector, X3, ({{0.30,0.40},{0.65,0.68}},pr) );
+        ARIADNE_TEST_CONSTRUCT( FloatDPBoundsVector, X3, ({{0.30,0.40},{0.65,0.68}},pr) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({0.35,0.655},pr) );
+        ARIADNE_TEST_CONSTRUCT(FloatDPValueVector, x2, ({0.35,0.655},pr) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

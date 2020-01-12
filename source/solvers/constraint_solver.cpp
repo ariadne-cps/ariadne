@@ -381,8 +381,8 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
     C -= g(centre);
 
     UpperBoxType new_domain(domain);
-    UpperIntervalVectorType ranges(domain.size());
-    for(Nat j=0; j!=domain.size(); ++j) {
+    UpperBoxType ranges(domain.size());
+    for(Nat j=0; j!=domain.dimension(); ++j) {
         ranges[j] = dg[j]*(domain[j]-centre[j]);
     }
 

@@ -570,7 +570,7 @@ template<> class BoxSet<ExactIntervalType>
     using Box<ExactIntervalType>::Box;
     BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
-    virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
+    virtual ExactBoxSetType* clone() const { return new ExactBoxSetType(*this); }
     virtual DimensionType dimension() const final { return this->ExactBoxType::dimension(); }
     virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
     virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
@@ -594,7 +594,7 @@ template<> class BoxSet<ApproximateIntervalType>
     using Box<ApproximateIntervalType>::Box;
     BoxSet<ApproximateIntervalType>(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
-    virtual ApproximateBoxSet* clone() const { return new ApproximateBoxSet(*this); }
+    virtual ApproximateBoxSetType* clone() const { return new ApproximateBoxSetType(*this); }
     virtual DimensionType dimension() const final { return this->ApproximateBoxType::dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
     virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }

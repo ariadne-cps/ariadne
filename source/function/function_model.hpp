@@ -157,6 +157,12 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
     DomainType _domain;
 };
 
+
+//! \ingroup FunctionModule
+//! \ingroup FunctionModelSubModule
+//! \brief Generic functions on bounded domains.
+template<class P, class D, class C, class PR, class PRE> class FunctionModel;
+
 //! \ingroup FunctionModelSubModule
 //! \brief Generic scalar functions on bounded domains.
 template<class P, class D, class PR, class PRE> class FunctionModel<P,D,IntervalDomainType,PR,PRE>

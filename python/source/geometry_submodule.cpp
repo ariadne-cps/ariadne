@@ -300,18 +300,22 @@ template<class PT> PT point_from_python(pybind11::list pylst) {
     return PT(Vector<X>(ary));
 }
 
-template<class X> Void export_point(pybind11::module& module, std::string name)
+template<class PT> Void export_point(pybind11::module& module, std::string name)
 {
-    pybind11::class_<Point<X>, DrawableInterface> point_class(module,name.c_str());
-    point_class.def(pybind11::init(&point_from_python<Point<X>>));
-    point_class.def(pybind11::init<Point<X>>());
+    typedef typename PT::ValueType X;
+    pybind11::class_<PT, DrawableInterface> point_class(module,name.c_str());
+    point_class.def(pybind11::init(&point_from_python<PT>));
+    point_class.def(pybind11::init<PT>());
     point_class.def(pybind11::init<Nat>());
-    point_class.def("__getitem__", &__getitem__<Point<X>,Int,X>);
-    point_class.def("__str__", &__cstr__<Point<X>>);
+    point_class.def("__getitem__", &__getitem__<PT,Int,X>);
+    point_class.def("__str__", &__cstr__<PT>);
 }
 
 Void export_points(pybind11::module& module) {
-    export_point<FloatDPValue>(module,"ExactPoint");
+    export_point<RealPoint>(module,"RealPoint");
+    export_point<ExactPointType>(module,"ExactPointType");
+    export_point<ValidatedPointType>(module,"ValidatedPointType");
+    export_point<ApproximatePointType>(module,"ApproximatePointType");
 }
 
 template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
@@ -379,9 +383,9 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
 }
 
 Void export_intervals(pybind11::module& module) {
-    export_interval<ExactIntervalType>(module,"ExactInterval");
-    export_interval<UpperIntervalType>(module,"UpperInterval");
-    export_interval<ApproximateIntervalType>(module,"ApproximateInterval");
+    export_interval<ExactIntervalType>(module,"ExactIntervalType");
+    export_interval<UpperIntervalType>(module,"UpperIntervalType");
+    export_interval<ApproximateIntervalType>(module,"ApproximateIntervalType");
     export_interval<DyadicInterval>(module,"DyadicInterval");
     export_interval<RealInterval>(module,"RealInterval");
 
@@ -460,9 +464,9 @@ template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name
 Void export_boxes(pybind11::module& module) {
     export_box<RealBox>(module,"RealBox");
     export_box<DyadicBox>(module,"DyadicBox");
-    export_box<ExactBoxType>(module,"ExactBox");
-    export_box<UpperBoxType>(module,"UpperBox");
-    export_box<ApproximateBoxType>(module,"ApproximateBox");
+    export_box<ExactBoxType>(module,"ExactBoxType");
+    export_box<UpperBoxType>(module,"UpperBoxType");
+    export_box<ApproximateBoxType>(module,"ApproximateBoxType");
 
     pybind11::implicitly_convertible<ExactBoxType,UpperBoxType>();
     pybind11::implicitly_convertible<ExactBoxType,ApproximateBoxType>();

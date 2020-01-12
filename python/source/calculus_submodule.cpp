@@ -190,15 +190,7 @@ Void export_expansion(pybind11::module& module)
 //    from_python< Expansion<MultiIndex,FloatDPApproximation> >();
 //    from_python< Expansion<MultiIndex,FloatDPBounds> >();
 //    from_python< Vector< Expansion<MultiIndex,FloatDPApproximation> > >();
-
-    pybind11::class_< ExpansionValue<MultiIndex,FloatDPApproximation> > expansion_value_class(module,"ExpansionValue");
-    expansion_value_class.def(pybind11::init<MultiIndex,FloatDPApproximation>());
-    // TODO: Add get/set for coefficient
-    // TODO: Use property for index
-    //expansion_value_class.add_property("index", (MultiIndex const&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::index);
-    expansion_value_class.def("index", (const MultiIndex&(ExpansionValue<MultiIndex,FloatDPApproximation>::*)()const)&ExpansionValue<MultiIndex,FloatDPApproximation>::index);
-    expansion_value_class.def("__str__", &__cstr__<ExpansionValue<MultiIndex,FloatDPApproximation>>);
-
+//    from_python< Vector< Expansion<MultiIndex,FloatDPBounds> > >();
 }
 
 
@@ -315,7 +307,7 @@ Void export_approximate_taylor_model(pybind11::module& module)
 
 Void export_scalar_function_model(pybind11::module& module)
 {
-    pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModel");
+    pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModelDP");
     scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateFunctionModelDP>());
     scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateTaylorFunctionModelDP>());
     scalar_function_model_class.def("argument_size", &ValidatedScalarMultivariateFunctionModelDP::argument_size);
@@ -357,7 +349,7 @@ Void export_vector_function_model(pybind11::module& module)
     //using VectorMultivariateFunctionModelType = ValidatedVectorMultivariateFunctionModelDP;
     //using ScalarMultivariateFunctionModelType = ValidatedScalarMultivariateFunctionModelDP;
 
-    pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModel");
+    pybind11::class_<ValidatedVectorMultivariateFunctionModelDP> vector_function_model_class(module,"ValidatedVectorMultivariateFunctionModelDP");
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateFunctionModelDP>());
 //    vector_function_model_class.def(pybind11::init([](Array<ValidatedScalarMultivariateFunctionModelDP> ary){return ValidatedVectorMultivariateFunctionModelDP(Vector<ValidatedScalarMultivariateFunctionModelDP>(ary));}));
     vector_function_model_class.def(pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
@@ -422,7 +414,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     Tag<GenericNumericType> generic_number_tag;
     Tag<GenericFunctionType> generic_function_tag;
 
-    pybind11::class_<ValidatedScalarMultivariateTaylorFunctionModelDP> scalar_taylor_function_class(module,"ValidatedScalarMultivariateTaylorFunctionModel");
+    pybind11::class_<ValidatedScalarMultivariateTaylorFunctionModelDP> scalar_taylor_function_class(module,"ValidatedScalarMultivariateTaylorFunctionModelDP");
     scalar_taylor_function_class.def(pybind11::init<ValidatedScalarMultivariateTaylorFunctionModelDP>());
     scalar_taylor_function_class.def(pybind11::init<ExactBoxType,ValidatedTaylorModelDP>());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType,SweeperDP >());
@@ -510,7 +502,7 @@ Void export_vector_taylor_function(pybind11::module& module)
     Tag<ValidatedScalarMultivariateFunctionModelDP> scalar_taylor_function_tag;
     Tag<Vector<NumericType>> number_vector_tag;
 
-    pybind11::class_<ValidatedVectorMultivariateTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorMultivariateTaylorFunctionModel");
+    pybind11::class_<ValidatedVectorMultivariateTaylorFunctionModelDP> vector_taylor_function_class(module,"ValidatedVectorMultivariateTaylorFunctionModelDP");
     vector_taylor_function_class.def( pybind11::init<ValidatedVectorMultivariateTaylorFunctionModelDP>());
 //    vector_taylor_function_class.def( pybind11::init<Vector<ValidatedScalarMultivariateTaylorFunctionModelDP>>());
     vector_taylor_function_class.def( pybind11::init([](Array<ValidatedScalarMultivariateTaylorFunctionModelDP> ary){return ValidatedVectorMultivariateTaylorFunctionModelDP(Vector<ValidatedScalarMultivariateTaylorFunctionModelDP>(ary));}));

@@ -138,7 +138,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridAppro
             guards=guard_functions(system,location);
             t._discrete_time+=1;
         } else {
-            FloatApproximationVector k1,k2,k3,k4;
+            FloatDPApproximationVector k1,k2,k3,k4;
             ApproximatePoint pt1,pt2,pt3,pt4;
 
             ApproximatePoint const& pt=point;

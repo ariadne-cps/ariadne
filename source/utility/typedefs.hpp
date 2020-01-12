@@ -36,25 +36,46 @@
 #include <type_traits>
 #include <memory>
 
-typedef unsigned char uchar;
-typedef unsigned int uint;
-
 namespace Ariadne {
 
+
+
+typedef unsigned char uchar;typedef unsigned int uint;
+
+//! \brief Internal name for standard output stream.
 using OutputStream = std::ostream;
+//! \brief Internal name for standard input stream.
 using InputStream = std::istream;
+//! Internal name for standard string stream.
 using StringStream = std::stringstream;
 
-class String; // Define as a class for consistency with other value types
-using StringType = std::string;
-
+//! Internal name for void type.
 using Void = void;
-using Char = char;
-using Byte = std::int8_t;
+//! Internal name for builtin boolean type.
 using Bool = bool;
+//! Internal name for builtin char type.
+using Char = char;
+//! Internal name for builtin byte type (8 bits).
+using Byte = std::int8_t;
+//! Internal name for builtin unsigned integers.
 using Nat = uint;
+//! Internal name for builtin integers.
 using Int = int;
+//! Internal name for builtin double-precision floats.
 using Dbl = double;
+
+
+//! Internal name for builtin double-precision floats.
+using StringType = std::string;
+//! A thin wrapper around a std::string.
+class String;
+
+
+//! Internal name for standard size type, used for sizes of containers.
+using SizeType = std::size_t;
+//! Internal name for standard difference type of container indices and pointers.
+using PointerDifferenceType = std::ptrdiff_t;
+
 using Nat32Type = std::uint32_t;
 using Int32Type = std::int32_t;
 using Nat64Type = std::uint64_t;
@@ -62,22 +83,34 @@ using Int64Type = std::int64_t;
 
 using std::declval;
 
-using SizeType = std::size_t;
-using PointerDifferenceType = std::ptrdiff_t;
-using DegreeType = std::uint16_t;
-
+//! Internal alias for standard shared pointer.
 template<class T> using SharedPointer = std::shared_ptr<T>;
+//! Internal alias for standard initializer list.
 template<class T> using InitializerList = std::initializer_list<T>;
+//! Internal alias for standard pair.
 template<class T1, class T2> using Pair = std::pair<T1,T2>;
+//! Internal alias for standard tuple.
 template<class... TS> using Tuple = std::tuple<TS...>;
 
+//! A class wrapper for C-style arrays.
 template<class T> class Array;
+//! A thin wrapper around a std::vector.
 template<class T> class List;
+//! A thin wrapper around a std::set.
 template<class T> class Set;
+//! A thin wrapper around a std::map.
 template<class K, class T> class Map;
 
+//! A tag for the size of a scalar object.
 struct SizeOne { operator SizeType() const { return 1u; } };
+//! A tag for an index into a scalar object.
 struct IndexZero { operator SizeType() const { return 0u; } };
+
+//! The type used for the degree of an index.
+using DegreeType = std::uint16_t;
+//! The type used for the dimension of a geometric object.
+typedef SizeType DimensionType;
+
 
 
 } // namespace Ariadne

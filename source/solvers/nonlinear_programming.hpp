@@ -75,10 +75,10 @@ class OptimiserInterface {
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                       FloatApproximationVector x, FloatDPApproximation eps) const = 0;
+                                       FloatDPApproximationVector x, FloatDPApproximation eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                   ExactFloatVector x) const = 0;
+                                   FloatDPValueVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                                       ExactVector x) const = 0;
@@ -90,7 +90,7 @@ class OptimiserInterface {
                                       ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
     virtual ValidatedKleenean contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                            FloatBoundsVector X) const = 0;
+                                            FloatDPBoundsVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                                               ExactVector y) const = 0;
@@ -147,11 +147,11 @@ class PenaltyFunctionOptimiser
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                  FloatApproximationVector& x, FloatApproximationVector& w, FloatDPApproximation& mu) const;
+                                  FloatDPApproximationVector& x, FloatDPApproximationVector& w, FloatDPApproximation& mu) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                                  FloatBoundsVector& x, FloatBoundsVector& w) const;
+                                  FloatDPBoundsVector& x, FloatDPBoundsVector& w) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                  FloatApproximationVector& x, FloatApproximationVector& y, FloatApproximationVector& z) const;
+                                  FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z) const;
 };
 
 
@@ -182,7 +182,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
+    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                                                                 const PrimalDualData& wxy0) const;
 
     Void setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
@@ -190,7 +190,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
     Void step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
               StepData& stp) const;
 //    FloatDPApproximation compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-//                     FloatApproximationVector& w, FloatApproximationVector& x, FloatApproximationVector& y) const;
+//                     FloatDPApproximationVector& w, FloatDPApproximationVector& x, FloatDPApproximationVector& y) const;
 };
 
 
@@ -214,43 +214,43 @@ class NonlinearInteriorPointOptimiser
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
-    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                                  const FloatApproximationVector& x0, const FloatApproximationVector& lambda0, const FloatDPApproximation& violation0) const;
+    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
+                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& lambda0, const FloatDPApproximation& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
-    Pair<ValidatedKleenean,FloatApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                                  const FloatApproximationVector& x0, const FloatApproximationVector& lambda0) const;
+    Pair<ValidatedKleenean,FloatDPApproximationVector> feasible_hotstarted(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
+                                                  const FloatDPApproximationVector& x0, const FloatDPApproximationVector& lambda0) const;
 
     Void minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C, const ApproximateVectorMultivariateFunction& h,
-                           FloatApproximationVector& x, FloatApproximationVector& w, FloatApproximationVector& kappa, FloatApproximationVector& lambda, const FloatDPApproximation& mu) const;
+                           FloatDPApproximationVector& x, FloatDPApproximationVector& w, FloatDPApproximationVector& kappa, FloatDPApproximationVector& lambda, const FloatDPApproximation& mu) const;
     Void setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                           FloatApproximationVector& x, FloatApproximationVector& lambda) const;
+                           FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const;
     Void setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                           FloatApproximationVector& x, FloatApproximationVector& lambda, FloatDPApproximation& t) const;
+                           FloatDPApproximationVector& x, FloatDPApproximationVector& lambda, FloatDPApproximation& t) const;
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatApproximationVector& x, FloatApproximationVector& lambda) const;
+                          FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const;
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatApproximationVector& x, FloatApproximationVector& lambda, FloatDPApproximation& violation) const;
+                          FloatDPApproximationVector& x, FloatDPApproximationVector& lambda, FloatDPApproximation& violation) const;
     Void initialise_lagrange_multipliers(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                         const FloatApproximationVector& x, FloatApproximationVector& lambda) const;
+                                         const FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const;
     FloatDPApproximation compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                     const FloatApproximationVector& x, const FloatApproximationVector& lambda) const;
+                     const FloatDPApproximationVector& x, const FloatDPApproximationVector& lambda) const;
 
   public: // Deprecated
     Void compute_tz(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatApproximationVector& x, FloatDPApproximation& t, FloatApproximationVector& z) const { }
+                          FloatDPApproximationVector& x, FloatDPApproximation& t, FloatDPApproximationVector& z) const { }
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatApproximationVector& x, FloatApproximationVector& y, FloatApproximationVector& z, FloatDPApproximation& violation) const { };
+                          FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& violation) const { };
     Void linearised_feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                     FloatDPApproximation& slack, FloatApproximationVector& x, FloatApproximationVector& lambda) const { };
+                                     FloatDPApproximation& slack, FloatDPApproximationVector& x, FloatDPApproximationVector& lambda) const { };
     Void linearised_feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                                     FloatApproximationVector& x, FloatApproximationVector& y, FloatApproximationVector& z, FloatDPApproximation& t) const { };
+                                     FloatDPApproximationVector& x, FloatDPApproximationVector& y, FloatDPApproximationVector& z, FloatDPApproximation& t) const { };
   private:
     FloatDPApproximation compute_mu(const ApproximateScalarMultivariateFunction& f, const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                     const FloatApproximationVector& x, const FloatApproximationVector& y) const;
+                     const FloatDPApproximationVector& x, const FloatDPApproximationVector& y) const;
     Void compute_violation(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,
-                           FloatApproximationVector& x, FloatDPApproximation& t) const;
+                           FloatDPApproximationVector& x, FloatDPApproximation& t) const;
 };
 
 
@@ -261,8 +261,8 @@ class IntervalOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
-    Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorMultivariateFunction& h,
-                          FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& zl, FloatBoundsVector zu, FloatDPBounds& mu) const;
+    Void feasibility_step(const FloatDPValueVector& xl, const FloatDPValueVector& xu, const ValidatedVectorMultivariateFunction& h,
+                          FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& zl, FloatDPBoundsVector zu, FloatDPBounds& mu) const;
 };
 
 
@@ -272,7 +272,7 @@ class ApproximateOptimiser
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
     virtual ValidatedKleenean feasible_zero(ExactBoxType D, ValidatedVectorMultivariateFunction h) const;
     Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& h,
-                          FloatApproximationVector& X, FloatApproximationVector& Lambda) const;
+                          FloatDPApproximationVector& X, FloatDPApproximationVector& Lambda) const;
 };
 
 
@@ -295,29 +295,29 @@ class KrawczykOptimiser
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
     ValidatedKleenean minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                     const FloatDPBounds& t0, const FloatBoundsVector& x0, const FloatBoundsVector& y0, const FloatBoundsVector& z0) const;
+                     const FloatDPBounds& t0, const FloatDPBoundsVector& x0, const FloatDPBoundsVector& y0, const FloatDPBoundsVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     Void minimisation_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                           FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& z, FloatDPBounds& t) const;
+                           FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& z, FloatDPBounds& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     Void feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& z, FloatDPBounds& t) const;
+                          FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& z, FloatDPBounds& t) const;
 
     //! \brief A primal feasibility step for the problem \f$g(y)\in C;\ y\in D\f$. \deprecated
     Void feasibility_step(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                          FloatBoundsVector& y, FloatDPBounds& t) const;
+                          FloatDPBoundsVector& y, FloatDPBounds& t) const;
     //! \brief A feasibility step for the problem \f$g(y)\leq 0\f$. \deprecated
     Void feasibility_step(const ValidatedVectorMultivariateFunction& g,
-                          FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& z, FloatDPBounds& t) const;
+                          FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& z, FloatDPBounds& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
     Void minimisation_step(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g,
-                           FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& z) const;
+                           FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& z) const;
   protected:
     Void setup_feasibility(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C,
-                           FloatBoundsVector& x, FloatBoundsVector& y, FloatBoundsVector& z, FloatDPBounds& t) const;
+                           FloatDPBoundsVector& x, FloatDPBoundsVector& y, FloatDPBoundsVector& z, FloatDPBounds& t) const;
     protected:
-    Void compute_tz(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C, const FloatBoundsVector& y, FloatDPBounds& t, FloatBoundsVector& z) const;
+    Void compute_tz(const ExactBoxType& D, const ValidatedVectorMultivariateFunction& g, const ExactBoxType& C, const FloatDPBoundsVector& y, FloatDPBounds& t, FloatDPBoundsVector& z) const;
 };
 
 */

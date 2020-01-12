@@ -29,14 +29,14 @@ def test_calculus():
     cy=ValidatedNumber(2)
     cx=FloatDPBounds(2,dp)
 
-    bx=ExactBox([{Dyadic(1):3},{-1:2},{-3:3}])
+    bx=ExactBoxType([{Dyadic(1):3},{-1:2},{-3:3}])
 
     swp = ThresholdSweeper(dp,1e-8);
 
-    tc=ValidatedScalarMultivariateTaylorFunctionModel.constant(bx,cast_exact(1.5),swp)
-    tx=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,0,swp)
-    ty=ValidatedScalarMultivariateTaylorFunctionModel.coordinate(bx,1,swp)
-    tid=ValidatedVectorMultivariateTaylorFunctionModel.identity(bx,swp)
+    tc=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(bx,cast_exact(1.5),swp)
+    tx=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bx,0,swp)
+    ty=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(bx,1,swp)
+    tid=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(bx,swp)
     ty=tid[1]
 
     tf=5+2*tx+ty
@@ -51,9 +51,9 @@ def test_calculus():
     derivative(tf,0)
     antiderivative(tf,0)
 
-    vtf=ValidatedVectorMultivariateTaylorFunctionModel([tx,tc,ty])
+    vtf=ValidatedVectorMultivariateTaylorFunctionModelDP([tx,tc,ty])
     vtf=tid
-    stf=ValidatedScalarMultivariateTaylorFunctionModel(tf)
+    stf=ValidatedScalarMultivariateTaylorFunctionModelDP(tf)
     compose(vtf,vtf)
     compose(stf,vtf)
 

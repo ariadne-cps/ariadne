@@ -58,6 +58,9 @@ class SolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
+//! \relates HybridEnclosure .
+using HybridOrbit = Orbit<HybridEnclosure>;
+
 //! \ingroup FunctionModule
 //! \brief A class representing the flow \f$\phi(x,t)\f$ of a differential equation \f$\frac{dx}{dt}=f(x)\f$.
 class FlowFunctionModel

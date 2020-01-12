@@ -137,17 +137,6 @@ constexpr ParadigmCode null(ParadigmCode p) {
 template<ParadigmCode CODE> struct InformationLevel { static constexpr ParadigmCode code() { return CODE; } };
 
 //! \ingroup ParadigmSubModule
-//! \brief The <em>computational paradigm</em> supported by the object.
-//! User paradigms are ExactTag, EffectiveTag, ValidatedTag,ValidatedBoundedTag, ValidatedUpperTag, ValidatedLowerTag or ApproximateTag.
-//! Internal paradigms are BuiltinTag and RawTag.
-template<class T> using Paradigm = typename T::Paradigm;
-
-//! \ingroup ParadigmSubModule
-//! \brief The <em>computational paradigm</em> supported by the object. Equivalent to Paradigm<T>.
-template<class T> using ParadigmTag = typename T::Paradigm;
-
-
-//! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object is of a builtin type. Such objects should be converted to %Ariadne internal types before use.
 struct BuiltinTag : InformationLevel<ParadigmCode::RAW>  { };
 
@@ -246,13 +235,65 @@ template<bool b> using BooleanConstant = std::integral_constant<bool,b>;
 //! \ingroup ParadigmSubModule
 //! \brief Inherits from \c TrueType if \a P is a paradigm tag class.
 template<class P> struct IsParadigm : IsSame<decltype(P::code()),ParadigmCode> { };
+//! \ingroup ParadigmSubModule
 //! \brief Inherits from \c TrueType if paradigm \a P1 is weaker than \a P2.
 template<class P1, class P2> struct IsWeaker : BooleanConstant<is_weaker(P1::code(),P2::code())> { };
-
+//! \ingroup ParadigmSubModule
 //! \brief Inherits from \c TrueType if paradigm \a P1 is stronger than \a P2.
 template<class P1, class P2> struct IsStronger : IsWeaker<P2,P1> { };
 
+template<class P1, class P2=P1> struct ParadigmTraits;
+
+//@{
+//! \ingroup ParadigmSubModule
+//! \name Information traits
+
+#ifdef DOXYGEN
+//! \brief Traits class describing information levels
+//!   \param P May be ExactTag, EffectiveTag, ValidatedTag, ApproximateTag etc.
+//! \ingroup ParadigmSubModule
 template<class P1, class P2=P1> struct ParadigmTraits {
+  public:
+    typedef typename Weaker; //!< The strongest paradigm (most information) which is weaker than (can be converted from) both \a P1 and \a P2.
+    typedef typename Stronger; //!< The weakest paradigm (least information) which stronger than (can be converted to) both \a P1 and \a P2.
+};
+//! \brief Traits class describing information levels
+//! \ingroup ParadigmSubModule
+template<class P> struct ParadigmTraits<P,P> {
+  public:
+    typedef P Weaker; //!< The weaker of \a P and itself is \a P.
+    typedef P Stronger; //!< The stronger of \a P and itself is \a P.
+    typedef typename NextWeaker; //!< The paradigm (information level) directly below (weaker) in the information hierarchy to \a P.
+};
+#endif
+
+//! \brief The <em>computational paradigm</em> supported by the object.
+//! User paradigms are ExactTag, EffectiveTag, ValidatedTag,ValidatedBoundedTag, ValidatedUpperTag, ValidatedLowerTag or ApproximateTag.
+//! Internal paradigms are BuiltinTag and RawTag.
+//! \ingroup ParadigmSubModule
+template<class T> using Paradigm = typename T::Paradigm;
+
+//! \brief The <em>computational paradigm</em> supported by the object. Equivalent to Paradigm<T>.
+//! \ingroup ParadigmSubModule
+template<class T> using ParadigmTag = typename T::Paradigm;
+
+//! \brief The strongest paradigm (most information) which is weaker than (can be converted from) both \a P1 and \a P2.
+//! \ingroup ParadigmSubModule
+template<class P1, class P2> using Weaker = typename ParadigmTraits<P1,P2>::Weaker;
+
+//! \brief The weakest paradigm (least information) which stronger than (can be converted to) both \a P1 and \a P2.
+//! \ingroup ParadigmSubModule
+template<class P1, class P2> using Stronger = typename ParadigmTraits<P1,P2>::Stronger;
+//! \brief The strongest paradigm which is strictly weaker than \a P. e.g. If \a P is \c ValidatedTag, is defined as \c ApproximateTag.
+//! \ingroup ParadigmSubModule
+template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
+//! \brief Synonym for NextWeaker.
+//! \ingroup ParadigmSubModule
+template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
+//@}
+
+
+template<class P1, class P2> struct ParadigmTraits {
     using Weaker = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
     using Stronger = typename InformationTraits<P1::code()&P2::code()>::Paradigm;
 };
@@ -302,16 +343,7 @@ template<> struct ParadigmTraits<ApproximateTag,ApproximateTag> {
     using NextWeaker = Void;
 };
 
-//! \ingroup ParadigmSubModule
-//! \brief The strongest paradigm which is weaker than both paradigms \a P1 and \a P2.
-template<class P1, class P2> using Weaker = typename ParadigmTraits<P1,P2>::Weaker;
-//! \ingroup ParadigmSubModule
-//! \brief The weakest paradigm which is stronger than both paradigms \a P1 and \a P2.
-template<class P1, class P2> using Stronger = typename ParadigmTraits<P1,P2>::Stronger;
-//! \ingroup ParadigmSubModule
-//! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c ValidatedBoundedTag, is defined as \c ApproximateTag.
-template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
-template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
+
 
 
 template<class P> using Opposite = ParadigmClass<opposite(P::code())>;

@@ -37,11 +37,25 @@
 namespace Ariadne {
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-typedef Point<EffectiveNumericType> EffectivePoint;
-typedef Point<ValidatedNumericType> ValidatedPoint;
-typedef Point<ApproximateNumericType> ApproximatePoint;
-typedef Point<Real> RealPoint;
+
+//@{
+//! \relates Point
+//! \name Type synonyms
+using DyadicPoint = Point<Dyadic>; //!< .
+using RationalPoint = Point<Rational>; //!< .
+using RealPoint = Point<Real>; //!< .
+//@}
+
+//@{
+//! \relates Point
+//! \name Standard type names (deprecated)
+typedef Point<ExactNumericType> ExactPointType; //!< .
+typedef Point<EffectiveNumericType> EffectivePointType; //!< .
+typedef Point<ValidatedNumericType> ValidatedPointType; //!< .
+typedef Point<UpperNumericType> UpperPointType; //!< .
+typedef Point<LowerNumericType> LowerPointType; //!< .
+typedef Point<ApproximateNumericType> ApproximatePointType; //!< .
+//@}
 
 //! A point in Euclidean space.
 template<class X>
@@ -83,7 +97,7 @@ class Point
 
 template<class X> Point(Vector<X>) -> Point<X>;
 
-ExactPoint make_point(const StringType&);
+ExactPointType make_point(const StringType&);
 
 } // namespace Ariadne
 

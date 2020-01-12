@@ -126,9 +126,10 @@ template<> template<class XL, class XU> inline VariableInterval<XU> Variable<Rea
     return VariableInterval<XU>(l,*this,u);
 }
 
-template<class UB> struct VariableLowerInterval {
+template<class UB> class VariableLowerInterval {
     typedef NegationType<UB> LB;
     RealVariable _variable; LB _lower;
+  public:
     template<class U,EnableIf<IsConstructible<UB,U>> =dummy> VariableLowerInterval(VariableLowerInterval<U> const& lv)
         : VariableLowerInterval<UB>(UB(lv.lower()),lv.variable()) { }
     VariableLowerInterval(const LB& l, const RealVariable& v) : _variable(v),  _lower(l) { }
@@ -141,9 +142,10 @@ template<class UB> struct VariableLowerInterval {
         return os << elivl._lower << "<=" << elivl._variable; }
 };
 
-template<class UB> struct VariableUpperInterval {
+template<class UB> class VariableUpperInterval {
     typedef NegationType<UB> LB;
     RealVariable _variable; UB _upper;
+  public:
     VariableUpperInterval<UB>(const RealVariable& v, const UB& u) : _variable(v), _upper(u)  { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(-infinity,_variable,_upper); }
     const RealVariable& variable() const { return _variable; }

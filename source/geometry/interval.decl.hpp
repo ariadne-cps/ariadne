@@ -32,45 +32,66 @@ namespace Ariadne {
 
 template<class U> class Interval;
 template<class U> class VariableInterval;
-typedef Interval<Dyadic> DyadicInterval;
-typedef Interval<Rational> RationalInterval;
-typedef Interval<Real> RealInterval;
 
-template<class F> using ExactInterval = Interval<Value<F>>;
-template<class F> using BallInterval = Interval<Ball<F>> ;
-template<class F> using BoundsInterval = Interval<Bounds<F>>;
-template<class F> using UpperInterval = Interval<UpperBound<F>>;
-template<class F> using LowerInterval = Interval<LowerBound<F>>;
-template<class F> using ApproximateInterval = Interval<Approximation<F>>;
+//@{
+//! \relates Interval
+//! \name Type shorthands
+template<class F> using ExactInterval = Interval<Value<F>>; //!< .
+template<class F> using BallInterval = Interval<Ball<F>>; //!< .
+template<class F> using BoundsInterval = Interval<Bounds<F>>; //!< .
+template<class F> using UpperInterval = Interval<UpperBound<F>>; //!< .
+template<class F> using LowerInterval = Interval<LowerBound<F>>; //!< .
+template<class F> using ApproximateInterval = Interval<Approximation<F>>; //!< .
 
-template<class PR> using FloatExactInterval = Interval<FloatValue<PR>>;
-template<class PR> using FloatBallInterval = Interval<FloatBall<PR>> ;
-template<class PR> using FloatBoundsInterval = Interval<FloatBounds<PR>>;
-template<class PR> using FloatUpperInterval = Interval<FloatUpperBound<PR>>;
-template<class PR> using FloatLowerInterval = Interval<FloatLowerBound<PR>>;
-template<class PR> using FloatApproximateInterval = Interval<FloatApproximation<PR>>;
+template<class PR> using FloatExactInterval = Interval<FloatValue<PR>>; //!< .
+template<class PR> using FloatBallInterval = Interval<FloatBall<PR>>; //!< .
+template<class PR> using FloatBoundsInterval = Interval<FloatBounds<PR>>; //!< .
+template<class PR> using FloatUpperInterval = Interval<FloatUpperBound<PR>>; //!< .
+template<class PR> using FloatLowerInterval = Interval<FloatLowerBound<PR>>; //!< .
+template<class PR> using FloatApproximateInterval = Interval<FloatApproximation<PR>>; //!< .
+//@}
 
-using FloatDPExactInterval = FloatExactInterval<DoublePrecision>;
-using FloatDPBallInterval = FloatBallInterval<DoublePrecision> ;
-using FloatDPBoundsInterval = FloatBoundsInterval<DoublePrecision>;
-using FloatDPUpperInterval = FloatUpperInterval<DoublePrecision>;
-using FloatDPLowerInterval = FloatLowerInterval<DoublePrecision>;
-using FloatDPApproximateInterval = FloatApproximateInterval<DoublePrecision>;
+//@{
+//! \relates Interval
+//! \name Type synonyms
+using DyadicInterval = Interval<Dyadic>; //!< .
+using RationalInterval = Interval<Rational>; //!< .
+using RealInterval = Interval<Real>; //!< .
 
-using FloatMPExactInterval = FloatExactInterval<MultiplePrecision>;
-using FloatMPBallInterval = FloatBallInterval<MultiplePrecision> ;
-using FloatMPBoundsInterval = FloatBoundsInterval<MultiplePrecision>;
-using FloatMPUpperInterval = FloatUpperInterval<MultiplePrecision>;
-using FloatMPLowerInterval = FloatLowerInterval<MultiplePrecision>;
-using FloatMPApproximateInterval = FloatApproximateInterval<MultiplePrecision>;
+using FloatDPExactInterval = FloatExactInterval<DoublePrecision>; //!< .
+using FloatDPBallInterval = FloatBallInterval<DoublePrecision>; //!< .
+using FloatDPBoundsInterval = FloatBoundsInterval<DoublePrecision>; //!< .
+using FloatDPUpperInterval = FloatUpperInterval<DoublePrecision>; //!< .
+using FloatDPLowerInterval = FloatLowerInterval<DoublePrecision>; //!< .
+using FloatDPApproximateInterval = FloatApproximateInterval<DoublePrecision>; //!< .
+
+using FloatMPExactInterval = FloatExactInterval<MultiplePrecision>; //!< .
+using FloatMPBallInterval = FloatBallInterval<MultiplePrecision>; //!< .
+using FloatMPBoundsInterval = FloatBoundsInterval<MultiplePrecision>; //!< .
+using FloatMPUpperInterval = FloatUpperInterval<MultiplePrecision>; //!< .
+using FloatMPLowerInterval = FloatLowerInterval<MultiplePrecision>; //!< .
+using FloatMPApproximateInterval = FloatApproximateInterval<MultiplePrecision>; //!< .
+//@}
+
+//@{
+//! \relates Interval
+//! \name Standard type names (deprecated)
+typedef Interval<ExactNumericType> ExactIntervalType; //!< .
+typedef Interval<EffectiveNumericType> EffectiveIntervalType; //!< .
+typedef Interval<ValidatedNumericType> ValidatedIntervalType; //!< .
+typedef Interval<UpperNumericType> UpperIntervalType; //!< .
+typedef Interval<LowerNumericType> LowerIntervalType; //!< .
+typedef Interval<ApproximateNumericType> ApproximateIntervalType; //!< .
+//@}
 
 
-typedef Interval<ExactNumericType> ExactIntervalType;
-typedef Interval<EffectiveNumericType> EffectiveIntervalType;
-typedef Interval<ValidatedNumericType> ValidatedIntervalType;
-typedef Interval<UpperNumericType> UpperIntervalType;
-typedef Interval<LowerNumericType> LowerIntervalType;
-typedef Interval<ApproximateNumericType> ApproximateIntervalType;
+//@{
+//! \ingroup GeometryModule
+//! \name Type definitions
+typedef FloatDPExactInterval IntervalDomainType; //!< \ingroup GeometryModule .
+typedef FloatDPUpperInterval IntervalValidatedRangeType; //!< \ingroup GeometryModule .
+typedef FloatDPApproximateInterval IntervalApproximateRangeType; //!< \ingroup GeometryModule .
+//@}
 
 
 } // namespace Ariadne

@@ -42,7 +42,8 @@
 #include "../algebra/expansion.hpp"
 #include "../algebra/operations.hpp"
 
-#include "../algebra/univariate_differential.hpp"
+#include "differential.decl.hpp"
+#include "univariate_differential.hpp"
 
 namespace Ariadne {
 
@@ -54,11 +55,6 @@ template<class I, class X> class Expansion;
 template<class X> class Differential;
 template<class X> class UnivariateDifferential;
 template<class X> class NonAssignableDifferential;
-
-typedef Differential<FloatDP> FloatDifferential;
-typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
-typedef Differential<FloatDPBounds> FloatBoundsDifferential;
-typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 template<class X> class DifferentialFactory {
     typedef PrecisionType<X> PR;

@@ -57,38 +57,41 @@ typedef Set<Variable<Real>> RealVariableSet;
 
 //! \ingroup SymbolicModule
 //! \brief An assignment statement of the form \f$v:=e\f$.
-//!   \tparam LHS The variable to be assigned to (left-hand-side). May be an extended variable (e.g. <code>dot(v)</code>)
-//!   \tparam RHS The expression to be assigned (right-hand-side).
+//!   \tparam V The variable to be assigned to (left-hand-side). May be an extended variable (e.g. <code>dot(v)</code>)
+//!   \tparam E The expression to be assigned (right-hand-side).
 //! \see Variable, Expression
-template<class LHS, class RHS>
+template<class V, class E>
 class Assignment
 {
   public:
+    typedef V VariableType;
+    typedef E ExpressionType;
+
     //! \brief Construct the assignment \c v=e.
-    Assignment(const LHS& v, const RHS& e) : lhs(v), rhs(e) { }
+    Assignment(const V& v, const E& e) : lhs(v), rhs(e) { }
     //! \brief The variable on the left-hand side.
-    const LHS& variable() const { return this->lhs; }
+    const V& variable() const { return this->lhs; }
     //! \brief The expression on the right-hand side.
-    const RHS& expression() const { return this->rhs; }
-    const LHS& left_hand_side() const { return this->lhs; }
-    const RHS& right_hand_side() const { return this->rhs; }
-    LHS lhs; RHS rhs;
+    const E& expression() const { return this->rhs; }
+    const V& left_hand_side() const { return this->lhs; }
+    const E& right_hand_side() const { return this->rhs; }
+    V lhs; E rhs;
 };
-template<class LHS, class RHS> Bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
+template<class V, class E> Bool operator<(const Assignment<V,E>& a1, const Assignment<V,E>& a2) {
     return a1.lhs < a2.lhs;
 }
-template<class LHS, class RHS> inline OutputStream& operator<<(OutputStream& os, const Assignment<LHS,RHS>& a) {
+template<class V, class E> inline OutputStream& operator<<(OutputStream& os, const Assignment<V,E>& a) {
     return os<<a.lhs<<"="<<a.rhs;
 }
 
-template<class LHS, class RHS> typename LHS::BaseType left_hand_side(const Assignment<LHS,RHS>& assignment) {
+template<class V, class E> typename V::BaseType left_hand_side(const Assignment<V,E>& assignment) {
     return assignment.lhs.base();
 }
-template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
-    return elementwise([](Assignment<LHS,RHS>const&a){return a.lhs.base();},assignments);
+template<class V, class E> List<typename V::BaseType> left_hand_sides(const List<Assignment<V,E>>& assignments) {
+    return elementwise([](Assignment<V,E>const&a){return a.lhs.base();},assignments);
 }
-template<class LHS, class RHS> List<RHS> right_hand_sides(const List<Assignment<LHS,RHS>>& assignments) {
-    return elementwise([](Assignment<LHS,RHS>const&a){return a.rhs;},assignments);
+template<class V, class E> List<E> right_hand_sides(const List<Assignment<V,E>>& assignments) {
+    return elementwise([](Assignment<V,E>const&a){return a.rhs;},assignments);
 }
 
 

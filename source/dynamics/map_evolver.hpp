@@ -56,9 +56,7 @@ class MapEvolverConfiguration;
 class EvolutionProfiler;
 
 
-/*! \brief A class for computing the evolution of a map system.
- *
- * The actual evolution steps are performed by the MapEvolver class.
+/*! \brief A class for computing the evolution of an iterated map.
  */
 class MapEvolver
     : public EvolverBase< IteratedMap, Enclosure, Integer>

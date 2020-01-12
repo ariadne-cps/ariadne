@@ -1578,7 +1578,7 @@ Void test_adjoin_inner_approximation_operation_one(){
     //theSetTwo = empty, with the bounding box [0,1]x[0,1]
     GridTreePaving theSetZero( theTrivialGrid, heightZero, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreePaving theSetZeroCopy( theSetZero );
-    ExactBoxSet theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
+    ExactBoxSetType theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
     ExactBoxType theBoundingBoxZeroOne = make_box("[0.01,0.99]x[0.01,0.99]");
 
     // !!!
@@ -1620,7 +1620,7 @@ Void test_adjoin_inner_approximation_operation_two(){
     //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
     GridTreePaving theSetOne( theTrivialGrid, heightOne, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreePaving theSetOneCopy( theSetOne );
-    ExactBoxSet theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
+    ExactBoxSetType theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
     ExactBoxType theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
 
     // !!!
@@ -1665,7 +1665,7 @@ Void test_adjoin_inner_approximation_operation_three(){
     //The set's bounding box is [-1,3]x[-1,3]
     GridTreePaving theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
     GridTreePaving theSetTwoCopy( theSetTwo );
-    ExactBoxSet theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
+    ExactBoxSetType theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 2) ");

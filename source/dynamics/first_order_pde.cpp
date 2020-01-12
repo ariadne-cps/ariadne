@@ -95,10 +95,16 @@ template<class X> Vector<Bounds<X>> multiaffine_interpolate(Tensor<2,Vector<Boun
     return us[i0][i1]+a0*(us[i0+1][i1]-us[i0][i1])+a1*(us[i0][i1+1]-us[i0][i1])+a0*(us[i0+1][i1+1]-us[i0+1][i1]-us[i0][i1+1]+us[i0][i1]);
 }
 
-template<class DP>
-Tuple< FloatValue<DP>, FloatValue<DP>, Tensor<3,Vector<FloatBounds<DP>>>, FloatUpperBound<DP> >
-first_order_pde(Matrix<Real> rA, Array<Matrix<Real>> rBs, Array<DiagonalMatrix<Real>> const& rDs, Array<Matrix<Real>> const& rTs, EffectiveVectorMultivariateFunction const& f, EffectiveVectorMultivariateFunction const& phi0, DP pr) {
-    typedef RawFloat<DP> X;
+template<class PR>
+FirstOrderPDESolution<PR>
+first_order_pde(FirstOrderPDE const& pde, EffectiveVectorMultivariateFunction const& phi0, PR pr) {
+    Matrix<Real>const& rA=pde.A;
+    Array<Matrix<Real>>const& rBs=pde.Bs;
+    Array<DiagonalMatrix<Real>>const& rDs=pde.Ds;
+    Array<Matrix<Real>>const& rTs=pde.Ts;
+    EffectiveVectorMultivariateFunction const& f=pde.f;
+
+    typedef RawFloat<PR> X;
 
     Rational tolerance = 1/3_q;
     Dyadic tmax=Integer(1)/(two^2);
@@ -233,13 +239,13 @@ first_order_pde(Matrix<Real> rA, Array<Matrix<Real>> rBs, Array<DiagonalMatrix<R
 
     auto final_us=us;
 
-    return make_tuple(h,tau,uts,error);
+    return FirstOrderPDESolution<PR>{h,tau,uts,error};
 }
 
-template Tuple< FloatValue<DP>, FloatValue<DP>, Tensor<3,Vector<FloatBounds<DP>>>, FloatUpperBound<DP> >
-first_order_pde(Matrix<Real> rA, Array<Matrix<Real>> rBs, Array<DiagonalMatrix<Real>> const& rDs, Array<Matrix<Real>> const& rTs, EffectiveVectorMultivariateFunction const& f, EffectiveVectorMultivariateFunction const& phi0, DP pr);
+template FirstOrderPDESolution<DP>
+first_order_pde(FirstOrderPDE const&, EffectiveVectorMultivariateFunction const& phi0, DP pr);
 
-template Tuple< FloatValue<MP>, FloatValue<MP>, Tensor<3,Vector<FloatBounds<MP>>>, FloatUpperBound<MP> >
-first_order_pde(Matrix<Real> rA, Array<Matrix<Real>> rBs, Array<DiagonalMatrix<Real>> const& rDs, Array<Matrix<Real>> const& rTs, EffectiveVectorMultivariateFunction const& f, EffectiveVectorMultivariateFunction const& phi0, MP pr);
+template FirstOrderPDESolution<MP>
+first_order_pde(FirstOrderPDE const&, EffectiveVectorMultivariateFunction const& phi0, MP pr);
 
 } // namespace Ariadne

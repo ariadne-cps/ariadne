@@ -121,7 +121,7 @@ class Curve
 
 
 
-/*!\brief A line segment in Euclidean space. */
+/*! \brief A linearly interpolated curve in Euclidean space. */
 class InterpolatedCurve
     : public DrawableInterface
 {

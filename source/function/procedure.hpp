@@ -45,9 +45,14 @@ template<class Y> class Formula;
 template<class X> class Graded;
 
 template<class Y> class Procedure;
-typedef Procedure<ApproximateNumber> ApproximateProcedure;
-typedef Procedure<ValidatedNumber> ValidatedProcedure;
-typedef Procedure<EffectiveNumber> EffectiveProcedure;
+//@{
+//! \ingroup FunctionModule
+//! \relates Procedure
+//! \name Type synonyms
+using ApproximateProcedure = Procedure<ApproximateNumber>; //!< .
+using ValidatedProcedure = Procedure<ValidatedNumber>; //!< .
+using EffectiveProcedure = Procedure<EffectiveNumber>; //!< .
+//@}
 
 Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, IntervalDomainType codom);
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, BoxDomainType codom);

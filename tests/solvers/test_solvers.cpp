@@ -64,9 +64,9 @@ class TestSolver
 
     Void test_solve() {
         EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
-        ExactIntervalVectorType d({ExactIntervalType(0.0,1.0)});
+        ExactBoxType d({ExactIntervalType(0.0,1.0)});
         EffectiveVectorMultivariateFunction f({(x*x+1)*x-1});
-        FloatBoundsVector p=solver->solve(f,d);
+        FloatDPBoundsVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
     }
 
@@ -78,15 +78,15 @@ class TestSolver
         EffectiveScalarMultivariateFunction a=EffectiveScalarMultivariateFunction::coordinate(2,0);
         EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,1);
         EffectiveScalarMultivariateFunction bb;
-        ExactIntervalVectorType p,r;
+        ExactBoxType p,r;
         EffectiveVectorMultivariateFunction f;
         ValidatedVectorMultivariateFunctionModelDP h;
         EffectiveVectorMultivariateFunction e;
         FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
-        p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
-        r=ExactIntervalVectorType({ExactIntervalType(-2.0,2.0)});
+        p=ExactBoxType({ExactIntervalType(-0.25,0.25)});
+        r=ExactBoxType({ExactIntervalType(-2.0,2.0)});
         f=EffectiveVectorMultivariateFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -96,8 +96,8 @@ class TestSolver
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
-        r=ExactIntervalVectorType({ExactIntervalType(0.25,1.25)});
+        p=ExactBoxType({ExactIntervalType(0.875,1.125)});
+        r=ExactBoxType({ExactIntervalType(0.25,1.25)});
         f=EffectiveVectorMultivariateFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -109,8 +109,8 @@ class TestSolver
         ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
-        p=ExactIntervalVectorType({ExactIntervalType(-0.25,0.25)});
-        r=ExactIntervalVectorType({ExactIntervalType(0.25,2.0)});
+        p=ExactBoxType({ExactIntervalType(-0.25,0.25)});
+        r=ExactBoxType({ExactIntervalType(0.25,2.0)});
         f=EffectiveVectorMultivariateFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
@@ -124,8 +124,8 @@ class TestSolver
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
         // Should obtain PartialSolutionException
-        p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
-        r=ExactIntervalVectorType({ExactIntervalType(-1,1)});
+        p=ExactBoxType({ExactIntervalType(-1,1)});
+        r=ExactBoxType({ExactIntervalType(-1,1)});
         f=EffectiveVectorMultivariateFunction({x-2*a});
         ARIADNE_TEST_PRINT(f);
         try {
@@ -147,14 +147,14 @@ class TestSolver
         EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,1);
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1]. There is at most one solution.
         // Uses scalar implicit
-        ExactIntervalVectorType p; ExactIntervalType r;
+        ExactBoxType p; ExactIntervalType r;
         EffectiveScalarMultivariateFunction e,f,s; // s is unscaling functions
         ValidatedScalarMultivariateFunctionModelDP h;
 
         ARIADNE_TEST_PRINT(*solver);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactIntervalVectorType({ExactIntervalType(0.875,1.125)});
+        p=ExactBoxType({ExactIntervalType(0.875,1.125)});
         r=ExactIntervalType(0.25,1.25);
         f=EffectiveScalarMultivariateFunction((x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
@@ -169,11 +169,11 @@ class TestSolver
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
         // Should obtain PartialSolutionException
-        p=ExactIntervalVectorType({ExactIntervalType(-1,1)});
+        p=ExactBoxType({ExactIntervalType(-1,1)});
         r=ExactIntervalType(-1,1);
         f=EffectiveScalarMultivariateFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(join(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
+        ValidatedScalarMultivariateFunctionModelDP g=ValidatedScalarMultivariateTaylorFunctionModelDP(product(p,r),f,ThresholdSweeper<FloatDP>(dp,1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);

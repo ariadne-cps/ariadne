@@ -63,9 +63,6 @@ class Effort {
 };
 inline Effort operator""_eff(unsigned long long int e) { Nat m=e; assert(m==e); return Effort(m); }
 
-//! \brief Explicitly declare that a type is %Effective.
-template<class T> using Effective = T;
-
 namespace Detail {
 
     //! \ingroup LogicalTypes

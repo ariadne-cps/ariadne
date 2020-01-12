@@ -2349,7 +2349,7 @@ Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, 
 }
 
 Void GridTreePaving::adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim ) {
-    ExactBoxSet theBoxSet=cast_exact_box(theBoxType);
+    ExactBoxSetType theBoxSet=cast_exact_box(theBoxType);
     CompactSetInterface const& theSet=theBoxSet;
     this->adjoin_outer_approximation(theSet,numSubdivInDim);
 }
@@ -2565,7 +2565,7 @@ Void GridTreePaving::adjoin_inner_approximation( const SetInterface& theSet, con
 }
 
 Void GridTreePaving::adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim ) {
-    ExactBoxSet theBoxSet=cast_exact_box(theBoxType);
+    ExactBoxSetType theBoxSet=cast_exact_box(theBoxType);
     this->adjoin_inner_approximation(theBoxSet,theBoxSet,numSubdivInDim);
 }
 
@@ -2813,7 +2813,7 @@ Void GridTreePaving::restrict_to_height( const Nat theHeight ) {
 //************************************FRIENDS OF GridTreeSet*****************************************/
 
 GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth) {
-    ExactBoxSet theBoxSet=theBoxType;
+    ExactBoxSetType theBoxSet=theBoxType;
     CompactSetInterface const& theSet=theBoxSet;
     return outer_approximation(theSet,theGrid,depth);
 }

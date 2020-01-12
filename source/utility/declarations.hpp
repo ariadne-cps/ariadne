@@ -39,39 +39,15 @@
 #include "../numeric/number.decl.hpp"
 #include "../numeric/float.decl.hpp"
 
+#include "../algebra/linear_algebra.decl.hpp"
+#include "../algebra/differential.decl.hpp"
+
 #include "../function/function.decl.hpp"
 
 #include "../geometry/interval.decl.hpp"
 #include "../geometry/box.decl.hpp"
 
 namespace Ariadne {
-
-typedef unsigned int uint;
-
-//! Internal name for output stream.
-typedef std::ostream OutputStream;
-
-//! Internal name for void type.
-typedef void Void;
-
-//! Internal name for builtin boolean type.
-typedef bool Bool;
-//! Internal name for builtin integers.
-typedef int Int;
-//! Internal name for builtin unsigned integers.
-typedef uint Nat;
-
-//! Internal name for standard size type, used for sizes of containers.
-typedef std::size_t SizeType;
-
-// A class containing an exact double-precision value
-class ExactDouble;
-
-// Define as a class for consistency with other value types
-class String;
-
-
-typedef SizeType DimensionType;
 
 typedef FloatDPError ValidatedNormType; // FIXME: Remove this typedef
 typedef FloatDPApproximation ApproximateNormType; // FIXME: Remove this typedef
@@ -85,18 +61,6 @@ template<> struct InformationTypedef<Real> { typedef EffectiveTag Type; };
 template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
-template<class X> using Scalar = X;
-// Concrete class declarations
-template<class X> class Vector;
-template<class X> class Covector;
-template<class X> class Matrix;
-template<class X> class Differential;
-template<class X> class UnivariateDifferential;
-template<class X> class Vector;
-template<class X> class Matrix;
-template<class X> class Differential;
-template<class X> class Series;
-
 template<class P, class F> class AffineModel;
 template<class P, class F> class TaylorModel;
 template<class X> class Formula;
@@ -104,33 +68,6 @@ template<class X> class Algebra;
 template<class X> class ElementaryAlgebra;
 
 template<class X> class Point;
-
-typedef Vector<Rational> RationalVector;
-typedef Vector<Real> RealVector;
-typedef Vector<FloatDP> FloatVector;
-typedef Vector<RawFloatDP> RawFloatVector;
-typedef Vector<FloatDPApproximation> FloatApproximationVector;
-typedef Vector<FloatDPBounds> FloatBoundsVector;
-typedef Vector<FloatDPValue> ExactFloatVector;
-
-typedef Vector<ApproximateNumericType> ApproximateVector;
-typedef Vector<ValidatedNumericType> ValidatedVector;
-typedef Vector<EffectiveNumericType> EffectiveVector;
-typedef Vector<ExactNumericType> ExactVector;
-
-typedef Matrix<Rational> RationalMatrix;
-typedef Matrix<Real> RealMatrix;
-typedef Matrix<RawFloatDP> RawFloatMatrix;
-typedef Matrix<FloatDP> FloatMatrix;
-typedef Matrix<FloatDPApproximation> FloatApproximationMatrix;
-typedef Matrix<FloatDPBounds> FloatBoundsMatrix;
-typedef Matrix<FloatDPValue> ExactFloatMatrix;
-
-typedef Point<ApproximateNumericType> ApproximatePoint;
-typedef Point<ValidatedNumericType> ValidatedPoint;
-typedef Point<EffectiveNumericType> EffectivePoint;
-typedef Point<ExactNumericType> ExactPoint;
-
 
 } // namespace Ariadne
 

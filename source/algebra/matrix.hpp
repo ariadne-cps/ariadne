@@ -241,6 +241,11 @@ template<class M, EnableIf<IsMatrixExpression<M>> =dummy> OutputStream& operator
 
 /************ Combinatorial Matrices *********************************************************/
 
+//! \ingroup LinearAlgebraModule
+//! \brief Permutation matrices defined as a sequence of transpositions.
+//! \details Pre-multiplying a matrix \f$A\f$ by the pivot matrix with pivots \f$[p_0,p_1,\ldots,p_{n-1}]\f$
+//!   first swaps row \f$0\f$ of \f$A\f$ with row \f$p_0\f$, then row \f$1\f$ of the new matrix with row \f$p_1\geq1\f$ of the new matrix,
+//!   continuing until the final row. This allows all row permutations to be realised.
 class PivotMatrix {
     Array<SizeType> _ary;
   public:

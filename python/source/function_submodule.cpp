@@ -211,7 +211,7 @@ Void export_polynomial(pybind11::module& module)
     define_algebra(module,polynomial_class);
     polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
 
-    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
+    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("MultivariatePolynomialVector")).c_str());
 }
 
 Void export_polynomials(pybind11::module& module)

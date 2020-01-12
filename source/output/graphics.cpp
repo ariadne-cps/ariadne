@@ -266,7 +266,7 @@ Colour Figure::get_fill_colour() const
 
 Figure& Figure::draw(ApproximateBoxType const& box)
 {
-    ApproximateBoxSet box_set(box);
+    ApproximateBoxSetType box_set(box);
     DrawableInterface const& shape=box_set;
     this->draw(shape); return *this;
 }

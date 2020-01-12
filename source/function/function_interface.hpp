@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_interface.hpp
+ *            function/function_interface.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_interface.hpp
+/*! \file function/function_interface.hpp
  *  \brief Interface for functions for which derivatives can be computed.
  */
 

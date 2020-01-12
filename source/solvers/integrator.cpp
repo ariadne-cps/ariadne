@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.cpp
+ *            solvers/integrator.cpp
  *
  *  Copyright  2006-20  Pieter Collins
  *

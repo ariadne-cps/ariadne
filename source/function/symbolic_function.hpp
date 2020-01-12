@@ -1,5 +1,5 @@
 /***************************************************************************
- *            symbolic_function.hpp
+ *            function/symbolic_function.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file symbolic_function.hpp
+/*! \file function/symbolic_function.hpp
  *  \brief Symbolic functions
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_mixin.hpp
+ *            function/function_mixin.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

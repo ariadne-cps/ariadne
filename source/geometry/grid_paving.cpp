@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_paving.cpp
+ *            geometry/grid_paving.cpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *

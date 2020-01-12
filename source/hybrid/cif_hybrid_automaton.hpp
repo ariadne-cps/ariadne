@@ -1,5 +1,5 @@
 /***************************************************************************
- *            cif_hybrid_automaton.hpp
+ *            hybrid/cif_hybrid_automaton.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file cif_hybrid_automaton.hpp
+/*! \file hybrid/cif_hybrid_automaton.hpp
  *  \brief Hybrid system classes for interface with the Compositional Interchange Format.
  */
 

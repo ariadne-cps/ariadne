@@ -1,5 +1,5 @@
 /***************************************************************************
- *            sweeper.hpp
+ *            algebra/sweeper.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file sweeper.hpp
+/*! \file algebra/sweeper.hpp
  *  \brief Classes for simplifying the representation of a polynomial expansion.
  */
 

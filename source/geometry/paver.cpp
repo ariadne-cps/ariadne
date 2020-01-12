@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paver.cpp
+ *            geometry/paver.cpp
  *
  *  Copyright  2011-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer.cpp
+ *            output/drawer.cpp
  *
  *  Copyright  2011-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_location.hpp
+ *            hybrid/discrete_location.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file discrete_location.hpp
+/*! \file hybrid/discrete_location.hpp
  *  \brief Class representing a discrete location of a hybrid automaton.
  */
 

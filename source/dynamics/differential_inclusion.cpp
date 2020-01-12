@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential_inclusion.cpp
+ *            dynamics/differential_inclusion.cpp
  *
  *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *

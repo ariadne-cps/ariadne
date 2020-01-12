@@ -1,5 +1,5 @@
 /***************************************************************************
- *            first_order_pde.hpp
+ *            dynamics/first_order_pde.hpp
  *
  *  Copyright  2018-20  Pieter Collins, Svetlana Selivanova
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file first_order_pde.hpp
+/*! \file dynamics/first_order_pde.hpp
  *  \brief Rigorous solutions of first-order hyperbolic partial differential equations.
  */
 

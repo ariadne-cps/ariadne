@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_bounds.hpp
+ *            numeric/float_bounds.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_bounds.hpp
+/*! \file numeric/float_bounds.hpp
  *  \brief Floating-point bounds for real numbers.
  */
 

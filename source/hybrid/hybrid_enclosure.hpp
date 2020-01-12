@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.hpp
+ *            hybrid/hybrid_enclosure.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_enclosure.hpp
+/*! \file hybrid/hybrid_enclosure.hpp
  *  \brief Enclosure sets for hybrid systems
  */
 

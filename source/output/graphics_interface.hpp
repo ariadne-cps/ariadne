@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graphics_interface.hpp
+ *            output/graphics_interface.hpp
  *
  *  Copyright  2009-20  Davide Bresolin, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file graphics_interface.hpp
+/*! \file output/graphics_interface.hpp
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
 

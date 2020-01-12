@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry.cpp
+ *            geometry/geometry.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

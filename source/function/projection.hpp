@@ -1,5 +1,5 @@
 /***************************************************************************
- *            projection.hpp
+ *            function/projection.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file projection.hpp
+/*! \file function/projection.hpp
  *  \brief Projections onto coordinates
  */
 

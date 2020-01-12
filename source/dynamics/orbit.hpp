@@ -1,5 +1,5 @@
 /***************************************************************************
- *            orbit.hpp
+ *            dynamics/orbit.hpp
  *
  *  Copyright  2007-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file orbit.hpp
+/*! \file dynamics/orbit.hpp
  *  \brief Orbits of dynamic systems
  */
 

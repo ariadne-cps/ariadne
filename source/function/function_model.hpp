@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model.hpp
+ *            function/function_model.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_model.hpp
+/*! \file function/function_model.hpp
  *  \brief Built-in and user functions and expressions
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rational.cpp
+ *            numeric/rational.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file rational.cpp
+/*! \file numeric/rational.cpp
  *  \brief
  */
 

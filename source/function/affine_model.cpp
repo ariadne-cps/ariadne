@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_model.cpp
+ *            function/affine_model.cpp
  *
  *  Copyright  2009-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.cpp
+ *            hybrid/hybrid_reachability_analyser.cpp
  *
  *  Copyright  2006-20  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *

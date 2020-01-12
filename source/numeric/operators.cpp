@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.cpp
+ *            numeric/operators.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

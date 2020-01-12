@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dyadic.hpp
+ *            numeric/dyadic.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dyadic.hpp
+/*! \file numeric/dyadic.hpp
  *  \brief Dyadic numbers.
  */
 

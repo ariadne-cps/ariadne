@@ -1,5 +1,5 @@
 /***************************************************************************
- *            procedure.hpp
+ *            function/procedure.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file procedure.hpp
+/*! \file function/procedure.hpp
  *  \brief Procedure to compute a real function
  */
 

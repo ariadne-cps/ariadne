@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_expression.hpp
+ *            symbolic/function_expression.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_expression.hpp
+/*! \file symbolic/function_expression.hpp
  *  \brief Expressions created as wrappers around functions
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine.cpp
+ *            function/affine.cpp
  *
  *  Copyright  2009-20  Pieter Collins
  *

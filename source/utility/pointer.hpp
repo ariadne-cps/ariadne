@@ -1,5 +1,5 @@
 /***************************************************************************
- *            pointer.hpp
+ *            utility/pointer.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file pointer.hpp
+/*! \file utility/pointer.hpp
  *  \brief Smart pointers in Euclidean space.
  */
 

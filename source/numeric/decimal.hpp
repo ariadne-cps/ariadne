@@ -1,5 +1,5 @@
 /***************************************************************************
- *            decimal.hpp
+ *            numeric/decimal.hpp
  *
  *  Copyright  2014-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file decimal.hpp
+/*! \file numeric/decimal.hpp
  *  \brief ExactTag decimal numbers, useful for user input.
  */
 

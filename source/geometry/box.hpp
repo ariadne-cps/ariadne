@@ -1,5 +1,5 @@
 /***************************************************************************
- *            box.hpp
+ *            geometry/box.hpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file box.hpp
+/*! \file geometry/box.hpp
  *  \brief Coordinate-aligned boxes in Euclidean space.
  */
 

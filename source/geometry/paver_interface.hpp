@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paver_interface.hpp
+ *            geometry/paver_interface.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file paver_interface.hpp
+/*! \file geometry/paver_interface.hpp
  *  \brief Interface for class to compute approximations to function sets.
  */
 

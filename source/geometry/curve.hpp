@@ -1,5 +1,5 @@
 /***************************************************************************
- *            curve.hpp
+ *            geometry/curve.hpp
  *
  *  Copyright  2007-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file curve.hpp
+/*! \file geometry/curve.hpp
  *  \brief A arbitraty curve in Euclidean space.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model_mixin.hpp
+ *            function/function_model_mixin.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_model_mixin.hpp
+/*! \file function/function_model_mixin.hpp
  *  \brief Mixin for concrete functions on bounded domains.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_set.cpp
+ *            geometry/affine_set.cpp
  *
  *  Copyright  2009-20  Pieter Collins
  *

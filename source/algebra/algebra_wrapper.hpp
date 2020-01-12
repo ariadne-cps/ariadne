@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_mixin.hpp
+ *            algebra/algebra_mixin.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra_wrapper.hpp
+/*! \file algebra/algebra_wrapper.hpp
  *  \brief Mixin class providing operations for (Banach) algebras.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_location.cpp
+ *            hybrid/discrete_location.cpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *

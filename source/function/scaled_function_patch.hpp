@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scaled_function_patch.hpp
+ *            function/scaled_function_patch.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file scaled_function_patch.hpp
+/*! \file function/scaled_function_patch.hpp
  *  \brief Over-approximations of functions on box domains.
  */
 

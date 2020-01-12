@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.cpp
+ *            hybrid/hybrid_set.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

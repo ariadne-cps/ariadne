@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graphics.cpp
+ *            output/graphics.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

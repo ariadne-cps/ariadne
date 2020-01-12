@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid.hpp
+ *            geometry/grid.hpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid.hpp
+/*! \file geometry/grid.hpp
  *  \brief Coordinate-aligned grids.
  */
 

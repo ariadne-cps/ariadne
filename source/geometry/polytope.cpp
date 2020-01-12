@@ -1,5 +1,5 @@
 /****************************************************************************
- *            polytope.cpp
+ *            geometry/polytope.cpp
  *
  *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *

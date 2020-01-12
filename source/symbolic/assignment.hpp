@@ -1,5 +1,5 @@
 /***************************************************************************
- *            assignment.hpp
+ *            symbolic/assignment.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file assignment.hpp
+/*! \file symbolic/assignment.hpp
  *  \brief Assignment expressions
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set_interface.hpp
+ *            geometry/set_interface.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file set_interface.hpp
+/*! \file geometry/set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of Euclidean space.
  */
 

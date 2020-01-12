@@ -1,5 +1,5 @@
 /***************************************************************************
- *            graded.hpp
+ *            algebra/graded.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file graded.hpp
+/*! \file algebra/graded.hpp
  *  \brief Graded algebras.
  */
 

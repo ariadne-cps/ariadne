@@ -1,5 +1,5 @@
 /***************************************************************************
- *            floatmp.cpp
+ *            numeric/floatmp.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file floatmp.cpp
+/*! \file numeric/floatmp.cpp
  *  \brief
  */
 

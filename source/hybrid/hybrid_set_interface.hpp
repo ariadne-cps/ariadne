@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set_interface.hpp
+ *            hybrid/hybrid_set_interface.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_set_interface.hpp
+/*! \file hybrid/hybrid_set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of hybrid spaces.
  */
 

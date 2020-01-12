@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_model.hpp
+ *            function/affine_model.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file affine_model.hpp
+/*! \file function/affine_model.hpp
  *  \brief Affine models defined on the unit box
  */
 

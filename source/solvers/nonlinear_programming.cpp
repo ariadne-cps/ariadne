@@ -1,5 +1,5 @@
 /***************************************************************************
- *            nonlinear_programming.cpp
+ *            solvers/nonlinear_programming.cpp
  *
  *  Copyright  2010-20  Pieter Collins
  *

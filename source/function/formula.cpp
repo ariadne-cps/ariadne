@@ -1,5 +1,5 @@
 /***************************************************************************
- *            formula.cpp
+ *            function/formula.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

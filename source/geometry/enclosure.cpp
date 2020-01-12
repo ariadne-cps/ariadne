@@ -1,5 +1,5 @@
 /***************************************************************************
- *            enclosure.cpp
+ *            geometry/enclosure.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

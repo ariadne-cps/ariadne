@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.hpp
+ *            hybrid/hybrid_reachability_analyser.hpp
  *
  *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_reachability_analyser.hpp
+/*! \file hybrid/hybrid_reachability_analyser.hpp
  *  \brief Methods for computing reachable sets of hybrid systems.
  */
 

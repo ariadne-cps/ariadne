@@ -1,5 +1,5 @@
 /***************************************************************************
- *            arithmetic.hpp
+ *            numeric/arithmetic.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file arithmetic.hpp
+/*! \file numeric/arithmetic.hpp
  *  \brief Arithmetic declarations
  */
 

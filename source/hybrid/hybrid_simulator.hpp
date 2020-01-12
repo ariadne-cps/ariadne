@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_simulator.hpp
+ *            hybrid/hybrid_simulator.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_simulator.hpp
+/*! \file hybrid/hybrid_simulator.hpp
  *  \brief Simulator for hybrid systems.
  */
 

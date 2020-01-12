@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set.hpp
+ *            geometry/set.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file set.hpp
+/*! \file geometry/set.hpp
  *  \brief Handles for open, closed, overt and compact subsets of Euclidean space.
  */
 

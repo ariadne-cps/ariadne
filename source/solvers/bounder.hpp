@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bounder.hpp
+ *            solvers/bounder.hpp
  *
  *  Copyright  2018-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file bounder.hpp
+/*! \file solvers/bounder.hpp
  *  \brief Classes for finding the bounds of the flow for differential equations.
  */
 

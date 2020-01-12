@@ -1,5 +1,5 @@
 /***************************************************************************
- *            fixed_differential.hpp
+ *            algebra/fixed_differential.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file fixed_differential.hpp
+/*! \file algebra/fixed_differential.hpp
  *  \brief First- and second-order multivariate differentials.
  */
 

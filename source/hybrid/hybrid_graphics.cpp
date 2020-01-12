@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_graphics.cpp
+ *            hybrid/hybrid_graphics.cpp
  *
  *  Copyright  2011-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry.hpp
+ *            geometry/geometry.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file geometry.hpp
+/*! \file geometry/geometry.hpp
  *  \brief Geometric operations on abstract sets.
  */
 #ifndef ARIADNE_GEOMETRY_HPP

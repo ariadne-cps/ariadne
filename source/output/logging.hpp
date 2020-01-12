@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logging.hpp
+ *            output/logging.hpp
  *
  *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file logging.hpp
+/*! \file output/logging.hpp
  *  \brief Support for writing debugging output to a logging stream.
  */
 

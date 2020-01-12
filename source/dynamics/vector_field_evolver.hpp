@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.hpp
+ *            dynamics/vector_field_evolver.hpp
  *
  *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file vector_field_evolver.hpp
+/*! \file dynamics/vector_field_evolver.hpp
  *  \brief Evolver for vector_field systems.
  */
 

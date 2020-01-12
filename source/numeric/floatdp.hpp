@@ -1,5 +1,5 @@
 /***************************************************************************
- *            floatdp.hpp
+ *            numeric/floatdp.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file floatdp.hpp
+/*! \file numeric/floatdp.hpp
  *  \brief RawTag floating-point number class based on double-precision floats.
  */
 

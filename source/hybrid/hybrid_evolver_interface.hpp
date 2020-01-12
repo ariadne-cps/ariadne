@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver_interface.hpp
+ *            hybrid/hybrid_evolver_interface.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_evolver_interface.hpp
+/*! \file hybrid/hybrid_evolver_interface.hpp
  *  \brief Interface for evolver classes in the hybrid space.
  */
 

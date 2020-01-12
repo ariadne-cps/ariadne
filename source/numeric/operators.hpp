@@ -1,5 +1,5 @@
 /***************************************************************************
- *            operators.hpp
+ *            numeric/operators.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file operators.hpp
+/*! \file numeric/operators.hpp
  *  \brief Numerical operator classes
  */
 

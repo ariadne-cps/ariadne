@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_series.hpp
+ *            function/taylor_series.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file taylor_series.hpp
+/*! \file function/taylor_series.hpp
  *  \brief ApproximateTag power series in one variable on a is_bounded domain with a dense
  *  representation as a floating-point polynomial plus an error bound.
  */

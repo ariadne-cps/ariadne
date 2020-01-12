@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_set.hpp
+ *            geometry/affine_set.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file affine_set.hpp
+/*! \file geometry/affine_set.hpp
  *  \brief Affine sets described by equality, inequality and interval constraints over a is_bounded box.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_graphics.hpp
+ *            hybrid/hybrid_graphics.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_graphics.hpp
+/*! \file hybrid/hybrid_graphics.hpp
  *  \brief Graphics class for drawing objects in hybrid spaces.
  */
 

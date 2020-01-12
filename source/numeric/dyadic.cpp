@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dyadic.cpp
+ *            numeric/dyadic.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dyadic.cpp
+/*! \file numeric/dyadic.cpp
  *  \brief
  */
 

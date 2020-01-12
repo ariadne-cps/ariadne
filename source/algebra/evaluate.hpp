@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evaluate.hpp
+ *            algebra/evaluate.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file evaluate.hpp
+/*! \file algebra/evaluate.hpp
  *  \brief Functions for evaluating polynomial expansions.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            declarations.hpp
+ *            utility/declarations.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file declarations.hpp
+/*! \file utility/declarations.hpp
  *  \brief Forward declarations of types and classes.
  */
 

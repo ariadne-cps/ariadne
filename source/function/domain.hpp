@@ -1,5 +1,5 @@
 /***************************************************************************
- *            domain.hpp
+ *            function/domain.hpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file domain.hpp
+/*! \file function/domain.hpp
  *  \brief Interval and box domains for functions.
  */
 

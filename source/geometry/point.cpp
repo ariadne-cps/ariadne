@@ -1,5 +1,5 @@
 /***************************************************************************
- *            point.cpp
+ *            geometry/point.cpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *

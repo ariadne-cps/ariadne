@@ -1,5 +1,5 @@
 /***************************************************************************
- *            fixed_univariate_differential.hpp
+ *            algebra/fixed_univariate_differential.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file fixed_univariate_differential.hpp
+/*! \file algebra/fixed_univariate_differential.hpp
  *  \brief First- and second-order univariate differentials.
  */
 

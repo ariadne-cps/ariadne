@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tensor.hpp
+ *            algebra/tensor.hpp
  *
  *  Copyright  2018-20  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file tensor.hpp
+/*! \file algebra/tensor.hpp
  *  \brief Arbitrary-rank tensors
  */
 

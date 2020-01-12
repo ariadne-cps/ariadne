@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_paving.hpp
+ *            geometry/grid_paving.hpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid_paving.hpp
+/*! \file geometry/grid_paving.hpp
  *  \brief Grid paving is used to represent sets, based on integer and dyadic coordinate cells, of a grid.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_function.hpp
+ *            function/taylor_function.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file taylor_function.hpp
+/*! \file function/taylor_function.hpp
  *  \brief Over-approximations of functions based on Taylor expansions.
  */
 

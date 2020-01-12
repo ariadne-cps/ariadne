@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model_interface.hpp
+ *            function/function_model_interface.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_model_interface.hpp
+/*! \file function/function_model_interface.hpp
  *  \brief Interface for functions on bounded sets.
  */
 

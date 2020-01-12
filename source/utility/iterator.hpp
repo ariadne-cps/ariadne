@@ -1,5 +1,5 @@
 /***************************************************************************
- *            iterator.hpp
+ *            utility/iterator.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file iterator.hpp
+/*! \file utility/iterator.hpp
  *  \brief Iterator support, similar to Boost's iterator package.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            configuration_interface.hpp
+ *            solvers/configuration_interface.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file configuration_interface.hpp
+/*! \file solvers/configuration_interface.hpp
  *  \brief A simple interface for configuration classes, mainly provided to specify the involved semantics.
  */
 

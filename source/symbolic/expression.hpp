@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression.hpp
+ *            symbolic/expression.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file expression.hpp
+/*! \file symbolic/expression.hpp
  *  \brief Internal expressions
  */
 

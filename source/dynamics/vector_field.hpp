@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field.hpp
+ *            dynamics/vector_field.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file vector_field.hpp
+/*! \file dynamics/vector_field.hpp
  *  \brief Main continuous dynamics system class.
  */
 

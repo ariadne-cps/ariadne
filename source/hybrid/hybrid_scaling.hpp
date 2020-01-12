@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_scaling.hpp
+ *            hybrid/hybrid_scaling.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_scaling.hpp
+/*! \file hybrid/hybrid_scaling.hpp
  *  \brief Scalings for variables in hybrid spaces.
  */
 

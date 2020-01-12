@@ -1,5 +1,5 @@
 /***************************************************************************
- *            univariate_differential.hpp
+ *            algebra/univariate_differential.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file univariate_differential.hpp
+/*! \file algebra/univariate_differential.hpp
  *  \brief Differentials with respect to a single variable.
  */
 

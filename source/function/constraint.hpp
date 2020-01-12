@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint.hpp
+ *            function/constraint.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file constraint.hpp
+/*! \file function/constraint.hpp
  *  \brief Linear and nonlinear constraints.
  */
 

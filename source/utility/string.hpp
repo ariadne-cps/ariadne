@@ -1,5 +1,5 @@
 /***************************************************************************
- *            string.hpp
+ *            utility/string.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file string.hpp
+/*! \file utility/string.hpp
  *  \brief Wrapper for string class
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.cpp
+ *            function/polynomial.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

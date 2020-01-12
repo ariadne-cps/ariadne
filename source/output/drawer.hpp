@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer.hpp
+ *            output/drawer.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file drawer.hpp
+/*! \file output/drawer.hpp
  *  \brief Class for drawing affine and nonlinear sets.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.cpp
+ *            algebra/differential.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

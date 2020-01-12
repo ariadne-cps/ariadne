@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_operations.hpp
+ *            numeric/float_operations.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_operations.hpp
+/*! \file numeric/float_operations.hpp
  *  \brief Common header for floating-point number operations.
  */
 

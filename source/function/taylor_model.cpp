@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.cpp
+ *            function/taylor_model.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

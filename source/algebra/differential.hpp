@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential.hpp
+ *            algebra/differential.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file differential.hpp
+/*! \file algebra/differential.hpp
  *  \brief Differential algebra variables with a sparse representation.
  */
 

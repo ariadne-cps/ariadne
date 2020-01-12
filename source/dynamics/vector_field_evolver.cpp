@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.cpp
+ *            dynamics/vector_field_evolver.cpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *

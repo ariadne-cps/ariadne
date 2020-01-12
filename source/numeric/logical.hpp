@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//! \file logical.hpp
+//! \file numeric/logical.hpp
 //! \brief Logical classes
 
 #ifndef ARIADNE_LOGICAL_HPP

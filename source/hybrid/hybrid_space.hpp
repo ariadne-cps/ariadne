@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_space.hpp
+ *            hybrid/hybrid_space.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_space.hpp
+/*! \file hybrid/hybrid_space.hpp
  *  \brief Sets in hybrid spaces.
  */
 

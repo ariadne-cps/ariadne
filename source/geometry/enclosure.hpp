@@ -1,5 +1,5 @@
 /***************************************************************************
- *            enclosure.hpp
+ *            geometry/enclosure.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file enclosure.hpp
+/*! \file geometry/enclosure.hpp
  *  \brief Enclosure sets for continuous systems
  */
 

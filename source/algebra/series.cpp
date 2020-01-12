@@ -1,5 +1,5 @@
 /***************************************************************************
- *            series.cpp
+ *            algebra/series.cpp
  *
  *  Copyright  2015-20  Pieter Collins
  *

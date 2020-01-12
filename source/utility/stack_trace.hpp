@@ -1,5 +1,5 @@
 /***************************************************************************
- *            stack_trace.hpp
+ *            utility/stack_trace.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

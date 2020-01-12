@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paver.hpp
+ *            geometry/paver.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file paver.hpp
+/*! \file geometry/paver.hpp
  *  \brief Class for computing outer approximations to nonlinear sets.
  */
 

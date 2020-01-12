@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.hpp
+ *            solvers/solver.hpp
  *
  *  Copyright  2006-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solver.hpp
+/*! \file solvers/solver.hpp
  *  \brief Solver classes for algebraic equations.
  */
 

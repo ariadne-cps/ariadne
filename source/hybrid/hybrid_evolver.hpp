@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.hpp
+ *            hybrid/hybrid_evolver.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_evolver.hpp
+/*! \file hybrid/hybrid_evolver.hpp
  *  \brief Hybrid evolver classes.
  */
 

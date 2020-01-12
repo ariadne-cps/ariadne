@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_value.hpp
+ *            numeric/float_value.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_value.hpp
+/*! \file numeric/float_value.hpp
  *  \brief Exact Floating-point representations of real numbers.
  */
 

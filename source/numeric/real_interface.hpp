@@ -1,5 +1,5 @@
 /***************************************************************************
- *            real_interface.hpp
+ *            numeric/real_interface.hpp
  *
  *  Copyright  2013-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            symbolic_function.cpp
+ *            function/symbolic_function.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

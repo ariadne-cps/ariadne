@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_error.cpp
+ *            numeric/float_error.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

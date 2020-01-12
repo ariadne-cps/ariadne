@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valuation.hpp
+ *            symbolic/valuation.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file valuation.hpp
+/*! \file symbolic/valuation.hpp
  *  \brief Valuations over named variables.
  */
 

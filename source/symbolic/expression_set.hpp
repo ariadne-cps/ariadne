@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression_set.hpp
+ *            symbolic/expression_set.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file expression_set.hpp
+/*! \file symbolic/expression_set.hpp
  *  \brief Sets defined using expressions over real variables.
  */
 

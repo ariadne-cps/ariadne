@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense_differential.hpp
+ *            algebra/dense_differential.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  * 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-/*! \file dense_differential.hpp
+/*! \file algebra/dense_differential.hpp
  *  \brief Differential algebra variables with a dense representation.
  */
 #ifndef ARIADNE_DENSE_DIFFERENTIAL_HPP

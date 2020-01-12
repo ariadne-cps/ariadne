@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_enclosure.cpp
+ *            hybrid/hybrid_enclosure.cpp
  *
  *  Copyright  2009-20  Pieter Collins
  *

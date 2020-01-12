@@ -1,5 +1,5 @@
 /***************************************************************************
- *            identifier.hpp
+ *            symbolic/identifier.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file identifier.hpp
+/*! \file symbolic/identifier.hpp
  *  \brief Strings used as names for constants and variables.
  */
 

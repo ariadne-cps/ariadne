@@ -1,5 +1,5 @@
 /***************************************************************************
- *            reachability_analyser_interface.hpp
+ *            dynamics/reachability_analyser_interface.hpp
  *
  *  Copyright  2006-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file reachability_analyser_interface.hpp
+/*! \file dynamics/reachability_analyser_interface.hpp
  *  \brief Interface for performing reachability analysis.
  */
 

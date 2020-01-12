@@ -1,5 +1,5 @@
 /***************************************************************************
- *            map_evolver.hpp
+ *            dynamics/map_evolver.hpp
  *
  *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file map_evolver.hpp
+/*! \file dynamics/map_evolver.hpp
  *  \brief Evolver for map systems.
  */
 

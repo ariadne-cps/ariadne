@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolver_interface.hpp
+ *            dynamics/evolver_interface.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file evolver_interface.hpp
+/*! \file dynamics/evolver_interface.hpp
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
 

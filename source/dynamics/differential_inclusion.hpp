@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differential_inclusion.hpp
+ *            dynamics/differential_inclusion.hpp
  *
  *  Copyright  2008-20  Luca Geretti, Pieter Collins, Sanja Zivanovic
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file differential_inclusion.hpp
+/*! \file dynamics/differential_inclusion.hpp
  *  \brief Methods for computing solutions of differential inclusions.
  */
 

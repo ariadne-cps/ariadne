@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_orbit.hpp
+ *            hybrid/hybrid_orbit.hpp
  *
  *  Copyright  2007-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_orbit.hpp
+/*! \file hybrid/hybrid_orbit.hpp
  *  \brief Orbits of hybrid dynamical systems
  */
 

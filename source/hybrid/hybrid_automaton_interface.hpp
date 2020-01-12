@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton_interface.hpp
+ *            hybrid/hybrid_automaton_interface.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_automaton_interface.hpp
+/*! \file hybrid/hybrid_automaton_interface.hpp
  *  \brief Interface for hybrid automata to be used by evolver classes.
  */
 

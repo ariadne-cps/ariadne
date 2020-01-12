@@ -1,5 +1,5 @@
 /***************************************************************************
- *            user_function.hpp
+ *            function/user_function.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file user_function.hpp
+/*! \file function/user_function.hpp
  *  \brief Wrappers for user functions
  */
 

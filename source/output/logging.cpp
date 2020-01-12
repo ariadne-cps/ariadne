@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logging.cpp
+ *            output/logging.cpp
  *
  *  Copyright  2007-20  Pieter Collins
  *

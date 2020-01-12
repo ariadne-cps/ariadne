@@ -1,5 +1,5 @@
 /***************************************************************************
- *            formula.hpp
+ *            function/formula.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file formula.hpp
+/*! \file function/formula.hpp
  *  \brief Formulae over variables
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra_interface.hpp
+ *            algebra/algebra_interface.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra_interface.hpp
+/*! \file algebra/algebra_interface.hpp
  *  \brief Interface for function algebras.
  */
 

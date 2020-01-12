@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.hpp
+ *            geometry/polyhedron.hpp
  *
  *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file polyhedron.hpp
+/*! \file geometry/polyhedron.hpp
  *  \brief Polyhedra.
  */
 

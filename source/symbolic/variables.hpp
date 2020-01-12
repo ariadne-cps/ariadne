@@ -1,5 +1,5 @@
 /***************************************************************************
- *            variables.hpp
+ *            symbolic/variables.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file variables.hpp
+/*! \file symbolic/variables.hpp
  *  \brief Internal variables
  */
 

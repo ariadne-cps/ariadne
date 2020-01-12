@@ -1,5 +1,5 @@
 /***************************************************************************
- *            procedure.cpp
+ *            function/procedure.cpp
  *
  *  Copyright  2016-20  Pieter Collins
  *

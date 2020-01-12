@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_event.hpp
+ *            hybrid/discrete_event.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file discrete_event.hpp
+/*! \file hybrid/discrete_event.hpp
  *  \brief Class representing a discrete event.
  */
 

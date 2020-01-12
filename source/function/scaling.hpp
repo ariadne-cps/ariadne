@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scaling.hpp
+ *            function/scaling.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file scaling.hpp
+/*! \file function/scaling.hpp
  *  \brief Scaling functions.
  */
 

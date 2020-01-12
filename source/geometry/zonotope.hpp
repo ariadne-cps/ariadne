@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotope.hpp
+ *            geometry/zonotope.hpp
  *
  *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file zonotope.hpp
+/*! \file geometry/zonotope.hpp
  *  \brief Zonotopes in Euclidean space.
  */
 

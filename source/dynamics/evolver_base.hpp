@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolver_base.hpp
+ *            dynamics/evolver_base.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file evolver_base.hpp
+/*! \file dynamics/evolver_base.hpp
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
 

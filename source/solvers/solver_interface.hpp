@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver_interface.hpp
+ *            solvers/solver_interface.hpp
  *
  *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solver_interface.hpp
+/*! \file solvers/solver_interface.hpp
  *  \brief Interface class for solving equations.
  */
 

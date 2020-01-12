@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_ball.hpp
+ *            numeric/float_ball.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_ball.hpp
+/*! \file numeric/float_ball.hpp
  *  \brief Floating-point approximations to real numbers.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_factory.hpp
+ *            numeric/float_factory.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_factory.hpp
+/*! \file numeric/float_factory.hpp
  *  \brief Factories for creating floating-point numbers.
  */
 

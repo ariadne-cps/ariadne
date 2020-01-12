@@ -1,5 +1,5 @@
 /***************************************************************************
- *            simulation_toolbox_interface.hpp
+ *            dynamics/simulation_toolbox_interface.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file simulation_toolbox_interface.hpp
+/*! \file dynamics/simulation_toolbox_interface.hpp
  *  \brief Interfaces for calculus tools useful for working with dynamical systems.
  */
 

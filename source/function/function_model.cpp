@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_model.cpp
+ *            function/function_model.cpp
  *
  *  Copyright  2011-20  Pieter Collins
  *

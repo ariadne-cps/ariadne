@@ -1,5 +1,5 @@
 /***************************************************************************
- *            stlio.hpp
+ *            utility/stlio.hpp
  *
  *  Copyright  2005-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file stlio.hpp
+/*! \file utility/stlio.hpp
  *  \brief Input-output utilities
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            attribute.hpp
+ *            utility/attribute.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file attribute.hpp
+/*! \file utility/attribute.hpp
  *  \brief Generic attributes for named parameters.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            standard.hpp
+ *            utility/standard.hpp
  *
  *  Copyright  2014-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file standard.hpp
+/*! \file utility/standard.hpp
  *  \brief Standard library and utility classes. File suitable for use as a pre-compiled header.
  */
 

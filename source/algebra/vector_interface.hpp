@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_interface.hpp
+ *            algebra/vector_interface.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-/*! \file vector_interface.hpp
+/*! \file algebra/vector_interface.hpp
  *  \brief Interface for vectors.
  */
 

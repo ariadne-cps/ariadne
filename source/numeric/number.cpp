@@ -1,5 +1,5 @@
 /***************************************************************************
- *            number.cpp
+ *            numeric/number.cpp
  *
  *  Copyright  2013-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file number.cpp
+/*! \file numeric/number.cpp
  *  \brief
  */
 

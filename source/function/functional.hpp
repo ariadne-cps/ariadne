@@ -1,5 +1,5 @@
 /***************************************************************************
- *            functional.hpp
+ *            function/functional.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file functional.hpp
+/*! \file function/functional.hpp
  *  \brief Function classes. File suitable for use as a pre-compiled header.
  */
 

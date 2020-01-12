@@ -1,5 +1,5 @@
 /***************************************************************************
- *            expression_set.cpp
+ *            symbolic/expression_set.cpp
  *
  *  Copyright  2011-20  Pieter Collins
  *

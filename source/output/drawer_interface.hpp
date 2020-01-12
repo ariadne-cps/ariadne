@@ -1,5 +1,5 @@
 /***************************************************************************
- *            drawer_interface.hpp
+ *            output/drawer_interface.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file drawer_interface.hpp
+/*! \file output/drawer_interface.hpp
  *  \brief Interface for drawing affine and nonlinear sets.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            builtin.hpp
+ *            numeric/builtin.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file builtin.hpp
+/*! \file numeric/builtin.hpp
  *  \brief Inclusion header for wrapper for builtin numbers.
  */
 

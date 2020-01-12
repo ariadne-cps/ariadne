@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_solver.hpp
+ *            solvers/constraint_solver.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file constraint_solver.hpp
+/*! \file solvers/constraint_solver.hpp
  *  \brief Class for solving systems of constraints over a box.
  */
 

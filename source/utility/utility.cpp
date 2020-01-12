@@ -1,5 +1,5 @@
 /***************************************************************************
- *            utility.cpp
+ *            utility/utility.cpp
  *
  *  Copyright  2017-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            space.cpp
+ *            symbolic/space.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file space.cpp
+/*! \file symbolic/space.cpp
  *  \brief Spaces formed by variables.
  */
 

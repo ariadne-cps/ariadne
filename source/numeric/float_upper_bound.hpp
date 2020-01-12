@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_upper_bound.hpp
+ *            numeric/float_upper_bound.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_upper_bound.hpp
+/*! \file numeric/float_upper_bound.hpp
  *  \brief Floating-point upper bounds for real numbers.
  */
 

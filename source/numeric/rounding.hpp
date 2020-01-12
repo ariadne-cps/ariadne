@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rounding.hpp
+ *            numeric/rounding.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file rounding.hpp
+/*! \file numeric/rounding.hpp
  *  \brief Functions to set and retrieve the processor rounding mode.
  *  May be platform-dependent.
  */

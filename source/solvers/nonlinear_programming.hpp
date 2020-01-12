@@ -1,5 +1,5 @@
 /***************************************************************************
- *            nonlinear_programming.hpp
+ *            solvers/nonlinear_programming.hpp
  *
  *  Copyright  2009-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file nonlinear_programming.hpp
+/*! \file solvers/nonlinear_programming.hpp
  *  \brief Nonlinear programming.
  */
 

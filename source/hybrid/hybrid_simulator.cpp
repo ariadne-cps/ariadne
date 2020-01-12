@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_simulator.cpp
+ *            hybrid/hybrid_simulator.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

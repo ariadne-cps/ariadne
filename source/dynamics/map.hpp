@@ -1,5 +1,5 @@
 /***************************************************************************
- *            map.hpp
+ *            dynamics/map.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file map.hpp
+/*! \file dynamics/map.hpp
  *  \brief Main continuous dynamics system class.
  */
 

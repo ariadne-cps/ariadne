@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bounder.cpp
+ *            solvers/bounder.cpp
  *
  *  Copyright  2018-20  Luca Geretti
  *

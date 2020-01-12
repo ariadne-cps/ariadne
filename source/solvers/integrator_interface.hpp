@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator_interface.hpp
+ *            solvers/integrator_interface.hpp
  *
  *  Copyright  2006-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file integrator_interface.hpp
+/*! \file solvers/integrator_interface.hpp
  *  \brief Interface for solver classes for differential equations.
  */
 

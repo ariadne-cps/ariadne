@@ -1,5 +1,5 @@
 /***************************************************************************
- *            simplex_algorithm.cpp
+ *            solvers/simplex_algorithm.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            series.hpp
+ *            algebra/series.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file series.hpp
+/*! \file algebra/series.hpp
  *  \brief Taylor series in a single variable.
  */
 

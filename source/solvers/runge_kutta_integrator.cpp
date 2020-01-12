@@ -1,5 +1,5 @@
 /***************************************************************************
- *            runge_kutta_integrator.cpp
+ *            solvers/runge_kutta_integrator.cpp
  *
  *  Copyright  2010-20  Pieter Collins
  *

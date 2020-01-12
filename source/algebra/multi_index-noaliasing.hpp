@@ -1,6 +1,6 @@
 
 /***************************************************************************
- *            multi_index.hpp
+ *            algebra/multi_index.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \brief \file multi_index.hpp
+/*! \brief \file algebra/multi_index.hpp
  *  \brief An index specifying the degree of differentiation.
  */
 

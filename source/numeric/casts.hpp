@@ -1,5 +1,5 @@
 /***************************************************************************
- *            casts.hpp
+ *            numeric/casts.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file casts.hpp
+/*! \file numeric/casts.hpp
  *  \brief Inclusion header for casting between different kinds of information.
  */
 

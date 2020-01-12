@@ -1,5 +1,5 @@
 /***************************************************************************
- *            algebra.hpp
+ *            algebra/algebra.hpp
  *
  *  Copyright  2010-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra.hpp
+/*! \file algebra/algebra.hpp
  *  \brief Algebras and normed algebras.
  */
 #ifndef ARIADNE_ALGEBRA_HPP

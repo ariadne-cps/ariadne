@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dense_differential.cpp
+ *            algebra/dense_differential.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

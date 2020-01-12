@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.hpp
+ *            hybrid/hybrid_automaton.hpp
  *
  *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_automaton.hpp
+/*! \file hybrid/hybrid_automaton.hpp
  *  \brief Main hybrid automaton class.
  */
 

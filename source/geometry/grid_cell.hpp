@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_cell.hpp
+ *            geometry/grid_cell.hpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid_cell.hpp
+/*! \file geometry/grid_cell.hpp
  *  \brief Cells on a grid defined by a binary word.
  */
 

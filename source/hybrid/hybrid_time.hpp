@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_time.hpp
+ *            hybrid/hybrid_time.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_time.hpp
+/*! \file hybrid/hybrid_time.hpp
  *  \brief Hybrid times
  */
 

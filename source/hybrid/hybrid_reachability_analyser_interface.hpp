@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_reachability_analyser_interface.hpp
+ *            hybrid/hybrid_reachability_analyser_interface.hpp
  *
  *  Copyright  2011-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_reachability_analyser_interface.hpp
+/*! \file hybrid/hybrid_reachability_analyser_interface.hpp
  *  \brief Interface for analysis in the hybrid case.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_expression_set.hpp
+ *            hybrid/hybrid_expression_set.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_expression_set.hpp
+/*! \file hybrid/hybrid_expression_set.hpp
  *  \brief Sets in hybrid spaces denoted by variables.
  */
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_grid.hpp
+ *            hybrid/hybrid_grid.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_grid.hpp
+/*! \file hybrid/hybrid_grid.hpp
  *  \brief Grids in hybrid spaces.
  */
 

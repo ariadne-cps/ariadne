@@ -1,5 +1,5 @@
 /***************************************************************************
- *            paving_interface.hpp
+ *            geometry/paving_interface.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file paving_interface.hpp
+/*! \file geometry/paving_interface.hpp
  *  \brief Storage sets based on pavings and covers
  */
 

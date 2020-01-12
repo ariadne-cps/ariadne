@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float_error.hpp
+ *            numeric/float_error.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_error.hpp
+/*! \file numeric/float_error.hpp
  *  \brief Floating-point error bounds for metric spaces.
  */
 

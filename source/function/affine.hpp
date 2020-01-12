@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine.hpp
+ *            function/affine.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file affine.hpp
+/*! \file function/affine.hpp
  *  \brief Affine scalar and vector functions
  */
 

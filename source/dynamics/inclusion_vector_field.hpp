@@ -1,5 +1,5 @@
 /***************************************************************************
- *            inclusion_vector_field.hpp
+ *            dynamics/inclusion_vector_field.hpp
  *
  *  Copyright  2018-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file inclusion_vector_field.hpp
+/*! \file dynamics/inclusion_vector_field.hpp
  *  \brief Differential inclusion continuous dynamics system class.
  */
 

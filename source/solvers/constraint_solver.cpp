@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_solver.cpp
+ *            solvers/constraint_solver.cpp
  *
  *  Copyright  2000-20  Pieter Collins
  *

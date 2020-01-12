@@ -1,5 +1,5 @@
 /***************************************************************************
- *            chebyshev_polynomial.cpp
+ *            function/chebyshev_polynomial.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *

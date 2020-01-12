@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file operations.hpp
+/*! \file algebra/operations.hpp
  *  \brief Provide common algebra operations automatically.
  */
 

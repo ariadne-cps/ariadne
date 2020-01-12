@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid.cpp
+ *            geometry/grid.cpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *

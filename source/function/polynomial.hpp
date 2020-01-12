@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.hpp
+ *            function/polynomial.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file polynomial.hpp
+/*! \file function/polynomial.hpp
  *  \brief Base class for polynomial rings.
  */
 

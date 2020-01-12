@@ -1,5 +1,5 @@
 /***************************************************************************
- *            predicate.hpp
+ *            symbolic/predicate.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file predicate.hpp
+/*! \file symbolic/predicate.hpp
  *  \brief Predicates.
  */
 

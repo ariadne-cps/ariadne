@@ -1,5 +1,5 @@
 /***************************************************************************
- *            binary_tree.hpp
+ *            geometry/binary_tree.hpp
  *
  *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *

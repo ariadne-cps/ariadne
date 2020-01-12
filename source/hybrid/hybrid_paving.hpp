@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_paving.hpp
+ *            hybrid/hybrid_paving.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_paving.hpp
+/*! \file hybrid/hybrid_paving.hpp
  *  \brief Hybrid extension of a paving.
  */
 

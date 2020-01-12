@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.hpp
+ *            function/taylor_model.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file taylor_model.hpp
+/*! \file function/taylor_model.hpp
  *  \brief ApproximateTag functions on a is_bounded domain with a sparse representation.
  */
 

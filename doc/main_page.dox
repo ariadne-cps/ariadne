@@ -1,7 +1,7 @@
 /***************************************************************************
  *            main_page.dox
  *
- *  Copyright  2004-8  Pieter Collins
+ *  Copyright  2004-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -52,13 +52,22 @@ An example of the use of %Ariadne for reachability analysis of a simple hybrid s
 
 An example of the use of %Ariadne for general-purpose rigorous numerical computation is given ony the \ref rigorous_numerics_tutorial_page  page. The example is contained in the file  \link tutorials/rigorous_numerics/rigorous_numerics_tutorial.cpp rigorous_numerics_tutorial.cpp \endlink.
 
+Examples of the use of %Ariadne via the Python interface can be found on the \ref python_tutorial_page documentation page.
+
 \section mainpage_advanced_usage Advanced Usage
 
-A guide for advanced users on to use the internal data types including the function calculus and Taylor calculus can be found on the \ref python_tutorial_page documentation page.
 
 \subsection mainpage_modules Modules
 
 The internal structure of %Ariadne can be best explored via the <A HREF="modules.html">Modules</A> page (also linked to at the top of this page).
+
+\subsection cpp_api_documentation C++ API
+
+The classes, methods, functions and associated type definitions are described in detail in the main documentation. Entities can be found either withing the \ref Ariadne namespace documentation, the <A HREF="classes.html">Class Index</A> (also linked to at the top-left of this page) or through the search bar at the top-right. Probably the best way of getting a structured overview is via the <A HREF="modules.html">Modules</A> page.
+
+\subsection python_interface Python Interface
+
+A guide on the differences between the Python interface and the documented C++ API can be found on the \ref python_interface_page page.
 
 \subsection mainpage_mathematical_foundations Mathematical Foundations
 

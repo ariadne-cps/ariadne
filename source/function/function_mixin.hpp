@@ -52,13 +52,13 @@ typedef ElementaryAlgebra<ApproximateNumber> ApproximateElementaryAlgebra;
 typedef ElementaryAlgebra<ValidatedNumber> ValidatedElementaryAlgebra;
 typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 
-template<class F, class P, class D, class C> class FunctionMixin { };
-template<class F, class P, class D> class ScalarFunctionMixin;
-template<class F, class P, class D> class VectorFunctionMixin;
-template<class F, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<F,P,IntervalDomainType>;
-template<class F, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<F,P,IntervalDomainType>;
-template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,BoxDomainType>;
-template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,BoxDomainType>;
+template<class F, class P, class SIG> class FunctionMixin { };
+template<class F, class P, class... ARGS> class ScalarFunctionMixin;
+template<class F, class P, class... ARGS> class VectorFunctionMixin;
+template<class F, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<F,P,RealScalar>;
+template<class F, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<F,P,RealScalar>;
+template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,RealVector>;
+template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,RealVector>;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 template<class T> T* heap_move(T&& t) { return new T(std::move(t)); }
@@ -70,15 +70,17 @@ template<class D> D make_domain(SizeType d);
 template<> inline IntervalDomainType make_domain(SizeType d) { assert(d==1u); return IntervalDomainType(-inf,+inf); }
 template<> inline BoxDomainType make_domain(SizeType d) { return BoxDomainType(d,IntervalDomainType(-inf,+inf)); }
 
-template<class F, class D, class C>
-class FunctionMixin<F,Void,D,C>
-    : public virtual FunctionInterface<Void,D,C>
+template<class F, class SIG>
+class FunctionMixin<F,Void,SIG>
+    : public virtual FunctionInterface<Void,SIG>
 {
+    using D=typename SignatureTraits<SIG>::DomainType;
+    using C=typename SignatureTraits<SIG>::CodomainType;
   public:
-    typedef typename FunctionInterface<Void,D,C>::DomainType DomainType;
-    typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
-    typedef typename FunctionInterface<Void,D,C>::ArgumentSizeType ArgumentSizeType;
-    typedef typename FunctionInterface<Void,D,C>::ResultSizeType ResultSizeType;
+    typedef typename FunctionInterface<Void,SIG>::DomainType DomainType;
+    typedef typename FunctionInterface<Void,SIG>::CodomainType CodomainType;
+    typedef typename FunctionInterface<Void,SIG>::ArgumentSizeType ArgumentSizeType;
+    typedef typename FunctionInterface<Void,SIG>::ResultSizeType ResultSizeType;
   protected:
     FunctionMixin() { }
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
@@ -95,15 +97,17 @@ class FunctionMixin<F,Void,D,C>
 };
 
 
-template<class F, class D, class C>
-class FunctionMixin<F,ApproximateTag,D,C>
-    : public virtual FunctionInterface<ApproximateTag,D,C>
-    , public FunctionMixin<F,Void,D,C>
+template<class F, class SIG>
+class FunctionMixin<F,ApproximateTag,SIG>
+    : public virtual FunctionInterface<ApproximateTag,SIG>
+    , public FunctionMixin<F,Void,SIG>
 {
+    using D=typename SignatureTraits<SIG>::DomainType;
+    using C=typename SignatureTraits<SIG>::CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual FunctionInterface<ApproximateTag,D,C>* _clone() const override;
+    virtual FunctionInterface<ApproximateTag,SIG>* _clone() const override;
     virtual Result<FloatDPApproximation> _evaluate(const Argument<FloatDPApproximation>& x) const override;
     virtual Result<FloatMPApproximation> _evaluate(const Argument<FloatMPApproximation>& x) const override;
     virtual Result<Differential<FloatDPApproximation>> _evaluate(const Argument<Differential<FloatDPApproximation>>& x) const override;
@@ -115,16 +119,18 @@ class FunctionMixin<F,ApproximateTag,D,C>
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F, class D, class C>
-class FunctionMixin<F,ValidatedTag,D,C>
-    : public virtual FunctionInterface<ValidatedTag,D,C>
-    , public FunctionMixin<F,ApproximateTag,D,C>
+template<class F, class SIG>
+class FunctionMixin<F,ValidatedTag,SIG>
+    : public virtual FunctionInterface<ValidatedTag,SIG>
+    , public FunctionMixin<F,ApproximateTag,SIG>
 {
+    using D=typename SignatureTraits<SIG>::DomainType;
+    using C=typename SignatureTraits<SIG>::CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionMixin<F,ApproximateTag,D,C>::_evaluate;
-    virtual FunctionInterface<ValidatedTag,D,C>* _clone() const override;
+    using FunctionMixin<F,ApproximateTag,SIG>::_evaluate;
+    virtual FunctionInterface<ValidatedTag,SIG>* _clone() const override;
     virtual Result<FloatDPBounds> _evaluate(const Argument<FloatDPBounds>& x) const override;
     virtual Result<FloatMPBounds> _evaluate(const Argument<FloatMPBounds>& x) const override;
     virtual Result<Differential<FloatDPBounds>> _evaluate(const Argument<Differential<FloatDPBounds>>& x) const override;
@@ -141,16 +147,18 @@ class FunctionMixin<F,ValidatedTag,D,C>
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
-template<class F, class D, class C>
-class FunctionMixin<F,EffectiveTag,D,C>
-    : public virtual FunctionInterface<EffectiveTag,D,C>
-    , public FunctionMixin<F,ValidatedTag,D,C>
+template<class F, class SIG>
+class FunctionMixin<F,EffectiveTag,SIG>
+    : public virtual FunctionInterface<EffectiveTag,SIG>
+    , public FunctionMixin<F,ValidatedTag,SIG>
 {
+    using D=typename SignatureTraits<SIG>::DomainType;
+    using C=typename SignatureTraits<SIG>::CodomainType;
     template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
     template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    using FunctionMixin<F,ValidatedTag,D,C>::_evaluate;
-    virtual FunctionInterface<EffectiveTag,D,C>* _clone() const override;
+    using FunctionMixin<F,ValidatedTag,SIG>::_evaluate;
+    virtual FunctionInterface<EffectiveTag,SIG>* _clone() const override;
     virtual Result<Real> _evaluate(const Argument<Real>& x) const override;
     virtual Result<ElementaryAlgebra<Real>> _evaluate(const Argument<ElementaryAlgebra<Real>>& x) const override;
     virtual Result<Formula<Real>> _evaluate(const Argument<Formula<Real>>& x) const override;
@@ -158,23 +166,23 @@ class FunctionMixin<F,EffectiveTag,D,C>
     virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const override;
 };
 
-template<class F, class P, class D> class ScalarFunctionMixin
-    : public FunctionMixin<F,P,D,IntervalDomainType> { };
+template<class F, class P, class... ARGS> class ScalarFunctionMixin
+    : public FunctionMixin<F,P,RealScalar(ARGS...)> { };
 
-template<class F, class P, class D> class VectorFunctionMixin
-    : public FunctionMixin<F,P,D,BoxDomainType>
-    , public virtual VectorOfFunctionInterface<P,D>
+template<class F, class P, class... ARGS> class VectorFunctionMixin
+    : public FunctionMixin<F,P,RealVector(ARGS...)>
+    , public virtual VectorOfFunctionInterface<P,ARGS...>
 {
-    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override {
+    virtual ScalarFunctionInterface<P,ARGS...>* _get(SizeType i) const override {
         auto fi=static_cast<F const&>(*this)[i]; return heap_copy(fi); }
 };
 
 
-template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
+template<class F,class SIG> FunctionInterface<ApproximateTag,SIG>* FunctionMixin<F,ApproximateTag,SIG>::_clone() const {
     return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
+template<class F,class SIG> FunctionInterface<ValidatedTag,SIG>* FunctionMixin<F,ValidatedTag,SIG>::_clone() const {
     return new F(static_cast<const F&>(*this)); }
-template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
+template<class F,class SIG> FunctionInterface<EffectiveTag,SIG>* FunctionMixin<F,EffectiveTag,SIG>::_clone() const {
     return new F(static_cast<const F&>(*this)); }
 
 

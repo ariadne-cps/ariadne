@@ -44,7 +44,7 @@ namespace Ariadne {
 
 
 
-Curve::Curve(const Function<EffectiveTag,IntervalDomainType,BoxDomainType>& f)
+Curve::Curve(const EffectiveVectorUnivariateFunction& f)
     : _function(f)
 {
     assert(this->_function.argument_size()==1);

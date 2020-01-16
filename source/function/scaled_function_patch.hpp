@@ -156,6 +156,8 @@ template<class M> class ScaledFunctionPatch
 {
     typedef BoxDomainType D;
     typedef IntervalDomainType C;
+    typedef Real SIG(RealVector);
+    typedef RealVector ARG;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -369,7 +371,7 @@ template<class M> class ScaledFunctionPatch
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class FunctionMixin<ScaledFunctionPatch<M>, P, D,C>;
+    friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
     friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, D, C, PR>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
@@ -535,6 +537,8 @@ template<class M> class VectorScaledFunctionPatch
     friend class VectorScaledFunctionPatchElementReference<M>;
     typedef BoxDomainType D;
     typedef BoxDomainType C;
+    typedef RealVector SIG(RealVector);
+    typedef RealVector ARG;
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -731,7 +735,7 @@ template<class M> class VectorScaledFunctionPatch
     virtual VectorScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
   private:
-    friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,BoxDomainType>;
+    friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,ARG>;
     friend class TaylorFunctionFactory;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
@@ -1236,6 +1240,7 @@ template<class M> class ScaledFunctionPatchFactory
 {
     typedef BoxDomainType D;
     typedef IntervalDomainType SD;
+    typedef RealVector ARG;
 
     typedef typename M::Paradigm P;
     typedef typename M::PrecisionType PR;
@@ -1253,8 +1258,8 @@ template<class M> class ScaledFunctionPatchFactory
     PropertiesType properties() const { return this->_properties; }
 
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
-    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,D>& function) const;
-    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,D>& function) const;
+    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,ARG>& function) const;
+    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,ARG>& function) const;
 
     ScaledFunctionPatch<M> create_zero(const DomainType& domain) const;
     ScaledFunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;

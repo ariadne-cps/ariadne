@@ -64,7 +64,7 @@ namespace Ariadne {
 //ValidatedVectorMultivariateFunctionModelDP join(const ValidatedVectorMultivariateFunctionModelDP&, const ValidatedVectorMultivariateFunctionModelDP&);
 
 template<class P, class D, class C, class PR, class PRE> OutputStream& operator<<(OutputStream& os, const Representation< FunctionModel<P,D,C,PR,PRE> >& frepr) {
-    static_cast<const FunctionInterface<P,D,C>&>(frepr.reference()).repr(os); return os;
+    static_cast<const FunctionModelInterface<P,D,C,PR,PRE>&>(frepr.reference()).repr(os); return os;
 }
 
 ValidatedVectorMultivariateTaylorFunctionModelDP __getslice__(const ValidatedVectorMultivariateTaylorFunctionModelDP& tf, Int start, Int stop) {

@@ -90,6 +90,7 @@ class UnitBox {
 
 struct ScalarElementTraits {
     template<class X> using Type=Scalar<X>;
+    typedef Scalar<Real> Kind;
     typedef SizeOne SizeType;
     typedef IndexZero IndexType;
     template<class PR> using RangeType = Interval<FloatUpperBound<PR>>;
@@ -97,6 +98,7 @@ struct ScalarElementTraits {
 
 struct VectorElementTraits {
     template<class X> using Type=Vector<X>;
+    typedef Vector<Real> Kind;
     typedef Ariadne::SizeType SizeType;
     typedef Ariadne::SizeType IndexType;
     template<class PR> using RangeType = Box<Interval<FloatUpperBound<PR>>>;

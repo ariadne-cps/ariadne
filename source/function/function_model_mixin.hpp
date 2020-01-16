@@ -57,7 +57,7 @@ template<class FM, class P, class D, class PR=DoublePrecision, class PRE=PR> usi
 
 template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,IntervalDomainType,PR,PRE>
     : public virtual ScalarFunctionModelInterface<P,D,PR,PRE>
-    , public ScalarFunctionMixin<FM,P,D>
+    , public ScalarFunctionMixin<FM,P,ElementKind<D>>
     , public ElementaryAlgebraMixin<FM,CanonicalNumericType<P,PR,PRE>>
 {
     using C = IntervalDomainType;
@@ -121,7 +121,7 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
 
 template<class FM, class P, class D, class PR, class PRE> class FunctionModelMixin<FM,P,D,BoxDomainType,PR,PRE>
     : public virtual VectorFunctionModelInterface<P,D,PR,PRE>
-    , public VectorFunctionMixin<FM,P,D>
+    , public VectorFunctionMixin<FM,P,ElementKind<D>>
 {
     using C = BoxDomainType;
     using X = typename FunctionModelInterface<P,D,C,PR,PRE>::NumericType;
@@ -222,9 +222,9 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
     inline FCTRY const& upcast() const { return static_cast<FCTRY const&>(*this); }
     virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const override {
         return this->upcast().create(number); }
-    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const ScalarFunctionInterface<P,VD>& function) const override {
+    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const override {
         return heap_move(this->upcast().create(domain,function)); };
-    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const VectorFunctionInterface<P,VD>& function) const override {
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const override {
         return heap_move(this->upcast().create(domain,function)); };
 
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_zero(const VectorDomainType& domain) const override {

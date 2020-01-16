@@ -81,8 +81,8 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<MultiIndex
     MultiIndex const& a=arepr.reference(); os << "("; for(SizeType i=0; i!=a.size(); ++i) { if(i!=0) { os << ','; } os << a[i]; } os << ")"; return os;
 }
 
-template<class P, class D, class C> OutputStream& operator<<(OutputStream& os, const Representation< Function<P,D,C> >& frepr) {
-    static_cast<const FunctionInterface<P,D,C>&>(frepr.reference()).repr(os); return os;
+template<class P, class SIG> OutputStream& operator<<(OutputStream& os, const Representation< Function<P,SIG> >& frepr) {
+    static_cast<const FunctionInterface<P,SIG>&>(frepr.reference()).repr(os); return os;
 }
 
 }// namespace Ariadne

@@ -58,11 +58,11 @@ template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,BoxDomainType>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelDP>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,IntervalDomainType>;
-template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,IntervalDomainType>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealScalar(RealVector)>;
+template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealScalar(RealVector)>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelDP>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,BoxDomainType,BoxDomainType>;
-template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,BoxDomainType,BoxDomainType>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealVector(RealVector)>;
+template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealVector(RealVector)>;
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,BoxDomainType>;

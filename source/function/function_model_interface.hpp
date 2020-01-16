@@ -53,7 +53,7 @@ template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterf
     typedef IntervalDomainType C;
     typedef RawFloat<PR> F;
   public:
-    typedef D DomainType;
+        typedef D DomainType;
     typedef C CodomainType;
     typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
   public:
@@ -78,13 +78,14 @@ template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterf
 };
 
 template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface
-    : public virtual FunctionInterface<P,D,C>
+    : public virtual FunctionInterface<P,ElementKind<C>(ElementKind<D>)>
     , public virtual FunctionModelAlgebraInterface<P,D,C,PR,PRE>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     static_assert(IsSame<C,IntervalDomainType>::value or IsSame<C,BoxDomainType>::value,"");
-    template<class X> using Argument = typename FunctionInterface<P,D,C>::template Argument<X>;
-    template<class X> using Result = typename FunctionInterface<P,D,C>::template Result<X>;
+    using RES=ElementKind<C>; using ARG=ElementKind<D>; using SIG=RES(ARG);
+    template<class X> using Argument = typename FunctionInterface<P,SIG>::template Argument<X>;
+    template<class X> using Result = typename FunctionInterface<P,SIG>::template Result<X>;
   public:
     typedef D DomainType;
     typedef C CodomainType;
@@ -116,10 +117,10 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelInte
     virtual FunctionModelInterface<P,D,C,PR,PRE>* _antiderivative(ElementIndexType<D> j) const = 0;
     virtual FunctionModelInterface<P,D,C,PR,PRE>* _antiderivative(ElementIndexType<D> j, CanonicalNumericType<P,PR,PRE> c) const = 0;
 
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarFunctionInterface<P,C>& f) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorFunctionInterface<P,C>& f) const = 0;
-    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P,C>& f) const = 0;
-    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorFunctionInterface<P,C>& f) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _compose(const ScalarFunctionInterface<P,RES>& f) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _compose(const VectorFunctionInterface<P,RES>& f) const = 0;
+    virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const ScalarFunctionInterface<P,RES>& f) const = 0;
+    virtual VectorFunctionModelInterface<P,D,PR,PRE>* _unchecked_compose(const VectorFunctionInterface<P,RES>& f) const = 0;
 
     virtual Boolean _refines(const FunctionModelInterface<P,D,C,PR,PRE>& f) const = 0;
     virtual Boolean _inconsistent(const FunctionModelInterface<P,D,C,PR,PRE>& f) const = 0;
@@ -147,8 +148,8 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) { factory._write(os); return os; }
   private:
     virtual CanonicalNumericType<P,PR,PRE> _create(const Number<P>& number) const = 0;
-    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const ScalarFunctionInterface<P,VD>& function) const = 0;
-    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const VectorFunctionInterface<P,VD>& function) const = 0;
+    virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const = 0;
+    virtual VectorFunctionModelInterface<P,VD,PR,PRE>* _create(const VectorDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const = 0;
 
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_zero(const VectorDomainType& domain) const = 0;
     virtual ScalarFunctionModelInterface<P,VD,PR,PRE>* _create_constant(const VectorDomainType& domain, const Number<P>& value) const = 0;
@@ -160,9 +161,9 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
   public:
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const {
         return CanonicalNumericType<P,PR,PRE>(this->_create(number)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create(const VectorDomainType& domain, const ScalarFunctionInterface<P,VD>& function) const {
+    ScalarFunctionModel<P,VD,PR,PRE> create(const VectorDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const {
         return ScalarFunctionModel<P,VD,PR,PRE>(this->_create(domain,function)); }
-    VectorFunctionModel<P,VD,PR,PRE> create(const VectorDomainType& domain, const VectorFunctionInterface<P,VD>& function) const {
+    VectorFunctionModel<P,VD,PR,PRE> create(const VectorDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const {
         return VectorFunctionModel<P,VD,PR,PRE>(this->_create(domain,function)); }
 
     CanonicalNumericType<P,PR,PRE> create_number(const Number<P>& number) const {

@@ -70,9 +70,9 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const {
         return CanonicalNumericType<P,PR,PRE>(this->_ptr->_create(c)); }
-    ScalarFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, ScalarFunction<P,VD> const& f) const {
+    ScalarFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, ScalarMultivariateFunction<P> const& f) const {
         return ScalarFunctionModel<P,VD,PR,PRE>(this->_ptr->_create(dom,f)); }
-    VectorFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, VectorFunction<P,VD> const& f) const {
+    VectorFunctionModel<P,VD,PR,PRE> create(VectorDomainType const& dom, VectorMultivariateFunction<P> const& f) const {
         return VectorFunctionModel<P,VD,PR,PRE>(this->_ptr->_create(dom,f)); }
 
     CanonicalNumericType<P,PR,PRE> create_number(Number<P> const& c) const {
@@ -106,6 +106,7 @@ FunctionModelFactoryInterface<P,PR,PRE>::create_identity(IntervalDomainType cons
     return ScalarFunctionModel<P,VD,PR,PRE>(this->create_coordinate(BoxDomainType(1u,dom),0u)); }
 
 template<class FCTRY, class D> class FunctionModelCreator {
+    typedef ElementKind<D> ARG;
     typedef typename FCTRY::Paradigm P;
     typedef typename FCTRY::PrecisionType PR;
     typedef typename FCTRY::ErrorPrecisionType PRE;
@@ -117,8 +118,8 @@ template<class FCTRY, class D> class FunctionModelCreator {
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
 
     decltype(auto) create(Number<P> const& c) const { return this->_factory.create(c); }
-    decltype(auto) create(ScalarFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
-    decltype(auto) create(VectorFunction<P,D> const& f) { return this->_factory.create(this->_domain,f); }
+    decltype(auto) create(ScalarFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
+    decltype(auto) create(VectorFunction<P,ARG> const& f) { return this->_factory.create(this->_domain,f); }
     decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
     decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
     decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
@@ -137,6 +138,7 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
     typedef typename FCTRY::PrecisionType PR;
     typedef typename FCTRY::ErrorPrecisionType PRE;
     typedef IntervalDomainType D;
+    typedef ElementKind<D> ARG;
   public:
     typedef FCTRY FactoryType;
     typedef D DomainType;
@@ -145,8 +147,8 @@ template<class FCTRY> class FunctionModelCreator<FCTRY,IntervalDomainType> {
     explicit FunctionModelCreator(DomainType domain, FactoryType factory) : _factory(factory), _domain(domain) { }
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const { return this->_factory.create(c); }
-    ScalarFunctionModel<P,D,PR,PRE> create(ScalarFunction<P,D> const& f) { ARIADNE_NOT_IMPLEMENTED; }
-    VectorFunctionModel<P,D,PR,PRE> create(VectorFunction<P,D> const& f) { ARIADNE_NOT_IMPLEMENTED; }
+    ScalarFunctionModel<P,D,PR,PRE> create(ScalarFunction<P,ARG> const& f) { ARIADNE_NOT_IMPLEMENTED; }
+    VectorFunctionModel<P,D,PR,PRE> create(VectorFunction<P,ARG> const& f) { ARIADNE_NOT_IMPLEMENTED; }
     ScalarFunctionModel<P,D,PR,PRE> create_zero() { ARIADNE_NOT_IMPLEMENTED; }
     VectorFunctionModel<P,D,PR,PRE> create_zeros(SizeType n) { ARIADNE_NOT_IMPLEMENTED; }
     ScalarFunctionModel<P,D,PR,PRE> create_identity() { ARIADNE_NOT_IMPLEMENTED; }
@@ -173,8 +175,10 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     using C = IntervalDomainType;
+    using SIG = ElementKind<C>(ElementKind<D>);
+    using ARG=ElementKind<D>;
   public:
-    typedef ScalarFunction<P,D> GenericType;
+    typedef ScalarFunction<P,ARG> GenericType;
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
@@ -197,8 +201,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
     FunctionModel& operator=(const FunctionModel<P,D,C,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
         FunctionModel(const FunctionModelInterface<P,D,C,PR,PRE>& f) : _ptr(f._clone()) { }
-    FunctionModel(const Function<P,D,C>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,D,C,PR,PRE>*>(f.raw_pointer()->_clone())) { }
-    operator Function<P,D,C>() const { return Function<P,D,C>(this->_ptr->_clone()); }
+    FunctionModel(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,D,C,PR,PRE>*>(f.raw_pointer()->_clone())) { }
+    operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); }
     operator FunctionModelInterface<P,D,C,PR,PRE>& () { return *_ptr; }
     operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
     const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
@@ -207,7 +211,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
 
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const Number<P>& c);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
-    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunction<P,D>& f);
+    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunction<P,ARG>& f);
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
 //    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarMultivariateTaylorFunctionModelDP& f);
 
@@ -372,7 +376,7 @@ template<class P, class D, class PR, class PRE> inline
 ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const Number<P>& c) {
     return (*this)=factory(*this).create(c); }
 template<class P, class D, class PR, class PRE> inline
-ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const ScalarFunction<P,D>& f) {
+ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const ScalarFunction<P,ARG>& f) {
     return (*this)=factory(*this).create(f); }
 template<class P, class D, class PR, class PRE> inline
 ScalarFunctionModel<P,D,PR,PRE>& ScalarFunctionModel<P,D,PR,PRE>::operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f) {
@@ -421,10 +425,12 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
     static_assert(IsSame<PRE,DoublePrecision>::value or IsSame<PRE,MultiplePrecision>::value,"");
     typedef BoxDomainType C;
+    using SIG=ElementKind<C>(ElementKind<D>);
+    using ARG=ElementKind<D>;
   public:
     clone_on_copy_ptr< VectorFunctionModelInterface<P,D,PR,PRE> > _ptr;
   public:
-    typedef VectorFunction<P,D> GenericType;
+    typedef VectorFunction<P,ARG> GenericType;
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
@@ -455,7 +461,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline FunctionModel(const FunctionModel<P,D,C,PR,PRE>& f) : _ptr(f._ptr) { }
     inline FunctionModel& operator=(const FunctionModel<P,D,C,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
     inline operator const FunctionModelInterface<P,D,C,PR,PRE>& () const { return *_ptr; }
-    inline operator Function<P,D,C> () const { return Function<P,D,C>(*_ptr); }
+    inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); }
     inline const FunctionModelInterface<P,D,C,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
     inline const FunctionModelInterface<P,D,C,PR,PRE>& reference() const { return *_ptr; }
     inline FunctionModelInterface<P,D,C,PR,PRE>& reference() { return *_ptr; }

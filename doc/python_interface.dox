@@ -51,12 +51,13 @@ added in a future release.
 C++ allows classes to be defined which depend on other classes;
 such classes are called \em templates. For example, the template \ref Bounds "Bounds<X>"
 describes bounds on a quantity, where the lower and upper bounds are objects of class \a X.
-Thus \ref Bounds<Dyadic> represents dyadic bounds on a real number, and Bounds<FloatMP> would
-represents multiple-precision floating-point bounds. Each instantiation
-of a C++ template yields a different class. Since Python does not have templates,
-in the Python interface, each instantiation has a single name derived from the
-template name and the class parameter. For example, Bounds<Dyadic> translates
-to the Python class \ref DyadicBounds "DyadicBounds". The Python class name is available from
+Thus Bounds<Dyadic> represents dyadic bounds on a real number,
+and Bounds<FloatMP> would represents multiple-precision floating-point bounds.
+Each instantiation of a C++ template yields a different class.
+Since Python does not have templates, in the Python interface,
+each instantiation has a single name derived from the template name and the class parameter.
+For example, \ref Bounds "Bounds<Dyadic>" translates to the Python class \ref DyadicBounds "DyadicBounds".
+The Python class name is available from
 C++ (and can be found in the documentation) as a C++ <tt>typedef</tt> class alias.
 
  - <em>Conversion:</em> <br>

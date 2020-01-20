@@ -56,6 +56,9 @@ class ApproximateDouble {
     operator double() const { return _d; }
 };
 
+//! \ingroup NumericModule
+//! \brief A wrapper around a builtin double-precision floating-point number,
+//! indicating that the stored value is the \em exact value of a real quantity.
 class ExactDouble {
     double _d;
   public:

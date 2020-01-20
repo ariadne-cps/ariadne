@@ -26,6 +26,8 @@
  * \brief Documentation for Ariadne's Python tutorial
  */
 
+namespace Ariadne {
+
 /*!
 
 \page python_tutorial_page Python Tutorial
@@ -36,47 +38,64 @@ The full code of the tutorial is given in \ref python/tutorials/tutorial.py
 
 \dontinclude python/tutorials/tutorial.py
 
+\section python_tutorial_introspection The %Ariadne module.
+
+First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
+\skipline import
+To see all the classes and functions available in %Ariadne, type:
+\skipline dir
+
 \section python_tutorial_numerical Numerical Types
 
-%Ariadne supports several basic numerical types, includin Integer, Rational, Real, Float, Bounds and Approximation. The Integer and Rational types are only supported if the GNU Multiple-Precision library (GMP) is installed, and are mostly used for system definition. The Float type is based on the IEEE double-precision type (native) in Python, and the Interval type is an internal type supporting outwardly-rounded interval arithmetic with interval endpoints.
+%Ariadne supports several basic numerical types, including core \ref Integer, \ref Dyadic, \ref Decimal, \ref Rational and \ref Real classes, which store numbers exactly. These number types are good for problem specification, but may be inefficient for actual numerical computations.
 
-Builtin double-precision numbers can be captured in the ExactDouble class:
-\skipline ExactDouble
-\skipline exact
-
-The Integer class supports integers of arbitrary size.
+The \ref Integer class supports integers of arbitrary size.
 \skipline Integer
 
-The Dyadic class supports numbers of the form \f$p/2^q\f$ where \f$p\f$ and \f$q\f$ are integers.
+The \ref Dyadic class supports numbers of the form \f$p/2^q\f$ where \f$p\f$ and \f$q\f$ are integers.
 These include all numbers of binary floating-point types and are useful as computational intermediates.
 \skip Dyadic
 \until two
 
-The Rational class supports exact representation of rational numbers.
+The \ref Decimal class supports exact representation of decimal numbers.
+Numbers can be constructed from floating-point values up to around 9 decimal places; for more accuracy a string literal must be used:
+\skipline Decimal
+\skipline Decimal
+\skipline Decimal
+
+The \ref Rational class supports exact representation of rational numbers.
 \skipline Rational
 \skipline Rational
 \skipline Rational
 
-The Real number class supports arbitrary formulae.
+The \ref Real number class supports arbitrary formulae.
+\skipline Real
 \skipline Real
 
+Computations in %Ariadne are usually most efficiently performed using floating-point number types. %Ariadne internally supports the \ref FloatDP and \ref FloatMP types, which are respectively based on builtin IEEE double-precision floating-point numbers, and multiple-precision floating-point numbers from the MPFR library.
 
-%Ariadne uses C++/Python's built-in floating-point type to provide a Float class.
-\skipline Float
+Since Python's builtin <tt>float</tt> class uses rounded arithmetic, such numbers may not be an exact representation of a value, leading to unsafe computation. If a Python <tt>float</tt> is indeed an exact value, (e.g. 1.375 is an exact double-precision floating-point number), this must first be converted to an %Ariadne \ref ExactDouble class:
+\skipline ExactDouble
+\skipline exact
+Numbers which are not exactly representable in double-precision should be converted to the \ref Decimal class instead.
 
-%Ariadne supplies a Bounds classes supporting outward-rounded interval arithmetic
+%Ariadne uses C++/Python's built-in floating-point types to provide a double-precision floating-point number class \ref FloatDP, and the MPFR library to provide a multiple-precision floating-point type \ref FloatMP. Each type has a corresponding precision:
+\skipline DoublePrecision
+\skipline double_precision
+\skipline MultiplePrecision
+Floating-point numbers can be constructed from integers and dyadic numbers by supplying the precision:
+\skipline FloatDP
+\skipline FloatMP
+
+Raw floating-point numbers only support rounded arithmetic, so are best avoided in user code. Instead, they can be used in safe correctly-rounded generic types  \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>", \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>". For example, the %Bounds classes support outward-rounded interval arithmetic
 \skipline Bounds
-
-Note that when creating an interval from floating-point values, the numerical literals are first converted to the nearest exactly representable number by the interpreter.
-
-To obtain an outwardly-rounded interval, use the Rational class if possible.
 
 
 
 
 \section python_tutorial_linear_algebra Linear Algebra
 
-%Ariadne supports linear algebra operations based on Vector and Matrix classes. In the C++ library, these types are parameterised by the scalar type (either Float or Interval). In the Python interface, only interval versions are provided.
+%Ariadne supports linear algebra operations based on Vector and Matrix classes. In the C++ library, these types are parameterised by the scalar type (e.g. %Rational, %FloatDPBounds).
 
 
 \snippet python/tutorials/tutorial.py Linear Algebra demonstration
@@ -115,7 +134,7 @@ The semantics of this operator have not been determined, since Python has differ
 
 The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
 
-\sa  \ref LinearAlgebraModule, Ariadne::Vector, Ariadne::Matrix
+\sa  \ref LinearAlgebraModule, Vector, Matrix
 
 <br><br>
 
@@ -124,7 +143,7 @@ The main design decision is whether to use a single "Ariadne" slicing semantics 
 
 \section python_tutorial_function Functions
 
-Currently %Ariadne provides a \c FunctionInterface class which specifies functions \f$f:\R^n\rightarrow\R^m\f$, i.e. functions of a single vector-valued variable.
+Currently %Ariadne provides a \c Function class which specifies functions \f$f:\R^n\rightarrow\R^m\f$, i.e. functions of a single vector-valued variable.
 
 There are currently two ways of creating user-defined functions, either via the Python interface or in C++.
 
@@ -178,7 +197,7 @@ It would be nice to have a script in which a function could be specified in C++ 
 
 \section python_tutorial_functional_calculus Functional Calculus
 
-%Ariadne supports nonlinear functions by means of two abstract classes, the RealScalarFunction for scalar functions \f$f:\R^m\rightarrow\R\f$ and the RealVectorFunction for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical ScalarTaylorFunction and VectorTaylorFunction types which can then be worked with.
+%Ariadne supports nonlinear functions by means of abstract classes, including \ref EffectiveScalarUnivariateFunction for functions \f$f:\R\rightarrow\R\f$, \ref EffectiveVectorUnivariateFunction for \f$f:\R\rightarrow\R^n\f$, \ref EffectiveScalarMultivariateFunction for scalar functions \f$f:\R^m\rightarrow\R\f$ and the \ref EffectiveVectorMultivariateFunction for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical \ref ValidatedScalarMultivariateTaylorFunctionModelDP and \ref ValidatedVectorMultivariateTaylorFunctionModelDP types which can then be worked with.
 
 \subsection taylor_calculus_nonlinear User-Defined Functions
 
@@ -191,9 +210,8 @@ The EffectiveScalarMultivariateFunction and EffectiveVectorMultivariateFunction 
 
 \dontinclude python/tutorials/tutorial.py
 
-The Polynomial class provide concrete implementations of the function calculus.
-
-A Polynomial represents a scalar polynomial function in multiple variables, with coefficients represented by intervals to take into account roundoff error. A polynomial can be created by using the PolynomialExpression.variable(n,j), which creates the polynomial \f$p(x)=x_j\f$ for \f$x\in\R^n\f$:
+The \ref Polynomial "Polynomial<X>" class provides concrete implementations of the function calculus. For example, \ref FloatDPApproximationMultivariatePolynomial class defines a polynomial in multiple variables with coefficients of type \ref FloatDPApproximation.
+A polynomial can be created by using the <tt>variable(n,j)</tt> static method, which creates the polynomial \f$p(x)=x_j\f$ for \f$x\in\R^n\f$:
 
 \skipline Polynomial
 
@@ -208,7 +226,7 @@ The standard arithmetical operations are available for polynomial expressions:
 
 \dontinclude python/tutorials/tutorial.py
 
-The core type is a ScalarTaylorFunction, which is a polynomial representation \a p of a function \a f on a box \a D in Euclidean space with uniform error \a e:
+The core type is a \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,F>", which is a polynomial representation \a p of a function \a f on a box \a D in Euclidean space with uniform error \a e:
 \f[ f(x) = p(x)\pm e \text{ for } x\in D . \f]
 
 Rather than represent a Taylor function by the polynomial \a p itself, we use a scaled model \a m such that
@@ -307,18 +325,16 @@ We can combine TaylorExpression objects into TaylorFunction objects using the \c
 
 The main use of the Taylor calculus is to perform composition of functions and solution of equations.
 
-We can compose TaylorFunction objects \f$f\f$ and \f$h\f$ to obtain the function \f$f\circ h\f$.
+We can compose Taylor function objects \f$f\f$ and \f$h\f$ to obtain the function \f$f\circ h\f$.
 
 \skipline compose(
 
 The codomain of \a g must be a subset of the domain of \a f.
 \skipline assert
 
-We can also compose a TaylorExpression \f$f\f$ and TaylorFunction \f$g\f$ to obtain a Taylor function model \f$f\circ g\f$.
+We can also compose a Taylor function \f$f\f$ and Taylor function \f$g\f$ to obtain a Taylor function model \f$f\circ g\f$.
 
 \until compose(
-
-We can also compose Expression interface objects and FunctionInterface objects.
 
 \subsection taylor_calculus_algebraic Solving Algebraic Equations
 
@@ -381,3 +397,5 @@ We can use Picard iteration to improve solutions to differential equations.
 \sa \ref function_model_contractors
 
 */
+
+} // namespace Ariadne

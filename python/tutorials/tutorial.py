@@ -25,29 +25,21 @@
 
 # Import all classes in the ariadne module
 from ariadne import *
-pr = DoublePrecision()
-
 
 # Print a list of all available classes and functions
-print(dir(),"\n")
+print(dir())
 
+# Output a
 ###############################################################################
 ## [Numeric demonstration]
 
 # Number classes and their constructors
 
-# Store a double-precision floating-point number
-d=ExactDouble(1.375)
-d=exact(1.375)
-print("d:",d,type(d))
-## Done ExactDouble
-
 # Create an integer
 z=Integer(5)
 print("z:",z,type(z))
 
-# Create a dyadic; can convert from ExactDouble and Integer
-w=Dyadic(d)
+# Create a dyadic; can convert from Integer
 w=Dyadic(z)
 w=Dyadic(5)
 w=Dyadic(11,3)
@@ -72,20 +64,31 @@ r=Real(sin(q))
 print("r:",r,type(r))
 
 
+# Store a double-precision floating-point number
+d=ExactDouble(1.375)
+d=exact(1.375)
+print("d:",d,type(d))
+# Can convert an ExactDouble to a Dyadic number.
+w=Dyadic(d)
+
 # Define shorthands for defining Ariadne values from input
 def dec(x): return Decimal(x)
 def ex(x): return ExactDouble(x)
 def dy(x): return Dyadic(ExactDouble(x))
 
-# Specify precisions
-mpr=MultiplePrecision(128)
+
+# Specify precisions of floating-point number types
 dpr=DoublePrecision()
+dpr=double_precision
+mpr=MultiplePrecision(128)
 
 # Create a raw double-precision number
-x=FloatDP(Dyadic(exact(1.75)),double_precision)
+x=FloatDP(Dyadic(exact(1.75)),dpr)
+# Create a raw multiple-precision number
+x=FloatMP(Dyadic(exact(1.75)),mpr)
 
 # Create double-precision bounds for a value
-x=FloatDPBounds(dec(1.2),dpr) # Creates the interval [1.19999999999999996:1.20000000000000018]
+x=FloatDPBounds(Decimal(1.2),dpr) # Creates the interval [1.19999999999999996:1.20000000000000018]
 print("FloatDPBounds(1.2):",x)
 
 # Create double-precision bounds for a range of values
@@ -180,8 +183,8 @@ dom=ExactBoxType([{4:7},{1:6},{-1:+1}])
 print("dom:",dom)
 
 # Create a sweeper to control the accuracy of a Taylor function
-swp=ThresholdSweeper(pr,1e-8)
-#swp=GradedSweeper(pr,6)
+swp=ThresholdSweeper(dpr,1e-8)
+#swp=GradedSweeper(dpr,6)
 print("swp:",swp)
 
 # Create the scalar Taylor model representing the function x1 on the domain dom
@@ -223,7 +226,7 @@ tx.range()
 +tx; -tx; tx+ty; tx-ty; tx*ty; tx/ty;
 
 # Define some constants
-n=int(3); c=FloatDPValue(Dyadic(exact(1.5)),pr); b=FloatDPBounds(Dyadic(exact(1.25)),Dyadic(exact(1.75)),pr);
+n=int(3); c=FloatDPValue(Dyadic(exact(1.5)),dpr); b=FloatDPBounds(Dyadic(exact(1.25)),Dyadic(exact(1.75)),dpr);
 # Mixed arithmetic
 tx+c; tx-c; tx*c; tx/c;
     #c+tx; c-tx; c*tx; c/tx;
@@ -373,7 +376,7 @@ print()
 # Compute two time steps of the flow of the Taylor function f starting in domain D for the interval [h,2h]
 phi0=phi
 print("phi.domain():",phi.domain(),", h:",h)
-phi0h=partial_evaluate(phi,1,FloatDPBounds(h,pr))
+phi0h=partial_evaluate(phi,1,FloatDPBounds(h,dpr))
 dom1=phi0h.codomain()
 phi=integrator.flow(f,dom1,h)[0]
 print("phi:",phi)
@@ -389,7 +392,7 @@ print()
 ## Contractors
 
 f1=x0+x0*x0/2
-f2=x0+FloatDPBounds(-1,1,pr)
+f2=x0+FloatDPBounds(-1,1,dpr)
 print("f1:",f1)
 print("f2:",f1)
 b=refines(f1,f2)
@@ -408,7 +411,7 @@ x=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom,0,swp)
 y=ValidatedScalarMultivariateTaylorFunctionModelDP.coordinate(dom,1,swp)
 f=x-4*y+y*y
 i=ValidatedVectorMultivariateTaylorFunctionModelDP.identity(dom1,swp)
-h=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(dom1,FloatDPBounds(-1,+1,pr),swp)
+h=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(dom1,FloatDPBounds(-1,+1,dpr),swp)
 
 # Newton contractor to solve f(x,h(x))=0 for scalar f
 df1 = derivative(f,1).range()

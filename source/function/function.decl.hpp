@@ -44,7 +44,7 @@ using BoxDomainType = ExactBoxType;
 template<class P, class D, class C> class Function;
 
 //@{
-//! \name Type shorthands
+//! \name Type shorthands for function classes
 template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>; //!< . \ingroup FunctionModule
 template<class P, class D> using VectorFunction = Function<P,D,BoxDomainType>; //!< . \ingroup FunctionModule
 template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>; //!< . \ingroup FunctionModule
@@ -61,43 +61,24 @@ template<class D, class C> using EffectiveFunction = Function<EffectiveTag,D,C>;
 //@}
 
 //@{
-//! \relates Function
-//! \name Type shorthands
-template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>; //!< .
-template<class P, class D> using VectorFunction = Function<P,D,BoxDomainType>; //!< .
-template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>; //!< .
-template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>; //!< .
+//! \name Type synonyms for function classes
+using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
+using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
+using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
 
-template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomainType,IntervalDomainType>; //!< .
-template<class P> using VectorUnivariateFunction = Function<P,IntervalDomainType,BoxDomainType>; //!< .
-template<class P> using ScalarMultivariateFunction = Function<P,BoxDomainType,IntervalDomainType>; //!< .
-template<class P> using VectorMultivariateFunction = Function<P,BoxDomainType,BoxDomainType>; //!< .
+using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
+using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
+using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
 
-template<class D, class C> using ApproximateFunction = Function<ApproximateTag,D,C>; //!< .
-template<class D, class C> using ValidatedFunction = Function<ValidatedTag,D,C>; //!< .
-template<class D, class C> using EffectiveFunction = Function<EffectiveTag,D,C>; //!< .
-//@}
+using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
+using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
+using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
 
-//@{
-//! \relates Function
-//! \name Type synonyms
-using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< .
-using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< .
-using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< .
+using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
+using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
+using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
 
-using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< .
-using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< .
-using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< .
-
-using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< .
-using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< .
-using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< .
-
-using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< .
-using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< .
-using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< .
-
-using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< .
+using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< DEPRECATED \ingroup FunctionModule
 using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!< .
 using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< .
 using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< .
@@ -277,14 +258,10 @@ template<class I, class X> class Monomial;
 template<class I, class X> class Polynomial;
 
 //@{
-//! \relates Monomial
-//! \name Type shorthands
+//! \name Type shorthands and synonyms for Monomial classes.
 template<class X> using UnivariateMonomial = Monomial<UniIndex,X>; //!< .
 template<class X> using MultivariateMonomial = Monomial<MultiIndex,X>; //!< .
-//@}
-//@{
-//! \relates Monomial
-//! \name Type synonyms
+
 using FloatDPApproximationMultivariateMonomial = MultivariateMonomial<FloatDPApproximation>; //!< .
 using FloatDPBoundsMultivariateMonomial = MultivariateMonomial<FloatDPBounds>; //!< .
 using FloatMPApproximationMultivariateMonomial = MultivariateMonomial<FloatMPApproximation>; //!< .
@@ -292,23 +269,19 @@ using FloatMPBoundsMultivariateMonomial = MultivariateMonomial<FloatMPBounds>; /
 //@}
 
 //@{
-//! \relates Polynomial
-//! \name Type shorthands
-template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>; //!< .
-template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>; //!< .
-//@}
-//@{
-//! \relates Polynomial
-//! \name Type synonyms
-using FloatDPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatDPApproximation>; //!< .
-using FloatDPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatDPBounds>; //!< .
-using FloatMPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatMPApproximation>; //!< .
-using FloatMPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatMPBounds>; //!< .
+//! \name Type shorthands and synonyms for Polynomial classes
+template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>; //!< . \ingroup FunctionModule
+template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>; //!< . \ingroup FunctionModule
 
-using FloatDPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPApproximation>>; //!< .
-using FloatDPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPBounds>>; //!< .
-using FloatMPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPApproximation>>; //!< .
-using FloatMPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPBounds>>; //!< .
+using FloatDPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatDPApproximation>; //!< . \ingroup FunctionModule
+using FloatDPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatDPBounds>; //!< . \ingroup FunctionModule
+using FloatMPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatMPApproximation>; //!< . \ingroup FunctionModule
+using FloatMPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatMPBounds>; //!< . \ingroup FunctionModule
+
+using FloatDPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPApproximation>>; //!< . \ingroup FunctionModule
+using FloatDPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPBounds>>; //!< . \ingroup FunctionModule
+using FloatMPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPApproximation>>; //!< . \ingroup FunctionModule
+using FloatMPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPBounds>>; //!< . \ingroup FunctionModule
 //@}
 
 

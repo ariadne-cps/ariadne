@@ -141,8 +141,7 @@ template<class P, class PR, class PRE=PR> using FloatType = typename FloatTypede
 
 //@{
 //! \ingroup NumericModule
-//! \relates FloatDP
-//! \name Type synonyms
+//! \name Type synonyms for FloatDP based numbers.
 using FloatDPApproximation = FloatApproximation<DoublePrecision>; //!< An approximation to a number, represented in double precision.
 using FloatDPLowerBound = FloatLowerBound<DoublePrecision>; //!< A lower bound for a number, represented in double precision.
 using FloatDPUpperBound = FloatUpperBound<DoublePrecision>; //!< An upper bound for a number, represented in double precision.
@@ -162,8 +161,8 @@ using FloatMPDPBall = FloatBall<MultiplePrecision,DoublePrecision>; //!< A ball 
 
 //@{
 //! \ingroup NumericModule
-//! \relates FloatMP
-//! \name Type synonyms
+//! \ingroup NumericModule
+//! \name Type synonyms for FloatMP based numbers.
 using FloatMPApproximation = FloatApproximation<MultiplePrecision>; //!< .
 using FloatMPLowerBound = FloatLowerBound<MultiplePrecision>; //!< .
 using FloatMPUpperBound = FloatUpperBound<MultiplePrecision>; //!< .

@@ -148,7 +148,7 @@ template<class X> class Matrix
     //! Construct a matrix from parameters of \a X.
     template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
 
-    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
 
     //! Construct a matrix using initializer lists.
@@ -196,7 +196,7 @@ template<class X> class Matrix
     const X& at(SizeType i, SizeType j) const;
     //! \brief Get the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column.
     const X& get(SizeType i, SizeType j) const ;
-    //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
+    //! \brief %Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
     Void set(SizeType i, SizeType j, const X& x);
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void set(SizeType i, SizeType j, const Y& y);
     //! \brief A pointer to the first element of the data storage.
@@ -260,6 +260,11 @@ OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv);
 template<class X> Vector<X> operator*(PivotMatrix, Vector<X>);
 template<class X> Matrix<X> operator*(PivotMatrix, Matrix<X>);
 
+//! \brief The decomposition \f$PA=LU\f$ of a matrix \f$A\f$, where \f$P\f$ is a permutation matrix,
+//! \f$L\f$ is a unit lower-triangular matrix, and \f$U\f$ is an upper-triangular matrix.
+//! \details The matrix \a LU stores the nonzero elements of \f$U\f$ in its upper triangle,
+//! and the nontrivial elements of \f$L\f$ in its strict lower triangle.
+//! \see Matrix
 template<class X> struct PLUMatrix {
     PivotMatrix P; Matrix<X> LU;
 };
@@ -874,21 +879,30 @@ template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
 
 
-// Construct transpose
+//! \relates Matrix \brief Construct transpose
 template<class X> inline Transpose<Matrix<X>> transpose(const Matrix<X>& A) { return Transpose<Matrix<X>>(A); }
 
-// Invert matrices and solve linear systems
+//! \relates Matrix \brief Compute the inverse of \f$A\f$.
 template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
+//! \brief Solve the linear equation \f$Ax=B\f$ for \f$x\f$. \relates Matrix
 template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
+//! \brief Solve the linear equations \f$AX=B\f$ for matrix \f$X\f$. \relates Matrix
 template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Matrix<X2> const& B);
 
-// Compute the inverse using lower/upper triangular factorization
+//! \brief Compute the inverse of \a A using lower/upper triangular factorization.
+//! \relates Matrix PLUMatrix
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
+//! \brief Solve the linear equations \f$AX=B\f$ for matrix \f$X\f$ using lower/upper triangular factorization.
+//! \relates Matrix \see PLUMatrix
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+//! \brief Solve the linear equation \f$Ax=b\f$ using lower/upper triangular factorization.
+//! \relates Matrix \see PLUMatrix
 template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b);
-// Compute the inverse using Gauss-Seidel iteration
+//! \brief Compute the inverse of \a A using Gauss-Seidel iteration. \relates Matrix
 template<class X> Matrix<X> gs_inverse(const Matrix<X>& A);
+//! \brief Solve the linear equations \f$AX=B\f$ for \f$X\f$ using Gauss-Seidel iteration. \relates Matrix
 template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
+//! \brief Solve the linear equation \f$Ax=b\f$ for \f$x\f$ using Gauss-Seidel iteration. \relates Matrix
 template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b);
 
 // Use Gauss-Seidel iteration hotstarted by iX

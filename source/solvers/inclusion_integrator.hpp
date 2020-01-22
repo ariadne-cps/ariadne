@@ -59,7 +59,7 @@ inline TimeStepType lower_bound(TimeStepType const& t) {
 inline TimeStepType lower_bound(Real const& t) {
     return TimeStepType(FloatDPLowerBound(t,DoublePrecision()).raw()); }
 
-inline Vector<FloatDPValue> const& cast_exact(Vector<FloatDPError> const& v) {
+inline Vector<FloatDPValue> const& cast_exact(Vector<ErrorType> const& v) {
     return reinterpret_cast<Vector<FloatDPValue>const&>(v); }
 
 Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e);
@@ -85,32 +85,32 @@ template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
     return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
 }
 
-struct ErrorNorms {
-    FloatDPError K; // K
-    Vector<FloatDPError> Kj; // K[j]
-    FloatDPError pK; // K'
-    Vector<FloatDPError> pKj; // K'[j]
-    FloatDPError L; // L
-    Vector<FloatDPError> Lj; // L[j]
-    FloatDPError pL; // L'
-    Vector<FloatDPError> pLj; // L'[j]
-    FloatDPError H; // H
-    Vector<FloatDPError> Hj; // H[j]
-    FloatDPError pH; // H'
-    Vector<FloatDPError> pHj; // H'[j]
+struct ErrorConstants {
+    ErrorType K; // K
+    Vector<ErrorType> Kj; // K[j]
+    ErrorType pK; // K'
+    Vector<ErrorType> pKj; // K'[j]
+    ErrorType L; // L
+    Vector<ErrorType> Lj; // L[j]
+    ErrorType pL; // L'
+    Vector<ErrorType> pLj; // L'[j]
+    ErrorType H; // H
+    Vector<ErrorType> Hj; // H[j]
+    ErrorType pH; // H'
+    Vector<ErrorType> pHj; // H'[j]
     FloatDPUpperBound Lambda; // Lambda
-    FloatDPError expLambda; // e^(Lambda*h - 1) / (Lambda*h)
-    FloatDPError expL; // e^(L*h)
+    ErrorType expLambda; // e^(Lambda*h - 1) / (Lambda*h)
+    ErrorType expL; // e^(L*h)
 
-    ErrorNorms(FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPError const&, Vector<FloatDPError> const&, FloatDPUpperBound const&, FloatDPError const&, FloatDPError const&);
-    Tuple<FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPError,Vector<FloatDPError>,FloatDPUpperBound,FloatDPError,FloatDPError> values() const;
+    ErrorConstants(ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, FloatDPUpperBound const&, ErrorType const&, ErrorType const&);
+    Tuple<ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
 private:
     SizeType _dimension;
 };
 
-inline std::ostream& operator << (std::ostream& os, const ErrorNorms& n) {
+inline std::ostream& operator << (std::ostream& os, const ErrorConstants& n) {
     os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", Kj'=" << n.Kj <<
           ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", Lj'=" << n.Lj <<
           ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", Hj'=" << n.Hj <<
@@ -118,7 +118,7 @@ inline std::ostream& operator << (std::ostream& os, const ErrorNorms& n) {
     return os;
 }
 
-ErrorNorms compute_norms(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+ErrorConstants compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
     virtual Void write(OutputStream& os) const = 0;
@@ -187,14 +187,14 @@ template<InputsRelationKind R> struct InputsRelationKindTrait {
     static InputsRelationKind kind() { return R; }
 };
 
-FloatDPError vstar(BoxDomainType const& inputs);
+ErrorType vstar(BoxDomainType const& inputs);
 
-template<class A> FloatDPError wstar_multiplier();
+template<class A> ErrorType wstar_multiplier();
 
-template<class A> FloatDPError wstar(BoxDomainType const& inputs) {
-    FloatDPError result(0u);
+template<class A> ErrorType wstar(BoxDomainType const& inputs) {
+    ErrorType result(0u);
     for (auto i : range(0,inputs.size()))
-        result = max(result,wstar_multiplier<A>()*FloatDPError(abs(inputs[i]).upper()));
+        result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper()));
     return result;
 }
 
@@ -242,7 +242,7 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
     EffectiveVectorMultivariateFunction const& _f;
     BoxDomainType const& _inputs;
   private:
-    Vector<ErrorType> process(ErrorNorms const& n, PositiveFloatDPValue const& h) const;
+    Vector<ErrorType> process(ErrorConstants const& n, PositiveFloatDPValue const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };

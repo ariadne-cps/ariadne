@@ -59,18 +59,26 @@ template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> Er
 template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(ErrorConstants const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n, vstar(inputs), wstar<A>(inputs), h, j); }
 
 
-ErrorConstants::ErrorConstants(ErrorType const& K_, Vector<ErrorType> const& Kj_, ErrorType const& pK_, Vector<ErrorType> const& pKj_,
-                               ErrorType const& L_, Vector<ErrorType> const& Lj_, ErrorType const& pL_, Vector<ErrorType> const& pLj_,
-                               ErrorType const& H_, Vector<ErrorType> const& Hj_, ErrorType const& pH_, Vector<ErrorType> const& pHj_,
+ErrorConstants::ErrorConstants(ErrorType const& K_, Vector<ErrorType> const& Kj_, ErrorType const& pK_, ErrorType const& pKv_, ErrorType const& pKw_, Vector<ErrorType> const& pKj_, Vector<ErrorType> const& pKjv_, Vector<ErrorType> const& pKjw_,
+                               ErrorType const& L_, Vector<ErrorType> const& Lj_, ErrorType const& pL_, ErrorType const& pLv_, ErrorType const& pLw_, Vector<ErrorType> const& pLj_, Vector<ErrorType> const& pLjv_, Vector<ErrorType> const& pLjw_,
+                               ErrorType const& H_, Vector<ErrorType> const& Hj_, ErrorType const& pH_, ErrorType const& pHv_, ErrorType const& pHw_, Vector<ErrorType> const& pHj_, Vector<ErrorType> const& pHjv_, Vector<ErrorType> const& pHjw_,
                                FloatDPUpperBound const& Lambda_, ErrorType const& expLambda_, ErrorType const& expL_)
- : K(K_), Kj(Kj_), pK(pK_), pKj(pKj_), L(L_), Lj(Lj_), pL(pL_), pLj(pLj_), H(H_), Hj(Hj_), pH(pH_), pHj(pHj_), Lambda(Lambda_), expLambda(expLambda_), expL(expL_) {
+ : K(K_), Kj(Kj_), pK(pK_), pKv(pKv_), pKw(pKw_), pKj(pKj_), pKjv(pKjv_), pKjw(pKjw_),
+   L(L_), Lj(Lj_), pL(pL_), pLv(pLv_), pLw(pLw_), pLj(pLj_), pLjv(pLjv_), pLjw(pLjw_),
+   H(H_), Hj(Hj_), pH(pH_), pHv(pHv_), pHw(pHw_), pHj(pHj_), pHjv(pHjv_), pHjw(pHjw_),
+   Lambda(Lambda_), expLambda(expLambda_), expL(expL_) {
     _dimension = Kj.size();
-    assert(Kj.size() == _dimension and pKj.size() == _dimension and Lj.size() == _dimension and pKj.size() == _dimension and Hj.size() == _dimension && pHj.size() == _dimension);
+    assert(Kj.size() == _dimension and pKj.size() == _dimension and pKjv.size() == _dimension and pKjw.size() == _dimension and
+           Lj.size() == _dimension and pLj.size() == _dimension and pLjv.size() == _dimension and pLjw.size() == _dimension and
+           Hj.size() == _dimension and pHj.size() == _dimension and pHjv.size() == _dimension and pHjw.size() == _dimension);
 }
 
-Tuple<ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,FloatDPUpperBound,ErrorType,ErrorType>
+Tuple<ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+      ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+      ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+      FloatDPUpperBound,ErrorType,ErrorType>
 ErrorConstants::values() const {
-    return std::tie(this->K,this->Kj,this->pK,this->pKj,this->L,this->Lj,this->pL,this->pLj,this->H,this->Hj,this->pH,this->pHj,this->Lambda,this->expLambda,this->expL);
+    return std::tie(this->K,this->Kj,this->pK,this->pKv,this->pKw,this->pKj,this->pKjv,this->pKjw,this->L,this->Lj,this->pL,this->pLv,this->pLw,this->pLj,this->pLjv,this->pLjw,this->H,this->Hj,this->pH,this->pHv,this->pHw,this->pHj,this->pHjv,this->pHjw,this->Lambda,this->expLambda,this->expL);
 }
 
 
@@ -81,8 +89,8 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
     auto m = input_derivatives.size();
     DoublePrecision pr;
     ErrorType ze(pr);
-    ErrorType K=ze, pK=ze, L=ze, pL=ze, H=ze, pH=ze;
-    Vector<ErrorType> Kj(n), pKj(n), Lj(n), pLj(n), Hj(n), pHj(n);
+    ErrorType K=ze, pK=ze, pKv=ze, pKw=ze, L=ze, pL=ze, pLv=ze, pLw=ze, H=ze, pH=ze, pHv=ze, pHw=ze;
+    Vector<ErrorType> Kj(n), pKj(n), pKjv(n), pKjw(n), Lj(n), pLj(n), pLjv(n), pLjw(n), Hj(n), pHj(n), pHjv(n), pHjw(n);
     FloatDPUpperBound Lambda=ze;
 
     auto Df=noise_independent_component.differential(cast_singleton(B),2);
@@ -148,7 +156,10 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
     ErrorType expLambda = (possibly(Lambda>0)) ? ErrorType(dexp(Lambda*h)) : ErrorType(1u,pr);
     ErrorType expL = cast_positive(exp(L*h));
 
-    return ErrorConstants(K, Kj, pK, pKj, L, Lj, pL, pLj, H, Hj, pH, pHj, Lambda, expLambda, expL);
+    return ErrorConstants(K, Kj, pK, pKv, pKw, pKj, pKjv, pKjw,
+                          L, Lj, pL, pLv, pLw, pLj, pLjv, pLjw,
+                          H, Hj, pH, pHv, pHw, pHj, pHjv, pHjw,
+                          Lambda, expLambda, expL);
 }
 
 ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {

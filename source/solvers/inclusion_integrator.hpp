@@ -89,21 +89,38 @@ struct ErrorConstants {
     ErrorType K; // K
     Vector<ErrorType> Kj; // K[j]
     ErrorType pK; // K'
+    ErrorType pKv; // K'v
+    ErrorType pKw; // K'w
     Vector<ErrorType> pKj; // K'[j]
+    Vector<ErrorType> pKjv; // K'v[j]
+    Vector<ErrorType> pKjw; // K'w[j]
     ErrorType L; // L
     Vector<ErrorType> Lj; // L[j]
     ErrorType pL; // L'
+    ErrorType pLv; // L'v
+    ErrorType pLw; // L'w
     Vector<ErrorType> pLj; // L'[j]
+    Vector<ErrorType> pLjv; // L'v[j]
+    Vector<ErrorType> pLjw; // L'w[j]
     ErrorType H; // H
     Vector<ErrorType> Hj; // H[j]
     ErrorType pH; // H'
+    ErrorType pHv; // H'v
+    ErrorType pHw; // H'w
     Vector<ErrorType> pHj; // H'[j]
+    Vector<ErrorType> pHjv; // H'v[j]
+    Vector<ErrorType> pHjw; // H'w[j]
     FloatDPUpperBound Lambda; // Lambda
     ErrorType expLambda; // e^(Lambda*h - 1) / (Lambda*h)
     ErrorType expL; // e^(L*h)
 
-    ErrorConstants(ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, ErrorType const&, Vector<ErrorType> const&, FloatDPUpperBound const&, ErrorType const&, ErrorType const&);
-    Tuple<ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,ErrorType,Vector<ErrorType>,FloatDPUpperBound,ErrorType,ErrorType> values() const;
+    ErrorConstants(ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&,
+                   ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&,
+                   ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&, FloatDPUpperBound const&, ErrorType const&, ErrorType const&);
+    Tuple<ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+          ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+          ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+          FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
 private:
@@ -111,9 +128,9 @@ private:
 };
 
 inline std::ostream& operator << (std::ostream& os, const ErrorConstants& n) {
-    os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", Kj'=" << n.Kj <<
-          ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", Lj'=" << n.Lj <<
-          ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", Hj'=" << n.Hj <<
+    os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", K'v=" << n.pKv << ", Kw'=" << n.pKw << ", Kj'=" << n.Kj << ", K'jv=" << n.pKjv << ", K'jw=" << n.pKjw <<
+          ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", L'v=" << n.pLv << ", L'w=" << n.pLw << ", Lj'=" << n.pLj << ", Lj'v=" << n.pLjv << ", Lj'w=" << n.pLjw <<
+          ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", H'v=" << n.pHv << ", H'w=" << n.pHw << ", Hj'=" << n.pHj << ", Hj'v=" << n.pHjv << ", Hj'w=" << n.pHjw <<
           ", Lambda=" << n.Lambda << ", expLambda=" << n.expLambda << ", expL=" << n.expL;
     return os;
 }

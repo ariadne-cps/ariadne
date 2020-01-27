@@ -112,12 +112,12 @@ ValidatedVectorMultivariateFunctionModelDP make_identity(const EffectiveBoxType&
 
 inline Pair<ValidatedScalarMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP> split(const ValidatedScalarMultivariateFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
-    return make_pair(restrict(f,domains.first),restrict(f,domains.second));
+    return make_pair(restriction(f,domains.first),restriction(f,domains.second));
 }
 
 inline Pair<ValidatedVectorMultivariateFunctionModelDP,ValidatedVectorMultivariateFunctionModelDP> split(const ValidatedVectorMultivariateFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);
-    return make_pair(restrict(f,domains.first),restrict(f,domains.second));
+    return make_pair(restriction(f,domains.first),restriction(f,domains.second));
 }
 
 
@@ -1077,7 +1077,7 @@ uniform_error_recondition()
         for(Nat i=0; i!=large_error_indices.size(); ++i) {
             FloatDP error=this->_state_function.get(large_error_indices[i]).error().raw();
             if(error > MAXIMUM_ERROR) {
-                this->_state_function[large_error_indices[i]].set_error(0u);
+                this->_state_function[large_error_indices[i]].clobber();
                 this->_state_function[large_error_indices[i]] = this->_state_function.get(large_error_indices[i]) + this->function_factory().create_coordinate(this->_domain,k)*FloatDPBounds(+error);
                 ++k;
             }
@@ -1242,22 +1242,22 @@ Void Enclosure::restrict(const ExactBoxType& subdomain)
     Enclosure& result(*this);
     result._domain=subdomain;
     result._reduced_domain=Ariadne::intersection(static_cast<const ExactBoxType&>(result._reduced_domain),subdomain);
-    result._state_function=Ariadne::restrict(result._state_function,subdomain);
-    result._time_function=Ariadne::restrict(result._time_function,subdomain);
-    result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
+    result._state_function=restriction(result._state_function,subdomain);
+    result._time_function=restriction(result._time_function,subdomain);
+    result._dwell_time_function=restriction(result._dwell_time_function,subdomain);
     ValidatedScalarMultivariateFunctionModelDP new_constraint;
     for(List<ValidatedConstraintModel>::Iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
         ValidatedScalarMultivariateFunctionModelDP& constraint_function=iter->function();
-        constraint_function=Ariadne::restrict(constraint_function,subdomain);
+        constraint_function=restriction(constraint_function,subdomain);
     }
     this->reduce();
 }
 
-Enclosure Enclosure::restriction(const ExactBoxType& subdomain) const
+Enclosure restriction(Enclosure const& encl, const ExactBoxType& subdomain)
 {
-    Enclosure result(*this);
+    Enclosure result(encl);
     result.restrict(subdomain);
     return result;
 }
@@ -1465,7 +1465,7 @@ Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclo
 Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set) {
     Enclosure result(set);
     const ValidatedVectorMultivariateFunctionModelDP& state_function=result.state_function();
-    const_cast<ValidatedVectorMultivariateFunctionModelDP&>(state_function)=Ariadne::unchecked_compose(function,set.state_function());
+    const_cast<ValidatedVectorMultivariateFunctionModelDP&>(state_function)=unchecked_compose(function,set.state_function());
     return result;
 }
 

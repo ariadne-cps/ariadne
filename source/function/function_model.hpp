@@ -183,7 +183,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     typedef CanonicalErrorType<P,PRE> ErrorType;
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
     typedef Number<P> GenericNumericType;
-    typedef FloatError<PR> NormType;
+    typedef PositiveFloatUpperBound<PR> NormType;
     typedef Interval<FloatUpperBound<PR>> RangeType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
@@ -211,7 +211,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     ScalarFunctionModel<P,D,PR,PRE>& operator=(const ScalarFunctionModelInterface<P,D,PR,PRE>& f);
 //    ScalarFunctionModel<P,D,PR,PRE>& operator=(const ValidatedScalarMultivariateTaylorFunctionModelDP& f);
 
-    inline PrecisionType const precision() const { return this->_ptr->value().precision(); }
+    inline PrecisionType const precision() const { return this->value().precision(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X operator() (const Vector<X>& x) const {
         return this->_ptr->_evaluate(x); }
@@ -222,11 +222,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     inline RangeType const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
-    inline CoefficientType gradient_value(SizeType j) const { return this->_ptr->gradient_value(j); }
     inline ErrorType error() const { return this->_ptr->error(); }
 
-    inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }
-    inline Void set_error(Nat e) { return this->_ptr->set_error(ErrorType(e,this->error().precision())); }
     inline Void clobber() { return this->_ptr->clobber(); }
 
 //    inline ScalarFunctionModel<P,D,PR,PRE> apply(UnaryElementaryOperator op) const { return ScalarFunctionModel<P,D,PR,PRE>(this->_ptr->_apply(op)); }
@@ -476,6 +473,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
+    inline Vector<CoefficientType> const values() const { return this->_ptr->values(); }
     inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
     inline ErrorType const error() const { return this->_ptr->error(); }
     inline Void clobber() { this->_ptr->clobber(); }
@@ -483,7 +481,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
 //        Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));
 //        return dfx.jacobian(); }
 
-    inline Void restrict(const DomainType& d) { this->_ptr->restrict(d); }
+    inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
   public:
     friend FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D> factory(VectorFunctionModel<P,D,PR,PRE> const& f) {
         FunctionModelFactory<P,PR,PRE> factory(f._ptr->_factory()); return FunctionModelCreator<FunctionModelFactory<P,PR,PRE>,D>(f.domain(),factory); }
@@ -550,10 +548,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
         return embed(DomainType(),f,d); }
     friend VectorFunctionModel<P,D,PR,PRE> embed(const VectorFunctionModel<P,D,PR,PRE>& f, const IntervalDomainType& d) {
         return embed(f,DomainType(1,d)); }
-    friend VectorFunctionModel<P,D,PR,PRE> restrict(const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        VectorFunctionModelInterface<P,D,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return VectorFunctionModel<P,D,PR,PRE>(rptr); }
     friend VectorFunctionModel<P,D,PR,PRE> restriction(const VectorFunctionModel<P,D,PR,PRE>& f, const DomainType& d) {
-        VectorFunctionModelInterface<P,D,PR,PRE>* rptr=f._ptr->_clone(); rptr->restrict(d); return VectorFunctionModel<P,D,PR,PRE>(rptr); }
+        return VectorFunctionModel<P,D,PR,PRE>(f._ptr->_restriction(d)); }
 
     friend Vector<CanonicalNumericType<P,PR,PRE>> evaluate(const VectorFunctionModel<P,D,PR,PRE>& f, const Vector<CanonicalNumericType<P,PR,PRE>>& x) {
         return f._ptr->_evaluate(x); }
@@ -640,12 +636,6 @@ template<class D, class PR, class PRE> ScalarFunctionModel<ValidatedTag,D,PR,PRE
     return VectorFunctionModel<ValidatedTag,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
 template<class D, class PR, class PRE> VectorFunctionModel<ValidatedTag,D,PR,PRE> unchecked_compose(const VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>& f, const VectorFunctionModel<ValidatedTag,D,PR,PRE>& g) {
     return VectorFunctionModel<ValidatedTag,D,PR,PRE>(g._ptr->_unchecked_compose(f)); }
-
-// FIXME: Should be unneeded
-template<class D, class PR, class PRE> ScalarFunctionModel<ValidatedTag,D,PR,PRE> restrict(const ScalarFunctionModel<ValidatedTag,D,PR,PRE>& f, const D& dom) {
-    return ScalarFunctionModel<ValidatedTag,D,PR,PRE>(f._ptr->_restriction(dom)); }
-template<class D, class PR, class PRE> VectorFunctionModel<ValidatedTag,D,PR,PRE> restrict(const VectorFunctionModel<ValidatedTag,D,PR,PRE>& f, const D& dom) {
-    return VectorFunctionModel<ValidatedTag,D,PR,PRE>(f._ptr->_restriction(dom)); }
 
 
 template<class P, class D, class PR, class PRE> VectorFunctionModelElement<P,D,PR,PRE>::operator const ScalarFunctionModel<P,D,PR,PRE> () const {

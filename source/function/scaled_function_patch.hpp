@@ -252,7 +252,7 @@ template<class M> class ScaledFunctionPatch
     //! \brief The scaled expansion over a unit box.
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.
-    const ErrorType& error() const { return this->_model.error(); }
+    const ErrorType error() const { return this->_model.error(); }
     //! \brief The accuracy parameter used to control approximation of the function model.
     PropertiesType properties() const { return this->_model.properties(); }
     //! \brief The precision of the numbers used.
@@ -263,7 +263,7 @@ template<class M> class ScaledFunctionPatch
     ErrorType& error() { return this->_model.error(); }
 
     //! \brief The constant term in the expansion.
-    const CoefficientType& value() const { return this->_model.value(); }
+    const CoefficientType value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
     const CoefficientType gradient_value(SizeType i) const {
         // FIXME: Cannot be guaranteed to be exact
@@ -305,7 +305,7 @@ template<class M> class ScaledFunctionPatch
     //@{
     //! \name Function operations.
     //! \brief An over-approximation to the range of the function.
-    RangeType range() const { return this->_model.range(); }
+    RangeType const range() const { return this->_model.range(); }
     //! \brief Evaluate the function at the point \a x.
     FloatBounds<PR> operator()(const Vector<FloatBounds<PR>>& x) const;
     FloatBounds<PR> operator()(const Vector<FloatValue<PR>>& x) const;
@@ -673,6 +673,8 @@ template<class M> class VectorScaledFunctionPatch
 
     //! \brief Convert to an interval polynomial.
     Vector<MultivariatePolynomial<FloatBounds<PR>>> polynomials() const;
+    //! \brief The constant term in the expansions.
+    Vector<CoefficientType> const values() const;
     //! \brief The vector of roundoff/truncation errors of each component.
     Vector<ErrorType> const errors() const;
     //! \brief The maximum roundoff/truncation error of the components.

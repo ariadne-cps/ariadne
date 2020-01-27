@@ -727,6 +727,15 @@ template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vecto
     return e;
 }
 
+template<class M> auto VectorScaledFunctionPatch<M>::values() const -> Vector<CoefficientType> const
+{
+    Vector<CoefficientType> e(this->result_size());
+    for(SizeType i=0; i!=this->result_size(); ++i) {
+        e[i]=this->models()[i].value();
+    }
+    return e;
+}
+
 template<class M> auto VectorScaledFunctionPatch<M>::errors() const -> Vector<ErrorType> const
 {
     Vector<FloatError<PR>> e(this->result_size());

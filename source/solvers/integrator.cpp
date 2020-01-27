@@ -287,7 +287,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error()<<"\n");
     }
 
-    FlowStepModelType res=restrict(phi,dom);
+    FlowStepModelType res=restriction(phi,dom);
 
     //for(SizeType i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
     //res.sweep();

@@ -602,7 +602,7 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     ExactBoxType flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
     flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
-    flow_model=restrict(flow_model,flow_domain);
+    flow_model=restriction(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
     return flow_model;
@@ -1840,7 +1840,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // essentially exact
                 ValidatedScalarMultivariateFunctionModelDP lower_crossing_time=crossing_iter->second.crossing_time;
                 FloatDPError crossing_time_error=lower_crossing_time.error();
-                lower_crossing_time.set_error(0u);
+                lower_crossing_time.clobber();
                 lower_crossing_time-=FloatDPValue(crossing_time_error.raw());
 
                 // One possibility is to use quadratic restrictions
@@ -1942,7 +1942,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
               ++crossing_iter;
             }
         }
-        spacial_evolution_time.set_error(0u);
+        spacial_evolution_time.clobber();
 
 
         ARIADNE_LOG(6,"Creep step: spacial_evolution_time="<<spacial_evolution_time<<"\n");

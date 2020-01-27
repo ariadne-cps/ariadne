@@ -726,7 +726,7 @@ ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::expand_errors(Va
     BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
     ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
-    for(SizeType i=0; i!=f.result_size(); ++i) { f[i].set_error(0); }
+    for(SizeType i=0; i!=f.result_size(); ++i) { f[i].clobber(); }
     ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,this->_sweeper);
     return embed(f,errors)+embed(domain,error_function);
 }

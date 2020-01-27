@@ -420,7 +420,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType,SweeperDP >());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType, const EffectiveScalarMultivariateFunction&,SweeperDP >());
     scalar_taylor_function_class.def(pybind11::init< ExactBoxType, Expansion<MultiIndex,FloatDPValue>, FloatDPError, SweeperDP >());
-    scalar_taylor_function_class.def("error", (const FloatDPError&(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::error);
+    scalar_taylor_function_class.def("error", (const FloatDPError(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::error);
     scalar_taylor_function_class.def("set_error", (Void(ValidatedScalarMultivariateTaylorFunctionModelDP::*)(const FloatDPError&)) &ValidatedScalarMultivariateTaylorFunctionModelDP::set_error);
     scalar_taylor_function_class.def("argument_size", &F::argument_size);
     scalar_taylor_function_class.def("domain", &F::domain);

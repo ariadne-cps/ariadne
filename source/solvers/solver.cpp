@@ -510,7 +510,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
     ValidatedVectorMultivariateFunctionModelDP mx(x);
-    for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
+    for(Nat i=0; i!=mx.size(); ++i) { mx[i].clobber(); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<FloatDPError> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }

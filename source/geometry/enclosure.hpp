@@ -269,7 +269,7 @@ class Enclosure
     //! resulting in more accurate computations.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief The set obtained by restricting to the \a subdomain.
-    Enclosure restriction(const ExactBoxType& subdomain) const;
+    friend Enclosure restriction(Enclosure const&, const ExactBoxType& subdomain);
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;

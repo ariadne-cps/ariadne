@@ -74,7 +74,7 @@ FloatDPError sup_error(const ValidatedVectorMultivariateFunctionModelDP& x) {
 
 static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 
 
 SolverBase::SolverBase(double max_error, Nat max_steps)
@@ -83,12 +83,12 @@ SolverBase::SolverBase(double max_error, Nat max_steps)
 }
 
 Void
-SolverBase::set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory)
+SolverBase::set_function_factory(const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& factory)
 {
-    this->_function_factory_ptr=std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> >(factory.clone());
+    this->_function_factory_ptr=std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> >(factory.clone());
 }
 
-const FunctionModelFactoryInterface<ValidatedTag>&
+const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>&
 SolverBase::function_factory() const
 {
     return *this->_function_factory_ptr;

@@ -67,9 +67,9 @@ class SolverBase
     Void set_maximum_number_of_steps(Nat max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief The class which constructs functions for the implicit function solver. */
-    const FunctionModelFactoryInterface<ValidatedTag>& function_factory() const;
+    const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& function_factory() const;
     /*! \brief Set the class which constructs functions for the implicit function solver. */
-    Void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
+    Void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
     virtual Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f,const ExactBoxType& bx) const;
@@ -97,7 +97,7 @@ class SolverBase
   private:
     FloatDPValue _max_error;
     Nat _max_steps;
-    std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> > _function_factory_ptr;
+    std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> > _function_factory_ptr;
 };
 
 

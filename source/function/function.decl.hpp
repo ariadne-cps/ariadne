@@ -245,9 +245,9 @@ using ApproximateScalarMultivariateFunctionModelDPInterface = ScalarMultivariate
 using ApproximateVectorMultivariateFunctionModelDPInterface = VectorMultivariateFunctionModelInterface<ApproximateTag,DoublePrecision>;
 
 
-template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactoryInterface;
+template<class P, class PR, class PRE=PR> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
-template<class P, class PR=DoublePrecision, class PRE=PR> class FunctionModelFactory;
+template<class P, class PR, class PRE=PR> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
 template<class FMF, class D> class FunctionModelCreator;
 

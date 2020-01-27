@@ -69,11 +69,11 @@ template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorMo
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold_) {
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(double sweep_threshold_) {
     return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold_));
 }
 

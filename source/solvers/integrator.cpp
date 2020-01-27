@@ -95,7 +95,7 @@ IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConsta
 Void
 IntegratorBase::set_function_factory(const ValidatedFunctionModelDPFactoryInterface& factory)
 {
-    this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
+    this->_function_factory_ptr=ValidatedFunctionModelDPFactoryPointer(factory.clone());
 }
 
 const ValidatedFunctionModelDPFactoryInterface&

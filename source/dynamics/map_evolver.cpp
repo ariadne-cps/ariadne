@@ -66,7 +66,7 @@ const Bool DEFAULT_ENABLE_PREMATURE_TERMINATION = false;
 
 using std::shared_ptr;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 
 class DegenerateCrossingException { };
 

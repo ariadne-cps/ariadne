@@ -79,8 +79,8 @@ class TaylorFunctionFactory
     friend OutputStream& operator<<(OutputStream& os, TaylorFunctionFactory const& factory) { return os << "TaylorFunctionFactory( sweeper=" << factory.sweeper() << " )"; }
 };
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold_);
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(double sweep_threshold_);
 
 } // namespace Ariadne
 

@@ -54,8 +54,8 @@ template<class I, class X> class Polynomial;
 template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 typedef Differential<ValidatedNumericType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
-typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelDPFactoryInterface;
-typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
+typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
+typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedFunctionModelDPFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
@@ -186,7 +186,7 @@ class IntegratorBase
     double _maximum_error;
     double _lipschitz_tolerance;
     StepSizeType _maximum_step_size;
-    FunctionFactoryPointer _function_factory_ptr;
+    ValidatedFunctionModelDPFactoryPointer _function_factory_ptr;
     BounderPointer _bounder_ptr;
 };
 

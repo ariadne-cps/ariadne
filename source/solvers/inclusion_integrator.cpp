@@ -44,22 +44,21 @@ ErrorType vstar(BoxDomainType const& inputs) {
     return result;
 }
 
-ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h);
-ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h);
-template<class R> ErrorType twoparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h);
-ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
-ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
-template<class R> ErrorType twoparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
+ErrorType zeroparam_worstcase_error(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h);
+ErrorType oneparam_worstcase_error(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h);
+template<class R> ErrorType twoparam_worstcase_error(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h);
+ErrorType zeroparam_component_error(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
+ErrorType oneparam_component_error(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
+template<class R> ErrorType twoparam_component_error(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j);
 
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType worstcase_error(ErrorConstants const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n, wstar_multiplier<A>(), h); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType worstcase_error(ErrorConstants const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n, wstar_multiplier<A>(), h); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(ErrorConstants const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n, wstar_multiplier<A>(), h); }
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(ErrorConstants const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(ErrorConstants const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(ErrorConstants const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n, vstar(inputs), wstar<A>(inputs), h, j); }
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType worstcase_error(ErrorConstants<> const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n, wstar_multiplier<A>(), h); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType worstcase_error(ErrorConstants<> const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n, wstar_multiplier<A>(), h); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(ErrorConstants<> const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n, wstar_multiplier<A>(), h); }
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(ErrorConstants<> const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(ErrorConstants<> const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n, vstar(inputs), wstar<A>(inputs), h, j); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(ErrorConstants<> const& n, BoxDomainType const& inputs, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n, vstar(inputs), wstar<A>(inputs), h, j); }
 
-
-ErrorConstants::ErrorConstants(ErrorType const& K_, Vector<ErrorType> const& Kj_, ErrorType const& pK_, ErrorType const& pKv_, ErrorType const& pKw_, Vector<ErrorType> const& pKj_, Vector<ErrorType> const& pKjv_, Vector<ErrorType> const& pKjw_,
+template<class E> ErrorConstants<E>::ErrorConstants(ErrorType const& K_, Vector<ErrorType> const& Kj_, ErrorType const& pK_, ErrorType const& pKv_, ErrorType const& pKw_, Vector<ErrorType> const& pKj_, Vector<ErrorType> const& pKjv_, Vector<ErrorType> const& pKjw_,
                                ErrorType const& L_, Vector<ErrorType> const& Lj_, ErrorType const& pL_, ErrorType const& pLv_, ErrorType const& pLw_, Vector<ErrorType> const& pLj_, Vector<ErrorType> const& pLjv_, Vector<ErrorType> const& pLjw_,
                                ErrorType const& H_, Vector<ErrorType> const& Hj_, ErrorType const& pH_, ErrorType const& pHv_, ErrorType const& pHw_, Vector<ErrorType> const& pHj_, Vector<ErrorType> const& pHjv_, Vector<ErrorType> const& pHjw_,
                                FloatDPUpperBound const& Lambda_, ErrorType const& expLambda_, ErrorType const& expL_)
@@ -73,16 +72,19 @@ ErrorConstants::ErrorConstants(ErrorType const& K_, Vector<ErrorType> const& Kj_
            Hj.size() == _dimension and pHj.size() == _dimension and pHjv.size() == _dimension and pHjw.size() == _dimension);
 }
 
-Tuple<ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
+template<class E> auto ErrorConstants<E>::values() const
+    -> Tuple<ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
       ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
       ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
-      FloatDPUpperBound,ErrorType,ErrorType>
-ErrorConstants::values() const {
+      UpperBoundType,ErrorType,ErrorType>
+{
     return std::tie(this->K,this->Kj,this->pK,this->pKv,this->pKw,this->pKj,this->pKjv,this->pKjw,this->L,this->Lj,this->pL,this->pLv,this->pLw,this->pLj,this->pLjv,this->pLjw,this->H,this->Hj,this->pH,this->pHv,this->pHw,this->pHj,this->pHjv,this->pHjw,this->Lambda,this->expLambda,this->expL);
 }
 
+ErrorConstants<FloatDPValue> const& cast_exact(ErrorConstants<FloatDPError> const& ec) {
+    return reinterpret_cast<ErrorConstants<FloatDPValue>const&>(ec); }
 
-ErrorConstants
+ErrorConstants<>
 compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_component, Vector<EffectiveVectorMultivariateFunction> const& input_derivatives, BoxDomainType const& inputs, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
     auto n = noise_independent_component.result_size();
@@ -156,57 +158,60 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
     ErrorType expLambda = (possibly(Lambda>0)) ? ErrorType(dexp(Lambda*h)) : ErrorType(1u,pr);
     ErrorType expL = cast_positive(exp(L*h));
 
-    return ErrorConstants(K, Kj, pK, pKv, pKw, pKj, pKjv, pKjw,
+    return ErrorConstants<>(K, Kj, pK, pKv, pKw, pKj, pKjv, pKjw,
                           L, Lj, pL, pLv, pLw, pLj, pLjv, pLjw,
                           H, Hj, pH, pHv, pHw, pHj, pHjv, pHjw,
                           Lambda, expLambda, expL);
 }
 
-ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+ErrorType zeroparam_worstcase_error(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h, (n.K*2u+n.pK)*h); }
-ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType zeroparam_component_error(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return min(n.pK*n.expL*h*v, min( (n.Kj[j]*2u+n.pKj[j]*v)*h, n.pK*v*n.expLambda*h));
 }
 
-ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+ErrorType oneparam_worstcase_error(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
-ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+ErrorType oneparam_component_error(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return pow(h,2u)*(n.pLj[j]*v*(n.K+v*n.pK)/2u + (n.Lj[j]+n.pLj[j])*(v+w)*n.pK*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
-template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return ((r*r+1u)*n.pL*n.pK +
             (r+1u)*h*n.pK*((n.pH*2u*r + n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+n.pL*r*r*2u)*n.pL)*n.expLambda +
             (r+1u)/6u*h*(n.K+n.pK)*((n.H*n.pK+n.L*n.pL)*3u+(n.pH*n.K+n.L*n.pL)*4u)
            )/cast_positive(+1u-h*n.L/2u-h*n.pL*r)*pow(h,2u)/4u; }
-template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+template<> ErrorType twoparam_worstcase_error<AdditiveInputs>(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return (n.H*(n.K+n.pK)/2u +
             (pow(n.L,2u)+n.H*(n.K+r*n.pK))*n.expLambda
            )/cast_positive(+1u-h*n.L/2u)*(r+1u)*n.pK*pow(h,3u)/4u; }
-template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+template<> ErrorType twoparam_worstcase_error<SingularInput>(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return ((r+1u)*n.pK*((n.pH*2u*r+n.H)*(n.K+r*n.pK)+pow(n.L,2u)+(n.L*3u*r+pow(r,2u)*2u*n.pL)*n.pL)*n.expLambda +
             (n.K+n.pK)/6u*((r+1u)*((n.H*n.pK+n.L*n.pL)*3u +(n.pH*n.K+n.L*n.pL)*4u) +
                            (n.pH*n.pK+pow(n.pL,2u))*8u*(r*r+1u))
            )*pow(h,3u)/4u/cast_positive(+1u-h*n.L/2u-h*n.pL*r); }
-template<> ErrorType twoparam_worstcase_error<DualInputs>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
+template<> ErrorType twoparam_worstcase_error<DualInputs>(ErrorConstants<> const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return twoparam_worstcase_error<AffineInputs>(n, r, h); }
 
-template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return (pow(h,2u)*(pow(v,2u)+pow(w,2u))*n.pK*n.pLj[j]/2u +
-            pow(h,3u)*(v+w)*((n.K+v*n.pK)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K)/6u)+n.L*n.pLj[j]*(n.K+w*n.pK)/6u) +
-            n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
-            n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
-           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
-template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return (
+        pow(h,2u) * (sqr(v)+sqr(w)) * n.pK*n.pLj[j]/2u +
+        pow(h,3u) * (v+w) * (
+            (n.K+v*n.pK) * ( (n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u + (n.pHj[j]*n.K+n.L*n.pLj[j])/6u ) +
+            n.pK * ( n.Lj[j]*n.L + w*n.pL*n.Lj[j] + n.Hj[j]*(n.K+w*n.pK) ) * psi0(n.Lambda*h) +
+            n.pK * ( n.pLj[j]*n.L + w*n.pL*n.pLj[j] +n.pHj[j]*(n.K+w*n.pK) ) * psi1(n.Lambda*h)  )
+      ) / cast_positive(1u - h * (n.Lj[j]/2u+w*n.pLj[j]) );
+}
+template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return (n.Hj[j]*(n.K+v)/8u +
             (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/pow(cast_exact(n.Lambda*h),3u))
            )*pow(h,3u)*(v+w)/cast_positive(+1u-h*n.Lj[j]/2u); }
-template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return (pow(h,3u)*((n.K+v*n.pK)*(v+w)*(n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K*(n.K+v*n.pK)+n.L*n.pLj[j]*(n.K+w*n.pK))*4u +
             (pow(v,2)+pow(w,2))*8u*((n.K+w*n.pK)*n.pHj[j]*n.pK + (n.K+v*n.pK)*n.pL*n.pLj[j]))/24u +
             n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
             n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
            )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
-template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants<> const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     ErrorType acc(0u);
     for (auto l : range(0,n.Lj.size())) {
         acc += n.pLj[l]*(n.K+w*n.pK)*n.pLj[j]+n.pKj[l]*n.pHj[j]*(n.K+v*n.pK);
@@ -217,7 +222,7 @@ template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& 
             n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
            )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
 
-template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorConstants const& n, PositiveFloatDPValue const& h) const {
+template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorConstants<> const& n, PositiveFloatDPValue const& h) const {
 
     Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,h));
 
@@ -234,7 +239,7 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
-    ErrorConstants norms = compute_constants(Ariadne::noise_independent_component(_f, _inputs.size()),
+    ErrorConstants<> norms = compute_constants(Ariadne::noise_independent_component(_f, _inputs.size()),
                                              Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
     ARIADNE_LOG(7,"norms: " << norms << "\n");
     Set<Nat> input_idx;

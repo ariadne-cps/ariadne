@@ -58,6 +58,10 @@ template<class PR> class FloatFactory {
     template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y);
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y);
     template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y);
+    PositiveFloatApproximation<PR> create(PositiveNumber<ApproximateTag> const& y);
+    PositiveFloatLowerBound<PR> create(PositiveNumber<ValidatedLowerTag> const& y);
+    PositiveFloatUpperBound<PR> create(PositiveNumber<ValidatedUpperTag> const& y);
+    PositiveFloatBounds<PR> create(PositiveNumber<ValidatedTag> const& y);
 };
 
 template<class Y, class PR> using ConcreteType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));

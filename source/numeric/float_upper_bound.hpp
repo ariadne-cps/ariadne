@@ -174,7 +174,8 @@ template<class PR> UpperBound(ValidatedUpperNumber, PR) -> UpperBound<RawFloatTy
 template<class F> UpperBound(F) -> UpperBound<F>;
 
 template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
-template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Number<UpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
+template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(ValidatedUpperNumber const& y) { return FloatUpperBound<PR>(y,_pr); }
+template<class PR> inline PositiveFloatUpperBound<PR> FloatFactory<PR>::create(PositiveValidatedUpperNumber const& y) { return PositiveFloatUpperBound<PR>(y,_pr); }
 
 template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     , DefineConcreteGenericOperators<PositiveUpperBound<F>>
@@ -187,7 +188,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<UpperBound<F>>(M m, PR pr) : UpperBound<F>(m,pr) { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveValue<F> create(M m) const { return PositiveValue<F>(m,this->precision()); }
     explicit Positive<UpperBound<F>>(UpperBound<F> const& x) : UpperBound<F>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
-    explicit Positive<UpperBound<F>>(ValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
+    Positive<UpperBound<F>>(PositiveValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
     Positive<UpperBound<F>>(PositiveValue<F> const& x) : UpperBound<F>(x) { }
     Positive<UpperBound<F>>(PositiveBounds<F> const& x) : UpperBound<F>(x) { }
   public:

@@ -763,6 +763,14 @@ template<class X, class QX, class Y, class QY, class R=X, class QR=QX> struct De
     friend QR operator/(const QY& y1, const X& x2) { return operator/(factory(x2).create(y1),x2); }
 };
 
+template<class X, class R=X> struct DefineSemiFieldOperators
+    : DefineDirectedSemiFieldOperators<X,X,R,R>
+{
+};
+template<class X, class Y, class R=X> struct DefineMixedSemiFieldOperators
+    : DefineMixedDirectedSemiFieldOperators<X,X,Y,Y,R,R>
+{
+};
 
 template<class X, class Y=X, class R=X> struct DefineInplaceRingOperators {
 };
@@ -1340,6 +1348,11 @@ template<class X, class QX, class R=X, class QR=QX> struct DispatchPositiveDirec
     friend X max(X const& x1, X const& x2) { return OperationsType::_max(x1,x2); }
     friend X min(X const& x1, X const& x2) { return OperationsType::_min(x1,x2); }
     friend X abs(X const& x) { return OperationsType::_abs(x); }
+};
+
+template<class X, class R=X> struct DispatchPositiveNumericOperations
+    : DispatchPositiveDirectedNumericOperations<X,X,R,R>
+{
 };
 
 template<class X, class LT, class EQ=LT> struct DispatchComparisonOperations

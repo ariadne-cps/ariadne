@@ -124,6 +124,7 @@ template<> struct IsGenericNumericType<Rational> : True { };
 template<> struct IsGenericNumericType<Real> : True { };
 template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
+template<class Y> struct IsGenericNumericType<Positive<Y>> : IsGenericNumericType<Y> { };
 
 //@{
 //! \name Type synonyms for generic numbers

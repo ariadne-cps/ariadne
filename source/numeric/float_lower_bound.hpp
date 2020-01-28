@@ -178,7 +178,8 @@ template<class PR> LowerBound(ValidatedLowerNumber, PR) -> LowerBound<RawFloatTy
 template<class F> LowerBound(F) -> LowerBound<F>;
 
 template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
-template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
+template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(ValidatedLowerNumber const& y) { return FloatLowerBound<PR>(y,_pr); }
+template<class PR> inline PositiveFloatLowerBound<PR> FloatFactory<PR>::create(PositiveValidatedLowerNumber const& y) { return PositiveFloatLowerBound<PR>(y,_pr); }
 
 template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     , DefineConcreteGenericOperators<PositiveLowerBound<F>>
@@ -190,7 +191,7 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
         Positive<LowerBound<F>>(M m) : LowerBound<F>(m) { }
     explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
     explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
-    explicit Positive<LowerBound<F>>(ValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
+    Positive<LowerBound<F>>(PositiveValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
     Positive<LowerBound<F>>(PositiveValue<F> const& x) : LowerBound<F>(x) { }
     Positive<LowerBound<F>>(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
   public:

@@ -298,6 +298,9 @@ template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Rational cons
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Dyadic const& y) { return FloatBounds<PR>(y,_pr); }
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Integer const& y) { return FloatBounds<PR>(y,_pr); }
 
+template<class PR> inline PositiveFloatBounds<PR> FloatFactory<PR>::create(PositiveValidatedNumber const& y) { return PositiveFloatBounds<PR>(y,_pr); }
+
+
 
 template<class F> class Positive<Bounds<F>> : public Bounds<F>
     , public DeclarePositiveFloatOperations<PositiveBounds<F>>
@@ -311,6 +314,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
     Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
+    Positive<Bounds<F>>(PositiveValidatedNumber const& y, PR pr) : Bounds<F>(y,pr) { }
   public:
     Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
     Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }

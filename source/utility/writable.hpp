@@ -77,7 +77,7 @@ template<class T> class Writable {
     Writable(WriterInterface<T> const& w, T const& t) : _w(w), _t(t) { }
     friend OutputStream& operator<<(OutputStream& os, Writable<T> const& wt) { return wt._w.write(os,wt._t); }
 //    template<class TT> friend Writable<TT> WriterInterface<TT>::operator() (TT const&) const;
-    friend class WriterInterface<T>;
+    friend class WriterInterface<T>; friend class Writer<T>;
 };
 
 template<class T> Writable<T> WriterInterface<T>::operator() (T const& t) const { return Writable<T>(*this,t); }
@@ -87,6 +87,9 @@ template<class T> class Writer : public Handle<WriterInterface<T>> {
   public:
     using Handle<WriterInterface<T>>::Handle;
     Writer<T>(Handle<WriterInterface<T>> wh) : Handle<WriterInterface<T>>(wh) { }
+    inline Writable<T> operator() (T const& t) const { return Writable<T>(*this->_ptr,t); }
+  private:
+    friend OutputStream& operator<<(OutputStream& os, T const& t);
     inline OutputStream& write(OutputStream& os, T const& t) const { return this->managed_pointer()->write(os,t); }
 };
 

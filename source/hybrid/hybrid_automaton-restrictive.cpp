@@ -440,6 +440,10 @@ Void RestrictiveHybridAutomaton::new_mode(DiscreteLocation q, List<RealAssignmen
     this->new_auxiliary(p,a);
     this->new_dynamic(p,d);
 }
+Void RestrictiveHybridAutomaton::new_mode(DiscreteLocation q, List<DottedRealAssignment> d, List<RealAssignment> a) {
+    new_mode(q,a,d);
+}
+
 
 Void RestrictiveHybridAutomaton::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_transition(make_predicate(s),e,make_update(t),r,g); }

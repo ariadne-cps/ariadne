@@ -295,6 +295,13 @@ class HybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     Void new_mode(DiscreteLocation location,
+                  List<DottedRealAssignment> const& dynamic,
+                  List<RealAssignment> const& auxiliary) {
+        this->_new_mode(location,auxiliary,dynamic);
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    Void new_mode(DiscreteLocation location,
                   List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(location,List<RealAssignment>(),dynamic);
     }
@@ -312,6 +319,11 @@ class HybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     Void new_mode(List<RealAssignment> const& auxiliary, List<DottedRealAssignment> const& dynamic) {
+        this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    Void new_mode(List<DottedRealAssignment> const& dynamic, List<RealAssignment> const& auxiliary) {
         this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
     }
 

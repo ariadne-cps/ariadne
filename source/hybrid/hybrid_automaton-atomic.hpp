@@ -110,6 +110,13 @@ class AtomicHybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     Void new_mode(AtomicDiscreteLocation location,
+                  List<DottedRealAssignment> const& dynamic,
+                  List<RealAssignment> const& auxiliary) {
+        this->HybridAutomaton::new_mode(this->_variable|location,auxiliary,dynamic);
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    Void new_mode(AtomicDiscreteLocation location,
                   List<DottedRealAssignment> const& dynamic) {
         this->HybridAutomaton::new_mode(this->_variable|location,dynamic);
     }

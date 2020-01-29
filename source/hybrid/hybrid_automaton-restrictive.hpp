@@ -186,13 +186,10 @@ class RestrictiveHybridAutomaton
 
     Void new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u);
     Void new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r);
-    Void new_dynamic(DiscretePredicate q, List<RealAssignment> a, List<DottedRealAssignment> d);
     Void new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d);
     Void new_dynamic(List<DottedRealAssignment> d);
     Void new_auxiliary(DiscretePredicate q, List<RealAssignment> a);
     Void new_auxiliary(List<RealAssignment> a);
-    Void new_dynamic(DiscretePredicate q ,List<RealAssignment> a, List<DottedRealAssignment>& d);
-    Void new_dynamic(List<RealAssignment> a);
     Void new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i);
     Void new_invariant(DiscretePredicate q, RealPredicate i);
     Void new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g);
@@ -202,6 +199,7 @@ class RestrictiveHybridAutomaton
     Void new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u, List<PrimedRealAssignment> r, RealPredicate g);
 
     Void new_mode(DiscreteLocation, List<RealAssignment>, List<DottedRealAssignment>);
+    Void new_mode(DiscreteLocation, List<DottedRealAssignment>, List<RealAssignment>);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, RealPredicate g);

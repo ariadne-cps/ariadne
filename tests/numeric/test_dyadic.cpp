@@ -89,6 +89,8 @@ void TestDyadic::test_concept() {
     b=(z==w); b=(z!=w); b=(z<=w); b=(z>=w); b=(z<w); b=(z>w);
 }
 
+const Writer<Dyadic> fraction_write=FractionWriter();
+
 void TestDyadic::test_literal() {
     ARIADNE_TEST_CONSTRUCT(Dyadic,q,(3.25_q2));
     ARIADNE_TEST_EQUALS(q,Dyadic(13,2u));
@@ -107,6 +109,18 @@ void TestDyadic::test_literal() {
 //    ARIADNE_TEST_EQUALS(-_2^-4,Dyadic(-1,4u));
 //    ARIADNE_TEST_EQUALS(5*_2^-4,Dyadic(5,4u));
 //    ARIADNE_TEST_EQUALS(5/_2^4,Dyadic(5,4u));
+
+    DecimalWriter decimal_write;
+
+    ARIADNE_TEST_PRINT(q);
+    ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
+    ARIADNE_TEST_PRINT(q);
+    ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
+    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<decimal_write(q));
+    ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q)<<"\n");
+    ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(decimal_write));
+    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
 }
 
 void TestDyadic::test_conversions() {

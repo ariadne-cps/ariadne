@@ -359,36 +359,50 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
     return cmp(x1,x2)==Comparison::LESS;
 }
 
+Writer<Dyadic> Dyadic::_default_writer(new FractionWriter());
 
 //   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
-    static const bool write_decimal = true;
+    return Dyadic::_default_writer.write(os,x);
+}
+
+template<class X> inline OutputStream& write_infinite(OutputStream& os, X const& x) {
+    if(is_nan(x)) {
+        os << "NaN";
+    } else {
+        os << (sgn(x)==Sign::POSITIVE ? "" : "-") << "inf";
+    }
+    return os;
+}
+
+auto DecimalWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
     if(is_finite(x)) {
-        if constexpr (write_decimal) {
-            Dyadic w=x;
-            if(w<0) { os << "-"; w=-w; }
-            Integer z=floor(w);
-            os << z << ".";
+        Dyadic w=x;
+        if(w<0) { os << "-"; w=-w; }
+        Integer z=floor(w);
+        os << z << ".";
+        w-=z;
+        while (w!=0) {
+            w*=10;
+            z=floor(w);
             w-=z;
-            while (w!=0) {
-                w*=10;
-                z=floor(w);
-                w-=z;
-                os << z;
-            }
-        } else { // Write p/2^q
-            Rational q;
-            mpq_set_f (q._mpq,x._mpf);
-            os << q.numerator();
-            Int exp = log2floor(q.denominator());
-            if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+            os << z;
         }
     } else {
-        if(is_nan(x)) {
-            os << "NaN";
-        } else {
-            os << (sgn(x)==Sign::POSITIVE ? "" : "-") << "inf";
-        }
+        write_infinite(os,x);
+    }
+    return os;
+}
+
+auto FractionWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    if(is_finite(x)) {
+        Rational q;
+        mpq_set_f (q._mpq,x._mpf);
+        os << q.numerator();
+        Int exp = log2floor(q.denominator());
+        if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+    } else {
+        write_infinite(os,x);
     }
     return os;
 }

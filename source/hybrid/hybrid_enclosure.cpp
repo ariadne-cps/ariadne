@@ -238,6 +238,12 @@ HybridEnclosure::auxiliary_function() const
 }
 
 ValidatedVectorMultivariateFunctionModelDP const
+HybridEnclosure::state_auxiliary_function() const
+{
+    return this->_set.state_auxiliary_function();
+}
+
+ValidatedVectorMultivariateFunctionModelDP const
 HybridEnclosure::state_time_auxiliary_function() const
 {
     return this->_set.state_time_auxiliary_function();

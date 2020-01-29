@@ -179,7 +179,9 @@ class HybridEnclosure
     const ValidatedScalarMultivariateFunctionModelDP& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
     const ValidatedVectorMultivariateFunctionModelDP auxiliary_function() const;
-    //! \brief The function related to the auxiliary space.
+    //! \brief The function returning the values of the state and auxiliary variables as a function of the parameter domain.
+    const ValidatedVectorMultivariateFunctionModelDP state_auxiliary_function() const;
+    //! \brief The function returning the values of the state, time and auxiliary variables.
     const ValidatedVectorMultivariateFunctionModelDP state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
     const ValidatedScalarMultivariateFunctionModelDP function(RealVariable var) const;

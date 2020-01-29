@@ -100,7 +100,9 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 
 } // namespace
 
+// Declare functions from hybrid_automaton.cpp
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
+EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()
     : _name("system"),_components() { }
@@ -429,12 +431,9 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 EffectiveVectorMultivariateFunction
 CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
-    RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
-    List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    Vector<RealExpression> results(algebraic.size(),default_expression);
-    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].rhs; }
-    return make_function(space,results);
+    List<RealAssignment> algebraic=this->sorted_auxiliary_assignments(location);
+    return Ariadne::make_auxiliary_function(space,algebraic);
 }
 
 EffectiveVectorMultivariateFunction

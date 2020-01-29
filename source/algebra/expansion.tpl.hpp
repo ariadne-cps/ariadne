@@ -92,7 +92,7 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
     {
         a=iter->first;
         x=iter->second;
-        if(decide(x!=0)) { this->append(a,x); }
+        if(!decide(x==0)) { this->append(a,x); }
     }
 }
 

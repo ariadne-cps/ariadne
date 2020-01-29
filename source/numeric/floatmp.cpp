@@ -476,6 +476,7 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
     if (x==0) { return "0."; }
     int edgts = abslog10floor(x.get_d())+1;
+    int zdgts = std::max(edgts,1);
     int fdgts = std::max(static_cast<int>(figs)-edgts,0);
     return print(x._mpfr,fdgts,rnd);
 }

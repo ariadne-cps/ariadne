@@ -76,9 +76,12 @@ using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< . \in
 //! \relates TaylorModel
 //! \name Template shorthands and type synonyms for Taylor models
 template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< Alias
+template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,Bounds<F>>; //!< Alias
 template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< Alias
 using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< Alias
 using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< Alias
+using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPBounds>; //!< Alias
+using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPBounds>; //!< Alias
 using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< Alias
 using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< Alias
 //@}

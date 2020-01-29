@@ -131,6 +131,7 @@ template<class F> class TestTaylorModel
     Void test_unscale();
     Void test_evaluate();
     Void test_arithmetic();
+    Void test_interval_arithmetic();
     Void test_range();
     Void test_functions();
     Void test_rescale();
@@ -167,6 +168,7 @@ template<class F> Void TestTaylorModel<F>::test()
     ARIADNE_TEST_CALL(test_approximation());
     ARIADNE_TEST_CALL(test_unscale());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_interval_arithmetic());
     ARIADNE_TEST_CALL(test_range());
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_rescale());
@@ -342,15 +344,69 @@ template<class F> Void TestTaylorModel<F>::test_arithmetic()
     ARIADNE_TEST_SAME(pow(t,3),t*t*t);
 
     F inf_ = F::inf(pr);
-    ValidatedTaylorModelType tm_inf(Expansion<MultiIndex,FloatType>(2),+inf_,swp);
-    ValidatedTaylorModelType tm_zero_times_inf=0*tm_inf;
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModelType,tm_inf,(Expansion<MultiIndex,FloatType>(2),+inf_,swp));
+    ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModelType,tm_zero_times_inf,(0*tm_inf));
     if(is_nan(tm_zero_times_inf.error().raw())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
     } else if(tm_zero_times_inf.error().raw()==+inf_) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
     } else if(tm_zero_times_inf.error().raw()==0.0) {
-        ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");
+        ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-0");
     }
+
+}
+
+
+template<class F> Void TestTaylorModel<F>::test_interval_arithmetic()
+{
+    IntervalTaylorModelType xi0=IntervalTaylorModelType::coordinate(2,0,swp);
+    IntervalTaylorModelType xi1=IntervalTaylorModelType::coordinate(2,1,swp);
+    IntervalTaylorModelType ri=IntervalTaylorModelType::unit_ball(2,swp);
+    IntervalTaylorModelType oi=IntervalTaylorModelType::constant(2,1,swp);
+
+    typedef typename IntervalTaylorModelType::CoefficientType CoefficientType;
+    typedef typename IntervalTaylorModelType::ErrorType ErrorType;
+
+
+    CoefficientType c(-1,2,pr);
+    CoefficientType d1(2,3,pr);
+    CoefficientType d2(5,7,pr);
+
+    auto rd1=rec(d1);
+    auto rd2=rec(d2);
+
+    InitializerList<DegreeType> i0={0}, i1={1}, i2={2}, i3={3};
+    CoefficientType a0(1,pr), a1(-2,pr), a2(3,pr);
+    CoefficientType b0(4,pr), b1(-2,pr), b2(3,pr), b3(5,pr);
+
+    ErrorType e(pr);
+
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)+c, IntervalTaylorModelType({{i0,a0+c},{i1,a1},{i2,a2}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)-c, IntervalTaylorModelType({{i0,a0-c},{i1,a1},{i2,a2}},e,swp));
+    ARIADNE_TEST_SAME(c-IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp), IntervalTaylorModelType({{i0,c-a0},{i1,-a1},{i2,-a2}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)*c, IntervalTaylorModelType({{i0,a0*c},{i1,a1*c},{i2,a2*c}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)/d1, IntervalTaylorModelType({{i0,a0*rd1},{i1,a1*rd1},{i2,a2*rd1}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)/d2, IntervalTaylorModelType({{i0,a0*rd2},{i1,a1*rd2},{i2,a2*rd2}},e,swp));
+
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp) + IntervalTaylorModelType({{i0,b0},{i1,b1}},e,swp),
+                      IntervalTaylorModelType({{i0,a0+b0},{i1,a1+b1},{i2,a2}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1}},e,swp) - IntervalTaylorModelType({{i0,b0},{i1,b1},{i2,b2}},e,swp),
+                      IntervalTaylorModelType({{i0,a0-b0},{i1,a1-b1},{i2,-b2}},e,swp));
+    ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp) * IntervalTaylorModelType({{i0,b0},{i1,b1}},e,swp),
+                      IntervalTaylorModelType({{i0,a0*b0},{i1,a0*b1+a1*b0},{i2,a1*b1+a2*b0},{i3,a2*b1}},e,swp));
+
+    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModelType,ti,(1-2*xi0+3*(xi0^2)+ri*3/4));
+    ARIADNE_TEST_SAME(ti,IntervalTaylorModelType({{{0,0},1.0},{{1,0},-2.0},{{2,0},3.0}},0.75,swp));
+    // Reciprocal of a constant
+    ARIADNE_TEST_SAME(rec(oi*4),oi/4);
+
+//    ARIADNE_TEST_SAME((1-2*x0+3*x1)*(3+2*x0-4*x1),3-4*x0+5*x1-4*(x0^2)+14*(x0*x1)-12*(x1^2));
+    ARIADNE_TEST_SAME(sqr(ti),ti*ti);
+    ARIADNE_TEST_SAME(pow(ti,0),oi);
+    ARIADNE_TEST_SAME(pow(ti,1),ti);
+    ARIADNE_TEST_SAME(pow(ti,2),ti*ti);
+    ARIADNE_TEST_SAME(pow(ti,3),ti*ti*ti);
+
 }
 
 template<class F> Void TestTaylorModel<F>::test_range()

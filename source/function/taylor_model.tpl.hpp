@@ -780,13 +780,11 @@ template<class P, class F> Void _scal(TaylorModel<P,F>& r, const TwoExp& c) {
     if (c.exponent()==0) { return; }
     r.error()*=Error<F>(c);
     _sparse_apply(std::bind(MulErr(),std::placeholders::_1,c,std::placeholders::_2),r);
-//    _sparse_apply(SMulErr{c},r);
 }
 
 template<class P, class F, class C> Void _scal(TaylorModel<P,F>& r, const C& c) {
     r.error()*=mag(c);
     _sparse_apply(std::bind(MulErr(),std::placeholders::_1,c,std::placeholders::_2),r);
-//    _sparse_apply(SMulErr{c},r);
 }
 
 /*

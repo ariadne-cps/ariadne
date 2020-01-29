@@ -292,7 +292,6 @@ template<class S> class LabelledSet {
     LabelledSet(const RealSpace& spc, const EuclideanSetType& set) : _spc(spc), _set(set) { ARIADNE_ASSERT(spc.dimension()==set.dimension()); }
     Set<RealVariable> variables() const { return _spc.variables(); }
     RealSpace const& space() const { return this->_spc; }
-    RealSpace canonical_space() const; [[deprecated]]
     EuclideanSetType const& continuous_set() const { return this->_set; }
     EuclideanSetType const& euclidean_set() const { return this->_set; }
     EuclideanSetType& euclidean_set() { return this->_set; }

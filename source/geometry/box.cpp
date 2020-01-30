@@ -40,6 +40,9 @@
 
 namespace Ariadne {
 
+typedef FloatDPBounds ValidatedNumericType;
+typedef Interval<FloatDPUpperBound> UpperIntervalType;
+
 UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }
 UpperBoxType apply(ValidatedVectorUnivariateFunction const& f, UpperIntervalType const& ivl) {

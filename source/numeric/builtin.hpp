@@ -48,6 +48,7 @@ class ApproximateDouble {
     double _d;
   public:
     typedef ApproximateTag Paradigm;
+    ApproximateDouble() : _d() { }
     ApproximateDouble(int n) : _d(n) { }
     template<class X, EnableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x) { }
     template<class X, DisableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x.get_d()) { }
@@ -64,6 +65,7 @@ class ExactDouble {
   public:
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
+    ExactDouble() : _d() { }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
     template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }

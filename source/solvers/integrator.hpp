@@ -52,8 +52,6 @@ template<class X> class Differential;
 template<class X> class Procedure;
 template<class I, class X> class Polynomial;
 template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
-typedef Differential<ValidatedNumericType> ValidatedDifferential;
-typedef Vector< Procedure<ValidatedNumericType> > ValidatedVectorProcedure;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
 typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedFunctionModelDPFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
@@ -404,9 +402,9 @@ class AffineIntegrator
     using IntegratorBase::flow_step;
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
-    Vector<ValidatedDifferential>
+    Vector<Differential<FloatDPBounds>>
     flow_derivative(const ValidatedVectorMultivariateFunction& f,
-                    const Vector<ValidatedNumericType>& dom) const;
+                    const Vector<FloatDPBounds>& dom) const;
 };
 
 

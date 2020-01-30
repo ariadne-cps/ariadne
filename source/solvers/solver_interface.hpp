@@ -82,6 +82,11 @@ class SingularJacobianException : public SolverException
 class SolverInterface
     : public Loggable
 {
+    using FLT=FloatDP;
+  public:
+    typedef Bounds<FLT> ValidatedNumericType;
+    typedef Approximation<FLT> ApproximateNumericType;
+    typedef ValidatedVectorMultivariateFunctionModelDP ValidatedVectorMultivariateFunctionModelType;
   public:
     //! \brief Virtual destructor.
     virtual ~SolverInterface() = default;

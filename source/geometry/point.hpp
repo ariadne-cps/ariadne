@@ -44,17 +44,16 @@ template<class X> class Point;
 using DyadicPoint = Point<Dyadic>; //!< .
 using RationalPoint = Point<Rational>; //!< .
 using RealPoint = Point<Real>; //!< .
-//@}
 
-//@{
-//! \relates Point
-//! \name Standard type names (deprecated)
-typedef Point<ExactNumericType> ExactPointType; //!< .
-typedef Point<EffectiveNumericType> EffectivePointType; //!< .
-typedef Point<ValidatedNumericType> ValidatedPointType; //!< .
-typedef Point<UpperNumericType> UpperPointType; //!< .
-typedef Point<LowerNumericType> LowerPointType; //!< .
-typedef Point<ApproximateNumericType> ApproximatePointType; //!< .
+template<class F> using ExactPoint = Point<Value<F>>;
+template<class F> using ValidatedPoint = Point<Bounds<F>>;
+template<class F> using ApproximatePoint = Point<Approximation<F>>;
+
+using FloatDPValuePoint = Point<FloatDPValue>;
+using FloatDPBoundsPoint = Point<FloatDPBounds>;
+using FloatDPApproximationPoint = Point<FloatDPApproximation>;
+
+typedef ExactPoint<FloatDP> ExactPointType;
 //@}
 
 //! A point in Euclidean space.
@@ -92,12 +91,12 @@ class Point
         return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
-    virtual ExactBoxType bounding_box() const;
+    virtual FloatDPUpperBox bounding_box() const;
 };
 
 template<class X> Point(Vector<X>) -> Point<X>;
 
-ExactPointType make_point(const StringType&);
+//Point<Real> make_point(const StringType&);
 
 } // namespace Ariadne
 

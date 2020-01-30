@@ -176,6 +176,10 @@ inline ValidatedConstraint operator<=(const ValidatedNumber& c, const ValidatedS
     return ValidatedConstraint(c,f,ExactNumber(+infty));
 }
 
+inline ValidatedConstraint operator<=(const ValidatedScalarMultivariateFunction& f, const ValidatedNumber& c) {
+    return ValidatedConstraint(ExactNumber(-infty),f,c);
+}
+
 inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumber& c) {
     ARIADNE_ASSERT(decide(nc.upper_bound()==infty));
    return ValidatedConstraint(nc.lower_bound(),nc.function(),c);

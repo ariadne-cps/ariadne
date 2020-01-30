@@ -73,24 +73,26 @@ using FloatMPLowerInterval = FloatLowerInterval<MultiplePrecision>; //!< .
 using FloatMPApproximateInterval = FloatApproximateInterval<MultiplePrecision>; //!< .
 //@}
 
-//@{
-//! \relates Interval
-//! \name Standard type names (deprecated)
-typedef Interval<ExactNumericType> ExactIntervalType; //!< .
-typedef Interval<EffectiveNumericType> EffectiveIntervalType; //!< .
-typedef Interval<ValidatedNumericType> ValidatedIntervalType; //!< .
-typedef Interval<UpperNumericType> UpperIntervalType; //!< .
-typedef Interval<LowerNumericType> LowerIntervalType; //!< .
-typedef Interval<ApproximateNumericType> ApproximateIntervalType; //!< .
-//@}
-
 
 //@{
 //! \ingroup GeometryModule
 //! \name Type definitions
-typedef FloatDPExactInterval IntervalDomainType; //!< \ingroup GeometryModule .
+
+//! The type used for the domain of a univariate function. \ingroup GeometryModule
+typedef FloatDPExactInterval IntervalDomainType;
+//! The type used for an over-approximation to the range of a validated scalar function. \ingroup GeometryModule
 typedef FloatDPUpperInterval IntervalValidatedRangeType; //!< \ingroup GeometryModule .
+//! The type used for an approximation to the range of an approximate scalar function. \ingroup GeometryModule
 typedef FloatDPApproximateInterval IntervalApproximateRangeType; //!< \ingroup GeometryModule .
+
+//! \brief The type used for testing properties of one-dimensional sets. \ingroup GeometryModule
+typedef FloatDPExactInterval ExactIntervalType;
+//! \brief The type used for the bounding interval of validated one-dimensional sets. \ingroup GeometryModule
+typedef FloatDPUpperInterval UpperIntervalType;
+//! \brief The type used for testing boundedness of validated one-dimensional sets. \ingroup GeometryModule
+typedef FloatDPLowerInterval LowerIntervalType;
+//! \brief The type used for the bounding interval of approximate one-dimensional sets. \ingroup GeometryModule
+typedef FloatDPApproximateInterval ApproximateIntervalType;
 //@}
 
 

@@ -49,13 +49,6 @@
 
 namespace Ariadne {
 
-typedef FloatDPError ValidatedNormType; // FIXME: Remove this typedef
-typedef FloatDPApproximation ApproximateNormType; // FIXME: Remove this typedef
-
-typedef FloatDPError NormType; // FIXME: Remove this typedef
-typedef FloatDPError ErrorType; // FIXME: Remove this typedef
-typedef FloatDPApproximation ApproximateErrorType; // FIXME: Remove this typedef
-
 template<class X> struct InformationTypedef;
 template<> struct InformationTypedef<Real> { typedef EffectiveTag Type; };
 template<class P> struct InformationTypedef<Number<P>> { typedef P Type; };

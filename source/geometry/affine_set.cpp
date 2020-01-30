@@ -64,25 +64,6 @@ struct LinearProgram {
     Vector<X> z;
 };
 
-
-ValidatedAffineConstraint operator<=(const FloatDPBounds& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const FloatDPBounds& u) { return ValidatedAffineConstraint(-infty,a,u); }
-ValidatedAffineConstraint operator==(const ValidatedAffine& a, const FloatDPBounds& b) { return ValidatedAffineConstraint(b,a,b); }
-
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const FloatDPBounds& u) {
-    ARIADNE_ASSERT(decide(c.upper_bound()==infty));
-    return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
-}
-
-ValidatedAffineModelConstraint operator<=(const FloatDPBounds& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const FloatDPBounds& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const FloatDPBounds& b) { return ValidatedAffineModelConstraint(b,a,b); }
-
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const FloatDPBounds& u) {
-    ARIADNE_ASSERT(decide(c.upper_bound()==infty));
-    return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
-}
-
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const RealBox& bx)
     : ValidatedAffineConstrainedImageSet(Box<Interval<FloatDPBall>>(bx,dp))
 {
@@ -111,29 +92,29 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> cons
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& bx)
-    : _domain(bx.dimension(),Interval<FloatDPValue>(0_z,dp)), _space_models(bx.dimension(),ValidatedAffineModel(bx.dimension(),dp))
+    : _domain(bx.dimension(),Interval<FloatDPValue>(0_z,dp)), _space_models(bx.dimension(),ValidatedAffineModelDP(bx.dimension(),dp))
 {
-    Vector<ErrorNumericType> errs(bx.dimension());
+    Vector<FloatDPError> errs(bx.dimension());
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
         make_lpair(_domain[i],errs[i])=make_domain(bx[i]);
     }
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
-        _space_models[i]=ValidatedAffineModel::scaling(bx.dimension(),i,_domain[i],dp);
+        _space_models[i]=ValidatedAffineModelDP::scaling(bx.dimension(),i,_domain[i],dp);
         _space_models[i].error()+=errs[i];
     }
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d)
-    : _domain(d), _space_models(ValidatedAffineModel::scalings(d,dp))
+    : _domain(d), _space_models(ValidatedAffineModelDP::scalings(d,dp))
 {
 }
 
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
-                     const Vector<ValidatedAffine>& f)
-    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),dp))
+                     const Vector<Affine<FloatDPBounds>>& f)
+    : _domain(d), _space_models(f.size(),ValidatedAffineModelDP(d.size(),dp))
 {
     if(d==ExactBoxType::unit_box(d.size())) {
         for(Nat i=0; i!=f.size(); ++i) {
@@ -144,9 +125,9 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
-                     const Vector<ValidatedAffine>& f,
-                     const List<ValidatedAffineConstraint>& c)
-    : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size(),dp)), _constraint_models()
+                     const Vector<Affine<FloatDPBounds>>& f,
+                     const List<ValidatedAffineConstraintDP>& c)
+    : _domain(d), _space_models(f.size(),ValidatedAffineModelDP(d.size(),dp)), _constraint_models()
 {
     ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
 
@@ -156,7 +137,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
         }
         for(Nat i=0; i!=c.size(); ++i) {
             ARIADNE_ASSERT_MSG(_domain.dimension() == c[i].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<c[i].argument_size()<<").");
-            _constraint_models.append(ValidatedAffineModelConstraint(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
+            _constraint_models.append(ValidatedAffineModelConstraintDP(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
         }
     } else {
         ARIADNE_NOT_IMPLEMENTED;
@@ -164,8 +145,8 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBoxType& d,
-                     const Vector<ValidatedAffineModel>& f,
-                     const List<ValidatedAffineModelConstraint>& c)
+                     const Vector<ValidatedAffineModelDP>& f,
+                     const List<ValidatedAffineModelConstraintDP>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
 {
     ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
@@ -173,13 +154,13 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
         ARIADNE_ASSERT_MSG(_domain.dimension() == cons.argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<cons.argument_size()<<").");
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f,
-                     const List<ValidatedAffineModelConstraint>& c)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModelDP>& f,
+                     const List<ValidatedAffineModelConstraintDP>& c)
     : ValidatedAffineConstrainedImageSet(ExactBoxType::unit_box(f[0].argument_size()),f,c)
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModelDP>& f)
     : _domain(ExactBoxType::unit_box(f[0].argument_size())), _space_models(f)
 {
     ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
@@ -199,9 +180,9 @@ Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const 
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
-    this->_space_models=Vector<ValidatedAffineModel>(G.row_size(),ValidatedAffineModel(G.column_size(),dp));
+    this->_space_models=Vector<ValidatedAffineModelDP>(G.row_size(),ValidatedAffineModelDP(G.column_size(),dp));
     for(Nat i=0; i!=G.row_size(); ++i) {
-        ValidatedAffineModel x(G.column_size(),dp);
+        ValidatedAffineModelDP x(G.column_size(),dp);
         x=h[i];
         for(Nat j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
@@ -211,7 +192,7 @@ Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const 
 }
 
 Void
-ValidatedAffineConstrainedImageSet::new_constraint(const ValidatedAffineModelConstraint& c)
+ValidatedAffineConstrainedImageSet::new_constraint(const ValidatedAffineModelConstraintDP& c)
 {
     ARIADNE_ASSERT(this->_space_models.size()>0);
     ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c["<<c.argument_size()<<"]="<<c<<" f["<<this->number_of_parameters()<<"]="<<this->_space_models);
@@ -219,11 +200,11 @@ ValidatedAffineConstrainedImageSet::new_constraint(const ValidatedAffineModelCon
 }
 
 Void
-ValidatedAffineConstrainedImageSet::new_parameter_constraint(const ValidatedAffineConstraint& c)
+ValidatedAffineConstrainedImageSet::new_parameter_constraint(const ValidatedAffineConstraintDP& c)
 {
     ARIADNE_ASSERT_MSG(this->_space_models.size()>0,"f="<<this->_space_models);
     ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c="<<c<<" f="<<this->_space_models);
-    this->new_constraint(ValidatedAffineModelConstraint(c.lower_bound(),affine_model(c.function()),c.upper_bound()));
+    this->new_constraint(ValidatedAffineModelConstraintDP(c.lower_bound(),affine_model(c.function()),c.upper_bound()));
 }
 
 
@@ -678,8 +659,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     const SizeType np=nx+ne+nc;
 
     // Set up matrix of function values
-    ValidatedAffineModel const& xa=this->_space_models[xind];
-    ValidatedAffineModel const& ya=this->_space_models[yind];
+    ValidatedAffineModelDP const& xa=this->_space_models[xind];
+    ValidatedAffineModelDP const& ya=this->_space_models[yind];
 
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
     Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np);

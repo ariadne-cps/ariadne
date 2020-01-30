@@ -313,9 +313,9 @@ template<class PT> Void export_point(pybind11::module& module, std::string name)
 
 Void export_points(pybind11::module& module) {
     export_point<RealPoint>(module,"RealPoint");
-    export_point<ExactPointType>(module,"ExactPointType");
-    export_point<ValidatedPointType>(module,"ValidatedPointType");
-    export_point<ApproximatePointType>(module,"ApproximatePointType");
+    export_point<FloatDPValuePoint>(module,"FloatDPValuePoint");
+    export_point<FloatDPBoundsPoint>(module,"FloatDPBoundsPoint");
+    export_point<FloatDPApproximationPoint>(module,"FloatDPApproximationPoint");
 }
 
 template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
@@ -521,7 +521,7 @@ Void export_curve(pybind11::module& module)
 {
     pybind11::class_<InterpolatedCurve, DrawableInterface> interpolated_curve_class(module,"InterpolatedCurve");
     interpolated_curve_class.def(pybind11::init<InterpolatedCurve>());
-    interpolated_curve_class.def(pybind11::init<FloatDPValue,ExactPoint>());
+    interpolated_curve_class.def(pybind11::init<FloatDPValue,FloatDPValuePoint>());
     interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDPValue&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__", [](InterpolatedCurve const& c){return pybind11::make_iterator(c.begin(),c.end());});
     interpolated_curve_class.def("__str__", &__cstr__<InterpolatedCurve>);

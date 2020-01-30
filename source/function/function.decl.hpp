@@ -37,8 +37,8 @@ namespace Ariadne {
 template<class X> class Vector;
 
 // Domain declarations
-using IntervalDomainType = ExactIntervalType;
-using BoxDomainType = ExactBoxType;
+typedef Interval<FloatDPValue> IntervalDomainType;
+typedef Box<Interval<FloatDPValue>> BoxDomainType;
 
 // Function declarations
 template<class P, class D, class C> class Function;

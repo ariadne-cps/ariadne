@@ -34,6 +34,7 @@
 #include "../utility/macros.hpp"
 #include "../utility/stlio.hpp"
 #include "../function/function.hpp"
+#include "../geometry/box.decl.hpp"
 #include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
@@ -42,10 +43,6 @@ namespace Ariadne {
 template<class X> class Vector;
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-template<class IVL> class Box;
-typedef Box<ExactIntervalType> ExactBoxType;
-typedef Box<UpperIntervalType> UpperBoxType;
 
 
 // Forward declarations for friends

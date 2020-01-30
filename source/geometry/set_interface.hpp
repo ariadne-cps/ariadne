@@ -35,19 +35,18 @@
 #include "../utility/tribool.hpp"
 #include "../numeric/numeric.hpp"
 
+#include "box.decl.hpp"
+
 namespace Ariadne {
 
 template<class X> class Vector;
 
-template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-typedef Point<ValidatedNumericType> ValidatedPoint;
-typedef Point<ApproximateNumericType> ApproximatePoint;
+template<class UB> class Interval;
+typedef FloatDPExactInterval ExactIntervalType;
 
 template<class IVL> class Box;
-typedef Box<ExactIntervalType> ExactBoxType;
-typedef Box<UpperIntervalType> UpperBoxType;
-typedef Box<ApproximateIntervalType> ApproximateBoxType;
+typedef FloatDPExactBox ExactBoxType;
+typedef FloatDPUpperBox UpperBoxType;
 
 class BoundedSetInterface;
 class OpenSetInterface;

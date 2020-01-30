@@ -444,7 +444,7 @@ ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariat
 
 
 ValidatedScalarMultivariateFunction& operator*=(ValidatedScalarMultivariateFunction& sf, const ExactNumber& c);
-EffectiveVectorMultivariateFunction operator*(const EffectiveNumericType& c, const EffectiveVectorMultivariateFunction& vf);
+EffectiveVectorMultivariateFunction operator*(const EffectiveNumber& c, const EffectiveVectorMultivariateFunction& vf);
 
 EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3);
 EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMultivariateFunction& f2, SizeType as3);
@@ -457,8 +457,8 @@ EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFuncti
 EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 
-Formula<EffectiveNumericType> make_formula(const EffectiveScalarMultivariateFunction& f);
-Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorMultivariateFunction& f);
+Formula<Real> make_formula(const EffectiveScalarMultivariateFunction& f);
+Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f);
 //RealExpression evaluate(EffectiveScalarMultivariateFunction const& f, Vector<RealVariable> const& vars);
 
 

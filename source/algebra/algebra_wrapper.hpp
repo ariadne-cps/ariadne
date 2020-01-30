@@ -75,6 +75,7 @@ template<class A, class X=NumericType<A>> class NormedAlgebraWrapper
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraWrapper<A,X>
 {
+    using typename AlgebraInterface<X>::ErrorType;
     using AlgebraWrapper<A,X>::AlgebraWrapper;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }

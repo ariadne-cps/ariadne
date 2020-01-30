@@ -62,7 +62,8 @@ using FloatDPBoundsDifferentialVector = DifferentialVector<FloatDPBounds>; //!< 
 using FloatMPApproximationDifferentialVector = DifferentialVector<FloatMPApproximation>; //!< .
 using FloatMPBoundsDifferentialVector = DifferentialVector<FloatMPBounds>; //!< .
 
-using UpperIntervalDifferentialType = Differential<UpperIntervalType>; //!< .
+using FloatDPUpperIntervalDifferential = Differential<FloatDPUpperInterval>; //!< .
+using FloatMPUpperIntervalDifferential = Differential<FloatMPUpperInterval>; //!< .
 //@}
 
 } //namespace Ariadne

@@ -152,18 +152,4 @@ using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< \ingroup Numeric
 
 } // namespace Ariadne
 
-#include "float.decl.hpp"
-
-namespace Ariadne {
-
-using ExactNumericType=FloatDPValue;
-using EffectiveNumericType=Real;
-using ValidatedNumericType=FloatDPBounds;
-using UpperNumericType=FloatDPUpperBound;
-using LowerNumericType=FloatDPLowerBound;
-using ApproximateNumericType=FloatDPApproximation;
-using ErrorNumericType=FloatDPError;
-
-} // namespace Ariadne
-
 #endif

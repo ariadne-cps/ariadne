@@ -75,7 +75,7 @@ inline Bool refines(Vector<UpperIntervalType> const& v1, UpperBoxType const& bx2
 
 Box<Interval<FloatDPValue>> over_approximation(Box<Interval<Real>> const&);
 
-ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<ErrorType> const& e);
+ValidatedVectorMultivariateFunctionModelDP add_errors(ValidatedVectorMultivariateFunctionModelDP phi, Vector<FloatDPError> const& e);
 
 ValidatedVectorMultivariateFunction build_Fw(ValidatedVectorMultivariateFunction const& F, Vector<ValidatedScalarMultivariateFunction> const& w);
 
@@ -160,12 +160,12 @@ class AffineApproximation : public InputApproximationKindTrait<InputApproximatio
 class SinusoidalApproximation : public InputApproximationKindTrait<InputApproximationKind::SINUSOIDAL> { };
 class PiecewiseApproximation : public InputApproximationKindTrait<InputApproximationKind::PIECEWISE> { };
 
-template<class A> ErrorType r_value();
-template<> ErrorType r_value<ZeroApproximation>() { return ErrorType(0u); }
-template<> ErrorType r_value<ConstantApproximation>() { return ErrorType(1u); }
-template<> ErrorType r_value<AffineApproximation>() { return ErrorType(5.0/3u); }
-template<> ErrorType r_value<SinusoidalApproximation>() { return ErrorType(5.0/4u); }
-template<> ErrorType r_value<PiecewiseApproximation>() { return ErrorType(1.3645_upper); }
+template<class A> FloatDPError r_value();
+template<> FloatDPError r_value<ZeroApproximation>() { return FloatDPError(0u); }
+template<> FloatDPError r_value<ConstantApproximation>() { return FloatDPError(1u); }
+template<> FloatDPError r_value<AffineApproximation>() { return FloatDPError(5.0/3u); }
+template<> FloatDPError r_value<SinusoidalApproximation>() { return FloatDPError(5.0/4u); }
+template<> FloatDPError r_value<PiecewiseApproximation>() { return FloatDPError(1.3645_upper); }
 
 template<class A> constexpr Nat num_params_per_input();
 template<> constexpr Nat num_params_per_input<ZeroApproximation>() { return 0u; }
@@ -194,19 +194,19 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind
     return os;
 }
 
-ErrorType zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
-ErrorType zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
-ErrorType oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
-ErrorType oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
-template<class R> ErrorType twoparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r);
-template<class R> ErrorType twoparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, ErrorType const& r, SizeType j);
+FloatDPError zeroparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
+FloatDPError zeroparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
+FloatDPError oneparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h);
+FloatDPError oneparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j);
+template<class R> FloatDPError twoparam_worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r);
+template<class R> FloatDPError twoparam_component_error(C1Norms const& n, PositiveFloatDPValue const& h, FloatDPError const& r, SizeType j);
 
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n,h); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n,h); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n,h,r_value<A>()); }
-template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n,h,j); }
-template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n,h,j); }
-template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> ErrorType component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n,h,r_value<A>(),j); }
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> FloatDPError worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return zeroparam_worstcase_error(n,h); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> FloatDPError worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return oneparam_worstcase_error(n,h); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> FloatDPError worstcase_error(C1Norms const& n, PositiveFloatDPValue const& h) { return twoparam_worstcase_error<R>(n,h,r_value<A>()); }
+template<class A, class R, EnableIf<IsSame<A,ZeroApproximation>> = dummy> FloatDPError component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return zeroparam_component_error(n,h,j); }
+template<class A, class R, EnableIf<IsSame<A,ConstantApproximation>> = dummy> FloatDPError component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return oneparam_component_error(n,h,j); }
+template<class A, class R, EnableIf<Not<Or<IsSame<A,ZeroApproximation>,IsSame<A,ConstantApproximation>>>> = dummy> FloatDPError component_error(C1Norms const& n, PositiveFloatDPValue const& h, SizeType j) { return twoparam_component_error<R>(n,h,r_value<A>(),j); }
 
 
 class InputApproximator;
@@ -219,20 +219,20 @@ public:
 
 template<class A> class ApproximationErrorProcessorInterface {
 public:
-    virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const = 0;
+    virtual Vector<FloatDPError> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const = 0;
 };
 
 template<class A, class R>
 class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
   public:
     ApproximationErrorProcessor(InclusionVectorField const& ivf) : _ivf(ivf), _enable_componentwise_error(false) { }
-    virtual Vector<ErrorType> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
+    virtual Vector<FloatDPError> process(PositiveFloatDPValue const& h, UpperBoxType const& B) const override;
   private:
     InclusionVectorField const& _ivf;
   protected:
     Boolean _enable_componentwise_error; // TODO: remove such option as soon as the DI paper is completed
   private:
-    Vector<ErrorType> process(C1Norms const& n, PositiveFloatDPValue const& h) const;
+    Vector<FloatDPError> process(C1Norms const& n, PositiveFloatDPValue const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };
@@ -252,7 +252,7 @@ public:
 class InputApproximatorInterface {
   public:
     virtual InputApproximationKind kind() const = 0;
-    virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
+    virtual Vector<FloatDPError> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const = 0;
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const = 0;
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const = 0;
 };
@@ -268,7 +268,7 @@ class InputApproximator : public InputApproximatorInterface {
     InputApproximator& operator=(InputApproximator const& other) { _impl = other._impl; return *this; }
   public:
     virtual InputApproximationKind kind() const override { return _impl->kind(); }
-    virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
+    virtual Vector<FloatDPError> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _impl->compute_errors(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override { return _impl->build_flow_domain(D,V,h); }
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override { return _impl->build_w_functions(DVh,n,m); }
     virtual ~InputApproximator() = default;
@@ -289,7 +289,7 @@ class InputApproximatorBase : public InputApproximatorInterface {
     const Nat _num_params_per_input;
   public:
     virtual InputApproximationKind kind() const override { return _kind; }
-    virtual Vector<ErrorType> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
+    virtual Vector<FloatDPError> compute_errors(PositiveFloatDPValue h, UpperBoxType const& B) const override { return _processor->process(h,B); }
     virtual BoxDomainType build_flow_domain(BoxDomainType D, BoxDomainType V, PositiveFloatDPValue h) const override;
     virtual Vector<ValidatedScalarMultivariateFunction> build_w_functions(BoxDomainType DVh, SizeType n, SizeType m) const override;
     virtual ~InputApproximatorBase() = default;

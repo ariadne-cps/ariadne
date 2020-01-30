@@ -46,26 +46,6 @@ namespace Ariadne {
 template<class PR> class FloatFactory;
 
 template<class X> class Affine;
-typedef Affine<ApproximateNumericType> ApproximateAffine;
-typedef Affine<ValidatedNumericType> ValidatedAffine;
-typedef Affine<EffectiveNumericType> EffectiveAffine;
-
-/*
-template<class X> struct DispatchAlgebraOperations<Affine<X>,X> {
-    friend Bool operator==(const Affine<X>& af1, const Affine<X>& af2) { return Operators<Affine<X>>::_eq(af1,af2); }
-    friend Affine<X> operator+(const Affine<X>& af) { return Operators<Affine<X>>::_pos(af); }
-    friend Affine<X> operator-(const Affine<X>& af) { return Operators<Affine<X>>::_neg(af); }
-    friend Affine<X> operator+(const Affine<X>& af1, const Affine<X>& af2) { return Operators<Affine<X>>::_add(af1,af2); }
-    friend Affine<X> operator-(const Affine<X>& af1, const Affine<X>& af2) { return Operators<Affine<X>>::_sub(af1,af2); }
-    friend Affine<X> operator+(const X& x1, const Affine<X>& af2) { return Operators<Affine<X>>::_add(x1,af2); }
-    friend Affine<X> operator+(const Affine<X>& af1, const X& x2) { return Operators<Affine<X>>::_add(af1,x2); }
-    friend Affine<X> operator-(const X& x1, const Affine<X>& af2) { return Operators<Affine<X>>::_sub(x1,af2); }
-    friend Affine<X> operator-(const Affine<X>& af1, const X& x2) { return Operators<Affine<X>>::_sub(af1,x2); }
-    friend Affine<X> operator*(const X& x1, const Affine<X>& af2) { return Operators<Affine<X>>::_mul(x1,af2); }
-    friend Affine<X> operator*(const Affine<X>& af1, const X& x2) { return Operators<Affine<X>>::_mul(af1,x2); }
-    friend Affine<X> operator/(const Affine<X>& af1, const X& x2) { return Operators<Affine<X>>::_div(af1,x2); }
-};
-*/
 
 template<class A, class X=typename A::NumericType> struct ProvideAlgebraOperations;
 

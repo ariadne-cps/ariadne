@@ -44,8 +44,9 @@
 
 using namespace Ariadne;
 
-typedef ElementaryAlgebra<EffectiveNumericType> EffectiveElementaryAlgebra;
-typedef SymbolicAlgebra<EffectiveNumericType> EffectiveSymbolicAlgebra;
+typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
+typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
+typedef SymbolicAlgebra<EffectiveNumber> EffectiveSymbolicAlgebra;
 
 class TestExpression {
     RealConstant o;
@@ -137,7 +138,7 @@ class TestExpression {
         RealExpression expr = x;//+u;
 
         Map<Identifier,Real> valuation;
-        Real value = Real(ExactNumericType(-0.0626));
+        Real value = Real(ExactDouble(-0.0626));
         valuation[x.name()] = value;
 
         ARIADNE_TEST_EQUALS(expr.kind(),OperatorKind::VARIABLE);
@@ -388,10 +389,10 @@ class TestExpression {
         //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
 
-        EffectiveElementaryAlgebra ax=RealExpression(x);
-        EffectiveElementaryAlgebra ay=RealExpression(y);
-        EffectiveElementaryAlgebra az=RealExpression(z);
-        Vector<EffectiveElementaryAlgebra> va={ax,ay,az};
+        RealElementaryAlgebra ax=RealExpression(x);
+        RealElementaryAlgebra ay=RealExpression(y);
+        RealElementaryAlgebra az=RealExpression(z);
+        Vector<RealElementaryAlgebra> va={ax,ay,az};
         ARIADNE_TEST_PRINT(va);
         ARIADNE_TEST_PRINT(f3(va));
         ARIADNE_TEST_PRINT(f3(va).extract<RealExpression>());

@@ -1163,6 +1163,7 @@ template<class M> class VectorScaledFunctionPatchElementReference
 {
     typedef M ModelType;
     typedef typename M::NumericType NumericType;
+    typedef typename M::ErrorType ErrorType;
     typedef typename M::NormType NormType;
     typedef VectorScaledFunctionPatchElementReference<M> SelfType;
     typedef ScaledFunctionPatch<M> FunctionType;

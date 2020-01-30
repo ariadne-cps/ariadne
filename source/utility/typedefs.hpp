@@ -40,7 +40,8 @@ namespace Ariadne {
 
 
 
-typedef unsigned char uchar;typedef unsigned int uint;
+using uchar = unsigned char;
+using uint = unsigned int;
 
 //! \brief Internal name for standard output stream.
 using OutputStream = std::ostream;
@@ -63,6 +64,8 @@ using Nat = uint;
 using Int = int;
 //! Internal name for builtin double-precision floats.
 using Dbl = double;
+//! Internal name for builtin double-precision floats.
+using Double = double;
 
 
 //! Internal name for builtin double-precision floats.
@@ -76,10 +79,10 @@ using SizeType = std::size_t;
 //! Internal name for standard difference type of container indices and pointers.
 using PointerDifferenceType = std::ptrdiff_t;
 
-using Nat32Type = std::uint32_t;
-using Int32Type = std::int32_t;
-using Nat64Type = std::uint64_t;
-using Int64Type = std::int64_t;
+class Nat32;
+class Int32;
+class Nat64;
+class Int64;
 
 using std::declval;
 
@@ -107,7 +110,7 @@ struct SizeOne { operator SizeType() const { return 1u; } };
 struct IndexZero { operator SizeType() const { return 0u; } };
 
 //! The type used for the degree of an index.
-using DegreeType = std::uint16_t;
+typedef std::uint16_t DegreeType;
 //! The type used for the dimension of a geometric object.
 typedef SizeType DimensionType;
 

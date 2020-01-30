@@ -31,10 +31,10 @@
 
 namespace Ariadne {
 
-typedef Differential<ApproximateNumericType> ApproximateDifferential;
-typedef Differential<ValidatedNumericType> ValidatedDifferential;
-typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
-typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
+typedef Differential<FloatDPApproximation> ApproximateDifferentialDP;
+typedef Differential<FloatDPBounds> ValidatedDifferentialDP;
+typedef UnivariateDifferential<FloatDPApproximation> ApproximateUnivariateDifferentialDP;
+typedef UnivariateDifferential<FloatDPBounds> ValidatedUnivariateDifferentialDP;
 typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
 typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 typedef TaylorModel<ApproximateTag,FloatMP> ApproximateTaylorModelMP;

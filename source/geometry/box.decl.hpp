@@ -47,24 +47,28 @@ using FloatDPLowerBox = Box<FloatDPLowerInterval>; //!< .
 using FloatDPApproximateBox = Box<FloatDPApproximateInterval>; //!< .
 //@}
 
-//@{
-//! \relates Box
-//! \name Standard type names (deprecated)
-typedef Box<ExactIntervalType> ExactBoxType; //!< .
-typedef Box<EffectiveIntervalType> EffectiveBoxType; //!< .
-typedef Box<ValidatedIntervalType> ValidatedBoxType; //!< .
-typedef Box<UpperIntervalType> UpperBoxType; //!< .
-typedef Box<LowerIntervalType> LowerBoxType; //!< .
-typedef Box<ApproximateIntervalType> ApproximateBoxType; //!< .
-//@}
-
 
 //@{
 //! \ingroup GeometryModule
 //! \name Type definitions
-typedef FloatDPExactBox BoxDomainType; //!< . \ingroup GeometryModule
-typedef FloatDPUpperBox BoxValidatedRangeType; //!< . \ingroup GeometryModule
-typedef FloatDPApproximateBox BoxApproximateRangeType; //!< . \ingroup GeometryModule
+//! The type used for the domain of a multivariate function. \ingroup GeometryModule
+typedef FloatDPExactBox BoxDomainType;
+//! The type used for an over-approximation to the range of a validated vector function. \ingroup GeometryModule
+typedef FloatDPUpperBox BoxValidatedRangeType; //!< \ingroup GeometryModule .
+//! The type used for an approximation to the range of an approximate vector function. \ingroup GeometryModule
+typedef FloatDPApproximateBox BoxApproximateRangeType; //!< \ingroup GeometryModule .
+
+//! \brief The type used for the bounding box of validated sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPUpperBox BoundingBoxType;
+
+//! \brief The type used for testing properties of sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPExactBox ExactBoxType;
+//! \brief The type used for the bounding box of validated sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPUpperBox UpperBoxType;
+//! \brief The type used for testing boundedness of sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPLowerBox LowerBoxType;
+//! \brief The type used for the bounding box of approximate sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPApproximateBox ApproximateBoxType;
 //@}
 
 template<class IVL> class BoxSet;
@@ -72,6 +76,7 @@ template<class IVL> class BoxSet;
 //! \relates BoxSet
 //! \name Type synonyms
 typedef BoxSet<ExactIntervalType> ExactBoxSetType; //!< .
+typedef BoxSet<UpperIntervalType> UpperBoxSetType; //!< .
 typedef BoxSet<ApproximateIntervalType> ApproximateBoxSetType; //!< .
 typedef BoxSet<RealInterval> RealBoxSet; //!< .
 //@}

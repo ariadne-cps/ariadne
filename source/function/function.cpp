@@ -869,16 +869,28 @@ ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction con
 }
 
 
-UpperIntervalType evaluate_range(ScalarMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<UpperIntervalType> evaluate_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Vector<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<Differential<UpperIntervalType>> derivative_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
-    return static_cast<Vector<Differential<UpperIntervalType>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
-Covector<UpperIntervalType> gradient_range(ValidatedScalarMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
-Matrix<UpperIntervalType> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
+FloatDPUpperInterval evaluate_range(ValidatedScalarMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<FloatDPUpperInterval>(f(reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Vector<FloatDPUpperInterval> evaluate_range(ValidatedVectorMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Vector<FloatDPUpperInterval>>(f(reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Vector<Differential<FloatDPUpperInterval>> derivative_range(ValidatedVectorMultivariateFunction const& f,
+                                                            const Vector<Differential<FloatDPUpperInterval>>& x) {
+    return static_cast<Vector<Differential<FloatDPUpperInterval>>>(
+        f(reinterpret_cast<Vector<Differential<FloatDPBounds>>const&>(x)));
+}
+
+Covector<FloatDPUpperInterval> gradient_range(ValidatedScalarMultivariateFunction const& f,
+                                              const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Covector<FloatDPUpperInterval>>(gradient(f,reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Matrix<FloatDPUpperInterval> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Matrix<FloatDPUpperInterval>>(jacobian(f,reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
 
 //------------------------ Function operators -------------------------------//
 

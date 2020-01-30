@@ -40,12 +40,12 @@
 namespace Ariadne {
 
 
-Orbit<ExactPoint>::Orbit(const ExactPoint& pt)
+template<class F> Orbit<ExactPoint<F>>::Orbit(const ExactPoint<F>& pt)
     : _curve(new InterpolatedCurve(0,pt))
 { }
 
-Void
-Orbit<ExactPoint>::insert(FloatDPValue t, const ExactPoint& pt)
+template<class F> Void
+Orbit<ExactPoint<F>>::insert(Value<F> t, const ExactPoint<F>& pt)
 {
     this->_curve->insert(t,pt);
 }

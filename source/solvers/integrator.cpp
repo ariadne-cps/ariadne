@@ -321,6 +321,7 @@ typedef Procedure<ValidatedNumber> ValidatedProcedure;
 typedef Differential<FloatDPBounds> ValidatedDifferential;
 typedef MultivariatePolynomial<FloatDPBounds> ValidatedMultivariatelynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
+typedef FloatDPBounds ValidatedNumericType;
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
 

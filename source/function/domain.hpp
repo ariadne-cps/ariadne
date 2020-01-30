@@ -34,8 +34,8 @@
 
 namespace Ariadne {
 
-using IntervalDomainType = ExactIntervalType;
-using BoxDomainType = ExactBoxType;
+using IntervalDomainType = Interval<FloatDPValue>;
+using BoxDomainType = Box<Interval<FloatDPValue>>;
 
 class RealDomain {
   public:

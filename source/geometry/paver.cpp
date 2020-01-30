@@ -329,7 +329,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
 Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f,
-    const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c, const GridCell& b, ExactPoint x, ExactPoint y, Nat e)
+    const ValidatedVectorMultivariateFunction& g, const ExactBoxType& c, const GridCell& b, ExactPointType x, ExactPointType y, Nat e)
 {
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
@@ -351,7 +351,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
     ARIADNE_LOG(2,"  x0="<<x<<", y0="<<y<<"\n");
 
-    ExactPoint z(x.size());
+    FloatDPValuePoint z(x.size());
     FloatDPValue t;
     FloatDPApproximation one = 1.0_exact;
 
@@ -486,7 +486,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPoint& x, ExactPoint& y, Nat e)
+Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const ExactBoxType& d, const ValidatedVectorMultivariateTaylorFunctionModelDP& fg, const ExactBoxType& c, const GridCell& b, ExactPointType& x, ExactPointType& y, Nat e)
 {
     auto properties = fg.properties();
     auto pr = properties.precision();
@@ -506,7 +506,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     NonlinearInteriorPointOptimiser optimiser;
 
     FloatDPValue t{pr};
-    ExactPoint z(x.size());
+    FloatDPValuePoint z(x.size());
 
     FloatDPApproximationVector& ax=reinterpret_cast<FloatDPApproximationVector&>(x);
     FloatDPApproximationVector& ay=reinterpret_cast<FloatDPApproximationVector&>(y);
@@ -566,8 +566,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBoxType,ExactBoxType> sd=split(d);
-        ExactPoint nx = cast_exact((1-XSIGMA)*ax + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
-        ExactPoint ny = midpoint(sd.first);
+        ExactPointType nx = cast_exact((1-XSIGMA)*ax + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
+        ExactPointType ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
         nx = cast_exact((1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
@@ -580,8 +580,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        ExactPoint sx = cast_exact((1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
-        ExactPoint sy = y;
+        ExactPointType sx = cast_exact((1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
+        ExactPointType sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
         sx = cast_exact(FloatDPApproximation(1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size()));
         sy = y;
@@ -605,9 +605,9 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     ExactBoxType r=cast_exact_box(widen(apply(g,d),1));
     ExactBoxType rc=intersection(r,c);
 
-    ExactPoint y=midpoint(d);
+    Point<FloatDPValue> y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
+    Point<FloatDPValue> x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
 
     Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -636,9 +636,9 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
     GridCell b=GridCell::smallest_enclosing_primary_cell(cast_exact_box(apply(g,d)),p.grid());
     ExactBoxType rc=intersection(cast_exact_box(widen(apply(g,d),1)),c);
 
-    ExactPoint y=midpoint(d);
+    ExactPointType y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
+    ExactPointType x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
 
     ValidatedVectorMultivariateTaylorFunctionModelDP fg;
     const ValidatedVectorMultivariateTaylorFunctionModelDP* tfptr;

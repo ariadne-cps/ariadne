@@ -58,7 +58,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> ValidatedConstraintModel;
 
 typedef Dyadic StepSizeType;
 
@@ -240,7 +240,7 @@ class Enclosure
     //! \brief A bounding box for the set.
     UpperBoxType bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
-    ExactPoint centre() const;
+    Point<FloatDPValue> centre() const;
     //! \brief An over-approximation to the radius of the set.
     FloatDPError radius() const;
     //! \brief Returns \c true if the set is definitely bounded.

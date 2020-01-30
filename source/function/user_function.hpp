@@ -80,9 +80,9 @@ template<class F> class ScalarUserFunction
         : public ScalarMultivariateFunctionMixin< Representation, EffectiveTag >
     {
       private:
-        Vector<EffectiveNumericType> _p;
+        Vector<EffectiveNumber> _p;
       public:
-        Representation(const Vector<EffectiveNumericType>& p) : _p(p) { }
+        Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         template<class R, class A> inline Void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
 
@@ -94,10 +94,10 @@ template<class F> class ScalarUserFunction
 
         virtual EffectiveScalarMultivariateFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
 
-        virtual Covector<ApproximateNumericType> gradient(const Vector<ApproximateNumericType>& x) const {
-            return this->evaluate(Differential<ApproximateNumericType>::variables(1u,x)).gradient(); }
-        virtual Covector<ValidatedNumericType> gradient(const Vector<ValidatedNumericType>& x) const {
-            return this->evaluate(Differential<ValidatedNumericType>::variables(1u,x)).gradient(); }
+        virtual Covector<FloatDPApproximation> gradient(const Vector<FloatDPApproximation>& x) const {
+            return this->evaluate(Differential<FloatDPApproximation>::variables(1u,x)).gradient(); }
+        virtual Covector<FloatDPBounds> gradient(const Vector<FloatDPBounds>& x) const {
+            return this->evaluate(Differential<FloatDPBounds>::variables(1u,x)).gradient(); }
 
          virtual OutputStream& repr(OutputStream& os) const  {
             return os << "USER"; }
@@ -105,9 +105,9 @@ template<class F> class ScalarUserFunction
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
-    ScalarUserFunction() : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
-    ScalarUserFunction(const Vector<ExactNumericType>& p) : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    ScalarUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveScalarMultivariateFunction(new Representation(p)) { }
+    ScalarUserFunction() : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumber>(this->parameter_size()))) { }
+    ScalarUserFunction(const Vector<Real>& p) : EffectiveScalarMultivariateFunction(new Representation(Vector<EffectiveNumber>(p))) { }
+    ScalarUserFunction(const Vector<EffectiveNumber>& p) : EffectiveScalarMultivariateFunction(new Representation(p)) { }
 
     SizeType parameter_size() const { return F().parameter_size(); }
     //const Vector<ValidatedNumericType> parameters() const { return _p; }
@@ -149,12 +149,13 @@ class VectorMultivariateFunctionData
 template<class F> class VectorUserFunction
     : public EffectiveVectorMultivariateFunction
 {
+    typedef DoublePrecision PR;
   private:
     class Representation
         : public VectorMultivariateFunctionMixin< Representation, EffectiveTag >
     {
       public:
-        Representation(const Vector<EffectiveNumericType>& p) : _p(p) { }
+        Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         virtual Representation* clone() const { return new Representation(*this); }
 
@@ -164,10 +165,10 @@ template<class F> class VectorUserFunction
 
         template<class R, class A> inline Void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
 
-        virtual Matrix<ApproximateNumericType> jacobian(const Vector<ApproximateNumericType>& x) const {
-            return Ariadne::jacobian(this->evaluate(Differential<ApproximateNumericType>::variables(1u,x))); }
-        virtual Matrix<ValidatedNumericType> jacobian(const Vector<ValidatedNumericType>& x) const {
-            return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumericType>::variables(1u,x))); }
+        virtual Matrix<FloatDPApproximation> jacobian(const Vector<FloatDPApproximation>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<FloatDPApproximation>::variables(1u,x))); }
+        virtual Matrix<FloatDPBounds> jacobian(const Vector<FloatDPBounds>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<FloatDPBounds>::variables(1u,x))); }
 
         virtual EffectiveScalarMultivariateFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -177,14 +178,11 @@ template<class F> class VectorUserFunction
         virtual OutputStream& write(OutputStream& os) const  {
             return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 
-        Vector<EffectiveNumericType> _p;
+        Vector<EffectiveNumber> _p;
     };
   public:
-    //VectorUserFunction() : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(this->parameter_size()))) { }
-    //VectorUserFunction(const Vector<ApproximateNumericType>& p) : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    //VectorUserFunction(const Vector<ValidatedNumericType>& p) : VectorMultivariateFunction(new Representation(Vector<EffectiveNumericType>(p))) { }
-    VectorUserFunction(const Vector<EffectiveNumericType>& p) : EffectiveVectorMultivariateFunction(new Representation(p)) { }
-    const Vector<EffectiveNumericType>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
+    VectorUserFunction(const Vector<EffectiveNumber>& p) : EffectiveVectorMultivariateFunction(new Representation(p)) { }
+    const Vector<EffectiveNumber>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
 };
 
 

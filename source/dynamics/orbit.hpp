@@ -69,7 +69,6 @@ template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 template<class BS> class ListSet;
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
 
 class InterpolatedCurve;
 class Grid;
@@ -77,12 +76,12 @@ class GridCell;
 class GridTreePaving;
 
 
-template<>
-class Orbit<ExactPoint>
+template<class F>
+class Orbit<Point<Value<F>>>
 {
   public:
-    Orbit(const ExactPoint& pt);
-    Void insert(FloatDPValue t, const ExactPoint& hpt);
+    Orbit(const Point<Value<F>>& pt);
+    Void insert(Value<F> t, const Point<Value<F>>& hpt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     std::shared_ptr< InterpolatedCurve > _curve;

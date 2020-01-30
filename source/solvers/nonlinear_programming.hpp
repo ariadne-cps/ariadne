@@ -56,6 +56,12 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
 //! \ingroup OptimisationSubModule EvaluationModule
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
+    using FLT=FloatDP;
+  public:
+    typedef Bounds<FLT> ValidatedNumericType;
+    typedef Vector<Value<FLT>> ExactVectorType;
+    typedef Vector<Bounds<FLT>> ValidatedVectorType;
+    typedef Vector<Approximation<FLT>> ApproximateVectorType;
   public:
     //! \brief Virtual destructor.
     virtual ~OptimiserInterface() = default;
@@ -81,19 +87,19 @@ class OptimiserInterface {
                                    FloatDPValueVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                      ExactVector x) const = 0;
+                                      ExactVectorType x) const = 0;
     //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                      ExactVector x, ExactVector y) const = 0;
+                                      ExactVectorType x, ExactVectorType y) const = 0;
     //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
     virtual Bool validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                      ExactVector x, ExactVector y) const = 0;
+                                      ExactVectorType x, ExactVectorType y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
     virtual ValidatedKleenean contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
                                             FloatDPBoundsVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                              ExactVector y) const = 0;
+                                              ExactVectorType y) const = 0;
 };
 
 //! \ingroup OptimisationSubModule
@@ -113,19 +119,19 @@ class OptimiserBase
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorMultivariateFunction h) const;
 
     virtual Bool almost_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                       ApproximateVector x, FloatDPApproximation error) const;
+                                       ApproximateVectorType x, FloatDPApproximation error) const;
     virtual Bool is_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                   ExactVector x) const;
+                                   ExactVectorType x) const;
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                      ExactVector x) const;
+                                      ExactVectorType x) const;
     virtual Bool validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                      ExactVector x, ExactVector y) const;
+                                      ExactVectorType x, ExactVectorType y) const;
     virtual Bool validate_infeasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                        ExactVector x, ExactVector y) const;
+                                        ExactVectorType x, ExactVectorType y) const;
     virtual ValidatedKleenean contains_feasible_point(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                            ValidatedVector X) const;
+                                            ValidatedVectorType X) const;
     virtual Bool is_infeasibility_certificate(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C,
-                                              ExactVector lambda) const;
+                                              ExactVectorType lambda) const;
 };
 
 //! \ingroup OptimisationSubModule
@@ -143,7 +149,7 @@ class PenaltyFunctionOptimiser
     using OptimiserBase::feasible;
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactVector x, ExactVector y) const;
+    virtual ValidatedKleenean check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C, ExactVectorType x, ExactVectorType y) const;
     virtual Vector<ValidatedNumericType> minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     virtual ValidatedKleenean feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) const;
     virtual Void feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& C,

@@ -40,33 +40,32 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-typedef Vector<ValidatedNumericType> ValidatedVectorType;
-typedef Vector<ApproximateNumericType> ApproximateVectorType;
-
 class SolverWrapper
   : public pybind11::wrapper< SolverInterface >
 {
+    typedef SolverInterface::ValidatedNumericType ValidatedNumericType;
+    typedef SolverInterface::ApproximateNumericType ApproximateNumericType;
   public:
     SolverInterface* clone() const { return this->get_override("clone")(); }
     Void set_maximum_error(RawFloatDP me) { this->get_override("set_maximum_error")(me); }
     FloatDPValue maximum_error() const { return this->get_override("maximum_error")(); }
     Void set_maximum_number_of_steps(Nat ns) { this->get_override("set_maximum_number_of_steps")(ns); }
     Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    ValidatedVectorType zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("zero")(f,bx); }
-    ValidatedVectorType fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("fixed_point")(f,bx); }
-    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorType& pt) const {
+    Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& pt) const {
         return this->get_override("solve")(f,pt); }
-    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve")(f,bx); }
     ValidatedVectorMultivariateFunctionModelDP implicit(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
         return this->get_override("implicit")(f,pd,bx); }
     ValidatedScalarMultivariateFunctionModelDP implicit(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
         return this->get_override("implicit")(f,pd,ivl); }
-    ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const ApproximateVectorType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
+    ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const Vector< ApproximateNumericType>& a, const ExactBoxType& X,  const ExactBoxType& A) const {
         return this->get_override("continuation")(f,a,X,A); }
-    Set< ValidatedVectorType > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve_all")(f,bx); }
     Void write(OutputStream& os) const { this->get_override("write")(os); }
 };
@@ -105,6 +104,7 @@ class IntegratorWrapper
 
 Void export_solvers(pybind11::module& module)
 {
+    typedef SolverInterface::ValidatedNumericType ValidatedNumericType;
     pybind11::class_<SolverInterface,SolverWrapper> solver_interface_class(module,"SolverInterface");
     solver_interface_class.def("solve", (Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve);
     solver_interface_class.def("implicit",(ValidatedVectorMultivariateFunctionModelDP(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit);

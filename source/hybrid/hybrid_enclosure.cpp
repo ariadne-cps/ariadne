@@ -456,7 +456,7 @@ Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 
 Void HybridEnclosure::set_maximum_time(DiscreteEvent event, FloatDP final_time)
 {
-    this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumericType(final_time)); // Deprecated
+    this->_set.new_negative_parameter_constraint(this->time_function()-FloatDPValue(final_time)); // Deprecated
 }
 
 Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint) {

@@ -40,7 +40,7 @@ namespace Ariadne {
 template class UnivariateDifferential<FloatDP>;
 template class UnivariateDifferential<FloatDPApproximation>;
 template class UnivariateDifferential<FloatDPBounds>;
-template class UnivariateDifferential<UpperIntervalType>;
+template class UnivariateDifferential<FloatDPUpperInterval>;
 
 template class UnivariateDifferential<FloatMPApproximation>;
 template class UnivariateDifferential<FloatMPBounds>;
@@ -49,7 +49,7 @@ template class UnivariateDifferential<FloatMPBounds>;
 template class Differential<FloatDP>;
 template class Differential<FloatDPBounds>;
 template class Differential<FloatDPApproximation>;
-template class Differential<UpperIntervalType>;
+template class Differential<FloatDPUpperInterval>;
 
 template struct AlgebraOperations<Differential<FloatDP>>;
 template struct AlgebraOperations<Differential<FloatDPApproximation>>;
@@ -61,7 +61,6 @@ template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
 template class Vector<Differential<FloatDP>>;
 template class Vector<Differential<FloatDPBounds>>;
 template class Vector<Differential<FloatDPApproximation>>;
-//template class Vector<Differential<UpperIntervalType>>;
 
 template class Differential<FloatMPBounds>;
 template class Differential<FloatMPApproximation>;

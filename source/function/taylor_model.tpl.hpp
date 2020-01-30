@@ -1413,24 +1413,29 @@ TaylorModel<ValidatedTag,F>::_compose(const TaylorModel<ValidatedTag,F>& x, cons
 
 template<class T> class Powers {
   public:
-    explicit Powers(const T& t) { _values.push_back(t*0+1); _values.push_back(t); }
-    explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
-    const T& operator[](SizeType i) const { while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
+    explicit Powers(const T& t) {
+        _values.push_back(t*0+1); _values.push_back(t); }
+    explicit Powers(const T& z, const T& t) {
+        _values.push_back(z); _values.push_back(t); }
+    const T& operator[](SizeType i) const {
+        while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
   private:
     mutable std::vector<T> _values;
 };
 
-template<> class Powers<ValidatedNumericType> {
+template<class F> class Powers<Bounds<F>> {
+    typedef Bounds<F> T;
   public:
-    explicit Powers(const ValidatedNumericType& t) { _values.push_back(ValidatedNumericType(1)); _values.push_back(t); }
-    explicit Powers(const ValidatedNumericType& z, const ValidatedNumericType& t) { _values.push_back(z); _values.push_back(t); }
-    const ValidatedNumericType& operator[](SizeType i) const {
+    explicit Powers(const T& t) {
+        _values.push_back(T(1,t.precision())); _values.push_back(t); }
+    explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
+    const T& operator[](SizeType i) const {
         while(_values.size()<=i) {
             if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
             else { _values.push_back(_values[1]*_values.back()); } }
         return _values[i]; }
   private:
-    mutable std::vector<ValidatedNumericType> _values;
+    mutable std::vector<T> _values;
 };
 
 
@@ -1691,31 +1696,31 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F
 // Jacobian matrices
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumericType>
-jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNumericType>& x) {
-    Vector< Differential<ValidatedNumericType> > dx=Differential<ValidatedNumericType>::variables(1u,x);
-    Vector< Differential<ValidatedNumericType> > df(f.size(),x.size(),1u);
+template<class F> Matrix<Bounds<F>>
+jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<Bounds<F>>& x) {
+    Vector< Differential<Bounds<F>> > dx=Differential<Bounds<F>>::variables(1u,x);
+    Vector< Differential<Bounds<F>> > df(f.size(),x.size(),1u);
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumericType> J=jacobian(df);
+    Matrix<Bounds<F>> J=jacobian(df);
     return J;
 }
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumericType>
-jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNumericType>& x, const Array<SizeType>& p) {
-    Vector<Differential<ValidatedNumericType>> dx(x.size(),x.size(),1u);
+template<class F> Matrix<Bounds<F>>
+jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<Bounds<F>>& x, const Array<SizeType>& p) {
+    Vector<Differential<Bounds<F>>> dx(x.size(),x.size(),1u);
     for(SizeType j=0; j!=x.size(); ++j) {
-        dx[j]=Differential<ValidatedNumericType>::constant(p.size(),1u,x[j]); }
+        dx[j]=Differential<Bounds<F>>::constant(p.size(),1u,x[j]); }
     for(SizeType k=0; k!=p.size(); ++k) {
         SizeType j=p[k];
-        dx[j]=Differential<ValidatedNumericType>::variable(p.size(),1u,x[j],k); }
-    Vector< Differential<ValidatedNumericType> > df(f.size());
+        dx[j]=Differential<Bounds<F>>::variable(p.size(),1u,x[j],k); }
+    Vector< Differential<Bounds<F>> > df(f.size());
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumericType> J=jacobian(df);
+    Matrix<Bounds<F>> J=jacobian(df);
     return J;
 }
 

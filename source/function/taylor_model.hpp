@@ -831,18 +831,18 @@ template<class P, class F> Vector<typename TaylorModel<P,F>::ErrorType> errors(c
     Vector<typename TaylorModel<P,F>::ErrorType> e(h.size()); for(SizeType i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
 
 template<class P, class F> Vector<typename TaylorModel<P,F>::NormType> norms(const Vector<TaylorModel<P,F>>& h) {
-    Vector<NormType> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
+    Vector<typename TaylorModel<P,F>::NormType> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
 
 template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector<TaylorModel<P,F>>& h) {
     typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return r;
 }
 
-template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y);
-template<class F> Matrix<ValidatedNumericType> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<ValidatedNumericType>& y, Array<SizeType>& p);
-template<class F> Matrix<FloatDPValue> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<FloatDPValue> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
-template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
-template<class F> Matrix<UpperIntervalType> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y);
+template<class F> Matrix<Bounds<F>> jacobian(const Vector<TaylorModel<ValidatedTag,F>>& x, const Vector<Bounds<F>>& y, Array<SizeType>& p);
+template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<Value<F>> jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
+template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x);
+template<class F> Matrix<UpperInterval<F>> jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& x, const Array<SizeType>& p);
 
 
 

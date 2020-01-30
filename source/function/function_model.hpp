@@ -434,6 +434,7 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     typedef CanonicalNumericType<P,PR,PRE> NumericType;
     typedef Number<P> GenericNumericType;
     typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
+    typedef PositiveFloatUpperBound<PR> NormType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;

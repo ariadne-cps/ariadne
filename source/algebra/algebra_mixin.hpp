@@ -119,6 +119,8 @@ template<class A, class X> class NormedAlgebraMixin
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraMixin<A,X>
 {
+    using typename NormedAlgebraInterface<X>::ErrorType;
+
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual NormedAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }

@@ -77,10 +77,10 @@ Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guard_functions(const Hyb
     return guards;
 }
 
-ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& spc) {
+template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
-    Map<RealVariable,FloatDPApproximation> values=hpt.values();
-    ApproximatePoint pt(spc.dimension());
+    Map<RealVariable,X> values=hpt.values();
+    Point<X> pt(spc.dimension());
     for(Nat i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
     }
@@ -92,14 +92,16 @@ ApproximatePoint make_point(const HybridApproximatePoint& hpt, const RealSpace& 
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-Orbit<HybridApproximatePoint>
-HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& tmax) const
+auto HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& tmax) const
+    -> Orbit<HybridApproximatePointType>
 {
     return orbit(system,HybridApproximatePoint(init_pt,dp),tmax);
 }
 
-Orbit<HybridApproximatePoint>
-HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridApproximatePoint& init_pt, const HybridTime& tmax) const
+auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
+                            const HybridApproximatePointType& init_pt,
+                            const HybridTime& tmax) const
+    -> Orbit<HybridApproximatePointType>
 {
     DoublePrecision pr;
     HybridTime t(0.0,0);
@@ -107,8 +109,8 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridAppro
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);
-    ApproximatePoint point=make_point(init_pt,space);
-    ApproximatePoint next_point;
+    ApproximatePointType point=make_point(init_pt,space);
+    ApproximatePointType next_point;
 
     Orbit<HybridApproximatePoint> orbit(HybridApproximatePoint(location,space,cast_exact(point)));
 
@@ -139,9 +141,9 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridAppro
             t._discrete_time+=1;
         } else {
             FloatDPApproximationVector k1,k2,k3,k4;
-            ApproximatePoint pt1,pt2,pt3,pt4;
+            ApproximatePointType pt1,pt2,pt3,pt4;
 
-            ApproximatePoint const& pt=point;
+            ApproximatePointType const& pt=point;
             k1=evaluate(dynamic,pt);
             pt1=pt+h*k1;
 

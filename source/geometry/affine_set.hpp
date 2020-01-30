@@ -54,25 +54,39 @@ class Figure;
 class CanvasInterface;
 struct Point2d;
 
+template<class X, class B=X> using AffineConstraint = Constraint<Affine<X>,B>;
+template<class F> using ValidatedAffineConstraint = Constraint<Affine<Bounds<F>>,Bounds<F>>;
+template<class F> using ValidatedAffineModel = AffineModel<ValidatedTag,F>;
+template<class F> using ValidatedAffineModelConstraint = Constraint<ValidatedAffineModel<F>,Bounds<F>>;
 
-typedef Constraint<AffineModel<ValidatedTag,FloatDP>,FloatDPBounds> ValidatedAffineModelConstraint;
-typedef Constraint<Affine<ValidatedNumericType>,FloatDPBounds> ValidatedAffineConstraint;
-typedef Constraint<Affine<EffectiveNumericType>,EffectiveNumericType> EffectiveAffineConstraint;
-typedef Affine<ValidatedNumericType> ValidatedAffineFunction;
+using EffectiveAffineConstraint = AffineConstraint<EffectiveNumber>;
+using RealAffineConstraint = AffineConstraint<Real>;
 
-EffectiveAffineConstraint operator<=(const EffectiveNumericType& l, const EffectiveAffine& am);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumericType& u);
-EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumericType& b);
+using ValidatedAffineModelDP = ValidatedAffineModel<FloatDP>;
+using ValidatedAffineConstraintDP = ValidatedAffineConstraint<FloatDP>;
+using ValidatedAffineModelConstraintDP = ValidatedAffineModelConstraint<FloatDP>;
 
-ValidatedAffineConstraint operator<=(const FloatDPBounds& l, const ValidatedAffineFunction& am);
-ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const FloatDPBounds& u);
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const FloatDPBounds& u);
-ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const FloatDPBounds& b);
 
-ValidatedAffineModelConstraint operator<=(const FloatDPBounds& l, const ValidatedAffineModel& am);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const FloatDPBounds& u);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const FloatDPBounds& u);
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const FloatDPBounds& b);
+template<class X> AffineConstraint<X> operator<=(const SelfType<X>& l, const Affine<X>& a) {
+    return AffineConstraint<X>(l,a,+infty); }
+template<class X> AffineConstraint<X> operator<=(const Affine<X>& a, const SelfType<X>& u) {
+    return AffineConstraint<X>(-infty,a,u); }
+template<class X> AffineConstraint<X> operator<=(const AffineConstraint<X>& ac, const SelfType<X>& u) {
+    ARIADNE_ASSERT(decide(ac.upper_bound()==infty));
+    return AffineConstraint<X>(ac.lower_bound(),ac.function(),u); }
+template<class X> AffineConstraint<X> operator==(const Affine<X>& a, const SelfType<X>& c) {
+    return AffineConstraint<X>(c,a,c); }
+
+template<class F> ValidatedAffineModelConstraint<F> operator<=(const Bounds<F>& l, const ValidatedAffineModel<F>& am) {
+    return ValidatedAffineModelConstraint<F>(l,am,+infty); };
+template<class F> ValidatedAffineModelConstraint<F> operator<=(const ValidatedAffineModel<F>& am, const Bounds<F>& u) {
+    return ValidatedAffineModelConstraint<F>(-infty,am,u); }
+template<class F> ValidatedAffineModelConstraint<F> operator<=(const ValidatedAffineModelConstraint<F>& amc, const Bounds<F>& u) {
+    ARIADNE_ASSERT(decide(amc.upper_bound()==infty));
+    return ValidatedAffineModelConstraint<F>(amc.lower_bound(),amc.function(),u); }
+template<class F> ValidatedAffineModelConstraint<F> operator==(const ValidatedAffineModel<F>& am, const Bounds<F>& c) {
+    return ValidatedAffineModelConstraint<F>(c,am,c); }
+
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$
@@ -86,8 +100,8 @@ class ValidatedAffineConstrainedImageSet
 	, public Loggable
 {
     ExactBoxType  _domain;
-    Vector<ValidatedAffineModel> _space_models;
-    List<ValidatedAffineModelConstraint> _constraint_models;
+    Vector<ValidatedAffineModelDP> _space_models;
+    List<ValidatedAffineModelConstraintDP> _constraint_models;
   public:
     //!\brief The set \f$\{ y \mid y\in D\}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBoxType& D);
@@ -96,14 +110,14 @@ class ValidatedAffineConstrainedImageSet
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     ValidatedAffineConstrainedImageSet(const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffine>& f);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<Affine<FloatDPBounds>>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffine>& f, const List<ValidatedAffineConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<Affine<FloatDPBounds>>& f, const List<AffineConstraint<FloatDPBounds>>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
-    explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
-    explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f);
+    explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModelDP>& f, const List<ValidatedAffineModelConstraintDP>& c);
+    explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModelDP>& f);
 
-    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBoxType& D, const Vector<ValidatedAffineModelDP>& f, const List<ValidatedAffineModelConstraintDP>& c);
 
     //!\brief The set \f$\{ x \mid x\in B\}\f$.
     ValidatedAffineConstrainedImageSet(const RealBox& B);
@@ -112,8 +126,8 @@ class ValidatedAffineConstrainedImageSet
 
     ValidatedAffineConstrainedImageSet* clone() const;
     Void new_parameter_constraint(const EffectiveAffineConstraint& c);
-    Void new_parameter_constraint(const ValidatedAffineConstraint& c);
-    Void new_constraint(const ValidatedAffineModelConstraint& c);
+    Void new_parameter_constraint(const ValidatedAffineConstraintDP& c);
+    Void new_constraint(const ValidatedAffineModelConstraintDP& c);
 
     DimensionType dimension() const;
     SizeType number_of_parameters() const;

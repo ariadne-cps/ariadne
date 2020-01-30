@@ -39,19 +39,19 @@ struct UnscalingException : std::runtime_error {
     inline UnscalingException(String msg, IntervalDomainType dom) : std::runtime_error(msg+to_str(dom)), domain(dom) { }
 };
 
-inline ApproximateNumericType med_apprx(IntervalDomainType const& ivl) {
-    return ApproximateNumericType(hlf(add(approx,ivl.lower().raw(),ivl.upper().raw())));
+template<class F> inline Approximation<F> med_apprx(Interval<Value<F>> const& ivl) {
+    return Approximation<F>(hlf(add(approx,ivl.lower().raw(),ivl.upper().raw())));
 }
 
-inline ApproximateNumericType rad_apprx(IntervalDomainType const& ivl) {
-    return ApproximateNumericType(hlf(sub(approx,ivl.upper().raw(),ivl.lower().raw())));
+template<class F> inline Approximation<F> rad_apprx(Interval<Value<F>> const& ivl) {
+    return Approximation<F>(hlf(sub(approx,ivl.upper().raw(),ivl.lower().raw())));
 }
 
-inline ValidatedNumericType med_val(IntervalDomainType const& ivl) {
+template<class F> inline Bounds<F> med_val(Interval<Value<F>> const& ivl) {
     return hlf(ivl.lower()+ivl.upper());
 }
 
-inline ValidatedNumericType rad_val(IntervalDomainType const& ivl) {
+template<class F> inline Bounds<F> rad_val(Interval<Value<F>> const& ivl) {
     return hlf(ivl.upper()-ivl.lower());
 }
 

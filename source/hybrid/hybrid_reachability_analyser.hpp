@@ -114,7 +114,7 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
     //! \brief The real type.
-    typedef ExactNumericType RealType;
+    typedef ExactDouble RealType;
 
     //! \brief The real type.
     typedef HybridAutomatonInterface::TimeType TimeType;
@@ -231,13 +231,13 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     const TimeType lock_to_grid_time() const { return HybridTime(Dyadic(_lock_to_grid_time),_lock_to_grid_steps); }
 
     //    const RealType& transient_time() const { return _transient_time; }
-    Void set_transient_time(const RawFloatDP value) { _transient_time = RealType(value); }
+    Void set_transient_time(const Double value) { _transient_time = RealType(value); }
 
     const UnsignedIntType& transient_steps() const { return _transient_steps; }
     Void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
 
 //    const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
-    Void set_lock_to_grid_time(const RawFloatDP value) { _lock_to_grid_time = RealType(value); }
+    Void set_lock_to_grid_time(const Double value) { _lock_to_grid_time = RealType(value); }
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
     Void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }

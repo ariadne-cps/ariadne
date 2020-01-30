@@ -63,15 +63,6 @@ using FloatMPDPBallVector = Vector<FloatMPDPBall>; //!< .
 //@}
 
 //@{
-//! \relates Vector
-//! \name Standard type names (deprecated)
-using ApproximateVector = Vector<ApproximateNumericType>; //!< .
-using ValidatedVector = Vector<ValidatedNumericType>; //!< .
-using EffectiveVector = Vector<EffectiveNumericType>; //!< .
-using ExactVector = Vector<ExactNumericType>; //!< .
-//@}
-
-//@{
 //! \relates Covector
 //! \name Type synonyms
 using DyadicCovector = Covector<Dyadic>; //!< .
@@ -92,15 +83,6 @@ using FloatMPValueCovector = Covector<FloatMPValue>; //!< .
 using FloatMPDPBallCovector = Covector<FloatMPDPBall>; //!< .
 //@}
 
-//@{
-//! \relates Covector
-//! \name Standard type names (deprecated)
-using ApproximateCovector = Covector<ApproximateNumericType>; //!< .
-using ValidatedCovector = Covector<ValidatedNumericType>; //!< .
-using EffectiveCovector = Covector<EffectiveNumericType>; //!< .
-using ExactCovector = Covector<ExactNumericType>; //!< .
-//@}
-
 
 //@{
 //! \relates Matrix
@@ -119,15 +101,6 @@ using FloatMPBoundsMatrix = Matrix<FloatMPBounds>; //!< .
 using FloatMPBallMatrix = Matrix<FloatMPBall>; //!< .
 using FloatMPValueMatrix = Matrix<FloatMPValue>; //!< .
 using FloatMPDPBallMatrix = Matrix<FloatMPDPBall>; //!< .
-//@}
-
-//@{
-//! \relates Matrix
-//! \name Standard type names (deprecated)
-using ApproximateMatrix = Matrix<ApproximateNumericType>; //!< .
-using ValidatedMatrix = Matrix<ValidatedNumericType>; //!< .
-using EffectiveMatrix = Matrix<EffectiveNumericType>; //!< .
-using ExactMatrix = Matrix<ExactNumericType>; //!< .
 //@}
 
 

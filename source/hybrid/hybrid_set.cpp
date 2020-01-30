@@ -592,7 +592,7 @@ template<> String class_name<GridCell>() { return "GridCell"; }
 
 
 // Instantiations
-template class HybridPoint<ApproximateNumericType>;
+template class HybridPoint<FloatDPApproximation>;
 template class HybridPoint<Real>;
 
 template class HybridBasicSet<ExactBoxType>;

@@ -84,6 +84,9 @@ TestHybridSimulator::system()
 
 Void TestHybridSimulator::test() const
 {
+    typedef HybridSimulator::ApproximatePointType ApproximatePointType;
+    typedef HybridSimulator::HybridApproximatePointType HybridApproximatePointType;
+
     cout << __PRETTY_FUNCTION__ << endl;
 
     const DiscreteLocation location1(1);
@@ -111,14 +114,14 @@ Void TestHybridSimulator::test() const
     RealSpace space={x,y};
     RealPoint initial_point = Point<Real>{-0.00, 0.50};
     cout << "initial_point=" << initial_point << endl;
-    ApproximatePoint approximate_initial_point = ApproximatePoint(initial_point,dp);
-    HybridApproximatePoint initial_hybrid_point(location1,space,approximate_initial_point);
+    ApproximatePointType approximate_initial_point = ApproximatePointType(initial_point,dp);
+    HybridApproximatePointType initial_hybrid_point(location1,space,approximate_initial_point);
     HybridTime simulation_time(2.25,3);
 
 
     // Compute the reachable sets
     cout << "Computing orbit... "<<std::flush;
-    Orbit<HybridApproximatePoint> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
+    Orbit<HybridApproximatePointType> hybrid_orbit=simulator.orbit(automaton,initial_hybrid_point,simulation_time);
     cout << "done"<<std::endl;
 
     ARIADNE_TEST_PRINT(hybrid_orbit);

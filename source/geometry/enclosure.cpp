@@ -1307,12 +1307,14 @@ inline const ValidatedVectorMultivariateFunctionModelDP& repr(const ValidatedVec
 inline const List<ValidatedScalarMultivariateFunctionModelDP>& repr(const List<ValidatedScalarMultivariateFunctionModelDP>& f) { return f; }
 
 OutputStream& Enclosure::write(OutputStream& os) const {
-    const Bool LONG_FORMAT=false;
+    const Bool LONG_FORMAT=true;
 
     if(LONG_FORMAT) {
         os << "Enclosure"
            << "(\n  domain=" << this->domain()
            << ",\n  range=" << this->bounding_box()
+           << ",\n  reduced_domain=" << this->reduced_domain()
+           << ",\n  is_empty=" << this->reduced_domain().is_empty()
            << ",\n  state_function=" << this->state_function()
            << ",\n  time_function=" << this->time_function()
            << ",\n  constraints=" << this->constraints()

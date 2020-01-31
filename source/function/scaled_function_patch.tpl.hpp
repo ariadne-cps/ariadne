@@ -469,7 +469,7 @@ template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctio
 }
 
 template<class M> OutputStream& ScaledFunctionPatch<M>::write(OutputStream& os) const {
-    os << "FunctionPatch(dom=" << this->domain() << ")";
+    os << "FunctionPatch(dom=" << this->domain() << ", rng=" << this->range() << ")";
     write_polynomial(os,*this);
     return os;
 }
@@ -1001,7 +1001,7 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream& os) const
 {
     os << "VectorFunctionPatch";
-    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ")";
+    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ", rng=" << this->range() << ")";
     os << "[ ";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }

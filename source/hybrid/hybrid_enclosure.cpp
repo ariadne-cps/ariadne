@@ -641,17 +641,16 @@ OutputStream& HybridEnclosure::write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( variables = " << variable_names(this->_variables)
-              << ", events=" << this->_events
-              << ", location=" << this->_location
-              << ", state_space=" << this->state_space()
-              << ", range=" << apply(this->state_function(),this->_set.domain())
-              << ", domain=" << this->_set.domain()
-              << ", subdomain=" << this->_set.reduced_domain()
-              << ", empty=" << this->_set.reduced_domain().is_empty()
-              << ", state=" << this->_set.state_function()
-              << ", constraints=" << this->_set.constraints()
-              << ", time="<< this->_set.time_function()
-              << ", empty="<< this->_set.is_empty()
+              << ",\n   events=" << this->_events
+              << ",\n   location=" << this->_location
+              << ",\n   state_space=" << this->state_space()
+              << ",\n   range=" << apply(this->state_function(),this->_set.domain())
+              << ",\n   domain=" << this->_set.domain()
+              << ",\n   reduced_domain=" << this->_set.reduced_domain()
+              << ",\n   is_(reduced_domain_)empty=" << this->_set.reduced_domain().is_empty()
+              << ",\n   state=" << this->_set.state_function()
+              << ",\n   constraints=" << this->_set.constraints()
+              << ",\n   time="<< this->_set.time_function()
               << ")";
 }
 
@@ -662,8 +661,7 @@ OutputStream& HybridEnclosure::print(OutputStream& os) const
               << ", location=" << this->_location
               << ", range=" << apply(this->state_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
-              << ", subdomain=" << this->_set.reduced_domain()
-              << ", subdomain=" << this->_set.reduced_domain()
+              << ", reduced_domain=" << this->_set.reduced_domain()
               << ", #constraints=" << this->_set.constraints().size()
               << ", time_range="<<this->time_range() << ")";
 }

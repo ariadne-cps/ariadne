@@ -13,8 +13,8 @@ Void TestOptimiser::benchmark_mistake()
   );
 
   ExactBoxType D = ExactBoxType{
-      {-inf, +inf}, {-inf, +inf}, {-inf, +inf}, {-inf, +inf}, {-inf, +inf},
-      {-inf, +inf}, {-inf, +inf}, {-inf, +inf}, {0.0, +inf},
+      {-1000000, +1000000}, {-1000000, +1000000}, {-1000000, +1000000}, {-1000000, +1000000}, {-1000000, +1000000},
+      {-1000000, +1000000}, {-1000000, +1000000}, {-1000000, +1000000}, {0.0, +1000000},
   };
   EffectiveVectorMultivariateFunction g = {
       x[2] * x[2] + x[3] * x[3] - Real(1.0),
@@ -32,10 +32,16 @@ Void TestOptimiser::benchmark_mistake()
       -x[4] * x[8]};
 
   ExactBoxType C = {
-      {-inf, 0.0}, {-inf, 0.0}, {-inf, 0.0}, {-inf, 0.0}, {-inf, 0.0},
-      {-inf, 0.0}, {-inf, 0.0}, {-inf, 0.0}, {-inf, 0.0}, {0.0, +inf},
-      {0.0, +inf}, {0.0, +inf}, {-inf, 0.0},
+      {-1000000, 0.0}, {-1000000, 0.0}, {-1000000, 0.0}, {-1000000, 0.0}, {-1000000, 0.0},
+      {-1000000, 0.0}, {-1000000, 0.0}, {-1000000, 0.0}, {-1000000, 0.0}, {0.0, +1000000},
+      {0.0, +1000000}, {0.0, +1000000}, {-1000000, 0.0}
   };
+
+    ExactBoxType testC = {
+            {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-1000000.01, 0.01},
+            {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-1000000.01, 0.01}, {-0.01, +1000000.01},
+            {-0.01, +1000000.01}, {-0.01, +1000000.01}, {-1000000.01, 0.01}
+    };
 
   optimiser->initial_guess     = Vector<FloatDP>(x.size(), 1.0);
   optimiser->use_initial_guess = true;
@@ -50,5 +56,5 @@ Void TestOptimiser::benchmark_mistake()
 
   std::cout << "f(x_optimal): " << f(x_optimal) << "\n";
   ARIADNE_TEST_BINARY_PREDICATE(element, x_optimal, D);
-  ARIADNE_TEST_BINARY_PREDICATE(element, g(x_optimal), C);
+  ARIADNE_TEST_BINARY_PREDICATE(element, g(x_optimal), testC);
 }

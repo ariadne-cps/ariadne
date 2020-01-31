@@ -18,14 +18,14 @@ find_path(
 
 find_path(
   GLPK_LIBRARIES_DIR
-  NAMES libglpk.so
+  NAMES libglpk.so libglpk.a
   PATHS ${SIMPATH}/basics/glpk/lib ${SIMPATH}/local/lib ${SIMPATH}/local/lib
         /usr/local/lib /usr/lib/x86_64-linux-gnu/ /usr/local/include/glpk/lib
   NO_DEFAULT_PATH)
 
 find_library(
   GLPK_LIBRARIES
-  NAMES libglpk.so
+  NAMES libglpk.so libglpk.a
   HINTS ${GLPK_LIBRARIES_DIR} /usr/lib/libglpk.so)
 
 if(GLPK_INCLUDE_DIR AND GLPK_LIBRARIES_DIR)

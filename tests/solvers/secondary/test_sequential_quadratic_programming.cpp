@@ -56,54 +56,17 @@ public:
   {}
   Void test()
   {
-    ARIADNE_TEST_CALL(benchmark_allinit());
-    // ARIADNE_TEST_CALL(benchmark_extrasim());
-    // ARIADNE_TEST_CALL(benchmark_hs54()); //**
-    // ARIADNE_TEST_CALL(benchmark_booth());
-    // ARIADNE_TEST_CALL(benchmark_himmelbc());
-    // ARIADNE_TEST_CALL(benchmark_hs44());
-    // ARIADNE_TEST_CALL(benchmark_s394());
-    // ARIADNE_TEST_CALL(benchmark_dualc2());
-    // ARIADNE_TEST_CALL(benchmark_loadbal());  //*
-    // ARIADNE_TEST_CALL(benchmark_mistake());  //*
-    // ARIADNE_TEST_CALL(benchmark_ssnlbeam()); //*
-    // ARIADNE_TEST_CALL(benchmark_optprloc()); //**
-    // ARIADNE_TEST_CALL(benchmark_eigminc());  //*
-    // ARIADNE_TEST_CALL(benchmark_smmpsf());   //*
-    // ARIADNE_TEST_CALL(benchmark_reading3()); //*
-    // ARIADNE_TEST_CALL(benchmark_dittert());  //*
-    // ARIADNE_TEST_CALL(benchmark_avion2());
-    // ARIADNE_TEST_CALL(benchmark_degenlpa());
+      ARIADNE_TEST_CALL(benchmark_dualc2());
+//     ARIADNE_TEST_CALL(benchmark_dittert());  // too much time, need a powerful machine
+     ARIADNE_TEST_CALL(benchmark_hs54());
+     ARIADNE_TEST_CALL(benchmark_hs44());
+     ARIADNE_TEST_CALL(benchmark_s394());
+     ARIADNE_TEST_CALL(benchmark_loadbal());
+     ARIADNE_TEST_CALL(benchmark_eigminc());
+     ARIADNE_TEST_CALL(benchmark_mistake());
+     ARIADNE_TEST_CALL(benchmark_ssnlbeam());
+     ARIADNE_TEST_CALL(benchmark_reading3());
   }
-
-  /*
-  Results from AmplOnline with LOQO:
-
-    LOQO 7.03: optimal solution (11 iterations, 11 evaluations)
-    primal objective 24.46390782
-      dual objective 24.46390771
-    f = 24.4639
-
-    x [*] :=
-    1  -0.635594
-    2   1
-    3   7.78044e-09
-    4   2
-  */
-  Void benchmark_allinit();
-
-  /*
-  Results from AmplOnline with LOQO:
-
-  LOQO 7.03: optimal solution (11 iterations, 11 evaluations)
-  primal objective 1.000000008
-  dual objective 1
-  f = 1
-
-  x = 7.97704e-09
-  y = 1
-  */
-  Void benchmark_extrasim();
 
   /*
     Precision test-case:
@@ -128,43 +91,6 @@ public:
       Obj = -0.995764
   */
   Void benchmark_hs54();
-
-  /*
-    Empty bound on variables test:
-      If there aren't bounds on variables this will generate an empty vector
-    which generate an error on line nonlinear_programming.cpp:3442. Solution: if
-    vector is empty generate an empty vector, or implement on Vector class level
-    the operation with empty sets.
-
-    LOQO 7.03: optimal solution (2 QP iterations, 3 evaluations)
-    primal objective 7.222223417e-21
-      dual objective 7.222223417e-21
-    f = 7.22222e-21
-
-    x [*] :=
-    1  1
-    2  3
-    ;
-  */
-  Void benchmark_booth();
-
-  /*
-    If there aren't bounds on variables this will generate an empty vector which
-    generate an error on line nonlinear_programming.cpp:3442.
-    Solution: if vector is empty generate an empty vector, or implement on
-    Vector class level the operation with empty sets.
-
-    LOQO 7.03: optimal solution (10 iterations, 11 evaluations)
-    primal objective 1.009641594e-15
-      dual objective 1.009641594e-15
-    f = 1.00964e-15
-
-    x [*] :=
-    1  3
-    2  2
-    ;
-  */
-  Void benchmark_himmelbc();
 
   /*
 
@@ -295,47 +221,6 @@ public:
   Void benchmark_ssnlbeam();
 
   /*
-      LOQO 7.03: optimal solution (23 iterations, 23 evaluations)
-        primal objective -16.4197738
-          dual objective -16.4197739
-        x1 = 2
-        x2 = 8
-        x3 = 7.32852
-        x4 = 3.52381
-        x5 = 4
-        y1 = 0.931507
-        y2 = 0.709683
-        y3 = 0.675482
-        y4 = 0.50181
-        y5 = 0.775392
-        y6 = 1
-        y7 = 0.781821
-        y8 = 1
-        y9 = 0.829286
-        y10 = 0.111667
-        y11 = 0.817812
-        y12 = 0.743768
-        y13 = 0.938481
-        y14 = 0.613581
-        y15 = 1
-        y16 = 0.691209
-        y17 = 1
-        y18 = 0.919566
-        y19 = 0.830827
-        y20 = 0.97454
-        y21 = 0.933849
-        y22 = 0.571531
-        y23 = 0.498603
-        y24 = 0.910953
-        y25 = 1
-
-        obj = -16.4198
-
-        SQP gives wrong results on constraints (really hard to solve!)
-  */
-  Void benchmark_optprloc();
-
-  /*
     LOQO 7.03: optimal solution (13 iterations, 13 evaluations)
       primal objective 1
         dual objective 0.9999999927
@@ -367,11 +252,6 @@ public:
   Void benchmark_eigminc();
 
   /*
-    Cannot run with n > 300 variables on ampl demo version
-  */
-  Void benchmark_smmpsf();
-
-  /*
     LOQO 7.03: optimal solution (49 iterations, 52 evaluations)
       primal objective -2.243213634e-14
         dual objective -1.1197009e-08
@@ -383,10 +263,6 @@ public:
     Cannot run with n > 300 variables on ampl demo version
   */
   Void benchmark_dittert();
-
-  Void benchmark_degenlpa();
-
-  Void benchmark_avion2();
 };
 
 #if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
@@ -398,10 +274,10 @@ main(Int argc, const char* argv[])
 {
   Nat optimiser_verbosity = get_verbosity(argc, argv);
 
-  // std::cout << "NonlinearInteriorPointOptimiser\n";
-  // NonlinearInteriorPointOptimiser nlo;
-  // nlo.verbosity = optimiser_verbosity;
-  // TestOptimiser(nlo).test();
+//   std::cout << "NonlinearInteriorPointOptimiser\n";
+//   NonlinearInteriorPointOptimiser nlo;
+//   nlo.verbosity = optimiser_verbosity;
+//   TestOptimiser(nlo).test();
   // return ARIADNE_TEST_FAILURES;
 
   // NonlinearInfeasibleInteriorPointOptimiser nlio;
@@ -410,17 +286,17 @@ main(Int argc, const char* argv[])
   // return ARIADNE_TEST_FAILURES;
 
 #if defined HAVE_EIGEN3_H && defined HAVE_GLPK_H
-
+//
   std::cout << "NonlinearSQPOptimiser\n";
   NonlinearSQPOptimiser nlsqp;
   nlsqp.verbosity = optimiser_verbosity;
   TestOptimiser(nlsqp).test();
   return ARIADNE_TEST_FAILURES;
-
-  std::cout << "NonlinearMixedOptimiser\n";
-  NonlinearMixedOptimiser nlhop;
-  nlhop.verbosity = optimiser_verbosity;
-  TestOptimiser(nlhop).test();
+//
+//  std::cout << "NonlinearMixedOptimiser\n";
+//  NonlinearMixedOptimiser nlhop;
+//  nlhop.verbosity = optimiser_verbosity;
+//  TestOptimiser(nlhop).test();
   // return ARIADNE_TEST_FAILURES;
 #endif
 }

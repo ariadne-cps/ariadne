@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined HAVE_GLPK_H
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
 #include <glpk.h>
 #endif
 

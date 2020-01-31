@@ -1556,15 +1556,20 @@ NonlinearInteriorPointOptimiser::minimise(ValidatedScalarMultivariateFunction f,
   FloatApproximationVector kappa(g.result_size(), zero);
   FloatApproximationVector lambda(h.result_size(), zero);
   FloatDPApproximation mu = one;
-
-  for (Nat i = 0; i != 50; ++i) {
+    Nat i;
+  for (i = 0; i != 50; ++i) {
+      ARIADNE_LOG(1,
+                  "f(x)=" << f(cast_approximate(x)) << ", x=" << x
+                          << ", y=" << lambda
+                          << ", g(x)=" << g(cast_approximate(x))
+                          << "\n");
     this->minimisation_step(f, D, g, C, h, x, w, kappa, lambda, mu);
     // this->step(f, D, g, C, h, stp);
     if (i % 3 == 0 && i <= 10) {
       mu *= 0.25_exact;
     }
   }
-
+    ARIADNE_LOG(1, "Algorithm ended in "<<i<< " steps\n");
   return ValidatedVector(cast_exact(x));
 }
 
@@ -3977,7 +3982,9 @@ NonlinearSQPOptimiser::minimise(ValidatedScalarMultivariateFunction f,
     ARIADNE_LOG(1,
                 "f(x)=" << f(cast_approximate(v.x)) << ", x=" << v.x
                         << ", y=" << v.y
-                        << ", g(x)=" << g(cast_approximate(v.x)) << "\n");
+                        << ", g(x)=" << g(cast_approximate(v.x))
+                        << ", status="<<static_cast<int>(v.status)
+                        << "\n");
     if (abs(cast_raw(f(cast_approximate(v.x)))) > static_cast<FloatDP>(10e32)) {
       // ARIADNE_WARN("Unsafe zone: Objective function is too big!");
       v.status = SQPStatus::UNSAFE_ZONE;
@@ -4118,10 +4125,11 @@ NonlinearSQPOptimiser::step(const ApproximateScalarMultivariateFunction& f,
   //            Check if the step size is too small (then converged)
   //----------------------------------------------------------------------------//
   Vector<FloatDP> s = x_cap - v.x;
-  if (norm2(s) < v.rtol * norm2(v.x)) {
-    v.status = SQPStatus::NULL_STEP;
-    return;
-  }
+  // FIXME: sometimes the condition is true and stop the algorithm, but if the algorithm could go on it will converge to optimum
+//  if (norm2(s) < v.rtol * norm2(v.x)) {
+//    v.status = SQPStatus::NULL_STEP;
+//    return;
+//  }
   //----------------------------------------------------------------------------//
 
   //----------------------------------------------------------------------------//
@@ -4292,7 +4300,7 @@ NonlinearSQPOptimiser::feasibility_step(
   //----------------------------------------------------------------------------//
 
   // TODO: delete, only testing
-  // v.compute_AS_rateo(v.x);
+   v.compute_AS_rateo(v.x);
 }
 
 FloatDP

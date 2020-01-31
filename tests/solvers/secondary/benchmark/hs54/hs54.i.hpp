@@ -20,7 +20,7 @@ Void TestOptimiser::benchmark_hs54()
                                 {0, 20},   {-1, +1},   {0, 2E+8}};
   EffectiveVectorMultivariateFunction g = {x[0] + Decimal(4E+3) * x[1] -
                                            Decimal(1.76E+4)};
-  ExactBoxType                        C = {{0, 0.001}};
+  ExactBoxType                        C = {{-1, 1}};
   float                               elapsed_time = 0;
   clock_t                             s_time       = clock();
   FloatBoundsVector x_optimal = optimiser->minimise(f, D, g, C);

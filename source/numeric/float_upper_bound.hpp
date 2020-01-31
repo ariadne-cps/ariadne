@@ -140,7 +140,7 @@ template<class F> class UpperBound
         return ceil(static_cast<Dyadic>(x._u)); }
 
     friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
-        return write(os,x.raw(),Bounds<F>::output_places,upward); }
+        return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},upward); }
     friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
         ARIADNE_NOT_IMPLEMENTED; }
   public:

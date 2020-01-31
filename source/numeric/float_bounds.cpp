@@ -31,6 +31,8 @@
 
 namespace Ariadne {
 
+int abslog10floor(double);
+
 Value<FloatDP> midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
 
 template<> auto Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x) -> OutputStream&;
@@ -58,8 +60,8 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
     //int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
-    int log10wdth=log10floor(sub(to_nearest,u,l));
-    int log10mag=log10floor(max(-ldbl,udbl));
+    int log10wdth=abslog10floor(udbl-ldbl);
+    int log10mag=abslog10floor(max(-ldbl,udbl));
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
     //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects

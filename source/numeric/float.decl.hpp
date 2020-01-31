@@ -45,8 +45,8 @@ using MP = MultiplePrecision;
 
 template<class F> using PrecisionType = typename F::PrecisionType;
 
-struct DecimalPlaces { Nat _places; DecimalPlaces(Nat plc) : _places(plc) { } operator uint() const { return _places; } };
-struct DecimalPrecision { Nat _figures; operator uint() const { return _figures; } };
+struct DecimalPlaces { Nat _places; explicit DecimalPlaces(Nat plc) : _places(plc) { } operator uint() const { return _places; } };
+struct DecimalPrecision { Nat _figures; explicit DecimalPrecision(Nat figs) : _figures(figs) { } operator uint() const { return _figures; } };
 
 template<class X> class Positive;
 

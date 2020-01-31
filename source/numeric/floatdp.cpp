@@ -71,7 +71,13 @@ static const double _log2_approx=0.6931471805599453094;
 
 static const double _pi_near=3.1415926535897931;
 
-
+// The floor of log_10(|x|). abslog10floor(x)+1 is the number of digits of x before the decimal point.
+// Returns the smallest representable  int  if x is zero
+int abslog10floor(double x) {
+    return static_cast<int>(std::floor(std::log10(std::abs(x))));
+    //static const double MIN_INT=-2147483648.;
+    //return std::max(std::floor(std::log10(std::abs(x))),MIN_INT);
+}
 
 static inline double next_rnd(double x) {
     volatile double y=+x; y=y+1e-300; y=y-1e-300; return +y;
@@ -563,7 +569,6 @@ double atan_rnd_series(double x) {
         w=horner_opp(17,s,c);
         r=x*w;
     }
-  //  std::cerr<<" {atan_rnd_series("<<x<<")="<<r<<"} ";
     return r;
 }
 
@@ -803,20 +808,26 @@ OutputStream& write(OutputStream& os, FloatDP const& x, Nat bits, BuiltinRoundin
     return os;
 }
 */
-OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces dgts, MPFRRoundingModeType rnd);
 
-OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces dgts, BuiltinRoundingModeType rnd) {
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, MPFRRoundingModeType rnd);
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision figs, MPFRRoundingModeType rnd);
+
+MPFRRoundingModeType to_mpfr_rounding_mode(BuiltinRoundingModeType rnd) {
     assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
-    MultiplePrecision pr_mp(53);
-    RoundingModeMP rnd_mp = (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
-    return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
+    return (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST
+               : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
 }
 
-OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision dgts, BuiltinRoundingModeType rnd) {
-    assert(rnd==ROUND_TO_NEAREST || rnd==ROUND_UPWARD || rnd==ROUND_DOWNWARD);
+OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPlaces plcs, BuiltinRoundingModeType rnd) {
     MultiplePrecision pr_mp(53);
-    RoundingModeMP rnd_mp = (rnd==FloatDP::ROUND_TO_NEAREST) ? FloatMP::ROUND_TO_NEAREST : (rnd==FloatDP::ROUND_DOWNWARD) ? FloatMP::ROUND_DOWNWARD : FloatMP::ROUND_UPWARD;
-    return write(os,FloatMP(x,pr_mp),dgts,rnd_mp);
+    MPFRRoundingModeType rnd_mp=to_mpfr_rounding_mode(rnd);
+    return write(os,FloatMP(x,pr_mp),plcs,rnd_mp);
+}
+
+OutputStream& write(OutputStream& os, FloatDP const& x, DecimalPrecision figs, BuiltinRoundingModeType rnd) {
+    MultiplePrecision pr_mp(53);
+    MPFRRoundingModeType rnd_mp=to_mpfr_rounding_mode(rnd);
+    return write(os,FloatMP(x,pr_mp),figs,rnd_mp);
 }
 
 

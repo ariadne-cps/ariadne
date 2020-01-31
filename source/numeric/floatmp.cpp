@@ -450,14 +450,10 @@ FloatMP operator/(Dbl x1, FloatMP const& x2) {
 }
 
 
-inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
-inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
-inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
+int abslog10floor(double x);
 
-
-String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
-    // zdgts is the number of places allocated for the integer part (currently unused)
-    // fdgts is the number of places allocated for the fractional part (currently unused)
+String print(const mpfr_t x, int fdgts, mpfr_rnd_t rnd) {
+    // fdgts is the number of places allocated for the fractional part
     char fmt[16];
     std::strcpy(fmt,"%.");
     std::sprintf(fmt+2, "%d", fdgts);
@@ -471,27 +467,31 @@ String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
     return String(cstr);
 }
 
+String print(const mpfr_t x, int zdgts, int fdgts, mpfr_rnd_t rnd) {
+    // zdgts is the number of places allocated for the integer part (currently unused)
+    // fdgts is the number of places allocated for the fractional part
+    return print(x,fdgts,rnd);
+}
+
 String print(FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
-    //static const double log2ten = 3.3219280948873621817;
-    //int pdgts = std::ceil(x.precision()/log2ten);
-    int edgts = log10floor(x)+1;
-    int zdgts = std::max(log10floor(x),0)+1;
+    if (x==0) { return "0."; }
+    int edgts = abslog10floor(x.get_d())+1;
     int fdgts = std::max(static_cast<int>(figs)-edgts,0);
-    return print(x._mpfr,zdgts,fdgts,rnd);
+    return print(x._mpfr,fdgts,rnd);
 }
 
 String print(FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
-    int zdgts = std::max(log10floor(x),0)+1;
+    //int zdgts = std::max(abslog10floor(x),0)+1;
     int fdgts = static_cast<int>(plcs);
-    return print(x._mpfr,zdgts,fdgts,rnd);
+    return print(x._mpfr,fdgts,rnd);
 }
 
 OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPlaces plcs, RoundingModeMP rnd) {
     return os << print(x,plcs,rnd);
 }
 
-OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision plcs, RoundingModeMP rnd) {
-    return os << print(x,plcs,rnd);
+OutputStream& write(OutputStream& os, FloatMP const& x, DecimalPrecision figs, RoundingModeMP rnd) {
+    return os << print(x,figs,rnd);
 }
 
 

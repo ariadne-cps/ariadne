@@ -77,9 +77,9 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
+    _zero_coefficient = nul(lst.begin()->second);
     _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
-    _coefficients = UniformList<X>(0,X());
-    _zero_coefficient = X();
+    _coefficients = UniformList<X>(0,_zero_coefficient);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);

@@ -253,7 +253,7 @@ template<class I, class X> class ExpansionValueReference {
 
 template<class I, class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
 Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
-    : Expansion(other.argument_size(),X(prs...))
+    : Expansion(other.argument_size(),X(other.zero_coefficient(),prs...))
 {
     MultiIndex a(other.argument_size());
     X x;

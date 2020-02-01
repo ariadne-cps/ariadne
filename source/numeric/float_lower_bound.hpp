@@ -189,6 +189,7 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     Positive<LowerBound<F>>() : LowerBound<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<LowerBound<F>>(M m) : LowerBound<F>(m) { }
+    explicit Positive<LowerBound<F>>(PR const& pr) : LowerBound<F>(pr) { }
     explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
     explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
     Positive<LowerBound<F>>(PositiveValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }

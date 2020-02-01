@@ -215,6 +215,7 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
     Positive<Approximation<F>>() : Approximation<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<Approximation<F>>(M m) : Approximation<F>(m) { }
+    explicit Positive<Approximation<F>>(PR const& pr) : Approximation<F>(pr) { }
     explicit Positive<Approximation<F>>(F const& x) : Approximation<F>(x) { }
     explicit Positive<Approximation<F>>(Approximation<F> const& x) : Approximation<F>(x) { }
     Positive<Approximation<F>>(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }

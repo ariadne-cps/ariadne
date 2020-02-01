@@ -202,19 +202,21 @@ using ApproximateVectorMultivariateFunctionModelMP = VectorMultivariateFunctionM
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 
-
-template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
-    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
-    typedef FloatApproximation<PR> CoefficientType;
-    typedef Void ErrorType;
-    typedef FloatApproximation<PR> NumericType;
-};
+template<class F> class UnknownError;
 
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
-    static_assert(IsSame<PR,DP>::value or IsSame<PR,MP>::value,"");
-    typedef FloatValue<PR> CoefficientType;
-    typedef FloatError<PRE> ErrorType;
-    typedef FloatBounds<PR> NumericType;
+    typedef RawFloat<PR> F; typedef RawFloat<PRE> FE;
+    typedef Value<F> ValueType; typedef Error<FE> ErrorType;
+    typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
+    typedef Bounds<F> NumericType; typedef ValidatedNumber GenericNumericType;
+    typedef F RawFloatType;
+};
+template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
+    typedef RawFloat<PR> F;
+    typedef Approximation<F> ValueType; typedef UnknownError<F> ErrorType;
+    typedef PositiveApproximation<F> NormType; typedef Interval<Approximation<F>> RangeType;
+    typedef Approximation<F> NumericType; typedef ApproximateNumber GenericNumericType;
+    typedef F RawFloatType;
 };
 
 template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;

@@ -172,19 +172,19 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,D,PR,PRE>,Number<P>>
 {
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
-    typedef IntervalDomainType C;
+    using C = IntervalDomainType;
   public:
     typedef ScalarFunction<P,D> GenericType;
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
-    typedef CanonicalCoefficientType<P,PR> CoefficientType;
-    typedef CanonicalErrorType<P,PRE> ErrorType;
-    typedef CanonicalNumericType<P,PR,PRE> NumericType;
-    typedef Number<P> GenericNumericType;
-    typedef PositiveFloatUpperBound<PR> NormType;
-    typedef Interval<FloatUpperBound<PR>> RangeType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ErrorType ErrorType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NumericType NumericType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::GenericNumericType GenericNumericType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NormType NormType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::RangeType RangeType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
@@ -221,8 +221,8 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,Interval
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
 
-    inline CoefficientType value() const { return this->_ptr->value(); }
-    inline ErrorType error() const { return this->_ptr->error(); }
+    inline ValueType value() const { return this->_ptr->_value(); }
+    inline ErrorType error() const { return this->_ptr->_error(); }
 
     inline Void clobber() { return this->_ptr->clobber(); }
 
@@ -429,12 +429,13 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
-    typedef CanonicalCoefficientType<P,PR> CoefficientType;
-    typedef CanonicalErrorType<P,PRE> ErrorType;
-    typedef CanonicalNumericType<P,PR,PRE> NumericType;
-    typedef Number<P> GenericNumericType;
-    typedef Box<Interval<FloatUpperBound<PR>>> RangeType;
-    typedef PositiveFloatUpperBound<PR> NormType;
+
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::RangeType RangeType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NormType NormType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ErrorType ErrorType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NumericType NumericType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::GenericNumericType GenericNumericType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
@@ -474,9 +475,9 @@ template<class P, class D, class PR, class PRE> class FunctionModel<P,D,BoxDomai
     inline DomainType const domain() const { return this->_ptr->domain(); }
     inline CodomainType const codomain() const { return this->_ptr->codomain(); }
     inline RangeType const range() const { return this->_ptr->range(); }
-    inline Vector<CoefficientType> const values() const { return this->_ptr->values(); }
-    inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
-    inline ErrorType const error() const { return this->_ptr->error(); }
+    inline Vector<ValueType> const values() const { return this->_ptr->_values(); }
+    inline Vector<ErrorType> const errors() const { return this->_ptr->_errors(); }
+    inline ErrorType const error() const { return this->_ptr->_error(); }
     inline Void clobber() { this->_ptr->clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 //        Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));

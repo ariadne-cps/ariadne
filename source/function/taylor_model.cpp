@@ -52,4 +52,21 @@ template class TaylorModel<ApproximateTag,FloatMP>;
 template struct AlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 template class NormedAlgebraOperations<TaylorModel<ApproximateTag,FloatMP>>;
 
+
+
+template class TaylorModel<ValidatedTag,FloatDPUpperInterval>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatDPUpperInterval>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatDPUpperInterval>>;
+
+template class TaylorModel<ValidatedTag,FloatMPUpperInterval>;
+template struct AlgebraOperations<TaylorModel<ValidatedTag,FloatMPUpperInterval>>;
+template class NormedAlgebraOperations<TaylorModel<ValidatedTag,FloatMPUpperInterval>>;
+
+//template TaylorModel<ValidatedTag,FloatDP> value_coefficients(TaylorModel<ValidatedTag,FloatDPBounds> const&);
+//template TaylorModel<ValidatedTag,FloatDPBounds> exact_coefficients(TaylorModel<ValidatedTag,FloatDPBounds> const&);
+//template TaylorModel<ValidatedTag,FloatMP> value_coefficients(TaylorModel<ValidatedTag,FloatMPBounds> const&);
+//template TaylorModel<ValidatedTag,FloatMPBounds> exact_coefficients(TaylorModel<ValidatedTag,FloatMPBounds> const&);
+
+
+
 } // namespace Ariadne

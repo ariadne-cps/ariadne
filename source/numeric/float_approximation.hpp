@@ -215,6 +215,7 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
     Positive<Approximation<F>>() : Approximation<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<Approximation<F>>(M m) : Approximation<F>(m) { }
+    explicit Positive<Approximation<F>>(PR const& pr) : Approximation<F>(pr) { }
     explicit Positive<Approximation<F>>(F const& x) : Approximation<F>(x) { }
     explicit Positive<Approximation<F>>(Approximation<F> const& x) : Approximation<F>(x) { }
     Positive<Approximation<F>>(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
@@ -233,7 +234,8 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
         return PositiveApproximation<F>(mul(near,x1.raw(),x2.raw())); }
     friend PositiveApproximation<F> div(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(div(near,x1.raw(),x2.raw())); }
-    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),m)); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),static_cast<Int>(m))); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Int n) { return PositiveApproximation<F>(pow(near,x.raw(),n)); }
     friend PositiveApproximation<F> sqrt(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqrt(near,x.raw())); }
     friend PositiveApproximation<F> exp(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(exp(near,x.raw())); }
     friend Approximation<F> log(PositiveApproximation<F> const& x) { return Approximation<F>(log(near,x.raw())); }

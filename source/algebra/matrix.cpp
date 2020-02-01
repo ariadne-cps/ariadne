@@ -926,5 +926,7 @@ template Matrix<SingletonType<FloatDPUpperInterval>> cast_singleton(Matrix<Float
 template Matrix<MidpointType<FloatDPUpperInterval>> midpoint(Matrix<FloatDPUpperInterval> const&);
 template Matrix<FloatDPUpperInterval> inverse(const Matrix<FloatDPUpperInterval>&);
 template Vector<FloatDPUpperInterval> solve(const Matrix<FloatDPUpperInterval>&, const Vector<FloatDPUpperInterval>&);
+
+template class Matrix<FloatMPUpperInterval>;
 } // namespace Ariadne
 

@@ -130,7 +130,7 @@ template<class I, class X> class Expansion {
     typedef typename UniformList<X>::ConstReference CoefficientConstReference;
 
     ~Expansion();
-    explicit Expansion(ArgumentSizeType as);
+    explicit Expansion(ArgumentSizeType as); // DEPRECATED
     explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
     template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
@@ -238,7 +238,7 @@ public:
 
 template<class I, class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
 Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
-    : Expansion(as,X(pr),cap)
+    : Expansion(as,X(0,pr),cap)
 {
 }
 
@@ -250,7 +250,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, P
 
     _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
     _coefficients = UniformList<X>(0,X(pr));
-    _zero_coefficient = X(pr);
+    _zero_coefficient = X(0,pr);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);

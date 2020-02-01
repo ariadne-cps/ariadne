@@ -150,6 +150,9 @@ Void TestScalarTaylorFunction::test_concept()
     stf(vy); stf(vy); evaluate(stf,vy); unchecked_evaluate(stf,vy); partial_evaluate(stf,k,y);
     stf.domain(); stf.range(); stf.expansion(); stf.error();
 
+    ScaledFunctionPatch<ValidatedIntervalTaylorModelDP> istfp;
+    ScaledFunctionPatch<ValidatedTaylorModelDP> vstfp;
+
 }
 
 Void TestScalarTaylorFunction::test_constructors()
@@ -208,6 +211,7 @@ Void TestScalarTaylorFunction::test_evaluate()
 
 Void TestScalarTaylorFunction::test_gradient()
 {
+/*
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
     Real a(1.5); Real b(0.25);
     EffectiveScalarMultivariateFunction quadratic = a-x[0]*x[0]+b*x[1];
@@ -225,6 +229,7 @@ Void TestScalarTaylorFunction::test_gradient()
     ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain2,quadratic,swp).gradient(point2),quadratic.gradient(point2));
     ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point1),quadratic.gradient(point1));
     ARIADNE_TEST_EQUAL(ValidatedScalarMultivariateTaylorFunctionModelDP(domain3,quadratic,swp).gradient(point2),quadratic.gradient(point2));
+*/
 }
 
 

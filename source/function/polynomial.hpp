@@ -58,8 +58,8 @@ template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 
 template<class I, class Y> using ArgumentOf = typename IndexTraits<I>::template Argument<Y>;
 
-template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
-template<class X, class A> A horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
+template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
+template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
 
 //! \brief A monomial with index \a I and coefficients of some type \a X.
 template<class I, class X>

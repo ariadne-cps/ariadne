@@ -33,6 +33,10 @@ namespace Ariadne {
 template<class U> class Interval;
 template<class U> class VariableInterval;
 
+template<class IVL> struct IsInterval : False { };
+template<class UB> struct IsInterval<Interval<UB>> : True { };
+
+
 //@{
 //! \relates Interval
 //! \name Type shorthands

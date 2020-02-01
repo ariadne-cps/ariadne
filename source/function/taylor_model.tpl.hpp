@@ -94,6 +94,12 @@ template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, PositiveApprox
 template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const& e) { return os << "???"; }
 
 
+template<class F> ZeroError<F> const& nul(ZeroError<F> const& e) { return e; }
+template<class F> PositiveUpperBound<F> const& operator+(PositiveUpperBound<F> const& r, ZeroError<F> const&) { return r; }
+template<class F> PositiveUpperBound<F>& operator+=(PositiveUpperBound<F>&, ZeroError<F> const&) { }
+template<class F> ZeroError<F>& operator+=(ZeroError<F>&, ZeroError<F> const&) { }
+
+
 template<class F> Bounds<F> fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> y) { return x1*x2+y; }
 template<class F> Bounds<F>& operator/=(Bounds<F>& x, TwoExp y) { return x*=Dyadic(rec(y)); }
 
@@ -103,6 +109,63 @@ template<class F> Approximation<F> fma(Approximation<F>const& x, Approximation<F
 template<class F> Approximation<F> pm(UnknownError<F> e) { return Approximation<F>(e.precision()); }
 
 
+template<class F> UpperInterval<F>& operator/=(UpperInterval<F>& ivl1, ValidatedNumber const& y2) {
+    return ivl1=ivl1/y2; }
+template<class F> UpperInterval<F>& operator/=(UpperInterval<F>& ivl1, Dyadic const& w2) {
+    return ivl1=ivl1/w2; }
+
+//namespace {
+// Operations for Interval<UpperBound<F>> coefficients
+template<class X> X const& cast_singleton(X const& x) { return x; }
+template<class F> Bounds<F> const& cast_singleton(Interval<UpperBound<F>> const& ivl) { return reinterpret_cast<Bounds<F>const&>(ivl); }
+
+template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2.lower(),x1.upper()+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2.upper(),x1.upper()-x2.lower()); }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return make_interval(reinterpret_cast<Bounds<F>const&>(x1)*reinterpret_cast<Bounds<F>const&>(x2)); }
+
+template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
+    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); }
+}
+template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return x2*x1; }
+/*
+template<class F> ApproximateInterval<F> operator+(UpperInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+template<class F> ApproximateInterval<F> operator-(UpperInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+*/
+template<class F> ApproximateInterval<F> operator*(UpperInterval<F> const& x1, Approximation<F> const& x2) {
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
+    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); } }
+/*
+template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, UpperInterval<F> x2) {
+    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, UpperInterval<F> x2) {
+    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+*/
+template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, UpperInterval<F> const& x2) {
+    return x2*x1; }
+
+template<class F> ApproximateInterval<F> operator*(UpperInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1)*x2; }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const& x1, UpperInterval<F> const& x2) {
+    return x1*ApproximateInterval<F>(x2); }
+
+
+//} // namespace
+
 
 template<class F> PositiveUpperBound<F> mag(Interval<UpperBound<F>> const& ivl) {
     return cast_positive(max(-ivl.lower(),ivl.upper()));
@@ -110,6 +173,12 @@ template<class F> PositiveUpperBound<F> mag(Interval<UpperBound<F>> const& ivl) 
 template<class F> PositiveApproximation<F> mag(Interval<Approximation<F>> const& ivl) {
     return cast_positive(max(-ivl.lower(),ivl.upper()));
 }
+
+
+template<class F> ValidatedIntervalTaylorModel<F> max(ValidatedIntervalTaylorModel<F> const& x1, Bounds<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> max(Bounds<F> const& x1, ValidatedIntervalTaylorModel<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> min(ValidatedIntervalTaylorModel<F> const& x1, Bounds<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> max(Bounds<F> const& x1, ValidatedIntervalTaylorModel<F> const& x2);
 
 struct UnitMultiIndex {
     SizeType n; DegreeType j;
@@ -149,6 +218,7 @@ Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproximation> c
 template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
 template<class FLT> Bool is_same_as_zero(Bounds<FLT> const& xb) { return xb.lower_raw()==0 && xb.upper_raw()==0; }
 template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv.raw()==0; }
+template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower().raw()==0 && xv.upper().raw()==0; }
 
 } // namespace
 
@@ -225,6 +295,33 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::Iterator curr=p.begin();
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->_discard(adv->index(),mag(adv->coefficient()).raw())) {
+            //te+=abs(adv->coefficient());
+            te+mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
 
 namespace {
 
@@ -319,15 +416,45 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>
 }
 
 
+template<class F>
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::Iterator curr=p.begin();
+
+    FloatError<PR> nrm=radius(p)+e;
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(0u,e.precision());
+    while(adv!=end) {
+        if(this->_discard(mag(adv->coefficient()).raw(),nrm.raw())) {
+            //te+=abs(adv->coefficient());
+            te+=mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
+
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel()
-    : _expansion(0), _error(0u), _sweeper()
+    : _expansion(0), _error(), _sweeper()
 {
 }
 
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
-    : _expansion(as), _error(0u), _sweeper(swp)
+    : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
 {
 }
 
@@ -353,9 +480,20 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::scaling(SizeType a
     auto ivl=convert_interval(codom,r.precision());
     r.set_gradient(j,1);
     r*=ivl.radius();
-    r+=ivl.midpoint();
+    r+=static_cast<NumericType>(ivl.midpoint());
     return r;
 }
+
+template<class P, class F> auto
+TaylorModel<P,F>::constant(SizeType as, const NumericType& c, SweeperType swp) -> TaylorModel<P,F> {
+    TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r;
+}
+template<class P, class F> auto
+TaylorModel<P,F>::constant(SizeType as, const GenericNumericType& c, SweeperType swp) -> TaylorModel<P,F> {
+    TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r;
+}
+
+
 
 template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create() const {
     return TaylorModel<P,F>(this->argument_size(),this->_sweeper);
@@ -408,9 +546,12 @@ template<class P, class F> DegreeType TaylorModel<P,F>::degree() const {
 }
 
 
+template<class F> UpperInterval<F> set_err(UpperInterval<F> const& x, Error<F>& e) {
+    return x;
+}
+
 template<class F> Value<F> set_err(Bounds<F> const& x, Error<F>& e) {
-    e+=x.error();
-    return x.value();
+     e+=x.error(); return x.value();
 }
 
 template<class F> Approximation<F> const& set_err(Approximation<F> const& x, UnknownError<F>& e) {
@@ -509,6 +650,14 @@ template<class F> Bounds<F> add_err(Bounds<F> const& x1, Bounds<F> const& x2, Er
     return add(x1,x2);
 }
 
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return add(x1,x2);
+}
+
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return add(x1,n2);
+}
+
 template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
     return add(x1,x2);
 }
@@ -526,6 +675,14 @@ template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error
 
 template<class F> Bounds<F> sub_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
     return sub(x1,x2);
+}
+
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return sub(x1,x2);
+}
+
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return sub(x1,n2);
 }
 
 template<class F> Approximation<F> sub_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
@@ -597,6 +754,14 @@ template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Nat const& n2, Error<F>
     return mul(x1,n2);
 }
 
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return mul(x1,x2);
+}
+
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return mul(x1,n2);
+}
+
 template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
     return mul(x1,x2);
 }
@@ -625,6 +790,14 @@ template<class F> Bounds<F> div_err(Bounds<F> const& x1, Bounds<F> const& x2, Er
 }
 
 template<class F> Bounds<F> div_err(Bounds<F> const& x1, Nat n2, Error<F>& e) {
+    return div(x1,n2);
+}
+
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return div(x1,x2);
+}
+
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
     return div(x1,n2);
 }
 
@@ -687,6 +860,10 @@ template<class F> Bounds<F> fma_err(Bounds<F> const& x, Bounds<F> const& y, Boun
     return fma(x,y,z);
 }
 
+template<class F> UpperInterval<F> fma_err(UpperInterval<F> const& x, UpperInterval<F> const& y, UpperInterval<F> z, Error<F>& e) {
+    return fma(x,y,z);
+}
+
 template<class F> Bounds<F> fma_err(ValidatedApproximation<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>& e) {
     return fma(static_cast<Bounds<F>>(x),y,z);
 }
@@ -698,7 +875,8 @@ template<class F> Approximation<F> fma_err(Approximation<F> const& x, Approximat
 
 
 template<class V, class OP> inline decltype(auto) _sparse_apply(OP const& op_err, V& r) {
-    auto e=r.error(); e=nul(e);
+    auto e=r.error();
+    e=nul(e);
     for(auto iter=r.begin(); iter!=r.end(); ++iter) {
         iter->coefficient()=op_err(iter->coefficient(),e);
     }
@@ -706,7 +884,8 @@ template<class V, class OP> inline decltype(auto) _sparse_apply(OP const& op_err
 }
 
 template<class V, class OP> inline Void _sparse_apply(OP const& op_err, V& r, const V& x, const V& y) {
-    auto e=r.error(); e=nul(e); // The maximum accumulated error
+    auto e=r.error();
+    e=nul(e); // The maximum accumulated error
     auto xiter=x.begin();
     auto yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
@@ -1149,7 +1328,7 @@ template<class P, class F> auto TaylorModel<P,F>::range() const -> RangeType {
     CoefficientType constant_term(zero);
     Array<CoefficientType> linear_terms(as,zero);
     Array<CoefficientType> quadratic_terms(as,zero);
-    ErrorType err(prec);
+    NormType err(prec);
     for(auto iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->index().degree()==0) {
             constant_term=iter->coefficient();
@@ -1168,22 +1347,23 @@ template<class P, class F> auto TaylorModel<P,F>::range() const -> RangeType {
     }
     err=err+tm.error();
 if constexpr(IsSame<P,ValidatedTag>::value) {
-    FloatBounds<PR> r(constant_term-err,constant_term+err);
-    const FloatBounds<PR> unit_ivl(-1,+1);
+    RangeType r(-err,+err);
+    r=r+constant_term;
+    const RangeType unit_ivl(-1,+1,this->precision());
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
     for(SizeType j=0; j!=as; ++j) {
         const CoefficientType& a=quadratic_terms[j];
         const CoefficientType& b=linear_terms[j];
-        FloatBounds<PR> ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
+        RangeType ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
         if(not is_same_as_zero(a)) { // Explicitly test for zero
-            FloatBounds<PR> qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+            RangeType qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
             r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
         } else {
             r += ql;
         }
     }
-    return RangeType(r);
+    return r;
 } else { assert(false); }
 }
 
@@ -1238,7 +1418,7 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
         static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const Dbl err=0.035;
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
-        CoefficientType xmag=cast_exact(mag(xr));
+        CoefficientType xmag=static_cast<CoefficientType>(cast_exact(mag(xr)));
         TaylorModel<P,F> s=x/xmag;
         s=sqr(s);
         r=static_cast<CoefficientType>(p[n-1u]);
@@ -1319,6 +1499,7 @@ compose(const TaylorSeries<typename F::PrecisionType>& ts, const TaylorModel<P,F
 template<class P, class F> TaylorModel<P,F>
 compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
     static const DegreeType MAX_DEGREE=20;
     static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
@@ -1384,7 +1565,7 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_embed_error(const
         MultiIndex ra(as+1u);
 
         // The new error term is first in reverse lexicographic order.
-        CoefficientType err_coef=cast_exact(tm.error());
+        CoefficientType err_coef=static_cast<CoefficientType>(cast_exact(tm.error()));
         ra[as]=1;
         rtm._append(ra,err_coef);
         ra[as]=0;
@@ -1537,7 +1718,11 @@ template<class P, class F> TaylorModel<P,F> derivative(const TaylorModel<P,F>& x
 // Scalar function operators (evaluate, split, unscale, embed)
 // and predicates (refines)
 
-template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ValidatedNumericType>& x) -> NumericType {
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<IntervalNumericType>& x) -> ArithmeticType<CoefficientType,IntervalNumericType> {
+    return horner_evaluate(tm.expansion(),x)+pm(tm.error());
+}
+
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ValidatedNumericType>& x) -> ArithmeticType<CoefficientType,ValidatedNumericType> {
     if constexpr (IsSame<NumericType,ValidatedNumericType>::value) {
         return horner_evaluate(tm.expansion(),x)+pm(tm.error());
     } else {
@@ -1545,14 +1730,14 @@ template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,
     }
 }
 
-template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ApproximateNumericType>& x) -> ApproximateNumericType {
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ApproximateNumericType>& x) -> ArithmeticType<CoefficientType,ApproximateNumericType> {
     return horner_evaluate(tm.expansion(),x);
 }
 
 
 template<class P, class F> auto TaylorModel<P,F>::_gradient(const TaylorModel<P,F>& tm, const Vector<NumericType>& x) -> Covector<NumericType> {
     Vector<Differential<NumericType>> dx=Differential<NumericType>::variables(1u,x);
-    Differential<NumericType> df=horner_evaluate(tm.expansion(),dx)+pm(tm.error());
+    Differential<NumericType> df=horner_evaluate(tm.expansion(),dx)+static_cast<NumericType>(pm(tm.error()));
     return gradient(df);
 }
 
@@ -1576,7 +1761,7 @@ template<class P, class F> Void TaylorModel<P,F>::unscale(IntervalDomainType con
     // The motivation for mapping to everything is that any function on the
     // resulting interval should be independent of the unneeded component
     TaylorModel<P,F>& tm=*this;
-    Interval<CoefficientType> ivl=convert_interval(codom,this->precision());
+    auto ivl=convert_interval(codom,this->precision());
     ARIADNE_ASSERT_MSG(decide(ivl.lower()<=ivl.upper()),"Cannot unscale TaylorModel<P,F> "<<tm<<" from empty interval "<<ivl);
 
     if(codom.lower()==codom.upper()) {
@@ -1703,9 +1888,16 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_split(const Taylo
 
 // Banach algebra operations
 
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator/(TaylorModel<ValidatedTag,UpperInterval<F>> const& x1, Value<F> const& x2) {
+    return x1/UpperInterval<F>(x2); }
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>>& operator/=(TaylorModel<ValidatedTag,UpperInterval<F>>& x1, Value<F> const& x2) {
+    return x1/=UpperInterval<F>(x2); }
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator-(TaylorModel<ValidatedTag,UpperInterval<F>> x1, Value<F> const& x2) {
+    return x1-UpperInterval<F>(x2); }
 
-template<class P, class F> auto TaylorModel<P,F>::average() const -> CoefficientType {
-    return (*this)[MultiIndex::zero(this->argument_size())];
+
+template<class P, class F> auto TaylorModel<P,F>::average() const -> ValueType {
+    return cast_exact(cast_singleton((*this)[MultiIndex::zero(this->argument_size())]));
 }
 
 template<class P, class F> auto TaylorModel<P,F>::radius() const -> NormType {
@@ -1755,66 +1947,82 @@ template<class P, class F> Bool TaylorModel<P,F>::_inconsistent(const TaylorMode
     return (mag(tm1.value()-tm2.value()).raw() > (tm1.error()+tm2.error()).raw());
 }
 
+template<class F> inline Bool inconsistent(UpperInterval<F> const& x1, UpperInterval<F> const& x2) {
+    return definitely(disjoint(x1,x2));
+}
+
 template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
-if constexpr (IsSame<P,ValidatedTag>::value) {
-    TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        TaylorModel<P,F> r(x.argument_size(),x.sweeper());
 
-    ErrorType max_error=nul(r.error());
+        ErrorType max_error=nul(r.error());
 
-    const ErrorType& xe=x.error();
-    const ErrorType& ye=y.error();
-    CoefficientType rv,xv,yv;
-    FloatDP xu,yu,mxl,myl,u,ml;
-    MultiIndex a;
+        const ErrorType& xe=x.error();
+        const ErrorType& ye=y.error();
 
-    typename TaylorModel<P,F>::ConstIterator xiter=x.begin();
-    typename TaylorModel<P,F>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() || yiter!=y.end()) {
-        // Can't use const MultiIndex& here since references change as the iterators change
-        // We would need to use a smart reference
-        //UniformConstReference<MultiIndex> xa=xiter->index();
-        //UniformConstReference<MultiIndex> ya=yiter->index();
-        if(xiter==x.end()) {
-            a=yiter->index();
-            yv=yiter->coefficient();
-            xv=0;
-            ++yiter;
-        } else if(yiter==y.end()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=0;
-            ++xiter;
-        } else if(xiter->index()==yiter->index()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=yiter->coefficient();
-            ++xiter;
-            ++yiter;
-        } else if(xiter->index()<yiter->index()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=0;
-            ++xiter;
-        } else { // xa>ya
-            a=yiter->index();
-            yv=yiter->coefficient();
-            xv=0;
-            ++yiter;
+        CoefficientType rv,xv,yv;
+        FloatDP xu,yu,mxl,myl,u,ml;
+        MultiIndex a;
+
+        typename TaylorModel<P,F>::ConstIterator xiter=x.begin();
+        typename TaylorModel<P,F>::ConstIterator yiter=y.begin();
+        while(xiter!=x.end() || yiter!=y.end()) {
+            // Can't use const MultiIndex& here since references change as the iterators change
+            // We would need to use a smart reference
+            //UniformConstReference<MultiIndex> xa=xiter->index();
+            //UniformConstReference<MultiIndex> ya=yiter->index();
+            if(xiter==x.end()) {
+                a=yiter->index();
+                yv=yiter->coefficient();
+                xv=0;
+                ++yiter;
+            } else if(yiter==y.end()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=0;
+                ++xiter;
+            } else if(xiter->index()==yiter->index()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=yiter->coefficient();
+                ++xiter;
+                ++yiter;
+            } else if(xiter->index()<yiter->index()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=0;
+                ++xiter;
+            } else { // xa>ya
+                a=yiter->index();
+                yv=yiter->coefficient();
+                xv=0;
+                ++yiter;
+            }
+
+            if constexpr (IsInterval<CoefficientType>::value) {
+                auto xve=xv+pm(xe); auto yve=yv+pm(ye);
+                if (definitely(disjoint(xve,yve))) {
+                    ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
+                }
+                auto rve=refinement( xve, yve );
+                // FIXME: This adds the error to all coefficients,
+                // resulting in an overly-large refinement
+                r.expansion().append(a,rve);
+            } else {
+                auto rve=refinement( xv.pm(xe), yv.pm(ye) );
+                if(rve.error().raw()<0.0) {
+                    ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
+                }
+                if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
+                max_error=max(max_error,rve.error());
+            }
         }
-
-        FloatBounds<PR> rve=refinement( xv.pm(xe), yv.pm(ye) );
-        if(rve.error().raw()<0.0) {
-            ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<P,F>,TaylorModel<P,F>)",x<<" and "<<y<<" are inconsistent.");
-        }
-
-        if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
-        max_error=max(max_error,rve.error());
+        r.error()=max_error;
+        return r;
+    } else {
+        // Refinement for Approximate models doesn't really make sense
+        ARIADNE_NOT_IMPLEMENTED;
     }
-
-    r.error()=max_error;
-
-    return r;
-} else { ARIADNE_NOT_IMPLEMENTED; }
 }
 
 
@@ -1857,7 +2065,7 @@ template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::zeros(Size
 }
 
 
-template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::constants(SizeType as, const Vector<ValidatedNumericType>& c, SweeperType swp)
+template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::constants(SizeType as, const Vector<NumericType>& c, SweeperType swp)
 {
     Vector<TaylorModel<P,F>> result(c.size(),TaylorModel<P,F>::zero(as,swp));
     for(SizeType i=0; i!=c.size(); ++i) {

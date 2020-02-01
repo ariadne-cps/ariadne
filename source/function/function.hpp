@@ -232,7 +232,7 @@ class Function
     Function(); //!< \brief Create an invalid (null) function.
     explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { } //!< \brief Capture a newly-allocated function pointer.
     explicit Function(SharedPointer<FunctionInterface<P,D,C>> p) : _ptr(p) { } //!< \brief Construct from a managed pointer.
-    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }  //!< \brief Clone from aeference.
+    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }  //!< \brief Clone from a reference.
 
     //! \brief Assign from a reference.
     Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {

@@ -55,15 +55,17 @@ template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterf
   public:
     typedef D DomainType;
     typedef C CodomainType;
-    typedef typename FunctionModelTraits<P,PR>::RangeType RangeType;
-    typedef FloatError<PR> NormType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
   public:
-    virtual CanonicalCoefficientType<P,PRE> const value() const = 0;
+    virtual ValueType const _value() const = 0;
 };
 
 template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterface<P,D,BoxDomainType,PR,PRE>
     : public virtual WritableInterface
 {
+  public:
+    typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::ErrorType ErrorType;
   public:
     virtual Void _set(SizeType, ScalarFunctionModelInterface<P,D,PR,PRE> const&) = 0;
     virtual ScalarFunctionModelInterface<P,D,PR,PRE>* _get(SizeType) const = 0;
@@ -71,8 +73,8 @@ template<class P, class D, class PR, class PRE> class FunctionModelAlgebraInterf
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _combine(const VectorFunctionModelInterface<P,D,PR,PRE>& f2) const = 0;
     virtual Void _adjoin(const ScalarFunctionModelInterface<P,D,PR,PRE>& f2) = 0;
 
-    virtual Vector<CanonicalCoefficientType<P,PRE>> const values() const = 0;
-    virtual Vector<CanonicalErrorType<P,PRE>> const errors() const = 0;
+    virtual Vector<ValueType> const _values() const = 0;
+    virtual Vector<ErrorType> const _errors() const = 0;
 };
 
 template<class P, class D, class C, class PR, class PRE> class FunctionModelInterface
@@ -87,11 +89,15 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelInte
     typedef D DomainType;
     typedef C CodomainType;
     typedef typename ElementTraits<CodomainType>::template RangeType<PR> RangeType;
-    typedef PositiveFloatUpperBound<PR> NormType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::NormType NormType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::ErrorType ErrorType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::NumericType NumericType;
+    typedef typename FunctionModelTraits<P,PR,PRE>::GenericNumericType GenericNumericType;
   public:
     virtual RangeType const range() const = 0;
     virtual NormType const _norm() const = 0;
-    virtual CanonicalErrorType<P,PRE> const error() const = 0;
+    virtual ErrorType const _error() const = 0;
 
     virtual Void clobber() = 0;
 

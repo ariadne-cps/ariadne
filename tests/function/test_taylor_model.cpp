@@ -112,7 +112,7 @@ template<class F> class TestTaylorModel
     typedef ValidatedTaylorModel<F> T;
     typedef Expansion<MI,F> ExpansionType;
   public:
-    typedef TaylorModel<ValidatedTag,Bounds<F>> IntervalTaylorModelType;
+    typedef TaylorModel<ValidatedTag,UpperInterval<F>> IntervalTaylorModelType;
     typedef TaylorModel<ValidatedTag,F> ValidatedTaylorModelType;
     typedef TaylorModel<ApproximateTag,F> ApproximateTaylorModelType;
     typedef F FloatType;
@@ -379,7 +379,10 @@ template<class F> Void TestTaylorModel<F>::test_interval_arithmetic()
     CoefficientType a0(1,pr), a1(-2,pr), a2(3,pr);
     CoefficientType b0(4,pr), b1(-2,pr), b2(3,pr), b3(5,pr);
 
-    ErrorType e(pr);
+    ARIADNE_TEST_CONSTRUCT(ErrorType,e,(pr));
+
+    IntervalTaylorModelType tm1({{i0,a0},{i1,a1},{i2,a2}},e,swp);
+    IntervalTaylorModelType tm1pc=tm1+c;
 
     ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)+c, IntervalTaylorModelType({{i0,a0+c},{i1,a1},{i2,a2}},e,swp));
     ARIADNE_TEST_SAME(IntervalTaylorModelType({{i0,a0},{i1,a1},{i2,a2}},e,swp)-c, IntervalTaylorModelType({{i0,a0-c},{i1,a1},{i2,a2}},e,swp));
@@ -406,7 +409,6 @@ template<class F> Void TestTaylorModel<F>::test_interval_arithmetic()
     ARIADNE_TEST_SAME(pow(ti,1),ti);
     ARIADNE_TEST_SAME(pow(ti,2),ti*ti);
     ARIADNE_TEST_SAME(pow(ti,3),ti*ti*ti);
-
 }
 
 template<class F> Void TestTaylorModel<F>::test_range()
@@ -552,8 +554,6 @@ template<class F> Void TestTaylorModel<F>::test_refinement()
     // FloatDP xv=2./3; FloatDP xe=1./2; FloatDP yv=6./5; FloatDP ye=1./4;
     // FloatDP rl=sub(down,yv,ye); FloatDP ru=add(up,xv,xe); FloatDP rv=add(near,rl,ru)/2; FloatDP re=sub(up,ru,rl)/2;
     // std::cerr << std::setprecision(18) << "xv="<<xv<<" yv="<<yv<<" rl="<<rl<<" ru="<<ru<<" rv="<<rv<<" re="<<re<<"\n";
-
-
 }
 
 template<class F> Void TestTaylorModel<F>::test_split()

@@ -206,14 +206,18 @@ template<class F> class UnknownError;
 
 template<class PR, class PRE> struct FunctionModelTraits<ValidatedTag,PR,PRE> {
     typedef RawFloat<PR> F; typedef RawFloat<PRE> FE;
-    typedef Value<F> CoefficientType; typedef Error<FE> ErrorType;
+    typedef Value<F> ValueType; typedef Error<FE> ErrorType;
     typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
-    typedef Bounds<F> NumericType; };
+    typedef Bounds<F> NumericType; typedef ValidatedNumber GenericNumericType;
+    typedef F RawFloatType;
+};
 template<class PR> struct FunctionModelTraits<ApproximateTag,PR> {
     typedef RawFloat<PR> F;
-    typedef Approximation<F> CoefficientType; typedef UnknownError<F> ErrorType;
+    typedef Approximation<F> ValueType; typedef UnknownError<F> ErrorType;
     typedef PositiveApproximation<F> NormType; typedef Interval<Approximation<F>> RangeType;
-    typedef Approximation<F> NumericType; };
+    typedef Approximation<F> NumericType; typedef ApproximateNumber GenericNumericType;
+    typedef F RawFloatType;
+};
 
 template<class P, class PR, class PRE=PR> using CanonicalNumericType = typename FunctionModelTraits<P,PR,PRE>::NumericType;
 template<class P, class PR> using CanonicalCoefficientType = typename FunctionModelTraits<P,PR>::CoefficientType;

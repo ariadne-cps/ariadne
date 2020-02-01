@@ -60,8 +60,13 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
     , public ScalarFunctionMixin<FM,P,D>
     , public ElementaryAlgebraMixin<FM,CanonicalNumericType<P,PR,PRE>>
 {
-    typedef PositiveFloatUpperBound<PR> NormType;
-    typedef CanonicalNumericType<P,PR,PRE> X;
+    using C = IntervalDomainType;
+    using X = typename FunctionModelInterface<P,D,C,PR,PRE>::NumericType;
+  public:
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ErrorType ErrorType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NormType NormType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::RangeType RangeType;
   public:
     ScalarFunctionModelInterface<P,D,PR,PRE>* _clone() const override {
         return new FM(static_cast<const FM&>(*this)); }
@@ -73,6 +78,10 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
     ScalarFunctionModelInterface<P,D,PR,PRE>* _create_constant(CanonicalNumericType<P,PR,PRE> const& c) const override {
         return new FM(factory(static_cast<FM const&>(*this)).create_constant(c)); }
 
+    ValueType const _value() const override {
+        return static_cast<const FM&>(*this).value(); }
+    ErrorType const _error() const override {
+        return static_cast<const FM&>(*this).error(); }
     NormType const _norm() const override {
         return norm(static_cast<const FM&>(*this)); }
     ScalarFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const override {
@@ -114,14 +123,27 @@ template<class FM, class P, class D, class PR, class PRE> class FunctionModelMix
     : public virtual VectorFunctionModelInterface<P,D,PR,PRE>
     , public VectorFunctionMixin<FM,P,D>
 {
+    using C = BoxDomainType;
+    using X = typename FunctionModelInterface<P,D,C,PR,PRE>::NumericType;
+  public:
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ValueType ValueType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::ErrorType ErrorType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::NormType NormType;
+    typedef typename FunctionModelInterface<P,D,C,PR,PRE>::RangeType RangeType;
+
     typedef typename Element<FM>::Type ScalarMultivariateFunctionType;
-    typedef PositiveFloatUpperBound<PR> NormType;
   public:
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _clone() const override { return new FM(static_cast<const FM&>(*this)); }
     virtual Void _set(SizeType i, const ScalarFunctionModelInterface<P,D,PR,PRE>& sf) override {
         if(!dynamic_cast<const typename FM::ScalarMultivariateFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorMultivariateFunctionModel "<<*this<<" to "<<sf<<"\n"); }
         static_cast<FM&>(*this).FM::set(i,dynamic_cast<const ScalarMultivariateFunctionType&>(sf)); }
+    Vector<ValueType> const _values() const override {
+        return static_cast<const FM&>(*this).values(); }
+    Vector<ErrorType> const _errors() const override {
+        return static_cast<const FM&>(*this).errors(); }
+    ErrorType const _error() const override {
+        return static_cast<const FM&>(*this).error(); }
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _derivative(SizeType j) const override {
         ARIADNE_NOT_IMPLEMENTED; }
     virtual VectorFunctionModelInterface<P,D,PR,PRE>* _antiderivative(SizeType j) const override {
@@ -177,7 +199,7 @@ template<class FCTRY, class P, class PR, class PRE> class FunctionModelFactoryMi
   public:
     typedef VD VectorDomainType;
     typedef SD ScalarDomainType;
-
+  public:
     virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const override { return new FCTRY(this->upcast()); }
     virtual OutputStream& _write(OutputStream& os) const override { return os << this->upcast(); }
 /*

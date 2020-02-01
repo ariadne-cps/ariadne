@@ -48,8 +48,17 @@
 
 namespace Ariadne {
 
+template<class F> class ZeroError {
+  public:
+    template<class... PRS, EnableIf<IsConstructible<Error<F>,PRS...>> =dummy> ZeroError(PRS...) { }
+    F raw() const;
+    typename F::PrecisionType precision() const;
+    operator Error<F> () const;
+};
+
 template<class F> class UnknownError {
   public:
+//    template<class... PRS, EnableIf<IsConstructible<Error<F>,PRS...>> =dummy> UnknownError(PRS...) { }
     template<class... PRS> UnknownError(PRS...) { }
     F raw() const;
     typename F::PrecisionType precision() const;
@@ -76,12 +85,12 @@ using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< . \in
 //! \relates TaylorModel
 //! \name Template shorthands and type synonyms for Taylor models
 template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< Alias
-template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,Bounds<F>>; //!< Alias
+template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,UpperInterval<F>>; //!< Alias
 template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< Alias
 using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< Alias
 using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< Alias
-using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPBounds>; //!< Alias
-using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPBounds>; //!< Alias
+using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPUpperInterval>; //!< Alias
+using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPUpperInterval>; //!< Alias
 using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< Alias
 using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< Alias
 //@}
@@ -96,23 +105,37 @@ class IntersectionException : public std::runtime_error {
 };
 
 template<class P, class F> struct ModelNumericTraits;
-template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>> {
-    typedef Bounds<F> CoefficientType; typedef Error<F> ErrorType;
-    typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
-    typedef Bounds<F> NumericType; typedef F RawFloatType; };
-template<class F> struct ModelNumericTraits<ValidatedTag,F> {
-    typedef Value<F> CoefficientType; typedef Error<F> ErrorType;
-    typedef PositiveUpperBound<F> NormType; typedef Interval<UpperBound<F>> RangeType;
-    typedef Bounds<F> NumericType; typedef F RawFloatType; };
-template<class F> struct ModelNumericTraits<ApproximateTag,F> {
-    typedef Approximation<F> CoefficientType; typedef UnknownError<F> ErrorType;
-    typedef PositiveApproximation<F> NormType; typedef Interval<Approximation<F>> RangeType;
-    typedef Approximation<F> NumericType; typedef F RawFloatType; };
+template<class F> struct ModelNumericTraits<ValidatedTag,Interval<UpperBound<F>>>
+    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+{
+    typedef Interval<UpperBound<F>> CoefficientType;
+    typedef Interval<UpperBound<F>> NumericType;
+//    typedef Bounds<F> NumericType;
+    typedef F RawFloatType;
+};
+template<class F> struct ModelNumericTraits<ValidatedTag,Bounds<F>>
+    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+{
+    typedef Bounds<F> CoefficientType;
+    typedef Bounds<F> NumericType;
+    typedef F RawFloatType;
+};
+template<class F> struct ModelNumericTraits<ValidatedTag,F>
+    : public FunctionModelTraits<ValidatedTag,PrecisionType<F>>
+{
+    typedef Value<F> CoefficientType;
+};
+template<class F> struct ModelNumericTraits<ApproximateTag,F>
+    : public FunctionModelTraits<ApproximateTag,PrecisionType<F>>
+{
+    typedef Approximation<F> CoefficientType;
+};
 
-template<class P, class F> using ModelNumericType = typename FunctionModelTraits<P,typename F::PrecisionType>::NumericType;
+template<class P, class F> using ModelNumericType = typename ModelNumericTraits<P,F>::NumericType;
 
 
 template<class P, class F> struct ModelNumericTypedef;
+template<class F> struct ModelNumericTypedef<ValidatedTag,UpperInterval<F>> { typedef UpperInterval<F> Type; };
 template<class F> struct ModelNumericTypedef<ValidatedTag,F> { typedef FloatBounds<typename F::PrecisionType> Type; };
 template<class F> struct ModelNumericTypedef<ApproximateTag,F> { typedef FloatApproximation<typename F::PrecisionType> Type; };
 
@@ -150,8 +173,8 @@ template<class P, class F> class TaylorModel;
  */
 template<class P, class F>
 class TaylorModel
-    : public DispatchElementaryAlgebraOperations<TaylorModel<P,F>,CanonicalNumericType<P,typename F::PrecisionType>>
-    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<P,F>,CanonicalNumericType<P,typename F::PrecisionType>,Number<P>>
+    : public DispatchElementaryAlgebraOperations<TaylorModel<P,F>,typename ModelNumericTraits<P,F>::NumericType>
+    , public DispatchConcreteGenericAlgebraNumberOperations<TaylorModel<P,F>,typename ModelNumericTraits<P,F>::NumericType,Number<P>>
 {
     typedef typename F::PrecisionType PR;
     typedef typename F::PrecisionType PRE;
@@ -162,6 +185,7 @@ class TaylorModel
 
     typedef typename ModelNumericTraits<P,F>::RawFloatType RawFloatType;
     typedef typename ModelNumericTraits<P,F>::CoefficientType CoefficientType;
+    typedef typename ModelNumericTraits<P,F>::ValueType ValueType;
     typedef typename ModelNumericTraits<P,F>::ErrorType ErrorType;
     typedef typename ModelNumericTraits<P,F>::NormType NormType;
     typedef ReverseLexicographicIndexLess ComparisonType;
@@ -185,6 +209,7 @@ class TaylorModel
     typedef typename ModelNumericTraits<P,F>::NumericType NumericType;
     typedef Number<P> GenericNumericType;
 
+    typedef Interval<FloatUpperBound<PR>> IntervalNumericType;
     typedef FloatBounds<PR> ValidatedNumericType;
     typedef FloatApproximation<PR> ApproximateNumericType;
 
@@ -196,8 +221,6 @@ class TaylorModel
 
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
-    //! \brief The type used for the coefficients.
-    typedef CoefficientType ValueType;
 
     //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
     typedef typename ExpansionType::Iterator Iterator;
@@ -247,11 +270,9 @@ class TaylorModel
     static TaylorModel<P,F> zero(SizeType as, SweeperType swp) {
         TaylorModel<P,F> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<P,F> constant(SizeType as, const NumericType& c, SweeperType swp) {
-        TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
+    static TaylorModel<P,F> constant(SizeType as, const NumericType& c, SweeperType swp);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<P,F> constant(SizeType as, const GenericNumericType& c, SweeperType swp) {
-        TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r; }
+    static TaylorModel<P,F> constant(SizeType as, const GenericNumericType& c, SweeperType swp);
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<P,F> coordinate(SizeType as, SizeType j, SweeperType swp) {
         TaylorModel<P,F> r(as,swp); r.set_gradient(j,1); return r; }
@@ -271,7 +292,7 @@ class TaylorModel
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorModel<P,F>> zeros(SizeType rs, SizeType as, SweeperType swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel<P,F>> constants(SizeType as, const Vector<ValidatedNumericType>& c, SweeperType swp);
+    static Vector<TaylorModel<P,F>> constants(SizeType as, const Vector<NumericType>& c, SweeperType swp);
     //! \brief Return the vector of variables on the unit domain.
     static Vector<TaylorModel<P,F>> coordinates(SizeType as, SweeperType swp);
 
@@ -311,14 +332,14 @@ class TaylorModel
     ErrorType& error() { return this->_error; }
 
     //! \brief The constant term in the expansion.
-    const CoefficientType& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
-    //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
-    const CoefficientType& gradient_value(SizeType j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
-    Covector<CoefficientType> gradient_value() const { Covector<CoefficientType> r(this->argument_size());
-        for(SizeType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
+    const ValueType value() const { return this->average(); }
+//    //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
+//    const ValueType gradient_value(SizeType j) const ;//{ return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+//    Covector<ValueType> gradient_value() const { Covector<ValueType> r(this->argument_size());
+//        for(SizeType j=0; j!=this->argument_size(); ++j) { r[j]=this->gradient_value(j); } return r; }
 
     //! \brief The constant term in the expansion.
-    CoefficientType average() const;
+    ValueType average() const;
     //! \brief The radius of the smallest ball about a constant function containing the model.
     NormType radius() const;
     //! \brief An over-approximation to the supremum norm.
@@ -377,15 +398,17 @@ class TaylorModel
     RangeType range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ApproximateNumericType evaluate(const TaylorModel<P,F>& f, const Vector<ApproximateNumericType>& x) {
+    friend ArithmeticType<CoefficientType,ApproximateNumericType> evaluate(const TaylorModel<P,F>& f, const Vector<ApproximateNumericType>& x) {
         return TaylorModel<P,F>::_evaluate(f,x); }
-    friend NumericType evaluate(const TaylorModel<P,F>& f, const Vector<ValidatedNumericType>& x) {
+    friend ArithmeticType<CoefficientType,ValidatedNumericType> evaluate(const TaylorModel<P,F>& f, const Vector<ValidatedNumericType>& x) {
+        return TaylorModel<P,F>::_evaluate(f,x); }
+    template<class X=NumericType, DisableIf<IsSame<X,ValidatedNumericType>> =dummy> friend ArithmeticType<CoefficientType,ValidatedNumericType> evaluate(const TaylorModel<P,F>& f, const Vector<X>& x) {
         return TaylorModel<P,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
     friend Covector<NumericType> gradient(const TaylorModel<P,F>& f, const Vector<NumericType>& x) {
         return TaylorModel<P,F>::_gradient(f,x); }
     //! \brief Substite \a c for the \a k th variable.
-    friend TaylorModel<P,F> partial_evaluate(const TaylorModel<P,F>& x, SizeType k, ValidatedNumericType c) {
+    friend TaylorModel<P,F> partial_evaluate(const TaylorModel<P,F>& x, SizeType k, NumericType c) {
         return TaylorModel<P,F>::_partial_evaluate(x,k,c); }
     //! \relates TaylorModel<P,F Compose a vector of Taylor models with another.
     friend TaylorModel<P,F> compose(const Unscaling& uf, const TaylorModel<P,F>& tg) {
@@ -397,7 +420,7 @@ class TaylorModel
     friend TaylorModel<P,F> compose(const TaylorModel<P,F>& tf, const VectorUnscaling& u);
 
     friend TaylorModel<P,F> evaluate(const TaylorModel<P,F>& f, const Vector<TaylorModel<P,F>>& g) { return compose(f,g); }
-    template<class A> ArithmeticType<A,FloatValue<PR>> operator() (Vector<A> const&) const;
+    template<class A> ArithmeticType<CoefficientType,A> operator() (Vector<A> const&) const;
     //@}
 
     //@{
@@ -533,12 +556,13 @@ class TaylorModel
     static TaylorModel<P,F> _compose(TaylorModel<P,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<P,F>>& tg);
     static TaylorModel<P,F> _partial_evaluate(const TaylorModel<P,F>& x, SizeType k, NumericType c);
     static Covector<X> _gradient(const TaylorModel<P,F>& x, Vector<X> const& v);
-    static NumericType _evaluate(const TaylorModel<P,F>& x, Vector<ValidatedNumericType> const& v);
-    static ApproximateNumericType _evaluate(const TaylorModel<P,F>& x, Vector<ApproximateNumericType> const& v);
+    static ArithmeticType<CoefficientType,IntervalNumericType> _evaluate(const TaylorModel<P,F>& x, Vector<IntervalNumericType> const& v);
+    static ArithmeticType<CoefficientType,ValidatedNumericType> _evaluate(const TaylorModel<P,F>& x, Vector<ValidatedNumericType> const& v);
+    static ArithmeticType<CoefficientType,ApproximateNumericType> _evaluate(const TaylorModel<P,F>& x, Vector<ApproximateNumericType> const& v);
 };
 
 // FIXME: Needed to dispatch gradient of ScaledFunctionPatch
-template<class P, class F> template<class A> auto TaylorModel<P,F>::operator() (Vector<A> const& x) const -> ArithmeticType<A,FloatValue<PR>> {
+template<class P, class F> template<class A> auto TaylorModel<P,F>::operator() (Vector<A> const& x) const -> ArithmeticType<CoefficientType,A> {
     return horner_evaluate(this->expansion(),x)+FloatBounds<typename F::PrecisionType>(-this->error(),+this->error());
 }
 
@@ -567,10 +591,10 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> refinement(const Vector<Ta
 
 
 
-template<class F> Vector<FloatBounds<PrecisionType<F>>> evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, const Vector<FloatBounds<PrecisionType<F>>>& x) {
-    Vector<FloatBounds<PrecisionType<F>>> r(tf.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
-    return r;
+template<class P, class F, class X> decltype(auto) evaluate(const Vector<TaylorModel<P,F>>& tf, const Vector<X>& x)
+{
+    typedef decltype(evaluate(tf[0],x)) R;
+    return Vector<R>(tf.size(),[&](SizeType i){return evaluate(tf[i],x);});
 }
 
 template<class F> Vector<TaylorModel<ValidatedTag,F>> partial_evaluate(const Vector<TaylorModel<ValidatedTag,F>>& tf, SizeType k, const FloatBounds<PrecisionType<F>>& c) {

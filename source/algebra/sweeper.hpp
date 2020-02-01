@@ -54,6 +54,7 @@ template<class F> class SweeperInterface {
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline PR precision() const { return this->_precision(); }
   private:
     virtual SweeperInterface* _clone() const = 0;
@@ -61,6 +62,7 @@ template<class F> class SweeperInterface {
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
 };
@@ -93,6 +95,8 @@ template<class F> class Sweeper {
     inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p, UnknownError<F>&) const { this->_ptr->_sweep(p); }
+    //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
+    inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;
@@ -105,6 +109,7 @@ template<class F> class SweeperBase
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
     virtual Bool _discard(const MultiIndex& a, const F& x) const = 0;
 };
 
@@ -144,6 +149,7 @@ template<class F> class RelativeSweeperBase
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
     virtual Bool _discard(const F& x, const F& nrm) const = 0;
 };
 

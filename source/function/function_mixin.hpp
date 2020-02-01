@@ -40,6 +40,8 @@ typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 typedef TaylorModel<ApproximateTag,FloatMP> ApproximateTaylorModelMP;
 typedef TaylorModel<ValidatedTag,FloatMP> ValidatedTaylorModelMP;
 
+typedef TaylorModel<ValidatedTag,FloatDPUpperInterval> ValidatedIntervalTaylorModelDP;
+
 typedef Formula<ApproximateNumber> ApproximateFormula;
 typedef Formula<ValidatedNumber> ValidatedFormula;
 typedef Formula<EffectiveNumber> EffectiveFormula;
@@ -129,6 +131,8 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const override;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
     virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const override;
 

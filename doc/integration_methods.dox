@@ -222,12 +222,12 @@ If \f$f(t,x,V)\f$ is everywhere convex, then we can find a measurable \f$\nu:[0,
 
 For simplicity, we henceforth take \f$f(t,x,V)\f$ everywhere convex.
 
-We say an interval Taylor model
-\f[ \hat{\Phi}(x,t) = \sum_{\alpha,k} \hat{C}_{\alpha,k} x^\alpha t^k \f]
+We say an <em>interval Taylor model</em> (see \ref interval_taylor_models for more details)
+\f[ \hat{\Phi}(x,t) = \sum_{\alpha,k} \widehat{C}_{\alpha,k} x^\alpha t^k \f]
 over-approximates the set of solutions of the differential inclusion if
 \f[ \forall \text{ solutions } \xi \text{ of } \der{x}(t)\in F(x(t)), \ \xi \in \hat{\Phi} . \f]
-In other words, there are functions \f$\gamma_{\alpha_k}:[0,h]\to \hat{C}_{\alpha,k} \f$ such that
-\f[ \xi(t) = \sum_{\alpha,k} \gamma_{\alpha,k}(t) \xi(0)^\alpha t^k . \f]
+In other words,
+\f[ \forall \text{ solutions } \xi \text{ of } \der{x}(t)\in F(x(t)), \ \exists \text{ functions } \gamma_{\alpha,k}:[0,h]\to \widehat{C}_{\alpha,k},\  \xi(t) = \sum_{\alpha,k} \gamma_{\alpha,k}(t) \xi(0)^\alpha t^k . \f]
 
 Now suppose \f$\hat{\Phi}\f$ over-approximates the set of solutions.
 Then we claim that
@@ -238,7 +238,7 @@ For if \f$\xi\f$ is a solution with \f$\der{\xi}(t) = f(\xi(t),\nu(t)) \text{ a.
 \f$\xi(t)-\xi(0) \in \int_0^t f(\hat{\Phi}(\xi(0),\tau),V)\,d\tau\f$.
 
 This gives rise to the iterative Picard method for solving differential inclusions, by taking an initial
-\f$\hat{\Phi}_0(x,t) = \hat{B}\f$, where \f$\hat{B}\f$ is a box containing the solution over a time interval \f$[0\!:\!h]\f$.
+\f$\hat{\Phi}_0(x,t) = \hat{B}_0\f$, where \f$\hat{B}_0\f$ is a box containing all solutions over a time interval \f$[0\!:\!h]\f$.
 
 
 

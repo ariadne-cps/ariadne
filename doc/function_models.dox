@@ -36,10 +36,12 @@ A \em validated model describes a set of possibilities for \f$f\f$, such as a ba
 A particularly useful approach is to first \em scale or otherwise perform a mapping of \f$D\f$ to a canonical domain, typically \f$[-1\!:\!+1]^n\f$, though for Fourier approximations we may prefer variables in \f$[-\pi\!:\!+\pi]\f$.
 We shall henceforth assume that our function models are defined on a rescaled domain.
 
+For more information on Taylor (polynomial) models, see Berz & Hoffstätter (1998) and Makino & Berz (1999).
 
 \section polynomial_models Polynomial Models
 
 A polynomial model represent represents a function \f$f\f$ on \f$X\f$ by in terms of a polynomial over \f$D\f$.
+
 
 We recall that a polynomial \f$p\f$ in \f$n\f$ variables \f$(x_1,\ldots,x_n)\f$ can be written as
 \f[ p(x) = \sum_{\alpha\in \aleph} c_{\alpha}\,x^{\alpha} . \f]
@@ -161,9 +163,37 @@ When working on the unit domain, \f$\|z^\alpha\|=1\f$ for all \f$\alpha\f$, so w
 Other model classes can be constructed from these basic building blocks.
 For example, we could consider models which are explicitly represented as a composition, or as a sum of other model classes.
 
+\subsection taylor_model_efficiency_and_accuracy Efficiency and accuracy considerations
 
-For more information on Taylor (polynomial) models, see Berz & Hoffstätter (1998) and Makino & Berz (1999).
+Consider the approximation of an analytic function \f$f:\mathbb{R}\to\mathbb{R}\f$.
+Assume that the Taylor series of \f$f\f$ at \f$0\f$ has coefficients \f$c_k\f$ and radius of convergence \f$R\f$.
 
+Suppose we with to represent \f$f\f$ over the interval \f$[-h\!:\!+h]\f$ by a Taylor model with sweep threshold \f$\theta\f$.
+We are interested in the balance between the choice of \f$h\f$ and \f$\theta\f$, the accuracy of the approximation, and the number of terms used.
+
+Since \f$R=\limsup_{k\to\infty} |c_k|^{1/k}\f$, there exists a constant \f$C\f$ such that \f$|c_k|\leq C/R^k\f$.
+Since we are working on \f$[-h\!:\!+h]\f$, scaling to the unit interval gives \f$f(z)=\sum_{k=0}^\infty c_k h^k z_k\f$ for \f$z\in[-1\!:\!+1]\f$.
+If \f$C h^k/R^k \leq \theta\f$, which occurs when \f$k\geq \log(\theta/C)/\log(h/R) = M\f$ (note that we require \f$h<R\f$, and we should therefore choose \f$\theta<C\f$), we discard the \f$k\f$th term.
+These terms have sum bounded by \f$C (h/R)^M /(1-h/R) = \theta /(1-h/R)\f$.
+The remaining \f$M\f$ coefficients \f$c_k h^k\f$ could also be less than \f$\theta\f$.
+If \f$N\f$ of these are keps, the additional extra error is \f$(M-N)\theta=\theta (\log(\theta/C)/\log(h/R)-N)\f$.
+Hence an over-approximation to the total error is
+\f[ \varepsilon = \theta \Bigl( M - N + \frac{1}{1-h/R} \Bigr)\theta \Bigl( (1-\nu) \frac{\log(\theta/C)}{\log(h/R)}  + \frac{1}{1-h/R} \Bigr). \f]
+Clearly, this decreases as \f$\theta\f$ decreases, but is non-monotone in \f$h\f$: for \f$h\to\R\f$, the Taylor expansion converges too slowly, but for \f$h\to 0\f$, all but the constant term decrease below the sweep threshold.
+
+The accuracy considerations need to be balanced by the effort needed to compute with the approximations.
+We need \f$\Theta(1/h)\f$ pieces of width \f$2h\f$ to cover a given interval, so we should divide \f$\varepsilon\f$ by \f$h\f$.
+The effort \f$\sigma(N)\f$ needed to store and work with \f$N\f$ terms also needs to be considered; realistic choices are \f$O(N)\f$, \f$O(N\log N)\f$ and \f$O(N^2)\f$.
+
+Assume \f$N\approx \nu M\f$ for some constant \f$\nu\in[0,1]\f$ i.e. a fraction \f$1-\nu\f$ of low-order terms are small, and are swept away.
+Denoting the total work by \f$\mu=\sigma(N)/h\f$ gives
+\f[ \varepsilon \times \mu = \frac{\theta \sigma(N)}{h} \Bigl( (1-\nu)M + \frac{1}{1-h/R} \Bigr) \f]
+
+If we assume \f$\sigma(N)=N\f$, then
+\f[ \varepsilon \times \mu = \nu \frac{\theta}{h} \frac{\log(\theta/C)}{\log(h/R)} \Bigr((1-\nu)\frac{\log(\theta/C)}{\log(h/R)}+\frac{1}{1-h/R} \Bigr) \f]
+For \f$\nu=1\f$ (i.e. all terms with a small degree are kept), this seems to indicates a sweep threshold of around \f$\theta = C/\mathrm{e}\approx0.37C\f$ should be used, and \f$h\approx 0.24 R\f$.
+
+If we were to take \f$\sigma(N)=N^2\f$, then we would expect to prefer a lower sweep threshould and more subintervals.
 
 \section affine_models Affine Models
 

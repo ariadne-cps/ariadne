@@ -84,7 +84,7 @@ operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
 }
 
 
-template<> FloatDPUpperInterval FloatUpperIntervalFactory<DoublePrecision>::create(ValidatedNumber const& y) const {
+template<> FloatDPUpperInterval UpperIntervalFactory<FloatDP>::create(ValidatedNumber const& y) const {
     return FloatDPUpperInterval(FloatDPBounds(y,this->_precision)); }
 
 FloatDPBounds cast_singleton(FloatDPUpperInterval const& ivl) {
@@ -119,6 +119,9 @@ FloatDPUpperInterval mul(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval 
     return make_interval(mul(cast_singleton(ivl1),cast_singleton(ivl2))); }
 FloatDPUpperInterval div(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return make_interval(div(cast_singleton(ivl1),cast_singleton(ivl2))); }
+
+FloatDPUpperInterval fma(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2, FloatDPUpperInterval ivl3) {
+    return make_interval(fma(cast_singleton(ivl1),cast_singleton(ivl2),cast_singleton(ivl3))); }
 
 FloatDPUpperInterval pow(FloatDPUpperInterval const& ivl, Nat m) {
     return make_interval(pow(cast_singleton(ivl),m)); }
@@ -156,12 +159,88 @@ ValidatedKleenean eq(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval cons
 ValidatedKleenean lt(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
+
 FloatMPBounds cast_singleton(FloatMPUpperInterval const& ivl) {
     return FloatMPBounds(ivl.lower(),ivl.upper()); }
 FloatMPUpperInterval make_interval(FloatMPBounds const& x) {
     return FloatMPUpperInterval(x.lower(),x.upper()); }
+
+template<> FloatMPUpperInterval UpperIntervalFactory<FloatMP>::create(ValidatedNumber const& y) const {
+    return FloatMPUpperInterval(FloatMPBounds(y,this->_precision)); }
+
+FloatMPUpperInterval max(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(max(cast_singleton(ivl1),cast_singleton(ivl2))); }
+FloatMPUpperInterval min(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(min(cast_singleton(ivl1),cast_singleton(ivl2))); }
+FloatMPUpperInterval abs(FloatMPUpperInterval const& ivl) {
+    return make_interval(abs(cast_singleton(ivl))); }
+FloatMPUpperInterval nul(FloatMPUpperInterval const& ivl) {
+    return make_interval(nul(cast_singleton(ivl))); }
+FloatMPUpperInterval pos(FloatMPUpperInterval const& ivl) {
+    return make_interval(pos(cast_singleton(ivl))); }
+FloatMPUpperInterval neg(FloatMPUpperInterval const& ivl) {
+    return make_interval(neg(cast_singleton(ivl))); }
+FloatMPUpperInterval sqr(FloatMPUpperInterval const& ivl) {
+    return make_interval(sqr(cast_singleton(ivl))); }
+FloatMPUpperInterval hlf(FloatMPUpperInterval const& ivl) {
+    return make_interval(hlf(cast_singleton(ivl))); }
+FloatMPUpperInterval rec(FloatMPUpperInterval const& ivl) {
+    return make_interval(rec(cast_singleton(ivl))); }
+
+FloatMPUpperInterval add(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(add(cast_singleton(ivl1),cast_singleton(ivl2))); }
+FloatMPUpperInterval sub(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(sub(cast_singleton(ivl1),cast_singleton(ivl2))); }
+FloatMPUpperInterval mul(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(mul(cast_singleton(ivl1),cast_singleton(ivl2))); }
+FloatMPUpperInterval div(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return make_interval(div(cast_singleton(ivl1),cast_singleton(ivl2))); }
+
+FloatMPUpperInterval fma(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2, FloatMPUpperInterval ivl3) {
+    return make_interval(fma(cast_singleton(ivl1),cast_singleton(ivl2),cast_singleton(ivl3))); }
+
+FloatMPUpperInterval pow(FloatMPUpperInterval const& ivl, Nat m) {
+    return make_interval(pow(cast_singleton(ivl),m)); }
+FloatMPUpperInterval pow(FloatMPUpperInterval const& ivl, Int n) {
+    return make_interval(pow(cast_singleton(ivl),n)); }
+
+FloatMPUpperInterval sqrt(FloatMPUpperInterval const& ivl) {
+    // Defining sqrt(I)=hull{x:x^2 in I}, if I=[a,b] with b>=0, then sqrt(I)=[-sqrt(b),+sqrt(b)]
+    if(ivl.upper().raw()<0) { return FloatMPUpperInterval::empty_interval(); }
+    else { FloatMP u=sqrt(up,ivl.upper().raw()); return FloatMPUpperInterval(-u,+u); } }
+FloatMPUpperInterval exp(FloatMPUpperInterval const& ivl) {
+    return make_interval(exp(cast_singleton(ivl))); }
+FloatMPUpperInterval log(FloatMPUpperInterval const& ivl) {
+    auto pr=ivl.upper().precision();
+    if(ivl.upper().raw()<=0) { return FloatMPUpperInterval::empty_interval(); }
+    else if(ivl.lower().raw()<=0) { return FloatMPUpperInterval(FloatMP::inf(Sign::NEGATIVE,pr),log(up,ivl.upper().raw())); }
+    else { return make_interval(log(cast_singleton(ivl))); } }
+FloatMPUpperInterval sin(FloatMPUpperInterval const& ivl) {
+    return make_interval(sin(cast_singleton(ivl))); }
+FloatMPUpperInterval cos(FloatMPUpperInterval const& ivl) {
+    return make_interval(cos(cast_singleton(ivl))); }
+FloatMPUpperInterval tan(FloatMPUpperInterval const& ivl) {
+    return make_interval(tan(cast_singleton(ivl))); }
+FloatMPUpperInterval asin(FloatMPUpperInterval const& ivl) {
+    return make_interval(asin(cast_singleton(ivl))); }
+FloatMPUpperInterval acos(FloatMPUpperInterval const& ivl) {
+    return make_interval(acos(cast_singleton(ivl))); }
+FloatMPUpperInterval atan(FloatMPUpperInterval const& ivl) {
+    return make_interval(atan(cast_singleton(ivl))); }
+
 FloatMPError mag(FloatMPUpperInterval const& ivl) {
     return mag(cast_singleton(ivl)); }
+
+ValidatedKleenean eq(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return eq(cast_singleton(ivl1),cast_singleton(ivl2)); }
+ValidatedKleenean lt(FloatMPUpperInterval const& ivl1, FloatMPUpperInterval const& ivl2) {
+    return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
+
+
+ApproximateKleenean eq(FloatDPApproximateInterval const& ivl1, FloatDPApproximateInterval const& ivl2) {
+    return ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper(); }
+ApproximateKleenean eq(FloatMPApproximateInterval const& ivl1, FloatMPApproximateInterval const& ivl2) {
+    return ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper(); }
 
 template<> String class_name<FloatDPUpperInterval>() { return "FloatDPUpperInterval"; }
 template<> String class_name<FloatMPUpperInterval>() { return "FloatMPUpperInterval"; }

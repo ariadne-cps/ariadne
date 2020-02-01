@@ -54,20 +54,26 @@ template class Differential<FloatDPUpperInterval>;
 template struct AlgebraOperations<Differential<FloatDP>>;
 template struct AlgebraOperations<Differential<FloatDPApproximation>>;
 template struct AlgebraOperations<Differential<FloatDPBounds>>;
+template struct AlgebraOperations<Differential<FloatDPUpperInterval>>;
 template class GradedAlgebraOperations<Differential<FloatDP>>;
 template class GradedAlgebraOperations<Differential<FloatDPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatDPBounds>>;
+template class GradedAlgebraOperations<Differential<FloatDPUpperInterval>>;
 
 template class Vector<Differential<FloatDP>>;
 template class Vector<Differential<FloatDPBounds>>;
 template class Vector<Differential<FloatDPApproximation>>;
+template class Vector<Differential<FloatDPUpperInterval>>;
 
 template class Differential<FloatMPBounds>;
 template class Differential<FloatMPApproximation>;
+template class Differential<FloatMPUpperInterval>;
 template struct AlgebraOperations<Differential<FloatMPApproximation>>;
 template struct AlgebraOperations<Differential<FloatMPBounds>>;
+template struct AlgebraOperations<Differential<FloatMPUpperInterval>>;
 template class GradedAlgebraOperations<Differential<FloatMPApproximation>>;
 template class GradedAlgebraOperations<Differential<FloatMPBounds>>;
+template class GradedAlgebraOperations<Differential<FloatMPUpperInterval>>;
 
 template class Vector<Differential<FloatMPBounds>>;
 template class Vector<Differential<FloatMPApproximation>>;

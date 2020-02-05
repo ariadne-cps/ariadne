@@ -553,13 +553,43 @@ void export_dyadic_bounds(pymodule& module)
 {
     pybind11::class_<DyadicBounds> dyadic_bounds_class(module,"DyadicBounds");
     dyadic_bounds_class.def(init<DyadicBounds>());
+    dyadic_bounds_class.def(init<Dyadic>());
     dyadic_bounds_class.def(init<Dyadic,Dyadic>());
     dyadic_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<DyadicBounds>(pydct);}));
+    implicitly_convertible<int,DyadicBounds>();
+    implicitly_convertible<Dyadic,DyadicBounds>();
     implicitly_convertible<pybind11::dict,DyadicBounds>();
+    dyadic_bounds_class.def("lower", &DyadicBounds::lower);
+    dyadic_bounds_class.def("upper", &DyadicBounds::upper);
+
+    define_arithmetic(module,dyadic_bounds_class);
+    define_lattice(module,dyadic_bounds_class);
+    dyadic_bounds_class.def("hlf", &_hlf_<DyadicBounds>);
 
     dyadic_bounds_class.def("__str__", &__cstr__<DyadicBounds>);
     dyadic_bounds_class.def("__repr__", &__cstr__<DyadicBounds>);
+}
 
+void export_rational_bounds(pymodule& module)
+{
+    pybind11::class_<RationalBounds> rational_bounds_class(module,"RationalBounds");
+    rational_bounds_class.def(init<RationalBounds>());
+    rational_bounds_class.def(init<Rational>());
+    rational_bounds_class.def(init<Rational,Rational>());
+    rational_bounds_class.def(init<DyadicBounds>());
+    rational_bounds_class.def(pybind11::init([](pybind11::dict pydct){return bounds_from_dict<RationalBounds>(pydct);}));
+    implicitly_convertible<int,RationalBounds>();
+    implicitly_convertible<Rational,RationalBounds>();
+    implicitly_convertible<pybind11::dict,RationalBounds>();
+    rational_bounds_class.def("lower", &RationalBounds::lower);
+    rational_bounds_class.def("upper", &RationalBounds::upper);
+
+    define_arithmetic(module,rational_bounds_class);
+    define_lattice(module,rational_bounds_class);
+    rational_bounds_class.def("rec", &_rec_<RationalBounds>);
+
+    rational_bounds_class.def("__str__", &__cstr__<RationalBounds>);
+    rational_bounds_class.def("__repr__", &__cstr__<RationalBounds>);
 }
 
 
@@ -1096,6 +1126,7 @@ Void numeric_submodule(pymodule& module) {
     export_real(module);
 
     export_dyadic_bounds(module);
+    export_rational_bounds(module);
 
     export_numbers(module);
 

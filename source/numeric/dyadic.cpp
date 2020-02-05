@@ -428,4 +428,11 @@ Dyadic hlf(Integer const& n) {
     return hlf(Dyadic(n));
 }
 
+struct RoundExact { };
+inline RoundExact opposite(RoundExact) { return RoundExact(); }
+template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
+
+template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
+
+
 } // namespace Ariadne

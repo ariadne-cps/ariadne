@@ -195,11 +195,18 @@ template<> class Bounds<Dyadic> {
     Dyadic upper() const { return _u; }
     Dyadic lower_raw() const { return _l; }
     Dyadic upper_raw() const { return _u; }
-    friend Bounds<Dyadic> add(DyadicBounds const& w1, DyadicBounds& w2) { return DyadicBounds(w1._l+w2._l,w1._u+w2._u); }
-    friend Bounds<Dyadic> sub(DyadicBounds const& w1, DyadicBounds& w2) { return DyadicBounds(w1._l-w2._u,w1._u-w2._l); }
+    friend Bounds<Dyadic> operator+(DyadicBounds const& w) { return DyadicBounds(+w._l,w._u); }
+    friend Bounds<Dyadic> operator-(DyadicBounds const& w) { return DyadicBounds(-w._u,-w._l); }
+    friend Bounds<Dyadic> operator+(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(w1._l+w2._l,w1._u+w2._u); }
+    friend Bounds<Dyadic> operator-(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(w1._l-w2._u,w1._u-w2._l); }
+    friend Bounds<Dyadic> operator*(DyadicBounds const& w1, DyadicBounds const& w2);
+    friend Bounds<Dyadic> hlf(DyadicBounds const& w) { return DyadicBounds(hlf(w._l),hlf(w._u)); }
     friend DyadicBounds abs(DyadicBounds const& w) { return DyadicBounds(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
+    friend DyadicBounds max(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),max(w1._u,w2._u)); }
+    friend DyadicBounds min(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(min(w1._l,w2._l),min(w1._u,w2._u)); }
     friend ValidatedKleenean operator<(DyadicBounds const& w1, DyadicBounds const& w2) {
         if (w1._u<w2._l) { return true; } else if (w1._l >= w2._u) { return false; } else { return indeterminate; } }
+    friend Boolean refines(DyadicBounds const& w1, DyadicBounds const& w2) { return w1._l>=w2._l and w1._u<=w2._u; }
     friend DyadicBounds refinement(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),min(w1._u,w2._u)); }
     friend OutputStream& operator<<(OutputStream& os, DyadicBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
 };
@@ -220,13 +227,15 @@ template<> class Ball<Dyadic,Dyadic> {
     Dyadic error() const { return _e; }
     Dyadic value_raw() const { return _v; }
     Dyadic error_raw() const { return _e; }
-    friend DyadicBall add(DyadicBall const& w1, DyadicBall& w2) { return DyadicBall(w1._v+w2._v,w1._e+w2._e); }
-    friend DyadicBall sub(DyadicBall const& w1, DyadicBall& w2) { return DyadicBall(w1._v-w2._e,w1._e+w2._v); }
+    friend DyadicBall operator+(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(w1._v+w2._v,w1._e+w2._e); }
+    friend DyadicBall operator-(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(w1._v-w2._v,w1._e+w2._e); }
+    friend DyadicBall operator*(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(w1._v*w2._v,abs(w1._v)*w2._e+w1._e*abs(w2._v)+w1._e*w2._e); }
     friend DyadicBall abs(DyadicBall const& w) {
         if (abs(w._v)>=w._e) { return DyadicBall(abs(w._v),w._e); } else { Dyadic av=hlf(max(w._e-w._v,w._v+w._e)); return DyadicBall(av,av); } }
     friend ValidatedKleenean operator<(DyadicBall const& w1, DyadicBall const& w2) {
         if (w1._v+w1._e<w2._v-w2._e) { return true; } else if (w1._v-w1._e >= w2._v+w2._e) { return false; } else { return indeterminate; } }
-    friend DyadicBall refinement(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(max(w1._v,w2._v),min(w1._e,w2._e)); }
+    friend Boolean refines(DyadicBall const& w1, DyadicBall const& w2) { return abs(w1._v-w2._v)+w1._e <= w2._e; }
+    friend DyadicBall refinement(DyadicBall const& w1, DyadicBall const& w2) { return DyadicBall(refinement(DyadicBounds(w1),DyadicBounds(w2))); }
     friend OutputStream& operator<<(OutputStream& os, DyadicBall y) { return os << "[" << y._v << ":" << y._e << "]"; }
 };
 

@@ -112,11 +112,7 @@ template<class F> PositiveUpperBound<F> psi1(PositiveUpperBound<F> const& xu) {
     return cast_positive(xu*exp(xu)+1u-(exp(xl)+sqr(xl)/2u))/pow(xl,3u);
 }
 
-
-template<class E=ErrorType>
 struct ErrorConstants {
-    typedef E ErrorType;
-    typedef decltype(-(-declval<ErrorType>())) UpperBoundType;
     ErrorType K; // K
     Vector<ErrorType> Kj; // K[j]
     ErrorType pK; // K'
@@ -141,24 +137,24 @@ struct ErrorConstants {
     Vector<ErrorType> pHj; // H'[j]
     Vector<ErrorType> pHjv; // H'v[j]
     Vector<ErrorType> pHjw; // H'w[j]
-    UpperBoundType Lambda; // Lambda
+    FloatDPUpperBound Lambda; // Lambda
     ErrorType expLambda; // e^(Lambda*h - 1) / (Lambda*h)
     ErrorType expL; // e^(L*h)
 
-    ErrorConstants<>(ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&,
+    ErrorConstants(ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&,
                    ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&,
                    ErrorType const&, Vector<ErrorType> const&, ErrorType const&, ErrorType const&, ErrorType const&, Vector<ErrorType> const&, Vector<ErrorType> const&, Vector<ErrorType> const&, FloatDPUpperBound const&, ErrorType const&, ErrorType const&);
     Tuple<ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
           ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
           ErrorType,Vector<ErrorType>,ErrorType,ErrorType,ErrorType,Vector<ErrorType>,Vector<ErrorType>,Vector<ErrorType>,
-          UpperBoundType,ErrorType,ErrorType> values() const;
+            FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
 private:
     SizeType _dimension;
 };
 
-template<class E> inline std::ostream& operator << (std::ostream& os, const ErrorConstants<E>& n) {
+inline std::ostream& operator << (std::ostream& os, const ErrorConstants& n) {
     os << "K=" << n.K << ", Kj=" << n.Kj << ", K'=" << n.pK << ", K'v=" << n.pKv << ", Kw'=" << n.pKw << ", Kj'=" << n.Kj << ", K'jv=" << n.pKjv << ", K'jw=" << n.pKjw <<
           ", L=" << n.L << ", Lj=" << n.Lj << ", L'=" << n.pL << ", L'v=" << n.pLv << ", L'w=" << n.pLw << ", Lj'=" << n.pLj << ", Lj'v=" << n.pLjv << ", Lj'w=" << n.pLjw <<
           ", H=" << n.H << ", Hj=" << n.Hj << ", H'=" << n.pH << ", H'v=" << n.pHv << ", H'w=" << n.pHw << ", Hj'=" << n.pHj << ", Hj'v=" << n.pHjv << ", Hj'w=" << n.pHjw <<
@@ -166,7 +162,7 @@ template<class E> inline std::ostream& operator << (std::ostream& os, const Erro
     return os;
 }
 
-ErrorConstants<> compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
+ErrorConstants compute_constants(EffectiveVectorMultivariateFunction const&, Vector<EffectiveVectorMultivariateFunction> const&, BoxDomainType const&, PositiveFloatDPValue const&, UpperBoxType const&);
 
 struct InputApproximationInterface {
     virtual Void write(OutputStream& os) const = 0;
@@ -290,7 +286,7 @@ class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<
     EffectiveVectorMultivariateFunction const& _f;
     BoxDomainType const& _inputs;
   private:
-    Vector<ErrorType> process(ErrorConstants<> const& n, PositiveFloatDPValue const& h) const;
+    Vector<ErrorType> process(ErrorConstants const& n, PositiveFloatDPValue const& h) const;
   public:
     virtual ~ApproximationErrorProcessor() = default;
 };

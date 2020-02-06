@@ -100,7 +100,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
             UniformReference<MultiIndex> a=ac.index();
             UniformReference<FloatDPBounds> c=ac.coefficient();
             if (a.degree()==0) {
-                K_j += mag(c);
+                K_j = mag(c);
             } else if (a.degree()==1) {
                 L_j += mag(c);
                 if (a[j]==1) { Lambda_j += c.upper(); }
@@ -116,40 +116,41 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
         Hj[j] = H_j;
     }
 
-    Matrix<ErrorType> pK_matrix(m,n), pL_matrix(m,n), pH_matrix(m,n);
+    Matrix<ErrorType> pK_ij(m,n), pL_ij(m,n), pH_ij(m,n);
 
     for (auto i : range(m)) {
-        auto Dg_i=input_derivatives[i].differential(cast_singleton(B),2);
-        ErrorType Vi(abs(inputs[i]).upper());
+        auto Diff_g_i=input_derivatives[i].differential(cast_singleton(B),2);
         ErrorType pK_i=ze, pL_i=ze, pH_i=ze;
         for (auto j : range(n)) {
-            auto Dg_ij=Dg_i[j].expansion();
-            ErrorType pK_ij=ze, pL_ij=ze, pH_ij=ze;
-            for (auto ac : Dg_ij) {
+            auto Diff_g_ij=Diff_g_i[j].expansion();
+            ErrorType g_ij=ze, Dg_ij=ze, D2g_ij=ze;
+            for (auto ac : Diff_g_ij) {
                 UniformReference<MultiIndex> a=ac.index();
                 FloatDPBounds const& c=ac.coefficient();
+                auto val = mag(c);
                 if (a.degree()==0) {
-                    pK_ij += mag(c);
+                    g_ij = val;
+                    pK_ij[i][j] = val;
                 } else if (a.degree()==1) {
-                    pL_ij += mag(c);
+                    Dg_ij += val;
+                    pL_ij[i][j] = max(pL_ij[i][j],ErrorType(val));
                 } else {
                     assert(a.degree()==2);
-                    pH_ij += mag(c);
+                    D2g_ij += val;
+                    pH_ij[i][j] = max(pH_ij[i][j],ErrorType(val));
                 }
             }
-            pK_i=max(pK_i,pK_ij); pL_i=max(pL_i,pL_ij); pH_i=max(pH_i,pH_ij);
-            pK_matrix[i][j] += pK_ij; pL_matrix[i][j] += pL_ij; pH_matrix[i][j] += pH_ij;
+            pK_i=max(pK_i,g_ij); pL_i=max(pL_i,Dg_ij); pH_i=max(pH_i,D2g_ij);
         }
-
-        pK+=Vi*pK_i; pL+=Vi*pL_i; pH+=Vi*pH_i;
+        pK+=pK_i; pL+=pL_i; pH+=pH_i;
     }
 
     for (auto j : range(n)) {
-        pKj[j] = ze; pLj[j] = ze; pHj[j] = ze;
         for (auto i : range(m)) {
             ErrorType Vi(abs(inputs[i]).upper());
-            pKj[j] += Vi*pK_matrix[i][j]; pLj[j] += Vi*pL_matrix[i][j]; pHj[j] += Vi*pH_matrix[i][j];
+            pKjv[j] += Vi*pK_ij[i][j]; pLjv[j] += Vi*pL_ij[i][j]; pHjv[j] += Vi*pH_ij[i][j];
         }
+        pKv = max(pKv,pKjv[j]); pLv = max(pLv,pLjv[j]); pHv = max(pHv,pHjv[j]);
     }
 
     ErrorType expLambda = (possibly(Lambda>0)) ? ErrorType(dexp(Lambda*h)) : ErrorType(1u,pr);

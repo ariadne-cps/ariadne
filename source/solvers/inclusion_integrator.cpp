@@ -81,7 +81,7 @@ auto ErrorConstants::values() const
     return std::tie(this->K,this->Kj,this->pK,this->pKv,this->pKw,this->pKj,this->pKjv,this->pKjw,this->L,this->Lj,this->pL,this->pLv,this->pLw,this->pLj,this->pLjv,this->pLjw,this->H,this->Hj,this->pH,this->pHv,this->pHw,this->pHj,this->pHjv,this->pHjw,this->Lambda,this->expLambda,this->expL);
 }
 
-ErrorConstants
+template<class A> ErrorConstants
 compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_component, Vector<EffectiveVectorMultivariateFunction> const& input_derivatives, BoxDomainType const& inputs, PositiveFloatDPValue const& h, UpperBoxType const& B) {
 
     auto n = noise_independent_component.result_size();
@@ -148,9 +148,12 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
     for (auto j : range(n)) {
         for (auto i : range(m)) {
             ErrorType Vi(abs(inputs[i]).upper());
+            ErrorType Wi(Vi*wstar_multiplier<A>());
             pKjv[j] += Vi*pK_ij[i][j]; pLjv[j] += Vi*pL_ij[i][j]; pHjv[j] += Vi*pH_ij[i][j];
+            pKjw[j] += Wi*pK_ij[i][j]; pLjw[j] += Wi*pL_ij[i][j]; pHjw[j] += Wi*pH_ij[i][j];
         }
         pKv = max(pKv,pKjv[j]); pLv = max(pLv,pLjv[j]); pHv = max(pHv,pHjv[j]);
+        pKw = max(pKw,pKjw[j]); pLw = max(pLw,pLjw[j]); pHw = max(pHw,pHjw[j]);
     }
 
     ErrorType expLambda = (possibly(Lambda>0)) ? ErrorType(dexp(Lambda*h)) : ErrorType(1u,pr);
@@ -165,13 +168,13 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h, (n.K*2u+n.pK)*h); }
 ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return min(n.pK*n.expL*h*v, min( (n.Kj[j]*2u+n.pKj[j]*v)*h, n.pK*v*n.expLambda*h));
+    return min(n.pKv*n.expL*h*v, min( (n.Kj[j]*2u+n.pKjv[j]*v)*h, n.pKv*n.expLambda*h));
 }
 
 ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
 ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return pow(h,2u)*(n.pLj[j]*v*(n.K+v*n.pK)/2u + (n.Lj[j]+n.pLj[j])*(v+w)*n.pK*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
+    return pow(h,2u)*(n.pLjv[j]*(n.K+v*n.pKv)/2u + (n.Lj[j]+n.pLjw[j])*(n.pKv+n.pKw)*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
 template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return ((r*r+1u)*n.pL*n.pK +
@@ -192,22 +195,22 @@ template<> ErrorType twoparam_worstcase_error<DualInputs>(ErrorConstants const& 
 
 template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return (
-        pow(h,2u) * (sqr(v)+sqr(w)) * n.pK*n.pLj[j]/2u +
-        pow(h,3u) * (v+w) * (
-            (n.K+v*n.pK) * ( (n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u + (n.pHj[j]*n.K+n.L*n.pLj[j])/6u ) +
-            n.pK * ( n.Lj[j]*n.L + w*n.pL*n.Lj[j] + n.Hj[j]*(n.K+w*n.pK) ) * psi0(n.Lambda*h) +
-            n.pK * ( n.pLj[j]*n.L + w*n.pL*n.pLj[j] +n.pHj[j]*(n.K+w*n.pK) ) * psi1(n.Lambda*h)  )
-      ) / cast_positive(1u - h * (n.Lj[j]/2u+w*n.pLj[j]) );
+            pow(h,2u) * (n.pKv*n.pLjv[j] + n.pKw*n.pLjw[j]) +
+            pow(h,3u) * (((
+               n.Hj[j]*(n.pKv+n.pKw) + n.Lj[j]*(n.pLv+n.pLw))*(n.K+n.pKv)/8u + ((n.pHjv[j] + n.pHjw[j])*n.K*(n.K+n.pKv) + n.L*(n.pLjv[j] + n.pLjw[j])*(n.K + n.pKw))/6u) +
+               (n.pKv + n.pKw) * ( n.Lj[j]*n.pLw + n.Lj[j]*n.pL + n.Hj[j]*(n.K+n.pKw) ) * psi0(n.Lambda*h) +
+               (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + w*n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)  )
+            ) / cast_positive(1u - h * (n.Lj[j]/2u+w*n.pLj[j]) );
 }
 template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return (n.Hj[j]*(n.K+v)/8u +
-            (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/pow(cast_exact(n.Lambda*h),3u))
-           )*pow(h,3u)*(v+w)/cast_positive(+1u-h*n.Lj[j]/2u); }
+    return pow(h,3u)*(v+w)*(n.Hj[j]*(n.K+v)/8u + (n.Lj[j]*n.L+n.Hj[j]*(n.K+w))*psi0(n.Lambda*h)
+           ) / cast_positive(+1u-h*n.Lj[j]/2u); }
 template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return (pow(h,3u)*((n.K+v*n.pK)*(v+w)*(n.Hj[j]*n.pK+n.Lj[j]*n.pL)*3u+(n.pHj[j]*n.K*(n.K+v*n.pK)+n.L*n.pLj[j]*(n.K+w*n.pK))*4u +
-            (pow(v,2)+pow(w,2))*8u*((n.K+w*n.pK)*n.pHj[j]*n.pK + (n.K+v*n.pK)*n.pL*n.pLj[j]))/24u +
-            n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
-            n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
+    return pow(h,3u)*(((n.pHj[j]*n.pK*(n.K+n.pKv)+n.pL*n.pLj[j]*(n.K+n.pKw))/6u +
+                          (n.Hj[j]*(n.pKv+n.pKw) + n.Lj[j]*(n.pLv+n.pLw))*(n.K+n.pKv)/8u +
+                          ((n.pHjv[j] + n.pHjw[j])*n.K*(n.K+n.pKv) + n.L*(n.pLjv[j] + n.pLjw[j])*(n.K + n.pKw))/6u) +
+            (n.pKv + n.pKw) * ( n.Lj[j]*n.pLw + n.Lj[j]*n.pL + n.Hj[j]*(n.K+n.pKw) ) * psi0(n.Lambda*h) +
+            (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + w*n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)
            )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
 template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     ErrorType acc(0u);
@@ -237,7 +240,7 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
-    ErrorConstants norms = compute_constants(Ariadne::noise_independent_component(_f, _inputs.size()),
+    ErrorConstants norms = compute_constants<A>(Ariadne::noise_independent_component(_f, _inputs.size()),
                                              Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
     ARIADNE_LOG(7,"norms: " << norms << "\n");
     Set<Nat> input_idx;

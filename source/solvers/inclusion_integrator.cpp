@@ -168,13 +168,13 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 ErrorType zeroparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return min(n.pK*n.expLambda*h, (n.K*2u+n.pK)*h); }
 ErrorType zeroparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return min(n.pKv*n.expL*h*v, min( (n.Kj[j]*2u+n.pKjv[j]*v)*h, n.pKv*n.expLambda*h));
+    return min(n.pKv*n.expL*h, min( (n.Kj[j]*2u+n.pKjv[j])*h, n.pKv*n.expLambda*h));
 }
 
 ErrorType oneparam_worstcase_error(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return pow(h,2u)*((n.K+n.pK)*n.pL/3u + n.pK*2u*(n.L+n.pL)*n.expLambda); }
 ErrorType oneparam_component_error(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
-    return pow(h,2u)*(n.pLjv[j]*(n.K+v*n.pKv)/2u + (n.Lj[j]+n.pLjw[j])*(n.pKv+n.pKw)*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
+    return pow(h,2u)*(n.pLjv[j]*(n.K+n.pKv)/2u + (n.Lj[j]+n.pLjw[j])*(n.pKv+n.pKw)*cast_positive(cast_exact(n.expLambda-1u))/(cast_positive(cast_exact(n.Lambda))*h) ); }
 
 template<> ErrorType twoparam_worstcase_error<AffineInputs>(ErrorConstants const& n, ErrorType const& r, PositiveFloatDPValue const& h) {
     return ((r*r+1u)*n.pL*n.pK +
@@ -199,7 +199,7 @@ template<> ErrorType twoparam_component_error<AffineInputs>(ErrorConstants const
             pow(h,3u) * (((
                n.Hj[j]*(n.pKv+n.pKw) + n.Lj[j]*(n.pLv+n.pLw))*(n.K+n.pKv)/8u + ((n.pHjv[j] + n.pHjw[j])*n.K*(n.K+n.pKv) + n.L*(n.pLjv[j] + n.pLjw[j])*(n.K + n.pKw))/6u) +
                (n.pKv + n.pKw) * ( n.Lj[j]*n.pLw + n.Lj[j]*n.pL + n.Hj[j]*(n.K+n.pKw) ) * psi0(n.Lambda*h) +
-               (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + w*n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)  )
+               (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)  )
             ) / cast_positive(1u - h * (n.Lj[j]/2u+w*n.pLj[j]) );
 }
 template<> ErrorType twoparam_component_error<AdditiveInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
@@ -210,9 +210,10 @@ template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants cons
                           (n.Hj[j]*(n.pKv+n.pKw) + n.Lj[j]*(n.pLv+n.pLw))*(n.K+n.pKv)/8u +
                           ((n.pHjv[j] + n.pHjw[j])*n.K*(n.K+n.pKv) + n.L*(n.pLjv[j] + n.pLjw[j])*(n.K + n.pKw))/6u) +
             (n.pKv + n.pKw) * ( n.Lj[j]*n.pLw + n.Lj[j]*n.pL + n.Hj[j]*(n.K+n.pKw) ) * psi0(n.Lambda*h) +
-            (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + w*n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)
+            (n.pKv + n.pKw) * ( n.pLjv[j]*n.L + n.pLv*n.pLjv[j] +n.pHjw[j]*(n.K+n.pKw) ) * psi1(n.Lambda*h)
            )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
 template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
+    return twoparam_component_error<AffineInputs>(n, v, w, h, j);/*
     ErrorType acc(0u);
     for (auto l : range(0,n.Lj.size())) {
         acc += n.pLj[l]*(n.K+w*n.pK)*n.pLj[j]+n.pKj[l]*n.pHj[j]*(n.K+v*n.pK);
@@ -221,7 +222,7 @@ template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& 
             pow(h,3u)*(n.K+v*n.pK)*(v+w)*((n.Hj[j]*n.pK+n.Lj[j]*n.pL)/8u+(n.pHj[j]*n.K+n.L*n.pLj[j])/6u) +
             n.pK*(v+w)*((n.Lj[j]*n.L+w*n.pL*n.Lj[j]+n.Hj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((n.L*h*(1+exp(n.Lambda*h))/2u -exp(n.Lambda*h)+1u))/cast_exact(pow(cast_exact(n.Lambda),3u)))) +
             n.pK*w*(v+w)*(n.pLj[j]*n.L+w*n.pL*n.pLj[j]+n.pHj[j]*(n.K+w*n.pK))*cast_positive(cast_exact((exp(n.Lambda*h)*(n.Lambda*h-1u)-pow(cast_exact(n.Lambda),2u)*pow(h,2u)/2u+1u)/pow(cast_exact(n.Lambda),3u)))
-           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]); }
+           )/cast_positive(1u-h*n.Lj[j]/2u-h*w*n.pLj[j]);*/ }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorConstants const& n, PositiveFloatDPValue const& h) const {
 

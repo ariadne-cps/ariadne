@@ -149,6 +149,7 @@ void TestRational::test_rounding() {
 }
 
 void TestRational::test_comparisons() {
+    ExactDouble inf=ExactDouble::inf();
     ExactDouble max=ExactDouble(std::numeric_limits<double>::max());
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(+max));
     ARIADNE_TEST_BINARY_PREDICATE(operator<,Rational(-max),Rational(-4,5));

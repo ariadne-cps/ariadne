@@ -154,7 +154,7 @@ UnivariateDifferential<X>::_antiderivative(const UnivariateDifferential<X>& x, c
 
 
 template<class X>
-OutputStream& UnivariateDifferential<X>::write(OutputStream& os) const
+OutputStream& UnivariateDifferential<X>::_write(OutputStream& os) const
 {
     UnivariateDifferential<X> const& x=*this;
     os << "D<"<<x.degree()<<">";
@@ -165,7 +165,7 @@ OutputStream& UnivariateDifferential<X>::write(OutputStream& os) const
 }
 
 /*
-template<class X> OutputStream& UnivariateDifferential<X>::write(OutputStream& os) const {
+template<class X> OutputStream& UnivariateDifferential<X>::_write(OutputStream& os) const {
     os << this->_ary[0];
     for(DegreeType i=1; i<=this->degree(); ++i) {
         os <<" ";

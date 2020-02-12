@@ -38,7 +38,7 @@ class PavingInterface;
 class ValidatedConstrainedImageSet;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
-class PaverInterface : public WritableInterface
+class PaverInterface : public virtual WritableInterface
 {
   public:
     typedef ValidatedConstrainedImageSet SetType;

@@ -62,8 +62,8 @@ template<class T> class ForwardConstantIteratorInterface
     virtual Void increment() = 0;
     virtual const T& dereference() const = 0;
     virtual Bool equals(const ForwardConstantIteratorInterface<T>&) const = 0;
-    virtual Void write(OutputStream&) const = 0;
-    friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorInterface<T>& self) { self.write(os); return os; }
+    virtual OutputStream& _write(OutputStream&) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorInterface<T>& self) { self._write(os); return os; }
 };
 
 //! \brief A generic forward Iterator through constant data.
@@ -87,7 +87,7 @@ template<class T> class ForwardConstantIteratorHandle
     Bool operator==(const ForwardConstantIteratorHandle<T>& other) const { return this->_ptr->equals(*other._ptr); }
     Bool operator!=(const ForwardConstantIteratorHandle<T>& other) const { return !this->_ptr->equals(*other._ptr); }
     friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { return os << *self._ptr; }
-    //friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { self._ptr->write(os); return os; }
+    //friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { self._ptr->_write(os); return os; }
 };
 
 
@@ -179,6 +179,8 @@ class SubPavingInterface
     virtual SubPavingInterface* _branch(Bool left_or_right) const = 0; // Could also be called "child" or "subpaving"
     virtual ForwardConstantIteratorInterface<GridCell>* _begin() const = 0;
     virtual ForwardConstantIteratorInterface<GridCell>* _end() const = 0;
+  private:
+    virtual OutputStream& _write(OutputStream&) const = 0;
 };
 
 inline Bool operator==(const SubPavingInterface& p1, const SubPavingInterface& p2) { return p1.equals(p2); }

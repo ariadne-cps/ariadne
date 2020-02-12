@@ -62,7 +62,7 @@ template<class X> class Matrix {
     X& at(SizeType i, SizeType j) { return this->_ary[i*this->_rs+this->_cs]; }
     Void set(SizeType i, SizeType j, const X& c) const { this->_ary[i*this->_rs+this->_cs]=c; }
     X zero_element() const { return _zero; }
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 template<class X> struct IsMatrix<Matrix<X>> : True { };
 

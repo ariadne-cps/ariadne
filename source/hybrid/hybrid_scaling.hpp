@@ -52,9 +52,9 @@ class HybridScalingInterface
     virtual ~HybridScalingInterface() = default;
     virtual HybridScalingInterface* clone() const = 0;
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
 };
-inline OutputStream& operator<<(OutputStream& os, const HybridScalingInterface& hsc) { hsc.write(os); return os; }
+inline OutputStream& operator<<(OutputStream& os, const HybridScalingInterface& hsc) { hsc._write(os); return os; }
 
 
 //! \ingroup HybridModule
@@ -84,7 +84,7 @@ class SimpleHybridScaling
     virtual SimpleHybridScaling* clone() const { return new SimpleHybridScaling(*this); }
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const {
         return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : FloatDPValue(1.0); }
-    virtual Void write(OutputStream& os) const { os << "HybridScaling( " << this->_scalings << " )"; }
+    virtual Void _write(OutputStream& os) const { os << "HybridScaling( " << this->_scalings << " )"; }
 };
 
 inline Pair<RealVariable,FloatDP> operator|(const RealVariable& var, FloatDP scal) {

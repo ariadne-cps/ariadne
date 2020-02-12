@@ -298,7 +298,7 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
 
 
-Void TaylorPicardIntegrator::write(OutputStream& os) const {
+Void TaylorPicardIntegrator::_write(OutputStream& os) const {
     os << "TaylorPicardIntegrator"
        << "(maximum_error = " << this->maximum_error()
        << ", function_factory = " << this->function_factory()
@@ -832,7 +832,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunction& v
     return this->bounder().compute(vf,dx,hmax);
 }
 
-Void TaylorSeriesIntegrator::write(OutputStream& os) const {
+Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
     os << "TaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()
@@ -893,7 +893,7 @@ GradedTaylorSeriesIntegrator::flow_bounds(const ValidatedVectorMultivariateFunct
     return this->bounder().compute(vf,dx,hmax);
 }
 
-Void GradedTaylorSeriesIntegrator::write(OutputStream& os) const {
+Void GradedTaylorSeriesIntegrator::_write(OutputStream& os) const {
     os << "GradedTaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()
@@ -1008,7 +1008,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Void AffineIntegrator::write(OutputStream& os) const {
+Void AffineIntegrator::_write(OutputStream& os) const {
     os << "AffineIntegrator"
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()

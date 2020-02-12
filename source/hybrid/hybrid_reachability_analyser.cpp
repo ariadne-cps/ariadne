@@ -172,7 +172,7 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
 
 
 OutputStream&
-HybridReachabilityAnalyserConfiguration::write(OutputStream& os) const
+HybridReachabilityAnalyserConfiguration::_write(OutputStream& os) const
 {
     os << "HybridReachabilityAnalyserSettings"
        << "(\n  transient_time=" << transient_time()

@@ -65,7 +65,7 @@ class IntegratorInterface
     virtual IntegratorInterface* clone() const = 0;
 
     //! \brief Write to an output stream.
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
 
     //! \brief Get the maximum allowable error in the flow.
     virtual double maximum_error() const = 0;
@@ -165,7 +165,7 @@ class IntegratorInterface
 
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, const IntegratorInterface& integrator) {
-        integrator.write(os); return os;
+        integrator._write(os); return os;
 }
 };
 

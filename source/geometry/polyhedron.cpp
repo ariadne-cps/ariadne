@@ -212,7 +212,7 @@ polytope(const Polyhedron& pltp)
 
 
 OutputStream&
-Polyhedron::write(OutputStream& os) const
+Polyhedron::_write(OutputStream& os) const
 {
     //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
     const Matrix<FloatDP> A=this->A();

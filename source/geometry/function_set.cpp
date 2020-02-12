@@ -365,7 +365,7 @@ ConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 
 
 OutputStream&
-ConstraintSet::write(OutputStream& os) const
+ConstraintSet::_write(OutputStream& os) const
 {
     return os << "ConstraintSet( constraints=" << this->constraints() << " )";
 }
@@ -489,7 +489,7 @@ BoundedConstraintSet::bounding_box() const
 
 
 OutputStream&
-BoundedConstraintSet::write(OutputStream& os) const
+BoundedConstraintSet::_write(OutputStream& os) const
 {
     return os << "BoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
 }
@@ -868,7 +868,7 @@ ConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 
 
 OutputStream&
-ConstrainedImageSet::write(OutputStream& os) const
+ConstrainedImageSet::_write(OutputStream& os) const
 {
     return os << "ConstrainedImageSet( domain=" << this->_domain
               << ", function=" << this->_function << ", constraints=" << this->_constraints << " )";
@@ -1305,13 +1305,13 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 }
 
 
-OutputStream& ValidatedConstrainedImageSet::write(OutputStream& os) const
+OutputStream& ValidatedConstrainedImageSet::_write(OutputStream& os) const
 {
     return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
 }
 
 OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& set) {
-    return set.write(os);
+    return set._write(os);
 }
 
 

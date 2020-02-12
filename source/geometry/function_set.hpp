@@ -109,7 +109,7 @@ class ConstraintSet
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
     friend BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
@@ -159,7 +159,7 @@ class BoundedConstraintSet
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     UpperBoxType bounding_box() const;
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
 
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
@@ -260,7 +260,7 @@ class ConstrainedImageSet
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorMultivariateFunction const& h);
@@ -369,7 +369,7 @@ class ValidatedConstrainedImageSet
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;
     Void grid_draw(CanvasInterface&, const Projection2d&, Nat depth) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
     friend ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);

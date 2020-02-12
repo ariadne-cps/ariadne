@@ -352,7 +352,7 @@ class RestrictiveHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
   private:
     DiscreteLocation _compute_target(DiscreteLocation source, DiscreteEvent target) const;
@@ -361,7 +361,7 @@ class RestrictiveHybridAutomaton
 };
 
 inline OutputStream& operator<<(OutputStream& os, const RestrictiveHybridAutomaton& hs) {
-    return hs.write(os);
+    return hs._write(os);
 }
 
 RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);

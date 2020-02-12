@@ -57,7 +57,7 @@ class DrawableWrapper
     virtual DrawableInterface* clone() const { return this->get_override("clone")(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const { this->get_override("draw")(c,p); }
     virtual DimensionType dimension() const { return this->get_override("dimension")(); }
-    virtual OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    virtual OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class OpenSetWrapper
@@ -68,7 +68,7 @@ class OpenSetWrapper
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ClosedSetWrapper
@@ -78,7 +78,7 @@ class ClosedSetWrapper
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -89,7 +89,7 @@ class OvertSetWrapper
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -103,7 +103,7 @@ class CompactSetWrapper
     LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
 class RegularSetWrapper
@@ -115,7 +115,7 @@ class RegularSetWrapper
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
     LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class LocatedSetWrapper
@@ -129,7 +129,7 @@ class LocatedSetWrapper
     LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(r); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -143,7 +143,7 @@ class ValidatedOpenSetWrapper
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ValidatedClosedSetWrapper
@@ -153,7 +153,7 @@ class ValidatedClosedSetWrapper
     ValidatedClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -164,7 +164,7 @@ class ValidatedOvertSetWrapper
     ValidatedOvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -178,7 +178,7 @@ class ValidatedCompactSetWrapper
     ValidatedLowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
 class ValidatedRegularSetWrapper
@@ -190,7 +190,7 @@ class ValidatedRegularSetWrapper
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
     ValidatedLowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     ValidatedLowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ValidatedLocatedSetWrapper
@@ -204,7 +204,7 @@ class ValidatedLocatedSetWrapper
     ValidatedLowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(r); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 

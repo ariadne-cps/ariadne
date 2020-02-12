@@ -223,7 +223,7 @@ template<class X> class Matrix
     static Matrix<X> _mul(const Matrix<X>& A1, const Matrix<X>& A2);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     InputStream& read(InputStream& is);
 
     template<class T> friend OutputStream& operator<<(OutputStream& os, Matrix<T>const& A);
@@ -523,14 +523,14 @@ template<class X> inline const X* Matrix<X>::begin() const {
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, Matrix<X> const& A) {
-    A.write(os); return os;
+    A._write(os); return os;
 }
 
 template<class X> inline InputStream& operator>>(InputStream& is, Matrix<X>& A) {
     A.read(is); return is;
 }
 
-template<class X> OutputStream& Matrix<X>::write(OutputStream& os) const {
+template<class X> OutputStream& Matrix<X>::_write(OutputStream& os) const {
     const Matrix<X>& A=*this;
     if(A.row_size()==0 || A.column_size()==0) { os << "["; }
     for(SizeType i=0; i!=A.row_size(); ++i) {

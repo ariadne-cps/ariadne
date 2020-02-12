@@ -74,7 +74,7 @@ class EvolverInterface
     virtual const SystemType& system() const = 0;
 
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 
   public:
     //@{
@@ -116,7 +116,7 @@ class EvolverInterface
 template<class SYS, class ES, class TRM> inline
 OutputStream&
 operator<<(OutputStream& os, const EvolverInterface<SYS,ES,TRM>& e) {
-    return e.write(os);
+    return e._write(os);
 }
 
 

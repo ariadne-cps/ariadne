@@ -66,7 +66,7 @@ Polytope::bounding_box() const
 
 
 OutputStream&
-Polytope::write(OutputStream& os) const
+Polytope::_write(OutputStream& os) const
 {
     return os << "Polytope( vertices=" << this->vertices() << " )";
 }

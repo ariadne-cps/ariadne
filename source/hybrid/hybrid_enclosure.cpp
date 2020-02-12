@@ -637,7 +637,7 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
     os << "    \n[ "; for(SizeType i=0; i!=c.size(); ++i) { if (i!=0) { os << ",\n      "; } os << c[i]; } os << "]"; return os;
 }
 
-OutputStream& HybridEnclosure::write(OutputStream& os) const
+OutputStream& HybridEnclosure::_write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( variables = " << variable_names(this->_variables)

@@ -336,7 +336,7 @@ class Function
     //! \name Input/output operations.
 
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
+    friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->_write(os); return os; }
 
     //@}
 };
@@ -354,7 +354,7 @@ template<class P, class D> struct AlgebraOperations<ScalarFunction<P,D>,Number<P
 
 template<class P, class D, class C> inline OutputStream&
 operator<<(OutputStream& os, const Function<P,D,C>& f) {
-    return f.write(os); }
+    return f._write(os); }
 
 template<class P, class C, class X> inline decltype(auto)
 evaluate(const Function<P,IntervalDomainType,C>& f, const Scalar<X>& x) {
@@ -610,7 +610,7 @@ inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {
-    factory._ptr->write(os); return os; }
+    factory._ptr->_write(os); return os; }
 
 } // namespace Ariadne
 

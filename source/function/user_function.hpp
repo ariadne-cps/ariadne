@@ -101,7 +101,7 @@ template<class F> class ScalarUserFunction
 
          virtual OutputStream& repr(OutputStream& os) const  {
             return os << "USER"; }
-       virtual OutputStream& write(OutputStream& os) const  {
+       virtual OutputStream& _write(OutputStream& os) const  {
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
@@ -174,8 +174,8 @@ template<class F> class VectorUserFunction
         virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
-        // write() method or operator<<.
-        virtual OutputStream& write(OutputStream& os) const  {
+        // _write() method or operator<<.
+        virtual OutputStream& _write(OutputStream& os) const  {
             return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 
         Vector<EffectiveNumber> _p;

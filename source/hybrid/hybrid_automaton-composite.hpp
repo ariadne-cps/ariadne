@@ -221,7 +221,7 @@ class CompositeHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
   protected:
     Identifier _name;
   private:
@@ -231,7 +231,7 @@ class CompositeHybridAutomaton
 CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components);
 
 inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton& ha) {
-    return ha.write(os); }
+    return ha._write(os); }
 
 } // namespace Ariadne
 

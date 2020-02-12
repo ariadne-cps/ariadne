@@ -366,7 +366,7 @@ class GridTreeSubpaving
     Void draw(CanvasInterface& canvas, const Projection2d& projection) const;
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
     //@}
@@ -894,7 +894,7 @@ class GridTreeConstIterator
     // Test equality with another abstract iterator.
     virtual Bool equals( ForwardConstantIteratorInterface<GridCell> const & theOtherIterator) const;
     // Write to an output stream.
-    virtual Void write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
 };
 

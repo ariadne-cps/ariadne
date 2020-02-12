@@ -357,12 +357,12 @@ template<class M> class ScaledFunctionPatch
     //@{
     //! \name Stream input/output operators.
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const ScaledFunctionPatch<M>& x) {
-        return x.write(os); }
+        return x._write(os); }
     //@}
 
   public:
@@ -717,7 +717,7 @@ template<class M> class VectorScaledFunctionPatch
     Void adjoin(const ScaledFunctionPatch<M>& sf);
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     //! \brief Write a full representation to an output stream.
     OutputStream& repr(OutputStream& os) const;
@@ -999,7 +999,7 @@ template<class M> class VectorScaledFunctionPatch
     }
 
     friend OutputStream& operator<<(OutputStream& os, const VectorScaledFunctionPatch<M>& p) {
-        return p.write(os);
+        return p._write(os);
     }
 
 

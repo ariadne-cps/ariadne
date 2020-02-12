@@ -90,8 +90,8 @@ class FunctionMixin<F,Void,D,C>
     virtual ArgumentSizeType argument_size() const override { return this->domain().dimension(); }
     virtual ResultSizeType result_size() const override { return this->codomain().dimension(); }
 
-    virtual OutputStream& write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
+    virtual OutputStream& _write(OutputStream& os) const override = 0;
+    virtual OutputStream& repr(OutputStream& os) const override { return this->_write(os); }
 };
 
 

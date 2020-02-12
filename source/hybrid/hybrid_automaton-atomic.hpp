@@ -260,8 +260,8 @@ class AtomicHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const {
-        return this->HybridAutomaton::write(os); }
+    OutputStream& _write(OutputStream& os) const {
+        return this->HybridAutomaton::_write(os); }
 };
 
 inline Pair<StringVariable,String> operator|(const AtomicHybridAutomaton& ha, const AtomicDiscreteLocation& q) {
@@ -269,7 +269,7 @@ inline Pair<StringVariable,String> operator|(const AtomicHybridAutomaton& ha, co
 }
 
 inline OutputStream& operator<<(OutputStream& os, const AtomicHybridAutomaton& ha) {
-    return ha.write(os);
+    return ha._write(os);
 }
 
 

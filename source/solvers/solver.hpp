@@ -114,7 +114,7 @@ class IntervalNewtonSolver
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     using SolverBase::implicit;
   public:
@@ -138,7 +138,7 @@ class KrawczykSolver
     /*! \brief Cloning operator. */
     virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual ValidatedVectorMultivariateFunctionModelDP implicit_step(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunctionModelDP& p, const ValidatedVectorMultivariateFunctionModelDP& x) const;
@@ -165,7 +165,7 @@ class FactoredKrawczykSolver
     /*! \brief Cloning operator. */
     virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<ValidatedNumericType>

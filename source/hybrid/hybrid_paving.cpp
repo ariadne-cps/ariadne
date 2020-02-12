@@ -238,7 +238,7 @@ Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2
     return true;
 }
 
-OutputStream& HybridGridTreePaving::write(OutputStream& os) const {
+OutputStream& HybridGridTreePaving::_write(OutputStream& os) const {
     return os << this->_map;
 }
 

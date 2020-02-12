@@ -67,15 +67,15 @@ template<class X> struct Vector : VectorObject<Vector<X>> {
     const X& at(SizeType i) const { return _ary.at(i); }
     X& at(SizeType i) { return _ary.at(i); }
     X zero_element() const { return _zero; }
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 };
-template<class X> OutputStream& Vector<X>::write(OutputStream& os) const {
+template<class X> OutputStream& Vector<X>::_write(OutputStream& os) const {
     if(size()==0) { os << "{"; }
     for(SizeType i=0; i!=size(); ++i) { os << (i==0u?"{":",") << this->_ary[i]; }
     return os << "}";
 }
 template<class X> OutputStream& operator<<(OutputStream& os, const Vector<X>& v) {
-    return v.write(os);
+    return v._write(os);
 }
 
 template<class V> OutputStream& operator<<(OutputStream& os, const VectorExpression<V>& ve) {
@@ -310,15 +310,15 @@ template<class X> struct Covector {
     const X& operator[](SizeType i) const { return _ary.at(i); }
     X& operator[](SizeType i) { return _ary.at(i); }
     X zero_element() const { return _zero; }
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 };
-template<class X> OutputStream& Covector<X>::write(OutputStream& os) const {
+template<class X> OutputStream& Covector<X>::_write(OutputStream& os) const {
     if(size()==0) { os << "{"; }
     for(SizeType i=0; i!=size(); ++i) { os << (i==0u?"{":",") << this->_ary[i]; }
     return os << "}";
 }
 template<class X> OutputStream& operator<<(OutputStream& os, const Covector<X>& v) {
-    return v.write(os);
+    return v._write(os);
 }
 
 

@@ -2423,7 +2423,7 @@ struct KuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<KuhnTuckerFuncti
     Nat result_size() const { return g.size()*2+f.argument_size(); }
     Nat argument_size() const { return g.size()*2+f.argument_size(); }
     ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
-    OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
+    OutputStream& _write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const Nat m=f.argument_size();
@@ -2456,7 +2456,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunctionMixin<Feasi
     Nat result_size() const { return g.size()*2+g[0].argument_size()+1; }
     Nat argument_size() const { return g.size()*2+g[0].argument_size()+1; }
     ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
-    OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
+    OutputStream& _write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const Nat m=g[0].argument_size();
@@ -2499,7 +2499,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunction
     Nat result_size() const { return 5*m+4*n+1u; }
     Nat argument_size() const { return 5*m+4*n+1u; }
     ValidatedScalarMultivariateFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
-    OutputStream& write(OutputStream& os) const { return os << "KuhnTuckerFunctionBody"; }
+    OutputStream& _write(OutputStream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const X zero=arg[0].zero_element();

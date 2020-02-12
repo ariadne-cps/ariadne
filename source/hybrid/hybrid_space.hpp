@@ -55,10 +55,10 @@ class HybridSpaceInterface
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
     virtual HybridSpaceInterface* clone() const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     virtual ValidatedKleenean operator==(const HybridSpaceInterface& other) const = 0;
   public:
-    friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
+    friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp._write(os); }
 };
 
 //! \ingroup HybridModule
@@ -139,7 +139,7 @@ class MonolithicHybridSpace
     ConstIterator begin() const { return this->_locations.begin(); }
     ConstIterator end() const { return this->_locations.end(); }
 
-    OutputStream& write(OutputStream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
+    OutputStream& _write(OutputStream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
   private:
     Map< DiscreteLocation, RealSpace > _locations;
 };

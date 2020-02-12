@@ -319,7 +319,7 @@ class HybridEnclosure
     //! \brief Draws onto a canvas.
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
     //! \brief Write an abbreviated representation to an output stream.
     OutputStream& print(OutputStream&) const;
     //! \brief Write a full representation to an output stream which can be used in a constructor.
@@ -342,7 +342,7 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
 inline ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }
 inline ValidatedLowerKleenean separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
 
-inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s._write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
 
 

@@ -582,7 +582,7 @@ template<> class BoxSet<ExactIntervalType>
     virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::inside(other); }
     virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
 };
 
 template<> class BoxSet<ApproximateIntervalType>
@@ -597,7 +597,7 @@ template<> class BoxSet<ApproximateIntervalType>
     virtual ApproximateBoxSetType* clone() const { return new ApproximateBoxSetType(*this); }
     virtual DimensionType dimension() const final { return this->ApproximateBoxType::dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
 
@@ -614,7 +614,7 @@ template<> class BoxSet<RealInterval>
     virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
     virtual DimensionType dimension() const final { return this->Box<RealInterval>::dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return this->Box<RealInterval>::draw(c,p); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
 
     virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->BoxType::separated(DyadicBox(other)); }
     virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->BoxType::overlaps(DyadicBox(other)); }

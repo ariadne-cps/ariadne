@@ -963,8 +963,8 @@ Bool GridTreeConstIterator::equals( ForwardConstantIteratorInterface<GridCell> c
     return theOtherIteratorPointer && (this->equal(*theOtherIteratorPointer));
 }
 
-Void GridTreeConstIterator::write(OutputStream& os) const {
-    os << "GridTreeConstIterator(" << this->cursor() << ")";
+OutputStream& GridTreeConstIterator::_write(OutputStream& os) const {
+    return os << "GridTreeConstIterator(" << this->cursor() << ")";
 }
 
 
@@ -1630,7 +1630,7 @@ Void GridTreeSubpaving::draw(CanvasInterface& theGraphic, const Projection2d& th
 }
 
 OutputStream&
-GridTreeSubpaving::write(OutputStream& os) const
+GridTreeSubpaving::_write(OutputStream& os) const
 {
     return os << (*this);
 }

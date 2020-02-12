@@ -90,7 +90,7 @@ template<class X> class Matrix : public MatrixObject<Matrix<X>> {
     X& at(SizeType i, SizeType j) { return this->_ary[i*this->_rs+this->_cs]; }
     Void set(SizeType i, SizeType j, const X& c) const { this->_ary[i*this->_rs+this->_cs]=c; }
     X zero_element() const { return _zero; }
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     Matrix<X>& operator=(const MatrixMatrixProduct<X,X>& A1mulA2);
   public:
@@ -112,7 +112,7 @@ template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n) {
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Matrix<X>& A) {
-    return A.write(os); }
+    return A._write(os); }
 
 
 template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs) {

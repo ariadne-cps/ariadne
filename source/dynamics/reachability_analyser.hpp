@@ -301,7 +301,7 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 

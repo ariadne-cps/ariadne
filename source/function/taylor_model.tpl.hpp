@@ -2045,7 +2045,7 @@ template<class P, class F> OutputStream& TaylorModel<P,F>::str(OutputStream& os)
     os << "TM["<<tm.argument_size()<<"](";
     Expansion<MultiIndex,CoefficientType> e=tm.expansion();
     e.sort(GradedIndexLess());
-    e.write(os,variable_names);
+    e._write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
 }
 

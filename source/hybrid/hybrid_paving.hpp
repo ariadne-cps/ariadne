@@ -147,7 +147,7 @@ class HybridGridTreePaving
     ValidatedLowerKleenean covers(const HybridExactBox& hbx) const;
     ValidatedLowerKleenean inside(const HybridExactBoxes& hbx) const ;
     HybridUpperBoxes bounding_box() const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
     //@}
   public:

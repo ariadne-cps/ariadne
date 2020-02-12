@@ -50,7 +50,7 @@ template<class SYS, class ES, class TRM> class EvolverBase
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const {
+    virtual OutputStream& _write(OutputStream& os) const {
         return os << "Evolver( ... )"; }
 
   public:

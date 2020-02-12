@@ -100,11 +100,11 @@ template<class A> class Graded : public List<A>
     Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
     DegreeType degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
-    OutputStream& write(OutputStream& os) const;
-    friend OutputStream& operator<<(OutputStream& os, Graded<A> const& g) { return g.write(os); }
+    OutputStream& _write(OutputStream& os) const;
+    friend OutputStream& operator<<(OutputStream& os, Graded<A> const& g) { return g._write(os); }
 };
 
-template<class A> OutputStream& Graded<A>::write(OutputStream& os) const {
+template<class A> OutputStream& Graded<A>::_write(OutputStream& os) const {
     Graded<A> const& g=*this;
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
@@ -117,7 +117,7 @@ template<class A> OutputStream& Graded<A>::write(OutputStream& os) const {
     return os;
 }
 
-template<> inline OutputStream& Graded<FloatDP>::write(OutputStream& os) const {
+template<> inline OutputStream& Graded<FloatDP>::_write(OutputStream& os) const {
     Graded<FloatDP> const& g=*this;
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
@@ -141,7 +141,7 @@ template<> inline OutputStream& Graded<FloatDP>::write(OutputStream& os) const {
 }
 
 /*
-template<> inline OutputStream& Graded<ExactIntervalType>::write(OutputStream& os) const {
+template<> inline OutputStream& Graded<ExactIntervalType>::_write(OutputStream& os) const {
     Graded<ExactIntervalType> const& g=*this;
     if(g.size()==0) { return os << "0"; }
     os << g[0];

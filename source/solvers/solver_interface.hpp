@@ -93,7 +93,7 @@ class SolverInterface
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
 
 
     //! \brief The maximum permissible error of the solution.
@@ -134,7 +134,7 @@ class SolverInterface
 };
 
 inline OutputStream& operator<<(OutputStream& os, const SolverInterface& solver) {
-    solver.write(os); return os;
+    solver._write(os); return os;
 }
 
 } // namespace Ariadne

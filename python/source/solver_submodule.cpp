@@ -67,7 +67,7 @@ class SolverWrapper
         return this->get_override("continuation")(f,a,X,A); }
     Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve_all")(f,bx); }
-    Void write(OutputStream& os) const { this->get_override("write")(os); }
+    Void _write(OutputStream& os) const { this->get_override("_write")(os); }
 };
 
 
@@ -95,8 +95,8 @@ class IntegratorWrapper
         return this->get_override("flow")(vf,D,t0,tf); }
     FlowModelType flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow")(vf,D,tf); }
-    Void write(OutputStream& os) const {
-        this->get_override("write")(os); }
+    Void _write(OutputStream& os) const {
+        this->get_override("_write")(os); }
 };
 
 } // namespace Ariadne

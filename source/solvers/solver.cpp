@@ -640,7 +640,7 @@ IntervalNewtonSolver::implicit(const ValidatedScalarMultivariateFunction& f,
 */
 
 
-Void IntervalNewtonSolver::write(OutputStream& os) const
+Void IntervalNewtonSolver::_write(OutputStream& os) const
 {
     os << "IntervalNewtonSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -648,7 +648,7 @@ Void IntervalNewtonSolver::write(OutputStream& os) const
        << " )";
 }
 
-Void KrawczykSolver::write(OutputStream& os) const
+Void KrawczykSolver::_write(OutputStream& os) const
 {
     os << "KrawczykSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -656,7 +656,7 @@ Void KrawczykSolver::write(OutputStream& os) const
        << " )";
 }
 
-Void FactoredKrawczykSolver::write(OutputStream& os) const
+Void FactoredKrawczykSolver::_write(OutputStream& os) const
 {
     os << "FactoredKrawczykSolver"
        << "( maximum_error=" << this->maximum_error()

@@ -87,7 +87,7 @@ class Point
     Vector<RealType> centre() const { return *this; }
 
     //! Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const {
+    virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;

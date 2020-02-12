@@ -33,6 +33,7 @@
 
 #include "../utility/declarations.hpp"
 #include "../utility/tribool.hpp"
+#include "../utility/writable.hpp"
 #include "../numeric/numeric.hpp"
 
 #include "box.decl.hpp"
@@ -83,7 +84,7 @@ struct Covers {
 };
 
 //! \brief Base class for sets described by predicates involving boxes.
-class SetInterfaceBase
+class SetInterfaceBase : public virtual WritableInterface
 {
   public:
     //! \brief Virtual destructor.
@@ -93,7 +94,7 @@ class SetInterfaceBase
     //! \brief The dimension of the set.
     virtual DimensionType dimension() const = 0;
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -235,7 +236,7 @@ class RegularLocatedSetInterface
 using SetInterface = RegularLocatedSetInterface;
 
 inline OutputStream& operator<<(OutputStream& os, const SetInterfaceBase& s) {
-    return s.write(os);
+    return s._write(os);
 }
 
 

@@ -49,7 +49,7 @@ template<class X> class DiagonalMatrix;
 struct DiagonalMatrixOperations {
 
     template<class X> friend OutputStream& operator<<(OutputStream& os, DiagonalMatrix<X> const& A) {
-        return A.write(os);
+        return A._write(os);
     }
 
     template<class X> friend DiagonalMatrix<ProductType<X,X>> operator+(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
@@ -165,7 +165,7 @@ template<class X> class DiagonalMatrix
     Vector<X> diagonal() const;
     operator Matrix<X>() const;
     operator SymmetricMatrix<X>() const;
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 };
 
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(SizeType n)
@@ -232,7 +232,7 @@ template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {
     return A;
 }
 
-template<class X> OutputStream& DiagonalMatrix<X>::write(OutputStream& os) const {
+template<class X> OutputStream& DiagonalMatrix<X>::_write(OutputStream& os) const {
     return os << "diag(" << this->_ary << ")";
 }
 

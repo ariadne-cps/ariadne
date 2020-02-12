@@ -101,7 +101,7 @@ class DiscreteTransition
     DiscreteLocation target() const { return this->_target; };
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
   private:
     DiscreteTransition(DiscreteLocation source,
                        DiscreteEvent event,
@@ -112,7 +112,7 @@ class DiscreteTransition
 };
 
 inline OutputStream& operator<<(OutputStream& os, const DiscreteTransition& dt) {
-    return dt.write(os); }
+    return dt._write(os); }
 
 inline Bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
@@ -166,12 +166,12 @@ class DiscreteMode {
     DiscreteLocation location() const { return this->_location; }
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 
 inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
-    return dm.write(os); }
+    return dm._write(os); }
 
 inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
     return mode1.location() < mode2.location(); }
@@ -591,12 +591,12 @@ class HybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
 };
 
 inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
-    return ha.write(os);
+    return ha._write(os);
 }
 
 

@@ -128,7 +128,7 @@ template<class X> class SymmetricMatrix
     friend SymmetricMatrix<X> operator+(SymmetricMatrix<X> const&, SymmetricMatrix<X> const&);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     friend Vector<X>& to_vector(SymmetricMatrix<X>& S) { return reinterpret_cast<Vector<X>&>(S._ary); }
     friend Vector<X> const& to_vector(SymmetricMatrix<X> const& S) { return reinterpret_cast<Vector<X>const&>(S._ary); }
@@ -231,7 +231,7 @@ template<class X> inline Void SymmetricMatrix<X>::_check_data_access(SizeType i,
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, SymmetricMatrix<X>const& S) {
-    return S.write(os);
+    return S._write(os);
 }
 
 
@@ -250,7 +250,7 @@ template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
 }
 
 
-template<class X> OutputStream& SymmetricMatrix<X>::write(OutputStream& os) const {
+template<class X> OutputStream& SymmetricMatrix<X>::_write(OutputStream& os) const {
     return os << Matrix<X>(*this);
 }
 

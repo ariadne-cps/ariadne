@@ -210,7 +210,7 @@ class Zonotope
     //@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     /*! \brief Draw on a canvas. */
     Void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}

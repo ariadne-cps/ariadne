@@ -372,7 +372,7 @@ RestrictiveHybridAutomaton* RestrictiveHybridAutomaton::clone() const {
 }
 
 
-OutputStream& RestrictiveHybridAutomaton::write(OutputStream& os) const {
+OutputStream& RestrictiveHybridAutomaton::_write(OutputStream& os) const {
     return os << "RestrictiveHybridAutomaton"
               << "(\n  updates=" << _discrete_updates
               << ",\n  auxiliary=" << _assignments
@@ -709,7 +709,7 @@ CompositionalHybridAutomaton::invariant_events(DiscreteLocation q) const
 
 
 OutputStream&
-CompositionalHybridAutomaton::write(OutputStream& os) const
+CompositionalHybridAutomaton::_write(OutputStream& os) const
 {
     os << "\nHybridAutomaton( \n";
     os << "  discrete_transitions="<<this->_discrete_updates<<"\n";
@@ -785,7 +785,7 @@ class CompositeHybridSpace
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
   private:
     const CompositeHybridAutomaton* _system_ptr;
 };
@@ -1388,7 +1388,7 @@ new_transition(const DiscretePredicate& sources,
 
 
 OutputStream&
-CompositeHybridAutomaton::write(OutputStream& os) const
+CompositeHybridAutomaton::_write(OutputStream& os) const
 {
     return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
 }

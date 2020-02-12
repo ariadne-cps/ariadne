@@ -158,7 +158,7 @@ class ListSet
     }
 
     /*! \brief Write to an output stream. */
-    OutputStream& write(OutputStream& os) const {
+    OutputStream& _write(OutputStream& os) const {
         return os << *this;
     }
 

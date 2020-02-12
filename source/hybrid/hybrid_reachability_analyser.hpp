@@ -271,7 +271,7 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 

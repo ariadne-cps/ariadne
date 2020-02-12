@@ -300,7 +300,7 @@ class HybridValidatedConstrainedImageSet
         return this->Base::separated(hbx); }
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override {
+    virtual OutputStream& _write(OutputStream& os) const override {
         return os << static_cast<const Base&>(*this); }
     virtual Void draw(CanvasInterface& cnvs, const Set<DiscreteLocation>& locs, const Variables2d& vars) const override {
         return this->Base::draw(cnvs,locs,vars); }

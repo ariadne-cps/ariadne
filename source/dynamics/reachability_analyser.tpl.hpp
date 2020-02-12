@@ -744,7 +744,7 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
 
 template<class SYS>
 OutputStream&
-ReachabilityAnalyserConfiguration<SYS>::write(OutputStream& os) const
+ReachabilityAnalyserConfiguration<SYS>::_write(OutputStream& os) const
 {
     os << "ReachabilityAnalyserSettings"
        << "(\n  transient_time=" << transient_time()

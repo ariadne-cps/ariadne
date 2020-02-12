@@ -94,11 +94,11 @@ class FunctionInterface<Void,D,C>
     virtual CodomainType const codomain() const = 0;
 
     virtual OutputStream& repr(OutputStream& os) const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,D,C>* _clone() const = 0;
   public:
-    friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) { return f.write(os); }
+    friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) { return f._write(os); }
 };
 
 //! \ingroup FunctionModule
@@ -201,7 +201,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     typedef BoxDomainType DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     inline ScalarMultivariateFunction<P> create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const;
     inline VectorMultivariateFunction<P> create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const;
     inline ScalarMultivariateFunction<P> create_zero(const BoxDomainType& domain) const;
@@ -211,7 +211,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     virtual VectorMultivariateFunctionInterface<P>* _create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const = 0;
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<P>& factory) {
-        return factory.write(os); }
+        return factory._write(os); }
   public:
     virtual ~FunctionFactoryInterface<P>() = default;
 };

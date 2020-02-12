@@ -710,7 +710,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 
@@ -730,7 +730,7 @@ class GeneralHybridEvolver
     GeneralHybridEvolver(const SystemType& system,
                          const ValidatedFunctionModelDPFactoryInterface& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
   protected:
     virtual

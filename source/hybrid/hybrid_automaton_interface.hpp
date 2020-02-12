@@ -266,13 +266,13 @@ class HybridAutomatonInterface {
     //! \name Input/output methods
 
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     //@}
 
 };
 
 inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface& ha) {
-    ha.write(os);
+    ha._write(os);
     return os;
 }
 

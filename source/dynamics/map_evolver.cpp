@@ -222,7 +222,7 @@ MapEvolverConfiguration::MapEvolverConfiguration()
 
 
 OutputStream&
-MapEvolverConfiguration::write(OutputStream& os) const
+MapEvolverConfiguration::_write(OutputStream& os) const
 {
     os << "MapEvolverSettings"
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()

@@ -217,7 +217,7 @@ class TaylorPicardIntegrator
     Void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
@@ -267,7 +267,7 @@ class TaylorSeriesIntegrator
     Void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
@@ -341,7 +341,7 @@ class GradedTaylorSeriesIntegrator
     Void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual GradedTaylorSeriesIntegrator* clone() const { return new GradedTaylorSeriesIntegrator(*this); }
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     virtual Pair<StepSizeType,UpperBoxType>
     flow_bounds(const ValidatedVectorMultivariateFunction& vector_field,
@@ -384,7 +384,7 @@ class AffineIntegrator
     //! \brief The order of the method in time.
     DegreeType temporal_order() const { return this->_temporal_order; }
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
-    virtual Void write(OutputStream& os) const;
+    virtual Void _write(OutputStream& os) const;
 
     virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,

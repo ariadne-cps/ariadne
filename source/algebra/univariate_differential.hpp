@@ -99,7 +99,7 @@ template<class X> class UnivariateDifferential
     const X& half_hessian() const;
 
     Void clear();
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     friend UnivariateDifferential<X> compose(Series<X> const& f, UnivariateDifferential<X> const& dx) {
         return UnivariateDifferential<X>::_compose(f,dx); }
@@ -113,7 +113,7 @@ template<class X> class UnivariateDifferential
         return UnivariateDifferential<X>::_antiderivative(dx,c); }
 
     friend OutputStream& operator<<(OutputStream& os, UnivariateDifferential<X> const& dx) {
-        return dx.write(os); }
+        return dx._write(os); }
   public:
     static Differential<X> _compose(Series<X> const& f, Differential<X> const& dx);
   private:

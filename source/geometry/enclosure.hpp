@@ -343,7 +343,7 @@ class Enclosure
      [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat depth) const;
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
   private:
     Void _check() const;
     Void _solve_zero_constraints();
@@ -355,7 +355,7 @@ class Enclosure
 };
 
 //! \related Enclosure \brief Stream output operator.
-inline OutputStream& operator<<(OutputStream& os, const Enclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Enclosure& s) { return s._write(os); }
 
 //! \related Enclosure \brief The Cartesian product of a constrained image set with an interval in one dimension.
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl);

@@ -858,7 +858,7 @@ Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
 }
 
 
-OutputStream& ValidatedAffineConstrainedImageSet::write(OutputStream& os) const {
+OutputStream& ValidatedAffineConstrainedImageSet::_write(OutputStream& os) const {
     return os << "ValidatedAffineConstrainedImageSet( domain=" << this->_domain << ", function=" << this->_space_models << ", constraints=" << this->_constraint_models <<" )";
 }
 

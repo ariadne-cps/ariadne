@@ -475,7 +475,7 @@ OutputStream& Polynomial<I,X>::_write(OutputStream& os) const {
 
 template<class I, class X>
 OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>::NameType const& argument_names) const {
-    return this->_expansion.write(os,argument_names);
+    return this->_expansion._write(os,argument_names);
 }
 
 

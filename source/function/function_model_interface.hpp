@@ -125,6 +125,8 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelInte
     virtual Boolean _inconsistent(const FunctionModelInterface<P,D,C,PR,PRE>& f) const = 0;
     virtual FunctionModelInterface<P,D,C,PR,PRE>* _refinement(const FunctionModelInterface<P,D,C,PR,PRE>& f) const = 0;
 
+    virtual OutputStream& _write(OutputStream&) const = 0;
+
     friend OutputStream& operator<<(OutputStream& os, FunctionModelInterface<P,D,C,PR,PRE> const& f) {
         return f._write(os); }
 };

@@ -281,7 +281,7 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
     return res;
 }
 
-OutputStream& HybridBoxSet::write(OutputStream& os) const {
+OutputStream& HybridBoxSet::_write(OutputStream& os) const {
     return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);
 }
 Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
@@ -369,7 +369,7 @@ LowerKleenean HybridConstraintSet::separated(const HybridExactBox& bx) const {
     }
 }
 
-OutputStream& HybridConstraintSet::write(OutputStream& os) const {
+OutputStream& HybridConstraintSet::_write(OutputStream& os) const {
     return os << "HybridConstraintSet( "<< this->_sets << " )";
 }
 
@@ -487,7 +487,7 @@ HybridExactBoxes HybridBoundedConstraintSet::bounding_box() const {
     return result;
 }
 
-OutputStream& HybridBoundedConstraintSet::write(OutputStream& os) const {
+OutputStream& HybridBoundedConstraintSet::_write(OutputStream& os) const {
     return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 

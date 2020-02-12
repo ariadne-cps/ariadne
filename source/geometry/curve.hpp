@@ -73,11 +73,11 @@ class CurveInterface
     virtual TangentVectorType tangent(const ParameterType& s) const = 0;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
 inline OutputStream& operator<<(OutputStream& os, const CurveInterface& c) {
-    return c.write(os); }
+    return c._write(os); }
 
 
 
@@ -111,7 +111,7 @@ class Curve
     virtual TangentVectorType tangent(const ParameterType& s) const;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
   private:
     Function<EffectiveTag,IntervalDomainType,BoxDomainType> _function;
 };
@@ -168,7 +168,7 @@ class InterpolatedCurve
     virtual UpperBoxType bounding_box() const;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
   private:
     friend OutputStream& operator<<(OutputStream&, const InterpolatedCurve&);

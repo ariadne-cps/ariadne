@@ -100,7 +100,7 @@ template<class X> class Algebra
     Algebra<X> clone() const { return Algebra<X>(this->_ptr->_create_copy()); }
     Algebra<X> create_zero() const { return Algebra<X>(this->_ptr->_create_zero()); }
     Algebra<X> create_constant(X const& c) const { return Algebra<X>(this->_ptr->_create_constant(c)); }
-    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+    OutputStream& _write(OutputStream& os) const { return _ptr->_write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
@@ -140,7 +140,7 @@ template<class X> class ElementaryAlgebra
     ElementaryAlgebra<X> clone() const { return ElementaryAlgebra<X>(this->_ptr->_create_copy()); }
     ElementaryAlgebra<X> create_zero() const { return ElementaryAlgebra<X>(this->_ptr->_create_zero()); }
     ElementaryAlgebra<X> create_constant(X const& c) const { return ElementaryAlgebra<X>(this->_ptr->_create_constant(c)); }
-    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+    OutputStream& _write(OutputStream& os) const { return _ptr->_write(os); }
 };
 
 
@@ -182,7 +182,7 @@ template<class X> class NormedAlgebra
     Void imul(const X& c) { _ptr->_imul(c); }
     Void isma(const X& c, const NormedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
     Void ifma(const NormedAlgebra<X>& x1, const NormedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
-    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+    OutputStream& _write(OutputStream& os) const { return _ptr->_write(os); }
 };
 
 //! \brief Generic class for elements of unital algebras.
@@ -209,7 +209,7 @@ template<class X> class GradedAlgebra
     Nat degree() const { return _ptr->degree(); }
     //! \brief The value in the null grade.
     const X& value() const { return _ptr->value(); }
-    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+    OutputStream& _write(OutputStream& os) const { return _ptr->_write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
@@ -240,7 +240,7 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(_ptr->_create_zero()); }
     SymbolicAlgebra<X> create_zero() const { return SymbolicAlgebra<X>(_ptr->_create_zero()); }
     SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(_ptr->_create_copy()); }
-    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
+    OutputStream& _write(OutputStream& os) const { return _ptr->_write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
     Void imul(const X& c) { _ptr->_imul(c); }
@@ -248,8 +248,8 @@ template<class X> class SymbolicAlgebra
     Void ifma(const SymbolicAlgebra<X>& x1, const SymbolicAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
 };
 
-template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x.write(os); }
-template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x.write(os); }
+template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x._write(os); }
+template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x._write(os); }
 } // namespace Ariadne
 
 #endif /* ARIADNE_ALGEBRA_HPP */

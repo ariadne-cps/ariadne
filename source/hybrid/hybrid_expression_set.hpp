@@ -105,7 +105,7 @@ class HybridBoxSet
     virtual LowerKleenean inside(const HybridExactBoxes& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   private:
     virtual HybridBoxSet* clone() const override;
@@ -189,7 +189,7 @@ class HybridConstraintSet
     virtual LowerKleenean separated(const HybridExactBox& bx) const override;
     virtual LowerKleenean covers(const HybridExactBox& bx) const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
   protected:
     virtual RegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
@@ -238,7 +238,7 @@ class HybridBoundedConstraintSet
     virtual LowerKleenean covers(const HybridExactBox& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   protected:
     virtual BoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;

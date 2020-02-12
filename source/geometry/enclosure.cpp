@@ -1306,7 +1306,7 @@ inline const ValidatedScalarMultivariateFunctionModelDP& repr(const ValidatedSca
 inline const ValidatedVectorMultivariateFunctionModelDP& repr(const ValidatedVectorMultivariateFunctionModelDP& f) { return f; }
 inline const List<ValidatedScalarMultivariateFunctionModelDP>& repr(const List<ValidatedScalarMultivariateFunctionModelDP>& f) { return f; }
 
-OutputStream& Enclosure::write(OutputStream& os) const {
+OutputStream& Enclosure::_write(OutputStream& os) const {
     const Bool LONG_FORMAT=false;
 
     if(LONG_FORMAT) {

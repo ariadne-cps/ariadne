@@ -1617,7 +1617,7 @@ HybridEvolverBaseConfiguration::set_flow_accuracy(const RawRealType value)
 
 
 OutputStream&
-HybridEvolverBaseConfiguration::write(OutputStream& os) const
+HybridEvolverBaseConfiguration::_write(OutputStream& os) const
 {
     os << "HybridEvolverBaseConfiguration"
        << ",\n  flow_accuracy=" << flow_accuracy()

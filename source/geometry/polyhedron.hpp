@@ -144,7 +144,7 @@ class Polyhedron
     //! \name Input/output.
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     //@}
   private:
     Matrix<FloatDP> _A;
@@ -153,7 +153,7 @@ class Polyhedron
 
 
 inline OutputStream& operator<<(OutputStream& os, const Polyhedron& p) {
-    return p.write(os);
+    return p._write(os);
 }
 
 

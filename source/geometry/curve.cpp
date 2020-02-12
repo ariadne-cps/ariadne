@@ -96,7 +96,7 @@ Curve::tangent(const ParameterType& s) const
 
 
 OutputStream&
-Curve::write(OutputStream& os) const
+Curve::_write(OutputStream& os) const
 {
     return os << "Curve( function=" << this->_function << " )";
 }
@@ -159,7 +159,7 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 }
 
 OutputStream&
-InterpolatedCurve::write(OutputStream& os) const
+InterpolatedCurve::_write(OutputStream& os) const
 {
     return os << (*this);
 }

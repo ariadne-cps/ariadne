@@ -30,6 +30,7 @@
 #define ARIADNE_CONFIGURATION_INTERFACE_HPP
 
 #include <ostream>
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 
@@ -102,17 +103,14 @@ namespace Ariadne {
  *  root Configuration object to retrieve their specific Configuration.
  *
  */
-class ConfigurationInterface {
+class ConfigurationInterface : public WritableInterface {
 
   private:
-
-    const ConfigurationInterface& operator=(const ConfigurationInterface& other);
-
+    const ConfigurationInterface& operator=(const ConfigurationInterface& other) = delete;
   public:
-    //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
-
-    friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& conf) { return conf.write(os); }
+    virtual ~ConfigurationInterface() = default;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
 

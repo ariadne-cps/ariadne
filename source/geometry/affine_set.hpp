@@ -150,7 +150,7 @@ class ValidatedAffineConstrainedImageSet
     List<Point2d> boundary(Nat xc, Nat yc) const;
 
     virtual Void draw(CanvasInterface&, const Projection2d& p) const;
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
@@ -160,7 +160,7 @@ class ValidatedAffineConstrainedImageSet
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {
-    return as.write(os); }
+    return as._write(os); }
 
 
 

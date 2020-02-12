@@ -53,7 +53,15 @@ static const Int RIGHT_MARGIN = 10;
 
 #endif
 
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable);
+OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
+    if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
+        os << *writable;
+    } else {
+        os << "Drawable";
+    }
+    return os;
+}
+
 
 
 Colour::Colour()
@@ -100,10 +108,6 @@ Void draw(Figure& fig, const DrawableInterface& shape) {
 
 Void draw(Figure& fig, FloatDPApproximateBox const& box) {
     fig.draw(box);
-}
-
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
-    return drawable.write(os);
 }
 
 struct GraphicsObject {

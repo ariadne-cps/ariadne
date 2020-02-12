@@ -97,7 +97,7 @@ template<class X> Set<Identifier> names(const List< Variable<X> >& variables) {
 }
 
 OutputStream&
-DiscreteMode::write(OutputStream& os) const
+DiscreteMode::_write(OutputStream& os) const
 {
     const DiscreteMode& mode=*this;
     os << "DiscreteMode( "
@@ -133,7 +133,7 @@ DiscreteTransition(DiscreteLocation source,
 }
 
 OutputStream&
-DiscreteTransition::write(OutputStream& os) const
+DiscreteTransition::_write(OutputStream& os) const
 {
     const DiscreteTransition& transition=*this;
     return os << "DiscreteTransition( "
@@ -509,7 +509,7 @@ HybridAutomaton::mode(DiscreteLocation location) const
 
 
 OutputStream&
-HybridAutomaton::write(OutputStream& os) const
+HybridAutomaton::_write(OutputStream& os) const
 {
     const HybridAutomaton& ha=*this;
     os << "\nHybridAutomaton( \n  modes=\n";

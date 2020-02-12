@@ -145,8 +145,6 @@ class DrawableInterface {
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
     virtual DimensionType dimension() const = 0;
-    //! brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const { return os << "Drawable"; }
 };
 
 } // namespace Ariadne

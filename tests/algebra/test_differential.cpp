@@ -257,7 +257,9 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_jacobian());
         ARIADNE_TEST_CALL(test_differentiate());
         ARIADNE_TEST_CALL(test_compose());
-        ARIADNE_TEST_CALL(test_flow());
+        ARIADNE_TEST_CALL(test_autonomous_flow());
+        ARIADNE_TEST_CALL(test_time_dependent_flow());
+        ARIADNE_TEST_CALL(test_linear_flow());
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_mapping());
     }
@@ -354,7 +356,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_EQUAL(compose(f,join(x,h)),zero);
     }
 
-    Void test_flow() {
+    Void test_autonomous_flow() {
         SizeType n=2;
         DegreeType deg=4;
         X z(pr);
@@ -366,6 +368,49 @@ class TestDifferentialVector {
         ARIADNE_TEST_EQUAL(phi.argument_size(),f.argument_size()+1u);
         ARIADNE_TEST_EQUAL(phi.degree(),f.degree()+1u);
         ARIADNE_TEST_EQUAL(derivative(phi,n),compose(f,phi));
+
+        n=1;
+        x0={z+1}; auto t0=z;
+        x=DifferentialType::variables(n,n,deg,x0);
+        f={x[0]};
+        phi=flow(f,x0);
+        x={DifferentialType::variable(n+1,deg+1,x0[0],0)};
+        DifferentialType t=DifferentialType::variable(n+1,deg+1,t0,1);
+        ARIADNE_TEST_EQUAL(phi[0],x[0]*exp(t));
+    }
+
+    Void test_time_dependent_flow() {
+        SizeType n=2;
+        DegreeType deg=4;
+        X z(pr);
+        Vector<X> x0={z,z}; X t0=z;
+        DifferentialVectorType xt=DifferentialType::variables(n+1,n+1,deg,join(x0,t0));
+        DifferentialVectorType x=project(xt,Range(0,n));
+        DifferentialType t=xt[n];
+
+        DifferentialVectorType f={5+2*x[0]-3*x[1]+x[0]*x[1]+t, 2+x[1]-x[0]*x[1]*t+x[0]*x[0]*x[0]/2};
+        DifferentialVectorType phi=flow(f,x0,t0);
+        ARIADNE_TEST_EQUAL(phi.result_size(),f.result_size());
+        ARIADNE_TEST_EQUAL(phi.argument_size(),f.argument_size());
+        ARIADNE_TEST_EQUAL(phi.degree(),f.degree()+1u);
+        t=DifferentialType::variable(n+1,deg+1,t0,n);
+        ARIADNE_TEST_EQUAL(derivative(phi,n),compose(f,join(phi,t)));
+    }
+
+    Void test_linear_flow() {
+        SizeType n=1;
+        DegreeType deg=4;
+        X z(pr);
+        Vector<X> x0={z+1}; X t0=z;
+        DifferentialVectorType xt=DifferentialType::variables(n+1,n+1,deg,join(x0,t0));
+        DifferentialVectorType x=project(xt,Range(0,n));
+        DifferentialType t=xt[n];
+        DifferentialVectorType f={2*x[0]+12*t};
+        DifferentialVectorType phi=flow(f,x0,t0);
+        xt=DifferentialType::variables(n+1,n+1,deg+1,join(x0,t0));
+        x=static_cast<DifferentialVectorType>(project(xt,Range(0,n)));
+        t=xt[n];
+        ARIADNE_TEST_EQUAL(phi[0],(x[0]+3)*exp(2*t)-6*t-3);
     }
 
     Void test_mapping() {

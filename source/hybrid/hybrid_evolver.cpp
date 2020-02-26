@@ -1120,13 +1120,13 @@ _apply_guard(List<HybridEnclosure>& sets,
                 hitting_set.reduce();
                 missing_set.reduce();
                 past_set.reduce();
-                std::cerr<<"final_guard_range="<<final_guard_function.range()<<"\n";
-                std::cerr<<"maximal_guard_function="<<maximal_guard_function<<"\n";
-                std::cerr<<"final_guard_function="<<final_guard_function<<"\n";
-                std::cerr<<"elapsed_time_function="<<elapsed_time_function<<"\n";
-                std::cerr<<"critical_time_function="<<critical_time_function<<"\n";
-                std::cerr<<"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty()<<"\n";
-                std::cerr<<"hitting_set="<<hitting_set<<"\n";
+                ARIADNE_LOG(9,"final_guard_range="<<final_guard_function.range()<<"\n");
+                ARIADNE_LOG(9,"maximal_guard_function="<<maximal_guard_function<<"\n");
+                ARIADNE_LOG(9,"final_guard_function="<<final_guard_function<<"\n");
+                ARIADNE_LOG(9,"elapsed_time_function="<<elapsed_time_function<<"\n");
+                ARIADNE_LOG(9,"critical_time_function="<<critical_time_function<<"\n");
+                ARIADNE_LOG(9,"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty()<<"\n");
+                ARIADNE_LOG(9,"hitting_set="<<hitting_set<<"\n");
                 // FIXME: The guard range at the critical time may provide a stronger guarantee of emptiness than maximal_guard_function > zero, but we should ideally not rely on this
                 if(definitely(guard_range_at_critical_time > 0 || missing_set.is_empty())) {
                     // swap out missing set

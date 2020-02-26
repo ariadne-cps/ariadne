@@ -53,7 +53,11 @@ void TestCrossingsIssue::test_crossings()
     /// Build the Hybrid System
     RealConstant v("v",0.1_dec);
     RealConstant L("L",0.00025_dec);
+<<<<<<< HEAD
     RealConstant M("M",0.004_dec);
+=======
+    RealConstant M("M",0.005_dec);
+>>>>>>> 7878adb3441c0ce29953e6572a1ce05d6994b3d5
 
     /// Create a HybridAutomaton object
     AtomicHybridAutomaton automaton("compute_crossings_issue");
@@ -74,8 +78,8 @@ void TestCrossingsIssue::test_crossings()
     DiscreteEvent comes("comes");
     DiscreteEvent leaves("leaves");
 
-    automaton.new_transition(far,comes,close,{next(x)=x+4*M},sqr(x-M)<=sqr(L),EventKind::URGENT);
-//	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L),EventKind::IMPACT);
+    automaton.new_transition(far,comes,close,{next(x)=x},sqr(x-M)<=sqr(L),EventKind::IMPACT);
+	automaton.new_transition(close,leaves,far,{next(x)=x},sqr(x-M)>=sqr(L),EventKind::IMPACT);
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(automaton);
@@ -84,7 +88,6 @@ void TestCrossingsIssue::test_crossings()
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.5);
     evolver.configuration().set_maximum_step_size(0.05);
-
     evolver.set_function_factory(*make_taylor_function_factory(1e-10));
 
     typedef GeneralHybridEvolver::OrbitType OrbitType;

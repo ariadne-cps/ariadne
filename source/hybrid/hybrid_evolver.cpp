@@ -937,17 +937,7 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
             jump_set.new_activation(event,transition_data.guard_function);
             break;
-        case EventKind::IMPACT: {
-            EffectiveScalarMultivariateFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
-            UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
-            ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n");
-            if(possibly(flow_derivative_range.lower()<=0)) {
-                jump_set.new_activation(event,flow_derivative_function);
-            }
-            if(definitely(jump_set.is_empty())) { return; }
-            [[fallthrough]];
-        }
-        case EventKind::URGENT:
+        case EventKind::URGENT: case EventKind::IMPACT:
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
@@ -979,7 +969,7 @@ _apply_guard_step(HybridEnclosure& set,
 /*
                 case CrossingKind::GRAZING:
                     ARIADNE_LOG(6,"critical_time="<<crossing_data.critical_time<<"\n");
-                    std::cerr<<"jump_set.domain()="<<jump_set.domain();
+                    ARIADNE_LOG(9,"jump_set.domain()="<<jump_set.domain()<<"\n");
                     IntervalDomainType evolution_time_domain=timing_data.evolution_time_domain;
                     ValidatedScalarMultivariateFunctionModelDP embedded_space_function=embed(set.space_function(),timing_data.evolution_time_domain);
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
@@ -1008,6 +998,19 @@ _apply_guard_step(HybridEnclosure& set,
                     break;
                 default:
                     ARIADNE_FAIL_MSG("Unhandled crossing kind in "<<crossing_data<<"\n");
+            }
+            if (transition_data.event_kind==EventKind::IMPACT) {
+                // For an IMPACT event, also impose that the flow derivative is positive at the crossing.
+                EffectiveScalarMultivariateFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
+                ARIADNE_LOG(9,"flow_derivative_function="<<flow_derivative_function<<"\n");
+                ARIADNE_LOG(9,"jump_set.state_bounding_box()="<<jump_set.state_bounding_box()<<"\n");
+                UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
+                ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n\n");
+                if(possibly(flow_derivative_range.lower()<=0)) {
+                    jump_set.new_activation(event,flow_derivative_function);
+                }
+                ARIADNE_LOG(9,"jump_set="<<jump_set<<"\n\n\n");
+                if(definitely(jump_set.is_empty())) { return; }
             }
             break;
         default:

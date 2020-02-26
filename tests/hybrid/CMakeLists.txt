@@ -1,5 +1,3 @@
-add_subdirectory(secondary)
-
 set(UNIT_TESTS
     test_hybrid_automaton
     test_hybrid_evolution    

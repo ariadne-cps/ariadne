@@ -244,7 +244,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
             auto current_evolve=approximator.evolve(current_reach.at(current_reach.size()-1u),new_t);
 
             FloatDPApproximation current_volume = volume(current_evolve.range());
-            if (definitely(current_volume < best_volume)) {
+            if (possibly(current_volume < best_volume)) {
                 best = approximator;
                 ARIADNE_LOG(6,"best approximator: " << best << "\n");
                 best_reach_functions = current_reach;

@@ -80,7 +80,7 @@ class TaylorFunctionFactory
 };
 
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(double sweep_threshold_);
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper);
 
 } // namespace Ariadne
 

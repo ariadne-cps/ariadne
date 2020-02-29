@@ -70,6 +70,7 @@ template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorMo
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
+
 template class ScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
 template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
 template class ScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
@@ -79,8 +80,8 @@ FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_functio
     return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
-FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(double sweep_threshold_) {
-    return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold_));
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
+    return new TaylorFunctionFactory(sweeper);
 }
 
 } // namespace Ariadne

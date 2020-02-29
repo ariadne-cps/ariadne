@@ -200,19 +200,19 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<FloatDPValue> convert_interval(Interval<FloatDPValue> const& ivl, DoublePrecision pr) {
+inline Interval<FloatDPValue> convert_interval(Interval<FloatDPValue> const& ivl, DoublePrecision pr) {
     return ivl; }
-Interval<FloatMPValue> convert_interval(Interval<FloatDPValue> const& ivl, MultiplePrecision pr) {
+inline Interval<FloatMPValue> convert_interval(Interval<FloatDPValue> const& ivl, MultiplePrecision pr) {
     return Interval<FloatMPValue>(FloatMP(ivl.lower().raw(),pr),FloatMP(ivl.upper().raw(),pr)); }
 
-Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) {
+inline Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) {
     return ivl; }
-Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
+inline Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
     return Interval<FloatDPUpperBound>(FloatDP(ivl.lower().raw(),down,pr),FloatDP(ivl.upper().raw(),up,pr)); }
 
-Interval<FloatDPApproximation> const& convert_interval(Interval<FloatDPApproximation> const& ivl, DoublePrecision) {
+inline Interval<FloatDPApproximation> const& convert_interval(Interval<FloatDPApproximation> const& ivl, DoublePrecision) {
     return ivl; }
-Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproximation> const& ivl, DoublePrecision pr) {
+inline Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproximation> const& ivl, DoublePrecision pr) {
     return Interval<FloatDPApproximation>(FloatDP(ivl.lower().raw(),near,pr),FloatDP(ivl.upper().raw(),near,pr)); }
 
 template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
@@ -1346,25 +1346,27 @@ template<class P, class F> auto TaylorModel<P,F>::range() const -> RangeType {
         }
     }
     err=err+tm.error();
-if constexpr(IsSame<P,ValidatedTag>::value) {
     RangeType r(-err,+err);
-    r=r+constant_term;
-    const RangeType unit_ivl(-1,+1,this->precision());
-    // If the ratio b/a is very large, then roundoff error can cause a significant
-    // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
-    for(SizeType j=0; j!=as; ++j) {
-        const CoefficientType& a=quadratic_terms[j];
-        const CoefficientType& b=linear_terms[j];
-        RangeType ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
-        if(not is_same_as_zero(a)) { // Explicitly test for zero
-            RangeType qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
-            r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
-        } else {
-            r += ql;
+    if constexpr(IsSame<P,ValidatedTag>::value) {
+        r=r+constant_term;
+        const RangeType unit_ivl(-1,+1,this->precision());
+        // If the ratio b/a is very large, then roundoff error can cause a significant
+        // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
+        for(SizeType j=0; j!=as; ++j) {
+            const CoefficientType& a=quadratic_terms[j];
+            const CoefficientType& b=linear_terms[j];
+            RangeType ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
+            if(not is_same_as_zero(a)) { // Explicitly test for zero
+                RangeType qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+                r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
+            } else {
+                r += ql;
+            }
         }
+    } else {
+        ARIADNE_ASSERT_MSG(false,"Range only available for a Validated TaylorModel.");
     }
     return r;
-} else { assert(false); }
 }
 
 

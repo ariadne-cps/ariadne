@@ -145,6 +145,10 @@ Void export_integrators(pybind11::module& module)
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
     taylor_picard_integrator_class.def(pybind11::init<double>());
+    taylor_picard_integrator_class.def("minimum_temporal_order",&TaylorPicardIntegrator::minimum_temporal_order);
+    taylor_picard_integrator_class.def("maximum_temporal_order",&TaylorPicardIntegrator::maximum_temporal_order);
+    taylor_picard_integrator_class.def("set_minimum_temporal_order",&TaylorPicardIntegrator::set_minimum_temporal_order);
+    taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
     taylor_series_integrator_class.def(pybind11::init<double,uint>());
@@ -158,11 +162,9 @@ Void export_integrators(pybind11::module& module)
     graded_taylor_series_integrator_class.def("maximum_spacial_order",&GradedTaylorSeriesIntegrator::maximum_spacial_order);
     graded_taylor_series_integrator_class.def("maximum_temporal_order",&GradedTaylorSeriesIntegrator::maximum_temporal_order);
     graded_taylor_series_integrator_class.def("maximum_error",&GradedTaylorSeriesIntegrator::maximum_error);
-    graded_taylor_series_integrator_class.def("maximum_step_size",&GradedTaylorSeriesIntegrator::maximum_step_size);
     graded_taylor_series_integrator_class.def("set_maximum_spacial_order",&GradedTaylorSeriesIntegrator::set_maximum_spacial_order);
     graded_taylor_series_integrator_class.def("set_maximum_temporal_order",&GradedTaylorSeriesIntegrator::set_maximum_temporal_order);
     graded_taylor_series_integrator_class.def("set_maximum_error",&GradedTaylorSeriesIntegrator::set_maximum_error);
-    graded_taylor_series_integrator_class.def("set_maximum_step_size",&GradedTaylorSeriesIntegrator::set_maximum_step_size);
 
     pybind11::class_<RungeKutta4Integrator> runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
     runge_kutta_4_integrator_class.def(pybind11::init<double>());

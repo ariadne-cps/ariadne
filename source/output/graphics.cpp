@@ -35,10 +35,6 @@
 #include "../output/graphics.hpp"
 #include "../output/cairo.hpp"
 
-#ifdef HAVE_GTK2_H
-#include <gtk/gtk.h>
-#endif
-
 namespace Ariadne {
 
 static const Int DEFAULT_WIDTH = 800;

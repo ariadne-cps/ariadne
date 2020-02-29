@@ -87,7 +87,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
         if(!success) {
             h=hlf(h);
             if (h < MINIMUM_STEP_SIZE)
-                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << "allowed, bounding could not be found.");
+                ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << ") allowed, bounding could not be found.");
 
             T = to_time_bounds(t,t+h);
         }

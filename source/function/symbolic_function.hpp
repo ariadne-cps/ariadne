@@ -146,7 +146,13 @@ struct VectorFormulaFunction
 };
 
 typedef VectorFormulaFunction<EffectiveNumber> EffectiveVectorFormulaFunction;
+typedef Pair<Nat,EffectiveFormula> CoordinateFormulaPair;
+typedef List<CoordinateFormulaPair> CoordinateFormulaPairs;
 
+class NotFormulaFunctionException : public std::runtime_error {
+  public:
+    NotFormulaFunctionException(const String& str) : std::runtime_error(str) { }
+};
 
 //! \brief Returns \a true if the function \a f is syntactically constant in the indices \a is.
 template<class Y> Bool is_constant_in(const ScalarFormulaFunction<Y>& f, const Set<Nat>& is) { return is_constant_in(f._formula,is); }
@@ -156,6 +162,50 @@ template<class Y> Bool is_affine_in(const ScalarFormulaFunction<Y>& f, const Set
 template<class Y> Bool is_affine_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_affine_in(f._formulae,is); }
 //! \brief Returns \a true if the vector function \a f is syntactically additive (possibly with multipliers) in the indices \a is.
 template<class Y> Bool is_additive_in(const VectorFormulaFunction<Y>& f, const Set<Nat>& is) { return is_additive_in(f._formulae,is); }
+
+template<class Y> Bool is_affine_in(const VectorMultivariateFunction<Y>& f, const Set<Nat>& is) {
+    auto ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(f.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"is_affine_in(f,is)","Affinity checking currently available only for formula functions.");
+    return is_affine_in(ff->_formulae,is);
+}
+template<class Y> Bool is_additive_in(const VectorMultivariateFunction<Y>& f, const Set<Nat>& is) {
+    auto ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(f.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"is_additive_in(f,is)","Additivity checking currently available only for formula functions.");
+    return is_additive_in(ff->_formulae,is);
+}
+
+inline EffectiveVectorMultivariateFunction noise_independent_component(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
+
+    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"noise_independent_component(f,num_inputs)","Noise independent component extraction currently available only for formula functions.");
+
+    CoordinateFormulaPairs substitutions;
+    for (auto i : range(ff->result_size(),ff->result_size()+num_inputs)) {
+        substitutions.append({i,EffectiveFormula::zero()});
+    }
+
+    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(ff->_formulae,substitutions)));
+}
+
+inline Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
+
+    Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
+
+    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"input_derivatives(f,num_inputs)","Input derivatives extraction currently available only for formula functions.");
+
+    SizeType n = function.result_size();
+
+    for (auto j : range(num_inputs)) {
+        Vector<EffectiveFormula> derivative_formulae(n);
+        for (auto i : range(n)) {
+            derivative_formulae[i] = simplify(derivative(ff->_formulae[i],n+j));
+        }
+        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
+    }
+
+    return result;
+}
 
 
 //------------------------ Arithmetic scalar functions  -----------------------------------//

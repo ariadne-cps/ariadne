@@ -29,8 +29,6 @@
 #ifndef ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 #define ARIADNE_INCLUSION_VECTOR_FIELD_HPP
 
-#include <memory>
-
 #include "../function/function.hpp"
 #include "../geometry/set_interface.hpp"
 #include "../geometry/grid.hpp"
@@ -38,11 +36,6 @@
 #include "../symbolic/expression.decl.hpp"
 
 namespace Ariadne {
-
-class NotFormulaFunctionException : public std::runtime_error {
-  public:
-    NotFormulaFunctionException(const String& str) : std::runtime_error(str) { }
-};
 
 class MissingInputException : public std::runtime_error {
   public:
@@ -89,30 +82,26 @@ class InclusionVectorField
     Grid grid() const { return Grid(_function.result_size()); }
 
     //! \brief If the dynamics is affine in the inputs.
-    Bool is_input_affine() const { return _is_input_affine; }
+    Bool is_input_affine() const;
     //! \brief If the inputs are additive (includes the case of constant multipliers).
-    Bool is_input_additive() const { return _is_input_additive; }
+    Bool is_input_additive() const;
 
     const EffectiveVectorMultivariateFunction& function() const { return _function; }
     const BoxDomainType& inputs() const { return _inputs; }
+
     //! \brief Return the dynamics component obtained by setting the input radius to zero.
-    const EffectiveVectorMultivariateFunction& noise_independent_component() const { return _noise_independent_component; }
+    EffectiveVectorMultivariateFunction noise_independent_component() const;
     //! \brief Return the dynamics components given by the derivatives for each input.
-    const Vector<EffectiveVectorMultivariateFunction>& input_derivatives() const { return _input_derivatives; }
+    Vector<EffectiveVectorMultivariateFunction> input_derivatives() const;
 
     friend OutputStream& operator<<(OutputStream& os, const InclusionVectorField& vf) {
         return os << "InclusionVectorField( " << vf.function() << ", " << vf.inputs() << " )"; }
   private:
     Void _transform_and_assign(EffectiveVectorMultivariateFunction const& function, BoxDomainType const& inputs);
-    Void _acquire_and_assign_properties();
   private:
     EffectiveVectorMultivariateFunction _function;
     BoxDomainType _inputs;
     List<Identifier> _variable_names;
-    Bool _is_input_affine;
-    Bool _is_input_additive;
-    EffectiveVectorMultivariateFunction _noise_independent_component;
-    Vector<EffectiveVectorMultivariateFunction> _input_derivatives;
 };
 
 } // namespace Ariadne

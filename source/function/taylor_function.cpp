@@ -76,11 +76,11 @@ template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
 template class ScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
     return new TaylorFunctionFactory(sweeper);
 }
 

@@ -29,15 +29,15 @@
 #include "inclusion_evolver.hpp"
 
 namespace Ariadne {
-
-FloatDP volume(Vector<ApproximateIntervalType> const& box) {
+/*
+FloatDP volume(Vector<IntervalValidatedRangeType> const& box) {
     FloatDP result = 1.0;
     for (auto i: range(box.size())) {
         result *= box[i].width().raw();
     }
     return result;
 }
-
+*/
 BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
@@ -235,7 +235,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
         List<ValidatedVectorMultivariateFunctionModelDP> best_reach_functions;
         ValidatedVectorMultivariateFunctionModelDP best_evolve_function;
         InclusionIntegratorHandle best = approximators_to_use.at(0);
-        FloatDP best_volume = FloatDP::inf(DoublePrecision());
+        FloatDPApproximation best_volume(std::numeric_limits<double>::infinity());
 
         for (auto approximator : approximators_to_use) {
             ARIADNE_LOG(5,"checking "<<approximator<<" approximator\n");
@@ -243,8 +243,8 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
             auto current_reach=approximator.reach(domx,evolve_function,B,t,h);
             auto current_evolve=approximator.evolve(current_reach.at(current_reach.size()-1u),new_t);
 
-            FloatDP current_volume = volume(current_evolve.range());
-            if (current_volume < best_volume) {
+            FloatDPApproximation current_volume = volume(current_evolve.range());
+            if (definitely(current_volume < best_volume)) {
                 best = approximator;
                 ARIADNE_LOG(6,"best approximator: " << best << "\n");
                 best_reach_functions = current_reach;
@@ -332,7 +332,7 @@ ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::incorporate_erro
 
     ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,tf.properties());
     ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
-    for(SizeType i=0; i!=result.result_size(); ++i) { result[i].set_error(0); }
+    for(SizeType i=0; i!=result.result_size(); ++i) { result[i].clobber(); }
     return result;
 }
 
@@ -431,7 +431,7 @@ InclusionEvolverConfiguration::InclusionEvolverConfiguration()
 
 
 OutputStream&
-InclusionEvolverConfiguration::write(OutputStream& os) const
+InclusionEvolverConfiguration::_write(OutputStream& os) const
 {
     os << "InclusionEvolverConfiguration"
        << ",\n  maximum_step_size=" << maximum_step_size()

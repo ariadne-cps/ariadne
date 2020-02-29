@@ -50,6 +50,8 @@ using ValidatedVectorMultivariateFunctionModelType = ValidatedVectorMultivariate
 
 using TimeStepType = Dyadic;
 
+typedef FloatDPError ErrorType;
+
 template<class C, class T> Bool instance_of(T* const obj) {
     return (dynamic_cast<const C*>(obj) != nullptr);
 }
@@ -65,6 +67,9 @@ inline Vector<FloatDPValue> const& cast_exact(Vector<ErrorType> const& v) {
 Void add_errors(ValidatedVectorMultivariateFunctionModelDP& phi, Vector<ErrorType> const& e);
 
 EffectiveVectorMultivariateFunction substitute_v_with_w(EffectiveVectorMultivariateFunction const& F, Vector<EffectiveScalarMultivariateFunction> const& w);
+
+template<class F1, class F2, class F3, class... FS> decltype(auto) product(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
+    return product(product(f1,f2),f3,fs...); }
 
 template<class F1, class F2, class F3, class... FS> decltype(auto) join(F1 const& f1, F2 const& f2, F3 const& f3, FS const& ... fs) {
     return join(join(f1,f2),f3,fs...); }

@@ -30,6 +30,8 @@
 
 namespace Ariadne {
 
+template<class I> decltype(auto) inline norm(Box<I> const& bx) { return norm(cast_vector(bx)); }
+
 template<> ErrorType wstar_multiplier<ZeroApproximation>() { return ErrorType(0u); }
 template<> ErrorType wstar_multiplier<ConstantApproximation>() { return ErrorType(1u); }
 template<> ErrorType wstar_multiplier<AffineApproximation>() { return ErrorType(5.0/3u); }
@@ -320,7 +322,7 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator
     BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB);
+    BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
     ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);
@@ -350,7 +352,7 @@ template<class A> ValidatedVectorMultivariateFunctionModelDP InclusionIntegrator
     BoxDomainType PB=Phi.domain()[range(n+1,n+1+b)];
 
     auto Tau=IntervalDomainType(t,new_t);
-    BoxDomainType XTP = join(X,Tau,PA,PB);
+    BoxDomainType XTP = product(X,Tau,PA,PB);
     ValidatedVectorMultivariateTaylorFunctionModelDP xf=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(0,n),swp);
     ValidatedScalarMultivariateTaylorFunctionModelDP tf=ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(XTP,n,swp);
     ValidatedVectorMultivariateTaylorFunctionModelDP af=ValidatedVectorMultivariateTaylorFunctionModelDP::projection(XTP,range(n+1,n+1+a),swp);

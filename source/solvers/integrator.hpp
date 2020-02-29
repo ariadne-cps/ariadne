@@ -55,6 +55,7 @@ template<class I, class X> class Polynomial;
 template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
 typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedFunctionModelDPFactoryPointer;
+typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };

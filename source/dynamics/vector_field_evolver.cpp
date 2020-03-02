@@ -215,7 +215,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorMultivariateFunction FunctionType;
-    typedef ValidatedVectorMultivariateFunctionModelDP FlowModelType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;
@@ -259,10 +258,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
-    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
+    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
+    FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model

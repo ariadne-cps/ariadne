@@ -31,8 +31,6 @@
 
 namespace Ariadne {
 
-int abslog10floor(double);
-
 Value<FloatDP> midpoint(Bounds<FloatDP> const& x) { return x.value(); } // DEPRECATED
 
 template<> auto Operations<FloatBounds<DoublePrecision>>::_write(OutputStream& os, const FloatBounds<DoublePrecision>& x) -> OutputStream&;

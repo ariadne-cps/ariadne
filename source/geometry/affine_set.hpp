@@ -78,7 +78,7 @@ template<class X> AffineConstraint<X> operator==(const Affine<X>& a, const SelfT
     return AffineConstraint<X>(c,a,c); }
 
 template<class F> ValidatedAffineModelConstraint<F> operator<=(const Bounds<F>& l, const ValidatedAffineModel<F>& am) {
-    return ValidatedAffineModelConstraint<F>(l,am,+infty); };
+    return ValidatedAffineModelConstraint<F>(l,am,+infty); }
 template<class F> ValidatedAffineModelConstraint<F> operator<=(const ValidatedAffineModel<F>& am, const Bounds<F>& u) {
     return ValidatedAffineModelConstraint<F>(-infty,am,u); }
 template<class F> ValidatedAffineModelConstraint<F> operator<=(const ValidatedAffineModelConstraint<F>& amc, const Bounds<F>& u) {

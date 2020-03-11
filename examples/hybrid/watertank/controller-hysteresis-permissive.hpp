@@ -26,7 +26,7 @@
 
 using namespace Ariadne;
 
-inline AtomicHybridAutomaton getController()
+inline HybridAutomaton getController()
 {
     // Declare some constants
     RealConstant hmin("hmin",5.75_decimal);
@@ -43,26 +43,28 @@ inline AtomicHybridAutomaton getController()
     DiscreteEvent e_must_close("must_close");
 
     // Create the controller automaton
-    AtomicHybridAutomaton controller("controller");
+    HybridAutomaton automaton("controller");
+
+    StringVariable controller("controller");
 
     // Declare the locations for the controller
-    AtomicDiscreteLocation rising("rising");
-    AtomicDiscreteLocation falling("falling");
+    DiscreteLocation rising(controller|"rising");
+    DiscreteLocation falling(controller|"falling");
 
     // Instantiate modes for each location; since no dynamics is present, we create an empty list
-    controller.new_mode(rising,List<RealAssignment>());
-    controller.new_mode(falling,List<RealAssignment>());
+    automaton.new_mode(rising,List<RealAssignment>());
+    automaton.new_mode(falling,List<RealAssignment>());
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    controller.new_invariant(falling,height>=hmin-delta,e_must_open);
-    controller.new_invariant(rising,height<=hmax+delta,e_must_close);
+    automaton.new_invariant(falling,height>=hmin-delta,e_must_open);
+    automaton.new_invariant(rising,height<=hmax+delta,e_must_close);
 
     // Specify the transitions, starting from the source location, according to an event, to a target location;
     // Following those arguments you specify a guard and whether the event is permissive or urgent.
-    controller.new_transition(falling,e_can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
-    controller.new_transition(rising,e_can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
+    automaton.new_transition(falling,e_can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
+    automaton.new_transition(rising,e_can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
 
-    return controller;
+    return automaton;
 }

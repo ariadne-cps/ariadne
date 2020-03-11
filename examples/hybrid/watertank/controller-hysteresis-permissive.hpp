@@ -42,10 +42,11 @@ inline HybridAutomaton getController()
     DiscreteEvent e_must_open("must_open");
     DiscreteEvent e_must_close("must_close");
 
-    // Create the controller automaton
-    HybridAutomaton automaton("controller");
-
+    // Declare the variable for the automaton name
     StringVariable controller("controller");
+
+    // Create the controller automaton
+    HybridAutomaton automaton(controller.name());
 
     // Declare the locations for the controller
     DiscreteLocation rising(controller|"rising");

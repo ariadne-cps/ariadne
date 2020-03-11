@@ -33,24 +33,23 @@ inline HybridAutomaton getTank()
     RealConstant lambda("lambda",0.02_decimal);
     RealConstant rate("rate",0.3_decimal);
 
-    // Declase the variables for the dynamics
+    // Declare the variables for the dynamics
     RealVariable aperture("aperture");
     RealVariable height("height");
 
-    // Create the tank automaton; in this case we use the HybridAutomaton class since
-    // it is more permissive than AtomicHybridAutomaton; in particular it uses
-    // a DiscreteLocation instead of an AtomicDiscreteLocation; a DiscreteLocation allows
-    // an empty label, which is cleaner from a logging perspective when there is only one
-    // location in an automaton.
-    HybridAutomaton tank("tank");
+    // Declare the variable for the automaton name
+    StringVariable tank("tank");
 
-    // Declare a trivial discrete location.
+    // Create the tank automaton
+    HybridAutomaton automaton(tank.name());
+
+    // Declare a trivial discrete location (we use an empty label since there is only one location).
     DiscreteLocation draining;
 
     // The water level is always given by the same dynamic.
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    tank.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
+    automaton.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
 
-    return tank;
+    return automaton;
 }

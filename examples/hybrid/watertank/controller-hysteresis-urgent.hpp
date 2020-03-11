@@ -39,10 +39,12 @@ HybridAutomaton getController()
     DiscreteEvent e_can_open("can_open");
     DiscreteEvent e_can_close("can_close");
 
-    // Create the controller automaton
-    HybridAutomaton automaton("controller");
-
+    // Declare the variable for the automaton name
     StringVariable controller("controller");
+
+    // Create the controller automaton
+    HybridAutomaton automaton(controller.name());
+
     // Declare the locations for the controller
     DiscreteLocation rising(controller|"rising");
     DiscreteLocation falling(controller|"falling");

@@ -42,10 +42,11 @@ inline HybridAutomaton getValve()
     DiscreteEvent e_can_open("can_open");
     DiscreteEvent e_can_close("can_close");
 
-    // Create the valve automaton
-    HybridAutomaton automaton("valve");
-
+    // Declare the variable for the automaton name
     StringVariable valve("valve");
+
+    // Create the valve automaton
+    HybridAutomaton automaton(valve.name());
 
     // Declare the values the valve variable can have
     DiscreteLocation opening(valve|"opening");

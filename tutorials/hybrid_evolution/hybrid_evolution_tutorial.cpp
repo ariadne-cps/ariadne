@@ -87,7 +87,7 @@ HybridAutomaton get_valve()
     automaton.new_mode(closing,{dot(aperture)=-1/T});
 
     // Define the transitions: source location, event and target location;
-    // then a mix of reset, guard and even kind can be present; if the event kind
+    // then a mix of reset, guard and event kind can be present; if the event kind
     // is not specified, then also the guard can't be specified: this implicitly
     // means that the event is an input event for this automaton.
     automaton.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
@@ -142,12 +142,9 @@ HybridAutomaton get_controller()
     return automaton;
 }
 
-Int main(Int argc, const char* argv[])
+Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_verbosity)
 {
-    // Acquire the verbosity value from the command line
-    Nat evolver_verbosity=get_verbosity(argc,argv);
-
-    // Declare the shared system variables required in the following
+    // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
 
@@ -157,46 +154,100 @@ Int main(Int argc, const char* argv[])
     StringConstant opened("opened");
     StringConstant rising("rising");
 
-    // Get the automata
-    HybridAutomaton tank_automaton = get_tank();
-    HybridAutomaton valve_automaton = get_valve();
-    HybridAutomaton controller_automaton = get_controller();
-    // Compose the automata
-    CompositeHybridAutomaton watertank_system({tank_automaton,valve_automaton,controller_automaton});
+    // Create a simulator object.
+    HybridSimulator simulator;
+    simulator.set_step_size(0.03125);
+    simulator.verbosity = log_verbosity;
 
-    // Print the system description on the command line
-    std::cout << watertank_system << std::endl;
+    // Set an initial point for the simulation
+    HybridRealPoint initial_point({valve|opened,controller|rising}, {height=7} );
+    std::cout << "initial_point=" << initial_point << std::endl;
 
-    // Compute the system evolution
+    // Set the maximum simulation time
+    HybridTime termination_time(30.0,5);
+    std::cout << "simulation_time=" << termination_time << std::endl;
 
-    // Create a GeneralHybridEvolver object and set its verbosity
-    GeneralHybridEvolver evolver(watertank_system);
-    evolver.verbosity = evolver_verbosity;
+    // Compute a simulation trajectory
+    std::cout << "Computing simulation trajectory... \n" << std::flush;
+    Orbit<HybridApproximatePoint> orbit = simulator.orbit(system,initial_point,termination_time);
+    std::cout << "done." << std::endl;
+
+    // Plot the simulation trajectory using two different projections
+    std::cout << "Plotting simulation trajectory... " << std::flush;
+    Axes2d time_height_axes(0<=TimeVariable()<=30,-0.1<=height<=9.1);
+    plot("simulation_t-height.png",time_height_axes, Colour(0.0,0.5,1.0), orbit);
+    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
+    plot("simulation_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "done." << std::endl;
+}
+
+GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, const Nat& log_verbosity)
+{
+    // Create a GeneralHybridEvolver object
+    GeneralHybridEvolver evolver(system);
 
     // Set the evolution parameters
-    evolver.configuration().set_maximum_enclosure_radius(3.05); // The maximum size of an evolved set before early termination
-    evolver.configuration().set_maximum_step_size(0.25); // The maximum value that can be used as a time step for integration
+    evolver.configuration().set_maximum_enclosure_radius(3.0);
+    evolver.configuration().set_maximum_step_size(0.25);
+    evolver.verbosity=log_verbosity;
+    std::cout << evolver.configuration() << std::endl;
+
+    return evolver;
+}
+
+Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybridEvolver& evolver) {
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
     std::cout << "Computing evolution... " << std::flush;
 
+    // Re-introduce the shared system variables required for the initial set
+    RealVariable aperture("aperture");
+    RealVariable height("height");
+
+    StringVariable valve("valve");
+    StringVariable controller("controller");
+
+    StringConstant opened("opened");
+    StringConstant rising("rising");
+
     // Define the initial set, by supplying the location as a list of locations for each composed automata, and
     // the continuous set as a list of variable assignments for each variable controlled on that location
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
-    HybridSet initial_set({valve|opened,controller|rising},{6.7_decimal<=height<=7});
+    HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
     // Define the evolution time: continuous time and maximum number of transitions
-    HybridTime evolution_time(30.0,5);
+    HybridTime termination_time(30.0,5);
     // Compute the orbit using upper semantics
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
+    OrbitType orbit = evolver.orbit(initial_set,termination_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     // Plot the trajectory using two different projections
     std::cout << "Plotting trajectory... " << std::flush;
     Axes2d time_height_axes(0<=TimeVariable()<=30,-0.1<=height<=9.1);
-    plot("watertank_hysteresis_t-height",time_height_axes, Colour(0.0,0.5,1.0), orbit);
+    plot("finite_evolution_t-height",time_height_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
-    plot("watertank_hysteresis_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
+    plot("finite_evolution_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
+}
+
+Int main(Int argc, const char* argv[])
+{
+    // Acquire the verbosity value from the command line
+    Nat log_verbosity=get_verbosity(argc,argv);
+
+    // Create the composed automaton
+    CompositeHybridAutomaton watertank_system({get_tank(),get_valve(),get_controller()});
+
+    // Print the system description on the command line
+    std::cout << watertank_system << std::endl;
+
+    // Compute an approximate simulation of the system evolution
+    simulate_evolution(watertank_system,log_verbosity);
+
+    // Create an evolver object
+    GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
+
+    // Compute the system evolution
+    compute_evolution(watertank_system,evolver);
 }

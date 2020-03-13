@@ -107,7 +107,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 {
     DoublePrecision pr;
     HybridTime t(0.0,0);
-    FloatDPApproximation h={this->_step_size,pr};
+    Dyadic h(ExactDouble(this->_step_size.get_d()));
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);
@@ -123,7 +123,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     while(possibly(check(t<tmax,Effort::get_default()))) {
         Int old_precision = std::clog.precision();
         ARIADNE_LOG(1,(verbosity==1?"\r":"")
-                <<"t="<<std::setw(4)<<std::left<<t.continuous_time().lower().get(DoublePrecision())
+                <<"t="<<std::setw(4)<<std::left<<t.continuous_time().lower().get(pr)
                 <<" #e="<<std::setw(4)<<std::left<<t.discrete_time()
                 <<" p="<<std::setw(5)<<std::left<<point
                 <<" l="<<std::left<<location
@@ -171,10 +171,10 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             k4=evaluate(dynamic,pt3);
 
             next_point=pt+(h/6)*(k1+FloatDPApproximation(2.0)*(k2+k3)+k4);
-            t._continuous_time += Real(FloatDPValue(h.raw()));
+            t._continuous_time += h;
         }
         point=next_point;
-        orbit.insert(t,HybridApproximatePoint(location,space,cast_exact(point)));
+        orbit.insert(t,HybridApproximatePoint(location,space,point));
     }
 
     return orbit;

@@ -83,10 +83,8 @@ Void
 Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
-    // FIXME: Should allow non-exact times
     Real time=ht.continuous_time();
     FloatDPValue flt_time=cast_exact(time.get(dp));
-    ARIADNE_ASSERT(decide(Real(flt_time)==time));
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
     } else {

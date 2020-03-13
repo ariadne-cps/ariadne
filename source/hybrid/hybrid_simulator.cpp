@@ -72,9 +72,9 @@ Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guard_functions(const Hyb
     Set<DiscreteEvent> events=system.events(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards;
     for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
-        if(system.event_kind(location,*iter)!=EventKind::INVARIANT) {
+        EventKind kind = system.event_kind(location,*iter);
+        if (kind != EventKind::INVARIANT && kind != EventKind::PROGRESS)
             guards.insert(*iter,system.guard_function(location,*iter));
-        }
     }
     return guards;
 }
@@ -113,6 +113,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     RealSpace space=system.continuous_state_space(location);
     ApproximatePointType point=make_point(init_pt,space);
     ApproximatePointType next_point;
+    List<DiscreteEvent> event_trace;
 
     Orbit<HybridApproximatePoint> orbit(HybridApproximatePoint(location,space,cast_exact(point)));
 
@@ -120,6 +121,14 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=guard_functions(system,location);
 
     while(possibly(check(t<tmax,Effort::get_default()))) {
+        Int old_precision = std::clog.precision();
+        ARIADNE_LOG(1,(verbosity==1?"\r":"")
+                <<"t="<<std::setw(4)<<std::left<<t.continuous_time().lower().get(DoublePrecision())
+                <<" #e="<<std::setw(4)<<std::left<<t.discrete_time()
+                <<" p="<<std::setw(5)<<std::left<<point
+                <<" l="<<std::left<<location
+                <<" e="<<std::left<<event_trace
+                <<" \n"<<std::setprecision(old_precision));
 
         Bool enabled=false;
         DiscreteEvent event;
@@ -127,6 +136,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             if(probably(evaluate(guard_iter->second,point)>0)) {
                 enabled=true;
                 event=guard_iter->first;
+                ARIADNE_LOG(2,"event " << event << " enabled.\n");
                 break;
             }
         }
@@ -137,6 +147,9 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             location=target;
             space=system.continuous_state_space(location);
             next_point=reset(point);
+            event_trace.push_back(event);
+
+            ARIADNE_LOG(2,"next point: " << next_point << ", on location " << target << "\n");
 
             dynamic=system.dynamic_function(location);
             guards=guard_functions(system,location);

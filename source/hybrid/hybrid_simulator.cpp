@@ -72,7 +72,9 @@ Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guard_functions(const Hyb
     Set<DiscreteEvent> events=system.events(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards;
     for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
-        guards.insert(*iter,system.guard_function(location,*iter));
+        if(system.event_kind(location,*iter)!=EventKind::INVARIANT) {
+            guards.insert(*iter,system.guard_function(location,*iter));
+        }
     }
     return guards;
 }

@@ -49,7 +49,7 @@ inline HybridAutomaton getValve()
 
     // Declare the locations for the valve automaton
     DiscreteLocation opened(valve|"opened");
-    DiscreteLocation modulated(valve!"modulated");
+    DiscreteLocation modulated(valve|"modulated");
     DiscreteLocation closed(valve|"closed");
 
     // Since aperture is a known constant when the valve is open or closed,

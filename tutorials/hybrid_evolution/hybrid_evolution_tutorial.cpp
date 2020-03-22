@@ -156,28 +156,28 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
 
     // Create a simulator object.
     HybridSimulator simulator;
-    simulator.set_step_size(0.03125);
+    simulator.set_step_size(0.01);
     simulator.verbosity = log_verbosity;
 
     // Set an initial point for the simulation
-    HybridRealPoint initial_point({valve|opened,controller|rising}, {height=7} );
-    std::cout << "initial_point=" << initial_point << std::endl;
+    HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
 
     // Set the maximum simulation time
     HybridTime termination_time(30.0,5);
-    std::cout << "simulation_time=" << termination_time << std::endl;
 
     // Compute a simulation trajectory
     std::cout << "Computing simulation trajectory... \n" << std::flush;
     Orbit<HybridApproximatePoint> orbit = simulator.orbit(system,initial_point,termination_time);
     std::cout << "done." << std::endl;
 
-    // Plot the simulation trajectory using two different projections
+    // Plot the simulation trajectory using all different projections
     std::cout << "Plotting simulation trajectory... " << std::flush;
-    Axes2d time_height_axes(0<=TimeVariable()<=30,-0.1<=height<=9.1);
-    plot("simulation_t-height.png",time_height_axes, Colour(0.0,0.5,1.0), orbit);
-    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
-    plot("simulation_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
+    Axes2d time_height_axes(0<=TimeVariable()<=30,5<=height<=9);
+    plot("simulation_t-height.png",time_height_axes, Colour(1.0,0.75,0.5), orbit);
+    Axes2d time_aperture_axes(0<=TimeVariable()<=30,-0.1<=aperture<=1.1);
+    plot("simulation_t-aperture.png",time_aperture_axes, Colour(1.0,0.75,0.5), orbit);
+    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
+    plot("simulation_height-aperture",height_aperture_axes, Colour(1.0,0.75,0.5), orbit);
     std::cout << "done." << std::endl;
 }
 
@@ -224,10 +224,12 @@ Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybr
 
     // Plot the trajectory using two different projections
     std::cout << "Plotting trajectory... " << std::flush;
-    Axes2d time_height_axes(0<=TimeVariable()<=30,-0.1<=height<=9.1);
-    plot("finite_evolution_t-height",time_height_axes, Colour(0.0,0.5,1.0), orbit);
-    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
-    plot("finite_evolution_height-aperture",height_aperture_axes, Colour(0.0,0.5,1.0), orbit);
+    Axes2d time_height_axes(0<=TimeVariable()<=30,5<=height<=9);
+    plot("finite_evolution_t-height",time_height_axes, Colour(1.0,0.75,0.5), orbit);
+    Axes2d time_aperture_axes(0<=TimeVariable()<=30,-0.1<=aperture<=1.1);
+    plot("finite_evolution_t-aperture.png",time_aperture_axes, Colour(1.0,0.75,0.5), orbit);
+    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
+    plot("finite_evolution_height-aperture",height_aperture_axes, Colour(1.0,0.75,0.5), orbit);
     std::cout << "done." << std::endl;
 }
 

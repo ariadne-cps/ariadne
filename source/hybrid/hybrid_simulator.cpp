@@ -103,7 +103,8 @@ template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace
     return pt;
 }
 
-template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const DiscreteLocation& location, const Point<X>& spt, const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const DiscreteLocation& location, const Point<X>& spt,
+        const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
     Point<X> sapt(saspc.dimension());
     Point<X> apt = evaluate(auxiliary_function,spt);
     for(Nat i=0; i!=sapt.size(); ++i) {

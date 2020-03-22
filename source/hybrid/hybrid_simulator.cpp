@@ -93,14 +93,24 @@ Bool satisfies_invariants(const HybridAutomatonInterface& system, const Discrete
     return result;
 }
 
-template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace& spc) {
-    if(hpt.space()==spc) { return hpt.point(); }
+template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace& sspc) {
+    if(hpt.space()==sspc) { return hpt.point(); }
     Map<RealVariable,X> values=hpt.values();
-    Point<X> pt(spc.dimension());
+    Point<X> pt(sspc.dimension());
     for(Nat i=0; i!=pt.size(); ++i) {
-        pt[i]=values[spc.variable(i)];
+        pt[i]=values[sspc.variable(i)];
     }
     return pt;
+}
+
+template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const DiscreteLocation& location, const Point<X>& spt, const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
+    Point<X> sapt(saspc.dimension());
+    Point<X> apt = evaluate(auxiliary_function,spt);
+    for(Nat i=0; i!=sapt.size(); ++i) {
+        RealVariable var = saspc.variable(i);
+        sapt[i]= sspc.contains(var) ? spt[sspc[var]] : apt[aspc[var]];
+    }
+    return HybridPoint<X>(location,saspc,sapt);
 }
 
 }
@@ -124,12 +134,16 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     Dyadic h(ExactDouble(this->_step_size.get_d()));
 
     DiscreteLocation location=init_pt.location();
-    RealSpace space=system.continuous_state_space(location);
-    ApproximatePointType point=make_point(init_pt,space);
+    RealSpace continuous_state_space=system.continuous_state_space(location);
+    RealSpace continuous_auxiliary_space = system.continuous_auxiliary_space(location);
+    RealSpace continuous_state_auxiliary_space = system.state_auxiliary_space()[location];
+    EffectiveVectorMultivariateFunction auxiliary_function = system.auxiliary_function(location);
+    ApproximatePointType point=make_point(init_pt,continuous_state_space);
     ApproximatePointType next_point;
     List<DiscreteEvent> event_trace;
 
-    Orbit<HybridApproximatePoint> orbit(HybridApproximatePoint(location,space,cast_exact(point)));
+    Orbit<HybridApproximatePoint> orbit(make_hybrid_state_auxiliary_point(location,point,continuous_state_space,
+            continuous_auxiliary_space,continuous_state_auxiliary_space,system.auxiliary_function(location)));
 
     EffectiveVectorMultivariateFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=guard_functions(system,location);
@@ -163,7 +177,10 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             DiscreteLocation target=system.target(location,event);
             EffectiveVectorMultivariateFunction reset=system.reset_function(location,event);
             location=target;
-            space=system.continuous_state_space(location);
+            continuous_state_space=system.continuous_state_space(location);
+            continuous_auxiliary_space=system.continuous_auxiliary_space(location);
+            continuous_state_auxiliary_space=system.state_auxiliary_space()[location];
+            auxiliary_function=system.auxiliary_function(location);
             next_point=reset(point);
             event_trace.push_back(event);
 
@@ -172,7 +189,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             dynamic=system.dynamic_function(location);
             guards=guard_functions(system,location);
 
-            t._discrete_time+=1;
+            t._discrete_time += 1;
         } else {
             FloatDPApproximationVector k1,k2,k3,k4;
             ApproximatePointType pt1,pt2,pt3,pt4;
@@ -194,7 +211,8 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             t._continuous_time += h;
         }
         point=next_point;
-        orbit.insert(t,HybridApproximatePoint(location,space,point));
+        orbit.insert(t,make_hybrid_state_auxiliary_point(location,point,
+                continuous_state_space,continuous_auxiliary_space,continuous_state_auxiliary_space,auxiliary_function));
     }
 
     return orbit;

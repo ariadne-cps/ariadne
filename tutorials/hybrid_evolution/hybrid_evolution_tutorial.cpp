@@ -154,7 +154,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
     StringConstant opened("opened");
     StringConstant rising("rising");
 
-    // Create a simulator object.
+    // Create a simulator object
     HybridSimulator simulator;
     simulator.set_step_size(0.01);
     simulator.verbosity = log_verbosity;
@@ -186,10 +186,11 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, cons
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(system);
 
-    // Set the evolution parameters
+    // Set the evolver configuration
     evolver.configuration().set_maximum_enclosure_radius(3.0);
     evolver.configuration().set_maximum_step_size(0.25);
     evolver.verbosity=log_verbosity;
+
     std::cout << evolver.configuration() << std::endl;
 
     return evolver;
@@ -199,8 +200,6 @@ Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybr
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
-
-    std::cout << "Computing evolution... " << std::flush;
 
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
@@ -219,6 +218,7 @@ Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybr
     // Define the evolution time: continuous time and maximum number of transitions
     HybridTime termination_time(30.0,5);
     // Compute the orbit using upper semantics
+    std::cout << "Computing evolution... \n" << std::flush;
     OrbitType orbit = evolver.orbit(initial_set,termination_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
@@ -233,10 +233,54 @@ Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybr
     std::cout << "done." << std::endl;
 }
 
+HybridReachabilityAnalyser create_analyser(const CompositeHybridAutomaton& system, const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
+{
+    // Create a ReachabilityAnalyser object
+    HybridReachabilityAnalyser analyser(system,evolver);
+
+    //  Set the analyser configuration
+    analyser.configuration().set_maximum_grid_depth(6);
+    analyser.configuration().set_lock_to_grid_time(5);
+    analyser.verbosity=log_verbosity+2;
+
+    std::cout << analyser.configuration() << std::endl;
+
+    return analyser;
+}
+
+Void compute_reachability(const CompositeHybridAutomaton& system, const HybridReachabilityAnalyser& analyser) {
+
+    // Re-introduce the shared system variables required for the initial set
+    RealVariable aperture("aperture");
+    RealVariable height("height");
+
+    StringVariable valve("valve");
+    StringVariable controller("controller");
+
+    StringConstant opened("opened");
+    StringConstant rising("rising");
+
+    // Define the initial set
+    HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
+
+    // Set the maximum evolution time
+    HybridTime termination_time(30.0,5);
+
+    // Compute over-approximation to finite-time reachable set using upper semantics.
+    std::cout << "Computing upper reach set... " << std::flush;
+    HybridGridTreePaving upper_reach = analyser.upper_reach(initial_set,termination_time);
+    std::cout << "done." << std::endl;
+
+    std::cout << "Plotting trajectory... " << std::flush;
+    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
+    plot("upper_reach.png", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
+    std::cout << "done." << std::endl;
+}
+
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
-    Nat log_verbosity=get_verbosity(argc,argv);
+    Nat log_verbosity = get_verbosity(argc,argv);
 
     // Create the composed automaton
     CompositeHybridAutomaton watertank_system({get_tank(),get_valve(),get_controller()});
@@ -251,5 +295,10 @@ Int main(Int argc, const char* argv[])
     GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
 
     // Compute the system evolution
-    compute_evolution(watertank_system,evolver);
+    //compute_evolution(watertank_system,evolver);
+
+    HybridReachabilityAnalyser analyser = create_analyser(watertank_system,evolver,log_verbosity);
+
+    // Compute the system reachability
+    compute_reachability(watertank_system,analyser);
 }

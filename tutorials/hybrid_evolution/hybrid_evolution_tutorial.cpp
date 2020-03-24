@@ -267,7 +267,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     HybridTime termination_time(30.0,5);
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
-    std::cout << "Computing upper reach set... " << std::flush;
+    std::cout << "Computing upper reach set... \n" << std::flush;
     HybridGridTreePaving upper_reach = analyser.upper_reach(initial_set,termination_time);
     std::cout << "done." << std::endl;
 
@@ -297,6 +297,7 @@ Int main(Int argc, const char* argv[])
     // Compute the system evolution
     compute_evolution(evolver);
 
+    // Create an analyser object
     HybridReachabilityAnalyser analyser = create_analyser(evolver,log_verbosity);
 
     // Compute the system reachability

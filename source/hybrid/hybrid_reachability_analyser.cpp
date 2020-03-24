@@ -99,10 +99,8 @@ namespace Ariadne {
 template class ReachabilityAnalyser<HybridAutomatonInterface>;
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(
-        const SystemType& system,
-        const HybridEvolverInterface& evolver)
-    : ReachabilityAnalyser<HybridAutomatonInterface>(system,evolver)
+HybridReachabilityAnalyser(const HybridEvolverInterface& evolver)
+    : ReachabilityAnalyser<HybridAutomatonInterface>(evolver)
 {
 }
 

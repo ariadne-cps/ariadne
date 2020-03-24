@@ -65,10 +65,8 @@ OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 template<class SYS>
 ReachabilityAnalyser<SYS>::
-ReachabilityAnalyser(
-        const SystemType& system,
-        const EvolverType& evolver)
-    : _system(system.clone())
+ReachabilityAnalyser(const EvolverType& evolver)
+    : _system(evolver.system().clone())
     , _evolver(evolver.clone())
     , _configuration(new ConfigurationType(*this))
 {

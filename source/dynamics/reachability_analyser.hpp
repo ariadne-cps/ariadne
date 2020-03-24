@@ -107,9 +107,7 @@ template<class SYS> class ReachabilityAnalyser
     virtual ~ReachabilityAnalyser() = default;
 
     //! \brief Construct from an evolver.
-    ReachabilityAnalyser(
-            const SystemType& system,
-            const EvolverType& evolver);
+    ReachabilityAnalyser(const EvolverType& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     virtual ReachabilityAnalyser* clone() const;

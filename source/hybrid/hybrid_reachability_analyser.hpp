@@ -87,9 +87,7 @@ class HybridReachabilityAnalyser
     //! \name Constructors and destructors
 
     //! \brief Construct from an evolver.
-    HybridReachabilityAnalyser(
-            const SystemType& system,
-            const HybridEvolverInterface& evolver);
+    HybridReachabilityAnalyser(const HybridEvolverInterface& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     virtual HybridReachabilityAnalyser* clone() const;

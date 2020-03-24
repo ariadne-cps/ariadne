@@ -196,7 +196,7 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, cons
     return evolver;
 }
 
-Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybridEvolver& evolver) {
+Void compute_evolution(const GeneralHybridEvolver& evolver) {
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::OrbitType OrbitType;
@@ -233,22 +233,22 @@ Void compute_evolution(const CompositeHybridAutomaton& system, const GeneralHybr
     std::cout << "done." << std::endl;
 }
 
-HybridReachabilityAnalyser create_analyser(const CompositeHybridAutomaton& system, const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
+HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
 {
     // Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(system,evolver);
+    HybridReachabilityAnalyser analyser(evolver);
 
     //  Set the analyser configuration
     analyser.configuration().set_maximum_grid_depth(6);
     analyser.configuration().set_lock_to_grid_time(5);
-    analyser.verbosity=log_verbosity+2;
+    analyser.verbosity=log_verbosity;
 
     std::cout << analyser.configuration() << std::endl;
 
     return analyser;
 }
 
-Void compute_reachability(const CompositeHybridAutomaton& system, const HybridReachabilityAnalyser& analyser) {
+Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
 
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
@@ -295,10 +295,10 @@ Int main(Int argc, const char* argv[])
     GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
 
     // Compute the system evolution
-    //compute_evolution(watertank_system,evolver);
+    compute_evolution(evolver);
 
-    HybridReachabilityAnalyser analyser = create_analyser(watertank_system,evolver,log_verbosity);
+    HybridReachabilityAnalyser analyser = create_analyser(evolver,log_verbosity);
 
     // Compute the system reachability
-    compute_reachability(watertank_system,analyser);
+    compute_reachability(analyser);
 }

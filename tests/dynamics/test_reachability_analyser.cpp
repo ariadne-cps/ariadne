@@ -99,7 +99,7 @@ class TestReachabilityAnalyser
 
         EvolverType evolver(system,integrator);
 
-        AnalyserType analyser(system,evolver);
+        AnalyserType analyser(evolver);
         analyser.configuration().set_maximum_grid_depth(3);
         cout << "Done building analyser\n";
         return analyser;

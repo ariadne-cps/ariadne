@@ -194,7 +194,7 @@ Int main(Int argc, const char* argv[])
 
 
 
-    HybridReachabilityAnalyser analyser(heating_system,evolver);
+    HybridReachabilityAnalyser analyser(evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
     analyser.configuration().set_lock_to_grid_steps(1);
     analyser.configuration().set_scaling(T,8.0);

@@ -77,7 +77,7 @@ Int main()
 
     // Set up the evaluators
     MapEvolver evolver(henon);
-    ReachabilityAnalyser<IteratedMap> analyser(henon,evolver);
+    ReachabilityAnalyser<IteratedMap> analyser(evolver);
     analyser.configuration().set_bounding_domain(ExactBoxType({{-4,4},{-4,4}}));
     analyser.configuration().set_maximum_grid_depth(5);
     analyser.set_verbosity(3);

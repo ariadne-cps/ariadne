@@ -466,7 +466,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
         if(verbosity==1) { std::clog << "i=" << i << "\n"; }
         accumulated_evolve_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"computing "<<i+1u<<"-th reachability step...\n");
-        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_depth,*_evolver);
+        this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_depth,*_evolver);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
         evolve_cells.remove(accumulated_evolve_cells);

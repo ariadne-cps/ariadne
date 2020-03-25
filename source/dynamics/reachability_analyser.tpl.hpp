@@ -588,25 +588,21 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
 
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     PavingType starting_cells = evolve_cells;
-    PavingType current_evolve_cells(grid);
-
+    PavingType accumulated_evolve_cells = evolve_cells;
 
     while(!starting_cells.is_empty()) {
         ++stage;
         if(verbosity==1) {
             std::clog <<"\n\ri="<<std::setw(3)<<stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size()<<std::flush;
         }
-
-        current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_depth,*_evolver);
-        ARIADNE_LOG(5,"reach.size()="<<reach_cells.size()<<"\n");
-        ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(4,"reach.size()="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(4,"evolve.size()="<<evolve_cells.size()<<"\n");
         _checked_restriction(evolve_cells,bounding);
-        evolve_cells.recombine();
-        evolve_cells.mince(maximum_grid_depth);
         starting_cells = evolve_cells;
-        starting_cells.remove(current_evolve_cells);
+        starting_cells.remove(accumulated_evolve_cells);
+        accumulated_evolve_cells.adjoin(starting_cells);
         starting_cells.mince(maximum_grid_depth);
         ARIADNE_LOG(3,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
     }

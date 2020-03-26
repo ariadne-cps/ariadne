@@ -235,6 +235,8 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
 
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
 {
+    // Silence the evolver
+    evolver.verbosity=0;
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 
@@ -263,17 +265,14 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     // Define the initial set
     HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
 
-    // Set the maximum evolution time
-    HybridTime termination_time(30.0,5);
-
     // Compute over-approximation to finite-time reachable set using upper semantics.
-    std::cout << "Computing upper reach set... \n" << std::flush;
-    HybridGridTreePaving upper_reach = analyser.upper_reach(initial_set,termination_time);
+    std::cout << "Computing outer chain reach set... \n" << std::flush;
+    HybridGridTreePaving outer_chain_reach = analyser.outer_chain_reach(initial_set);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... " << std::flush;
     Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
-    plot("upper_reach.png", height_aperture_axes, Colour(0.0,0.5,1.0), upper_reach);
+    plot("outer_chain_reach.png", height_aperture_axes, Colour(0.0,0.5,1.0), outer_chain_reach);
     std::cout << "done." << std::endl;
 }
 

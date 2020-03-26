@@ -505,21 +505,39 @@ HybridAutomaton::mode(DiscreteLocation location) const
                   location<<" does not define a mode of the automaton with locations "<<this->locations());
 }
 
-
-
+Writer<HybridAutomaton> HybridAutomaton::_default_writer(new CompactHybridAutomatonWriter());
 
 OutputStream&
-HybridAutomaton::_write(OutputStream& os) const
-{
-    const HybridAutomaton& ha=*this;
+HybridAutomaton::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
+}
+
+OutputStream&
+VerboseHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha) const {
     os << "\nHybridAutomaton( \n  modes=\n";
     Set<DiscreteMode> modes(ha.modes().values());
     for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
-            mode_iter!=modes.end(); ++mode_iter)
+        mode_iter!=modes.end(); ++mode_iter)
     {
         os << "    " <<*mode_iter<<",\n";
     }
     return os << ")\n";
+
+}
+
+OutputStream&
+CompactHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha) const {
+    os << "'" << ha.name() << "': ";
+    Set<DiscreteMode> modes(ha.modes().values());
+    Bool multiple_modes = (modes.size()>1);
+    for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
+        mode_iter!=modes.end(); ++mode_iter)
+    {
+        if (multiple_modes) os << "\n - ";
+        os << *mode_iter;
+    }
+    return os << "\n";
+
 }
 
 

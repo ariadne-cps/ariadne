@@ -219,6 +219,10 @@ class HybridAutomaton
     , public Loggable
 {
     friend class CompositeHybridAutomaton;
+    static Writer<HybridAutomaton> _default_writer;
+public:
+    static Void set_default_writer(Writer<HybridAutomaton> w) { _default_writer=w; }
+    static Writer<HybridAutomaton> default_writer() { return _default_writer; }
   public:
     //! \brief The type used to represent time.
     typedef HybridTime TimeType;
@@ -598,6 +602,14 @@ class HybridAutomaton
 inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
     return ha._write(os);
 }
+
+class CompactHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
+    virtual OutputStream& write(OutputStream& os, HybridAutomaton const& ha) const final override;
+};
+
+class VerboseHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
+    virtual OutputStream& write(OutputStream& os, HybridAutomaton const& ha) const final override;
+};
 
 
 } // namespace Ariadne

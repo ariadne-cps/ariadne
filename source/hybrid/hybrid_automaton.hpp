@@ -132,6 +132,8 @@ class DiscreteMode {
     friend class DiscreteTransition;
     friend class HybridAutomaton;
     friend class CompositeHybridAutomaton;
+    friend class CompactDiscreteModeWriter;
+    friend class VerboseDiscreteModeWriter;
   private:
     // The discrete mode's discrete state.
     DiscreteLocation _location;
@@ -161,6 +163,10 @@ class DiscreteMode {
     DiscreteMode(DiscreteLocation, List<RealAssignment>const&, List<DottedRealAssignment>const&);
     DiscreteMode(DiscreteLocation);
     DiscreteMode();
+    static Writer<DiscreteMode> _default_writer;
+  public:
+    static Void set_default_writer(Writer<DiscreteMode> w) { _default_writer=w; }
+    static Writer<DiscreteMode> default_writer() { return _default_writer; }
   public:
     //! \brief The mode's discrete state.
     DiscreteLocation location() const { return this->_location; }
@@ -172,6 +178,14 @@ class DiscreteMode {
 
 inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
     return dm._write(os); }
+
+class CompactDiscreteModeWriter : public WriterInterface<DiscreteMode> {
+    virtual OutputStream& write(OutputStream& os, DiscreteMode const& m) const final override;
+};
+
+class VerboseDiscreteModeWriter : public WriterInterface<DiscreteMode> {
+    virtual OutputStream& write(OutputStream& os, DiscreteMode const& m) const final override;
+};
 
 inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
     return mode1.location() < mode2.location(); }

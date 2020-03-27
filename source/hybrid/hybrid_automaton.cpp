@@ -96,28 +96,61 @@ template<class X> Set<Identifier> names(const List< Variable<X> >& variables) {
     return names;
 }
 
+
+Writer<DiscreteMode> DiscreteMode::_default_writer(new VerboseDiscreteModeWriter());
+
 OutputStream&
-DiscreteMode::_write(OutputStream& os) const
-{
-    const DiscreteMode& mode=*this;
+DiscreteMode::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
+}
+
+OutputStream&
+VerboseDiscreteModeWriter::write(OutputStream& os, DiscreteMode const& m) const {
     os << "DiscreteMode( "
-       << "location=" << mode._location;
-    if(mode._auxiliary.size()>0) {
-        os << ", algebraic_equations="<<mode._auxiliary; }
-    if(mode._dynamic.size()>0) {
-        os << ", differential_equations="<<mode._dynamic; }
-    if(mode._invariants.size()>0) {
-        os << ", invariants="<<mode._invariants; }
-    if(mode._guards.size()>0) {
-        os << ", guards="<<mode._guards; }
-    if(mode._targets.size()>0) {
-        os << ", targets="<<mode._targets; }
-    if(mode._targets.size()>0) {
-        os << ", resets="<<mode._resets; }
+       << "location=" << m._location;
+    if(m._auxiliary.size()>0) {
+        os << ", algebraic_equations="<<m._auxiliary; }
+    if(m._dynamic.size()>0) {
+        os << ", differential_equations="<<m._dynamic; }
+    if(m._invariants.size()>0) {
+        os << ", invariants="<<m._invariants; }
+    if(m._guards.size()>0) {
+        os << ", guards="<<m._guards; }
+    if(m._targets.size()>0) {
+        os << ", targets="<<m._targets; }
+    if(m._targets.size()>0) {
+        os << ", resets="<<m._resets; }
     return os << " )";
 }
 
-
+OutputStream&
+CompactDiscreteModeWriter::write(OutputStream& os, DiscreteMode const& m) const {
+    if (m._location.values().size() > 0)
+        os << m._location << ": ";
+    if(m._auxiliary.size()>0 || m._dynamic.size()>0)
+        os << "eqt=";
+    if(m._auxiliary.size()>0) {
+        os << m._auxiliary; }
+    if(m._auxiliary.size()>0 && m._dynamic.size()>0)
+        os << ",";
+    if(m._dynamic.size()>0) {
+        os << m._dynamic; }
+    if(m._invariants.size()>0) {
+        os << ", inv="<<m._invariants; }
+    if(m._guards.size()>0) {
+        os << ", grd="<<m._guards; }
+    if(m._targets.size()>0) {
+        os << ", trg="<<m._targets; }
+    if(m._targets.size()>0) {
+        Map<DiscreteEvent, List<PrimedRealAssignment>> nonempty_resets;
+        for (auto it = m._resets.begin(); it != m._resets.end(); ++it)
+            if (it->second.size() != 0)
+                nonempty_resets.insert(*it);
+        if (not nonempty_resets.empty())
+            os << ", rst="<<nonempty_resets;
+    }
+    return os;
+}
 
 
 DiscreteTransition::
@@ -530,14 +563,16 @@ CompactHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha)
     os << "'" << ha.name() << "': ";
     Set<DiscreteMode> modes(ha.modes().values());
     Bool multiple_modes = (modes.size()>1);
+    Writer<DiscreteMode> previous_mode_writer = DiscreteMode::default_writer();
+    DiscreteMode::set_default_writer(new CompactDiscreteModeWriter());
     for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
         mode_iter!=modes.end(); ++mode_iter)
     {
         if (multiple_modes) os << "\n - ";
         os << *mode_iter;
     }
+    DiscreteMode::set_default_writer(previous_mode_writer);
     return os << "\n";
-
 }
 
 

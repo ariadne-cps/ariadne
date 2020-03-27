@@ -37,6 +37,7 @@
 #include "../utility/declarations.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/container.hpp"
+#include "../utility/writable.hpp"
 
 #include "../numeric/logical.decl.hpp"
 #include "../numeric/number.decl.hpp"
@@ -69,6 +70,10 @@ class Expression
     : public DeclareExpressionOperations<T>
 {
     typedef SharedPointer<const ExpressionNode<T>> Pointer;
+    static Writer<Expression<T>> _default_writer;
+  public:
+    static Void set_default_writer(Writer<Expression<T>> w) { _default_writer=w; }
+    static Writer<Expression<T>> default_writer() { return _default_writer; }
   public:
     typedef Real NumericType;
     //! \brief The type represented by the expression.
@@ -269,6 +274,22 @@ ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
+//@}
+
+//@{
+//! \name Output.
+//! \related Expression
+
+//! \brief Prefix notation for writing an Expression
+template<class T> class PrefixExpressionWriter : public WriterInterface<Expression<T>> {
+    virtual OutputStream& write(OutputStream& os, Expression<T> const& e) const final override;
+};
+
+//! \brief Infix notation for writing an Expression
+template<class T> class InfixExpressionWriter : public WriterInterface<Expression<T>> {
+    virtual OutputStream& write(OutputStream& os, Expression<T> const& e) const final override;
+};
+
 //@}
 
 //@}

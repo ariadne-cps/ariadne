@@ -197,7 +197,17 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 }
 
 template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
-    this->node_ref().accept([&os](auto e){_write_impl(os,e);}); return os;
+    return os << _default_writer(*this);
+}
+
+template<class T> Writer<Expression<T>> Expression<T>::_default_writer(new PrefixExpressionWriter<T>());
+
+template<class T> OutputStream& PrefixExpressionWriter<T>::write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
+}
+
+template<class T> OutputStream& InfixExpressionWriter<T>::write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
 }
 
 template<class R> inline

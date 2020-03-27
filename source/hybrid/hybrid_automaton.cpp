@@ -505,7 +505,7 @@ HybridAutomaton::mode(DiscreteLocation location) const
                   location<<" does not define a mode of the automaton with locations "<<this->locations());
 }
 
-Writer<HybridAutomaton> HybridAutomaton::_default_writer(new CompactHybridAutomatonWriter());
+Writer<HybridAutomaton> HybridAutomaton::_default_writer(new VerboseHybridAutomatonWriter());
 
 OutputStream&
 HybridAutomaton::_write(OutputStream& os) const {

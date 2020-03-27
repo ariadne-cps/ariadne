@@ -68,6 +68,10 @@ class CompositeHybridAutomaton
 {
     mutable DiscreteMode _cached_mode;
     Void _cache_mode(DiscreteLocation) const;
+    static Writer<CompositeHybridAutomaton> _default_writer;
+  public:
+    static Void set_default_writer(Writer<CompositeHybridAutomaton> w) { _default_writer=w; }
+    static Writer<CompositeHybridAutomaton> default_writer() { return _default_writer; }
   public:
     typedef HybridTime TimeType;
   public:
@@ -232,6 +236,14 @@ CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& compo
 
 inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton& ha) {
     return ha._write(os); }
+
+class CompactCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
+    virtual OutputStream& write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+};
+
+class VerboseCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
+    virtual OutputStream& write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+};
 
 } // namespace Ariadne
 

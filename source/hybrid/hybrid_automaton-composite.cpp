@@ -476,18 +476,33 @@ CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEven
     return make_function(space,substitute(guard,algebraic));
 }
 
-
-
+Writer<CompositeHybridAutomaton> CompositeHybridAutomaton::_default_writer(new VerboseCompositeHybridAutomatonWriter());
 
 OutputStream&
-CompositeHybridAutomaton::_write(OutputStream& os) const
-{
-    return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
+CompositeHybridAutomaton::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
 }
 
+OutputStream&
+VerboseCompositeHybridAutomatonWriter::write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+    os << "CompositeHybridAutomaton(\n";
+    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+        os << ha.component(i);
+    }
+    return os << "\n)\n";
+}
 
-
-
+OutputStream&
+CompactCompositeHybridAutomatonWriter::write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+    os << ha.number_of_components() << " components: {\n";
+    Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
+    HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());
+    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+        os << ha.component(i);
+    }
+    HybridAutomaton::set_default_writer(previous_writer);
+    return os << "}\n";
+}
 
 
 

@@ -284,6 +284,9 @@ Int main(Int argc, const char* argv[])
     // Create the composed automaton
     CompositeHybridAutomaton watertank_system({get_tank(),get_valve(),get_controller()});
 
+    // Choose a compact output representation for systems
+    CompositeHybridAutomaton::set_default_writer(new CompactCompositeHybridAutomatonWriter());
+
     // Print the system description on the command line
     std::cout << watertank_system << std::endl;
 

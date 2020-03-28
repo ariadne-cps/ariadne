@@ -167,13 +167,13 @@ class Dyadic
 };
 
 class DecimalWriter : public WriterInterface<Dyadic> {
-    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+    virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
 class FractionWriter : public WriterInterface<Dyadic> {
-    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+    virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
 template<> class RepresentationWriter<Dyadic> : public WriterInterface<Dyadic> {
-    virtual OutputStream& write(OutputStream& os, Dyadic const& w) const final override;
+    virtual OutputStream& _write(OutputStream& os, Dyadic const& w) const final override;
 };
 
 

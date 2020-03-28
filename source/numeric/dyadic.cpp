@@ -361,9 +361,8 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
 
 Writer<Dyadic> Dyadic::_default_writer(new FractionWriter());
 
-//   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
-    return Dyadic::_default_writer.write(os,x);
+    return os << Dyadic::_default_writer(x);
 }
 
 template<class X> inline OutputStream& write_infinite(OutputStream& os, X const& x) {
@@ -375,7 +374,7 @@ template<class X> inline OutputStream& write_infinite(OutputStream& os, X const&
     return os;
 }
 
-auto DecimalWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+auto DecimalWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
     if(is_finite(x)) {
         Dyadic w=x;
         if(w<0) { os << "-"; w=-w; }
@@ -394,7 +393,7 @@ auto DecimalWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStre
     return os;
 }
 
-auto FractionWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+auto FractionWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
     if(is_finite(x)) {
         Rational q;
         mpq_set_f (q._mpq,x._mpf);
@@ -405,6 +404,10 @@ auto FractionWriter::write(OutputStream& os, Dyadic const& x) const -> OutputStr
         write_infinite(os,x);
     }
     return os;
+}
+
+auto RepresentationWriter<Dyadic>::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    return os << "Dyadic(" << x.mantissa() << "," << x.exponent() << "u)";
 }
 
 Dyadic make_dyadic(unsigned long long int n) {

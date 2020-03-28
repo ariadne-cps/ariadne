@@ -24,6 +24,8 @@
 
 #include "config.hpp"
 
+#include "utility/string.hpp"
+
 #include "numeric/twoexp.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/builtin.hpp"
@@ -121,6 +123,14 @@ void TestDyadic::test_literal() {
     ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q)<<"\n");
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(decimal_write));
     ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+
+    RepresentationWriter<Dyadic> representation_write;
+    ARIADNE_TEST_EXECUTE(std::cout<<representation_write(q));
+
+    ARIADNE_TEST_EQUALS(to_string(fraction_write(q)),"13/2^2");
+    ARIADNE_TEST_EQUALS(to_string(decimal_write(q)),"3.25");
+    ARIADNE_TEST_EQUALS(to_string(representation_write(q)),"Dyadic(13,2u)");
+
 }
 
 void TestDyadic::test_conversions() {

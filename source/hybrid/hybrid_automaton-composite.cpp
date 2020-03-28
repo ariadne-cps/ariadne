@@ -484,7 +484,7 @@ CompositeHybridAutomaton::_write(OutputStream& os) const {
 }
 
 OutputStream&
-VerboseCompositeHybridAutomatonWriter::write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+VerboseCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << "CompositeHybridAutomaton(\n";
     for(Nat i = 0; i < ha.number_of_components(); ++i) {
         os << ha.component(i);
@@ -493,7 +493,7 @@ VerboseCompositeHybridAutomatonWriter::write(OutputStream& os, CompositeHybridAu
 }
 
 OutputStream&
-CompactCompositeHybridAutomatonWriter::write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << ha.number_of_components() << " components: {\n";
     Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
     HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());

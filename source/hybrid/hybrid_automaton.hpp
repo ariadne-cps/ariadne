@@ -180,11 +180,11 @@ inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
     return dm._write(os); }
 
 class CompactDiscreteModeWriter : public WriterInterface<DiscreteMode> {
-    virtual OutputStream& write(OutputStream& os, DiscreteMode const& m) const final override;
+    virtual OutputStream& _write(OutputStream& os, DiscreteMode const& m) const final override;
 };
 
 class VerboseDiscreteModeWriter : public WriterInterface<DiscreteMode> {
-    virtual OutputStream& write(OutputStream& os, DiscreteMode const& m) const final override;
+    virtual OutputStream& _write(OutputStream& os, DiscreteMode const& m) const final override;
 };
 
 inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
@@ -618,11 +618,11 @@ inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
 }
 
 class CompactHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
-    virtual OutputStream& write(OutputStream& os, HybridAutomaton const& ha) const final override;
+    virtual OutputStream& _write(OutputStream& os, HybridAutomaton const& ha) const final override;
 };
 
 class VerboseHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
-    virtual OutputStream& write(OutputStream& os, HybridAutomaton const& ha) const final override;
+    virtual OutputStream& _write(OutputStream& os, HybridAutomaton const& ha) const final override;
 };
 
 

@@ -238,11 +238,11 @@ inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton
     return ha._write(os); }
 
 class CompactCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
-    virtual OutputStream& write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+    virtual OutputStream& _write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
 };
 
 class VerboseCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
-    virtual OutputStream& write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+    virtual OutputStream& _write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
 };
 
 } // namespace Ariadne

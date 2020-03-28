@@ -105,7 +105,7 @@ DiscreteMode::_write(OutputStream& os) const {
 }
 
 OutputStream&
-VerboseDiscreteModeWriter::write(OutputStream& os, DiscreteMode const& m) const {
+VerboseDiscreteModeWriter::_write(OutputStream& os, DiscreteMode const& m) const {
     os << "DiscreteMode( "
        << "location=" << m._location;
     if(m._auxiliary.size()>0) {
@@ -124,7 +124,7 @@ VerboseDiscreteModeWriter::write(OutputStream& os, DiscreteMode const& m) const 
 }
 
 OutputStream&
-CompactDiscreteModeWriter::write(OutputStream& os, DiscreteMode const& m) const {
+CompactDiscreteModeWriter::_write(OutputStream& os, DiscreteMode const& m) const {
     if (m._location.values().size() > 0)
         os << m._location << ": ";
     if(m._auxiliary.size()>0 || m._dynamic.size()>0)
@@ -546,7 +546,7 @@ HybridAutomaton::_write(OutputStream& os) const {
 }
 
 OutputStream&
-VerboseHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha) const {
+VerboseHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha) const {
     os << "\nHybridAutomaton( \n  modes=\n";
     Set<DiscreteMode> modes(ha.modes().values());
     for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
@@ -559,7 +559,7 @@ VerboseHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha)
 }
 
 OutputStream&
-CompactHybridAutomatonWriter::write(OutputStream& os, HybridAutomaton const& ha) const {
+CompactHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha) const {
     os << "'" << ha.name() << "': ";
     Set<DiscreteMode> modes(ha.modes().values());
     Bool multiple_modes = (modes.size()>1);

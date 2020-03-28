@@ -282,12 +282,12 @@ Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 
 //! \brief Prefix notation for writing an Expression
 template<class T> class PrefixExpressionWriter : public WriterInterface<Expression<T>> {
-    virtual OutputStream& write(OutputStream& os, Expression<T> const& e) const final override;
+    virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
 
 //! \brief Infix notation for writing an Expression
 template<class T> class InfixExpressionWriter : public WriterInterface<Expression<T>> {
-    virtual OutputStream& write(OutputStream& os, Expression<T> const& e) const final override;
+    virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
 
 //@}

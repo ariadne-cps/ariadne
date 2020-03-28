@@ -560,7 +560,7 @@ VerboseHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha
 
 OutputStream&
 CompactHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha) const {
-    os << "'" << ha.name() << "': ";
+    os << ha.name() << ": ";
     Set<DiscreteMode> modes(ha.modes().values());
     Bool multiple_modes = (modes.size()>1);
     Writer<DiscreteMode> previous_mode_writer = DiscreteMode::default_writer();

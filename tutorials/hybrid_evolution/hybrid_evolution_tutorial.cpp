@@ -288,7 +288,7 @@ Int main(Int argc, const char* argv[])
     CompositeHybridAutomaton::set_default_writer(new CompactCompositeHybridAutomatonWriter());
 
     // Print the system description on the command line
-    std::cout << watertank_system << std::endl;
+    std::cout << "System: " << watertank_system << std::endl;
 
     // Compute an approximate simulation of the system evolution
     simulate_evolution(watertank_system,log_verbosity);

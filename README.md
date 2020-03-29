@@ -8,7 +8,7 @@ Ariadne is a tool for reachability analysis and model checking of hybrid systems
 
 ### Installation ###
 
-The installation instructions are presented for Ubuntu 18.04 and macOS 10.14 only. However, openSUSE Tumbleweed and Fedora 29 are known to be working when using their package managers. Windows installations are not supported yet.
+The installation instructions are presented for Ubuntu 20.04 and macOS 10.15 only. However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
 
 For the Ubuntu installation, we will refer to packages available on Aptitude. The macOS installation instead will assume you are using the Brew package manager.
 

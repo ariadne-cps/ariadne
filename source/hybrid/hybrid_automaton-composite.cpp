@@ -329,7 +329,7 @@ CompositeHybridAutomaton::continuous_state_space(DiscreteLocation location) cons
 
 RealSpace
 CompositeHybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
-    return RealSpace(this->auxiliary_variables(location));
+    return RealSpace(left_hand_sides(this->sorted_auxiliary_assignments(location)));
 }
 
 RealSpace

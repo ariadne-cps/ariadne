@@ -42,6 +42,8 @@
 #include "../function/formula.hpp"
 #include "../function/taylor_model.hpp"
 
+#include "../solvers/runge_kutta_integrator.hpp"
+
 #include "../output/logging.hpp"
 
 #include "../hybrid/hybrid_set.hpp"
@@ -149,7 +151,9 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     EffectiveVectorMultivariateFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarMultivariateFunction> guards=guard_functions(system,location);
 
-    while(possibly(check(t<tmax,Effort::get_default()))) {
+    RungeKutta4Integrator integrator(this->_step_size.get_d());
+
+    while(possibly(t<tmax)) {
         Int old_precision = std::clog.precision();
         ARIADNE_LOG(1, (verbosity == 1 ? "\r" : "")
                 << "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
@@ -192,23 +196,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 
             t._discrete_time += 1;
         } else {
-            FloatDPApproximationVector k1,k2,k3,k4;
-            ApproximatePointType pt1,pt2,pt3,pt4;
-
-            ApproximatePointType const& pt=point;
-            k1=evaluate(dynamic,pt);
-            pt1=pt+h*k1;
-
-            k2=evaluate(dynamic,pt1);
-            pt2=pt1+(h/2)*k2;
-
-            k3=evaluate(dynamic,pt2);
-            pt3=pt1+(h/2)*k3;
-
-            k4=evaluate(dynamic,pt3);
-
-            next_point=pt+(h/6)*(k1+FloatDPApproximation(2.0)*(k2+k3)+k4);
-
+            next_point = ApproximatePointType(integrator.step(dynamic,point,this->_step_size));
             t._continuous_time += h;
         }
         point=next_point;
@@ -217,7 +205,6 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     }
 
     return orbit;
-
 }
 
 

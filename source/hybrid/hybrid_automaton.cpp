@@ -270,7 +270,7 @@ EffectiveScalarMultivariateFunction make_constraint_function(
 }
 
 HybridAutomaton::HybridAutomaton()
-    : _name("system"),_modes()
+    : _name("automaton"),_modes()
 {
 }
 

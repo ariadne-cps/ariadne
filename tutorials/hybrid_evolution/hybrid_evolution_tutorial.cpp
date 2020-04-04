@@ -59,10 +59,10 @@ HybridAutomaton get_valve()
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent e_stop_opening("stop_opening");
-    DiscreteEvent e_stop_closing("stop_closing");
-    DiscreteEvent e_can_open("can_open");
-    DiscreteEvent e_can_close("can_close");
+    DiscreteEvent stop_opening("stop_opening");
+    DiscreteEvent stop_closing("stop_closing");
+    DiscreteEvent can_open("can_open");
+    DiscreteEvent can_close("can_close");
 
     // Declare the variable for the automaton name
     StringVariable valve("valve");
@@ -87,10 +87,10 @@ HybridAutomaton get_valve()
     // then a mix of reset, guard and event kind can be present; if the event kind
     // is not specified, then also the guard can't be specified: this implicitly
     // means that the event is an input event for this automaton.
-    automaton.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
-    automaton.new_transition(opening,e_stop_opening,opened,aperture>=1,EventKind::URGENT);
-    automaton.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
-    automaton.new_transition(closing,e_stop_closing,closed,aperture<=0,EventKind::URGENT);
+    automaton.new_transition(closed,can_open,opening,{next(aperture)=aperture});
+    automaton.new_transition(opening,stop_opening,opened,aperture>=1,EventKind::URGENT);
+    automaton.new_transition(opened,can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(closing,stop_closing,closed,aperture<=0,EventKind::URGENT);
 
     return automaton;
 }
@@ -106,10 +106,10 @@ HybridAutomaton get_controller()
     RealVariable height("height");
 
     // Declare the events we use
-    DiscreteEvent e_can_open("can_open");
-    DiscreteEvent e_can_close("can_close");
-    DiscreteEvent e_must_open("must_open");
-    DiscreteEvent e_must_close("must_close");
+    DiscreteEvent can_open("can_open");
+    DiscreteEvent can_close("can_close");
+    DiscreteEvent must_open("must_open");
+    DiscreteEvent must_close("must_close");
 
     // Declare the variable for the automaton name
     StringVariable controller("controller");
@@ -128,13 +128,13 @@ HybridAutomaton get_controller()
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    automaton.new_invariant(falling,height>=hmin-delta,e_must_open);
-    automaton.new_invariant(rising,height<=hmax+delta,e_must_close);
+    automaton.new_invariant(falling,height>=hmin-delta,must_open);
+    automaton.new_invariant(rising,height<=hmax+delta,must_close);
 
     // Specify the transitions, starting from the source location, according to an event, to a target location;
     // Following those arguments you specify a guard and whether the event is permissive or urgent.
-    automaton.new_transition(falling,e_can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
-    automaton.new_transition(rising,e_can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
+    automaton.new_transition(falling,can_open,rising,height<=hmin+delta,EventKind::PERMISSIVE);
+    automaton.new_transition(rising,can_close,falling,height>=hmax-delta,EventKind::PERMISSIVE);
 
     return automaton;
 }

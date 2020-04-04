@@ -28,26 +28,23 @@ using namespace Ariadne;
 HybridAutomaton get_tank()
 {
     // Declare the system constants
-    RealConstant lambda("lambda",0.02_decimal);
-    RealConstant rate("rate",0.3_decimal);
+    RealConstant alpha("alpha",0.02_decimal);
+    RealConstant beta("beta",0.3_decimal);
 
     // Declare the variables for the dynamics
     RealVariable aperture("aperture");
     RealVariable height("height");
 
-    // Declare the variable for the automaton name
-    StringVariable tank("tank");
-
     // Create the tank automaton
-    HybridAutomaton automaton(tank.name());
+    HybridAutomaton automaton("tank");
 
     // Declare a trivial discrete location (we use an empty label since there is only one location).
-    DiscreteLocation draining;
+    DiscreteLocation flow;
 
     // The water level is always given by the same dynamic.
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    automaton.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
+    automaton.new_mode(flow,{dot(height)=beta*aperture-alpha*height});
 
     return automaton;
 }

@@ -126,7 +126,9 @@ template<> template<class XL, class XU> inline VariableInterval<XU> Variable<Rea
     return VariableInterval<XU>(l,*this,u);
 }
 
-template<class UB> class VariableLowerInterval {
+template<class UB> class VariableLowerInterval
+    : public DeclareExpressionOperations<Kleenean>
+{
     typedef NegationType<UB> LB;
     RealVariable _variable; LB _lower;
   public:
@@ -142,7 +144,9 @@ template<class UB> class VariableLowerInterval {
         return os << elivl._lower << "<=" << elivl._variable; }
 };
 
-template<class UB> class VariableUpperInterval {
+template<class UB> class VariableUpperInterval
+    : public DeclareExpressionOperations<Kleenean>
+{
     typedef NegationType<UB> LB;
     RealVariable _variable; UB _upper;
   public:

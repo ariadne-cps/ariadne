@@ -56,7 +56,6 @@ HybridAutomaton get_valve()
 
     // Declare the shared system variables
     RealVariable aperture("aperture");
-    RealVariable height("height");
 
     // Declare the events we use
     DiscreteEvent stop_opening("stop_opening");
@@ -121,9 +120,9 @@ HybridAutomaton get_controller()
     DiscreteLocation rising(controller|"rising");
     DiscreteLocation falling(controller|"falling");
 
-    // Instantiate modes for each location; since no dynamics is present, we create an empty list
-    automaton.new_mode(rising,List<RealAssignment>());
-    automaton.new_mode(falling,List<RealAssignment>());
+    // Instantiate modes for each location with no dynamics
+    automaton.new_mode(rising);
+    automaton.new_mode(falling);
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to

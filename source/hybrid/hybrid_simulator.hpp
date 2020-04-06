@@ -35,11 +35,10 @@
 namespace Ariadne {
 
 class HybridTime;
+//class HybridTerminationCriterion;
 class HybridAutomatonInterface;
 
 template<class T> class Orbit;
-
-
 
 /*! \brief A class for computing the evolution of a hybrid system.
  */
@@ -50,6 +49,7 @@ class HybridSimulator
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
     typedef HybridApproximatePointType EnclosureType;
+    typedef HybridTime TerminationType;
   private:
     FloatDPApproximation _step_size;
   public:
@@ -61,8 +61,8 @@ class HybridSimulator
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const HybridTime& time) const;
-    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const TerminationType& termination) const;
 };
 
 

@@ -72,12 +72,6 @@ typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& transitions);
 Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& transitions);
 
-OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
-    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
-              << ", maximum_steps="<<termination.maximum_steps()
-              << ", terminating_events="<<termination.terminating_events() << " )";
-}
-
 OutputStream& operator<<(OutputStream& os, const CrossingKind& crk) {
     switch(crk) {
         case CrossingKind::DEGENERATE: os<<"DEGENERATE"; break;

@@ -30,10 +30,13 @@
 #define ARIADNE_HYBRID_TIME_HPP
 
 #include "../numeric/numeric.hpp"
+#include "../hybrid/discrete_event.hpp"
 
 namespace Ariadne {
 
 typedef Integer DiscreteTimeType;
+
+class DiscreteEvent;
 
 //! \ingroup AnalysisModule
 //! \ingroup HybridDynamicsSubModule
@@ -123,6 +126,34 @@ class HybridTime
     }
 };
 
+class HybridTerminationCriterion
+{
+  public:
+    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
+    typedef HybridTime::DiscreteTimeType DiscreteTimeType;
+  private:
+    ContinuousTimeType _maximum_time;
+    DiscreteTimeType _maximum_steps;
+    Set<DiscreteEvent> _terminating_events;
+  public:
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax, Set<DiscreteEvent> evnts)
+            : _maximum_time(tmax), _maximum_steps(nmax), _terminating_events(evnts) { } //!< .
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax)
+            : HybridTerminationCriterion(tmax,nmax,Set<DiscreteEvent>()) { } //!< .
+    HybridTerminationCriterion(const HybridTime& maximum_time)
+            : HybridTerminationCriterion(maximum_time.continuous_time(),maximum_time.discrete_time()) { } //!< .
+    //! \brief The maximum continuous (real, physical) time.
+    const ContinuousTimeType& maximum_time() const { return this->_maximum_time; }
+    //! \brief The maximum number of discrete steps taken.
+    const DiscreteTimeType& maximum_steps() const { return this->_maximum_steps; }
+    //! \brief The maximum number of discrete steps taken.
+    const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
+};
+inline OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
+    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
+              << ", maximum_steps="<<termination.maximum_steps()
+              << ", terminating_events="<<termination.terminating_events() << " )";
+}
 
 } // namespace Ariadne
 

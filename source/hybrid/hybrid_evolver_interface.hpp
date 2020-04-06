@@ -46,33 +46,6 @@ class HybridEnclosure;
 
 //! \ingroup AnalysisModule
 //! \ingroup HybridDynamicsSubModule
-//! A class representing a termination criterion for computing the evolution of a hybrid system.
-class HybridTerminationCriterion {
-  public:
-    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
-    typedef HybridTime::DiscreteTimeType DiscreteTimeType;
-  private:
-    ContinuousTimeType _maximum_time;
-    DiscreteTimeType _maximum_steps;
-    Set<DiscreteEvent> _terminating_events;
-  public:
-    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax, Set<DiscreteEvent> evnts)
-        : _maximum_time(tmax), _maximum_steps(nmax), _terminating_events(evnts) { } //!< .
-    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax)
-        : HybridTerminationCriterion(tmax,nmax,Set<DiscreteEvent>()) { } //!< .
-    HybridTerminationCriterion(const HybridTime& maximum_time)
-        : HybridTerminationCriterion(maximum_time.continuous_time(),maximum_time.discrete_time()) { } //!< .
-    //! \brief The maximum continuous (real, physical) time.
-    const ContinuousTimeType& maximum_time() const { return this->_maximum_time; }
-    //! \brief The maximum number of discrete steps taken.
-    const DiscreteTimeType& maximum_steps() const { return this->_maximum_steps; }
-    //! \brief The maximum number of discrete steps taken.
-    const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
-};
-OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination);
-
-//! \ingroup AnalysisModule
-//! \ingroup HybridDynamicsSubModule
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface

@@ -121,7 +121,7 @@ template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const Discret
 inline FloatDPApproximation evaluate(const EffectiveScalarMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 inline Vector<FloatDPApproximation> evaluate(const EffectiveVectorMultivariateFunction& f, const Vector<FloatDPApproximation>& x) { return f(x); }
 
-auto HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const HybridTime& termination) const
+auto HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridRealPoint& init_pt, const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
     return orbit(system,HybridApproximatePoint(init_pt,dp),termination);
@@ -135,6 +135,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     DoublePrecision pr;
     HybridTime t(0.0,0);
     Dyadic h(ExactDouble(this->_step_size.get_d()));
+    HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
 
     DiscreteLocation location=init_pt.location();
     RealSpace continuous_state_space=system.continuous_state_space(location);
@@ -153,7 +154,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 
     RungeKutta4Integrator integrator(this->_step_size.get_d());
 
-    while(possibly(t<termination)) {
+    while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
         ARIADNE_LOG(1, (verbosity == 1 ? "\r" : "")
                 << "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)

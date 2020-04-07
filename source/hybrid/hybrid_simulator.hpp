@@ -34,8 +34,7 @@
 
 namespace Ariadne {
 
-class HybridTime;
-//class HybridTerminationCriterion;
+class HybridTerminationCriterion;
 class HybridAutomatonInterface;
 
 template<class T> class Orbit;
@@ -49,7 +48,7 @@ class HybridSimulator
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
     typedef Point<FloatDPApproximation> ApproximatePointType;
     typedef HybridApproximatePointType EnclosureType;
-    typedef HybridTime TerminationType;
+    typedef HybridTerminationCriterion TerminationType;
   private:
     FloatDPApproximation _step_size;
   public:

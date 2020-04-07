@@ -158,12 +158,12 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
     // Set an initial point for the simulation
     HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
 
-    // Set the maximum simulation time
-    HybridTime termination_time(30.0,5);
+    // Define the termination: continuous time and maximum number of transitions
+    HybridTerminationCriterion termination(30,5);
 
     // Compute a simulation trajectory
     std::cout << "Computing simulation trajectory... \n" << std::flush;
-    Orbit<HybridApproximatePoint> orbit = simulator.orbit(system,initial_point,termination_time);
+    Orbit<HybridApproximatePoint> orbit = simulator.orbit(system,initial_point,termination);
     std::cout << "done." << std::endl;
 
     // Plot the simulation trajectory using all different projections
@@ -211,11 +211,11 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     // the continuous set as a list of variable assignments for each variable controlled on that location
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
     HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
-    // Define the evolution time: continuous time and maximum number of transitions
-    HybridTime termination_time(30.0,5);
+    // Define the termination: continuous time and maximum number of transitions
+    HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
     std::cout << "Computing evolution... \n" << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,termination_time,Semantics::UPPER);
+    OrbitType orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     // Plot the trajectory using two different projections
@@ -289,6 +289,7 @@ Int main(Int argc, const char* argv[])
     // Compute an approximate simulation of the system evolution
     simulate_evolution(watertank_system,log_verbosity);
 
+    return 0;
     // Create an evolver object
     GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
 

@@ -70,6 +70,7 @@ ReachabilityAnalyser(const EvolverType& evolver)
     , _evolver(evolver.clone())
     , _configuration(new ConfigurationType(*this))
 {
+        this->charcode = "a";
 }
 
 
@@ -541,14 +542,13 @@ ReachabilityAnalyser<SYS>::
 outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     -> SetApproximationType
 {
-    ARIADNE_LOG(2,"ReachabilityAnalyser::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
     TimeType lock_to_grid_time=this->_configuration->lock_to_grid_time();
     Nat maximum_grid_depth = this->_configuration->maximum_grid_depth();
     Nat maximum_grid_height = this->_configuration->maximum_grid_height();
-    ARIADNE_LOG(3,"transient_time=("<<transient_time<<")\n");
-    ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
-    ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+    ARIADNE_LOG(2,"transient_time=("<<transient_time<<")\n");
+    ARIADNE_LOG(2,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
+    ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n");
 
     const GridType& grid=this->_configuration->grid();
 
@@ -558,35 +558,32 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     if (has_bounding_domain)
         bounding.adjoin_outer_approximation(this->_configuration->bounding_domain(),maximum_grid_depth);
 
-    ARIADNE_LOG(5,"maximum_grid_height="<<maximum_grid_height<<"\n");
-    ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
+    ARIADNE_LOG(3,"maximum_grid_height="<<maximum_grid_height<<"\n");
+    ARIADNE_LOG(3,"bounding_size="<<bounding.size()<<"\n");
 
     PavingType initial_cells(grid);
     initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
     _checked_restriction(initial_cells,bounding);
-    ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
+    ARIADNE_LOG(3,"initial_size="<<initial_cells.size()<<"\n");
 
     Nat stage=0;
-    if(verbosity==1) {
-        std::clog <<"\n\ri="<<std::setw(3)<<std::left<<stage<<" #s="<<std::setw(4)<<std::left<<initial_cells.size()<<std::endl;
-    }
 
     PavingType reach_cells(grid);
     PavingType evolve_cells(grid);
     if(definitely(transient_time > TimeType(0))) {
-        ARIADNE_LOG(3,"Computing transient evolution...\n");
+        ARIADNE_LOG(1,"Computing transient evolution...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_depth,*_evolver);
         _checked_restriction(evolve_cells,bounding);
         evolve_cells.recombine();
         evolve_cells.mince(maximum_grid_depth);
-        ARIADNE_LOG(5,"transient_reach_size="<<reach_cells.size()<<"\n");
-        ARIADNE_LOG(5,"transient evolve_size="<<evolve_cells.size()<<"\n");
-        ARIADNE_LOG(3,"  found "<<reach_cells.size()<<" cells.\n");
+        ARIADNE_LOG(3,"transient_reach_size="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(3,"transient evolve_size="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(2,"  found "<<reach_cells.size()<<" cells.\n");
     } else {
         evolve_cells=initial_cells;
     }
 
-    ARIADNE_LOG(3,"Computing recurrent evolution...\n");
+    ARIADNE_LOG(1,"Computing recurrent evolution...\n");
     PavingType starting_cells = evolve_cells;
     PavingType accumulated_evolve_cells = evolve_cells;
 
@@ -597,14 +594,14 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
         }
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_depth,*_evolver);
-        ARIADNE_LOG(4,"reach.size()="<<reach_cells.size()<<"\n");
-        ARIADNE_LOG(4,"evolve.size()="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(3,"reach.size()="<<reach_cells.size()<<"\n");
+        ARIADNE_LOG(3,"evolve.size()="<<evolve_cells.size()<<"\n");
         _checked_restriction(evolve_cells,bounding);
         starting_cells = evolve_cells;
         starting_cells.remove(accumulated_evolve_cells);
         accumulated_evolve_cells.adjoin(starting_cells);
         starting_cells.mince(maximum_grid_depth);
-        ARIADNE_LOG(3,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
+        ARIADNE_LOG(2,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
     }
     _checked_restriction(reach_cells,bounding);
     return reach_cells;

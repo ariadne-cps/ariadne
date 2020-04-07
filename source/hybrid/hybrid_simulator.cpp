@@ -61,6 +61,7 @@ class DegenerateCrossingException { };
 HybridSimulator::HybridSimulator()
     : _step_size(0.125)
 {
+    this->charcode="s";
 }
 
 Void HybridSimulator::set_step_size(double h)

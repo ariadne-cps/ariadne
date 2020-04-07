@@ -101,7 +101,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-
+    this->charcode = "v";
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {

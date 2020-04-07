@@ -33,8 +33,9 @@
 #include <fstream>
 #include <cstring>
 
-// (Placeholder constant required for compilation)
+// (Placeholder constants required for compilation)
 static const std::string charcode="";
+static const unsigned int verbosity=0;
 
 //! Send a message to the global logging stream.
 #define ARIADNE_LOG(level,msg) \

@@ -109,10 +109,10 @@ class TestInteriorPointSolver
 
 Int main(Int argc, const char* argv[])
 {
-    auto verbosity = get_verbosity(argc,argv);
+    auto verb = get_verbosity(argc,argv);
 
     InteriorPointSolver interior_point_optimiser;
-    interior_point_optimiser.verbosity=verbosity;
+    interior_point_optimiser.verbosity=verb;
     TestInteriorPointSolver(interior_point_optimiser).test();
 
     std::cerr<<"INCOMPLETE ";

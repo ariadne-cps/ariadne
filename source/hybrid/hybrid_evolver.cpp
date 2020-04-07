@@ -336,6 +336,7 @@ HybridEvolverBase::_create(
     this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
+    this->charcode="e";
     //this->_configuration_ptr=std::shared_ptr<ConfigurationType>(new ConfigurationType());
 }
 

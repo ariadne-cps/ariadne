@@ -42,7 +42,7 @@
 using namespace Ariadne;
 using namespace std;
 
-Nat verbosity=0;
+Nat log_verbosity=0;
 
 class TestHybridSimulator
 {
@@ -103,7 +103,7 @@ Void TestHybridSimulator::test() const
     // Set up the evaluators
     HybridSimulator simulator;
     simulator.set_step_size(0.0625);
-    simulator.verbosity = verbosity;
+    simulator.verbosity = log_verbosity;
 
 
     // Make a hybrid automaton for the Van der Pol equation

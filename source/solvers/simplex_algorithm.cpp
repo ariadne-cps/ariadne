@@ -37,8 +37,6 @@
 #include "../utility/macros.hpp"
 #include "../output/logging.hpp"
 
-static const unsigned int verbosity=0;
-
 namespace Ariadne {
 
 template<class X1, class X2, EnableIf<IsSame<X1,RawFloatDP>> =dummy, EnableIf<IsSame<X2,FloatDPValue>> =dummy>

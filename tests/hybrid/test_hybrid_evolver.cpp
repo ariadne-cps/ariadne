@@ -906,12 +906,12 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    Nat verbosity=get_verbosity(argc,argv);
+    Nat log_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
-    ARIADNE_TEST_CALL(TestHybridEvolver("general",verbosity,evolver_integrator).test_all());
+    ARIADNE_TEST_CALL(TestHybridEvolver("general",log_verbosity,evolver_integrator).test_all());
 
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;

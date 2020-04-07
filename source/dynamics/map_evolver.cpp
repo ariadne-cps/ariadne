@@ -75,6 +75,7 @@ MapEvolver::MapEvolver(const SystemType& system)
     : _sys_ptr(system.clone())
     , _configuration(new ConfigurationType())
 {
+    this->charcode = "m";
 }
 
 typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() const {

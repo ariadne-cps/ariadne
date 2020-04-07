@@ -66,7 +66,7 @@ class HybridTime
     DiscreteTimeType _discrete_time;
   public:
     explicit HybridTime(Real t)
-      : _continuous_time(t), _discrete_time(0) { }
+      : _continuous_time(t), _discrete_time(-1) { }
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(RawFloatDP t, Integer n)
@@ -109,12 +109,12 @@ class HybridTime
 
     friend Kleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
         return Kleenean(ht1._continuous_time< ht2._continuous_time) &&
-            Boolean(ht1._discrete_time<=ht2._discrete_time);
+            Boolean(ht1._discrete_time<ht2._discrete_time);
     }
 
     friend Kleenean operator>(const HybridTime& ht1, const HybridTime& ht2) {
         return Kleenean(ht1._continuous_time> ht2._continuous_time) &&
-            Boolean(ht1._discrete_time>=ht2._discrete_time);
+            Boolean(ht1._discrete_time>ht2._discrete_time);
     }
 
     friend Kleenean operator>(const HybridTime& ht1, const ContinuousTimeType& ct2) {

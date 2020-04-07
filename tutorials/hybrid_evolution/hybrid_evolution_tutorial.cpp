@@ -289,7 +289,6 @@ Int main(Int argc, const char* argv[])
     // Compute an approximate simulation of the system evolution
     simulate_evolution(watertank_system,log_verbosity);
 
-    return 0;
     // Create an evolver object
     GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
 

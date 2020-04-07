@@ -163,7 +163,7 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
 
     // Compute a simulation trajectory
     std::cout << "Computing simulation trajectory... \n" << std::flush;
-    Orbit<HybridApproximatePoint> orbit = simulator.orbit(system,initial_point,termination);
+    auto orbit = simulator.orbit(system,initial_point,termination);
     std::cout << "done." << std::endl;
 
     // Plot the simulation trajectory using all different projections
@@ -194,9 +194,6 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, cons
 
 Void compute_evolution(const GeneralHybridEvolver& evolver) {
 
-    // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::OrbitType OrbitType;
-
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
@@ -215,7 +212,7 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
     std::cout << "Computing evolution... \n" << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
+    auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
     std::cout << "done." << std::endl;
 
     // Plot the trajectory using two different projections
@@ -263,7 +260,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
     std::cout << "Computing outer chain reach set... \n" << std::flush;
-    HybridGridTreePaving outer_chain_reach = analyser.outer_chain_reach(initial_set);
+    auto outer_chain_reach = analyser.outer_chain_reach(initial_set);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... " << std::flush;
@@ -290,13 +287,13 @@ Int main(Int argc, const char* argv[])
     simulate_evolution(watertank_system,log_verbosity);
 
     // Create an evolver object
-    GeneralHybridEvolver evolver = create_evolver(watertank_system,log_verbosity);
+    auto evolver = create_evolver(watertank_system,log_verbosity);
 
     // Compute the system evolution
     compute_evolution(evolver);
 
     // Create an analyser object
-    HybridReachabilityAnalyser analyser = create_analyser(evolver,log_verbosity);
+    auto analyser = create_analyser(evolver,log_verbosity);
 
     // Compute the system reachability
     compute_reachability(analyser);

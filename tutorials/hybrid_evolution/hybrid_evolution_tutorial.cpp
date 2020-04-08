@@ -168,12 +168,9 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
 
     // Plot the simulation trajectory using all different projections
     std::cout << "Plotting simulation trajectory... " << std::flush;
-    Axes2d time_height_axes(0<=TimeVariable()<=30,5<=height<=9);
-    plot("simulation_t-height.png",time_height_axes, Colour(1.0,0.75,0.5), orbit);
-    Axes2d time_aperture_axes(0<=TimeVariable()<=30,-0.1<=aperture<=1.1);
-    plot("simulation_t-aperture.png",time_aperture_axes, Colour(1.0,0.75,0.5), orbit);
-    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
-    plot("simulation_height-aperture",height_aperture_axes, Colour(1.0,0.75,0.5), orbit);
+    plot("simulation_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
+    plot("simulation_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
+    plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     std::cout << "done." << std::endl;
 }
 
@@ -217,12 +214,9 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
 
     // Plot the trajectory using two different projections
     std::cout << "Plotting trajectory... " << std::flush;
-    Axes2d time_height_axes(0<=TimeVariable()<=30,5<=height<=9);
-    plot("finite_evolution_t-height",time_height_axes, Colour(1.0,0.75,0.5), orbit);
-    Axes2d time_aperture_axes(0<=TimeVariable()<=30,-0.1<=aperture<=1.1);
-    plot("finite_evolution_t-aperture.png",time_aperture_axes, Colour(1.0,0.75,0.5), orbit);
-    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
-    plot("finite_evolution_height-aperture",height_aperture_axes, Colour(1.0,0.75,0.5), orbit);
+    plot("finite_evolution_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
+    plot("finite_evolution_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
+    plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
     std::cout << "done." << std::endl;
 }
 
@@ -264,8 +258,7 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting trajectory... " << std::flush;
-    Axes2d height_aperture_axes(5<=height<=9,-0.1<=aperture<=1.1);
-    plot("outer_chain_reach.png", height_aperture_axes, Colour(0.0,0.5,1.0), outer_chain_reach);
+    plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
     std::cout << "done." << std::endl;
 }
 

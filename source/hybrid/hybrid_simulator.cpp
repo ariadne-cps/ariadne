@@ -159,8 +159,8 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
         Int old_precision = std::clog.precision();
         ARIADNE_LOG(1, (verbosity == 1 ? "\r" : "")
                 << "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
-                << " #e=" << std::setw(4) << std::left << t.discrete_time()
-                << " p=" << std::setw(5) << std::left << point
+                << " #e=" << std::left << t.discrete_time()
+                << " p=" << point
                 << " l=" << std::left << location
                 << " e=" << std::left << event_trace
                 << " \n" << std::setprecision(old_precision));

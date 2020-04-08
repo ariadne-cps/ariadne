@@ -197,15 +197,13 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
         ARIADNE_LOG(5,"  adjoining "<<reach_enclosures.size()<<" reach enclosures to grid... ");
 
         for(auto enclosure : reach_enclosures) {
-            if(verbosity==1) { std::clog << "."; }
             ARIADNE_LOG(7,"enclosure="<<enclosure<<"\n");
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
-        if(verbosity==1) { std::clog << " "; }
+        if(verbosity==1) { std::clog << "."; }
         ARIADNE_LOG(5,"done\n");
         ARIADNE_LOG(5,"  adjoining final enclosures to grid... ");
         for(auto enclosure : final_enclosures) {
-            if(verbosity==1) { std::clog << "."; }
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
         ARIADNE_LOG(5,"done.\n");

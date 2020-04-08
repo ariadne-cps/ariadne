@@ -40,7 +40,7 @@ static const unsigned int verbosity=0;
 //! Send a message to the global logging stream.
 #define ARIADNE_LOG(level,msg) \
     if(verbosity >= level) { \
-        std::clog << "[" << charcode << ":" << level << "] "; \
+        std::clog << "[" << charcode << ":" << level << "]"; \
         for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
         std::clog << msg << std::flush; \
     }

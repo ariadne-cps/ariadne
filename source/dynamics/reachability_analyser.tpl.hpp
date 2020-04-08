@@ -195,10 +195,7 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,Semantics::UPPER);
         ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(5,"  adjoining "<<reach_enclosures.size()<<" reach enclosures to grid... ");
-        if(verbosity==1) {
-            std::clog <<"\n\r#r="<<std::setw(4)<<std::left<<reach_enclosures.size()
-                      <<"#e="<<std::setw(4)<<final_enclosures.size();
-        }
+
         for(auto enclosure : reach_enclosures) {
             if(verbosity==1) { std::clog << "."; }
             ARIADNE_LOG(7,"enclosure="<<enclosure<<"\n");
@@ -213,10 +210,8 @@ _adjoin_upper_reach_evolve(PavingType& reach_cells,
         }
         ARIADNE_LOG(5,"done.\n");
     }
-    if(verbosity==1) {
-            std::clog <<" #rc="<<reach_cells.size()
-                      <<" #ec="<<evolve_cells.size() << " \n";
-    }
+    if(verbosity==1) { std::clog << "\n"; }
+
     ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve size = "<<evolve_cells.size()<<"\n");
     ARIADNE_LOG(2,"Done.\n");
@@ -589,9 +584,11 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
 
     while(!starting_cells.is_empty()) {
         ++stage;
-        if(verbosity==1) {
-            std::clog <<"\n\ri="<<std::setw(3)<<stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size()<<std::flush;
-        }
+        ARIADNE_LOG(1,"stage="<<std::setw(3)<<stage<<
+                      " #starting="<<std::setw(4)<<std::left<<starting_cells.size()<<
+                      " #reached="<<std::setw(4)<<std::left<<reach_cells.size()<<
+                      " #evolved="<<std::setw(4)<<std::left<<accumulated_evolve_cells.size()<<
+                      std::flush);
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          lock_to_grid_time,maximum_grid_depth,*_evolver);
         ARIADNE_LOG(3,"reach.size()="<<reach_cells.size()<<"\n");

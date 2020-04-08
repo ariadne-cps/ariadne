@@ -64,7 +64,7 @@ inline FillColour fill_colour(Dbl r, Dbl g, Dbl b) { return FillColour(Colour(r,
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
+        : dot_radius(1.0), line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(ariadneorange) { }
     GraphicsProperties(Bool ls, Dbl lw, Dbl dr, Colour lc, Bool fs, Colour fc)
         : dot_radius(dr), line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
     Dbl dot_radius;

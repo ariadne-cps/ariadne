@@ -60,6 +60,7 @@ extern const Colour blue;
 extern const Colour yellow;
 extern const Colour cyan;
 extern const Colour magenta;
+extern const Colour ariadneorange;
 
 
 } // namespace Ariadne

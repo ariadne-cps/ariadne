@@ -79,7 +79,7 @@ Int main()
     MapEvolver evolver(henon);
     ReachabilityAnalyser<IteratedMap> analyser(evolver);
     analyser.configuration().set_bounding_domain(ExactBoxType({{-4,4},{-4,4}}));
-    analyser.configuration().set_maximum_grid_depth(5);
+    analyser.configuration().set_maximum_grid_fineness(5);
     analyser.set_verbosity(3);
 
     // Set-up initial set and time for evolution

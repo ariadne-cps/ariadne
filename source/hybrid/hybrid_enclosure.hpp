@@ -299,8 +299,8 @@ class HybridEnclosure
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
-    //! \a depth subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+    //! \a fineness subdivisions in each component.
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;

@@ -199,10 +199,10 @@ Int main(Int argc, const char* argv[])
     analyser.configuration().set_lock_to_grid_steps(1);
     analyser.configuration().set_scaling(T,8.0);
     analyser.configuration().set_scaling(C,1.0);
-    std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth()<<"\n";
+    std::cerr<<"max grid fineness="<<analyser.configuration().maximum_grid_fineness()<<"\n";
     std::cerr<<"transient_time="<<analyser.configuration().transient_time()<<"\n";
     std::cerr<<"transient_steps="<<analyser.configuration().transient_steps()<<"\n";
-    analyser.configuration().set_maximum_grid_depth(5);
+    analyser.configuration().set_maximum_grid_fineness(5);
     analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
     HybridGridTreePaving chain_reach_set = analyser.outer_chain_reach(initial_set);

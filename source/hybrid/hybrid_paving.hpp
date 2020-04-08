@@ -121,12 +121,12 @@ class HybridGridTreePaving
     Void adjoin(const HybridGridTreePaving& hgts);
     Void remove(const HybridGridTreePaving& hgts);
     Void restrict(const HybridGridTreePaving& hgts);
-    Void restrict_to_height(Nat height);
-    Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat depth);
-    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat depth);
-    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat height, const Nat depth);
-    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat depth);
-    Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat depth);
+    Void restrict_to_extent(Nat extent);
+    Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
+    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat fineness);
+    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
+    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness);
+    Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
     template<class S> Void adjoin_outer_approximation(DiscreteLocation q, const S& s);
 
     GridTreePaving& operator[](DiscreteLocation q);
@@ -134,7 +134,7 @@ class HybridGridTreePaving
     Bool is_empty() const;
     SizeType size() const;
     HybridListSet<ExactBoxType> boxes() const;
-    Void mince(Nat depth);
+    Void mince(Nat fineness);
     Void recombine();
 
     friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
@@ -160,8 +160,8 @@ class HybridGridTreePaving
 template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
     this->_provide_location(q).adjoin_outer_approximation(s); }
 
-inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat depth) {
-    HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,depth); return paving; }
+inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
+    HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
 
 } // namespace Ariadne
 

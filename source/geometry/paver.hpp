@@ -39,8 +39,8 @@ class Paver {
     using SetType = PaverInterface::SetType;
     Paver(SharedPointer<const PaverInterface> ptr) : _ptr(ptr) { }
     Paver(const PaverInterface* ptr) : _ptr(ptr) { }
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const {
-        this->_ptr->adjoin_outer_approximation(paving,set,depth); }
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const {
+        this->_ptr->adjoin_outer_approximation(paving,set,fineness); }
     friend OutputStream& operator<<(OutputStream& os, Paver const& pv) { return pv._ptr->_write(os); }
 };
 
@@ -48,7 +48,7 @@ class Paver {
 class AffinePaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -56,8 +56,8 @@ class AffinePaver : public PaverInterface
 class SubdivisionPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
-    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat depth, const Vector<FloatDPValue>& max_errors) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
+    Void adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDPValue>& max_errors) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -65,7 +65,7 @@ class SubdivisionPaver : public PaverInterface
 class ReducePaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -73,7 +73,7 @@ class ReducePaver : public PaverInterface
 class ConstraintPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
     OutputStream& _write(OutputStream& os) const;
 };
 
@@ -81,7 +81,7 @@ class ConstraintPaver : public PaverInterface
 class OptimalConstraintPaver : public PaverInterface
 {
   public:
-    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat depth) const;
+    Void adjoin_outer_approximation(PavingInterface& paving, const SetType& set, Nat fineness) const;
     OutputStream& _write(OutputStream& os) const;
 };
 

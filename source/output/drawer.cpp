@@ -54,7 +54,7 @@ OutputStream& EnclosureAffineDrawer::_write(OutputStream& os) const {
 OutputStream& SubdivisionDrawer::_write(OutputStream& os) const {
     return os << "SubdivisionDrawer()"; }
 OutputStream& GridDrawer::_write(OutputStream& os) const {
-    return os << "GridDrawer(depth=" << this->_depth << ")"; }
+    return os << "GridDrawer(fineness=" << this->_fineness << ")"; }
 
 Void BoxDrawer::draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const { box_draw(cnvs,proj,set); }
 
@@ -128,7 +128,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
 }
 
 Void GridDrawer::draw(CanvasInterface& canvas, const Projection2d& projection, const ValidatedConstrainedImageSet& set) const {
-    set.outer_approximation(Grid(set.dimension()),this->_depth).draw(canvas,projection);
+    set.outer_approximation(Grid(set.dimension()),this->_fineness).draw(canvas,projection);
 }
 
 Void box_draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set)

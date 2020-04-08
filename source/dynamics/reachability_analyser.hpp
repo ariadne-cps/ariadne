@@ -241,23 +241,23 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     //! This property is only used for continuous-time computation.
     TimeType _lock_to_grid_time;
 
-    //! \brief The depth used for approximation on a grid for computations using upper semantics.
+    //! \brief The fineness used for approximation on a grid for computations using upper semantics.
     //! \details
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    UnsignedIntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_fineness;
 
-    //! \brief The maximum height used for approximation on a grid for chain reachability computations.
+    //! \brief The maximum extent used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    UnsignedIntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_extent;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
-    //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
+    //! If defined, this property combines with _maximum_grid_extent to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
     SharedPointer<BoundingDomainType> _bounding_domain_ptr;
@@ -279,11 +279,11 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     const TimeType& lock_to_grid_time() const { return _lock_to_grid_time; }
     Void set_lock_to_grid_time(const TimeType value) { _lock_to_grid_time = TimeType(value); }
 
-    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_fineness() const { return _maximum_grid_fineness; }
+    Void set_maximum_grid_fineness(const UnsignedIntType value) { _maximum_grid_fineness = value; }
 
-    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_extent() const { return _maximum_grid_extent; }
+    Void set_maximum_grid_extent(const UnsignedIntType value) { _maximum_grid_extent = value; }
 
     const SharedPointer<BoundingDomainType>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     Void set_bounding_domain_ptr(SharedPointer<BoundingDomainType> bounding_domain_ptr) { _bounding_domain_ptr = bounding_domain_ptr; }

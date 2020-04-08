@@ -513,16 +513,16 @@ HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const Hybrid
     return res;
 }
 
-template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const {
+template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const {
     if(this->space()==paving.space(this->location())) {
-        paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),depth);
+        paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),fineness);
     } else {
         ARIADNE_FAIL_MSG("HybridSet's state variables "<<this->space()<<
                          " do not match variables "<<paving.space()<<" of paving in location "<<this->location());
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
 
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)

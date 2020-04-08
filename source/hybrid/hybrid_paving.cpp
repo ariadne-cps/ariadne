@@ -85,57 +85,57 @@ Void HybridGridTreePaving::restrict(const HybridGridTreePaving& hgts) {
     }
 }
 
-Void HybridGridTreePaving::restrict_to_height(Nat h) {
+Void HybridGridTreePaving::restrict_to_extent(Nat h) {
     for(LocationsIterator _loc_iter=locations_begin(); _loc_iter!=locations_end(); ++_loc_iter) {
-        _loc_iter->second.restrict_to_height(h);
+        _loc_iter->second.restrict_to_extent(h);
     }
 }
 
-Void HybridGridTreePaving::adjoin_inner_approximation(const HybridSetInterface& hset, const Nat depth) {
+Void HybridGridTreePaving::adjoin_inner_approximation(const HybridSetInterface& hset, const Nat fineness) {
     Set<DiscreteLocation> locations=hset.locations();
     for(auto location : locations) {
         RealSpace space = this->space(location);
-        this->_provide_location(location).adjoin_inner_approximation(hset.euclidean_set(location,space),depth);
+        this->_provide_location(location).adjoin_inner_approximation(hset.euclidean_set(location,space),fineness);
     }
 }
 
-Void HybridGridTreePaving::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat depth) {
+Void HybridGridTreePaving::adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat fineness) {
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
         LabelledSet<ExactBoxType> const& vbx=_loc_iter->second;
         ARIADNE_ASSERT(vbx.space() == this->space(loc));
-        this->_provide_location(loc).adjoin_inner_approximation(vbx.euclidean_set(),depth);
+        this->_provide_location(loc).adjoin_inner_approximation(vbx.euclidean_set(),fineness);
     }
 }
 
-Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat height, const Nat depth) {
+Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness) {
     Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
         DiscreteLocation loc=*_loc_iter;
         RealSpace spc=this->space(loc);
-        this->_provide_location(loc).adjoin_lower_approximation(hs.euclidean_set(loc,spc),height,depth);
+        this->_provide_location(loc).adjoin_lower_approximation(hs.euclidean_set(loc,spc),extent,fineness);
     }
 }
 
-Void HybridGridTreePaving::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat depth) {
+Void HybridGridTreePaving::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness) {
     Set<DiscreteLocation> hlocs=hs.locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
         DiscreteLocation loc=*_loc_iter;
         RealSpace spc=this->space(loc);
-        this->_provide_location(loc).adjoin_outer_approximation(hs.euclidean_set(loc,spc),depth);
+        this->_provide_location(loc).adjoin_outer_approximation(hs.euclidean_set(loc,spc),fineness);
     }
 }
 
-Void HybridGridTreePaving::adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat depth) {
+Void HybridGridTreePaving::adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat fineness) {
     for(HybridExactBoxes::ConstIterator _loc_iter=hbxs.begin();
             _loc_iter!=hbxs.end(); ++_loc_iter) {
         DiscreteLocation const& loc=_loc_iter->first;
         LabelledSet<ExactBoxType> const& vbx=_loc_iter->second;
         ARIADNE_ASSERT(vbx.space() == this->space(loc));
-        this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.euclidean_set(),depth);
+        this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.euclidean_set(),fineness);
     }
 }
 
@@ -173,10 +173,10 @@ HybridListSet<ExactBoxType> HybridGridTreePaving::boxes() const {
     return result;
 }
 
-Void HybridGridTreePaving::mince(Nat depth) {
+Void HybridGridTreePaving::mince(Nat fineness) {
     for(LocationsIterator _loc_iter=this->locations_begin();
         _loc_iter!=this->locations_end(); ++_loc_iter) {
-        _loc_iter->second.mince(depth);
+        _loc_iter->second.mince(fineness);
     }
 }
 

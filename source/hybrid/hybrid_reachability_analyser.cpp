@@ -162,8 +162,8 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
     set_transient_steps(0);
     set_lock_to_grid_time(1.0);
     set_lock_to_grid_steps(1);
-    set_maximum_grid_depth(3);
-    set_maximum_grid_height(16);
+    set_maximum_grid_fineness(3);
+    set_maximum_grid_extent(16);
     set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
@@ -177,8 +177,8 @@ HybridReachabilityAnalyserConfiguration::_write(OutputStream& os) const
        << ",\n  transient_steps=" << transient_steps()
        << ",\n  lock_to_grid_steps=" << lock_to_grid_steps()
        << ",\n  lock_to_grid_time=" << lock_to_grid_time()
-       << ",\n  maximum_grid_depth=" << maximum_grid_depth()
-       << ",\n  maximum_grid_height=" << maximum_grid_height()
+       << ",\n  maximum_grid_fineness=" << maximum_grid_fineness()
+       << ",\n  maximum_grid_extent=" << maximum_grid_extent()
        << ",\n  bounding_domain=" << (bounding_domain_ptr() ? "available" : "none")
        << ",\n  grid=" << grid()
        << ",\n  outer_overspill_policy=" << outer_overspill_policy()

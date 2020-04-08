@@ -306,7 +306,7 @@ ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) co
 }
 
 
-Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
+Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness)
 {
 
     // No need to check if cell is already part of the set
@@ -325,8 +325,8 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
         lp.u[i]=add(up,bx[i].upper().raw(),errors[i].raw());
     }
 
-    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
-    Int maximum_tree_depth=depth*cell.dimension();
+    Int cell_depth=cell.depth();
+    Int maximum_depth=fineness*cell.dimension();
 
     // Check for disjointness using linear program
     //ValidatedKleenean feasible=SimplexSolver<FloatDP>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
@@ -338,14 +338,13 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     // If not disjoint, and we are at maximum depth, adjoin the set.
     // Otherwise, split and continue.
 
-    // FIXME: The cell depth should be an absolute depth, so this conversion should not be needed
-    if(cell_tree_depth>=maximum_tree_depth) {
+    if(cell_depth>=maximum_depth) {
         paving.adjoin(cell);
     } else {
         GridCell subcell1 = cell.split(0);
         GridCell subcell2 = cell.split(1);
-        _adjoin_outer_approximation_to(paving,lp,errors,subcell1,depth);
-        _adjoin_outer_approximation_to(paving,lp,errors,subcell2,depth);
+        _adjoin_outer_approximation_to(paving,lp,errors,subcell1,fineness);
+        _adjoin_outer_approximation_to(paving,lp,errors,subcell2,fineness);
     }
 
 }
@@ -433,7 +432,7 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
 
 Void
-ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
@@ -446,13 +445,13 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     for(Nat i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error().raw();
     }
-    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
+    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,fineness);
 }
 
 
 
 
-Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth)
+Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness)
 {
     SimplexSolver<FloatDP> lpsolver;
 
@@ -475,8 +474,8 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
         lp.u[i]=bx[i].upper().raw();
     }
 
-    Int cell_tree_depth=static_cast<Int>(cell.depth())-static_cast<Int>(cell.height());
-    Int maximum_tree_depth=depth*cell.dimension();
+    Int cell_depth=cell.depth();
+    Int maximum_depth=fineness*cell.dimension();
 
     // Check for disjointness using linear program
     ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
@@ -499,14 +498,13 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     // If not disjoint, and we are at maximum depth, adjoin the set.
     // Otherwise, split and continue.
 
-    // FIXME: The cell depth should be an absolute depth, so this conversion should not be needed
-    if(cell_tree_depth>=maximum_tree_depth) {
+    if(cell_depth>=maximum_depth) {
         paving.adjoin(cell);
     } else {
         GridCell subcell1 = cell.split(0);
 		GridCell subcell2 = cell.split(1);
-        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell1,depth);
-        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell2,depth);
+        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell1,fineness);
+        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell2,fineness);
     }
 
 }
@@ -514,7 +512,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
 
 Void
-ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const {
+ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
     SimplexSolver<FloatDP> lpsolver;
@@ -629,7 +627,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(definitely(not feasible)) { return; } // no intersection
 
-    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
+    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,fineness);
 }
 
 

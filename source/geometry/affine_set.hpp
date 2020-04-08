@@ -143,9 +143,9 @@ class ValidatedAffineConstrainedImageSet
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
 
-    Void adjoin_outer_approximation_to(PavingInterface& g, Nat depth) const;
-    GridTreePaving outer_approximation(const Grid& g, Nat depth) const;
-    Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& g, Nat fineness) const;
+    GridTreePaving outer_approximation(const Grid& g, Nat fineness) const;
+    Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
     List<Point2d> boundary(Nat xc, Nat yc) const;
 
@@ -155,8 +155,8 @@ class ValidatedAffineConstrainedImageSet
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     Void construct_linear_program(LinearProgram<FloatDP>& lp) const;
-    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth);
-    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat depth);
+    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness);
+    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness);
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {

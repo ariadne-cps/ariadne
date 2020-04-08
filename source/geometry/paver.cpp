@@ -98,17 +98,17 @@ OutputStream& ReducePaver::_write(OutputStream& os) const { return os << "Reduce
 OutputStream& ConstraintPaver::_write(OutputStream& os) const { return os << "ConstraintPaver()"; }
 OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os << "OptimalConstraintPaver()"; }
 
-Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const
+Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const
 {
     Vector<FloatDPValue> max_errors(paving.dimension());
     for(Nat i=0; i!=max_errors.size(); ++i) {
-        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(depth));
+        max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(fineness));
     }
 
-    this->adjoin_outer_approximation_recursion(paving,set,depth,max_errors);
+    this->adjoin_outer_approximation_recursion(paving,set,fineness,max_errors);
 }
 
-Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat depth, const Vector<FloatDPValue>& max_errors) const
+Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& paving, ValidatedConstrainedImageSet const& set, Nat fineness, const Vector<FloatDPValue>& max_errors) const
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const ExactDouble RELATIVE_SMALLNESS=0.5_x;
@@ -134,11 +134,11 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
     }
 
     if(small) {
-        paving.adjoin_outer_approximation(cast_exact_box(range),depth);
+        paving.adjoin_outer_approximation(cast_exact_box(range),fineness);
     } else {
         Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> subsets=set.split();
-        this->adjoin_outer_approximation_recursion(paving,subsets.first,depth,max_errors);
-        this->adjoin_outer_approximation_recursion(paving,subsets.second,depth,max_errors);
+        this->adjoin_outer_approximation_recursion(paving,subsets.first,fineness,max_errors);
+        this->adjoin_outer_approximation_recursion(paving,subsets.second,fineness,max_errors);
     }
 }
 
@@ -146,7 +146,7 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
 
 Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
                                              const ValidatedConstrainedImageSet& set,
-                                             Nat depth) const
+                                             Nat fineness) const
 {
     const ExactBoxType& subdomain = set.reduced_domain();
     const ValidatedVectorMultivariateFunction& function = set.function();
@@ -159,7 +159,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     // The basic approximation error when plotting with accuracy=0
     static const double BASIC_ERROR = 0.0625;
 
-    const double max_error=BASIC_ERROR/(1<<depth);
+    const double max_error=BASIC_ERROR/(1<<fineness);
 
     ARIADNE_DEBUG_ASSERT(function.domain()==set.constraint_function().domain());
     ValidatedVectorMultivariateFunction fg=join(function,set.constraint_function());
@@ -194,7 +194,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
 
     for(Nat n=0; n!=subdomains.size(); ++n) {
         ValidatedConstrainedImageSet subset(subdomains[n],function,constraints);
-        subset.affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
+        subset.affine_over_approximation().adjoin_outer_approximation_to(paving,fineness);
     }
 }
 
@@ -231,7 +231,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     FloatDP clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
 
     ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
+    ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.depth()<<" max_dpth="<<max_dpth<<"\n");
     ARIADNE_LOG(2,"     domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
 
     ConstraintSolver constraint_solver;
@@ -306,13 +306,13 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     PositiveFloatDPUpperBound clmaxwdth = maximum_scaled_width(cell_box,scalings);
     ExactDouble RELATIVE_SPLITTING_SIZE = 4.0_x;
 
-    if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.tree_depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
+    if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
         Pair<Nat,FloatDP> lipsch = lipschitz_index_and_error(f,new_domain);
         ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
         Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
-    } else if(cell.tree_depth()>=max_dpth) {
+    } else if(cell.depth()>=max_dpth) {
         ARIADNE_LOG(4,"  Adjoining cell "<<cell_box<<"\n");
         paving.adjoin(cell);
     } else {
@@ -348,7 +348,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     const Nat m=fg.argument_size();
     const Nat n=fg.result_size();
     ARIADNE_LOG(2,"\nadjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
+    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e<<"\n");
     ARIADNE_LOG(2,"  x0="<<x<<", y0="<<y<<"\n");
 
     FloatDPValuePoint z(x.size());
@@ -474,7 +474,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(2," Intersection point: parameter="<<y<<"\n");
     }
 
-    if(b.tree_depth()>=Int(e*b.dimension())) {
+    if(b.depth()>=Int(e*b.dimension())) {
         ARIADNE_LOG(2,"  Adjoining cell "<<b.box()<<"\n");
         r.adjoin(b);
     } else {
@@ -500,7 +500,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     const Nat m=fg.argument_size();
     const Nat n=fg.result_size();
     ARIADNE_LOG(2,"\nadjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
+    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e<<"\n");
 
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
@@ -574,7 +574,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
 
-    if(b.tree_depth()>=Int(e*b.dimension())) {
+    if(b.depth()>=Int(e*b.dimension())) {
         ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
         r.adjoin(b);
     } else {
@@ -663,16 +663,16 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 } // namespace
 
 
-Void ReducePaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
-    return procedure_constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+Void ReducePaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const {
+    return procedure_constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),fineness);
 }
 
-Void ConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
-    return constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+Void ConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const {
+    return constraint_adjoin_outer_approximation(paving,set.domain(),set.function(),set.constraint_function(),set.constraint_bounds(),fineness);
 }
 
-Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat depth) const {
-    return optimal_constraint_adjoin_outer_approximation(paving,set.reduced_domain(),set.function(),set.constraint_function(),set.constraint_bounds(),depth);
+Void OptimalConstraintPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const {
+    return optimal_constraint_adjoin_outer_approximation(paving,set.reduced_domain(),set.function(),set.constraint_function(),set.constraint_bounds(),fineness);
 }
 
 } // namespace Ariadne

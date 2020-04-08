@@ -113,8 +113,8 @@ class HybridBasicSet
     //! \brief A singleton list of the bounding box.
     HybridUpperBoxes bounding_boxes() const;
 
-    //! \brief Adjoin an outer approximation of the set to \a paving using a given \a depth of subdividing the paving cells.
-    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+    //! \brief Adjoin an outer approximation of the set to \a paving using a given \a fineness of subdividing the paving cells.
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
 
     //! \brief Draw to a canvas. Only draws if the set of locations \a q is empty, or contains the set's actual location.
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const;

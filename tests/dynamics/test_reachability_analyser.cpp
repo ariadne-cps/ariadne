@@ -100,7 +100,7 @@ class TestReachabilityAnalyser
         EvolverType evolver(system,integrator);
 
         AnalyserType analyser(evolver);
-        analyser.configuration().set_maximum_grid_depth(3);
+        analyser.configuration().set_maximum_grid_fineness(3);
         cout << "Done building analyser\n";
         return analyser;
     }
@@ -209,7 +209,7 @@ class TestReachabilityAnalyser
         cout << "Computing outer chain reachable set" << endl;
         analyser.configuration().set_transient_time(12.0_dec);
         analyser.configuration().set_lock_to_grid_time(6.0_dec);
-        analyser.configuration().set_maximum_grid_depth(3);
+        analyser.configuration().set_maximum_grid_fineness(3);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 
@@ -224,7 +224,7 @@ class TestReachabilityAnalyser
 
         cout << "Recomputing with tight restriction" << endl;
 
-        analyser.configuration().set_maximum_grid_height(1);
+        analyser.configuration().set_maximum_grid_extent(1);
         ARIADNE_TEST_THROWS(analyser.outer_chain_reach(initial_set),OuterChainOverspill);
     }
 
@@ -237,7 +237,7 @@ class TestReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
-        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_depth());
+        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
         plot("test_reachability_analyser-verify_safety.png",PlanarProjectionMap(2,0,1),graphics_box,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,

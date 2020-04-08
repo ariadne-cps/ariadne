@@ -683,7 +683,7 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
-Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat depth) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat fineness) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
     GridTreePaving& paving = hgts[location];
@@ -692,19 +692,19 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, 
     RealSpace auxiliary_space=this->auxiliary_space();
     if(state_space==paving_space) {
         auto state_set = Enclosure(this->parameter_domain(),this->state_function(),this->time_function(),this->constraints(),this->function_factory());
-        state_set.adjoin_outer_approximation_to(paving,depth);
+        state_set.adjoin_outer_approximation_to(paving,fineness);
     } else if(join(state_space,auxiliary_space)==paving_space) {
-        set.adjoin_outer_approximation_to(paving,depth);
+        set.adjoin_outer_approximation_to(paving,fineness);
     } else {
         ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" and auxiliary variables "<<auxiliary_space<<
                          " do not match variables "<<paving_space<<" of paving in location "<<location);
     }
 }
 
-HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat depth) {
+HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat fineness) {
     HybridGridTreePaving result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
+        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),fineness);
     }
     return result;
 }

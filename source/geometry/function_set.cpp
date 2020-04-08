@@ -674,10 +674,10 @@ ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Eff
 
 
 Void
-ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
     ValidatedConstrainedImageSet set(over_approximation(this->domain()),this->function(),this->constraints());
-    return set.adjoin_outer_approximation_to(paving,depth);
+    return set.adjoin_outer_approximation_to(paving,fineness);
 }
 
 
@@ -1135,23 +1135,23 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
     optimiser.verbosity=0;
 
     List<Pair<Nat,ExactBoxType> > subdomains;
-    Nat depth(0);
-    Nat MAX_DEPTH=2;
+    Nat splittings(0);
+    Nat MAX_SPLITTINGS=2;
     ValidatedKleenean feasible = false;
-    subdomains.append(make_pair(depth,subdomain));
+    subdomains.append(make_pair(splittings,subdomain));
 
     while(!subdomains.empty()) {
-        make_lpair(depth,subdomain)=subdomains.back();
+        make_lpair(splittings,subdomain)=subdomains.back();
         subdomains.pop_back();
         ValidatedKleenean found_feasible = optimiser.feasible(subdomain,function,codomain);
         if(definitely(found_feasible)) { return true; }
         if(possibly(found_feasible)) {
-            if(depth==MAX_DEPTH) {
+            if(splittings==MAX_SPLITTINGS) {
                 feasible = ValidatedKleenean(indeterminate);
             } else {
                 Pair<ExactBoxType,ExactBoxType> split_subdomains=subdomain.split();
-                subdomains.append(make_pair(depth+1,split_subdomains.first));
-                subdomains.append(make_pair(depth+1,split_subdomains.second));
+                subdomains.append(make_pair(splittings+1,split_subdomains.first));
+                subdomains.append(make_pair(splittings+1,split_subdomains.second));
             }
         }
     }
@@ -1160,26 +1160,26 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
 }
 
 
-GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
+GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat fineness) const
 {
     GridTreePaving paving(grid);
-    this->adjoin_outer_approximation_to(paving,depth);
+    this->adjoin_outer_approximation_to(paving,fineness);
     return paving;
 }
 
-Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
     ValidatedConstrainedImageSet const& set=*this;
 
     switch(DISCRETISATION_METHOD) {
         case DiscretisationMethod::SUBDIVISION:
-            SubdivisionPaver().adjoin_outer_approximation(paving,set,depth);
+            SubdivisionPaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         case DiscretisationMethod::AFFINE:
-            AffinePaver().adjoin_outer_approximation(paving,set,depth);
+            AffinePaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         case DiscretisationMethod::CONSTRAINT:
-            ConstraintPaver().adjoin_outer_approximation(paving,set,depth);
+            ConstraintPaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         default:
             ARIADNE_FAIL_MSG("Unknown discretisation method\n");
@@ -1244,9 +1244,9 @@ ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projectio
 }
 
 Void
-ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat depth) const
+ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat fineness) const
 {
-    GridDrawer(depth).draw(cnvs,proj,*this);
+    GridDrawer(fineness).draw(cnvs,proj,*this);
 }
 
 ValidatedConstrainedImageSet

@@ -1014,16 +1014,16 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 
 
-Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
-    this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),depth);
+    this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),fineness);
 }
 
 
-GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat depth) const
+GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat fineness) const
 {
     GridTreePaving paving(grid);
-    this->adjoin_outer_approximation_to(paving,depth);
+    this->adjoin_outer_approximation_to(paving,fineness);
     return paving;
 }
 
@@ -1285,8 +1285,8 @@ Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     EnclosureAffineDrawer(accuracy).draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
-Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat depth) const {
-    GridDrawer(depth).draw(canvas,projection,this->state_time_auxiliary_set());
+Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat fineness) const {
+    GridDrawer(fineness).draw(canvas,projection,this->state_time_auxiliary_set());
 }
 
 

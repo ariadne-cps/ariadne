@@ -228,7 +228,7 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, 
     HybridReachabilityAnalyser analyser(evolver);
 
     //  Set the analyser configuration
-    analyser.configuration().set_maximum_grid_depth(6);
+    analyser.configuration().set_maximum_grid_fineness(6);
     analyser.configuration().set_lock_to_grid_time(5);
     analyser.verbosity=log_verbosity;
 

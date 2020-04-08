@@ -80,9 +80,9 @@ class SubdivisionDrawer : public DrawerInterface
 //! \brief Pave the set and draw the computed cells.
 class GridDrawer : public DrawerInterface
 {
-    Nat _depth;
+    Nat _fineness;
   public:
-    GridDrawer(Nat depth) : _depth(depth) { }
+    GridDrawer(Nat fineness) : _fineness(fineness) { }
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
     OutputStream& _write(OutputStream& os) const;
 };

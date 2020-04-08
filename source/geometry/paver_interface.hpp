@@ -43,7 +43,7 @@ class PaverInterface : public virtual WritableInterface
   public:
     typedef ValidatedConstrainedImageSet SetType;
   public:
-    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Nat depth) const = 0;
+    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Nat fineness) const = 0;
 };
 
 } //namespace Ariadne

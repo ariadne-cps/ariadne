@@ -271,27 +271,27 @@ class Enclosure
     //! \brief The set obtained by restricting to the \a subdomain.
     friend Enclosure restriction(Enclosure const&, const ExactBoxType& subdomain);
 
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
+    GridTreePaving outer_approximation(const Grid& grid, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by subdividing the parameter domain. Does not require constraint propagation,
     //! but may be inefficient.
-    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by first computing affine over-approximations of the set.
-    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by using constraint propagation.
-    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by using an interior point method to try to find good barrier functions
     //! and using constraint propagation to prove disjointness with cells.
     //! \details Potentially very efficient, but may be unreliable due to the
     //! use of nonlinear programming to find good Lyapounov multipliers for
     //! the constraints.
-    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
+    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the
@@ -340,7 +340,7 @@ class Enclosure
     //! affine over-approximations yield a good image.
     [[deprecated]] Void affine_draw(CanvasInterface&, const Projection2d& p, Nat splittings) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
-     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat depth) const;
+     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat fineness) const;
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

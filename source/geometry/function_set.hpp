@@ -247,7 +247,7 @@ class ConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     LowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
@@ -355,9 +355,9 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
+    GridTreePaving outer_approximation(const Grid& grid, Nat fineness) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
@@ -367,7 +367,7 @@ class ValidatedConstrainedImageSet
     Void draw(CanvasInterface&, const Projection2d&) const;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;
-    Void grid_draw(CanvasInterface&, const Projection2d&, Nat depth) const;
+    Void grid_draw(CanvasInterface&, const Projection2d&, Nat fineness) const;
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;
 

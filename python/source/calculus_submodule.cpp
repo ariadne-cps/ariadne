@@ -230,7 +230,7 @@ Void export_validated_taylor_model(pybind11::module& module)
     taylor_model_class.def(pybind11::init<ValidatedTaylorModelDP>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const ValidatedTaylorModelDP&))&keys);
-    taylor_model_class.def("value", (const FloatDPValue&(ValidatedTaylorModelDP::*)()const) &ValidatedTaylorModelDP::value);
+    taylor_model_class.def("value", (const FloatDPValue(ValidatedTaylorModelDP::*)()const) &ValidatedTaylorModelDP::value);
     taylor_model_class.def("error", (const FloatDPError&(ValidatedTaylorModelDP::*)()const) &ValidatedTaylorModelDP::error);
     taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPValue>&(*)(ValidatedTaylorModelDP const&)) &get_expansion);
     taylor_model_class.def("set_error", (Void(ValidatedTaylorModelDP::*)(const FloatDPError&)) &ValidatedTaylorModelDP::set_error);
@@ -273,7 +273,7 @@ Void export_approximate_taylor_model(pybind11::module& module)
     taylor_model_class.def(pybind11::init<ModelType>());
     taylor_model_class.def(pybind11::init< SizeType,SweeperDP >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const ModelType&))&keys);
-    taylor_model_class.def("value", (const FloatDPApproximation&(ModelType::*)()const) &ModelType::value);
+    taylor_model_class.def("value", (const FloatDPApproximation(ModelType::*)()const) &ModelType::value);
     taylor_model_class.def("expansion", (const Expansion<MultiIndex,FloatDPApproximation>&(*)(ModelType const&)) &get_expansion);
     taylor_model_class.def("argument_size", &ModelType::argument_size);
     taylor_model_class.def("domain", &ModelType::domain);
@@ -443,7 +443,7 @@ Void export_scalar_taylor_function(pybind11::module& module)
     scalar_taylor_function_class.def("__str__", &__cstr__<F>);
     scalar_taylor_function_class.def("__repr__", &__crepr__<F>);
 
-    scalar_taylor_function_class.def("value", (const FloatDPValue&(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::value);
+    scalar_taylor_function_class.def("value", (const FloatDPValue(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()const) &ValidatedScalarMultivariateTaylorFunctionModelDP::value);
     scalar_taylor_function_class.def("clobber", (Void(ValidatedScalarMultivariateTaylorFunctionModelDP::*)()) &ValidatedScalarMultivariateTaylorFunctionModelDP::clobber);
     scalar_taylor_function_class.def("set_properties",&ValidatedScalarMultivariateTaylorFunctionModelDP::set_properties);
     scalar_taylor_function_class.def("properties",&ValidatedScalarMultivariateTaylorFunctionModelDP::properties);

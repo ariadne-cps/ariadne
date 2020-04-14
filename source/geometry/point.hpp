@@ -86,6 +86,9 @@ class Point
 
     Vector<RealType> centre() const { return *this; }
 
+    friend Point<X> product(Point<X> const& pt1, Point<X> const& pt2) {
+        return Point<X>(join(pt1.vector(),pt2.vector())); }
+
     //! Write to an output stream.
     virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<const Vector<RealType>&>(*this); }

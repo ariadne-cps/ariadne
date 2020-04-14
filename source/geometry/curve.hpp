@@ -134,17 +134,17 @@ class InterpolatedCurve
     /*! \brief Create an empty curve. */
     InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
-    InterpolatedCurve(const PointType& pt)
+    explicit InterpolatedCurve(const PointType& pt)
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(ParameterType s, const PointType& pt)
+    explicit InterpolatedCurve(ParameterType s, const PointType& pt)
         : _points() { this->insert(s,pt); }
-    InterpolatedCurve(GenericParameterType s, const PointType& pt)
+    explicit InterpolatedCurve(GenericParameterType s, const PointType& pt)
         : _points() { PrecisionType pr; this->insert(ParameterType(s,pr),pt); }
-    InterpolatedCurve(const RawFloatDP& s, const Vector<RawFloatDP>& pt)
+    explicit InterpolatedCurve(const RawFloatDP& s, const Vector<RawFloatDP>& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
-    InterpolatedCurve(const PointType& pt0, const PointType& pt1)
+    explicit InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     Void insert(const GenericParameterType& s, const PointType& pt);

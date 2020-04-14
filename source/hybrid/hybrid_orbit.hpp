@@ -60,6 +60,8 @@ class HybridGridCell;
 class HybridGridTreePaving;
 class HybridTime;
 
+class HybridAutomatonInterface;
+
 class DiscreteLocation;
 
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
@@ -72,14 +74,17 @@ class Orbit<HybridApproximatePoint>
 {
   public:
     Orbit(const HybridApproximatePoint& hpt);
+    Orbit(List<HybridInterpolatedCurve> crvs);
     Void insert(HybridTime ht, const HybridApproximatePoint& hpt);
     Nat size() const;
     const InterpolatedCurve& curve(Nat m) const;
-    const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
+    const List<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
   private:
-    std::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves_ptr;
+    SharedPointer<List<HybridInterpolatedCurve> > _curves_ptr;
 };
+
+Orbit<HybridApproximatePoint> extend_auxiliary(Orbit<HybridApproximatePoint> const& horb, HybridAutomatonInterface const& ha);
 
 template<>
 OutputStream&
@@ -93,18 +98,21 @@ class Orbit<HybridGridCell>
     typedef HybridGridCell EnclosureType;
     typedef HybridGridTreePaving EnclosureListType;
 
-    Orbit(const HybridGrid&, const HybridGridCell&);
-    Orbit(const HybridGridTreePaving&);
-    Orbit(const HybridGridTreePaving&, const HybridGridTreePaving&,
-          const HybridGridTreePaving&, const HybridGridTreePaving&);
+    Orbit(const HybridGrid& grid, const HybridGridCell& initial_cell);
+    Orbit(const HybridGridTreePaving& initial_set);
+    Orbit(const HybridGridTreePaving& initial_set, const HybridGridTreePaving& reach_set,
+          const HybridGridTreePaving& intermediate_set, const HybridGridTreePaving& final_set);
     HybridGrid const& grid() const;
     HybridGridTreePaving const& initial() const;
     HybridGridTreePaving const& reach() const;
     HybridGridTreePaving const& intermediate() const;
     HybridGridTreePaving const& final() const;
   private:
-    std::shared_ptr<Data> _data;
+    SharedPointer<Data> _data;
 };
+
+Orbit<HybridGridCell> extend_auxiliary(Orbit<HybridGridCell> const& horb, HybridAutomatonInterface const& ha);
+
 
 template<>
 class Orbit<HybridEnclosure>

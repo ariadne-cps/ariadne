@@ -259,6 +259,103 @@ GridTreePaving& HybridGridTreePaving::_provide_location(const DiscreteLocation& 
         this->_map.insert(std::make_pair(q,GridTreePaving(this->_hgrid[q])));
         iter=this->_map.find(q);
     }
-    return iter->second; }
+    return iter->second;
+}
+
+
+Grid HybridScaling::grid(const DiscreteLocation& loc, const RealSpace& space) const
+{
+    Vector<RawFloatDP> lengths(space.size());
+    for(SizeType i=0; i!=space.size(); ++i) {
+        lengths[i] = (this->scaling(loc,space.variable(i))).raw();
+    }
+    return Grid(lengths);
+}
+
+HybridGridTreePaving extend_auxiliary(const HybridGridTreePaving& hybrid_paving,
+                                      const HybridAutomatonInterface& hybrid_automaton) {
+    HybridGrid hybrid_state_grid = hybrid_paving.grid();
+    HybridSpace hybrid_state_space = hybrid_state_grid.space();
+    HybridScaling scaling = hybrid_state_grid.scaling();
+
+    HybridSpace hybrid_state_auxiliary_space = hybrid_automaton.state_auxiliary_space();
+    HybridGrid hybrid_state_auxiliary_grid(hybrid_state_auxiliary_space,scaling);
+
+    HybridGridTreePaving result(hybrid_state_auxiliary_grid);
+    for (auto iter = hybrid_paving.locations_begin(); iter!=hybrid_paving.locations_end(); ++iter) {
+        DiscreteLocation const& location=iter->first;
+        GridTreePaving const& state_paving=iter->second;
+        RealSpace auxiliary_space=hybrid_automaton.continuous_auxiliary_space(location);
+        EffectiveVectorMultivariateFunction auxiliary_function=hybrid_automaton.auxiliary_function(location);
+        Grid auxiliary_grid=scaling.grid(location,auxiliary_space);
+        GridTreePaving state_auxiliary_paving=outer_skew_product(state_paving,auxiliary_grid,auxiliary_function);
+        result[location]=state_auxiliary_paving;
+    }
+    return result;
+}
+
+
+
+struct Orbit<HybridGridCell>::Data {
+    Data(const HybridGrid& grid)
+        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    HybridGridTreePaving initial;
+    HybridGridTreePaving reach;
+    HybridGridTreePaving intermediate;
+    HybridGridTreePaving final;
+};
+
+Orbit<HybridGridCell>::
+Orbit(const HybridGridTreePaving& initial_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
+}
+
+Orbit<HybridGridCell>::
+Orbit(const HybridGridTreePaving& initial_set,
+      const HybridGridTreePaving& reach_set,
+      const HybridGridTreePaving& intermediate_set,
+      const HybridGridTreePaving& final_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
+    this->_data->reach=reach_set;
+    this->_data->intermediate=intermediate_set;
+    this->_data->final=final_set;
+}
+
+HybridGridTreePaving const&
+Orbit<HybridGridCell>::
+initial() const
+{
+    return this->_data->initial;
+}
+
+HybridGridTreePaving const&
+Orbit<HybridGridCell>::
+reach() const
+{
+    return this->_data->reach;
+}
+
+HybridGridTreePaving const&
+Orbit<HybridGridCell>::
+intermediate() const
+{
+    return this->_data->intermediate;
+}
+
+HybridGridTreePaving const&
+Orbit<HybridGridCell>::
+final() const
+{
+    return this->_data->final;
+}
+
+Orbit<HybridGridCell> extend_auxiliary(const Orbit<HybridGridCell>& orbit, const HybridAutomatonInterface& ha) {
+    return Orbit<HybridGridCell>(extend_auxiliary(orbit.initial(),ha),extend_auxiliary(orbit.reach(),ha),
+                                 extend_auxiliary(orbit.intermediate(),ha),extend_auxiliary(orbit.final(),ha));
+}
 
 } // namespace Ariadne

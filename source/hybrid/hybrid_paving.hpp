@@ -163,6 +163,12 @@ template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(Discrete
 inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
     HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
 
+
+class HybridAutomatonInterface;
+
+HybridGridTreePaving extend_auxiliary(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& ha);
+
+
 } // namespace Ariadne
 
 #endif // ARIADNE_HYBRID_PAVING_HPP

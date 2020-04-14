@@ -62,7 +62,7 @@ class HybridGrid
     //! The underlying real space in location \a loc.
     RealSpace space(const DiscreteLocation& loc) const { return this->_space[loc]; }
     //! The variable scalings used.
-    HybridScalingInterface& scalings() { return this->_scaling; }
+    HybridScaling& scaling() { return this->_scaling; }
     //! The grid in location \a loc.
     Grid grid(const DiscreteLocation& loc) const { return this->operator[](loc); }
   public:
@@ -78,12 +78,7 @@ class HybridGrid
 
 inline Grid HybridGrid::operator[](const DiscreteLocation& loc) const
 {
-    RealSpace continuous_space = this->_space[loc];
-    Vector<RawFloatDP> lengths(continuous_space.size());
-    for(Nat i=0; i!=continuous_space.size(); ++i) {
-        lengths[i] = (this->_scaling.scaling(loc,continuous_space.variable(i))).raw();
-    }
-    return Grid(lengths);
+    return this->_scaling.grid(loc,this->_space[loc]);
 }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridGrid& hgrid) {

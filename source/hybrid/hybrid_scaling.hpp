@@ -67,6 +67,7 @@ class HybridScaling
     operator const HybridScalingInterface& () const { return *this->_ptr; }
     operator HybridScalingInterface& () { return *this->_ptr; }
     FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
+    Grid grid(const DiscreteLocation& loc, const RealSpace& spc) const;
   public:
     HybridScaling(const Map<Identifier,FloatDPValue>& scalings);
     HybridScaling(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);

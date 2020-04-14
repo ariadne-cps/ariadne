@@ -236,6 +236,10 @@ ExactBoxType Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& 
     return res;
 }
 
+Grid join(Grid const& g1, Grid const& g2) {
+    return Grid(join(g1._data->_origin,g2._data->_origin),join(g1._data->_lengths,g2._data->_lengths));
+}
+
 OutputStream& operator<<(OutputStream& os, const Grid& gr)
 {
     os << "Grid( ";

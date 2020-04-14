@@ -43,6 +43,8 @@ class Projection
         for(SizeType i=0; i!=this->_ind.size(); ++i) { ARIADNE_PRECONDITION(_ind[i]<_as); } }
     SizeType result_size() const { return this->_ind.size(); }
     SizeType argument_size() const { return this->_as; }
+    Array<SizeType> const& indices() const { return this->_ind; }
+    SizeType const& operator[](SizeType i) const { return this->_ind[i]; }
     SizeType index(SizeType i) const { return this->_ind[i]; }
 
     template<class X> Vector<X> operator() (Vector<X> const& v) const {

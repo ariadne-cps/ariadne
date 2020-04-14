@@ -32,6 +32,7 @@
 #include "../utility/macros.hpp"
 #include "../utility/exceptions.hpp"
 #include "../utility/stlio.hpp"
+#include "../function/projection.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
 #include "../geometry/grid_paving.hpp"
@@ -188,6 +189,30 @@ GridCell GridCell::smallest_enclosing_primary_cell( const UpperBoxType& theBoxTy
     return GridCell( theGrid, smallest_enclosing_primary_cell_extent(theBoxType, theGrid), BinaryWord() );
 }
 
+class BinaryCode {
+    Nat _height;
+    BinaryWord _word;
+  public:
+    BinaryCode(Nat tree_height, BinaryWord word) : _height(tree_height), _word(word) { } //assert(word.size()>=height); }
+    bool operator[](Int i) { return _word[static_cast<Nat>(i+static_cast<Int>(_height))]; }
+    friend OutputStream& operator<<(OutputStream& os, BinaryCode const& bc) {
+        for (Nat i=0; i!=bc._word.size(); ++i) {
+            if (i==bc._height) { os << '.'; } os << (short)bc._word[i];
+        }
+        return os;
+    }
+    Array<BinaryCode> split(DimensionType dim) {
+        assert(_height % dim==0);
+        Array<BinaryCode> codes(dim, BinaryCode(_height/dim,BinaryWord()));
+        DimensionType k=0;
+        for (SizeType i=0; i!=_word.size(); ++i) {
+            codes[k]._word.append(this->_word[i]);
+            k=(k+1) % dim;
+        }
+        return codes;
+    }
+};
+
 //Computes the box corresponding the the cell defined by the primary cell and the binary word.
 //The resulting box is not relaterd to the original space, but is a lattice box.
 // 1. Compute the primary cell located the the extent \a theExtent above the zero level,
@@ -213,6 +238,21 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
     }
     return theResultLatticeBoxType;
 }
+
+GridCell raise_to_level(GridCell gc, Nat level) {
+    assert(gc.root_extent()<=level);
+    DimensionType n=gc.dimension();
+    BinaryWord w;
+    for (Nat l=level; l!=gc.root_extent(); --l) {
+        for (DimensionType j=0; j!=n; ++j) {
+            w.append(l%2);
+        }
+    }
+    w.append(gc.word());
+    return GridCell(gc.grid(),level,w);
+}
+
+
 
 //This method appends \a dimension() zeroes to the binary word defining this cell
 //and return a GridOpenCell created with the given grid, primany cell extent and
@@ -357,7 +397,7 @@ OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
     //Write the grid data to the string stream
     return os << "GridCell( " << gridPavingCell.grid() <<
         ", Primary cell extent: " << gridPavingCell.root_extent() <<
-        ", Path to the root: " << gridPavingCell.word() <<
+        ", Path from the root: " << gridPavingCell.word() <<
         ", ExactBoxType: " << gridPavingCell.box() << " )";
 }
 
@@ -2171,9 +2211,19 @@ BinaryTreeNode* GridTreePaving::align_with_cell( const Nat otherPavingPCellExten
     return pBinaryTreeNode;
 }
 
+Void GridTreePaving::_adjoin_cell( const Nat theCellRootExtent, BinaryWord const& theCellPath ) {
+    Bool has_stopped = false;
+    BinaryTreeNode* pBinaryTreeNode = this->align_with_cell( theCellRootExtent, true, false, has_stopped );
+    if( ! has_stopped ){
+        //Add the enabled cell to the binary tree.
+        pBinaryTreeNode->add_enabled( theCellPath );
+    }
+}
+
+
 Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
                                                   const Nat max_mince_tree_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
-    //Compute the cell correspomding to the current node
+    //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
@@ -2350,7 +2400,7 @@ Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, 
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(ExactBoxType,Nat)","ExactBoxType "<<theBoxType<<" has empty interior.");
         }
     }
-    this->adjoin_outer_approximation( theBoxType, numSubdivInDim );
+    this->adjoin_outer_approximation(theBoxType,numSubdivInDim);
 }
 
 Void GridTreePaving::adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim ) {
@@ -2929,6 +2979,76 @@ GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpa
     return resultSet;
 }
 
+
+
+struct LatticeCell {
+    DimensionType _dim;
+    Nat _root;
+    BinaryWord _word;
+};
+
+
+
+BinaryWord product_word(GridCell const& gc1, GridCell const& gc2) {
+    Nat extent = std::max(gc1.root_extent(),gc2.root_extent());
+    Int h1=static_cast<Int>(gc1.root_extent());
+    Int h2=static_cast<Int>(gc2.root_extent());
+    DimensionType n1=gc1.dimension();
+    DimensionType n2=gc2.dimension();
+    Int r1=gc1.depth()/static_cast<Int>(gc1.dimension()); // refinements
+    BinaryWord const& w1=gc1.word();
+    BinaryWord const& w2=gc2.word();
+    BinaryWord word;
+    SizeType i1=0u, i2=0u;
+    Int level=-static_cast<Int>(extent);
+    while (level < r1) {
+        if (-level>h1) {
+            for(SizeType j=0; j!=n1; ++j) { word.append(level%2); }
+        } else {
+            for(SizeType j=0; j!=n1; ++j) { word.append(w1[i1]); ++i1; }
+        }
+        if (-level>h2) {
+            for(SizeType j=0; j!=n2; ++j) { word.append(level%2); }
+        } else {
+            for(SizeType j=0; j!=n2; ++j) { word.append(w2[i2]); ++i2; }
+        }
+        ++level;
+    }
+    return word;
+}
+
+// The product of two cells of the same depth
+GridCell product(GridCell const& gc1, GridCell const& gc2) {
+    ARIADNE_ASSERT_MSG(gc1.depth()*static_cast<Int>(gc2.dimension())==gc2.depth()*static_cast<Int>(gc1.dimension()),"Computing product of grid cells "<<gc1<<" and "<<gc2<<" which do not have the same depth in each dimension.");
+    GridCell r(join(gc1.grid(),gc2.grid()),std::max(gc1.root_extent(),gc2.root_extent()),product_word(gc1,gc2));
+//    std::cerr<<"r="<<r<<"\nr.box()="<<r.box()<<", product(bx1,bx2)="<<product(gc1.box(),gc2.box())<<"\n";
+//    std::cerr<<"r-codes="<<BinaryCode(tree_height,word).split(n1+n2)<<"\n";
+//    std::cerr<<"gc1-codes="<<BinaryCode(gc1.tree_height(),gc1.word()).split(n1)<<"\n";
+//    std::cerr<<"gc2-codes="<<BinaryCode(gc2.tree_height(),gc2.word()).split(n2)<<"\n";
+    ARIADNE_ASSERT(r.box()==product(gc1.box(),gc2.box()));
+    return r;
+}
+
+// The product of two cells of the same depth
+GridTreePaving product(GridTreeSubpaving const& theSet1, GridTreeSubpaving const& theSet2) {
+    GridTreePaving result(join(theSet1.grid(),theSet2.grid()));
+    for (GridCell const& theCell1 : theSet1) {
+        for (GridCell const& theCell2 : theSet2) {
+            result._adjoin_cell(std::max(theCell1.root_extent(),theCell2.root_extent()),product_word(theCell1,theCell2));
+        }
+    }
+    return result;
+}
+
+// The product of two cells of the same depth
+GridTreePaving product(GridCell const& theCell1, GridTreeSubpaving const& theSet2) {
+    GridTreePaving result(join(theCell1.grid(),theSet2.grid()));
+    for (GridCell const& theCell2 : theSet2) {
+        result.adjoin(product(theCell1,theCell2));
+    }
+    return result;
+}
+
 Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridCell& theGridCell) {
     theGridCell.box().draw(theGraphic,theProjection);
 }
@@ -2948,6 +3068,56 @@ OutputStream& operator<<(OutputStream& os, const GridTreePaving& theGridTreeSet)
     const GridTreeSubpaving& theGridTreeSubset = theGridTreeSet;
     return os << "GridTreeSet( " << theGridTreeSubset << " )";
 }
+
+template<class X> Vector<X> project(Vector<X> const& v, const Array<SizeType>& prj) {
+    return Vector<X>(prj.size(),[&](SizeType i){return v[prj[i]];});
+}
+
+Grid project(Grid const& grd, Array<SizeType> const& prj) {
+    return Grid(project(grd.origin(),prj),project(grd.lengths(),prj));
+}
+
+GridTreePaving image(const GridTreePaving& theSet, const Projection& theProjection) {
+    Grid resultGrid=project(theSet.grid(),theProjection.indices());
+    GridTreePaving theResultSet(resultGrid);
+    for (GridCell const& theCell : theSet) {
+        BinaryWord const& theWord = theCell.word();
+        assert(theWord.size() % theSet.dimension() == 0);
+        BinaryWord resultWord;
+        SizeType n=theWord.size()/theSet.dimension()*theResultSet.dimension();
+        resultWord.reserve(n);
+        for (SizeType i=0; i!=n; ++i) {
+            resultWord.append(theWord[theProjection[i%theResultSet.dimension()]]);
+        }
+        theResultSet._adjoin_cell(theCell.root_extent(),resultWord);
+    }
+    theResultSet.recombine();
+    return theResultSet;
+}
+
+
+GridTreePaving outer_skew_product(GridTreePaving const& gtp1, Grid const& g2, ValidatedVectorMultivariateFunction const& f) {
+    Grid g1=gtp1.grid();
+    Nat tree_depth = gtp1.tree_depth();
+    Nat fineness=tree_depth/g1.dimension()-gtp1.root_cell().root_extent();
+
+    const_cast<GridTreePaving&>(gtp1).mince(fineness);
+    GridTreePaving gtp2(g2);
+    GridTreePaving r(join(g1,g2));
+
+    for (GridCell gc1 : gtp1) {
+        ValidatedConstrainedImageSet s2(gc1.box(),f);
+        gtp2.adjoin_outer_approximation(s2,fineness);
+        gtp2.mince(fineness);
+        for (GridCell gc2 : gtp2) {
+            r.adjoin(product(gc1,gc2));
+        }
+        gtp2.clear();
+    }
+    r.recombine();
+    return r;
+}
+
 
 } // namespace Ariadne
 

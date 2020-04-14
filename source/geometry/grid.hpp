@@ -102,6 +102,11 @@ class Grid {
     //! The strides between successive integer points.
     const Vector<RawFloatDP>& lengths() const;
 
+    //! Construct a grid for the product space,
+    //! comprising subdivisions of \a g1 for the first,
+    //! then those of \a g2.
+    friend Grid join(Grid const& g1, Grid const& g2);
+
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 

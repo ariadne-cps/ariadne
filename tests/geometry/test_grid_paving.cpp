@@ -2759,10 +2759,41 @@ Void test_subset_superset_box(){
 
 }
 
+void test_products() {
+    Grid g1(2);
+    Grid g2(1);
+    GridCell gc1(g1,3,BinaryWord("0100110001"));
+    GridCell gc2(g2,2,BinaryWord("1001"));
+
+    Grid g3(3);
+    GridCell gc3(g3,3,BinaryWord("011001110000011"));
+    ARIADNE_TEST_EQUALS(product(gc1,gc2),gc3);
+
+
+    GridTreePaving gtp1(g1);
+    gtp1.adjoin(GridCell(g1,3,BinaryWord("0100110001")));
+    gtp1.adjoin(GridCell(g1,3,BinaryWord("0100110011")));
+
+    GridTreePaving gtp2(g2);
+    gtp2.adjoin(GridCell(g2,2,BinaryWord("1001")));
+
+    GridTreePaving gtp3(g3);
+    gtp3.adjoin(GridCell(g3,3,BinaryWord("011001110000011")));
+    gtp3.adjoin(GridCell(g3,3,BinaryWord("011001110000111")));
+
+    ARIADNE_TEST_EQUALS(product(gtp1,gtp2),gtp3);
+
+    EffectiveVectorMultivariateFunction x = EffectiveVectorMultivariateFunction::identity(2);
+    EffectiveVectorMultivariateFunction f({x[0]*x[0]-exp(x[1])-11});
+
+    ARIADNE_TEST_EQUALS(outer_skew_product(gtp1,g2,f).size(),11);
+
+
 }
 
-Int main() {
+} // namespace Ariadne
 
+Int main() {
     test_grid_paving_cursor();
 
     test_grid_paving_const_iterator();
@@ -2807,6 +2838,8 @@ Int main() {
     test_subset_intersects_box();
     test_subset_subset_box();
     test_subset_superset_box();
+
+    test_products();
 
     return ARIADNE_TEST_FAILURES;
 }

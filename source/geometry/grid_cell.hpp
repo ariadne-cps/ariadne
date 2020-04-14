@@ -251,6 +251,9 @@ class GridCell : public GridAbstractCell {
     //! \brief Stream insertion operator for the GridCell.
     friend OutputStream& operator<<(OutputStream& os, const GridCell& theCell);
 
+    //! \brief The cartesian prodcut of the cells, on the product grid.
+    friend GridCell product(GridCell const& gc1, GridCell const& gc2);
+
     //! \brief The dimension of the cell.
     DimensionType dimension() const;
 

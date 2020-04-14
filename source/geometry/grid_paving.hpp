@@ -63,6 +63,8 @@ namespace Ariadne {
 typedef Array<Int> IndexArray;
 typedef Array<SizeType> SizeArray;
 
+class Projection;
+
 // Some pre-declarations
 class BinaryTreeNode;
 class Grid;
@@ -94,6 +96,10 @@ GridTreePaving join( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& 
 GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 Bool intersect( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+GridTreePaving product( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+GridTreePaving image(const GridTreePaving& theSet, const Projection& theProjection);
 
 //! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
 //! this class is just a pointer to the node in the tree of some paving. This class is not
@@ -432,6 +438,9 @@ class GridTreePaving
     //! cell of extent \a otherPavingPCellExtent and set \a has_stopped to true.
     BinaryTreeNode* align_with_cell( const Nat otherPavingPCellExtent, const Bool stop_on_enabled, const Bool stop_on_disabled, Bool & has_stopped );
 
+    //! \brief This method adjoins a cell with root extent \a cellExtent with path \a pCellPath to this paving.
+    Void _adjoin_cell( const Nat cellExtent, BinaryWord const& pCellPath );
+
     //! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
     //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_hight and represented
     //! by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
@@ -609,6 +618,16 @@ class GridTreePaving
 
     //! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2)
     friend GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+    //! \brief The Cartesian product of two grid paving sets.
+    friend GridTreePaving product( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+    //! \brief The image of a grid paving set under a coordinate projection.
+    friend GridTreePaving image( const GridTreePaving&, const Projection&);
+
+    //! \brief Compute an outer-approximation to the set \f$\{ (x_1,f(x_1)) \mid x_1 \in S_1 \}\f$ preserving the projection onto \f$S_1\f$.
+    friend GridTreePaving outer_skew_product(GridTreePaving const& theSet1, Grid const& theGrid2,
+                                             ValidatedVectorMultivariateFunction const& theFunction);
 
     //@}
 

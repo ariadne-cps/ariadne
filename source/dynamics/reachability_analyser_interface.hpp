@@ -46,8 +46,10 @@ template<class SYS> class ReachabilityAnalyserInterface {
     typedef SYS SystemType;
     //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::EvolverType EvolverType;
-    //! \brief The type used to define the elapsed evolution time for the system type.
+    //! \brief The type used to define enclosures for local reach and evolve sets.
     typedef typename EvolverType::EnclosureType EnclosureType;
+    //! \brief The type used to define global pavings of reach and evolve sets.
+    typedef typename SystemType::StorageType StorageType;
     //! \brief The type used to define the elapsed evolution time for the system type.
     typedef typename SystemType::TimeType TimeType;
     //! \brief The type used to describe the state space of the system evolution.
@@ -83,43 +85,43 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \name Evaluation of maps on abstract sets
 
     //! \brief Compute an approximation to the set obtained by iterating \a steps times the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     lower_evolve(const OvertSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
 
     //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                        const TimeType& time) const = 0;
 
     //! \brief Compute an approximation to the reachable set of the system starting in \a initial_set iterating at most \a steps times.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set,
                 const TimeType& steps) const = 0;
 
     //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
     //! of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set) const = 0;
 
     //! \brief Compute an approximation to the set obtained by iterating \a steps times the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     upper_evolve(const CompactSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
 
     //! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
                        const TimeType& time) const = 0;
 
     //! \brief Compute an approximation to the reachable set
     //! of the system starting in \a initial_set iterating at most \a steps times.
-    virtual SetApproximationType
+    virtual StorageType
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& steps) const = 0;
 
     //! \brief Compute an outer-approximation to the chain-reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const = 0;
 
     //! \brief Test if the system is safe.

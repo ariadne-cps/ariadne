@@ -102,7 +102,7 @@ Int main()
     fig.write("henon_map-reach");
 
     // Compute the chain-reach set
-    GridTreePaving chain_reach_set = analyser.outer_chain_reach(initial_box_set);
+    Storage chain_reach_set = analyser.outer_chain_reach(initial_box_set);
 
     fig.clear();
     fig << fill_colour(blue) << initial_box_set << fill_colour(cyan) << chain_reach_set;

@@ -116,6 +116,7 @@ class HybridGridTreePaving
 //    Void adjoin(DiscreteLocation q, const GridCell& c) {
 //        this->_provide_location(q).adjoin(c); }
 
+    Void clear();
     Void adjoin(const HybridGridCell& hgc);
     Void adjoin(const ListSet<HybridGridCell>& hgcls);
     Void adjoin(const HybridGridTreePaving& hgts);
@@ -138,6 +139,7 @@ class HybridGridTreePaving
     Void recombine();
 
     friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
+    friend Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
   public:
     //@{ \name HybridSetInterface methods
     HybridGridTreePaving* clone() const { return new HybridGridTreePaving(*this); }

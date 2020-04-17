@@ -68,6 +68,7 @@ template<class ES> class ListSet;
 template<class ES> class HybridListSet;
 
 class HybridEnclosure;
+class HybridStorage;
 template<> class ListSet<HybridEnclosure>;
 
 enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
@@ -300,7 +301,7 @@ class HybridEnclosure
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a fineness subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
+    Void adjoin_outer_approximation_to(HybridStorage& paving, Nat fineness) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
@@ -392,7 +393,7 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
-HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
+HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 
 
 } // namespace Ariadne

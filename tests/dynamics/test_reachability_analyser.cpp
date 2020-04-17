@@ -65,6 +65,7 @@ class TestReachabilityAnalyser
     typedef BoundedConstraintSet SetType;
     typedef ReachabilityAnalyser<SystemType> AnalyserType;
     typedef AnalyserType::BoundingDomainType BoundingDomainType;
+    typedef AnalyserType::StorageType StorageType;
 
     SystemType system;
     AnalyserType analyser;
@@ -146,9 +147,9 @@ class TestReachabilityAnalyser
 
     Void test_lower_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreePaving& lower_reach=reach_evolve_set.first;
-        GridTreePaving& lower_evolve=reach_evolve_set.second;
+        Pair<StorageType,StorageType> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
+        StorageType& lower_reach=reach_evolve_set.first;
+        StorageType& lower_evolve=reach_evolve_set.second;
         cout << "Reached " << lower_reach.size() << " cells " << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
@@ -161,11 +162,11 @@ class TestReachabilityAnalyser
 
     Void test_upper_reach_upper_evolve() {
         cout << "Computing timed reachable set" << endl;
-        GridTreePaving upper_reach_set=analyser.upper_reach(initial_set,reach_time);
+        StorageType upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        GridTreePaving upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
+        StorageType upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
 
         cout << "Reached " << upper_reach_set.size() << " cells " << endl;
@@ -177,7 +178,7 @@ class TestReachabilityAnalyser
 
     Void test_upper_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
+        Pair<StorageType,StorageType> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
 
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
         ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
@@ -195,7 +196,7 @@ class TestReachabilityAnalyser
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
-        GridTreePaving lower_reach_set=analyser.lower_reach(initial_set);
+        StorageType lower_reach_set=analyser.lower_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
 
@@ -213,7 +214,7 @@ class TestReachabilityAnalyser
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 
-        GridTreePaving outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+        StorageType outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
 

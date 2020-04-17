@@ -57,6 +57,12 @@ HybridGridTreePaving::ConstIterator HybridGridTreePaving::end() const {
 }
 
 
+Void HybridGridTreePaving::clear() {
+    for(HybridGridTreePaving::LocationsIterator _loc_iter=this->locations_begin(); _loc_iter!=this->locations_end(); ++_loc_iter) {
+        _loc_iter->second.clear();
+    }
+}
+
 Void HybridGridTreePaving::adjoin(const HybridGridCell& hgc) {
     this->_provide_location(hgc.location()).adjoin(hgc.euclidean_set());
 }
@@ -236,6 +242,19 @@ Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2
         }
     }
     return true;
+}
+
+Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2) {
+    for( typename HybridGridTreePaving::LocationsConstIterator _loc_iter = hgts1.locations_begin(); _loc_iter != hgts1.locations_end(); ++_loc_iter ) {
+        if( !_loc_iter->second.is_empty() ) {
+            DiscreteLocation const& loc = _loc_iter->first;
+            RealSpace spc=hgts1.space(loc);
+            if(intersect(hgts1.euclidean_set(loc),hgts2.euclidean_set(loc,spc))) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 OutputStream& HybridGridTreePaving::_write(OutputStream& os) const {

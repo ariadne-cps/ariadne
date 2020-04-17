@@ -34,6 +34,8 @@
 #include "../geometry/grid_paving.hpp"
 #include "../geometry/function_set.hpp"
 
+#include "../dynamics/enclosure.hpp"
+#include "../dynamics/storage.hpp"
 #include "../dynamics/orbit.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
 #include "../dynamics/reachability_analyser_interface.hpp"
@@ -50,8 +52,8 @@ class AutomatonInterface;
 
 class Grid;
 class GridCell;
-class PavingType;
-class PavingType;
+class GridTreePaving;
+class Storage;
 
 template<class ES> class ListSet;
 
@@ -64,8 +66,8 @@ using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
     ValidatedSierpinskian is_safe;
-    GridTreePaving chain_reach_set;
-    GridTreePaving safe_set;
+    Storage chain_reach_set;
+    Storage safe_set;
 };
 
 //! \ingroup DynamicsModule
@@ -92,8 +94,9 @@ template<class SYS> class ReachabilityAnalyser
     using typename Interface::SafetyCertificateType;
 
     typedef typename Interface::EnclosureType EnclosureType;
-    using GridType = typename SetApproximationType::GridType;
-    using PavingType = SetApproximationType;
+    typedef typename Interface::StorageType StorageType;
+    using GridType = typename StorageType::GridType;
+    using PavingType = StorageType;
   private:
   protected:
     SharedPointer<SystemType> _system;
@@ -129,41 +132,41 @@ template<class SYS> class ReachabilityAnalyser
     //@{
     //! \name Evaluation of systems on abstract sets
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
-    virtual SetApproximationType
+    virtual StorageType
     lower_evolve(const OvertSetInterfaceType& initial_set,
                  const TimeType& steps) const override;
 
     //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                        const TimeType& time) const override;
 
     //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set,
                 const TimeType& time) const override;
 
     //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set) const override;
 
     //! \brief Compute an upper-approximation to the set obtained by evolving the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     upper_evolve(const CompactSetInterfaceType& initial_set,
                  const TimeType& time) const override;
 
     //! \brief Compute upper-approximations to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
                        const TimeType& time) const override;
 
     //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& time) const override;
 
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const override;
 
     //! \brief Test if the system is safe.
@@ -174,18 +177,18 @@ template<class SYS> class ReachabilityAnalyser
 
   protected:
     // Helper functions for operators on lists of sets.
-    Pair<PavingType,PavingType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
+    Pair<StorageType,StorageType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
             const TimeType& time, const Nat accuracy, ListSet<EnclosureType>& evolve_enclosures,
             Semantics semantics, const EvolverType& evolver) const;
-    PavingType _upper_reach(const PavingType& set, const TimeType& time,
+    StorageType _upper_reach(const StorageType& set, const TimeType& time,
             const Nat accuracy, const EvolverType& evolver) const;
-    PavingType _upper_evolve(const PavingType& set, const TimeType& time,
+    StorageType _upper_evolve(const StorageType& set, const TimeType& time,
             const Nat accuracy, const EvolverType& evolver) const;
-    Void _adjoin_upper_reach_evolve(PavingType& reach_set, PavingType& final_set,
-                                    const PavingType& set, const TimeType& time,
+    Void _adjoin_upper_reach_evolve(StorageType& reach_set, StorageType& final_set,
+                                    const StorageType& set, const TimeType& time,
                                     const Nat accuracy, const EvolverType& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
-    Void _checked_restriction(PavingType& set, const PavingType& bounding) const;
+    Void _checked_restriction(StorageType& set, const StorageType& bounding) const;
 };
 
 //! \brief Configuration for a ReachabilityAnalyser, essentially for controlling the

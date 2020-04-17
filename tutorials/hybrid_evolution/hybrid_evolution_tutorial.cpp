@@ -254,9 +254,8 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
     std::cout << "Computing outer chain reach set... \n" << std::flush;
-    HybridGridTreePaving outer_chain_reach = analyser.outer_chain_reach(initial_set);
+    HybridStorage outer_chain_reach = analyser.outer_chain_reach(initial_set);
     std::cout << "done." << std::endl;
-    outer_chain_reach = extend_auxiliary(outer_chain_reach,analyser.system());
 
     std::cout << "Plotting trajectory... " << std::flush;
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);

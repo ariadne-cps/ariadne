@@ -116,16 +116,16 @@ clone() const
 
 
 Void
-HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
-                                                       HybridGridTreePaving& evolve_cells,
-                                                       const HybridGridTreePaving& set,
+HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridStorage& reach_cells,
+                                                       HybridStorage& evolve_cells,
+                                                       const HybridStorage& set,
                                                        const HybridTerminationCriterion& termination,
                                                        const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    HybridGridTreePaving cells=set;
+    HybridGridTreePaving cells=set.state_set();
     cells.mince(accuracy);
 
     ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");

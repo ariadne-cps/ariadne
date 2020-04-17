@@ -205,12 +205,12 @@ Int main(Int argc, const char* argv[])
     analyser.configuration().set_maximum_grid_fineness(5);
     analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
-    HybridGridTreePaving chain_reach_set = analyser.outer_chain_reach(initial_set);
+    HybridStorage chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;
     cout << "\nPlotting chain-reachable set... " << flush;
-    HybridGridTreePaving chain_reach_set_off=chain_reach_set;
+    HybridStorage chain_reach_set_off=chain_reach_set;
     chain_reach_set_off[heating|on].clear();
-    HybridGridTreePaving chain_reach_set_on=chain_reach_set;
+    HybridStorage chain_reach_set_on=chain_reach_set;
     chain_reach_set_on[heating|off].clear();
     plot("heating-chainreach.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off, chain_reach_on_colour, chain_reach_set_on);
     plot("heating-chainreach-off.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off);

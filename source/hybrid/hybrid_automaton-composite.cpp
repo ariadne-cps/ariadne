@@ -49,7 +49,7 @@ class CompositeHybridStateSpace
     virtual CompositeHybridStateSpace* clone() const { return new CompositeHybridStateSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << this->_system_ptr->name() << " )"; }
     ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridStateSpace* chs_ptr = dynamic_cast<const CompositeHybridStateSpace* >(&other);
         if (!chs_ptr) return indeterminate;
@@ -70,7 +70,7 @@ class CompositeHybridSpace
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_auxiliary_space(q); }
-    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << this->_system_ptr->name() << " )"; }
     ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridSpace* chs_ptr = dynamic_cast<const CompositeHybridSpace* >(&other);
         if (!chs_ptr) return indeterminate;
@@ -494,7 +494,7 @@ VerboseCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridA
 
 OutputStream&
 CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
-    os << "{\n";
+    os << ha.name() << " {\n";
     Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
     HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());
     for(Nat i = 0; i < ha.number_of_components(); ++i) {

@@ -40,6 +40,7 @@
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
 #include "../dynamics/enclosure.hpp"
+#include "../dynamics/storage.hpp"
 
 
 namespace Ariadne {
@@ -69,11 +70,7 @@ template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 template<class BS> class ListSet;
 
 template<class X> class Point;
-
 class InterpolatedCurve;
-class Grid;
-class GridCell;
-class GridTreePaving;
 
 
 template<class F>
@@ -88,22 +85,20 @@ class Orbit<Point<Value<F>>>
 };
 
 template<>
-class Orbit<GridCell>
+class Orbit<Storage>
 {
     struct Data;
   public:
-    typedef GridCell EnclosureType;
-    typedef GridTreePaving EnclosureListType;
+    typedef Storage EnclosureListType;
 
-    Orbit(const Grid&, const GridCell&);
-    Orbit(const GridTreePaving&);
-    Orbit(const GridTreePaving&, const GridTreePaving&,
-          const GridTreePaving&, const GridTreePaving&);
-    Grid const& grid() const;
-    GridTreePaving const& initial() const;
-    GridTreePaving const& reach() const;
-    GridTreePaving const& intermediate() const;
-    GridTreePaving const& final() const;
+    Orbit(const Storage& initial);
+    Orbit(const Storage& initial, const Storage& reach,
+          const Storage& intermediate, const Storage& final);
+
+    Storage const& initial() const;
+    Storage const& reach() const;
+    Storage const& intermediate() const;
+    Storage const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

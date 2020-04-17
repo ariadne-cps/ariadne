@@ -91,27 +91,23 @@ OutputStream&
 operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb);
 
 template<>
-class Orbit<HybridGridCell>
+class Orbit<HybridStorage>
 {
     struct Data;
   public:
-    typedef HybridGridCell EnclosureType;
-    typedef HybridGridTreePaving EnclosureListType;
+    typedef HybridStorage EnclosureListType;
 
-    Orbit(const HybridGrid& grid, const HybridGridCell& initial_cell);
-    Orbit(const HybridGridTreePaving& initial_set);
-    Orbit(const HybridGridTreePaving& initial_set, const HybridGridTreePaving& reach_set,
-          const HybridGridTreePaving& intermediate_set, const HybridGridTreePaving& final_set);
-    HybridGrid const& grid() const;
-    HybridGridTreePaving const& initial() const;
-    HybridGridTreePaving const& reach() const;
-    HybridGridTreePaving const& intermediate() const;
-    HybridGridTreePaving const& final() const;
+    Orbit(const HybridStorage& initial_set);
+    Orbit(const HybridStorage& initial_set, const HybridStorage& reach_set,
+          const HybridStorage& intermediate_set, const HybridStorage& final_set);
+
+    HybridStorage const& initial() const;
+    HybridStorage const& reach() const;
+    HybridStorage const& intermediate() const;
+    HybridStorage const& final() const;
   private:
     SharedPointer<Data> _data;
 };
-
-Orbit<HybridGridCell> extend_auxiliary(Orbit<HybridGridCell> const& horb, HybridAutomatonInterface const& ha);
 
 
 template<>

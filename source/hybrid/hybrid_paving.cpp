@@ -36,6 +36,7 @@
 
 #include "../hybrid/hybrid_space.hpp"
 #include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_storage.hpp"
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_automaton_interface.hpp"
 #include "../output/graphics.hpp"
@@ -315,27 +316,27 @@ HybridGridTreePaving extend_auxiliary(const HybridGridTreePaving& hybrid_paving,
 
 
 
-struct Orbit<HybridGridCell>::Data {
+struct Orbit<HybridStorage>::Data {
     Data(const HybridGrid& grid)
         : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreePaving initial;
-    HybridGridTreePaving reach;
-    HybridGridTreePaving intermediate;
-    HybridGridTreePaving final;
+    HybridStorage initial;
+    HybridStorage reach;
+    HybridStorage intermediate;
+    HybridStorage final;
 };
 
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set)
+Orbit<HybridStorage>::
+Orbit(const HybridStorage& initial_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
 }
 
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set,
-      const HybridGridTreePaving& reach_set,
-      const HybridGridTreePaving& intermediate_set,
-      const HybridGridTreePaving& final_set)
+Orbit<HybridStorage>::
+Orbit(const HybridStorage& initial_set,
+      const HybridStorage& reach_set,
+      const HybridStorage& intermediate_set,
+      const HybridStorage& final_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
@@ -344,37 +345,33 @@ Orbit(const HybridGridTreePaving& initial_set,
     this->_data->final=final_set;
 }
 
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
+HybridStorage const&
+Orbit<HybridStorage>::
 initial() const
 {
     return this->_data->initial;
 }
 
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
+HybridStorage const&
+Orbit<HybridStorage>::
 reach() const
 {
     return this->_data->reach;
 }
 
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
+HybridStorage const&
+Orbit<HybridStorage>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
+HybridStorage const&
+Orbit<HybridStorage>::
 final() const
 {
     return this->_data->final;
 }
 
-Orbit<HybridGridCell> extend_auxiliary(const Orbit<HybridGridCell>& orbit, const HybridAutomatonInterface& ha) {
-    return Orbit<HybridGridCell>(extend_auxiliary(orbit.initial(),ha),extend_auxiliary(orbit.reach(),ha),
-                                 extend_auxiliary(orbit.intermediate(),ha),extend_auxiliary(orbit.final(),ha));
-}
 
 } // namespace Ariadne

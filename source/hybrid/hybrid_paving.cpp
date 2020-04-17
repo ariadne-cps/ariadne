@@ -36,6 +36,7 @@
 
 #include "../hybrid/hybrid_space.hpp"
 #include "../hybrid/hybrid_time.hpp"
+#include "../hybrid/hybrid_storage.hpp"
 #include "../hybrid/hybrid_orbit.hpp"
 #include "../hybrid/hybrid_automaton_interface.hpp"
 #include "../output/graphics.hpp"
@@ -56,6 +57,12 @@ HybridGridTreePaving::ConstIterator HybridGridTreePaving::end() const {
     return ConstIterator(this->_map,this->_hgrid.space(),true);
 }
 
+
+Void HybridGridTreePaving::clear() {
+    for(HybridGridTreePaving::LocationsIterator _loc_iter=this->locations_begin(); _loc_iter!=this->locations_end(); ++_loc_iter) {
+        _loc_iter->second.clear();
+    }
+}
 
 Void HybridGridTreePaving::adjoin(const HybridGridCell& hgc) {
     this->_provide_location(hgc.location()).adjoin(hgc.euclidean_set());
@@ -238,6 +245,19 @@ Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2
     return true;
 }
 
+Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2) {
+    for( typename HybridGridTreePaving::LocationsConstIterator _loc_iter = hgts1.locations_begin(); _loc_iter != hgts1.locations_end(); ++_loc_iter ) {
+        if( !_loc_iter->second.is_empty() ) {
+            DiscreteLocation const& loc = _loc_iter->first;
+            RealSpace spc=hgts1.space(loc);
+            if(intersect(hgts1.euclidean_set(loc),hgts2.euclidean_set(loc,spc))) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 OutputStream& HybridGridTreePaving::_write(OutputStream& os) const {
     return os << this->_map;
 }
@@ -259,6 +279,99 @@ GridTreePaving& HybridGridTreePaving::_provide_location(const DiscreteLocation& 
         this->_map.insert(std::make_pair(q,GridTreePaving(this->_hgrid[q])));
         iter=this->_map.find(q);
     }
-    return iter->second; }
+    return iter->second;
+}
+
+
+Grid HybridScalings::grid(const DiscreteLocation& loc, const RealSpace& space) const
+{
+    Vector<RawFloatDP> lengths(space.size());
+    for(SizeType i=0; i!=space.size(); ++i) {
+        lengths[i] = (this->scaling(loc,space.variable(i))).raw();
+    }
+    return Grid(lengths);
+}
+
+HybridGridTreePaving extend_auxiliary(const HybridGridTreePaving& hybrid_paving,
+                                      const HybridAutomatonInterface& hybrid_automaton) {
+    HybridGrid hybrid_state_grid = hybrid_paving.grid();
+    HybridSpace hybrid_state_space = hybrid_state_grid.space();
+    HybridScalings scalings = hybrid_state_grid.scalings();
+
+    HybridSpace hybrid_state_auxiliary_space = hybrid_automaton.state_auxiliary_space();
+    HybridGrid hybrid_state_auxiliary_grid(hybrid_state_auxiliary_space,scalings);
+
+    HybridGridTreePaving result(hybrid_state_auxiliary_grid);
+    for (auto iter = hybrid_paving.locations_begin(); iter!=hybrid_paving.locations_end(); ++iter) {
+        DiscreteLocation const& location=iter->first;
+        GridTreePaving const& state_paving=iter->second;
+        RealSpace auxiliary_space=hybrid_automaton.continuous_auxiliary_space(location);
+        EffectiveVectorMultivariateFunction auxiliary_function=hybrid_automaton.auxiliary_function(location);
+        Grid auxiliary_grid=scalings.grid(location,auxiliary_space);
+        GridTreePaving state_auxiliary_paving=outer_skew_product(state_paving,auxiliary_grid,auxiliary_function);
+        result[location]=state_auxiliary_paving;
+    }
+    return result;
+}
+
+
+
+struct Orbit<HybridStorage>::Data {
+    Data(const HybridGrid& grid)
+        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    HybridStorage initial;
+    HybridStorage reach;
+    HybridStorage intermediate;
+    HybridStorage final;
+};
+
+Orbit<HybridStorage>::
+Orbit(const HybridStorage& initial_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
+}
+
+Orbit<HybridStorage>::
+Orbit(const HybridStorage& initial_set,
+      const HybridStorage& reach_set,
+      const HybridStorage& intermediate_set,
+      const HybridStorage& final_set)
+    : _data(new Data(initial_set.grid()))
+{
+    this->_data->initial=initial_set;
+    this->_data->reach=reach_set;
+    this->_data->intermediate=intermediate_set;
+    this->_data->final=final_set;
+}
+
+HybridStorage const&
+Orbit<HybridStorage>::
+initial() const
+{
+    return this->_data->initial;
+}
+
+HybridStorage const&
+Orbit<HybridStorage>::
+reach() const
+{
+    return this->_data->reach;
+}
+
+HybridStorage const&
+Orbit<HybridStorage>::
+intermediate() const
+{
+    return this->_data->intermediate;
+}
+
+HybridStorage const&
+Orbit<HybridStorage>::
+final() const
+{
+    return this->_data->final;
+}
+
 
 } // namespace Ariadne

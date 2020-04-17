@@ -41,6 +41,7 @@
 #include "../hybrid/hybrid_grid.hpp"
 #include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_paving.hpp"
+#include "../hybrid/hybrid_storage.hpp"
 
 #include "../output/logging.hpp"
 
@@ -55,7 +56,7 @@ class HybridAutomatonInterface;
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreePaving;
-class HybridGridTreePaving;
+class HybridStorage;
 
 template<class ES> class HybridListSet;
 
@@ -65,8 +66,8 @@ class HybridAutomaton;
 
 template<> struct SafetyCertificate<HybridSpace> {
     ValidatedSierpinskian is_safe;
-    HybridGridTreePaving chain_reach_set;
-    HybridGridTreePaving safe_set;
+    HybridStorage chain_reach_set;
+    HybridStorage safe_set;
 };
 
 using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
@@ -94,9 +95,9 @@ class HybridReachabilityAnalyser
     //@}
 
   protected:
-    Void _adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
-                                    HybridGridTreePaving& evolve_cells,
-                                    const HybridGridTreePaving& set,
+    Void _adjoin_upper_reach_evolve(HybridStorage& reach_cells,
+                                    HybridStorage& evolve_cells,
+                                    const HybridStorage& set,
                                     const HybridTerminationCriterion& termination,
                                     const Nat accuracy,
                                     const HybridEvolverInterface& evolver) const;
@@ -262,7 +263,7 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     Void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
     Void set_scaling(const RealVariable& v, RawFloatDP s) {
-        dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,FloatDPValue(s)); }
+        dynamic_cast<SimpleHybridScalings&>(static_cast<HybridScalingsInterface&>(this->grid().scalings())) .set_scaling(v,FloatDPValue(s)); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

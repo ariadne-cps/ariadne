@@ -39,7 +39,7 @@
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
 #include "solvers/solver.hpp"
-#include "geometry/enclosure.hpp"
+#include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "dynamics/map.hpp"
@@ -102,7 +102,7 @@ Int main()
     fig.write("henon_map-reach");
 
     // Compute the chain-reach set
-    GridTreePaving chain_reach_set = analyser.outer_chain_reach(initial_box_set);
+    Storage chain_reach_set = analyser.outer_chain_reach(initial_box_set);
 
     fig.clear();
     fig << fill_colour(blue) << initial_box_set << fill_colour(cyan) << chain_reach_set;

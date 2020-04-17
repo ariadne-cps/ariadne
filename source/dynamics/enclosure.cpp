@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/enclosure.cpp
+ *            dynamics/enclosure.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -30,7 +30,8 @@
 #include "../function/constraint.hpp"
 #include "../function/formula.hpp"
 #include "../function/procedure.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
+#include "../dynamics/storage.hpp"
 
 #include "../utility/macros.hpp"
 #include "../utility/exceptions.hpp"
@@ -1014,15 +1015,15 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 
 
-Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
+Void Enclosure::adjoin_outer_approximation_to(Storage& storage, Nat fineness) const
 {
-    this->paver().adjoin_outer_approximation(paving,this->state_auxiliary_set(),fineness);
+    this->paver().adjoin_outer_approximation(storage.state_set(),this->state_set(),fineness);
 }
 
 
-GridTreePaving Enclosure::outer_approximation(const Grid& grid, Nat fineness) const
+Storage Enclosure::outer_approximation(const Grid& grid, Nat fineness) const
 {
-    GridTreePaving paving(grid);
+    Storage paving(grid);
     this->adjoin_outer_approximation_to(paving,fineness);
     return paving;
 }

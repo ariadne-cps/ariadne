@@ -52,6 +52,7 @@ inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;
 class HybridEnclosure;
+class HybridStorage;
 
 //! \defgroup SystemSpecificationErrors System specification errors
 //! \ingroup HybridAutomataSubModule
@@ -183,7 +184,8 @@ class HybridAutomatonInterface {
     //! \brief The type used to describe the state space.
     typedef HybridEvolverInterface EvolverType;
     typedef HybridEnclosure EnclosureType;
-
+    //! \brief The type used to define global pavings of reach and evolve sets.
+    typedef HybridStorage StorageType;
   public:
     //! \brief Virtual destructor.
     virtual ~HybridAutomatonInterface() = default;

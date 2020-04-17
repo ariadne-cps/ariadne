@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid/hybrid_scaling.hpp
+ *            hybrid/hybrid_scalings.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid/hybrid_scaling.hpp
+/*! \file hybrid/hybrid_scalings.hpp
  *  \brief Scalings for variables in hybrid spaces.
  */
 
-#ifndef ARIADNE_HYBRID_SCALING_HPP
-#define ARIADNE_HYBRID_SCALING_HPP
+#ifndef ARIADNE_HYBRID_SCALINGS_HPP
+#define ARIADNE_HYBRID_SCALINGS_HPP
 
 #include <iostream>
 #include <map>
@@ -45,58 +45,59 @@ typedef std::ostream OutputStream;
 
 //! \ingroup HybridModule
 //! \brief A class which defines the state space grid to use in location \a loc given the continuous state variables \a spc.
-class HybridScalingInterface
+class HybridScalingsInterface
 {
   public:
     //!
-    virtual ~HybridScalingInterface() = default;
-    virtual HybridScalingInterface* clone() const = 0;
+    virtual ~HybridScalingsInterface() = default;
+    virtual HybridScalingsInterface* clone() const = 0;
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
 };
-inline OutputStream& operator<<(OutputStream& os, const HybridScalingInterface& hsc) { hsc._write(os); return os; }
+inline OutputStream& operator<<(OutputStream& os, const HybridScalingsInterface& hsc) { hsc._write(os); return os; }
 
 
 //! \ingroup HybridModule
 //! \brief A class which defines the state space grid to use in location \a loc given the continuous state variables \a spc.
-class HybridScaling
+class HybridScalings
 {
-    std::shared_ptr<HybridScalingInterface> _ptr;
+    std::shared_ptr<HybridScalingsInterface> _ptr;
   public:
-    HybridScaling(const HybridScalingInterface& ref) : _ptr(ref.clone()) { }
-    operator const HybridScalingInterface& () const { return *this->_ptr; }
-    operator HybridScalingInterface& () { return *this->_ptr; }
+    HybridScalings(const HybridScalingsInterface& ref) : _ptr(ref.clone()) { }
+    operator const HybridScalingsInterface& () const { return *this->_ptr; }
+    operator HybridScalingsInterface& () { return *this->_ptr; }
     FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
+    Grid grid(const DiscreteLocation& loc, const RealSpace& spc) const;
   public:
-    HybridScaling(const Map<Identifier,FloatDPValue>& scalings);
-    HybridScaling(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
+    HybridScalings(const Map<Identifier,FloatDPValue>& scalings);
+    HybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
 };
 
-class SimpleHybridScaling
-    : public HybridScalingInterface
+class SimpleHybridScalings
+    : public HybridScalingsInterface
 {
     Map<Identifier,FloatDPValue> _scalings;
   public:
-    SimpleHybridScaling() : _scalings() { }
-    SimpleHybridScaling(const Map<Identifier,FloatDPValue>& scalings) : _scalings(scalings) { }
-    SimpleHybridScaling(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
+    SimpleHybridScalings() : _scalings() { }
+    SimpleHybridScalings(const Map<Identifier,FloatDPValue>& scalings) : _scalings(scalings) { }
+    SimpleHybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
     Void set_scaling(const RealVariable& var, FloatDPValue res) { ARIADNE_ASSERT(decide(res>0)); _scalings[var.name()]=res; }
-    virtual SimpleHybridScaling* clone() const { return new SimpleHybridScaling(*this); }
+    virtual SimpleHybridScalings* clone() const { return new SimpleHybridScalings(*this); }
     virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const {
         return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : FloatDPValue(1.0); }
-    virtual Void _write(OutputStream& os) const { os << "HybridScaling( " << this->_scalings << " )"; }
+    virtual Void _write(OutputStream& os) const { os << "HybridScalings( " << this->_scalings << " )"; }
 };
 
 inline Pair<RealVariable,FloatDP> operator|(const RealVariable& var, FloatDP scal) {
     return Pair<RealVariable,FloatDP>(var,scal); }
 
-inline HybridScaling::HybridScaling(const Map<Identifier,FloatDPValue>& scalings)
-    : _ptr(new SimpleHybridScaling(scalings)) { }
+inline HybridScalings::HybridScalings(const Map<Identifier,FloatDPValue>& scalings)
+    : _ptr(new SimpleHybridScalings(scalings)) { }
 
-inline HybridScaling::HybridScaling(const InitializerList<Pair<RealVariable,FloatDP>>& scalings)
-    : _ptr(new SimpleHybridScaling(scalings)) { }
+inline HybridScalings::HybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings)
+    : _ptr(new SimpleHybridScalings(scalings)) { }
 
-inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealVariable,FloatDP>>& scalings) {
+inline SimpleHybridScalings::SimpleHybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings) {
     for(auto iter=scalings.begin(); iter!=scalings.end(); ++iter) {
         this->_scalings.insert(iter->first.name(),FloatDPValue(iter->second));
     }
@@ -104,5 +105,5 @@ inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealV
 
 }
 
-#endif // ARIADNE_HYBRID_SCALING_HPP
+#endif // ARIADNE_HYBRID_SCALINGS_HPP
 

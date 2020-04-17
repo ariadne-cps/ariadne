@@ -39,6 +39,7 @@
 namespace Ariadne {
 
 class Enclosure;
+class Storage;
 class VectorFieldEvolver;
 
 //! \brief A vector field in Euclidean space.
@@ -54,6 +55,8 @@ class VectorField
     //! \brief The generic type used to compute the system evolution.
     typedef VectorFieldEvolver EvolverType;
     typedef Enclosure EnclosureType;
+    //! \brief The type used to define global pavings of reach and evolve sets.
+    typedef Storage StorageType;
   public:
     VectorField(List<DottedRealAssignment> const& dynamics);
     VectorField(EffectiveVectorMultivariateFunction const& function);

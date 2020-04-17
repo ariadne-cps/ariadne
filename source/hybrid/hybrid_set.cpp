@@ -64,7 +64,11 @@ HybridExactBox over_approximation(HybridRealBox const& hbx) {
 
 
 Orbit<HybridApproximatePoint>::Orbit(const HybridApproximatePoint& hpt)
-    : _curves_ptr(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
+    : _curves_ptr(new List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
+{ }
+
+Orbit<HybridApproximatePoint>::Orbit(List<HybridInterpolatedCurve> hcrvs)
+    : _curves_ptr(new List<HybridInterpolatedCurve>(std::move(hcrvs)))
 { }
 
 Nat
@@ -112,64 +116,6 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
     return os << orb.curves();
 }
 
-
-
-struct Orbit<HybridGridCell>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreePaving initial;
-    HybridGridTreePaving reach;
-    HybridGridTreePaving intermediate;
-    HybridGridTreePaving final;
-};
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-}
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set,
-      const HybridGridTreePaving& reach_set,
-      const HybridGridTreePaving& intermediate_set,
-      const HybridGridTreePaving& final_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-    this->_data->reach=reach_set;
-    this->_data->intermediate=intermediate_set;
-    this->_data->final=final_set;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-initial() const
-{
-    return this->_data->initial;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-reach() const
-{
-    return this->_data->reach;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-intermediate() const
-{
-    return this->_data->intermediate;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-final() const
-{
-    return this->_data->final;
-}
 
 
 
@@ -580,6 +526,7 @@ HybridSpaceSetConstIterator<DS,HBS>::increment_loc()
     }
 }
 
+Vector<FloatDPApproximation> evaluate(ApproximateVectorMultivariateFunction const& f, Vector<FloatDPApproximation> const& v);
 
 template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
@@ -601,5 +548,8 @@ template class HybridBox<RealInterval>;
 
 
 template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;
+
+
+
 
 } // namespace Ariadne

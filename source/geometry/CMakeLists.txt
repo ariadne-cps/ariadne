@@ -9,7 +9,6 @@ add_library(ariadne-geometry OBJECT
     grid_paving.cpp
     paver.cpp
     affine_set.cpp
-    enclosure.cpp
 )
 
 cotire(ariadne-geometry CONFIGURATIONS None)

@@ -262,7 +262,7 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     Void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
     Void set_scaling(const RealVariable& v, RawFloatDP s) {
-        dynamic_cast<SimpleHybridScaling&>(static_cast<HybridScalingInterface&>(this->grid().scaling())) .set_scaling(v,FloatDPValue(s)); }
+        dynamic_cast<SimpleHybridScalings&>(static_cast<HybridScalingsInterface&>(this->grid().scalings())) .set_scaling(v,FloatDPValue(s)); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

@@ -164,7 +164,7 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
     set_lock_to_grid_steps(1);
     set_maximum_grid_fineness(3);
     set_maximum_grid_extent(16);
-    set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
+    set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScalings())));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 

@@ -36,7 +36,7 @@
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
-#include "geometry/enclosure.hpp"
+#include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "dynamics/map.hpp"

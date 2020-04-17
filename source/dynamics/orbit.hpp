@@ -39,7 +39,7 @@
 #include "../output/graphics_interface.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
 
 
 namespace Ariadne {

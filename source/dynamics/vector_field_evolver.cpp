@@ -33,7 +33,7 @@
 #include "../algebra/vector.hpp"
 #include "../function/function.hpp"
 #include "../function/constraint.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
 #include "../dynamics/orbit.hpp"
 
 #include "../solvers/integrator.hpp"

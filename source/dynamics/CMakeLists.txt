@@ -1,4 +1,5 @@
 add_library(ariadne-dynamics OBJECT
+    enclosure.cpp
     orbit.cpp
     inclusion_vector_field.cpp
     inclusion_evolver.cpp

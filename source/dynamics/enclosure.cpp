@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/enclosure.cpp
+ *            dynamics/enclosure.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -30,7 +30,7 @@
 #include "../function/constraint.hpp"
 #include "../function/formula.hpp"
 #include "../function/procedure.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
 
 #include "../utility/macros.hpp"
 #include "../utility/exceptions.hpp"

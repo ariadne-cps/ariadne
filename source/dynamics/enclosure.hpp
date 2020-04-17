@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry/enclosure.hpp
+ *            dynamics/enclosure.hpp
  *
  *  Copyright  2011-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file geometry/enclosure.hpp
+/*! \file dynamics/enclosure.hpp
  *  \brief Enclosure sets for continuous systems
  */
 
@@ -77,8 +77,9 @@ struct EnclosureConfiguration {
 };
 
 
-//! \ingroup BasicSetSubModule
-//! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
+//! \ingroup DynamicsModule
+//! \brief An enclosure for part of the reachable or evolved set of a dynamical system.
+//! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
     , public ValidatedCompactSetInterface
@@ -372,4 +373,4 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& func
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_TAYLOR_SET_HPP */
+#endif /* ARIADNE_ENCLOSURE_HPP */

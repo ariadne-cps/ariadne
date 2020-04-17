@@ -164,14 +164,14 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
     // Compute a simulation trajectory
     std::cout << "Computing simulation trajectory... \n" << std::flush;
     auto orbit = simulator.orbit(system,initial_point,termination);
-    std::cout << "done." << std::endl;
+    std::cout << "done.\n" << std::endl;
 
     // Plot the simulation trajectory using all different projections
     std::cout << "Plotting simulation trajectory... " << std::flush;
     plot("simulation_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
     plot("simulation_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    std::cout << "done." << std::endl;
+    std::cout << "done.\n" << std::endl;
 }
 
 GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, const Nat& log_verbosity)
@@ -184,7 +184,7 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, cons
     evolver.configuration().set_maximum_step_size(0.25);
     evolver.verbosity=log_verbosity;
 
-    std::cout << evolver.configuration() << std::endl;
+    std::cout << "Evolver configuration: " << evolver.configuration() << std::endl;
 
     return evolver;
 }
@@ -210,14 +210,14 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     // Compute the orbit using upper semantics
     std::cout << "Computing evolution... \n" << std::flush;
     auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+    std::cout << "done.\n" << std::endl;
 
     // Plot the trajectory using two different projections
     std::cout << "Plotting trajectory... " << std::flush;
     plot("finite_evolution_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
     plot("finite_evolution_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    std::cout << "done." << std::endl;
+    std::cout << "done.\n" << std::endl;
 }
 
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
@@ -232,7 +232,7 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, 
     analyser.configuration().set_lock_to_grid_time(5);
     analyser.verbosity=log_verbosity;
 
-    std::cout << analyser.configuration() << std::endl;
+    std::cout << "Analyser configuration: " << analyser.configuration() << std::endl;
 
     return analyser;
 }
@@ -254,8 +254,8 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
     std::cout << "Computing outer chain reach set... \n" << std::flush;
-    HybridStorage outer_chain_reach = analyser.outer_chain_reach(initial_set);
-    std::cout << "done." << std::endl;
+    auto outer_chain_reach = analyser.outer_chain_reach(initial_set);
+    std::cout << "done.\n" << std::endl;
 
     std::cout << "Plotting trajectory... " << std::flush;
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);

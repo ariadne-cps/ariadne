@@ -1639,7 +1639,7 @@ OutputStream&
 HybridEvolverBaseConfiguration::_write(OutputStream& os) const
 {
     os << "HybridEvolverBaseConfiguration"
-       << ",\n  flow_accuracy=" << flow_accuracy()
+       << "(\n  flow_accuracy=" << flow_accuracy()
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  maximum_spacial_error=" << maximum_spacial_error()

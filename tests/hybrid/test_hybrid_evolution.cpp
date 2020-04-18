@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_hybrid_evolution.cpp
  *
- *  Copyright  2006-9  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -49,10 +49,6 @@ using namespace Ariadne;
 using namespace std;
 
 
-EffectiveScalarMultivariateFunction c=EffectiveScalarMultivariateFunction::constant(2,1);
-EffectiveScalarMultivariateFunction x0=EffectiveScalarMultivariateFunction::coordinate(2,0);
-EffectiveScalarMultivariateFunction x1=EffectiveScalarMultivariateFunction::coordinate(2,1);
-
 Colour reach_set_colour(0.25,0.25,0.50);
 Colour intermediate_set_colour(0.50,0.50,0.75);
 Colour final_set_colour(0.75,0.75,1.00);
@@ -62,7 +58,7 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    unsigned int verbosity;
+    unsigned int log_verbosity;
     mutable shared_ptr<HybridEvolverBase> evolver;
   public:
     TestHybridEvolution(const unsigned int verb);
@@ -74,14 +70,14 @@ class TestHybridEvolution
     Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const unsigned int verb) : verbosity(verb) { }
+TestHybridEvolution::TestHybridEvolution(const unsigned int verb) : log_verbosity(verb) { }
 
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
     //evolver->set_integrator(GradedTaylorSeriesIntegrator(1e-5));
     evolver->set_integrator(TaylorPicardIntegrator(1e-5));
-    evolver->verbosity=verbosity;
+    evolver->verbosity=log_verbosity;
     evolver->configuration().set_maximum_step_size(1./4);
     evolver->configuration().set_maximum_enclosure_radius(1./8);
     evolver->configuration().set_maximum_enclosure_radius(1./2);
@@ -222,11 +218,11 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    auto verbosity = get_verbosity(argc,argv);
+    auto log_verbosity = get_verbosity(argc,argv);
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 1u;
 
-    TestHybridEvolution(verbosity).test();
+    TestHybridEvolution(log_verbosity).test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

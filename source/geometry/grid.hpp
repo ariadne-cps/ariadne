@@ -1,7 +1,7 @@
 /***************************************************************************
- *            grid.hpp
+ *            geometry/grid.hpp
  *
- *  Copyright  2008-9  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid.hpp
+/*! \file geometry/grid.hpp
  *  \brief Coordinate-aligned grids.
  */
 
@@ -50,8 +50,15 @@ class GridCell;
 //! This should be more general, and will unify the concepts of Paving and Cover,
 //! as well as different types of covers.
 class Grid {
+    using FLT=FloatDP;
+    using Double = double;
+  public:
     typedef double DyadicType;
     typedef Int IntegerType;
+    typedef Value<FLT> ExactNumericType;
+    typedef UpperBound<FLT> UpperNumericType;
+    typedef LowerBound<FLT> LowerNumericType;
+    typedef Point<Value<FLT>> ExactPointType;
   private:
     // Structure containing actual data values
     struct Data;
@@ -77,6 +84,9 @@ class Grid {
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
 
+    //! Copy assignment. Copies a reference to the grid data.
+    Grid& operator=(const Grid& g);
+
     //! The underlying dimension of the grid.
     DimensionType dimension() const;
 
@@ -92,23 +102,28 @@ class Grid {
     //! The strides between successive integer points.
     const Vector<RawFloatDP>& lengths() const;
 
+    //! Construct a grid for the product space,
+    //! comprising subdivisions of \a g1 for the first,
+    //! then those of \a g2.
+    friend Grid join(Grid const& g1, Grid const& g2);
+
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
-    ExactNumericType coordinate(Nat d, DyadicType x) const;
-    ExactNumericType subdivision_coordinate(Nat d, DyadicType x) const;
-    ExactNumericType subdivision_coordinate(Nat d, IntegerType n) const;
+    Value<FloatDP> coordinate(Nat d, DyadicType x) const;
+    Value<FloatDP> subdivision_coordinate(Nat d, DyadicType x) const;
+    Value<FloatDP> subdivision_coordinate(Nat d, IntegerType n) const;
 
-    Int subdivision_index(Nat d, const ExactNumericType& x) const;
-    Int subdivision_lower_index(Nat d, const LowerNumericType& x) const;
-    Int subdivision_upper_index(Nat d, const UpperNumericType& x) const;
+    Int subdivision_index(Nat d, const Value<FloatDP>& x) const;
+    Int subdivision_lower_index(Nat d, const LowerBound<FloatDP>& x) const;
+    Int subdivision_upper_index(Nat d, const UpperBound<FloatDP>& x) const;
 
-    Array<DyadicType> index(const ExactPoint& pt) const;
+    Array<DyadicType> index(const Point<FloatDPValue>& pt) const;
     Array<DyadicType> lower_index(const ExactBoxType& bx) const;
     Array<DyadicType> upper_index(const ExactBoxType& bx) const;
 
-    ExactPoint point(const Array<IntegerType>& a) const;
-    ExactPoint point(const Array<DyadicType>& a) const;
+    Point<FloatDPValue> point(const Array<IntegerType>& a) const;
+    Point<FloatDPValue> point(const Array<DyadicType>& a) const;
     ExactBoxType box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
     ExactBoxType box(const GridCell& cell) const;
   private:

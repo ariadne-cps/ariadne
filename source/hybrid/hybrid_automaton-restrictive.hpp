@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-restrictive.hpp
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -130,7 +130,11 @@ OutputStream& operator<<(OutputStream& os, const RestrictiveDiscreteMode& mode);
 
 Set<Identifier> names(const Set<RealVariable>& v);
 
-class HybridSystem
+//! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
+//! \brief A hybrid system defined using purely restrictive operations.
+//! \details Trivially compositional by definition.
+class RestrictiveHybridAutomaton
 //    : public virtual HybridAutomatonInterface
 //    , public Loggable
 : public Loggable
@@ -164,14 +168,14 @@ class HybridSystem
 
   public:
     //! \brief  Constructor.
-    HybridSystem();
+    RestrictiveHybridAutomaton();
 
     //! \brief  Destructor.
-    virtual ~HybridSystem() = default;
+    virtual ~RestrictiveHybridAutomaton() = default;
     //! \brief Construct dynamically-allocated copy.
-    virtual HybridSystem* clone() const;
+    virtual RestrictiveHybridAutomaton* clone() const;
 
-    friend HybridSystem compose(const List<HybridSystem>& components);
+    friend RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);
 
     //@{
     //! \name Methods for building the automaton.
@@ -182,13 +186,10 @@ class HybridSystem
 
     Void new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u);
     Void new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r);
-    Void new_dynamic(DiscretePredicate q, List<RealAssignment> a, List<DottedRealAssignment> d);
     Void new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d);
     Void new_dynamic(List<DottedRealAssignment> d);
     Void new_auxiliary(DiscretePredicate q, List<RealAssignment> a);
     Void new_auxiliary(List<RealAssignment> a);
-    Void new_dynamic(DiscretePredicate q ,List<RealAssignment> a, List<DottedRealAssignment>& d);
-    Void new_dynamic(List<RealAssignment> a);
     Void new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i);
     Void new_invariant(DiscretePredicate q, RealPredicate i);
     Void new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g);
@@ -198,6 +199,7 @@ class HybridSystem
     Void new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u, List<PrimedRealAssignment> r, RealPredicate g);
 
     Void new_mode(DiscreteLocation, List<RealAssignment>, List<DottedRealAssignment>);
+    Void new_mode(DiscreteLocation, List<DottedRealAssignment>, List<RealAssignment>);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g);
     Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, RealPredicate g);
@@ -350,7 +352,7 @@ class HybridSystem
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
   private:
     DiscreteLocation _compute_target(DiscreteLocation source, DiscreteEvent target) const;
@@ -358,11 +360,11 @@ class HybridSystem
     static List<RealAssignment> _order_algebraic_assignments(const List<RealAssignment>&);
 };
 
-inline OutputStream& operator<<(OutputStream& os, const HybridSystem& hs) {
-    return hs.write(os);
+inline OutputStream& operator<<(OutputStream& os, const RestrictiveHybridAutomaton& hs) {
+    return hs._write(os);
 }
 
-HybridSystem compose(const List<HybridSystem>& components);
+RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>& components);
 
 } // namespace Ariadne
 

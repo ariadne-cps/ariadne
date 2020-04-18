@@ -1,7 +1,7 @@
 /***************************************************************************
- *            polynomial.cpp
+ *            function/polynomial.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -46,12 +46,12 @@ template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 template class Polynomial<MultiIndex,FloatDP>;
 template class Polynomial<MultiIndex,FloatDPApproximation>;
 template class Polynomial<MultiIndex,FloatDPBounds>;
-template class Polynomial<MultiIndex,UpperIntervalType>;
+template class Polynomial<MultiIndex,FloatDPUpperInterval>;
 
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDP>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
-// template struct AlgebraOperations<Polynomial<MultiIndex,UpperIntervalType>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;
 
 template<> Void Polynomial<MultiIndex,FloatDPValue>::cleanup() { }
 
@@ -63,8 +63,10 @@ template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&
 
 template class Polynomial<MultiIndex,FloatMPApproximation>;
 template class Polynomial<MultiIndex,FloatMPBounds>;
+template class Polynomial<MultiIndex,FloatMPUpperInterval>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPBounds>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,FloatMPUpperInterval>>;
 
 } //namespace Ariadne
 

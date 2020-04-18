@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_expression_set.hpp
+ *            hybrid/hybrid_expression_set.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_expression_set.hpp
+/*! \file hybrid/hybrid_expression_set.hpp
  *  \brief Sets in hybrid spaces denoted by variables.
  */
 
@@ -55,7 +55,7 @@
 namespace Ariadne {
 
 
-//! \ingroup ExpressionSetSubModule
+//! \ingroup SymbolicModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a box in a single location.
 //! \details Does not assume a canonical order of the real variables.
@@ -105,7 +105,7 @@ class HybridBoxSet
     virtual LowerKleenean inside(const HybridExactBoxes& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   private:
     virtual HybridBoxSet* clone() const override;
@@ -189,7 +189,7 @@ class HybridConstraintSet
     virtual LowerKleenean separated(const HybridExactBox& bx) const override;
     virtual LowerKleenean covers(const HybridExactBox& bx) const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
   protected:
     virtual RegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
@@ -238,7 +238,7 @@ class HybridBoundedConstraintSet
     virtual LowerKleenean covers(const HybridExactBox& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   protected:
     virtual BoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;

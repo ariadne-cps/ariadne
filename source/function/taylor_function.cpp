@@ -1,7 +1,7 @@
 /***************************************************************************
- *            taylor_function.cpp
+ *            function/taylor_function.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -66,16 +66,22 @@ template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,V
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
 template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,BoxDomainType>;
+
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
+
+template class ScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
+template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelDP>;
+template class ScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
+template class VectorScaledFunctionPatch<ValidatedIntervalTaylorModelMP>;
+
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper<FloatDP>());
 }
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold_) {
-    return new TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,sweep_threshold_));
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory(Sweeper<FloatDP> const& sweeper) {
+    return new TaylorFunctionFactory(sweeper);
 }
-
 
 } // namespace Ariadne

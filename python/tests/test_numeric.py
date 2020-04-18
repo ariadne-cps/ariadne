@@ -29,7 +29,7 @@ def test_regression():
     mp = MultiplePrecision(52)
     # Questions: Should the following conversions from double be allowed?
     ExactDouble(1.3) # Can we construct ExactDouble when input probably not exact?
-    Dyadic(1.375)
+    Dyadic(exact(1.375))
     FloatDP(1.375,dp)
     FloatMP(1.375,mp)
     #FloatDPValue(1.375,dp)
@@ -151,8 +151,6 @@ def test():
     test_algebraic()
     test_rounded()
 
-    def exact(x): return Dyadic(FloatDPValue(FloatDP(x,DoublePrecision())))
-
     n=2
     d=2.125
     z=Integer(3)
@@ -164,6 +162,7 @@ def test():
     x=FloatDPApproximation(2.25,dp)
     bx=FloatDPBounds(dp)
     bx=FloatDPBounds(5,dp)
+    bx=FloatDPBounds(ExactDouble(2.25),dp)
     bx=FloatDPBounds(exact(2.25),dp)
     bx=FloatDPBounds(exact(2.00),exact(2.25),dp)
 #    bx=FloatDPBounds({exact(2.00):exact(2.25)},dp)
@@ -171,7 +170,7 @@ def test():
 
     ax=FloatDPApproximation(2.25,dp)
     bx=FloatDPBounds(exact(2.25),dp)
-    vx=FloatDPValue(2.25)
+    vx=FloatDPValue(exact(2.25),dp)
 
     #(z+z,z-z,z*z)
     #(z+n,z-n,z*n)

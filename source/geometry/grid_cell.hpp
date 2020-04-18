@@ -1,7 +1,7 @@
 /***************************************************************************
- *            grid_cell.hpp
+ *            geometry/grid_cell.hpp
  *
- *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
  *
  ****************************************************************************/
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid_cell.hpp
+/*! \file geometry/grid_cell.hpp
  *  \brief Cells on a grid defined by a binary word.
  */
 
@@ -88,7 +88,7 @@ class GridAbstractCell {
     Grid _theGrid;
 
     //! \brief The level of the primary root cell relative to the zero level.
-    Nat _theHeight;
+    Nat _theExtent;
 
     //! \brief The word describing the path in a binary tree. This path defines the cell in the Grid.
     BinaryWord _theWord;
@@ -98,17 +98,17 @@ class GridAbstractCell {
 
     //! \brief The box is given as an explicit parameter. This should only be used
     //! by friend classes which have already computed the box.
-    GridAbstractCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBoxType& theBoxType);
+    GridAbstractCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord, const ExactBoxType& theBoxType);
 
     //! \brief The copy constructor for the \a GridAbstractCell
     GridAbstractCell(const GridAbstractCell& theGridCell);
 
     friend class GridTreeCursor;
 
-    //! \brief having \a theHeight the height of the primary cell, with \a leftBottomCorner and \a rightTopCorner
-    //! defining the primary cell corners for \a theHeight-1, we recompute \a leftBottomCorner and \a rightTopCorner
-    //! for the current level \a theHeight.
-    static inline Void primary_cell_at_height( const Nat theHeight, Int & leftBottomCorner, Int & rightTopCorner );
+    //! \brief having \a theExtent the height of the primary cell, with \a leftBottomCorner and \a rightTopCorner
+    //! defining the primary cell corners for \a theExtent-1, we recompute \a leftBottomCorner and \a rightTopCorner
+    //! for the current level \a theExtent.
+    static inline Void primary_cell_at_extent( const Nat theExtent, Int & leftBottomCorner, Int & rightTopCorner );
 
     //! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
     //! The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
@@ -129,17 +129,14 @@ class GridAbstractCell {
     //! \brief The underlying grid.
     const Grid& grid() const;
 
-    //! \brief The height of the primary cell to which this cell is rooted.
-    Nat height() const;
-
-    //! \brief The depth in the grid at which the cell lies.
-    Int depth() const;
+    //! \brief The extent (height in each coordinate) of the primary cell to which this cell is rooted.
+    Nat root_extent() const;
 
     //! \brief The height in the tree of the primary cell to which this cell is rooted.
-    Int tree_height() const;
+    Nat root_height() const;
 
-    //! \brief The depth in the tree at which the cell lies.
-    Int tree_depth() const;
+    //! \brief The depth in the lattice at which the cell lies.
+    Int depth() const;
 
     //! \brief The word describing the path in a binary tree from the primary cell of height (this.height()) to this cell.
     const BinaryWord& word() const;
@@ -179,18 +176,18 @@ class GridAbstractCell {
     //! space is not taken into account.
     //!
     //! Here
-    //! \a theHeight defines the height of the primary cell above the zero level and
+    //! \a theExtent defines the height of the primary cell above the zero level and
     //! \a dimensions is the number of dimension in the considered space
-    static LatticeBoxType primary_cell_lattice_box( const Nat theHeight, const dimension_type dimensions );
+    static LatticeBoxType primary_cell_lattice_box( const Nat theExtent, const dimension_type dimensions );
 
     //! \brief Takes the lattice box \a theLatticeBoxType related to some (unknown) grid and computes the
     //! smallest primary cell on that grid that will contain this box.
-    //! The method returns the hight of that primary cell.
-    static Nat smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBoxType );
+    //! The method returns the extent (height in each coordinate) of that primary cell.
+    static Nat smallest_enclosing_primary_cell_extent( const LatticeBoxType& theLatticeBoxType );
 
-    //! /brief Computes the height of the primary cell that encloses
+    //! /brief Computes the extent (height in each coordinate) of the primary cell that encloses
     //! (may be exactly) the given box on the given grid.
-    static Nat smallest_enclosing_primary_cell_height( const UpperBoxType & theBoxType, const Grid& theGrid );
+    static Nat smallest_enclosing_primary_cell_extent( const UpperBoxType & theBoxType, const Grid& theGrid );
 
     //! \brief This method returns the path from the \a topPCellHeight to the \a bottomPCellHeight
     //! in the \a dimensions dimensional space. We assume that \a topPCellHeight >= \a bottomPCellHeight
@@ -226,11 +223,14 @@ class GridCell : public GridAbstractCell {
     //! \brief Default constructor. Needed for some containers and iterators.
     GridCell();
 
-    //! \brief Construct a cell based on \a theGrid, the primary cell of level \a theHeight,
+    //! \brief Construct a cell based on \a theGrid, the primary cell of level \a theExtent,
     //! and the path to the SubPaving's root cell which is accessible from the primary cell
-    //! via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
+    //! via the path \a _theWord. Note that, \a theExtent is the height relative to the Grid,
     //! but not to the original space!
-    GridCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
+    GridCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord);
+
+    //! \brief Copy constructor.
+    GridCell( const GridCell & otherCell );
 
     //! \brief Allows to split the given cell into two sub-cells. When isRight == true
     //! then we return the right sub-cell, otherwise the left one */
@@ -251,6 +251,9 @@ class GridCell : public GridAbstractCell {
     //! \brief Stream insertion operator for the GridCell.
     friend OutputStream& operator<<(OutputStream& os, const GridCell& theCell);
 
+    //! \brief The cartesian prodcut of the cells, on the product grid.
+    friend GridCell product(GridCell const& gc1, GridCell const& gc2);
+
     //! \brief The dimension of the cell.
     DimensionType dimension() const;
 
@@ -258,13 +261,13 @@ class GridCell : public GridAbstractCell {
     GridOpenCell interior() const;
 
     //! \brief this method computes the box corresponding to this cell in the grid lattice.*/
-    static LatticeBoxType compute_lattice_box( const DimensionType dimensions, const Nat theHeight, const BinaryWord& theWord );
+    static LatticeBoxType compute_lattice_box( const DimensionType dimensions, const Nat theExtent, const BinaryWord& theWord );
 
     //! \brief this method computes the box in the original space based on the \a theGrid,
     //! and a cell which is obtained by traversing the path given by \a _theWord from the
-    //! primary cell located at the heigth \a theHeight above the zero level cells
+    //! primary cell located at the heigth \a theExtent above the zero level cells
     //! (relative to the grid).
-    static ExactBoxType compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
+    static ExactBoxType compute_box(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord);
 
     //! /brief Creates an over approximation for the \a theBoxType on \a theGrid. \a theBoxType
     //! is in the original space coordinates. We compute the over approximation as the
@@ -280,9 +283,9 @@ class GridCell : public GridAbstractCell {
     //! the \a BinaryWord class.
     static Bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const Nat comparator );
 
-    //! \brief Computes the neighboring cell to the given cell (defined by \a theGrid, \a theHeight, \a theWord)
+    //! \brief Computes the neighboring cell to the given cell (defined by \a theGrid, \a theExtent, \a theWord)
     //! in the given dimension \a dim. The resulting cell will the of the same size as the given one.
-    static GridCell neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const DimensionType dim );
+    static GridCell neighboringCell( const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord, const DimensionType dim );
 };
 
 //! \brief An open cell of a grid paving. This cell is open and the path from the primary cell
@@ -300,23 +303,23 @@ class GridOpenCell: public GridAbstractCell {
 
     //! \brief The box is given as an explicit parameter. This should only be used
     //! by friend classes which have already computed the box.
-    GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBoxType& theBoxType);
+    GridOpenCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord, const ExactBoxType& theBoxType);
 
     //! \brief This method allows to enumerate the GridCells that are located in the positive
-    //! axis direction from the base cell. The base cell is defined by \a theHeight and
+    //! axis direction from the base cell. The base cell is defined by \a theExtent and
     //! \a theBaseCellWord. When called \a cellPosition should be an empty word. This is a
     //! technical parameter used in the method's recursivce calls. \a theResultSet is the vector
     //! to which all the neighboring cell will be added, i.e. it is a return parameter.
-    //! NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
-    Void neighboring_cells( const Nat theHeight, const BinaryWord& theBaseCellWord,
+    //! NOTE: The cell defined by \a theExtent, \a theBaseCellWord will also be in \a theResultSet.
+    Void neighboring_cells( const Nat theExtent, const BinaryWord& theBaseCellWord,
                             BinaryWord& cellPosition, GridTreePaving& theResultSet ) const;
 
     //! \brief This method allows to compute the neighboring (to the right) cell of
-    //! the base cell given by \a theHeight and \a theBaseCellWord. Here \a cellPosition
+    //! the base cell given by \a theExtent and \a theBaseCellWord. Here \a cellPosition
     //! is the position of the neighboring cell with resect to the base cell in the
     //! theGrid.dimensions() dimensional space. Note that if \a cellPosition consists
     //! of theGrid.dimensions() zeroes then we adjoin the base cell itself.
-    static GridCell neighboring_cell( const Grid& theGrid, const Nat theHeight,
+    static GridCell neighboring_cell( const Grid& theGrid, const Nat theExtent,
                                       const BinaryWord& theBaseCellWord, BinaryWord& cellPosition );
 
     //! \brief This method allows to find the smallest open cell that contains \a theBoxType.
@@ -338,11 +341,14 @@ class GridOpenCell: public GridAbstractCell {
     //! \brief Default constructor. Needed for some containers and iterators.
     GridOpenCell();
 
-    //! \brief Construct a cell based on \a theGrid, the primary cell of level \a theHeight,
+    //! \brief Construct a cell based on \a theGrid, the primary cell of level \a theExtent,
     //! and the path to the SubPaving's root cell which is accessible from the primary cell
-    //! via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
+    //! via the path \a _theWord. Note that, \a theExtent is the height level relative to the Grid,
     //! but not to the original space!
-    GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
+    GridOpenCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord);
+
+    //! \brief Copy constructor.
+    GridOpenCell( const GridOpenCell & otherCell );
 
     //! \brief Allows to split the given cell into two sub-cells. When isRight == true
     //! then we return the right sub-cell, if false then the left one, otherwise the middle one */
@@ -377,8 +383,8 @@ class GridOpenCell: public GridAbstractCell {
 
     //! \brief this method computes the box in the original space based on the \a theGrid.
     //! This box should be treated as an open set. I.e. the borders of the box must be excluded.
-    //! Note tha, \a theHeight and \a theWord define the left bottom cell (base cell) of the open cell.
-    static ExactBoxType compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
+    //! Note tha, \a theExtent and \a theWord define the left bottom cell (base cell) of the open cell.
+    static ExactBoxType compute_box(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord);
 
     //! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
     //! The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
@@ -401,18 +407,18 @@ class GridOpenCell: public GridAbstractCell {
 /*****************************************GridAbstractCell*******************************************/
 
 inline GridAbstractCell::GridAbstractCell(const GridAbstractCell& theGridCell):
-    _theGrid(theGridCell._theGrid), _theHeight(theGridCell._theHeight),
+    _theGrid(theGridCell._theGrid), _theExtent(theGridCell._theExtent),
     _theWord(theGridCell._theWord), _theBoxType(theGridCell._theBoxType) {
 }
 
-inline GridAbstractCell::GridAbstractCell(const Grid& theGrid, const Nat theHeight,
+inline GridAbstractCell::GridAbstractCell(const Grid& theGrid, const Nat theExtent,
                                             const BinaryWord& theWord, const ExactBoxType& theBoxType):
-    _theGrid(theGrid), _theHeight(theHeight),
+    _theGrid(theGrid), _theExtent(theExtent),
     _theWord(theWord), _theBoxType(theBoxType) {
 }
 
-inline Void GridAbstractCell::primary_cell_at_height( const Nat theHeight, Int & leftBottomCorner, Int & rightTopCorner ) {
-    if ( theHeight % 2 == 1 ) {
+inline Void GridAbstractCell::primary_cell_at_extent( const Nat theExtent, Int & leftBottomCorner, Int & rightTopCorner ) {
+    if ( theExtent % 2 == 1 ) {
         leftBottomCorner = 2*leftBottomCorner - rightTopCorner;
     } else {
         rightTopCorner   = 2*rightTopCorner - leftBottomCorner;
@@ -423,20 +429,16 @@ inline const Grid& GridAbstractCell::grid() const {
     return _theGrid;
 }
 
-inline Nat GridAbstractCell::height() const {
-    return _theHeight;
+inline Nat GridAbstractCell::root_extent() const {
+    return _theExtent;
+}
+
+inline Nat GridAbstractCell::root_height() const {
+    return _theExtent * _theGrid.dimension();
 }
 
 inline Int GridAbstractCell::depth() const {
-    return _theWord.size() - _theHeight;
-}
-
-inline Int GridAbstractCell::tree_height() const {
-    return _theHeight * _theGrid.dimension();
-}
-
-inline Int GridAbstractCell::tree_depth() const {
-    return _theWord.size() - _theHeight * _theGrid.dimension();
+    return _theWord.size() - _theExtent * _theGrid.dimension();
 }
 
 inline const BinaryWord& GridAbstractCell::word() const {
@@ -458,7 +460,7 @@ inline ExactIntervalType GridAbstractCell::operator[](dimension_type i) const {
 
 inline GridAbstractCell& GridAbstractCell::operator=(const GridAbstractCell & otherCell ) {
     _theGrid = otherCell._theGrid;
-    _theHeight = otherCell._theHeight;
+    _theExtent = otherCell._theExtent;
     _theWord = otherCell._theWord;
     _theBoxType = otherCell._theBoxType;
 
@@ -470,8 +472,11 @@ inline GridAbstractCell& GridAbstractCell::operator=(const GridAbstractCell & ot
 inline GridCell::GridCell() : GridAbstractCell( Grid(), 0, BinaryWord(), ExactBoxType() ) {
 }
 
-inline GridCell::GridCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) :
-                    GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
+inline GridCell::GridCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord) :
+                    GridAbstractCell( theGrid, theExtent, theWord, compute_box(theGrid, theExtent, theWord) ) {
+}
+
+inline GridCell::GridCell(const GridCell & otherCell ) : GridAbstractCell(otherCell) {
 }
 
 inline GridCell& GridCell::operator=(const GridCell & otherCell ) {
@@ -492,22 +497,25 @@ inline Bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridC
 }
 
 //The box is not related to the Grid, i.e. it is in the original space, whereas the binary tree is related to the Lattice of the grid:
-inline ExactBoxType GridCell::compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) {
+inline ExactBoxType GridCell::compute_box(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord) {
     //Compute the lattice box and then map it to the original space using the grid data
-    return lattice_box_to_space( GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord ), theGrid );
+    return lattice_box_to_space( GridCell::compute_lattice_box( theGrid.dimension(), theExtent, theWord ), theGrid );
 }
 
 /*********************************************GridOpenCell***********************************************/
 
-inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBoxType& theBoxType) :
-                            GridAbstractCell(theGrid, theHeight, theWord, theBoxType) {
+inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord, const ExactBoxType& theBoxType) :
+                            GridAbstractCell(theGrid, theExtent, theWord, theBoxType) {
 }
 
 inline GridOpenCell::GridOpenCell() : GridAbstractCell( Grid(), 0, BinaryWord(), compute_box(Grid(), 0, BinaryWord()) ) {
 }
 
-inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) :
-                    GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
+inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord) :
+                    GridAbstractCell( theGrid, theExtent, theWord, compute_box(theGrid, theExtent, theWord) ) {
+}
+
+inline GridOpenCell::GridOpenCell(const GridOpenCell & otherCell ) : GridAbstractCell(otherCell) {
 }
 
 inline GridOpenCell& GridOpenCell::operator=(const GridOpenCell & otherCell ) {

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            paver_interface.hpp
+ *            geometry/paver_interface.hpp
  *
- *  Copyright  2011-12  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file paver_interface.hpp
+/*! \file geometry/paver_interface.hpp
  *  \brief Interface for class to compute approximations to function sets.
  */
 
@@ -38,12 +38,12 @@ class PavingInterface;
 class ValidatedConstrainedImageSet;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
-class PaverInterface : public WritableInterface
+class PaverInterface : public virtual WritableInterface
 {
   public:
     typedef ValidatedConstrainedImageSet SetType;
   public:
-    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Nat depth) const = 0;
+    virtual Void  adjoin_outer_approximation(PavingInterface& paving, SetType const& set, Nat fineness) const = 0;
 };
 
 } //namespace Ariadne

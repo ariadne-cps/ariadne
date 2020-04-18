@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-composite.cpp
  *
- *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -49,7 +49,7 @@ class CompositeHybridStateSpace
     virtual CompositeHybridStateSpace* clone() const { return new CompositeHybridStateSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << this->_system_ptr->name() << " )"; }
     ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridStateSpace* chs_ptr = dynamic_cast<const CompositeHybridStateSpace* >(&other);
         if (!chs_ptr) return indeterminate;
@@ -70,7 +70,7 @@ class CompositeHybridSpace
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_auxiliary_space(q); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << this->_system_ptr->name() << " )"; }
     ValidatedKleenean operator==(const HybridSpaceInterface& other) const {
         const CompositeHybridSpace* chs_ptr = dynamic_cast<const CompositeHybridSpace* >(&other);
         if (!chs_ptr) return indeterminate;
@@ -100,7 +100,9 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 
 } // namespace
 
+// Declare functions from hybrid_automaton.cpp
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
+EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()
     : _name("system"),_components() { }
@@ -327,7 +329,7 @@ CompositeHybridAutomaton::continuous_state_space(DiscreteLocation location) cons
 
 RealSpace
 CompositeHybridAutomaton::continuous_auxiliary_space(DiscreteLocation location) const {
-    return RealSpace(this->auxiliary_variables(location));
+    return RealSpace(left_hand_sides(this->sorted_auxiliary_assignments(location)));
 }
 
 RealSpace
@@ -429,12 +431,9 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 EffectiveVectorMultivariateFunction
 CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
-    RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
-    List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    Vector<RealExpression> results(algebraic.size(),default_expression);
-    for(SizeType i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].rhs; }
-    return make_function(space,results);
+    List<RealAssignment> algebraic=this->sorted_auxiliary_assignments(location);
+    return Ariadne::make_auxiliary_function(space,algebraic);
 }
 
 EffectiveVectorMultivariateFunction
@@ -477,18 +476,33 @@ CompositeHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEven
     return make_function(space,substitute(guard,algebraic));
 }
 
-
-
+Writer<CompositeHybridAutomaton> CompositeHybridAutomaton::_default_writer(new VerboseCompositeHybridAutomatonWriter());
 
 OutputStream&
-CompositeHybridAutomaton::write(OutputStream& os) const
-{
-    return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
+CompositeHybridAutomaton::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
 }
 
+OutputStream&
+VerboseCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+    os << "CompositeHybridAutomaton(\n";
+    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+        os << ha.component(i);
+    }
+    return os << "\n)\n";
+}
 
-
-
+OutputStream&
+CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
+    os << ha.name() << " {\n";
+    Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
+    HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());
+    for(Nat i = 0; i < ha.number_of_components(); ++i) {
+        os << ha.component(i);
+    }
+    HybridAutomaton::set_default_writer(previous_writer);
+    return os << "}\n";
+}
 
 
 

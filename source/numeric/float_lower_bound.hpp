@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_lower_bound.hpp
+ *            numeric/float_lower_bound.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_lower_bound.hpp
+/*! \file numeric/float_lower_bound.hpp
  *  \brief Floating-point lower bounds for real numbers.
  */
 
@@ -50,7 +50,7 @@ template<class F> class LowerBound
     , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
-    typedef LowerTag P; typedef typename F::PrecisionType PR;
+    typedef LowerTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef LowerTag Paradigm;
     typedef LowerBound<F> NumericType;
@@ -73,6 +73,8 @@ template<class F> class LowerBound
         LowerBound<F>(const Real& r, PR pr);
     LowerBound<F>(const LowerBound<F>& x, PR pr);
     LowerBound<F>(const ValidatedLowerNumber& y, PR pr);
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        LowerBound<F>(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
 
     LowerBound<F>(Bounds<F> const& x);
     template<class FE> LowerBound<F>(Ball<F,FE> const& x);
@@ -142,7 +144,7 @@ template<class F> class LowerBound
         return floor(static_cast<Dyadic>(x._l)); }
 
     friend OutputStream& operator<<(OutputStream& os, LowerBound<F> const& x) {
-        return write(os,x.raw(),Bounds<F>::output_places,downward); }
+        return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},downward); }
     friend InputStream& operator>>(InputStream& is, LowerBound<F>& x) {
         ARIADNE_NOT_IMPLEMENTED; }
   public:
@@ -176,7 +178,8 @@ template<class PR> LowerBound(ValidatedLowerNumber, PR) -> LowerBound<RawFloatTy
 template<class F> LowerBound(F) -> LowerBound<F>;
 
 template<class F> inline FloatFactory<PrecisionType<F>> factory(LowerBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
-template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(Number<LowerTag> const& y) { return FloatLowerBound<PR>(y,_pr); }
+template<class PR> inline FloatLowerBound<PR> FloatFactory<PR>::create(ValidatedLowerNumber const& y) { return FloatLowerBound<PR>(y,_pr); }
+template<class PR> inline PositiveFloatLowerBound<PR> FloatFactory<PR>::create(PositiveValidatedLowerNumber const& y) { return PositiveFloatLowerBound<PR>(y,_pr); }
 
 template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     , DefineConcreteGenericOperators<PositiveLowerBound<F>>
@@ -186,9 +189,10 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     Positive<LowerBound<F>>() : LowerBound<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<LowerBound<F>>(M m) : LowerBound<F>(m) { }
+    explicit Positive<LowerBound<F>>(PR const& pr) : LowerBound<F>(pr) { }
     explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
     explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
-    explicit Positive<LowerBound<F>>(ValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
+    Positive<LowerBound<F>>(PositiveValidatedLowerNumber const& y, PR pr) : LowerBound<F>(y,pr) { }
     Positive<LowerBound<F>>(PositiveValue<F> const& x) : LowerBound<F>(x) { }
     Positive<LowerBound<F>>(PositiveBounds<F> const& x) : LowerBound<F>(x) { }
   public:

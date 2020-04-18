@@ -1,7 +1,7 @@
 /***************************************************************************
  *            polynomial.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -232,7 +232,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Add, Polynomial<I,X> p, const X& c) {
     p[IndexType(p.argument_size())]+=c;
-    return std::move(p);
+    return p;
 }
 
 template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::iapply(Add, Polynomial<I,X>& p, const X& c) {
@@ -248,7 +248,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
             iter->coefficient()*=c;
         }
     }
-    return std::move(p);
+    return p;
 }
 
 template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::iapply(Mul, Polynomial<I,X>& p, const X& c) {
@@ -287,7 +287,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
             r._expansion.append(iter2->index(),iter2->coefficient());
             ++iter2;
     }
-    return std::move(r);
+    return r;
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Sub, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
@@ -315,7 +315,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
             r._expansion.append(iter2->index(),-iter2->coefficient());
             ++iter2;
     }
-    return std::move(r);
+    return r;
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Mul, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
@@ -336,7 +336,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
         iter->index()+=m.index();
         iter->coefficient()*=m.coefficient();
     }
-    return std::move(p);
+    return p;
 }
 
 template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::iapply(Mul, Polynomial<I,X>& p, const Monomial<I,X>& m) {
@@ -475,7 +475,7 @@ OutputStream& Polynomial<I,X>::_write(OutputStream& os) const {
 
 template<class I, class X>
 OutputStream& Polynomial<I,X>::_write(OutputStream& os, typename IndexTraits<I>::NameType const& argument_names) const {
-    return this->_expansion.write(os,argument_names);
+    return this->_expansion._write(os,argument_names);
 }
 
 

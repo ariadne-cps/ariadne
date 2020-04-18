@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_traits.hpp
+ *            numeric/float_traits.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_traits.hpp
+/*! \file numeric/float_traits.hpp
  *  \brief Type traits for floating-point numbers.
  */
 

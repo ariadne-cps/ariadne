@@ -1,7 +1,7 @@
 /***************************************************************************
- *            space.cpp
+ *            symbolic/space.cpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file space.cpp
+/*! \file symbolic/space.cpp
  *  \brief Spaces formed by variables.
  */
 
@@ -101,23 +101,18 @@ template<class T> Map<typename Space<T>::VariableType,SizeType> Space<T>::indice
     return indices;
 }
 
-//! \brief Tests if the variable \a v is in the space.
 template<class T> Bool Space<T>::contains(const typename Space<T>::VariableType& v) const {
     for(Nat i=0; i!=_variables.size(); ++i) {
         if(v.name()==_variables[i]) { return true; } }
     return false; }
-//! \brief Tests if all the variables \a vs is in the space.
 template<class T> Bool Space<T>::contains(const Set<typename Space<T>::VariableType>& vs) const {
     for(auto v : vs) {
         if(!this->contains(v)) { return false; } }
     return true; }
-//! \brief The index of the named variable \a v.
 template<class T> SizeType Space<T>::operator[](const typename Space<T>::VariableType& v) const {
     return this->index(v); }
-//! \brief The index of the named variable \a v.
 template<class T> SizeType Space<T>::operator[](const Identifier& n) const {
     return this->index(n); }
-//! \brief The index of the named variable \a v.
 template<class T> SizeType Space<T>::index(const typename Space<T>::VariableType& v) const {
     for(Nat i=0; i!=_variables.size(); ++i) {
         if(v.name()==_variables[i]) { return i; } }
@@ -128,7 +123,6 @@ template<class T> SizeType Space<T>::index(const Identifier& n) const {
         if(n==_variables[i]) { return i; } }
     ARIADNE_ASSERT_MSG(false,"Variable named "<<n<<" is not in the Space "<<*this);
     return _variables.size(); }
-//! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
 template<class T> Space<T>& Space<T>::insert(const typename Space<T>::VariableType& v) {
     for(Nat i=0; i!=_variables.size(); ++i) {
         if(_variables[i]==v.name()) { return *this; } }

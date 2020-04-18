@@ -1,7 +1,7 @@
 /***************************************************************************
- *            procedure.cpp
+ *            function/procedure.cpp
  *
- *  Copyright 2016--17  Pieter Collins
+ *  Copyright  2016-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -67,9 +67,9 @@ Void simple_hull_reduce(UpperBoxType& dom, const ValidatedProcedure& f, ExactInt
     const List<ProcedureInstruction>& p=f._instructions;
     const List<ValidatedNumber>& c=f._constants;
     List<UpperIntervalType> t(p.size());
-    _execute(t,p,c,dom);
+    _execute(t,p,c,cast_vector(dom));
     restrict(t.back(),codom);
-    _backpropagate(dom,t,p,c);
+    _backpropagate(cast_vector(dom),t,p,c);
 }
 
 Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, ExactBoxType codom)
@@ -80,11 +80,11 @@ Void simple_hull_reduce(UpperBoxType& dom, const Vector<ValidatedProcedure>& f, 
 
     ARIADNE_ASSERT(codom.size()==f._results.size());
 
-    _execute(t,p,c,dom);
+    _execute(t,p,c,cast_vector(dom));
     for(SizeType i=0; i!=codom.size(); ++i) {
         restrict(t[f._results[i]],codom[i]);
     }
-    _backpropagate(dom,t,p,c);
+    _backpropagate(cast_vector(dom),t,p,c);
 }
 
 } // namespace Ariadne

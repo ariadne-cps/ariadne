@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/vector.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -287,6 +287,9 @@ class Vector
 
 template<class X> struct IsVector<Vector<X>> : True { };
 
+//! \ingroup LinearAlgebraModule
+//! A view into a subvector of a vector of class \a V.
+//! \see Vector, Range
 template<class V> class VectorRange
     : public VectorContainer< VectorRange<V> >
 {
@@ -548,7 +551,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
-    return std::move(r);
+    return r;
 }
 
 template<class X>
@@ -558,7 +561,7 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2, co
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
     for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+1u+i]=v3[i]; }
-    return std::move(r);
+    return r;
 }
 
 template<class X>
@@ -567,7 +570,7 @@ Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
     Vector<X> r(1u+v2.size(),v2.zero_element());
     r[0u]=x1;
     for(SizeType i=0; i!=v2.size(); ++i) { r[1u+i]=v2[i]; }
-    return std::move(r);
+    return r;
 }
 
 template<class X>
@@ -576,7 +579,7 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
     Vector<X> r(v1.size()+1u,v1.zero_element());
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     r[v1.size()]=x2;
-    return std::move(r);
+    return r;
 }
 
 //template<class X, EnableIf<IsScalar<X>> =dummy>
@@ -585,7 +588,7 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
 //    Vector<X> r(2u);
 //    r[0u]=x1;
 //    r[1u]=x2;
-//    return std::move(r);
+//    return r;
 //}
 
 template<class X>
@@ -595,7 +598,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X
     for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     r[v1.size()+v2.size()]=x3;
-    return std::move(r);
+    return r;
 }
 
 
@@ -620,7 +623,7 @@ template<class X> inline Vector<decltype(refinement(declval<X>(),declval<X>()))>
     for(SizeType i=0; i!=v1.size(); ++i) {
         r[i]=refinement(v1[i],v2[i]);
     }
-    return std::move(r);
+    return r;
 }
 
 template<class X> inline decltype(refines(declval<X>(),declval<X>())) refines(const Vector<X>& v1, const Vector<X>& v2) {
@@ -706,7 +709,7 @@ template<class X> inline Vector<BoundsType<X>> make_bounds(const Vector<X>& v) {
     for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=make_bounds(v[i]);
     }
-    return std::move(r);
+    return r;
 }
 
 
@@ -717,7 +720,7 @@ template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
     for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=cast_exact(v[i]);
     }
-    return std::move(r);
+    return r;
 }
 
 template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>>>

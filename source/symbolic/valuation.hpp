@@ -1,7 +1,7 @@
 /***************************************************************************
- *            valuation.hpp
+ *            symbolic/valuation.hpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file valuation.hpp
+/*! \file symbolic/valuation.hpp
  *  \brief Valuations over named variables.
  */
 
@@ -53,10 +53,10 @@ typedef Valuation<Integer> IntegerValuation;
 typedef Valuation<String> StringValuation;
 typedef Valuation<Real> RealValuation;
 
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! \brief A valuation of named variables of mathematical type \a T, with values represented by values of concrete type \a X,
 //!   where X defaults to \a T.
-//! \sa DiscreteValuation, ContinuousValuation, HybridValuation, DiscreteLocation
+//! \see DiscreteValuation, ContinuousValuation, HybridValuation, DiscreteLocation
 template<class T, class X>
 class Valuation
 {
@@ -94,7 +94,7 @@ class Valuation
     Map<Identifier,ValueType> _values;
 };
 
-template<class V, class X> Bool operator==(const Valuation<V,X>& v1, const Valuation<V,X>& v2) {
+template<class T, class X> Bool operator==(const Valuation<T,X>& v1, const Valuation<T,X>& v2) {
     Bool identical = true;
     const Map<Identifier,X>& v1sm=v1.values();
     const Map<Identifier,X>& v2sm=v2.values();

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector.cpp
+ *            algebra/vector.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file vector.cpp
+/*! \file algebra/vector.cpp
  *  \brief 
  */
 

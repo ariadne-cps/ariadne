@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expression.cpp
+ *            symbolic/expression.cpp
  *
- *  Copyright 2009--17  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -60,7 +60,7 @@ template class Expression<Real>;
 template Bool before<Real>(Expression<Real> const& e1, Expression<Real> const& e2);
 template Nat count_nodes<Real>(const Expression<Real>& e);
 template Nat count_distinct_nodes<Real>(const Expression<Real>& e);
-template Nat count_distinct_node_ptrs<Real>(const Expression<Real>& e);
+template Nat count_distinct_node_pointers<Real>(const Expression<Real>& e);
 
 template Expression<Real> ElementaryAlgebra<Real>::extract() const;
 
@@ -460,6 +460,11 @@ Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Rea
 
 
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var)
+{
+    return make_formula(e,Space<Real>({var}));
+}
+
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Variable<Real>& var)
 {
     return make_formula(e,Space<Real>({var}));
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expansion.cpp
+ *            algebra/expansion.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -52,7 +52,6 @@ namespace Ariadne {
     template class SortedExpansion<MultiIndex,FloatDPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPApproximation,ReverseLexicographicIndexLess>;
 
-
     template class Expansion<MultiIndex,FloatDPUpperInterval>;
     template class SortedExpansion<MultiIndex,FloatDPUpperInterval,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPUpperInterval,ReverseLexicographicIndexLess>;
@@ -72,5 +71,10 @@ namespace Ariadne {
     template class SortedExpansion<MultiIndex,FloatMPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatMPApproximation,ReverseLexicographicIndexLess>;
 
+    template class Expansion<MultiIndex,FloatMPUpperInterval>;
+    template class SortedExpansion<MultiIndex,FloatMPUpperInterval,GradedIndexLess>;
+    template class SortedExpansion<MultiIndex,FloatMPUpperInterval,ReverseLexicographicIndexLess>;
+
     template Expansion<MultiIndex,Interval<FloatDPUpperBound>>::Expansion(Expansion<MultiIndex,FloatDPBounds> const&);
+    template Expansion<MultiIndex,FloatDPApproximation>::Expansion(Expansion<MultiIndex,FloatDPBounds> const&);
 }

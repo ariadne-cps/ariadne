@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_set.hpp
+ *            hybrid/hybrid_set.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_set.hpp
+/*! \file hybrid/hybrid_set.hpp
  *  \brief Sets in hybrid spaces.
  */
 
@@ -113,8 +113,8 @@ class HybridBasicSet
     //! \brief A singleton list of the bounding box.
     HybridUpperBoxes bounding_boxes() const;
 
-    //! \brief Adjoin an outer approximation of the set to \a paving using a given \a depth of subdividing the paving cells.
-    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+    //! \brief Adjoin an outer approximation of the set to \a paving using a given \a fineness of subdividing the paving cells.
+    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
 
     //! \brief Draw to a canvas. Only draws if the set of locations \a q is empty, or contains the set's actual location.
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const;
@@ -300,7 +300,7 @@ class HybridValidatedConstrainedImageSet
         return this->Base::separated(hbx); }
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual OutputStream& write(OutputStream& os) const override {
+    virtual OutputStream& _write(OutputStream& os) const override {
         return os << static_cast<const Base&>(*this); }
     virtual Void draw(CanvasInterface& cnvs, const Set<DiscreteLocation>& locs, const Variables2d& vars) const override {
         return this->Base::draw(cnvs,locs,vars); }

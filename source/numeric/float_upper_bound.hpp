@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_upper_bound.hpp
+ *            numeric/float_upper_bound.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_upper_bound.hpp
+/*! \file numeric/float_upper_bound.hpp
  *  \brief Floating-point upper bounds for real numbers.
  */
 
@@ -50,7 +50,7 @@ template<class F> class UpperBound
     , public DeclareFloatOperations<Approximation<F>>
 {
   protected:
-    typedef UpperTag P; typedef typename F::PrecisionType PR;
+    typedef UpperTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef UpperTag Paradigm;
     typedef UpperBound<F> NumericType;
@@ -73,6 +73,8 @@ template<class F> class UpperBound
         UpperBound<F>(const Real& r, PR pr);
     UpperBound<F>(const UpperBound<F>& x, PR pr);
     UpperBound<F>(const ValidatedUpperNumber& y, PR pr);
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        UpperBound<F>(const UpperBound<FF>& x, PR pr) : _u(x.raw(),up,pr) { }
 
     UpperBound<F>(Bounds<F> const& x);
     template<class FE> UpperBound<F>(Ball<F,FE> const& x);
@@ -138,7 +140,7 @@ template<class F> class UpperBound
         return ceil(static_cast<Dyadic>(x._u)); }
 
     friend OutputStream& operator<<(OutputStream& os, UpperBound<F> const& x) {
-        return write(os,x.raw(),Bounds<F>::output_places,upward); }
+        return write(os,x.raw(),DecimalPrecision{Bounds<F>::output_places},upward); }
     friend InputStream& operator>>(InputStream& is, UpperBound<F>& x) {
         ARIADNE_NOT_IMPLEMENTED; }
   public:
@@ -172,7 +174,8 @@ template<class PR> UpperBound(ValidatedUpperNumber, PR) -> UpperBound<RawFloatTy
 template<class F> UpperBound(F) -> UpperBound<F>;
 
 template<class F> inline FloatFactory<PrecisionType<F>> factory(UpperBound<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
-template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(Number<UpperTag> const& y) { return FloatUpperBound<PR>(y,_pr); }
+template<class PR> inline FloatUpperBound<PR> FloatFactory<PR>::create(ValidatedUpperNumber const& y) { return FloatUpperBound<PR>(y,_pr); }
+template<class PR> inline PositiveFloatUpperBound<PR> FloatFactory<PR>::create(PositiveValidatedUpperNumber const& y) { return PositiveFloatUpperBound<PR>(y,_pr); }
 
 template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     , DefineConcreteGenericOperators<PositiveUpperBound<F>>
@@ -185,7 +188,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Positive<UpperBound<F>>(M m, PR pr) : UpperBound<F>(m,pr) { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveValue<F> create(M m) const { return PositiveValue<F>(m,this->precision()); }
     explicit Positive<UpperBound<F>>(UpperBound<F> const& x) : UpperBound<F>(x) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"x="<<x); }
-    explicit Positive<UpperBound<F>>(ValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
+    Positive<UpperBound<F>>(PositiveValidatedUpperNumber const& y, PR pr) : UpperBound<F>(y,pr) { ARIADNE_PRECONDITION_MSG(!(this->_u<0),"y="<<y); }
     Positive<UpperBound<F>>(PositiveValue<F> const& x) : UpperBound<F>(x) { }
     Positive<UpperBound<F>>(PositiveBounds<F> const& x) : UpperBound<F>(x) { }
   public:

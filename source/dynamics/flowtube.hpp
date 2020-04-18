@@ -1,7 +1,7 @@
 /***************************************************************************
- *            flowtube.hpp
+ *            dynamics/flowtube.hpp
  *
- *  Copyright 2007-17  Pieter Collins
+ *  Copyright  2007-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file flowtube.hpp
+/*! \file dynamics/flowtube.hpp
  *  \brief Flow tubes for dynamic systems
  */
 

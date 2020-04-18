@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_enclosure.cpp
+ *            hybrid/hybrid_enclosure.cpp
  *
- *  Copyright  2009-10  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -38,6 +38,7 @@
 #include "../geometry/grid_paving.hpp"
 #include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_paving.hpp"
+#include "../hybrid/hybrid_storage.hpp"
 #include "../hybrid/hybrid_time.hpp"
 #include "../hybrid/discrete_event.hpp"
 #include "../hybrid/discrete_location.hpp"
@@ -235,6 +236,12 @@ ValidatedVectorMultivariateFunctionModelDP const
 HybridEnclosure::auxiliary_function() const
 {
     return this->_set.auxiliary_function();
+}
+
+ValidatedVectorMultivariateFunctionModelDP const
+HybridEnclosure::state_auxiliary_function() const
+{
+    return this->_set.state_auxiliary_function();
 }
 
 ValidatedVectorMultivariateFunctionModelDP const
@@ -450,7 +457,7 @@ Void HybridEnclosure::set_time(ValidatedScalarMultivariateFunction time)
 
 Void HybridEnclosure::set_maximum_time(DiscreteEvent event, FloatDP final_time)
 {
-    this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumericType(final_time)); // Deprecated
+    this->_set.new_negative_parameter_constraint(this->time_function()-FloatDPValue(final_time)); // Deprecated
 }
 
 Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarMultivariateFunction constraint) {
@@ -561,7 +568,7 @@ HybridEnclosure::uniform_error_recondition()
 {
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
-    ExactIntervalVectorType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    ExactBoxType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
     this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
     this->_check();
 }
@@ -600,7 +607,7 @@ Void
 HybridEnclosure::_check() const
 {
     //this->_set.check();
-    const ExactIntervalVectorType& reduced_domain = this->_set.reduced_domain();
+    const ExactBoxType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->state_function().domain(),"function domain");
     for(Nat i=0; i!=this->_set.constraints().size(); ++i) {
@@ -631,21 +638,20 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
     os << "    \n[ "; for(SizeType i=0; i!=c.size(); ++i) { if (i!=0) { os << ",\n      "; } os << c[i]; } os << "]"; return os;
 }
 
-OutputStream& HybridEnclosure::write(OutputStream& os) const
+OutputStream& HybridEnclosure::_write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( variables = " << variable_names(this->_variables)
-              << ", events=" << this->_events
-              << ", location=" << this->_location
-              << ", state_space=" << this->state_space()
-              << ", range=" << apply(this->state_function(),this->_set.domain())
-              << ", domain=" << this->_set.domain()
-              << ", subdomain=" << this->_set.reduced_domain()
-              << ", empty=" << this->_set.reduced_domain().is_empty()
-              << ", state=" << this->_set.state_function()
-              << ", constraints=" << this->_set.constraints()
-              << ", time="<< this->_set.time_function()
-              << ", empty="<< this->_set.is_empty()
+              << ",\n   events=" << this->_events
+              << ",\n   location=" << this->_location
+              << ",\n   state_space=" << this->state_space()
+              << ",\n   range=" << apply(this->state_function(),this->_set.domain())
+              << ",\n   domain=" << this->_set.domain()
+              << ",\n   reduced_domain=" << this->_set.reduced_domain()
+              << ",\n   is_(reduced_domain_)empty=" << this->_set.reduced_domain().is_empty()
+              << ",\n   state=" << this->_set.state_function()
+              << ",\n   constraints=" << this->_set.constraints()
+              << ",\n   time="<< this->_set.time_function()
               << ")";
 }
 
@@ -656,8 +662,7 @@ OutputStream& HybridEnclosure::print(OutputStream& os) const
               << ", location=" << this->_location
               << ", range=" << apply(this->state_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
-              << ", subdomain=" << this->_set.reduced_domain()
-              << ", subdomain=" << this->_set.reduced_domain()
+              << ", reduced_domain=" << this->_set.reduced_domain()
               << ", #constraints=" << this->_set.constraints().size()
               << ", time_range="<<this->time_range() << ")";
 }
@@ -679,28 +684,25 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
     return he.inside(under_approximation(hbx));
 }
 
-Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreePaving& hgts, Nat depth) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fineness) const {
     DiscreteLocation location=this->location();
     const Enclosure& set = this->continuous_set();
-    GridTreePaving& paving = hgts[location];
-    RealSpace paving_space=hgts.space(location);
+    HybridGridTreePaving& hgtp=hst.state_set();
+    GridTreePaving& paving = hgtp[location];
+    RealSpace paving_space=hgtp.space(location);
     RealSpace state_space=this->state_space();
-    RealSpace auxiliary_space=this->auxiliary_space();
     if(state_space==paving_space) {
-        auto state_set = Enclosure(this->parameter_domain(),this->state_function(),this->time_function(),this->constraints(),this->function_factory());
-        state_set.adjoin_outer_approximation_to(paving,depth);
-    } else if(join(state_space,auxiliary_space)==paving_space) {
-        set.adjoin_outer_approximation_to(paving,depth);
+        set.state_set().adjoin_outer_approximation_to(paving,fineness);
     } else {
-        ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" and auxiliary variables "<<auxiliary_space<<
-                         " do not match variables "<<paving_space<<" of paving in location "<<location);
+        ARIADNE_FAIL_MSG("HybridEnclosure's state variables "<<state_space<<" do not match variables "<<paving_space<<" of HybridStorage in location "<<location);
     }
 }
 
-HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat depth) {
-    HybridGridTreePaving result(g);
+
+HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat fineness) {
+    HybridStorage result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
+        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),fineness);
     }
     return result;
 }

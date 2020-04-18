@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tensor.hpp
+ *            algebra/tensor.hpp
  *
- *  Copyright 2018  Pieter Collins
+ *  Copyright  2018-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file tensor.hpp
+/*! \file algebra/tensor.hpp
  *  \brief Arbitrary-rank tensors
  */
 
@@ -43,9 +43,10 @@ template<class T> class TensorRow {
     T& operator[] (SizeType j) { return _t[Array<SizeType>({_i,j})]; }
 };
 
+//! \ingroup LinearAlgebraModule
 //! \brief A rank-\a N tensor with elements of type \a X.
-//!   TODO: Also provide a version which is not templated on rank.
 template<SizeType N, class X> class Tensor {
+//   TODO: Also provide a version which is not templated on rank.
     Array<SizeType> _ns;
     Array<X> _a;
   public:

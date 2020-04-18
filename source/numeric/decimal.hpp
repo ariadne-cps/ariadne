@@ -1,7 +1,7 @@
 /***************************************************************************
- *            decimal.hpp
+ *            numeric/decimal.hpp
  *
- *  Copyright 2014-17  Pieter Collins
+ *  Copyright  2014-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file decimal.hpp
+/*! \file numeric/decimal.hpp
  *  \brief ExactTag decimal numbers, useful for user input.
  */
 
@@ -77,6 +77,8 @@ class Decimal
     friend Rational operator/(Decimal const& d1, Decimal const& d2);
     //! \brief Squared value of a decimal.
     friend Decimal sqr(Decimal const& d);
+    //! \brief Half the value of a decimal.
+    friend Decimal hlf(Decimal const& d);
     //! \brief Absolute value of a decimal.
     friend Decimal abs(Decimal const& d);
     //! \brief Maximum of two decimal values.

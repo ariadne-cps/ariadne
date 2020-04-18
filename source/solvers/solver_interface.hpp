@@ -1,7 +1,7 @@
 /***************************************************************************
- *            solver_interface.hpp
+ *            solvers/solver_interface.hpp
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solver_interface.hpp
+/*! \file solvers/solver_interface.hpp
  *  \brief Interface class for solving equations.
  */
 
@@ -82,13 +82,18 @@ class SingularJacobianException : public SolverException
 class SolverInterface
     : public Loggable
 {
+    using FLT=FloatDP;
+  public:
+    typedef Bounds<FLT> ValidatedNumericType;
+    typedef Approximation<FLT> ApproximateNumericType;
+    typedef ValidatedVectorMultivariateFunctionModelDP ValidatedVectorMultivariateFunctionModelType;
   public:
     //! \brief Virtual destructor.
     virtual ~SolverInterface() = default;
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
 
 
     //! \brief The maximum permissible error of the solution.
@@ -129,7 +134,7 @@ class SolverInterface
 };
 
 inline OutputStream& operator<<(OutputStream& os, const SolverInterface& solver) {
-    solver.write(os); return os;
+    solver._write(os); return os;
 }
 
 } // namespace Ariadne

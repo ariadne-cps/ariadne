@@ -1,7 +1,7 @@
 /***************************************************************************
- *            chebyshev_polynomial.hpp
+ *            function/chebyshev_polynomial.hpp
  *
- *  Copyright 2008-18  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file chebyshev_polynomial.hpp
+/*! \file function/chebyshev_polynomial.hpp
  *  \brief Chebyshev functions on a bounded domain with a sparse representation.
  */
 

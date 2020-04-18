@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_automaton.hpp
+ *            hybrid/hybrid_automaton.hpp
  *
- *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_automaton.hpp
+/*! \file hybrid/hybrid_automaton.hpp
  *  \brief Main hybrid automaton class.
  */
 
@@ -101,7 +101,7 @@ class DiscreteTransition
     DiscreteLocation target() const { return this->_target; };
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
   private:
     DiscreteTransition(DiscreteLocation source,
                        DiscreteEvent event,
@@ -112,7 +112,7 @@ class DiscreteTransition
 };
 
 inline OutputStream& operator<<(OutputStream& os, const DiscreteTransition& dt) {
-    return dt.write(os); }
+    return dt._write(os); }
 
 inline Bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
@@ -132,6 +132,8 @@ class DiscreteMode {
     friend class DiscreteTransition;
     friend class HybridAutomaton;
     friend class CompositeHybridAutomaton;
+    friend class CompactDiscreteModeWriter;
+    friend class VerboseDiscreteModeWriter;
   private:
     // The discrete mode's discrete state.
     DiscreteLocation _location;
@@ -161,17 +163,29 @@ class DiscreteMode {
     DiscreteMode(DiscreteLocation, List<RealAssignment>const&, List<DottedRealAssignment>const&);
     DiscreteMode(DiscreteLocation);
     DiscreteMode();
+    static Writer<DiscreteMode> _default_writer;
+  public:
+    static Void set_default_writer(Writer<DiscreteMode> w) { _default_writer=w; }
+    static Writer<DiscreteMode> default_writer() { return _default_writer; }
   public:
     //! \brief The mode's discrete state.
     DiscreteLocation location() const { return this->_location; }
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 };
 
 
 inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
-    return dm.write(os); }
+    return dm._write(os); }
+
+class CompactDiscreteModeWriter : public WriterInterface<DiscreteMode> {
+    virtual OutputStream& _write(OutputStream& os, DiscreteMode const& m) const final override;
+};
+
+class VerboseDiscreteModeWriter : public WriterInterface<DiscreteMode> {
+    virtual OutputStream& _write(OutputStream& os, DiscreteMode const& m) const final override;
+};
 
 inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
     return mode1.location() < mode2.location(); }
@@ -183,6 +197,7 @@ inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 
 
 //! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
 //! \brief A hybrid automaton, comprising continuous-time behaviour
 //! at each discrete mode, coupled by instantaneous discrete transitions.
 //!  The state space is given by a hybrid set.
@@ -218,6 +233,10 @@ class HybridAutomaton
     , public Loggable
 {
     friend class CompositeHybridAutomaton;
+    static Writer<HybridAutomaton> _default_writer;
+public:
+    static Void set_default_writer(Writer<HybridAutomaton> w) { _default_writer=w; }
+    static Writer<HybridAutomaton> default_writer() { return _default_writer; }
   public:
     //! \brief The type used to represent time.
     typedef HybridTime TimeType;
@@ -294,6 +313,13 @@ class HybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     Void new_mode(DiscreteLocation location,
+                  List<DottedRealAssignment> const& dynamic,
+                  List<RealAssignment> const& auxiliary) {
+        this->_new_mode(location,auxiliary,dynamic);
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    Void new_mode(DiscreteLocation location,
                   List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(location,List<RealAssignment>(),dynamic);
     }
@@ -311,6 +337,11 @@ class HybridAutomaton
 
     //! \brief Adds a discrete mode to the automaton.
     Void new_mode(List<RealAssignment> const& auxiliary, List<DottedRealAssignment> const& dynamic) {
+        this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    Void new_mode(List<DottedRealAssignment> const& dynamic, List<RealAssignment> const& auxiliary) {
         this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
     }
 
@@ -420,7 +451,7 @@ class HybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
-    //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
+    //!    \param kind is a label indicating whether the transition is permissive, urgent, or an impact etc.
     Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
@@ -578,13 +609,21 @@ class HybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
 };
 
 inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
-    return ha.write(os);
+    return ha._write(os);
 }
+
+class CompactHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
+    virtual OutputStream& _write(OutputStream& os, HybridAutomaton const& ha) const final override;
+};
+
+class VerboseHybridAutomatonWriter : public WriterInterface<HybridAutomaton> {
+    virtual OutputStream& _write(OutputStream& os, HybridAutomaton const& ha) const final override;
+};
 
 
 } // namespace Ariadne

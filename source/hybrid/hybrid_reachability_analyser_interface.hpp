@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_reachability_analyser_interface.hpp
+ *            hybrid/hybrid_reachability_analyser_interface.hpp
  *
- *  Copyright  2011  Luca Geretti
+ *  Copyright  2011-20  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_reachability_analyser_interface.hpp
+/*! \file hybrid/hybrid_reachability_analyser_interface.hpp
  *  \brief Interface for analysis in the hybrid case.
  */
 
@@ -41,8 +41,9 @@ namespace Ariadne {
 class HybridAutomatonInterface;
 class HybridGridTreePaving;
 
-/*! \brief A class for performing reachability analysis on a hybrid system.
- */
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
+//! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyserInterface
     : public virtual ReachabilityAnalyserInterface<HybridAutomatonInterface>
     , public Loggable
@@ -70,6 +71,7 @@ class HybridReachabilityAnalyserInterface
 };
 
 
+//! \relates HybridReachabilityAnalyserInterface
 //! \brief Factory for hybrid reachability analyser interface classes.
 class HybridReachabilityAnalyserFactoryInterface
     : public ReachabilityAnalyserFactoryInterface<HybridAutomatonInterface>

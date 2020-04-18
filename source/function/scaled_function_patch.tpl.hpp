@@ -1,7 +1,7 @@
 /***************************************************************************
  *            scaled_function_patch.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -156,7 +156,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Repres
 
 inline OutputStream& operator<<(OutputStream& os, const Representation< BoxDomainType >& box_repr)
 {
-    const Vector<IntervalDomainType>& vec=*box_repr.pointer;
+    const BoxDomainType& vec=*box_repr.pointer;
     ARIADNE_ASSERT(vec.size()!=0);
     os << "(";
     for(SizeType i=0; i!=vec.size(); ++i) {
@@ -206,7 +206,7 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 {
 }
 
-template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,FloatValue<PR>>& p, const FloatError<PR>& e, const Sweeper<RawFloat<PR>>& prp)
+template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,CoefficientType>& p, const ErrorType& e, const Sweeper<RawFloat<PR>>& prp)
     : _domain(d), _model(p,e,prp)
 {
 }
@@ -219,10 +219,14 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainType& d, const ScalarFunctionType<M>& f, PropertiesType prp)
     : _domain(d), _model(f.argument_size(),prp)
 {
-    ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-    Vector<ModelType> x=ModelType::scalings(d,prp);
-    this->_model=f.evaluate(x);
-    this->_model.simplify();
+    if constexpr (IsInterval<typename M::NumericType>::value) {
+        ARIADNE_ERROR("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function."); abort();
+    } else {
+        ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
+        Vector<ModelType> x=ModelType::scalings(d,prp);
+        this->_model=f.evaluate(x);
+        this->_model.simplify();
+    }
 }
 
 template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ScalarFunctionModelType<M>& f) {
@@ -234,7 +238,6 @@ template<class M> ScaledFunctionPatch<M>& ScaledFunctionPatch<M>::operator=(cons
 {
     return (*this)=ScaledFunctionPatch<M>(this->domain(),f,this->properties());
 }
-
 
 
 template<class M> ScaledFunctionPatch<M> ScaledFunctionPatch<M>::zero(const BoxDomainType& d, PropertiesType prp)
@@ -366,25 +369,35 @@ inline Bool operator> (FloatDPValue x1, Int n2) { return x1.raw()> FloatDP(n2); 
 inline Bool operator> (FloatDPBounds x1, Int n2) { return x1.lower_raw()> FloatDP(n2); }
 inline Bool operator> (FloatDPApproximation x1, Int n2) { return x1.raw()> FloatDP(n2); }
 
-template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> MultivariatePolynomial<Bounds<F>>
+/*
+template<class M> auto ScaledFunctionPatch<M>::gradient_value(SizeType i) const -> const ValueType
 {
-    Bounds<F> zero(0,this->model().precision());
+    // FIXME: Cannot be guaranteed to be exact
+    Bounds<F> radius(this->_domain[i].radius(),this->model().precision());
+    Value<F> gradient=this->_model.gradient_value(i);
+    return cast_exact(gradient/radius);
+}
+*/
 
-    Vector<MultivariatePolynomial<Bounds<F>> > pid=MultivariatePolynomial<NumericType>::coordinates(this->argument_size());
-    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+Bounds<F>(-this->error(),+this->error());
+template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> MultivariatePolynomial<NumericType>
+{
+    NumericType zero(0,this->model().precision());
 
-    MultivariatePolynomial<Bounds<F>> z(this->argument_size());
-    MultivariatePolynomial<Bounds<F>> p;//=Ariadne::polynomial(this->model());
+    Vector<MultivariatePolynomial<NumericType> > pid=MultivariatePolynomial<NumericType>::coordinates(this->argument_size());
+    return horner_evaluate(this->expansion(),unscale(pid,this->domain()))+NumericType(-this->error(),+this->error());
 
-    Vector<MultivariatePolynomial<Bounds<F>> > s(this->argument_size(),z);
+    MultivariatePolynomial<NumericType> z(this->argument_size());
+    MultivariatePolynomial<NumericType> p;//=Ariadne::polynomial(this->model());
+
+    Vector<MultivariatePolynomial<NumericType> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         auto domj=convert_interval(this->domain()[j],this->precision());
         if(domj.lower()>=domj.upper()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
-            s[j]=MultivariatePolynomial<Bounds<F>>::constant(this->argument_size(),zero);
+            s[j]=MultivariatePolynomial<NumericType>::constant(this->argument_size(),zero);
         } else {
             //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->properties()));
-            s[j]=(MultivariatePolynomial<Bounds<F>>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(MultivariatePolynomial<NumericType>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -393,12 +406,17 @@ template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Multivariat
 
 template<class M> ScalarFunctionType<M> ScaledFunctionPatch<M>::function() const
 {
-    return ScalarFunctionType<M>(new ScaledFunctionPatch<M>(*this));
+    if constexpr (IsInterval<CoefficientType>::value) {
+        ARIADNE_ERROR("IntervalTaylorModel object "<<*this<<" cannot be converted to a function.");
+        abort();
+    } else {
+        return ScalarFunctionType<M>(new ScaledFunctionPatch<M>(*this));
+    }
 }
 
 template<class M> ScalarFunctionType<M> ScaledFunctionPatch<M>::generic() const
 {
-    return ScalarFunctionType<M>(new ScaledFunctionPatch<M>(*this));
+    return this->function();
 }
 
 
@@ -415,17 +433,19 @@ template<class M> ScaledFunctionPatch<M>* ScaledFunctionPatch<M>::_derivative(Si
     return new ScaledFunctionPatch<M>(derivative(*this,j));
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const -> FloatApproximation<PR>
+template<class M> auto ScaledFunctionPatch<M>::operator() (const Vector<FloatApproximation<PR>>& x) const
+    -> ArithmeticType<CoefficientType,FloatApproximation<PR>>
 {
     const ScaledFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
     Vector<FloatApproximation<PR>> sx=Ariadne::unscale(x,f._domain);
-    return Ariadne::evaluate(this->_model.expansion(),sx);
+    return evaluate(this->_model,sx);
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const -> FloatBounds<PR>
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const
+    -> ArithmeticType<CoefficientType,FloatBounds<PR>>
 {
     const ScaledFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
@@ -434,41 +454,59 @@ template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatBoun
     return unchecked_evaluate(f,x);
 }
 
-template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> FloatBounds<PR>
+template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<FloatValue<PR>>& x) const -> ArithmeticType<CoefficientType,FloatBounds<PR>>
 {
     return evaluate(*this,Vector<FloatBounds<PR>>(x));
 }
 
 template<class M> auto ScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const -> ValidatedNumber
 {
-    return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+    if constexpr (IsInterval<CoefficientType>::value) {
+        ARIADNE_ERROR("Cannot evaluate an IntervalTaylorModel on a generic Number");
+        abort();
+    } else {
+        return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
+    }
 }
 
+
+
+/*
+template<class M, class V> decltype(auto) model_gradient(const M& f, const V& s) {
+    return gradient(f,s); }
 
 template<class M> auto ScaledFunctionPatch<M>::gradient(const Vector<NumericType>& x) const -> Covector<NumericType>
 {
     Vector<NumericType> s=unscale(x,this->_domain);
-    Covector<NumericType> g=Ariadne::gradient(this->_model,s);
+    Covector<NumericType> g=model_gradient(this->_model,s);
+//    Covector<NumericType> g=this->_model.gradient(s);
     for(SizeType j=0; j!=g.size(); ++j) {
         NumericType rad=convert_interval(this->_domain[j],this->model().precision()).radius();
         g[j]/=rad;
     }
     return g;
 }
+*/
 
 
 template<class M> OutputStream& write_polynomial(OutputStream& os, ScaledFunctionPatch<M> const& fp) {
+    typedef typename ScaledFunctionPatch<M>::CoefficientType CoefficientType;
     typedef typename ScaledFunctionPatch<M>::PrecisionType PR;
-    MultivariatePolynomial<FloatBounds<PR>> p=fp.polynomial();
-    MultivariatePolynomial<FloatApproximation<PR>> ap=p;
+
     os << "{";
-    os << ap;
+    if constexpr (IsInterval<CoefficientType>::value) {
+        os << fp.polynomial();
+    } else {
+        os << MultivariatePolynomial<FloatApproximation<PR>>(fp.polynomial());
+    }
+
     if(fp.error().raw()>0.0) { os << "+/-" << fp.error(); }
+
     os << "}";
     return os;
 }
 
-template<class M> OutputStream& ScaledFunctionPatch<M>::write(OutputStream& os) const {
+template<class M> OutputStream& ScaledFunctionPatch<M>::_write(OutputStream& os) const {
     os << "FunctionPatch(dom=" << this->domain() << ")";
     write_polynomial(os,*this);
     return os;
@@ -594,8 +632,8 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
-                                           const Vector<FloatError<PR>>& e,
+                                           const Vector<Expansion<MultiIndex,CoefficientType>>& f,
+                                           const Vector<ErrorType>& e,
                                            PropertiesType prp)
     : _domain(d), _models(f.size(),ModelType(d.size(),prp))
 {
@@ -607,25 +645,26 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
-                                           const Vector<Expansion<MultiIndex,FloatValue<PR>>>& f,
+                                           const Vector<Expansion<MultiIndex,CoefficientType>>& f,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,f,Vector<FloatError<PR>>(f.size()),prp)
+    : VectorScaledFunctionPatch<M>(d,f,Vector<ErrorType>(f.size()),prp)
 {
 }
+
+
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            const Vector<RawFloat<PR>>& e,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),
-                           reinterpret_cast<Vector<FloatError<PR>>const&>(e),prp)
+    : VectorScaledFunctionPatch<M>(d,Vector<M>(f.size(),[&](SizeType i){return M(f[i],e[i],prp);}))
 {
 }
 
 template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const BoxDomainType& d,
                                            const Vector<Expansion<MultiIndex,RawFloat<PR>>>& f,
                                            PropertiesType prp)
-    : VectorScaledFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<MultiIndex,FloatValue<PR>>>const&>(f),Vector<FloatError<PR>>(f.size()),prp)
+    : VectorScaledFunctionPatch<M>(d,Vector<M>(f.size(),[&](SizeType i){return M(f[i],RawFloat<PR>(0,prp.precision()),prp);}))
 {
 }
 
@@ -709,20 +748,30 @@ template<class M> VectorScaledFunctionPatch<M> VectorScaledFunctionPatch<M>::ide
 }
 
 
-template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vector<MultivariatePolynomial<FloatBounds<PR>>>
+template<class M> auto VectorScaledFunctionPatch<M>::polynomials() const -> Vector<MultivariatePolynomial<NumericType>>
 {
-    Vector<MultivariatePolynomial<FloatBounds<PR>> > p(this->result_size(),MultivariatePolynomial<FloatBounds<PR>>(this->argument_size()));
+    Vector<MultivariatePolynomial<NumericType> > p(this->result_size(),MultivariatePolynomial<NumericType>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<ScaledFunctionPatch<M>>((*this)[i]).polynomial();
     }
     return p;
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<MultiIndex,FloatValue<PR>>> const
+template<class M> auto VectorScaledFunctionPatch<M>::expansions() const -> Vector<Expansion<MultiIndex,CoefficientType>> const
 {
-    Vector<Expansion<MultiIndex,FloatValue<PR>>> e(this->result_size(),Expansion<MultiIndex,FloatValue<PR>>(this->argument_size()));
+    Vector<Expansion<MultiIndex,CoefficientType>> e(this->result_size(),Expansion<MultiIndex,CoefficientType>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
+    }
+    return e;
+}
+
+template<class M> auto VectorScaledFunctionPatch<M>::values() const -> Vector<ValueType> const
+{
+    return elementwise([&](auto x){return x.value();},this->models());
+    Vector<ValueType> e(this->result_size());
+    for(SizeType i=0; i!=this->result_size(); ++i) {
+        e[i]=this->models()[i].value();
     }
     return e;
 }
@@ -748,12 +797,16 @@ template<class M> auto VectorScaledFunctionPatch<M>::error() const -> ErrorType 
 
 template<class M> VectorFunctionType<M> VectorScaledFunctionPatch<M>::function() const
 {
-    return VectorFunctionType<M>(new VectorScaledFunctionPatch<M>(*this));
+    if constexpr (IsInterval<CoefficientType>::value) {
+        ARIADNE_ERROR("Cannot convert multivalued IntervalTaylorFunctionModel "<<*this<<" to a single-valued function."); abort();
+    } else {
+        return VectorFunctionType<M>(new VectorScaledFunctionPatch<M>(*this));
+    }
 }
 
 template<class M> VectorFunctionType<M> VectorScaledFunctionPatch<M>::generic() const
 {
-    return VectorFunctionType<M>(new VectorScaledFunctionPatch<M>(*this));
+    return this->function();
 }
 
 template<class M> Bool VectorScaledFunctionPatch<M>::operator==(const VectorScaledFunctionPatch<M>& tm) const
@@ -937,21 +990,23 @@ template<class M> Void VectorScaledFunctionPatch<M>::clobber()
 
 
 
-template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<FloatApproximation<PR>>& x) const -> Vector<FloatApproximation<PR>>
+template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<FloatApproximation<PR>>& x) const
+    -> Vector<ArithmeticType<CoefficientType,FloatApproximation<PR>>>
 {
     const VectorScaledFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x,"ax is not an element of tf.domain()="<<f.domain());
     }
     Vector<FloatApproximation<PR>> sx=Ariadne::unscale(x,f._domain);
-    Vector<FloatApproximation<PR>> r(this->result_size());
+    Vector<ArithmeticType<CoefficientType,FloatApproximation<PR>>> r(this->result_size());
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
     }
     return r;
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const -> Vector<FloatBounds<PR>>
+template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<FloatBounds<PR>>& x) const
+    -> Vector<ArithmeticType<CoefficientType,FloatBounds<PR>>>
 {
     const VectorScaledFunctionPatch<M>& f=*this;
     if(!definitely(contains(f.domain(),x))) {
@@ -961,7 +1016,8 @@ template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<Flo
     return Ariadne::evaluate(f._models,sx);
 }
 
-template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const -> Vector<ValidatedNumber>
+template<class M> auto VectorScaledFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
+    -> Vector<ArithmeticType<CoefficientType,ValidatedNumber>>
 {
     return this->operator()(Vector<FloatBounds<PR>>(x,this->precision()));
 }
@@ -989,10 +1045,10 @@ template<class M> Void VectorScaledFunctionPatch<M>::restrict(const BoxDomainTyp
 
 
 
-template<class M> OutputStream& VectorScaledFunctionPatch<M>::write(OutputStream& os) const
+template<class M> OutputStream& VectorScaledFunctionPatch<M>::_write(OutputStream& os) const
 {
     os << "VectorFunctionPatch";
-    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ")";
+    os << "(result_size="<<this->result_size()<<",dom=" << this->domain() << ", rng=" << this->range() << ")";
     os << "[ ";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
@@ -1036,7 +1092,7 @@ template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::cr
     return VectorScaledFunctionPatch<M>(rsize,domain,this->_properties);
 }
 template<class M> VectorScaledFunctionPatch<M> ScaledFunctionPatchFactory<M>::create_constants(const DomainType& domain, Vector<Number<P>> const& values) const {
-    Vector<CanonicalNumericType<P,PR,PRE>> concrete_values(values.size(),this->_properties.precision());
+    Vector<NumericType> concrete_values(values.size(),this->_properties.precision());
     for(SizeType i=0; i!=values.size(); ++i) { concrete_values[i]=values[i]; }
     return VectorScaledFunctionPatch<M>::constant(domain,concrete_values,this->_properties);
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric/twoexp.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -40,7 +40,7 @@ class Integer;
 class Dyadic;
 
 //! \ingroup NumericModule
-//! \brief A class representing a number of the form  \c 2<sup>\it n</sup> for some \it n.
+//! \brief A class representing a number of the form  \c 2<sup><i>n</i></sup> for some <i>n</i>.
 //! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
 class TwoExp {
     Int _n;

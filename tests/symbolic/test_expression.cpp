@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_expression.cpp
  *
- *  Copyright 2009--17  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -44,8 +44,9 @@
 
 using namespace Ariadne;
 
-typedef ElementaryAlgebra<EffectiveNumericType> EffectiveElementaryAlgebra;
-typedef SymbolicAlgebra<EffectiveNumericType> EffectiveSymbolicAlgebra;
+typedef ElementaryAlgebra<Real> RealElementaryAlgebra;
+typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
+typedef SymbolicAlgebra<EffectiveNumber> EffectiveSymbolicAlgebra;
 
 class TestExpression {
     RealConstant o;
@@ -137,7 +138,7 @@ class TestExpression {
         RealExpression expr = x;//+u;
 
         Map<Identifier,Real> valuation;
-        Real value = Real(ExactNumericType(-0.0626));
+        Real value = Real(ExactDouble(-0.0626));
         valuation[x.name()] = value;
 
         ARIADNE_TEST_EQUALS(expr.kind(),OperatorKind::VARIABLE);
@@ -234,59 +235,59 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(count_distinct_nodes(x+cos(x)+pow(cos(x),2)),5);
     }
 
-    Void test_count_distinct_node_ptrs() {
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(RealExpression(x)),1);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*exp(x)),4);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*x),3);
+    Void test_count_distinct_node_pointers() {
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(RealExpression(x)),1);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(x*exp(x)),4);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(x*x),3);
         RealExpression one = 1;
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(one+cos(one)),3);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x*y+sqr(x*y)),8);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(x,2)*pow(x,2)),5);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(y,2)+y*y),6);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(pow(x+cos(y),2)+cos(y)),8);
-        ARIADNE_TEST_EQUALS(count_distinct_node_ptrs(x+cos(x)+pow(cos(x),2)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(one+cos(one)),3);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(x*y+sqr(x*y)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(pow(x,2)*pow(x,2)),5);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(pow(y,2)+y*y),6);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(pow(x+cos(y),2)+cos(y)),8);
+        ARIADNE_TEST_EQUALS(count_distinct_node_pointers(x+cos(x)+pow(cos(x),2)),8);
     }
 
     Void test_eliminate_common_subexpressions() {
         RealExpression expr1 = x;
         ARIADNE_TEST_PRINT(expr1);
         eliminate_common_subexpressions(expr1);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr1),1);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr1),1);
         RealExpression expr2 = x*exp(x);
         ARIADNE_TEST_PRINT(expr2);
         eliminate_common_subexpressions(expr2);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr2),3);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr2),3);
         RealExpression expr3 = x*x;
         ARIADNE_TEST_PRINT(expr3);
         eliminate_common_subexpressions(expr3);
         eliminate_common_subexpressions(expr3);
         ARIADNE_TEST_PRINT(expr3);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr3),2);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr3),2);
         RealExpression one = 1;
         RealExpression expr4 = one+cos(one);
         ARIADNE_TEST_PRINT(expr4);
         eliminate_common_subexpressions(expr4);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr4),3);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr4),3);
         RealExpression expr5 = x*y+sqr(x*y);
         ARIADNE_TEST_PRINT(expr5);
         eliminate_common_subexpressions(expr5);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr5),5);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr5),5);
         RealExpression expr6 = pow(x,2)*pow(x,2);
         ARIADNE_TEST_PRINT(expr6);
         eliminate_common_subexpressions(expr6);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr6),3);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr6),3);
         RealExpression expr7 = pow(y,2)+y*y;
         ARIADNE_TEST_PRINT(expr7);
         eliminate_common_subexpressions(expr7);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr7),4);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr7),4);
         RealExpression expr8 = pow(x+cos(y),2)+cos(y);
         ARIADNE_TEST_PRINT(expr8);
         eliminate_common_subexpressions(expr8);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr8),6);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr8),6);
         RealExpression expr9 = x+cos(x)+pow(cos(x),2);
         ARIADNE_TEST_PRINT(expr9);
         eliminate_common_subexpressions(expr9);
-        ARIADNE_TEST_EQUAL(count_distinct_node_ptrs(expr9),5);
+        ARIADNE_TEST_EQUAL(count_distinct_node_pointers(expr9),5);
     }
 
     Void test_substitute() {
@@ -388,10 +389,10 @@ class TestExpression {
         //ARIADNE_TEST_EVALUATE(EffectiveVectorMultivariateFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(EffectiveVectorMultivariateFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarMultivariateFunction(x+y,(x,y,z)));
 
-        EffectiveElementaryAlgebra ax=RealExpression(x);
-        EffectiveElementaryAlgebra ay=RealExpression(y);
-        EffectiveElementaryAlgebra az=RealExpression(z);
-        Vector<EffectiveElementaryAlgebra> va={ax,ay,az};
+        RealElementaryAlgebra ax=RealExpression(x);
+        RealElementaryAlgebra ay=RealExpression(y);
+        RealElementaryAlgebra az=RealExpression(z);
+        Vector<RealElementaryAlgebra> va={ax,ay,az};
         ARIADNE_TEST_PRINT(va);
         ARIADNE_TEST_PRINT(f3(va));
         ARIADNE_TEST_PRINT(f3(va).extract<RealExpression>());
@@ -410,7 +411,7 @@ class TestExpression {
         ARIADNE_TEST_CALL(test_ordering());
         ARIADNE_TEST_CALL(test_count_nodes());
         ARIADNE_TEST_CALL(test_count_distinct_nodes());
-        ARIADNE_TEST_CALL(test_count_distinct_node_ptrs());
+        ARIADNE_TEST_CALL(test_count_distinct_node_pointers());
         ARIADNE_TEST_CALL(test_eliminate_common_subexpressions());
         ARIADNE_TEST_CALL(test_substitute());
         ARIADNE_TEST_CALL(test_scalar_properties());

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            box.decl.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -32,36 +32,54 @@ namespace Ariadne {
 template<class IVL> class Box;
 template<class IVL> class VariablesBox;
 
-typedef Box<DyadicInterval> DyadicBox;
-typedef Box<RationalInterval> RationalBox;
-typedef Box<RealInterval> RealBox;
+//@{
+//! \relates Box
+//! \name Type synonyms
+using DyadicBox = Box<DyadicInterval>; //!< .
+using RationalBox = Box<RationalInterval>; //!< .
+using RealBox = Box<RealInterval>; //!< .
 
-typedef Box<FloatDPExactInterval> FloatDPExactBox;
-typedef Box<FloatDPBallInterval> FloatDPBallBox;
-typedef Box<FloatDPBoundsInterval> FloatDPBoundsBox;
-typedef Box<FloatDPUpperInterval> FloatDPUpperBox;
-typedef Box<FloatDPLowerInterval> FloatDPLowerBox;
-typedef Box<FloatDPApproximateInterval> FloatDPApproximateBox;
+using FloatDPExactBox = Box<FloatDPExactInterval>; //!< .
+using FloatDPBallBox = Box<FloatDPBallInterval>; //!< .
+using FloatDPBoundsBox = Box<FloatDPBoundsInterval>; //!< .
+using FloatDPUpperBox = Box<FloatDPUpperInterval>; //!< .
+using FloatDPLowerBox = Box<FloatDPLowerInterval>; //!< .
+using FloatDPApproximateBox = Box<FloatDPApproximateInterval>; //!< .
+//@}
 
-typedef Box<ExactIntervalType> ExactBoxType;
-typedef Box<EffectiveIntervalType> EffectiveBoxType;
-typedef Box<ValidatedIntervalType> ValidatedBoxType;
-typedef Box<UpperIntervalType> UpperBoxType;
-typedef Box<LowerIntervalType> LowerBoxType;
-typedef Box<ApproximateIntervalType> ApproximateBoxType;
+
+//@{
+//! \ingroup GeometryModule
+//! \name Type definitions
+//! The type used for the domain of a multivariate function. \ingroup GeometryModule
+typedef FloatDPExactBox BoxDomainType;
+//! The type used for an over-approximation to the range of a validated vector function. \ingroup GeometryModule
+typedef FloatDPUpperBox BoxValidatedRangeType; //!< \ingroup GeometryModule .
+//! The type used for an approximation to the range of an approximate vector function. \ingroup GeometryModule
+typedef FloatDPApproximateBox BoxApproximateRangeType; //!< \ingroup GeometryModule .
+
+//! \brief The type used for the bounding box of validated sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPUpperBox BoundingBoxType;
+
+//! \brief The type used for testing properties of sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPExactBox ExactBoxType;
+//! \brief The type used for the bounding box of validated sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPUpperBox UpperBoxType;
+//! \brief The type used for testing boundedness of sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPLowerBox LowerBoxType;
+//! \brief The type used for the bounding box of approximate sets in Euclidean space. \ingroup GeometryModule
+typedef FloatDPApproximateBox ApproximateBoxType;
+//@}
 
 template<class IVL> class BoxSet;
-typedef BoxSet<ExactIntervalType> ExactBoxSet;
-typedef BoxSet<ApproximateIntervalType> ApproximateBoxSet;
-typedef BoxSet<RealInterval> RealBoxSet;
-
-using BoxDomainType = FloatDPExactBox;
-
-template<class X> class Vector;
-
-typedef Vector<ExactIntervalType> ExactIntervalVectorType;
-typedef Vector<UpperIntervalType> UpperIntervalVectorType;
-typedef Vector<ApproximateIntervalType> ApproximateIntervalVectorType;
+//@{
+//! \relates BoxSet
+//! \name Type synonyms
+typedef BoxSet<ExactIntervalType> ExactBoxSetType; //!< .
+typedef BoxSet<UpperIntervalType> UpperBoxSetType; //!< .
+typedef BoxSet<ApproximateIntervalType> ApproximateBoxSetType; //!< .
+typedef BoxSet<RealInterval> RealBoxSet; //!< .
+//@}
 
 } // namespace Ariadne
 

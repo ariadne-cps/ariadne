@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_set.cpp
+ *            hybrid/hybrid_set.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -64,7 +64,11 @@ HybridExactBox over_approximation(HybridRealBox const& hbx) {
 
 
 Orbit<HybridApproximatePoint>::Orbit(const HybridApproximatePoint& hpt)
-    : _curves_ptr(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
+    : _curves_ptr(new List<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
+{ }
+
+Orbit<HybridApproximatePoint>::Orbit(List<HybridInterpolatedCurve> hcrvs)
+    : _curves_ptr(new List<HybridInterpolatedCurve>(std::move(hcrvs)))
 { }
 
 Nat
@@ -83,10 +87,8 @@ Void
 Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
-    // FIXME: Should allow non-exact times
     Real time=ht.continuous_time();
     FloatDPValue flt_time=cast_exact(time.get(dp));
-    ARIADNE_ASSERT(decide(Real(flt_time)==time));
     if(this->size()==ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(flt_time,hpt.point())));
     } else {
@@ -114,64 +116,6 @@ operator<<(OutputStream& os, const Orbit< HybridApproximatePoint >& orb)
     return os << orb.curves();
 }
 
-
-
-struct Orbit<HybridGridCell>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    HybridGridTreePaving initial;
-    HybridGridTreePaving reach;
-    HybridGridTreePaving intermediate;
-    HybridGridTreePaving final;
-};
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-}
-
-Orbit<HybridGridCell>::
-Orbit(const HybridGridTreePaving& initial_set,
-      const HybridGridTreePaving& reach_set,
-      const HybridGridTreePaving& intermediate_set,
-      const HybridGridTreePaving& final_set)
-    : _data(new Data(initial_set.grid()))
-{
-    this->_data->initial=initial_set;
-    this->_data->reach=reach_set;
-    this->_data->intermediate=intermediate_set;
-    this->_data->final=final_set;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-initial() const
-{
-    return this->_data->initial;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-reach() const
-{
-    return this->_data->reach;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-intermediate() const
-{
-    return this->_data->intermediate;
-}
-
-HybridGridTreePaving const&
-Orbit<HybridGridCell>::
-final() const
-{
-    return this->_data->final;
-}
 
 
 
@@ -281,7 +225,7 @@ HybridUpperBoxes HybridBoxSet::bounding_box() const {
     return res;
 }
 
-OutputStream& HybridBoxSet::write(OutputStream& os) const {
+OutputStream& HybridBoxSet::_write(OutputStream& os) const {
     return os << static_cast<HybridVariablesBox<RealInterval>const&>(*this);
 }
 Void HybridBoxSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& qs, const Variables2d& vs) const {
@@ -369,7 +313,7 @@ LowerKleenean HybridConstraintSet::separated(const HybridExactBox& bx) const {
     }
 }
 
-OutputStream& HybridConstraintSet::write(OutputStream& os) const {
+OutputStream& HybridConstraintSet::_write(OutputStream& os) const {
     return os << "HybridConstraintSet( "<< this->_sets << " )";
 }
 
@@ -487,7 +431,7 @@ HybridExactBoxes HybridBoundedConstraintSet::bounding_box() const {
     return result;
 }
 
-OutputStream& HybridBoundedConstraintSet::write(OutputStream& os) const {
+OutputStream& HybridBoundedConstraintSet::_write(OutputStream& os) const {
     return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 
@@ -515,16 +459,16 @@ HybridBoundedConstraintSet intersection(const HybridBoxesSet& hbxs, const Hybrid
     return res;
 }
 
-template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const {
+template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const {
     if(this->space()==paving.space(this->location())) {
-        paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),depth);
+        paving[this->location()].adjoin_outer_approximation(this->euclidean_set(),fineness);
     } else {
         ARIADNE_FAIL_MSG("HybridSet's state variables "<<this->space()<<
                          " do not match variables "<<paving.space()<<" of paving in location "<<this->location());
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
 
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
@@ -582,6 +526,7 @@ HybridSpaceSetConstIterator<DS,HBS>::increment_loc()
     }
 }
 
+Vector<FloatDPApproximation> evaluate(ApproximateVectorMultivariateFunction const& f, Vector<FloatDPApproximation> const& v);
 
 template<> String class_name<RealInterval>() { return "RealInterval"; }
 template<> String class_name<InterpolatedCurve>() { return "InterpolatedCurve"; }
@@ -592,7 +537,7 @@ template<> String class_name<GridCell>() { return "GridCell"; }
 
 
 // Instantiations
-template class HybridPoint<ApproximateNumericType>;
+template class HybridPoint<FloatDPApproximation>;
 template class HybridPoint<Real>;
 
 template class HybridBasicSet<ExactBoxType>;
@@ -603,5 +548,8 @@ template class HybridBox<RealInterval>;
 
 
 template class HybridSpaceSetConstIterator<GridTreePaving, HybridGridCell>;
+
+
+
 
 } // namespace Ariadne

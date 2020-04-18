@@ -1,7 +1,7 @@
 /***************************************************************************
- *            algebra_mixin.hpp
+ *            algebra/algebra_mixin.hpp
  *
- *  Copyright 2010-17  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra_wrapper.hpp
+/*! \file algebra/algebra_wrapper.hpp
  *  \brief Mixin class providing operations for (Banach) algebras.
  */
 
@@ -67,7 +67,7 @@ template<class A, class X=NumericType<A>> class AlgebraWrapper
         static_cast<A*>(this)->A::isma(c,dynamic_cast<const A&>(x)); }
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
-    virtual OutputStream& write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
+    virtual OutputStream& _write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
 };
 */
 
@@ -75,6 +75,7 @@ template<class A, class X=NumericType<A>> class NormedAlgebraWrapper
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraWrapper<A,X>
 {
+    using typename AlgebraInterface<X>::ErrorType;
     using AlgebraWrapper<A,X>::AlgebraWrapper;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }

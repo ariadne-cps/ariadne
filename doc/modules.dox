@@ -1,7 +1,7 @@
 /***************************************************************************
  *            modules.dox
  *
- *  Copyright  2006  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -44,11 +44,6 @@ namespace Ariadne {
  * building blocks for defining hybrid systems.
  */
 
-/*!\defgroup ExpressionSetSubModule Expression Sets
- * \ingroup SymbolicModule
- * \brief Sets described by giving constraints on variables and expressions.
- */
-
 /*!\defgroup SystemModule System Module
  * \ingroup UserModules
  * \brief Abstract base classes for system interface, and some commonly used systems.
@@ -75,6 +70,7 @@ namespace Ariadne {
  *  \brief Classes for computing the evolution and analysing the behaviour of a system.
  */
 
+
 /*! \defgroup CoreModules Core Modules
  *
  *  \brief Core classes and functions used for both system specification and internal computation.
@@ -85,7 +81,7 @@ namespace Ariadne {
 
 /*!\defgroup LogicalModule Logical Module
  * \ingroup CoreModules
- * \brief Logical types.
+ * \brief Logical types, including \ref Boolean, \ref Sierpinskian and \ref Kleenean types.
  * \details In this module, we define %Ariadne's base logical types.
  * The main classes are \ref Ariadne::Boolean "Boolean",
  * \ref Ariadne::Sierpinskian "Sierpinskian", and \ref Ariadne::Kleenean "Kleenean".
@@ -97,12 +93,12 @@ namespace Ariadne {
  * The Kleenean class has three values, \c true, \c indeterminate and \c false,
  * and represents the result of a \em quasidecidable predicate.
  *
- * The Sierpinskian and Kleenean classes are \ref Ariadne::Effective "Effective" types.
+ * The Sierpinskian and Kleenean classes are "Effective" types, denoted by \ref Ariadne::EffectiveTag.
  * They are used to represent the results of predicates on exactly-specified objects from continuous (i.e. uncountable) spaces.
  * From the viewpoint of computable analysis, they can be considered as sequences of their values,
  * which stabilise as soon as a decision  (\c true or \c false) is reached.
  * In %Ariadne, this is realised by providing a method check(\ref Ariadne::Effort "Effort"),
- * which returns a \ref Ariadne::Validated "Validated" version of the class containing one of its concrete values.
+ * which returns a "Validated" version of the class (denoted by  \ref Ariadne::ValidatedTag) containing one of its concrete values.
  * For example, if \c k is a Kleeanen object, then \c k.check(3) is a \ref Ariadne::ValidatedKleenean "ValidatedKleenean" object
  * which may have value \c true, \c indeterminate or \c false. Further, if \c k.check(3) is \c true or \c false, then k.check(4) has the same value.
  * Validated logical types are also used for the result of logical predicates on approximations to objects on continuous spaces with given error bounds.
@@ -151,7 +147,8 @@ namespace Ariadne {
 /*!
 \defgroup NumericModule Numeric Module
 \ingroup CoreModules
-\brief Numerical types, including \ref Integer, \ref Dyadic, \ref Rational and \ref Real types,
+\brief Numerical types, including \ref Integer, \ref Dyadic,  \ref Decimal, \ref Rational and \ref Real types,
+generic types \ref Number "Number<P>",
 double/multiple precision floating-point types \ref FloatDP and \ref FloatMP,
 and correctly-rounded types \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
 \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>".
@@ -166,7 +163,7 @@ The main real number type is \ref Real,
 with directed versions \ref LowerReal and \ref UpperReal.
 Generic numbers are defined using the \ref Number "Number<P>" templates,
 with typedefs e.g. \ref EffectiveNumber for \ref Number<\ref EffectiveTag>.
-[Forthcoming] Validated and approximate versions of real numbers are given by
+Validated and approximate versions of real numbers are given by
 \ref ValidatedReal and \ref ApproximateReal, and convergent sequences without
 error bounds by \ref NaiveReal.
 
@@ -206,7 +203,7 @@ The following aliases are used for arithmetical operations:
      <dt><dd><tt>div(x,y)</tt> is equivalent to <tt>x/y</tt>
      <dt><dd><tt>pow(x,y)</tt> is equivalent to <tt>x^y</tt>
  </dl>
-Note that C++ does not support the power operator <tt>^</tt>.
+Note that C++ does not support the power operator <tt>^</tt>. In Python, the power operator is denoted <tt>**</tt>.
 
 We have the following operations on floating-point types
  - Exact arithmetic where possible:
@@ -247,8 +244,8 @@ See the page \ref numeric_page for more information.
 /*!
  * \defgroup LinearAlgebraModule Linear Algebra Module
  * \ingroup CoreModules
- * \brief %Vector, matrix and tensor classes, solution of linear equations,
- * LU and QR factorisation and singular value decomposition.
+ * \brief \ref Vector "Vector<X>", \ref Matrix "Matrix<X>" and \ref Tensor "Tensor<N,X>" classes,
+ * solution of linear equations, LU and QR factorisation and singular value decomposition.
  *
  * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector"
  * and \ref Ariadne::Matrix "Matrix".
@@ -290,7 +287,7 @@ See the page \ref numeric_page for more information.
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
  *
- *  \defgroup FunctionModelSubModule Function Models
+ *  \defgroup FunctionModelSubModule Function models
  *  \ingroup FunctionModule
  *  \brief Validated and approximate functions on bounded domains in Euclidean space.
  */
@@ -340,7 +337,7 @@ See the page \ref numeric_page for more information.
  * rectangles. Exact sets are defined by an interface in which these predicates are
  * defined.
  *
- * \defgroup BasicSetSubModule Basic Sets
+ * \defgroup BasicSetSubModule Basic sets
  * \ingroup GeometryModule
  * \brief Basic set classes.
  *
@@ -354,12 +351,13 @@ See the page \ref numeric_page for more information.
  * rectangles) or may need to be represented by a fuzzy set (e.g. Minkowski sum
  * of two rectangles).
  *
- * \defgroup ListSetSubModule List Sets
+ * \defgroup ListSetSubModule List sets
  * \ingroup GeometryModule
  * \brief Denotable sets based on arbitrary lists of elements.
  *
  * \defgroup HybridSetSubModule Hybrid sets
  * \ingroup GeometryModule
+ * \ingroup HybridModules
  * \brief Sets in spaces with many components.
  *
  * The state space of a hybrid system consists of many disconnected components,
@@ -399,13 +397,18 @@ See the page \ref numeric_page for more information.
  * computations are performed by a BLAS/LAPACK style lpslv() routing.
  */
 
-/*!\defgroup OptimisationSubModule Optimisation Submodule
- * \ingroup CoreModules
+/*!\defgroup OptimisationSubModule Optimisation solvers
+ * \ingroup SolverModule
  * \brief Classes and functions for solving linear and nonlinear programming problems.
  *
  * The LinearProgram class supports construction and solution of linear
  * programming problems. Tests for feasibility only are also possible. The
  * computations are performed by a BLAS/LAPACK style lpslv() routing.
+ */
+
+/*!\defgroup DynamicsModule Dynamics Module
+ * \ingroup CoreModules
+ * \brief Classes and functions for analysing dynamic systems.
  */
 
 
@@ -426,6 +429,16 @@ See the page \ref numeric_page for more information.
 
 
 /*! \defgroup HybridModules Hybrid System Modules
+ */
+
+/*! \defgroup HybridAutomataSubModule Hybrid automata
+ *    \ingroup HybridModules
+ *  \brief Hybrid system classes.
+ */
+
+/*! \defgroup HybridDynamicsSubModule Hybrid evolution
+ *    \ingroup HybridModules
+ *  \brief Classes and functions for analysing hybrid dynamic systems.
  */
 
 /*!\defgroup ExternalModules External Modules

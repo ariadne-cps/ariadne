@@ -1,7 +1,7 @@
 /***************************************************************************
- *            configuration_interface.hpp
+ *            solvers/configuration_interface.hpp
  *
- *  Copyright  2011  Luca Geretti
+ *  Copyright  2011-20  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file configuration_interface.hpp
+/*! \file solvers/configuration_interface.hpp
  *  \brief A simple interface for configuration classes, mainly provided to specify the involved semantics.
  */
 
@@ -30,6 +30,7 @@
 #define ARIADNE_CONFIGURATION_INTERFACE_HPP
 
 #include <ostream>
+#include "utility/writable.hpp"
 
 namespace Ariadne {
 
@@ -102,17 +103,14 @@ namespace Ariadne {
  *  root Configuration object to retrieve their specific Configuration.
  *
  */
-class ConfigurationInterface {
+class ConfigurationInterface : public WritableInterface {
 
   private:
-
-    const ConfigurationInterface& operator=(const ConfigurationInterface& other);
-
+    const ConfigurationInterface& operator=(const ConfigurationInterface& other) = delete;
   public:
-    //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
-
-    friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& conf) { return conf.write(os); }
+    virtual ~ConfigurationInterface() = default;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& config) { return config._write(os); }
 };
 
 

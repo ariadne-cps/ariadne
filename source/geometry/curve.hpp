@@ -1,7 +1,7 @@
 /***************************************************************************
- *            curve.hpp
+ *            geometry/curve.hpp
  *
- *  Copyright  2007-8  Pieter Collins
+ *  Copyright  2007-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file curve.hpp
+/*! \file geometry/curve.hpp
  *  \brief A arbitraty curve in Euclidean space.
  */
 
@@ -34,6 +34,7 @@
 #include "../utility/macros.hpp"
 #include "../utility/stlio.hpp"
 #include "../function/function.hpp"
+#include "../geometry/box.decl.hpp"
 #include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
@@ -42,10 +43,6 @@ namespace Ariadne {
 template<class X> class Vector;
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-template<class IVL> class Box;
-typedef Box<ExactIntervalType> ExactBoxType;
-typedef Box<UpperIntervalType> UpperBoxType;
 
 
 // Forward declarations for friends
@@ -76,11 +73,11 @@ class CurveInterface
     virtual TangentVectorType tangent(const ParameterType& s) const = 0;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
 inline OutputStream& operator<<(OutputStream& os, const CurveInterface& c) {
-    return c.write(os); }
+    return c._write(os); }
 
 
 
@@ -114,14 +111,14 @@ class Curve
     virtual TangentVectorType tangent(const ParameterType& s) const;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
   private:
     Function<EffectiveTag,IntervalDomainType,BoxDomainType> _function;
 };
 
 
 
-/*!\brief A line segment in Euclidean space. */
+/*! \brief A linearly interpolated curve in Euclidean space. */
 class InterpolatedCurve
     : public DrawableInterface
 {
@@ -137,17 +134,17 @@ class InterpolatedCurve
     /*! \brief Create an empty curve. */
     InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
-    InterpolatedCurve(const PointType& pt)
+    explicit InterpolatedCurve(const PointType& pt)
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(ParameterType s, const PointType& pt)
+    explicit InterpolatedCurve(ParameterType s, const PointType& pt)
         : _points() { this->insert(s,pt); }
-    InterpolatedCurve(GenericParameterType s, const PointType& pt)
+    explicit InterpolatedCurve(GenericParameterType s, const PointType& pt)
         : _points() { PrecisionType pr; this->insert(ParameterType(s,pr),pt); }
-    InterpolatedCurve(const RawFloatDP& s, const Vector<RawFloatDP>& pt)
+    explicit InterpolatedCurve(const RawFloatDP& s, const Vector<RawFloatDP>& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
-    InterpolatedCurve(const PointType& pt0, const PointType& pt1)
+    explicit InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     Void insert(const GenericParameterType& s, const PointType& pt);
@@ -171,7 +168,7 @@ class InterpolatedCurve
     virtual UpperBoxType bounding_box() const;
 
     /*! \brief Write to an output stream. */
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
   private:
     friend OutputStream& operator<<(OutputStream&, const InterpolatedCurve&);

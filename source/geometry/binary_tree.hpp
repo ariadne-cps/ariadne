@@ -1,7 +1,7 @@
 /***************************************************************************
- *            binary_tree.hpp
+ *            geometry/binary_tree.hpp
  *
- *  Copyright  2008-17  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
  *
  ****************************************************************************/
@@ -278,7 +278,7 @@ class BinaryTreeNode {
     //! \brief checks if the tree pRootNodeOne is a subset of the tree pRootNodeTwo, in a set-theory sence.
     //! I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
     //! and then we see if every enabled leaf node of pRootNodeOne is contained in the enabled leaf nodes of
-    //! pRootNodeTwo, or it is covered by the enabled leaf nodes of pRootNodeTwo. When we write, contained and
+    //! pRootNodeTwo, or it is covered by the enabled leaf nodes of pRootNodeTwo. When we _write, contained and
     //! covered then we mean: is a subnode in the (virtual) tree and all it's subnodes in the (virtual) tree.
     static Bool subset( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
 

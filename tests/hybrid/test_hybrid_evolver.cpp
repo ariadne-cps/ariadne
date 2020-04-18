@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_hybrid_evolver.cpp
  *
- *  Copyright  2006-9  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -51,15 +51,9 @@
 using namespace Ariadne;
 using namespace std;
 
-RealVariable x("x");
-RealVariable y("y");
-Real zero=0;
-Real one=1;
 Dyadic half(0.5);
 Dyadic quarter(0.25);
 Dyadic eighth(0.125);
-DiscreteEvent e("e");
-DiscreteLocation q;
 
 Colour reach_set_colour(0.25,0.25,0.50);
 Colour intermediate_set_colour(0.50,0.50,0.75);
@@ -69,6 +63,10 @@ Colour guard_set_colour(0.75,0.75,0.75);
 
 class TestHybridEvolver
 {
+    static RealVariable x,y;
+    static DiscreteLocation q;
+    static DiscreteEvent e;
+    static Real zero,one;
   private:
     string evolver_name;
     unsigned int evolver_verbosity;
@@ -154,6 +152,13 @@ Void TestHybridEvolver::test_all() const {
     ARIADNE_TEST_CALL(test_transverse_cube_root_crossing());
     ARIADNE_TEST_CALL(test_constant_derivative_system());
 }
+
+RealVariable TestHybridEvolver::x("x");
+RealVariable TestHybridEvolver::y("y");
+DiscreteEvent TestHybridEvolver::e("e");
+DiscreteLocation TestHybridEvolver::q;
+Real TestHybridEvolver::zero(0);
+Real TestHybridEvolver::one(1);
 
 Void TestHybridEvolver::test_flow() const {
     HybridAutomaton automaton;
@@ -901,12 +906,12 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    Nat verbosity=get_verbosity(argc,argv);
+    Nat log_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
-    ARIADNE_TEST_CALL(TestHybridEvolver("general",verbosity,evolver_integrator).test_all());
+    ARIADNE_TEST_CALL(TestHybridEvolver("general",log_verbosity,evolver_integrator).test_all());
 
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;

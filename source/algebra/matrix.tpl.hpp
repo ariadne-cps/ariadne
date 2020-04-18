@@ -1,7 +1,7 @@
 /***************************************************************************
  *            matrix.tpl.hpp
  *
- *  Copyright 2005-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -36,13 +36,13 @@ template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
 
 template<class X> Matrix<X> Matrix<X>::zero(SizeType m, SizeType n) {
     Matrix<X> A(m,n,X(0));
-    return std::move(A);
+    return A;
 }
 
 template<class X> Matrix<X> Matrix<X>::identity(SizeType n) {
     Matrix<X> A(n,n,X(0));
     for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }
-    return std::move(A);
+    return A;
 }
 
 

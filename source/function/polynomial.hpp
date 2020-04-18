@@ -1,7 +1,7 @@
 /***************************************************************************
- *            polynomial.hpp
+ *            function/polynomial.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file polynomial.hpp
+/*! \file function/polynomial.hpp
  *  \brief Base class for polynomial rings.
  */
 
@@ -56,11 +56,10 @@ template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>;
 template<class X> using MultivariateMonomial = Monomial<MultiIndex,X>;
 template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>;
 
-
 template<class I, class Y> using ArgumentOf = typename IndexTraits<I>::template Argument<Y>;
 
-template<class X, class A> A horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
-template<class X, class A> A horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
+template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& y);
+template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<UniIndex,X>& e, const A& y);
 
 //! \brief A monomial with index \a I and coefficients of some type \a X.
 template<class I, class X>
@@ -348,13 +347,13 @@ template<class X, class A> inline A evaluate(const MultivariatePolynomial<X>& p,
     return horner_evaluate(p.expansion(),v); }
 
 template<class I, class X> inline Polynomial<I,X> derivative(Polynomial<I,X> p, SizeType k) {
-    p.differentiate(k); return std::move(p); }
+    p.differentiate(k); return p; }
 
 template<class I, class X> inline Polynomial<I,X> antiderivative(Polynomial<I,X> p, SizeType k) {
-    p.antidifferentiate(k); return std::move(p); }
+    p.antidifferentiate(k); return p; }
 
 template<class I, class X> inline Polynomial<I,X> truncate(Polynomial<I,X> p, DegreeType deg) {
-    p.truncate(deg); return std::move(p); }
+    p.truncate(deg); return p; }
 
 template<class I, class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<I,X>& p) {
     return p._write(os); }

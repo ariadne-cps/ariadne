@@ -1,7 +1,7 @@
 /***************************************************************************
- *            algebra_mixin.hpp
+ *            algebra/algebra_mixin.hpp
  *
- *  Copyright 2010-17  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra_mixin.hpp
+/*! \file algebra/algebra_mixin.hpp
  *  \brief Mixin class providing operations for (Banach) algebras.
  */
 
@@ -61,13 +61,13 @@ template<class A, class X> class AlgebraMixin
         static_cast<A*>(this)->A::isma(c,dynamic_cast<const A&>(x)); }
     virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
-    virtual OutputStream& write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
 
     virtual AlgebraInterface<X>* _apply(Neg op) const { return _eval(op,*this); }
     virtual AlgebraInterface<X>* _apply(BinaryRingOperator op, AlgebraInterface<X> const& other) const { return _eval(op,*this,other); }
     virtual AlgebraInterface<X>* _apply(BinaryFieldOperator op, X const& cnst) const { return _eval(op,*this,cnst); }
     virtual AlgebraInterface<X>* _rapply(BinaryRingOperator op, X const& cnst) const { return _eval(op,cnst,*this); }
     virtual AlgebraInterface<X>* _apply(Pow op, Nat m) const { return _eval(op,*this,m); }
+
     virtual OutputStream& _write(OutputStream& os) const { return os << *static_cast<A const*>(this); }
 };
 
@@ -119,6 +119,8 @@ template<class A, class X> class NormedAlgebraMixin
     : public virtual NormedAlgebraInterface<X>
     , public AlgebraMixin<A,X>
 {
+    using typename NormedAlgebraInterface<X>::ErrorType;
+
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
     virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual NormedAlgebraInterface<X>* _create_zero() const { return new A(static_cast<const A&>(*this).A::create()); }

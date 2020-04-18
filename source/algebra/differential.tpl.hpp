@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -357,7 +357,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Pos op, Differential<X
         UniformReference<X> xa=iter->coefficient();
         xa=+xa;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -367,7 +367,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Neg op, Differential<X
         UniformReference<X> xa=iter->coefficient();
         xa=-xa;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -381,7 +381,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, Differential<X
     } else {
         x.begin()->coefficient()+=c;
     }
-    return std::move(x);
+    return x;
 }
 
 template<class X>
@@ -394,7 +394,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X
             iter->coefficient()*=c;
         }
     }
-    return std::move(x);
+    return x;
 }
 
 
@@ -891,7 +891,7 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
 
 template<class X>
 Vector<Differential<X>>
-Vector<Differential<X>>::_flow(const Vector<Differential<X>>& df, Vector<Differential<X>> const& dx0, Vector<Differential<X>> const& dt0a)
+Vector<Differential<X>>::_flow(const Vector<Differential<X>>& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a)
 {
     ARIADNE_ASSERT(df.result_size()==dx0.result_size());
     ARIADNE_ASSERT(df.argument_size()==dx0.result_size()+dt0a.result_size());

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.cpp
+ *            hybrid/hybrid_reachability_analyser.cpp
  *
- *  Copyright  2006-11  Alberto Casagrande, Pieter Collins, Davide Bresolin
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
  ****************************************************************************/
 
@@ -99,10 +99,8 @@ namespace Ariadne {
 template class ReachabilityAnalyser<HybridAutomatonInterface>;
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(
-        const SystemType& system,
-        const HybridEvolverInterface& evolver)
-    : ReachabilityAnalyser<HybridAutomatonInterface>(system,evolver)
+HybridReachabilityAnalyser(const HybridEvolverInterface& evolver)
+    : ReachabilityAnalyser<HybridAutomatonInterface>(evolver)
 {
 }
 
@@ -118,16 +116,16 @@ clone() const
 
 
 Void
-HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
-                                                       HybridGridTreePaving& evolve_cells,
-                                                       const HybridGridTreePaving& set,
+HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridStorage& reach_cells,
+                                                       HybridStorage& evolve_cells,
+                                                       const HybridStorage& set,
                                                        const HybridTerminationCriterion& termination,
                                                        const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    HybridGridTreePaving cells=set;
+    HybridGridTreePaving cells=set.state_set();
     cells.mince(accuracy);
 
     ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");
@@ -164,23 +162,23 @@ HybridReachabilityAnalyserConfiguration::ReachabilityAnalyserConfiguration(Reach
     set_transient_steps(0);
     set_lock_to_grid_time(1.0);
     set_lock_to_grid_steps(1);
-    set_maximum_grid_depth(3);
-    set_maximum_grid_height(16);
-    set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
+    set_maximum_grid_fineness(3);
+    set_maximum_grid_extent(16);
+    set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScalings())));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 
 
 OutputStream&
-HybridReachabilityAnalyserConfiguration::write(OutputStream& os) const
+HybridReachabilityAnalyserConfiguration::_write(OutputStream& os) const
 {
     os << "HybridReachabilityAnalyserSettings"
        << "(\n  transient_time=" << transient_time()
        << ",\n  transient_steps=" << transient_steps()
        << ",\n  lock_to_grid_steps=" << lock_to_grid_steps()
        << ",\n  lock_to_grid_time=" << lock_to_grid_time()
-       << ",\n  maximum_grid_depth=" << maximum_grid_depth()
-       << ",\n  maximum_grid_height=" << maximum_grid_height()
+       << ",\n  maximum_grid_fineness=" << maximum_grid_fineness()
+       << ",\n  maximum_grid_extent=" << maximum_grid_extent()
        << ",\n  bounding_domain=" << (bounding_domain_ptr() ? "available" : "none")
        << ",\n  grid=" << grid()
        << ",\n  outer_overspill_policy=" << outer_overspill_policy()

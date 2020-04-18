@@ -1,7 +1,7 @@
 /***************************************************************************
- *            calculus_base.hpp
+ *            function/calculus_base.hpp
  *
- *  Copyright  2008  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file calculus_base.hpp
+/*! \file function/calculus_base.hpp
  *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines.
  */
 

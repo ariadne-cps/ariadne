@@ -1,7 +1,7 @@
 /***************************************************************************
- *            simplex_algorithm.cpp
+ *            solvers/simplex_algorithm.cpp
  *
- *  Copyright 2008--17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -36,8 +36,6 @@
 
 #include "../utility/macros.hpp"
 #include "../output/logging.hpp"
-
-static const unsigned int verbosity=0;
 
 namespace Ariadne {
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_space.hpp
+ *            hybrid/hybrid_space.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_space.hpp
+/*! \file hybrid/hybrid_space.hpp
  *  \brief Sets in hybrid spaces.
  */
 
@@ -55,10 +55,10 @@ class HybridSpaceInterface
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
     virtual HybridSpaceInterface* clone() const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     virtual ValidatedKleenean operator==(const HybridSpaceInterface& other) const = 0;
   public:
-    friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
+    friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp._write(os); }
 };
 
 //! \ingroup HybridModule
@@ -68,7 +68,7 @@ class HybridSpace
   public:
     //! \brief The canonical type used for bounding sets in the space.
     typedef HybridExactBoxes BoundingDomainType;
-    //! \brief The interface satisified by singleton sets in the space.
+    //! \brief The interface satisified by bounded sets in the space.
     typedef HybridBoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
     typedef HybridOvertSetInterface OvertSetInterfaceType;
@@ -139,7 +139,7 @@ class MonolithicHybridSpace
     ConstIterator begin() const { return this->_locations.begin(); }
     ConstIterator end() const { return this->_locations.end(); }
 
-    OutputStream& write(OutputStream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
+    OutputStream& _write(OutputStream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
   private:
     Map< DiscreteLocation, RealSpace > _locations;
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            logical.cpp
+ *            numeric/logical.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file logical.cpp
+/*! \file numeric/logical.cpp
  *  \brief
  */
 

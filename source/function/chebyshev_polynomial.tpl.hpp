@@ -1,7 +1,7 @@
 /***************************************************************************
  *            chebyshev_polynomial.tpl.hpp
  *
- *  Copyright 2008-18  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -220,7 +220,7 @@ UnivariateChebyshevPolynomial<X>::operator() (X const& x) const -> X {
 }
 
 template<class X> auto
-UnivariateChebyshevPolynomial<X>::_write (OutputStream& os) const -> OutputStream& {
+UnivariateChebyshevPolynomial<X>::_write(OutputStream& os) const -> OutputStream& {
     for (auto term : this->_terms) {
         String c = to_str(term.coefficient());
         if (c[0]!='+' && c[0]!='-') { os << "+"; }
@@ -436,7 +436,7 @@ MultivariateChebyshevPolynomial<X>::_mul_from(ConstIterator& from1, ConstIterato
 
 
 template<class X> auto
-MultivariateChebyshevPolynomial<X>::_write (OutputStream& os) const -> OutputStream& {
+MultivariateChebyshevPolynomial<X>::_write(OutputStream& os) const -> OutputStream& {
     for (auto term_iter = this->_terms.begin(); term_iter!=this->_terms.end(); ++term_iter) {
         auto const& term = *term_iter;
         String cs = to_str(term.coefficient());

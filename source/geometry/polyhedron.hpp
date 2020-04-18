@@ -1,7 +1,7 @@
 /***************************************************************************
- *            polyhedron.hpp
+ *            geometry/polyhedron.hpp
  *
- *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file polyhedron.hpp
+/*! \file geometry/polyhedron.hpp
  *  \brief Polyhedra.
  */
 
@@ -108,7 +108,7 @@ class Polyhedron
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
     virtual ValidatedKleenean empty() const;
 
-    //! \brief Tests if the polyhedron is singleton. (Not currently implemented.)
+    //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
     virtual ValidatedKleenean is_bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
@@ -144,7 +144,7 @@ class Polyhedron
     //! \name Input/output.
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     //@}
   private:
     Matrix<FloatDP> _A;
@@ -153,7 +153,7 @@ class Polyhedron
 
 
 inline OutputStream& operator<<(OutputStream& os, const Polyhedron& p) {
-    return p.write(os);
+    return p._write(os);
 }
 
 

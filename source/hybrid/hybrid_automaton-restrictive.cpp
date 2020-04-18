@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-restrictive.cpp
  *
- *  Copyright  2010-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2010-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -242,43 +242,43 @@ List<PrimedRealAssignment> primed_real_assignments(const Set<Identifier>& nonjum
 
 
 
-HybridSystem::HybridSystem()
+RestrictiveHybridAutomaton::RestrictiveHybridAutomaton()
 {
 }
 
-Void HybridSystem::disable_events(DiscretePredicate q, EventSet e) {
+Void RestrictiveHybridAutomaton::disable_events(DiscretePredicate q, EventSet e) {
     this->_disabled_events.append(make_tuple(q,e)); }
-Void HybridSystem::nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v) {
+Void RestrictiveHybridAutomaton::nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v) {
     this->_nonjumping_continuous_state_variables.append(make_tuple(q,e,names(v))); }
-Void HybridSystem::new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u) {
+Void RestrictiveHybridAutomaton::new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u) {
     this->_discrete_updates.append(make_tuple(q,e,u)); }
-Void HybridSystem::new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r) {
+Void RestrictiveHybridAutomaton::new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r) {
     this->_primed_assignments.append(make_tuple(q,e,r)); }
-Void HybridSystem::new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d) {
+Void RestrictiveHybridAutomaton::new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d) {
     this->_dotted_assignments.append(make_tuple(q,d)); }
-Void HybridSystem::new_dynamic(List<DottedRealAssignment> d) {
+Void RestrictiveHybridAutomaton::new_dynamic(List<DottedRealAssignment> d) {
     this->_dotted_assignments.append(make_tuple(DiscretePredicate(true),d)); }
-Void HybridSystem::new_auxiliary(DiscretePredicate q, List<RealAssignment> a) {
+Void RestrictiveHybridAutomaton::new_auxiliary(DiscretePredicate q, List<RealAssignment> a) {
     this->_assignments.append(make_tuple(q,a)); }
-Void HybridSystem::new_auxiliary(List<RealAssignment> a) {
+Void RestrictiveHybridAutomaton::new_auxiliary(List<RealAssignment> a) {
     this->_assignments.append(make_tuple(DiscretePredicate(true),a)); }
-Void HybridSystem::new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i) {
+Void RestrictiveHybridAutomaton::new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i) {
     this->_invariant_predicates.append(make_tuple(q,e,i)); }
-Void HybridSystem::new_invariant(DiscretePredicate q, RealPredicate i) {
+Void RestrictiveHybridAutomaton::new_invariant(DiscretePredicate q, RealPredicate i) {
     this->_invariant_predicates.append(make_tuple(q,DiscreteEvent(),i)); }
-Void HybridSystem::new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g) {
     this->_guard_predicates.append(make_tuple(q,e,g)); }
 /*
-Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u,
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u,
                                                 List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_update(q,e,u); this->new_reset(q,e,r); this->new_guard(q,e,g); }
-Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, PrimedRealAssignment r, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, PrimedRealAssignment r, RealPredicate g) {
     this->new_reset(q,e,make_list(r)); this->new_guard(q,e,g); }
-Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
     this->new_update(q,e,make_list(u)); this->new_guard(q,e,g); }
 */
 
-RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& location) const
+RestrictiveDiscreteMode RestrictiveHybridAutomaton::compute_mode(const DiscreteLocation& location) const
 {
     RestrictiveDiscreteMode mode;
 
@@ -351,29 +351,29 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
     return mode;
 }
 
-RestrictiveDiscreteMode const& HybridSystem::mode(DiscreteLocation location) const {
+RestrictiveDiscreteMode const& RestrictiveHybridAutomaton::mode(DiscreteLocation location) const {
     if(!this->_cached_modes.has_key(location)) {
         this->_cached_modes.insert(location,this->compute_mode(location));
     }
     return this->_cached_modes[location];
 }
 
-Set<DiscreteLocation> HybridSystem::reachable_locations(DiscreteLocation const& location) const {
+Set<DiscreteLocation> RestrictiveHybridAutomaton::reachable_locations(DiscreteLocation const& location) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-Void HybridSystem::check_mode(DiscreteLocation) const {
+Void RestrictiveHybridAutomaton::check_mode(DiscreteLocation) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-HybridSystem* HybridSystem::clone() const {
-    return new HybridSystem(*this);
+RestrictiveHybridAutomaton* RestrictiveHybridAutomaton::clone() const {
+    return new RestrictiveHybridAutomaton(*this);
 }
 
 
-OutputStream& HybridSystem::write(OutputStream& os) const {
-    return os << "HybridSystem"
+OutputStream& RestrictiveHybridAutomaton::_write(OutputStream& os) const {
+    return os << "RestrictiveHybridAutomaton"
               << "(\n  updates=" << _discrete_updates
               << ",\n  auxiliary=" << _assignments
               << ",\n  dynamic=" << _dotted_assignments
@@ -394,7 +394,7 @@ OutputStream& operator<<(OutputStream& os, const RestrictiveDiscreteMode& mode) 
               << "\n  )\n";
 }
 
-HybridSystem compose(const List<HybridSystem>&) {
+RestrictiveHybridAutomaton compose(const List<RestrictiveHybridAutomaton>&) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -423,11 +423,11 @@ List<PrimedStringAssignment> make_update(const DiscreteLocation& q) {
 
 
 
-Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
     this->new_transition(s,e,make_list(u),List<PrimedRealAssignment>(),g); }
-Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_transition(s,e,make_list(u),r,g); }
-Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, List<PrimedStringAssignment> u,
+Void RestrictiveHybridAutomaton::new_transition(DiscretePredicate s, DiscreteEvent e, List<PrimedStringAssignment> u,
                                                 List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_guard(s,e,g);
     this->new_update(s,e,u);
@@ -435,17 +435,21 @@ Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, List<Pri
 }
 
 
-Void HybridSystem::new_mode(DiscreteLocation q, List<RealAssignment> a, List<DottedRealAssignment> d) {
+Void RestrictiveHybridAutomaton::new_mode(DiscreteLocation q, List<RealAssignment> a, List<DottedRealAssignment> d) {
     DiscretePredicate p=make_predicate(q);
     this->new_auxiliary(p,a);
     this->new_dynamic(p,d);
 }
+Void RestrictiveHybridAutomaton::new_mode(DiscreteLocation q, List<DottedRealAssignment> d, List<RealAssignment> a) {
+    new_mode(q,a,d);
+}
 
-Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g) {
+
+Void RestrictiveHybridAutomaton::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_transition(make_predicate(s),e,make_update(t),r,g); }
-Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g) {
     this->new_transition(s,e,t,make_list(r),g); }
-Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealPredicate g) {
+Void RestrictiveHybridAutomaton::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealPredicate g) {
     this->new_transition(s,e,t,List<PrimedRealAssignment>(),g); }
 
 
@@ -705,7 +709,7 @@ CompositionalHybridAutomaton::invariant_events(DiscreteLocation q) const
 
 
 OutputStream&
-CompositionalHybridAutomaton::write(OutputStream& os) const
+CompositionalHybridAutomaton::_write(OutputStream& os) const
 {
     os << "\nHybridAutomaton( \n";
     os << "  discrete_transitions="<<this->_discrete_updates<<"\n";
@@ -781,7 +785,7 @@ class CompositeHybridSpace
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
   private:
     const CompositeHybridAutomaton* _system_ptr;
 };
@@ -1384,7 +1388,7 @@ new_transition(const DiscretePredicate& sources,
 
 
 OutputStream&
-CompositeHybridAutomaton::write(OutputStream& os) const
+CompositeHybridAutomaton::_write(OutputStream& os) const
 {
     return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
 }

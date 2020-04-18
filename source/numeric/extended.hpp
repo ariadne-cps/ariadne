@@ -1,7 +1,7 @@
 /***************************************************************************
- *            extended.hpp
+ *            numeric/extended.hpp
  *
- *  Copyright 2017  Pieter Collins
+ *  Copyright  2017-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file extended.hpp
+/*! \file numeric/extended.hpp
  *  \brief Extended real numbers.
  */
 

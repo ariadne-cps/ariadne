@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_automata.hpp
+ *            hybrid/hybrid_automata.hpp
  *
- *  Copyright  2004-16  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_automata.hpp
+/*! \file hybrid/hybrid_automata.hpp
  *  \brief Main hybrid system classes.
  */
 
@@ -35,7 +35,6 @@ namespace Ariadne {
 
 #include "../hybrid/hybrid_automaton_interface.hpp"
 #include "../hybrid/hybrid_automaton.hpp"
-#include "../hybrid/hybrid_automaton-atomic.hpp"
 #include "../hybrid/hybrid_automaton-composite.hpp"
 #include "../hybrid/hybrid_automaton-restrictive.hpp"
 

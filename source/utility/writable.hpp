@@ -1,7 +1,7 @@
 /***************************************************************************
  *            utility/writable.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -57,6 +57,44 @@ template<class T, class = Fallback> struct IsWritable : decltype(has_write<T>(1)
 template<class T> EnableIf<IsWritable<T>,OutputStream&> operator<<(OutputStream& os, const T& t) {
     return t._write(os);
 }
+
+template<class T> class Writer;
+template<class T> class WritableTemporary;
+
+template<class T> class WriterInterface {
+  public:
+    virtual ~WriterInterface() = default;
+    inline WritableTemporary<T> operator() (T const& t) const;
+  private:
+    virtual OutputStream& _write(OutputStream& os, T const& t) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, WritableTemporary<T> const& t);
+};
+
+template<class T> class Handle;
+template<class T> class Writer : public Handle<WriterInterface<T>> {
+  public:
+    using Handle<WriterInterface<T>>::Handle;
+    Writer<T>(Handle<WriterInterface<T>> wh) : Handle<WriterInterface<T>>(wh) { }
+    inline WritableTemporary<T> operator() (T const& t) const;
+};
+
+
+template<class T> class WritableTemporary {
+  private:
+    WriterInterface<T> const& _w; T const& _t;
+    WritableTemporary(WriterInterface<T> const& w, T const& t) : _w(w), _t(t) { }
+    friend class WriterInterface<T>; friend class Writer<T>;
+  public:
+    friend OutputStream& operator<<(OutputStream& os, WritableTemporary<T> const& wt) { return wt._w._write(os,wt._t); }
+};
+
+template<class T> WritableTemporary<T> WriterInterface<T>::operator() (T const& t) const {
+    return WritableTemporary<T>(*this,t); }
+template<class T> WritableTemporary<T> Writer<T>::operator() (T const& t) const {
+    return WritableTemporary<T>(*this->_ptr,t); }
+
+
+template<class T> class RepresentationWriter;
 
 } // namespace Ariadne
 

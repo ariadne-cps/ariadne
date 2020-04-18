@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/gmp.h>
+ *            numeric/gmp.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,8 +22,8 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric/gmp.h>
- *  \brief 
+/*! \file numeric/gmp.hpp
+ *  \brief
  */
 
 

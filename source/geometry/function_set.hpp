@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function_set.hpp
+ *            geometry/function_set.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_set.hpp
+/*! \file geometry/function_set.hpp
  *  \brief Images and preimages of boxes in Euclidean space.
  */
 
@@ -50,10 +50,12 @@
 namespace Ariadne {
 
 
+class ImageSet;
 class ConstraintSet;
 class BoundedConstraintSet;
 class ConstrainedImageSet;
 
+typedef ImageSet EffectiveImageSet;
 typedef ConstraintSet EffectiveConstraintSet;
 typedef BoundedConstraintSet EffectiveBoundedConstraintSet;
 typedef ConstrainedImageSet EffectiveConstrainedImageSet;
@@ -67,6 +69,11 @@ class PavingInterface;
 
 class Drawer;
 
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of a box \f$D\f$ under a function \f$f\f$.
+//! \see ConstrainedImageSet
+class ImageSet { };
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
@@ -102,7 +109,7 @@ class ConstraintSet
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean overlaps(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     friend ConstraintSet intersection(const ConstraintSet& cs1, const ConstraintSet& cs2);
     friend BoundedConstraintSet intersection(const ConstraintSet& cs, const RealBox& bx);
@@ -152,7 +159,7 @@ class BoundedConstraintSet
     ValidatedLowerKleenean covers(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     UpperBoxType bounding_box() const;
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
 
     friend BoundedConstraintSet intersection(const BoundedConstraintSet& bcs1, const BoundedConstraintSet& bcs2);
@@ -164,6 +171,10 @@ class BoundedConstraintSet
 };
 
 
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
+//! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
+//! \see ValidatedConstrainedImageSet
 class ConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
@@ -181,7 +192,7 @@ class ConstrainedImageSet
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
     ConstrainedImageSet(const RealBox& dom, const EffectiveVectorMultivariateFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    //! \brief Convert from a singleton constraint set.
+    //! \brief Convert from a bounded constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief The domain of the set.
     const RealBox& domain() const { return this->_domain; }
@@ -236,7 +247,7 @@ class ConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     LowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
     ValidatedLowerKleenean inside(const ExactBoxType&, Effort) const;
     ValidatedLowerKleenean separated(const ExactBoxType&, Effort) const;
@@ -249,7 +260,7 @@ class ConstrainedImageSet
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ConstrainedImageSet image(ConstrainedImageSet set, EffectiveVectorMultivariateFunction const& h);
@@ -344,9 +355,9 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps(const ExactBoxType&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
+    //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
+    GridTreePaving outer_approximation(const Grid& grid, Nat fineness) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     ValidatedKleenean satisfies(const ValidatedConstraint& c) const;
@@ -356,9 +367,9 @@ class ValidatedConstrainedImageSet
     Void draw(CanvasInterface&, const Projection2d&) const;
     Void box_draw(CanvasInterface&, const Projection2d&) const;
     Void affine_draw(CanvasInterface&, const Projection2d&, Nat splittings) const;
-    Void grid_draw(CanvasInterface&, const Projection2d&, Nat depth) const;
+    Void grid_draw(CanvasInterface&, const Projection2d&, Nat fineness) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
 
     friend ValidatedConstrainedImageSet image(ValidatedConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
     friend ValidatedConstrainedImageSet join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2);

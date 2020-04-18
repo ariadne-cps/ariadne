@@ -1,7 +1,7 @@
 /***************************************************************************
- *            taylor_series.hpp
+ *            function/taylor_series.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file taylor_series.hpp
+/*! \file function/taylor_series.hpp
  *  \brief ApproximateTag power series in one variable on a is_bounded domain with a dense
  *  representation as a floating-point polynomial plus an error bound.
  */
@@ -72,8 +72,8 @@ template<class OP> inline
 TaylorSeries<FloatDPBounds>::TaylorSeries(OP unary_operator, const IntervalDomainType& domain, const FloatDPValue& centre, DegreeType degree)
     : _domain(domain), _expansion(degree+1u), _error(0u)
 {
-    Series<ValidatedNumericType> centre_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(centre));
-    Series<ValidatedNumericType> range_series=Series<FloatDPBounds>(unary_operator,ValidatedNumericType(cast_singleton(domain)));
+    Series<FloatDPBounds> centre_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(centre));
+    Series<FloatDPBounds> range_series=Series<FloatDPBounds>(unary_operator,FloatDPBounds(cast_singleton(domain)));
     for(DegreeType i=0; i!=degree; ++i) {
         this->_expansion[i]=centre_series[i].value();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);

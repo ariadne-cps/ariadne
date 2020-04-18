@@ -1,7 +1,7 @@
 /***************************************************************************
- *            list_set.hpp
+ *            geometry/list_set.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file list_set.hpp
+/*! \file geometry/list_set.hpp
  *  \brief Sets which are lists of simple shapes.
  */
 
@@ -149,7 +149,7 @@ class ListSet
 
     /*! \brief Draw on a canvas.
      *
-     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.hpp header file.
+     *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the geometry/box.hpp header file.
      */
     Void draw(CanvasInterface& c, const Projection2d& p) const {
         for(Nat i=0; i!=this->size(); ++i) {
@@ -158,7 +158,7 @@ class ListSet
     }
 
     /*! \brief Write to an output stream. */
-    OutputStream& write(OutputStream& os) const {
+    OutputStream& _write(OutputStream& os) const {
         return os << *this;
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_evolver_interface.hpp
+ *            hybrid/hybrid_evolver_interface.hpp
  *
- *  Copyright  2011  Luca Geretti
+ *  Copyright  2011-20  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_evolver_interface.hpp
+/*! \file hybrid/hybrid_evolver_interface.hpp
  *  \brief Interface for evolver classes in the hybrid space.
  */
 
@@ -44,30 +44,8 @@ namespace Ariadne {
 class HybridAutomatonInterface;
 class HybridEnclosure;
 
-class HybridTerminationCriterion {
-  public:
-    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
-    typedef HybridTime::DiscreteTimeType DiscreteTimeType;
-  private:
-    ContinuousTimeType _maximum_time;
-    DiscreteTimeType _maximum_steps;
-    Set<DiscreteEvent> _terminating_events;
-  public:
-    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax, Set<DiscreteEvent> evnts)
-        : _maximum_time(tmax), _maximum_steps(nmax), _terminating_events(evnts) { }
-    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax)
-        : HybridTerminationCriterion(tmax,nmax,Set<DiscreteEvent>()) { }
-    HybridTerminationCriterion(const HybridTime& maximum_time)
-        : HybridTerminationCriterion(maximum_time.continuous_time(),maximum_time.discrete_time()) { }
-    //! \brief The maximum continuous (real, physical) time.
-    const ContinuousTimeType& maximum_time() const { return this->_maximum_time; }
-    //! \brief The maximum number of discrete steps taken.
-    const DiscreteTimeType& maximum_steps() const { return this->_maximum_steps; }
-    //! \brief The maximum number of discrete steps taken.
-    const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
-};
-OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination);
-
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
@@ -109,6 +87,8 @@ class HybridEvolverInterface
 };
 
 
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief Factory for hybrid evolver interface classes.
 class HybridEvolverFactoryInterface
     : public EvolverFactoryInterface<HybridAutomatonInterface,HybridEnclosure,HybridTerminationCriterion>

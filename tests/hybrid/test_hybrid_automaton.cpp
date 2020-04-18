@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_hybrid_automaton.cpp
  *
- *  Copyright  2009  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -41,7 +41,7 @@ class TestHybridSystem {
     Void test_build_hybrid_system();
     Void test_static_analysis();
   private:
-    HybridSystem _system;
+    RestrictiveHybridAutomaton _system;
 };
 
 Void
@@ -70,7 +70,7 @@ TestHybridSystem::test_build_hybrid_system()
     RealVariable alpha("alpha");
 
     // Create the tank object
-    HybridSystem tank_component;
+    RestrictiveHybridAutomaton tank_component;
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve alpha, the outflow depends on the
     // pressure, which is proportional to the water height.
@@ -96,7 +96,7 @@ TestHybridSystem::test_build_hybrid_system()
     RealVariable beta("beta");
     StringVariable valve("valve");
 
-    HybridSystem valve_component;
+    RestrictiveHybridAutomaton valve_component;
 
     valve_component.disable_events(valve==open || valve==opening,complement(EventSet{start_closing,finished_opening}));
     valve_component.disable_events((valve==closed || valve==closing),complement(EventSet{start_opening,finished_closing}));
@@ -139,7 +139,7 @@ TestHybridSystem::test_build_hybrid_system()
     ARIADNE_TEST_PRINT(valve_component.mode({valve|closed}));
     ARIADNE_TEST_PRINT(valve_component);
 
-    HybridSystem watertank_system=compose({tank_component,valve_component});
+    RestrictiveHybridAutomaton watertank_system=compose({tank_component,valve_component});
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     _system=watertank_system;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            sweeper.hpp
+ *            algebra/sweeper.hpp
  *
- *  Copyright 2010-17  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file sweeper.hpp
+/*! \file algebra/sweeper.hpp
  *  \brief Classes for simplifying the representation of a polynomial expansion.
  */
 
@@ -41,6 +41,9 @@ template<class F> class Sweeper;
 template<class F> class SweeperBase;
 template<class I, class X> class Expansion;
 
+
+template<class F> class UnknownError;
+
 template<class F> class SweeperInterface {
     friend class Sweeper<F>;
     friend class SweeperBase<F>;
@@ -49,13 +52,17 @@ template<class F> class SweeperInterface {
   public:
     virtual ~SweeperInterface<F>() = default;
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
+    inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_sweep(p,e); }
     inline PR precision() const { return this->_precision(); }
   private:
     virtual SweeperInterface* _clone() const = 0;
     virtual PR _precision() const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const = 0;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
 };
@@ -82,11 +89,14 @@ template<class F> class Sweeper {
   public:
     //! \brief The precision to which terms should be built.
     inline PrecisionType precision() const { return this->_ptr->_precision(); }
-    //! \brief Returns \a true if the term with index \a a and coefficient \a x should be discarded.
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
     inline Void sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
+    //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
+    inline Void sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
-    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const { this->_ptr->_sweep(p); }
+    inline Void sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p, UnknownError<F>&) const { this->_ptr->_sweep(p); }
+    //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
+    inline Void sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const { this->_ptr->_sweep(p,e); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper<F>& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface<F>> _ptr;
@@ -97,7 +107,9 @@ template<class F> class SweeperBase
 {
     typedef typename F::PrecisionType PR;
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
     virtual Bool _discard(const MultiIndex& a, const F& x) const = 0;
 };
 
@@ -135,7 +147,9 @@ template<class F> class RelativeSweeperBase
 {
     typedef typename F::PrecisionType PR;
     virtual Void _sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<PR>& e) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const override;
     virtual Void _sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const override;
+    virtual Void _sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const override;
     virtual Bool _discard(const F& x, const F& nrm) const = 0;
 };
 
@@ -274,6 +288,14 @@ template<> inline Sweeper<FloatMP>::Sweeper() : _ptr(new ThresholdSweeper<FloatM
 
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;
+
+template<class PR> ThresholdSweeper(PR,RawFloatType<PR>) -> ThresholdSweeper<RawFloatType<PR>>;
+template<class PR> RelativeThresholdSweeper(PR,RawFloatType<PR>) -> RelativeThresholdSweeper<RawFloatType<PR>>;
+template<class PR> TrivialSweeper(PR) -> TrivialSweeper<RawFloatType<PR>>;
+template<class PR> NullSweeper(PR) -> NullSweeper<RawFloatType<PR>>;
+template<class PR> AffineSweeper(PR) -> AffineSweeper<RawFloatType<PR>>;
+template<class PR> GradedSweeper(PR,DegreeType) -> GradedSweeper<RawFloatType<PR>>;
+template<class PR> GradedThresholdSweeper(PR,DegreeType,RawFloatType<PR>) -> GradedThresholdSweeper<RawFloatType<PR>>;
 
 } // namespace Ariadne
 

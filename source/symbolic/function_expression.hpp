@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function_expression.hpp
+ *            symbolic/function_expression.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_expression.hpp
+/*! \file symbolic/function_expression.hpp
  *  \brief Expressions created as wrappers around functions
  */
 
@@ -115,7 +115,7 @@ template<class F> TaylorModel<ValidatedTag,F> compose(const TaylorModel<Validate
         r.expansion().append(ra,xc);
     }
     r.cleanup();
-    return std::move(r);
+    return r;
 }
 
 template<class M> ScaledFunctionPatch<M> compose(ScaledFunctionPatch<M> const& f, Projection const& prj) {

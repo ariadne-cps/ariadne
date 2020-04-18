@@ -1,7 +1,7 @@
 /***************************************************************************
- *            stopwatch.hpp
+ *            utility/stopwatch.hpp
  *
- *  Copyright  2018  Luca Geretti
+ *  Copyright  2018-20  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file stopwatch.hpp
+/*! \file utility/stopwatch.hpp
  *  \brief Stopwatch class to be used for profiling execution times.
  */
 

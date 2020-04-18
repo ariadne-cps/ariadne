@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_evolver.cpp
+ *            hybrid/hybrid_evolver.cpp
  *
- *  Copyright  2009  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -72,12 +72,6 @@ typedef Vector<ExactIntervalType> ExactIntervalVectorType;
 Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& transitions);
 Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& transitions);
 
-OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
-    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
-              << ", maximum_steps="<<termination.maximum_steps()
-              << ", terminating_events="<<termination.terminating_events() << " )";
-}
-
 OutputStream& operator<<(OutputStream& os, const CrossingKind& crk) {
     switch(crk) {
         case CrossingKind::DEGENERATE: os<<"DEGENERATE"; break;
@@ -90,19 +84,6 @@ OutputStream& operator<<(OutputStream& os, const CrossingKind& crk) {
         case CrossingKind::TRANSVERSE: os<<"TRANSVERSE"; break;
         case CrossingKind::GRAZING: os<<"GRAZING"; break;
         default: os << "unknown"; break;
-    } return os;
-}
-
-OutputStream& operator<<(OutputStream& os, const DirectionKind& dir) {
-    switch(dir) {
-        case DirectionKind::POSITIVE: os<<"POSITIVE"; break;
-        case DirectionKind::NEGATIVE: os<<"NEGATIVE"; break;
-        case DirectionKind::INCREASING: os<<"INCREASING"; break;
-        case DirectionKind::DECREASING: os<<"DECREASING"; break;
-        case DirectionKind::CONVEX: os<<"CONVEX"; break;
-        case DirectionKind::CONCAVE: os<<"CONCAVE"; break;
-        case DirectionKind::INDETERMINATE: os<<"INDETERMINATE"; break;
-        default: os << "UNKNOWN"; break;
     } return os;
 }
 
@@ -173,7 +154,13 @@ inline OutputStream& operator<<(OutputStream& os, LogOutput<CrossingData> const&
     if(crossing_data.crossing_kind==CrossingKind::TRANSVERSE) {
         os<<",crossing_time_range="<<crossing_data.crossing_time.range();
         os<<",crossing_time_error="<<crossing_data.crossing_time.error();
+    } else if(crossing_data.crossing_kind==CrossingKind::GRAZING) {
+        os<<",critical_time_range="<<crossing_data.critical_time.range();
+        os<<",critical_time_error="<<crossing_data.critical_time.error();
+        os<<",guard_range_at_critical_time="<<crossing_data.guard_range_at_critical_time;
+        os<<",evolve_bounds_at_critical_time="<<crossing_data.evolve_bounds_at_critical_time;
     }
+
     return os;
 }
 
@@ -349,6 +336,7 @@ HybridEvolverBase::_create(
     this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
+    this->charcode="e";
     //this->_configuration_ptr=std::shared_ptr<ConfigurationType>(new ConfigurationType());
 }
 
@@ -612,12 +600,13 @@ _compute_flow(EffectiveVectorMultivariateFunction dynamic,
     ValidatedVectorMultivariateFunctionModelDP flow_model=integrator.flow_step(dynamic,initial_box,step_size);
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
-    ExactIntervalVectorType flow_domain=flow_model.domain();
+    ExactBoxType flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
     flow_domain[flow_domain.size()-1u]=ExactIntervalType(0,step_size);
-    flow_model=restrict(flow_model,flow_domain);
+    flow_model=restriction(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
+    ARIADNE_LOG(2,"flow_model="<<flow_model<<"\n");
     return flow_model;
 }
 
@@ -676,7 +665,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
-    ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+    ExactBoxType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
     ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
     UpperBoxType flow_bounds=flow.range();
     for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin();
@@ -794,8 +783,12 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     HybridEnclosure evolve_set_at_critical_time=initial_set;
                     evolve_set_at_critical_time.apply_space_evolve_step(flow,critical_time);
                     ValidatedVectorMultivariateFunctionModelDP identity = factory(critical_time).create_identity();
-                    //ValidatedVectorMultivariateFunctionModelDP::identity(critical_time.domain(),critical_time.sweeper());
-                    UpperIntervalType guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
+                    //ValidatedVectorFunctionModelDP::identity(critical_time.domain(),critical_time.sweeper());
+                    UpperBoxType evolve_bounds_at_critical_time=evolve_set_at_critical_time.bounding_box().euclidean_set();
+                    UpperIntervalType guard_range_at_critical_time
+                        =intersection(apply(guard,evolve_bounds_at_critical_time),evolve_set_at_critical_time.range_of(guard));
+                    // Less accurate version: guard_range_at_critical_time=evolve_set_at_critical_time.range_of(guard);
+                    ARIADNE_LOG(8,"evolve_bounds_at_critical_time="<<evolve_bounds_at_critical_time<<"\n");
                     ARIADNE_LOG(8,"guard_range_at_critical_time="<<guard_range_at_critical_time<<"\n");
                     if(definitely(guard_range_at_critical_time.upper()<0)) {
                         // No crossing
@@ -832,10 +825,14 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                             // NOTE: Use GRAZING here since this will later put in a block on continuous evolution at critical time.
                             crossings[event]=CrossingData(CrossingKind::GRAZING);
                             crossings[event].critical_time=critical_time;
+                            crossings[event].evolve_bounds_at_critical_time=evolve_bounds_at_critical_time;
+                            crossings[event].guard_range_at_critical_time=guard_range_at_critical_time;
                         }
                     } else {
                         crossings[event]=CrossingData(CrossingKind::GRAZING);
                         crossings[event].critical_time=critical_time;
+                        crossings[event].evolve_bounds_at_critical_time=evolve_bounds_at_critical_time;
+                        crossings[event].guard_range_at_critical_time=guard_range_at_critical_time;
                     }
                 }
                 catch(const SolverException& e) {
@@ -935,17 +932,7 @@ _apply_guard_step(HybridEnclosure& set,
             jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
             jump_set.new_activation(event,transition_data.guard_function);
             break;
-        case EventKind::IMPACT: {
-            EffectiveScalarMultivariateFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
-            UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
-            ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n");
-            if(possibly(flow_derivative_range.lower()<=0)) {
-                jump_set.new_activation(event,flow_derivative_function);
-            }
-            if(definitely(jump_set.is_empty())) { return; }
-            [[fallthrough]];
-        }
-        case EventKind::URGENT:
+        case EventKind::URGENT: case EventKind::IMPACT:
             ARIADNE_LOG(5,"crossing_data.crossing_kind="<<crossing_data.crossing_kind<<"\n");
             switch(crossing_data.crossing_kind) {
                 case CrossingKind::TRANSVERSE:
@@ -977,7 +964,7 @@ _apply_guard_step(HybridEnclosure& set,
 /*
                 case CrossingKind::GRAZING:
                     ARIADNE_LOG(6,"critical_time="<<crossing_data.critical_time<<"\n");
-                    std::cerr<<"jump_set.domain()="<<jump_set.domain();
+                    ARIADNE_LOG(9,"jump_set.domain()="<<jump_set.domain()<<"\n");
                     IntervalDomainType evolution_time_domain=timing_data.evolution_time_domain;
                     ValidatedScalarMultivariateFunctionModelDP embedded_space_function=embed(set.space_function(),timing_data.evolution_time_domain);
                     jump_set.apply_parameter_reach_step(flow,timing_data.parameter_dependent_evolution_time);
@@ -1006,6 +993,19 @@ _apply_guard_step(HybridEnclosure& set,
                     break;
                 default:
                     ARIADNE_FAIL_MSG("Unhandled crossing kind in "<<crossing_data<<"\n");
+            }
+            if (transition_data.event_kind==EventKind::IMPACT) {
+                // For an IMPACT event, also impose that the flow derivative is positive at the crossing.
+                EffectiveScalarMultivariateFunction flow_derivative_function=lie_derivative(transition_data.guard_function,dynamic);
+                ARIADNE_LOG(9,"flow_derivative_function="<<flow_derivative_function<<"\n");
+                ARIADNE_LOG(9,"jump_set.state_bounding_box()="<<jump_set.state_bounding_box()<<"\n");
+                UpperIntervalType flow_derivative_range=apply(flow_derivative_function,jump_set.state_bounding_box());
+                ARIADNE_LOG(9,"flow_derivative_range="<<flow_derivative_range<<"\n\n");
+                if(possibly(flow_derivative_range.lower()<=0)) {
+                    jump_set.new_activation(event,flow_derivative_function);
+                }
+                ARIADNE_LOG(9,"jump_set="<<jump_set<<"\n\n\n");
+                if(definitely(jump_set.is_empty())) { return; }
             }
             break;
         default:
@@ -1066,6 +1066,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                     = compose( guard_function, unchecked_compose( flow, join(starting_state_function, elapsed_time_function) ) );
                 ValidatedScalarMultivariateFunctionModelDP maximal_guard_function
                     = compose( guard_function, unchecked_compose( flow, join(starting_state_function, critical_time_function) ) );
+                UpperIntervalType guard_range_at_critical_time = guard_crossing_data.guard_range_at_critical_time;
                 ARIADNE_ASSERT_MSG(starting_state_function.argument_size()==set.parameter_domain().size(),
                                    starting_state_function<<" "<<set);
                 ARIADNE_ASSERT_MSG(critical_time_function.argument_size()==set.parameter_domain().size(),
@@ -1100,10 +1101,10 @@ _apply_guard(List<HybridEnclosure>& sets,
 
                 // Split the set into three components,
                 //   hitting_set: points which hit the guard in the future
-                //   missing_set: points whose trajectories hich miss the guard completely
+                //   missing_set: points whose trajectories miss the guard completely
                 //   past_set: points which would have hit the guard in the past, but do not in the future
-                HybridEnclosure hitting_set=set;
                 HybridEnclosure& missing_set=set;
+                HybridEnclosure hitting_set=set;
                 HybridEnclosure past_set=set;
                 missing_set.new_parameter_constraint( event, maximal_guard_function <= zero );
                 hitting_set.new_parameter_constraint( event, maximal_guard_function >= zero );
@@ -1111,16 +1112,20 @@ _apply_guard(List<HybridEnclosure>& sets,
                 hitting_set.new_parameter_constraint( event, final_guard_function <= zero );
                 past_set.new_parameter_constraint( event, maximal_guard_function >= zero );
                 past_set.new_parameter_constraint( event, critical_time_function <= zero );
-//                hitting_set.reduce();
-//                missing_set.reduce();
-//                past_set.reduce();
-                if(definitely(missing_set.is_empty())) {
+                hitting_set.reduce();
+                missing_set.reduce();
+                past_set.reduce();
+                ARIADNE_LOG(9,"final_guard_range="<<final_guard_function.range()<<"\n");
+                ARIADNE_LOG(9,"maximal_guard_function="<<maximal_guard_function<<"\n");
+                ARIADNE_LOG(9,"final_guard_function="<<final_guard_function<<"\n");
+                ARIADNE_LOG(9,"elapsed_time_function="<<elapsed_time_function<<"\n");
+                ARIADNE_LOG(9,"critical_time_function="<<critical_time_function<<"\n");
+                ARIADNE_LOG(9,"missing_set.is_empty()="<<missing_set.is_empty()<<", hitting_set.is_empty()="<<hitting_set.is_empty()<<", past_set.is_empty()="<<past_set.is_empty()<<"\n");
+                ARIADNE_LOG(9,"hitting_set="<<hitting_set<<"\n");
+                // FIXME: The guard range at the critical time may provide a stronger guarantee of emptiness than maximal_guard_function > zero, but we should ideally not rely on this
+                if(definitely(guard_range_at_critical_time > 0 || missing_set.is_empty())) {
                     // swap out missing set
-                    if (not definitely(hitting_set.is_empty())) {
-                        std::swap(hitting_set,missing_set);
-                    } else {
-                        std::swap(past_set,missing_set);
-                    }
+                    std::swap(hitting_set,missing_set);
                 } else if(not definitely(hitting_set.is_empty())) {
                     sets.append(hitting_set);
                 }
@@ -1268,6 +1273,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     if(verbosity==1 || verbosity==2) { _log_summary(evolution_data,starting_set); }
     ARIADNE_LOG(2,"starting_set: bounding_box="<<starting_set.bounding_box()<<", time_range="<<starting_set.time_function().range()<<"    \n");
+    ARIADNE_LOG(2,"starting_set="<<starting_set<<"    \n");
 
 
     // Compute the bounding box of the enclosure
@@ -1354,7 +1360,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ValidatedLowerKleenean starting_set_empty=starting_set_copy.is_empty();
 
     if(definitely(starting_set_empty)) {
-        ExactIntervalVectorType reduced_domain=starting_set.continuous_set().reduced_domain();
+        ExactBoxType reduced_domain=starting_set.continuous_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
@@ -1469,7 +1475,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 if(possibly(evolve_set_time_range.upper()>timing_data.final_time)) {
                     evolve_set.bound_time(timing_data.final_time);
                 }
-                // Only continue evolution if the time-singleton evolve set is nonempty;
+                // Only continue evolution if the time-bounded evolve set is nonempty;
                 // However, continue evolution without adding time constraint,
                 // since this will be introduced in the next step
                 if(!definitely(evolve_set.is_empty())) {
@@ -1630,10 +1636,10 @@ HybridEvolverBaseConfiguration::set_flow_accuracy(const RawRealType value)
 
 
 OutputStream&
-HybridEvolverBaseConfiguration::write(OutputStream& os) const
+HybridEvolverBaseConfiguration::_write(OutputStream& os) const
 {
     os << "HybridEvolverBaseConfiguration"
-       << ",\n  flow_accuracy=" << flow_accuracy()
+       << "(\n  flow_accuracy=" << flow_accuracy()
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  maximum_spacial_error=" << maximum_spacial_error()
@@ -1681,7 +1687,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
     ExactBoxType state_domain = cast_exact_box(initial_set.state_bounding_box());
     ExactIntervalType time_domain = cast_exact_interval(initial_set.time_range()+ExactIntervalType(zero,step_size));
-    ExactBoxType statetime_domain = join(state_domain,time_domain);
+    ExactBoxType statetime_domain = product(state_domain,time_domain);
 
     //ValidatedVectorMultivariateFunctionModelDP space_coordinates=this->function_factory().create_identity(space_domain);
     ValidatedScalarMultivariateFunctionModelDP time_coordinate=this->function_factory().create_coordinate(statetime_domain,n);
@@ -1853,7 +1859,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // essentially exact
                 ValidatedScalarMultivariateFunctionModelDP lower_crossing_time=crossing_iter->second.crossing_time;
                 FloatDPError crossing_time_error=lower_crossing_time.error();
-                lower_crossing_time.set_error(0u);
+                lower_crossing_time.clobber();
                 lower_crossing_time-=FloatDPValue(crossing_time_error.raw());
 
                 // One possibility is to use quadratic restrictions
@@ -1897,7 +1903,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
         EffectiveVectorMultivariateFunction dynamic=this->system().dynamic_function(initial_set.location());
-        ExactIntervalVectorType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+        ExactBoxType flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
         ExactIntervalType flow_time_domain=flow.domain()[flow.argument_size()-1u];
         ValidatedScalarMultivariateFunctionModelDP zero_function=factory(flow).create_zero();
         ValidatedVectorMultivariateFunctionModelDP identity_function=factory(flow).create_identity();
@@ -1955,7 +1961,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
               ++crossing_iter;
             }
         }
-        spacial_evolution_time.set_error(0u);
+        spacial_evolution_time.clobber();
 
 
         ARIADNE_LOG(6,"Creep step: spacial_evolution_time="<<spacial_evolution_time<<"\n");

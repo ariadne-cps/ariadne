@@ -1,7 +1,7 @@
 /***************************************************************************
- *            differential.hpp
+ *            algebra/differential.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file differential.hpp
+/*! \file algebra/differential.hpp
  *  \brief Differential algebra variables with a sparse representation.
  */
 
@@ -42,7 +42,8 @@
 #include "../algebra/expansion.hpp"
 #include "../algebra/operations.hpp"
 
-#include "../algebra/univariate_differential.hpp"
+#include "differential.decl.hpp"
+#include "univariate_differential.hpp"
 
 namespace Ariadne {
 
@@ -54,11 +55,6 @@ template<class I, class X> class Expansion;
 template<class X> class Differential;
 template<class X> class UnivariateDifferential;
 template<class X> class NonAssignableDifferential;
-
-typedef Differential<FloatDP> FloatDifferential;
-typedef Differential<FloatDPApproximation> FloatApproximationDifferential;
-typedef Differential<FloatDPBounds> FloatBoundsDifferential;
-typedef Differential<UpperIntervalType> UpperIntervalDifferentialType;
 
 template<class X> class DifferentialFactory {
     typedef PrecisionType<X> PR;
@@ -496,7 +492,7 @@ class Vector< Differential<X> >
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const Vector<X>& a);
     static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<X>& x0, const X& t0, const Vector<X>& a);
-    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& da);
+    static Vector<Differential<X>> _flow(const Vector<Differential<X> >& df, const Vector<Differential<X>>& dx0, const Vector<Differential<X>>& dt0a);
     OutputStream& _write(OutputStream& os) const;
 };
 

@@ -402,6 +402,12 @@ int test_case_counter = 0;
     Class variable expression;                                          \
     std::cout << #variable << "==" << variable << "\n" << std::endl;    \
 
+/*! \brief Constructs default object \a variable of type \a Class. */
+#define ARIADNE_TEST_DEFAULT_CONSTRUCT(Class,variable)               \
+    std::cout << #Class << " " << #variable << ": " << std::flush; \
+    Class variable;                                                \
+    std::cout << #variable << "==" << (variable) << "\n" << std::endl;    \
+
 /*
 #define ARIADNE_TEST_CONSTRUCT(Class,variable,expression)               \
     {                                                                   \

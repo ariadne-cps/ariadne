@@ -1,7 +1,7 @@
 /***************************************************************************
- *            ValidatedKleenean.hpp
+ *            utility/tribool.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file ValidatedKleenean.hpp
+/*! \file utility/tribool.hpp
  *  \brief Three-valued logic variable.
  */
 

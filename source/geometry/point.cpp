@@ -1,7 +1,7 @@
 /***************************************************************************
- *            point.cpp
+ *            geometry/point.cpp
  *
- *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -33,20 +33,21 @@ template<> String class_name<Point<FloatDPBounds>>() { return "Point<FloatDPBoun
 template<> String class_name<Point<FloatDPValue>>() { return "Point<FloatDPValue>"; }
 template<> String class_name<Point<Real>>() { return "Point<Real>"; }
 
-template class Point<ExactNumericType>;
-template class Point<EffectiveNumericType>;
-template class Point<ValidatedNumericType>;
-template class Point<ApproximateNumericType>;
+template class Point<FloatDPValue>;
+template class Point<FloatDPBounds>;
+template class Point<FloatDPApproximation>;
+template class Point<Real>;
 
-
-ExactPoint make_point(const StringType& str)
+/*
+Point<Real> make_point(const StringType& str)
 {
     std::vector<FloatDP> lst;
     StringStream ss(str);
     read_sequence(ss,lst,'(',')',',');
-    Vector<FloatDP> vec(lst);
+    Vector<Real> vec(lst);
 
-    return ExactPoint(Vector<FloatDPValue>(vec));
+    return Point<Real>(vec);
 }
+*/
 
 } //namespace Ariadne

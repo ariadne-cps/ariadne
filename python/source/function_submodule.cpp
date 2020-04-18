@@ -1,7 +1,7 @@
 /***************************************************************************
  *            function_submodule.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -211,7 +211,7 @@ Void export_polynomial(pybind11::module& module)
     define_algebra(module,polynomial_class);
     polynomial_class.def("__str__",&__cstr__<MultivariatePolynomial<X>>);
 
-    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("PolynomialVector")).c_str());
+    export_vector<MultivariatePolynomial<X>>(module, (python_name<X>("MultivariatePolynomialVector")).c_str());
 }
 
 Void export_polynomials(pybind11::module& module)
@@ -220,7 +220,7 @@ Void export_polynomials(pybind11::module& module)
     export_polynomial<FloatDPApproximation>(module);
 }
 
-template<class P> Void export_univariate_function(pybind11::module& module)
+template<class P> Void export_scalar_univariate_function(pybind11::module& module)
 {
     pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
     function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
@@ -244,11 +244,59 @@ template<class P> Void export_univariate_function(pybind11::module& module)
     function_class.def("__str__", &__cstr__<ScalarUnivariateFunction<P>>);
 }
 
-Void export_univariate_functions(pybind11::module& module)
+template<class P> Void export_vector_univariate_function(pybind11::module& module)
 {
-    export_univariate_function<EffectiveTag>(module);
-    export_univariate_function<ValidatedTag>(module);
-    export_univariate_function<ApproximateTag>(module);
+    pybind11::class_<VectorUnivariateFunction<P>> vector_univariate_function_class(module,(class_name<P>()+"VectorUnivariateFunction").c_str());
+    vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<P>>());
+    vector_univariate_function_class.def(pybind11::init<Nat>());
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<EffectiveTag>>());
+//        pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ValidatedTag>>();
+    }
+    // NOTE: This must go *after* the conversion constructor
+    vector_univariate_function_class.def(pybind11::init([](std::vector<ScalarUnivariateFunction<P>> const& lst){return VectorUnivariateFunction<P>(lst);}));
+
+    vector_univariate_function_class.def("result_size", &VectorUnivariateFunction<P>::result_size);
+    vector_univariate_function_class.def("argument_size", &VectorUnivariateFunction<P>::argument_size);
+    vector_univariate_function_class.def("__getitem__", &VectorUnivariateFunction<P>::get);
+    vector_univariate_function_class.def("__setitem__", &VectorUnivariateFunction<P>::set);
+
+    // TODO: Put these in C++ API
+    // define_vector_algebra_arithmetic<VectorUnivariateFunction<P>,ScalarUnivariateFunction<P>,Number<P>>(module,vector_univariate_function_class);
+
+    // FIXME: Define vector function operations for Validated and Approximate
+//    if constexpr (IsSame<P,EffectiveTag>::value) {
+//        define_vector_algebra_arithmetic<VectorUnivariateFunction<P>,ScalarUnivariateFunction<P>>(module,vector_univariate_function_class);
+//    }
+    export_function_evaluation(module,vector_univariate_function_class);
+
+    vector_univariate_function_class.def("__str__", &__cstr__<VectorUnivariateFunction<P>>);
+    vector_univariate_function_class.def("__repr__", &__crepr__<VectorUnivariateFunction<P>>);
+
+//    module.def("join", (VectorUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&, const ScalarUnivariateFunction<P>&)) &join);
+//    module.def("join", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&, const ScalarUnivariateFunction<P>&)) &join);
+//    module.def("join", (VectorUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&, const VectorUnivariateFunction<P>&)) &join);
+//    module.def("join", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&, const VectorUnivariateFunction<P>&)) &join);
+
+    module.def("compose", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&,const ScalarUnivariateFunction<P>&)) &compose);
+    module.def("compose", (ScalarUnivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorUnivariateFunction<P>&)) &compose);
+    module.def("compose", (VectorUnivariateFunction<P>(*)(const VectorUnivariateFunction<P>&,const ScalarUnivariateFunction<P>&)) &compose);
+    module.def("compose", (VectorUnivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorUnivariateFunction<P>&)) &compose);
+}
+
+
+Void export_scalar_univariate_functions(pybind11::module& module)
+{
+    export_scalar_univariate_function<EffectiveTag>(module);
+    export_scalar_univariate_function<ValidatedTag>(module);
+    export_scalar_univariate_function<ApproximateTag>(module);
+}
+
+Void export_vector_univariate_functions(pybind11::module& module)
+{
+    export_vector_univariate_function<EffectiveTag>(module);
+    export_vector_univariate_function<ValidatedTag>(module);
+    export_vector_univariate_function<ApproximateTag>(module);
 }
 
 
@@ -331,7 +379,9 @@ template<class P> Void export_vector_function(pybind11::module& module)
     module.def("join", (VectorMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
     module.def("join", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&, const VectorMultivariateFunction<P>&)) &join);
 
+    module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&,const ScalarMultivariateFunction<P>&)) &compose);
     module.def("compose", (ScalarMultivariateFunction<P>(*)(const ScalarMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
+    module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorUnivariateFunction<P>&,const ScalarMultivariateFunction<P>&)) &compose);
     module.def("compose", (VectorMultivariateFunction<P>(*)(const VectorMultivariateFunction<P>&,const VectorMultivariateFunction<P>&)) &compose);
 }
 
@@ -373,7 +423,8 @@ Void function_submodule(pybind11::module& module) {
 
     export_polynomials(module);
 
-    export_univariate_functions(module);
+    export_scalar_univariate_functions(module);
+    export_vector_univariate_functions(module);
     export_scalar_functions(module);
     export_vector_functions(module);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            matrix.cpp
+ *            algebra/matrix.cpp
  *
- *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -823,7 +823,7 @@ template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
             R.at(i,j)=midpoint(A.at(i,j));
         }
     }
-    return std::move(R);
+    return R;
 }
 
 template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
@@ -833,7 +833,7 @@ template<class X> Matrix<SingletonType<X>> cast_singleton(Matrix<X> const& A) {
             R.at(i,j)=cast_singleton(A.at(i,j));
         }
     }
-    return std::move(R);
+    return R;
 }
 
 
@@ -926,5 +926,7 @@ template Matrix<SingletonType<FloatDPUpperInterval>> cast_singleton(Matrix<Float
 template Matrix<MidpointType<FloatDPUpperInterval>> midpoint(Matrix<FloatDPUpperInterval> const&);
 template Matrix<FloatDPUpperInterval> inverse(const Matrix<FloatDPUpperInterval>&);
 template Vector<FloatDPUpperInterval> solve(const Matrix<FloatDPUpperInterval>&, const Vector<FloatDPUpperInterval>&);
+
+template class Matrix<FloatMPUpperInterval>;
 } // namespace Ariadne
 

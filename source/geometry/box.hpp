@@ -1,7 +1,7 @@
 /***************************************************************************
- *            box.hpp
+ *            geometry/box.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file box.hpp
+/*! \file geometry/box.hpp
  *  \brief Coordinate-aligned boxes in Euclidean space.
  */
 
@@ -53,8 +53,10 @@ struct DoubleInput {
 //! \brief A box in Euclidean space.
 template<class I>
 class Box
-    : public Vector<I>
 {
+  private:
+    Vector<I> _vec;
+  private:
     typedef typename I::UpperBoundType U;
     typedef typename I::LowerBoundType L;
     typedef typename I::MidpointType M;
@@ -95,28 +97,45 @@ class Box
     template<class II> explicit Box(const Array<II>& bx);
 
     // Non-templated constructor to allow conversion from VectorExpression
-    Box(const Vector<I>& bx) : Vector<I>(bx) { }
+    Box(const Vector<I>& bx) : _vec(bx) { }
 
     //! Convert from a box of a different type
     template<class II, EnableIf<IsConvertible<II,I>> = dummy>
-        Box(const Vector<II>& bx) : Vector<I>(bx) { }
+        Box(const Box<II>& bx) : _vec(cast_vector(bx)) { }
 
     //! Construct from a box of a different type
     template<class II, EnableIf<And<IsConstructible<I,II>,Not<IsConvertible<II,I>>>> = dummy>
-        explicit Box(const Vector<II>& bx) : Vector<I>(bx) { }
+        explicit Box(const Box<II>& bx) : _vec(cast_vector(bx)) { }
+
+    //! Convert from a box of a different type
+    template<class II, EnableIf<IsConvertible<II,I>> = dummy>
+        Box(const Vector<II>& vec) : _vec(vec) { }
+
+    //! Construct from a box of a different type
+    template<class II, EnableIf<And<IsConstructible<I,II>,Not<IsConvertible<II,I>>>> = dummy>
+        explicit Box(const Vector<II>& vec) : _vec(vec) { }
 
     template<class II, class PR, EnableIf<IsConstructible<I,II,PR>> = dummy>
-        Box(const Vector<II>& bx, PR pr) : Vector<I>(bx,pr) { }
+        Box(const Box<II>& bx, PR pr) : _vec(cast_vector(bx),pr) { }
 
     //! \brief Construct from an interval of a different type using a default precision.
     template<class II, EnableIf<IsConstructibleGivenDefaultPrecision<I,II>> =dummy, DisableIf<IsConstructible<I,II>> =dummy>
         explicit Box(Box<II> const& x) : Box(x,PrecisionType<II>()) { }
+
+    /*! \brief Generate from a function (object) \a g of type \a G mapping an index to a value. */
+    template<class G, EnableIf<IsInvocableReturning<I,G,SizeType>> =dummy>
+    Box(SizeType n, G const& g) : _vec(n,g) { }
+
+    friend Vector<I> const& cast_vector(Box<I> const& bx) { return bx._vec; }
+    friend Vector<I>& cast_vector(Box<I>& bx) { return bx._vec; }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box<IntervalType> unit_box(SizeType n);
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
     static Box<IntervalType> upper_orthant(SizeType n);
 
+    //! The dimension of the set. DEPRECATED
+    SizeType size() const;
     //! The dimension of the set.
     DimensionType dimension() const;
     //! Indexing the bounds in each dimension yields an exact interval.
@@ -140,7 +159,7 @@ class Box
 
     //! \brief Test if the box is empty.
     auto is_empty() const -> decltype(declval<IntervalType>().is_empty());
-    //! \brief Test if the box is singleton.
+    //! \brief Test if the box is bounded.
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
     //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
@@ -166,6 +185,7 @@ class Box
 
     //! The area or volume of the box.
     RadiusType measure() const;
+    RadiusType volume() const;
     //! The sum of the lengths of the sides.
     RadiusType lengths() const;
     //! Half the length of the longest side.
@@ -176,36 +196,43 @@ class Box
     static Box<I> _product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3);
     static Box<I> _product(const Box<I>& bx1, const Box<I>& bx2);
     static Box<I> _product(const Box<I>& bx1, const I& ivl2);
+    static Box<I> _product(const I& ivl1, const Box<I>& bx2);
 
     static Box<I> _project(const Box<I>& bx, const Array<SizeType>& rng);
     static Box<I> _project(const Box<I>& bx, const Range& rng);
 };
 
 template<class I> inline OutputStream& operator<<(OutputStream& os, const Box<I>& bx) {
-    return os << static_cast<const Vector<I>&>(bx);
+    return os << cast_vector(bx);
 }
 
 template<class I> Box(InitializerList<I>) -> Box<I>;
 
-template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : Vector<I>(ary) { }
-template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : Vector<I>(lst) { }
+template<class I> template<class II> inline Box<I>::Box(const Array<II>& ary) : _vec(ary) { }
+template<class I> inline Box<I>::Box(InitializerList<I> const& lst) : _vec(lst) { }
 
-template<class I> decltype(declval<Box<I>>().is_empty()) is_empty(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).is_empty(); }
-template<class I> decltype(declval<Box<I>>().is_bounded()) is_bounded(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).is_bounded(); }
+template<class I> decltype(declval<Box<I>>().is_empty()) is_empty(const Box<I>& bx) { return bx.is_empty(); }
+template<class I> decltype(declval<Box<I>>().is_bounded()) is_bounded(const Box<I>& bx) { return bx.is_bounded(); }
 
-template<class I> decltype(declval<Box<I>>().radius()) radius(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).radius(); }
-template<class I> decltype(declval<Box<I>>().widths()) widths(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).widths(); }
-template<class I> decltype(declval<Box<I>>().measure()) measure(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).measure(); }
+template<class I> decltype(declval<Box<I>>().radius()) radius(const Box<I>& bx) { return bx.radius(); }
+template<class I> decltype(declval<Box<I>>().widths()) widths(const Box<I>& bx) { return bx.widths(); }
+template<class I> decltype(declval<Box<I>>().measure()) measure(const Box<I>& bx) { return bx.measure(); }
+template<class I> decltype(declval<Box<I>>().volume()) volume(const Box<I>& bx) { return bx.volume(); }
 
-template<class I> inline Box<I> split(const Vector<I>& bx, SizeType k, SplitPart lmu) { return static_cast<Box<I>const&>(bx).split(k,lmu); }
-template<class I> inline Box<I> split(const Vector<I>& bx, SplitPart lmu) { return static_cast<Box<I>const&>(bx).split(lmu); }
-template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx) { return static_cast<Box<I>const&>(bx).split(); }
-template<class I> inline Pair<Box<I>,Box<I>> split(const Vector<I>& bx, SizeType k) { return static_cast<Box<I>const&>(bx).split(k); }
+template<class I> inline Box<I> split(const Box<I>& bx, SizeType k, SplitPart lmu) { return bx.split(k,lmu); }
+template<class I> inline Box<I> split(const Box<I>& bx, SplitPart lmu) { return bx.split(lmu); }
+template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx) { return bx.split(); }
+template<class I> inline Pair<Box<I>,Box<I>> split(const Box<I>& bx, SizeType k) { return bx.split(k); }
 
 //! \relates FloatDPExactBox \brief The cartesian product of two boxes.
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2) { return Box<I>::_product(bx1,bx2); }
+template<class I> inline Box<I> product(const Interval<I>& ivl1, const Box<I>& bx2) { return Box<I>::_product(ivl1,bx2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2) { return Box<I>::_product(bx1,ivl2); }
 template<class I> inline Box<I> product(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
+template<class I> inline Box<I> product(const Box<I>& bx1, const I& ivl2, const Box<I>& bx3) { return Box<I>::_product(bx1,Box<I>({ivl2}),bx3); }
+
+template<class I> inline Box<I> join(const Box<I>& bx1, const I& ivl2, const Box<I>& bx3) { return Box<I>::_product(bx1,Box<I>({ivl2}),bx3); }
+template<class I> inline Box<I> join(const Box<I>& bx1, const Box<I>& bx2, const Box<I>& bx3) { return Box<I>::_product(bx1,bx2,bx3); }
 
 template<class S1, class S2, class S3> inline decltype(auto) product(S1 const& s1, S2 const& s2, S3 const& s3) { return product(product(s1,s2),s3); }
 
@@ -240,19 +267,32 @@ template<class I> auto upper_bounds(const Box<I>& bx) -> typename Box<I>::Vertex
 }
 
 
+template<class I1, class I2> EqualsType<I1,I2> operator==(const Box<I1>& bx1, const Box<I2>& bx2) {
+    if (bx1.dimension()!=bx2.dimension()) { return EqualsType<I1,I2>(false); }
+    EqualsType<I1,I2> r(true);
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
+        r = r && (bx1[i]==bx2[i]);
+    }
+    return r;
+}
+
+template<class I1, class I2> decltype(declval<I1>()!=declval<I2>()) operator!=(const Box<I1>& bx1, const Box<I2>& bx2) {
+    return !(bx1==bx2);
+}
+
 template<class I> Bool same(const Box<I>& bx1, const Box<I>& bx2) {
-    if(bx1.size()!=bx2.size()) { return false; }
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    if(bx1.dimension()!=bx2.dimension()) { return false; }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         if(not same(bx1[i],bx2[i])) { return false; }
     }
     return true;
 }
 
-//! \relates EBoxType \brief The smallest box containing the two boxes.
+//! \relates Box \brief The smallest box containing the two boxes.
 template<class I1, class I2> Box<decltype(hull(declval<I1>(),declval<I2>()))> hull(const Box<I1>& bx1, const Box<I2>& bx2) {
-    ARIADNE_ASSERT(bx1.size()==bx2.size());
-    Box<decltype(hull(declval<I1>(),declval<I2>()))> r(bx1.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
+    Box<decltype(hull(declval<I1>(),declval<I2>()))> r(bx1.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         r[i]=hull(bx1[i],bx2[i]);
     }
     return r;
@@ -260,9 +300,9 @@ template<class I1, class I2> Box<decltype(hull(declval<I1>(),declval<I2>()))> hu
 
 //! \relates Box \brief The smallest box containing the box and a point.
 template<class I, class X> Box<I> hull(const Box<I>& bx1, const Point<X>& pt2) {
-    ARIADNE_ASSERT(bx1.size()==pt2.size());
-    Box<I> r(bx1.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    ARIADNE_ASSERT(bx1.dimension()==pt2.dimension());
+    Box<I> r(bx1.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         r[i]=hull(bx1[i],pt2[i]);
     }
     return r;
@@ -270,9 +310,9 @@ template<class I, class X> Box<I> hull(const Box<I>& bx1, const Point<X>& pt2) {
 
 //! \relates Box \brief The smallest box containing the box and a point.
 template<class I, class X> Box<I> hull(const Point<X>& pt1, const Box<I>& bx2) {
-    ARIADNE_ASSERT(pt1.size()==bx2.size());
-    Box<I> r(bx2.size());
-    for(SizeType i=0; i!=bx2.size(); ++i) {
+    ARIADNE_ASSERT(pt1.dimension()==bx2.dimension());
+    Box<I> r(bx2.dimension());
+    for(SizeType i=0; i!=bx2.dimension(); ++i) {
         r[i]=hull(pt1[i],bx2[i]);
     }
     return r;
@@ -280,87 +320,87 @@ template<class I, class X> Box<I> hull(const Point<X>& pt1, const Box<I>& bx2) {
 
 //! \relates Box \brief The intersection of the two boxes.
 template<class I1, class I2> Box<decltype(intersection(declval<I1>(),declval<I2>()))> intersection(const Box<I1>& bx1, const Box<I2>& bx2) {
-    Box<decltype(intersection(declval<I1>(),declval<I2>()))> res(bx1.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) { res[i]=intersection(bx1[i],bx2[i]); }
+    Box<decltype(intersection(declval<I1>(),declval<I2>()))> res(bx1.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res[i]=intersection(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I, class X> decltype(element(declval<X>(),declval<I>())) element(const Vector<X>& pt1, const Box<I>& bx2) {
     decltype(element(declval<X>(),declval<I>())) res=true;
-    for(SizeType i=0; i!=pt1.size(); ++i) { res = res && element(pt1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx2.dimension(); ++i) { res = res && element(pt1[i],bx2[i]); }
     return res;
 }
 
 template<class I, class X> decltype(contains(declval<I>(),declval<X>())) contains(const Box<I>& bx1, const Vector<X>& vec2) {
     decltype(contains(declval<I>(),declval<X>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && contains(bx1[i],vec2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && contains(bx1[i],vec2[i]); }
     return res;
 }
 
 template<class I, class X> decltype(contains(declval<I>(),declval<X>())) contains(const Box<I>& bx1, const Point<X>& pt2) {
     decltype(contains(declval<I>(),declval<X>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && contains(bx1[i],pt2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && contains(bx1[i],pt2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(disjoint(declval<I1>(),declval<I2>())) disjoint(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(disjoint(declval<I1>(),declval<I2>())) res=false;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res || disjoint(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res || disjoint(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(intersect(declval<I1>(),declval<I2>())) intersect(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(intersect(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && intersect(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && intersect(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(equal(declval<I1>(),declval<I2>())) equal(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(equal(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && equal(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && equal(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(subset(declval<I1>(),declval<I2>())) subset(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(subset(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && subset(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && subset(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(superset(declval<I1>(),declval<I2>())) superset(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(superset(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && superset(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && superset(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(covers(declval<I1>(),declval<I2>())) covers(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(covers(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && covers(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && covers(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(overlap(declval<I1>(),declval<I2>())) overlap(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(overlap(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && overlap(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && overlap(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(separated(declval<I1>(),declval<I2>())) separated(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(separated(declval<I1>(),declval<I2>())) res=false;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res || separated(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res || separated(bx1[i],bx2[i]); }
     return res;
 }
 
 template<class I1, class I2> decltype(inside(declval<I1>(),declval<I2>())) inside(const Box<I1>& bx1, const Box<I2>& bx2) {
     decltype(inside(declval<I1>(),declval<I2>())) res=true;
-    for(SizeType i=0; i!=bx1.size(); ++i) { res = res && inside(bx1[i],bx2[i]); }
+    for(SizeType i=0; i!=bx1.dimension(); ++i) { res = res && inside(bx1[i],bx2[i]); }
     return res;
 }
 
 
 template<class I> inline decltype(refines(declval<I>(),declval<I>())) refines(const Box<typename Box<I>::IntervalType>& bx1, const Box<I>& bx2) {
-    ARIADNE_ASSERT(bx1.size()==bx2.size());
-    for(SizeType i=0; i!=bx1.size(); ++i) {
+    ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
+    for(SizeType i=0; i!=bx1.dimension(); ++i) {
         if(!refines(bx1[i],bx2[i])) { return false; }
     }
     return true;
@@ -397,31 +437,34 @@ ExactBoxType make_box(const String& str);
 // Inline functions so as not to have to instantiate box class
 
 template<class I> Box<I>::Box()
-    : Vector<I>() { }
+    : _vec() { }
 
 template<class I> inline Box<I>::Box(SizeType n)
     : Box(n,IntervalType::empty_interval()) { }
 
 template<class I> inline Box<I>::Box(SizeType n, IntervalType ivl)
-    : Vector<I>(n,ivl) { }
+    : _vec(n,ivl) { }
 
 template<class I> inline Box<I> Box<I>::unit_box(SizeType n) {
     return Box<IntervalType>(n,IntervalType(-1,1));
 }
 
-template<class I> inline SizeType Box<I>::dimension() const {
-    return this->Vector<I>::size();
+template<class I> inline DimensionType Box<I>::dimension() const {
+    return this->_vec.size();
+}
+template<class I> inline SizeType Box<I>::size() const {
+    return this->_vec.size();
 }
 template<class I> inline const I& Box<I>::operator[](SizeType i) const {
-    return this->Vector<I>::operator[](i);
+    return this->_vec.operator[](i);
 }
 
 template<class I> inline I& Box<I>::operator[](SizeType i) {
-    return this->Vector<I>::operator[](i);
+    return this->_vec.operator[](i);
 }
 
 template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
-    return Box<I>(Vector<I>(project(*this,rng)));
+    return Box<I>(project(*this,rng));
 }
 
 template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {
@@ -450,11 +493,17 @@ inline Box<FloatDPExactInterval> cast_exact_box(Vector<FloatDPBounds> const& bv)
     return Box<FloatDPExactInterval>(reinterpret_cast<Vector<FloatDPExactInterval>const&>(bv));
 }
 
+template<class I, class X> inline Box<decltype(declval<I>()+declval<X>())> operator+(Box<I> const& bx1, Vector<X> const& v2) {
+    return Box(cast_vector(bx1)+v2); }
+
+template<class I, class X> inline Vector<decltype(declval<I>()-declval<X>())> operator-(Box<I> const& bx1, Vector<X> const& v2) {
+    return cast_vector(bx1)-v2; }
+
 
 inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPApproximation e) {
     FloatDPApproximation eps(e);
     FloatDPApproximateBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
     }
     return r;
@@ -462,7 +511,7 @@ inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPAppro
 
 inline FloatDPUpperBox widen(const FloatDPUpperBox& bx, FloatDPUpperBound eps) {
     FloatDPUpperBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=widen(bx[i],eps);
     }
     return r;
@@ -478,7 +527,7 @@ inline FloatDPUpperBox widen(const FloatDPExactBox& bx, FloatDPValue eps) {
 
 inline FloatDPUpperBox widen(const FloatDPUpperBox& bx) {
     FloatDPUpperBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=widen(bx[i]);
     }
     return r;
@@ -486,7 +535,7 @@ inline FloatDPUpperBox widen(const FloatDPUpperBox& bx) {
 
 inline FloatDPExactBox widen_domain(const FloatDPUpperBox& bx) {
     FloatDPExactBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=widen_domain(bx[i]);
     }
     return r;
@@ -494,7 +543,7 @@ inline FloatDPExactBox widen_domain(const FloatDPUpperBox& bx) {
 
 inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx, FloatDPUpperBound eps) {
     FloatDPLowerBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=narrow(bx[i],eps);
     }
     return r;
@@ -502,7 +551,7 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx, FloatDPUpperBound eps) 
 
 inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
     FloatDPLowerBox r(bx.dimension());
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(DimensionType i=0; i!=bx.dimension(); ++i) {
         r[i]=narrow(bx[i]);
     }
     return r;
@@ -521,8 +570,8 @@ template<> class BoxSet<ExactIntervalType>
     using Box<ExactIntervalType>::Box;
     BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
-    virtual ExactBoxSet* clone() const { return new ExactBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->ExactBoxType::size(); }
+    virtual ExactBoxSetType* clone() const { return new ExactBoxSetType(*this); }
+    virtual DimensionType dimension() const final { return this->ExactBoxType::dimension(); }
     virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->ExactBoxType::separated(other); }
     virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->ExactBoxType::overlaps(other); }
     virtual LowerKleenean covers(const ExactBoxType& other) const final { return this->ExactBoxType::covers(other); }
@@ -533,7 +582,7 @@ template<> class BoxSet<ExactIntervalType>
     virtual ValidatedLowerKleenean inside(const ExactBoxType& other, Effort eff) const final { return this->ExactBoxType::inside(other); }
     virtual UpperBoxType bounding_box() const final { return this->ExactBoxType::bounding_box(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ExactBoxType&>(*this); }
 };
 
 template<> class BoxSet<ApproximateIntervalType>
@@ -545,10 +594,10 @@ template<> class BoxSet<ApproximateIntervalType>
     using Box<ApproximateIntervalType>::Box;
     BoxSet<ApproximateIntervalType>(Box<ApproximateIntervalType>const& bx) : Box<ApproximateIntervalType>(bx) { }
 
-    virtual ApproximateBoxSet* clone() const { return new ApproximateBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->ApproximateBoxType::size(); }
+    virtual ApproximateBoxSetType* clone() const { return new ApproximateBoxSetType(*this); }
+    virtual DimensionType dimension() const final { return this->ApproximateBoxType::dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return Ariadne::draw(c,p,*this); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const ApproximateBoxType&>(*this); }
 };
 
 
@@ -563,9 +612,9 @@ template<> class BoxSet<RealInterval>
     BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 
     virtual RealBoxSet* clone() const { return new RealBoxSet(*this); }
-    virtual DimensionType dimension() const final { return this->Box<RealInterval>::size(); }
+    virtual DimensionType dimension() const final { return this->Box<RealInterval>::dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const final { return this->Box<RealInterval>::draw(c,p); }
-    virtual OutputStream& write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
+    virtual OutputStream& _write(OutputStream& os) const final { return os << static_cast<const Box<RealInterval>&>(*this); }
 
     virtual LowerKleenean separated(const ExactBoxType& other) const final { return this->BoxType::separated(DyadicBox(other)); }
     virtual LowerKleenean overlaps(const ExactBoxType& other) const final { return this->BoxType::overlaps(DyadicBox(other)); }

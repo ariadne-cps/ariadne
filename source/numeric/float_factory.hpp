@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_factory.hpp
+ *            numeric/float_factory.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_factory.hpp
+/*! \file numeric/float_factory.hpp
  *  \brief Factories for creating floating-point numbers.
  */
 
@@ -58,6 +58,10 @@ template<class PR> class FloatFactory {
     template<class N, EnableIf<IsBuiltinSignedIntegral<N>> =dummy> FloatValue<PR> create(N const& y);
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> PositiveFloatValue<PR> create(M const& y);
     template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> FloatApproximation<PR> create(D const& y);
+    PositiveFloatApproximation<PR> create(PositiveNumber<ApproximateTag> const& y);
+    PositiveFloatLowerBound<PR> create(PositiveNumber<ValidatedLowerTag> const& y);
+    PositiveFloatUpperBound<PR> create(PositiveNumber<ValidatedUpperTag> const& y);
+    PositiveFloatBounds<PR> create(PositiveNumber<ValidatedTag> const& y);
 };
 
 template<class Y, class PR> using ConcreteType = decltype(declval<FloatFactory<PR>>().create(declval<Y>()));

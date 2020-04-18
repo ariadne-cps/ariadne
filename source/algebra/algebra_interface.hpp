@@ -1,7 +1,7 @@
 /***************************************************************************
- *            algebra_interface.hpp
+ *            algebra/algebra_interface.hpp
  *
- *  Copyright 2010-17  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file algebra_interface.hpp
+/*! \file algebra/algebra_interface.hpp
  *  \brief Interface for function algebras.
  */
 
@@ -49,6 +49,7 @@ template<class X> struct AlgebraTraits;
 
 template<> struct AlgebraTraits<ApproximateNumber> {
     typedef ApproximateNumber ValueType;
+    typedef PositiveApproximateNumber ErrorType;
     typedef Interval<ApproximateNumber> RangeType;
     typedef Positive<ApproximateNumber> NormType;
     typedef ApproximateNumber NumericType;
@@ -56,6 +57,7 @@ template<> struct AlgebraTraits<ApproximateNumber> {
 
 template<> struct AlgebraTraits<ValidatedNumber> {
     typedef ExactNumber ValueType;
+    typedef ValidatedErrorNumber ErrorType;
     typedef Interval<ValidatedUpperNumber> RangeType;
     typedef Positive<ValidatedNumber> NormType;
     typedef ValidatedNumber NumericType;
@@ -63,6 +65,7 @@ template<> struct AlgebraTraits<ValidatedNumber> {
 
 template<> struct AlgebraTraits<EffectiveNumber> {
     typedef EffectiveNumber ValueType;
+    typedef ValidatedErrorNumber ErrorType;
     typedef Interval<EffectiveUpperNumber> RangeType;
     typedef Positive<EffectiveNumber> NormType;
     typedef EffectiveNumber NumericType;
@@ -70,6 +73,7 @@ template<> struct AlgebraTraits<EffectiveNumber> {
 
 template<class F> struct AlgebraTraits<Approximation<F>> {
     typedef Approximation<F> ValueType;
+    typedef PositiveApproximation<F> ErrorType;
     typedef Interval<Approximation<F>> RangeType;
     typedef PositiveApproximation<F> NormType;
     typedef Approximation<F> NumericType;
@@ -77,6 +81,7 @@ template<class F> struct AlgebraTraits<Approximation<F>> {
 
 template<class F> struct AlgebraTraits<Bounds<F>> {
     typedef Value<F> ValueType;
+    typedef Error<F> ErrorType;
     typedef Interval<UpperBound<F>> RangeType;
     typedef FloatDPError NormType;
     typedef Bounds<F> NumericType;
@@ -129,9 +134,7 @@ template<class X> class ElementaryAlgebraInterface
     : public virtual WritableInterface
 {
   public:
-    typedef typename AlgebraTraits<X>::ValueType ValueType;
-    typedef typename AlgebraTraits<X>::NormType NormType;
-    typedef typename AlgebraTraits<X>::RangeType RangeType;
+    typedef X NumericType;
   public:
     // Overrides for AlgebraInterface operations
     virtual ElementaryAlgebraInterface<X>* _create_copy() const = 0;
@@ -150,6 +153,7 @@ template<class X> class TranscendentalAlgebraInterface
     : public virtual AlgebraInterface<X>
 {
   public:
+    typedef X NumericType;
     typedef typename AlgebraTraits<X>::ValueType ValueType;
     typedef typename AlgebraTraits<X>::NormType NormType;
     typedef typename AlgebraTraits<X>::RangeType RangeType;
@@ -169,6 +173,7 @@ template<class X> class NormedAlgebraInterface
 {
   public:
     typedef typename AlgebraTraits<X>::ValueType ValueType;
+    typedef typename AlgebraTraits<X>::ErrorType ErrorType;
     typedef typename AlgebraTraits<X>::NormType NormType;
     typedef typename AlgebraTraits<X>::RangeType RangeType;
   public:

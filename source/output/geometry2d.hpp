@@ -1,7 +1,7 @@
 /***************************************************************************
- *            geometry2d.hpp
+ *            output/geometry2d.hpp
  *
- *  Copyright 2009-17  Davide Bresolin, Pieter Collins
+ *  Copyright  2009-20  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file graphics_interface.hpp
+/*! \file output/graphics_interface.hpp
  *  \brief Base graphics interface from which all plotting and drawing classes are inherited.
  */
 
@@ -94,6 +94,8 @@ struct Polytope2d
     Polytope2d operator+(const Vector2d& v) {
         Polytope2d r(*this); for(Nat i=0; i!=r.boundary.size(); ++i) { r.boundary[i]+=v; } return r;
     }
+  private:
+    virtual OutputStream& _write(OutputStream& os) const { return os << "Polytope2d(boundary="<<boundary<<")"; }
 };
 
 

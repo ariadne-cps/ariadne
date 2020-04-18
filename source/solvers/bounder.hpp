@@ -1,7 +1,7 @@
 /***************************************************************************
- *            bounder.hpp
+ *            solvers/bounder.hpp
  *
- *  Copyright  2018  Luca Geretti
+ *  Copyright  2018-20  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file bounder.hpp
+/*! \file solvers/bounder.hpp
  *  \brief Classes for finding the bounds of the flow for differential equations.
  */
 
@@ -70,11 +70,11 @@ class BounderInterface {
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& differential_equation, BoxDomainType const& state_domain, StepSizeType const& initial_time, BoxDomainType const& parameter_domain, StepSizeType const& suggested_time_step) const = 0;
 
   public:
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
     virtual BounderInterface* clone() const = 0;
 
     friend inline OutputStream& operator<<(OutputStream& os, BounderInterface const& bounder) {
-        bounder.write(os); return os; }
+        bounder._write(os); return os; }
 
     virtual ~BounderInterface() = default;
 };
@@ -92,7 +92,7 @@ class EulerBounder final : public BounderBase {
     using BounderBase::compute;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, BoxDomainType const& A, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const override;
-    virtual Void write(OutputStream& os) const override { os << "EulerBounder"; }
+    virtual Void _write(OutputStream& os) const override { os << "EulerBounder"; }
     virtual EulerBounder* clone() const override { return new EulerBounder(*this); }
   private:
     // Compute the bounds on the reach set of dx/dt = f(x,t,a) starting at time t, for a suggested step size of h.
@@ -113,7 +113,7 @@ class BounderHandle {
 
     operator BounderInterface const& () const { return *_impl; }
 
-    Void write(OutputStream& os) const { _impl->write(os); }
+    Void _write(OutputStream& os) const { _impl->_write(os); }
     BounderHandle* clone() const { return new BounderHandle(*this); }
 
     Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const {

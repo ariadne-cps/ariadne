@@ -1,7 +1,7 @@
 /***************************************************************************
- *            colour.hpp
+ *            output/colour.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file colour.hpp
+/*! \file output/colour.hpp
  *  \brief Colours for graphics objects.
  */
 
@@ -60,6 +60,7 @@ extern const Colour blue;
 extern const Colour yellow;
 extern const Colour cyan;
 extern const Colour magenta;
+extern const Colour ariadneorange;
 
 
 } // namespace Ariadne

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_graphics_interface.hpp
+ *            hybrid/hybrid_graphics_interface.hpp
  *
- *  Copyright 2009-17  Davide Bresolin, Pieter Collins
+ *  Copyright  2009-20  Davide Bresolin, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_graphics_interface.hpp
+/*! \file hybrid/hybrid_graphics_interface.hpp
  *  \brief Base graphics interface from which all drawable classes in hybrid spaces are inherited.
  */
 

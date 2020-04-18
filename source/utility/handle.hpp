@@ -1,7 +1,7 @@
 /***************************************************************************
  *            utility/handle.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -68,6 +68,8 @@ template<class I> class Handle {
     Handle(SharedPointer<I> p) : _ptr(p) { }
     Handle(I&& r) : _ptr(r._move()) { }
     Handle(const I& r) : _ptr(r._copy()) { }
+    template<class T, EnableIf<IsBaseOf<I,T>> =dummy> Handle(T&& t) : _ptr(new T(std::move(t))) { }
+    template<class T, EnableIf<IsBaseOf<I,T>> =dummy> Handle(const T& t) : _ptr(new T(t)) { }
     //Handle(const Handle<I>& h) : _ptr(h._ptr) { }
     //Handle(Handle<I>&& h) : _ptr(h._ptr) { }
     Handle(const Handle<I>& h) = default;

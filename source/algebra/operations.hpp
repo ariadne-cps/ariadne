@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/operations.hpp
  *
- *  Copyright 2010-17  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file operations.hpp
+/*! \file algebra/operations.hpp
  *  \brief Provide common algebra operations automatically.
  */
 
@@ -191,10 +191,10 @@ template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberO
     friend A& operator-=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1-=x2; }
     friend A& operator*=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1*=x2; }
     friend A& operator/=(A& a1, Y const& y2) { X x2=create(y2,a1); return a1/=x2; }
-    friend A operator+(A a1, Y const& y2) { a1+=y2; return std::move(a1); }
-    friend A operator-(A a1, Y const& y2) { a1-=y2; return std::move(a1); }
-    friend A operator*(A a1, Y const& y2) { a1*=y2; return std::move(a1); }
-    friend A operator/(A a1, Y const& y2) { a1/=y2; return std::move(a1); }
+    friend A operator+(A a1, Y const& y2) { a1+=y2; return a1; }
+    friend A operator-(A a1, Y const& y2) { a1-=y2; return a1; }
+    friend A operator*(A a1, Y const& y2) { a1*=y2; return a1; }
+    friend A operator/(A a1, Y const& y2) { a1/=y2; return a1; }
     friend A operator+(Y const& y1, A a2) { return a2+y1; }
     friend A operator-(Y const& y1, A a2) { return (-a2)+y1; }
     friend A operator*(Y const& y1, A a2) { return a2*y1; }
@@ -202,10 +202,10 @@ template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberO
 };
 
 template<class A, class X, class Y> struct DispatchConcreteGenericAlgebraNumberOperations : DispatchConcreteGenericAlgebraNumberOperators<A,X,Y> {
-    friend A add(A a1, Y const& y2) { a1+=y2; return std::move(a1); }
-    friend A sub(A a1, Y const& y2) { a1-=y2; return std::move(a1); }
-    friend A mul(A a1, Y const& y2) { a1*=y2; return std::move(a1); }
-    friend A div(A a1, Y const& y2) { a1/=y2; return std::move(a1); }
+    friend A add(A a1, Y const& y2) { a1+=y2; return a1; }
+    friend A sub(A a1, Y const& y2) { a1-=y2; return a1; }
+    friend A mul(A a1, Y const& y2) { a1*=y2; return a1; }
+    friend A div(A a1, Y const& y2) { a1/=y2; return a1; }
     friend A add(Y const& y1, A a2) { return a2+y1; }
     friend A sub(Y const& y1, A a2) { return (-a2)+y1; }
     friend A mul(Y const& y1, A a2) { return a2*y1; }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/expansion.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -130,7 +130,7 @@ template<class I, class X> class Expansion {
     typedef typename UniformList<X>::ConstReference CoefficientConstReference;
 
     ~Expansion();
-    explicit Expansion(ArgumentSizeType as);
+    explicit Expansion(ArgumentSizeType as); // DEPRECATED
     explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
     template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
@@ -202,10 +202,10 @@ template<class I, class X> class Expansion {
     Bool is_sorted(ReverseLexicographicIndexLess cmp);
     Bool is_sorted(GradedIndexLess cmp);
 
-    OutputStream& write(OutputStream& os) const;
-    OutputStream& write(OutputStream& os, typename IndexTraits<I>::NameType const& vars) const;
+    OutputStream& _write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os, typename IndexTraits<I>::NameType const& vars) const;
   public:
-    friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self.write(os); }
+    friend OutputStream& operator<<(OutputStream& os, Expansion<I,X> const& self) { return self._write(os); }
     friend Bool same(Expansion<I,X> const& e1, Expansion<I,X> const& e2) { return e1.same_as(e2); }
     friend Expansion<MultiIndex,CoefficientType> embed(SizeType as1, Expansion<IndexType,CoefficientType> const& e2, SizeType as3) { return _embed(as1,e2,as3); }
   private:
@@ -238,7 +238,7 @@ public:
 
 template<class I, class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
 Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
-    : Expansion(as,X(pr),cap)
+    : Expansion(as,X(0,pr),cap)
 {
 }
 
@@ -250,7 +250,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, P
 
     _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
     _coefficients = UniformList<X>(0,X(pr));
-    _zero_coefficient = X(pr);
+    _zero_coefficient = X(0,pr);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);

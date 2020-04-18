@@ -1,7 +1,7 @@
 /***************************************************************************
- *            binary_tree.cpp
+ *            geometry/binary_tree.cpp
  *
- *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
  *
  ****************************************************************************/
@@ -37,8 +37,6 @@
 
 
 namespace Ariadne {
-
-typedef SizeType SizeType;
 
 
 Bool BinaryTreeNode::has_enabled() const {

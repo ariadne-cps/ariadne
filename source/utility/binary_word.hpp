@@ -1,7 +1,7 @@
 /***************************************************************************
- *            binary_word.hpp
+ *            utility/binary_word.hpp
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file binary_word.hpp
+/*! \file utility/binary_word.hpp
  *  \brief Binary words and sets of binary words.
  *
  * Binary words are generally useful objects.
@@ -48,7 +48,7 @@
  * using a binary tree representation.
  *
  * The main intended use of these classes in Ariadne is to represent
- * sets as unions of rectangles on a grid. See the file grid_box.hpp
+ * sets as unions of rectangles on a grid. See the file utility/grid_box.hpp
  * for the implementation of this representation.
  * The basic idea is that a inside of Euclidean space contained in some
  * cuboid R can be represented by a union of sets obtained by repeatedly

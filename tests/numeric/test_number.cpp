@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_number.cpp
  *
- *  Copyright  2016  Alberto Casagrande, Pieter Collins
+ *  Copyright  2016-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -134,6 +134,7 @@ Int main() {
 
     TestNumber<ApproximateNumber>().test();
     TestNumber<ValidatedNumber>().test();
+    return ARIADNE_TEST_FAILURES;
     TestNumber<EffectiveNumber>().test();
     TestNumber<ExactNumber>().test();
 
@@ -225,6 +226,18 @@ template<> void test_number_get<ApproximateNumber>() {
     MultiplePrecision mp(128);
     ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),dp),q,3e-16);
     ARIADNE_TEST_WITHIN(y.get(ApproximateTag(),mp),q,3e-16);
+
+    // Regression tests for DP/MP conversion.
+    Dbl d=-0.6;
+    ARIADNE_TEST_ASSIGN(y,d);
+    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),dp));
+    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),mp));
+
+    FloatDPApproximation x(-2.5,double_precision);
+    ARIADNE_TEST_ASSIGN(y,x);
+    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),dp));
+    ARIADNE_TEST_EXECUTE(y.get(ApproximateTag(),mp));
+
 }
 
 template<class Y> Void

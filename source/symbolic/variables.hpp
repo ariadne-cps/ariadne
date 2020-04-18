@@ -1,7 +1,7 @@
 /***************************************************************************
- *            variables.hpp
+ *            symbolic/variables.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file variables.hpp
+/*! \file symbolic/variables.hpp
  *  \brief Internal variables
  */
 
@@ -73,7 +73,9 @@ inline String class_name(const VariableType& tp) {
     }
 }
 
-//! A named variable of unknown type.
+//! \ingroup SymbolicModule
+//! \brief A named variable of unknown type.
+//! \see Variable
 class UntypedVariable {
   public:
     //! \brief The name of the variable.
@@ -95,9 +97,10 @@ class UntypedVariable {
 };
 
 
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! \brief A named variable of type \a T.
-//! \sa Expression \sa Assignment
+//! %Ariadne supports variables of type Boolean, Kleenean, String, Integer and Real.
+//! \see TimeVariable \see Constant, Expression, Assignment, Space
 template<class T> class Variable
     : public UntypedVariable
     , public DeclareExpressionOperations<T>
@@ -105,8 +108,8 @@ template<class T> class Variable
   public:
     typedef T Type;
     typedef Variable<T> BaseType;
-    //! \brief Construct a variable with name \a nm.
-    explicit Variable(const Identifier& nm) : UntypedVariable(nm,variable_type<T>()) { }
+    //! \brief Construct a variable with name \a name.
+    explicit Variable(const Identifier& name) : UntypedVariable(name,variable_type<T>()) { }
     Variable<T> const& base() const { return *this; }
     inline Variable<T>& operator=(const Variable<T>& v) = default;
     inline Assignment<Variable<T>,T> operator=(const T& c) const;
@@ -119,18 +122,30 @@ template<class T> class Variable
     friend DottedVariable<Real> dot(const Variable<Real>&);
 };
 
+//! \ingroup SymbolicModule
+//! \brief A special variable representing time.
 class TimeVariable : public Variable<Real> {
   public:
     TimeVariable() : Variable<Real>(" t ") { }
 };
 
-//! \ingroup ExpressionModule
+//@{
+//! \related Variable \name Type synonyms.
+using BooleanVariable = Variable<Boolean>; //!< .
+using KleeneanVariable = Variable<Kleenean>; //!< .
+using StringVariable = Variable<String>; //!< .
+using IntegerVariable = Variable<Integer>; //!< .
+using RealVariable = Variable<Real>; //!< .
+//@}
+
+//! \ingroup SymbolicModule
 //! \brief A list of variables of type \a T.
 //! \sa Variable
 template<class T> class Variables : public List<Variable<T>> {
   public:
-    Variables(Identifier name, SizeType num) : List<Variable<T>>() {
-        this->reserve(num); for(SizeType i=0; i!=num; ++i) { this->append(Variable<T>(name+to_str(i))); } }
+    //! \brief Construct \a n variables with name \a name.
+    Variables(Identifier name, SizeType n) : List<Variable<T>>() {
+        this->reserve(n); for(SizeType i=0; i!=n; ++i) { this->append(Variable<T>(name+to_str(i))); } }
     Variables<T>& operator=(Variables<T> const&) = default;
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
     template<class IVL> inline VariablesBox<IVL> in(const List<IVL>& bx) const;
@@ -151,8 +166,8 @@ inline OutputStream& operator<<(OutputStream& os, VariableCategory const& cat) {
     return os;
 }
 
-//! A named variable of type \a T, possibly decorated by a "let", "dot" or "prime"
-//! representing a time derivative or updated value.
+// A named variable of type \a T, possibly decorated by a "let", "dot" or "prime"
+// representing a time derivative or updated value.
 class ExtendedUntypedVariable
     : public UntypedVariable
 {
@@ -187,7 +202,9 @@ template<class T> class ExtendedVariable
     explicit ExtendedVariable(const Variable<T>& var, VariableCategory category) : ExtendedUntypedVariable(var.name(),variable_type<T>(),category) { }
 };
 
+//! \ingroup SymbolicModule
 //! A named variable of type \a T to be used on the left-hand-side of an assignment denoting an algebraic equation.
+//! \relates Variable
 template<class T> class LetVariable
     : public ExtendedVariable<T>
 {
@@ -202,6 +219,7 @@ template<class T> class LetVariable
 template<class T> inline LetVariable<T> set(const Variable<T>& var) { return let(var); }
 
 
+//! \ingroup SymbolicModule
 //! \brief A named variable of type \a T decorated by a prime representing a value after a discrete jump.
 template<class T> class PrimedVariable
     : public ExtendedVariable<T>
@@ -217,6 +235,7 @@ template<class T> class PrimedVariable
 template<class T> inline PrimedVariable<T> next(const Variable<T>& var) { return prime(var); }
 
 
+//! \ingroup SymbolicModule
 //! \brief A named variable of type \a T decorated by a dot representing differentiation with respect to time.
 template<class T> class DottedVariable
     : public ExtendedVariable<T>

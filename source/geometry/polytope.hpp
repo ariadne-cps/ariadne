@@ -1,7 +1,7 @@
 /****************************************************************************
- *            polytope.hpp
+ *            geometry/polytope.hpp
  *
- *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -25,7 +25,7 @@
 #ifndef ARIADNE_POLYTOPE_HPP
 #define ARIADNE_POLYTOPE_HPP
 
-/*! \file polytope.hpp
+/*! \file geometry/polytope.hpp
  *  \brief Polytope class for geometry output.
  */
 
@@ -98,7 +98,7 @@ class Polytope
     virtual ValidatedKleenean inside(const ExactBoxType& bx) const;
     virtual UpperBoxType bounding_box() const;
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
     //! \brief The convex hull of two polytopes.
     friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
@@ -107,7 +107,7 @@ class Polytope
   private:
     std::vector<ExactPoint> _vertices;
 };
-inline OutputStream& operator<<(OutputStream& os, const Polytope& p) { return p.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Polytope& p) { return p._write(os); }
 
 
 

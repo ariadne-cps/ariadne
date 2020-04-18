@@ -1,0 +1,401 @@
+/***************************************************************************
+ *            python_tutorial.dox
+ *
+ *  Copyright  2009-20  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*!
+ * \file python_tutorial.dox
+ * \brief Documentation for Ariadne's Python tutorial
+ */
+
+namespace Ariadne {
+
+/*!
+
+\page python_tutorial_page Python Tutorial
+
+On this page, we explain how to use %Ariadne's internal function calculus via the Python interface. First, a brief overview of the numerical types and linear algebra operations are given in the \ref python_tutorial_numerical and \ref python_tutorial_linear_algebra sections. A guide to the nonlinear functions available is given in \ref python_tutorial_functional_calculus. Finally, a guide to the numerical Taylor calculus is given in \ref python_tutorial_taylor_calculus.
+
+The full code of the tutorial is given in \ref python/tutorials/tutorial.py
+
+\dontinclude python/tutorials/tutorial.py
+
+\section python_tutorial_introspection The %Ariadne module.
+
+First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
+\skipline import
+To see all the classes and functions available in %Ariadne, type:
+\skipline dir
+
+\section python_tutorial_numerical Numerical Types
+
+%Ariadne supports several basic numerical types, including core \ref Integer, \ref Dyadic, \ref Decimal, \ref Rational and \ref Real classes, which store numbers exactly. These number types are good for problem specification, but may be inefficient for actual numerical computations.
+
+The \ref Integer class supports integers of arbitrary size.
+\skipline Integer
+
+The \ref Dyadic class supports numbers of the form \f$p/2^q\f$ where \f$p\f$ and \f$q\f$ are integers.
+These include all numbers of binary floating-point types and are useful as computational intermediates.
+\skip Dyadic
+\until two
+
+The \ref Decimal class supports exact representation of decimal numbers.
+Numbers can be constructed from floating-point values up to around 9 decimal places; for more accuracy a string literal must be used:
+\skipline Decimal
+\skipline Decimal
+\skipline Decimal
+
+The \ref Rational class supports exact representation of rational numbers.
+\skipline Rational
+\skipline Rational
+\skipline Rational
+
+The \ref Real number class supports arbitrary formulae.
+\skipline Real
+\skipline Real
+
+Computations in %Ariadne are usually most efficiently performed using floating-point number types. %Ariadne internally supports the \ref FloatDP and \ref FloatMP types, which are respectively based on builtin IEEE double-precision floating-point numbers, and multiple-precision floating-point numbers from the MPFR library.
+
+Since Python's builtin <tt>float</tt> class uses rounded arithmetic, such numbers may not be an exact representation of a value, leading to unsafe computation. If a Python <tt>float</tt> is indeed an exact value, (e.g. 1.375 is an exact double-precision floating-point number), this must first be converted to an %Ariadne \ref ExactDouble class:
+\skipline ExactDouble
+\skipline exact
+Numbers which are not exactly representable in double-precision should be converted to the \ref Decimal class instead.
+
+%Ariadne uses C++/Python's built-in floating-point types to provide a double-precision floating-point number class \ref FloatDP, and the MPFR library to provide a multiple-precision floating-point type \ref FloatMP. Each type has a corresponding precision:
+\skipline DoublePrecision
+\skipline double_precision
+\skipline MultiplePrecision
+Floating-point numbers can be constructed from integers and dyadic numbers by supplying the precision:
+\skipline FloatDP
+\skipline FloatMP
+
+Raw floating-point numbers only support rounded arithmetic, so are best avoided in user code. Instead, they can be used in safe correctly-rounded generic types  \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>", \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>". For example, the %Bounds classes support outward-rounded interval arithmetic
+\skipline Bounds
+
+
+
+
+\section python_tutorial_linear_algebra Linear Algebra
+
+%Ariadne supports linear algebra operations based on Vector and Matrix classes. In the C++ library, these types are parameterised by the scalar type (e.g. %Rational, %FloatDPBounds).
+
+
+\snippet python/tutorials/tutorial.py Linear Algebra demonstration
+
+%Vector and matrix classes can be constructed using Python lists.
+\skipline Vector
+\skipline RationalMatrix
+\skipline Matrix
+
+Note that a string literal representing a Float must be possible to represent exactly. For example
+\code
+v=Vector( [1,2.2,Float(3.3),"4.5"] )
+v=IntervalVector( [1,2.2,Float(3.3),"4.4",Interval(5.5,5.6) ] )
+A=Matrix( [ [1,2.2,Float(3.3)], ["4.5",Float("5.75"),6.875] ] )
+\endcode
+
+
+As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine for solving systems of linear equations:
+\skipline solve
+
+\subsection python_tutorial_linear_algebra_slicing Slicing (Future addition)
+
+In the future, it will be possible to create \c VectorSlice and \c MatrixSlice objects using Python's slicing operatior. As in Matlab and other C++ libraries, and unlike Python sequences, these operations return a "view" into the structure, and not a copy, so can be used for in-place modification.
+
+The semantics of this operator have not been determined, since Python has different conventions from C++ libraries such as the STL \c valarray class, glas and uBlas \c vector classes and Matlab classes. For example, if \c v is the vector <c>[0,1,2,3,4,5,6,7,8,9]</c>, then different possibilities are
+
+ - Python: <c> v[start:finish:stride] </c>  e.g. <c>v[1:6:2]</c> = <c>v[1:7:2]</c> = <c>[1,3,5]</c>;
+
+ - C++ STL \c valarray : <c> v[slice(start,size,stride)]</c> e.g.  <c> v[slice(1,3,2)]</c>\c  = <c>[3,5,7]</c>;
+
+ - C++ uBlas: \c <c> project(v,slice(start,stride,size)) </c>  e.g.  <c>project(v,slice(1,2,3))</c> = <c>[1,3,5]</c>;
+
+ - C++ glas: \c <c> slice(start,finish,stride)) </c>  e.g.  <c>v[slice(1,6,2)])</c> = <c>v[slice(1,7,2)])</c> = <c>[1,3,5]</c>;
+
+ - Matlab: <c> v(first:stride:last) </c> with one-based indexing; e.g. <c>v(2:2:6)</c> = <c>v(2:2;7)</c> = <c>[1,3,5]</c>;
+
+The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
+
+\sa  \ref LinearAlgebraModule, Vector, Matrix
+
+<br><br>
+
+
+
+
+\section python_tutorial_function Functions
+
+Currently %Ariadne provides a \c Function class which specifies functions \f$f:\R^n\rightarrow\R^m\f$, i.e. functions of a single vector-valued variable.
+
+There are currently two ways of creating user-defined functions, either via the Python interface or in C++.
+
+
+\subsection tutorial_function_python Python functions
+
+An %Ariadne function can be constructed directly from a Python function.
+\code
+def henon_function(x):
+    return [ 1.5-x[0]*x[0]+0.375*x[1], x[0] ]
+\endcode
+Note that there must be a single argument of sequence type (i.e. supporting subscripting), and that the result must be a Python \c list object.
+
+To prepare the Python function for use in %Ariadne, some meta-information is required.
+\code
+henon_function.result_size = 2
+henon_function.argument_size = 2
+\endcode
+
+Finally, the function can be exported to the C++ wrapper.
+\code
+henon = AriadneFunction(henon_function)
+\endcode
+The newly-created function can be used exactly as a native C++ function, and supports automatic differentiation.
+\code
+x=Vector([1,0])
+print henon.evaluate(x)
+print henon.jacobian(x)
+print henon.derivative(x,3)
+\endcode
+
+An %Ariadne function can actually be constructed from any Python object with methods \c "result_size", \c "argument_size" and the special method \c "__call__". For example, to create a parameterised version of the Henon map, use:
+\code
+class HenonFunction:
+    def __init__(self,p):
+        self.p=p
+        self.result_size=2
+        self.argument_size=2
+    def __call__(self,x):
+        return [ p[0]-x[0]*x[0]+p[1]*x[1], x[0] ]
+
+henon = AriadneFunction( HenonFunction( [1.5,0.375] ) )
+\endcode
+
+Unfortunately, since all calls to the function require the Python interpreter, function evaluations will be much less efficient than a native C++
+
+It would be nice to have a script in which a function could be specified in C++ (or some other function description language) and directly linked into the Python library. Ideally it would be possible to make a user-specific library of C++ functions and alongside this a separate user-specific library of Python bindings. However, for reasons relating to how Python performs symbol table lookup, it may be impossible to import user-defined C++ functions into Python without re-linking the Python interface. Help on this issue would be appreciated.
+
+
+
+
+\section python_tutorial_functional_calculus Functional Calculus
+
+%Ariadne supports nonlinear functions by means of abstract classes, including \ref EffectiveScalarUnivariateFunction for functions \f$f:\R\rightarrow\R\f$, \ref EffectiveVectorUnivariateFunction for \f$f:\R\rightarrow\R^n\f$, \ref EffectiveScalarMultivariateFunction for scalar functions \f$f:\R^m\rightarrow\R\f$ and the \ref EffectiveVectorMultivariateFunction for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical \ref ValidatedScalarMultivariateTaylorFunctionModelDP and \ref ValidatedVectorMultivariateTaylorFunctionModelDP types which can then be worked with.
+
+\subsection taylor_calculus_nonlinear User-Defined Functions
+
+The EffectiveScalarMultivariateFunction and EffectiveVectorMultivariateFunction also allow the creation of %Ariadne functions.
+
+\skipline argument_size
+\until evaluate
+
+\subsection taylor_calculus_polynomial Polynomial Calculus
+
+\dontinclude python/tutorials/tutorial.py
+
+The \ref Polynomial "Polynomial<X>" class provides concrete implementations of the function calculus. For example, \ref FloatDPApproximationMultivariatePolynomial class defines a polynomial in multiple variables with coefficients of type \ref FloatDPApproximation.
+A polynomial can be created by using the <tt>variable(n,j)</tt> static method, which creates the polynomial \f$p(x)=x_j\f$ for \f$x\in\R^n\f$:
+
+\skipline Polynomial
+
+The standard arithmetical operations are available for polynomial expressions:
+
+\skipline p0*
+
+
+
+
+\section python_tutorial_taylor_calculus Taylor Calculus
+
+\dontinclude python/tutorials/tutorial.py
+
+The core type is a \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,F>", which is a polynomial representation \a p of a function \a f on a box \a D in Euclidean space with uniform error \a e:
+\f[ f(x) = p(x)\pm e \text{ for } x\in D . \f]
+
+Rather than represent a Taylor function by the polynomial \a p itself, we use a scaled model \a m such that
+\f[ m(\xi) = p(s(\xi)) \f]
+where
+\f[ s:[-1,+1]^n \rightarrow [a_1,b_1]\times\cdots\times[a_n,b_n] = D\f]
+is the scaling function given by
+\f[ s_i(\xi) = \frac{a_i+b_i}{2} + \frac{b_i-a_i}{2} \xi_i . \f]
+The use of the scaled model \a m gives better accuracy over the domain of the expression.
+
+\sa \ref function_models_page
+
+\subsection taylor_calculus_creating Creating Taylor functions
+
+The simplest way to create a Taylor function is to use the named constructor coordinate(D,j,swp), which constructs a Taylor function for the function \f$f(x)=x_j\f$ on the domain \f$D\f$ using the \e sweeper to control the accuracy:
+
+\skip TaylorFunction
+\skipline coordinate
+
+It is possible to create a list of all \f$n\f$ variables on \f$D\in\R^n\f$:
+\skip TaylorFunctionModel
+\skipline coordinate
+
+To save typing, give shorthand names to the variables:
+\skipline x
+\until z
+
+We can even make a shorthand function to create new Taylor function models.
+\skipline def T(
+\until return
+
+A Taylor function model can also be constructed as an approximations to any object satisfying a Function type interface, including a Polynomial. The domain of the expression has to be given.
+
+\skipline tp=
+
+The following functions are available to inspect the Taylor function model.
+The domain() function returns the domain of validity \a D.
+The codomain() returns the over-approximation to the image of the domain given by
+\f[ c_0 \pm \left(\textstyle\sum_{|\alpha|\neq0} |c_\alpha| + e \right) . \f]
+The range() also gives an over-approximation to the image of the domain, but may be more accurate (and slower).
+The polynomial() function gives an interval polynomial representation of the function which is only valid on the domain.
+\skipline .domain
+\skipline .codomain
+\skipline .range
+\skipline .polynomial
+
+\subsection taylor_calculus_arithmetic Arithmetical Operators
+
+The standard arithmetical operations are available between Taylor function models. In all cases, the result enclosed all possible functions represented by the arguments.
+\skip +tx
+\until tx/ty
+
+Mixed operations with concrete (Value, Bounds and Approximation) scalars are also supported:
+\skip tx+c
+\until tx/c
+\skip tx+b
+\until tx/b
+
+Inplace operations are supported where they can be implemented efficiently:
+\skip tx+=ty
+\until tx/=b
+
+\subsection taylor_calculus_functions Algebraic and Transcendental Functions
+
+The comparison functions \c min, \c max and \c abs are provided.
+abs(x) returns x if is (provably) positive on the entire domain, -x if x is (provably) negative on the entire domain, and the interval constant abs(x.range()) otherwise. max(x,y) can be implemented as ( x + y + abs(x-y) )/2
+
+\skip min(
+\until abs(
+The standard %Ariadne arithmetical functions \c neg, \c rec, \c sqr and \c pow are provided.
+The \c rec function throws a DivideByZeroException if zero lies in the codomain of \a x, as does \c pow(x,n) for negative \a n.
+
+\skip neg(
+\until pow(
+
+The standard algebraic and transcendental functions are also given. The \c sqrt and \c log functions throw a DomainException if the codomain of the expression is not positive. The \c tan function throws a DivideByZeroException if \a cos(x) becomes zero over the domain.
+
+\skipline sqrt(
+\until tan(
+
+\subsection taylor_calculus_combining Joining Expressions to make Functions
+
+We can also change the domain of definition of the expression using the \c embed function. The result of \f$\mathrm{embed}(D_0,f_1,D_2)\f$ is the function \f$f:D_0\times D_1\times D_2 \rightarrow \R\f$ given by \f$\hat{f}(x_0,x_1,x_2)=f(x_1)\f$.
+
+\skipline embed(
+
+We can combine TaylorExpression objects into TaylorFunction objects using the \c join function. The domain of each of the subexpressions must be the same. The result of \c join(f,g) is the function given by \f$\mathrm{join}(f,g)(x)=(f(x),g(x))\f$.
+
+\skipline join(
+
+We can combine TaylorExpression objects into TaylorFunction objects using the \c combine function. The result of \c combine(f,g) is the function given by \f$\mathrm{combine}(f,g)(x,y)=(f(x),g(y))\f$.
+
+\skipline combine(
+
+\subsection taylor_calculus_composition Composition
+
+The main use of the Taylor calculus is to perform composition of functions and solution of equations.
+
+We can compose Taylor function objects \f$f\f$ and \f$h\f$ to obtain the function \f$f\circ h\f$.
+
+\skipline compose(
+
+The codomain of \a g must be a subset of the domain of \a f.
+\skipline assert
+
+We can also compose a Taylor function \f$f\f$ and Taylor function \f$g\f$ to obtain a Taylor function model \f$f\circ g\f$.
+
+\until compose(
+
+\subsection taylor_calculus_algebraic Solving Algebraic Equations
+
+We can use Taylor functions to solve parameterised algebraic equations using the operator \c implicit.
+If \f$f:D_1\times D_2\rightarrow \R^n\f$ with \f$D_2\subset\R^n\f$ then the operator \c implicit(f) attempts to compute a function \a h such that \f$f(x,h(x))=0\f$ for \f$x\in D_m\f$. The function \f$h\f$ must satisfy \f$h(D_1)\subset D_2\f$.
+
+\skipline implicit(
+
+In the case of a Taylor function model, the \c implicit function applied to \f$f:D_1\times I_2\rightarrow\R\f$ returns a Taylor function model \f$h:D_1\rightarrow I_2\subset\R\f$ such that \f$h(x,h(x))=0\f$.
+
+\subsection taylor_calculus_differential Computing (Anti)Derivatives and Solving Differential Equations
+
+The antiderivative method computes a Taylor function model \f$\int^{x_j} f\f$ such that \f$\frac{\partial}{\partial x_j} \int^{x_j} f = f\f$:
+\skipline antiderivative(
+
+If \f$f\f$ is a Taylor function model, then \c derivative(f,j) computes the derivative of \a f with respect to the \a j<sup>th</sup> independent variable. Since the derivative is only well-defined if the error term is zero (otherwise there are represented functions with arbitrary high derivatives) a prerequisite of the operator is that the error is zero:
+
+\skipline derivative(
+
+If a derivative with respect to more than one variable is requires, the form \c derivative(f,[j1,...,jk]) can be used, where \c [j1,...,jk] is an array of indices:
+
+\skipline derivative(
+
+
+
+Given a function \f$f:B\rightarrow\R^n\f$, a domain \a D which is a subset of \a B and a time step \a h, a function \f$\phi:D\times[-h,+h]\rightarrow B\f$ satisfying \f$\frac{d}{dt}\phi(x,t) = f(\phi(x,t))\f$ and \f$\phi(x,0)=x\f$ can be computed using the \c flow operator:
+
+If \f$f\f$ is a Taylor function, then the domain \a B is the domain of the function model, so the flow can be computed using:
+
+\skipline flow(
+
+\subsection taylor_calculus_comparisons Comparisons
+
+Taylor function models \a f<sub>1</sub> and \a f<sub>2</sub> can be compared to see if one gives a better approximation than the other using the \c refines operator. If \c refines(f<sub>1</sub>,f<sub>2</sub>) is \c True, then any function represented by \a f<sub>1</sub> is also represented by \a f<sub>2</sub>. The result may be \c Indeterminate if it cannot be determined up to numerical error whether \a f<sub>1</sub> refined \a f<sub>2</sub> or not.
+
+If \f$f_1(x)=p_1(x)+e_1\f$ and \f$f_2(x)=p_2(x)+e_2\f$, then \c refines(f_1,f_2) yields \c True if \f$|p_1-p_1|+e_1 \leq e_2\f$.
+
+Taylor function models \a f<sub>1</sub> \a f<sub>2</sub> can be compared to see if there is a function \a f modelled by both.
+If \f$f_1(x)=p_1(x)+e_1\f$ and \f$f_2(x)=p_2(x)+e_2\f$, then \c intersect(f_1,f_2) yields \c True if \f$|p_1-p_1| \leq e_1 + e_2\f$.
+
+
+\skipline refines(
+\skipline inconsistent(
+\skipline refinement(
+
+
+\subsection taylor_calculus_contractors Contractors
+
+We can use a variant of the interval Newton method to improve solutions to algebraic equations.
+
+\skip Newton contractor
+\skip derivative(
+\until refinement(
+
+We can use Picard iteration to improve solutions to differential equations.
+
+\skip Picard operator
+\skipline antiderivative(
+
+\sa \ref function_model_contractors
+
+*/
+
+} // namespace Ariadne

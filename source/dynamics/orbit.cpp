@@ -1,7 +1,7 @@
 /***************************************************************************
- *            orbit.cpp
+ *            dynamics/orbit.cpp
  *
- *  Copyright 2007--17 Pieter Collins
+ *  Copyright  2007-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -35,17 +35,16 @@
 #include "../geometry/curve.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/grid_paving.hpp"
 
 namespace Ariadne {
 
 
-Orbit<ExactPoint>::Orbit(const ExactPoint& pt)
+template<class F> Orbit<ExactPoint<F>>::Orbit(const ExactPoint<F>& pt)
     : _curve(new InterpolatedCurve(0,pt))
 { }
 
-Void
-Orbit<ExactPoint>::insert(FloatDPValue t, const ExactPoint& pt)
+template<class F> Void
+Orbit<ExactPoint<F>>::insert(Value<F> t, const ExactPoint<F>& pt)
 {
     this->_curve->insert(t,pt);
 }
@@ -53,27 +52,27 @@ Orbit<ExactPoint>::insert(FloatDPValue t, const ExactPoint& pt)
 
 
 
-struct Orbit<GridCell>::Data {
+struct Orbit<Storage>::Data {
     Data(const Grid& grid) : initial(grid), reach(grid), intermediate(grid), final(grid) { }
-    GridTreePaving initial;
-    GridTreePaving reach;
-    GridTreePaving intermediate;
-    GridTreePaving final;
+    Storage initial;
+    Storage reach;
+    Storage intermediate;
+    Storage final;
 };
 
-Orbit<GridCell>::
-Orbit(const GridTreePaving& initial_set)
+Orbit<Storage>::
+Orbit(const Storage& initial_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
 }
 
 
-Orbit<GridCell>::
-Orbit(const GridTreePaving& initial_set,
-      const GridTreePaving& reach_set,
-      const GridTreePaving& intermediate_set,
-      const GridTreePaving& final_set)
+Orbit<Storage>::
+Orbit(const Storage& initial_set,
+      const Storage& reach_set,
+      const Storage& intermediate_set,
+      const Storage& final_set)
     : _data(new Data(initial_set.grid()))
 {
     this->_data->initial=initial_set;
@@ -83,29 +82,29 @@ Orbit(const GridTreePaving& initial_set,
 }
 
 
-GridTreePaving const&
-Orbit<GridCell>::
+Storage const&
+Orbit<Storage>::
 initial() const
 {
     return this->_data->initial;
 }
 
-GridTreePaving const&
-Orbit<GridCell>::
+Storage const&
+Orbit<Storage>::
 reach() const
 {
     return this->_data->reach;
 }
 
-GridTreePaving const&
-Orbit<GridCell>::
+Storage const&
+Orbit<Storage>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-GridTreePaving const&
-Orbit<GridCell>::
+Storage const&
+Orbit<Storage>::
 final() const
 {
     return this->_data->final;

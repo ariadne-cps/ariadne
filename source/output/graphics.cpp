@@ -1,7 +1,7 @@
 /***************************************************************************
- *            graphics.cpp
+ *            output/graphics.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -35,10 +35,6 @@
 #include "../output/graphics.hpp"
 #include "../output/cairo.hpp"
 
-#ifdef HAVE_GTK2_H
-#include <gtk/gtk.h>
-#endif
-
 namespace Ariadne {
 
 static const Int DEFAULT_WIDTH = 800;
@@ -53,18 +49,26 @@ static const Int RIGHT_MARGIN = 10;
 
 #endif
 
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable);
+OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
+    if(auto writable=dynamic_cast<const WritableInterface*>(&drawable)) {
+        os << *writable;
+    } else {
+        os << "Drawable";
+    }
+    return os;
+}
+
 
 
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
-Colour::Colour(double rd, double gr, double bl, Bool tr)
+Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Bool tr)
     : Colour("",rd,gr,bl,tr?0.0:1.0) { }
-Colour::Colour(double rd, double gr, double bl, double op)
+Colour::Colour(Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : Colour("",rd,gr,bl,op) { }
-Colour::Colour(const char* nm, double rd, double gr, double bl, Bool tr)
+Colour::Colour(const Char* nm, Dbl rd, Dbl gr, Dbl bl, Bool tr)
     : Colour("",rd,gr,bl,tr?0.0:1.0) { }
-Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
+Colour::Colour(const char* nm, Dbl rd, Dbl gr, Dbl bl, Dbl op)
     : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
 OutputStream& operator<<(OutputStream& os, const Colour& c) {
     return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
@@ -80,7 +84,7 @@ const Colour blue=Colour("blue",0.0,0.0,1.0);
 const Colour yellow=Colour("yellow",1.0,1.0,0.0);
 const Colour cyan=Colour("cyan",0.0,1.0,1.0);
 const Colour magenta=Colour("magenta",1.0,0.0,1.0);
-
+const Colour ariadneorange=Colour("ariadneorange",1.0,0.75,0.5);
 
 OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp) {
     return os << "GraphicsProperties(" << "dot_radius=" << gp.dot_radius
@@ -100,10 +104,6 @@ Void draw(Figure& fig, const DrawableInterface& shape) {
 
 Void draw(Figure& fig, FloatDPApproximateBox const& box) {
     fig.draw(box);
-}
-
-OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
-    return drawable.write(os);
 }
 
 struct GraphicsObject {
@@ -142,8 +142,13 @@ Figure::Figure(const GraphicsBoundingBoxType& bbx, const PlanarProjectionMap& pr
     ARIADNE_ASSERT_MSG(proj.argument_size() == bbx.dimension(), "Coordinate projection "<<proj<<" must take same number of arguments as the dimension of the bounding box "<<bbx);
 }
 
-Figure::Figure(const GraphicsBoundingBoxType& bbx, Nat ix, Nat iy)
+Figure::Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy)
     : Figure(bbx,PlanarProjectionMap(bbx.dimension(),ix,iy))
+{
+}
+
+Figure::Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy)
+    : Figure(bbx,PlanarProjectionMap(bbx.dimension(),ixy.first,ixy.second))
 {
 }
 
@@ -153,7 +158,7 @@ Figure& Figure::draw(const DrawableInterface& shape)
 }
 
 
-Figure& Figure::set_projection(Nat as, Nat ix, Nat iy)
+Figure& Figure::set_projection(DimensionType as, DimensionType ix, DimensionType iy)
 {
     this->_data->projection=PlanarProjectionMap(as,ix,iy); return *this;
 }
@@ -178,7 +183,7 @@ ApproximateBoxType Figure::get_bounding_box() const
     return this->_data->bounding_box;
 }
 
-Figure& Figure::set_dot_radius(double dr)
+Figure& Figure::set_dot_radius(Dbl dr)
 {
     this->_data->properties.dot_radius=dr; return *this;
 }
@@ -188,7 +193,7 @@ Figure& Figure::set_line_style(Bool ls)
     this->_data->properties.line_style=ls; return *this;
 }
 
-Figure& Figure::set_line_width(double lw)
+Figure& Figure::set_line_width(Dbl lw)
 {
     this->_data->properties.line_width=lw; return *this;
 }
@@ -198,7 +203,7 @@ Figure& Figure::set_line_colour(Colour lc)
     this->_data->properties.line_colour=lc; return *this;
 }
 
-Figure& Figure::set_line_colour(double r, double g, double b)
+Figure& Figure::set_line_colour(Dbl r, Dbl g, Dbl b)
 {
     this->set_line_colour(Colour(r,g,b)); return *this;
 }
@@ -208,7 +213,7 @@ Figure& Figure::set_fill_style(Bool fs)
     this->_data->properties.fill_style=fs; return *this;
 }
 
-Figure& Figure::set_fill_opacity(double fo)
+Figure& Figure::set_fill_opacity(Dbl fo)
 {
     this->_data->properties.fill_colour.opacity=fo; return *this;
 }
@@ -218,7 +223,7 @@ Figure& Figure::set_fill_colour(Colour fc)
     this->_data->properties.fill_colour=fc; return *this;
 }
 
-Figure& Figure::set_fill_colour(double r, double g, double b)
+Figure& Figure::set_fill_colour(Dbl r, Dbl g, Dbl b)
 {
     this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity)); return *this;
 }
@@ -228,12 +233,12 @@ Bool Figure::get_line_style() const
     return this->_data->properties.line_style;
 }
 
-double Figure::get_line_width() const
+Dbl Figure::get_line_width() const
 {
     return this->_data->properties.line_width;
 }
 
-double Figure::get_dot_radius() const
+Dbl Figure::get_dot_radius() const
 {
     return this->_data->properties.dot_radius;
 }
@@ -249,7 +254,7 @@ Bool Figure::get_fill_style() const
     return this->_data->properties.fill_style;
 }
 
-double Figure::get_fill_opacity() const
+Dbl Figure::get_fill_opacity() const
 {
     return this->_data->properties.fill_colour.opacity;
 }
@@ -261,7 +266,7 @@ Colour Figure::get_fill_colour() const
 
 Figure& Figure::draw(ApproximateBoxType const& box)
 {
-    ApproximateBoxSet box_set(box);
+    ApproximateBoxSetType box_set(box);
     DrawableInterface const& shape=box_set;
     this->draw(shape); return *this;
 }
@@ -286,15 +291,13 @@ Void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-inline OutputStream& operator<<(OutputStream& os, const ExactBoxType& bx) { return os << static_cast<const ExactIntervalVectorType&>(bx); }
-
 Void Figure::_paint_all(CanvasInterface& canvas) const
 {
     ApproximateBoxType bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap projection=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
 
-    Nat dimension=projection.argument_size();
+    DimensionType dimension=projection.argument_size();
 
     // Don't attempt to compute a bounding box, as this relies on
     // a drawable object having one. Instead, the bounding box must be
@@ -309,17 +312,17 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
 
     // Project the bounding box onto the canvas
-    double xl=numeric_cast<double>(bounding_box[projection.x_coordinate()].lower());
-    double xu=numeric_cast<double>(bounding_box[projection.x_coordinate()].upper());
-    double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
-    double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
+    Dbl xl=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].lower());
+    Dbl xu=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].upper());
+    Dbl yl=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].lower());
+    Dbl yu=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].upper());
 
     StringType tx=StringType("x")+str(projection.x_coordinate());
     StringType ty=StringType("x")+str(projection.y_coordinate());
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
-    for(Nat i=0; i!=objects.size(); ++i) {
+    for(SizeType i=0; i!=objects.size(); ++i) {
         const DrawableInterface& shape=objects[i].shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
         ARIADNE_ASSERT_MSG(dimension==shape.dimension(),

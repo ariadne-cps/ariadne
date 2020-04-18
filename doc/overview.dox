@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_evolution_methods.dox
+ *            overview.dox
  *
- *  Copyright  2004-7  Pieter Collins
+ *  Copyright  2004-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -115,36 +115,36 @@ The main operations which %Ariadne can perform are
 - Main user classes for reachability analysis of hybrid systems.
    - System classes implementing \ref HybridAutomatonInterface for defining hybrid systems,
    - Evolution classes implementing \ref HybridEvolverInterface for computing the evolution of a hybrid system from a given initial set, and a \ref HybridReachabilityAnalyser for performing global reachability analysis
-   - Output classes \ref Figure for plotting sets and orbits and \ref InputArchive and \ref OutputArchive classes for data persistence.
+   - Output classes \ref Figure for plotting sets and orbits.
    .
 - Auxiliary user classes, used to define systems and store output.
    - Numeric classes, including \ref Real, \link Bounds \c Bounds<F> \endlink and \link Approximation \c Approximation<F> \endlink based on floating-point types \ref FloatDP and \ref FloatMP, and concrete \ref Integer, \ref Dyadic, \ref Decimal and \ref Rational classes.
    - Linear algebra classes, \link Vector \c Vector<X> \endlink and \link Matrix \c Matrix<X> \endlink, templated on the numerical type.
-   - Function classes, including the general \ref ScalarFunction and \ref VectorFunction classes, with \ref ScalarUnivariateFunction and \ref VectorUnivariantFunction, specific \ref ScalarConstantFunction, \ref ScalarAffineFunction, \ref ScalarPolynomialFunction and \ref IdentityFunction types.
-   - Geometric classes, including affine geometric types such as \ref Point, \ref Box and \ref Polyhedron, and general \ref ImageSet, \ref ConstraintSet and \ref ConstrainedImageSet objects, and abstract interfaces such as \ref OpenSetInterface, \ref OvertSetInterface and \ref CompactSetInterface.
-   - Storage class \link Orbit Orbit<S> \endlink for storing evolution traces and \ref GridTreeSet for storing reached sets.
+   - %Function classes, including the general \ref Function type, with \ref ScalarUnivariateFunction, \ref VectorUnivariateFunction, \ref ScalarMultivariateFunction and \ref VectorMultivariateFunction, specific \ref ConstantFunction, \ref CoordinateFunction, \ref Affine function, and \ref Polynomial function types.
+   - Geometric classes, including affine geometric types such as \ref Point, \ref Box and \ref Polyhedron, and general \ref ImageSet, \ref ConstraintSet and \ref ConstrainedImageSet objects, and generic sets such as \ref OpenSet, \ref OvertSet and \ref CompactSet defined by abstract interfaces.
+   - Storage class \link Orbit Orbit<S> \endlink for storing evolution traces and \ref GridTreePaving for storing reached sets.
    .
 - Internal classes, used in computations.
   - Automatic differentiation classes \link Differential Differential<X> \endlink.
   - %Differential calculus classes, including \ref TaylorModel class for high-order polynomial approximation to dependent quantities.
-  - Function patches, such as \ref ScalarTaylorFunction and \ref VectorTaylorFunction, for storing approximation to functions over bounded sets.
+ - %Function patch models, such as the \ref ScalarMultivariateTaylorFunctionModel and \ref VectorMultivariateTaylorFunctionModel classes, for storing approximation to functions over bounded sets.
   .
 - Evaluation classes for performing nontrivial internal computations.
   - %Differential equation solvers satisfying the \ref IntegratorInterface.
   - Algebraic equation solvers satisfying the \ref SolverInterface.
   - Nonlinear programming classes satisfying the \ref OptimiserInterface.
-  - Constraint propagation classes satisfying the \ref ConstraintSolverInterface.
+  - %Constraint propagation classes satisfying the \ref ConstraintSolverInterface.
 
 
 \section overview_system Building a Hybrid System
 
-In order to use %Ariadne for reachability analysis, it is first necessary to build a hybrid system. The \ref MonolithicHybridAutomaton class is the main %Ariadne class for describing hybrid systems as a single hybrid automaton. A %MonolithicHybridAutomaton comprises \ref DiscreteMode and \ref DiscreteTransition objects to describe the modes (including continuous dynamics and invariants) and the discrete transitions (describing guards/activation predicates and reset relations.
+In order to use %Ariadne for reachability analysis, it is first necessary to build a hybrid system. The \ref HybridAutomaton class is the main %Ariadne class for describing hybrid systems as a single hybrid automaton. A %MonolithicHybridAutomaton comprises \ref DiscreteMode and \ref DiscreteTransition objects to describe the modes (including continuous dynamics and invariants) and the discrete transitions (describing guards/activation predicates and reset relations.
 
 An %Ariadne automaton must be built explicitly using the
-  \link MonolithicHybridAutomaton::new_mode() \c new_mode \endlink,
-  \link MonolithicHybridAutomaton::new_invariant() \c new_invariant \endlink
+  \link HybridAutomaton::new_mode() \c new_mode \endlink,
+  \link HybridAutomaton::new_invariant() \c new_invariant \endlink
 and
-  \link MonolithicHybridAutomaton::new_transition() \c new_transition \endlink
+  \link HybridAutomaton::new_transition() \c new_transition \endlink
 methods.
 
 All resets, flows and guards are specified using <em>functions</em>. A function is just a mapping from \f$\R^m\f$ to \f$\R^n\f$.
@@ -159,10 +159,10 @@ In order to analyse a hybrid system, we need an <em>Evolver</em> or <em>Analyser
 An Evolver class is used to perform simulations, and computes the evolution up to a given time starting from an initial <em>enclosure</em> set. An Analyser class is used to perform global analysis, and computes the evolution starting from an arbitrary given set. Internally, an Analyser class typically uses an Evolver to perform the evolution, and then performs a discretization of the evolved set on a grid.
 
 An evolver class satisfies the interface \link EvolverInterface \c EvolverInterface<SYS,ES> \endlink, where \c ES is the template parameter giving the type used for the enclosure sets. The \link HybridEvolverInterface HybridEvolverInterface \endlink class is an interface for evolvers for hybrid systems using the type \c HybridEnclosure to specify the continuous part of the enclosure set.
-To build an Evolver class, we need to give <em>evolution parameters</em> to specify the accuracy of the computation. The evolution parameters are passed using the \ref ContinuousEvolutionParameters class. Note that not all parameters need be used by a given Evolver class.
+To build an Evolver class, we need to give <em>evolution parameters</em> to specify the accuracy of the computation. The evolution parameters are passed using the evolver's configuration class. Note that not all parameters need be used by a given Evolver class.
 
 A reachability analyser class satisfies the interface \link ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
-The class \ref HybridReachabilityAnalyser may be used to perform reachability analysis of hybrid systems. It can be constructed from a \ref HybridEvolverInterface class, with parameters given by \ref DiscreteEvolutionParameters.
+The class \ref HybridReachabilityAnalyser may be used to perform reachability analysis of hybrid systems. It can be constructed from a \ref HybridEvolverInterface class.
 
 \remark We use Evolver and Analyser classes rather than functions to perform the analysis since different methods require different user parameters to specify the accuracy.
 

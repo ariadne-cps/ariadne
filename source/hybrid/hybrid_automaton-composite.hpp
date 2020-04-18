@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-composite.hpp
  *
- *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -58,6 +58,7 @@ class CompositeHybridAutomaton;
 
 
 //! \ingroup SystemModule
+//! \ingroup HybridAutomataSubModule
 //! \brief A hybrid automaton, formed by running a finite number of HybridAutomaton classes in parallel.
 //!
 //! \sa \ref HybridAutomaton
@@ -67,6 +68,10 @@ class CompositeHybridAutomaton
 {
     mutable DiscreteMode _cached_mode;
     Void _cache_mode(DiscreteLocation) const;
+    static Writer<CompositeHybridAutomaton> _default_writer;
+  public:
+    static Void set_default_writer(Writer<CompositeHybridAutomaton> w) { _default_writer=w; }
+    static Writer<CompositeHybridAutomaton> default_writer() { return _default_writer; }
   public:
     typedef HybridTime TimeType;
   public:
@@ -220,7 +225,7 @@ class CompositeHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
   protected:
     Identifier _name;
   private:
@@ -230,7 +235,15 @@ class CompositeHybridAutomaton
 CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components);
 
 inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton& ha) {
-    return ha.write(os); }
+    return ha._write(os); }
+
+class CompactCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
+    virtual OutputStream& _write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+};
+
+class VerboseCompositeHybridAutomatonWriter : public WriterInterface<CompositeHybridAutomaton> {
+    virtual OutputStream& _write(OutputStream& os, CompositeHybridAutomaton const& ha) const final override;
+};
 
 } // namespace Ariadne
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_reachability_analyser.hpp
+ *            hybrid/hybrid_reachability_analyser.hpp
  *
- *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_reachability_analyser.hpp
+/*! \file hybrid/hybrid_reachability_analyser.hpp
  *  \brief Methods for computing reachable sets of hybrid systems.
  */
 
@@ -41,6 +41,7 @@
 #include "../hybrid/hybrid_grid.hpp"
 #include "../hybrid/hybrid_set.hpp"
 #include "../hybrid/hybrid_paving.hpp"
+#include "../hybrid/hybrid_storage.hpp"
 
 #include "../output/logging.hpp"
 
@@ -55,7 +56,7 @@ class HybridAutomatonInterface;
 class HybridGrid;
 class HybridGridCell;
 class HybridGridTreePaving;
-class HybridGridTreePaving;
+class HybridStorage;
 
 template<class ES> class HybridListSet;
 
@@ -65,8 +66,8 @@ class HybridAutomaton;
 
 template<> struct SafetyCertificate<HybridSpace> {
     ValidatedSierpinskian is_safe;
-    HybridGridTreePaving chain_reach_set;
-    HybridGridTreePaving safe_set;
+    HybridStorage chain_reach_set;
+    HybridStorage safe_set;
 };
 
 using HybridSafetyCertificate = SafetyCertificate<HybridSpace>;
@@ -75,6 +76,7 @@ using HybridReachabilityAnalyserConfiguration = ReachabilityAnalyserConfiguratio
 template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface>;
 
 //! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyser
     : public ReachabilityAnalyser<HybridAutomatonInterface>
@@ -86,18 +88,16 @@ class HybridReachabilityAnalyser
     //! \name Constructors and destructors
 
     //! \brief Construct from an evolver.
-    HybridReachabilityAnalyser(
-            const SystemType& system,
-            const HybridEvolverInterface& evolver);
+    HybridReachabilityAnalyser(const HybridEvolverInterface& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     virtual HybridReachabilityAnalyser* clone() const;
     //@}
 
   protected:
-    Void _adjoin_upper_reach_evolve(HybridGridTreePaving& reach_cells,
-                                    HybridGridTreePaving& evolve_cells,
-                                    const HybridGridTreePaving& set,
+    Void _adjoin_upper_reach_evolve(HybridStorage& reach_cells,
+                                    HybridStorage& evolve_cells,
+                                    const HybridStorage& set,
                                     const HybridTerminationCriterion& termination,
                                     const Nat accuracy,
                                     const HybridEvolverInterface& evolver) const;
@@ -113,7 +113,7 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! \brief The unsigned integer type.
     typedef Nat UnsignedIntType;
     //! \brief The real type.
-    typedef ExactNumericType RealType;
+    typedef ExactDouble RealType;
 
     //! \brief The real type.
     typedef HybridAutomatonInterface::TimeType TimeType;
@@ -193,23 +193,23 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     //! This property is only used for discrete-time computation.
     UnsignedIntType _lock_to_grid_steps;
 
-    //! \brief The depth used for approximation on a grid for computations using upper semantics.
+    //! \brief The fineness used for approximation on a grid for computations using upper semantics.
     //! \details
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    UnsignedIntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_fineness;
 
-    //! \brief The maximum height used for approximation on a grid for chain reachability computations.
+    //! \brief The maximum extent used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    UnsignedIntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_extent;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
-    //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
+    //! If defined, this property combines with _maximum_grid_extent to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
     SharedPointer<HybridExactBoxes> _bounding_domain_ptr;
@@ -230,13 +230,13 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     const TimeType lock_to_grid_time() const { return HybridTime(Dyadic(_lock_to_grid_time),_lock_to_grid_steps); }
 
     //    const RealType& transient_time() const { return _transient_time; }
-    Void set_transient_time(const RawFloatDP value) { _transient_time = RealType(value); }
+    Void set_transient_time(const Double value) { _transient_time = RealType(value); }
 
     const UnsignedIntType& transient_steps() const { return _transient_steps; }
     Void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
 
 //    const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
-    Void set_lock_to_grid_time(const RawFloatDP value) { _lock_to_grid_time = RealType(value); }
+    Void set_lock_to_grid_time(const Double value) { _lock_to_grid_time = RealType(value); }
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
     Void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }
@@ -244,11 +244,11 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     const Set<DiscreteEvent>& lock_to_grid_events() const { return _lock_to_grid_events; }
     Void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
 
-    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_fineness() const { return _maximum_grid_fineness; }
+    Void set_maximum_grid_fineness(const UnsignedIntType value) { _maximum_grid_fineness = value; }
 
-    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_extent() const { return _maximum_grid_extent; }
+    Void set_maximum_grid_extent(const UnsignedIntType value) { _maximum_grid_extent = value; }
 
     const std::shared_ptr<HybridExactBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.
@@ -263,14 +263,14 @@ template<> class ReachabilityAnalyserConfiguration<HybridAutomatonInterface> : p
     Void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
     Void set_scaling(const RealVariable& v, RawFloatDP s) {
-        dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,FloatDPValue(s)); }
+        dynamic_cast<SimpleHybridScalings&>(static_cast<HybridScalingsInterface&>(this->grid().scalings())) .set_scaling(v,FloatDPValue(s)); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 

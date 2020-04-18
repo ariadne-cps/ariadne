@@ -1,7 +1,7 @@
 /***************************************************************************
  *            acoustic_first_order_pde.cpp
  *
- *  Copyright 2018  Pieter Collins, Svetlana Selivanova
+ *  Copyright  2018-20  Pieter Collins, Svetlana Selivanova
  *
  ****************************************************************************/
 
@@ -66,14 +66,16 @@ int main() {
     EffectiveVectorMultivariateFunction f=EffectiveVectorMultivariateFunction::zeros(3,EuclideanDomain(2+1));
     EffectiveVectorMultivariateFunction phi0={sin(2*x[0]),sin(3*x[1]),z};
 
-    auto h_tau_uts_error=first_order_pde(A,Bs,Ds,Ts,f,phi0,multiple_precision(128));
-    auto h=std::get<0>(h_tau_uts_error);
-    auto tau=std::get<1>(h_tau_uts_error);
-    auto uts=std::get<2>(h_tau_uts_error);
-    auto err=std::get<3>(h_tau_uts_error);
+    FirstOrderPDE pde{A,Bs,Ds,Ts,f};
+    auto pr=multiple_precision(128);
 
+    auto solution=first_order_pde(pde,phi0,pr);
+    auto h=solution.h;
+    auto tau=solution.tau;
+    auto uts=solution.uts;
+    auto error=solution.error;
     std::cout << "uts="<<uts<<"\n";
-    std::cout << "h="<<h<<", tau="<<tau<<", err="<<err<<"\n";
+    std::cout << "h="<<h<<", tau="<<tau<<", error="<<error<<"\n";
 
     // Check derivatives
     SizeType i0=2; SizeType i1=3; SizeType k=0;

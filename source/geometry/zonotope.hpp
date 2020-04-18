@@ -1,7 +1,7 @@
 /***************************************************************************
- *            zonotope.hpp
+ *            geometry/zonotope.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file zonotope.hpp
+/*! \file geometry/zonotope.hpp
  *  \brief Zonotopes in Euclidean space.
  */
 
@@ -210,7 +210,7 @@ class Zonotope
     //@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     /*! \brief Draw on a canvas. */
     Void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}

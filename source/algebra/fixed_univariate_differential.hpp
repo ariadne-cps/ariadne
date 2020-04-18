@@ -1,7 +1,7 @@
 /***************************************************************************
- *            fixed_univariate_differential.hpp
+ *            algebra/fixed_univariate_differential.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file fixed_univariate_differential.hpp
+/*! \file algebra/fixed_univariate_differential.hpp
  *  \brief First- and second-order univariate differentials.
  */
 
@@ -143,22 +143,22 @@ template<class X> UnivariateFirstDifferential<X> create_zero(const UnivariateFir
 
 template<class X> struct AlgebraOperations<UnivariateFirstDifferential<X>,X> {
     static UnivariateFirstDifferential<X> apply(Add, UnivariateFirstDifferential<X> x, const X& c) {
-        x._value+=c; return std::move(x); }
+        x._value+=c; return x; }
     static UnivariateFirstDifferential<X> apply(Sub, UnivariateFirstDifferential<X> x, const X& c) {
-        x._value-=c; return std::move(x); }
+        x._value-=c; return x; }
     static UnivariateFirstDifferential<X> apply(Mul, UnivariateFirstDifferential<X> x, const X& c) {
-        x._value*=c; x._gradient*=c; return std::move(x); }
+        x._value*=c; x._gradient*=c; return x; }
     static UnivariateFirstDifferential<X> apply(Div, UnivariateFirstDifferential<X> x, const X& c) {
-        x._value/=c; x._gradient/=c; return std::move(x); }
+        x._value/=c; x._gradient/=c; return x; }
 
     static UnivariateFirstDifferential<X> apply(Add, UnivariateFirstDifferential<X> x, const UnivariateFirstDifferential<X>& y) {
-        x._value += y._value; x._gradient += y._gradient; return std::move(x); }
+        x._value += y._value; x._gradient += y._gradient; return x; }
     static UnivariateFirstDifferential<X> apply(Sub, UnivariateFirstDifferential<X> x, const UnivariateFirstDifferential<X>& y) {
-        x._value -= y._value; x._gradient -= y._gradient; return std::move(x); }
+        x._value -= y._value; x._gradient -= y._gradient; return x; }
     static UnivariateFirstDifferential<X> apply(Mul, UnivariateFirstDifferential<X> x, const UnivariateFirstDifferential<X>& y) {
-        x._gradient *= y._value; x._gradient += x._value * y._gradient; x._value *= y._value; return std::move(x); }
+        x._gradient *= y._value; x._gradient += x._value * y._gradient; x._value *= y._value; return x; }
     static UnivariateFirstDifferential<X> apply(Div, UnivariateFirstDifferential<X> x, const UnivariateFirstDifferential<X>& y) {
-        x._value /= y._value; x._gradient -= x._value * y._gradient; x._gradient /= y._value; return std::move(x); }
+        x._value /= y._value; x._gradient -= x._value * y._gradient; x._gradient /= y._value; return x; }
 
     static UnivariateFirstDifferential<X> apply(Pos, const UnivariateFirstDifferential<X>& x) {
         return UnivariateFirstDifferential<X>(+x._value,+x._gradient); }
@@ -314,7 +314,7 @@ class UnivariateSecondDifferential
         dg._half_hessian += df._half_hessian * sqr(dg._gradient);
         dg._gradient *= df._gradient;
         dg._value = df._value;
-        return std::move(dg);
+        return dg;
     }
     friend OutputStream& operator<<(OutputStream& os, const UnivariateSecondDifferential<X>& x)  {
         os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{";
@@ -346,22 +346,22 @@ class UnivariateSecondDifferential
 
 template<class X> struct AlgebraOperations<UnivariateSecondDifferential<X>,X> {
     static UnivariateSecondDifferential<X> apply(Add, UnivariateSecondDifferential<X> x, const X& c) {
-        x._value+=c; return std::move(x); }
+        x._value+=c; return x; }
     static UnivariateSecondDifferential<X> apply(Sub, UnivariateSecondDifferential<X> x, const X& c) {
-        x._value-=c; return std::move(x); }
+        x._value-=c; return x; }
     static UnivariateSecondDifferential<X> apply(Mul, UnivariateSecondDifferential<X> x, const X& c) {
-        x._value*=c; x._gradient*=c; x._half_hessian*=c; return std::move(x); }
+        x._value*=c; x._gradient*=c; x._half_hessian*=c; return x; }
     static UnivariateSecondDifferential<X> apply(Div, UnivariateSecondDifferential<X> x, const X& c) {
-        x._value/=c; x._gradient/=c; x._half_hessian/=c; return std::move(x); }
+        x._value/=c; x._gradient/=c; x._half_hessian/=c; return x; }
 
     static UnivariateSecondDifferential<X> apply(Add, UnivariateSecondDifferential<X> x, const UnivariateSecondDifferential<X>& y) {
-        x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return std::move(x); }
+        x._value += y._value; x._gradient += y._gradient; x._half_hessian += y._half_hessian; return x; }
 
     static UnivariateSecondDifferential<X> apply(Sub, UnivariateSecondDifferential<X> x, const UnivariateSecondDifferential<X>& y) {
-        x._value -= y._value; x._gradient -= y._gradient; x._half_hessian -= y._half_hessian; return std::move(x); }
+        x._value -= y._value; x._gradient -= y._gradient; x._half_hessian -= y._half_hessian; return x; }
 
     static UnivariateSecondDifferential<X> apply(Mul, UnivariateSecondDifferential<X> x, const UnivariateSecondDifferential<X>& y) {
-        x._half_hessian *= y._value; x._half_hessian += x._gradient*y._gradient; x._half_hessian += x._value * y._half_hessian; x._gradient *= y._value; x._gradient += x._value * y._gradient; x._value *= y._value; return std::move(x); }
+        x._half_hessian *= y._value; x._half_hessian += x._gradient*y._gradient; x._half_hessian += x._value * y._half_hessian; x._gradient *= y._value; x._gradient += x._value * y._gradient; x._value *= y._value; return x; }
     static UnivariateSecondDifferential<X> apply(Div, const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y) {
         return UnivariateSecondDifferential<X>(x._value/y._value,(x._gradient-(x._value/y._value)*y._gradient)/y._value,
                                             (x._half_hessian/y._value)-(x._value/y._value)*(y._half_hessian/y._value)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric/logical.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//! \file logical.hpp
+//! \file numeric/logical.hpp
 //! \brief Logical classes
 
 #ifndef ARIADNE_LOGICAL_HPP
@@ -37,11 +37,6 @@
 namespace Ariadne {
 
 template<class X> class Sequence;
-
-/*! \defgroup LogicalModule Logical Module
- *  \ingroup CoreModules
- *  \brief %Logical classes and functions.
- */
 
 //! \ingroup LogicalModule
 //! \brief The amount of work used in performing a calculation or checking a quasidecidable predicate.
@@ -67,9 +62,6 @@ class Effort {
     friend OutputStream& operator<<(OutputStream& os, Effort eff) { return os << "Effort(" << eff._m << ")"; }
 };
 inline Effort operator""_eff(unsigned long long int e) { Nat m=e; assert(m==e); return Effort(m); }
-
-//! \brief Explicitly declare that a type is %Effective.
-template<class T> using Effective = T;
 
 namespace Detail {
 

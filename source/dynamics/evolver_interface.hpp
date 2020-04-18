@@ -1,7 +1,7 @@
 /***************************************************************************
- *            evolver_interface.hpp
+ *            dynamics/evolver_interface.hpp
  *
- *  Copyright  2008  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file evolver_interface.hpp
+/*! \file dynamics/evolver_interface.hpp
  *  \brief Interface for computing a single time step of the evolution of a system.
  */
 
@@ -36,15 +36,16 @@ namespace Ariadne {
 template<class ES> class ListSet;
 template<class ES> class Orbit;
 
+//! \ingroup DynamicsModule
 //! \brief The semantics used to determine the trajectories of the system.
-//! \relates EvolverInterface
+//! \see EvolverInterface
 enum class Semantics : std::uint8_t {
     LOWER, //!< Under-approximation with trajectories terminating at spacial discontinuities.
     UPPER  //!< Over-approximations with all possibilities included as spacial discontinuities.
 };
 
 
-//! \ingroup EvaluationModule
+//! \ingroup DynamicsModule
 //! \brief Interface for evolving a dynamic system.
 //! \sa HybridEvolverInterface
 //! \sa ReachabilityAnalyserInterface
@@ -73,7 +74,7 @@ class EvolverInterface
     virtual const SystemType& system() const = 0;
 
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 
   public:
     //@{
@@ -115,7 +116,7 @@ class EvolverInterface
 template<class SYS, class ES, class TRM> inline
 OutputStream&
 operator<<(OutputStream& os, const EvolverInterface<SYS,ES,TRM>& e) {
-    return e.write(os);
+    return e._write(os);
 }
 
 

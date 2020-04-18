@@ -1,7 +1,7 @@
 /***************************************************************************
  *            numeric/complex.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -158,8 +158,8 @@ template<class X> class Complex
     //@{
     //! \name Constructors
     Complex() : _re(), _im() { } //!< Default constructor yields the number 0.
-    Complex(X const& x) : _re(x), _im(nul(x)) { } //!< Construct the number \a x + <it>i</it> \a y.
-    Complex(X const& x, X const& y) : _re(x), _im(y) { } //!< Construct the number \a x + <it>i</it> \a y.
+    Complex(X const& x) : _re(x), _im(nul(x)) { } //!< Construct the number \a x + <i>i</i> \a y.
+    Complex(X const& x, X const& y) : _re(x), _im(y) { } //!< Construct the number \a x + <i>i</i> \a y.
 
     //template<class POL, EnableIf<And<IsSame<POL,PolarTag>,IsConvertible<TranscendentalType<X>,X>>> = dummy>
     //    Complex(X const& r, X const& th, POL) : _re(exp(r)*cos(th)), _im(exp(r)*sin(th)) { } //!< Construct the number \a exp(r)*(cos(th)+i*sin(th)).

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            drawer.hpp
+ *            output/drawer.hpp
  *
- *  Copyright  2011-12  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file drawer.hpp
+/*! \file output/drawer.hpp
  *  \brief Class for drawing affine and nonlinear sets.
  */
 
@@ -80,9 +80,9 @@ class SubdivisionDrawer : public DrawerInterface
 //! \brief Pave the set and draw the computed cells.
 class GridDrawer : public DrawerInterface
 {
-    Nat _depth;
+    Nat _fineness;
   public:
-    GridDrawer(Nat depth) : _depth(depth) { }
+    GridDrawer(Nat fineness) : _fineness(fineness) { }
     Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const;
     OutputStream& _write(OutputStream& os) const;
 };

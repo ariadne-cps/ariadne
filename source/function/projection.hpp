@@ -1,7 +1,7 @@
 /***************************************************************************
- *            projection.hpp
+ *            function/projection.hpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file projection.hpp
+/*! \file function/projection.hpp
  *  \brief Projections onto coordinates
  */
 
@@ -43,12 +43,14 @@ class Projection
         for(SizeType i=0; i!=this->_ind.size(); ++i) { ARIADNE_PRECONDITION(_ind[i]<_as); } }
     SizeType result_size() const { return this->_ind.size(); }
     SizeType argument_size() const { return this->_as; }
+    Array<SizeType> const& indices() const { return this->_ind; }
+    SizeType const& operator[](SizeType i) const { return this->_ind[i]; }
     SizeType index(SizeType i) const { return this->_ind[i]; }
 
     template<class X> Vector<X> operator() (Vector<X> const& v) const {
         Vector<X> r(this->result_size(),v.zero_element());
         for(SizeType i=0; i!=this->result_size(); ++i) { r[i]=v[this->_ind[i]]; }
-        return std::move(r); }
+        return r; }
     friend OutputStream& operator<<(OutputStream& os, Projection const& prj) {
         return os << "Projection("<<prj._ind<<")"; }
 };

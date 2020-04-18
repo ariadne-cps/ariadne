@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/matrix.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -148,7 +148,7 @@ template<class X> class Matrix
     //! Construct a matrix from parameters of \a X.
     template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
 
-    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
 
     //! Construct a matrix using initializer lists.
@@ -196,7 +196,7 @@ template<class X> class Matrix
     const X& at(SizeType i, SizeType j) const;
     //! \brief Get the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column.
     const X& get(SizeType i, SizeType j) const ;
-    //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
+    //! \brief %Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
     Void set(SizeType i, SizeType j, const X& x);
     template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void set(SizeType i, SizeType j, const Y& y);
     //! \brief A pointer to the first element of the data storage.
@@ -208,9 +208,9 @@ template<class X> class Matrix
     //! \brief C-style constant subscripting operator.
     const X& operator[][](SizeType i, SizeType j) const;
     //! \brief C-style range subscripting operator.
-    X& operator[][](Range is, Range js);
+    MatrixRange<Matrix<X>>& operator[][](Range is, Range js);
     //! \brief C-style constant subscripting operator.
-    const X& operator[][](Range i, Range js) const;
+    const MatrixRange<Matrix<X>>& operator[][](Range i, Range js) const;
 #else
     MatrixRow<const Matrix<X>> operator[](SizeType i) const;
     MatrixRow<Matrix<X>> operator[](SizeType i);
@@ -223,7 +223,7 @@ template<class X> class Matrix
     static Matrix<X> _mul(const Matrix<X>& A1, const Matrix<X>& A2);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     InputStream& read(InputStream& is);
 
     template<class T> friend OutputStream& operator<<(OutputStream& os, Matrix<T>const& A);
@@ -241,6 +241,11 @@ template<class M, EnableIf<IsMatrixExpression<M>> =dummy> OutputStream& operator
 
 /************ Combinatorial Matrices *********************************************************/
 
+//! \ingroup LinearAlgebraModule
+//! \brief Permutation matrices defined as a sequence of transpositions.
+//! \details Pre-multiplying a matrix \f$A\f$ by the pivot matrix with pivots \f$[p_0,p_1,\ldots,p_{n-1}]\f$
+//!   first swaps row \f$0\f$ of \f$A\f$ with row \f$p_0\f$, then row \f$1\f$ of the new matrix with row \f$p_1\geq1\f$ of the new matrix,
+//!   continuing until the final row. This allows all row permutations to be realised.
 class PivotMatrix {
     Array<SizeType> _ary;
   public:
@@ -255,6 +260,11 @@ OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv);
 template<class X> Vector<X> operator*(PivotMatrix, Vector<X>);
 template<class X> Matrix<X> operator*(PivotMatrix, Matrix<X>);
 
+//! \brief The decomposition \f$PA=LU\f$ of a matrix \f$A\f$, where \f$P\f$ is a permutation matrix,
+//! \f$L\f$ is a unit lower-triangular matrix, and \f$U\f$ is an upper-triangular matrix.
+//! \details The matrix \a LU stores the nonzero elements of \f$U\f$ in its upper triangle,
+//! and the nontrivial elements of \f$L\f$ in its strict lower triangle.
+//! \see Matrix
 template<class X> struct PLUMatrix {
     PivotMatrix P; Matrix<X> LU;
 };
@@ -339,7 +349,7 @@ template<class M1, class M2> struct MatrixMatrixProduct {
     SizeType column_size() const { return _A2.column_size(); }
     ScalarType zero_element() const { return _A1.zero_element()*_A2.zero_element(); }
     ScalarType at(SizeType i, SizeType j) const { ScalarType r=this->zero_element();
-        for(SizeType k=0; k!=_A1.row_size(); ++k) { r+=_A1.at(i,k)*_A2.at(k,j); } return std::move(r); }
+        for(SizeType k=0; k!=_A1.row_size(); ++k) { r+=_A1.at(i,k)*_A2.at(k,j); } return r; }
 };
 template<class M1,class M2> struct IsMatrixExpression<MatrixMatrixProduct<M1,M2>> : True { };
 
@@ -351,7 +361,7 @@ template<class M1, class V2> struct MatrixVectorProduct {
     SizeType size() const { return _A1.row_size(); }
     ScalarType zero_element() const { return _A1.zero_element()*_v2.zero_element(); }
     ScalarType operator[](SizeType i) const { ScalarType r=this->zero_element();
-        for(SizeType j=0; j!=_v2.size(); ++j) { r+=_A1.at(i,j)*_v2.at(j); } return std::move(r); }
+        for(SizeType j=0; j!=_v2.size(); ++j) { r+=_A1.at(i,j)*_v2.at(j); } return r; }
 };
 template<class M1,class V2> struct IsVectorExpression<MatrixVectorProduct<M1,V2>> : True { };
 
@@ -366,6 +376,9 @@ template<class M1, class X2> struct MatrixScalarQuotient {
 };
 template<class M1, class X2> struct IsMatrixExpression<MatrixScalarQuotient<M1,X2>> : True { };
 
+//! \ingroup LinearAlgebraModule
+//! \brief A view into a submatrix of a matrix of class \a M.
+//! \see Matrix, Range
 template<class M> struct MatrixRange
     : public MatrixContainer< MatrixRange<M> >
 {
@@ -420,12 +433,14 @@ template<class M> struct MatrixRows {
 };
 template<class M> struct IsMatrixExpression<MatrixRows<M>> : True { };
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRows<const Matrix<X>> Matrix<X>::operator[](Range is) const {
     return MatrixRows<const Matrix<X>>(*this,is);
 }
 template<class X> inline MatrixRows<Matrix<X>> Matrix<X>::operator[](Range is) {
     return MatrixRows<Matrix<X>>(*this,is);
 }
+#endif
 
 template<class M1, class M2, EnableIf<And<IsMatrixExpression<M1>,IsMatrixExpression<M2>>>> inline
 auto operator==(M1 const& A1, M2 const& A2) -> decltype(declval<ScalarType<M1>>()==declval<ScalarType<M2>>()) {
@@ -470,13 +485,14 @@ template<class X> inline Void Matrix<X>::_check_data_access(SizeType i, SizeType
     ARIADNE_PRECONDITION_MSG(i<this->row_size()&&j<this->column_size(),"A="<<*this<<" i="<<i<<" j="<<j);
 }
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRow<const Matrix<X>> Matrix<X>::operator[](SizeType i) const {
     return MatrixRow<const Matrix<X>>(*this,i);
 }
-
 template<class X> inline MatrixRow<Matrix<X>> Matrix<X>::operator[](SizeType i) {
     return MatrixRow<Matrix<X>>(*this,i);
 }
+#endif
 
 template<class X> inline SizeType Matrix<X>::row_size() const {
     return this->_rs;
@@ -507,14 +523,14 @@ template<class X> inline const X* Matrix<X>::begin() const {
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, Matrix<X> const& A) {
-    A.write(os); return os;
+    A._write(os); return os;
 }
 
 template<class X> inline InputStream& operator>>(InputStream& is, Matrix<X>& A) {
     A.read(is); return is;
 }
 
-template<class X> OutputStream& Matrix<X>::write(OutputStream& os) const {
+template<class X> OutputStream& Matrix<X>::_write(OutputStream& os) const {
     const Matrix<X>& A=*this;
     if(A.row_size()==0 || A.column_size()==0) { os << "["; }
     for(SizeType i=0; i!=A.row_size(); ++i) {
@@ -632,7 +648,7 @@ template<class X0, class X1, class X2> Void _mul_assign(Matrix<X0>& A0, Matrix<X
 struct ProvideMatrixOperations {
 
     template<class X> friend inline Matrix<X> operator+(Matrix<X> A) {
-        return std::move(A);
+        return A;
     }
 
     template<class X> friend inline Matrix<X> operator-(Matrix<X> A) {
@@ -641,7 +657,7 @@ struct ProvideMatrixOperations {
                 A[i][j]=-A[i][j];
             }
         }
-        return std::move(A);
+        return A;
     }
 
     template<class X1, class X2> friend inline Matrix<SumType<X1,X2>> operator+(Matrix<X1> const& A1, Matrix<X2> const& A2) {
@@ -653,7 +669,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]+A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<DifferenceType<X1,X2>> operator-(Matrix<X1> const& A1, Matrix<X2> const& A2) {
@@ -665,7 +681,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]-A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<Scalar<X1>,X2>> operator*(X1 const& s1, Matrix<X2> const& A2) {
@@ -675,7 +691,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=s1*A2[i][j];
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<ProductType<X1,Scalar<X2>>> operator*(Matrix<X1> const& A1, X2 const& s2) {
@@ -685,7 +701,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]*s2;
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<QuotientType<X1,Scalar<X2>>> operator/(Matrix<X1> const& A1, X2 const& s2) {
@@ -695,7 +711,7 @@ struct ProvideMatrixOperations {
                 R[i][j]=A1[i][j]/s2;
             }
         }
-        return std::move(R);
+        return R;
     }
 
     template<class X1, class X2> friend inline Matrix<InplaceProductType<X1,X2>>& operator*=(Matrix<X1>& A1, X2 const& s2) {
@@ -730,7 +746,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Vector<X2> const& v2) {
@@ -742,7 +758,7 @@ struct ProvideMatrixOperations {
                 v0.at(i)+=A1.at(i,j)*v2.at(j);
             }
         }
-        return std::move(v0);
+        return v0;
     }
 
     template<class X1, class X2> friend Covector<ArithmeticType<X1,X2>> operator*(Covector<X1> const& u1, Matrix<X2> const& A2) {
@@ -754,7 +770,7 @@ struct ProvideMatrixOperations {
                 u0.at(j)+=u1.at(i)*A2.at(i,j);
             }
         }
-        return std::move(u0);
+        return u0;
     }
 
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Matrix<X1> const& A1, Transpose<Matrix<X2>> const& A2) {
@@ -768,7 +784,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Matrix<ArithmeticType<X1,X2>> operator*(Transpose<Matrix<X1>> const& A1, Matrix<X2> const& A2) {
@@ -782,7 +798,7 @@ struct ProvideMatrixOperations {
                 }
             }
         }
-        return std::move(A0);
+        return A0;
     }
 
     template<class X1, class X2> friend Vector<ArithmeticType<X1,X2>> operator*(MatrixTranspose<Matrix<X1>> const& A1, Vector<X2> const& v2) {
@@ -794,7 +810,7 @@ struct ProvideMatrixOperations {
                 v0.at(i)+=A1T.at(j,i)*v2.at(j);
             }
         }
-        return std::move(v0);
+        return v0;
     }
 
     template<class X> friend inline Matrix<X>& operator*=(Matrix<X>& A, typename Matrix<X>::ScalarType const& s) {
@@ -863,21 +879,30 @@ template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> cast_singleton(const Matrix<X>&);
 
 
-// Construct transpose
+//! \relates Matrix \brief Construct transpose
 template<class X> inline Transpose<Matrix<X>> transpose(const Matrix<X>& A) { return Transpose<Matrix<X>>(A); }
 
-// Invert matrices and solve linear systems
+//! \relates Matrix \brief Compute the inverse of \f$A\f$.
 template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
+//! \brief Solve the linear equation \f$Ax=B\f$ for \f$x\f$. \relates Matrix
 template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
+//! \brief Solve the linear equations \f$AX=B\f$ for matrix \f$X\f$. \relates Matrix
 template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Matrix<X2> const& B);
 
-// Compute the inverse using lower/upper triangular factorization
+//! \brief Compute the inverse of \a A using lower/upper triangular factorization.
+//! \relates Matrix PLUMatrix
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
+//! \brief Solve the linear equations \f$AX=B\f$ for matrix \f$X\f$ using lower/upper triangular factorization.
+//! \relates Matrix \see PLUMatrix
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+//! \brief Solve the linear equation \f$Ax=b\f$ using lower/upper triangular factorization.
+//! \relates Matrix \see PLUMatrix
 template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b);
-// Compute the inverse using Gauss-Seidel iteration
+//! \brief Compute the inverse of \a A using Gauss-Seidel iteration. \relates Matrix
 template<class X> Matrix<X> gs_inverse(const Matrix<X>& A);
+//! \brief Solve the linear equations \f$AX=B\f$ for \f$X\f$ using Gauss-Seidel iteration. \relates Matrix
 template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
+//! \brief Solve the linear equation \f$Ax=b\f$ for \f$x\f$ using Gauss-Seidel iteration. \relates Matrix
 template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b);
 
 // Use Gauss-Seidel iteration hotstarted by iX

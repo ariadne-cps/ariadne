@@ -1,7 +1,7 @@
 /***************************************************************************
  *            geometry_submodule.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -57,7 +57,7 @@ class DrawableWrapper
     virtual DrawableInterface* clone() const { return this->get_override("clone")(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const { this->get_override("draw")(c,p); }
     virtual DimensionType dimension() const { return this->get_override("dimension")(); }
-    virtual OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    virtual OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class OpenSetWrapper
@@ -68,7 +68,7 @@ class OpenSetWrapper
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ClosedSetWrapper
@@ -78,7 +78,7 @@ class ClosedSetWrapper
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -89,7 +89,7 @@ class OvertSetWrapper
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -103,7 +103,7 @@ class CompactSetWrapper
     LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
 class RegularSetWrapper
@@ -115,7 +115,7 @@ class RegularSetWrapper
     LowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
     LowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     LowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class LocatedSetWrapper
@@ -129,7 +129,7 @@ class LocatedSetWrapper
     LowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(r); }
     LowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -143,7 +143,7 @@ class ValidatedOpenSetWrapper
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ValidatedClosedSetWrapper
@@ -153,7 +153,7 @@ class ValidatedClosedSetWrapper
     ValidatedClosedSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -164,7 +164,7 @@ class ValidatedOvertSetWrapper
     ValidatedOvertSetInterface* clone() const { return this->get_override("clone")(); }
     SizeType dimension() const { return this->get_override("dimension")(); }
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -178,7 +178,7 @@ class ValidatedCompactSetWrapper
     ValidatedLowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(); }
 };
 
 class ValidatedRegularSetWrapper
@@ -190,7 +190,7 @@ class ValidatedRegularSetWrapper
     ValidatedLowerKleenean overlaps(const ExactBoxType& r) const { return this->get_override("overlaps")(r); }
     ValidatedLowerKleenean covers(const ExactBoxType& r) const { return this->get_override("covers")(r); }
     ValidatedLowerKleenean separated(const ExactBoxType& r) const { return this->get_override("separated")(r); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 class ValidatedLocatedSetWrapper
@@ -204,7 +204,7 @@ class ValidatedLocatedSetWrapper
     ValidatedLowerKleenean inside(const ExactBoxType& r) const { return this->get_override("inside")(r); }
     ValidatedLowerKleenean is_bounded() const { return this->get_override("is_bounded")(); }
     UpperBoxType bounding_box() const { return this->get_override("bounding_box")(); }
-    OutputStream& write(OutputStream& os) const { return this->get_override("write")(os); }
+    OutputStream& _write(OutputStream& os) const { return this->get_override("_write")(os); }
 };
 
 
@@ -300,18 +300,33 @@ template<class PT> PT point_from_python(pybind11::list pylst) {
     return PT(Vector<X>(ary));
 }
 
-template<class X> Void export_point(pybind11::module& module, std::string name)
+template<class PT> Void export_point(pybind11::module& module, std::string name)
 {
-    pybind11::class_<Point<X>, DrawableInterface> point_class(module,name.c_str());
-    point_class.def(pybind11::init(&point_from_python<Point<X>>));
-    point_class.def(pybind11::init<Point<X>>());
+    typedef typename PT::ValueType X;
+    pybind11::class_<PT, DrawableInterface> point_class(module,name.c_str());
+    point_class.def(pybind11::init(&point_from_python<PT>));
+    point_class.def(pybind11::init<PT>());
     point_class.def(pybind11::init<Nat>());
-    point_class.def("__getitem__", &__getitem__<Point<X>,Int,X>);
-    point_class.def("__str__", &__cstr__<Point<X>>);
+    point_class.def("__getitem__", &__getitem__<PT,Int,X>);
+    point_class.def("__str__", &__cstr__<PT>);
 }
 
 Void export_points(pybind11::module& module) {
-    export_point<FloatDPValue>(module,"ExactPoint");
+    export_point<RealPoint>(module,"RealPoint");
+    export_point<FloatDPValuePoint>(module,"FloatDPValuePoint");
+    export_point<FloatDPBoundsPoint>(module,"FloatDPBoundsPoint");
+    export_point<FloatDPApproximationPoint>(module,"FloatDPApproximationPoint");
+}
+
+template<class IVL> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<IVL>& interval_class) {
+}
+
+template<> Void export_interval_arithmetic(pybind11::module& module, pybind11::class_<UpperIntervalType>& interval_class) {
+    define_arithmetic(module,interval_class);
+    define_transcendental(module,interval_class);
+
+    define_mixed_arithmetic(module,interval_class,Tag<ValidatedNumber>());
+
 }
 
 template<class IVL> Void export_interval(pybind11::module& module, std::string name) {
@@ -337,6 +352,8 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
     if constexpr (IsConstructible<IntervalType,DyadicInterval>::value and not IsSame<IntervalType,DyadicInterval>::value) {
         interval_class.def(pybind11::init([](Dyadic l, Dyadic u){return IntervalType(DyadicInterval(l,u));}));
     }
+
+    export_interval_arithmetic(module,interval_class);
 
     if constexpr (HasEquality<IVL,IVL>::value) {
         interval_class.def("__eq__",  &__eq__<IVL,IVL , Return<EqualityType<IVL,IVL>> >);
@@ -366,9 +383,9 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
 }
 
 Void export_intervals(pybind11::module& module) {
-    export_interval<ExactIntervalType>(module,"ExactInterval");
-    export_interval<UpperIntervalType>(module,"UpperInterval");
-    export_interval<ApproximateIntervalType>(module,"ApproximateInterval");
+    export_interval<ExactIntervalType>(module,"ExactIntervalType");
+    export_interval<UpperIntervalType>(module,"UpperIntervalType");
+    export_interval<ApproximateIntervalType>(module,"ApproximateIntervalType");
     export_interval<DyadicInterval>(module,"DyadicInterval");
     export_interval<RealInterval>(module,"RealInterval");
 
@@ -447,9 +464,9 @@ template<> Void export_box<DyadicBox>(pybind11::module& module, std::string name
 Void export_boxes(pybind11::module& module) {
     export_box<RealBox>(module,"RealBox");
     export_box<DyadicBox>(module,"DyadicBox");
-    export_box<ExactBoxType>(module,"ExactBox");
-    export_box<UpperBoxType>(module,"UpperBox");
-    export_box<ApproximateBoxType>(module,"ApproximateBox");
+    export_box<ExactBoxType>(module,"ExactBoxType");
+    export_box<UpperBoxType>(module,"UpperBoxType");
+    export_box<ApproximateBoxType>(module,"ApproximateBoxType");
 
     pybind11::implicitly_convertible<ExactBoxType,UpperBoxType>();
     pybind11::implicitly_convertible<ExactBoxType,ApproximateBoxType>();
@@ -504,7 +521,7 @@ Void export_curve(pybind11::module& module)
 {
     pybind11::class_<InterpolatedCurve, DrawableInterface> interpolated_curve_class(module,"InterpolatedCurve");
     interpolated_curve_class.def(pybind11::init<InterpolatedCurve>());
-    interpolated_curve_class.def(pybind11::init<FloatDPValue,ExactPoint>());
+    interpolated_curve_class.def(pybind11::init<FloatDPValue,FloatDPValuePoint>());
     interpolated_curve_class.def("insert", (Void(InterpolatedCurve::*)(const FloatDPValue&, const Point<FloatDPApproximation>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__", [](InterpolatedCurve const& c){return pybind11::make_iterator(c.begin(),c.end());});
     interpolated_curve_class.def("__str__", &__cstr__<InterpolatedCurve>);

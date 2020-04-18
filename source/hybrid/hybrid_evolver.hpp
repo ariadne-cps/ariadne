@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_evolver.hpp
+ *            hybrid/hybrid_evolver.hpp
  *
- *  Copyright  2009  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_evolver.hpp
+/*! \file hybrid/hybrid_evolver.hpp
  *  \brief Hybrid evolver classes.
  */
 
@@ -58,6 +58,9 @@ class SolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
+//! \relates HybridEnclosure .
+using HybridOrbit = Orbit<HybridEnclosure>;
+
 //! \ingroup FunctionModule
 //! \brief A class representing the flow \f$\phi(x,t)\f$ of a differential equation \f$\frac{dx}{dt}=f(x)\f$.
 class FlowFunctionModel
@@ -79,6 +82,8 @@ struct FinalData;
 struct EvolutionData;
 
 
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief Base routines for hybrid evolution.
 //! Includes routines for extracting system information in a mode,
 //! applying initial events, computing crossing times,
@@ -186,13 +191,12 @@ class HybridEvolverBase
     //! \param reachable Output parameter containing the reachable set.
     //! \param intermediate Output parameter containing the intermediate sets
     //!   attained after every time step.
-    //! \param system The hybrid system under consideration.
     //! \param initial The inital set of the evolution.
-    //! \param time The maximum time of evolution; either specifies the stopping time
+    //! \param termination The termination condition of evolution; such as the stopping time
     //!   or the maximum number of steps.
     //! \param semantics The semantics used for the solution trajectories.
     //!   Either \a #Semantics::LOWER, in which case trajectories terminate at
-    //!   discontinuities, or #Semantics::UPPER, in which case all branches
+    //!   discontinuities, or \a #Semantics::UPPER, in which case all branches
     //!   are taken.
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
@@ -256,17 +260,17 @@ class HybridEvolverBase
 
     //! \brief Compute data on how trajectories of the \a flow
     //! cross the given \a guards.
-    //! For example, trajectories may have a #INCREASING crossing with
-    //! a given crossing_time as a function of the initial state.
+    //! For example, trajectories may have a crossing where the guard value is strictly increasing
+    //! which has a crossing_time as a function of the initial state.
     //!
     //! \details The \a dynamic is given explicitly to facilitate computation
     //! of crossing times.
     //! A crossing_time computed must be valid over the \a initial_set, though
     //! will often be computed over the entire bounding box.
     //!
-    //! If the crossing is #INCREASING, then the \a crossing_time \f$\gamma\f$
+    //! If the crossing is #CrossingKind::INCREASING, then the \a crossing_time \f$\gamma\f$
     //! should be computed, satisfying \f$g(\phi(x,\gamma(x)))=0\f$.
-    //! If the crossing is #CONCAVE, the the \a critical_time (\a maximum_time) \f$\mu\f$
+    //! If the crossing is #CrossingKind::CONCAVE, the the \a critical_time (\a maximum_time) \f$\mu\f$
     //! should be computed, satisfying \f$L_{f}g(\phi(x,\mu(x)))=0\f$.
     virtual
     Map<DiscreteEvent,CrossingData>
@@ -424,7 +428,7 @@ class HybridEvolverBase
     //!
     //! \note The \a jump, \a finishing, \a final and \a reach sets may need to
     //! be constructed as unions of Enclosure sets. The is because when dealing
-    //! with #CONCAVE events, it may be the case that these sets are split into
+    //! with #CrossingKind::CONCAVE events, it may be the case that these sets are split into
     //! two.
     //!
     //! TODO: This method might be better split into even simpler events.
@@ -460,8 +464,9 @@ class HybridEvolverBase
 Bool is_blocking(EventKind evk);
 Bool is_activating(EventKind evk);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief A data type used to store information about a transition of a hybrid system.
-//! \relates HybridEvolverInterface
+//! \relates HybridEvolverBase
 struct TransitionData
 {
     //! \brief The event label.
@@ -486,23 +491,7 @@ struct TransitionData
 };
 OutputStream& operator<<(OutputStream& os, const TransitionData& transition);
 
-//! \relates HybridEvolverBase
-//! \brief Information on how a flow tube crosses a hypersurface.
-enum class DirectionKind : std::uint8_t {
-    POSITIVE, //!< The guard function is strictly positive on the flow range.
-        //! The event occurs immediately (if urgent) or at any time (if permissive).
-    NEGATIVE, //!< The guard function is strictly negative on the flow range. No event occurs.
-    INCREASING, //!< The guard function is strictly increasing along flow lines.
-        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$. Implied by \f$L_{f}g > 0\f$.
-    DECREASING, //!< The guard function is strictly decreasing along flow lines.
-        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))<0\f$. Implied by \f$L_{f}g < 0\f$.
-    CONCAVE, //!< The guard function varies concavely along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$.
-    CONVEX, //!< The guard function varies convexly along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$.
-    INDETERMINATE //!< Neither the guard function, nor its first or second Lie derivatives, has a definite sign.
-};
-OutputStream& operator<<(OutputStream& os, const DirectionKind& dir);
-
-//! \relates HybridEvolverBase
+//! \ingroup HybridDynamicsSubModule
 //! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\frac{dx}{dt}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
 //! The rate of change of the guard function changes along flow lines is given by
 //! \f$d g(x(t))/dt = L_{f}g(x(t))\f$ where the Lie derivative \f$L_{f}g\f$ is defined by \f$L_{f}g(x) = (\nabla g\cdot f)(x)\f$.
@@ -511,7 +500,6 @@ OutputStream& operator<<(OutputStream& os, const DirectionKind& dir);
 //! this need not necessarily mean that the crossing is degenerate, but may
 //! also imply that the crossing information is too expensive or sensitive to
 //! compute.
-//! \relates HybridEvolverInterface \relates CrossingData
 enum class CrossingKind : std::uint8_t {
     DEGENERATE, //!< The crossing may be degenerate to second order.
     NEGATIVE, //!< The guard function is negative on the flow domain. No event occurs.
@@ -535,8 +523,9 @@ enum class CrossingKind : std::uint8_t {
 };
 OutputStream& operator<<(OutputStream& os, const CrossingKind& crk);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief A data type used to store information about the way flow lines cross a guard \f$g(x)=0\f$.
-//! \relates HybridEvolverInterface
+//! \relates HybridEvolverBase
 struct CrossingData
 {
     CrossingData() : crossing_kind() { }
@@ -544,27 +533,30 @@ struct CrossingData
     CrossingData(CrossingKind crk, const ValidatedScalarMultivariateFunctionModelDP& crt)
         : crossing_kind(crk), crossing_time(crt) { }
     //! \brief The way in which the guard function changes along trajectories
-    DirectionKind direction_kind;
-    //! \brief The way in which the guard function changes along trajectories
-    //! during a crossing. e.g. INCREASING
+    //! during a crossing. e.g. increasing.
     CrossingKind crossing_kind;
     //! \brief The range of times at which the crossing may occur.
-    ExactIntervalType crossing_time_range;
+    UpperIntervalType crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ValidatedScalarMultivariateFunctionModelDP crossing_time;
     //! \brief The time \f$\mu(x)\f$ at which the guard function reaches a maximum or minimum
     //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
     ValidatedScalarMultivariateFunctionModelDP critical_time;
+    //! \brief The range of values of the guard function at the critical time.
+    UpperIntervalType guard_range_at_critical_time;
+    //! \brief The range of values of the guard function at the critical time.
+    UpperBoxType evolve_bounds_at_critical_time;
 };
 OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief The kind of step taken in the evolution. Determines how the evolution time is specified.
 //! \details Assumes that the starting set and time is given as a subset of \f$\{ \xi(s); \tau(s) \mid s\in D\}\f$
 //! where \f$s\in D\f$ is a parameter, \f$x=\xi(s)\f$ is the state corresponding to parameter \f$s\f$, and \f$t=\tau(s)\f$
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
-//! typically only defined over a singleton set of space and time.
-//! \relates TimingData
+//! typically only defined over a bounded set of space and time.
+//! \see TimingData
 enum class StepKind : std::uint8_t {
     CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
@@ -585,12 +577,13 @@ enum class StepKind : std::uint8_t {
 };
 OutputStream& operator<<(OutputStream& os, const StepKind& crk);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief The way in which the step interacts with the final evolution time.
 //! \details Used to control whether final time constraints need to be added,
 //! whether further evolution is possible, and whether and how sets should be put in the list of final sets.
 //! Needed since the final time may be an arbitrary real number, at it may not be possible to determine
 //! whether a given enclosure is exactly at the final time or not
-//! \relates TimingData
+//! \see TimingData
 enum class FinishingKind : std::uint8_t {
     BEFORE_FINAL_TIME, //!< At the end of the step, the final time has definitely not been reached by any point.
     AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
@@ -600,8 +593,9 @@ enum class FinishingKind : std::uint8_t {
 };
 OutputStream& operator<<(OutputStream& os, const FinishingKind& crk);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
-//! \relates HybridEvolverInterface
+//! \relates HybridEvolverBase
 struct TimingData
 {
     StepKind step_kind; //!< The kind of step taken in the evolution
@@ -623,8 +617,8 @@ struct TimingData
 };
 OutputStream& operator<<(OutputStream& os, const TimingData& timing);
 
+//! \ingroup HybridDynamicsSubModule
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
-//! \relates HybridEvolverInterface
 //! \relates HybridEvolverBase
 struct EvolutionData
 {
@@ -720,11 +714,12 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 
 //! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief A class for computing the evolution of a general hybrid system as
 //! efficiently as possible. In particular, crossing times are computed
 //! explicitly, and the number of additional constraints is minimised.
@@ -739,7 +734,7 @@ class GeneralHybridEvolver
     GeneralHybridEvolver(const SystemType& system,
                          const ValidatedFunctionModelDPFactoryInterface& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
-    virtual OutputStream& write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
   protected:
     virtual
@@ -790,6 +785,7 @@ class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
 
 //! \brief Factory for GeneralHybridEvolver objects.
 //! \deprecated Use cloning instead
+//! \relates GeneralHybridEvolver
 class GeneralHybridEvolverFactory
     : public HybridEvolverFactoryInterface
 {

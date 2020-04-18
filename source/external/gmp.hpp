@@ -1,7 +1,7 @@
 /***************************************************************************
- *            external/gmp.h>
+ *            external/gmp.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file external/gmp.h>
+/*! \file external/gmp.hpp
  *  \brief
  */
 

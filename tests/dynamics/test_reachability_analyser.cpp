@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_reachability_analysis.cpp
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -65,6 +65,7 @@ class TestReachabilityAnalyser
     typedef BoundedConstraintSet SetType;
     typedef ReachabilityAnalyser<SystemType> AnalyserType;
     typedef AnalyserType::BoundingDomainType BoundingDomainType;
+    typedef AnalyserType::StorageType StorageType;
 
     SystemType system;
     AnalyserType analyser;
@@ -99,8 +100,8 @@ class TestReachabilityAnalyser
 
         EvolverType evolver(system,integrator);
 
-        AnalyserType analyser(system,evolver);
-        analyser.configuration().set_maximum_grid_depth(3);
+        AnalyserType analyser(evolver);
+        analyser.configuration().set_maximum_grid_fineness(3);
         cout << "Done building analyser\n";
         return analyser;
     }
@@ -146,9 +147,9 @@ class TestReachabilityAnalyser
 
     Void test_lower_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreePaving& lower_reach=reach_evolve_set.first;
-        GridTreePaving& lower_evolve=reach_evolve_set.second;
+        Pair<StorageType,StorageType> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
+        StorageType& lower_reach=reach_evolve_set.first;
+        StorageType& lower_evolve=reach_evolve_set.second;
         cout << "Reached " << lower_reach.size() << " cells " << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
@@ -161,11 +162,11 @@ class TestReachabilityAnalyser
 
     Void test_upper_reach_upper_evolve() {
         cout << "Computing timed reachable set" << endl;
-        GridTreePaving upper_reach_set=analyser.upper_reach(initial_set,reach_time);
+        StorageType upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
 
         cout << "Computing timed evolve set" << endl;
-        GridTreePaving upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
+        StorageType upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
         ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
 
         cout << "Reached " << upper_reach_set.size() << " cells " << endl;
@@ -177,7 +178,7 @@ class TestReachabilityAnalyser
 
     Void test_upper_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<GridTreePaving,GridTreePaving> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
+        Pair<StorageType,StorageType> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
 
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
         ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
@@ -195,7 +196,7 @@ class TestReachabilityAnalyser
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
-        GridTreePaving lower_reach_set=analyser.lower_reach(initial_set);
+        StorageType lower_reach_set=analyser.lower_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
 
@@ -209,11 +210,11 @@ class TestReachabilityAnalyser
         cout << "Computing outer chain reachable set" << endl;
         analyser.configuration().set_transient_time(12.0_dec);
         analyser.configuration().set_lock_to_grid_time(6.0_dec);
-        analyser.configuration().set_maximum_grid_depth(3);
+        analyser.configuration().set_maximum_grid_fineness(3);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<BoundingDomainType>(new BoundingDomainType(bounding)));
         cout << analyser.configuration();
 
-        GridTreePaving outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+        StorageType outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
 
         ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
 
@@ -224,7 +225,7 @@ class TestReachabilityAnalyser
 
         cout << "Recomputing with tight restriction" << endl;
 
-        analyser.configuration().set_maximum_grid_height(1);
+        analyser.configuration().set_maximum_grid_extent(1);
         ARIADNE_TEST_THROWS(analyser.outer_chain_reach(initial_set),OuterChainOverspill);
     }
 
@@ -237,7 +238,7 @@ class TestReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
-        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_depth());
+        auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
         plot("test_reachability_analyser-verify_safety.png",PlanarProjectionMap(2,0,1),graphics_box,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,

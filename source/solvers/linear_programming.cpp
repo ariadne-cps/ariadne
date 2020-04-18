@@ -1,7 +1,7 @@
 /***************************************************************************
- *            linear_programming.cpp
+ *            solvers/linear_programming.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 

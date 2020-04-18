@@ -1,7 +1,7 @@
 /***************************************************************************
- *            builtin.hpp
+ *            numeric/builtin.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file builtin.hpp
+/*! \file numeric/builtin.hpp
  *  \brief Inclusion header for wrapper for builtin numbers.
  */
 
@@ -48,6 +48,7 @@ class ApproximateDouble {
     double _d;
   public:
     typedef ApproximateTag Paradigm;
+    ApproximateDouble() : _d() { }
     ApproximateDouble(int n) : _d(n) { }
     template<class X, EnableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x) { }
     template<class X, DisableIf<IsBuiltinArithmetic<X>> =dummy> ApproximateDouble(X const& x) : _d(x.get_d()) { }
@@ -56,11 +57,15 @@ class ApproximateDouble {
     operator double() const { return _d; }
 };
 
+//! \ingroup NumericModule
+//! \brief A wrapper around a builtin double-precision floating-point number,
+//! indicating that the stored value is the \em exact value of a real quantity.
 class ExactDouble {
     double _d;
   public:
     typedef ExactTag Paradigm;
     double get_d() const { return this->_d; }
+    ExactDouble() : _d() { }
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> ExactDouble(N n) : _d(n) { assert(_d==n); }
     template<class X, EnableIf<IsBuiltinFloatingPoint<X>> =dummy> explicit ExactDouble(X const& x) : _d(x) { assert(std::isnan(_d) || (_d==x)); }
     static ExactDouble infinity() { return ExactDouble(std::numeric_limits<double>::infinity()); }

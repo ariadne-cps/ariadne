@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_time.hpp
+ *            hybrid/hybrid_time.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_time.hpp
+/*! \file hybrid/hybrid_time.hpp
  *  \brief Hybrid times
  */
 
@@ -30,12 +30,16 @@
 #define ARIADNE_HYBRID_TIME_HPP
 
 #include "../numeric/numeric.hpp"
+#include "../hybrid/discrete_event.hpp"
 
 namespace Ariadne {
 
 typedef Integer DiscreteTimeType;
 
-//! \ingroup SystemModule
+class DiscreteEvent;
+
+//! \ingroup AnalysisModule
+//! \ingroup HybridDynamicsSubModule
 //! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time
 //! and an integer \a discrete_time.
 //!
@@ -62,7 +66,7 @@ class HybridTime
     DiscreteTimeType _discrete_time;
   public:
     explicit HybridTime(Real t)
-      : _continuous_time(t), _discrete_time(0) { }
+      : _continuous_time(t), _discrete_time(-1) { }
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(RawFloatDP t, Integer n)
@@ -105,12 +109,12 @@ class HybridTime
 
     friend Kleenean operator<(const HybridTime& ht1, const HybridTime& ht2) {
         return Kleenean(ht1._continuous_time< ht2._continuous_time) &&
-            Boolean(ht1._discrete_time<=ht2._discrete_time);
+            Boolean(ht1._discrete_time<ht2._discrete_time);
     }
 
     friend Kleenean operator>(const HybridTime& ht1, const HybridTime& ht2) {
         return Kleenean(ht1._continuous_time> ht2._continuous_time) &&
-            Boolean(ht1._discrete_time>=ht2._discrete_time);
+            Boolean(ht1._discrete_time>ht2._discrete_time);
     }
 
     friend Kleenean operator>(const HybridTime& ht1, const ContinuousTimeType& ct2) {
@@ -122,6 +126,34 @@ class HybridTime
     }
 };
 
+class HybridTerminationCriterion
+{
+  public:
+    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
+    typedef HybridTime::DiscreteTimeType DiscreteTimeType;
+  private:
+    ContinuousTimeType _maximum_time;
+    DiscreteTimeType _maximum_steps;
+    Set<DiscreteEvent> _terminating_events;
+  public:
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax, Set<DiscreteEvent> evnts)
+            : _maximum_time(tmax), _maximum_steps(nmax), _terminating_events(evnts) { } //!< .
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax)
+            : HybridTerminationCriterion(tmax,nmax,Set<DiscreteEvent>()) { } //!< .
+    HybridTerminationCriterion(const HybridTime& maximum_time)
+            : HybridTerminationCriterion(maximum_time.continuous_time(),maximum_time.discrete_time()) { } //!< .
+    //! \brief The maximum continuous (real, physical) time.
+    const ContinuousTimeType& maximum_time() const { return this->_maximum_time; }
+    //! \brief The maximum number of discrete steps taken.
+    const DiscreteTimeType& maximum_steps() const { return this->_maximum_steps; }
+    //! \brief The maximum number of discrete steps taken.
+    const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
+};
+inline OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
+    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
+              << ", maximum_steps="<<termination.maximum_steps()
+              << ", terminating_events="<<termination.terminating_events() << " )";
+}
 
 } // namespace Ariadne
 

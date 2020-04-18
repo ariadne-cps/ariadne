@@ -1,7 +1,7 @@
 /***************************************************************************
- *            formula.hpp
+ *            function/formula.hpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file formula.hpp
+/*! \file function/formula.hpp
  *  \brief Formulae over variables
  */
 
@@ -213,7 +213,7 @@ template<class X, class Y> X make_constant(const Y& c, X r);
 template<class X, class Y> X make_constant(const Y& c, const Vector<X>& v);
 
 template<class X, class Y> inline X make_constant(const Y& c, X r) {
-    r=c; return std::move(r); }
+    r=c; return r; }
 
 inline Real make_constant(const EffectiveNumber& c, const Real& x) {
     return Real(c); }

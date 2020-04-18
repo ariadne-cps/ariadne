@@ -1,7 +1,7 @@
 /***************************************************************************
- *            integrator_interface.hpp
+ *            solvers/integrator_interface.hpp
  *
- *  Copyright  2006-10  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file integrator_interface.hpp
+/*! \file solvers/integrator_interface.hpp
  *  \brief Interface for solver classes for differential equations.
  */
 
@@ -40,8 +40,8 @@ struct FlowBoundsException : public std::runtime_error {
     FlowBoundsException(const StringType& what) : std::runtime_error(what) { }
 };
 
-class FlowStepModel;
-class FlowModel;
+class FlowStepModelType;
+class FlowModelType;
 
 //! \ingroup SolverModule EvaluationModule
 //! \brief A solution to a differential equation could not be computed within the requested tolerances.
@@ -65,7 +65,7 @@ class IntegratorInterface
     virtual IntegratorInterface* clone() const = 0;
 
     //! \brief Write to an output stream.
-    virtual Void write(OutputStream& os) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
 
     //! \brief Get the maximum allowable error in the flow.
     virtual double maximum_error() const = 0;
@@ -99,7 +99,7 @@ class IntegratorInterface
     //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
-    virtual FlowStepModel
+    virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               StepSizeType& suggested_time_step) const = 0;
@@ -113,7 +113,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$h\f$ is the \a time_step, and \f$B\f$ is the \a state_bounding_box.
     //! <br>
     //! Throws: A FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
-    virtual FlowStepModel
+    virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& vector_field,
               const ExactBoxType& state_domain,
               const StepSizeType& time_step,
@@ -126,7 +126,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$t_f\f$ is the \a final_time.
     //! <br>
     //! Throws: A FlowTimeStepException if the flow cannot be represented as a single function to sufficiently accurately for the given time interval.
-    virtual FlowStepModel
+    virtual FlowStepModelType
     flow_to(const ValidatedVectorMultivariateFunction& vector_field,
             const ExactBoxType& state_domain,
             const Real& final_time) const = 0;
@@ -136,7 +136,7 @@ class IntegratorInterface
     //! Returns: A validated version of the flow represented as a list of functions whose spacial domains are all \f$D\f$ and whose time domains have union \f$[t_b,t_f]\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$t_b\f$ is the \a beginning_time, and \f$t_f\f$ is the \a final_time.
-    virtual FlowModel
+    virtual FlowModelType
     flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& beginning_time,
@@ -145,7 +145,7 @@ class IntegratorInterface
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$..
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain,  and \f$t_f\f$ is the \a final_time.
-    virtual FlowModel
+    virtual FlowModelType
     flow(const ValidatedVectorMultivariateFunction& vector_field,
          const ExactBoxType& state_domain,
          const Real& final_time) const = 0;
@@ -156,7 +156,7 @@ class IntegratorInterface
     //! <br>
     //! Arguments: \f$f\f$ is the \a differential_equation, \f$D\f$ is the \a state_domain, \f$T\f$ is the \a time_domain,
     //! \f$A\f$ is the \a parameter_domain and \f$B\f$ is the \a maximum_time_step.
-    virtual FlowStepModel
+    virtual FlowStepModelType
     flow_step(const ValidatedVectorMultivariateFunction& differential_equation,
               const ExactBoxType& state_domain,
               const Interval<StepSizeType>& time_domain,
@@ -165,7 +165,7 @@ class IntegratorInterface
 
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, const IntegratorInterface& integrator) {
-        integrator.write(os); return os;
+        integrator._write(os); return os;
 }
 };
 

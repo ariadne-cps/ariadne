@@ -1,7 +1,7 @@
 /***************************************************************************
  *            geometry/interval.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -69,11 +69,31 @@ class UnitInterval;
 class EmptyInterval;
 class EntireInterval;
 
-template<class PR> struct FloatUpperIntervalFactory {
-    PR _precision;
-    FloatUpperIntervalFactory(PR precision) : _precision(precision) { }
-    FloatUpperInterval<PR> create(ValidatedNumber const& y) const;
+//! \related FloatDPUpperInterval \related FloatBounds \brief Allows the over-approximating interval \a ivl to be treated an over-approximation to a single point.
+template<class F> Bounds<F> cast_singleton(Interval<UpperBound<F>> const&);
+template<class F> Interval<UpperBound<F>> make_interval(Bounds<F> const&);
+
+template<class UB> class IntervalFactory;
+
+template<class F> class IntervalFactory<UpperBound<F>> {
+    typedef typename F::PrecisionType PrecisionType;
+    PrecisionType _precision;
+  public:
+    IntervalFactory(PrecisionType precision) : _precision(precision) { }
+    Interval<UpperBound<F>> create(ValidatedNumber const& y) const;
 };
+
+template<class F> class IntervalFactory<Approximation<F>> {
+    typedef typename F::PrecisionType PrecisionType;
+    PrecisionType _precision;
+  public:
+    IntervalFactory(PrecisionType precision) : _precision(precision) { }
+    ApproximateInterval<F> create(ApproximateNumber const& y) const {
+        return ApproximateInterval<F>(y,this->_precision); }
+};
+
+template<class F> using UpperIntervalFactory = IntervalFactory<UpperBound<F>>;
+template<class F> using ApproximateIntervalFactory = IntervalFactory<Approximation<F>>;
 
 template<class U> struct DeclareIntervalArithmeticOperations { };
 template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
@@ -86,10 +106,63 @@ template<class F> struct DeclareIntervalArithmeticOperations<UpperBound<F>>
     , ProvideConcreteGenericElementaryOperations<UpperInterval<F>,ValidatedNumber>
     , ProvideConcreteGenericComparisonOperations<UpperInterval<F>,ValidatedNumber,ValidatedKleenean>
 {
-    typedef typename F::PrecisionType PR; typedef PR PrecisionType;
-    friend FloatError<PR> mag(FloatUpperInterval<PR> const&);
-    friend FloatUpperIntervalFactory<PR> factory(FloatUpperInterval<PR> const& ivl) { return FloatUpperIntervalFactory<PR>(ivl.upper().precision()); }
+    typedef typename F::PrecisionType PrecisionType;
+    friend Error<F> mag(UpperInterval<F> const&);
+    friend UpperInterval<F> fma(UpperInterval<F> const& x1, UpperInterval<F> const& x2, UpperInterval<F> y);
+    friend UpperIntervalFactory<F> factory(UpperInterval<F> const& ivl) {
+        return UpperIntervalFactory<F>(ivl.upper().precision()); }
+
+    PrecisionType precision() const;
+
+    friend UpperInterval<F> operator+(UpperInterval<F> const& ivl1, Value<F> const& x2) {
+        return make_interval(cast_singleton(ivl1)+x2); }
+    friend UpperInterval<F> operator+(Value<F> const& x1, UpperInterval<F> const& ivl2) {
+        return make_interval(x1+cast_singleton(ivl2)); }
+
+    friend ApproximateInterval<F> operator+(UpperInterval<F> const& ivl1, Approximation<F> const& x2) {
+        return ApproximateInterval<F>(ivl1)+x2; }
+    friend ApproximateInterval<F> operator+(Approximation<F> const& x1, UpperInterval<F> const& ivl2) {
+        return x1+ApproximateInterval<F>(ivl2); }
+
+    friend UpperInterval<F> operator*(UpperInterval<F> const& ivl1, Value<F> const& x2) {
+        return make_interval(cast_singleton(ivl1)*x2); }
+    friend UpperInterval<F> operator*(Value<F> const& x1, UpperInterval<F> const& ivl2) {
+        return make_interval(x1*cast_singleton(ivl2)); }
+
+    friend ApproximateInterval<F> operator*(UpperInterval<F> const& ivl1, Approximation<F> const& x2) {
+        return ApproximateInterval<F>(ivl1)*x2; }
+    friend ApproximateInterval<F> operator*(Approximation<F> const& x1, UpperInterval<F> const& ivl2) {
+        return x1*ApproximateInterval<F>(ivl2); }
 };
+
+template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
+    : DeclareNumericOperations<ApproximateInterval<F>>
+    , DeclareComparisonOperations<ApproximateInterval<F>,ApproximateKleenean>
+    , DefineFieldOperators<ApproximateInterval<F>>
+    , DefineComparisonOperators<ApproximateInterval<F>,ApproximateKleenean>
+    , ProvideConvertedFieldOperations<ApproximateInterval<F>,Approximation<F>>
+    , ProvideConvertedComparisonOperations<ApproximateInterval<F>,Approximation<F>,ApproximateInterval<F>,ApproximateKleenean>
+    , ProvideConcreteGenericElementaryOperations<ApproximateInterval<F>,ApproximateNumber>
+    , ProvideConcreteGenericComparisonOperations<ApproximateInterval<F>,ApproximateNumber,ApproximateKleenean>
+{
+    typedef typename F::PrecisionType PR; typedef PR PrecisionType;
+    friend ApproximateIntervalFactory<F> factory(ApproximateInterval<F> const& ivl) {
+        return ApproximateIntervalFactory<F>(ivl.upper().precision()); }
+    friend PositiveApproximation<F> mag(ApproximateInterval<F> const& ivl) {
+        return cast_positive(max(-ivl.lower(),ivl.upper())); }
+    friend ApproximateInterval<F> add(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
+        return ApproximateInterval<F>(ivl1.lower()+ivl2.lower(),ivl1.upper()+ivl2.upper()); }
+    friend ApproximateInterval<F> sub(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
+        return ApproximateInterval<F>(ivl1.lower()-ivl2.upper(),ivl1.upper()-ivl2.lower()); }
+    friend ApproximateInterval<F> mul(ApproximateInterval<F> const& ivl1, ApproximateInterval<F> const& ivl2) {
+        auto rll=ivl1.lower()*ivl2.lower(); auto rlu=ivl1.lower()*ivl2.upper();
+        auto rul=ivl1.upper()*ivl2.lower(); auto ruu=ivl1.upper()*ivl2.upper();
+        return ApproximateInterval<F>(min(min(rll,rlu),min(rul,ruu)),max(max(rll,rlu),max(rul,ruu))); }
+    friend ApproximateInterval<F> fma(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2, ApproximateInterval<F> y);
+
+    PR precision() const;
+};
+
 
 template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
@@ -186,7 +259,8 @@ template<class U> class Interval
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.
-    template<class LL, class UU, EnableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>,Not<And<IsConvertible<LL,L>,IsConvertible<UU,U>>>>> =dummy>
+    template<class LL, class UU, EnableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>,Not<And<IsConvertible<LL,L>,IsConvertible<UU,U>>>>> =dummy,
+    DisableIf<And<IsConstructible<L,LL,UU>,IsConstructible<U,LL,UU>>> =dummy> // Disambiguate Interval(Y,PR)
         Interval(const LL& l, const UU& u) : _l(l), _u(u) { }
 
     //! \brief Construct an interval with the lower and upper bounds using the given precision.
@@ -223,6 +297,11 @@ template<class U> class Interval
   public:
     L _l; U _u;
 };
+
+template<class F> auto DeclareIntervalArithmeticOperations<UpperBound<F>>::precision() const -> PrecisionType {
+    Interval<UpperBound<F>>const& ivl=static_cast<Interval<UpperBound<F>>const&>(*this);
+    return min(ivl.lower().precision(),ivl.upper().precision());
+}
 
 //! \related Interval \brief Write to an output stream.
 template<class U> OutputStream& operator<<(OutputStream& os, Interval<U> const& ivl);
@@ -346,6 +425,7 @@ InputStream& operator>>(InputStream&, Interval<FloatDPValue>&);
 
 class EmptyInterval { };
 class EntireInterval { };
+
 
 } // namespace Ariadne
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_discrete_evolution.cpp
  *
- *  Copyright  2006-8  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -36,7 +36,7 @@
 #include "function/function.hpp"
 #include "function/taylor_function.hpp"
 #include "function/formula.hpp"
-#include "geometry/enclosure.hpp"
+#include "dynamics/enclosure.hpp"
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "dynamics/map.hpp"
@@ -63,6 +63,7 @@ Int main()
 
 Void TestMapEvolver::test() const
 {
+    typedef DoublePrecision PR;
     DoublePrecision pr;
 
     typedef Enclosure EnclosureType;
@@ -86,18 +87,18 @@ Void TestMapEvolver::test() const
     ARIADNE_TEST_PRINT(henon);
 
     // Function evaluation sanity check
-    Vector<ApproximateNumericType> p={{a,b},pr};
-    Vector<ApproximateNumericType> x={{0.5,0.25},pr};
-    Vector<ApproximateNumericType> hx={p[0]-x[0]*x[0]+x[1]*p[1], x[0]};
+    Vector<FloatApproximation<PR>> p={{a,b},pr};
+    Vector<FloatApproximation<PR>> x={{0.5,0.25},pr};
+    Vector<FloatApproximation<PR>> hx={p[0]-x[0]*x[0]+x[1]*p[1], x[0]};
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
-    Matrix<ApproximateNumericType> dhx={{-2*x[0],p[1]},{1.0_approx,0.0_approx}};
+    Matrix<FloatApproximation<PR>> dhx={{-2*x[0],p[1]},{1.0_approx,0.0_approx}};
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
 
 
     // Function evaluation sanity check
     ARIADNE_TEST_PRINT(initial_box);
     ARIADNE_TEST_PRINT(image(initial_box,henon));
-    ARIADNE_TEST_PRINT(jacobian_range(henon,initial_box));
+    ARIADNE_TEST_PRINT(jacobian_range(henon,cast_vector(initial_box)));
 
 
 
@@ -111,7 +112,7 @@ Void TestMapEvolver::test() const
 
     // Set up the evaluators
     MapEvolver evolver(henon);
-    evolver.configuration().maximum_enclosure_radius(enclosure_radius);
+    evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
 
     // Compute the reachable sets
     ListSet<EnclosureType> evolve_set,reach_set;
@@ -123,6 +124,7 @@ Void TestMapEvolver::test() const
 
     // Print the intial, evolve and reach sets
     Figure fig;
+    fig.set_bounding_box({{-4,2},{-3,3}});
     fig << line_style(true) << fill_colour(cyan) << reach_set;
     fig << fill_colour(yellow) << evolve_set;
     fig << fill_colour(blue) << initial_set;

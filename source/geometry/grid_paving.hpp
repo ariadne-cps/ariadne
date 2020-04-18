@@ -1,7 +1,7 @@
 /***************************************************************************
- *            grid_paving.hpp
+ *            geometry/grid_paving.hpp
  *
- *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
  *
  ****************************************************************************/
@@ -23,7 +23,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file grid_paving.hpp
+/*! \file geometry/grid_paving.hpp
  *  \brief Grid paving is used to represent sets, based on integer and dyadic coordinate cells, of a grid.
  */
 
@@ -63,6 +63,8 @@ namespace Ariadne {
 typedef Array<Int> IndexArray;
 typedef Array<SizeType> SizeArray;
 
+class Projection;
+
 // Some pre-declarations
 class BinaryTreeNode;
 class Grid;
@@ -95,6 +97,10 @@ GridTreePaving intersection( const GridTreeSubpaving& theSet1, const GridTreeSub
 GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 Bool intersect( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
+GridTreePaving product( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+GridTreePaving image(const GridTreePaving& theSet, const Projection& theProjection);
+
 //! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
 //! this class is just a pointer to the node in the tree of some paving. This class is not
 //! responsible for deallocation of that original tree.
@@ -122,33 +128,33 @@ class GridTreeSubpaving
 
     //! \brief This method checks whether the set defined by \a pCurrentNode is a superset
     //! of \a theBoxType, in case when it is known that the cell corresponding to the root of
-    //! pCurrentNode [and defined by \a theGrid, the primary cell (\a theHeight) to which
+    //! pCurrentNode [and defined by \a theGrid, the primary cell (\a theExtent) to which
     //! this tree is (virtually) rooted via the path theWord] encloses \a theBoxType.
     //! This is a recursive procedure and it returns true only if there are no disabled
     //! cells in \a pCurrentNode that intersect with theBoxType.
     static ValidatedKleenean _superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                        const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+                                        const Nat theExtent, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     //! \brief This method checks whether the set defined by \a pCurrentNode is a subset
     //! of \a theBoxType. The set of \a pCurrentNode is defined by \a theGrid, the primary
-    //! cell (\a theHeight) to which this tree is (virtually) rooted via the path theWord.
+    //! cell (\a theExtent) to which this tree is (virtually) rooted via the path theWord.
     //! This is a recursive procedure and it returns true only if all enabled sub-cells of
     //! \a pCurrentNode are sub-sets of \a theBoxType.
     static ValidatedKleenean _subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                      const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+                                      const Nat theExtent, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     //! \brief This method checks whether \a theBoxType is disjoint from the set defined by
-    //! \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
+    //! \a pCurrentNode, \a theGrid, the primary cell (\a theExtent) to which this
     //! tree is (virtually) rooted via the path theWord. This is done using the recursive
     //! procedure by checking the cells of the tree that intersect with the box and going
     //! down to the leaves. When reaching a leaf node that is enabled we conclude that we
     //! have an intersection. If there are no such nodes then there is no intersection,
     //! and the sets are disjoint.
     static ValidatedKleenean _disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                        const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+                                        const Nat theExtent, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     //! \brief This method checks whether \a theBoxType overlaps the set defined by
-    //! \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
+    //! \a pCurrentNode, \a theGrid, the primary cell (\a theExtent) to which this
     //! tree is (virtually) rooted via the path theWord. This is done using the recursive
     //! procedure by checking the cells of the tree that overlap the box and going
     //! down to the leaves. When reaching a leaf node that is enabled we conclude that we
@@ -156,16 +162,16 @@ class GridTreeSubpaving
     //! method cannot be implemented using disjoint since disjoint tests if the closures
     //! are disjoint, and overlaps tests if the interiors are not disjoint.
     static ValidatedKleenean _intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                          const Nat theHeight, BinaryWord &theWord, const ExactBoxType& theBoxType );
+                                          const Nat theExtent, BinaryWord &theWord, const ExactBoxType& theBoxType );
 
     //! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
     //! starting from the zero cell into the number of subdivisions that have to be done in a
-    //! subpaving rooted to the primary cell of the height \a primaryCellHeight and having a
+    //! subpaving rooted to the primary cell of the extent \a primaryCellExtent and having a
     //! length of the path from the primary cell to the root cell of length \a primaryToRootCellPathLength.
     //! Returns zero if the binary tree already has a sufficient number of subdivisions due to
     //! its root cell being smaller than the cells obtained when subdividing \a numSubdivInDim
     //! times in each dimension starting from the zero-cell level.
-    Nat zero_cell_subdivisions_to_tree_subdivisions( const Nat numSubdivInDim, const Nat primaryCellHeight,
+    Nat zero_cell_subdivisions_to_tree_subdivisions( const Nat numSubdivInDim, const Nat primaryCellExtent,
                                                      const Nat primaryToRootCellPathLength ) const;
 
   public:
@@ -179,11 +185,11 @@ class GridTreeSubpaving
     //! \brief The new root node can only be constructed from the existing tree node.
     //! Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
     //! Note that, \a pRootTreeNode should correspond to the sub-paving root node. Thus,
-    //! \a theHeight defines the height of the primary root cell of the GridTreeSet
+    //! \a theExtent defines the extent of the primary root cell of the GridTreeSet
     //! (Remember that every GridTreeSubset is just a reference to a subtree of a GridTreeSet).
     //! \a theWord defines the path to the \a pRootTreeNode node from the primary root cell
     //! of the corresponding GridTreeSet.
-    GridTreeSubpaving( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode );
+    GridTreeSubpaving( const Grid& theGrid, const Nat theExtent, const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode );
 
     //! \brief A copy constructor that only copies the pointer to the root of the binary tree and the cell
     GridTreeSubpaving( const GridTreeSubpaving &otherSubset);
@@ -216,7 +222,7 @@ class GridTreeSubpaving
     const BinaryTreeNode * binary_tree() const;
 
     //! Recalculate the depth of the tree rooted at \a _pRootTreeNode
-    Nat depth() const;
+    Nat tree_depth() const;
 
     //! The measure (area, volume) of the set in Euclidean space.
     FloatDPApproximation measure() const;
@@ -250,17 +256,22 @@ class GridTreeSubpaving
     //@{
     //! \name Subdivisions
 
-    //! \brief Subdivides the tree in such a way thaty it's depth becomes ( height + numSubdivInDim ) * D
-    //! Where height is the height of the primary cell to which the tree is rooted, \a numSubdivInDim is
-    //! the number of subdivisions in each dimension, and D is the number of dimensions of our space.
+    //! \brief Subdivides the tree in such a way that it's total depth becomes ( extent + numSubdivInDim ) * D
+    //! Where extent is the height in each dimension of the primary cell to which the tree is rooted,
+    //! \a numSubdivInDim is the number of subdivisions in each dimension, and D is the number of dimensions of our space.
     //! Note that, in case the subset is already subdivided to the required depth then nothing is done.
-    //! The latter can happen if the root cell of the subset is below the depth ( height + numSubdivInDim ) * D.
+    //! The latter can happen if the root cell of the subset is below the depth ( extent + numSubdivInDim ) * D.
     Void mince( Nat numSubdivInDim );
+
+    //! \brief Subdivides the set up to the depth specified by the parameter.
+    //! Note that the depth is measured from the unit cell and thus the subdivision
+    //! is done relative to it but not to the root of the original paving.
+    Void mince_to_depth( const Nat theNewDepth );
 
     //! \brief Subdivides the tree up to the depth specified by the parameter.
     //! Note that, we start from the root of the sub-paving and thus the subdivision
     //! is done relative to it but not to the root of the original paving.
-    Void mince_to_tree_depth( const Nat theNewDepth );
+    Void mince_to_tree_depth( const Nat theNewTreeDepth );
 
     //! \brief Subdivide the paving until the smallest depth such that the leaf
     //! cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
@@ -366,7 +377,7 @@ class GridTreeSubpaving
     Void draw(CanvasInterface& canvas, const Projection2d& projection) const;
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
     //@}
@@ -410,77 +421,80 @@ class GridTreePaving
 
     friend class GridTreeCursor;
 
-    //! \brief This method takes the height of the primary cell
-    //! \a otherPavingPCellHeight and if it is:
+    //! \brief This method takes the extent of the primary cell
+    //! \a otherPavingPCellExtent and if it is:
     //!   (a) higher then for this paving, pre-pends \a _pRootTreeNode.
     //!   (b) lower then for this paving, locates it in this paging's tree.
     //!   (c) equal to the hight of this paving's primary cell, does nothing.
     //! This method returns the node corresponding to the primary cell of
-    //! height \a otherPavingPCellHeight in the (updated) paving.
+    //! extent \a otherPavingPCellExtent in the (updated) paving.
     //! If \a stop_on_enabled is set to true then for the case (b) if we meet
     //! a leaf node on the path from the primary node of the paving to the primary
     //! node of the cell, we stop locating the node corresponding to the primary
-    //! cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
+    //! cell of extent \a otherPavingPCellExtent and set \a has_stopped to true.
     //! If \a stop_on_disabled is set to true then for the case (b) if we meet
     //! a leaf node on the path from the primary node of the paving to the primary
     //! node of the cell, we stop locating the node corresponding to the primary
-    //! cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
-    BinaryTreeNode* align_with_cell( const Nat otherPavingPCellHeight, const Bool stop_on_enabled, const Bool stop_on_disabled, Bool & has_stopped );
+    //! cell of extent \a otherPavingPCellExtent and set \a has_stopped to true.
+    BinaryTreeNode* align_with_cell( const Nat otherPavingPCellExtent, const Bool stop_on_enabled, const Bool stop_on_disabled, Bool & has_stopped );
+
+    //! \brief This method adjoins a cell with root extent \a cellExtent with path \a pCellPath to this paving.
+    Void _adjoin_cell( const Nat cellExtent, BinaryWord const& pCellPath );
 
     //! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
-    //! We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented
+    //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_hight and represented
     //! by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
-    //! up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+    //! up to the level of accuracy given by \a max_mince_tree_depth. This parameter defines, how many subdivisions
     //! of the binary tree we should make to get the proper cells for outer approximating \a theSet.
     //! This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
-    static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
-                                             const Nat max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
-    static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
-                                             const Nat max_mince_depth, const ValidatedCompactSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
+                                             const Nat max_mince_tree_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
+                                             const Nat max_mince_tree_depth, const ValidatedCompactSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
-    //! We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented
+    //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_extent and represented
     //! by the paving's binary node \a pBinaryTreeNode. When adding the inner approximation, we compute it
-    //! up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+    //! up to the level of accuracy given by \a max_mince_tree_depth. This parameter defines, how many subdivisions
     //! of the binary tree we should make to get the proper cells for inner approximating \a theSet.
     //! This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
-    static Void _adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
-                                             const Nat max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
+                                             const Nat max_mince_tree_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
-    //! We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented
+    //! We use the primary cell (enclosed in this paving) of extent \a primary_cell_hight and represented
     //! by the paving's binary node \a pBinaryTreeNode. When adding the lower approximation, we compute it
-    //! up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+    //! up to the level of accuracy given by \a max_mince_tree_depth. This parameter defines, how many subdivisions
     //! of the binary tree we should make to get the proper cells for lower approximating \a theSet.
     //! This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
     //! from the root node in recursive calls, thus the initial evaluate for this method must be done with an empty word.
     //! The approximation method does not recombine cells, as knowing that both children intersect a set is more
     //! information than knowing that the parent does.
-    static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
-                                             const Nat max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
+                                             const Nat max_mince_tree_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
     //! It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
     //! a cell, then we know it overlaps the cell and all its children.
-    static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_height,
-                                             const Nat max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static Void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
+                                             const Nat max_mince_tree_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     //! \brief This method is uset to do restriction of this set to the set given by
-    //! \a theOtherSubPaving Note that, here we require that the height of the primary
-    //! root cell of this set is >= the height of the primary root cell of \a theOtherSubPaving.
+    //! \a theOtherSubPaving Note that, here we require that the extent of the primary
+    //! root cell of this set is >= the extent of the primary root cell of \a theOtherSubPaving.
     Void restrict_to_lower( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief This method is uset to remove \a theOtherSubPaving from this set.
-    //! Note that, here we require that the height of the primary root cell of
-    //! this set is >= the height of the primary root cell of \a theOtherSubPaving.
+    //! Note that, here we require that the extent of the primary root cell of
+    //! this set is >= the extent of the primary root cell of \a theOtherSubPaving.
     Void remove_from_lower( const GridTreeSubpaving& theOtherSubPaving );
 
     //! \brief This method changes the primary cell of this GridTreeSet.
-    //! We only can increase the height of the primary cell, this is why
-    //! if toPCellHeight <= this->cell().height(), then nothing is done.
-    Void up_to_primary_cell( const Nat toPCellHeight );
+    //! We only can increase the extent of the primary cell, this is why
+    //! if toPCellExtent <= this->cell().extent(), then nothing is done.
+    Void up_to_primary_cell( const Nat toPCellExtent );
 
   public:
     //@{
@@ -492,9 +506,9 @@ class GridTreePaving
 
     //! \brief The new root node can only be constructed from the existing tree node.
     //! Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
-    //! Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
-    //! the height of the primary root cell corresponding to the \a pRootTreeNode node.
-    GridTreePaving( const Grid& theGrid, const Nat theHeight, BinaryTreeNode * pRootTreeNode );
+    //! Note that, \a pRootTreeNode should correspond to the root node. \a theExtent defines
+    //! the extent of the primary root cell corresponding to the \a pRootTreeNode node.
+    GridTreePaving( const Grid& theGrid, const Nat theExtent, BinaryTreeNode * pRootTreeNode );
 
     //! \brief Construct a grid tree set from a single cell.
     GridTreePaving( const GridCell & theGridCell );
@@ -526,9 +540,9 @@ class GridTreePaving
                           const IndexArray theRightUpperPoint, const BooleanArray& theEnabledCells );
 
     //! \brief Creates a new paving from the user data. \a theTree is an Array representation of the binary
-    //! tree structure, \a theEnabledCells tells whether a node is or is not a leaf, \a theHeight gives the
-    //! height of the primary cell which is assumed to correspond to the root node of \a theTree.
-    explicit GridTreePaving( const Grid& theGrid, Nat theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
+    //! tree structure, \a theEnabledCells tells whether a node is or is not a leaf, \a theExtent gives the
+    //! extent of the primary cell which is assumed to correspond to the root node of \a theTree.
+    explicit GridTreePaving( const Grid& theGrid, Nat theExtent, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
     //@}
 
@@ -582,8 +596,8 @@ class GridTreePaving
     //! \brief Remove cells from  an abstract paving set.
     Void remove( const SubPavingInterface& theOtherSubPaving );
 
-    //! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight.
-    Void restrict_to_height( const Nat theHeight );
+    //! \brief Restrict to cells rooted to the primary cell with the extent (at most) \a theExtent.
+    Void restrict_to_extent( const Nat theExtent );
 
     //! /brief Creates an over approximation for the \a theBoxType on \a theGrid. \a theBoxType
     //! is in the original space coordinates. We compute the over approximation as the
@@ -605,62 +619,72 @@ class GridTreePaving
     //! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2)
     friend GridTreePaving difference( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
 
+    //! \brief The Cartesian product of two grid paving sets.
+    friend GridTreePaving product( const GridTreeSubpaving& theSet1, const GridTreeSubpaving& theSet2 );
+
+    //! \brief The image of a grid paving set under a coordinate projection.
+    friend GridTreePaving image( const GridTreePaving&, const Projection&);
+
+    //! \brief Compute an outer-approximation to the set \f$\{ (x_1,f(x_1)) \mid x_1 \in S_1 \}\f$ preserving the projection onto \f$S_1\f$.
+    friend GridTreePaving outer_skew_product(GridTreePaving const& theSet1, Grid const& theGrid2,
+                                             ValidatedVectorMultivariateFunction const& theFunction);
+
     //@}
 
     //@{
     //! \name Geometric Approximation
 
-    //! \brief Adjoin an over approximation to box, computing to the given depth:
+    //! \brief Adjoin an over approximation to box, computing to the given resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of
     //! the zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! \pre The box must have nonempty interior.
     Void adjoin_over_approximation( const ExactBoxType& theBoxType, const Nat numSubdivInDim );
 
-    //! \brief Adjoin an outer approximation to a given set, computing to the given depth.
+    //! \brief Adjoin an outer approximation to a given set, computing to the given resolution.
     //! This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
     //! Note that, the depth is the total number of subdivisions (in all dimensions) of the unit
     //! cell of the grid. This method does the followig:
     //!   1. Computes the smallest Primary cell enclosing \a theSet
     //!   2. Allocates the paving for this cell
-    //!   3. Minces the paving to the level: depth + \<the primary cell height\>
+    //!   3. Minces the paving to the level: depth + \<the primary cell extent\>
     //!   4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
     //!   5. Disables the cells that are disjoint with the \a theSet
     Void adjoin_outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
     Void adjoin_outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
     Void adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim );
 
-    //! \brief Adjoin a lower approximation to a given set, computing to the given height and depth:
+    //! \brief Adjoin a lower approximation to a given set, computing to the given extent and resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! A lower approximation comprises all cells intersecting a given set.
-    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const Nat height, const Nat numSubdivInDim );
+    Void adjoin_lower_approximation( const OvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
 
     //! \brief Adjoin a lower approximation to a given set restricted to the given bounding box,
-    //! computing to the given depth: \a numSubdivInDim -- defines, how many subdivisions in each
+    //! computing to the given resolution: \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. A lower approximation comprises all cells intersecting a given set.
     Void adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
-    //! \brief Adjoin a lower approximation to a given set, computing to the given depth
+    //! \brief Adjoin a lower approximation to a given set, computing to the given resolution
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! A lower approximation comprises all cells intersecting a given set.
     Void adjoin_lower_approximation( const LocatedSetInterface& theSet, const Nat numSubdivInDim );
 
-    //! \brief Adjoin an inner approximation to a given set, computing to the given height and depth:
+    //! \brief Adjoin an inner approximation to a given set, computing to the given extent and resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
     //! zero cell we should make to get the proper cells for outer approximating \a theSet.
     //! An inner approximation comprises all cells that are sub-cells of the given set.
-    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const Nat height, const Nat numSubdivInDim );
+    Void adjoin_inner_approximation( const OpenSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim );
 
     //! \brief Adjoin an inner approximation to a given set restricted to the given bounding box,
-    //! computing to the given depth: \a numSubdivInDim -- defines, how many subdivisions in each
+    //! computing to the given resolution: \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
     //! the given set.
     Void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 
-    //! \brief Adjoin an inner approximation to the given set, computing to the given depth:
+    //! \brief Adjoin an inner approximation to the given set, computing to the given resolution:
     //! \a numSubdivInDim -- defines, how many subdivisions in each
     //! dimension from the level of the zero cell we should make to get the proper cells for outer
     //! approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
@@ -678,13 +702,13 @@ class GridTreePaving
 
 };
 
-GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat depth);
-GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat depth);
+GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat fineness);
+GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat fineness);
 GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 GridTreePaving outer_approximation( const CompactSetInterface& theSet, const Nat numSubdivInDim );
 GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 GridTreePaving outer_approximation( const ValidatedCompactSetInterface& theSet, const Nat numSubdivInDim );
-GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat height, const Nat numSubdivInDim );
+GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim );
 GridTreePaving inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim );
 GridTreePaving inner_approximation( const SetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim );
 
@@ -894,7 +918,7 @@ class GridTreeConstIterator
     // Test equality with another abstract iterator.
     virtual Bool equals( ForwardConstantIteratorInterface<GridCell> const & theOtherIterator) const;
     // Write to an output stream.
-    virtual Void write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
 };
 

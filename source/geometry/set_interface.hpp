@@ -1,7 +1,7 @@
 /***************************************************************************
- *            set_interface.hpp
+ *            geometry/set_interface.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file set_interface.hpp
+/*! \file geometry/set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of Euclidean space.
  */
 
@@ -33,21 +33,21 @@
 
 #include "../utility/declarations.hpp"
 #include "../utility/tribool.hpp"
+#include "../utility/writable.hpp"
 #include "../numeric/numeric.hpp"
+
+#include "box.decl.hpp"
 
 namespace Ariadne {
 
 template<class X> class Vector;
 
-template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-typedef Point<ValidatedNumericType> ValidatedPoint;
-typedef Point<ApproximateNumericType> ApproximatePoint;
+template<class UB> class Interval;
+typedef FloatDPExactInterval ExactIntervalType;
 
 template<class IVL> class Box;
-typedef Box<ExactIntervalType> ExactBoxType;
-typedef Box<UpperIntervalType> UpperBoxType;
-typedef Box<ApproximateIntervalType> ApproximateBoxType;
+typedef FloatDPExactBox ExactBoxType;
+typedef FloatDPUpperBox UpperBoxType;
 
 class BoundedSetInterface;
 class OpenSetInterface;
@@ -84,7 +84,7 @@ struct Covers {
 };
 
 //! \brief Base class for sets described by predicates involving boxes.
-class SetInterfaceBase
+class SetInterfaceBase : public virtual WritableInterface
 {
   public:
     //! \brief Virtual destructor.
@@ -94,11 +94,11 @@ class SetInterfaceBase
     //! \brief The dimension of the set.
     virtual DimensionType dimension() const = 0;
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class BoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -169,7 +169,7 @@ class ClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class CompactSetInterface
     : public virtual BoundedSetInterface,
       public virtual ClosedSetInterface
@@ -224,7 +224,7 @@ class LocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class RegularLocatedSetInterface
     : public virtual RegularSetInterface,
       public virtual LocatedSetInterface
@@ -236,7 +236,7 @@ class RegularLocatedSetInterface
 using SetInterface = RegularLocatedSetInterface;
 
 inline OutputStream& operator<<(OutputStream& os, const SetInterfaceBase& s) {
-    return s.write(os);
+    return s._write(os);
 }
 
 
@@ -251,7 +251,7 @@ class ValidatedLocatedSetInterface;
 class ValidatedRegularLocatedSetInterface;
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class ValidatedBoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
@@ -261,6 +261,7 @@ class ValidatedBoundedSetInterface
     //! \brief Returns a bounding box for the set.
     virtual UpperBoxType bounding_box() const = 0;
 };
+
 //! \ingroup GeometryModule SetInterfaceSubModule
 //! \brief Interface for overt sets, for which intersection with an open box is verifiable.
 class ValidatedOvertSetInterface
@@ -303,7 +304,7 @@ class ValidatedClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class ValidatedCompactSetInterface
     : public virtual ValidatedBoundedSetInterface,
       public virtual ValidatedClosedSetInterface
@@ -350,7 +351,7 @@ class ValidatedLocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class ValidatedRegularLocatedSetInterface
     : public virtual ValidatedRegularSetInterface,
       public virtual ValidatedLocatedSetInterface
@@ -369,7 +370,7 @@ class EuclideanSpace
   public:
     //! \brief The canonical type used for bounding sets in the space.
     typedef ExactBoxType BoundingDomainType;
-    //! \brief The interface satisified by singleton sets in the space.
+    //! \brief The interface satisified by bounded sets in the space.
     typedef BoundedSetInterface BoundedSetInterfaceType;
     //! \brief The interface satisified by overt sets in the space.
     typedef OvertSetInterface OvertSetInterfaceType;

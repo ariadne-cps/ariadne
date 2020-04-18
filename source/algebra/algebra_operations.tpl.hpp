@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra_operations.tpl.hpp
  *
- *  Copyright 2011-17  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -213,7 +213,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose(const AnalyticFunction& fn, 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Algebraic and trancendental functions
-//   singleton domain (rec,sqrt,log,tan)
+//   bounded domain (rec,sqrt,log,tan)
 //   unbounded domain (exp,sin,cos)
 
 namespace {

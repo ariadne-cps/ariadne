@@ -1,7 +1,7 @@
 /***************************************************************************
- *            rational.cpp
+ *            numeric/rational.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file rational.cpp
+/*! \file numeric/rational.cpp
  *  \brief
  */
 
@@ -513,7 +513,108 @@ OutputStream& operator<<(OutputStream& os, Rational const& q1) {
     return os;
 }
 
+struct RoundExact { };
+inline RoundExact opposite(RoundExact) { return RoundExact(); }
+template<class Y> inline decltype(auto) rec(RoundExact, Y const& y) { return rec(y); }
+template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
+template<class Y1, class Y2> inline decltype(auto) div(RoundExact, Y1 const& y1, Y2 const& y2) { return y1/y2; }
+
+template<class RNDUP, class Y> inline auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>
+{
+    auto down=opposite(up);
+    const Y& y1l=y1.lower_raw(); const Y& y1u=y1.upper_raw();
+    const Y& y2l=y2.lower_raw(); const Y& y2u=y2.upper_raw();
+    if(y1l>=0) {
+        if(y2l>=0) {
+            return Bounds<Y>(mul(down,y1l,y2l),mul(up,y1u,y2u));
+        } else if(y2u<=0) {
+            return Bounds<Y>(mul(down,y1u,y2l),mul(up,y1l,y2u));
+        } else {
+            return Bounds<Y>(mul(down,y1u,y2l),mul(up,y1u,y2u));
+        }
+    }
+    else if(y1u<=0) {
+        if(y2l>=0) {
+            return Bounds<Y>(mul(down,y1l,y2u),mul(up,y1u,y2l));
+        } else if(y2u<=0) {
+            return Bounds<Y>(mul(down,y1u,y2u),mul(up,y1l,y2l));
+        } else {
+            return Bounds<Y>(mul(down,y1l,y2u),mul(up,y1l,y2l));
+        }
+    } else {
+        if(y2l>=0) {
+            return Bounds<Y>(mul(down,y1l,y2u),mul(up,y1u,y2u));
+        } else if(y2u<=0) {
+            return Bounds<Y>(mul(down,y1u,y2l),mul(up,y1l,y2l));
+        } else {
+            return Bounds<Y>(min(mul(down,y1u,y2l),mul(down,y1l,y2u)),max(mul(up,y1l,y2l),mul(up,y1u,y2u)));
+        }
+    }
+}
+
+template<class RNDUP, class Y> inline auto _div(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>
+{
+    auto down=opposite(up);
+    const Y& y1l=y1.lower_raw(); const Y& y1u=y1.upper_raw();
+    const Y& y2l=y2.lower_raw(); const Y& y2u=y2.upper_raw();
+    // IMPORTANT: Need to be careful when one of the bounds is 0, since if y2l=-0.0 and y1u>0, then y2l>=0 but y1u/y2l=-inf
+    if(y2l>0) {
+        if(y1l>=0) {
+            return Bounds<Y>(div(down,y1l,y2u),div(up,y1u,y2l));
+        } else if(y1u<=0) {
+            return Bounds<Y>(div(down,y1l,y2l),div(up,y1u,y2u));
+        } else {
+            return Bounds<Y>(div(down,y1l,y2l),div(up,y1u,y2l));
+        }
+    }
+    else if(y2u<0) {
+        if(y1l>=0) {
+            return Bounds<Y>(div(down,y1u,y2u),div(up,y1l,y2l));
+        } else if(y1u<=0) {
+            return Bounds<Y>(div(down,y1u,y2l),div(up,y1l,y2u));
+        } else {
+            return Bounds<Y>(div(down,y1u,y2u),div(up,y1l,y2u));
+        }
+    }
+    else {
+        //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds y1, FloatBounds y2)","y1="<<y1<<", y2="<<y2);
+        if constexpr(HasPrecisionType<Y>::value) {
+            auto pr=max(y1.precision(),y2.precision());
+            return Bounds<Y>(-Y::inf(pr),+Y::inf(pr));
+        } else {
+            return Bounds<Y>(-Y::inf(),+Y::inf());
+        }
+    }
+}
+
+template<class RNDUP, class Y> Bounds<Y> _rec(RNDUP up, Bounds<Y> const& y) {
+    auto down=opposite(up);
+   const Y& yl=y.lower_raw(); const Y& yu=y.upper_raw();
+    if(yl>0 || yu<0) {
+        return Bounds<Y>(rec(down,yu),rec(up,yl));
+    } else {
+        if constexpr(HasPrecisionType<Y>::value) {
+            auto pr=y.precision();
+            return Bounds<Y>(-Y::inf(pr),+Y::inf(pr));
+        } else {
+            return Bounds<Y>(-Y::inf(),+Y::inf());
+        }
+    }
+}
+
+Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2) {
+    return _mul(RoundExact(),q1,q2); }
+Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2) {
+    return _div(RoundExact(),q1,q2); }
+Bounds<Rational> rec(RationalBounds const& q) {
+    return _rec(RoundExact(),q); }
 
 template<> String class_name<Rational>() { return "Rational"; }
+
+
+// TODO: Move to dyadic.cpp
+Bounds<Dyadic> operator*(DyadicBounds const& w1, DyadicBounds const& w2) {
+    return _mul(RoundExact(),w1,w2); }
+
 
 } // namespace Ariadne

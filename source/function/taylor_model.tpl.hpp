@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_model.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -51,6 +51,11 @@
 
 namespace Ariadne {
 
+typedef IntegralConstant<Int,0> Zero;
+typedef IntegralConstant<Int,1> One;
+static const Zero zero = Zero();
+static const One one = One();
+
 FloatDP operator+(FloatDP x1, FloatDP x2);
 FloatDP operator-(FloatDP x1, FloatDP x2);
 FloatDP operator*(FloatDP x1, FloatDP x2);
@@ -68,6 +73,125 @@ FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
 FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
 FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
+template<class F> F UnknownError<F>::raw() const {
+    return F(0u,this->precision()); }
+template<class F> typename F::PrecisionType UnknownError<F>::precision() const {
+    if constexpr (IsSame<F,FloatMP>::value) { return MultiplePrecision(64); }
+    else { return typename F::PrecisionType(); } }
+template<class F> UnknownError<F>::operator PositiveApproximation<F> () const {
+    return PositiveApproximation<F>(0,this->precision()); }
+
+template<class F> UnknownError<F> nul(UnknownError<F>) { return UnknownError<F>(); }
+template<class F> UnknownError<F> mag(UnknownError<F>) { return UnknownError<F>(); }
+template<class F> UnknownError<F> operator+(UnknownError<F>, UnknownError<F>) { return UnknownError<F>(); }
+template<class F> UnknownError<F> operator*(UnknownError<F>, UnknownError<F>) { return UnknownError<F>(); }
+template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, UnknownError<F> const&) { return e; }
+template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, UnknownError<F> const&) { return e; }
+
+template<class F> UnknownError<F> operator+(UnknownError<F>, PositiveApproximation<F> const&) { return UnknownError<F>(); }
+template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
+template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
+template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const& e) { return os << "???"; }
+
+
+template<class F> ZeroError<F> const& nul(ZeroError<F> const& e) { return e; }
+template<class F> PositiveUpperBound<F> const& operator+(PositiveUpperBound<F> const& r, ZeroError<F> const&) { return r; }
+template<class F> PositiveUpperBound<F>& operator+=(PositiveUpperBound<F>&, ZeroError<F> const&) { }
+template<class F> ZeroError<F>& operator+=(ZeroError<F>&, ZeroError<F> const&) { }
+
+
+template<class F> Bounds<F> fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> y) { return x1*x2+y; }
+template<class F> Bounds<F>& operator/=(Bounds<F>& x, TwoExp y) { return x*=Dyadic(rec(y)); }
+
+template<class F> Approximation<F>& operator/=(Approximation<F>& x, TwoExp y) { return x/=Dyadic(y); }
+template<class F> Approximation<F> fma(Approximation<F>const& x, Approximation<F> const& y, Approximation<F> z) {
+    z._a = fma(near,x._a,y._a,z._a);; return std::move(z); }
+template<class F> Approximation<F> pm(UnknownError<F> e) { return Approximation<F>(e.precision()); }
+
+
+template<class F> UpperInterval<F>& operator/=(UpperInterval<F>& ivl1, ValidatedNumber const& y2) {
+    return ivl1=ivl1/y2; }
+template<class F> UpperInterval<F>& operator/=(UpperInterval<F>& ivl1, Dyadic const& w2) {
+    return ivl1=ivl1/w2; }
+
+//namespace {
+// Operations for Interval<UpperBound<F>> coefficients
+template<class X> X const& cast_singleton(X const& x) { return x; }
+template<class F> Bounds<F> const& cast_singleton(Interval<UpperBound<F>> const& ivl) { return reinterpret_cast<Bounds<F>const&>(ivl); }
+
+template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2.lower(),x1.upper()+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2.upper(),x1.upper()-x2.lower()); }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return make_interval(reinterpret_cast<Bounds<F>const&>(x1)*reinterpret_cast<Bounds<F>const&>(x2)); }
+
+template<class F> ApproximateInterval<F> operator+(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+template<class F> ApproximateInterval<F> operator-(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> x1, Approximation<F> const& x2) {
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
+    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); }
+}
+template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, ApproximateInterval<F> x2) {
+    return x2*x1; }
+/*
+template<class F> ApproximateInterval<F> operator+(UpperInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()+x2,x1.upper()+x2); }
+template<class F> ApproximateInterval<F> operator-(UpperInterval<F> x1, Approximation<F> const& x2) {
+    return ApproximateInterval<F>(x1.lower()-x2,x1.upper()-x2); }
+*/
+template<class F> ApproximateInterval<F> operator*(UpperInterval<F> const& x1, Approximation<F> const& x2) {
+    if (x2.raw()>=0) { return ApproximateInterval<F>(x1.lower()*x2,x1.upper()*x2); }
+    else { return ApproximateInterval<F>(x1.upper()*x2,x1.lower()*x2); } }
+/*
+template<class F> ApproximateInterval<F> operator+(Approximation<F> const& x1, UpperInterval<F> x2) {
+    return ApproximateInterval<F>(x1+x2.lower(),x1+x2.upper()); }
+template<class F> ApproximateInterval<F> operator-(Approximation<F> const& x1, UpperInterval<F> x2) {
+    return ApproximateInterval<F>(x1-x2.upper(),x1-x2.lower()); }
+*/
+template<class F> ApproximateInterval<F> operator*(Approximation<F> const& x1, UpperInterval<F> const& x2) {
+    return x2*x1; }
+
+template<class F> ApproximateInterval<F> operator*(UpperInterval<F> const& x1, ApproximateInterval<F> const& x2) {
+    return ApproximateInterval<F>(x1)*x2; }
+template<class F> ApproximateInterval<F> operator*(ApproximateInterval<F> const& x1, UpperInterval<F> const& x2) {
+    return x1*ApproximateInterval<F>(x2); }
+
+
+//} // namespace
+
+
+template<class F> PositiveUpperBound<F> mag(Interval<UpperBound<F>> const& ivl) {
+    return cast_positive(max(-ivl.lower(),ivl.upper()));
+}
+template<class F> PositiveApproximation<F> mag(Interval<Approximation<F>> const& ivl) {
+    return cast_positive(max(-ivl.lower(),ivl.upper()));
+}
+
+
+template<class F> ValidatedIntervalTaylorModel<F> max(ValidatedIntervalTaylorModel<F> const& x1, Bounds<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> max(Bounds<F> const& x1, ValidatedIntervalTaylorModel<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> min(ValidatedIntervalTaylorModel<F> const& x1, Bounds<F> const& x2);
+template<class F> ValidatedIntervalTaylorModel<F> max(Bounds<F> const& x1, ValidatedIntervalTaylorModel<F> const& x2);
+
+struct UnitMultiIndex {
+    SizeType n; DegreeType j;
+    friend MultiIndex& operator+=(MultiIndex& a, UnitMultiIndex const& aj) { a[aj.j]+=1u; return a; }
+};
+struct SumMultiIndex {
+    MultiIndex const& a1; MultiIndex const& a2;
+    SizeType size() const { return a1.size(); }
+    DegreeType operator[] (SizeType j) const { return a1[j]+a2[j]; }
+    DegreeType degree() const { return a1.degree()+a2.degree(); }
+};
+
+
 namespace {
 
 static const double MACHINE_EPSILON = 2.2204460492503131e-16;
@@ -76,17 +200,25 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 
-Interval<FloatDPValue> const& convert_interval(IntervalDomainType const& ivl, DoublePrecision) { return ivl; }
-Interval<FloatMPValue> convert_interval(IntervalDomainType const& ivl, MultiplePrecision pr) {
-    return Interval<FloatMPValue>(FloatMP(ivl.lower().get_d(),pr),FloatMP(ivl.upper().get_d(),pr)); }
+inline Interval<FloatDPValue> convert_interval(Interval<FloatDPValue> const& ivl, DoublePrecision pr) {
+    return ivl; }
+inline Interval<FloatMPValue> convert_interval(Interval<FloatDPValue> const& ivl, MultiplePrecision pr) {
+    return Interval<FloatMPValue>(FloatMP(ivl.lower().raw(),pr),FloatMP(ivl.upper().raw(),pr)); }
 
-Interval<FloatDPValue> convert_exact_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision pr) {
-    return cast_exact(ivl); }
-Interval<FloatDPValue> convert_exact_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
-    FloatDP l(Dyadic(ivl.lower().raw()),downward,pr); FloatDP u(Dyadic(ivl.lower().raw()),upward,pr);
-    return Interval<FloatDPValue>(FloatDPValue(l),FloatDPValue(u)); }
+inline Interval<FloatDPUpperBound> const& convert_interval(Interval<FloatDPUpperBound> const& ivl, DoublePrecision) {
+    return ivl; }
+inline Interval<FloatDPUpperBound> convert_interval(Interval<FloatMPUpperBound> const& ivl, DoublePrecision pr) {
+    return Interval<FloatDPUpperBound>(FloatDP(ivl.lower().raw(),down,pr),FloatDP(ivl.upper().raw(),up,pr)); }
 
-inline Box<Interval<FloatDPValue>> const& convert_box(BoxDomainType const& bx, DoublePrecision) { return bx; }
+inline Interval<FloatDPApproximation> const& convert_interval(Interval<FloatDPApproximation> const& ivl, DoublePrecision) {
+    return ivl; }
+inline Interval<FloatDPApproximation> convert_interval(Interval<FloatMPApproximation> const& ivl, DoublePrecision pr) {
+    return Interval<FloatDPApproximation>(FloatDP(ivl.lower().raw(),near,pr),FloatDP(ivl.upper().raw(),near,pr)); }
+
+template<class FLT> Bool is_same_as_zero(Approximation<FLT> const& xa) { return xa.raw()==0; }
+template<class FLT> Bool is_same_as_zero(Bounds<FLT> const& xb) { return xb.lower_raw()==0 && xb.upper_raw()==0; }
+template<class FLT> Bool is_same_as_zero(Value<FLT> const& xv) { return xv.raw()==0; }
+template<class FLT> Bool is_same_as_zero(UpperInterval<FLT> const& xv) { return xv.lower().raw()==0 && xv.upper().raw()==0; }
 
 } // namespace
 
@@ -120,6 +252,33 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, FloatError<
 }
 
 template<class F>
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatBounds<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatBounds<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatBounds<PR>>::Iterator curr=p.begin();
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->_discard(adv->index(),mag(adv->coefficient()).raw())) {
+            //te+=abs(adv->coefficient());
+            te+mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
+template<class F>
 Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const
 {
     typename Expansion<MultiIndex,FloatApproximation<PR>>::ConstIterator end=p.end();
@@ -136,6 +295,33 @@ Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) con
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+
+template<class F>
+Void SweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::Iterator curr=p.begin();
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->_discard(adv->index(),mag(adv->coefficient()).raw())) {
+            //te+=abs(adv->coefficient());
+            te+mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
 
 namespace {
 
@@ -179,6 +365,35 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatValue<PR>>& p, Flo
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+template<class F>
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatBounds<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatBounds<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatBounds<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatBounds<PR>>::Iterator curr=p.begin();
+
+    FloatError<PR> nrm=radius(p)+e;
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(e.precision());
+    while(adv!=end) {
+        if(this->_discard(mag(adv->coefficient()).raw(),nrm.raw())) {
+            //te+=abs(adv->coefficient());
+            te+=mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
 
 template<class F>
 Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>& p) const
@@ -201,87 +416,128 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatApproximation<PR>>
 }
 
 
+template<class F>
+Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>& p, FloatError<PR>& e) const
+{
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator end=p.end();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::ConstIterator adv=p.begin();
+    typename Expansion<MultiIndex,FloatUpperInterval<PR>>::Iterator curr=p.begin();
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel()
-    : _expansion(0), _error(0u), _sweeper()
+    FloatError<PR> nrm=radius(p)+e;
+
+    // FIXME: Not needed, but added to pair with rounding mode change below
+    F::set_rounding_upward();
+    FloatError<PR> te(0u,e.precision());
+    while(adv!=end) {
+        if(this->_discard(mag(adv->coefficient()).raw(),nrm.raw())) {
+            //te+=abs(adv->coefficient());
+            te+=mag(adv->coefficient());
+        } else {
+            *curr=*adv;
+            ++curr;
+        }
+        ++adv;
+    }
+    e+=te;
+
+    // FIXME: Removing reset of rounding mode causes error in TestNonlinear programming
+    F::set_rounding_to_nearest();
+    p.resize(static_cast<SizeType>(curr-p.begin()));
+}
+
+
+
+template<class P, class F> TaylorModel<P,F>::TaylorModel()
+    : _expansion(0), _error(), _sweeper()
 {
 }
 
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(SizeType as, SweeperType swp)
-    : _expansion(as), _error(0u), _sweeper(swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
+    : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,CoefficientType>& f, const ErrorType& e, SweeperType swp)
     : _expansion(f), _error(e), _sweeper(swp)
 {
     this->cleanup();
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,F>& f, const F& e, SweeperType swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,RawFloatType>& f, const RawFloatType& e, SweeperType swp)
 //    : TaylorModel(reinterpret_cast<Expansion<MultiIndex,CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
     : TaylorModel(static_cast<Expansion<MultiIndex,CoefficientType>>(f),static_cast<ErrorType>(e),swp)
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F>::TaylorModel(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp)
     : TaylorModel(Expansion<MultiIndex,CoefficientType>(Expansion<MultiIndex,Dyadic>(f),swp.precision()),ErrorType(Dyadic(e),swp.precision()),swp)
 {
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::scaling(SizeType as, SizeType j, const IntervalDomainType& codom, SweeperType swp) {
-    TaylorModel<ValidatedTag,F> r(as,swp);
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::scaling(SizeType as, SizeType j, const IntervalDomainType& codom, SweeperType swp) {
+    TaylorModel<P,F> r(as,swp);
     auto ivl=convert_interval(codom,r.precision());
     r.set_gradient(j,1);
     r*=ivl.radius();
-    r+=ivl.midpoint();
+    r+=static_cast<NumericType>(ivl.midpoint());
     return r;
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create() const {
-    return TaylorModel<ValidatedTag,F>(this->argument_size(),this->_sweeper);
+template<class P, class F> auto
+TaylorModel<P,F>::constant(SizeType as, const NumericType& c, SweeperType swp) -> TaylorModel<P,F> {
+    TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r;
+}
+template<class P, class F> auto
+TaylorModel<P,F>::constant(SizeType as, const GenericNumericType& c, SweeperType swp) -> TaylorModel<P,F> {
+    TaylorModel<P,F> r(as,swp); r.set_value(CoefficientType(1,r.precision())); r*=c; return r;
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_zero() const {
-    return TaylorModel<ValidatedTag,F>(this->argument_size(),this->_sweeper);
+
+
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create() const {
+    return TaylorModel<P,F>(this->argument_size(),this->_sweeper);
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_constant(NumericType c) const {
-    return TaylorModel<ValidatedTag,F>::constant(this->argument_size(),c,this->_sweeper);
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create_zero() const {
+    return TaylorModel<P,F>(this->argument_size(),this->_sweeper);
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_constant(GenericNumericType c) const {
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create_constant(NumericType c) const {
+    return TaylorModel<P,F>::constant(this->argument_size(),c,this->_sweeper);
+}
+
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create_constant(GenericNumericType c) const {
     return this->create_constant(NumericType(c,this->precision()));
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_coordinate(SizeType j) const {
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create_coordinate(SizeType j) const {
     ARIADNE_PRECONDITION(j<this->argument_size());
-    TaylorModel<ValidatedTag,F> r(this->argument_size(),this->_sweeper);
-    CoefficientType one(1,this->precision());
-    r._expansion.append(MultiIndex::unit(this->argument_size(),j),one);
+    TaylorModel<P,F> r(this->argument_size(),this->_sweeper);
+    CoefficientType o(1,this->precision());
+    r._expansion.append(MultiIndex::unit(this->argument_size(),j),o);
     return r;
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::create_ball(ErrorType e) const {
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::create_ball(ErrorType e) const {
     ARIADNE_DEBUG_PRECONDITION(e.raw()>=0);
-    TaylorModel<ValidatedTag,F> r(this->argument_size(),this->_sweeper);
+    TaylorModel<P,F> r(this->argument_size(),this->_sweeper);
     r._error=e;
     return r;
 }
 
-template<class F> Void TaylorModel<ValidatedTag,F>::swap(TaylorModel<ValidatedTag,F>& tm) {
+template<class P, class F> Void TaylorModel<P,F>::swap(TaylorModel<P,F>& tm) {
     this->_expansion.swap(tm._expansion);
     std::swap(this->_error,tm._error);
     std::swap(this->_sweeper,tm._sweeper);
 }
 
-template<class F> Void TaylorModel<ValidatedTag,F>::clear() {
+template<class P, class F> Void TaylorModel<P,F>::clear() {
     this->_expansion.clear();
     this->_error=0u;
 }
 
-template<class F> DegreeType TaylorModel<ValidatedTag,F>::degree() const {
+template<class P, class F> DegreeType TaylorModel<P,F>::degree() const {
     DegreeType deg=0u;
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
         deg=std::max(deg,iter->index().degree());
@@ -290,17 +546,29 @@ template<class F> DegreeType TaylorModel<ValidatedTag,F>::degree() const {
 }
 
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::operator=(const NumericType& c) {
-    this->_expansion.clear();
-    FloatValue<PR> m=c.value();
-    if(m!=0) {
+template<class F> UpperInterval<F> set_err(UpperInterval<F> const& x, Error<F>& e) {
+    return x;
+}
+
+template<class F> Value<F> set_err(Bounds<F> const& x, Error<F>& e) {
+     e+=x.error(); return x.value();
+}
+
+template<class F> Approximation<F> const& set_err(Approximation<F> const& x, UnknownError<F>& e) {
+    return x;
+}
+
+
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::operator=(const NumericType& c) {
+    this->clear();
+    CoefficientType m=set_err(c,this->_error);
+    if(not is_same_as_zero(m)) {
         this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
     }
-    this->_error=c.error();
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::operator=(const GenericNumericType& c) {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::operator=(const GenericNumericType& c) {
     return *this = NumericType(c,this->precision());
 }
 
@@ -309,13 +577,44 @@ namespace { // Internal code for arithmetic
 template<class F> struct ValidatedApproximation {
     Bounds<F> _v; Approximation<F> _a;
     ValidatedApproximation(Bounds<F>const& x) : _v(x), _a(x) { }
+    operator Bounds<F> const& () const { return _v; }
     LowerBound<F> lower() const { return _v.lower(); }
     Approximation<F> middle() const { return _a; }
     UpperBound<F> upper() const { return _v.upper(); }
     F const& lower_raw() const { return _v.lower_raw(); }
     F const& middle_raw() const { return _a.raw(); }
     F const& upper_raw() const { return _v.upper_raw(); }
+    friend OutputStream& operator<<(OutputStream& os, ValidatedApproximation<F> const& x) {
+        return os << "{"<<x._v.lower()<<":"<<x._a<<":"<<x._v.upper()<<"}"; }
 };
+template<class F> Approximation<F> const& make_validated_approximation(Approximation<F> const& x) { return x; }
+template<class F> ValidatedApproximation<F> make_validated_approximation(Bounds<F> const& x) { return ValidatedApproximation<F>(x); }
+
+
+template<class F, class PRE> Ball<F,RawFloatType<PRE>> add(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    F r(x1.raw() + x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()+x2.raw();
+    F ml=mx1.raw()-x2.raw();
+    Error<RawFloatType<PRE>> e(pre);
+    e += max(u-r,ml+r);
+    return Ball(r,e);
+}
+template<class F, class PRE> Ball<F,RawFloatType<PRE>> mul(Value<F> const& x1, Value<F> const& x2, PRE pre) {
+    Value<F> mx1=-x1;
+    F::set_rounding_to_nearest();
+    F r(x1.raw() * x2.raw());
+    F::set_rounding_upward();
+    F u=x1.raw()*x2.raw();
+    F ml=mx1.raw()*x2.raw();
+    Error<RawFloatType<PRE>> e(pre);
+    e += max(u-r,ml+r);
+    return Ball(r,e);
+}
+
+
 
 template<class F> Value<F> add_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
     Value<F> mx1=-x1;
@@ -347,6 +646,22 @@ template<class F> Value<F> add_err(Value<F> const& x, Bounds<F> const& c, Error<
     return add_err(x,ValidatedApproximation<F>(c),e);
 }
 
+template<class F> Bounds<F> add_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+    return add(x1,x2);
+}
+
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return add(x1,x2);
+}
+
+template<class F> UpperInterval<F> add_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return add(x1,n2);
+}
+
+template<class F> Approximation<F> add_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+    return add(x1,x2);
+}
+
 template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
     Value<F> mx1=-x1;
     F::set_rounding_to_nearest();
@@ -358,11 +673,31 @@ template<class F> Value<F> sub_err(Value<F> const& x1, Value<F> const& x2, Error
     return r;
 }
 
+template<class F> Bounds<F> sub_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+    return sub(x1,x2);
+}
+
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return sub(x1,x2);
+}
+
+template<class F> UpperInterval<F> sub_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return sub(x1,n2);
+}
+
+template<class F> Approximation<F> sub_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+    return sub(x1,x2);
+}
+
 template<class F> Value<F> mul_no_err(Value<F> const& x1, Value<F> const& x2) {
     F::set_rounding_to_nearest();
     Value<F> r(x1.raw() * x2.raw());
     F::set_rounding_upward();
     return r;
+}
+
+template<class F> Approximation<F> mul_no_err(Approximation<F> const& x1, Approximation<F> const& x2) {
+    return x1*x2;
 }
 
 template<class F> Value<F> mul_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
@@ -403,32 +738,36 @@ template<class F> Value<F> mul_err(Value<F> const& x, Bounds<F> const& c, Error<
     return mul_err(x,ValidatedApproximation<F>(c),e);
 }
 
-template<class F> Value<F> fma_err(Value<F> const& x, ValidatedApproximation<F> const& c, Value<F> y, Error<F>& e) {
-    F const& xv=x.raw();
-    F const& cu=c.upper_raw();
-    F const& cm=c.middle_raw();
-    F const& cl=c.lower_raw();
-    F const& yv=y.raw();
-    F& re=e.raw();
-    F::set_rounding_to_nearest();
-    F rv=xv+cm*yv;
-    F::set_rounding_upward();
-    F u,ml;
-    if(yv>=0) {
-        F mcl=-cl;
-        u=cu*yv+xv;
-        ml=mcl*yv-xv;
-    } else {
-        F mcu=-cu;
-        u=cl*yv+xv;
-        ml=mcu*yv-xv;
-    }
-    re+=(u+ml)/2;
-    return Value<F>(rv);
-}
-
 template<class F> Value<F> mul_err(Value<F> const& x1, Nat n2, Error<F>& e) {
     return mul_err(x1,Value<F>(n2,x1.precision()),e);
+}
+
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+    return mul(x1,x2);
+}
+
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, ValidatedApproximation<F> const& x2, Error<F>& e) {
+    return mul(x1,static_cast<Bounds<F>>(x2));
+}
+
+template<class F> Bounds<F> mul_err(Bounds<F> const& x1, Nat const& n2, Error<F>& e) {
+    return mul(x1,n2);
+}
+
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return mul(x1,x2);
+}
+
+template<class F> UpperInterval<F> mul_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return mul(x1,n2);
+}
+
+template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+    return mul(x1,x2);
+}
+
+template<class F> Approximation<F> mul_err(Approximation<F> const& x1, Nat n2, UnknownError<F>& e) {
+    return mul_err(x1,Approximation<F>(n2,x1.precision()),e);
 }
 
 template<class F> Value<F> div_err(Value<F> const& x1, Value<F> const& x2, Error<F>& e) {
@@ -446,122 +785,229 @@ template<class F> Value<F> div_err(Value<F> const& x1, Nat n2, Error<F>& e) {
     return div_err(x1,Value<F>(n2,x1.precision()),e);
 }
 
-// Inplace negation
-template<class F> Void _neg(TaylorModel<ValidatedTag,F>& r)
-{
+template<class F> Bounds<F> div_err(Bounds<F> const& x1, Bounds<F> const& x2, Error<F>& e) {
+    return div(x1,x2);
+}
+
+template<class F> Bounds<F> div_err(Bounds<F> const& x1, Nat n2, Error<F>& e) {
+    return div(x1,n2);
+}
+
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, UpperInterval<F> const& x2, Error<F>& e) {
+    return div(x1,x2);
+}
+
+template<class F> UpperInterval<F> div_err(UpperInterval<F> const& x1, Nat n2, Error<F>& e) {
+    return div(x1,n2);
+}
+
+template<class F> Approximation<F> div_err(Approximation<F> const& x1, Approximation<F> const& x2, UnknownError<F>& e) {
+    return div(x1,x2);
+}
+
+template<class F> Approximation<F> div_err(Approximation<F> const& x1, Nat n2, UnknownError<F>& e) {
+    return div_err(x1,Approximation<F>(n2,x1.precision()),e);
+}
+
+
+
+
+
+template<class F> Value<F> fma_err(Value<F> const& x, Value<F> const& y, Value<F> z, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& yv=y.raw();
+    F const& zv=z.raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv*yv+zv;
+    F::set_rounding_upward();
+    F myv=-yv;
+    F u=xv*yv+zv;
+    F ml=xv*myv-zv;
+    re+=(u+ml)/2;
+    return Value<F>(rv);
+}
+
+template<class F> Value<F> fma_err(ValidatedApproximation<F> const& c, Value<F> const& x, Value<F> y, Error<F>& e) {
+    F const& xv=x.raw();
+    F const& cu=c.upper_raw();
+    F const& cm=c.middle_raw();
+    F const& cl=c.lower_raw();
+    F const& yv=y.raw();
+    F& re=e.raw();
+    F::set_rounding_to_nearest();
+    F rv=xv*cm+yv;
+    F::set_rounding_upward();
+    F u,ml;
+    if(xv>=0) {
+        F mcl=-cl;
+        u=xv*cu+yv;
+        ml=xv*mcl-yv;
+    } else {
+        F mcu=-cu;
+        u=xv*cl+yv;
+        ml=xv*mcu-yv;
+    }
+    re+=(u+ml)/2;
+    return Value<F>(rv);
+}
+
+template<class F> Value<F> fma_err(Bounds<F> const& c, Value<F> const& x, Value<F> y, Error<F>& e) {
+    return fma_err(ValidatedApproximation<F>(c),x,y,e);
+}
+
+template<class F> Bounds<F> fma_err(Bounds<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>& e) {
+    return fma(x,y,z);
+}
+
+template<class F> UpperInterval<F> fma_err(UpperInterval<F> const& x, UpperInterval<F> const& y, UpperInterval<F> z, Error<F>& e) {
+    return fma(x,y,z);
+}
+
+template<class F> Bounds<F> fma_err(ValidatedApproximation<F> const& x, Bounds<F> const& y, Bounds<F> z, Error<F>& e) {
+    return fma(static_cast<Bounds<F>>(x),y,z);
+}
+
+template<class F> Approximation<F> fma_err(Approximation<F> const& x, Approximation<F> const& y, Approximation<F> z, UnknownError<F>& e) {
+    return fma(x,y,z);
+}
+
+
+
+template<class V, class OP> inline decltype(auto) _sparse_apply(OP const& op_err, V& r) {
+    auto e=r.error();
+    e=nul(e);
     for(auto iter=r.begin(); iter!=r.end(); ++iter) {
-        iter->coefficient()=-iter->coefficient();
+        iter->coefficient()=op_err(iter->coefficient(),e);
     }
-}
-
-
-template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const TwoExp& c)
-{
-    typedef typename F::PrecisionType PR;
-    if(FloatValue<PR>(c)==1) { return; }
-    for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
-        riter->coefficient()*=c;
-    }
-    r.error()*=FloatError<PR>(c);
- }
-
-template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Value<F>& c) {
-    typedef typename F::PrecisionType PR;
-    FloatError<PR> e=0u; // The maximum accumulated error
-    for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
-        riter->coefficient() = mul_err(riter->coefficient(),c,e);
-    }
-    FloatError<PR>& re=r.error();
-    re*=abs(c);
-    re+=e;
-}
-
-template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
-{
-    typedef typename F::PrecisionType PR;
-    //std::cerr<<"TaylorModel<ValidatedTag,F>::scal(Float64Bounds c) c="<<c<<std::endl;
-    ARIADNE_ASSERT_MSG(is_finite(c.lower().raw()) && is_finite(c.upper().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
-
-    const F inf = F::inf(r.precision());
-    if(r.error().raw()==inf) {
-        r.expansion().clear(); return;
-    }
-
-    FloatError<PR> e=nul(r.error());
-    ValidatedApproximation<F> clmu=c;
-    for(typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
-        UniformReference<FloatValue<PR>> rv=riter->coefficient();
-        rv=mul_err(rv,clmu,e);
-    }
-    r.error()*=mag(c);
     r.error()+=e;
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
 
+template<class V, class OP> inline Void _sparse_apply(OP const& op_err, V& r, const V& x, const V& y) {
+    auto e=r.error();
+    e=nul(e); // The maximum accumulated error
+    auto xiter=x.begin();
+    auto yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->index()<yiter->index()) {
+            auto xv=xiter->coefficient();
+            r._append(xiter->index(),op_err(xv,zero,e));
+            ++xiter;
+        } else if(yiter->index()<xiter->index()) {
+            auto yv=yiter->coefficient();
+            r._append(yiter->index(),op_err(zero,yv,e));
+            ++yiter;
+        } else {
+            auto xv=xiter->coefficient();
+            auto yv=yiter->coefficient();
+            r._append(xiter->index(),op_err(xv,yv,e));
+            ++xiter; ++yiter;
+        }
+    }
+    while(xiter!=x.end()) {
+        auto xv=xiter->coefficient();
+        r._append(xiter->index(),op_err(xv,zero,e));
+        ++xiter;
+    }
+    while(yiter!=y.end()) {
+        auto yv=yiter->coefficient();
+        r._append(yiter->index(),op_err(zero,yv,e));
+        ++yiter;
+    }
+    r.error()+=e;
+}
+
+template<class X> X const& add(X const& x, Zero) { return x; }
+template<class X> X const& add(Zero, X const& x) { return x; }
+template<class X> X const& sub(X const& x, Zero) { return x; }
+template<class X> X sub(Zero, X const& x) { return neg(x); }
+template<class X> Zero mul(X const& x, Zero) { return zero; }
+template<class X> Zero mul(Zero, X const& x) { return zero; }
+
+
+struct NegErr {
+    template<class V, class E> decltype(auto) operator()(V&& v, E& e) const { return neg(std::forward<V>(v)); }
+};
+struct AddErr {
+    template<class V, class E> inline V operator() (V const& xv, V const& yv, E& e) const { return add_err(xv,yv,e); }
+    template<class V, class E> inline V const& operator() (V const& xv, Zero, E& e) const { return xv; }
+    template<class V, class E> inline V const& operator() (Zero, V const& yv, E& e) const { return yv; }
+};
+struct SubErr {
+    template<class V, class E> inline V operator() (V const& xv, V const& yv, E& e) const { return sub_err(xv,yv,e); }
+    template<class V, class E> inline V const& operator() (V const& xv, Zero, E& e) const { return xv; }
+    template<class V, class E> inline V operator() (Zero, V const& yv, E& e) const { return neg(yv); }
+};
+struct MulErr {
+    template<class VX, class VY, class E> inline decltype(auto) operator() (VX const& xv, VY const& yv, E& e) const { return mul_err(xv,yv,e); }
+    template<class V, class E> inline Zero operator() (V const& xv, Zero, E& e) const { return zero; }
+    template<class V, class E> inline Zero operator() (Zero, V const& yv, E& e) const { return zero; }
+};
+struct FmaErr {
+    template<class C, class VX, class VY, class E> inline decltype(auto) operator() (C const& c, VX const& xv, VY const& yv, E& e) const { return fma_err(c,xv,yv,e); }
+    template<class C, class V, class E> inline V operator() (C const& c, V const& xv, Zero, E& e) const { return mul_err(c,xv,e); }
+    template<class C, class V, class E> inline V const& operator() (C const&, Zero, V const& yv, E& e) const { return yv; }
+};
+
+// Inplace negation
+template<class P, class F> Void _neg(TaylorModel<P,F>& r)
+{
+    _sparse_apply(NegErr(),r);
+}
+
+template<class P, class F> Void _scal(TaylorModel<P,F>& r, const TwoExp& c) {
+    if (c.exponent()==0) { return; }
+    r.error()*=Error<F>(c);
+    _sparse_apply(std::bind(MulErr(),std::placeholders::_1,c,std::placeholders::_2),r);
+}
+
+template<class P, class F, class C> Void _scal(TaylorModel<P,F>& r, const C& c) {
+    r.error()*=mag(c);
+    _sparse_apply(std::bind(MulErr(),std::placeholders::_1,c,std::placeholders::_2),r);
+}
+
+/*
+template<class F> Void _scal(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c) {
+    ARIADNE_ASSERT_MSG(is_finite(c.lower().raw()) && is_finite(c.upper().raw()),"scal(tm,c): tm="<<r<<", c="<<c);
+    ValidatedApproximation<F> clmu=c;
+    r.error()*=mag(c);
+    _sparse_apply(SMulErr{clmu},r);
+}
+*/
 
 struct UnitMultiIndex { SizeType argument_size; SizeType unit_index; };
 
 
-template<class F> inline Void _incr(TaylorModel<ValidatedTag,F>& r, const MultiIndex& a) {
-    for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
+template<class P, class F> inline Void _incr(TaylorModel<P,F>& r, const MultiIndex& a) {
+    for(typename TaylorModel<P,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         iter->index()+=a;
     }
 }
 
-template<class F> inline Void _incr(TaylorModel<ValidatedTag,F>& r, SizeType j) {
-    for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
+template<class P, class F> inline Void _incr(TaylorModel<P,F>& r, SizeType j) {
+    for(typename TaylorModel<P,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         ++iter->index()[j];
     }
 }
 
 
-template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Value<F>& c) {
-    // Compute self+=c
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
-    typedef typename F::PrecisionType PR;
-    if(c==0) { return; }
+template<class P, class F, class C> inline Void _acc(TaylorModel<P,F>& r, const C& c) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using ErrorType = typename TaylorModel<P,F>::ErrorType;
+
+    if (is_same_as_zero(c)) { return; }
     if(r.expansion().empty() || r.expansion().back().index().degree()>0) {
-        r.expansion().append(MultiIndex(r.argument_size()),c);
+        CoefficientType rv=set_err(c,r.error());
+        r.expansion().append(MultiIndex(r.argument_size()),rv);
     } else {
-        UniformReference<FloatValue<PR>> rv=(r.end()-1)->coefficient();
-        FloatError<PR>& re=r.error();
+        UniformReference<CoefficientType> rv=(r.end()-1)->coefficient();
+        ErrorType& re=r.error();
         rv=add_err(rv,c,re);
     }
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
     return;
 }
 
 
-
-template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<F>& c)
-{
-    // Compute self+=c
-    ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
-    typedef typename F::PrecisionType PR;
-
-    const F inf = F::inf(r.precision());
-    if(c.lower().raw()==-inf || c.upper().raw()==+inf) {
-        r.clear();
-        r.set_error(mag(FloatValue<PR>(inf)));
-        return;
-    }
-
-    if(c.lower().raw()==-c.upper().raw()) { // The midpoint of the interval is zero, so no need to change constant term
-        r.error()+=mag(c);
-        return;
-    }
-
-    if(r.expansion().empty() || r.expansion().back().index().degree()>0) { // Append a constant term zero
-        r._append(MultiIndex(r.argument_size()),FloatValue<PR>(0,r.precision()));
-    }
-
-    UniformReference<FloatValue<PR>> rv=(r.end()-1)->coefficient();
-    FloatError<PR>& re=r.error();
-    rv=add_err(rv,c,re);
-
-    ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
-}
 
 
 // Compute r=x+y, assuming r is empty.
@@ -569,134 +1015,42 @@ template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const Bounds<
 //   than using two loops
 // Use opposite rounding to compute difference of upward and downward roundings,
 //   as this seems to be marginally faster than changing the rounding mode
-template<class F> inline Void _add(TaylorModel<ValidatedTag,F>& r, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y)
+template<class P, class F> inline TaylorModel<P,F> _add(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y)
 {
-    ARIADNE_PRECONDITION(r.number_of_nonzeros()==0);
-    typedef typename F::PrecisionType PR;
-    FloatError<PR> e=nul(r.error());
-    typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->index()<yiter->index()) {
-            r._append(xiter->index(),xiter->coefficient());
-            ++xiter;
-        } else if(yiter->index()<xiter->index()) {
-            r._append(yiter->index(),yiter->coefficient());
-            ++yiter;
-        } else {
-            ARIADNE_DEBUG_ASSERT(xiter->index()==yiter->index());
-            r._append(xiter->index(),add_err(xiter->coefficient(),yiter->coefficient(),e));
-            ++xiter; ++yiter;
-        }
-    }
+    //ARIADNE_PRECONDITION(x.sweeper()==y.sweeper());
+    TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+    _sparse_apply(AddErr(),r,x,y);
+    r.error()+=(x.error()+y.error());
+    r.sweep();
+    return r;
+}
 
-    while(xiter!=x.end()) {
-        r._append(xiter->index(),xiter->coefficient());
-        ++xiter;
-    }
-    while(yiter!=y.end()) {
-        r._append(yiter->index(),yiter->coefficient());
-        ++yiter;
-    }
 
-    FloatDP::set_rounding_upward();
-    r.error()=(x.error()+y.error())+e;
-    FloatDP::set_rounding_to_nearest();
-
+template<class P, class F> inline TaylorModel<P,F> _sub(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y)
+{
+    TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+    _sparse_apply(SubErr(),r,x,y);
+    r.error()+=(x.error()+y.error());
+    r.sweep();
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
+    return r;
 }
 
-
-template<class F> inline Void _acc(TaylorModel<ValidatedTag,F>& r, const TaylorModel<ValidatedTag,F>& x)
-{
-    TaylorModel<ValidatedTag,F> s(r.argument_size(),r.sweeper()); _add(s,r,x); s.swap(r);
-    ARIADNE_DEBUG_ASSERT_MSG(r.error()>=0,r);
-}
-
-template<class F> inline Void _sub(TaylorModel<ValidatedTag,F>& r, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y)
-{
-    ARIADNE_PRECONDITION(r.number_of_nonzeros()==0);
-    typedef typename F::PrecisionType PR;
-    FloatError<PR> e=0u;
-    typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->index()<yiter->index()) {
-            r._append(xiter->index(),xiter->coefficient());
-            ++xiter;
-        } else if(yiter->index()<xiter->index()) {
-            r._append(yiter->index(),-yiter->coefficient());
-            ++yiter;
-        } else {
-            ARIADNE_DEBUG_ASSERT(xiter->index()==yiter->index());
-            r._append(xiter->index(),sub_err(xiter->coefficient(),yiter->coefficient(),e));
-            ++xiter; ++yiter;
-        }
-    }
-
-    while(xiter!=x.end()) {
-        r._append(xiter->index(),xiter->coefficient());
-        ++xiter;
-    }
-    while(yiter!=y.end()) {
-        r._append(yiter->index(),-yiter->coefficient());
-        ++yiter;
-    }
-
-    FloatDP::set_rounding_upward();
-    r.error()=(x.error()+y.error())+e;
-    FloatDP::set_rounding_to_nearest();
-
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
-}
-
-
-template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorModel<ValidatedTag,F>& x, const FloatBounds<typename F::PrecisionType>& c, const TaylorModel<ValidatedTag,F>& y)
+template<class P, class F> inline Void _sma(TaylorModel<P,F>& r, const TaylorModel<P,F>& x, const typename TaylorModel<P,F>::NumericType& c, const TaylorModel<P,F>& y)
 {
     typedef typename F::PrecisionType PR;
-    ARIADNE_ASSERT_MSG(c.lower().raw()<=c.upper().raw(),c);
-    ARIADNE_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
-    ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
+    using namespace std::placeholders;
 
-    VOLATILE FloatDP u,ml,myv;
-    FloatError<PR> err=nul(r.error()); // Twice the maximum accumulated error
-    ValidatedApproximation<F> clmu=c;
-
-    // Compute r=x+y, assuming r is empty
-    RawFloat<PR>::set_rounding_upward();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->index()<yiter->index()) {
-            UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
-            r.expansion().append(xiter->index(),xv);
-            ++xiter;
-        } else if(yiter->index()<xiter->index()) {
-            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
-            r.expansion().append(yiter->index(),mul_err(yv,c,err));
-            ++yiter;
-        } else {
-            UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
-            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
-            r.expansion().append(xiter->index(),fma_err(xv,clmu,yv,err));
-            ++xiter; ++yiter;
-        }
+    if constexpr (IsSame<decltype(c),FloatBounds<PR>>::value) {
+        ARIADNE_DEBUG_ASSERT_MSG(c.lower().raw()<=c.upper().raw(),c);
+        ARIADNE_DEBUG_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
+        ARIADNE_DEBUG_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
     }
 
-    while(xiter!=x.end()) {
-        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
-        r.expansion().append(xiter->index(),xv);
-        ++xiter;
-    }
-    while(yiter!=y.end()) {
-        UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
-        r.expansion().append(yiter->index(),mul_err(yv,clmu,err));
-        ++yiter;
-    }
-
-    r.error()=x.error()+y.error();
-    r.error()+=err;
-
+    auto clmu=make_validated_approximation(c);
+    _sparse_apply(std::bind(FmaErr(), clmu,_1,_2,_3));
+//    _sparse_apply(SFmaErr<decltype(clmu)>{clmu},r,x,y);
+    r.error()+=(x.error()*mag(c)+y.error());
     ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r);
 }
 
@@ -705,58 +1059,98 @@ template<class F> inline Void _sma(TaylorModel<ValidatedTag,F>& r, const TaylorM
 // Compute r+=x*y
 // Compute monomial-by-monomial in y
 // Avoid changing rounding mode
-template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y)
+template<class P, class F> inline Void _ifma(TaylorModel<P,F>& r, const TaylorModel<P,F>& x, const TaylorModel<P,F>& y)
 {
-    typedef typename F::PrecisionType PR;
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using ErrorType = typename TaylorModel<P,F>::ErrorType;
+
     const SizeType as=r.argument_size();
-    TaylorModel<ValidatedTag,F> t(as,r.sweeper());
-    TaylorModel<ValidatedTag,F> s(as,r.sweeper());
+    TaylorModel<P,F> t(as,r.sweeper());
     MultiIndex ta(as);
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        FloatError<PR> te=nul(r.error()); // trucation error
-        FloatError<PR> re=nul(r.error()); // roundoff error
+    CoefficientType tv(t.precision());
+    ErrorType te=t.error();
+
+    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
         UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
-        for(typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            UniformConstReference<MultiIndex> ya=yiter->index();
-            UniformConstReference<FloatValue<PR>> yv=yiter->coefficient();
-            ta=xa+ya;
-            FloatValue<PR> tv=mul_no_err(xv,yv);
-            // NOTE: Previously, we allowed to discard terms immediately since Sweeper() had a discard methd
-            // if(r.sweeper().discard(ta,tv)) { te+=mag(xv)*mag(yv); }
-            t._append(ta,tv);
-            re+=(xv*yv).error();
+        UniformConstReference<CoefficientType> xv=xiter->coefficient();
+
+        auto riter = r.begin(); auto yiter=y.begin();
+        while (riter!=r.end() && yiter!=y.end()) {
+            auto ra=riter->index();
+            auto rv=riter->coefficient();
+            auto ya=yiter->index();
+            auto yv=yiter->coefficient();
+            ta = xa + ya;
+            if (ra == ta) {
+                tv=fma_err(xv,yv,rv,te);
+                t._append(ta,tv);
+                ++riter; ++yiter;
+            } else if (ra < ta) {
+                t._append(ra,rv);
+                ++riter;
+            } else { // ta<ra
+                tv=mul_err(xv,yv,te);
+                t._append(ta,tv);
+                ++yiter;
+            }
         }
-        t.error()=te+re;
+        while (riter!=r.end()) {
+            auto ra=riter->index();
+            auto rv=riter->coefficient();
+            t._append(ra,rv);
+            ++riter;
+        }
+        while (yiter!=y.end()) {
+            auto ya=yiter->index();
+            auto yv=yiter->coefficient();
+            ta = xa + ya;
+            tv=mul_err(xv,yv,te);
+            t._append(ta,tv);
+            ++yiter;
+        }
+
+        t.error()=te;
+        te = 0u;
 
         t.sweep();
-
-        _add(s,r,t);
-        r.expansion().swap(s.expansion());
-        r.error()=s.error();
-        s.expansion().clear();
-        s.error()=0u;
-        t.expansion().clear();
-        t.error()=0u;
+        r.expansion().swap(t.expansion());
+        r.error()=t.error();
+        t.clear();
     }
 
-    FloatError<PR> xs=nul(r.error());
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    ErrorType xs=nul(r.error());
+    for(auto xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=mag(xiter->coefficient());
     }
 
-    FloatError<PR> ys=nul(r.error());
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    ErrorType ys=nul(r.error());
+    for(auto yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=mag(yiter->coefficient());
     }
 
-    FloatError<PR>& re=r.error();
-    const FloatError<PR>& xe=x.error();
-    const FloatError<PR>& ye=y.error();
-    re+=xs*ye+ys*xe+xe*ye;
+    ErrorType& re=r.error();
+    const ErrorType& xe=x.error();
+    const ErrorType& ye=y.error();
+    re+=xe*ye;
+    re+=xs*ye+ys*xe;
 
-    return;
 }
+
+template<class P, class F> inline TaylorModel<P,F> _fma(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y, TaylorModel<P,F> z) {
+    ARIADNE_PRECONDITION(x.argument_size()==y.argument_size());
+    //ARIADNE_PRECONDITION(x.sweeper()==y.sweeper());
+    _ifma(z,x,y);
+    return z;
+}
+
+template<class P, class F> inline TaylorModel<P,F> _mul(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
+    ARIADNE_PRECONDITION(x.argument_size()==y.argument_size());
+    //ARIADNE_PRECONDITION(x.sweeper()==y.sweeper());
+    TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+    _ifma(r,x,y);
+    return r;
+}
+
 
 
 } // namespace
@@ -764,63 +1158,31 @@ template<class F> inline Void _mul(TaylorModel<ValidatedTag,F>& r, const TaylorM
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Inplace arithmetical operations for Algebra concept
-
-template<class F> Void TaylorModel<ValidatedTag,F>::iadd(const NumericType& c)
+/*
+template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
+    : NormedAlgebraOperations<TaylorModel<P,F>>
 {
-    _acc(*this,c);
-    this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
-}
-
-template<class F> Void TaylorModel<ValidatedTag,F>::imul(const NumericType& c)
-{
-    _scal(*this,c);
-    this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
-}
-
-template<class F> Void TaylorModel<ValidatedTag,F>::isma(const NumericType& c, const TaylorModel<ValidatedTag,F>& y)
-{
-    TaylorModel<ValidatedTag,F>& x=*this;
-    TaylorModel<ValidatedTag,F> r=this->create();
-    _sma(r,x,c,y);
-    this->swap(r);
-    this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
-}
-
-template<class F> Void TaylorModel<ValidatedTag,F>::ifma(const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y)
-{
-    _mul(*this,x,y);
-    this->sweep();
-    ARIADNE_DEBUG_ASSERT_MSG(this->error().raw()>=0,*this);
-}
-
-template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
-    : NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>
-{
-    typedef TaylorModel<ValidatedTag,F> ModelType;
-    typedef typename TaylorModel<ValidatedTag,F>::NumericType NumericType;
+    typedef TaylorModel<P,F> ModelType;
+    typedef typename TaylorModel<P,F>::NumericType NumericType;
     typedef typename ModelType::RangeType RangeType;
   public:
-    using NormedAlgebraOperations<TaylorModel<ValidatedTag,F>>::apply;
+    using NormedAlgebraOperations<TaylorModel<P,F>>::apply;
     static ModelType apply(Nul, ModelType const& x) {
         return ModelType(x.argument_size(),x.sweeper()); }
     static ModelType apply(Pos, ModelType x) {
-        return std::move(x); }
+        return x; }
     static ModelType apply(Neg, ModelType x) {
-        x.imul(NumericType(-1)); return std::move(x); }
+        x.imul(NumericType(-1)); return x; }
     static ModelType apply(Add, ModelType const& x, ModelType const& y) {
-        auto r=x; r.isma(NumericType(+1),y); return std::move(r); }
+        auto r=x; r.isma(NumericType(+1),y); return r; }
     static ModelType apply(Sub, ModelType const& x, ModelType const& y) {
-        auto r=x; r.isma(NumericType(-1),y); return std::move(r); }
+        auto r=x; r.isma(NumericType(-1),y); return r; }
     static ModelType apply(Mul, ModelType const& x, ModelType const& y) {
-        auto r=nul(x); r.ifma(x,y); return std::move(r); }
+        auto r=nul(x); r.ifma(x,y); return r; }
     static ModelType apply(Add, ModelType x, NumericType const& c) {
-        auto& r=x; r.iadd(c); return std::move(r); }
+        x.iadd(c); return x; }
     static ModelType apply(Mul, ModelType x, NumericType const& c) {
-        auto& r=x; r.imul(c); return std::move(r); }
+        x.imul(c); return x; }
     static ModelType apply(Max, ModelType const& x, ModelType const& y);
     static ModelType apply(Min, ModelType const& x, ModelType const& y);
 // TODO: Should be able to automatically generate these operations
@@ -830,30 +1192,59 @@ template<class F> struct AlgebraOperations<TaylorModel<ValidatedTag,F>>
     static ModelType apply(Min, NumericType const& c, ModelType const& x);
     static ModelType apply(Abs, ModelType const& x);
 };
+*/
 
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Nul, ModelType const& x) -> ModelType {
+    return ModelType(x.argument_size(),x.sweeper()); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Pos, ModelType x) -> ModelType {
+    return std::move(x); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Neg, ModelType x) -> ModelType {
+    _neg(x); return std::move(x); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType const& x, ModelType const& y) -> ModelType {
+    return _add(x,y); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Sub, ModelType const& x, ModelType const& y) -> ModelType {
+    return _sub(x,y); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType const& x, ModelType const& y) -> ModelType {
+    return _mul(x,y); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType x, NumericType const& c) -> ModelType {
+    _acc(x,c); return std::move(x); }
+template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType x, NumericType const& c) -> ModelType {
+    _scal(x,c); return std::move(x); }
+
+// TODO: Should be able to automatically generate these operations
+/*
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Max, ModelType const& x, ModelType const& y) -> ModelType;
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Min, ModelType const& x, ModelType const& y) -> ModelType;
+
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Max, ModelType const& x, NumericType const& c) -> ModelType;
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Min, ModelType const& x, NumericType const& c) -> ModelType;
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Max, NumericType const& c, ModelType const& x) -> ModelType;
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Min, NumericType const& c, ModelType const& x) -> ModelType;
+template<class P, class F> auto AlgebraOperations<P,F>::apply(Abs, ModelType const& x) -> ModelType;
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Truncation and error control
 
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sort() {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::sort() {
     this->_expansion.sort();
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::unique()
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::unique()
 {
-    typename TaylorModel<ValidatedTag,F>::ConstIterator advanced =this->begin();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator end =this->end();
-    typename TaylorModel<ValidatedTag,F>::Iterator current=this->begin();
-    FloatError<PR> e=nul(this->error());
+    typename TaylorModel<P,F>::ConstIterator advanced =this->begin();
+    typename TaylorModel<P,F>::ConstIterator end =this->end();
+    typename TaylorModel<P,F>::Iterator current=this->begin();
+    ErrorType e=nul(this->error());
     while(advanced!=end) {
         current->index()=advanced->index();
-        FloatValue<PR> rv=advanced->coefficient();
+        CoefficientType rv=advanced->coefficient();
         ++advanced;
         while(advanced!=end && advanced->index()==current->index()) {
-            UniformConstReference<FloatValue<PR>> xv=advanced->coefficient();
+            UniformConstReference<CoefficientType> xv=advanced->coefficient();
             rv=add_err(rv,xv,e);
             ++advanced;
         }
@@ -866,33 +1257,33 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::uniq
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep() {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::sweep() {
 //    this->_sweeper.sweep(reinterpret_cast<Expansion<MultiIndex,F>&>(this->_expansion),reinterpret_cast<F&>(this->_error));
     this->_sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::sweep(const SweeperType& sweeper) {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::sweep(const SweeperType& sweeper) {
     sweeper.sweep(this->_expansion,this->_error);
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify() {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify() {
     return this->sweep();
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::simplify(const PropertiesType& properties) {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::simplify(const PropertiesType& properties) {
     return this->sweep(properties);
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::cleanup() {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::cleanup() {
     this->sort();
     this->unique();
     this->sweep();
     return *this;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::clobber() {
+template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::clobber() {
     this->_error=0u;
     return *this;
 }
@@ -903,9 +1294,10 @@ template<class F> TaylorModel<ValidatedTag,F>& TaylorModel<ValidatedTag,F>::clob
 
 // Accuracy control
 
-template<class F> F TaylorModel<ValidatedTag,F>::tolerance() const {
-    const ThresholdSweeper<F>* ptr=dynamic_cast<const ThresholdSweeper<F>*>(&static_cast<const SweeperInterface<F>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : F(std::numeric_limits<double>::epsilon(),this->precision());
+template<class P, class F> auto TaylorModel<P,F>::tolerance() const -> RawFloatType {
+    typedef RawFloatType FLT;
+    const ThresholdSweeper<FLT>* ptr=dynamic_cast<const ThresholdSweeper<FLT>*>(&static_cast<const SweeperInterface<FLT>&>(this->_sweeper));
+    return (ptr) ? ptr->sweep_threshold() : FLT(std::numeric_limits<double>::epsilon(),this->precision());
 }
 
 
@@ -914,29 +1306,29 @@ template<class F> F TaylorModel<ValidatedTag,F>::tolerance() const {
 
 // Basic function operators (domain, range, evaluate)
 
-template<class F> UnitBox TaylorModel<ValidatedTag,F>::domain() const
+template<class P, class F> UnitBox TaylorModel<P,F>::domain() const
 {
     return UnitBox(this->argument_size(),UnitInterval());
 }
 
-template<class F> auto TaylorModel<ValidatedTag,F>::codomain() const -> CodomainType
+template<class P, class F> auto TaylorModel<P,F>::codomain() const -> CodomainType
 {
     RangeType rng=this->range();
-    return convert_exact_interval(rng,dp);
+    return cast_exact_interval(convert_interval(rng,dp));
 }
 
 
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
-template<class F> auto TaylorModel<ValidatedTag,F>::range() const -> RangeType {
-    const TaylorModel<ValidatedTag,F>& tm=*this;
+template<class P, class F> auto TaylorModel<P,F>::range() const -> RangeType {
+    const TaylorModel<P,F>& tm=*this;
     const SizeType as=tm.argument_size();
     const PrecisionType prec = tm.precision();
-    const FloatValue<PR> zero(prec);
-    FloatValue<PR> constant_term(zero);
-    Array<FloatValue<PR>> linear_terms(as,zero);
-    Array<FloatValue<PR>> quadratic_terms(as,zero);
-    FloatError<PR> err(prec);
+    const CoefficientType zero(prec);
+    CoefficientType constant_term(zero);
+    Array<CoefficientType> linear_terms(as,zero);
+    Array<CoefficientType> quadratic_terms(as,zero);
+    NormType err(prec);
     for(auto iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->index().degree()==0) {
             constant_term=iter->coefficient();
@@ -954,55 +1346,28 @@ template<class F> auto TaylorModel<ValidatedTag,F>::range() const -> RangeType {
         }
     }
     err=err+tm.error();
-    FloatBounds<PR> r(constant_term-err,constant_term+err);
-    const FloatBounds<PR> unit_ivl(-1,+1);
-    // If the ratio b/a is very large, then roundoff error can cause a significant
-    // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
-    for(SizeType j=0; j!=as; ++j) {
-        const FloatValue<PR>& a=quadratic_terms[j];
-        const FloatValue<PR>& b=linear_terms[j];
-        FloatBounds<PR> ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
-        if(a!=0) { // Explicitly test for zero
-            FloatBounds<PR> qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
-            r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
-        } else {
-            r += ql;
-        }
-    }
-    return RangeType(r);
-}
-
-
-template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range(SizeType j) const -> RangeType {
-    FloatBounds<PR> g(0,0);
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        UniformConstReference<MultiIndex> a=iter->index();
-        const Nat c=a[j];
-        if(c>0) {
-            UniformConstReference<FloatValue<PR>> x=iter->coefficient();
-            if(a.degree()==1) { g+=x; }
-            else { g+=FloatBounds<PR>(-1,1)*x*c; }
-        }
-    }
-    return RangeType(g);
-}
-
-template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Covector<RangeType> {
-    Covector<FloatBounds<PR>> g(this->argument_size(),FloatBounds<PR>(0,0));
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        UniformConstReference<MultiIndex> a=iter->index();
-        UniformConstReference<FloatValue<PR>> x=iter->coefficient();
-        for(SizeType j=0; j!=this->argument_size(); ++j) {
-            const Nat c=a[j];
-            if(c>0) {
-                if(a.degree()==1) { g[j]+=x; }
-                else { g[j]+=FloatBounds<PR>(-1,1)*x*c; }
+    RangeType r(-err,+err);
+    if constexpr(IsSame<P,ValidatedTag>::value) {
+        r=r+constant_term;
+        const RangeType unit_ivl(-1,+1,this->precision());
+        // If the ratio b/a is very large, then roundoff error can cause a significant
+        // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
+        for(SizeType j=0; j!=as; ++j) {
+            const CoefficientType& a=quadratic_terms[j];
+            const CoefficientType& b=linear_terms[j];
+            RangeType ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
+            if(not is_same_as_zero(a)) { // Explicitly test for zero
+                RangeType qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+                r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
+            } else {
+                r += ql;
             }
         }
+    } else {
+        ARIADNE_ASSERT_MSG(false,"Range only available for a Validated TaylorModel.");
     }
-    return Covector<RangeType>(g);
+    return r;
 }
-
 
 
 
@@ -1011,9 +1376,8 @@ template<class F> auto TaylorModel<ValidatedTag,F>::gradient_range() const -> Co
 
 // ExactTag functions (max, min, abs, neg) and arithmetical functions (sqr, pow)
 
-
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Max, const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
+    typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
     RangeType yr=y.range();
     if(definitely(xr.lower()>=yr.upper())) {
@@ -1021,13 +1385,13 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
     } else if(definitely(yr.lower()>=xr.upper())) {
         return y;
     } else {
-        return ((x+y)+abs(x-y))/FloatValue<PR>(2);
+        return hlf((x+y)+abs(x-y));;
     }
 }
 
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min, const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Min, const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
+    typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
     RangeType yr=y.range();
     if(definitely(xr.upper()<=yr.lower())) {
@@ -1035,12 +1399,14 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
     } else if(definitely(yr.upper()<=xr.lower())) {
         return y;
     } else {
-        return ((x+y)-abs(x-y))/FloatValue<PR>(2);
+        return hlf((x+y)-abs(x-y));
     }
 }
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Abs, const TaylorModel<ValidatedTag,F>& x) {
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Abs, const TaylorModel<P,F>& x) {
     typedef typename F::PrecisionType PR;
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
     if(definitely(xr.lower()>=0)) {
         return x;
@@ -1053,30 +1419,30 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
         static const Nat n=7u;
         static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const Dbl err=0.035;
-        TaylorModel<ValidatedTag,F> r(x.argument_size(),x.sweeper());
-        FloatValue<PR> xmag=cast_exact(mag(xr));
-        TaylorModel<ValidatedTag,F> s=x/xmag;
+        TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+        CoefficientType xmag=static_cast<CoefficientType>(cast_exact(mag(xr)));
+        TaylorModel<P,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<FloatValue<PR>>(p[n-1u]);
+        r=static_cast<CoefficientType>(p[n-1u]);
         for(Nat i=0; i!=(n-1u); ++i) {
             Nat j=(n-2)-i;
-            r=s*r+static_cast<FloatValue<PR>>(p[j]);
+            r=s*r+static_cast<CoefficientType>(p[j]);
         }
         r+=FloatBounds<PR>(-err,+err);
         return r*xmag;
     }
 }
 
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max op, const TaylorModel<ValidatedTag,F>& x, const NumericType& c) {
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Max op, const TaylorModel<P,F>& x, const NumericType& c) {
     return apply(op, x, x.create_constant(c));
 }
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min op, const TaylorModel<ValidatedTag,F>& x, const NumericType& c) {
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Min op, const TaylorModel<P,F>& x, const NumericType& c) {
     return apply(op, x, x.create_constant(c));
 }
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Max op, const NumericType& c, const TaylorModel<ValidatedTag,F>& x) {
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Max op, const NumericType& c, const TaylorModel<P,F>& x) {
     return apply(op, x.create_constant(c), x);
 }
-template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<ValidatedTag,F>>::apply(Min op, const NumericType& c, const TaylorModel<ValidatedTag,F>& x) {
+template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Min op, const NumericType& c, const TaylorModel<P,F>& x) {
     return apply(op, x.create_constant(c), x);
 }
 
@@ -1084,13 +1450,13 @@ template<class F> TaylorModel<ValidatedTag,F> AlgebraOperations<TaylorModel<Vali
 
 // Arithmetical functions (sqr, pow)
 
-template<class F> TaylorModel<ValidatedTag,F> sqr(const TaylorModel<ValidatedTag,F>& x) {
+template<class P, class F> TaylorModel<P,F> sqr(const TaylorModel<P,F>& x) {
     return x*x;
 }
 
-template<class F> TaylorModel<ValidatedTag,F> pow(const TaylorModel<ValidatedTag,F>& x, Int n) {
-    TaylorModel<ValidatedTag,F> r=x.create_constant(1);
-    TaylorModel<ValidatedTag,F> p(x);
+template<class P, class F> TaylorModel<P,F> pow(const TaylorModel<P,F>& x, Int n) {
+    TaylorModel<P,F> r=x.create_constant(1);
+    TaylorModel<P,F> p(x);
     while(n) { if(n%2) { r=r*p; } p=sqr(p); n/=2; }
     return r;
 }
@@ -1105,15 +1471,15 @@ template<class X> class Series;
 template<class X> class TaylorSeries;
 
 
-template<class F> TaylorModel<ValidatedTag,F>
-compose(const TaylorSeries<typename F::PrecisionType>& ts, const TaylorModel<ValidatedTag,F>& tv)
+template<class P, class F> TaylorModel<P,F>
+compose(const TaylorSeries<typename F::PrecisionType>& ts, const TaylorModel<P,F>& tv)
 {
-    typedef typename F::PrecisionType PR;
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     Sweeper<F> threshold_sweeper(new ThresholdSweeper<F>(tv.precision(),MACHINE_EPSILON));
-    FloatValue<PR>& vref=const_cast<FloatValue<PR>&>(tv.value());
-    FloatValue<PR> vtmp=vref;
+    CoefficientType& vref=const_cast<CoefficientType&>(tv.value());
+    CoefficientType vtmp=vref;
     vref=0;
-    TaylorModel<ValidatedTag,F> r(tv.argument_size(),tv.sweeper());
+    TaylorModel<P,F> r(tv.argument_size(),tv.sweeper());
     r+=ts[ts.degree()];
     for(SizeType i=1; i<=ts.degree(); ++i) {
         r=r*tv;
@@ -1132,9 +1498,10 @@ compose(const TaylorSeries<typename F::PrecisionType>& ts, const TaylorModel<Val
 // Compose using the Taylor formula with a constant truncation error. This method
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error.
-template<class F> TaylorModel<ValidatedTag,F>
-compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> TaylorModel<P,F>
+compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
     static const DegreeType MAX_DEGREE=20;
     static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
@@ -1151,7 +1518,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     //std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
     Nat d=max_degree;
-    FloatValue<PR> c=tm.value();
+    CoefficientType c=tm.value();
     FloatDPBounds r=cast_singleton(tm.range());
     Series<FloatDPBounds> centre_series=fn.series(c);
     Series<FloatDPBounds> range_series=fn.series(r);
@@ -1159,20 +1526,20 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
 
 
-    FloatError<PR> se=mag(range_series[d]-centre_series[d]);
-    FloatError<PR> e=mag(r-c);
-    FloatError<PR> p=pow(e,d);
+    ErrorType se=mag(range_series[d]-centre_series[d]);
+    ErrorType e=mag(r-c);
+    ErrorType p=pow(e,d);
     //std::cerr<<"se="<<se<<"\ne="<<e<<"\np="<<p<<"\n";
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    FloatError<PR> truncation_error=se*p;
+    ErrorType truncation_error=se*p;
     //std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
                  <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
     }
 
-    TaylorModel<ValidatedTag,F> x=tm-c;
-    TaylorModel<ValidatedTag,F> res(tm.argument_size(),tm.sweeper());
+    TaylorModel<P,F> x=tm-c;
+    TaylorModel<P,F> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
     for(Nat i=0; i!=d; ++i) {
         res=centre_series[d-i-1u]+x*res;
@@ -1192,28 +1559,31 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedTag,F>& tm) {
 
 // Inplace operators manipulating the error term
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embed_error(const TaylorModel<ValidatedTag,F>& tm) {
-    const SizeType as=tm.argument_size();
-    TaylorModel<ValidatedTag,F> rtm(as+1u,tm.sweeper());
-    MultiIndex ra(as+1u);
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_embed_error(const TaylorModel<P,F>& tm) {
+    if constexpr (IsSame<ErrorType,UnknownError<F>>::value) { return tm; }// do nothing
+    else {
+        const SizeType as=tm.argument_size();
+        TaylorModel<P,F> rtm(as+1u,tm.sweeper());
+        MultiIndex ra(as+1u);
 
-    // The new error term is first in reverse lexicographic order.
-    FloatValue<PR> err_coef=cast_exact(tm.error());
-    ra[as]=1;
-    rtm._append(ra,err_coef);
-    ra[as]=0;
+        // The new error term is first in reverse lexicographic order.
+        CoefficientType err_coef=static_cast<CoefficientType>(cast_exact(tm.error()));
+        ra[as]=1;
+        rtm._append(ra,err_coef);
+        ra[as]=0;
 
-    // Copy new terms
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
-        UniformConstReference<MultiIndex> xa=iter->index();
-        UniformConstReference<FloatValue<PR>> xv=iter->coefficient();
-        for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
-        rtm._append(ra,xv);
+        // Copy new terms
+        for(typename TaylorModel<P,F>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
+            UniformConstReference<MultiIndex> xa=iter->index();
+            UniformConstReference<CoefficientType> xv=iter->coefficient();
+            for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
+            rtm._append(ra,xv);
+        }
+        return std::move(rtm);
     }
-    return std::move(rtm);
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_discard_variables(const TaylorModel<ValidatedTag,F>& tm, Array<SizeType> const& discarded_variables) {
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_discard_variables(const TaylorModel<P,F>& tm, Array<SizeType> const& discarded_variables) {
     for(SizeType i=0; i!=discarded_variables.size()-1u; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1u]);
     }
@@ -1227,16 +1597,16 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_disc
     Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<ValidatedTag,F> rtm(number_of_kept_variables,tm.sweeper());
+    TaylorModel<P,F> rtm(number_of_kept_variables,tm.sweeper());
     rtm.expansion().reserve(tm.number_of_nonzeros()+1u);
 
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
     MultiIndex ra(number_of_kept_variables);
-    FloatError<PR> derr=mag(tm.error()); // Magnitude of discarded terms
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    ErrorType derr=mag(tm.error()); // Magnitude of discarded terms
+    for(typename TaylorModel<P,F>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         UniformConstReference<MultiIndex> xa=iter->index();
-        UniformConstReference<FloatValue<PR>> xv=iter->coefficient();
+        UniformConstReference<CoefficientType> xv=iter->coefficient();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
             if(xa[discarded_variables[k]]!=0) {
@@ -1266,14 +1636,14 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_disc
 // Differentiation operators
 
 
-template<class F> Void TaylorModel<ValidatedTag,F>::antidifferentiate(SizeType k) {
-    TaylorModel<ValidatedTag,F>& x=*this;
+template<class P, class F> Void TaylorModel<P,F>::antidifferentiate(SizeType k) {
+    TaylorModel<P,F>& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
 
-    FloatError<PR> e=nul(this->error());
-    for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    ErrorType e=nul(this->error());
+    for(typename TaylorModel<P,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformReference<FloatValue<PR>> xv=xiter->coefficient();
+        UniformReference<CoefficientType> xv=xiter->coefficient();
         xa[k]+=1;
         Nat c=xa[k];
         xv=div_err(xv,c,e);
@@ -1281,8 +1651,8 @@ template<class F> Void TaylorModel<ValidatedTag,F>::antidifferentiate(SizeType k
     x.error()+=e;
 }
 
-template<class F> TaylorModel<ValidatedTag,F> antiderivative(const TaylorModel<ValidatedTag,F>& x, SizeType k) {
-    TaylorModel<ValidatedTag,F> r(x);
+template<class P, class F> TaylorModel<P,F> antiderivative(const TaylorModel<P,F>& x, SizeType k) {
+    TaylorModel<P,F> r(x);
     r.antidifferentiate(k);
     return r;
 }
@@ -1290,22 +1660,22 @@ template<class F> TaylorModel<ValidatedTag,F> antiderivative(const TaylorModel<V
 
 // Compute derivative inplace by computing term-by-term, switching the rounding mode
 // Note that since some terms may be eliminated, requiring two iterators.
-template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
-    TaylorModel<ValidatedTag,F> const& x=*this;
+template<class P, class F> Void TaylorModel<P,F>::differentiate(SizeType k) {
+    TaylorModel<P,F> const& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
     // ARIADNE_PRECONDITION_MSG(x.error().raw()==0,x);
     this->clobber();
 
-    TaylorModel<ValidatedTag,F>& r=*this;
-    FloatError<PR>& re=r.error();
-    typename TaylorModel<ValidatedTag,F>::Iterator riter=r.begin();
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    TaylorModel<P,F>& r=*this;
+    ErrorType& re=r.error();
+    typename TaylorModel<P,F>::Iterator riter=r.begin();
+    for(typename TaylorModel<P,F>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<CoefficientType> xv=xiter->coefficient();
         Nat c=xa[k];
         if(c!=0) {
             UniformReference<MultiIndex> ra=riter->index();
-            UniformReference<FloatValue<PR>> rv=riter->coefficient();
+            UniformReference<CoefficientType> rv=riter->coefficient();
             ra=xa; ra[k]-=1;
             rv=mul_err(xv,c,re);
             ++riter;
@@ -1318,19 +1688,19 @@ template<class F> Void TaylorModel<ValidatedTag,F>::differentiate(SizeType k) {
 
 
 
-template<class F> TaylorModel<ValidatedTag,F> derivative(const TaylorModel<ValidatedTag,F>& x, SizeType k) {
-    TaylorModel<ValidatedTag,F> rx=x; rx.differentiate(k); return rx;
+template<class P, class F> TaylorModel<P,F> derivative(const TaylorModel<P,F>& x, SizeType k) {
+    TaylorModel<P,F> rx=x; rx.differentiate(k); return rx;
 
     ARIADNE_ASSERT(k<x.argument_size());
-    typedef typename F::PrecisionType PR;
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
 
-    MultiIndex ra(x.argument_size()); FloatValue<PR> rv; Nat c;
+    MultiIndex ra(x.argument_size()); CoefficientType rv; Nat c;
 
-    TaylorModel<ValidatedTag,F> r(x.argument_size(),x.sweeper());
-    FloatError<PR>& re=r.error();
-    for(typename TaylorModel<ValidatedTag,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    TaylorModel<P,F> r(x.argument_size(),x.sweeper());
+    typename TaylorModel<P,F>::ErrorType& re=r.error();
+    for(typename TaylorModel<P,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         UniformConstReference<MultiIndex> xa=xiter->index();
-        UniformConstReference<FloatValue<PR>> xv=xiter->coefficient();
+        UniformConstReference<CoefficientType> xv=xiter->coefficient();
         c=xa[k];
         if(c!=0) {
             ra=xa;
@@ -1350,29 +1720,37 @@ template<class F> TaylorModel<ValidatedTag,F> derivative(const TaylorModel<Valid
 // Scalar function operators (evaluate, split, unscale, embed)
 // and predicates (refines)
 
-template<class F> auto TaylorModel<ValidatedTag,F>::_evaluate(const TaylorModel<ValidatedTag,F>& tm, const Vector<FloatBounds<PR>>& x) -> FloatBounds<PR> {
-    return horner_evaluate(tm.expansion(),x)+FloatBounds<typename F::PrecisionType>(-tm.error(),+tm.error());
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<IntervalNumericType>& x) -> ArithmeticType<CoefficientType,IntervalNumericType> {
+    return horner_evaluate(tm.expansion(),x)+pm(tm.error());
 }
 
-template<class F> auto TaylorModel<ValidatedTag,F>::_evaluate(const TaylorModel<ValidatedTag,F>& tm, const Vector<FloatApproximation<PR>>& x) -> FloatApproximation<PR> {
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ValidatedNumericType>& x) -> ArithmeticType<CoefficientType,ValidatedNumericType> {
+    if constexpr (IsSame<NumericType,ValidatedNumericType>::value) {
+        return horner_evaluate(tm.expansion(),x)+pm(tm.error());
+    } else {
+        return horner_evaluate(tm.expansion(),Vector<NumericType>(x))+pm(tm.error());
+    }
+}
+
+template<class P, class F> auto TaylorModel<P,F>::_evaluate(const TaylorModel<P,F>& tm, const Vector<ApproximateNumericType>& x) -> ArithmeticType<CoefficientType,ApproximateNumericType> {
     return horner_evaluate(tm.expansion(),x);
 }
 
 
-template<class F> auto TaylorModel<ValidatedTag,F>::_gradient(const TaylorModel<ValidatedTag,F>& tm, const Vector<FloatBounds<PR>>& x) -> Covector<FloatBounds<PR>> {
-    Vector< Differential<FloatBounds<PR>> > dx=Differential<FloatBounds<PR>>::variables(1u,x);
-    Differential<FloatBounds<PR>> df=horner_evaluate(tm.expansion(),dx)+FloatBounds<PR>(-tm.error(),+tm.error());
+template<class P, class F> auto TaylorModel<P,F>::_gradient(const TaylorModel<P,F>& tm, const Vector<NumericType>& x) -> Covector<NumericType> {
+    Vector<Differential<NumericType>> dx=Differential<NumericType>::variables(1u,x);
+    Differential<NumericType> df=horner_evaluate(tm.expansion(),dx)+static_cast<NumericType>(pm(tm.error()));
     return gradient(df);
 }
 
 
 
-template<class F> TaylorModel<ValidatedTag,F>
-TaylorModel<ValidatedTag,F>::_compose(TaylorModel<ValidatedTag,F> const& x, Vector<TaylorModel<ValidatedTag,F>> const& y) {
-    return horner_evaluate(x.expansion(),y)+NumericType(-x.error(),+x.error());
+template<class P, class F> TaylorModel<P,F>
+TaylorModel<P,F>::_compose(TaylorModel<P,F> const& x, Vector<TaylorModel<P,F>> const& y) {
+    return horner_evaluate(x.expansion(),y)+pm(x.error());
 }
 
-template<class F> Void TaylorModel<ValidatedTag,F>::unscale(IntervalDomainType const& codom) {
+template<class P, class F> Void TaylorModel<P,F>::unscale(IntervalDomainType const& codom) {
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
     // and s the reciprocal of the radius of ivl
@@ -1384,11 +1762,11 @@ template<class F> Void TaylorModel<ValidatedTag,F>::unscale(IntervalDomainType c
     // restricted to the point and this is
     // The motivation for mapping to everything is that any function on the
     // resulting interval should be independent of the unneeded component
-    TaylorModel<ValidatedTag,F>& tm=*this;
-    Interval<FloatValue<PR>> ivl=convert_interval(codom,this->precision());
-    ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<ValidatedTag,F> "<<tm<<" from empty interval "<<ivl);
+    TaylorModel<P,F>& tm=*this;
+    auto ivl=convert_interval(codom,this->precision());
+    ARIADNE_ASSERT_MSG(decide(ivl.lower()<=ivl.upper()),"Cannot unscale TaylorModel<P,F> "<<tm<<" from empty interval "<<ivl);
 
-    if(ivl.lower()==ivl.upper()) {
+    if(codom.lower()==codom.upper()) {
         tm=0;
         // Uncomment out line below to make unscaling to a singleton interval undefined
         //tm.clear(); tm.set_error(+inf);
@@ -1400,12 +1778,12 @@ template<class F> Void TaylorModel<ValidatedTag,F>::unscale(IntervalDomainType c
     }
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_compose(const Unscaling& u, const TaylorModel<ValidatedTag,F>& y) {
-    TaylorModel<ValidatedTag,F> r=y; r.unscale(u.domain()); return std::move(r);
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_compose(const Unscaling& u, const TaylorModel<P,F>& y) {
+    TaylorModel<P,F> r=y; r.unscale(u.domain()); return r;
 }
 
-template<class F> TaylorModel<ValidatedTag,F>
-TaylorModel<ValidatedTag,F>::_compose(const TaylorModel<ValidatedTag,F>& x, const VectorUnscaling& u, const Vector<TaylorModel<ValidatedTag,F>>& y) {
+template<class P, class F> TaylorModel<P,F>
+TaylorModel<P,F>::_compose(const TaylorModel<P,F>& x, const VectorUnscaling& u, const Vector<TaylorModel<P,F>>& y) {
     return compose(x,compose(u,y));
 }
 
@@ -1413,58 +1791,63 @@ TaylorModel<ValidatedTag,F>::_compose(const TaylorModel<ValidatedTag,F>& x, cons
 
 template<class T> class Powers {
   public:
-    explicit Powers(const T& t) { _values.push_back(t*0+1); _values.push_back(t); }
-    explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
-    const T& operator[](SizeType i) const { while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
+    explicit Powers(const T& t) {
+        _values.push_back(t*0+1); _values.push_back(t); }
+    explicit Powers(const T& z, const T& t) {
+        _values.push_back(z); _values.push_back(t); }
+    const T& operator[](SizeType i) const {
+        while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
   private:
     mutable std::vector<T> _values;
 };
 
-template<> class Powers<ValidatedNumericType> {
+template<class F> class Powers<Bounds<F>> {
+    typedef Bounds<F> T;
   public:
-    explicit Powers(const ValidatedNumericType& t) { _values.push_back(ValidatedNumericType(1)); _values.push_back(t); }
-    explicit Powers(const ValidatedNumericType& z, const ValidatedNumericType& t) { _values.push_back(z); _values.push_back(t); }
-    const ValidatedNumericType& operator[](SizeType i) const {
+    explicit Powers(const T& t) {
+        _values.push_back(T(1,t.precision())); _values.push_back(t); }
+    explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
+    const T& operator[](SizeType i) const {
         while(_values.size()<=i) {
             if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
             else { _values.push_back(_values[1]*_values.back()); } }
         return _values[i]; }
   private:
-    mutable std::vector<ValidatedNumericType> _values;
+    mutable std::vector<T> _values;
 };
 
 
 
-template<class F> TaylorModel<ValidatedTag,F>
-TaylorModel<ValidatedTag,F>::_partial_evaluate(const TaylorModel<ValidatedTag,F>& x, SizeType k, NumericType c)
+template<class P, class F> TaylorModel<P,F>
+TaylorModel<P,F>::_partial_evaluate(const TaylorModel<P,F>& x, SizeType k, NumericType c)
 {
     const SizeType as=x.argument_size();
-    Vector<TaylorModel<ValidatedTag,F>> y(as,TaylorModel<ValidatedTag,F>(as-1u,x.sweeper()));
-    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i,x.sweeper()); }
-    y[k]=TaylorModel<ValidatedTag,F>::constant(as-1u,c,x.sweeper());
-    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<ValidatedTag,F>::coordinate(as-1u,i-1u,x.sweeper()); }
+    Vector<TaylorModel<P,F>> y(as,TaylorModel<P,F>(as-1u,x.sweeper()));
+    for(SizeType i=0; i!=k; ++i) { y[i]=TaylorModel<P,F>::coordinate(as-1u,i,x.sweeper()); }
+    y[k]=TaylorModel<P,F>::constant(as-1u,c,x.sweeper());
+    for(SizeType i=k+1; i!=as; ++i) { y[i]=TaylorModel<P,F>::coordinate(as-1u,i-1u,x.sweeper()); }
     return compose(x,y);
 }
 
 
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_embed(SizeType as1, const TaylorModel<ValidatedTag,F>& tm2, SizeType as3) {
-    return TaylorModel<ValidatedTag,F>(embed(as1,tm2.expansion(),as3),tm2.error(),tm2.sweeper());
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_embed(SizeType as1, const TaylorModel<P,F>& tm2, SizeType as3) {
+    return TaylorModel<P,F>(embed(as1,tm2.expansion(),as3),tm2.error(),tm2.sweeper());
 }
 
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_split(const TaylorModel<ValidatedTag,F>& tm, SizeType k, SplitPart h) {
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_split(const TaylorModel<P,F>& tm, SizeType k, SplitPart h) {
     const DegreeType deg=tm.degree();
     const SizeType as=tm.argument_size();
     SweeperType swp=tm.sweeper();
 
-    TaylorModel<ValidatedTag,F> r(tm);
+    TaylorModel<P,F> r(tm);
 
     // Divide all coefficients by 2^a[k]
     // This can be done exactly
-    for(typename TaylorModel<ValidatedTag,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(typename TaylorModel<P,F>::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         const DegreeType ak=iter->index()[k];
-        UniformReference<FloatValue<PR>> c=iter->coefficient();
+        UniformReference<CoefficientType> c=iter->coefficient();
         c/=pow(two,ak);
     }
 
@@ -1474,16 +1857,16 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
     // Replace x[k] with x[k]+tr
 
     // Split variables by degree in x[k]
-    Array<TaylorModel<ValidatedTag,F>> ary(deg+1u,TaylorModel<ValidatedTag,F>(as,swp));
-    for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
+    Array<TaylorModel<P,F>> ary(deg+1u,TaylorModel<P,F>(as,swp));
+    for(typename TaylorModel<P,F>::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->index();
-        UniformConstReference<FloatValue<PR>> c=iter->coefficient();
+        UniformConstReference<CoefficientType> c=iter->coefficient();
         DegreeType ak=a[k];
         a[k]=0u;
         ary[ak].expansion().append(a,c);
     }
 
-    FloatError<PR> re=r.error();
+    ErrorType re=r.error();
     r.clear();
     r.set_error(re);
 
@@ -1492,7 +1875,7 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
             Int sf=bin(j,i);
             if(tr==-1 && (j-i)%2==1) { sf=-sf; }
             r+=ary[j]*sf;
-            for(typename TaylorModel<ValidatedTag,F>::Iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
+            for(typename TaylorModel<P,F>::Iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
                 ++iter->index()[k];
             }
          }
@@ -1507,13 +1890,20 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_spli
 
 // Banach algebra operations
 
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator/(TaylorModel<ValidatedTag,UpperInterval<F>> const& x1, Value<F> const& x2) {
+    return x1/UpperInterval<F>(x2); }
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>>& operator/=(TaylorModel<ValidatedTag,UpperInterval<F>>& x1, Value<F> const& x2) {
+    return x1/=UpperInterval<F>(x2); }
+template<class F> TaylorModel<ValidatedTag,UpperInterval<F>> operator-(TaylorModel<ValidatedTag,UpperInterval<F>> x1, Value<F> const& x2) {
+    return x1-UpperInterval<F>(x2); }
 
-template<class F> typename TaylorModel<ValidatedTag,F>::CoefficientType TaylorModel<ValidatedTag,F>::average() const {
-    return (*this)[MultiIndex::zero(this->argument_size())];
+
+template<class P, class F> auto TaylorModel<P,F>::average() const -> ValueType {
+    return cast_exact(cast_singleton((*this)[MultiIndex::zero(this->argument_size())]));
 }
 
-template<class F> typename TaylorModel<ValidatedTag,F>::NormType TaylorModel<ValidatedTag,F>::radius() const {
-    FloatError<PR> r(0u,this->precision());
+template<class P, class F> auto TaylorModel<P,F>::radius() const -> NormType {
+    typename TaylorModel<P,F>::NormType r(0u,this->precision());
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->index().degree()!=0) {
             r+=mag(iter->coefficient());
@@ -1523,8 +1913,8 @@ template<class F> typename TaylorModel<ValidatedTag,F>::NormType TaylorModel<Val
     return r;
 }
 
-template<class F> typename TaylorModel<ValidatedTag,F>::NormType TaylorModel<ValidatedTag,F>::norm() const {
-    FloatError<PR> r(0u,this->precision());
+template<class P, class F> auto TaylorModel<P,F>::norm() const -> NormType {
+    NormType r(0u,this->precision());
     for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         r+=mag(iter->coefficient());
     }
@@ -1532,91 +1922,109 @@ template<class F> typename TaylorModel<ValidatedTag,F>::NormType TaylorModel<Val
     return r;
 }
 
-template<class F> typename TaylorModel<ValidatedTag,F>::NormType norm(const TaylorModel<ValidatedTag,F>& tm) {
+template<class P, class F> typename TaylorModel<P,F>::NormType norm(const TaylorModel<P,F>& tm) {
     return tm.norm();
 }
 
 
-template<class F> Bool TaylorModel<ValidatedTag,F>::_refines(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2)
+template<class P, class F> Bool TaylorModel<P,F>::_refines(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
 {
     ARIADNE_ASSERT(tm1.argument_size()==tm2.argument_size());
-    TaylorModel<ValidatedTag,F> d=tm2;
+    TaylorModel<P,F> d=tm2;
     d.error()=0u;
     d-=tm1;
     return d.norm().raw() <= tm2.error().raw();
 }
 
 
-template<class F> Bool TaylorModel<ValidatedTag,F>::_consistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2)
+template<class P, class F> Bool TaylorModel<P,F>::_consistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
     return (Ariadne::norm(tm1-tm2).raw() <= (tm1.error()+tm2.error()).raw()*2u);
 }
 
-template<class F> Bool TaylorModel<ValidatedTag,F>::_inconsistent(const TaylorModel<ValidatedTag,F>& tm1, const TaylorModel<ValidatedTag,F>& tm2)
+template<class P, class F> Bool TaylorModel<P,F>::_inconsistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
     return (mag(tm1.value()-tm2.value()).raw() > (tm1.error()+tm2.error()).raw());
 }
 
-template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refinement(const TaylorModel<ValidatedTag,F>& x, const TaylorModel<ValidatedTag,F>& y) {
-    TaylorModel<ValidatedTag,F> r(x.argument_size(),x.sweeper());
+template<class F> inline Bool inconsistent(UpperInterval<F> const& x1, UpperInterval<F> const& x2) {
+    return definitely(disjoint(x1,x2));
+}
 
-    FloatError<PR> max_error=nul(r.error());
+template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const TaylorModel<P,F>& x, const TaylorModel<P,F>& y) {
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        TaylorModel<P,F> r(x.argument_size(),x.sweeper());
 
-    const FloatError<PR>& xe=x.error();
-    const FloatError<PR>& ye=y.error();
-    FloatValue<PR> rv,xv,yv;
-    FloatDP xu,yu,mxl,myl,u,ml;
-    MultiIndex a;
+        ErrorType max_error=nul(r.error());
 
-    typename TaylorModel<ValidatedTag,F>::ConstIterator xiter=x.begin();
-    typename TaylorModel<ValidatedTag,F>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() || yiter!=y.end()) {
-        // Can't use const MultiIndex& here since references change as the iterators change
-        // We would need to use a smart reference
-        //UniformConstReference<MultiIndex> xa=xiter->index();
-        //UniformConstReference<MultiIndex> ya=yiter->index();
-        if(xiter==x.end()) {
-            a=yiter->index();
-            yv=yiter->coefficient();
-            xv=0;
-            ++yiter;
-        } else if(yiter==y.end()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=0;
-            ++xiter;
-        } else if(xiter->index()==yiter->index()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=yiter->coefficient();
-            ++xiter;
-            ++yiter;
-        } else if(xiter->index()<yiter->index()) {
-            a=xiter->index();
-            xv=xiter->coefficient();
-            yv=0;
-            ++xiter;
-        } else { // xa>ya
-            a=yiter->index();
-            yv=yiter->coefficient();
-            xv=0;
-            ++yiter;
+        const ErrorType& xe=x.error();
+        const ErrorType& ye=y.error();
+
+        CoefficientType rv,xv,yv;
+        FloatDP xu,yu,mxl,myl,u,ml;
+        MultiIndex a;
+
+        typename TaylorModel<P,F>::ConstIterator xiter=x.begin();
+        typename TaylorModel<P,F>::ConstIterator yiter=y.begin();
+        while(xiter!=x.end() || yiter!=y.end()) {
+            // Can't use const MultiIndex& here since references change as the iterators change
+            // We would need to use a smart reference
+            //UniformConstReference<MultiIndex> xa=xiter->index();
+            //UniformConstReference<MultiIndex> ya=yiter->index();
+            if(xiter==x.end()) {
+                a=yiter->index();
+                yv=yiter->coefficient();
+                xv=0;
+                ++yiter;
+            } else if(yiter==y.end()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=0;
+                ++xiter;
+            } else if(xiter->index()==yiter->index()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=yiter->coefficient();
+                ++xiter;
+                ++yiter;
+            } else if(xiter->index()<yiter->index()) {
+                a=xiter->index();
+                xv=xiter->coefficient();
+                yv=0;
+                ++xiter;
+            } else { // xa>ya
+                a=yiter->index();
+                yv=yiter->coefficient();
+                xv=0;
+                ++yiter;
+            }
+
+            if constexpr (IsInterval<CoefficientType>::value) {
+                auto xve=xv+pm(xe); auto yve=yv+pm(ye);
+                if (definitely(disjoint(xve,yve))) {
+                    ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
+                }
+                auto rve=refinement( xve, yve );
+                // FIXME: This adds the error to all coefficients,
+                // resulting in an overly-large refinement
+                r.expansion().append(a,rve);
+            } else {
+                auto rve=refinement( xv.pm(xe), yv.pm(ye) );
+                if(rve.error().raw()<0.0) {
+                    ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
+                }
+                if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
+                max_error=max(max_error,rve.error());
+            }
         }
-
-        FloatBounds<PR> rve=refinement( xv.pm(xe), yv.pm(ye) );
-        if(rve.error().raw()<0.0) {
-            ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedTag,F>,TaylorModel<ValidatedTag,F>)",x<<" and "<<y<<" are inconsistent.");
-        }
-
-        if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
-        max_error=max(max_error,rve.error());
+        r.error()=max_error;
+        return r;
+    } else {
+        // Refinement for Approximate models doesn't really make sense
+        ARIADNE_NOT_IMPLEMENTED;
     }
-
-    r.error()=max_error;
-
-    return r;
 }
 
 
@@ -1624,8 +2032,8 @@ template<class F> TaylorModel<ValidatedTag,F> TaylorModel<ValidatedTag,F>::_refi
 
 // Input/output operators
 
-template<class F> OutputStream& TaylorModel<ValidatedTag,F>::str(OutputStream& os) const {
-    TaylorModel<ValidatedTag,F> const& tm=*this;
+template<class P, class F> OutputStream& TaylorModel<P,F>::str(OutputStream& os) const {
+    TaylorModel<P,F> const& tm=*this;
 
     // Set the variable names to be 'parameter' s0,s1,..
     Array<StringType> variable_names(tm.argument_size());
@@ -1635,15 +2043,15 @@ template<class F> OutputStream& TaylorModel<ValidatedTag,F>::str(OutputStream& o
         variable_names[j]=sstr.str();
     }
 
-    //os << "TaylorModel<ValidatedTag,F>";
+    //os << "TaylorModel<P,F>";
     os << "TM["<<tm.argument_size()<<"](";
-    Expansion<MultiIndex,FloatValue<PR>> e=tm.expansion();
+    Expansion<MultiIndex,CoefficientType> e=tm.expansion();
     e.sort(GradedIndexLess());
-    e.write(os,variable_names);
+    e._write(os,variable_names);
     return os << "+/-" << tm.error() << ")";
 }
 
-template<class F> OutputStream& TaylorModel<ValidatedTag,F>::repr(OutputStream& os) const {
+template<class P, class F> OutputStream& TaylorModel<P,F>::repr(OutputStream& os) const {
     return this->str(os);
 }
 
@@ -1652,34 +2060,34 @@ template<class F> OutputStream& TaylorModel<ValidatedTag,F>::repr(OutputStream& 
 // Vector-valued named constructors
 
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::zeros(SizeType rs, SizeType as, SweeperType swp)
+template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::zeros(SizeType rs, SizeType as, SweeperType swp)
 {
-    Vector<TaylorModel<ValidatedTag,F>> result(rs,TaylorModel<ValidatedTag,F>::zero(as,swp));
+    Vector<TaylorModel<P,F>> result(rs,TaylorModel<P,F>::zero(as,swp));
     return result;
 }
 
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::constants(SizeType as, const Vector<ValidatedNumericType>& c, SweeperType swp)
+template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::constants(SizeType as, const Vector<NumericType>& c, SweeperType swp)
 {
-    Vector<TaylorModel<ValidatedTag,F>> result(c.size(),TaylorModel<ValidatedTag,F>::zero(as,swp));
+    Vector<TaylorModel<P,F>> result(c.size(),TaylorModel<P,F>::zero(as,swp));
     for(SizeType i=0; i!=c.size(); ++i) {
-        result[i]=TaylorModel<ValidatedTag,F>::constant(as,c[i],swp);
+        result[i]=TaylorModel<P,F>::constant(as,c[i],swp);
     }
     return result;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::coordinates(SizeType as, SweeperType swp)
+template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::coordinates(SizeType as, SweeperType swp)
 {
-    Vector<TaylorModel<ValidatedTag,F>> result(as,TaylorModel<ValidatedTag,F>::zero(as,swp));
-    for(SizeType i=0; i!=as; ++i) { result[i]=TaylorModel<ValidatedTag,F>::coordinate(as,i,swp); }
+    Vector<TaylorModel<P,F>> result(as,TaylorModel<P,F>::zero(as,swp));
+    for(SizeType i=0; i!=as; ++i) { result[i]=TaylorModel<P,F>::coordinate(as,i,swp); }
     return result;
 }
 
-template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F>::scalings(const Vector<IntervalDomainType>& d, SweeperType swp)
+template<class P, class F> Vector<TaylorModel<P,F>> TaylorModel<P,F>::scalings(const BoxDomainType& d, SweeperType swp)
 {
-    Vector<TaylorModel<ValidatedTag,F>> result(d.size(),TaylorModel<ValidatedTag,F>::zero(d.size(),swp));
+    Vector<TaylorModel<P,F>> result(d.size(),TaylorModel<P,F>::zero(d.size(),swp));
     for(SizeType i=0; i!=d.size(); ++i) {
-        result[i]=TaylorModel<ValidatedTag,F>::scaling(d.size(),i,d[i],swp);
+        result[i]=TaylorModel<P,F>::scaling(d.size(),i,d[i],swp);
     }
     return result;
 }
@@ -1691,62 +2099,62 @@ template<class F> Vector<TaylorModel<ValidatedTag,F>> TaylorModel<ValidatedTag,F
 // Jacobian matrices
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumericType>
-jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNumericType>& x) {
-    Vector< Differential<ValidatedNumericType> > dx=Differential<ValidatedNumericType>::variables(1u,x);
-    Vector< Differential<ValidatedNumericType> > df(f.size(),x.size(),1u);
+template<class F> Matrix<Bounds<F>>
+jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<Bounds<F>>& x) {
+    Vector< Differential<Bounds<F>> > dx=Differential<Bounds<F>>::variables(1u,x);
+    Vector< Differential<Bounds<F>> > df(f.size(),x.size(),1u);
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumericType> J=jacobian(df);
+    Matrix<Bounds<F>> J=jacobian(df);
     return J;
 }
 
 // Compute the Jacobian over an arbitrary domain
-template<class F> Matrix<ValidatedNumericType>
-jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<ValidatedNumericType>& x, const Array<SizeType>& p) {
-    Vector<Differential<ValidatedNumericType>> dx(x.size(),x.size(),1u);
+template<class F> Matrix<Bounds<F>>
+jacobian(const Vector<TaylorModel<ValidatedTag,F>>& f, const Vector<Bounds<F>>& x, const Array<SizeType>& p) {
+    Vector<Differential<Bounds<F>>> dx(x.size(),x.size(),1u);
     for(SizeType j=0; j!=x.size(); ++j) {
-        dx[j]=Differential<ValidatedNumericType>::constant(p.size(),1u,x[j]); }
+        dx[j]=Differential<Bounds<F>>::constant(p.size(),1u,x[j]); }
     for(SizeType k=0; k!=p.size(); ++k) {
         SizeType j=p[k];
-        dx[j]=Differential<ValidatedNumericType>::variable(p.size(),1u,x[j],k); }
-    Vector< Differential<ValidatedNumericType> > df(f.size());
+        dx[j]=Differential<Bounds<F>>::variable(p.size(),1u,x[j],k); }
+    Vector< Differential<Bounds<F>> > df(f.size());
     for(SizeType i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
-    Matrix<ValidatedNumericType> J=jacobian(df);
+    Matrix<Bounds<F>> J=jacobian(df);
     return J;
 }
 
 // Compute the Jacobian at the origin
-template<class F> Matrix<Value<F>>
-jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& f) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> Matrix<Value<F>>
+jacobian_value(const Vector<TaylorModel<P,F>>& f) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
-    Matrix<FloatValue<PR>> J(rs,as);
+    Matrix<CoefficientType> J(rs,as);
     MultiIndex a(as);
     for(SizeType i=0; i!=rs; ++i) {
         for(SizeType j=0; j!=as; ++j) {
-            a[j]=1; const FloatValue<PR> x=f[i][a]; J[i][j]=x; a[j]=0;
+            a[j]=1; const CoefficientType x=f[i][a]; J[i][j]=x; a[j]=0;
         }
     }
     return J;
 }
 
 // Compute the Jacobian at the origin with respect to the variables args.
-template<class F> Matrix<Value<F>>
-jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeType>& p) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> Matrix<Value<F>>
+jacobian_value(const Vector<TaylorModel<P,F>>& f, const Array<SizeType>& p) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     const SizeType rs=f.size();
     const SizeType as=f.zero_element().argument_size();
     const SizeType ps=p.size();
-    Matrix<FloatValue<PR>> J(rs,ps);
+    Matrix<CoefficientType> J(rs,ps);
     MultiIndex a(as);
     for(SizeType i=0; i!=rs; ++i) {
         for(SizeType k=0; k!=ps; ++k) {
-            SizeType j=p[k]; a[j]=1; const FloatValue<PR> x=f[i][a]; J[i][k]=x; a[j]=0;
+            SizeType j=p[k]; a[j]=1; const CoefficientType x=f[i][a]; J[i][k]=x; a[j]=0;
         }
     }
     return J;
@@ -1755,286 +2163,81 @@ jacobian_value(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeTyp
 
 
 // Compute the Jacobian over the unit domain
-template<class F> Matrix<UpperIntervalType>
-jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> Matrix<typename TaylorModel<P,F>::RangeType>
+jacobian_range(const Vector<TaylorModel<P,F>>& f) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using RangeType = typename TaylorModel<P,F>::RangeType;
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
-    Matrix<FloatBounds<PR>> J(rs,as);
+    Matrix<RangeType> J(rs,as);
     for(SizeType i=0; i!=rs; ++i) {
-        for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(typename TaylorModel<P,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             UniformConstReference<MultiIndex> a=iter->index();
             for(SizeType k=0; k!=as; ++k) {
                 const Nat c=a[k];
                 if(c>0) {
-                    UniformConstReference<FloatValue<PR>> x=iter->coefficient();
+                    UniformConstReference<CoefficientType> x=iter->coefficient();
                     if(a.degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=FloatBounds<PR>(-1,1)*x*c; }
+                    else { J[i][k]+=RangeType(-1,1)*x*c; }
                 }
             }
         }
     }
-    return Matrix<UpperIntervalType>(J);
+    return J;
 }
 
 // Compute the Jacobian over the unit domain, with respect to the variables p.
-template<class F> Matrix<UpperIntervalType>
-jacobian_range(const Vector<TaylorModel<ValidatedTag,F>>& f, const Array<SizeType>& p) {
-    typedef typename F::PrecisionType PR;
+template<class P, class F> Matrix<typename TaylorModel<P,F>::RangeType>
+jacobian_range(const Vector<TaylorModel<P,F>>& f, const Array<SizeType>& p) {
+    using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
+    using RangeType = typename TaylorModel<P,F>::RangeType;
     SizeType rs=f.size();
     SizeType ps=p.size();
-    Matrix<FloatBounds<PR>> J(rs,ps);
+    Matrix<RangeType> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {
-        for(typename TaylorModel<ValidatedTag,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(typename TaylorModel<P,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             UniformConstReference<MultiIndex> a=iter->index();
             for(SizeType k=0; k!=ps; ++k) {
                 SizeType j=p[k];
                 const Nat c=a[j];
                 if(c>0) {
-                    UniformConstReference<FloatValue<PR>> x=iter->coefficient();
+                    UniformConstReference<CoefficientType> x=iter->coefficient();
                     if(a.degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=FloatBounds<PR>(-1,1)*x*c; }
+                    else { J[i][k]+=RangeType(-1,1)*x*c; }
                 }
             }
         }
     }
-    return Matrix<UpperIntervalType>(J);
+    return J;
 }
 
 
+template<class F> TaylorModel<ValidatedTag,F> value_coefficients(TaylorModel<ValidatedTag,Bounds<F>> const& tm) {
+    TaylorModel<ValidatedTag,F> r(tm.argument_size(),tm.sweeper());
+    auto& e=r.error();
 
-
-
-
-
-
-
-
-
-template<class F> TaylorModel<ApproximateTag,F>::TaylorModel()
-    : _expansion(0), _sweeper()
-{
-}
-
-template<class F> TaylorModel<ApproximateTag,F>::TaylorModel(SizeType as)
-    : _expansion(as), _sweeper()
-{
-}
-
-template<class F> TaylorModel<ApproximateTag,F>::TaylorModel(SizeType as, SweeperType swp)
-    : _expansion(as), _sweeper(swp)
-{
-}
-
-template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(FloatApproximation<PR> c) const {
-    TaylorModel<ApproximateTag,F> r(this->argument_size(),this->_sweeper);
-    r._expansion.append(MultiIndex::zero(this->argument_size()),c);
-    return std::move(r);
-}
-
-template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_constant(ApproximateNumber c) const {
-    return this->create_constant(NumericType(c,this->precision()));
-}
-
-template<class F> TaylorModel<ApproximateTag,F> TaylorModel<ApproximateTag,F>::create_ball(ErrorType) const {
-    return TaylorModel<ApproximateTag,F>(this->argument_size(),this->_sweeper);
-}
-
-
-template<class F> Void TaylorModel<ApproximateTag,F>::iadd(const FloatApproximation<PR>& c)
-{
-    // Compute self+=c
-    TaylorModel<ApproximateTag,F>& x=*this;
-    if(decide(c==0)) { return; }
-    if(x._expansion.empty()) {
-        x._expansion.append(MultiIndex(x.argument_size()),c);
-    } else if((x._expansion.end()-1)->index().degree()>0) {
-        x._expansion.append(MultiIndex(x.argument_size()),c);
-    } else {
-        UniformReference<FloatApproximation<PR>> rv=(x._expansion.end()-1)->coefficient();
-        rv+=c;
+    for (auto term : tm.expansion()) {
+        Value<F> c=set_err(term.coefficient(),e);
+        r.expansion().append(term.index(), c);
     }
+    e+=tm.error();
+    return r;
 }
 
-template<class F> Void TaylorModel<ApproximateTag,F>::imul(const FloatApproximation<PR>& c)
-{
-    // Compute self*=c
-    if(decide(c==0)) { this->clear(); return; }
-    if(decide(c==1)) { return; }
-    for(Iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-        iter->coefficient() *= c;
+template<class F> TaylorModel<ValidatedTag,Bounds<F>> exact_coefficients(TaylorModel<ValidatedTag,Bounds<F>> const& tm) {
+    TaylorModel<ValidatedTag,Bounds<F>> r(tm.argument_size(),tm.sweeper());
+    auto& e=r.error();
+
+    for (auto term : tm.expansion()) {
+        Value<F> c=set_err(term.coefficient(),e);
+        r.expansion().append(term.index(), c);
     }
+    e+=tm.error();
+    return r;
 }
 
 
 
-template<class F> Void TaylorModel<ApproximateTag,F>::isma(const FloatApproximation<PR>& c, const TaylorModel<ApproximateTag,F>& y)
-{
-    const TaylorModel<ApproximateTag,F>& x=*this;
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<", y="<<y);
-    TaylorModel<ApproximateTag,F> r(x.argument_size());
-
-    ConstIterator xiter=x._expansion.begin();
-    ConstIterator yiter=y._expansion.begin();
-    while(xiter!=x._expansion.end() && yiter!=y._expansion.end()) {
-        if(xiter->index()<yiter->index()) {
-            r._expansion.append(xiter->index(),xiter->coefficient());
-            ++xiter;
-        } else if(yiter->index()<xiter->index()) {
-            r._expansion.append(yiter->index(),c*yiter->coefficient());
-            ++yiter;
-        } else {
-            r._expansion.append(xiter->index(),xiter->coefficient()+c*yiter->coefficient());
-            ++xiter; ++yiter;
-        }
-    }
-    while(xiter!=x._expansion.end()) {
-        r._expansion.append(xiter->index(),xiter->coefficient());
-        ++xiter;
-    }
-    while(yiter!=y._expansion.end()) {
-        r._expansion.append(yiter->index(),c*yiter->coefficient());
-        ++yiter;
-    }
-
-    this->swap(r);
-}
-
-
-template<class F> Void TaylorModel<ApproximateTag,F>::ifma(const TaylorModel<ApproximateTag,F>& x, const TaylorModel<ApproximateTag,F>& y)
-{
-    TaylorModel<ApproximateTag,F>& r(*this);
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<",y="<<y);
-
-    TaylorModel<ApproximateTag,F> t(x.argument_size());
-    MultiIndex sa;
-    for(ConstIterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
-        ConstIterator yiter=y._expansion.begin();
-        ConstIterator riter=r._expansion.begin();
-        while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
-            UniformConstReference<MultiIndex> ra=riter->index();
-            sa=xiter->index()+yiter->index();
-            if(sa==ra) {
-                t._expansion.append(sa,riter->coefficient()+xiter->coefficient()*yiter->coefficient());
-                ++riter; ++yiter;
-            } else if(sa<ra) {
-                t._expansion.append(sa,xiter->coefficient()*yiter->coefficient());
-                ++yiter;
-            } else {
-                t._expansion.append(ra,riter->coefficient());
-                ++riter;
-            }
-        }
-        while(riter!=r._expansion.end()) {
-            t._expansion.append(riter->index(),riter->coefficient());
-            ++riter;
-        }
-        while(yiter!=y._expansion.end()) {
-            t._expansion.append_sum(xiter->index(),yiter->index(),xiter->coefficient()*yiter->coefficient());
-            ++yiter;
-
-        }
-
-        r._expansion.swap(t._expansion);
-        t._expansion.clear();
-    }
-}
-
-
-template<class F> struct AlgebraOperations<TaylorModel<ApproximateTag,F>>
-    : NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>
-{
-    typedef typename F::PrecisionType PR;
-    typedef CanonicalNumericType<ApproximateTag,PR> ApproximateNumericType;
-  public:
-    using NormedAlgebraOperations<TaylorModel<ApproximateTag,F>>::apply;
-    static TaylorModel<ApproximateTag,F> apply(Nul, TaylorModel<ApproximateTag,F> const& x) {
-        return TaylorModel<ApproximateTag,F>(x.argument_size(),x.sweeper()); }
-    static TaylorModel<ApproximateTag,F> apply(Pos, TaylorModel<ApproximateTag,F> x) {
-        return std::move(x); }
-    static TaylorModel<ApproximateTag,F> apply(Neg, TaylorModel<ApproximateTag,F> x) {
-        x.imul(ApproximateNumericType(-1,x.precision())); return std::move(x); }
-    static TaylorModel<ApproximateTag,F> apply(Add, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
-        auto r=x; r.isma(ApproximateNumericType(-1,x.precision()),y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> apply(Sub, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
-        auto r=x; r.isma(ApproximateNumericType(-1,x.precision()),y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> apply(Mul, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
-        auto r=nul(x); r.ifma(x,y); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> apply(Add, TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
-        auto& r=x; r.iadd(c); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> apply(Mul, TaylorModel<ApproximateTag,F> x, ApproximateNumericType const& c) {
-        auto& r=x; r.imul(c); return std::move(r); }
-    static TaylorModel<ApproximateTag,F> apply(Max, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
-        ARIADNE_NOT_IMPLEMENTED; }
-    static TaylorModel<ApproximateTag,F> apply(Min, TaylorModel<ApproximateTag,F> const& x, TaylorModel<ApproximateTag,F> const& y) {
-        ARIADNE_NOT_IMPLEMENTED; }
-    static TaylorModel<ApproximateTag,F> apply(Abs, TaylorModel<ApproximateTag,F> const& x) {
-        ARIADNE_NOT_IMPLEMENTED; }
-};
-
-template<class F> Void TaylorModel<ApproximateTag,F>::unscale(IntervalDomainType const& dom) {
-    auto ivl=convert_interval(dom,this->precision());
-    TaylorModel<ApproximateTag,F>& x=*this;
-    x-=ivl.midpoint();
-    x/=ivl.radius();
-}
-
-
-
-template<class F> typename TaylorModel<ApproximateTag,F>::NormType TaylorModel<ApproximateTag,F>::norm() const {
-    FloatApproximation<PR> r(0u,this->precision());
-    for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-        r+=mag(iter->coefficient());
-    }
-    return NormType(r);
-}
-
-template<class F> typename TaylorModel<ApproximateTag,F>::CoefficientType TaylorModel<ApproximateTag,F>::average() const {
-    return (*this)[MultiIndex(this->argument_size())];
-}
-
-template<class F> typename TaylorModel<ApproximateTag,F>::NormType TaylorModel<ApproximateTag,F>::radius() const {
-    FloatApproximation<PR> r(0u,this->precision());
-    for(auto iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-        if(iter->index().degree()!=0) {
-            r+=mag(iter->coefficient());
-        }
-    }
-    return NormType(r);
-}
-
-template<class F> UnitBox TaylorModel<ApproximateTag,F>::domain() const {
-    return UnitBox(this->argument_size(),UnitInterval());
-}
-
-template<class F> auto TaylorModel<ApproximateTag,F>::range() const -> RangeType {
-    FloatApproximation<PR> av=this->average();
-    FloatApproximation<PR> rad=this->radius();
-    return Interval<FloatApproximation<PR>>(av-rad,av+rad);
-}
-
-template<class F> TaylorModel<ApproximateTag,F>& TaylorModel<ApproximateTag,F>::sweep() {
-    this->_sweeper.sweep(this->_expansion);
-    return *this;
-}
-
-template<class F> F TaylorModel<ApproximateTag,F>::tolerance() const {
-    const ThresholdSweeper<F>* ptr=dynamic_cast<const ThresholdSweeper<F>*>(&static_cast<const SweeperInterface<F>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : F(std::numeric_limits<double>::epsilon(),this->precision());
-}
-
-
-template<class F> OutputStream& TaylorModel<ApproximateTag,F>::write(OutputStream& os) const {
-    return os << "TM["<<this->argument_size()<<"](" << this->_expansion << ")";
-}
-
-template<class F> OutputStream& TaylorModel<ApproximateTag,F>::str(OutputStream& os) const {
-    return os << this->_expansion;
-}
-
-template<class F> OutputStream& TaylorModel<ApproximateTag,F>::repr(OutputStream& os) const {
-    return this->str(os);
-}
 
 } //namespace Ariadne
 

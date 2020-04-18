@@ -1,7 +1,7 @@
 /***************************************************************************
- *            domain.hpp
+ *            function/domain.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file domain.hpp
+/*! \file function/domain.hpp
  *  \brief Interval and box domains for functions.
  */
 
@@ -34,8 +34,8 @@
 
 namespace Ariadne {
 
-using IntervalDomainType = ExactIntervalType;
-using BoxDomainType = ExactBoxType;
+using IntervalDomainType = Interval<FloatDPValue>;
+using BoxDomainType = Box<Interval<FloatDPValue>>;
 
 class RealDomain {
   public:
@@ -72,6 +72,7 @@ class UnitInterval {
     friend Bool operator==(UnitInterval const& dom1, UnitInterval const& dom2) { return true; }
     friend OutputStream& operator<<(OutputStream& os, UnitInterval const& dom) { return os << "[-1:+1]"; }
 };
+
 class UnitBox {
     SizeType _dim;
   public:
@@ -87,15 +88,29 @@ class UnitBox {
     friend OutputStream& operator<<(OutputStream& os, UnitBox const& dom) { return os << "[-1:+1]^" << dom.dimension(); }
 };
 
+struct ScalarElementTraits {
+    template<class X> using Type=Scalar<X>;
+    typedef SizeOne SizeType;
+    typedef IndexZero IndexType;
+    template<class PR> using RangeType = Interval<FloatUpperBound<PR>>;
+};
+
+struct VectorElementTraits {
+    template<class X> using Type=Vector<X>;
+    typedef Ariadne::SizeType SizeType;
+    typedef Ariadne::SizeType IndexType;
+    template<class PR> using RangeType = Box<Interval<FloatUpperBound<PR>>>;
+};
+
 template<class S> struct ElementTraits;
 template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
-template<class UB> struct ElementTraits<Interval<UB>> { template<class X> using Type=Scalar<X>; };
-template<class IVL> struct ElementTraits<Box<IVL>> { template<class X> using Type=Vector<X>; };
-template<> struct ElementTraits<RealDomain> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<EuclideanDomain> { template<class X> using Type=Vector<X>; };
-template<> struct ElementTraits<UnitInterval> { template<class X> using Type=Scalar<X>; };
-template<> struct ElementTraits<UnitBox> { template<class X> using Type=Vector<X>; };
+template<class UB> struct ElementTraits<Interval<UB>> : ScalarElementTraits { };
+template<class IVL> struct ElementTraits<Box<IVL>> : VectorElementTraits { };
+template<> struct ElementTraits<RealDomain> : ScalarElementTraits { };
+template<> struct ElementTraits<EuclideanDomain> : VectorElementTraits { };
+template<> struct ElementTraits<UnitInterval> : ScalarElementTraits { };
+template<> struct ElementTraits<UnitBox> : VectorElementTraits { };
 
 template<class... TS> using CartesianProductType = decltype(product(declval<TS>()...));
 

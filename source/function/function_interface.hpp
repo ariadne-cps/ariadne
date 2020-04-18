@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function_interface.hpp
+ *            function/function_interface.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function_interface.hpp
+/*! \file function/function_interface.hpp
  *  \brief Interface for functions for which derivatives can be computed.
  */
 
@@ -48,7 +48,7 @@ template<class P, class D, class C> class FunctionInterface;
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
+//! \sa \ref FunctionInterface
 template<class P,class D>
 class VectorOfFunctionInterface
 {
@@ -94,11 +94,11 @@ class FunctionInterface<Void,D,C>
     virtual CodomainType const codomain() const = 0;
 
     virtual OutputStream& repr(OutputStream& os) const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,D,C>* _clone() const = 0;
   public:
-    friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) { return f.write(os); }
+    friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) { return f._write(os); }
 };
 
 //! \ingroup FunctionModule
@@ -146,6 +146,9 @@ class FunctionInterface<ValidatedTag,D,C>
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument< Differential<FloatMPBounds> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatDP> >& x) const = 0;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument< TaylorModel<ValidatedTag,FloatMP> >& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const = 0;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const = 0;
+
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
     virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument< ElementaryAlgebra<ValidatedNumber> >& x) const = 0;
 
@@ -198,7 +201,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     typedef BoxDomainType DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     inline ScalarMultivariateFunction<P> create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const;
     inline VectorMultivariateFunction<P> create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const;
     inline ScalarMultivariateFunction<P> create_zero(const BoxDomainType& domain) const;
@@ -208,7 +211,7 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     virtual VectorMultivariateFunctionInterface<P>* _create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const = 0;
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<P>& factory) {
-        return factory.write(os); }
+        return factory._write(os); }
   public:
     virtual ~FunctionFactoryInterface<P>() = default;
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function_mixin.hpp
+ *            function/function_mixin.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -31,12 +31,16 @@
 
 namespace Ariadne {
 
-typedef Differential<ApproximateNumericType> ApproximateDifferential;
-typedef Differential<ValidatedNumericType> ValidatedDifferential;
-typedef UnivariateDifferential<ApproximateNumericType> ApproximateUnivariateDifferential;
-typedef UnivariateDifferential<ValidatedNumericType> ValidatedUnivariateDifferential;
+typedef Differential<FloatDPApproximation> ApproximateDifferentialDP;
+typedef Differential<FloatDPBounds> ValidatedDifferentialDP;
+typedef UnivariateDifferential<FloatDPApproximation> ApproximateUnivariateDifferentialDP;
+typedef UnivariateDifferential<FloatDPBounds> ValidatedUnivariateDifferentialDP;
 typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
 typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
+typedef TaylorModel<ApproximateTag,FloatMP> ApproximateTaylorModelMP;
+typedef TaylorModel<ValidatedTag,FloatMP> ValidatedTaylorModelMP;
+
+typedef TaylorModel<ValidatedTag,FloatDPUpperInterval> ValidatedIntervalTaylorModelDP;
 
 typedef Formula<ApproximateNumber> ApproximateFormula;
 typedef Formula<ValidatedNumber> ValidatedFormula;
@@ -51,6 +55,8 @@ typedef ElementaryAlgebra<EffectiveNumber> EffectiveElementaryAlgebra;
 template<class F, class P, class D, class C> class FunctionMixin { };
 template<class F, class P, class D> class ScalarFunctionMixin;
 template<class F, class P, class D> class VectorFunctionMixin;
+template<class F, class P> using ScalarUnivariateFunctionMixin = ScalarFunctionMixin<F,P,IntervalDomainType>;
+template<class F, class P> using VectorUnivariateFunctionMixin = VectorFunctionMixin<F,P,IntervalDomainType>;
 template<class F, class P> using ScalarMultivariateFunctionMixin = ScalarFunctionMixin<F,P,BoxDomainType>;
 template<class F, class P> using VectorMultivariateFunctionMixin = VectorFunctionMixin<F,P,BoxDomainType>;
 
@@ -84,8 +90,8 @@ class FunctionMixin<F,Void,D,C>
     virtual ArgumentSizeType argument_size() const override { return this->domain().dimension(); }
     virtual ResultSizeType result_size() const override { return this->codomain().dimension(); }
 
-    virtual OutputStream& write(OutputStream& os) const override = 0;
-    virtual OutputStream& repr(OutputStream& os) const override { return this->write(os); }
+    virtual OutputStream& _write(OutputStream& os) const override = 0;
+    virtual OutputStream& repr(OutputStream& os) const override { return this->_write(os); }
 };
 
 
@@ -125,6 +131,8 @@ class FunctionMixin<F,ValidatedTag,D,C>
     virtual Result<Differential<FloatMPBounds>> _evaluate(const Argument<Differential<FloatMPBounds>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatDP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDP>>& x) const override;
     virtual Result<TaylorModel<ValidatedTag,FloatMP>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const override;
+    virtual Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> _evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const override;
     virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument<Formula<ValidatedNumber>>& x) const override;
     virtual Result<ElementaryAlgebra<ValidatedNumber>> _evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const override;
 

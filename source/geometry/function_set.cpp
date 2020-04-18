@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function_set.cpp
+ *            geometry/function_set.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -68,9 +68,10 @@ Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFun
 
 Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub);
 ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl);
-ExactBoxType under_approximation(const EffectiveBoxType& rbx);
-ExactBoxType over_approximation(const EffectiveBoxType& rbx);
-ExactBoxType approximation(const EffectiveBoxType& rbx);
+ExactBoxType under_approximation(const RealBox& rbx);
+ExactBoxType over_approximation(const RealBox& rbx);
+ExactBoxType approximation(const RealBox& rbx);
+
 
 
 Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom)
@@ -102,7 +103,7 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, dom);
+    Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 1, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius().upper().raw();
@@ -111,13 +112,13 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferentialType> df=derivative_range(f,ivl_dx);
+    Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
-        const UpperIntervalDifferentialType& d=df[i];
-        for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const Differential<FloatDPUpperInterval>& d=df[i];
+        for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
@@ -137,7 +138,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, dom);
+    Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 2, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius().upper().raw();
@@ -146,13 +147,13 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferentialType> df=derivative_range(f,ivl_dx);
+    Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
-        const UpperIntervalDifferentialType& d=df[i];
-        for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const Differential<FloatDPUpperInterval>& d=df[i];
+        for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
@@ -204,17 +205,17 @@ ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl) 
     return cast_exact_interval(UpperIntervalType(ivl,double_precision));
 }
 
-ExactBoxType under_approximation(const EffectiveBoxType& rbx) {
+ExactBoxType under_approximation(const RealBox& rbx) {
     DoublePrecision prec;
     return cast_exact_box(LowerBoxType(rbx,prec));
 }
 
-ExactBoxType over_approximation(const EffectiveBoxType& rbx) {
+ExactBoxType over_approximation(const RealBox& rbx) {
     DoublePrecision prec;
     return cast_exact_box(UpperBoxType(rbx,prec));
 }
 
-ExactBoxType approximation(const EffectiveBoxType& rbx) {
+ExactBoxType approximation(const RealBox& rbx) {
     DoublePrecision prec;
     return cast_exact_box(ApproximateBoxType(rbx,prec));
 }
@@ -252,15 +253,15 @@ ValidatedVectorMultivariateFunction constraint_function(BoxDomainType dom, const
 }
 
 
-EffectiveBoxType constraint_bounds(const List<EffectiveConstraint>& c) {
-    EffectiveBoxType b(c.size());
+RealBox constraint_bounds(const List<EffectiveConstraint>& c) {
+    RealBox b(c.size());
     for(Nat i=0; i!=c.size(); ++i) {
-        b[i]=EffectiveIntervalType(c[i].lower_bound(),c[i].upper_bound());
+        b[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
     }
     return b;
 }
 
-List<EffectiveConstraint> constraints(const EffectiveVectorMultivariateFunction& f, const EffectiveBoxType& b) {
+List<EffectiveConstraint> constraints(const EffectiveVectorMultivariateFunction& f, const RealBox& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<EffectiveConstraint> c; c.reserve(b.size());
     for(Nat i=0; i!=b.size(); ++i) {
@@ -288,7 +289,7 @@ template<class OP, class ARG1, class ARG2> struct LogicalExpression<OP,ARG1,ARG2
 template<class OP, class ARG1, class ARG2> decltype(auto) make_shared_logical_expression(OP const& op, ARG1 const& arg1, ARG2 const& arg2) {
     return std::make_shared<Detail::LogicalExpression<OP,ARG1,ARG2>>(op,arg1,arg2); }
 
-ConstraintSet::ConstraintSet(const EffectiveVectorMultivariateFunction& f, const EffectiveBoxType& b)
+ConstraintSet::ConstraintSet(const EffectiveVectorMultivariateFunction& f, const RealBox& b)
     : _dimension(f.argument_size()), _constraints()
 {
     this->_constraints=Ariadne::constraints(f,b);
@@ -304,7 +305,7 @@ EffectiveVectorMultivariateFunction const ConstraintSet::constraint_function() c
     return Ariadne::constraint_function(EuclideanDomain(this->dimension()),this->constraints());
 }
 
-EffectiveBoxType const ConstraintSet::constraint_bounds() const
+RealBox const ConstraintSet::constraint_bounds() const
 {
     return Ariadne::constraint_bounds(this->constraints());
 }
@@ -364,7 +365,7 @@ ConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 
 
 OutputStream&
-ConstraintSet::write(OutputStream& os) const
+ConstraintSet::_write(OutputStream& os) const
 {
     return os << "ConstraintSet( constraints=" << this->constraints() << " )";
 }
@@ -378,19 +379,19 @@ intersection(const ConstraintSet& cs1,const ConstraintSet& cs2)
 
 
 
-BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& bx)
+BoundedConstraintSet::BoundedConstraintSet(const RealBox& bx)
     : _domain(bx), _constraints()
 {
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const EffectiveVectorMultivariateFunction& f, const EffectiveBoxType& b)
+BoundedConstraintSet::BoundedConstraintSet(const RealBox& d, const EffectiveVectorMultivariateFunction& f, const RealBox& b)
     : _domain(d), _constraints(Ariadne::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const EffectiveBoxType& d, const List<EffectiveConstraint>& c)
+BoundedConstraintSet::BoundedConstraintSet(const RealBox& d, const List<EffectiveConstraint>& c)
     : _domain(d), _constraints(c)
 {
 }
@@ -400,7 +401,7 @@ EffectiveVectorMultivariateFunction const BoundedConstraintSet::constraint_funct
     return Ariadne::constraint_function(EuclideanDomain(this->dimension()),this->constraints());
 }
 
-EffectiveBoxType const BoundedConstraintSet::constraint_bounds() const
+RealBox const BoundedConstraintSet::constraint_bounds() const
 {
     return Ariadne::constraint_bounds(this->constraints());
 }
@@ -488,7 +489,7 @@ BoundedConstraintSet::bounding_box() const
 
 
 OutputStream&
-BoundedConstraintSet::write(OutputStream& os) const
+BoundedConstraintSet::_write(OutputStream& os) const
 {
     return os << "BoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
 }
@@ -501,13 +502,13 @@ BoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 
 
 BoundedConstraintSet
-intersection(const ConstraintSet& cs,const EffectiveBoxType& bx)
+intersection(const ConstraintSet& cs,const RealBox& bx)
 {
     return BoundedConstraintSet(bx,cs.constraints());
 }
 
 BoundedConstraintSet
-intersection(const EffectiveBoxType& bx,const ConstraintSet& cs)
+intersection(const RealBox& bx,const ConstraintSet& cs)
 {
     return intersection(cs,bx);
 }
@@ -519,13 +520,13 @@ intersection(const BoundedConstraintSet& bcs1,const BoundedConstraintSet& bcs2)
 }
 
 BoundedConstraintSet
-intersection(const BoundedConstraintSet& bcs,const EffectiveBoxType& bx)
+intersection(const BoundedConstraintSet& bcs,const RealBox& bx)
 {
     return BoundedConstraintSet(intersection(bcs.constraint_bounds(),bx),bcs.constraints());
 }
 
 BoundedConstraintSet
-intersection(const EffectiveBoxType& bx,const BoundedConstraintSet& bcs)
+intersection(const RealBox& bx,const BoundedConstraintSet& bcs)
 {
     return intersection(bcs,bx);
 }
@@ -563,11 +564,11 @@ const EffectiveVectorMultivariateFunction ConstrainedImageSet::constraint_functi
     return Ariadne::constraint_function(this->function().domain(),this->constraints());
 }
 
-const EffectiveBoxType ConstrainedImageSet::constraint_bounds() const
+const RealBox ConstrainedImageSet::constraint_bounds() const
 {
-    EffectiveBoxType result(this->number_of_constraints());
+    RealBox result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=EffectiveIntervalType(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=RealInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -587,7 +588,7 @@ ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
     DoublePrecision prec;
-    const Vector<ExactIntervalType> D=approximation(this->domain());
+    const Box<ExactIntervalType> D=approximation(this->domain());
     Vector<FloatDPValue> m=midpoint(D);
     Matrix<FloatDPValue> G=cast_exact(jacobian(this->_function,m));
     Vector<FloatDPValue> h=cast_exact(this->_function.evaluate(m)-G*m);
@@ -596,9 +597,9 @@ ConstrainedImageSet::affine_approximation() const
     for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<ValidatedTag,FloatDP> a=affine_model(D,iter->function(),prec);
+        ValidatedAffineModelDP a=affine_model(D,iter->function(),prec);
         ExactIntervalType b=iter->bounds();
-        result.new_constraint(b.lower()<=a<=b.upper());
+        result.new_constraint(ValidatedAffineModelConstraintDP(b.lower(),a,b.upper()));
     }
 
     return result;
@@ -612,7 +613,7 @@ ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, 
     }
 
     ConstraintSolver solver;
-    const EffectiveBoxType& domain=this->_domain;
+    const RealBox& domain=this->_domain;
     List<EffectiveConstraint> all_constraints=this->_constraints;
     EffectiveScalarMultivariateFunction composed_function = compose(nc.function(),this->_function);
     const EffectiveNumber& lower_bound = nc.lower_bound();
@@ -673,10 +674,10 @@ ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Eff
 
 
 Void
-ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
     ValidatedConstrainedImageSet set(over_approximation(this->domain()),this->function(),this->constraints());
-    return set.adjoin_outer_approximation_to(paving,depth);
+    return set.adjoin_outer_approximation_to(paving,fineness);
 }
 
 
@@ -699,11 +700,11 @@ ConstrainedImageSet::split() const
 Pair<ConstrainedImageSet,ConstrainedImageSet>
 ConstrainedImageSet::split(Nat j) const
 {
-    EffectiveIntervalType interval = this->domain()[j];
+    RealInterval interval = this->domain()[j];
     Real midpoint = interval.midpoint();
-    Pair<EffectiveBoxType,EffectiveBoxType> subdomains(this->domain(),this->domain());
-    subdomains.first[j]=EffectiveIntervalType(interval.lower(),midpoint);
-    subdomains.second[j]=EffectiveIntervalType(midpoint,interval.upper());
+    Pair<RealBox,RealBox> subdomains(this->domain(),this->domain());
+    subdomains.first[j]=RealInterval(interval.lower(),midpoint);
+    subdomains.second[j]=RealInterval(midpoint,interval.upper());
     return make_pair(ConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
                      ConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
 }
@@ -803,7 +804,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
 
 Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
-    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,domain);
+    Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,cast_vector(domain));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -867,7 +868,7 @@ ConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 
 
 OutputStream&
-ConstrainedImageSet::write(OutputStream& os) const
+ConstrainedImageSet::_write(OutputStream& os) const
 {
     return os << "ConstrainedImageSet( domain=" << this->_domain
               << ", function=" << this->_function << ", constraints=" << this->_constraints << " )";
@@ -952,14 +953,14 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     DoublePrecision prec;
 
-    Vector<ExactIntervalType> domain = this->domain();
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
-    List<ValidatedAffineModelConstraint> constraint_models;
+    Box<ExactIntervalType> domain = this->domain();
+    Vector<ValidatedAffineModelDP> space_models=affine_models(domain,this->function(),prec);
+    List<ValidatedAffineModelConstraintDP> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
+        constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
@@ -1014,15 +1015,15 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
 {
     DoublePrecision prec;
 
-    Vector<ExactIntervalType> domain = this->domain();
+    Box<ExactIntervalType> domain = this->domain();
 
-    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function(),prec);
-    List<ValidatedAffineModelConstraint> constraint_models;
+    Vector<ValidatedAffineModelDP> space_models=affine_models(domain,this->function(),prec);
+    List<ValidatedAffineModelConstraintDP> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
-        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),am,constraint.upper_bound()));
+        constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
     for(Nat i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
@@ -1134,23 +1135,23 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
     optimiser.verbosity=0;
 
     List<Pair<Nat,ExactBoxType> > subdomains;
-    Nat depth(0);
-    Nat MAX_DEPTH=2;
+    Nat splittings(0);
+    Nat MAX_SPLITTINGS=2;
     ValidatedKleenean feasible = false;
-    subdomains.append(make_pair(depth,subdomain));
+    subdomains.append(make_pair(splittings,subdomain));
 
     while(!subdomains.empty()) {
-        make_lpair(depth,subdomain)=subdomains.back();
+        make_lpair(splittings,subdomain)=subdomains.back();
         subdomains.pop_back();
         ValidatedKleenean found_feasible = optimiser.feasible(subdomain,function,codomain);
         if(definitely(found_feasible)) { return true; }
         if(possibly(found_feasible)) {
-            if(depth==MAX_DEPTH) {
+            if(splittings==MAX_SPLITTINGS) {
                 feasible = ValidatedKleenean(indeterminate);
             } else {
                 Pair<ExactBoxType,ExactBoxType> split_subdomains=subdomain.split();
-                subdomains.append(make_pair(depth+1,split_subdomains.first));
-                subdomains.append(make_pair(depth+1,split_subdomains.second));
+                subdomains.append(make_pair(splittings+1,split_subdomains.first));
+                subdomains.append(make_pair(splittings+1,split_subdomains.second));
             }
         }
     }
@@ -1159,26 +1160,26 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
 }
 
 
-GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat depth) const
+GridTreePaving ValidatedConstrainedImageSet::outer_approximation(const Grid& grid, Nat fineness) const
 {
     GridTreePaving paving(grid);
-    this->adjoin_outer_approximation_to(paving,depth);
+    this->adjoin_outer_approximation_to(paving,fineness);
     return paving;
 }
 
-Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const
+Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const
 {
     ValidatedConstrainedImageSet const& set=*this;
 
     switch(DISCRETISATION_METHOD) {
         case DiscretisationMethod::SUBDIVISION:
-            SubdivisionPaver().adjoin_outer_approximation(paving,set,depth);
+            SubdivisionPaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         case DiscretisationMethod::AFFINE:
-            AffinePaver().adjoin_outer_approximation(paving,set,depth);
+            AffinePaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         case DiscretisationMethod::CONSTRAINT:
-            ConstraintPaver().adjoin_outer_approximation(paving,set,depth);
+            ConstraintPaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         default:
             ARIADNE_FAIL_MSG("Unknown discretisation method\n");
@@ -1243,9 +1244,9 @@ ValidatedConstrainedImageSet::affine_draw(CanvasInterface& cnvs, const Projectio
 }
 
 Void
-ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat depth) const
+ValidatedConstrainedImageSet::grid_draw(CanvasInterface& cnvs, const Projection2d& proj, Nat fineness) const
 {
-    GridDrawer(depth).draw(cnvs,proj,*this);
+    GridDrawer(fineness).draw(cnvs,proj,*this);
 }
 
 ValidatedConstrainedImageSet
@@ -1304,13 +1305,13 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 }
 
 
-OutputStream& ValidatedConstrainedImageSet::write(OutputStream& os) const
+OutputStream& ValidatedConstrainedImageSet::_write(OutputStream& os) const
 {
     return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
 }
 
 OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& set) {
-    return set.write(os);
+    return set._write(os);
 }
 
 

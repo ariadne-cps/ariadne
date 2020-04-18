@@ -1,7 +1,7 @@
 /***************************************************************************
- *            linear_programming.hpp
+ *            solvers/linear_programming.hpp
  *
- *  Copyright 2005-17 Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file linear_programming.hpp
+/*! \file solvers/linear_programming.hpp
  *  \brief Linear programming.
  */
 
@@ -67,7 +67,7 @@ struct InfeasibleLinearProgram : std::runtime_error {
 
 
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
     : public Loggable
@@ -76,12 +76,12 @@ class InteriorPointSolver
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
     Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
-    minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
+    minimise(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
     Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
-    hotstarted_minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
+    hotstarted_minimise(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
                         Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
 
     //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.
@@ -119,11 +119,19 @@ template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds Type; };
 template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
-//! \relates SimplexSolver \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower singleton).
-enum class Slackness : std::int8_t { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
+//! \ingroup OptimisationSubModule
+//! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
+//! \see SimplexSolver
+enum class Slackness : std::int8_t {
+    LOWER=-1, //!< .
+    BASIS=0,  //!< .
+    UPPER=+1, //!< .
+    FIXED=+2  //!< .
+};
+
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
-//! \ingroup OptimisationModule
+//! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using the simplex algorithm.
 template<class X>
 class SimplexSolver
@@ -265,6 +273,12 @@ class SimplexSolver
 
 };
 
+//@{
+//! \relates SimplexSolver \name Type synonyms
+using RationalSimplexSolver = SimplexSolver<Rational>; //!< \relates SimplexSolver .
+using FloatDPSimplexSolver = SimplexSolver<FloatDP>; //!< \relates SimplexSolver .
+using FloatMPSimplexSolver = SimplexSolver<FloatMP>; //!< \relates SimplexSolver .
+//@}
 
 } // namespace Ariadne
 

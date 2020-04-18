@@ -1,7 +1,7 @@
 /***************************************************************************
  *            utility/variant.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -37,6 +37,7 @@
 
 namespace Ariadne {
 
+//! Internal alias for standard variant.
 template<class... TS> using Variant = std::variant<TS...>;
 
 template<class C, class... TS> class CodedVariant {

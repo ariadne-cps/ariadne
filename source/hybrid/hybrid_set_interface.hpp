@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_set_interface.hpp
+ *            hybrid/hybrid_set_interface.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_set_interface.hpp
+/*! \file hybrid/hybrid_set_interface.hpp
  *  \brief Interfaces for open, closed, overt and compact subsets of hybrid spaces.
  */
 
@@ -54,13 +54,13 @@ class HybridSetInterfaceBase
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual Set<RealVariable> variables(DiscreteLocation) const = 0;
     inline SetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& hs);
   protected:
     virtual SetInterfaceBase* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for singleton sets in a hybrid space.
+//! \brief Interface for bounded sets in a hybrid space.
 class HybridBoundedSetInterface
     : public virtual HybridSetInterfaceBase
 {
@@ -110,7 +110,7 @@ class HybridClosedSetInterface
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Interface for compact (closed and singleton) sets in a hybrid space.
+//! \brief Interface for compact (closed and bounded) sets in a hybrid space.
 class HybridCompactSetInterface
     : public virtual HybridBoundedSetInterface
     , public virtual HybridClosedSetInterface
@@ -146,7 +146,7 @@ class HybridLocatedSetInterface
     virtual LocatedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
 
-//! \brief Complete set interface for singleton regular sets in a hybrid space.
+//! \brief Complete set interface for bounded regular sets in a hybrid space.
 class HybridRegularLocatedSetInterface
     : public virtual HybridRegularSetInterface,
       public virtual HybridLocatedSetInterface
@@ -161,12 +161,12 @@ class HybridRegularLocatedSetInterface
 using HybridSetInterface = HybridRegularLocatedSetInterface;
 
 inline OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& s) {
-    return s.write(os);
+    return s._write(os);
 }
 
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for singleton sets.
+//! \brief Interface for bounded sets.
 class HybridValidatedBoundedSetInterface
     : public virtual HybridSetInterfaceBase {
   public:
@@ -218,7 +218,7 @@ class HybridValidatedClosedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Interface for compact (closed and singleton) sets.
+//! \brief Interface for compact (closed and bounded) sets.
 class HybridValidatedCompactSetInterface
     : public virtual HybridValidatedBoundedSetInterface,
       public virtual HybridValidatedClosedSetInterface
@@ -255,7 +255,7 @@ class HybridValidatedLocatedSetInterface
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
-//! \brief Complete set interface for singleton regular sets.
+//! \brief Complete set interface for bounded regular sets.
 class HybridValidatedRegularLocatedSetInterface
     : public virtual HybridValidatedRegularSetInterface,
       public virtual HybridValidatedLocatedSetInterface

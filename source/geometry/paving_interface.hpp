@@ -1,7 +1,7 @@
 /***************************************************************************
- *            paving_interface.hpp
+ *            geometry/paving_interface.hpp
  *
- *  Copyright 2011-17  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file paving_interface.hpp
+/*! \file geometry/paving_interface.hpp
  *  \brief Storage sets based on pavings and covers
  */
 
@@ -62,8 +62,8 @@ template<class T> class ForwardConstantIteratorInterface
     virtual Void increment() = 0;
     virtual const T& dereference() const = 0;
     virtual Bool equals(const ForwardConstantIteratorInterface<T>&) const = 0;
-    virtual Void write(OutputStream&) const = 0;
-    friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorInterface<T>& self) { self.write(os); return os; }
+    virtual OutputStream& _write(OutputStream&) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorInterface<T>& self) { self._write(os); return os; }
 };
 
 //! \brief A generic forward Iterator through constant data.
@@ -87,7 +87,7 @@ template<class T> class ForwardConstantIteratorHandle
     Bool operator==(const ForwardConstantIteratorHandle<T>& other) const { return this->_ptr->equals(*other._ptr); }
     Bool operator!=(const ForwardConstantIteratorHandle<T>& other) const { return !this->_ptr->equals(*other._ptr); }
     friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { return os << *self._ptr; }
-    //friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { self._ptr->write(os); return os; }
+    //friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorHandle<T>& self) { self._ptr->_write(os); return os; }
 };
 
 
@@ -173,12 +173,14 @@ class SubPavingInterface
     virtual ValidatedLowerKleenean separated(const ExactBoxType& bx) const = 0; // Inherited from ClosedSetInterface
     virtual ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const = 0; // Inherited from OvertSetInterface
 
-    virtual Void mince(Nat depth) = 0; // Deprecated?
+    virtual Void mince(Nat fineness) = 0; // Deprecated?
     virtual Void recombine() = 0; // Deprecated?
   protected:
     virtual SubPavingInterface* _branch(Bool left_or_right) const = 0; // Could also be called "child" or "subpaving"
     virtual ForwardConstantIteratorInterface<GridCell>* _begin() const = 0;
     virtual ForwardConstantIteratorInterface<GridCell>* _end() const = 0;
+  private:
+    virtual OutputStream& _write(OutputStream&) const = 0;
 };
 
 inline Bool operator==(const SubPavingInterface& p1, const SubPavingInterface& p2) { return p1.equals(p2); }
@@ -220,7 +222,7 @@ class SubPavingHandle
     ValidatedLowerKleenean separated(const ExactBoxType& bx) const { return this->_ptr->separated(bx); }
     ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
-    Void mince(Nat depth) { this->_ptr->mince(depth); }
+    Void mince(Nat fineness) { this->_ptr->mince(fineness); }
     Void recombine() { this->_ptr->recombine(); }
     friend OutputStream& operator<<(OutputStream& os, const SubPavingHandle& self) { return os << *self._ptr; }
 };
@@ -237,11 +239,11 @@ class PavingInterface
   public:
     virtual PavingInterface* clone() const = 0;
     virtual GridCell smallest_enclosing_primary_cell(const UpperBoxType& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
-    virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
-    virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
-    virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat depth) = 0;
-    virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
-    virtual Void adjoin_inner_approximation(const SetInterface& set, const Nat depth) = 0;
+    virtual Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat fineness) { ARIADNE_ABSTRACT_METHOD; }
+    virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat fineness) = 0;
+    virtual Void adjoin_outer_approximation(const UpperBoxType& set, const Nat fineness) = 0;
+    virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat extent, const Nat fineness) = 0;
+    virtual Void adjoin_inner_approximation(const SetInterface& set, const Nat fineness) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
     virtual Void restrict(const SubPavingInterface& paving) = 0;
     virtual Void remove(const SubPavingInterface& paving) = 0;
@@ -281,10 +283,10 @@ class PavingHandle
     ValidatedLowerKleenean overlaps(const ExactBoxType& bx) const { return this->_ptr->overlaps(bx); }
 
     //GridCell smallest_enclosing_primary_cell(const ExactBoxType& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
-    Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
-    Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) { return this->_ptr->adjoin_outer_approximation(set,depth); }
-    Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,height,depth); }
-    Void adjoin_inner_approximation(const SetInterface& set, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,depth); }
+    Void adjoin_cells(const PredicateInterface<ExactBoxType>& predicate, const Nat fineness) { return this->_ptr->adjoin_cells(predicate,fineness); }
+    Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat fineness) { return this->_ptr->adjoin_outer_approximation(set,fineness); }
+    Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat extent, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,extent,fineness); }
+    Void adjoin_inner_approximation(const SetInterface& set, const Nat fineness) { return this->_ptr->adjoin_inner_approximation(set,fineness); }
     Void adjoin(const SubPavingInterface& paving) { return this->_ptr->adjoin(paving); }
     Void restrict(const SubPavingInterface& paving) { return this->_ptr->restrict(paving); }
     Void remove(const SubPavingInterface& paving) { return this->_ptr->remove(paving); }

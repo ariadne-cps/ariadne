@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_procedure.cpp
  *
- *  Copyright  2010  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -182,7 +182,7 @@ Void TestProcedure::test_propagate()
     UpperBoxType xx=ExactBoxType{ {0.125,2.0}, {0.25,3.0} };
     ExactBoxType cc=ExactBoxType{ {1.0,1.0}, {1.0,1.0} };
     ARIADNE_TEST_PRINT(xx);
-    ARIADNE_TEST_PRINT(evaluate(pp,xx));
+    ARIADNE_TEST_PRINT(evaluate(pp,cast_vector(xx)));
     simple_hull_reduce(xx,pp,cc);
     ARIADNE_TEST_PRINT(xx);
 }

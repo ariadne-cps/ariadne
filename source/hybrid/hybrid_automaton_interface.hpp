@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_automaton_interface.hpp
+ *            hybrid/hybrid_automaton_interface.hpp
  *
- *  Copyright  2010  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_automaton_interface.hpp
+/*! \file hybrid/hybrid_automaton_interface.hpp
  *  \brief Interface for hybrid automata to be used by evolver classes.
  */
 
@@ -52,101 +52,129 @@ inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 class HybridEvolverInterface;
 class HybridEnclosure;
+class HybridStorage;
 
+//! \defgroup SystemSpecificationErrors System specification errors
+//! \ingroup HybridAutomataSubModule
+//! \brief  Exception classes reporting system specification errors
+///@{
+
+//! \ingroup SystemModule
+//! \brief Base class for an error in system specification.
 class SystemSpecificationError : public std::runtime_error {
   public:
     SystemSpecificationError(const StringType& what) : std::runtime_error(what) { }
 };
 
+//! \brief A reachable discrete location does not have dynamics specified.
 class NonExistentModeError : public SystemSpecificationError {
   public:
     NonExistentModeError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief %Two modes cannot be distinguised, since they define different variables, but no defined variable differ.
 class IndistinguishableModeError : public SystemSpecificationError {
   public:
     IndistinguishableModeError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief A discrete event is defined twice.
 class DuplicateEventError : public SystemSpecificationError {
   public:
     DuplicateEventError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief A guard was defined twice in the same location.
 class MultipleGuardError : public SystemSpecificationError {
   public:
     MultipleGuardError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief Two transitions kinds were specified for for an event in some location.
 class MultipleTransitionError : public SystemSpecificationError {
   public:
     MultipleTransitionError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief A set of variables has a loop of algebraic (rather than differential) dependencies
+//! in the continuous dynamics in a given mode.
 class AlgebraicLoopError : public SystemSpecificationError {
   public:
     AlgebraicLoopError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief The dynamics of a system is overspecified in some way.
 class OverspecifiedSystemError : public SystemSpecificationError {
   public:
     OverspecifiedSystemError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief A variable has multiple defining (algebraic and/or differential) equations in some mode.
 class OverspecifiedDynamicError : public OverspecifiedSystemError {
   public:
     OverspecifiedDynamicError(const StringType& what) : OverspecifiedSystemError(what) { }
 };
 
+//! \brief A variable has multiple defining values (updates and/or algebraic equations) after some event in some mode.
 class OverspecifiedResetError : public OverspecifiedSystemError {
   public:
     OverspecifiedResetError(const StringType& what) : OverspecifiedSystemError(what) { }
 };
 
+//! \brief The dynamics of a system is underspecified in some way.
 class UnderspecifiedSystemError : public SystemSpecificationError {
   public:
     UnderspecifiedSystemError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
+//! \brief A guard condition is missing for some event in some location.
 class MissingGuardError : public UnderspecifiedSystemError {
   public:
     MissingGuardError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
+//! \brief The continuous dynamics in some mode refers to variables which have no specified behaviour.
 class UnderspecifiedDynamicError : public UnderspecifiedSystemError {
   public:
     UnderspecifiedDynamicError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
+//! \brief A constraint (guard/invariant) in some location uses undefined variables.
 class UnderspecifiedConstraintError : public UnderspecifiedSystemError {
   public:
     UnderspecifiedConstraintError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
+//! \brief The reset function for some event in some location refers to undefined variables.
 class UnderspecifiedResetError : public UnderspecifiedSystemError {
   public:
     UnderspecifiedResetError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
-
+//! \brief The discrete locations of a system are ill-defined in some way.
 class StateSpecificationError : public std::runtime_error {
   public:
     StateSpecificationError(const StringType& what) : std::runtime_error(what) { }
 };
 
+//! \brief Two discrete locations define different variables, but variables defined in both locations differ.
 class IndistinguishableLocationsError : public StateSpecificationError {
   public:
     IndistinguishableLocationsError(const StringType& what) : StateSpecificationError(what) { }
 };
 
+//! .
 class OverspecifiedLocationException : public IndistinguishableLocationsError {
   public:
     OverspecifiedLocationException(const StringType& what) : IndistinguishableLocationsError(what) { }
 };
 
+///@}
+
 
 //! \ingroup SystemModule
-//! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
+//! \ingroup HybridAutomataSubModule
+//! \brief Interface for hybrid systems required to perform analysis.
 class HybridAutomatonInterface {
   public:
     //! \brief The type used to represent time.
@@ -156,7 +184,8 @@ class HybridAutomatonInterface {
     //! \brief The type used to describe the state space.
     typedef HybridEvolverInterface EvolverType;
     typedef HybridEnclosure EnclosureType;
-
+    //! \brief The type used to define global pavings of reach and evolve sets.
+    typedef HybridStorage StorageType;
   public:
     //! \brief Virtual destructor.
     virtual ~HybridAutomatonInterface() = default;
@@ -239,13 +268,13 @@ class HybridAutomatonInterface {
     //! \name Input/output methods
 
     //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
+    virtual OutputStream& _write(OutputStream& os) const = 0;
     //@}
 
 };
 
 inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface& ha) {
-    ha.write(os);
+    ha._write(os);
     return os;
 }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_automaton-composite.cpp
  *
- *  Copyright  2004-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -40,10 +40,10 @@
 
 namespace Ariadne {
 
-EffectiveVectorMultivariateFunction auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
-EffectiveVectorMultivariateFunction dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
-EffectiveVectorMultivariateFunction reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
-EffectiveScalarMultivariateFunction constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
+EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
+EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
+EffectiveVectorMultivariateFunction make_reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
+EffectiveScalarMultivariateFunction make_constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
 
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
@@ -96,28 +96,61 @@ template<class X> Set<Identifier> names(const List< Variable<X> >& variables) {
     return names;
 }
 
+
+Writer<DiscreteMode> DiscreteMode::_default_writer(new VerboseDiscreteModeWriter());
+
 OutputStream&
-DiscreteMode::write(OutputStream& os) const
-{
-    const DiscreteMode& mode=*this;
+DiscreteMode::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
+}
+
+OutputStream&
+VerboseDiscreteModeWriter::_write(OutputStream& os, DiscreteMode const& m) const {
     os << "DiscreteMode( "
-       << "location=" << mode._location;
-    if(mode._auxiliary.size()>0) {
-        os << ", algebraic_equations="<<mode._auxiliary; }
-    if(mode._dynamic.size()>0) {
-        os << ", differential_equations="<<mode._dynamic; }
-    if(mode._invariants.size()>0) {
-        os << ", invariants="<<mode._invariants; }
-    if(mode._guards.size()>0) {
-        os << ", guards="<<mode._guards; }
-    if(mode._targets.size()>0) {
-        os << ", targets="<<mode._targets; }
-    if(mode._targets.size()>0) {
-        os << ", resets="<<mode._resets; }
+       << "location=" << m._location;
+    if(m._auxiliary.size()>0) {
+        os << ", algebraic_equations="<<m._auxiliary; }
+    if(m._dynamic.size()>0) {
+        os << ", differential_equations="<<m._dynamic; }
+    if(m._invariants.size()>0) {
+        os << ", invariants="<<m._invariants; }
+    if(m._guards.size()>0) {
+        os << ", guards="<<m._guards; }
+    if(m._targets.size()>0) {
+        os << ", targets="<<m._targets; }
+    if(m._targets.size()>0) {
+        os << ", resets="<<m._resets; }
     return os << " )";
 }
 
-
+OutputStream&
+CompactDiscreteModeWriter::_write(OutputStream& os, DiscreteMode const& m) const {
+    if (m._location.values().size() > 0)
+        os << m._location << ": ";
+    if(m._auxiliary.size()>0 || m._dynamic.size()>0)
+        os << "eqt=";
+    if(m._auxiliary.size()>0) {
+        os << m._auxiliary; }
+    if(m._auxiliary.size()>0 && m._dynamic.size()>0)
+        os << ",";
+    if(m._dynamic.size()>0) {
+        os << m._dynamic; }
+    if(m._invariants.size()>0) {
+        os << ", inv="<<m._invariants; }
+    if(m._guards.size()>0) {
+        os << ", grd="<<m._guards; }
+    if(m._targets.size()>0) {
+        os << ", trg="<<m._targets; }
+    if(m._targets.size()>0) {
+        Map<DiscreteEvent, List<PrimedRealAssignment>> nonempty_resets;
+        for (auto it = m._resets.begin(); it != m._resets.end(); ++it)
+            if (it->second.size() != 0)
+                nonempty_resets.insert(*it);
+        if (not nonempty_resets.empty())
+            os << ", rst="<<nonempty_resets;
+    }
+    return os;
+}
 
 
 DiscreteTransition::
@@ -133,7 +166,7 @@ DiscreteTransition(DiscreteLocation source,
 }
 
 OutputStream&
-DiscreteTransition::write(OutputStream& os) const
+DiscreteTransition::_write(OutputStream& os) const
 {
     const DiscreteTransition& transition=*this;
     return os << "DiscreteTransition( "
@@ -192,7 +225,7 @@ algebraic_sort(const List<RealAssignment>& auxiliary) {
     return sorted_auxiliary;
 }
 
-EffectiveVectorMultivariateFunction auxiliary_function(
+EffectiveVectorMultivariateFunction make_auxiliary_function(
     Space<Real> const& space,
     List<RealAssignment> const& sorted_algebraic)
 {
@@ -202,7 +235,7 @@ EffectiveVectorMultivariateFunction auxiliary_function(
     return make_function(space,results);
 }
 
-EffectiveVectorMultivariateFunction dynamic_function(
+EffectiveVectorMultivariateFunction make_dynamic_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     List<DottedRealAssignment> const& differential)
@@ -214,7 +247,7 @@ EffectiveVectorMultivariateFunction dynamic_function(
     return make_function(space,results);
 }
 
-EffectiveVectorMultivariateFunction reset_function(
+EffectiveVectorMultivariateFunction make_reset_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     List<PrimedRealAssignment> const& primed)
@@ -226,7 +259,7 @@ EffectiveVectorMultivariateFunction reset_function(
     return make_function(space,results);
 }
 
-EffectiveScalarMultivariateFunction constraint_function(
+EffectiveScalarMultivariateFunction make_constraint_function(
     Space<Real> const& space,
     List<RealAssignment> const& algebraic,
     ContinuousPredicate const& constraint,
@@ -237,7 +270,7 @@ EffectiveScalarMultivariateFunction constraint_function(
 }
 
 HybridAutomaton::HybridAutomaton()
-    : _name("system"),_modes()
+    : _name("automaton"),_modes()
 {
 }
 
@@ -505,21 +538,41 @@ HybridAutomaton::mode(DiscreteLocation location) const
                   location<<" does not define a mode of the automaton with locations "<<this->locations());
 }
 
-
-
+Writer<HybridAutomaton> HybridAutomaton::_default_writer(new VerboseHybridAutomatonWriter());
 
 OutputStream&
-HybridAutomaton::write(OutputStream& os) const
-{
-    const HybridAutomaton& ha=*this;
+HybridAutomaton::_write(OutputStream& os) const {
+    return os << _default_writer(*this);
+}
+
+OutputStream&
+VerboseHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha) const {
     os << "\nHybridAutomaton( \n  modes=\n";
     Set<DiscreteMode> modes(ha.modes().values());
     for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
-            mode_iter!=modes.end(); ++mode_iter)
+        mode_iter!=modes.end(); ++mode_iter)
     {
         os << "    " <<*mode_iter<<",\n";
     }
     return os << ")\n";
+
+}
+
+OutputStream&
+CompactHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha) const {
+    os << ha.name() << ": ";
+    Set<DiscreteMode> modes(ha.modes().values());
+    Bool multiple_modes = (modes.size()>1);
+    Writer<DiscreteMode> previous_mode_writer = DiscreteMode::default_writer();
+    DiscreteMode::set_default_writer(new CompactDiscreteModeWriter());
+    for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
+        mode_iter!=modes.end(); ++mode_iter)
+    {
+        if (multiple_modes) os << "\n - ";
+        os << *mode_iter;
+    }
+    DiscreteMode::set_default_writer(previous_mode_writer);
+    return os << "\n";
 }
 
 
@@ -682,27 +735,27 @@ EventKind HybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
 
 EffectiveVectorMultivariateFunction HybridAutomaton::auxiliary_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::auxiliary_function(this->continuous_state_space(location),mode._sorted_auxiliary);
+    return Ariadne::make_auxiliary_function(this->continuous_state_space(location),mode._sorted_auxiliary);
 }
 
 EffectiveVectorMultivariateFunction HybridAutomaton::dynamic_function(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::dynamic_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._dynamic);
+    return Ariadne::make_dynamic_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._dynamic);
 }
 
 EffectiveVectorMultivariateFunction HybridAutomaton::reset_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::reset_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._resets[event]);
+    return Ariadne::make_reset_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._resets[event]);
 }
 
 EffectiveScalarMultivariateFunction HybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._invariants[event],Sign::NEGATIVE);
+    return Ariadne::make_constraint_function(this->continuous_state_space(location),mode._auxiliary,mode._invariants[event],Sign::NEGATIVE);
 }
 
 EffectiveScalarMultivariateFunction HybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const {
     DiscreteMode const& mode=this->mode(location);
-    return Ariadne::constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],Sign::POSITIVE);
+    return Ariadne::make_constraint_function(this->continuous_state_space(location),mode._sorted_auxiliary,mode._guards[event],Sign::POSITIVE);
 }
 
 

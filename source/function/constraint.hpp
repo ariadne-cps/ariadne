@@ -1,7 +1,7 @@
 /***************************************************************************
- *            constraint.hpp
+ *            function/constraint.hpp
  *
- *  Copyright 2009-17  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file constraint.hpp
+/*! \file function/constraint.hpp
  *  \brief Linear and nonlinear constraints.
  */
 
@@ -35,18 +35,25 @@
 
 namespace Ariadne {
 
+//! \ingroup GeometryModule
+//! \brief A constraint defined by requiring values of a function \f$f\f$ to lie in a range \f$R\f$.
+//! i.e. restricts point \f$x\f$ to satsify \f$f(x)\in R\f$.
+//!    \param F The type of the function
+//!    \param R The type of the range of values.
 template<class F, class R>
 class Constraint {
   public:
-    typedef F FunctionType;
-    typedef R BoundType;
-    typedef R UpperBoundType;
-    typedef decltype(-std::declval<R>()) LowerBoundType;
+    typedef F FunctionType; //!< .
+    typedef R BoundType; //!< .
+    typedef R UpperBoundType; //!< .
+    typedef NegationType<R> LowerBoundType; //!< .
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
+    //! .
     Constraint(LowerBoundType const& l, FunctionType const& f, UpperBoundType const& u)
         : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT_MSG(decide(l<=u),"f="<<f<<"\nl="<<l<<", u="<<u); }
 
+    //! .
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 
@@ -65,9 +72,13 @@ class Constraint {
 
     Void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
+    //! .
     FunctionType const& function() const { return this->_function; }
-    Nat argument_size() const { return this->_function.argument_size(); }
+    //! .
+    SizeType argument_size() const { return this->_function.argument_size(); }
+    //! .
     LowerBoundType const& lower_bound() const { return this->_lower_bound; }
+    //! .
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
 
     // FIXME: This function should not be used as it breaks type safety
@@ -78,10 +89,15 @@ class Constraint {
     R _upper_bound;
 };
 
-typedef Constraint<RealScalarMultivariateFunction,Real> RealConstraint;
-typedef Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber> EffectiveConstraint;
-typedef Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber> ValidatedConstraint;
-typedef Constraint<ValidatedScalarMultivariateFunction,ExactNumber> ValidatedExactConstraint;
+//@{
+//! \relates Constraint
+//! \name Type synonyms
+using RealConstraint = Constraint<RealScalarMultivariateFunction,Real>; //!< .
+using EffectiveConstraint = Constraint<EffectiveScalarMultivariateFunction,EffectiveNumber>; //!< .
+using ValidatedConstraint = Constraint<ValidatedScalarMultivariateFunction,ValidatedNumber>; //!< .
+using ApproximateConstraint = Constraint<ApproximateScalarMultivariateFunction,ApproximateNumber>; //!< .
+using ValidatedExactConstraint = Constraint<ValidatedScalarMultivariateFunction,ExactNumber>; //!< .
+//@}
 
 template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
@@ -158,6 +174,10 @@ inline ValidatedExactConstraint operator>=(const ValidatedScalarMultivariateFunc
 
 inline ValidatedConstraint operator<=(const ValidatedNumber& c, const ValidatedScalarMultivariateFunction& f) {
     return ValidatedConstraint(c,f,ExactNumber(+infty));
+}
+
+inline ValidatedConstraint operator<=(const ValidatedScalarMultivariateFunction& f, const ValidatedNumber& c) {
+    return ValidatedConstraint(ExactNumber(-infty),f,c);
 }
 
 inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumber& c) {

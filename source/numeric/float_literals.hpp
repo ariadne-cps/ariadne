@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_literals.hpp
+ *            numeric/float_literals.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_literals.hpp
+/*! \file numeric/float_literals.hpp
  *  \brief Inclusion header for floating-point extended literals.
  */
 

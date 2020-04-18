@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/matrix-crtp.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -90,7 +90,7 @@ template<class X> class Matrix : public MatrixObject<Matrix<X>> {
     X& at(SizeType i, SizeType j) { return this->_ary[i*this->_rs+this->_cs]; }
     Void set(SizeType i, SizeType j, const X& c) const { this->_ary[i*this->_rs+this->_cs]=c; }
     X zero_element() const { return _zero; }
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     Matrix<X>& operator=(const MatrixMatrixProduct<X,X>& A1mulA2);
   public:
@@ -108,11 +108,11 @@ template<class X> inline Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
 template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n) {
     Matrix<X> A(n,n,X(0));
     for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1u; }
-    return std::move(A);
+    return A;
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const Matrix<X>& A) {
-    return A.write(os); }
+    return A._write(os); }
 
 
 template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs) {

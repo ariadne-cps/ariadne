@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_inclusion_vector_field.cpp
  *
- *  Copyright  2008-18 Luca Geretti, Pieter Collins, Sanja Zivanovic
+ *  Copyright  2008-20  Copyright  2008-20uca Geretti, Pieter Collins, Sanja Zivanovic
  *
  ****************************************************************************/
 
@@ -89,7 +89,8 @@ class TestInclusionVectorField {
 
         ARIADNE_TEST_PRINT(ivf);
 
-        const EffectiveVectorFormulaFunction& noise_independent_component = dynamic_cast<const EffectiveVectorFormulaFunction&>(ivf.noise_independent_component().reference());
+        auto nic = ivf.noise_independent_component();
+        const EffectiveVectorFormulaFunction& noise_independent_component = dynamic_cast<const EffectiveVectorFormulaFunction&>(nic.reference());
         ARIADNE_TEST_PRINT(noise_independent_component);
 
         EffectiveFormula zero = EffectiveFormula::zero();
@@ -101,7 +102,8 @@ class TestInclusionVectorField {
 
         ARIADNE_TEST_ASSERT(identical(noise_independent_component._formulae,{-yf,xf+twice*one_point_five}));
 
-        const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(ivf.input_derivatives()[0].reference());
+        auto id = ivf.input_derivatives();
+        const EffectiveVectorFormulaFunction& input_derivatives = dynamic_cast<const EffectiveVectorFormulaFunction&>(id[0].reference());
         ARIADNE_TEST_PRINT(input_derivatives);
 
         ARIADNE_TEST_ASSERT(identical(input_derivatives._formulae,{zero,one}));

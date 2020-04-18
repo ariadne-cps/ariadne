@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function.hpp
+ *            function/function.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file function.hpp
+/*! \file function/function.hpp
  *  \brief Built-in and user functions and expressions
  */
 
@@ -232,7 +232,7 @@ class Function
     Function(); //!< \brief Create an invalid (null) function.
     explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { } //!< \brief Capture a newly-allocated function pointer.
     explicit Function(SharedPointer<FunctionInterface<P,D,C>> p) : _ptr(p) { } //!< \brief Construct from a managed pointer.
-    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }  //!< \brief Clone from aeference.
+    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }  //!< \brief Clone from a reference.
 
     //! \brief Assign from a reference.
     Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {
@@ -336,7 +336,7 @@ class Function
     //! \name Input/output operations.
 
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
+    friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->_write(os); return os; }
 
     //@}
 };
@@ -354,7 +354,7 @@ template<class P, class D> struct AlgebraOperations<ScalarFunction<P,D>,Number<P
 
 template<class P, class D, class C> inline OutputStream&
 operator<<(OutputStream& os, const Function<P,D,C>& f) {
-    return f.write(os); }
+    return f._write(os); }
 
 template<class P, class C, class X> inline decltype(auto)
 evaluate(const Function<P,IntervalDomainType,C>& f, const Scalar<X>& x) {
@@ -414,8 +414,37 @@ FunctionFacade<P,BoxDomainType,BoxDomainType>::jacobian(Vector<X> const& x) cons
 }
 
 
+
+EffectiveScalarUnivariateFunction compose(const EffectiveScalarUnivariateFunction& f, const EffectiveScalarUnivariateFunction& g);
+EffectiveScalarUnivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorUnivariateFunction& g);
+EffectiveVectorUnivariateFunction compose(const EffectiveVectorUnivariateFunction& f, const EffectiveScalarUnivariateFunction& g);
+EffectiveVectorUnivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorUnivariateFunction& g);
+EffectiveScalarMultivariateFunction compose(const EffectiveScalarUnivariateFunction& f, const EffectiveScalarMultivariateFunction& g);
+EffectiveScalarMultivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
+EffectiveVectorMultivariateFunction compose(const EffectiveVectorUnivariateFunction& f, const EffectiveScalarMultivariateFunction& g);
+EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
+
+ValidatedScalarUnivariateFunction compose(const ValidatedScalarUnivariateFunction& f, const ValidatedScalarUnivariateFunction& g);
+ValidatedScalarUnivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorUnivariateFunction& g);
+ValidatedVectorUnivariateFunction compose(const ValidatedVectorUnivariateFunction& f, const ValidatedScalarUnivariateFunction& g);
+ValidatedVectorUnivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorUnivariateFunction& g);
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarUnivariateFunction& f, const ValidatedScalarMultivariateFunction& g);
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
+ValidatedVectorMultivariateFunction compose(const ValidatedVectorUnivariateFunction& f, const ValidatedScalarMultivariateFunction& g);
+ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
+
+ApproximateScalarUnivariateFunction compose(const ApproximateScalarUnivariateFunction& f, const ApproximateScalarUnivariateFunction& g);
+ApproximateScalarUnivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorUnivariateFunction& g);
+ApproximateVectorUnivariateFunction compose(const ApproximateVectorUnivariateFunction& f, const ApproximateScalarUnivariateFunction& g);
+ApproximateVectorUnivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorUnivariateFunction& g);
+ApproximateScalarMultivariateFunction compose(const ApproximateScalarUnivariateFunction& f, const ApproximateScalarMultivariateFunction& g);
+ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
+ApproximateVectorMultivariateFunction compose(const ApproximateVectorUnivariateFunction& f, const ApproximateScalarMultivariateFunction& g);
+ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
+
+
 ValidatedScalarMultivariateFunction& operator*=(ValidatedScalarMultivariateFunction& sf, const ExactNumber& c);
-EffectiveVectorMultivariateFunction operator*(const EffectiveNumericType& c, const EffectiveVectorMultivariateFunction& vf);
+EffectiveVectorMultivariateFunction operator*(const EffectiveNumber& c, const EffectiveVectorMultivariateFunction& vf);
 
 EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3);
 EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMultivariateFunction& f2, SizeType as3);
@@ -425,14 +454,11 @@ EffectiveVectorMultivariateFunction join(const EffectiveScalarMultivariateFuncti
 EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveScalarMultivariateFunction& f2);
 EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFunction& f1, const EffectiveVectorMultivariateFunction& f2);
 
-EffectiveScalarMultivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
-EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g);
-
 EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f);
 
-Formula<EffectiveNumericType> make_formula(const EffectiveScalarMultivariateFunction& f);
-Vector<Formula<EffectiveNumericType>> make_formula(const EffectiveVectorMultivariateFunction& f);
+Formula<Real> make_formula(const EffectiveScalarMultivariateFunction& f);
+Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f);
 //RealExpression evaluate(EffectiveScalarMultivariateFunction const& f, Vector<RealVariable> const& vars);
 
 
@@ -441,16 +467,12 @@ ValidatedVectorMultivariateFunction join(const ValidatedScalarMultivariateFuncti
 ValidatedVectorMultivariateFunction join(const ValidatedScalarMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
 ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedScalarMultivariateFunction& f2);
 ValidatedVectorMultivariateFunction join(const ValidatedVectorMultivariateFunction& f1, const ValidatedVectorMultivariateFunction& f2);
-ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
-ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g);
 
 
 ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
-ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
-ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g);
 
 
 //! \brief A reference into an element of a vector function.
@@ -588,7 +610,7 @@ inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {
-    factory._ptr->write(os); return os; }
+    factory._ptr->_write(os); return os; }
 
 } // namespace Ariadne
 

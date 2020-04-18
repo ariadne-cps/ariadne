@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expression.hpp
+ *            symbolic/expression.hpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file expression.hpp
+/*! \file symbolic/expression.hpp
  *  \brief Internal expressions
  */
 
@@ -37,6 +37,7 @@
 #include "../utility/declarations.hpp"
 #include "../utility/pointer.hpp"
 #include "../utility/container.hpp"
+#include "../utility/writable.hpp"
 
 #include "../numeric/logical.decl.hpp"
 #include "../numeric/number.decl.hpp"
@@ -53,25 +54,29 @@ template<class T> class Set;
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 
-//! \ingroup ExpressionModule
+//! \ingroup SymbolicModule
 //! \brief A simple expression in named variables.
-//!
 //! %Ariadne supports expressions of type Boolean, Kleenean, String, Integer and Real.
-//! The class Real is a dummy type which can be implemented in many different ways.
+//!    \tparam T The type represented by the expression
 //!
 //! The independent variables are given string names, rather than an integer index.
-//! Formulae in different variables may be combined; the variables of the resulting formula
-//! are all variables occuring in all formulae.
-//! Formulae may be manipulated symbolically.
+//! Expressions in different variables may be combined; the argument variables of the resulting expression
+//! are all variables occuring in all expression.
+//! Expressions may be manipulated symbolically.
 //!
-//! \sa Variable \sa Assignment
+//! \see Constant,  Variable,  Assignment
 template<class T>
 class Expression
     : public DeclareExpressionOperations<T>
 {
     typedef SharedPointer<const ExpressionNode<T>> Pointer;
+    static Writer<Expression<T>> _default_writer;
+  public:
+    static Void set_default_writer(Writer<Expression<T>> w) { _default_writer=w; }
+    static Writer<Expression<T>> default_writer() { return _default_writer; }
   public:
     typedef Real NumericType;
+    //! \brief The type represented by the expression.
     typedef T ValueType;
     typedef Constant<T> ConstantType;
     typedef Variable<T> VariableType;
@@ -80,7 +85,7 @@ class Expression
     template<class P, EnableIf<IsConvertible<P,SharedPointer<const ExpressionNode<T>>>> =dummy>
         explicit Expression(P const& eptr) : _root(eptr) { }
   public:
-    //! \brief Default expression is a constant with value \c 0.
+    //! \brief Default expression is a constant with default value.
     Expression();
     //! \brief Construct an expression from a numerical value.
     Expression(const T& c);
@@ -114,7 +119,7 @@ class Expression
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
   public:
-    template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,EffectiveNumericType>>> =dummy> operator ElementaryAlgebra<X>() const;
+    template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,Real>>> =dummy> operator ElementaryAlgebra<X>() const;
   public:
     //! \brief The variables needed to compute the expression.
     Set<UntypedVariable> arguments() const;
@@ -128,6 +133,17 @@ class Expression
     SharedPointer<const ExpressionNode<T>> _root;
 };
 
+//@{
+//! \related Expression \name Type synonyms.
+using BooleanExpression = Expression<Boolean>; //!< .
+using KleeneanExpression = Expression<Kleenean>; //!< .
+using StringExpression = Expression<String>; //!< .
+using IntegerExpression = Expression<Integer>; //!< .
+using RealExpression = Expression<Real>; //!< .
+
+using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
+using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
+//@}
 
 //@{
 //! \name Evaluation and related operations.
@@ -154,6 +170,24 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
+//@}
+
+//@{
+//! \name Operations on expressions.
+//! \related Expression
+
+//! \brief Given \a sign when the predicate \a p is true.
+Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
+
+//! \brief The derivative of the expression \a e with respect to the variable \a v.
+Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
+//@}
+
+
+//@{
+//! \name Testing the form of expressions.
+//! \related Expression
+
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
 template<class T> Bool is_constant(const Expression<T>& e, const SelfType<T>& c);
 
@@ -173,47 +207,61 @@ Bool is_affine_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& 
 Bool is_additive_in(const Vector<Expression<Real>>& e, const Set<Variable<Real>>& vs);
 Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
 
-//! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
-template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
+//! \brief Returns true if the expressions are mutual negations. <br>
+//! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
+//! or (a1>=a2; a2>=a1).
+Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
+//@}
 
-//! \brief Simplify the expression \a e.
-template<class T> Expression<T> simplify(const Expression<T>& e);
-template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
-template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
+//@{
+//! \name Equality and ordering.
+//! \related Expression
 
 //! \brief Tests whether two expressions are identical.
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
+//! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
+template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
+//@}
+
+//@{
+//! \name Complexity checks and simplification and .
+//! \related Expression
 
 //! \brief Count the number of nodes in the expression \a e.
 template<class T> Nat count_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct (i.e., having identical representation) nodes in the expression \a e.
 template<class T> Nat count_distinct_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct node pointers in the expression \a e.
-template<class T> Nat count_distinct_node_ptrs(const Expression<T>& e);
-
-//! \brief Returns true if the expressions are mutual negations.
-//!
-//! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
-//! or (a1>=a2; a2>=a1).
-Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
-
-//! \brief Given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
+template<class T> Nat count_distinct_node_pointers(const Expression<T>& e);
 
 //! \brief Simplify the expression \a e.
-Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
+template<class T> Expression<T> simplify(const Expression<T>& e);
+//! \brief Eliminate common subexpression in \a e by replacing identical nodes.
+template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
+template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
+//@}
+
+
+
+
+//@{
+//! \name Conversion to/from functions and formulae.
+//! \related Expression
 
 //! \brief Make a formula in terms of numbered coordinates from an expression in named variables.
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Map<Identifier,SizeType>& v);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Space<Real>& spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Space<Real>& spc);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const Variable<Real>& var);
+Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& e, const Variable<Real>& spc);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
 Formula<EffectiveNumber> make_formula(const Expression<Real>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
 Vector<Formula<EffectiveNumber>> make_formula(const Vector<Expression<Real>>& out, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
 
 //! \brief Make a function on the real line given an expression in a single argument variable.
 ScalarUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Expression<Real>& e);
+//! \brief Make a vector function on the real line given a vector of expressions in a single argument variable.
+VectorUnivariateFunction<EffectiveTag> make_function(const Variable<Real>& v, const Vector<Expression<Real>>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 ScalarMultivariateFunction<EffectiveTag> make_function(const Space<Real>& s, const Expression<Real>& e);
 //! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
@@ -226,6 +274,23 @@ ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
+//@}
+
+//@{
+//! \name Output.
+//! \related Expression
+
+//! \brief Prefix notation for writing an Expression
+template<class T> class PrefixExpressionWriter : public WriterInterface<Expression<T>> {
+    virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
+};
+
+//! \brief Infix notation for writing an Expression
+template<class T> class InfixExpressionWriter : public WriterInterface<Expression<T>> {
+    virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
+};
+
+//@}
 
 //@}
 

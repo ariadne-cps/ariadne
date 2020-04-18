@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_approximation.hpp
+ *            numeric/float_approximation.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_approximation.hpp
+/*! \file numeric/float_approximation.hpp
  *  \brief Floating-point approximations to real numbers.
  */
 
@@ -41,16 +41,16 @@ namespace Ariadne {
 //! \ingroup NumericModule
 //! \brief Floating point number approximations to real numbers supporting approxiamate arithmetic.
 //! \details
-//! The \c %Approximation<F> class represents approximate floating-point numbers.
+//! The \c Approximation<F> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
 //! \sa Real, FloatDP , FloatMP, FloatValue, FloatBall, FloatBounds.
 template<class F> class Approximation
-    : public DefineConcreteGenericOperators<Approximation<F>>
-    , public DefineFieldOperators<Approximation<F>>
+    : public DefineFieldOperators<Approximation<F>>
+    , public DefineConcreteGenericOperators<Approximation<F>>
     , public DefineComparisonOperators<Approximation<F>,LessTrait<Approximation<F>>,EqualsTrait<Approximation<F>>>
 {
   protected:
-    typedef ApproximateTag P; typedef typename F::PrecisionType PR;
+    typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
     typedef ApproximateTag Paradigm;
     typedef Approximation<F> NumericType;
@@ -73,6 +73,9 @@ template<class F> class Approximation
         Approximation<F>(const Real& r, PR pr); // : _a(r.get(pr)) { }
         Approximation<F>(const Approximation<F>& x, PR pr) : _a(x.raw(),near,pr) { }
     Approximation<F>(const ApproximateNumber& y, PR pr); // : _a(y.get(ApproximateTag(),pr)) { }
+
+    template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
+        Approximation<F>(const Approximation<FF>& x, PR pr) : _a(x.raw(),near,pr) { }
 
     Approximation<F>(Error<F> const& x); // FIXME: Remove
     Approximation<F>(Value<F> const& x);
@@ -180,7 +183,7 @@ template<class F> class Approximation
         return round(static_cast<Dyadic>(x._a)); }
 
     friend OutputStream& operator<<(OutputStream& os, Approximation<F> const& x) {
-        return write(os,x.raw(),Approximation<F>::output_places,to_nearest); }
+        return write(os,x.raw(),DecimalPrecision{Approximation<F>::output_places},to_nearest); }
     friend InputStream& operator>>(InputStream& is, Approximation<F>& x) {
         is >> x._a; return is; }
   public:
@@ -197,21 +200,25 @@ template<class PR> Approximation(ApproximateNumber, PR) -> Approximation<RawFloa
 template<class F> Approximation(F) -> Approximation<F>;
 
 template<class F> inline FloatFactory<PrecisionType<F>> factory(Approximation<F> const& flt) { return FloatFactory<PrecisionType<F>>(flt.precision()); }
-template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::create(Number<ApproximateTag> const& y) { return FloatApproximation<PR>(y,_pr); }
+template<class PR> inline FloatApproximation<PR> FloatFactory<PR>::create(ApproximateNumber const& y) { return FloatApproximation<PR>(y,_pr); }
+template<class PR> inline PositiveFloatApproximation<PR> FloatFactory<PR>::create(PositiveApproximateNumber const& y) { return PositiveFloatApproximation<PR>(y,_pr); }
 template<class PR> template<class D, EnableIf<IsBuiltinFloatingPoint<D>>> inline
     FloatApproximation<PR> FloatFactory<PR>::create(D const& y) { return FloatApproximation<PR>(y,_pr); }
 
 template<class F> class Positive<Approximation<F>> : public Approximation<F>
     , public DeclarePositiveFloatOperations<PositiveApproximation<F>>
+    , public DefineSemiFieldOperators<PositiveApproximation<F>>
+    , public DefineConcreteGenericOperators<PositiveApproximation<F>>
 {
     using typename Approximation<F>::PR;
   public:
     Positive<Approximation<F>>() : Approximation<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<Approximation<F>>(M m) : Approximation<F>(m) { }
+    explicit Positive<Approximation<F>>(PR const& pr) : Approximation<F>(pr) { }
     explicit Positive<Approximation<F>>(F const& x) : Approximation<F>(x) { }
     explicit Positive<Approximation<F>>(Approximation<F> const& x) : Approximation<F>(x) { }
-    explicit Positive<Approximation<F>>(ApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
+    Positive<Approximation<F>>(PositiveApproximateNumber const& y, PR pr) : Approximation<F>(y,pr) { }
     Positive<Approximation<F>>(PositiveLowerBound<F> const& x) : Approximation<F>(x) { }
     Positive<Approximation<F>>(PositiveUpperBound<F> const& x) : Approximation<F>(x) { }
     Positive<Approximation<F>>(PositiveValue<F> const& x) : Approximation<F>(x) { }
@@ -220,16 +227,19 @@ template<class F> class Positive<Approximation<F>> : public Approximation<F>
     friend PositiveApproximation<F> nul(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(nul(x.raw())); }
     friend PositiveApproximation<F> hlf(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(hlf(x.raw())); }
     friend PositiveApproximation<F> sqr(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqr(near,x.raw())); }
-    friend PositiveApproximation<F> rec(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(rec(near,x)); }
+    friend PositiveApproximation<F> rec(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(rec(near,x.raw())); }
     friend PositiveApproximation<F> add(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(add(near,x1.raw(),x2.raw())); }
     friend PositiveApproximation<F> mul(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(mul(near,x1.raw(),x2.raw())); }
     friend PositiveApproximation<F> div(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(div(near,x1.raw(),x2.raw())); }
-    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),m)); }
-    friend PositiveApproximation<F> sqrt(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqrt(near,x)); }
-    friend PositiveApproximation<F> atan(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(atan(near,x)); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Nat m) { return PositiveApproximation<F>(pow(near,x.raw(),static_cast<Int>(m))); }
+    friend PositiveApproximation<F> pow(PositiveApproximation<F> const& x, Int n) { return PositiveApproximation<F>(pow(near,x.raw(),n)); }
+    friend PositiveApproximation<F> sqrt(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(sqrt(near,x.raw())); }
+    friend PositiveApproximation<F> exp(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(exp(near,x.raw())); }
+    friend Approximation<F> log(PositiveApproximation<F> const& x) { return Approximation<F>(log(near,x.raw())); }
+    friend PositiveApproximation<F> atan(PositiveApproximation<F> const& x) { return PositiveApproximation<F>(atan(near,x.raw())); }
     friend PositiveApproximation<F> max(PositiveApproximation<F> const& x1, PositiveApproximation<F> const& x2) {
         return PositiveApproximation<F>(max(near,x1.raw(),x2.raw())); }
     friend PositiveApproximation<F> max(PositiveApproximation<F> const& x1, Approximation<F> const& x2) {

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            exceptions.hpp
+ *            utility/exceptions.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file exceptions.hpp
+/*! \file utility/exceptions.hpp
  *  \brief Exception classes
  */
 

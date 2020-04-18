@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tuple.hpp
+ *            utility/tuple.hpp
  *
- *  Copyright  2007  Pieter Collins
+ *  Copyright  2007-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file tuple.hpp
+/*! \file utility/tuple.hpp
  *  \brief Pair and Tuple types, and types to be used as lvalues in assignments.
  */
 

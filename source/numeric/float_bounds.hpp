@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_bounds.hpp
+ *            numeric/float_bounds.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_bounds.hpp
+/*! \file numeric/float_bounds.hpp
  *  \brief Floating-point bounds for real numbers.
  */
 
@@ -217,12 +217,12 @@ template<class F> class Bounds
     friend Bounds<F> atan(Bounds<F> const& x) {
         return Bounds<F>(atan(down,x._l),atan(up,x._u)); }
 
-    //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> eq(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()<x2.lower_raw() || x1.lower_raw()>x2.upper_raw()) { return false; }
         else if(x1.lower_raw()==x2.upper_raw() && x1.upper_raw() == x2.lower_raw()) { return true; }
         else { return indeterminate; } }
-    //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+    //! \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
     friend LogicalType<ValidatedTag> lt(Bounds<F> const& x1, Bounds<F> const& x2) {
         if(x1.upper_raw()< x2.lower_raw()) { return true; }
         else if(x1.lower_raw()>=x2.upper_raw()) { return false; }
@@ -298,6 +298,9 @@ template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Rational cons
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Dyadic const& y) { return FloatBounds<PR>(y,_pr); }
 template<class PR> inline FloatBounds<PR> FloatFactory<PR>::create(Integer const& y) { return FloatBounds<PR>(y,_pr); }
 
+template<class PR> inline PositiveFloatBounds<PR> FloatFactory<PR>::create(PositiveValidatedNumber const& y) { return PositiveFloatBounds<PR>(y,_pr); }
+
+
 
 template<class F> class Positive<Bounds<F>> : public Bounds<F>
     , public DeclarePositiveFloatOperations<PositiveBounds<F>>
@@ -311,6 +314,7 @@ template<class F> class Positive<Bounds<F>> : public Bounds<F>
     explicit Positive<Bounds<F>>(F const& l, F const& u) : Bounds<F>(l,u) { }
     explicit Positive<Bounds<F>>(Bounds<F> const& x) : Bounds<F>(x) { }
     Positive<Bounds<F>>(Positive<LowerBound<F>> const& xl, Positive<UpperBound<F>> const& xu) : Bounds<F>(xl,xu) { }
+    Positive<Bounds<F>>(PositiveValidatedNumber const& y, PR pr) : Bounds<F>(y,pr) { }
   public:
     Positive<Value<F>> value() const { return cast_positive(this->Bounds<F>::value()); }
     Positive<LowerBound<F>> lower() const { return cast_positive(this->Bounds<F>::lower()); }
@@ -361,6 +365,8 @@ template<class F> class Operations<Bounds<F>> {
   public:
     static Bounds<F> _mul(Bounds<F> const& x1, Bounds<F> const& x2);
     static Bounds<F> _div(Bounds<F> const& x1, Bounds<F> const& x2);
+
+    static Bounds<F> _fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> const& x3);
 
     static Bounds<F> _pi(PR pr);
     static Bounds<F> _sin(Bounds<F> const& x);
@@ -454,6 +460,12 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
     }
     return Bounds<F>(rl,ru);
 }
+
+template<class F> inline auto Operations<Bounds<F>>::_fma(Bounds<F> const& x1, Bounds<F> const& x2, Bounds<F> const& x3) -> Bounds<F>
+{
+    return add(mul(x1,x2),x3);
+}
+
 
 }
 

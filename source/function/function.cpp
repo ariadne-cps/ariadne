@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function.cpp
+ *            function/function.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -67,11 +67,11 @@ template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_con
 //------------------------ Formula Function ----------------------------------//
 
 template<class P, class Y> ScalarFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Scalar<Formula<Y>> const& e) {
-    assert(false); return ScalarFunction<P,IntervalDomainType>(nullptr);
+    return ScalarFunction<P,IntervalDomainType>(new ScalarUnivariateFormulaFunction<Y>(e));
 }
 
 template<class P, class Y> VectorFunction<P,IntervalDomainType> make_formula_function(IntervalDomainType dom, Vector<Formula<Y>> const& e) {
-    assert(false); return VectorFunction<P,IntervalDomainType>(nullptr);
+    return VectorFunction<P,IntervalDomainType>(new VectorUnivariateFormulaFunction<Y>(e));
 }
 
 template<class P, class Y> ScalarFunction<P,BoxDomainType> make_formula_function(BoxDomainType dom, Scalar<Formula<Y>> const& e) {
@@ -171,7 +171,7 @@ template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordin
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
-    return std::move(r);
+    return r;
 }
 
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
@@ -271,7 +271,7 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constan
 template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(SizeType as) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(as);
     for(SizeType j=0; j!=as; ++j) { r.append(coordinate(as,j)); }
-    return std::move(r);
+    return r;
 }
 
 template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(SizeType n) {
@@ -323,12 +323,16 @@ SizeType dimension(const Space<Real>& spc);
 
 inline EffectiveScalarUnivariateFunction make_formula_function(SizeOne as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarUnivariateFunction(RealDomain(),fm); }
+inline EffectiveVectorUnivariateFunction make_formula_function(SizeOne as, const Vector<Formula<EffectiveNumber>>& fm) {
+    return EffectiveVectorUnivariateFunction(RealDomain(),fm); }
 inline EffectiveScalarMultivariateFunction make_formula_function(SizeType as, const Formula<EffectiveNumber>& fm) {
     return EffectiveScalarMultivariateFunction(EuclideanDomain(as),fm); }
 inline EffectiveVectorMultivariateFunction make_formula_function(SizeType as, const Vector<Formula<EffectiveNumber>>& fm) {
     return EffectiveVectorMultivariateFunction(EuclideanDomain(as),fm); }
 
 EffectiveScalarUnivariateFunction make_function(const Variable<Real>& var, const Expression<Real>& expr) {
+    return make_formula_function(SizeOne(),make_formula(expr,var)); }
+EffectiveVectorUnivariateFunction make_function(const Variable<Real>& var, const Vector<Expression<Real>>& expr) {
     return make_formula_function(SizeOne(),make_formula(expr,var)); }
 EffectiveScalarMultivariateFunction make_function(const Space<Real>& spc, const Expression<Real>& expr) {
     return make_formula_function(dimension(spc),make_formula(expr,spc)); }
@@ -656,7 +660,31 @@ EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMul
     return EffectiveVectorMultivariateFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
+EffectiveScalarUnivariateFunction compose(const EffectiveScalarUnivariateFunction& f, const EffectiveScalarUnivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
+EffectiveScalarUnivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorUnivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
+EffectiveVectorUnivariateFunction compose(const EffectiveVectorUnivariateFunction& f, const EffectiveScalarUnivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
+EffectiveVectorUnivariateFunction compose(const EffectiveVectorMultivariateFunction& f, const EffectiveVectorUnivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
+EffectiveScalarMultivariateFunction compose(const EffectiveScalarUnivariateFunction& f, const EffectiveScalarMultivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
 EffectiveScalarMultivariateFunction compose(const EffectiveScalarMultivariateFunction& f, const EffectiveVectorMultivariateFunction& g) {
+    return make_composed_function(f,g);
+}
+
+EffectiveVectorMultivariateFunction compose(const EffectiveVectorUnivariateFunction& f, const EffectiveScalarMultivariateFunction& g) {
     return make_composed_function(f,g);
 }
 
@@ -720,27 +748,49 @@ ValidatedVectorMultivariateFunction operator-(ValidatedVectorMultivariateFunctio
     }
 }
 
-
-ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g) {
+template<class P, class D, class E, class C> inline
+Function<P,D,C> _validated_compose(const Function<P,E,C>& f, const Function<P,D,E>& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(g.managed_pointer());
+    typedef DoublePrecision PR;
+    std::shared_ptr<FunctionModelInterface<P,D,E,PR> const>
+        gp=std::dynamic_pointer_cast<FunctionModelInterface<P,D,E,PR> const>(g.managed_pointer());
     if(gp) {
-        return compose(f,ValidatedVectorMultivariateFunctionModelDP(gp->_clone()));
+        return compose(f,FunctionModel<P,D,E,PR>(gp->_clone()));
     } else {
         return make_composed_function(f,g);
     }
 }
 
+ValidatedScalarUnivariateFunction compose(const ValidatedScalarUnivariateFunction& f, const ValidatedScalarUnivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedScalarUnivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorUnivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedVectorUnivariateFunction compose(const ValidatedVectorUnivariateFunction& f, const ValidatedScalarUnivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedVectorUnivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorUnivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarUnivariateFunction& f, const ValidatedScalarMultivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedScalarMultivariateFunction compose(const ValidatedScalarMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
+ValidatedVectorMultivariateFunction compose(const ValidatedVectorUnivariateFunction& f, const ValidatedScalarMultivariateFunction& g) {
+    return _validated_compose(f,g);
+}
+
 ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorMultivariateFunction& g) {
-    ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        gp=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(g.managed_pointer());
-    if(gp) {
-        return compose(f,ValidatedVectorMultivariateFunctionModelDP(gp->_clone()));
-    } else {
-        return make_composed_function(f,g);
-    }
+    return _validated_compose(f,g);
 }
 
 ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
@@ -819,16 +869,28 @@ ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction con
 }
 
 
-UpperIntervalType evaluate_range(ScalarMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<UpperIntervalType>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<UpperIntervalType> evaluate_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Vector<UpperIntervalType>>(f(reinterpret_cast<Vector<ValidatedNumericType>const&>(x))); }
-Vector<Differential<UpperIntervalType>> derivative_range(VectorMultivariateFunction<ValidatedTag>const& f, const Vector<Differential<UpperIntervalType>>& x) {
-    return static_cast<Vector<Differential<UpperIntervalType>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumericType>>const&>(x))); }
-Covector<UpperIntervalType> gradient_range(ValidatedScalarMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Covector<UpperIntervalType>>(static_cast<Covector<ValidatedNumericType>>(gradient(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
-Matrix<UpperIntervalType> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<UpperIntervalType>& x) {
-    return static_cast<Matrix<UpperIntervalType>>(static_cast<Matrix<ValidatedNumericType>>(jacobian(f,reinterpret_cast<Vector<ValidatedNumericType>const&>(x)))); }
+FloatDPUpperInterval evaluate_range(ValidatedScalarMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<FloatDPUpperInterval>(f(reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Vector<FloatDPUpperInterval> evaluate_range(ValidatedVectorMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Vector<FloatDPUpperInterval>>(f(reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Vector<Differential<FloatDPUpperInterval>> derivative_range(ValidatedVectorMultivariateFunction const& f,
+                                                            const Vector<Differential<FloatDPUpperInterval>>& x) {
+    return static_cast<Vector<Differential<FloatDPUpperInterval>>>(
+        f(reinterpret_cast<Vector<Differential<FloatDPBounds>>const&>(x)));
+}
+
+Covector<FloatDPUpperInterval> gradient_range(ValidatedScalarMultivariateFunction const& f,
+                                              const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Covector<FloatDPUpperInterval>>(gradient(f,reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
+
+Matrix<FloatDPUpperInterval> jacobian_range(ValidatedVectorMultivariateFunction const& f, const Vector<FloatDPUpperInterval>& x) {
+    return static_cast<Matrix<FloatDPUpperInterval>>(jacobian(f,reinterpret_cast<Vector<FloatDPBounds>const&>(x)));
+}
 
 //------------------------ Function operators -------------------------------//
 
@@ -913,14 +975,22 @@ ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFu
 }
 
 
+ApproximateScalarUnivariateFunction compose(const ApproximateScalarUnivariateFunction& f, const ApproximateScalarUnivariateFunction& g) {
+    return make_composed_function(f,g); }
+ApproximateScalarUnivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorUnivariateFunction& g) {
+    return make_composed_function(f,g); }
+ApproximateVectorUnivariateFunction compose(const ApproximateVectorUnivariateFunction& f, const ApproximateScalarUnivariateFunction& g) {
+    return make_composed_function(f,g); }
+ApproximateVectorUnivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorUnivariateFunction& g) {
+    return make_composed_function(f,g); }
+ApproximateScalarMultivariateFunction compose(const ApproximateScalarUnivariateFunction& f, const ApproximateScalarMultivariateFunction& g) {
+    return make_composed_function(f,g); }
 ApproximateScalarMultivariateFunction compose(const ApproximateScalarMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g) {
-    return make_composed_function(f,g);
-}
-
-
+    return make_composed_function(f,g); }
+ApproximateVectorMultivariateFunction compose(const ApproximateVectorUnivariateFunction& f, const ApproximateScalarMultivariateFunction& g) {
+    return make_composed_function(f,g); }
 ApproximateVectorMultivariateFunction compose(const ApproximateVectorMultivariateFunction& f, const ApproximateVectorMultivariateFunction& g) {
-    return make_composed_function(f,g);
-}
+    return make_composed_function(f,g); }
 
 
 using std::dynamic_pointer_cast;

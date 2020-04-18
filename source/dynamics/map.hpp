@@ -1,7 +1,7 @@
 /***************************************************************************
- *            map.hpp
+ *            dynamics/map.hpp
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file map.hpp
+/*! \file dynamics/map.hpp
  *  \brief Main continuous dynamics system class.
  */
 
@@ -38,6 +38,8 @@
 namespace Ariadne {
 
 class MapEvolver;
+class Enclosure;
+class Storage;
 
 /*! \brief An iterated function system in Euclidean space.
  */
@@ -52,7 +54,9 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
     //! \brief The type used to evolve the system
     typedef MapEvolver EvolverType;
-
+    typedef Enclosure EnclosureType;
+    //! \brief The type used to define global pavings of reach and evolve sets.
+    typedef Storage StorageType;
   public:
     IteratedMap(const EffectiveVectorMultivariateFunction& f) : _function(f) {
         ARIADNE_PRECONDITION(f.result_size()==f.argument_size()); }

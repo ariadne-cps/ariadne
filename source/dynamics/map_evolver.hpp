@@ -1,7 +1,7 @@
 /***************************************************************************
- *            map_evolver.hpp
+ *            dynamics/map_evolver.hpp
  *
- *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file map_evolver.hpp
+/*! \file dynamics/map_evolver.hpp
  *  \brief Evolver for map systems.
  */
 
@@ -56,9 +56,7 @@ class MapEvolverConfiguration;
 class EvolutionProfiler;
 
 
-/*! \brief A class for computing the evolution of a map system.
- *
- * The actual evolution steps are performed by the MapEvolver class.
+/*! \brief A class for computing the evolution of an iterated map.
  */
 class MapEvolver
     : public EvolverBase< IteratedMap, Enclosure, Integer>
@@ -162,14 +160,26 @@ class MapEvolverConfiguration : public ConfigurationInterface
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
     RealType _maximum_enclosure_radius;
 
+    //! \brief Allow subdivisions in upper evolution.
+    Bool _enable_subdivisions;
+
+    //! \brief Allow premature termination of lower evolution.
+    Bool _enable_premature_termination;
+
   public:
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+    const Bool& enable_subdivisions() const { return _enable_subdivisions; }
+    Void set_enable_subdivisions(const Bool value) { _enable_subdivisions = value; }
+
+    const Bool& enable_premature_termination() const { return _enable_premature_termination; }
+    Void set_enable_premature_termination(const Bool value) { _enable_premature_termination = value; }
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 
 };
 

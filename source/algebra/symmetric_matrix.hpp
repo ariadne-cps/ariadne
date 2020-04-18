@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/symmetric_matrix.hpp
  *
- *  Copyright 2013-14  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -128,7 +128,7 @@ template<class X> class SymmetricMatrix
     friend SymmetricMatrix<X> operator+(SymmetricMatrix<X> const&, SymmetricMatrix<X> const&);
   private:
     Void _check_data_access(SizeType i, SizeType j) const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
 
     friend Vector<X>& to_vector(SymmetricMatrix<X>& S) { return reinterpret_cast<Vector<X>&>(S._ary); }
     friend Vector<X> const& to_vector(SymmetricMatrix<X> const& S) { return reinterpret_cast<Vector<X>const&>(S._ary); }
@@ -173,7 +173,7 @@ template<class X> SymmetricMatrix<X> SymmetricMatrix<X>::identity(SizeType n) {
     for(SizeType i=0; i!=n; ++i) {
         S[i][i]=1;
     }
-    return std::move(S);
+    return S;
 }
 
 template<class X> inline SizeType SymmetricMatrix<X>::size() const {
@@ -213,13 +213,14 @@ template<class X> inline const X* SymmetricMatrix<X>::begin() const {
     return this->_ary.begin();
 }
 
+#ifndef DOXYGEN
 template<class X> inline MatrixRow<const SymmetricMatrix<X>> SymmetricMatrix<X>::operator[](SizeType i) const {
     return MatrixRow<const SymmetricMatrix<X>>(*this,i);
 }
-
 template<class X> inline MatrixRow<SymmetricMatrix<X>> SymmetricMatrix<X>::operator[](SizeType i) {
     return MatrixRow<SymmetricMatrix<X>>(*this,i);
 }
+#endif
 
 template<class X> inline X SymmetricMatrix<X>::zero_element() const {
     return X();
@@ -230,7 +231,7 @@ template<class X> inline Void SymmetricMatrix<X>::_check_data_access(SizeType i,
 }
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, SymmetricMatrix<X>const& S) {
-    return S.write(os);
+    return S._write(os);
 }
 
 
@@ -245,11 +246,11 @@ template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
             A[j][i]=S.at(i,j);
         }
     }
-    return std::move(A);
+    return A;
 }
 
 
-template<class X> OutputStream& SymmetricMatrix<X>::write(OutputStream& os) const {
+template<class X> OutputStream& SymmetricMatrix<X>::_write(OutputStream& os) const {
     return os << Matrix<X>(*this);
 }
 
@@ -260,7 +261,7 @@ template<class X> SymmetricMatrix<X> operator+(SymmetricMatrix<X> const& S1, Sym
     for(SizeType i=0; i!=n*(n-1)/2; ++i) {
         R._ary[i]=S1._ary[i]+S2._ary[i];
     }
-    return std::move(R);
+    return R;
 }
 
 template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
@@ -276,7 +277,7 @@ template<class X> SymmetricMatrix<X> outer(Matrix<X> const& A) {
             }
         }
     }
-    return std::move(S);
+    return S;
 }
 
 template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
@@ -292,7 +293,7 @@ template<class X> SymmetricMatrix<X> outer(SymmetricMatrix<X> const& A) {
             }
         }
     }
-    return std::move(S);
+    return S;
 }
 
 

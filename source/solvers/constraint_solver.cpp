@@ -1,7 +1,7 @@
 /***************************************************************************
- *            constraint_solver.cpp
+ *            solvers/constraint_solver.cpp
  *
- *  Copyright 2000--17  Pieter Collins
+ *  Copyright  2000-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -75,7 +75,9 @@ inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) 
 }
 
 
-Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const List<ValidatedConstraint>& constraints) const
+auto ConstraintSolver::feasible(const ExactBoxType& domain,
+                                const List<ValidatedConstraint>& constraints) const
+    -> Pair<ValidatedKleenean,ExactPointType>
 {
     if(constraints.empty()) { return make_pair(!domain.is_empty(),domain.midpoint()); }
 
@@ -90,7 +92,10 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
 }
 
 
-Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
+auto ConstraintSolver::feasible(const ExactBoxType& domain,
+                                const ValidatedVectorMultivariateFunction& function,
+                                const ExactBoxType& codomain) const
+    -> Pair<ValidatedKleenean,ExactPointType>
 {
 
     static const FloatDPValue XSIGMA=0.125_exact;
@@ -100,14 +105,14 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
     ARIADNE_ASSERT(codomain.dimension()>0);
 
-    // Make codomain singleton
+    // Make codomain bounded
     UpperBoxType bounds=codomain;
     UpperBoxType image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(Nat i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
             ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");
-            return make_pair(false,ExactPoint());
+            return make_pair(false,ExactPointType());
         } else {
             bounds[i]=intersection(codomain[i],image[i]);
         }
@@ -175,13 +180,13 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(definitely(subdomain.is_empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-            return make_pair(false,ExactPoint());
+            return make_pair(false,ExactPointType());
         }
 
         for(Nat i=0; i!=m; ++i) {
             this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
-            if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
+            if(definitely(subdomain.is_empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPointType()); }
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
@@ -194,10 +199,10 @@ Pair<ValidatedKleenean,ExactPoint> ConstraintSolver::feasible(const ExactBoxType
         nx = FloatDPApproximation(1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
-        return make_pair(result,ExactPoint());
+        return make_pair(result,ExactPointType());
     }
 
-    return make_pair(indeterminate,ExactPoint());
+    return make_pair(indeterminate,ExactPointType());
 }
 
 
@@ -329,8 +334,8 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     FloatDPValue splitpoint;
     UpperIntervalType lower=domain[variable];
     UpperIntervalType upper=domain[variable];
-    Vector<UpperIntervalType> slice=domain;
-    Vector<UpperIntervalType> subdomain=domain;
+    Box<UpperIntervalType> slice=domain;
+    Box<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
     const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
@@ -377,12 +382,12 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
         g += cast_exact(multipliers[i]) * function[i];
         C += cast_exact(multipliers[i]) * bounds[i];
     }
-    Covector<UpperIntervalType> dg = gradient_range(g,domain);
+    Covector<UpperIntervalType> dg = gradient_range(g,cast_vector(domain));
     C -= g(centre);
 
     UpperBoxType new_domain(domain);
-    UpperIntervalVectorType ranges(domain.size());
-    for(Nat j=0; j!=domain.size(); ++j) {
+    UpperBoxType ranges(domain.size());
+    for(Nat j=0; j!=domain.dimension(); ++j) {
         ranges[j] = dg[j]*(domain[j]-centre[j]);
     }
 
@@ -413,7 +418,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     RawFloatDP u=interval.upper().raw();
     ExactIntervalType subinterval;
     UpperIntervalType new_interval(interval);
-    Vector<UpperIntervalType> slice=domain;
+    Box<UpperIntervalType> slice=domain;
 
     static const Nat MAX_SLICES=(1<<3);
     const Nat n=MAX_SLICES;
@@ -466,7 +471,7 @@ Pair<UpperBoxType,UpperBoxType> ConstraintSolver::split(const UpperBoxType& d, c
 }
 
 
-ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c, const ExactPoint& y) const
+ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& f, const ExactBoxType& c, const ExactPointType& y) const
 {
     for(Nat i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            real.cpp
+ *            numeric/real.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file real.cpp
+/*! \file numeric/real.cpp
  *  \brief
  */
 

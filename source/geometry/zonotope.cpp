@@ -1,7 +1,7 @@
 /***************************************************************************
- *            zonotope.cpp
+ *            geometry/zonotope.cpp
  *
- *  Copyright 2008--17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -355,7 +355,7 @@ Zonotope::inside(const ExactBoxType& bx) const
 
 
 OutputStream&
-Zonotope::write(OutputStream& os) const
+Zonotope::_write(OutputStream& os) const
 {
     return os << *this;
 }

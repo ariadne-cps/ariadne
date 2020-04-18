@@ -1,7 +1,7 @@
 /***************************************************************************
- *            solver.cpp
+ *            solvers/solver.cpp
  *
- *  Copyright  2006-9  Pieter Collins
+ *  Copyright  2006-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -49,11 +49,14 @@ namespace Ariadne {
 
 namespace {
 
-ValidatedVectorMultivariateFunctionModelDP operator*(const Matrix<ValidatedNumericType>& A,const ValidatedVectorMultivariateFunctionModelDP& v) {
+template<class PR> auto
+operator*(const Matrix<FloatBounds<PR>>& A,const ValidatedVectorMultivariateFunctionModel<PR>& v)
+    -> ValidatedVectorMultivariateFunctionModel<PR>
+{
     ARIADNE_ASSERT(v.size()!=0);
-    ValidatedVectorMultivariateFunctionModelDP r(A.row_size(),factory(v).create_zero());
+    ValidatedVectorMultivariateFunctionModel<PR> r(A.row_size(),factory(v).create_zero());
     for(Nat i=0; i!=r.size(); ++i) {
-        ValidatedScalarMultivariateFunctionModelDP t=r[i];
+        ValidatedScalarMultivariateFunctionModel<PR> t=r[i];
         for(Nat j=0; j!=v.size(); ++j) {
             t+=A[i][j]*v[j];
         }
@@ -62,8 +65,8 @@ ValidatedVectorMultivariateFunctionModelDP operator*(const Matrix<ValidatedNumer
     return r;
 }
 
-FloatDPError sup_error(const ValidatedVectorMultivariateFunctionModelDP& x) {
-    FloatDPError r; r=0u;
+template<class PR> FloatError<PR> sup_error(const ValidatedVectorMultivariateFunctionModel<PR>& x) {
+    FloatError<PR> r; r=0u;
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
@@ -74,7 +77,7 @@ FloatDPError sup_error(const ValidatedVectorMultivariateFunctionModelDP& x) {
 
 static const Bool ALLOW_PARTIAL_FUNCTION = true;
 
-FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
+FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 
 
 SolverBase::SolverBase(double max_error, Nat max_steps)
@@ -83,29 +86,29 @@ SolverBase::SolverBase(double max_error, Nat max_steps)
 }
 
 Void
-SolverBase::set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory)
+SolverBase::set_function_factory(const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>& factory)
 {
-    this->_function_factory_ptr=std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> >(factory.clone());
+    this->_function_factory_ptr=std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> >(factory.clone());
 }
 
-const FunctionModelFactoryInterface<ValidatedTag>&
+const FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>&
 SolverBase::function_factory() const
 {
     return *this->_function_factory_ptr;
 }
 
 
-Vector<ValidatedNumericType>
-SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
-                  const Vector<ValidatedNumericType>& ix) const
+auto SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
+                       const Vector<ValidatedNumericType>& ix) const
+    -> Vector<ValidatedNumericType>
 {
     ExactBoxType bx=cast_exact_box(ix);
     return this->solve(f,bx);
 }
 
-Vector<ValidatedNumericType>
-SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
-                  const ExactBoxType& bx) const
+auto SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
+                       const ExactBoxType& bx) const
+    -> Vector<ValidatedNumericType>
 {
     Set< Vector<ValidatedNumericType> > r = this->solve_all(f,bx);
     if(r.size()==0u) { ARIADNE_THROW(NoSolutionException,"SolverBase::solve","no solution in solve("<<f<<","<<bx<<")"); }
@@ -114,14 +117,14 @@ SolverBase::solve(const ValidatedVectorMultivariateFunction& f,
 }
 
 Void
-solve_all(Set< Vector<ValidatedNumericType> >& r,
+solve_all(Set< Vector<SolverInterface::ValidatedNumericType> >& r,
           const SolverInterface& s,
           const ValidatedVectorMultivariateFunction& f,
           const ExactBoxType& ix);
 
-Set< Vector<ValidatedNumericType> >
-SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
-                      const ExactBoxType& bx) const
+auto SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
+                           const ExactBoxType& bx) const
+    -> Set< Vector<ValidatedNumericType> >
 {
     ARIADNE_LOG(5,"SolverBase::solve_all(f,bx): f="<<f<<", ix="<<bx<<"\n");
 
@@ -191,7 +194,7 @@ SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
         }
 
         //std::cerr<<"  Splitting "<<bx<<"\n";
-        Pair< Vector<ExactIntervalType>, Vector<ExactIntervalType> > splt=split(bx);
+        Pair< Box<ExactIntervalType>, Box<ExactIntervalType> > splt=split(bx);
         r.adjoin(this->solve_all(f,splt.first));
         r.adjoin(this->solve_all(f,splt.second));
     }
@@ -203,9 +206,9 @@ SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
 
 
 
-Vector<ValidatedNumericType>
-SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
-                 const ExactBoxType& bx) const
+auto SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
+                      const ExactBoxType& bx) const
+    -> Vector<ValidatedNumericType>
 {
     const FloatDPValue e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
@@ -246,18 +249,19 @@ SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
 
 
 
-Vector<ValidatedNumericType>
-SolverBase::fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const
+auto SolverBase::fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const
+    -> Vector<ValidatedNumericType>
 {
     ValidatedVectorMultivariateFunction id=ValidatedVectorMultivariateFunction::identity(f.argument_size());
     return this->solve(f-id,bx);
 }
 
 
-ValidatedVectorMultivariateFunctionModelDP
-SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
-                      const ExactBoxType& ip,
-                      const ExactBoxType& ix) const
+
+auto SolverBase::implicit(const ValidatedVectorMultivariateFunction& f,
+                          const ExactBoxType& ip,
+                          const ExactBoxType& ix) const
+    -> ValidatedVectorMultivariateFunctionModelType
 {
     ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorMultivariateFunction f, ExactIntervalVectorType ip, ExactIntervalVectorType ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
@@ -341,11 +345,11 @@ SolverBase::implicit(const ValidatedScalarMultivariateFunction& f,
     return res[0];
 }
 
-ValidatedVectorMultivariateFunctionModelDP
-SolverBase::continuation(const ValidatedVectorMultivariateFunction& f,
-                         const Vector<ApproximateNumericType>& p,
-                         const ExactBoxType& ix,
-                         const ExactBoxType& ip) const
+auto SolverBase::continuation(const ValidatedVectorMultivariateFunction& f,
+                              const Vector<ApproximateNumericType>& p,
+                              const ExactBoxType& ix,
+                              const ExactBoxType& ip) const
+    -> ValidatedVectorMultivariateFunctionModelType
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -353,9 +357,9 @@ SolverBase::continuation(const ValidatedVectorMultivariateFunction& f,
 
 
 
-Vector<ValidatedNumericType>
-IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
-                           const Vector<ValidatedNumericType>& x) const
+auto IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
+                                const Vector<ValidatedNumericType>& x) const
+    -> Vector<ValidatedNumericType>
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
@@ -375,9 +379,9 @@ IntervalNewtonSolver::step(const ValidatedVectorMultivariateFunction& f,
     return nx;
 }
 
-Vector<ValidatedNumericType>
-KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
-                     const Vector<ValidatedNumericType>& x) const
+auto KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
+                          const Vector<ValidatedNumericType>& x) const
+    -> Vector<ValidatedNumericType>
 {
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -401,9 +405,9 @@ KrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
 }
 
 
-Vector<ValidatedNumericType>
-FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
-                             const Vector<ValidatedNumericType>& x) const
+auto FactoredKrawczykSolver::step(const ValidatedVectorMultivariateFunction& f,
+                                  const Vector<ValidatedNumericType>& x) const
+    -> Vector<ValidatedNumericType>
 {
     Matrix<ValidatedNumericType> I=Matrix<ValidatedNumericType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -510,7 +514,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
     ValidatedVectorMultivariateFunctionModelDP mx(x);
-    for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
+    for(Nat i=0; i!=mx.size(); ++i) { mx[i].clobber(); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<FloatDPError> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
@@ -636,7 +640,7 @@ IntervalNewtonSolver::implicit(const ValidatedScalarMultivariateFunction& f,
 */
 
 
-Void IntervalNewtonSolver::write(OutputStream& os) const
+Void IntervalNewtonSolver::_write(OutputStream& os) const
 {
     os << "IntervalNewtonSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -644,7 +648,7 @@ Void IntervalNewtonSolver::write(OutputStream& os) const
        << " )";
 }
 
-Void KrawczykSolver::write(OutputStream& os) const
+Void KrawczykSolver::_write(OutputStream& os) const
 {
     os << "KrawczykSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -652,7 +656,7 @@ Void KrawczykSolver::write(OutputStream& os) const
        << " )";
 }
 
-Void FactoredKrawczykSolver::write(OutputStream& os) const
+Void FactoredKrawczykSolver::_write(OutputStream& os) const
 {
     os << "FactoredKrawczykSolver"
        << "( maximum_error=" << this->maximum_error()

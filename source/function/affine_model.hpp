@@ -1,7 +1,7 @@
 /***************************************************************************
- *            affine_model.hpp
+ *            function/affine_model.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file affine_model.hpp
+/*! \file function/affine_model.hpp
  *  \brief Affine models defined on the unit box
  */
 
@@ -46,18 +46,10 @@
 namespace Ariadne {
 
 template<class X> class Affine;
-typedef Affine<FloatDP> FloatAffine;
-typedef Affine<IntervalDomainType> IntervalAffine;
-typedef Affine<ApproximateNumericType> ApproximateAffine;
-typedef Affine<ValidatedNumericType> ValidatedAffine;
 
 template<class P, class F> class AffineModel;
-typedef AffineModel<ApproximateTag,FloatDP> ApproximateAffineModel;
-typedef AffineModel<ValidatedTag,FloatDP> ValidatedAffineModel;
 
 template<class P, class F> class TaylorModel;
-typedef TaylorModel<ApproximateTag,FloatDP> ApproximateTaylorModelDP;
-typedef TaylorModel<ValidatedTag,FloatDP> ValidatedTaylorModelDP;
 
 
 
@@ -172,7 +164,7 @@ class AffineModel<ValidatedTag,F>
         AffineModel<ValidatedTag,F> res(n,prec); res._g[j]=1;  return res; }
 
     static AffineModel<ValidatedTag,F> scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType precision);
-    static Vector<AffineModel<ValidatedTag,F>> scalings(const Vector<IntervalDomainType>& codom, PrecisionType precision);
+    static Vector<AffineModel<ValidatedTag,F>> scalings(const BoxDomainType& codom, PrecisionType precision);
 
     SizeType argument_size() const { return this->_g.size(); }
     PrecisionType precision() const { return this->_c.precision(); }

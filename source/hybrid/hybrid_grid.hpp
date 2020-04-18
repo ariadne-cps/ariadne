@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_grid.hpp
+ *            hybrid/hybrid_grid.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_grid.hpp
+/*! \file hybrid/hybrid_grid.hpp
  *  \brief Grids in hybrid spaces.
  */
 
@@ -33,14 +33,12 @@
 
 #include "../symbolic/space.hpp"
 #include "../hybrid/hybrid_space.hpp"
-#include "../hybrid/hybrid_scaling.hpp"
+#include "../hybrid/hybrid_scalings.hpp"
 
 #include "../geometry/grid.hpp"
 
 namespace Ariadne {
 
-typedef OutputStream OutputStream;
-typedef Bool Bool;
 typedef Vector<FloatDPValue> ExactFloatVector;
 class HybridGridTreePaving;
 
@@ -52,7 +50,7 @@ class HybridGrid
     // hybrid automaton to be computed on-the-fly since it might not be
     // feasible to compute the reachable states.
     HybridSpace _space;
-    HybridScaling _scaling;
+    HybridScalings _scalings;
   public:
     //! Test whether the grid has location \a q.
     Bool has_location(const DiscreteLocation& q) const {
@@ -64,15 +62,15 @@ class HybridGrid
     //! The underlying real space in location \a loc.
     RealSpace space(const DiscreteLocation& loc) const { return this->_space[loc]; }
     //! The variable scalings used.
-    HybridScalingInterface& scalings() { return this->_scaling; }
+    HybridScalings& scalings() { return this->_scalings; }
     //! The grid in location \a loc.
     Grid grid(const DiscreteLocation& loc) const { return this->operator[](loc); }
   public:
     //! The grid corresponding to unit resolution on each dimension.
-    HybridGrid(const HybridSpace& hsp) : _space(hsp), _scaling(SimpleHybridScaling()) { }
-    //! The grid corresponding to scaling each variable in each location according to the policy \a hsc.
-    HybridGrid(const HybridSpace& hsp, const HybridScaling& hsc)
-        : _space(hsp), _scaling(hsc) { }
+    HybridGrid(const HybridSpace& hsp) : _space(hsp), _scalings(SimpleHybridScalings()) { }
+    //! The grid corresponding to scalings each variable in each location according to the policy \a hsc.
+    HybridGrid(const HybridSpace& hsp, const HybridScalings& hsc)
+        : _space(hsp), _scalings(hsc) { }
     HybridGrid* clone() const { return new HybridGrid(*this); }
     //!
     friend OutputStream& operator<<(OutputStream& os, const HybridGrid& hgrid);
@@ -80,16 +78,11 @@ class HybridGrid
 
 inline Grid HybridGrid::operator[](const DiscreteLocation& loc) const
 {
-    RealSpace continuous_space = this->_space[loc];
-    Vector<RawFloatDP> lengths(continuous_space.size());
-    for(Nat i=0; i!=continuous_space.size(); ++i) {
-        lengths[i] = (this->_scaling.scaling(loc,continuous_space.variable(i))).raw();
-    }
-    return Grid(lengths);
+    return this->_scalings.grid(loc,this->_space[loc]);
 }
 
 inline OutputStream& operator<<(OutputStream& os, const HybridGrid& hgrid) {
-    return os << "HybridGrid( space="<<hgrid._space << ", scalings=" << hgrid._scaling << " )";
+    return os << "HybridGrid( space="<<hgrid._space << ", scalings=" << hgrid._scalings << " )";
 }
 
 }

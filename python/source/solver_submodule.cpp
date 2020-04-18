@@ -1,7 +1,7 @@
 /***************************************************************************
  *            solver_submodule.cpp
  *
- *  Copyright 2009--17  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -40,35 +40,34 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-typedef Vector<ValidatedNumericType> ValidatedVectorType;
-typedef Vector<ApproximateNumericType> ApproximateVectorType;
-
 class SolverWrapper
   : public pybind11::wrapper< SolverInterface >
 {
+    typedef SolverInterface::ValidatedNumericType ValidatedNumericType;
+    typedef SolverInterface::ApproximateNumericType ApproximateNumericType;
   public:
     SolverInterface* clone() const { return this->get_override("clone")(); }
     Void set_maximum_error(RawFloatDP me) { this->get_override("set_maximum_error")(me); }
     FloatDPValue maximum_error() const { return this->get_override("maximum_error")(); }
     Void set_maximum_number_of_steps(Nat ns) { this->get_override("set_maximum_number_of_steps")(ns); }
     Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    ValidatedVectorType zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("zero")(f,bx); }
-    ValidatedVectorType fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> fixed_point(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("fixed_point")(f,bx); }
-    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ValidatedVectorType& pt) const {
+    Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& pt) const {
         return this->get_override("solve")(f,pt); }
-    ValidatedVectorType solve(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Vector<ValidatedNumericType> solve(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve")(f,bx); }
     ValidatedVectorMultivariateFunctionModelDP implicit(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& pd, const ExactBoxType& bx) const {
         return this->get_override("implicit")(f,pd,bx); }
     ValidatedScalarMultivariateFunctionModelDP implicit(const ValidatedScalarMultivariateFunction& f, const ExactBoxType& pd, const ExactIntervalType& ivl) const {
         return this->get_override("implicit")(f,pd,ivl); }
-    ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const ApproximateVectorType& a, const ExactBoxType& X,  const ExactBoxType& A) const {
+    ValidatedVectorMultivariateFunctionModelDP continuation(const ValidatedVectorMultivariateFunction& f, const Vector< ApproximateNumericType>& a, const ExactBoxType& X,  const ExactBoxType& A) const {
         return this->get_override("continuation")(f,a,X,A); }
-    Set< ValidatedVectorType > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
+    Set< Vector<ValidatedNumericType> > solve_all(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
         return this->get_override("solve_all")(f,bx); }
-    Void write(OutputStream& os) const { this->get_override("write")(os); }
+    Void _write(OutputStream& os) const { this->get_override("_write")(os); }
 };
 
 
@@ -86,18 +85,18 @@ class IntegratorWrapper
         return this->get_override("maximum_error")(); }
     Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
-    FlowStepModel flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, StepSizeType& h) const {
         return this->get_override("flow_step")(vf,D,h); }
-    FlowStepModel flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
+    FlowStepModelType flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h, const UpperBoxType& B) const {
         return this->get_override("flow_step")(vf,D,h,B); }
-    FlowStepModel flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
+    FlowStepModelType flow_to(const ValidatedVectorMultivariateFunction& vf ,const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow_to")(vf,D,tf); }
-    FlowModel flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
+    FlowModelType flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& t0, const Real& tf) const {
         return this->get_override("flow")(vf,D,t0,tf); }
-    FlowModel flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
+    FlowModelType flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const Real& tf) const {
         return this->get_override("flow")(vf,D,tf); }
-    Void write(OutputStream& os) const {
-        this->get_override("write")(os); }
+    Void _write(OutputStream& os) const {
+        this->get_override("_write")(os); }
 };
 
 } // namespace Ariadne
@@ -105,6 +104,7 @@ class IntegratorWrapper
 
 Void export_solvers(pybind11::module& module)
 {
+    typedef SolverInterface::ValidatedNumericType ValidatedNumericType;
     pybind11::class_<SolverInterface,SolverWrapper> solver_interface_class(module,"SolverInterface");
     solver_interface_class.def("solve", (Vector<ValidatedNumericType>(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&)const) &SolverInterface::solve);
     solver_interface_class.def("implicit",(ValidatedVectorMultivariateFunctionModelDP(SolverInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const ExactBoxType&)const) &SolverInterface::implicit);
@@ -123,28 +123,32 @@ Void export_solvers(pybind11::module& module)
 
 Void export_integrators(pybind11::module& module)
 {
-    pybind11::class_<FlowStepModel> flow_step_model_class(module,"FlowStepModel");
-    flow_step_model_class.def("__str__", &__cstr__<FlowStepModel>);
-    pybind11::class_<FlowModel> flow_model_class(module,"FlowModel");
+    pybind11::class_<FlowStepModelType> flow_step_model_class(module,"FlowStepModelType");
+    flow_step_model_class.def("__str__", &__cstr__<FlowStepModelType>);
+    pybind11::class_<FlowModelType> flow_model_class(module,"FlowModelType");
     // Use a lambda here to prevent errors when using Clang/GCC
-    flow_model_class.def("__len__",[](FlowModel const& fm){return fm.size();});
+    flow_model_class.def("__len__",[](FlowModelType const& fm){return fm.size();});
     // NOTE: The export below gives 'ValueError: vector::reserve' at runtime when compiled using Clang
-    // flow_model_class.def("__len__",&FlowModel::size);
+    // flow_model_class.def("__len__",&FlowModelType::size);
     // NOTE: The export below produces 'internal compiler error: in fold_convert_loc' with GCC
-    // flow_model_class.def("__len__",(SizeType(FlowModel::*)()const)&FlowModel::size);
-    flow_model_class.def("__getitem__",&__getitem__<FlowModel,SizeType>);
-    flow_model_class.def("__str__", &__cstr__<FlowModel>);
+    // flow_model_class.def("__len__",(SizeType(FlowModelType::*)()const)&FlowModelType::size);
+    flow_model_class.def("__getitem__",&__getitem__<FlowModelType,SizeType>);
+    flow_model_class.def("__str__", &__cstr__<FlowModelType>);
 
     pybind11::class_<IntegratorInterface,IntegratorWrapper> integrator_interface_class(module,"IntegratorInterface");
     integrator_interface_class.def("flow_bounds",(Pair<StepSizeType,UpperBoxType>(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, const StepSizeType&)const)&IntegratorInterface::flow_bounds);
-    integrator_interface_class.def("flow_step",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_step",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
-    integrator_interface_class.def("flow_to",(FlowStepModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
-    integrator_interface_class.def("flow",(FlowModel(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
+    integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&, const ExactBoxType&, StepSizeType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_step",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const StepSizeType&,const UpperBoxType&)const)&IntegratorInterface::flow_step);
+    integrator_interface_class.def("flow_to",(FlowStepModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow_to);
+    integrator_interface_class.def("flow",(FlowModelType(IntegratorInterface::*)(const ValidatedVectorMultivariateFunction&,const ExactBoxType&,const Real&)const)&IntegratorInterface::flow);
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
     taylor_picard_integrator_class.def(pybind11::init<double>());
+    taylor_picard_integrator_class.def("minimum_temporal_order",&TaylorPicardIntegrator::minimum_temporal_order);
+    taylor_picard_integrator_class.def("maximum_temporal_order",&TaylorPicardIntegrator::maximum_temporal_order);
+    taylor_picard_integrator_class.def("set_minimum_temporal_order",&TaylorPicardIntegrator::set_minimum_temporal_order);
+    taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
     taylor_series_integrator_class.def(pybind11::init<double,uint>());
@@ -158,11 +162,9 @@ Void export_integrators(pybind11::module& module)
     graded_taylor_series_integrator_class.def("maximum_spacial_order",&GradedTaylorSeriesIntegrator::maximum_spacial_order);
     graded_taylor_series_integrator_class.def("maximum_temporal_order",&GradedTaylorSeriesIntegrator::maximum_temporal_order);
     graded_taylor_series_integrator_class.def("maximum_error",&GradedTaylorSeriesIntegrator::maximum_error);
-    graded_taylor_series_integrator_class.def("maximum_step_size",&GradedTaylorSeriesIntegrator::maximum_step_size);
     graded_taylor_series_integrator_class.def("set_maximum_spacial_order",&GradedTaylorSeriesIntegrator::set_maximum_spacial_order);
     graded_taylor_series_integrator_class.def("set_maximum_temporal_order",&GradedTaylorSeriesIntegrator::set_maximum_temporal_order);
     graded_taylor_series_integrator_class.def("set_maximum_error",&GradedTaylorSeriesIntegrator::set_maximum_error);
-    graded_taylor_series_integrator_class.def("set_maximum_step_size",&GradedTaylorSeriesIntegrator::set_maximum_step_size);
 
     pybind11::class_<RungeKutta4Integrator> runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
     runge_kutta_4_integrator_class.def(pybind11::init<double>());

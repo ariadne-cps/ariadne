@@ -1,7 +1,7 @@
 /***************************************************************************
- *            runge_kutta_integrator.hpp
+ *            solvers/runge_kutta_integrator.hpp
  *
- *  Copyright  2010  Pieter Collins
+ *  Copyright  2010-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -39,17 +39,17 @@ namespace Ariadne {
 template<class T1, class T2> using Pair = std::pair<T1,T2>;
 template<class T> class List;
 
-
+//! \brief An approximate differential equation integrator based on the classical 4th-order Runge-Kutta method.
 class RungeKutta4Integrator
 {
   public:
     RungeKutta4Integrator(double step_size);
 
-    FloatApproximationVector
-    step(const ApproximateVectorMultivariateFunction& f, const FloatApproximationVector& x, const FloatDPApproximation& h) const;
+    FloatDPApproximationVector
+    step(const ApproximateVectorMultivariateFunction& f, const FloatDPApproximationVector& x, const FloatDPApproximation& h) const;
 
-    List< Pair<FloatDPApproximation,FloatApproximationVector> >
-    evolve(const ApproximateVectorMultivariateFunction& f, const FloatApproximationVector& x0, const FloatDPApproximation& tmax) const;
+    List< Pair<FloatDPApproximation,FloatDPApproximationVector> >
+    evolve(const ApproximateVectorMultivariateFunction& f, const FloatDPApproximationVector& x0, const FloatDPApproximation& tmax) const;
   private:
     double _step_size;
 };

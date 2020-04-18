@@ -1,7 +1,7 @@
 /***************************************************************************
- *            box.cpp
+ *            geometry/box.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file box.cpp
+/*! \file geometry/box.cpp
  *  \brief
  */
 
@@ -39,6 +39,9 @@
 #include "../algebra/algebra.hpp"
 
 namespace Ariadne {
+
+typedef FloatDPBounds ValidatedNumericType;
+typedef Interval<FloatDPUpperBound> UpperIntervalType;
 
 UpperIntervalType apply(ValidatedScalarUnivariateFunction const& f, UpperIntervalType const& ivl) {
     return static_cast<UpperIntervalType>(f(reinterpret_cast<ValidatedNumericType const&>(ivl))); }

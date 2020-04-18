@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_enclosure.hpp
+ *            hybrid/hybrid_enclosure.hpp
  *
- *  Copyright  2009-10  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_enclosure.hpp
+/*! \file hybrid/hybrid_enclosure.hpp
  *  \brief Enclosure sets for hybrid systems
  */
 
@@ -45,7 +45,7 @@
 #include "../hybrid/hybrid_graphics_interface.hpp"
 
 #include "../geometry/box.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
 
 namespace Ariadne {
 
@@ -68,14 +68,16 @@ template<class ES> class ListSet;
 template<class ES> class HybridListSet;
 
 class HybridEnclosure;
+class HybridStorage;
 template<> class ListSet<HybridEnclosure>;
 
 enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
+//! \ingroup HybridSetSubModule
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.
-//! The set is represented as the image of a box \f$D\f$ under a function model \f$\hat{f}(s)\f$, under the constraints
-//! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\hat{t}(s)\f$.
+//! The set is represented as the image of a box \f$D\f$ under a function model \f$\xi(s)=\hat{f}(s)\f$, under the constraints
+//! \f$\hat{c}(s) \leq 0\f$ and \f$\hat{e}(s)=0\f$. Also keeps track of the current time \f$\tau(s)=\hat{t}(s)\f$.
 //!
 //! In other words,
 //! \f[ S=\{ \hat{f}(s);\  \hat{t}(s) \mid s\in D \mid \hat{c}(s) \leq 0 \ \wedge \hat{e}(s)=0 \} . \f]
@@ -178,7 +180,9 @@ class HybridEnclosure
     const ValidatedScalarMultivariateFunctionModelDP& dwell_time_function() const;
     //! \brief The function related to the auxiliary space.
     const ValidatedVectorMultivariateFunctionModelDP auxiliary_function() const;
-    //! \brief The function related to the auxiliary space.
+    //! \brief The function returning the values of the state and auxiliary variables as a function of the parameter domain.
+    const ValidatedVectorMultivariateFunctionModelDP state_auxiliary_function() const;
+    //! \brief The function returning the values of the state, time and auxiliary variables.
     const ValidatedVectorMultivariateFunctionModelDP state_time_auxiliary_function() const;
     //! \brief The function related to the variable \a var.
     const ValidatedScalarMultivariateFunctionModelDP function(RealVariable var) const;
@@ -212,23 +216,22 @@ class HybridEnclosure
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon)\f$ and \f$\tau'(s)=\tau(s)+\epsilon\f$
     Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s))) and tau'(s)=tau(s)+eps(xi(s))
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$
     Void apply_space_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
+    //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
+    //! \brief Apply the reach step \f$\xi'(s) = \phi(\xi(s),t-\tau(s))\f$ and \f$\tau'(s)=\tau(s)+t\f$ for \f$0<=t<=\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
+    //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$
     Void apply_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
+    //! Compute the evolve step \f$\xi'(s) = \phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$
     Void apply_finishing_parameter_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& omega);
-    //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
+    //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$ and \f$t \leq \epsilon(s)\f$, assuming \f$\epsilon(s) \leq h\f$ throughout.
     Void apply_parameter_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const ValidatedScalarMultivariateFunctionModelDP& eps);
-    //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
+    //! \brief Compute the reach step \f$\xi'(s,t) = \phi(\xi(s),t)\f$ and \f$\tau'(s,t)=\tau(s)+t\f$ for \f$t \in [0,h]\f$.
     Void apply_full_reach_step(const ValidatedVectorMultivariateFunctionModelDP& phi);
-
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
     //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.
@@ -297,8 +300,8 @@ class HybridEnclosure
     //! \brief Restricts to a subdomain of the \em parameter domain.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
-    //! \a depth subdivisions in each component.
-    Void adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat depth) const;
+    //! \a fineness subdivisions in each component.
+    Void adjoin_outer_approximation_to(HybridStorage& paving, Nat fineness) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
     Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
@@ -317,7 +320,7 @@ class HybridEnclosure
     //! \brief Draws onto a canvas.
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
     //! \brief Write an abbreviated representation to an output stream.
     OutputStream& print(OutputStream&) const;
     //! \brief Write a full representation to an output stream which can be used in a constructor.
@@ -340,7 +343,7 @@ ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridRealBox& hb
 inline ValidatedLowerKleenean inside(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.inside(hbx); }
 inline ValidatedLowerKleenean separated(const HybridEnclosure& he, const HybridExactBox& hbx) { return he.separated(hbx); }
 
-inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s._write(os); }
 inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
 
 
@@ -390,7 +393,7 @@ class ListSet<HybridEnclosure>
     List<HybridEnclosure> _list;
 };
 
-HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
+HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
 
 
 } // namespace Ariadne

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            reachability_analyser.hpp
+ *            dynamics/reachability_analyser.hpp
  *
- *  Copyright  2006-11  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file reachability_analyser.hpp
+/*! \file dynamics/reachability_analyser.hpp
  *  \brief Methods for computing reachable sets of hybrid systems.
  */
 
@@ -34,6 +34,8 @@
 #include "../geometry/grid_paving.hpp"
 #include "../geometry/function_set.hpp"
 
+#include "../dynamics/enclosure.hpp"
+#include "../dynamics/storage.hpp"
 #include "../dynamics/orbit.hpp"
 #include "../dynamics/vector_field_evolver.hpp"
 #include "../dynamics/reachability_analyser_interface.hpp"
@@ -50,8 +52,8 @@ class AutomatonInterface;
 
 class Grid;
 class GridCell;
-class PavingType;
-class PavingType;
+class GridTreePaving;
+class Storage;
 
 template<class ES> class ListSet;
 
@@ -64,11 +66,11 @@ using ContinuousReachabilityAnalyser = ReachabilityAnalyser<VectorField>;
 
 template<> struct SafetyCertificate<EuclideanSpace> {
     ValidatedSierpinskian is_safe;
-    GridTreePaving chain_reach_set;
-    GridTreePaving safe_set;
+    Storage chain_reach_set;
+    Storage safe_set;
 };
 
-//! \ingroup AnalysisModule
+//! \ingroup DynamicsModule
 //! \brief A class for performing reachability analysis on a hybrid system.
 template<class SYS> class ReachabilityAnalyser
     : public ReachabilityAnalyserInterface<SYS>
@@ -92,8 +94,9 @@ template<class SYS> class ReachabilityAnalyser
     using typename Interface::SafetyCertificateType;
 
     typedef typename Interface::EnclosureType EnclosureType;
-    using GridType = typename SetApproximationType::GridType;
-    using PavingType = SetApproximationType;
+    typedef typename Interface::StorageType StorageType;
+    using GridType = typename StorageType::GridType;
+    using PavingType = StorageType;
   private:
   protected:
     SharedPointer<SystemType> _system;
@@ -107,9 +110,7 @@ template<class SYS> class ReachabilityAnalyser
     virtual ~ReachabilityAnalyser() = default;
 
     //! \brief Construct from an evolver.
-    ReachabilityAnalyser(
-            const SystemType& system,
-            const EvolverType& evolver);
+    ReachabilityAnalyser(const EvolverType& evolver);
 
     //! \brief Make a dynamically-allocated copy.
     virtual ReachabilityAnalyser* clone() const;
@@ -131,41 +132,41 @@ template<class SYS> class ReachabilityAnalyser
     //@{
     //! \name Evaluation of systems on abstract sets
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
-    virtual SetApproximationType
+    virtual StorageType
     lower_evolve(const OvertSetInterfaceType& initial_set,
                  const TimeType& steps) const override;
 
     //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                        const TimeType& time) const override;
 
     //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set,
                 const TimeType& time) const override;
 
     //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     lower_reach(const OvertSetInterfaceType& initial_set) const override;
 
     //! \brief Compute an upper-approximation to the set obtained by evolving the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     upper_evolve(const CompactSetInterfaceType& initial_set,
                  const TimeType& time) const override;
 
     //! \brief Compute upper-approximations to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
-    virtual Pair<SetApproximationType,SetApproximationType>
+    virtual Pair<StorageType,StorageType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
                        const TimeType& time) const override;
 
     //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set up to \a time.
-    virtual SetApproximationType
+    virtual StorageType
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& time) const override;
 
     //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
-    virtual SetApproximationType
+    virtual StorageType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const override;
 
     //! \brief Test if the system is safe.
@@ -176,18 +177,18 @@ template<class SYS> class ReachabilityAnalyser
 
   protected:
     // Helper functions for operators on lists of sets.
-    Pair<PavingType,PavingType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
+    Pair<StorageType,StorageType> _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
             const TimeType& time, const Nat accuracy, ListSet<EnclosureType>& evolve_enclosures,
             Semantics semantics, const EvolverType& evolver) const;
-    PavingType _upper_reach(const PavingType& set, const TimeType& time,
+    StorageType _upper_reach(const StorageType& set, const TimeType& time,
             const Nat accuracy, const EvolverType& evolver) const;
-    PavingType _upper_evolve(const PavingType& set, const TimeType& time,
+    StorageType _upper_evolve(const StorageType& set, const TimeType& time,
             const Nat accuracy, const EvolverType& evolver) const;
-    Void _adjoin_upper_reach_evolve(PavingType& reach_set, PavingType& final_set,
-                                    const PavingType& set, const TimeType& time,
+    Void _adjoin_upper_reach_evolve(StorageType& reach_set, StorageType& final_set,
+                                    const StorageType& set, const TimeType& time,
                                     const Nat accuracy, const EvolverType& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
-    Void _checked_restriction(PavingType& set, const PavingType& bounding) const;
+    Void _checked_restriction(StorageType& set, const StorageType& bounding) const;
 };
 
 //! \brief Configuration for a ReachabilityAnalyser, essentially for controlling the
@@ -243,23 +244,23 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     //! This property is only used for continuous-time computation.
     TimeType _lock_to_grid_time;
 
-    //! \brief The depth used for approximation on a grid for computations using upper semantics.
+    //! \brief The fineness used for approximation on a grid for computations using upper semantics.
     //! \details
     //! Increasing this value increases the accuracy of the computation.
     //!  <br>
     //! This property is only used in upper_evolve(), upper_reach() and chain_reach() routines.
-    UnsignedIntType _maximum_grid_depth;
+    UnsignedIntType _maximum_grid_fineness;
 
-    //! \brief The maximum height used for approximation on a grid for chain reachability computations.
+    //! \brief The maximum extent used for approximation on a grid for chain reachability computations.
     //! \details
     //! Increasing this value increases the bounding domain over which computation is performed.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    UnsignedIntType _maximum_grid_height;
+    UnsignedIntType _maximum_grid_extent;
 
     //! \brief The explicit bounding domain for approximation on a grid for chain reachability computations.
     //! \details
-    //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
+    //! If defined, this property combines with _maximum_grid_extent to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
     SharedPointer<BoundingDomainType> _bounding_domain_ptr;
@@ -281,11 +282,11 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
     const TimeType& lock_to_grid_time() const { return _lock_to_grid_time; }
     Void set_lock_to_grid_time(const TimeType value) { _lock_to_grid_time = TimeType(value); }
 
-    const UnsignedIntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    Void set_maximum_grid_depth(const UnsignedIntType value) { _maximum_grid_depth = value; }
+    const UnsignedIntType& maximum_grid_fineness() const { return _maximum_grid_fineness; }
+    Void set_maximum_grid_fineness(const UnsignedIntType value) { _maximum_grid_fineness = value; }
 
-    const UnsignedIntType& maximum_grid_height() const { return _maximum_grid_height; }
-    Void set_maximum_grid_height(const UnsignedIntType value) { _maximum_grid_height = value; }
+    const UnsignedIntType& maximum_grid_extent() const { return _maximum_grid_extent; }
+    Void set_maximum_grid_extent(const UnsignedIntType value) { _maximum_grid_extent = value; }
 
     const SharedPointer<BoundingDomainType>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     Void set_bounding_domain_ptr(SharedPointer<BoundingDomainType> bounding_domain_ptr) { _bounding_domain_ptr = bounding_domain_ptr; }
@@ -301,7 +302,7 @@ template<class SYS> class ReachabilityAnalyserConfiguration : public Configurati
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 

@@ -37,7 +37,7 @@ inline Tuple<String,DottedRealAssignments,RealVariablesBox,RealVariablesBox,Real
     RealVariablesBox initial={{-e<=x<=e},{-e<=y<=e}};
 
     Real evolution_time=3.141592_dec;
-    double step=1.0/64;
+    double step = 1.0/64;
 
     return make_tuple("HO",dynamics,inputs,initial,evolution_time,step);
 }

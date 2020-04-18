@@ -6,12 +6,9 @@
 
 Ariadne is a tool for reachability analysis and model checking of hybrid systems. Additionally, it is a framework for rigorous computation featuring arithmetic, linear algebra, calculus, geometry, algebraic and differential equations, and optimization solvers.
 
-* This repository contains the main development fork of the tool. For a more stable version with a less sophisticated user interface, see the *release-1.0* repository.
-* For the latest internal release, see the [releases](https://github.com/ariadne-cps/ariadne/releases) page. However, the code in the master branch should always be usable.
-
 ### Installation ###
 
-The installation instructions are presented for Ubuntu 18.04 and macOS 10.14 only. However, openSUSE Tumbleweed and Fedora 29 are known to be working when using their package managers. Windows installations are not supported yet.
+The installation instructions are presented for Ubuntu 20.04 and macOS 10.15 only. However, openSUSE and Fedora are known to be working when using their own package managers. Windows installations are not supported yet.
 
 For the Ubuntu installation, we will refer to packages available on Aptitude. The macOS installation instead will assume you are using the Brew package manager.
 
@@ -19,16 +16,20 @@ The build system is CMake. The library is tested for compilation using gcc and c
 
 #### Dependencies
 
-The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo in order to save into png files. Finally, the Python bindings require the Python headers (either Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to fetch the dependency, Git must be installed.
+The only required library dependencies of Ariadne are GMP and MPFR. If you want to enable the graphical output you will require Cairo in order to save into png files. Finally, the Python bindings require the Python headers (either Python 2 or 3 are supported). In particular for Python, there is an internal Git submodule dependency on the header-only [pybind11](https://github.com/pybind/pybind11) library. Therefore in order to build the Python interface, Git must be installed even if Ariadne has been downloaded as an archive.
 
 Finally, if you want to build the documentation, you need Doxygen and a working Latex distribution (including the Math packages).
 
-Specific instructions for Ubuntu and macOS follow (documentation packages are excluded).
+Please note that adding new dependencies after preparing the build environment requires to re-run the CMake command.
+
+Specific instructions for Ubuntu and macOS follow.
 
 ##### Ubuntu
 Aptitude packages: `cmake pkg-config git libgmp-dev libmpfr-dev libcairo2-dev`
 
-Additional Aptitude package required for the Python interface: `python3-dev` or `python-dev`.
+Additional package required for the Python interface: `python3-dev` or `python-dev`.
+
+Additional packages required for documentation: `doxygen doxygen-latex` 
 
 ##### macOS
 1. Install the Command Line Developer Tools (will also be asked when installing Homebrew) from the Apple Store
@@ -40,6 +41,8 @@ For Cairo support, you may need to set up a permanent variable for the path of p
 ```
 export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
 ```
+
+To allow building the documentation: `brew cask install mactex-no-gui` and `brew install doxygen`.
 
 #### Building
 
@@ -91,6 +94,8 @@ To build the documentation, instead use:
 $ make doc
 ```
 
+You can access the built documentation from the `docs/html/index.html` file in the build directory.
+
 
 ### Installing globally
 
@@ -106,9 +111,9 @@ or
 $ sudo make install
 ```
 
-if you require administrator privileges, in particular for a Linux installation. Please note that the installation will build the whole distribution beforehand.
+if you require administrator privileges, in particular for a Linux installation. Please note that the installation will build the whole distribution beforehand, hence it is preferable that you first build the binaries without administrator privileges, then install.
 
-To find the installed library under Ubuntu, you may need to set the LD_LIBRARY_PATH in the .bashrc file of your home directory:
+To find the installed library under Ubuntu, you may need to set the LD\_LIBRARY\_PATH in the .bashrc file of your home directory:
 
 ```
 export LD_LIBRARY_PATH=/usr/local/lib
@@ -116,7 +121,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 
 ### Building executables using Ariadne
 
-The tutorials directory contains three CMake projects that rely on a correct installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
+The tutorials directory contains two CMake projects that rely on a correct installation of Ariadne. You can copy a project directory in any place on your file system and follow the instructions on the README file inside to check that your installation was successful.
 
 Due to limitations of the C++ standard library on macOS since C++11, you won't be able to build an executable with GCC if the Ariadne library has been built using Clang, and viceversa. Hence on macOS you shall use the same compiler for both Ariadne and any projects that depend on it.
 

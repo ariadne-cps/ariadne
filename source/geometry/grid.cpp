@@ -1,7 +1,7 @@
 /***************************************************************************
- *            grid.cpp
+ *            geometry/grid.cpp
  *
- *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
+ *  Copyright  2008-20  Ivan S. Zapreev, Pieter Collins
  *
  *
  ****************************************************************************/
@@ -39,6 +39,9 @@
 
 namespace Ariadne {
 
+using ExactNumericType = Grid::ExactNumericType;
+using Double = double;
+
 struct Grid::Data
 {
     Vector<FloatDP> _origin;
@@ -57,6 +60,11 @@ Grid::Grid()
 Grid::Grid(const Grid& gr)
     : _data(gr._data)
 {
+}
+
+Grid& Grid::operator=(const Grid& gr)
+{
+    this->_data=gr._data; return *this;
 }
 
 Grid::Grid(Nat d)
@@ -173,7 +181,7 @@ Bool Grid::operator!=(const Grid& g) const
     return !(*this==g);
 }
 
-Array<double> Grid::index(const ExactPoint& pt) const
+Array<Double> Grid::index(const ExactPointType& pt) const
 {
     Array<double> res(pt.size());
     for(SizeType i=0; i!=res.size(); ++i) {
@@ -182,7 +190,8 @@ Array<double> Grid::index(const ExactPoint& pt) const
     return res;
 }
 
-Array<double> Grid::lower_index(const ExactBoxType& bx) const {
+Array<Double> Grid::lower_index(const ExactBoxType& bx) const
+{
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=subdivision_lower_index(i,bx[i].lower());
@@ -190,7 +199,8 @@ Array<double> Grid::lower_index(const ExactBoxType& bx) const {
     return res;
 }
 
-Array<double> Grid::upper_index(const ExactBoxType& bx) const {
+Array<Double> Grid::upper_index(const ExactBoxType& bx) const
+{
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=subdivision_upper_index(i,bx[i].upper());
@@ -198,7 +208,7 @@ Array<double> Grid::upper_index(const ExactBoxType& bx) const {
     return res;
 }
 
-ExactPoint Grid::point(const Array<IntegerType>& a) const
+ExactPointType Grid::point(const Array<IntegerType>& a) const
 {
     Vector<FloatDPValue> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
@@ -207,7 +217,7 @@ ExactPoint Grid::point(const Array<IntegerType>& a) const
     return res;
 }
 
-ExactPoint Grid::point(const Array<DyadicType>& a) const
+ExactPointType Grid::point(const Array<DyadicType>& a) const
 {
     Vector<FloatDPValue> res(a.size());
     for(SizeType i=0; i!=res.size(); ++i) {
@@ -224,6 +234,10 @@ ExactBoxType Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& 
                         this->subdivision_coordinate(i,upper[i]));
     }
     return res;
+}
+
+Grid join(Grid const& g1, Grid const& g2) {
+    return Grid(join(g1._data->_origin,g2._data->_origin),join(g1._data->_lengths,g2._data->_lengths));
 }
 
 OutputStream& operator<<(OutputStream& os, const Grid& gr)

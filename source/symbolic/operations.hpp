@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expression.hpp
+ *            symbolic/operations.hpp
  *
- *  Copyright 2008-17 Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file expression.hpp
- *  \brief Internal expressions
+/*! \file symbolic/operations.hpp
+ *  \brief Operations on symbolic expressions
  */
 
-#ifndef ARIADNE_EXPRESSION_OPERATIONS_HPP
-#define ARIADNE_EXPRESSION_OPERATIONS_HPP
+#ifndef ARIADNE_SYMBOLIC_OPERATIONS_HPP
+#define ARIADNE_SYMBOLIC_OPERATIONS_HPP
 
 #include <cstdarg>
 #include <iosfwd>
@@ -213,4 +213,4 @@ template<> struct DeclareExpressionOperations<Real> {
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_EXPRESSION_OPERATIONS_HPP */
+#endif /* ARIADNE_SYMBOLIC_OPERATIONS_HPP */

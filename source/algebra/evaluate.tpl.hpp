@@ -1,7 +1,7 @@
 /***************************************************************************
  *            evaluate.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -42,21 +42,24 @@ namespace Ariadne {
 //! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
 //! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
 //! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
+template<class X, class A> ArithmeticType<X,A> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<A>& x);
+
+template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& x)
 {
     typedef typename Expansion<MultiIndex,X>::ConstIterator ConstIterator;
+    typedef ArithmeticType<X,Y> R;
     const SizeType n=e.argument_size();
-    const Y z=x.zero_element(); // The zero element of the ring Y
+    const R z(x.zero_element()); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
-    Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
+    Array< R > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
     ConstIterator iter=e.begin();
     ConstIterator end=e.end();
     SizeType k=n;   // The current working register
     MultiIndex na=iter->index(); // The values of the next multi-index
     SizeType j=k;   // The lowest register containing a non-zero value
     X c=iter->coefficient();
-    Y t=z;
+    R t=z;
     MultiIndex a=na; // The values of the next multi-index
     ++iter;
     while(iter!=end) {
@@ -95,7 +98,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
         ++iter;
     }
     // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
-    t=static_cast<typename Y::NumericType>(c);
+    t=c;
     for(SizeType i=0; i!=j; ++i) {
         for(SizeType ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];
@@ -112,8 +115,9 @@ template<class X, class Y> Y horner_evaluate(const Expansion<MultiIndex,X>& e, c
     return t;
 }
 
-template<class X, class Y> Y horner_evaluate(const Expansion<UniIndex,X>& e, const Y& x)
+template<class X, class Y> ArithmeticType<X,Y> horner_evaluate(const Expansion<UniIndex,X>& e, const Y& x)
 {
+    typedef ArithmeticType<X,Y> R;
     typedef typename Expansion<UniIndex,X>::ConstIterator ConstIterator;
     if(e.number_of_nonzeros()==0) { return nul(x); }
 
@@ -121,7 +125,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<UniIndex,X>& e, con
     ConstIterator end=e.end();
     DegreeType na=iter->index(); // The values of the next multi-index
     X c=iter->coefficient();
-    Y r=nul(x);
+    R r=nul(x);
     r=c;
     DegreeType a=na; // The values of the next multi-index
     ++iter;
@@ -144,13 +148,15 @@ template<class X, class Y> Y horner_evaluate(const Expansion<UniIndex,X>& e, con
 }
 
 template<class X, class Y>
-Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
+ArithmeticType<X,Y> power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
-    Y zero = y.zero_element();
-    Y one = zero + 1;
+    typedef ArithmeticType<X,Y> R;
 
-    Y r=zero;
-    Y t=zero;
+    R zero = e.zero_coefficient()*y.zero_element();
+    R one = zero + 1;
+
+    R r=zero;
+    R t=zero;
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
@@ -171,19 +177,19 @@ Y power_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 
 
 template<class X, class Y>
-Y evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
+ArithmeticType<X,Y> evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Y simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
+ArithmeticType<X,Y> simple_evaluate(const Expansion<MultiIndex,X>& e, const Vector<Y>& y)
 {
     return power_evaluate(e,y);
 }
 
 template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
+Vector<ArithmeticType<X,Y>> evaluate(const Vector< Expansion<MultiIndex,X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size(),y.zero_element());
     for(SizeType i=0; i!=x.size(); ++i) {

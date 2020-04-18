@@ -1,7 +1,7 @@
 /***************************************************************************
- *            expression_set.hpp
+ *            symbolic/expression_set.hpp
  *
- *  Copyright 2011-17  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file expression_set.hpp
+/*! \file symbolic/expression_set.hpp
  *  \brief Sets defined using expressions over real variables.
  */
 
@@ -89,7 +89,7 @@ template<class C, class P> decltype(auto) all(C const& c, P const& p) {
     R r=true; for(auto e:c) { r=r and p(e); if(definitely(not r)) { return r; } } return r;
 }
 
-//! \ingroup ExpressionSetSubModule
+//! \ingroup SymbolicModule
 //! \brief An interval range for a real variable.
 template<class UB> class VariableInterval {
     typedef decltype(-declval<UB>()) LB;
@@ -126,9 +126,12 @@ template<> template<class XL, class XU> inline VariableInterval<XU> Variable<Rea
     return VariableInterval<XU>(l,*this,u);
 }
 
-template<class UB> struct VariableLowerInterval {
+template<class UB> class VariableLowerInterval
+    : public DeclareExpressionOperations<Kleenean>
+{
     typedef NegationType<UB> LB;
     RealVariable _variable; LB _lower;
+  public:
     template<class U,EnableIf<IsConstructible<UB,U>> =dummy> VariableLowerInterval(VariableLowerInterval<U> const& lv)
         : VariableLowerInterval<UB>(UB(lv.lower()),lv.variable()) { }
     VariableLowerInterval(const LB& l, const RealVariable& v) : _variable(v),  _lower(l) { }
@@ -141,9 +144,12 @@ template<class UB> struct VariableLowerInterval {
         return os << elivl._lower << "<=" << elivl._variable; }
 };
 
-template<class UB> struct VariableUpperInterval {
+template<class UB> class VariableUpperInterval
+    : public DeclareExpressionOperations<Kleenean>
+{
     typedef NegationType<UB> LB;
     RealVariable _variable; UB _upper;
+  public:
     VariableUpperInterval<UB>(const RealVariable& v, const UB& u) : _variable(v), _upper(u)  { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(-infinity,_variable,_upper); }
     const RealVariable& variable() const { return _variable; }
@@ -235,7 +241,7 @@ template<> template<class IVL> inline VariablesBox<IVL> Variables<Real>::in(cons
     ARIADNE_PRECONDITION(this->size()==bx.size());
     Map<RealVariable,IVL> bnds;
     for(SizeType i=0; i!=this->size(); ++i) { bnds.insert((*this)[i],bx[i]); }
-    return std::move(bnds);
+    return bnds;
 }
 
 //! \ingroup ExpressionSetSubModule
@@ -287,10 +293,9 @@ template<class S> class LabelledSet {
   public:
     typedef S EuclideanSetType;
 
-    LabelledSet(const RealSpace& spc, const EuclideanSetType& set) : _spc(spc), _set(set) { ARIADNE_ASSERT(spc.dimension()==set.dimension()); }
+    LabelledSet(const RealSpace& spc, const EuclideanSetType& set) : _spc(spc), _set(set) { ARIADNE_ASSERT_MSG(spc.dimension()==set.dimension(),"spc="<<spc<<", set.dimension()="<<set.dimension()); }
     Set<RealVariable> variables() const { return _spc.variables(); }
     RealSpace const& space() const { return this->_spc; }
-    RealSpace canonical_space() const; [[deprecated]]
     EuclideanSetType const& continuous_set() const { return this->_set; }
     EuclideanSetType const& euclidean_set() const { return this->_set; }
     EuclideanSetType& euclidean_set() { return this->_set; }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_float_lower_upper_bound.cpp
  *
- *  Copyright  2006-14  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 

@@ -26,7 +26,7 @@
 
 using namespace Ariadne;
 
-AtomicHybridAutomaton getController()
+HybridAutomaton getController()
 {
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant hmin("hmin",5.75_decimal);
@@ -39,21 +39,24 @@ AtomicHybridAutomaton getController()
     DiscreteEvent e_can_open("can_open");
     DiscreteEvent e_can_close("can_close");
 
+    // Declare the variable for the automaton name
+    StringVariable controller("controller");
+
     // Create the controller automaton
-    AtomicHybridAutomaton controller("controller");
+    HybridAutomaton automaton(controller.name());
 
     // Declare the locations for the controller
-    AtomicDiscreteLocation rising("rising");
-    AtomicDiscreteLocation falling("falling");
+    DiscreteLocation rising(controller|"rising");
+    DiscreteLocation falling(controller|"falling");
 
     // Instantiate modes for each location; since no dynamics is present, we create an empty list
-    controller.new_mode(rising,List<RealAssignment>());
-    controller.new_mode(falling,List<RealAssignment>());
+    automaton.new_mode(rising,List<RealAssignment>());
+    automaton.new_mode(falling,List<RealAssignment>());
 
     // Specify the transitions, starting from the source location, according to an event, to a target location;
     // Following those arguments you specify a guard and whether the event is permissive or urgent.
-    controller.new_transition(falling,e_can_open,rising,height<=hmin,EventKind::URGENT);
-    controller.new_transition(rising,e_can_close,falling,height>=hmax,EventKind::URGENT);
+    automaton.new_transition(falling,e_can_open,rising,height<=hmin,EventKind::URGENT);
+    automaton.new_transition(rising,e_can_close,falling,height>=hmax,EventKind::URGENT);
 
-    return controller;
+    return automaton;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector_field_evolver.cpp
+ *            dynamics/vector_field_evolver.cpp
  *
- *  Copyright  2008  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -33,7 +33,7 @@
 #include "../algebra/vector.hpp"
 #include "../function/function.hpp"
 #include "../function/constraint.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
 #include "../dynamics/orbit.hpp"
 
 #include "../solvers/integrator.hpp"
@@ -101,7 +101,7 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
     , _integrator(i.clone())
     , _configuration(new ConfigurationType())
 {
-
+    this->charcode = "v";
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
@@ -215,7 +215,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Bool reach) const
 {
     typedef EffectiveVectorMultivariateFunction FunctionType;
-    typedef ValidatedVectorMultivariateFunctionModelDP FlowModelType;
 
     EnclosureType current_set_model;
     TimeStepType current_time;
@@ -259,10 +258,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     StepSizeType step_size=maximum_step_size;
-    FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
+    FlowStepModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
+    FlowStepModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model
@@ -288,17 +287,17 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 {
-    maximum_step_size(1);
-    maximum_enclosure_radius(100.0);
-    enable_reconditioning(true);
-    maximum_spacial_error(1e-2);
+    set_maximum_step_size(1);
+    set_maximum_enclosure_radius(100.0);
+    set_enable_reconditioning(true);
+    set_maximum_spacial_error(1e-2);
 }
 
 
 OutputStream&
-VectorFieldEvolverConfiguration::write(OutputStream& os) const
+VectorFieldEvolverConfiguration::_write(OutputStream& os) const
 {
-    os << "VectorFieldEvolverSettings"
+    os << "VectorFieldEvolverConfiguration"
        << ",\n  maximum_step_size=" << maximum_step_size()
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
        << ",\n  enable_reconditioning=" << enable_reconditioning()

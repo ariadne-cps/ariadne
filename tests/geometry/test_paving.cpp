@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_paving.cpp
  *
- *  Copyright  2012  Pieter Collins
+ *  Copyright  2012-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -216,7 +216,7 @@ Void TestPaving::test_approximation() const {
     PavingInterface& paving = grid_set;
 
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);
-    EffectiveConstrainedImageSet set(EffectiveBoxType(ExactIntervalVectorType({{-1.0,1.0},{-1.0,1.0}})));
+    EffectiveConstrainedImageSet set(RealBox({{-1.0,1.0},{-1.0,1.0}}));
     set.apply( {2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]} );
     Nat depth = 2;
     paving.adjoin_outer_approximation(set,depth);

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            enclosure.hpp
+ *            dynamics/enclosure.hpp
  *
- *  Copyright  2011  Pieter Collins
+ *  Copyright  2011-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file enclosure.hpp
+/*! \file dynamics/enclosure.hpp
  *  \brief Enclosure sets for continuous systems
  */
 
@@ -57,8 +57,9 @@ template<class BS> class ListSet;
 
 class Grid;
 class PavingInterface;
+class Storage;
 
-typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,ValidatedNumericType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> ValidatedConstraintModel;
 
 typedef Dyadic StepSizeType;
 
@@ -77,7 +78,9 @@ struct EnclosureConfiguration {
 };
 
 
-//! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
+//! \ingroup DynamicsModule
+//! \brief An enclosure for part of the reachable or evolved set of a dynamical system.
+//! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
     , public ValidatedCompactSetInterface
@@ -107,7 +110,7 @@ class Enclosure
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
     explicit Enclosure(const ExactBoxType& d, const ValidatedVectorMultivariateFunction& sf, const ValidatedScalarMultivariateFunction tf, const ValidatedVectorMultivariateFunction& g, const ValidatedVectorMultivariateFunction& h, const EnclosureConfiguration& fac);
-    //! \brief Construct from an exact singleton constraint \a set.
+    //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& fac);
 
     //! \brief Create a dynamically-allocated copy.
@@ -180,11 +183,11 @@ class Enclosure
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
     Void apply_finishing_parameter_evolve_step(ValidatedVectorMultivariateFunction phi, ValidatedScalarMultivariateFunction omega);
 
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq h.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq h\f$.
     Void apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$0\leq r\leq\epsilon(\xi(s),\tau(s))\f$
     Void apply_spacetime_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $0\leq r\leq\epsilon(s)$.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for \f$0\leq r\leq\epsilon(s)\f$.
     Void apply_parameter_reach_step(ValidatedVectorMultivariateFunctionModelDP phi, ValidatedScalarMultivariateFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
@@ -239,10 +242,10 @@ class Enclosure
     //! \brief A bounding box for the set.
     UpperBoxType bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
-    ExactPoint centre() const;
+    Point<FloatDPValue> centre() const;
     //! \brief An over-approximation to the radius of the set.
     FloatDPError radius() const;
-    //! \brief Returns \c true if the set is definitely singleton.
+    //! \brief Returns \c true if the set is definitely bounded.
     ValidatedLowerKleenean is_bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
@@ -268,29 +271,29 @@ class Enclosure
     //! resulting in more accurate computations.
     Void restrict(const ExactBoxType& subdomain);
     //! \brief The set obtained by restricting to the \a subdomain.
-    Enclosure restriction(const ExactBoxType& subdomain) const;
+    friend Enclosure restriction(Enclosure const&, const ExactBoxType& subdomain);
 
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreePaving outer_approximation(const Grid& grid, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
-    Void adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    //! \brief Compute an outer approximation on the \a grid to the given \a fineness.
+    Storage outer_approximation(const Grid& grid, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving.
+    Void adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by subdividing the parameter domain. Does not require constraint propagation,
     //! but may be inefficient.
-    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void subdivision_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by first computing affine over-approximations of the set.
-    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void affine_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by using constraint propagation.
-    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
-    //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
+    Void constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
+    //! \brief Adjoin an outer approximation to the given \a fineness to the \a paving
     //! by using an interior point method to try to find good barrier functions
     //! and using constraint propagation to prove disjointness with cells.
     //! \details Potentially very efficient, but may be unreliable due to the
     //! use of nonlinear programming to find good Lyapounov multipliers for
     //! the constraints.
-    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Nat depth) const;
+    Void optimal_constraint_adjoin_outer_approximation_to(Storage& paving, Nat fineness) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the
@@ -339,10 +342,10 @@ class Enclosure
     //! affine over-approximations yield a good image.
     [[deprecated]] Void affine_draw(CanvasInterface&, const Projection2d& p, Nat splittings) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
-     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat depth) const;
+     [[deprecated]] Void grid_draw(CanvasInterface&, const Projection2d& p, Nat fineness) const;
 
     //! \brief Write to an output stream.
-    OutputStream& write(OutputStream&) const;
+    OutputStream& _write(OutputStream&) const;
   private:
     Void _check() const;
     Void _solve_zero_constraints();
@@ -354,14 +357,14 @@ class Enclosure
 };
 
 //! \related Enclosure \brief Stream output operator.
-inline OutputStream& operator<<(OutputStream& os, const Enclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Enclosure& s) { return s._write(os); }
 
 //! \related Enclosure \brief The Cartesian product of a constrained image set with an interval in one dimension.
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl);
 //! \related Enclosure \brief The Cartesian product of a constrained image set with a box.
 Enclosure product(const Enclosure& set, const ExactBoxType& bx);
 //! \related Enclosure \brief The Cartesian product of two constrained image sets.
-//! \precondition The time function of each set is constant with the same value.
+//! \pre The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.
@@ -371,4 +374,4 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& func
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_TAYLOR_SET_HPP */
+#endif /* ARIADNE_ENCLOSURE_HPP */

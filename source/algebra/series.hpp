@@ -1,7 +1,7 @@
 /***************************************************************************
- *            series.hpp
+ *            algebra/series.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file series.hpp
+/*! \file algebra/series.hpp
  *  \brief Taylor series in a single variable.
  */
 
@@ -146,6 +146,7 @@ template<class X> inline X const& Series<X>::operator[] (DegreeType n) const {
     this->_compute(n); return this->_data[n];
 }
 
+
 template<class X> inline Series<X>::Series(std::shared_ptr<const SeriesGeneratorInterface<X>> p, X const& c, std::nullptr_t)
     : _ptr(p), _centre(c), _data() {
 }
@@ -162,6 +163,10 @@ template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { re
 
 
 class AnalyticFunction {
+    typedef FloatDPApproximation ApproximateNumericType; // [[deprecated]]
+    typedef FloatDPBounds ValidatedNumericType; // [[deprecated]]
+    typedef FloatDPValue ExactNumericType; // [[deprecated]]
+  private:
     UnaryTranscendentalOperator _op;
     std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumericType>> _asg_ptr;
     std::shared_ptr<const SeriesGeneratorInterface<ValidatedNumericType>> _vsg_ptr;

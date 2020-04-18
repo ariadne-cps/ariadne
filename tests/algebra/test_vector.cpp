@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_vector.cpp
  *
- *  Copyright  2006  Pieter Collins, Alberto Casagrande
+ *  Copyright  2006-20  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -84,13 +84,13 @@ TestVector::test_concept()
 Void
 TestVector::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT( RawFloatVector, v0, (3) );
+    ARIADNE_TEST_CONSTRUCT( RawFloatDPVector, v0, (3) );
     ARIADNE_TEST_ASSERT( v0.size()==3 );
     ARIADNE_TEST_ASSERT( v0[0]==0.0 );
     ARIADNE_TEST_ASSERT( v0[1]==0.0 );
     ARIADNE_TEST_ASSERT( v0[2]==0.0 );
 
-    ARIADNE_TEST_CONSTRUCT( RawFloatVector, v1, ({3.25,-0.75,0.0,1.375}) );
+    ARIADNE_TEST_CONSTRUCT( RawFloatDPVector, v1, ({3.25,-0.75,0.0,1.375}) );
     ARIADNE_TEST_ASSERT( v1.size()==4 );
     ARIADNE_TEST_ASSERT( v1[0]==3.25 );
     ARIADNE_TEST_ASSERT( v1[1]==-0.75 );
@@ -102,25 +102,25 @@ TestVector::test_constructors()
 Void
 TestVector::test_comparisons()
 {
-    RawFloatVector v(2); v[0]=1.25; v[1]=-1.375;
+    RawFloatDPVector v(2); v[0]=1.25; v[1]=-1.375;
     ARIADNE_TEST_PRINT( v );
-    ARIADNE_TEST_COMPARE( v , ==, RawFloatVector({1.25,-1.375}) );
-    ARIADNE_TEST_COMPARE( v , !=, RawFloatVector({1.25,-1.625}) );
+    ARIADNE_TEST_COMPARE( v , ==, RawFloatDPVector({1.25,-1.375}) );
+    ARIADNE_TEST_COMPARE( v , !=, RawFloatDPVector({1.25,-1.625}) );
 }
 
 
 Void
 TestVector::test_arithmetic()
 {
-    ARIADNE_TEST_EQUAL( + RawFloatVector({2.0,-3.0,5.0}) , RawFloatVector({2.0,-3.0,5.0}) );
-    ARIADNE_TEST_EQUAL( - RawFloatVector({2.0,-3.0,5.0}) , RawFloatVector({-2.0,+3.0,-5.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) + RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({3.25,-0.25,1.5}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) - RawFloatVector({1.25,2.75,-3.5}), RawFloatVector({0.75,-5.75,8.5}) );
-    ARIADNE_TEST_EQUAL( FloatDP(4.0) * RawFloatVector({2.0,-3.0,5.0}), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) * FloatDP(4.0), RawFloatVector({8.0,-12.0,20.0}) );
-    ARIADNE_TEST_EQUAL( RawFloatVector({2.0,-3.0,5.0}) / FloatDP(4.0), RawFloatVector({0.5,-0.75,1.25}) );
+    ARIADNE_TEST_EQUAL( + RawFloatDPVector({2.0,-3.0,5.0}) , RawFloatDPVector({2.0,-3.0,5.0}) );
+    ARIADNE_TEST_EQUAL( - RawFloatDPVector({2.0,-3.0,5.0}) , RawFloatDPVector({-2.0,+3.0,-5.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0,-3.0,5.0}) + RawFloatDPVector({1.25,2.75,-3.5}), RawFloatDPVector({3.25,-0.25,1.5}) );
+    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0,-3.0,5.0}) - RawFloatDPVector({1.25,2.75,-3.5}), RawFloatDPVector({0.75,-5.75,8.5}) );
+    ARIADNE_TEST_EQUAL( FloatDP(4.0) * RawFloatDPVector({2.0,-3.0,5.0}), RawFloatDPVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0,-3.0,5.0}) * FloatDP(4.0), RawFloatDPVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0,-3.0,5.0}) / FloatDP(4.0), RawFloatDPVector({0.5,-0.75,1.25}) );
 
-    ARIADNE_TEST_EQUAL( sup_norm(RawFloatVector({2.0,-3.0,1.0})), FloatDP(3.0) )
+    ARIADNE_TEST_EQUAL( sup_norm(RawFloatDPVector({2.0,-3.0,1.0})), FloatDP(3.0) )
 }
 
 

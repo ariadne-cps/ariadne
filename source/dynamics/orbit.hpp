@@ -1,7 +1,7 @@
 /***************************************************************************
- *            orbit.hpp
+ *            dynamics/orbit.hpp
  *
- *  Copyright 2007-17  Pieter Collins
+ *  Copyright  2007-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file orbit.hpp
+/*! \file dynamics/orbit.hpp
  *  \brief Orbits of dynamic systems
  */
 
@@ -39,7 +39,8 @@
 #include "../output/graphics_interface.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/list_set.hpp"
-#include "../geometry/enclosure.hpp"
+#include "../dynamics/enclosure.hpp"
+#include "../dynamics/storage.hpp"
 
 
 namespace Ariadne {
@@ -69,42 +70,35 @@ template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 template<class BS> class ListSet;
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-
 class InterpolatedCurve;
-class Grid;
-class GridCell;
-class GridTreePaving;
 
 
-template<>
-class Orbit<ExactPoint>
+template<class F>
+class Orbit<Point<Value<F>>>
 {
   public:
-    Orbit(const ExactPoint& pt);
-    Void insert(FloatDPValue t, const ExactPoint& hpt);
+    Orbit(const Point<Value<F>>& pt);
+    Void insert(Value<F> t, const Point<Value<F>>& hpt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     std::shared_ptr< InterpolatedCurve > _curve;
 };
 
 template<>
-class Orbit<GridCell>
+class Orbit<Storage>
 {
     struct Data;
   public:
-    typedef GridCell EnclosureType;
-    typedef GridTreePaving EnclosureListType;
+    typedef Storage EnclosureListType;
 
-    Orbit(const Grid&, const GridCell&);
-    Orbit(const GridTreePaving&);
-    Orbit(const GridTreePaving&, const GridTreePaving&,
-          const GridTreePaving&, const GridTreePaving&);
-    Grid const& grid() const;
-    GridTreePaving const& initial() const;
-    GridTreePaving const& reach() const;
-    GridTreePaving const& intermediate() const;
-    GridTreePaving const& final() const;
+    Orbit(const Storage& initial);
+    Orbit(const Storage& initial, const Storage& reach,
+          const Storage& intermediate, const Storage& final);
+
+    Storage const& initial() const;
+    Storage const& reach() const;
+    Storage const& intermediate() const;
+    Storage const& final() const;
   private:
     std::shared_ptr<Data> _data;
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_graphics.cpp
  *
- *  Copyright 2008--17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -58,7 +58,7 @@ Int main(Int argc, char **argv)
     ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25_x);
 
     EffectiveVectorMultivariateFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
-    ConstraintSet cs1(rf,EffectiveBoxType(1u,EffectiveIntervalType(-1,0)));
+    ConstraintSet cs1(rf,RealBox(1u,RealInterval(-1,0)));
 
     {
         double h=10000;
@@ -110,9 +110,9 @@ Int main(Int argc, char **argv)
     g.write("test_graphics-set");
     g.clear();
 
-    InterpolatedCurve cv(0,ExactPoint(2,FloatDPValue(0.0)));
+    InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0)));
     for(Int i=1; i<=10; ++i) {
-        ExactPoint pt(2); pt[0]=FloatDPValue(i/10.); pt[1]=FloatDPValue(i*i/100.);
+        Point<FloatDPValue> pt(2); pt[0]=FloatDPValue(i/10.); pt[1]=FloatDPValue(i*i/100.);
         cv.insert(i,pt);
     }
     g.set_bounding_box(cv.bounding_box());

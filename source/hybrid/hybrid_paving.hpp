@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_paving.hpp
+ *            hybrid/hybrid_paving.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_paving.hpp
+/*! \file hybrid/hybrid_paving.hpp
  *  \brief Hybrid extension of a paving.
  */
 
@@ -116,17 +116,18 @@ class HybridGridTreePaving
 //    Void adjoin(DiscreteLocation q, const GridCell& c) {
 //        this->_provide_location(q).adjoin(c); }
 
+    Void clear();
     Void adjoin(const HybridGridCell& hgc);
     Void adjoin(const ListSet<HybridGridCell>& hgcls);
     Void adjoin(const HybridGridTreePaving& hgts);
     Void remove(const HybridGridTreePaving& hgts);
     Void restrict(const HybridGridTreePaving& hgts);
-    Void restrict_to_height(Nat height);
-    Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat depth);
-    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat depth);
-    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat height, const Nat depth);
-    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat depth);
-    Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat depth);
+    Void restrict_to_extent(Nat extent);
+    Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
+    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat fineness);
+    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
+    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness);
+    Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
     template<class S> Void adjoin_outer_approximation(DiscreteLocation q, const S& s);
 
     GridTreePaving& operator[](DiscreteLocation q);
@@ -134,10 +135,11 @@ class HybridGridTreePaving
     Bool is_empty() const;
     SizeType size() const;
     HybridListSet<ExactBoxType> boxes() const;
-    Void mince(Nat depth);
+    Void mince(Nat fineness);
     Void recombine();
 
     friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
+    friend Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
   public:
     //@{ \name HybridSetInterface methods
     HybridGridTreePaving* clone() const { return new HybridGridTreePaving(*this); }
@@ -147,7 +149,7 @@ class HybridGridTreePaving
     ValidatedLowerKleenean covers(const HybridExactBox& hbx) const;
     ValidatedLowerKleenean inside(const HybridExactBoxes& hbx) const ;
     HybridUpperBoxes bounding_box() const;
-    OutputStream& write(OutputStream& os) const;
+    OutputStream& _write(OutputStream& os) const;
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
     //@}
   public:
@@ -160,8 +162,14 @@ class HybridGridTreePaving
 template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
     this->_provide_location(q).adjoin_outer_approximation(s); }
 
-inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat depth) {
-    HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,depth); return paving; }
+inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
+    HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
+
+
+class HybridAutomatonInterface;
+
+HybridGridTreePaving extend_auxiliary(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& ha);
+
 
 } // namespace Ariadne
 

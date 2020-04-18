@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_matrix.cpp
  *
- *  Copyright  2006  Pieter Collins, Alberto Casagrande
+ *  Copyright  2006-20  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -168,7 +168,7 @@ TestMatrix::test_misc()
     ARIADNE_TEST_EQUALS(FloatApproximationMatrix(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr));
     ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr))*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{1.,3.},{2.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr));
     ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*transpose(FloatApproximationMatrix({{5.,7.},{8.,6.}},pr)),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,8.},{7.,6.}},pr));
-    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))*FloatApproximationVector({5.,7.},pr),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr)*FloatApproximationVector({5.,7.},pr));
+    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))*FloatDPApproximationVector({5.,7.},pr),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr)*FloatDPApproximationVector({5.,7.},pr));
 }
 
 Int main() {

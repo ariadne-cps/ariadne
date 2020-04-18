@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector_field_evolver.hpp
+ *            dynamics/vector_field_evolver.hpp
  *
- *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file vector_field_evolver.hpp
+/*! \file dynamics/vector_field_evolver.hpp
  *  \brief Evolver for vector_field systems.
  */
 
@@ -139,7 +139,6 @@ class VectorFieldEvolver
   private:
     std::shared_ptr< SystemType > _sys_ptr;
     std::shared_ptr< IntegratorInterface > _integrator;
-    //std::shared_ptr< EvolutionProfiler >  _profiler;
     std::shared_ptr< ConfigurationType > _configuration;
 };
 
@@ -176,21 +175,21 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
   public:
 
     const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
+    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
+    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
-    Void enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
+    Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
 
   public:
 
-    virtual OutputStream& write(OutputStream& os) const;
+    virtual OutputStream& _write(OutputStream& os) const;
 };
 
 } // namespace Ariadne

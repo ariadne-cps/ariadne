@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_ball.hpp
+ *            numeric/float_ball.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_ball.hpp
+/*! \file numeric/float_ball.hpp
  *  \brief Floating-point approximations to real numbers.
  */
 
@@ -239,11 +239,13 @@ template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F
 }
 
 template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
+    using PR = typename Ball<F,FE>::PrecisionType;
     using PRE = typename Ball<F,FE>::ErrorPrecisionType;
   public:
     Positive<Ball<F,FE>>() : Bounds<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
         Positive<Ball<F,FE>>(M m, PRE pre) : Ball<F,FE>(m,pre) { }
+    explicit Positive<Ball<F,FE>>(PR pr, PRE pre) : Ball<F,FE>(pr,pre) { }
     explicit Positive<Ball<F,FE>>(Ball<F,FE> const& x) : Ball<F,FE>(x) { }
 };
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric.hpp
+ *            numeric/numeric.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file numeric.hpp
+/*! \file numeric/numeric.hpp
  *  \brief Number classes. File suitable for use as a pre-compiled header.
  */
 

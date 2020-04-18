@@ -1,7 +1,7 @@
 /***************************************************************************
  *            expression.tpl.hpp
  *
- *  Copyright 2009--17  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -197,7 +197,17 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 }
 
 template<class T> OutputStream& Expression<T>::_write(OutputStream& os) const {
-    this->node_ref().accept([&os](auto e){_write_impl(os,e);}); return os;
+    return os << _default_writer(*this);
+}
+
+template<class T> Writer<Expression<T>> Expression<T>::_default_writer(new PrefixExpressionWriter<T>());
+
+template<class T> OutputStream& PrefixExpressionWriter<T>::_write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
+}
+
+template<class T> OutputStream& InfixExpressionWriter<T>::_write(OutputStream& os, Expression<T> const& e) const {
+    e.node_ref().accept([&os](auto expr){_write_impl(os,expr);}); return os;
 }
 
 template<class R> inline
@@ -488,7 +498,7 @@ template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
     return NodeCounter<T,ExpressionComparator,true>().count_nodes(e);
 }
 
-template<class T> Nat count_distinct_node_ptrs(Expression<T> const& e) {
+template<class T> Nat count_distinct_node_pointers(Expression<T> const& e) {
     return NodeCounter<T,ExpressionPtrComparator,true>().count_nodes(e);
 }
 

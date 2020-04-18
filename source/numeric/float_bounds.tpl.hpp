@@ -1,7 +1,7 @@
 /***************************************************************************
  *            float_bounds.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -38,11 +38,7 @@
 
 namespace Ariadne {
 
-namespace {
-inline int log10floor(double const& x) { return std::max(std::floor(std::log10(x)),-65280.); }
-inline int log10floor(FloatMP const& x) { return log10floor(x.get_d()); }
-inline int abslog10floor(double const& x) { return log10floor(std::abs(x)); }
-}
+int abslog10floor(double x);
 
 template<class F> Nat Bounds<F>::output_places=8;
 
@@ -141,12 +137,18 @@ template<class F> auto Operations<Bounds<F>>::_cast_integer(Bounds<F> const& x) 
     return z;
 }
 
+    template<class F> auto Operations<Bounds<F>>::_write(OutputStream& os, Bounds<F> const& x) -> OutputStream& {
+    // Display using a number of fractional places so that the larger number in absolute value is displayed to the given precision.
+    F amax=max(-x._l,x._u);
+    if(amax==0) { return os << "{0.:0.}"; }
 
-template<class F> auto Operations<Bounds<F>>::_write(OutputStream& os, Bounds<F> const& x) -> OutputStream& {
+    Int zdgts=abslog10floor(amax.get_d())+1;
+
+    Nat fdgts=Nat(std::max(int(Bounds<F>::output_places)-zdgts,0));
     os << '{';
-    write(os,x.lower().raw(),Bounds<F>::output_places,downward);
+    write(os,x.lower().raw(),DecimalPlaces{fdgts},downward);
     os << ':';
-    write(os,x.upper().raw(),Bounds<F>::output_places,upward);
+    write(os,x.upper().raw(),DecimalPlaces{fdgts},upward);
     os << '}';
     return os;
 }

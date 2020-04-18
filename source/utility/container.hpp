@@ -1,7 +1,7 @@
 /***************************************************************************
  *            utility/container.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -180,7 +180,7 @@ template<class T> class Set : public std::set<T> {
         return *this; }
 };
 template<class T> inline Set<T> join(Set<T> s1, Set<T> const& s2) {
-    s1.adjoin(s2); return std::move(s1); }
+    s1.adjoin(s2); return s1; }
 template<class T> inline bool contains(const std::set<T>& s, const T& t) {
     return s.find(t)!=s.end(); }
 template<class T> inline bool subset(const std::set<T>& s1, const std::set<T>& s2) {
@@ -253,13 +253,13 @@ template<class K, class T> class Map : public std::map<K,T> {
             res.append(iter->second); } return res; }
 };
 template<class K, class T> inline Map<K,T> join(Map<K,T> m1, Map<K,T> const& m2) {
-    m1.adjoin(m2); return std::move(m1); }
+    m1.adjoin(m2); return m1; }
 template<class I, class X, class J> inline X& insert(Map<I,X>& m, const J& k, const X& v) {
     return m.std::template map<I,X>::insert(std::make_pair(k,v)).first->second; }
 template<class K, class T> Map<K,T> restrict_keys(const std::map<K,T>& m, const std::set<K>& k) {
     Map<K,T> result; const Set<K>& keys=static_cast<const Set<K>&>(k);
     for(auto item_iter=m.begin(); item_iter!=m.end(); ++item_iter) {
-        if(keys.contains(item_iter->first)) { result.insert(*item_iter); } } return std::move(result); }
+        if(keys.contains(item_iter->first)) { result.insert(*item_iter); } } return result; }
 template<class K, class T> OutputStream& operator<<(OutputStream& os, const std::map<K,T>& m) {
     bool first=true;
     for(auto x : m) {

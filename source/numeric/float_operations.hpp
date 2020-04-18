@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_operations.hpp
+ *            numeric/float_operations.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_operations.hpp
+/*! \file numeric/float_operations.hpp
  *  \brief Common header for floating-point number operations.
  */
 
@@ -40,9 +40,9 @@
 namespace Ariadne {
 
 template<class X, class R=X> struct DeclareFloatOperations
-    : public DeclareRealOperations<X,R>
-    , public DeclareComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
-    , public DeclareMixedFieldOperators<X,GenericTrait<X>,R>
+    : DeclareRealOperations<X,R>
+    , DeclareComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
+    , DeclareMixedFieldOperators<X,GenericTrait<X>,R>
 {
     friend OutputStream& operator<<(OutputStream&, X const&);
     friend InputStream& operator>>(InputStream&, X&);
@@ -58,7 +58,6 @@ template<class X, class NX=OppositeTrait<X>> struct DeclareDirectedFloatOperatio
 
 template<class PX, class QPX=OppositeTrait<PX>> struct DeclarePositiveDirectedFloatOperations
     : DeclarePositiveDirectedNumericOperations<PX,QPX>
-    , DeclareMixedDirectedSemifieldOperators<PX,QPX,GenericTrait<PX>,GenericTrait<QPX>>
 {
 };
 
@@ -71,8 +70,6 @@ template<class X, class R=X> struct DispatchFloatOperations
     : DispatchNumericOperations<X,R>
     , DispatchComparisonOperations<X,LessTrait<X>,EqualsTrait<X>>
     , DefineConcreteGenericOperators<X>
-//    , ProvideConcreteGenericFieldOperations<X,GenericTrait<X>,R>
-//    , ProvideConcreteGenericComparisonOperations<X,GenericTrait<X>,LessTrait<X>,EqualsTrait<X>>
 {
     friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
@@ -84,28 +81,21 @@ template<class X> struct DispatchDirectedFloatOperations
     , DispatchDirectedComparisonOperations<X,OppositeTrait<X>,LessTrait<X>,EqualsTrait<X>>
     , DispatchDirectedComparisonOperations<OppositeTrait<X>,X,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
     , DefineConcreteGenericOperators<X>
-//    , ProvideConcreteGenericDirectedGroupOperations<X,OppositeTrait<X>,GenericTrait<X>,GenericTrait<OppositeTrait<X>>>
-//    , ProvideConcreteGenericDirectedGroupOperations<OppositeTrait<X>,X,GenericTrait<OppositeTrait<X>>,GenericTrait<X>>
-//    , ProvideConcreteGenericDirectedComparisonOperations<X,GenericTrait<OppositeTrait<X>>,LessTrait<X>,EqualsTrait<X>>
-//    , ProvideConcreteGenericDirectedComparisonOperations<OppositeTrait<X>,GenericTrait<X>,LessTrait<OppositeTrait<X>>,EqualsTrait<OppositeTrait<X>>>
 {
     friend OutputStream& operator<<(OutputStream& os, X const& x) { return Operations<X>::_write(os,x); }
     friend InputStream& operator>>(InputStream& is, X& x) { return Operations<X>::_read(is,x); }
 };
 
 template<class PX, class QPX=OppositeTrait<PX>> struct DispatchPositiveDirectedFloatOperations
-    : public DispatchPositiveDirectedNumericOperations<PX,QPX>
-    , public DispatchPositiveDirectedNumericOperations<QPX,PX>
+    : DispatchPositiveDirectedNumericOperations<PX,QPX>
+    , DispatchPositiveDirectedNumericOperations<QPX,PX>
     , DefineConcreteGenericOperators<PX>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,QPX,Nat,Nat>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<QPX,PX,Nat,Nat>
 {
 };
 
 template<class PX> struct DispatchPositiveFloatOperations
-    : public DispatchPositiveDirectedNumericOperations<PX,PX>
+    : DispatchPositiveDirectedNumericOperations<PX,PX>
     , DefineConcreteGenericOperators<PX>
-//    , public ProvideConcreteGenericDirectedSemiFieldOperations<PX,PX,Nat,Nat>
 {
 };
 

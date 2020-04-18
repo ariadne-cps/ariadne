@@ -1,7 +1,7 @@
 /***************************************************************************
  *            test_linear_programming.cpp
  *
- *  Copyright  2009  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -52,54 +52,54 @@ class TestInteriorPointSolver
 
     Void test_validate_feasibility() {
         // A feasible instance
-        RawFloatVector xl={0.0,0.0,0.0};
-        RawFloatVector xu={inf,inf,inf};
-        FloatMatrix A={{1.0,0.0,1.0}, {0.0,1.0,2.0}};
-        RawFloatVector b={1.0,1.0};
-        RawFloatVector x={0.81,0.51,0.21};
-        RawFloatVector y={-1.0,-0.5};
+        RawFloatDPVector xl={0.0,0.0,0.0};
+        RawFloatDPVector xu={inf,inf,inf};
+        RawFloatDPMatrix A={{1.0,0.0,1.0}, {0.0,1.0,2.0}};
+        RawFloatDPVector b={1.0,1.0};
+        RawFloatDPVector x={0.81,0.51,0.21};
+        RawFloatDPVector y={-1.0,-0.5};
         ARIADNE_ASSERT(definitely(optimiser->validate_feasibility(xl,xu,A,b,x,y)));
 
-        b=RawFloatVector{1.0, -1.0};
-        y=RawFloatVector{-0.5, -1.0};
+        b=RawFloatDPVector{1.0, -1.0};
+        y=RawFloatDPVector{-0.5, -1.0};
         ARIADNE_ASSERT(definitely(!optimiser->validate_feasibility(xl,xu,A,b,x,y)));
     }
 
 
     Void test_feasibility() {
         // A feasible instance
-        RawFloatVector xl={0.0,0.0,0.0};
-        RawFloatVector xu={inf,inf,inf};
-        FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatVector b={1.0,1.0};
+        RawFloatDPVector xl={0.0,0.0,0.0};
+        RawFloatDPVector xu={inf,inf,inf};
+        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
+        RawFloatDPVector b={1.0,1.0};
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=RawFloatVector{1.0,-1.0};
+        b=RawFloatDPVector{1.0,-1.0};
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
     }
 
 
     Void test_constrained_feasibility() {
-        FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatVector b={1.0,1.0};
-        RawFloatVector xl={0.0,0.0,0.0};
-        RawFloatVector xu={4.0,2.0,3.0};
+        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
+        RawFloatDPVector b={1.0,1.0};
+        RawFloatDPVector xl={0.0,0.0,0.0};
+        RawFloatDPVector xu={4.0,2.0,3.0};
 
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=RawFloatVector{1.0,-1.0};
+        b=RawFloatDPVector{1.0,-1.0};
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
 
-        xu=RawFloatVector{+inf,+inf,3.0};
+        xu=RawFloatDPVector{+inf,+inf,3.0};
     }
 
 
     Void test_optimization() {
-        FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatVector b={1.0,1.0};
-        RawFloatVector c={1.0,0.5,-0.75};
-        RawFloatVector xl={0.0,0.0,0.0};
-        RawFloatVector xu={+inf,+inf,3.0};
+        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
+        RawFloatDPVector b={1.0,1.0};
+        RawFloatDPVector c={1.0,0.5,-0.75};
+        RawFloatDPVector xl={0.0,0.0,0.0};
+        RawFloatDPVector xu={+inf,+inf,3.0};
 
         ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
     }
@@ -109,10 +109,10 @@ class TestInteriorPointSolver
 
 Int main(Int argc, const char* argv[])
 {
-    auto verbosity = get_verbosity(argc,argv);
+    auto verb = get_verbosity(argc,argv);
 
     InteriorPointSolver interior_point_optimiser;
-    interior_point_optimiser.verbosity=verbosity;
+    interior_point_optimiser.verbosity=verb;
     TestInteriorPointSolver(interior_point_optimiser).test();
 
     std::cerr<<"INCOMPLETE ";

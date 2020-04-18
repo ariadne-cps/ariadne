@@ -1,7 +1,7 @@
 /***************************************************************************
- *            point.hpp
+ *            geometry/point.hpp
  *
- *  Copyright 2008-17  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008-20  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file point.hpp
+/*! \file geometry/point.hpp
  *  \brief Points in Euclidean space.
  */
 
@@ -37,11 +37,24 @@
 namespace Ariadne {
 
 template<class X> class Point;
-typedef Point<ExactNumericType> ExactPoint;
-typedef Point<EffectiveNumericType> EffectivePoint;
-typedef Point<ValidatedNumericType> ValidatedPoint;
-typedef Point<ApproximateNumericType> ApproximatePoint;
-typedef Point<Real> RealPoint;
+
+//@{
+//! \relates Point
+//! \name Type synonyms
+using DyadicPoint = Point<Dyadic>; //!< .
+using RationalPoint = Point<Rational>; //!< .
+using RealPoint = Point<Real>; //!< .
+
+template<class F> using ExactPoint = Point<Value<F>>;
+template<class F> using ValidatedPoint = Point<Bounds<F>>;
+template<class F> using ApproximatePoint = Point<Approximation<F>>;
+
+using FloatDPValuePoint = Point<FloatDPValue>;
+using FloatDPBoundsPoint = Point<FloatDPBounds>;
+using FloatDPApproximationPoint = Point<FloatDPApproximation>;
+
+typedef ExactPoint<FloatDP> ExactPointType;
+//@}
 
 //! A point in Euclidean space.
 template<class X>
@@ -73,17 +86,20 @@ class Point
 
     Vector<RealType> centre() const { return *this; }
 
+    friend Point<X> product(Point<X> const& pt1, Point<X> const& pt2) {
+        return Point<X>(join(pt1.vector(),pt2.vector())); }
+
     //! Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const {
+    virtual OutputStream& _write(OutputStream& os) const {
         return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
-    virtual ExactBoxType bounding_box() const;
+    virtual FloatDPUpperBox bounding_box() const;
 };
 
 template<class X> Point(Vector<X>) -> Point<X>;
 
-ExactPoint make_point(const StringType&);
+//Point<Real> make_point(const StringType&);
 
 } // namespace Ariadne
 

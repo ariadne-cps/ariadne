@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra/expansion.tpl.hpp
  *
- *  Copyright 2013-17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -77,9 +77,9 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
+    _zero_coefficient = nul(lst.begin()->second);
     _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
-    _coefficients = UniformList<X>(0,X());
-    _zero_coefficient = X();
+    _coefficients = UniformList<X>(0,_zero_coefficient);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);
@@ -92,7 +92,7 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
     {
         a=iter->first;
         x=iter->second;
-        if(decide(x!=0)) { this->append(a,x); }
+        if(!decide(x==0)) { this->append(a,x); }
     }
 }
 
@@ -488,7 +488,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, typename Uni
 template<class X> inline OutputStream& operator<<(OutputStream& os, typename UniformList<X>::ConstIterator const& iter) {
     return os << iter.operator->(); }
 
-template<class I, class X> OutputStream& Expansion<I,X>::write(OutputStream& os) const {
+template<class I, class X> OutputStream& Expansion<I,X>::_write(OutputStream& os) const {
     os << "Expansion<I," << class_name<X>() <<">";
     os << "{"<<this->number_of_terms()<<"/"<<this->capacity()<<","<<this->argument_size()<<"\n";
     for(auto iter=this->begin(); iter!=this->end(); ++iter) {
@@ -499,11 +499,11 @@ template<class I, class X> OutputStream& Expansion<I,X>::write(OutputStream& os)
 }
 
 
-inline OutputStream& _write(OutputStream& os, UniIndex const& a, String const& name, bool first_factor) {
+inline OutputStream& write(OutputStream& os, UniIndex const& a, String const& name, bool first_factor) {
     if (a!=0) { if (!first_factor) { os << "*"; } os << name; if (a!=1) { os << "^" << a; } } return os;
 }
 
-inline OutputStream& _write(OutputStream& os, MultiIndex const& a, Array<String> const& names, bool first_factor) {
+inline OutputStream& write(OutputStream& os, MultiIndex const& a, Array<String> const& names, bool first_factor) {
     for(SizeType j=0; j!=a.size(); ++j) {
         if(a[j]!=0) {
             if(first_factor) { first_factor=false; } else { os <<"*"; }
@@ -514,7 +514,7 @@ inline OutputStream& _write(OutputStream& os, MultiIndex const& a, Array<String>
 }
 
 template<class I, class X>
-OutputStream& Expansion<I,X>::write(OutputStream& os, const typename IndexTraits<I>::NameType& variable_names) const
+OutputStream& Expansion<I,X>::_write(OutputStream& os, const typename IndexTraits<I>::NameType& variable_names) const
 {
     const Expansion<I,X>& p=*this;
     ARIADNE_ASSERT(p.argument_size()==variable_names.size());
@@ -531,7 +531,7 @@ OutputStream& Expansion<I,X>::write(OutputStream& os, const typename IndexTraits
             bool first_factor=true;
             if(decide(v<0)) { os<<"-"; }
             if(possibly(abs(v)!=1) || degree_of(a)==0) { os<<abs(v); first_factor=false; }
-            _write(os,a,variable_names,first_factor);
+            write(os,a,variable_names,first_factor);
         }
     }
     return os;

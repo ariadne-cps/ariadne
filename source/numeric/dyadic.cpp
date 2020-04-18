@@ -1,7 +1,7 @@
 /***************************************************************************
- *            dyadic.cpp
+ *            numeric/dyadic.cpp
  *
- *  Copyright 2013--17  Pieter Collins
+ *  Copyright  2013-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dyadic.cpp
+/*! \file numeric/dyadic.cpp
  *  \brief
  */
 
@@ -359,38 +359,55 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
     return cmp(x1,x2)==Comparison::LESS;
 }
 
+Writer<Dyadic> Dyadic::_default_writer(new FractionWriter());
 
-//   mpf_get_str (char *str, mp_exp_t *expptr, int base, size_t n_digits, const mpf_t op)
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
-    static const bool write_decimal = true;
-    if(is_finite(x)) {
-        if constexpr (write_decimal) {
-            Dyadic w=x;
-            if(w<0) { os << "-"; w=-w; }
-            Integer z=floor(w);
-            os << z << ".";
-            w-=z;
-            while (w!=0) {
-                w*=10;
-                z=floor(w);
-                w-=z;
-                os << z;
-            }
-        } else { // Write p/2^q
-            Rational q;
-            mpq_set_f (q._mpq,x._mpf);
-            os << q.numerator();
-            Int exp = log2floor(q.denominator());
-            if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
-        }
+    return os << Dyadic::_default_writer(x);
+}
+
+template<class X> inline OutputStream& write_infinite(OutputStream& os, X const& x) {
+    if(is_nan(x)) {
+        os << "NaN";
     } else {
-        if(is_nan(x)) {
-            os << "NaN";
-        } else {
-            os << (sgn(x)==Sign::POSITIVE ? "" : "-") << "inf";
-        }
+        os << (sgn(x)==Sign::POSITIVE ? "" : "-") << "inf";
     }
     return os;
+}
+
+auto DecimalWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    if(is_finite(x)) {
+        Dyadic w=x;
+        if(w<0) { os << "-"; w=-w; }
+        Integer z=floor(w);
+        os << z << ".";
+        w-=z;
+        while (w!=0) {
+            w*=10;
+            z=floor(w);
+            w-=z;
+            os << z;
+        }
+    } else {
+        write_infinite(os,x);
+    }
+    return os;
+}
+
+auto FractionWriter::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    if(is_finite(x)) {
+        Rational q;
+        mpq_set_f (q._mpq,x._mpf);
+        os << q.numerator();
+        Int exp = log2floor(q.denominator());
+        if (exp!=0) { if(exp==1) { os << "/2"; } else { os << "/2^" << exp; } }
+    } else {
+        write_infinite(os,x);
+    }
+    return os;
+}
+
+auto RepresentationWriter<Dyadic>::_write(OutputStream& os, Dyadic const& x) const -> OutputStream& {
+    return os << "Dyadic(" << x.mantissa() << "," << x.exponent() << "u)";
 }
 
 Dyadic make_dyadic(unsigned long long int n) {
@@ -413,5 +430,12 @@ template<> String class_name<Dyadic>() { return "Dyadic"; }
 Dyadic hlf(Integer const& n) {
     return hlf(Dyadic(n));
 }
+
+struct RoundExact { };
+inline RoundExact opposite(RoundExact) { return RoundExact(); }
+template<class Y1, class Y2> inline decltype(auto) mul(RoundExact, Y1 const& y1, Y2 const& y2) { return y1*y2; }
+
+template<class RNDUP, class Y> auto _mul(RNDUP up, Bounds<Y> const& y1, Bounds<Y> const& y2) -> Bounds<Y>;
+
 
 } // namespace Ariadne

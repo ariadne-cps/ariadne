@@ -1,7 +1,7 @@
 /***************************************************************************
- *            hybrid_simulator.hpp
+ *            hybrid/hybrid_simulator.hpp
  *
- *  Copyright  2009  Pieter Collins
+ *  Copyright  2009-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file hybrid_simulator.hpp
+/*! \file hybrid/hybrid_simulator.hpp
  *  \brief Simulator for hybrid systems.
  */
 
@@ -34,20 +34,23 @@
 
 namespace Ariadne {
 
-class HybridTime;
+class HybridTerminationCriterion;
 class HybridAutomatonInterface;
 
 template<class T> class Orbit;
-
-
 
 /*! \brief A class for computing the evolution of a hybrid system.
  */
 class HybridSimulator
     : public Loggable
 {
-    typedef HybridApproximatePoint EnclosureType;
-    double _step_size;
+  public:
+    typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;
+    typedef Point<FloatDPApproximation> ApproximatePointType;
+    typedef HybridApproximatePointType EnclosureType;
+    typedef HybridTerminationCriterion TerminationType;
+  private:
+    FloatDPApproximation _step_size;
   public:
 
     //! \brief Default constructor.
@@ -57,8 +60,8 @@ class HybridSimulator
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridApproximatePoint> orbit(const HybridAutomatonInterface& system, const HybridApproximatePoint& initial_point, const HybridTime& time) const;
-    Orbit<HybridApproximatePoint> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const TerminationType& termination) const;
+    Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridRealPoint& initial_point, const TerminationType& termination) const;
 };
 
 

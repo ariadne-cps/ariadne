@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_error.hpp
+ *            numeric/float_error.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file float_error.hpp
+/*! \file numeric/float_error.hpp
  *  \brief Floating-point error bounds for metric spaces.
  */
 
@@ -71,7 +71,8 @@ template<class F> class Error
   public:
     Error<F>() : _e() { }
     explicit Error<F>(PR const& pr) : _e(pr) { }
-    explicit Error<F>(F const& x) : _e(x) { ARIADNE_PRECONDITION_MSG((this->_e>=0),"e="<<*this); }
+    // Check error not being negative to allow for NaN as a valid input.
+    explicit Error<F>(F const& x) : _e(x) { ARIADNE_PRECONDITION_MSG(!(this->_e<0),"e="<<*this); }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy> Error<F>(M m, PR pr) : _e(m,pr) { }
     explicit Error<F>(UpperBound<F> const& x) : Error<F>(x._u) { }
     explicit Error<F>(ValidatedUpperNumber const& y, PR pr) : Error<F>(UpperBound<F>(y,pr)) { }
@@ -121,9 +122,9 @@ template<class F> class Error
 
         friend Error<F> operator/(Error<F> const& x1, PositiveLowerBound<F> const& x2) { return Error<F>(div(up,x1._e,x2._l)); }
 
-        friend Error<F> operator+(Error<F> const& x1, Nat m) { return Error<F>(add(up,x1._e,m)); }
-        friend Error<F> operator*(Error<F> const& x1, Nat m) { return Error<F>(mul(up,x1._e,m)); }
-        friend Error<F> operator/(Error<F> const& x1, Nat m) { return Error<F>(div(up,x1._e,m)); }
+        friend Error<F> operator+(Error<F> const& x1, Nat m) { return Error<F>(add(up,x1._e,F(m,up,x1.precision()))); }
+        friend Error<F> operator*(Error<F> const& x1, Nat m) { return Error<F>(mul(up,x1._e,F(m,up,x1.precision()))); }
+        friend Error<F> operator/(Error<F> const& x1, Nat m) { return Error<F>(div(up,x1._e,F(m,down,x1.precision()))); }
 
         friend Approximation<F> operator-(Error<F> const& x1, Error<F> const& x2) { return Approximation<F>(sub(up,x1._e,x2._e)); }
         friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2);
@@ -164,8 +165,7 @@ template<class F> class Error
     friend Error<F>const& cast_positive(Error<F> const& x) { return x; }
   public:
     friend OutputStream& operator<<(OutputStream& os, Error<F> const& x) {
-//        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
-        return write(os,x.raw(),Error<F>::output_places,to_nearest); }
+        return write(os,x.raw(),DecimalPrecision{Error<F>::output_places},upward); }
     friend InputStream& operator>>(InputStream& is, Error<F>& x) {
         UpperBound<F> xu; is >> xu; x=Error<F>(xu); return is; }
   public:

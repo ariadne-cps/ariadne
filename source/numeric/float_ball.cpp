@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float_ball.cpp
+ *            numeric/float_ball.cpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -61,14 +61,14 @@ template<> OutputStream& Operations<FloatBall<MultiplePrecision>>::_write(Output
     double edbl=e.get_d();
     // Compute the number of decimal places to be displayed
     Nat errplc = static_cast<Nat>(FloatError<MultiplePrecision>::output_places);
-    Nat log10err = static_cast<Nat>(log10floor(edbl));
+    Nat log10err = static_cast<Nat>(abslog10floor(edbl));
     Nat dgtserr = errplc-(log10err+1);
     Nat dgtsval = (x.value().raw()==0) ? dgtserr : std::floor((x.value().precision()+1-x.value().raw().exponent())/log2ten);
     Nat dgts = std::max(std::min(dgtsval,dgtserr),errplc);
     if(edbl==0.0) { dgts = dgtsval; }
 
-    DecimalPlaces plcs{dgts}
-;
+    DecimalPlaces plcs{dgts};
+
     // Get string version of mpfr values
     String vstr=print(v,plcs,MPFR_RNDN);
     String estr=print(e,plcs,MPFR_RNDU);

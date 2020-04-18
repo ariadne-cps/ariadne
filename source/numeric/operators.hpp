@@ -1,7 +1,7 @@
 /***************************************************************************
- *            operators.hpp
+ *            numeric/operators.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file operators.hpp
+/*! \file numeric/operators.hpp
  *  \brief Numerical operator classes
  */
 
@@ -324,7 +324,7 @@ struct Neg : OperatorObject<Neg> {
     template<class X> X derivative(const X& a) const { return nul(a)-1; }
     template<class X,class D> D derivative(const X& a, const D& d) const { return -d; }
 };
-struct Hlf : OperatorObject<Neg> {
+struct Hlf : OperatorObject<Hlf> {
     static constexpr OperatorCode code() { return OperatorCode::HLF; } static constexpr OperatorKind kind() { return OperatorKind::UNARY; }
     template<class A> auto operator()(A&& a) const -> decltype(hlf(a)) { return hlf(a); }
     template<class X> X derivative(const X& a) const { return hlf(a); }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            function_mixin.tpl.hpp
  *
- *  Copyright 2008-17  Pieter Collins
+ *  Copyright  2008-20  Pieter Collins
  *
  ****************************************************************************/
 
@@ -42,14 +42,14 @@ template<class X> Vector<X> create_result(SizeType n, X z) { return Vector<X>(n,
 template<class F, class D, class C> template<class X> auto
 FunctionMixin<F,Void,D,C>::_base_evaluate(const ElementType<D,X>& x) const -> ElementType<C,X> {
     ElementType<C,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
-    static_cast<const F*>(this)->_compute(r,x); return std::move(r);
+    static_cast<const F*>(this)->_compute(r,x); return r;
 }
 
 /*
 template<class F, class D> template<class X> auto
 FunctionMixin<F,Void,D,IntervalDomainType>::_base_evaluate(const ElementType<D,X>& x) const -> X {
     ElementType<IntervalDomainType,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
-    static_cast<const F*>(this)->_compute(r,x); return std::move(r);
+    static_cast<const F*>(this)->_compute(r,x); return r;
 }
 */
 
@@ -95,6 +95,12 @@ FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<Validate
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatMP>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMP>> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatDPUpperInterval>>& x) const -> Result<TaylorModel<ValidatedTag,FloatDPUpperInterval>> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<TaylorModel<ValidatedTag,FloatMPUpperInterval>>& x) const -> Result<TaylorModel<ValidatedTag,FloatMPUpperInterval>> {
     return this->_base_evaluate(x); }
 template<class F,class D, class C> auto
 FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ElementaryAlgebra<ValidatedNumber>>& x) const -> Result<ElementaryAlgebra<ValidatedNumber>> {

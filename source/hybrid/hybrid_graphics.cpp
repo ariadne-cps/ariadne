@@ -40,13 +40,13 @@
 
 namespace Ariadne {
 
-static const Nat DEFAULT_WIDTH = 800;
-static const Nat DEFAULT_HEIGHT = 800;
+static const Nat HYBRID_DEFAULT_WIDTH = 800;
+static const Nat HYBRID_DEFAULT_HEIGHT = 800;
 
-static const Nat LEFT_MARGIN = 160;
-static const Nat BOTTOM_MARGIN = 40;
-static const Nat TOP_MARGIN = 10;
-static const Nat RIGHT_MARGIN = 10;
+static const Nat HYBRID_LEFT_MARGIN = 0;
+static const Nat HYBRID_BOTTOM_MARGIN = 0;
+static const Nat HYBRID_TOP_MARGIN = 0;
+static const Nat HYBRID_RIGHT_MARGIN = 0;
 
 Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
     return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
@@ -83,15 +83,15 @@ HybridFigure::HybridFigure()
 Void
 HybridFigure::write(const char* cfilename) const
 {
-    this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    this->write(cfilename, HYBRID_DEFAULT_WIDTH, HYBRID_DEFAULT_HEIGHT);
 }
 
 
 Void
 HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
-    const Nat canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
-    const Nat canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;
+    const Nat canvas_width = drawing_width+HYBRID_LEFT_MARGIN+HYBRID_RIGHT_MARGIN;
+    const Nat canvas_height = drawing_height+HYBRID_BOTTOM_MARGIN+HYBRID_TOP_MARGIN;
 
     SharedPointer<CanvasInterface> canvas=make_canvas(canvas_width, canvas_height);
 

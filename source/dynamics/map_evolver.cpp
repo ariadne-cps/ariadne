@@ -32,6 +32,7 @@
 #include "../algebra/vector.hpp"
 #include "../function/function.hpp"
 #include "../function/constraint.hpp"
+#include "../symbolic/assignment.hpp"
 #include "../dynamics/enclosure.hpp"
 #include "../dynamics/orbit.hpp"
 
@@ -40,9 +41,9 @@
 #include "../dynamics/map.hpp"
 #include "../dynamics/map_evolver.hpp"
 
-namespace {
+namespace Ariadne {
 
-using namespace Ariadne;
+namespace {
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {
     List<ES> result;
@@ -54,8 +55,6 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 
 } // namespace
 
-
-namespace Ariadne {
 
 // The maximum allowable radius of a basic set.
 MapEvolverConfiguration::RealType DEFAULT_MAXIMUM_ENCLOSURE_RADIUS = 100;
@@ -69,6 +68,52 @@ using std::shared_ptr;
 FunctionModelFactoryInterface<ValidatedTag,DoublePrecision>* make_taylor_function_factory();
 
 class DegenerateCrossingException { };
+
+
+EffectiveVectorMultivariateFunction make_auxiliary_function(
+    Space<Real> const& state_space,
+    List<RealAssignment> const& algebraic);
+
+EffectiveVectorMultivariateFunction make_reset_function(
+    Space<Real> const& space,
+    List<RealAssignment> const& algebraic,
+    List<PrimedRealAssignment> const& differential);
+
+
+IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
+    : _update_function(f)
+{
+    ARIADNE_PRECONDITION(f.result_size()==f.argument_size());
+}
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
+    : IteratedMap(updates,List<RealAssignment>()) { }
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates, List<RealAssignment> const& auxiliary)
+    : _updates(updates), _auxiliary(auxiliary)
+    , _update_function(make_reset_function(left_hand_sides(updates),auxiliary,updates))
+    , _auxiliary_function(make_auxiliary_function(left_hand_sides(updates),auxiliary))
+{
+}
+
+RealSpace IteratedMap::state_space() const {
+    return RealSpace(left_hand_sides(this->_updates));
+}
+
+RealSpace IteratedMap::auxiliary_space() const {
+    return RealSpace(left_hand_sides(this->_auxiliary));
+}
+
+
+OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
+    os << "IteratedMap( update_function = " << map.update_function() << ", "
+          "auxiliary_function = " << map.auxiliary_function() << ", "
+          "updates = " << map._updates << ", "
+          "auxiliary = " << map._auxiliary << ")";
+    return os;
+}
+
+
 
 
 MapEvolver::MapEvolver(const SystemType& system)

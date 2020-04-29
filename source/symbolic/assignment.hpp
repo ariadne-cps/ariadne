@@ -140,6 +140,15 @@ template<class T> inline List<Assignment<DottedVariable<T>,Expression<T>>> Dotte
 }
 
 
+//! \relates Assignment
+//! \brief Sort a list of assignments so that an assigned-to variable is only used after it is assigned.
+List<RealAssignment> algebraic_sort(const List<RealAssignment>& assignments);
+
+//! \relates Assignment
+//! \brief Make a function on a Euclidean domain given an ordered list of assignments,
+//! so that assigned variables can be used in the definition of other variables.
+EffectiveVectorMultivariateFunction make_function(const List<RealAssignment>& assignments, const RealSpace& arguments);
+
 } // namespace Ariadne
 
 #include "../symbolic/valuation.hpp"

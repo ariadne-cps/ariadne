@@ -46,9 +46,9 @@
 #include "../symbolic/space.hpp"
 #include "../symbolic/assignment.hpp"
 
-namespace {
+namespace Ariadne {
 
-using namespace Ariadne;
+namespace {
 
 template<class ES> List<ES> subdivide(const ES& enclosure) {
     List<ES> result;
@@ -58,31 +58,51 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
     return result;
 }
 
+} // namespace
 
-}
+EffectiveVectorMultivariateFunction make_auxiliary_function(
+    Space<Real> const& state_space,
+    List<RealAssignment> const& algebraic);
 
+EffectiveVectorMultivariateFunction make_dynamic_function(
+    Space<Real> const& space,
+    List<RealAssignment> const& algebraic,
+    List<DottedRealAssignment> const& differential);
 
-
-namespace Ariadne {
 
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
-    : _variable_names(variable_names(left_hand_sides(dynamics)))
-    , _function(make_function(left_hand_sides(dynamics),Vector<RealExpression>(right_hand_sides(dynamics))))
+    : VectorField(dynamics, List<RealAssignment>())
 {
 }
 
-VectorField::VectorField(EffectiveVectorMultivariateFunction const& function) {
-    List<Identifier> variable_names;
-    for (auto i : range(0,function.result_size()))
-        variable_names.append(Identifier("x"+std::to_string(i)));
-
-    _variable_names = variable_names;
-    _function = function;
+VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAssignment> const& auxiliary)
+    : _dynamics(dynamics), _auxiliary(auxiliary)
+    , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
+    , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
+{
 }
 
-RealSpace VectorField::state_space() const
+VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
+    : _dynamic_function(function), _auxiliary_function(0u,function.argument_size())
 {
-    return real_space(this->_variable_names);
+    ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
+}
+
+RealSpace VectorField::state_space() const {
+    return RealSpace(left_hand_sides(this->_dynamics));
+}
+
+RealSpace VectorField::auxiliary_space() const {
+    return RealSpace(left_hand_sides(this->_auxiliary));
+}
+
+
+OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
+    os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "
+          "auxiliary_function = " << vf.auxiliary_function() << ", "
+          "dynamics = " << vf._dynamics << ", "
+          "auxiliary = " << vf._auxiliary << ")";
+    return os;
 }
 
 // Allow subdivisions in upper evolution

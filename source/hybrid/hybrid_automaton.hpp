@@ -245,8 +245,6 @@ public:
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    friend List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
-
   protected:
 
     //! \brief The automaton name.
@@ -549,9 +547,11 @@ public:
     DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The algebraic equations valid in the location.
     List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
+/*
     //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
     //! occurs before any equation using that variable.
     List<RealAssignment> sorted_auxiliary_assignments(DiscreteLocation location) const;
+*/
     //! \brief The differential equations valid in the given location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
     //! \brief The invariant predicates valid in the given location.

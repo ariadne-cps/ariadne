@@ -40,10 +40,10 @@
 
 namespace Ariadne {
 
-EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
-EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<DottedRealAssignment> const& differential);
-EffectiveVectorMultivariateFunction make_reset_function(Space<Real> const& space, List<RealAssignment> const& algebraic, List<PrimedRealAssignment> const& primed);
-EffectiveScalarMultivariateFunction make_constraint_function(Space<Real> const& space, List<RealAssignment> const& algebraic, ContinuousPredicate const& constraint, Sign sign);
+EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& algebraic);
+EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, List<DottedRealAssignment> const& differential);
+EffectiveVectorMultivariateFunction make_reset_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, List<PrimedRealAssignment> const& primed);
+EffectiveScalarMultivariateFunction make_constraint_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, ContinuousPredicate const& constraint, Sign sign);
 
 List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 
@@ -226,13 +226,20 @@ algebraic_sort(const List<RealAssignment>& auxiliary) {
 }
 
 EffectiveVectorMultivariateFunction make_auxiliary_function(
-    Space<Real> const& space,
-    List<RealAssignment> const& sorted_algebraic)
+    Space<Real> const& state_space,
+    List<RealAssignment> const& algebraic)
 {
+    List<RealAssignment> sorted_algebraic = algebraic_sort(algebraic);
+    Space<Real> auxiliary_space(left_hand_sides(algebraic));
+    Space<Real> sorted_auxiliary_space(left_hand_sides(sorted_algebraic));
+
     RealExpression default_expression;
     Vector<RealExpression> results(sorted_algebraic.size(),default_expression);
-    for(SizeType i=0; i!=sorted_algebraic.size(); ++i) { results[i]=substitute(sorted_algebraic[i].rhs,sorted_algebraic); }
-    return make_function(space,results);
+    for(SizeType j=0; j!=sorted_algebraic.size(); ++j) {
+        SizeType i=auxiliary_space[sorted_auxiliary_space[j]];
+        results[i]=substitute(sorted_algebraic[j].rhs,sorted_algebraic);
+    }
+    return make_function(state_space,results);
 }
 
 EffectiveVectorMultivariateFunction make_dynamic_function(
@@ -647,12 +654,14 @@ HybridAutomaton::auxiliary_assignments(DiscreteLocation location) const {
     return this->mode(location)._auxiliary;
 }
 
+/*
 List<RealAssignment>
 HybridAutomaton::sorted_auxiliary_assignments(DiscreteLocation location) const {
     DiscreteMode const& mode=this->mode(location);
     assert(mode._sorted_auxiliary.size()==mode._auxiliary.size());
     return mode._sorted_auxiliary;
 }
+*/
 
 List<DottedRealAssignment>
 HybridAutomaton::dynamic_assignments(DiscreteLocation location) const {

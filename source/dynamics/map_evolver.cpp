@@ -87,17 +87,35 @@ IteratedMap::IteratedMap(const EffectiveVectorMultivariateFunction& f)
 }
 
 IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates)
-    : IteratedMap(updates,List<RealAssignment>()) { }
+    : IteratedMap(updates,List<RealAssignment>(),List<RealParameter>()) { }
 
 IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates, List<RealAssignment> const& auxiliary)
-    : _updates(updates), _auxiliary(auxiliary)
-    , _update_function(make_reset_function(left_hand_sides(updates),auxiliary,updates))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(updates),auxiliary))
+    : IteratedMap(updates,auxiliary,List<RealParameter>())
+{
+}
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates,
+                         List<RealParameter> const& parameters)
+    : IteratedMap(updates,List<RealAssignment>(),parameters)
+{
+}
+
+IteratedMap::IteratedMap(const List<PrimedRealAssignment>& updates,
+                         List<RealAssignment> const& auxiliary,
+                         List<RealParameter> const& parameters)
+    : _updates(updates), _auxiliary(auxiliary), _parameters(parameters)
+    , _update_function(make_reset_function(catenate<RealVariable>(left_hand_sides(updates),parameters),auxiliary,updates))
+    , _auxiliary_function(make_auxiliary_function(catenate<RealVariable>(left_hand_sides(updates),parameters),auxiliary))
+
 {
 }
 
 RealSpace IteratedMap::state_space() const {
     return RealSpace(left_hand_sides(this->_updates));
+}
+
+RealSpace IteratedMap::parameter_space() const {
+    return RealSpace(this->_parameters);
 }
 
 RealSpace IteratedMap::auxiliary_space() const {
@@ -109,10 +127,10 @@ OutputStream& operator<<(OutputStream& os, const IteratedMap& map) {
     os << "IteratedMap( update_function = " << map.update_function() << ", "
           "auxiliary_function = " << map.auxiliary_function() << ", "
           "updates = " << map._updates << ", "
-          "auxiliary = " << map._auxiliary << ")";
+          "auxiliary = " << map._auxiliary << ", "
+          "parameters = " << map._parameters << ")";
     return os;
 }
-
 
 
 

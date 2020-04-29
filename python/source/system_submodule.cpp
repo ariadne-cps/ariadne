@@ -56,12 +56,22 @@ template<> Nat __hash__<DiscreteLocation>(const DiscreteLocation& q) {
 
 }
 
+Void export_parameters(pybind11::module& module)
+{
+    pybind11::class_<RealParameter> real_parameter_class(module,"RealParameter");
+    module.def("unchanging", (RealParameter(*)(RealVariable const&)) &unchanging);
+    module.def("unchanging", (List<RealParameter>(*)(List<RealVariable> const&)) &unchanging);
+}
+
 Void export_map(pybind11::module& module)
 {
     pybind11::class_<IteratedMap> iterated_map_class(module,"IteratedMap");
     iterated_map_class.def(pybind11::init<List<PrimedRealAssignment> const&>());
     iterated_map_class.def(pybind11::init<List<PrimedRealAssignment> const&,List<RealAssignment> const&>());
+    iterated_map_class.def(pybind11::init<List<PrimedRealAssignment> const&,List<RealParameter>const&>());
+    iterated_map_class.def(pybind11::init<List<PrimedRealAssignment> const&,List<RealAssignment> const&,List<RealParameter>const&>());
     iterated_map_class.def("state_space", &IteratedMap::state_space);
+    iterated_map_class.def("parameter_space", &IteratedMap::parameter_space);
     iterated_map_class.def("auxiliary_space", &IteratedMap::auxiliary_space);
     iterated_map_class.def("update_function", &IteratedMap::update_function);
     iterated_map_class.def("auxiliary_function", &IteratedMap::auxiliary_function);
@@ -73,7 +83,10 @@ Void export_vector_field(pybind11::module& module)
     pybind11::class_<VectorField> vector_field_class(module,"VectorField");
     vector_field_class.def(pybind11::init<List<DottedRealAssignment> const&>());
     vector_field_class.def(pybind11::init<List<DottedRealAssignment> const&,List<RealAssignment> const&>());
+    vector_field_class.def(pybind11::init<List<DottedRealAssignment> const&,List<RealParameter>const&>());
+    vector_field_class.def(pybind11::init<List<DottedRealAssignment> const&,List<RealAssignment> const&,List<RealParameter>const&>());
     vector_field_class.def("state_space", &VectorField::state_space);
+    vector_field_class.def("parameter_space", &VectorField::parameter_space);
     vector_field_class.def("auxiliary_space", &VectorField::auxiliary_space);
     vector_field_class.def("dynamic_function", &VectorField::dynamic_function);
     vector_field_class.def("auxiliary_function", &VectorField::auxiliary_function);
@@ -125,6 +138,7 @@ Void export_hybrid_automaton(pybind11::module& module)
 
 
 Void system_submodule(pybind11::module& module) {
+    export_parameters(module);
     export_map(module);
     export_vector_field(module);
     export_hybrid_automaton(module);

@@ -68,13 +68,18 @@ class VectorField
     VectorField(const EffectiveVectorMultivariateFunction& f);
     VectorField(const List<DottedRealAssignment>&);
     VectorField(const List<DottedRealAssignment>&, List<RealAssignment> const&);
+    VectorField(const List<DottedRealAssignment>&, List<RealParameter> const&);
+    VectorField(const List<DottedRealAssignment>&, List<RealAssignment> const&, List<RealParameter> const&);
 
     const EffectiveVectorMultivariateFunction& dynamic_function() const { return this->_dynamic_function; }
     const EffectiveVectorMultivariateFunction& auxiliary_function() const { return this->_auxiliary_function; }
 
     RealSpace state_space() const;
+    RealSpace parameter_space() const;
     RealSpace auxiliary_space() const;
+    RealSpace state_parameter_space() const;
     RealSpace state_auxiliary_space() const;
+    RealSpace state_parameter_auxiliary_space() const;
 
     VectorField* clone() const { return new VectorField(*this); }
     ~VectorField() = default;
@@ -85,6 +90,7 @@ class VectorField
   private:
     List<DottedRealAssignment> _dynamics;
     List<RealAssignment> _auxiliary;
+    List<RealParameter> _parameters;
     EffectiveVectorMultivariateFunction _dynamic_function;
     EffectiveVectorMultivariateFunction _auxiliary_function;
 };

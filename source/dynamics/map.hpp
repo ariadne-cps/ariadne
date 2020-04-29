@@ -49,7 +49,6 @@ class Storage;
 
 //! \brief An iterated function system in Euclidean space.
 class IteratedMap
-//    : public ExtendedSystemMixin
 {
   public:
     //! \brief The type used to represent time.
@@ -60,6 +59,7 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
     //! \brief The type used to evolve the system
     typedef MapEvolver EvolverType;
+    //! \brief The type used to store local over-approximations to reach and evolve sets.
     typedef Enclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
     typedef Storage StorageType;
@@ -67,13 +67,18 @@ class IteratedMap
     IteratedMap(const EffectiveVectorMultivariateFunction& f);
     IteratedMap(const List<PrimedRealAssignment>&);
     IteratedMap(const List<PrimedRealAssignment>&, List<RealAssignment> const&);
+    IteratedMap(const List<PrimedRealAssignment>&, List<RealParameter> const&);
+    IteratedMap(const List<PrimedRealAssignment>&, List<RealAssignment> const&, List<RealParameter> const&);
 
     const EffectiveVectorMultivariateFunction& update_function() const { return this->_update_function; }
     const EffectiveVectorMultivariateFunction& auxiliary_function() const { return this->_auxiliary_function; }
 
     RealSpace state_space() const;
+    RealSpace parameter_space() const;
     RealSpace auxiliary_space() const;
+    RealSpace state_parameter_space() const;
     RealSpace state_auxiliary_space() const;
+    RealSpace state_parameter_auxiliary_space() const;
 
     IteratedMap* clone() const { return new IteratedMap(*this); }
     ~IteratedMap() = default;
@@ -84,6 +89,7 @@ class IteratedMap
   private:
     List<PrimedRealAssignment> _updates;
     List<RealAssignment> _auxiliary;
+    List<RealParameter> _parameters;
     EffectiveVectorMultivariateFunction _update_function;
     EffectiveVectorMultivariateFunction _auxiliary_function;
 };

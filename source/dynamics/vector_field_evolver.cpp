@@ -71,14 +71,26 @@ EffectiveVectorMultivariateFunction make_dynamic_function(
 
 
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics)
-    : VectorField(dynamics, List<RealAssignment>())
+    : VectorField(dynamics, List<RealAssignment>(), List<RealParameter>())
+{
+}
+
+VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealParameter> const& parameters)
+    : VectorField(dynamics, List<RealAssignment>(), parameters)
 {
 }
 
 VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAssignment> const& auxiliary)
-    : _dynamics(dynamics), _auxiliary(auxiliary)
-    , _dynamic_function(make_dynamic_function(left_hand_sides(dynamics),auxiliary,dynamics))
-    , _auxiliary_function(make_auxiliary_function(left_hand_sides(dynamics),auxiliary))
+    : VectorField(dynamics, List<RealAssignment>(), List<RealParameter>())
+{
+}
+
+VectorField::VectorField(List<DottedRealAssignment> const& dynamics,
+                         List<RealAssignment> const& auxiliary,
+                         List<RealParameter> const& parameters)
+    : _dynamics(dynamics), _auxiliary(auxiliary), _parameters(parameters)
+    , _dynamic_function(make_dynamic_function(catenate<RealVariable>(left_hand_sides(dynamics),parameters),auxiliary,dynamics))
+    , _auxiliary_function(make_auxiliary_function(catenate<RealVariable>(left_hand_sides(dynamics),parameters),auxiliary))
 {
 }
 
@@ -92,6 +104,10 @@ RealSpace VectorField::state_space() const {
     return RealSpace(left_hand_sides(this->_dynamics));
 }
 
+RealSpace VectorField::parameter_space() const {
+    return RealSpace(this->_parameters);
+}
+
 RealSpace VectorField::auxiliary_space() const {
     return RealSpace(left_hand_sides(this->_auxiliary));
 }
@@ -101,7 +117,8 @@ OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
     os << "VectorField( dynamic_function = " << vf.dynamic_function() << ", "
           "auxiliary_function = " << vf.auxiliary_function() << ", "
           "dynamics = " << vf._dynamics << ", "
-          "auxiliary = " << vf._auxiliary << ")";
+          "auxiliary = " << vf._auxiliary << ", "
+          "parameters = " << vf._parameters << ")";
     return os;
 }
 

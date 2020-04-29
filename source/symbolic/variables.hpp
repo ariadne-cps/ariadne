@@ -250,6 +250,24 @@ template<class T> class DottedVariable
 };
 DottedVariable<Real> inline dot(const Variable<Real>& var) { return DottedVariable<Real>(var); }
 
+//! \ingroup SymbolicModule
+//! \brief A named variable of type \a T representing an unchanging quantity with respect to time.
+template<class T> class UnchangingVariable
+    : public Variable<T>
+{
+  public:
+    //! \brief Decorate a simple variable with a dot.
+    template<class TT> friend UnchangingVariable<TT> unchanging(const Variable<TT>& var);
+    template<class TT> friend List<UnchangingVariable<TT>> unchanging(const List<Variable<TT>>& var);
+  private:
+    explicit UnchangingVariable(const Variable<T>& var) : Variable<T>(var) { }
+};
+template<class T> inline UnchangingVariable<T> unchanging(const Variable<T>& var) {
+    return UnchangingVariable<T>(var); }
+template<class T> inline List<UnchangingVariable<T>> unchanging(const List<Variable<T>>& vars) {
+    List<UnchangingVariable<T>> res; for (auto var : vars) { res.append(unchanging(var)); } return res; }
+
+using RealParameter = UnchangingVariable<Real>;
 
 
 template<class T> struct LetVariables {
@@ -281,6 +299,7 @@ template<class T> struct DottedVariables {
 };
 inline DottedVariables<Real> dot(const List<Variable<Real>>& lhs) { return DottedVariables<Real>(lhs); }
 inline DottedVariables<Real> dot(const InitializerList<Variable<Real>>& lhs) { return DottedVariables<Real>(List<Variable<Real>>(lhs)); }
+
 
 } // namespace Ariadne
 

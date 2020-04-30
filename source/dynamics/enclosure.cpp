@@ -77,7 +77,7 @@
 
 namespace Ariadne {
 
-template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
+template<class T> inline StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 using ValidatedConstraintModelDP = Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds>;
 
@@ -109,6 +109,27 @@ ValidatedVectorMultivariateFunctionModelDP make_identity(const RealBox& bx, cons
 }
 
 } // namespace
+
+OutputStream& operator<<(OutputStream& os, const EnclosureVariableKind& vk) {
+    switch (vk) {
+        case EnclosureVariableKind::INITIAL: return os << "x";
+        case EnclosureVariableKind::TEMPORAL: return os << "t";
+        case EnclosureVariableKind::PARAMETER: return os << "a";
+        case EnclosureVariableKind::INPUT: return os << "u";
+        case EnclosureVariableKind::NOISE: return os << "v";
+        case EnclosureVariableKind::ERROR: return os << "e";
+        case EnclosureVariableKind::UNKNOWN: default: return os << "s";
+    }
+}
+
+List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks) {
+    std::map<EnclosureVariableKind,Nat> counts;
+    List<Identifier> result;
+    for(SizeType i=0; i!=vks.size(); ++i) {
+        result.append( str(vks[i]) + str(counts[vks[i]]++) );
+    }
+    return result;
+}
 
 inline Pair<ValidatedScalarMultivariateFunctionModelDP,ValidatedScalarMultivariateFunctionModelDP> split(const ValidatedScalarMultivariateFunctionModelDP& f, Nat k) {
     Pair<ExactBoxType,ExactBoxType> domains=split(f.domain(),k);

@@ -44,6 +44,7 @@
 
 namespace Ariadne {
 
+class Identifier;
 class ValidatedConstrainedImageSet;
 
 template<class X, class R> class Constraint;
@@ -77,6 +78,9 @@ struct EnclosureConfiguration {
     friend OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec);
 };
 
+enum class EnclosureVariableKind : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
+OutputStream& operator<<(OutputStream& os, const EnclosureVariableKind& vk);
+List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks);
 
 //! \ingroup DynamicsModule
 //! \brief An enclosure for part of the reachable or evolved set of a dynamical system.

@@ -55,32 +55,8 @@
 
 namespace Ariadne {
 
-OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt);
 OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
-
-OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
-    switch (evt) {
-        case EnclosureVariableType::INITIAL: return os << "x";
-        case EnclosureVariableType::TEMPORAL: return os << "t";
-        case EnclosureVariableType::PARAMETER: return os << "a";
-        case EnclosureVariableType::INPUT: return os << "u";
-        case EnclosureVariableType::NOISE: return os << "v";
-        case EnclosureVariableType::ERROR: return os << "e";
-        case EnclosureVariableType::UNKNOWN: default: return os << "s";
-    }
-}
-
-template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
-
-inline List<String> variable_names(const List<EnclosureVariableType>& vt) {
-    std::map<EnclosureVariableType,Nat> counts;
-    List<String> result;
-    for(Nat i=0; i!=vt.size(); ++i) {
-        result.append( str(vt[i]) + str(counts[vt[i]]++) );
-    }
-    return result;
-}
 
 template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
     std::cerr<<"catenate(List<T>,T,List<T>): "<<lst1<<"; "<<val2<<"; "<<lst3<<"\n";
@@ -100,7 +76,7 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(), _events(), _state_space(), _set(), _variables()
+    : _location(), _events(), _state_space(), _set(), _variable_kinds()
 {
 }
 
@@ -115,7 +91,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
                                  const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _state_space(state_space.variables()), _set(),
-      _variables(state_space.dimension(),EnclosureVariableType::INITIAL)
+      _variable_kinds(state_space.dimension(),EnclosureVariableKind::INITIAL)
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
     this->_set=Enclosure(euclidean_set,factory);
@@ -125,7 +101,7 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
                                  const RealBox& box, const ValidatedFunctionModelDPFactoryInterface& factory)
     : _location(location), _events(), _state_space(state_space.variables()), _set(box,factory),
-      _variables(box.dimension(),EnclosureVariableType::INITIAL)
+      _variable_kinds(box.dimension(),EnclosureVariableKind::INITIAL)
 {
 }
 
@@ -142,12 +118,12 @@ HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const Validated
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
     : _location(location), _events(), _state_space(spc.variables()), _set(set),
-      _variables(set.state_dimension(),EnclosureVariableType::INITIAL)
+      _variable_kinds(set.state_dimension(),EnclosureVariableKind::INITIAL)
 {
-    if(_variables.size()<set.number_of_parameters()) {
-        _variables.append(EnclosureVariableType::TEMPORAL);
-        while(_variables.size()<set.number_of_parameters()) {
-            _variables.append(EnclosureVariableType::UNKNOWN);
+    if(_variable_kinds.size()<set.number_of_parameters()) {
+        _variable_kinds.append(EnclosureVariableKind::TEMPORAL);
+        while(_variable_kinds.size()<set.number_of_parameters()) {
+            _variable_kinds.append(EnclosureVariableKind::UNKNOWN);
         }
     }
 }
@@ -325,16 +301,16 @@ Void HybridEnclosure::set_auxiliary(List<RealVariable> vars, EffectiveVectorMult
     this->_set.set_auxiliary(aux);
 }
 
-Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
     this->_set.new_parameter(ivl);
-    this->_variables.append(vt);
+    this->_variable_kinds.append(vk);
 }
 
-Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
     this->_set.new_variable(ivl);
-    this->_variables.append(vt);
+    this->_variable_kinds.append(vk);
 }
 
 Void HybridEnclosure::new_state_time_bound(DiscreteEvent e, ValidatedScalarMultivariateFunction gamma) {
@@ -568,8 +544,8 @@ HybridEnclosure::uniform_error_recondition()
 {
     Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
-    ExactBoxType new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
-    this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),EnclosureVariableType::ERROR));
+    ExactBoxType new_variable_kinds = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
+    this->_variable_kinds.concatenate(List<EnclosureVariableKind>(new_variable_kinds.size(),EnclosureVariableKind::ERROR));
     this->_check();
 }
 
@@ -641,7 +617,7 @@ OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c) {
 OutputStream& HybridEnclosure::_write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
-              << "( variables = " << variable_names(this->_variables)
+              << "( variables = " << canonical_variable_names(this->_variable_kinds)
               << ",\n   events=" << this->_events
               << ",\n   location=" << this->_location
               << ",\n   state_space=" << this->state_space()

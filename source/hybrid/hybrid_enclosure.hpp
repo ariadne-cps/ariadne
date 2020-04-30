@@ -71,8 +71,6 @@ class HybridEnclosure;
 class HybridStorage;
 template<> class ListSet<HybridEnclosure>;
 
-enum class EnclosureVariableType : std::uint8_t { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
-
 //! \ingroup HybridSetSubModule
 //! \brief A class representing an enclosure for a hybrid evolution.
 //! Handles progress, activation and guard constraints internally.
@@ -124,7 +122,7 @@ class HybridEnclosure
     List<RealVariable> _state_space;
     List<RealVariable> _auxiliary_space;
     Enclosure _set;
-    List<EnclosureVariableType> _variables;
+    List<EnclosureVariableKind> _variable_kinds;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
@@ -256,9 +254,9 @@ class HybridEnclosure
     Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction aux);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    Void new_parameter(ExactIntervalType ivl, EnclosureVariableType);
+    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    Void new_variable(ExactIntervalType ivl, EnclosureVariableType);
+    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.

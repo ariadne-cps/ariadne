@@ -214,10 +214,6 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-//    Void apply_reset(DiscreteEvent e, DiscreteLocation q,
-//                     RealSpace s, const ValidatedVectorMultivariateFunction& r);
-    //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
-    //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     Void apply_reset(DiscreteEvent e, DiscreteLocation q,
                      RealSpace s, const ValidatedVectorMultivariateFunction& r,
                      RealSpace v, const EffectiveVectorMultivariateFunction& a);

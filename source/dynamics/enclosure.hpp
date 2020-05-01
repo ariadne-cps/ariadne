@@ -66,6 +66,8 @@ using RealSpace = Space<Real>;
 template<class IVL> class VariablesBox;
 using RealVariablesBox = VariablesBox<RealInterval>;
 
+struct Variables2d;
+
 typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> ValidatedConstraintModel;
 
 typedef Dyadic StepSizeType;
@@ -440,7 +442,9 @@ class LabelledEnclosure
 
     Void set_state_space(RealSpace const&);
     const RealSpace state_space() const;
+    const RealVariable time_variable() const;
     const RealSpace auxiliary_space() const;
+    const RealSpace state_time_auxiliary_space() const;
 
     Void set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux);
 
@@ -449,6 +453,9 @@ class LabelledEnclosure
     friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactIntervalType&);
     friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactBoxType&);
     friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledEnclosure&);
+
+    using Enclosure::draw;
+    Void draw(CanvasInterface&, const Variables2d&) const;
   private:
     List<Identifier> _state_variables;
     List<Identifier> _auxiliary_variables;

@@ -1583,8 +1583,18 @@ const RealSpace LabelledEnclosure::state_space() const {
     return RealSpace(this->_state_variables);
 }
 
+const RealVariable LabelledEnclosure::time_variable() const
+{
+    return TimeVariable();
+}
+
 const RealSpace LabelledEnclosure::auxiliary_space() const {
     return RealSpace(this->_auxiliary_variables);
+}
+
+const RealSpace LabelledEnclosure::state_time_auxiliary_space() const
+{
+    return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
 }
 
 Void LabelledEnclosure::set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux) {
@@ -1644,6 +1654,15 @@ Void LabelledEnclosure::apply_map(ValidatedVectorMultivariateFunction const& f, 
     this->_state_variables=spc.variable_names();
     this->_auxiliary_variables=aux_spc.variable_names();
 }
+
+Projection2d projection(const RealSpace& spc, const Variables2d& variables);
+
+Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) const
+{
+    Projection2d proj=projection(this->state_time_auxiliary_space(),axes);
+    this->euclidean_set().draw(canvas,proj);
+}
+
 
 
 } // namespace Ariadne

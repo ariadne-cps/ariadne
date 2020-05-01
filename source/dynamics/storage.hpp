@@ -108,9 +108,7 @@ class Storage
     virtual Storage* clone() const override { return new Storage(*this); }
     virtual DimensionType dimension() const override { return this->_state_set.dimension(); }
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const override {
-        std::cerr<<"Storage::draw(Canvas, Projection2d): dimension="<<this->dimension()<<", projection="<<p<<"\n";
         GridTreePaving state_aux_set=this->state_auxiliary_set();
-        std::cerr<<"state_auxiliary_set.size()="<<state_aux_set.size()<<"\n";
         return this->state_auxiliary_set().draw(c,p); }
 
     friend OutputStream& operator<<(OutputStream& os, Storage const& set) {

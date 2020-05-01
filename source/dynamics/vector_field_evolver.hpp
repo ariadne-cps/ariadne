@@ -61,7 +61,7 @@ class EvolutionProfiler;
 //!
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, Enclosure, typename VectorField::TimeType >
+    : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
     , public Loggable
 {
   public:
@@ -70,7 +70,7 @@ class VectorFieldEvolver
     typedef typename VectorField::TimeType TimeType;
     typedef Dyadic TimeStepType;
     typedef TimeType TerminationType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;

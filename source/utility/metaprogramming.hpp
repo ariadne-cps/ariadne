@@ -179,6 +179,8 @@ template<class A1, class A2> struct CanDivide {
     static const bool value = decltype(test<A1,A2>(1))::value;
 };
 
+template<class F, class... AS> using InvokeResult = typename std::invoke_result<F,AS...>::type;
+//template<class F, class... AS> using IsInvocable = std::is_invokable<F,AS...>;
 //template<class R, class F, class... AS> using IsInvocableReturning = std::is_invokable_r<R,F,AS...>;
 template<class F, class... AS> struct IsInvocable;
 template<class R, class F, class... AS> struct IsInvocableReturning;

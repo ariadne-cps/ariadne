@@ -59,7 +59,7 @@ class EvolutionProfiler;
 /*! \brief A class for computing the evolution of an iterated map.
  */
 class MapEvolver
-    : public EvolverBase< IteratedMap, Enclosure, Integer>
+    : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
     , public Loggable
 {
   public:
@@ -67,7 +67,7 @@ class MapEvolver
     typedef IteratedMap SystemType;
     typedef Integer TimeType;
     typedef Integer TerminationType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     typedef Pair<TerminationType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -85,6 +85,7 @@ class MapEvolver
 
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
+    EnclosureType enclosure(RealVariablesBox const&) const;
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;

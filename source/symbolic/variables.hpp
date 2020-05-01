@@ -149,6 +149,8 @@ template<class T> class Variables : public List<Variable<T>> {
     Variables<T>& operator=(Variables<T> const&) = default;
     inline List<Assignment<Variable<T>,T>> operator=(const List<T>& c) const;
     template<class IVL> inline VariablesBox<IVL> in(const List<IVL>& bx) const;
+    List<Identifier> names() const {
+        List<Variable<T>> const& lst=*this; return apply([](Variable<T>const& var){return var.name();},lst); }
 };
 
 

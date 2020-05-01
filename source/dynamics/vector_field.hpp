@@ -44,6 +44,7 @@
 namespace Ariadne {
 
 class Enclosure;
+class LabelledEnclosure;
 class Storage;
 class VectorFieldEvolver;
 
@@ -61,7 +62,7 @@ class VectorField
     //! \brief The class used to compute the system evolution.
     typedef VectorFieldEvolver EvolverType;
     //! \brief The type used to store local over-approximations to reach and evolve sets.
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
     typedef Storage StorageType;
   public:

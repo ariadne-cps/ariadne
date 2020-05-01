@@ -66,7 +66,7 @@ Void TestMapEvolver::test() const
     typedef DoublePrecision PR;
     DoublePrecision pr;
 
-    typedef Enclosure EnclosureType;
+    typedef IteratedMap::EnclosureType EnclosureType;
 
     // Define the initial box
     ExactBoxType initial_box(2);
@@ -77,33 +77,29 @@ Void TestMapEvolver::test() const
 
     // Set up the map field
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
-    Real a=Dyadic(1.5); Real b=Dyadic(0.375);
-    EffectiveVectorMultivariateFunction henon;
-    {
-        EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
-        EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
-        henon = { a-x*x+b*y, x };
-    }
+    Real a=1.5_dyadic; Real b=0.375_dyadic;
+    RealVariable x("x"), y("y");
+    IteratedMap henon({ next(x)=a-x*x+b*y, next(y)=x });
     ARIADNE_TEST_PRINT(henon);
 
     // Function evaluation sanity check
     Vector<FloatApproximation<PR>> p={{a,b},pr};
-    Vector<FloatApproximation<PR>> x={{0.5,0.25},pr};
-    Vector<FloatApproximation<PR>> hx={p[0]-x[0]*x[0]+x[1]*p[1], x[0]};
-    ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
-    Matrix<FloatApproximation<PR>> dhx={{-2*x[0],p[1]},{1.0_approx,0.0_approx}};
-    ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
+    Vector<FloatApproximation<PR>> xa={{0.5,0.25},pr};
+    Vector<FloatApproximation<PR>> hxa={p[0]-xa[0]*xa[0]+xa[1]*p[1], xa[0]};
+    ARIADNE_TEST_EQUAL(henon.update_function().evaluate(xa),hxa);
+    Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{1.0_approx,0.0_approx}};
+    ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
 
 
     // Function evaluation sanity check
     ARIADNE_TEST_PRINT(initial_box);
-    ARIADNE_TEST_PRINT(image(initial_box,henon));
-    ARIADNE_TEST_PRINT(jacobian_range(henon,cast_vector(initial_box)));
+    ARIADNE_TEST_PRINT(image(initial_box,henon.update_function()));
+    ARIADNE_TEST_PRINT(jacobian_range(henon.update_function(),cast_vector(initial_box)));
 
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10)));
+    EnclosureType initial_set(initial_box,henon.state_space(),TaylorFunctionFactory(ThresholdSweeper<FloatDP>(dp,1e-10)));
     ARIADNE_TEST_PRINT(initial_set);
 
     // Set up the evolution parameters and grid

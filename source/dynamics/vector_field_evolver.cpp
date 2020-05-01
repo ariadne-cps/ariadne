@@ -125,11 +125,11 @@ VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const Integrato
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
@@ -162,7 +162,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
 {
     if (possibly(current_set.bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG(2,"initial set too large, splitting\n");
-        Pair<Enclosure,Enclosure> split_sets = current_set.split();
+        Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
         if(!definitely(split_sets.second.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.second); }
     } else {
@@ -305,10 +305,13 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     TimeStepType next_time=current_time+TimeStepType(step_size);
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
-    ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0,step_size))<<"\n");
-    EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0,step_size)));
+    EnclosureType reach_set_model=current_set_model;
+    reach_set_model.apply_full_reach_step(flow_model);
+    //ARIADNE_LOG(6,"product = "<<product(current_set_model,ExactIntervalType(0,step_size))<<"\n");
+    //EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0,step_size)),current_set_model.state_space());
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-    EnclosureType next_set_model=apply(flow_step_model,current_set_model);
+    EnclosureType next_set_model=current_set_model;
+    next_set_model.apply_map(flow_step_model);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");
 

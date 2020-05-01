@@ -44,6 +44,7 @@ namespace Ariadne {
 
 class MapEvolver;
 class Enclosure;
+class LabelledEnclosure;
 class Storage;
 
 
@@ -60,7 +61,7 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
     //! \brief The type used to evolve the system
     typedef MapEvolver EvolverType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
     typedef Storage StorageType;
   public:

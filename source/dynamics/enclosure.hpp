@@ -34,6 +34,7 @@
 #include "../numeric/numeric.hpp"
 #include "../algebra/vector.hpp"
 #include "../geometry/set_interface.hpp"
+#include "../symbolic/identifier.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../output/drawer_interface.hpp"
 
@@ -44,7 +45,6 @@
 
 namespace Ariadne {
 
-class Identifier;
 class ValidatedConstrainedImageSet;
 
 template<class X, class R> class Constraint;
@@ -59,6 +59,12 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 class Storage;
+
+template<class T> class Space;
+using RealSpace = Space<Real>;
+
+template<class IVL> class VariablesBox;
+using RealVariablesBox = VariablesBox<RealInterval>;
 
 typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> ValidatedConstraintModel;
 
@@ -87,7 +93,7 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-    , public ValidatedCompactSetInterface
+//    , public ValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -97,10 +103,17 @@ class Enclosure
     List<ValidatedConstraintModel> _constraints;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
+
+    List<EnclosureVariableKind> _variable_kinds;
+
     EnclosureConfiguration _configuration;
+  public:
+    typedef EnclosureConfiguration ConfigurationType;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
+    //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
+    explicit Enclosure(EnclosureConfiguration const& config);
     //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const RealBox& bx, const EnclosureConfiguration& config);
     //! \brief Construct a representation of the box \a bx.
@@ -158,13 +171,21 @@ class Enclosure
     ValidatedScalarMultivariateFunctionModelDP const  get_function(SizeType i) const;
 
     //! \brief Set the auxiliary function.
-    Void set_auxiliary(EffectiveVectorMultivariateFunction const& aux);
+    Void set_auxiliary_mapping(EffectiveVectorMultivariateFunction const& aux);
+    //! \brief Get the auxiliary function.
+    EffectiveVectorMultivariateFunction const& auxiliary_mapping() const;
 
+
+    //! \brief A list detailing the kind of variable each of the domain parameters represents.
+    List<EnclosureVariableKind> const& variable_kinds() const;
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     Void new_parameter(ExactIntervalType ivl);
+    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Introduces a new independent variable with values in the interval \a ivl.
     //! Equivalent to constructing the set \f$S\times I\f$.
     Void new_variable(ExactIntervalType ivl);
+    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
+    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     Void substitute(SizeType j, ValidatedScalarMultivariateFunctionModelDP v);
@@ -174,8 +195,10 @@ class Enclosure
     //! \brief Set the time function to zero.
     Void clear_time();
 
-    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The state variables are unchanged.
     Void apply_map(ValidatedVectorMultivariateFunction r);
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The auxiliary function is updated to \a aux.
+    Void apply_map(ValidatedVectorMultivariateFunction r, EffectiveVectorMultivariateFunction aux);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     Void apply_fixed_evolve_step(ValidatedVectorMultivariateFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
@@ -351,7 +374,7 @@ class Enclosure
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;
   private:
-    Void _check() const;
+    Void _check(std::string from="") const;
     Void _solve_zero_constraints();
     EffectiveVectorMultivariateFunction real_function() const;
   private:
@@ -375,6 +398,61 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2);
 Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
 Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
+
+} // namespace Ariadne
+
+#include "../symbolic/space.hpp"
+
+namespace Ariadne {
+
+template<class S> class LabelledSet;
+
+template<class UB> using LabelledInterval = VariableInterval<UB>;
+using LabelledExactIntervalType = LabelledInterval<typename ExactIntervalType::UpperBoundType>;
+
+template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
+using LabelledExactBoxType = LabelledBox<ExactIntervalType>;
+using LabelledRealBox = LabelledSet<RealBox>;
+
+class LabelledEnclosure
+    : public Enclosure
+{
+  public:
+    LabelledEnclosure() : Enclosure() { }
+    LabelledEnclosure(EnclosureConfiguration const& config) : Enclosure(config) { }
+    LabelledEnclosure(LabelledRealBox const& bx, EnclosureConfiguration const& config);
+    LabelledEnclosure(LabelledExactBoxType const& bx, EnclosureConfiguration const& config);
+    LabelledEnclosure(ExactBoxType const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(RealVariablesBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(RealBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(BoundedConstraintSet const& set, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(Enclosure const& set, RealSpace const& state_space);
+    LabelledEnclosure(Enclosure const& set, RealSpace const& state_space, RealSpace const& auxiliary_space);
+
+    Enclosure const& euclidean_set() const { return *this; }
+    Pair<LabelledEnclosure,LabelledEnclosure> split() const;
+    Void apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi);
+
+    Void apply_map(ValidatedVectorMultivariateFunction const& f);
+    Void apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& new_state_space);
+    Void apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& new_state_space,
+                   EffectiveVectorMultivariateFunction const& a, RealSpace const& new_auxiliary_space);
+
+    Void set_state_space(RealSpace const&);
+    const RealSpace state_space() const;
+    const RealSpace auxiliary_space() const;
+
+    Void set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux);
+
+    friend LabelledEnclosure product(const LabelledEnclosure&, const ExactIntervalType&);
+
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactIntervalType&);
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactBoxType&);
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledEnclosure&);
+  private:
+    List<Identifier> _state_variables;
+    List<Identifier> _auxiliary_variables;
+};
 
 } //namespace Ariadne
 

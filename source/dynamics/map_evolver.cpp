@@ -128,11 +128,15 @@ typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() co
 }
 
 typename MapEvolver::EnclosureType MapEvolver::enclosure(const ExactBoxType& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealBox& box) const {
-    return Enclosure(box,this->function_factory());
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
+}
+
+typename MapEvolver::EnclosureType MapEvolver::enclosure(const RealVariablesBox& box) const {
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
 Orbit<MapEvolver::EnclosureType>
@@ -244,7 +248,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 
     // Compute the map model
-    EnclosureType final_enclosure=Ariadne::apply(_sys_ptr->function(),initial_enclosure);
+    EnclosureType& final_enclosure=initial_enclosure;
+    final_enclosure.apply_map(_sys_ptr->function());
     TimeType final_time=initial_time+1;
     ARIADNE_LOG(6,"final_enclosure = "<<final_enclosure<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");

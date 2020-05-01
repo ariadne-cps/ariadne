@@ -33,9 +33,13 @@
 #include "../geometry/set_interface.hpp"
 #include "../geometry/paving_interface.hpp"
 #include "../geometry/grid_paving.hpp"
+#include "../symbolic/identifier.hpp"
 #include "../output/graphics_interface.hpp"
 
 namespace Ariadne {
+
+template<class T> class Space;
+using RealSpace = Space<Real>;
 
 //! \ingroup DynamicsModule
 //! \brief A storage for part of the reachable or evolved set of a dynamical system.
@@ -44,6 +48,9 @@ class Storage
 {
     GridTreePaving _state_set;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
+
+    List<Identifier> _state_space;
+    List<Identifier> _auxiliary_space;
   public:
     typedef Grid GridType;
     Storage(Grid const& g) : _state_set(g), _auxiliary_mapping(0,g.dimension()) { }
@@ -54,8 +61,12 @@ class Storage
         : _state_set(gtp), _auxiliary_mapping(aux) { }
 
     template<class SYS> Void set_system(SYS const&) { }
-    Void set_auxiliary(EffectiveVectorMultivariateFunction const& aux) { this->_auxiliary_mapping=aux; }
-    EffectiveVectorMultivariateFunction auxiliary() const { return this->_auxiliary_mapping; }
+    Void set_auxiliary_mapping(EffectiveVectorMultivariateFunction const& aux) { this->_auxiliary_mapping=aux; }
+    EffectiveVectorMultivariateFunction auxiliary_mapping() const { return this->_auxiliary_mapping; }
+    Void set_auxiliary(List<RealVariable> vars, EffectiveVectorMultivariateFunction const& aux);
+
+    const RealSpace state_space() const;
+    const RealSpace auxiliary_space() const;
 
     GridTreePaving& state_set() { return this->_state_set; }
     GridTreePaving const& state_set() const { return this->_state_set; }

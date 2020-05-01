@@ -316,6 +316,8 @@ template<class IVL> VariablesBox<IVL>::operator LabelledSet<Box<IVL>>() const {
     return LabelledSet<Box<IVL>>(spc,this->euclidean_set(spc));
 }
 
+template<class UB> using LabelledInterval = VariableInterval<UB>;
+template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
 
 RealBox make_box(RealSpace const&, RealVariablesBox const&);
 RealBox make_set(RealSpace const&, RealVariablesBox const&);

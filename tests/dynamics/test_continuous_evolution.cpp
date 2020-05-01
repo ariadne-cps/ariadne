@@ -37,6 +37,7 @@
 #include "geometry/box.hpp"
 #include "geometry/list_set.hpp"
 #include "solvers/integrator.hpp"
+#include "symbolic/expression_set.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/orbit.hpp"
 #include "output/graphics.hpp"
@@ -90,7 +91,7 @@ Void TestContinuousEvolution::test() const
 {
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef Enclosure EnclosureType;
+    typedef VectorField::EnclosureType EnclosureType;
 
     // Set up the evolution parameters and grid
     Real time(2.0_dec);
@@ -110,21 +111,20 @@ Void TestContinuousEvolution::test() const
 
     ARIADNE_TEST_PRINT(integrator);
 
-    // Define the initial box
-    ExactBoxType initial_box(2);
-    initial_box[0]=ExactIntervalType(1.01,1.02);
-    initial_box[1]=ExactIntervalType(0.51,0.52);
-
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field
     Real mu=Dyadic(0.5);
-    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
-    EffectiveScalarMultivariateFunction xp=EffectiveScalarMultivariateFunction::coordinate(2,1);
-    EffectiveVectorMultivariateFunction vdp={x,mu*(1-x*x)*xp-x};
+    RealVariable x("x"), v("v");
 
-    VectorField vanderpol(vdp);
+    VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
     ARIADNE_TEST_PRINT(vanderpol);
+
+    // Define the initial box
+    RealVariablesBox initial_box({x.in(1.01_dec,1.02_dec),v.in(0.51_dec,0.52_dec)});
+//    initial_box[0]=ExactIntervalType(1.01,1.02);
+//    initial_box[1]=ExactIntervalType(0.51,0.52);
+
 
     VectorFieldEvolver evolver(vanderpol,integrator);
     evolver.configuration().set_maximum_enclosure_radius(enclosure_radius);
@@ -132,7 +132,7 @@ Void TestContinuousEvolution::test() const
 
     // Over-approximate the initial set by a grid cell
     TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-8));
-    EnclosureType initial_set(initial_box,function_factory);
+    EnclosureType initial_set(initial_box,vanderpol.state_space(),function_factory);
     ARIADNE_TEST_PRINT(initial_set);
 
     Semantics semantics=Semantics::UPPER;
@@ -161,7 +161,7 @@ Void TestContinuousEvolution::failure_test() const
 
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef Enclosure EnclosureType;
+    typedef VectorField::EnclosureType EnclosureType;
 
     // Set up the evolution parameters and grid
     Real time(0.5_dec);
@@ -192,7 +192,7 @@ Void TestContinuousEvolution::failure_test() const
     evolverone.configuration().set_maximum_step_size(step_size);
 
     TaylorFunctionFactory function_factory(ThresholdSweeper<FloatDP>(dp,1e-10));
-    EnclosureType initial_set(initial_box,function_factory);
+    EnclosureType initial_set(initial_box,failone_vf.state_space(),function_factory);
     // cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=Semantics::UPPER;
@@ -232,7 +232,7 @@ Void TestContinuousEvolution::failure_test() const
     evolvertwo.configuration().set_maximum_step_size(step_size);
 
     ExactBoxType initial_box2 = ExactBoxType{{0.0,0.0},{1.0,1.0},{1.0,1.0}};
-    initial_set = EnclosureType(initial_box2,function_factory);
+    initial_set = EnclosureType(initial_box2,failtwo_vf.state_space(),function_factory);
 
     time = 1.5_dec;
 

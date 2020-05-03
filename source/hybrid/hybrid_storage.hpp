@@ -78,8 +78,9 @@ class HybridStorage
 
     HybridStorage(HybridGrid const& hg) : _state_set(hg), _system_ptr(nullptr) { }
     HybridStorage(HybridGridTreePaving const& hgtp) : _state_set(hgtp), _system_ptr(nullptr) { }
+    HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(&sys) { }
+    HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(&sys) { }
 
-    Void set_system(HybridAutomatonInterface const& system) { _system_ptr=&system; }
     HybridAutomatonInterface const* auxiliary() const { return this->_system_ptr; }
     EffectiveVectorMultivariateFunction auxiliary(DiscreteLocation const& loc) const {
         return this->_system_ptr->auxiliary_function(loc); }

@@ -112,9 +112,6 @@ ValidatedVectorMultivariateFunctionModelDP make_identity(const RealBox& bx, cons
 } // namespace
 
 
-const RealSpace Storage::state_space() const { return RealSpace(this->_state_space); }
-const RealSpace Storage::auxiliary_space() const { return RealSpace(this->_auxiliary_space); }
-
 OutputStream& operator<<(OutputStream& os, const EnclosureVariableKind& vk) {
     switch (vk) {
         case EnclosureVariableKind::INITIAL: return os << "x";
@@ -1664,6 +1661,58 @@ Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) c
 }
 
 
+
+
+
+
+
+LabelledStorage::LabelledStorage(Grid const& grid, RealSpace const& state_space)
+    : LabelledStorage(GridTreePaving(grid), state_space) { }
+
+LabelledStorage::LabelledStorage(GridTreePaving const& paving, RealSpace const& state_space)
+    : Storage(paving), _state_variables(state_space.variable_names()), _auxiliary_variables() { }
+
+LabelledStorage::LabelledStorage(Grid const& grid,
+                                 RealSpace const& state_space,
+                                 EffectiveVectorMultivariateFunction const& auxiliary_mapping,
+                                 RealSpace const& auxiliary_space)
+    : LabelledStorage(GridTreePaving(grid), state_space, auxiliary_mapping, auxiliary_space) { }
+
+LabelledStorage::LabelledStorage(GridTreePaving const& paving,
+                                 RealSpace const& state_space,
+                                 EffectiveVectorMultivariateFunction const& auxiliary_mapping,
+                                 RealSpace const& auxiliary_space)
+    : Storage(paving,auxiliary_mapping)
+    , _state_variables(state_space.variable_names())
+    , _auxiliary_variables(auxiliary_space.variable_names())
+{ }
+
+
+LabelledStorage inner_approximation(SetInterface const& set, LabelledGrid const& grid, Nat fineness) {
+    LabelledStorage paving(grid); paving.euclidean_set().adjoin_inner_approximation(set,fineness); return paving;
+}
+
+const RealSpace LabelledStorage::state_space() const {
+    return RealSpace(this->_state_variables);
+}
+
+const RealSpace LabelledStorage::auxiliary_space() const {
+    return RealSpace(this->_auxiliary_variables);
+}
+
+const RealSpace LabelledStorage::state_auxiliary_space() const {
+    return join(this->state_space(),this->auxiliary_space());
+}
+
+const LabelledGrid LabelledStorage::grid() const {
+    return LabelledGrid(this->euclidean_set().grid(),this->state_space(),this->auxiliary_mapping(),this->auxiliary_space());
+}
+
+Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) const
+{
+    Projection2d proj=projection(this->state_auxiliary_space(),axes);
+    this->euclidean_set().draw(canvas,proj);
+}
 
 } // namespace Ariadne
 

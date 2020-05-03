@@ -226,7 +226,8 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     Nat grid_extent = this->_configuration->maximum_grid_extent();
     GridType grid=this->_configuration->grid();
-    PavingType initial_cells(grid); PavingType final_cells(grid);
+    PavingType initial_cells(grid);
+    PavingType final_cells(grid);
 
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_extent,grid_fineness+4);
@@ -562,7 +563,7 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
     Nat stage=0;
 
     StorageType reach_cells(grid);
-    StorageType evolve_cells(grid);
+    StorageType evolve_cells(grid,this->system());
     if(definitely(transient_time > TimeType(0))) {
         ARIADNE_LOG(1,"Computing transient evolution...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_fineness,*_evolver);
@@ -599,7 +600,6 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
         ARIADNE_LOG(2,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
     }
     _checked_restriction(reach_cells,bounding);
-    reach_cells.set_system(this->system());
     return reach_cells;
 }
 
@@ -724,7 +724,7 @@ template<class SYS> ReachabilityAnalyserConfiguration<SYS>::ReachabilityAnalyser
     set_maximum_grid_fineness(3);
     set_maximum_grid_extent(16);
     set_bounding_domain(BoundingDomainType(_analyser.system().dimension(),{-1,+1}));
-    set_grid(Grid(_analyser.system().dimension()));
+    set_grid(GridType(_analyser.system()));
     set_outer_overspill_policy(ChainOverspillPolicy::ERROR);
 }
 

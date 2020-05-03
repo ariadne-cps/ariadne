@@ -104,7 +104,7 @@ Int main()
     fig.write("henon_map-reach");
 
     // Compute the chain-reach set
-#warning
+    // FIXME: Use inital_box as starting set
     Storage chain_reach_set = analyser.outer_chain_reach(RealBoxSet(initial_box.euclidean_set(henon.state_space())));
 
     fig.clear();

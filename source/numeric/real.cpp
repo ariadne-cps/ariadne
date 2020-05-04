@@ -374,9 +374,8 @@ Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 Integer round(Real const& r) {
-    DyadicBounds wb=r.compute(Effort(0)).get();
-    Dyadic wc=hlf(wb.lower()+wb.upper());
-    return round(wc);
+    DyadicBounds wb=r.compute(Accuracy(1)).get();
+    return round(hlf(wb.lower()+wb.upper()));
 }
 
 template<> String class_name<Real>() { return "Real"; }

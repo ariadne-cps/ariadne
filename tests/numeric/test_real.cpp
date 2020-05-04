@@ -87,6 +87,7 @@ class TestReal
     void test_arithmetic();
     void test_transcendental();
     void test_comparison();
+    void test_rounding();
     void test_accuracy();
     void test_sequence();
 };
@@ -99,6 +100,7 @@ void TestReal::test()
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_transcendental());
     ARIADNE_TEST_CALL(test_comparison());
+    ARIADNE_TEST_CALL(test_rounding());
     ARIADNE_TEST_CALL(test_accuracy());
     ARIADNE_TEST_CALL(test_sequence());
 }
@@ -121,7 +123,6 @@ void TestReal::test_conversions() {
 //    auto pi_mp=pi(MultiplePrecision(2));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
-
 }
 
 void TestReal::test_constructors() {
@@ -204,7 +205,18 @@ void TestReal::test_comparison() {
 
     Rational zero=0;
     ARIADNE_TEST_ASSERT(check(e*log(pi)-pi<zero,effort));
+}
 
+
+void TestReal::test_rounding() {
+    ARIADNE_TEST_EQUALS(round(Real(0.1_dec)*10),1)
+    ARIADNE_TEST_EQUALS(round(Real(0.9_dec)*10),9)
+    ARIADNE_TEST_COMPARE(round(Real(-0.7_dec)*5),>=,-4)
+    ARIADNE_TEST_COMPARE(round(Real(-0.7_dec)*5),<=,-3)
+    ARIADNE_TEST_COMPARE(round(Real(0.1_dec)*5),>=,0)
+    ARIADNE_TEST_COMPARE(round(Real(0.1_dec)*5),<=,1)
+    ARIADNE_TEST_COMPARE(round(Real(0.9_dec)*5),>=,4)
+    ARIADNE_TEST_COMPARE(round(Real(0.9_dec)*5),<=,5)
 }
 
 

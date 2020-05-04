@@ -481,12 +481,15 @@ _extract_transitions(DiscreteLocation const& location) const
         ARIADNE_LOG(5,"constraint_function="<<constraint_function<<"\n");
         EffectiveScalarMultivariateFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
         EffectiveVectorMultivariateFunction reset_function; DiscreteLocation target; RealSpace target_space;
+        EffectiveVectorMultivariateFunction target_auxiliary_function; RealSpace target_auxiliary_space;
         if(is_activating(event_kind)) {
             reset_function=this->system().reset_function(location,event);
             target=this->system().target(location,event);
             target_space=this->system().continuous_state_space(target);
+            target_auxiliary_function=this->system().auxiliary_function(target);
+            target_auxiliary_space=this->system().continuous_auxiliary_space(target);
         }
-        TransitionData transition_data={event,event_kind,constraint_function,constraint_flow_derivative_function,target,reset_function,target_space};
+        TransitionData transition_data={event,event_kind,constraint_function,constraint_flow_derivative_function,target,reset_function,target_space,target_auxiliary_function,target_auxiliary_space};
         transitions.insert(event,transition_data);
     }
     ARIADNE_LOG(3,"transitions="<<transitions<<"\n");
@@ -557,10 +560,7 @@ _process_starting_events(EvolutionData& evolution_data,
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
                         ARIADNE_LOG(2,event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
-                        immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function);
-                        DiscreteLocation const& target=transitions[event].target;
-                        ARIADNE_LOG(9,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target)<<"\n");
-                        immediate_jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
+                        immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
                         evolution_data.intermediate_sets.append(immediate_jump_set);
                         evolution_data.initial_sets.append(immediate_jump_set);
@@ -1572,8 +1572,9 @@ _apply_evolution_step(EvolutionData& evolution_data,
             if(!definitely(_jump_set.is_empty())) {
                 DiscreteLocation const& target=transitions[event].target;
                 ARIADNE_LOG(9,"target="<<target<<", auxiliary_space="<<this->system().continuous_auxiliary_space(target)<<", auxiliary_function="<<this->system().auxiliary_function(target)<<"\n");
-                _jump_set.apply_reset(event,target,transitions[event].target_space,transitions[event].reset_function);
-                _jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
+                TransitionData const& transition=transitions[event];
+                _jump_set.apply_reset(event,target,transition.target_space,transition.reset_function,transition.target_auxiliary_space,transition.target_auxiliary_function);
+//                _jump_set.set_auxiliary(this->system().continuous_auxiliary_space(target).variables(),this->system().auxiliary_function(target));
                 evolution_data.initial_sets.append(_jump_set);
                 _step_data.events.insert(event);
                 ARIADNE_LOG(6, "jump_set="<<_jump_set<<"\n");

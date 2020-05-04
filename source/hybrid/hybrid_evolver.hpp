@@ -485,6 +485,10 @@ struct TransitionData
     EffectiveVectorMultivariateFunction reset_function;
     //! \brief The state space in the target location.
     RealSpace target_space;
+    //! \brief The auxliary mapping in the target location.
+    EffectiveVectorMultivariateFunction target_auxiliary_function;
+    //! \brief The auxliary space in the target location.
+    RealSpace target_auxiliary_space;
     //TransitionData() { }
     //TransitionData(DiscreteLocation t, ValidatedScalarMultivariateFunction g, ValidatedVectorMultivariateFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }

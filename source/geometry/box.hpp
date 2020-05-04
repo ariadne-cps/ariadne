@@ -65,6 +65,9 @@ class Box
     typedef typename I::WidthType W;
     typedef decltype(max(declval<L>(),declval<U>())) V;
   public:
+    //! \brief The type used for drawing ListSet of Box. FIXME: Should not be present
+    typedef DrawableInterface DrawableInterfaceType;
+
     //! \brief The type returned by the dimension() method.
     typedef SizeType DimensionType;
     //! The type used for a component interval.

@@ -56,6 +56,15 @@ template<class X> struct LinearProgram;
 class Storage;
 class GridTreePaving;
 
+// FIXME: This class should not be necessary, as indexing HybridStorage should give a reference to a Euclidean/Labelled storage
+class HybridStorageElementReference {
+    HybridStorage* _hstorage; DiscreteLocation const& _loc;
+  public:
+    HybridStorageElementReference(HybridStorage* hstorage, DiscreteLocation const& loc) : _hstorage(hstorage), _loc(loc) { }
+    inline operator const Storage () const;
+    inline Void clear();
+};
+
 //! \ingroup HybridSetSubModule
 //! \brief A class representing global reach or evolve set for a hybrid system.
 class HybridStorage
@@ -64,12 +73,14 @@ class HybridStorage
     HybridGridTreePaving  _state_set;
     HybridAutomatonInterface const* _system_ptr;
   public:
+  public:
     typedef HybridGrid GridType;
 
     HybridStorage(HybridGrid const& hg) : _state_set(hg), _system_ptr(nullptr) { }
     HybridStorage(HybridGridTreePaving const& hgtp) : _state_set(hgtp), _system_ptr(nullptr) { }
+    HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(&sys) { }
+    HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(&sys) { }
 
-    Void set_system(HybridAutomatonInterface const& system) { _system_ptr=&system; }
     HybridAutomatonInterface const* auxiliary() const { return this->_system_ptr; }
     EffectiveVectorMultivariateFunction auxiliary(DiscreteLocation const& loc) const {
         return this->_system_ptr->auxiliary_function(loc); }
@@ -108,8 +119,10 @@ class HybridStorage
     Void mince(Nat fineness) { this->_state_set.mince(fineness); }
     Void recombine() { this->_state_set.recombine(); }
 
-    Storage operator[] (DiscreteLocation const& loc) const {
+    const Storage operator[] (DiscreteLocation const& loc) const {
         return Storage(this->_state_set[loc],this->auxiliary(loc)); }
+    HybridStorageElementReference operator[] (DiscreteLocation const& loc) {
+        return HybridStorageElementReference{this,loc}; }
 
     virtual Void draw(CanvasInterface& cnv, const Set<DiscreteLocation>& locs, const Variables2d& vars) const override {
         if (this->_system_ptr!=nullptr) {
@@ -121,8 +134,14 @@ class HybridStorage
 
     friend OutputStream& operator<<(OutputStream& os, HybridStorage const& set) {
         return os << "HybridStorage(" << set._state_set << ", " << set._system_ptr << "\n"; }
+
+    friend class HybridStorageElementReference;
 };
 
+//HybridStorageElementReference::operator const Storage () const { return (*_hstorage)[_loc]; }
+HybridStorageElementReference::operator const Storage () const {
+    return Storage(_hstorage->_state_set[_loc],_hstorage->auxiliary(_loc)); }
+Void HybridStorageElementReference::clear() { return _hstorage->state_set()[_loc].clear(); }
 
 } // namespace Ariadne
 

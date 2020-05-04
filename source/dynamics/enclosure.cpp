@@ -71,6 +71,7 @@
 
 #include "../numeric/operators.hpp"
 #include "../symbolic/space.hpp"
+#include "../symbolic/expression_set.hpp"
 
 #include "../algebra/expansion.inl.hpp"
 
@@ -109,6 +110,7 @@ ValidatedVectorMultivariateFunctionModelDP make_identity(const RealBox& bx, cons
 }
 
 } // namespace
+
 
 OutputStream& operator<<(OutputStream& os, const EnclosureVariableKind& vk) {
     switch (vk) {
@@ -153,13 +155,15 @@ OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
               <<", drawer=" << ec._drawer<<")";
 }
 
-Void Enclosure::_check() const {
+Void Enclosure::_check(std::string from) const {
     ARIADNE_ASSERT_MSG(this->_state_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
     for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
+    ARIADNE_ASSERT_MSG(this->_variable_kinds.size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_variable_kinds<<"\n\n");
+    ARIADNE_ASSERT_MSG(this->_state_function.result_size()==this->_auxiliary_mapping.argument_size(),*this<<"\n\n"<<this->_state_function<<"\n"<<this->_auxiliary_mapping<<"\n\n");
 }
 
 EnclosureConfiguration const&
@@ -250,8 +254,20 @@ Void Enclosure::_solve_zero_constraints() {
 */
 
 Enclosure::Enclosure()
-    : _domain(), _auxiliary_mapping(), _state_function(), _time_function(), _dwell_time_function(), _reduced_domain(), _is_fully_reduced(true)
+    : _domain(), _auxiliary_mapping(), _state_function()
+    , _time_function(), _dwell_time_function()
+    , _reduced_domain(), _is_fully_reduced(true)
+    , _variable_kinds()
     , _configuration(ValidatedFunctionModelDPFactory(nullptr),Paver(nullptr),Drawer(nullptr))
+{
+}
+
+Enclosure::Enclosure(EnclosureConfiguration const& config)
+    : _domain(), _auxiliary_mapping(), _state_function()
+    , _time_function(), _dwell_time_function()
+    , _reduced_domain(), _is_fully_reduced(true)
+    , _variable_kinds()
+    , _configuration(config)
 {
 }
 
@@ -273,7 +289,8 @@ Enclosure::Enclosure(const BoundedConstraintSet& set, const EnclosureConfigurati
     this->_time_function=this->function_factory().create_zero(this->domain());
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
     this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
-    for(Nat i=0; i!=set.number_of_constraints(); ++i) {
+    this->_variable_kinds=List<EnclosureVariableKind>(this->_domain.size(),EnclosureVariableKind::INITIAL);
+    for(SizeType i=0; i!=set.number_of_constraints(); ++i) {
         this->new_state_constraint(set.constraint(i));
     }
     this->_reduced_domain=this->_domain;
@@ -288,13 +305,13 @@ Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& conf
     const FloatDPValue min_float(std::numeric_limits<float>::min());
     List<Nat> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
-    for(Nat i=0; i!=box.dimension(); ++i) {
+    for(DimensionType i=0; i!=box.dimension(); ++i) {
         if(decide(box[i].width()>=min_float)) {
             proper_coordinates.append(i);
         }
     }
     this->_domain=ExactBoxType(proper_coordinates.size());
-    for(Nat j=0; j!=this->_domain.size(); ++j) {
+    for(DimensionType j=0; j!=this->_domain.dimension(); ++j) {
         this->_domain[j]=box[proper_coordinates[j]];
     }
 
@@ -303,14 +320,15 @@ Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& conf
     // FIXME: Fix issues with TaylorFunction on zero-dimensional domain.
     if(proper_coordinates.size()==0) { this->_domain=ExactBoxType(1u,ExactIntervalType(-1,+1)); }
 
+    this->_variable_kinds=List<EnclosureVariableKind>(this->_domain.dimension(),EnclosureVariableKind::INITIAL);
 
     this->_state_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
     this->_time_function=this->function_factory().create_zero(this->_domain);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
     this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
-    Nat j=0;
+    SizeType j=0;
     proper_coordinates.append(box.dimension());
-    for(Nat i=0; i!=box.dimension(); ++i) {
+    for(DimensionType i=0; i!=box.dimension(); ++i) {
         if(proper_coordinates[j]==i) {
             this->_state_function[i]=this->function_factory().create_coordinate(this->_domain,j);
             ++j;
@@ -325,43 +343,13 @@ Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& conf
 
 
 Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const EnclosureConfiguration& configuration)
-    : _configuration(configuration)
+    : Enclosure(domain,function,List<ValidatedConstraint>(),configuration)
 {
-    ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
-    this->_domain=domain;
-    this->_state_function=this->function_factory().create(this->_domain,function);
-    this->_time_function=this->function_factory().create_zero(this->_domain);
-    this->_dwell_time_function=this->function_factory().create_zero(this->domain());
-    this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
-    this->_reduced_domain=this->_domain;
-    this->_check();
 }
 
 Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& function, const List<ValidatedConstraint>& constraints, const EnclosureConfiguration& configuration)
-    : _configuration(configuration)
+    : Enclosure(domain,function,configuration._function_factory.create_zero(domain),constraints,configuration)
 {
-    ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
-    this->_domain=domain;
-    for(Nat i=0; i!=this->_domain.size(); ++i) {
-        if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=cast_exact_interval(widen(this->_domain[i]));
-        }
-    }
-
-    this->_state_function=this->function_factory().create(this->_domain,function);
-    this->_time_function=this->function_factory().create_zero(this->_domain);
-    this->_dwell_time_function=this->function_factory().create_zero(this->domain());
-    this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
-
-    for(Nat i=0; i!=constraints.size(); ++i) {
-        ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
-        this->new_parameter_constraint(constraints[i]);
-    }
-
-    this->_reduced_domain=domain;
-    this->_check();
-    this->reduce();
-    this->_check();
 }
 
 Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& state_function, const ValidatedScalarMultivariateFunction& time_function, const List<ValidatedConstraint>& constraints, const EnclosureConfiguration& configuration)
@@ -375,6 +363,7 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivaria
             this->_domain[i]=cast_exact_interval(widen(this->_domain[i]));
         }
     }
+    this->_variable_kinds=List<EnclosureVariableKind>(this->_domain.size(),EnclosureVariableKind::INITIAL);
 
     this->_state_function=this->function_factory().create(this->_domain,state_function);
     this->_time_function=this->function_factory().create(this->_domain,time_function);
@@ -391,7 +380,6 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivaria
     this->reduce();
     this->_check();
 }
-
 
 
 
@@ -435,7 +423,15 @@ Void Enclosure::substitute(SizeType j, FloatDP c)
 }
 */
 
-Void Enclosure::set_auxiliary(const EffectiveVectorMultivariateFunction& aux) {
+const List<EnclosureVariableKind>& Enclosure::variable_kinds() const {
+    return this->_variable_kinds;
+}
+
+EffectiveVectorMultivariateFunction const& Enclosure::auxiliary_mapping() const {
+    return this->_auxiliary_mapping;
+}
+
+Void Enclosure::set_auxiliary_mapping(const EffectiveVectorMultivariateFunction& aux) {
     if(this->_state_function.result_size()!=aux.argument_size()) {
         std::cerr<<"rs="<<this->_state_function.result_size()<<", aux=[R"<<aux.argument_size()<<"]"<<aux<<"\n"; }
     ARIADNE_PRECONDITION(this->_state_function.result_size()==aux.argument_size());
@@ -444,19 +440,36 @@ Void Enclosure::set_auxiliary(const EffectiveVectorMultivariateFunction& aux) {
 
 Void Enclosure::new_parameter(ExactIntervalType ivl)
 {
+    this->new_parameter(ivl,EnclosureVariableKind::UNKNOWN);
+}
+
+Void Enclosure::new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk)
+{
     this->_domain=product(this->_domain,ivl);
     this->_reduced_domain=product(this->_reduced_domain,ivl);
     this->_state_function=embed(this->_state_function,ivl);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
+    this->_variable_kinds.append(vk);
     this->_check();
 }
 
 Void Enclosure::new_variable(ExactIntervalType ivl)
+{
+    this->new_variable(ivl,EnclosureVariableKind::UNKNOWN);
+}
+
+Void Enclosure::new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
+{
+    this->_unchecked_new_variable(ivl,vk);
+    this->_check();
+}
+
+Void Enclosure::_unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk)
 {
     ValidatedScalarMultivariateFunctionModelDP variable_function = this->function_factory().create_identity(ivl);
     this->_domain=product(this->_domain,ivl);
@@ -464,11 +477,11 @@ Void Enclosure::new_variable(ExactIntervalType ivl)
     this->_state_function=combine(this->_state_function,variable_function);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
-    this->_check();
+    this->_variable_kinds.append(vk);
 }
 
 Void Enclosure::clear_time()
@@ -483,6 +496,16 @@ Void Enclosure::apply_map(ValidatedVectorMultivariateFunction map)
     ARIADNE_ASSERT_MSG(map.argument_size()==this->state_dimension(),"state_dimension="<<this->state_dimension()<<", map="<<map);
     this->_state_function=compose(map,this->_state_function);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
+    this->_check();
+}
+
+Void Enclosure::apply_map(ValidatedVectorMultivariateFunction map, EffectiveVectorMultivariateFunction aux_map)
+{
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->state_dimension(),"state_dimension="<<this->state_dimension()<<", map="<<map);
+    ARIADNE_ASSERT_MSG(aux_map.argument_size()==map.result_size(),"map="<<map<<", aux_map="<<aux_map);
+    this->_state_function=compose(map,this->_state_function);
+    this->_dwell_time_function=this->function_factory().create_zero(this->domain());
+    this->_auxiliary_mapping=aux_map;
     this->_check();
 }
 
@@ -588,7 +611,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionMo
     ExactBoxType parameter_domain=this->parameter_domain();
     ExactIntervalType time_domain=ExactIntervalType(0,h);
     ValidatedScalarMultivariateFunctionModelDP time_function=this->function_factory().create_identity(time_domain);
-    this->new_variable(time_domain);
+    this->_unchecked_new_variable(time_domain,EnclosureVariableKind::TEMPORAL);
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension());
     this->apply_map(phi);
     ExactBoxType new_domain=this->parameter_domain();
@@ -977,8 +1000,8 @@ Enclosure::split(Nat d) const
     make_lpair(function1,function2)=Ariadne::split(this->_state_function,d);
 
     Pair<Enclosure,Enclosure>
-    result=make_pair(Enclosure(function1.domain(),function1,this->function_factory()),
-                     Enclosure(function2.domain(),function2,this->function_factory()));
+    result=make_pair(Enclosure(function1.domain(),function1,this->configuration()),
+                     Enclosure(function2.domain(),function2,this->configuration()));
     Enclosure& result1=result.first;
     Enclosure& result2=result.second;
 
@@ -1038,6 +1061,13 @@ ValidatedAffineConstrainedImageSet Enclosure::affine_over_approximation() const
 
 Void Enclosure::adjoin_outer_approximation_to(Storage& storage, Nat fineness) const
 {
+    if (this->auxiliary_mapping().result_size()!=0 &&
+            this->auxiliary_mapping().managed_pointer()==storage.auxiliary_mapping().managed_pointer())
+    {
+        ARIADNE_WARN("enclosure="<<*this<<", "
+                    "enclosure.auxiliary_mapping()="<<this->auxiliary_mapping()<<", "
+                    "storage.auxiliary_mapping()="<<storage.auxiliary_mapping());
+    }
     this->paver().adjoin_outer_approximation(storage.state_set(),this->state_set(),fineness);
 }
 
@@ -1108,7 +1138,10 @@ uniform_error_recondition()
         this->_time_function = embed(this->_time_function,new_variables);
         this->_dwell_time_function = embed(this->_dwell_time_function,new_variables);
     }
+    SizeType number_of_extra_parameters=this->number_of_parameters()-old_number_of_parameters;
+    this->_variable_kinds.concatenate(List<EnclosureVariableKind>(number_of_extra_parameters,EnclosureVariableKind::ERROR));
 
+    this->_check();
 }
 
 TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,FloatDP>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
@@ -1329,7 +1362,7 @@ inline const ValidatedVectorMultivariateFunctionModelDP& repr(const ValidatedVec
 inline const List<ValidatedScalarMultivariateFunctionModelDP>& repr(const List<ValidatedScalarMultivariateFunctionModelDP>& f) { return f; }
 
 OutputStream& Enclosure::_write(OutputStream& os) const {
-    const Bool LONG_FORMAT=false;
+    const Bool LONG_FORMAT=true;
 
     if(LONG_FORMAT) {
         os << "Enclosure"
@@ -1340,6 +1373,8 @@ OutputStream& Enclosure::_write(OutputStream& os) const {
            << ",\n  state_function=" << this->state_function()
            << ",\n  time_function=" << this->time_function()
            << ",\n  constraints=" << this->constraints()
+           << ",\n  auxiliary_mapping = [" << this->auxiliary_mapping().argument_size() << "]" << this->auxiliary_mapping()
+           << ",\n  parameters = " << canonical_variable_names(this->variable_kinds())
            << "\n)\n";
     } else {
         os << "Enclosure"
@@ -1348,6 +1383,7 @@ OutputStream& Enclosure::_write(OutputStream& os) const {
            << ", state_function=" << repr(this->state_function())
            << ", time_function=" << repr(this->time_function())
            << ", constraints=" << this->constraints()
+           << ", auxiliary_mapping = " << this->auxiliary_mapping()
            << ")";
 
     } return os;
@@ -1427,7 +1463,6 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModelDP& tm) {
 */
 
 
-
 Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {
     typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
@@ -1439,6 +1474,8 @@ Enclosure product(const Enclosure& set, const ExactIntervalType& ivl) {
     }
     result._time_function=embed(set._time_function,ivl);
     result._dwell_time_function=embed(set._dwell_time_function,ivl);
+
+    result._check();
 
     return result;
 }
@@ -1454,6 +1491,8 @@ Enclosure product(const Enclosure& set, const ExactBoxType& bx) {
     }
     result._time_function=embed(set._time_function,bx);
     result._dwell_time_function=embed(set._dwell_time_function,bx);
+
+    result._check();
 
     return result;
 }
@@ -1476,6 +1515,8 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     result._time_function=embed(set1.time_function(),set2.time_function().domain());
     result._dwell_time_function=embed(set1.dwell_time_function(),set2.dwell_time_function().domain());
 
+    result._check();
+
     return result;
 }
 
@@ -1490,6 +1531,248 @@ Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& func
     const ValidatedVectorMultivariateFunctionModelDP& state_function=result.state_function();
     const_cast<ValidatedVectorMultivariateFunctionModelDP&>(state_function)=unchecked_compose(function,set.state_function());
     return result;
+}
+
+
+
+LabelledEnclosure::LabelledEnclosure(LabelledExactBoxType const& bx, EnclosureConfiguration const& config)
+    : Enclosure(bx.euclidean_set(),config), _state_variables(bx.space().variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(ExactBoxType const& bx, RealSpace const& state_space, EnclosureConfiguration const& config)
+    : Enclosure(bx,config), _state_variables(state_space.variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(RealBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config)
+    : Enclosure(bx,config), _state_variables(state_space.variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(RealVariablesBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config)
+    : Enclosure(bx.euclidean_set(state_space),config), _state_variables(state_space.variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(BoundedConstraintSet const& set, RealSpace const& state_space, EnclosureConfiguration const& config)
+    : Enclosure(set,config), _state_variables(state_space.variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(Enclosure const& set, RealSpace const& state_space)
+    : Enclosure(set), _state_variables(state_space.variable_names())
+{
+}
+
+LabelledEnclosure::LabelledEnclosure(Enclosure const& set, RealSpace const& state_space, RealSpace const& auxiliary_space)
+    : Enclosure(set), _state_variables(state_space.variable_names()), _auxiliary_variables(auxiliary_space.variable_names())
+{
+}
+
+LabelledEnclosure* LabelledEnclosure::clone() const {
+    return new LabelledEnclosure(*this);
+}
+
+
+Void LabelledEnclosure::set_state_space(RealSpace const& space) {
+    ARIADNE_PRECONDITION(this->state_function().result_size()==space.dimension());
+    this->_state_variables=space.variable_names();
+}
+
+const RealSpace LabelledEnclosure::state_space() const {
+    return RealSpace(this->_state_variables);
+}
+
+const RealVariable LabelledEnclosure::time_variable() const
+{
+    return TimeVariable();
+}
+
+const RealSpace LabelledEnclosure::auxiliary_space() const {
+    return RealSpace(this->_auxiliary_variables);
+}
+
+const RealSpace LabelledEnclosure::state_auxiliary_space() const {
+    return join(this->state_space(),this->auxiliary_space());
+}
+
+const RealSpace LabelledEnclosure::state_time_auxiliary_space() const
+{
+    return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
+}
+
+
+const RealSpace LabelledEnclosure::space() const {
+    return this->state_time_auxiliary_space();
+}
+
+
+Void LabelledEnclosure::set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux) {
+    ARIADNE_PRECONDITION(this->state_function().result_size()==aux.argument_size());
+    ARIADNE_PRECONDITION(spc.size()==aux.result_size());
+    this->Enclosure::set_auxiliary_mapping(aux);
+    this->_auxiliary_variables=spc.variable_names();
+}
+
+
+Pair<LabelledEnclosure,LabelledEnclosure> LabelledEnclosure::split() const {
+    Pair<Enclosure,Enclosure> split_enclosures = this->Enclosure::split();
+    return make_pair(LabelledEnclosure(split_enclosures.first,this->state_space(),this->auxiliary_space()),
+                     LabelledEnclosure(split_enclosures.second,this->state_space(),this->auxiliary_space()));
+}
+
+LabelledEnclosure product(const LabelledEnclosure& set1, const ExactIntervalType& ivl2) {
+    return product(set1,LabelledExactIntervalType(RealVariable(Identifier("x")+to_str(set1.dimension())),ivl2));
+}
+
+LabelledEnclosure product(const LabelledEnclosure& set1, const LabelledExactIntervalType& ivl2) {
+    return LabelledEnclosure(product(set1.euclidean_set(),ivl2.interval()),
+                             join(set1.state_space(),ivl2.variable()),
+                             set1.auxiliary_space());
+}
+
+LabelledEnclosure product(const LabelledEnclosure& set1, const LabelledExactBoxType& bx2) {
+    return LabelledEnclosure(product(set1.euclidean_set(),bx2.euclidean_set()),
+                             join(set1.state_space(),bx2.space()),
+                             set1.auxiliary_space());
+}
+
+LabelledEnclosure product(const LabelledEnclosure& set1, const LabelledEnclosure& set2) {
+    return LabelledEnclosure(product(static_cast<Enclosure const&>(set1),static_cast<Enclosure const&>(set2)),
+                             join(set1.state_space(),set2.state_space()),join(set1.auxiliary_space(),set2.auxiliary_space()));
+}
+
+Void LabelledEnclosure::apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi) {
+    this->Enclosure::apply_full_reach_step(phi);
+}
+
+Void LabelledEnclosure::apply_map(ValidatedVectorMultivariateFunction const& f) {
+    this->Enclosure::apply_map(f);
+}
+
+Void LabelledEnclosure::apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& spc) {
+    ARIADNE_PRECONDITION(spc.size()==f.result_size());
+    this->Enclosure::apply_map(f);
+    this->_state_variables=spc.variable_names();
+}
+
+Void LabelledEnclosure::apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& spc,
+                                  EffectiveVectorMultivariateFunction const& aux_f, RealSpace const& aux_spc) {
+    ARIADNE_PRECONDITION(spc.size()==aux_f.argument_size());
+    ARIADNE_PRECONDITION(aux_spc.size()==aux_f.result_size());
+    this->Enclosure::apply_map(f,aux_f);
+    this->_state_variables=spc.variable_names();
+    this->_auxiliary_variables=aux_spc.variable_names();
+}
+
+Projection2d projection(const RealSpace& spc, const Variables2d& variables);
+
+Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) const
+{
+    Projection2d proj=projection(this->state_time_auxiliary_space(),axes);
+    this->euclidean_set().draw(canvas,proj);
+}
+
+
+
+
+
+
+
+
+
+LabelledStorage::LabelledStorage(Grid const& grid, RealSpace const& state_space)
+    : LabelledStorage(GridTreePaving(grid), state_space) { }
+
+LabelledStorage::LabelledStorage(GridTreePaving const& paving, RealSpace const& state_space)
+    : Storage(paving), _state_variables(state_space.variable_names()), _auxiliary_variables() { }
+
+LabelledStorage::LabelledStorage(Grid const& grid,
+                                 RealSpace const& state_space,
+                                 EffectiveVectorMultivariateFunction const& auxiliary_mapping,
+                                 RealSpace const& auxiliary_space)
+    : LabelledStorage(GridTreePaving(grid), state_space, auxiliary_mapping, auxiliary_space) { }
+
+LabelledStorage::LabelledStorage(GridTreePaving const& paving,
+                                 RealSpace const& state_space,
+                                 EffectiveVectorMultivariateFunction const& auxiliary_mapping,
+                                 RealSpace const& auxiliary_space)
+    : Storage(paving,auxiliary_mapping)
+    , _state_variables(state_space.variable_names())
+    , _auxiliary_variables(auxiliary_space.variable_names())
+{ }
+
+
+LabelledStorage inner_approximation(SetInterface const& set, LabelledGrid const& grid, Nat fineness) {
+    LabelledStorage paving(grid); paving.euclidean_set().adjoin_inner_approximation(set,fineness); return paving;
+}
+
+const RealSpace LabelledStorage::state_space() const {
+    return RealSpace(this->_state_variables);
+}
+
+const RealSpace LabelledStorage::auxiliary_space() const {
+    return RealSpace(this->_auxiliary_variables);
+}
+
+const RealSpace LabelledStorage::state_auxiliary_space() const {
+    return join(this->state_space(),this->auxiliary_space());
+}
+
+const LabelledGrid LabelledStorage::grid() const {
+    return LabelledGrid(this->euclidean_set().grid(),this->state_space(),this->auxiliary_mapping(),this->auxiliary_space());
+}
+
+Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) const {
+    Projection2d proj=projection(this->state_auxiliary_space(),axes);
+    this->euclidean_set().draw(canvas,proj);
+}
+
+LabelledSet<UpperBoxType> LabelledEnclosure::bounding_box() const {
+    return LabelledSet(this->state_space(), this->euclidean_set().bounding_box());
+}
+
+const ListSet<LabelledSet<UpperBoxType>> ListSet<LabelledEnclosure>::bounding_boxes() const {
+    ListSet<LabelledSet<UpperBoxType>> boxes;
+    for(SizeType i=0; i!=this->size(); ++i) {
+        boxes.adjoin(LabelledSet((*this)[i].state_space(),(*this)[i].euclidean_set().bounding_box()));
+    }
+    return boxes;
+}
+
+ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
+    return new ListSet<LabelledEnclosure>(*this);
+}
+
+Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
+    for (auto set : this->_data) { set.draw(cnvs, prj); }
+}
+
+const RealSpace LabelledSet<ListSet<Enclosure>>::space() const {
+    return (*this)[0].space();
+}
+
+const RealSpace LabelledSet<ListSet<Enclosure>>::state_space() const {
+    return (*this)[0].state_space();
+}
+
+const ListSet<Enclosure> LabelledSet<ListSet<Enclosure>>::euclidean_set() const {
+    ListSet<Enclosure> result;
+    for (SizeType i=0; i!=this->size(); ++i) {
+        result.adjoin((*this)[i].euclidean_set());
+    }
+    return result;
+}
+
+const LabelledSet<UpperBoxType> LabelledSet<ListSet<Enclosure>>::bounding_box() const {
+    if (this->empty()) { return LabelledSet<UpperBoxType>(this->space(),UpperBoxType(this->space().dimension())); }
+    UpperBoxType bbx=(*this)[0].euclidean_set().bounding_box();
+    for (SizeType i=1; i!=this->size(); ++i) {
+        bbx=hull(bbx,(*this)[i].euclidean_set().bounding_box());
+    }
+    std::cerr<<"\nHere\n\n";
+    return LabelledSet<UpperBoxType>(this->state_space(),bbx);
 }
 
 } // namespace Ariadne

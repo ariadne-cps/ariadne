@@ -119,13 +119,12 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
-    List<RealVariable> _state_space;
-    List<RealVariable> _auxiliary_space;
-    Enclosure _set;
-    List<EnclosureVariableKind> _variable_kinds;
+    LabelledEnclosure _set;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
+    //! \brief An empty enclosure.
+    HybridEnclosure(EnclosureConfiguration const& config);
     //! \brief An enclosure corresponding to a hybrid box \a hbx with variables canonically ordered by \a spc.
     HybridEnclosure(const HybridBoxSet& hbx, const RealSpace& spc, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
@@ -140,8 +139,10 @@ class HybridEnclosure
     explicit HybridEnclosure(const HybridExactBoxType& hbx, const ValidatedFunctionModelDPFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
     explicit HybridEnclosure(const HybridExactBoxType& hbx, List<RealAssignment> aux, const ValidatedFunctionModelDPFactoryInterface& fac);
-    //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
+    //! \brief An enclosure constructed from a location \a q, and a (timed, labelled) enclosure \a es.
     explicit HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
+    //! \brief An enclosure constructed from a location \a q, and a (timed, labelled) enclosure \a es.
+    explicit HybridEnclosure(const DiscreteLocation& q, const LabelledEnclosure& es);
 
     //! \brief Destructor.
     ~HybridEnclosure();
@@ -213,7 +214,9 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorMultivariateFunction& r);
+    Void apply_reset(DiscreteEvent e, DiscreteLocation q,
+                     RealSpace s, const ValidatedVectorMultivariateFunction& r,
+                     RealSpace v, const EffectiveVectorMultivariateFunction& a);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon)\f$ and \f$\tau'(s)=\tau(s)+\epsilon\f$
     Void apply_fixed_evolve_step(const ValidatedVectorMultivariateFunctionModelDP& phi, const StepSizeType& eps);
     //! \brief Apply the evolve step \f$\xi'(s) = \phi(\xi(s),\epsilon(\xi(s)))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$
@@ -286,6 +289,8 @@ class HybridEnclosure
     ValidatedLowerKleenean is_empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
     ValidatedKleenean satisfies(EffectiveConstraint c) const;
+    //! \brief A list of the kind of quantity each parameter represents.
+    List<EnclosureVariableKind> const& variable_kinds() const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridUpperBoxType bounding_box() const;

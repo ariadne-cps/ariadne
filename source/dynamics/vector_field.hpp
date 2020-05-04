@@ -43,8 +43,13 @@
 
 namespace Ariadne {
 
+template<class S> class LabelledSet;
+
 class Enclosure;
+class LabelledEnclosure;
 class Storage;
+class LabelledStorage;
+
 class VectorFieldEvolver;
 
 
@@ -61,9 +66,9 @@ class VectorField
     //! \brief The class used to compute the system evolution.
     typedef VectorFieldEvolver EvolverType;
     //! \brief The type used to store local over-approximations to reach and evolve sets.
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef Storage StorageType;
+    typedef LabelledStorage StorageType;
   public:
     VectorField(const EffectiveVectorMultivariateFunction& f);
     VectorField(const List<DottedRealAssignment>&);
@@ -71,6 +76,7 @@ class VectorField
 
     const EffectiveVectorMultivariateFunction& dynamic_function() const { return this->_dynamic_function; }
     const EffectiveVectorMultivariateFunction& auxiliary_function() const { return this->_auxiliary_function; }
+    const EffectiveVectorMultivariateFunction& auxiliary_mapping() const { return this->_auxiliary_function; }
 
     RealSpace state_space() const;
     RealSpace auxiliary_space() const;

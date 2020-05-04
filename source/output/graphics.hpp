@@ -37,6 +37,7 @@
 
 #include "../utility/typedefs.hpp"
 #include "../utility/declarations.hpp"
+#include "../symbolic/variables.hpp"
 #include "../output/colour.hpp"
 #include "../output/graphics_interface.hpp"
 
@@ -73,10 +74,62 @@ struct GraphicsProperties {
     Colour line_colour;
     Bool fill_style;
     Colour fill_colour;
+
+    GraphicsProperties& set_dot_radius(Dbl);
+    GraphicsProperties& set_line_style(Bool);
+    GraphicsProperties& set_line_width(Dbl);
+    GraphicsProperties& set_line_colour(Colour);
+    GraphicsProperties& set_fill_style(Bool);
+    GraphicsProperties& set_fill_colour(Colour);
+
+    GraphicsProperties& set_line_colour(Dbl, Dbl, Dbl);
+    GraphicsProperties& set_fill_colour(Dbl, Dbl, Dbl);
+    GraphicsProperties& set_fill_opacity(Dbl);
+
     friend OutputStream& operator<<(OutputStream& os, GraphicsProperties const& gp);
 };
 
 Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
+
+// TODO: Move to interval.hpp as templated IntervalData classes
+template<> class Interval<Double> {
+    Double _l, _u;
+  public:
+    Interval(Double l, Double u) : _l(l), _u(u) { }
+    Double lower() const { return _l; }
+    Double upper() const { return _u; }
+};
+
+template<> class Interval<ApproximateDouble> {
+    ApproximateDouble _l, _u;
+  public:
+    typedef ApproximateDouble UpperBoundType;
+    Interval(ApproximateDouble l, ApproximateDouble u) : _l(l), _u(u) { }
+    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
+    ApproximateDouble lower() const { return _l; }
+    ApproximateDouble upper() const { return _u; }
+};
+using ApproximateDoubleInterval = Interval<ApproximateDouble>;
+using ApproximateDoubleVariableInterval = VariableInterval<ApproximateDouble>;
+using DoubleVariableInterval = VariableInterval<Double>;
+
+struct Variables2d {
+    Identifier _x,_y;
+    Variables2d(const RealVariable& x, const RealVariable& y);
+    RealVariable x() const;
+    RealVariable y() const;
+    RealVariable x_variable() const;
+    RealVariable y_variable() const;
+};
+
+struct Axes2d {
+    Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y);
+    Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable& y, ApproximateDouble yu);
+    Variables2d variables;
+    Map<RealVariable,ApproximateDoubleInterval> bounds;
+};
+
+
 
 //! \brief Class for plotting figures.
 class Figure
@@ -85,18 +138,17 @@ class Figure
   public:
     ~Figure();
     Figure(); //< Deprecated
-    Figure(const GraphicsBoundingBoxType& bbx, const PlanarProjectionMap& proj);
+    //! Construct a figure projecting \a bbx onto the \a proj coordinates
+    Figure(const GraphicsBoundingBoxType& bbx, const Projection2d& proj);
     //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
     Figure(const GraphicsBoundingBoxType& bbx, DimensionType ix, DimensionType iy);
     //! Construct a figure projecting \a bbx onto the (\a ix, \a iy) coordinates
     Figure(const GraphicsBoundingBoxType& bbx, Pair<DimensionType,DimensionType> ixy);
-    Figure& set_projection_map(const PlanarProjectionMap&);
-    //! Set the restricted region to display coordinates to (\a i, \a j)
+
+    Figure& set_projection_map(const Projection2d&);
+    Projection2d get_projection_map() const;
     Figure& set_bounding_box(const GraphicsBoundingBoxType&);
-
-    PlanarProjectionMap get_projection_map() const;
     GraphicsBoundingBoxType get_bounding_box() const;
-
     //! Set the displayed coordinates to (\a i, \a j)
     Figure& set_projection(DimensionType i, DimensionType j);
     Figure& set_projection(DimensionType as, DimensionType ix, DimensionType iy);
@@ -125,6 +177,9 @@ class Figure
     Dbl get_fill_opacity() const;
     Colour get_fill_colour() const;
 
+    GraphicsProperties& properties();
+    GraphicsProperties const& properties() const;
+
     //! Add a set to draw onto the figure.
     Figure& draw(const DrawableInterface& shape);
     Figure& draw(const ApproximateBoxType& box);
@@ -146,17 +201,79 @@ class Figure
     Data* _data;
 };
 
+
 Void draw(Figure& fig, const ApproximateBoxType& box);
-
-inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
-inline Figure& operator<<(Figure& g, const LineWidth& lw) { g.set_line_width(lw); return g; }
-inline Figure& operator<<(Figure& g, const LineColour& lc) { g.set_line_colour(lc); return g; }
-inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
-inline Figure& operator<<(Figure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
-inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
-
-inline Figure& operator<<(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
 inline Figure& operator<<(Figure& fig, const ApproximateBoxType& box) { fig.draw(box); return fig; }
+
+inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.properties().set_line_style(ls); return g; }
+inline Figure& operator<<(Figure& g, const LineWidth& lw) { g.properties().set_line_width(lw); return g; }
+inline Figure& operator<<(Figure& g, const LineColour& lc) { g.properties().set_line_colour(lc); return g; }
+inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.properties().set_fill_style(fs); return g; }
+inline Figure& operator<<(Figure& g, const FillOpacity& fo) { g.properties().set_fill_opacity(fo); return g; }
+inline Figure& operator<<(Figure& g, const FillColour& fc) { g.properties().set_fill_colour(fc); return g; }
+
+template<class S> class LabelledSet;
+
+//! \brief Class for plotting figures.
+class LabelledFigure {
+  public:
+    ~LabelledFigure();
+
+    //! Construct a figure drawing the given coordinates in the given bounds.
+    LabelledFigure(const Axes2d& axes);
+
+    LabelledFigure(const Variables2d& vars, VariablesBox<ApproximateIntervalType> const& bnds);
+
+    Void set_axes(const Axes2d& axes);
+//    Void set_bounds(const RealVariable& x, const ApproximateDouble& l, const ApproximateDouble& u);
+    Void set_bounds(const RealVariable& x, const ApproximateDoubleInterval& ivl);
+    Void set_bounds(const Map<RealVariable,ApproximateDoubleInterval>& b);
+
+    Void set_bounding_box(VariablesBox<ApproximateIntervalType> const& bnds);
+
+    GraphicsProperties& properties();
+    GraphicsProperties const& properties() const;
+
+    //! Add a set to draw onto the figure.
+    LabelledFigure& draw(const LabelledDrawableInterface& shape);
+
+    //! Clear the figure.
+    LabelledFigure& clear();
+    //! Display the figure.
+    Void display() const;
+    //! Write out to file, using width \a nx pixels, and height \a ny pixels
+    Void write(const Char* filename, Nat nx, Nat ny) const;
+    //! Write to \a filename.
+    Void write(const Char* filename) const;
+  public:
+    struct Data;
+  public:
+    Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
+  private:
+    Data* _data;
+};
+
+inline LabelledFigure& operator<<(LabelledFigure& g, const LineStyle& ls) { g.properties().set_line_style(ls); return g; }
+inline LabelledFigure& operator<<(LabelledFigure& g, const LineWidth& lw) { g.properties().set_line_width(lw); return g; }
+inline LabelledFigure& operator<<(LabelledFigure& g, const LineColour& lc) { g.properties().set_line_colour(lc); return g; }
+inline LabelledFigure& operator<<(LabelledFigure& g, const FillStyle& fs) { g.properties().set_fill_style(fs); return g; }
+inline LabelledFigure& operator<<(LabelledFigure& g, const FillOpacity& fo) { g.properties().set_fill_opacity(fo); return g; }
+inline LabelledFigure& operator<<(LabelledFigure& g, const FillColour& fc) { g.properties().set_fill_colour(fc); return g; }
+
+template<class S> class LabelledSet;
+template<class S> class LabelledDrawableWrapper : public LabelledDrawableInterface {
+    LabelledSet<S> _lset;
+  public:
+    LabelledDrawableWrapper(LabelledSet<S> lset) : _lset(lset) { }
+    virtual LabelledDrawableWrapper<S>* clone() const { return new LabelledDrawableWrapper<S>(*this); }
+    virtual Void draw(CanvasInterface& cnvs, Variables2d const& vars) const {
+        Projection2d prj(this->_lset.euclidean_set().dimension(),this->_lset.space()[vars.x()],this->_lset.space()[vars.y()]);
+        this->_lset.euclidean_set().draw(cnvs,prj);
+    }
+};
+template<class S> inline LabelledFigure& operator<<(LabelledFigure& g, const LabelledSet<S>& lset) {
+    return g << LabelledDrawableWrapper<S>(lset);
+}
 
 inline Void draw(Figure& g) { }
 
@@ -165,13 +282,14 @@ draw(Figure& g, const Colour& fc, const SET& set, CSETS const& ... csets) {
     g.set_fill_colour(fc); draw(g,set); draw(g,csets...); }
 
 template<class... CSETS> Void
-plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBoxType& bbox, CSETS const&... csets) {
+plot(const char* filename, const Projection2d& pr, const ApproximateBoxType& bbox, CSETS const&... csets) {
     Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); draw(g,csets...);  g.write(filename); }
 
 template<class... CSETS> Void
 plot(const char* filename, const ApproximateBoxType& bbox, CSETS const&... csets) {
-    plot(filename, PlanarProjectionMap(2u,0,1), bbox, csets...); }
+    plot(filename, Projection2d(2u,0,1), bbox, csets...); }
 
 } // namespace Ariadne
 
 #endif // ARIADNE_GRAPHICS_HPP
+

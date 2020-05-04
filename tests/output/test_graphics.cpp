@@ -101,7 +101,7 @@ Int main(Int argc, char **argv)
     g.write("test_graphics-bx3");
     g.clear();
 
-    g.set_projection_map(PlanarProjectionMap(2,0,1));
+    g.set_projection_map(Projection2d(2,0,1));
     g.set_bounding_box(bbx1);
 
     ARIADNE_TEST_PRINT(s1);

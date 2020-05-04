@@ -468,8 +468,6 @@ template<class EBS> Void HybridBasicSet<EBS>::adjoin_outer_approximation_to(Hybr
     }
 }
 
-template Void HybridBasicSet<Enclosure>::adjoin_outer_approximation_to(HybridGridTreePaving& paving, Nat fineness) const;
-
 
 template<class BS> Void draw_hybrid_basic_set(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {

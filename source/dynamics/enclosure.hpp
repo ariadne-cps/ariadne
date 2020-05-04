@@ -34,6 +34,7 @@
 #include "../numeric/numeric.hpp"
 #include "../algebra/vector.hpp"
 #include "../geometry/set_interface.hpp"
+#include "../symbolic/identifier.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../output/drawer_interface.hpp"
 
@@ -44,7 +45,6 @@
 
 namespace Ariadne {
 
-class Identifier;
 class ValidatedConstrainedImageSet;
 
 template<class X, class R> class Constraint;
@@ -59,6 +59,14 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 class Storage;
+
+template<class T> class Space;
+using RealSpace = Space<Real>;
+
+template<class IVL> class VariablesBox;
+using RealVariablesBox = VariablesBox<RealInterval>;
+
+struct Variables2d;
 
 typedef Constraint<ValidatedScalarMultivariateFunctionModelDP,FloatDPBounds> ValidatedConstraintModel;
 
@@ -87,7 +95,7 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-    , public ValidatedCompactSetInterface
+//    , public ValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -97,10 +105,18 @@ class Enclosure
     List<ValidatedConstraintModel> _constraints;
     mutable ExactBoxType _reduced_domain;
     mutable Bool _is_fully_reduced;
+
+    List<EnclosureVariableKind> _variable_kinds;
+
     EnclosureConfiguration _configuration;
+  public:
+    typedef DrawableInterface DrawableInterfaceType;
+    typedef EnclosureConfiguration ConfigurationType;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
+    //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
+    explicit Enclosure(EnclosureConfiguration const& config);
     //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const RealBox& bx, const EnclosureConfiguration& config);
     //! \brief Construct a representation of the box \a bx.
@@ -118,7 +134,7 @@ class Enclosure
     explicit Enclosure(const BoundedConstraintSet& set, const EnclosureConfiguration& fac);
 
     //! \brief Create a dynamically-allocated copy.
-    Enclosure* clone() const;
+    virtual Enclosure* clone() const override;
 
     //! \brief The classes used to work with the set.
     const EnclosureConfiguration& configuration() const;
@@ -158,13 +174,21 @@ class Enclosure
     ValidatedScalarMultivariateFunctionModelDP const  get_function(SizeType i) const;
 
     //! \brief Set the auxiliary function.
-    Void set_auxiliary(EffectiveVectorMultivariateFunction const& aux);
+    Void set_auxiliary_mapping(EffectiveVectorMultivariateFunction const& aux);
+    //! \brief Get the auxiliary function.
+    EffectiveVectorMultivariateFunction const& auxiliary_mapping() const;
 
+
+    //! \brief A list detailing the kind of variable each of the domain parameters represents.
+    List<EnclosureVariableKind> const& variable_kinds() const;
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     Void new_parameter(ExactIntervalType ivl);
+    Void new_parameter(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Introduces a new independent variable with values in the interval \a ivl.
     //! Equivalent to constructing the set \f$S\times I\f$.
     Void new_variable(ExactIntervalType ivl);
+    Void new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
+    Void _unchecked_new_variable(ExactIntervalType ivl, EnclosureVariableKind vk);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     Void substitute(SizeType j, ValidatedScalarMultivariateFunctionModelDP v);
@@ -174,8 +198,10 @@ class Enclosure
     //! \brief Set the time function to zero.
     Void clear_time();
 
-    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$.
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The state variables are unchanged.
     Void apply_map(ValidatedVectorMultivariateFunction r);
+    //! \brief Apply the map \f$r\f$ to the enclosure, obtaining \f$\phi'(s)=r(\phi(s))(x,h)\f$ and \f$\tau'(s)=\tau(s)\f$. \f$f\f$. The auxiliary function is updated to \a aux.
+    Void apply_map(ValidatedVectorMultivariateFunction r, EffectiveVectorMultivariateFunction aux);
     //! \brief Apply the flow \f$\xi'(s)=\phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     Void apply_fixed_evolve_step(ValidatedVectorMultivariateFunction phi, StepSizeType h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
@@ -235,10 +261,10 @@ class Enclosure
     ValidatedKleenean satisfies(ValidatedScalarMultivariateFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual ValidatedKleenean satisfies(ValidatedConstraint c) const;
+    ValidatedKleenean satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
-    DimensionType dimension() const;
+    virtual DimensionType dimension() const override;
     //! \brief The state dimension of the set.
     DimensionType state_dimension() const;
     //! \brief The number of parameters i.e. the dimension of the parameter domain.
@@ -338,7 +364,7 @@ class Enclosure
     ValidatedConstrainedImageSet state_time_auxiliary_set() const;
 
     //! \brief Draw to a canvas.
-    Void draw(CanvasInterface& c, const Projection2d& p) const;
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const override;
     //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
     //! image or when all else fails.
     [[deprecated]] Void box_draw(CanvasInterface&, const Projection2d& p) const; [[deprecated]]
@@ -351,7 +377,7 @@ class Enclosure
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;
   private:
-    Void _check() const;
+    Void _check(std::string from="") const;
     Void _solve_zero_constraints();
     EffectiveVectorMultivariateFunction real_function() const;
   private:
@@ -375,6 +401,111 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2);
 Enclosure apply(const ValidatedVectorMultivariateFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
 Enclosure unchecked_apply(const ValidatedVectorMultivariateFunctionModelDP& function, const Enclosure& set);
+
+} // namespace Ariadne
+
+#include "../symbolic/space.hpp"
+#include "../symbolic/expression_set.hpp"
+
+namespace Ariadne {
+
+template<class S> class LabelledSet;
+
+template<class UB> using LabelledInterval = VariableInterval<UB>;
+using LabelledExactIntervalType = LabelledInterval<typename ExactIntervalType::UpperBoundType>;
+
+template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
+using LabelledExactBoxType = LabelledBox<ExactIntervalType>;
+using LabelledRealBox = LabelledSet<RealBox>;
+
+class LabelledEnclosure
+    : public LabelledDrawableInterface, public Enclosure
+{
+  public:
+    typedef LabelledDrawableInterface DrawableInterfaceType;
+    typedef Box<UpperIntervalType> EuclideanBoundingBoxType;
+    typedef LabelledBox<UpperIntervalType> BoundingBoxType;
+  public:
+    LabelledEnclosure() : Enclosure() { }
+    LabelledEnclosure(EnclosureConfiguration const& config) : Enclosure(config) { }
+    LabelledEnclosure(LabelledRealBox const& bx, EnclosureConfiguration const& config);
+    LabelledEnclosure(LabelledExactBoxType const& bx, EnclosureConfiguration const& config);
+    LabelledEnclosure(ExactBoxType const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(RealVariablesBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(RealBox const& bx, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(BoundedConstraintSet const& set, RealSpace const& state_space, EnclosureConfiguration const& config);
+    LabelledEnclosure(Enclosure const& set, RealSpace const& state_space);
+    LabelledEnclosure(Enclosure const& set, RealSpace const& state_space, RealSpace const& auxiliary_space);
+
+    BoundingBoxType bounding_box() const;
+
+    const RealSpace space() const;
+    Enclosure const& euclidean_set() const { return *this; }
+    Pair<LabelledEnclosure,LabelledEnclosure> split() const;
+    Void apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP phi);
+
+    Void apply_map(ValidatedVectorMultivariateFunction const& f);
+    Void apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& new_state_space);
+    Void apply_map(ValidatedVectorMultivariateFunction const& f, RealSpace const& new_state_space,
+                   EffectiveVectorMultivariateFunction const& a, RealSpace const& new_auxiliary_space);
+
+    Void set_state_space(RealSpace const&);
+    const RealSpace state_space() const;
+    const RealVariable time_variable() const;
+    const RealSpace auxiliary_space() const;
+    const RealSpace state_auxiliary_space() const;
+    const RealSpace state_time_auxiliary_space() const;
+
+    Void set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux);
+
+    friend LabelledEnclosure product(const LabelledEnclosure&, const ExactIntervalType&);
+
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactIntervalType&);
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledExactBoxType&);
+    friend LabelledEnclosure product(const LabelledEnclosure&, const LabelledEnclosure&);
+
+    virtual LabelledEnclosure* clone() const override;
+
+    using Enclosure::draw;
+    virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+  private:
+    List<Identifier> _state_variables;
+    List<Identifier> _auxiliary_variables;
+};
+
+using LabelledEnclosureListSet = LabelledSet<ListSet<Enclosure>>;
+
+template<> class ListSet<LabelledEnclosure> : public LabelledDrawableInterface {
+    using BS=LabelledEnclosure;
+  private:
+    List<BS> _data;
+  public:
+    typedef List<BS>::ConstIterator ConstIterator;
+    Bool empty() const { return this->_data.empty(); }
+    SizeType size() const { return this->_data.size(); }
+    BS const& operator[] (SizeType i) const { return this->_data[i]; }
+    ConstIterator begin() const { return this->_data.begin(); }
+    ConstIterator end() const { return this->_data.end(); }
+
+    Void adjoin(LabelledEnclosure const& other) { this->_data.append(other); }
+    Void adjoin(ListSet<LabelledEnclosure> const& other) { this->_data.concatenate(other._data); }
+
+    const ListSet<LabelledSet<UpperBoxType>> bounding_boxes() const;
+
+    virtual ListSet<LabelledEnclosure>* clone() const override;
+    virtual Void draw(CanvasInterface&, const Variables2d&) const override;
+};
+
+template<> class LabelledSet<ListSet<Enclosure>> : public ListSet<LabelledEnclosure> {
+  public:
+    LabelledSet<ListSet<Enclosure>>() : ListSet<LabelledEnclosure>() { }
+    LabelledSet<ListSet<Enclosure>>(ListSet<LabelledEnclosure> lst) : ListSet<LabelledEnclosure>(lst) { }
+
+    const RealSpace state_space() const;
+    const RealSpace space() const;
+    const ListSet<Enclosure> euclidean_set() const;
+    const LabelledSet<UpperBoxType> bounding_box() const;
+};
 
 } //namespace Ariadne
 

@@ -42,10 +42,12 @@
 
 namespace Ariadne {
 
-class MapEvolver;
 class Enclosure;
+class LabelledEnclosure;
 class Storage;
+class LabelledStorage;
 
+class MapEvolver;
 
 //! \brief An iterated function system in Euclidean space.
 class IteratedMap
@@ -60,9 +62,9 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
     //! \brief The type used to evolve the system
     typedef MapEvolver EvolverType;
-    typedef Enclosure EnclosureType;
+    typedef LabelledEnclosure EnclosureType;
     //! \brief The type used to define global pavings of reach and evolve sets.
-    typedef Storage StorageType;
+    typedef LabelledStorage StorageType;
   public:
     IteratedMap(const EffectiveVectorMultivariateFunction& f);
     IteratedMap(const List<PrimedRealAssignment>&);
@@ -70,6 +72,7 @@ class IteratedMap
 
     const EffectiveVectorMultivariateFunction& update_function() const { return this->_update_function; }
     const EffectiveVectorMultivariateFunction& auxiliary_function() const { return this->_auxiliary_function; }
+    const EffectiveVectorMultivariateFunction& auxiliary_mapping() const { return this->_auxiliary_function; }
 
     RealSpace state_space() const;
     RealSpace auxiliary_space() const;

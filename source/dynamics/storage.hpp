@@ -132,7 +132,9 @@ struct LabelledGrid {
     List<Identifier> _auxiliary_variables;
 };
 
-class LabelledStorage : public Storage {
+class LabelledStorage
+    : public LabelledDrawableInterface, public Storage
+{
   public:
     typedef LabelledGrid GridType;
 
@@ -178,7 +180,7 @@ class LabelledStorage : public Storage {
     virtual LabelledStorage* clone() const override { return new LabelledStorage(*this); }
 
     using Storage::draw;
-    virtual Void draw(CanvasInterface& c, const Variables2d& p) const;
+    virtual Void draw(CanvasInterface& c, const Variables2d& p) const override;
 
     friend OutputStream& operator<<(OutputStream& os, LabelledStorage const& set) {
         return os << "LabelledStorage(" << set.state_set() << ", state_variables=" << set._state_variables << ", auxiliary_mapping=" << set.auxiliary_mapping() << ", auxiliary_variables=" << set._auxiliary_variables << ")"; }

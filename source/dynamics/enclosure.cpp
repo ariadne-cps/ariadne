@@ -1570,6 +1570,10 @@ LabelledEnclosure::LabelledEnclosure(Enclosure const& set, RealSpace const& stat
 {
 }
 
+LabelledEnclosure* LabelledEnclosure::clone() const {
+    return new LabelledEnclosure(*this);
+}
+
 
 Void LabelledEnclosure::set_state_space(RealSpace const& space) {
     ARIADNE_PRECONDITION(this->state_function().result_size()==space.dimension());
@@ -1589,10 +1593,20 @@ const RealSpace LabelledEnclosure::auxiliary_space() const {
     return RealSpace(this->_auxiliary_variables);
 }
 
+const RealSpace LabelledEnclosure::state_auxiliary_space() const {
+    return join(this->state_space(),this->auxiliary_space());
+}
+
 const RealSpace LabelledEnclosure::state_time_auxiliary_space() const
 {
     return join(join(this->state_space(),this->time_variable()),this->auxiliary_space());
 }
+
+
+const RealSpace LabelledEnclosure::space() const {
+    return this->state_time_auxiliary_space();
+}
+
 
 Void LabelledEnclosure::set_auxiliary(const RealSpace& spc, const EffectiveVectorMultivariateFunction& aux) {
     ARIADNE_PRECONDITION(this->state_function().result_size()==aux.argument_size());
@@ -1666,6 +1680,8 @@ Void LabelledEnclosure::draw(CanvasInterface& canvas, const Variables2d& axes) c
 
 
 
+
+
 LabelledStorage::LabelledStorage(Grid const& grid, RealSpace const& state_space)
     : LabelledStorage(GridTreePaving(grid), state_space) { }
 
@@ -1708,10 +1724,55 @@ const LabelledGrid LabelledStorage::grid() const {
     return LabelledGrid(this->euclidean_set().grid(),this->state_space(),this->auxiliary_mapping(),this->auxiliary_space());
 }
 
-Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) const
-{
+Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) const {
     Projection2d proj=projection(this->state_auxiliary_space(),axes);
     this->euclidean_set().draw(canvas,proj);
+}
+
+LabelledSet<UpperBoxType> LabelledEnclosure::bounding_box() const {
+    return LabelledSet(this->state_space(), this->euclidean_set().bounding_box());
+}
+
+const ListSet<LabelledSet<UpperBoxType>> ListSet<LabelledEnclosure>::bounding_boxes() const {
+    ListSet<LabelledSet<UpperBoxType>> boxes;
+    for(SizeType i=0; i!=this->size(); ++i) {
+        boxes.adjoin(LabelledSet((*this)[i].state_space(),(*this)[i].euclidean_set().bounding_box()));
+    }
+    return boxes;
+}
+
+ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
+    return new ListSet<LabelledEnclosure>(*this);
+}
+
+Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
+    for (auto set : this->_data) { set.draw(cnvs, prj); }
+}
+
+const RealSpace LabelledSet<ListSet<Enclosure>>::space() const {
+    return (*this)[0].space();
+}
+
+const RealSpace LabelledSet<ListSet<Enclosure>>::state_space() const {
+    return (*this)[0].state_space();
+}
+
+const ListSet<Enclosure> LabelledSet<ListSet<Enclosure>>::euclidean_set() const {
+    ListSet<Enclosure> result;
+    for (SizeType i=0; i!=this->size(); ++i) {
+        result.adjoin((*this)[i].euclidean_set());
+    }
+    return result;
+}
+
+const LabelledSet<UpperBoxType> LabelledSet<ListSet<Enclosure>>::bounding_box() const {
+    if (this->empty()) { return LabelledSet<UpperBoxType>(this->space(),UpperBoxType(this->space().dimension())); }
+    UpperBoxType bbx=(*this)[0].euclidean_set().bounding_box();
+    for (SizeType i=1; i!=this->size(); ++i) {
+        bbx=hull(bbx,(*this)[i].euclidean_set().bounding_box());
+    }
+    std::cerr<<"\nHere\n\n";
+    return LabelledSet<UpperBoxType>(this->state_space(),bbx);
 }
 
 } // namespace Ariadne

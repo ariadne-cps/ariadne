@@ -74,7 +74,7 @@ Int main()
     ExactBoxType search_box({{0,1},{0,1}});
     Point<FloatDPBounds> fixed_point = Point(solver.fixed_point(henon.update_function(),search_box));
     ARIADNE_PRINT(fixed_point);
-
+    LabelledSet<Point<FloatDPBounds>> labelled_fixed_point(henon.state_space(),fixed_point);
 
     // Set up the evaluators
     MapEvolver evolver(henon);
@@ -95,17 +95,17 @@ Int main()
     ListSet<EnclosureType> evolve_set,reach_set;
     tie(reach_set,evolve_set) = evolver.reach_evolve(initial_set,evolve_time);
 
-    ExactBoxType figure_bounding_box({{-4,2},{-3,3}});
-    Figure fig(figure_bounding_box,{0,1});
+    Axes2d figure_axes(-4<=x<=2,-3<=y<=3);
+    LabelledFigure fig(figure_axes);
     fig << fill_colour(magenta) << reach_set;
     fig << fill_colour(blue) << initial_set;
     fig << fill_colour(red) << evolve_set;
-    fig << line_width(4) << fill_colour(green) << fixed_point << line_width(1);
+    fig << line_width(4) << fill_colour(green) << labelled_fixed_point << line_width(1);
     fig.write("henon_map-reach");
 
     // Compute the chain-reach set
     // FIXME: Use inital_box as starting set
-    Storage chain_reach_set = analyser.outer_chain_reach(RealBoxSet(initial_box.euclidean_set(henon.state_space())));
+    LabelledStorage chain_reach_set = analyser.outer_chain_reach(RealBoxSet(initial_box.euclidean_set(henon.state_space())));
 
     fig.clear();
     fig << fill_colour(blue) << initial_set << fill_colour(cyan) << chain_reach_set;

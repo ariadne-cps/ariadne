@@ -48,17 +48,6 @@ static const Nat HYBRID_BOTTOM_MARGIN = 0;
 static const Nat HYBRID_TOP_MARGIN = 0;
 static const Nat HYBRID_RIGHT_MARGIN = 0;
 
-Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
-    return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
-}
-
-Projection2d projection(const RealSpace& space, const Variables2d& variables) {
-    ARIADNE_ASSERT(valid_axis_variables(space,variables));
-    Nat x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
-    Nat y_index = space.index(variables.y_variable());
-    return Projection2d(space.dimension(),x_index,y_index);
-}
-
 
 Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
     for(Nat i=0; i!=objects.size(); ++i) {

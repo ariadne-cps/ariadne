@@ -141,6 +141,7 @@ Void TestContinuousEvolution::test() const
     Orbit<EnclosureType> orbit = evolver.orbit(initial_set,time,semantics);
     ARIADNE_TEST_PRINT(orbit);
 
+/*
     // Print the intial, evolve and reach sets
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
@@ -152,7 +153,16 @@ Void TestContinuousEvolution::test() const
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("test_continuous_evolution-vdp");
+*/
 
+//    LabelledFigure fig(Axes2d(-1.0<=x<=+21,-1.125<=v<=+1.125));
+    LabelledFigure fig(Axes2d(-1.0<=x<=+21,-1.125<=v<=+1.125));
+//    fig.set_bounds({x,{-1.0_dec,+21.0_dec}},{v,{-1.125_dec,+1.125_dec}});
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach();
+    fig << fill_colour(magenta) << orbit.intermediate();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("test_continuous_evolution-vdp");
 }
 
 Void TestContinuousEvolution::failure_test() const
@@ -181,11 +191,9 @@ Void TestContinuousEvolution::failure_test() const
 
     // Set up the vector field for the first test
     Real p = 200;
-    EffectiveScalarMultivariateFunction o=EffectiveScalarMultivariateFunction::constant(2,1.0_q);
-    EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(2,0);
-    EffectiveScalarMultivariateFunction y=EffectiveScalarMultivariateFunction::coordinate(2,1);
-    EffectiveVectorMultivariateFunction failone={o,-p*y+p};
-    VectorField failone_vf(failone);
+    RealVariable x("x"), y("y");
+
+    VectorField failone_vf({dot(x)=1,dot(y)=-p*y+p});
 
     VectorFieldEvolver evolverone(failone_vf,integrator);
     evolverone.configuration().set_maximum_enclosure_radius(enclosure_radius);
@@ -210,13 +218,20 @@ Void TestContinuousEvolution::failure_test() const
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
     std::cout << "Plotting..."<< std::flush;
-    Figure fig; fig.set_bounding_box( widen(orbit.reach().bounding_box(),+0.25_x));
+    LabelledFigure fig(Variables2d(x,y),widen(orbit.reach().bounding_box(),+0.25_x));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("test_continuous_evolution-failone");
-
+/*
+    Figure fig; fig.set_bounding_box( widen(orbit.reach().bounding_box(),+0.25_x));
+    fig << line_style(true) << fill_colour(cyan) << orbit.reach().euclidean_set();
+    fig << fill_colour(magenta) << orbit.intermediate().euclidean_set();
+    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(blue) << initial_set;
+    fig.write("test_continuous_evolution-failone");
+*/
     // Set up the vector field for the second test
     p = Rational(1,10);
     EffectiveScalarMultivariateFunction z3=EffectiveScalarMultivariateFunction::zero(3);
@@ -250,12 +265,10 @@ Void TestContinuousEvolution::failure_test() const
     // cout << "reach_set=" << hybrid_reach_set << endl;
     std::cout << "Plotting..." << std::flush;
     fig.clear(); fig.set_bounding_box(orbit.reach().bounding_box());
-    fig.set_projection(2,0,1);
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;
     fig.write("test_continuous_evolution-failtwo");
     std::cout << std::endl;
-
 }
 

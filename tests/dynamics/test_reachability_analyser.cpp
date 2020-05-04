@@ -32,6 +32,7 @@
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
 #include "geometry/grid_paving.hpp"
+#include "dynamics/enclosure.hpp"
 #include "dynamics/vector_field_evolver.hpp"
 #include "dynamics/reachability_analyser.hpp"
 #include "symbolic/expression_set.hpp"
@@ -141,7 +142,7 @@ class TestReachabilityAnalyser
         cout << "Reached " << lower_reach.size() << " cells " << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-lower_reach_lower_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-lower_reach_lower_evolve.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
     }
 
@@ -156,7 +157,7 @@ class TestReachabilityAnalyser
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-map_lower_reach_evolve.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,lower_reach,evolve_set_colour,lower_evolve);
     }
 
@@ -172,7 +173,7 @@ class TestReachabilityAnalyser
         cout << "Reached " << upper_reach_set.size() << " cells " << endl;
         cout << "Evolved to " << upper_evolve_set.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
     }
 
@@ -186,7 +187,7 @@ class TestReachabilityAnalyser
         cout << "Reached " << reach_evolve_set.first.size() << " cells " << endl;
         cout << "Evolved to " << reach_evolve_set.second.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-map_upper_reach_evolve.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-map_upper_reach_evolve.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
     }
 
@@ -202,7 +203,7 @@ class TestReachabilityAnalyser
 
         cout << "Reached " << lower_reach_set.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-map_infinite_time_lower_reach.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-map_infinite_time_lower_reach.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,lower_reach_set);
     }
 
@@ -220,7 +221,7 @@ class TestReachabilityAnalyser
 
         cout << "Reached " << outer_chain_reach_set.size() << " cells " << endl << endl;
 
-        plot("test_reachability_analyser-map_outer_chain_reach.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-map_outer_chain_reach.png",Projection2d(2,0,1),graphics_box,
              reach_set_colour,outer_chain_reach_set);
 
         cout << "Recomputing with tight restriction" << endl;
@@ -239,7 +240,7 @@ class TestReachabilityAnalyser
         ARIADNE_TEST_ASSERT(definitely(safety_certificate.is_safe));
 
         auto safe_cells=inner_approximation(safe_set, grid, analyser.configuration().maximum_grid_fineness());
-        plot("test_reachability_analyser-verify_safety.png",PlanarProjectionMap(2,0,1),graphics_box,
+        plot("test_reachability_analyser-verify_safety.png",Projection2d(2,0,1),graphics_box,
              safe_set_colour,safety_certificate.safe_set,
              reach_set_colour,safety_certificate.chain_reach_set,
              initial_set_colour,initial_set);

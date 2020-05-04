@@ -131,7 +131,7 @@ int main() {
         fig << fill_colour(0.0,0.5,0.5) << bbx; // Use stream insertion to control graphics
         fig.set_fill_colour(0,1,1).draw(cis); // Use chained methods to control graphics
         fig.write("rigorous_numerics_tutorial"); //
-        plot("rigorous_numerics_tutorial",PlanarProjectionMap(2,0,1),bbx,Colour(1,0.5,0.5),bbx,Colour(0,1,1),cis); // Plot in one command
+        plot("rigorous_numerics_tutorial",Projection2d(2,0,1),bbx,Colour(1,0.5,0.5),bbx,Colour(0,1,1),cis); // Plot in one command
 
     }
     //! [geometry_demonstration]

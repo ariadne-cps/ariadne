@@ -243,7 +243,7 @@ HybridEnclosure::state_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain())<<"\n");
     //return this->state_function()(this->_set.reduced_domain());
-    return cast_exact_box(this->_set.bounding_box());
+    return cast_exact_box(this->_set.state_set().bounding_box());
 }
 
 UpperIntervalType

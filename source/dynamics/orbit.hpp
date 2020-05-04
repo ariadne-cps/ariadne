@@ -137,10 +137,10 @@ template<>
 class Orbit<LabelledEnclosure>
 {
     typedef LabelledEnclosure ES;
-    typedef ListSet<ES> ESL;
+    typedef LabelledSet<ListSet<Enclosure>> ESL;
   public:
     typedef ES EnclosureType;
-    typedef ListSet<ES> EnclosureListType;
+    typedef ESL EnclosureListType;
 
     Orbit(const ES& set) : _initial(set) { }
     Void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }

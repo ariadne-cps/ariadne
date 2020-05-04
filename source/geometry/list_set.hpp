@@ -51,7 +51,7 @@ struct ListSetSummary { Nat size, dimension; };
  */
 template<class BS>
 class ListSet
-    : public DrawableInterface
+//    : public DrawableInterface
 {
   private:
     std::vector<BS> _data;
@@ -151,8 +151,8 @@ class ListSet
      *
      *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the geometry/box.hpp header file.
      */
-    Void draw(CanvasInterface& c, const Projection2d& p) const {
-        for(Nat i=0; i!=this->size(); ++i) {
+    template<class PRJ> Void draw(CanvasInterface& c, const PRJ& p) const {
+        for(SizeType i=0; i!=this->size(); ++i) {
             (*this)[i].draw(c,p);
         }
     }

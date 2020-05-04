@@ -118,6 +118,7 @@ Void TestMapEvolver::test() const
     //cout << "evolve_bounding_boxes=" << evolve_set.bounding_boxes() << endl;
     ARIADNE_TEST_PRINT(reach_set.bounding_boxes());
 
+/*
     // Print the intial, evolve and reach sets
     Figure fig;
     fig.set_bounding_box({{-4,2},{-3,3}});
@@ -125,4 +126,12 @@ Void TestMapEvolver::test() const
     fig << fill_colour(yellow) << evolve_set;
     fig << fill_colour(blue) << initial_set;
     fig.write("test_discrete_evolution-henon");
+*/
+
+    // Print the intial, evolve and reach sets
+    LabelledFigure lfig(Axes2d(-4,x,2, -3,y,3));
+    lfig << line_style(true) << fill_colour(cyan) << reach_set;
+    lfig << fill_colour(yellow) << evolve_set;
+    lfig << fill_colour(blue) << initial_set;
+    lfig.write("test_discrete_evolution-henon-labelled");
 }

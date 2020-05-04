@@ -62,15 +62,12 @@ int main()
     std::cout << "done." << std::endl;
 
     std::cout << "plotting..." << std::endl;
-    Box<FloatDPUpperInterval> graphics_box(2);
-    graphics_box[0] = FloatDPUpperInterval(-2.5,2.5);
-    graphics_box[1] = FloatDPUpperInterval(-3.0,3.0);
-    Figure fig=Figure();
-    fig.set_bounding_box(graphics_box);
-    fig.set_line_colour(0.0,0.0,0.0);
-    fig.set_line_style(false);
-    fig.set_fill_colour(0.5,0.5,0.5);
-    fig.set_fill_colour(1.0,0.75,0.5);
+    Axes2d axes(-2.5<=x<=2.5,-3.0<=y<=3.0);
+    LabelledFigure fig=LabelledFigure(axes);
+    fig << line_colour(0.0,0.0,0.0);
+    fig << line_style(false);
+    fig << fill_colour(0.5,0.5,0.5);
+    fig << fill_colour(1.0,0.75,0.5);
     fig.draw(orbit.reach());
     fig.write("vanderpol");
 }

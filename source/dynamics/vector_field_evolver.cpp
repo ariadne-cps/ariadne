@@ -160,7 +160,7 @@ _append_initial_set(List<TimedEnclosureType>& working_sets,
                    const TimeStepType& initial_time,
                    const EnclosureType& current_set) const
 {
-    if (possibly(current_set.bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
+    if (possibly(current_set.euclidean_set().bounding_box().radius() > this->_configuration->maximum_enclosure_radius())) {
         ARIADNE_LOG(2,"initial set too large, splitting\n");
         Pair<EnclosureType,EnclosureType> split_sets = current_set.split();
         if(!definitely(split_sets.first.is_empty())) { _append_initial_set(working_sets,initial_time,split_sets.first); }
@@ -204,7 +204,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         TimeStepType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        FloatDPUpperBound current_set_radius=current_set_model.bounding_box().radius();
+        FloatDPUpperBound current_set_radius=current_set_model.euclidean_set().bounding_box().radius();
         if(definitely(current_time>=maximum_time)) {
             final_sets.adjoin(current_set_model);
         } else if(semantics == Semantics::UPPER && ENABLE_SUBDIVISIONS
@@ -262,7 +262,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     ARIADNE_LOG(6,"current_set_model = "<<current_set_model<<"\n");
 
     ARIADNE_LOG(2,"box = "<<current_set_model.bounding_box()<<" ");
-    ARIADNE_LOG(2,"radius = "<<current_set_model.bounding_box().radius()<<"\n\n");
+    ARIADNE_LOG(2,"radius = "<<current_set_model.euclidean_set().bounding_box().radius()<<"\n\n");
     //const Nat nd=initial_set_model.result_size();
     //const Nat ng=initial_set_model.argument_size();
 
@@ -286,7 +286,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const FloatDP zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
-    ExactBoxType current_set_bounds=cast_exact_box(current_set_model.bounding_box());
+    auto current_set_bounds=cast_exact_box(current_set_model.euclidean_set().bounding_box());
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
 

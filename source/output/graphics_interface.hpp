@@ -44,19 +44,25 @@ typedef Box<Interval<FloatDPApproximation>> GraphicsBoundingBoxType;
 struct Colour;
 
 class DrawableInterface;
+class LabelledDrawableInterface;
 class FigureInterface;
 class CanvasInterface;
 
-struct PlanarProjectionMap {
+struct Projection2d;
+typedef Projection2d Projection2d;
+
+struct Variables2d;
+
+struct Projection2d {
     DimensionType n, i, j;
-    PlanarProjectionMap(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) { }
+    Projection2d(DimensionType nn, DimensionType ii, DimensionType jj) : n(nn), i(ii), j(jj) { }
     DimensionType argument_size() const { return n; }
     DimensionType x_coordinate() const { return i; }
     DimensionType y_coordinate() const { return j; }
+    friend OutputStream& operator<<(OutputStream& os, const Projection2d& p) {
+        return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 };
-inline OutputStream& operator<<(OutputStream& os, const PlanarProjectionMap& p) {
-    return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
-typedef PlanarProjectionMap Projection2d;
+
 
 SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height);
 
@@ -65,7 +71,7 @@ SharedPointer<CanvasInterface> make_canvas(Nat drawing_width, Nat drawing_height
 class FigureInterface {
   public:
     virtual ~FigureInterface() = default;
-    virtual FigureInterface& set_projection_map(const PlanarProjectionMap& prj) = 0;
+    virtual FigureInterface& set_projection_map(const Projection2d& prj) = 0;
     virtual FigureInterface& set_bounding_box(const GraphicsBoundingBoxType& bx) = 0;
     virtual FigureInterface& set_projection(DimensionType as, DimensionType ix, DimensionType iy) = 0;
     virtual FigureInterface& set_line_style(Bool) = 0;
@@ -83,11 +89,14 @@ class FigureInterface {
     virtual FigureInterface& draw(const DrawableInterface&) = 0;
 };
 inline Void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
-inline FigureInterface& operator<<(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
 
 class Figure;
 Void draw(Figure& fig, const DrawableInterface& shape);
 Figure& operator<<(Figure& fig, const DrawableInterface& shape);
+
+class LabelledFigure;
+Void draw(LabelledFigure& fig, const LabelledDrawableInterface& shape);
+LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface& shape);
 
 //! \ingroup GraphicsModule
 //! \brief Interface to two-dimensional drawing canvas with the ability to draw polyhedra.
@@ -137,6 +146,9 @@ class CanvasInterface {
 //! \brief Base interface for drawable objects
 class DrawableInterface {
   public:
+    //! brief The type of data needed to project to a 2d image.
+    typedef Projection2d ProjectionType;
+
     //! brief Virtual destructor.
     virtual ~DrawableInterface() = default;
     //! brief Make a dynamically-allocated copy.
@@ -145,6 +157,20 @@ class DrawableInterface {
     virtual Void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
     virtual DimensionType dimension() const = 0;
+};
+
+//! \ingroup GraphicsModule
+//! \brief Base interface for drawable objects
+class LabelledDrawableInterface {
+  public:
+    //! brief The type of data needed to project to a 2d image.
+    typedef Variables2d ProjectionType;
+    //! brief Virtual destructor.
+    virtual ~LabelledDrawableInterface() = default;
+    //! brief Make a dynamically-allocated copy.
+    virtual LabelledDrawableInterface* clone() const = 0;
+    //! brief Draw the projection of object onto variables \a p on the canvas \a c .
+    virtual Void draw(CanvasInterface& c, const Variables2d& p) const = 0;
 };
 
 } // namespace Ariadne

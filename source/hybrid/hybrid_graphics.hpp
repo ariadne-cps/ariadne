@@ -44,61 +44,12 @@
 
 namespace Ariadne {
 
-template<> class Interval<FloatDP> {
-    FloatDP _l, _u;
-  public:
-    Interval(FloatDP l, FloatDP u) : _l(l), _u(u) { }
-    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
-    FloatDP lower() const { return _l; }
-    FloatDP upper() const { return _u; }
-};
-
-template<> class Interval<ApproximateDouble> {
-    ApproximateDouble _l, _u;
-  public:
-    Interval(ApproximateDouble l, ApproximateDouble u) : _l(l), _u(u) { }
-    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
-    ApproximateDouble lower() const { return _l; }
-    ApproximateDouble upper() const { return _u; }
-};
-using ApproximateDoubleInterval = Interval<ApproximateDouble>;
-using ApproximateDoubleVariableInterval = VariableInterval<ApproximateDouble>;
-
-
 struct HybridGraphicsObject {
     HybridGraphicsObject(const GraphicsProperties& gp, const HybridDrawableInterface& sh)
         : properties(gp), shape_ptr(&sh) { }
     GraphicsProperties properties;
     const HybridDrawableInterface* shape_ptr;
 };
-
-struct Variables2d {
-    Identifier _x,_y;
-    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x.name()), _y(y.name()) { }
-    RealVariable x_variable() const { return RealVariable(_x); }
-    RealVariable y_variable() const { return RealVariable(_y); }
-};
-
-
-
-struct Axes2d {
-    Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y);
-    Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable& y, ApproximateDouble yu);
-    Variables2d variables;
-    Map<RealVariable,ApproximateDoubleInterval> bounds;
-};
-
-inline Axes2d::Axes2d(const ApproximateDoubleVariableInterval x, const ApproximateDoubleVariableInterval& y)
-        : variables(x.variable(),y.variable()), bounds() {
-    bounds.insert(x.variable(),x.interval());
-    bounds.insert(y.variable(),y.interval());
-}
-
-inline Axes2d::Axes2d(ApproximateDouble xl, const RealVariable& x, ApproximateDouble xu, ApproximateDouble yl, const RealVariable& y, ApproximateDouble yu)
-        : variables(x,y), bounds() {
-    bounds.insert(x,ApproximateDoubleInterval(xl,xu));
-    bounds.insert(y,ApproximateDoubleInterval(yl,yu));
-}
 
 //! \brief Class for plotting figures of hybrid sets.
 class HybridFigure

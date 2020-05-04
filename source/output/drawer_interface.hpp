@@ -36,8 +36,8 @@ namespace Ariadne {
 
 typedef Void Void;
 class CanvasInterface;
-struct PlanarProjectionMap;
-typedef PlanarProjectionMap Projection2d;
+struct Projection2d;
+typedef Projection2d Projection2d;
 class ValidatedConstrainedImageSet;
 
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.

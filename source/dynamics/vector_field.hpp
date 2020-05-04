@@ -43,6 +43,8 @@
 
 namespace Ariadne {
 
+template<class S> class LabelledSet;
+
 class Enclosure;
 class LabelledEnclosure;
 class Storage;

@@ -44,6 +44,9 @@
 
 namespace Ariadne {
 
+template<class UB> class Interval;
+template<class IVL> class Box;
+template<class BS> class ListSet;
 class ConstraintSet;
 class BoundedConstraintSet;
 
@@ -192,10 +195,10 @@ inline VariableInterval<Real> operator<=(const VariableLowerInterval<Real>& lv, 
 
 inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDPValue& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Dyadic& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
-inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable& v) { return Dyadic(l)<=v; }
+inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }
 
 inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
-inline VariableLowerInterval<FloatDP> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
+inline VariableLowerInterval<Double> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<Double>(l,v); }
 
 //! \brief An box defining ranges for a collection of real variables.
 template<class IVL> class VariablesBox {
@@ -208,6 +211,7 @@ template<class IVL> class VariablesBox {
     typedef VariablesBox<IVL> VariablesBoxType;
 
     VariablesBox() : _bnds() { }
+    template<class I, EnableIf<IsConvertible<I,IVL>> = dummy> VariablesBox(const LabelledSet<Box<I>>& lbx);
     VariablesBox(const RealSpace& spc, const Box<IVL>& bx);
     VariablesBox(const Map<RealVariable,IntervalType>& bnds) : _bnds(bnds) { }
     VariablesBox(const List<VariableIntervalType>& bnds) :  _bnds() {
@@ -301,9 +305,19 @@ template<class S> class LabelledSet {
     EuclideanSetType& euclidean_set() { return this->_set; }
     EuclideanSetType euclidean_set(const RealSpace& vars) const {
         Array<SizeType> prj(vars.dimension()); for(SizeType i=0; i!=vars.dimension(); ++i) { prj[i]=this->_spc.index(vars.variable(i)); } return project(this->_set,prj); }
+    DimensionType dimension() const { return this->euclidean_set().dimension(); }
+    template<class T> Void adjoin(LabelledSet<T> const& other) const {
+        ARIADNE_ASSERT(this->space()==other.space()); this->euclidean_set().adjoin(other.euclidean_set()); }
+    decltype(auto) bounding_box() const { return LabelledSet(this->space(),this->euclidean_set().bounding_box()); }
+    decltype(auto) bounding_boxes() const { return LabelledSet(this->space(),this->euclidean_set().bounding_boxes()); }
+    Void draw(CanvasInterface& cnvs, Variables2d const& vars) const;
+
+    template<class E> friend decltype(auto) widen(const LabelledSet<S>& set, const E& e) {
+        return LabelledSet(set.space(),widen(set.euclidean_set(),e)); }
     friend OutputStream& operator<<(OutputStream& os, const LabelledSet<S>& eset) {
         return os << "LabelledSet( space=" << eset.space() << ", set=" << eset.continuous_set() << " )"; }
 };
+template<class S> LabelledSet(const RealSpace&, const S&) -> LabelledSet<S>;
 
 template<class S> EqualsType<S> operator==(LabelledSet<S> const& eset1, LabelledSet<S> const& eset2) {
     if(eset1.variables()!=eset2.variables()) { return false; }
@@ -316,14 +330,21 @@ template<class IVL> VariablesBox<IVL>::operator LabelledSet<Box<IVL>>() const {
     return LabelledSet<Box<IVL>>(spc,this->euclidean_set(spc));
 }
 
+template<class IVL> template<class I,EnableIf<IsConvertible<I,IVL>>> VariablesBox<IVL>::VariablesBox(LabelledSet<Box<I>> const& lbx)
+    : VariablesBox(lbx.space(),lbx.euclidean_set()) { }
+
+
 template<class UB> using LabelledInterval = VariableInterval<UB>;
 template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
+template<class BS> using LabelledListSet = LabelledSet<ListSet<BS>>;
 
 RealBox make_box(RealSpace const&, RealVariablesBox const&);
 RealBox make_set(RealSpace const&, RealVariablesBox const&);
 ConstraintSet make_set(RealSpace const&, RealExpressionConstraintSet const&);
 BoundedConstraintSet make_set(RealSpace const&, RealExpressionBoundedConstraintSet const&);
 BoundedConstraintSet make_set(RealSpace const&, RealVariablesBox const&, RealExpressionConstraintSet const&);
+
+
 } // namespace Ariadne
 
 

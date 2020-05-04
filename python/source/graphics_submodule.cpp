@@ -38,14 +38,14 @@ using namespace Ariadne;
 
 Void export_figure(pybind11::module& module)
 {
-    pybind11::class_<PlanarProjectionMap> planar_projection_map_class(module,"PlanarProjectionMap");
+    pybind11::class_<Projection2d> planar_projection_map_class(module,"Projection2d");
     planar_projection_map_class.def(pybind11::init<DimensionType,DimensionType,DimensionType>());
 
     static constexpr auto reference_internal = pybind11::return_value_policy::reference_internal ;
 
     pybind11::class_<Figure> figure_class(module,"Figure");
     figure_class.def(pybind11::init<>());
-    figure_class.def("set_projection_map",(Figure&(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map, reference_internal);
+    figure_class.def("set_projection_map",(Figure&(Figure::*)(const Projection2d&)) &Figure::set_projection_map, reference_internal);
     figure_class.def("set_projection",(Figure&(Figure::*)(DimensionType,DimensionType,DimensionType)) &Figure::set_projection, reference_internal);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box, reference_internal);
     figure_class.def("set_dot_radius", (Figure&(Figure::*)(double)) &Figure::set_dot_radius, reference_internal);

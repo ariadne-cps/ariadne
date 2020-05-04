@@ -231,6 +231,8 @@ template<class K, class T> class Map : public std::map<K,T> {
   public:
     typedef typename std::map<K,T>::iterator Iterator;
     typedef typename std::map<K,T>::const_iterator ConstIterator;
+    template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
+        Map(const std::map<K,TT>& m) : std::map<K,T>(m.begin(),m.end()) { }
     using std::map<K,T>::map;
     using std::map<K,T>::insert;
     T& operator[](K k) { return this->std::map<K,T>::operator[](k); }

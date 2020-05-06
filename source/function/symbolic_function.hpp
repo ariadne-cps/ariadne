@@ -65,7 +65,7 @@ struct ScalarUnivariateFormulaFunction
 
     virtual SizeOne argument_size() const final { return SizeOne(); }
     virtual SizeOne result_size() const final { return SizeOne(); }
-    virtual ScalarUnivariateFunctionInterface<P>* _derivative(SizeOne j) const final {
+    virtual typename ScalarUnivariateFunction<P>::Interface* _derivative(SizeOne j) const final {
         return new ScalarUnivariateFormulaFunction<Y>(Ariadne::derivative(_formula,0)); }
     virtual OutputStream& _write(OutputStream& os) const final { return os << this->_formula; }
     virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_formula<<")"; }

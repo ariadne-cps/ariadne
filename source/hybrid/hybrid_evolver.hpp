@@ -104,7 +104,7 @@ class HybridEvolverBase
     friend class HybridEvolverBaseConfiguration;
   public:
     typedef HybridEvolverBaseConfiguration ConfigurationType;
-    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
     typedef TimeType::ContinuousTimeType ContinuousTimeType;
@@ -736,7 +736,7 @@ class GeneralHybridEvolver
 
     GeneralHybridEvolver(const SystemType& system);
     GeneralHybridEvolver(const SystemType& system,
-                         const ValidatedFunctionModelDPFactoryInterface& factory);
+                         const FunctionFactoryType& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
     virtual OutputStream& _write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
@@ -795,13 +795,13 @@ class GeneralHybridEvolverFactory
 {
   private:
 
-    std::shared_ptr<ValidatedFunctionModelDPFactoryInterface> _function_factory;
+    std::shared_ptr<ValidatedFunctionModelDPFactory::Interface> _function_factory;
 
   public:
 
     GeneralHybridEvolverFactory();
 
-    GeneralHybridEvolverFactory(const ValidatedFunctionModelDPFactoryInterface& factory);
+    GeneralHybridEvolverFactory(const ValidatedFunctionModelDPFactory::Interface& factory);
 
     virtual GeneralHybridEvolverFactory* clone() const { return new GeneralHybridEvolverFactory(*this); }
 

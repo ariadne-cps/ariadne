@@ -74,7 +74,7 @@ class VectorFieldEvolver
     typedef Pair<TimeStepType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
-    typedef ValidatedFunctionModelDPFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelDPFactory::Interface FunctionFactoryType;
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.

@@ -98,35 +98,6 @@ using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!<
 //! \see Function
 template<class P, class SIG> class FunctionInterface;
 
-//@{
-//! \relates FunctionInterface
-//! \name Type shorthands
-template<class P, class... ARGS> using ScalarFunctionInterface = FunctionInterface<P,RealScalar(ARGS...)>; //!< .
-template<class P, class... ARGS> using VectorFunctionInterface = FunctionInterface<P,RealVector(ARGS...)>; //!< .
-template<class P, class RES> using UnivariateFunctionInterface = FunctionInterface<P,RES(RealScalar)>; //!< .
-template<class P, class RES> using MultivariateFunctionInterface = FunctionInterface<P,RES(RealVector)>; //!< .
-template<class P> using ScalarUnivariateFunctionInterface = FunctionInterface<P,RealScalar(RealScalar)>; //!< .
-template<class P> using VectorUnivariateFunctionInterface = FunctionInterface<P,RealVector(RealScalar)>; //!< .
-template<class P> using ScalarMultivariateFunctionInterface = FunctionInterface<P,RealScalar(RealVector)>; //!< .
-template<class P> using VectorMultivariateFunctionInterface = FunctionInterface<P,RealVector(RealVector)>; //!< .
-//@}
-
-typedef ScalarUnivariateFunctionInterface<ApproximateTag> ApproximateScalarUnivariateFunctionInterface;
-typedef ScalarUnivariateFunctionInterface<ValidatedTag> ValidatedScalarUnivariateFunctionInterface;
-typedef ScalarUnivariateFunctionInterface<EffectiveTag> EffectiveScalarUnivariateFunctionInterface;
-
-typedef VectorUnivariateFunctionInterface<ApproximateTag> ApproximateVectorUnivariateFunctionInterface;
-typedef VectorUnivariateFunctionInterface<ValidatedTag> ValidatedVectorUnivariateFunctionInterface;
-typedef VectorUnivariateFunctionInterface<EffectiveTag> EffectiveVectorUnivariateFunctionInterface;
-
-typedef ScalarMultivariateFunctionInterface<ApproximateTag> ApproximateScalarMultivariateFunctionInterface;
-typedef ScalarMultivariateFunctionInterface<ValidatedTag> ValidatedScalarMultivariateFunctionInterface;
-typedef ScalarMultivariateFunctionInterface<EffectiveTag> EffectiveScalarMultivariateFunctionInterface;
-
-typedef VectorMultivariateFunctionInterface<ApproximateTag> ApproximateVectorMultivariateFunctionInterface;
-typedef VectorMultivariateFunctionInterface<ValidatedTag> ValidatedVectorMultivariateFunctionInterface;
-typedef VectorMultivariateFunctionInterface<EffectiveTag> EffectiveVectorMultivariateFunctionInterface;
-
 template<class P, class SIG> using FunctionPatch=Function<P,SIG>;
 using ValidatedScalarUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealScalar(RealScalar)>;
 using ValidatedVectorUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealVector(RealScalar)>;
@@ -138,18 +109,6 @@ using ValidatedVectorMultivariateFunctionPatch = FunctionPatch<ValidatedTag,Real
 
 
 template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModelInterface;
-template<class P, class ARG, class PR=Void, class PRE=PR> using ScalarFunctionModelInterface = FunctionModelInterface<P,RealScalar(ARG),PR,PRE>;
-template<class P, class ARG, class PR=Void, class PRE=PR> using VectorFunctionModelInterface = FunctionModelInterface<P,RealVector(ARG),PR,PRE>;
-template<class P, class RES, class PR=Void, class PRE=PR> using UnivariateFunctionModelInterface = FunctionModelInterface<P,RES(RealScalar),PR,PRE>;
-template<class P, class RES, class PR=Void, class PRE=PR> using MultivariateFunctionModelInterface = FunctionModelInterface<P,RES(RealVector),PR,PRE>;
-template<class P, class PR=Void, class PRE=PR> using ScalarUnivariateFunctionModelInterface
-    = FunctionModelInterface<P,RealScalar(RealScalar),PR,PRE>;
-template<class P, class PR=Void, class PRE=PR> using VectorUnivariateFunctionModelInterface
-    = FunctionModelInterface<P,RealVector(RealScalar),PR,PRE>;
-template<class P, class PR=Void, class PRE=PR> using ScalarMultivariateFunctionModelInterface
-    = FunctionModelInterface<P,RealScalar(RealVector),PR,PRE>;
-template<class P, class PR=Void, class PRE=PR> using VectorMultivariateFunctionModelInterface
-    = FunctionModelInterface<P,RealVector(RealVector),PR,PRE>;
 
 template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModel;
 
@@ -241,24 +200,9 @@ template<class X> using PrecisionType = typename X::PrecisionType;
 template<class X> using ErrorPrecisionType = typename X::ErrorPrecisionType;
 
 
-template<class P> using ScalarUnivariateFunctionModelDPInterface = ScalarUnivariateFunctionModelInterface<P,DoublePrecision>;
-template<class P> using VectorUnivariateFunctionModelDPInterface = VectorUnivariateFunctionModelInterface<P,DoublePrecision>;
-template<class P> using ScalarMultivariateFunctionModelDPInterface = ScalarMultivariateFunctionModelInterface<P,DoublePrecision>;
-template<class P> using VectorMultivariateFunctionModelDPInterface = VectorMultivariateFunctionModelInterface<P,DoublePrecision>;
-
-using ValidatedScalarUnivariateFunctionModelDPInterface = ScalarUnivariateFunctionModelInterface<ValidatedTag,DoublePrecision>;
-using ValidatedVectorUnivariateFunctionModelDPInterface = VectorUnivariateFunctionModelInterface<ValidatedTag,DoublePrecision>;
-using ValidatedScalarMultivariateFunctionModelDPInterface = ScalarMultivariateFunctionModelInterface<ValidatedTag,DoublePrecision>;
-using ValidatedVectorMultivariateFunctionModelDPInterface = VectorMultivariateFunctionModelInterface<ValidatedTag,DoublePrecision>;
-
-using ApproximateScalarUnivariateFunctionModelDPInterface = ScalarUnivariateFunctionModelInterface<ApproximateTag,DoublePrecision>;
-using ApproximateVectorUnivariateFunctionModelDPInterface = VectorUnivariateFunctionModelInterface<ApproximateTag,DoublePrecision>;
-using ApproximateScalarMultivariateFunctionModelDPInterface = ScalarMultivariateFunctionModelInterface<ApproximateTag,DoublePrecision>;
-using ApproximateVectorMultivariateFunctionModelDPInterface = VectorMultivariateFunctionModelInterface<ApproximateTag,DoublePrecision>;
-
 
 template<class P, class PR, class PRE=PR> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactoryInterface;
+
 template<class P, class PR, class PRE=PR> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag,DoublePrecision> ValidatedFunctionModelDPFactory;
 template<class FMF, class D> class FunctionModelCreator;

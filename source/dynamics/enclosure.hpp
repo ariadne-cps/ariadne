@@ -77,7 +77,7 @@ struct EnclosureConfiguration {
     Paver _paver;
     Drawer _drawer;
     EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory);
-    EnclosureConfiguration(ValidatedFunctionModelDPFactoryInterface const& function_factory)
+    EnclosureConfiguration(ValidatedFunctionModelDPFactory::Interface const& function_factory)
         : EnclosureConfiguration(ValidatedFunctionModelDPFactory(function_factory.clone())) { }
     EnclosureConfiguration(ValidatedFunctionModelDPFactory function_factory, Paver paver, Drawer drawer)
         : _function_factory(function_factory), _paver(paver), _drawer(drawer) { }

@@ -658,8 +658,8 @@ EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivar
 
 
 ValidatedVectorMultivariateFunction operator-(ValidatedVectorMultivariateFunction const& f1, ValidatedVectorMultivariateFunction const& f2) {
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const> f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const> f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) {
         return ValidatedVectorMultivariateFunctionModelDP(*f1p) - ValidatedVectorMultivariateFunctionModelDP(*f2p);
     } else if(f1p) {
@@ -680,8 +680,7 @@ Function<P,R(AS...)> _validated_compose(const Function<P,R(T)>& f, const Functio
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     typedef DoublePrecision PR;
 
-    std::shared_ptr<FunctionModelInterface<P,T(AS...),PR> const>
-        gp=std::dynamic_pointer_cast<FunctionModelInterface<P,T(AS...),PR> const>(g.managed_pointer());
+    auto gp=std::dynamic_pointer_cast<typename FunctionModel<P,T(AS...),PR>::Interface const>(g.managed_pointer());
     if(gp) {
         return compose(f,FunctionModel<P,T(AS...),PR>(gp->_clone()));
     } else {
@@ -722,10 +721,8 @@ ValidatedVectorMultivariateFunction compose(const ValidatedVectorMultivariateFun
 }
 
 ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) {
         ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
@@ -740,10 +737,8 @@ ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction con
 }
 
 ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction const& f1, const ValidatedScalarMultivariateFunction& f2) {
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) {
         ValidatedVectorMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
@@ -759,10 +754,8 @@ ValidatedVectorMultivariateFunction join(ValidatedVectorMultivariateFunction con
 }
 
 ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction const& f1, const ValidatedVectorMultivariateFunction& f2) {
-    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedVectorMultivariateFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) {
         ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedVectorMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
@@ -778,10 +771,8 @@ ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction con
 }
 
 ValidatedVectorMultivariateFunction join(ValidatedScalarMultivariateFunction const& f1, const ValidatedScalarMultivariateFunction& f2) {
-    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
-        f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    std::shared_ptr<ValidatedScalarMultivariateFunctionModelDPInterface const>
-        f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=std::dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) {
         ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return join(f1m,f2m);
     } else if(f1p) {
@@ -955,14 +946,14 @@ template<> EffectiveScalarMultivariateFunction AlgebraOperations<EffectiveScalar
 
 
 template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalarMultivariateFunction,ValidatedNumber>::apply(UnaryElementaryOperator op, ValidatedScalarMultivariateFunction const& f) {
-    auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
+    auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f.managed_pointer());
     if(fp) { ValidatedScalarMultivariateFunctionModelDP fm=fp; return op(fm); }
     else { return ValidatedScalarMultivariateFunction(new UnaryMultivariateFunction<ValidatedTag>(op,f)); }
 }
 
 template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalarMultivariateFunction,ValidatedNumber>::apply(BinaryElementaryOperator op, ValidatedScalarMultivariateFunction const& f1, ValidatedScalarMultivariateFunction const& f2) {
-    auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
-    auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
+    auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f1p && f2p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(f1m,f2m); }
     else if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m(f1p); return op(f1m,factory(f1m).create(f2)); }
     else if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m(f2p); return op(factory(f2m).create(f1),f2m); }
@@ -970,19 +961,19 @@ template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalar
 }
 
 template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalarMultivariateFunction,ValidatedNumber>::apply(BinaryElementaryOperator op, ValidatedScalarMultivariateFunction const& f1, ValidatedNumber const& c2) {
-    auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f1.managed_pointer());
+    auto f1p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f1.managed_pointer());
     if(f1p) { ValidatedScalarMultivariateFunctionModelDP f1m=f1p; return op(f1,c2); }
     else { return ValidatedScalarMultivariateFunction(new BinaryMultivariateFunction<ValidatedTag>(op,f1,f1.create_constant(c2))); }
 }
 
 template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalarMultivariateFunction,ValidatedNumber>::apply(BinaryElementaryOperator op, ValidatedNumber const& c1, ValidatedScalarMultivariateFunction const& f2) {
-    auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f2.managed_pointer());
+    auto f2p=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f2.managed_pointer());
     if(f2p) { ValidatedScalarMultivariateFunctionModelDP f2m=f2p; return op(c1,f2m); }
     else { return ValidatedScalarMultivariateFunction(new BinaryMultivariateFunction<ValidatedTag>(op,f2.create_constant(c1),f2)); }
 }
 
 template<> ValidatedScalarMultivariateFunction AlgebraOperations<ValidatedScalarMultivariateFunction,ValidatedNumber>::apply(GradedElementaryOperator op, ValidatedScalarMultivariateFunction const& f, Int n) {
-    auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDPInterface const>(f.managed_pointer());
+    auto fp=dynamic_pointer_cast<ValidatedScalarMultivariateFunctionModelDP::Interface const>(f.managed_pointer());
     if(fp) { ValidatedScalarMultivariateFunctionModelDP fm=fp; return op(fm,n); }
     else { return ValidatedScalarMultivariateFunction(new GradedMultivariateFunction<ValidatedTag>(op,f,n)); }
 }

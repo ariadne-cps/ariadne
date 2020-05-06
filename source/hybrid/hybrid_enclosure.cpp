@@ -87,14 +87,14 @@ HybridEnclosure::HybridEnclosure(EnclosureConfiguration const& config)
 
 HybridEnclosure::HybridEnclosure(const HybridBoxSet& hbox,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactoryInterface& factory)
+                                 const ValidatedFunctionModelDPFactory& factory)
     : HybridEnclosure(hbox.location(),state_space,hbox.euclidean_set(state_space),factory)
 {
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& state_space,
-                                 const ValidatedFunctionModelDPFactoryInterface& factory)
+                                 const ValidatedFunctionModelDPFactory& factory)
     : _location(hybrid_set.location()), _events(), _set()
 {
     BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,state_space);
@@ -103,17 +103,17 @@ HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
 
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& state_space,
-                                 const RealBox& box, const ValidatedFunctionModelDPFactoryInterface& factory)
+                                 const RealBox& box, const ValidatedFunctionModelDPFactory& factory)
     : _location(location), _events(), _set(box,state_space,factory)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModelDPFactoryInterface& factory)
+HybridEnclosure::HybridEnclosure(const HybridRealBox& hbox, const ValidatedFunctionModelDPFactory& factory)
     : HybridEnclosure(hbox.location(),hbox.space(),hbox.euclidean_set(),factory)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModelDPFactoryInterface& factory)
+HybridEnclosure::HybridEnclosure(const HybridExactBoxType& hbox, const ValidatedFunctionModelDPFactory& factory)
     : HybridEnclosure(hbox.location(),LabelledEnclosure(hbox.euclidean_set(),hbox.space(),factory))
 {
 }
@@ -170,7 +170,7 @@ HybridEnclosure::configuration() const
     return this->_set.configuration();
 }
 
-ValidatedFunctionModelDPFactoryInterface const&
+ValidatedFunctionModelDPFactory const&
 HybridEnclosure::function_factory() const
 {
     return this->_set.function_factory();

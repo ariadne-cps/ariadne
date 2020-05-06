@@ -1276,13 +1276,13 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     ExactBoxType new_domain = hull(domain1,domain2);
 
     ValidatedVectorMultivariateFunctionModelDP function1
-        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<VectorMultivariateFunctionModelDPInterface<ValidatedTag> const&>(set1.function().reference()));
+        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const&>(set1.function().reference()));
     Vector<FloatDPError> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
     ValidatedVectorMultivariateFunctionModelDP function2
-        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<VectorMultivariateFunctionModelDPInterface<ValidatedTag> const&>(set2.function().reference()));
+        = ValidatedVectorMultivariateFunctionModelDP( dynamic_cast<ValidatedVectorMultivariateFunctionModelDP::Interface const&>(set2.function().reference()));
     Vector<FloatDPError> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);

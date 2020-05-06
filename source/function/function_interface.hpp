@@ -67,6 +67,14 @@ template<> struct SignatureTraits<RealVector(RealVector)> {
 
 template<class P, class SIG> class FunctionInterface;
 
+template<class P, class... ARGS> using ScalarFunctionInterface = FunctionInterface<P,RealScalar(ARGS...)>;
+template<class P, class... ARGS> using VectorFunctionInterface = FunctionInterface<P,RealVector(ARGS...)>;
+template<class P> using ScalarUnivariateFunctionInterface = ScalarFunctionInterface<P,RealScalar>;
+template<class P> using VectorUnivariateFunctionInterface = VectorFunctionInterface<P,RealScalar>;
+template<class P> using ScalarMultivariateFunctionInterface = ScalarFunctionInterface<P,RealVector>;
+template<class P> using VectorMultivariateFunctionInterface = VectorFunctionInterface<P,RealVector>;
+
+
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.

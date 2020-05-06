@@ -170,7 +170,7 @@ template<class F> class VectorUserFunction
         virtual Matrix<FloatDPBounds> jacobian(const Vector<FloatDPBounds>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<FloatDPBounds>::variables(1u,x))); }
 
-        virtual EffectiveScalarMultivariateFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarMultivariateFunction::Interface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual EffectiveScalarMultivariateFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a

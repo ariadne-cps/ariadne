@@ -53,22 +53,26 @@ template<class P, class A, class PR, class PRE> struct AlgebraOperations<ScalarF
 
 // FIXME: Extend with univariate case
 template<class P, class PR, class PRE> class FunctionModelFactory {
+  private:
     SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> _ptr;
     typedef RealScalar SARG;
     typedef RealVector VARG;
     typedef IntervalDomainType SD;
     typedef BoxDomainType VD;
   public:
+    typedef FunctionModelFactoryInterface<P,PR,PRE> Interface;
+
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef PRE ErrorPrecisionType;
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
 
-    operator const FunctionModelFactoryInterface<P,PR,PRE>& () const { return *_ptr; }
+    operator const Interface& () const { return *_ptr; }
 
-    explicit FunctionModelFactory(const FunctionModelFactoryInterface<P,PR,PRE>* p) : _ptr(p) { }
-    explicit FunctionModelFactory(SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> p) : _ptr(p) { }
+    FunctionModelFactory(const Interface& i) : _ptr(i.clone()) { }
+    explicit FunctionModelFactory(const Interface* p) : _ptr(p) { }
+    explicit FunctionModelFactory(SharedPointer<const Interface> p) : _ptr(p) { }
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const {
         return CanonicalNumericType<P,PR,PRE>(this->_ptr->_create(c)); }
@@ -180,36 +184,37 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
     static_assert(IsSame<D,IntervalDomainType>::value or IsSame<D,BoxDomainType>::value,"");
   public:
+    typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
     typedef ScalarFunction<P,ARG> GenericType;
     typedef P Paradigm;
     typedef PR PrecisionType;
     typedef D DomainType;
     typedef C CodomainType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ValueType ValueType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ErrorType ErrorType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType NumericType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::GenericNumericType GenericNumericType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NormType NormType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::RangeType RangeType;
+    typedef typename Interface::ValueType ValueType;
+    typedef typename Interface::ErrorType ErrorType;
+    typedef typename Interface::NumericType NumericType;
+    typedef typename Interface::GenericNumericType GenericNumericType;
+    typedef typename Interface::NormType NormType;
+    typedef typename Interface::RangeType RangeType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
-    clone_on_copy_ptr< FunctionModelInterface<P,SIG,PR,PRE> > _ptr;
+    clone_on_copy_ptr< Interface > _ptr;
   public:
     FunctionModel() : _ptr() { }
-    explicit FunctionModel(FunctionModelInterface<P,SIG,PR,PRE>* p) : _ptr(p) { }
-    FunctionModel(const SharedPointer<const FunctionModelInterface<P,SIG,PR,PRE>> p) : _ptr(p->_clone()) { }
+    explicit FunctionModel(Interface* p) : _ptr(p) { }
+    FunctionModel(const SharedPointer<const Interface> p) : _ptr(p->_clone()) { }
     FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : _ptr(f._ptr) { }
     FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
-        FunctionModel(const FunctionModelInterface<P,SIG,PR,PRE>& f) : _ptr(f._clone()) { }
-    FunctionModel(const Function<P,SIG>& f) : _ptr(dynamic_cast<FunctionModelInterface<P,SIG,PR,PRE>*>(f.raw_pointer()->_clone())) { }
+        FunctionModel(const Interface& f) : _ptr(f._clone()) { }
+    FunctionModel(const Function<P,SIG>& f) : _ptr(dynamic_cast<Interface*>(f.raw_pointer()->_clone())) { }
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); }
-    operator FunctionModelInterface<P,SIG,PR,PRE>& () { return *_ptr; }
-    operator const FunctionModelInterface<P,SIG,PR,PRE>& () const { return *_ptr; }
-    const FunctionModelInterface<P,SIG,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    FunctionModelInterface<P,SIG,PR,PRE>& reference() { return *_ptr; }
-    const FunctionModelInterface<P,SIG,PR,PRE>& reference() const { return *_ptr; }
+    operator Interface& () { return *_ptr; }
+    operator const Interface& () const { return *_ptr; }
+    const Interface* raw_pointer() const { return _ptr.operator->(); }
+    Interface& reference() { return *_ptr; }
+    const Interface& reference() const { return *_ptr; }
 
     ScalarFunctionModel<P,ARG,PR,PRE>& operator=(const Number<P>& c);
     ScalarFunctionModel<P,ARG,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
@@ -429,7 +434,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     using RES=RealVector; using SIG=RES(ARG);
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
   public:
-    clone_on_copy_ptr< VectorFunctionModelInterface<P,ARG,PR,PRE> > _ptr;
+    typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
+  private:
+    clone_on_copy_ptr< Interface > _ptr;
   public:
     typedef VectorFunction<P,ARG> GenericType;
     typedef P Paradigm;
@@ -437,18 +444,18 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     typedef D DomainType;
     typedef C CodomainType;
 
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::RangeType RangeType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NormType NormType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ValueType ValueType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ErrorType ErrorType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType NumericType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::GenericNumericType GenericNumericType;
+    typedef typename Interface::RangeType RangeType;
+    typedef typename Interface::NormType NormType;
+    typedef typename Interface::ValueType ValueType;
+    typedef typename Interface::ErrorType ErrorType;
+    typedef typename Interface::NumericType NumericType;
+    typedef typename Interface::GenericNumericType GenericNumericType;
 
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
     inline FunctionModel() : _ptr() { }
-    inline FunctionModel(SharedPointer<const FunctionModelInterface<P,SIG,PR,PRE>> vfp)
+    inline FunctionModel(SharedPointer<const Interface> vfp)
         : _ptr(vfp->_clone()) { }
     inline FunctionModel(SizeType n, const ScalarFunctionModelInterface<P,ARG,PR,PRE>& sf) {
         FunctionModelFactory<P,PR,PRE> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
@@ -457,15 +464,15 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
         : FunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
     inline FunctionModel(List<ScalarFunctionModel<P,ARG,PR,PRE>> const& lsf)
         : FunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
-    inline explicit FunctionModel(FunctionModelInterface<P,SIG,PR,PRE>* p) : _ptr(p) { }
-    inline FunctionModel(const FunctionModelInterface<P,SIG,PR,PRE>& f) : _ptr(f._clone()) { }
+    inline explicit FunctionModel(Interface* p) : _ptr(p) { }
+    inline FunctionModel(const Interface& f) : _ptr(f._clone()) { }
     inline FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : _ptr(f._ptr) { }
     inline FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
-    inline operator const FunctionModelInterface<P,SIG,PR,PRE>& () const { return *_ptr; }
+    inline operator const Interface& () const { return *_ptr; }
     inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); }
-    inline const FunctionModelInterface<P,SIG,PR,PRE>* raw_pointer() const { return _ptr.operator->(); }
-    inline const FunctionModelInterface<P,SIG,PR,PRE>& reference() const { return *_ptr; }
-    inline FunctionModelInterface<P,SIG,PR,PRE>& reference() { return *_ptr; }
+    inline const Interface* raw_pointer() const { return _ptr.operator->(); }
+    inline const Interface& reference() const { return *_ptr; }
+    inline Interface& reference() { return *_ptr; }
 
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
@@ -626,18 +633,18 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
 
 // FIXME: Implement for Multiple-Precision versions
 template<class P> inline CanonicalNumeric64Type<P> unchecked_evaluate(const ScalarMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    ScalarMultivariateFunctionModelDPInterface<P> const* fptr = dynamic_cast<ScalarMultivariateFunctionModelDPInterface<P> const*>(f.raw_pointer());
+    auto const* fptr = dynamic_cast<typename ScalarMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
     if(fptr) { return unchecked_evaluate(ScalarMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
 
 template<class P> inline Vector<CanonicalNumeric64Type<P>> unchecked_evaluate(const VectorMultivariateFunction<P>& f, const Vector<CanonicalNumeric64Type<P>>& x) {
-    VectorMultivariateFunctionModelDPInterface<P> const* fptr = dynamic_cast<VectorMultivariateFunctionModelDPInterface<P> const*>(f.raw_pointer());
+    auto const* fptr = dynamic_cast<typename VectorMultivariateFunctionModelDP<P>::Interface const*>(f.raw_pointer());
     if(fptr) { return unchecked_evaluate(VectorMultivariateFunctionModelDP<P>(*fptr),x); } else { return evaluate(f,x); } }
 
 template<class P, class ARG, class PR, class PRE> inline ScalarFunctionModel<P,ARG,PR,PRE> unchecked_compose(const ScalarMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
-    ScalarFunctionModelInterface<P,ARG,PR,PRE> const* fptr = dynamic_cast<ScalarFunctionModelInterface<P,ARG,PR,PRE> const*>(f.raw_pointer());
+    auto const* fptr = dynamic_cast<typename ScalarFunctionModel<P,ARG,PR,PRE>::Interface const*>(f.raw_pointer());
     if(fptr) { return unchecked_compose(ScalarFunctionModel<P,ARG,PR,PRE>(*fptr),g); } else { return compose(f,g); } }
 template<class P, class ARG, class PR, class PRE> inline VectorFunctionModel<P,ARG,PR,PRE> unchecked_compose(const VectorMultivariateFunction<P>& f, const VectorFunctionModel<P,ARG,PR,PRE>& g) {
-    VectorFunctionModelInterface<P,ARG,PR,PRE> const* fptr = dynamic_cast<VectorFunctionModelInterface<P,ARG,PR,PRE> const*>(f.raw_pointer());
+    auto const* fptr = dynamic_cast<typename VectorFunctionModel<P,ARG,PR,PRE>::Interface const*>(f.raw_pointer());
     if(fptr) { return unchecked_compose(VectorFunctionModel<P,ARG,PR,PRE>(*fptr),g); } else { return compose(f,g); } }
 
 // FIXME: Should be unneeded

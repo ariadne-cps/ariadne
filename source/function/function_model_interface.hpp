@@ -61,6 +61,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInte
     virtual ValueType const _value() const = 0;
 };
 
+template<class P, class ARG, class PR, class PRE> using ScalarFunctionModelInterface = FunctionModelInterface<P,RealScalar(ARG),PR,PRE>;
+template<class P, class ARG, class PR, class PRE> using VectorFunctionModelInterface = FunctionModelInterface<P,RealVector(ARG),PR,PRE>;
+
 template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInterface<P,RealVector(ARG),PR,PRE>
     : public virtual WritableInterface
 {

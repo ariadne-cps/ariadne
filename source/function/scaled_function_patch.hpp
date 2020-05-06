@@ -163,6 +163,8 @@ template<class M> class ScaledFunctionPatch
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
   public:
+    typedef typename D::DimensionType ArgumentSizeType;
+    typedef typename C::DimensionType ResultSizeType;
     typedef D DomainType;
     typedef M ModelType;
     typedef typename ModelType::CodomainType CodomainType;
@@ -307,6 +309,8 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief The number of variables in the argument of the quantity.
     SizeType argument_size() const { return this->_model.argument_size(); }
+    //! \brief The number of variables in the argument of the quantity.
+    SizeOne result_size() const { return SizeOne(); }
     //! \brief The maximum degree of terms in the expansion expansion.
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.

@@ -175,8 +175,7 @@ template<class P> ScalarFunction<P,EuclideanDomain> compose(ScalarFunction<P,Euc
 }
 
 RealScalarMultivariateFunction compose(RealScalarMultivariateFunction const& f, Projection const& prj) {
-    auto f_dom=f.domain();
-    BoxDomainType dom=preimage(prj,f_dom);
+    EuclideanDomain dom(prj.argument_size());
     Vector<RealScalarMultivariateFunction> id(RealScalarMultivariateFunction::coordinates(dom));
     RealVectorMultivariateFunction pid=prj(id);
     return compose(f,pid);

@@ -50,8 +50,8 @@ class Storage
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
   public:
     typedef Grid GridType;
-    Storage(Grid const& g) : _state_set(g), _auxiliary_mapping(0,g.dimension()) { }
-    Storage(GridTreePaving const& gtp) : _state_set(gtp), _auxiliary_mapping(0,gtp.dimension()) { }
+    Storage(Grid const& g) : _state_set(g), _auxiliary_mapping(EuclideanDomain(g.dimension())) { }
+    Storage(GridTreePaving const& gtp) : _state_set(gtp), _auxiliary_mapping(EuclideanDomain(gtp.dimension())) { }
     Storage(Grid const& g, EffectiveVectorMultivariateFunction const& aux)
         : _state_set(g), _auxiliary_mapping(aux) { }
     Storage(GridTreePaving const& gtp, EffectiveVectorMultivariateFunction const& aux)

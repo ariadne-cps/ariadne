@@ -245,11 +245,11 @@ EffectiveVectorMultivariateFunction constraint_function(EuclideanDomain dom, con
 }
 
 EffectiveVectorMultivariateFunction constraint_function(BoxDomainType dom, const List<EffectiveConstraint>& c) {
-    return make_constraint_function<EffectiveTag>(dom,c);
+    return make_constraint_function<EffectiveTag>(EuclideanDomain(dom.dimension()),c);
 }
 
 ValidatedVectorMultivariateFunction constraint_function(BoxDomainType dom, const List<ValidatedConstraint>& c) {
-    return make_constraint_function<ValidatedTag>(dom,c);
+    return make_constraint_function<ValidatedTag>(EuclideanDomain(dom.dimension()),c);
 }
 
 

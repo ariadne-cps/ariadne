@@ -83,7 +83,7 @@ VectorField::VectorField(List<DottedRealAssignment> const& dynamics, List<RealAs
 }
 
 VectorField::VectorField(EffectiveVectorMultivariateFunction const& function)
-    : _dynamic_function(function), _auxiliary_function(0u,function.argument_size())
+    : _dynamic_function(function), _auxiliary_function(0u,function.domain())
 {
     ARIADNE_PRECONDITION(function.result_size()==function.argument_size());
 }

@@ -235,7 +235,7 @@ template<class P> Void export_scalar_univariate_function(pybind11::module& modul
     module.def("derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,1u).gradient()[0]);} );
     module.def("second_derivative", [](const ScalarUnivariateFunction<P>& f, const FloatDPApproximation& x){return static_cast<FloatDPApproximation>(differential(f,x,2u).hessian()[0][0]);} );
 
-    function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(IntervalDomainType,Number<P>)) &ScalarUnivariateFunction<P>::constant);
+    function_class.def_static("constant", (ScalarUnivariateFunction<P>(*)(RealDomain,Number<P>)) &ScalarUnivariateFunction<P>::constant);
     function_class.def_static("coordinate", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::coordinate);
     function_class.def_static("identity", (ScalarUnivariateFunction<P>(*)()) &ScalarUnivariateFunction<P>::identity);
 
@@ -248,7 +248,7 @@ template<class P> Void export_vector_univariate_function(pybind11::module& modul
 {
     pybind11::class_<VectorUnivariateFunction<P>> vector_univariate_function_class(module,(class_name<P>()+"VectorUnivariateFunction").c_str());
     vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<P>>());
-    vector_univariate_function_class.def(pybind11::init<Nat>());
+    vector_univariate_function_class.def(pybind11::init<SizeType,RealDomain>());
     if constexpr (IsSame<P,ValidatedTag>::value) {
         vector_univariate_function_class.def(pybind11::init<VectorUnivariateFunction<EffectiveTag>>());
 //        pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ValidatedTag>>();
@@ -347,7 +347,7 @@ template<class P> Void export_vector_function(pybind11::module& module)
 {
     pybind11::class_<VectorMultivariateFunction<P>> vector_function_class(module,(class_name<P>()+"VectorMultivariateFunction").c_str());
     vector_function_class.def(pybind11::init<VectorMultivariateFunction<P>>());
-    vector_function_class.def(pybind11::init<Nat,Nat>());
+    vector_function_class.def(pybind11::init<SizeType,SizeType>());
     if constexpr (IsSame<P,ValidatedTag>::value) {
         vector_function_class.def(pybind11::init<VectorMultivariateFunction<EffectiveTag>>());
 //        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();

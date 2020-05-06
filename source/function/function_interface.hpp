@@ -47,13 +47,13 @@ template<class S> using ElementIndexType = decltype(declval<S>().dimension());
 
 template<class SIG> struct SignatureTraits;
 template<> struct SignatureTraits<Real(Real)> {
-    typedef Real ArgumentKind; typedef IntervalDomainType DomainType; typedef IntervalDomainType CodomainType; };
+    typedef Real ArgumentKind; typedef RealDomain DomainType; typedef RealDomain CodomainType; };
 template<> struct SignatureTraits<Real(RealVector)> {
-    typedef RealVector ArgumentKind; typedef BoxDomainType DomainType; typedef IntervalDomainType CodomainType; };
+    typedef RealVector ArgumentKind; typedef EuclideanDomain DomainType; typedef RealDomain CodomainType; };
 template<> struct SignatureTraits<RealVector(Real)> {
-    typedef Real ArgumentKind; typedef IntervalDomainType DomainType; typedef BoxDomainType CodomainType; };
+    typedef Real ArgumentKind; typedef RealDomain DomainType; typedef EuclideanDomain CodomainType; };
 template<> struct SignatureTraits<RealVector(RealVector)> {
-    typedef RealVector ArgumentKind; typedef BoxDomainType DomainType; typedef BoxDomainType CodomainType; };
+    typedef RealVector ArgumentKind; typedef EuclideanDomain DomainType; typedef EuclideanDomain CodomainType; };
 
 
 template<class P, class SIG> class FunctionInterface;
@@ -105,8 +105,8 @@ class FunctionInterface<Void,SIG>
     virtual ~FunctionInterface() = default;
     virtual ArgumentSizeType argument_size() const = 0;
     virtual ResultSizeType result_size() const = 0;
-    virtual DomainType const domain() const = 0;
-    virtual CodomainType const codomain() const = 0;
+//    virtual DomainType const domain() const = 0;
+//    virtual CodomainType const codomain() const = 0;
 
     virtual OutputStream& repr(OutputStream& os) const = 0;
     virtual OutputStream& _write(OutputStream& os) const = 0;

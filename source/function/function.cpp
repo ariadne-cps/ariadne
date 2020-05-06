@@ -66,19 +66,19 @@ template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_con
 
 //------------------------ Formula Function ----------------------------------//
 
-template<class P, class Y> ScalarUnivariateFunction<P> make_formula_function(IntervalDomainType dom, Scalar<Formula<Y>> const& e) {
+template<class P, class Y> ScalarUnivariateFunction<P> make_formula_function(RealDomain dom, Scalar<Formula<Y>> const& e) {
     return ScalarUnivariateFunction<P>(new ScalarUnivariateFormulaFunction<Y>(e));
 }
 
-template<class P, class Y> VectorUnivariateFunction<P> make_formula_function(IntervalDomainType dom, Vector<Formula<Y>> const& e) {
+template<class P, class Y> VectorUnivariateFunction<P> make_formula_function(RealDomain dom, Vector<Formula<Y>> const& e) {
     return VectorUnivariateFunction<P>(new VectorUnivariateFormulaFunction<Y>(e));
 }
 
-template<class P, class Y> ScalarMultivariateFunction<P> make_formula_function(BoxDomainType dom, Scalar<Formula<Y>> const& e) {
+template<class P, class Y> ScalarMultivariateFunction<P> make_formula_function(EuclideanDomain dom, Scalar<Formula<Y>> const& e) {
     return ScalarMultivariateFunction<P>(new ScalarFormulaFunction<Y>(dom.dimension(),e));
 }
 
-template<class P, class Y> VectorMultivariateFunction<P> make_formula_function(BoxDomainType dom, Vector<Formula<Y>> const& e) {
+template<class P, class Y> VectorMultivariateFunction<P> make_formula_function(EuclideanDomain dom, Vector<Formula<Y>> const& e) {
     return VectorMultivariateFunction<P>(new VectorFormulaFunction<Y>(dom.dimension(),e));
 }
 
@@ -86,32 +86,21 @@ template<class P, class Y> VectorMultivariateFunction<P> make_formula_function(B
 
 namespace {
 
-template<class D, class DD> D make_domain(DD dom);
-template<> IntervalDomainType make_domain<IntervalDomainType,BoxDomainType>(BoxDomainType dom) { throw std::runtime_error(""); }
-template<> IntervalDomainType make_domain<IntervalDomainType,IntervalDomainType>(IntervalDomainType dom) { return dom; }
-template<> BoxDomainType make_domain<BoxDomainType,BoxDomainType>(BoxDomainType dom) { return dom; }
-
-template<class P, class D, class DD> ScalarFunction<P,ElementKind<D>> make_zero_function(SizeOne rs, DD dom) {
-    return FunctionConstructors<P>::zero(make_domain<D>(dom)); }
-template<class P, class D, class DD> VectorFunction<P,ElementKind<D>> make_zero_function(SizeType rs, DD dom) {
-    return  FunctionConstructors<P>::zeros(rs,make_domain<D>(dom)); }
+template<class P, class D> ScalarFunction<P,ElementKind<D>> make_zero_function(SizeOne rs, D dom) {
+    return FunctionConstructors<P>::zero(dom); }
+template<class P, class D> VectorFunction<P,ElementKind<D>> make_zero_function(SizeType rs, D dom) {
+    return  FunctionConstructors<P>::zeros(rs,dom); }
 }
 
 template<class P, class SIG> Function<P,SIG>::Function() : _ptr() {
 }
 
-template<class P, class SIG> Function<P,SIG>::Function(EuclideanDomain dom) {
-    ResultSizeType rs=ResultSizeType(); BoxDomainType bx_dom=dom;
-    (*this) = make_zero_function<P,D>(rs,bx_dom);
-}
-
-template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, EuclideanDomain dom) {
-    BoxDomainType const& bx_dom=dom;
-    (*this) = make_zero_function<P,D>(rs,bx_dom);
-}
-
 template<class P, class SIG> Function<P,SIG>::Function(DomainType dom) {
     ResultSizeType rs=ResultSizeType(); (*this) = make_zero_function<P,D>(rs,dom);
+}
+
+template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ArgumentSizeType as) {
+    (*this) = make_zero_function<P,D>(rs,DomainType(as));
 }
 
 template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, DomainType dom) {
@@ -155,30 +144,30 @@ template<class P, class SIG> Function<P,SIG>::Function(Vector<ScalarFunction<P,A
 
 //------------------------ Function Constructors -----------------------------------//
 
-template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::zero(BoxDomainType dom) {
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::zero(VectorDomainType dom) {
     return ConstantFunction<Y,RealVector>(dom, Y(0));
 }
 
 
-template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::constant(BoxDomainType dom, NumericType c) {
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::constant(VectorDomainType dom, NumericType c) {
     return ConstantFunction<Y,RealVector>(dom, c);
 }
 
-template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordinate(BoxDomainType dom, SizeType j) {
+template<class P> ScalarMultivariateFunction<P> FunctionConstructors<P>::coordinate(VectorDomainType dom, SizeType j) {
     return CoordinateFunction<P,RealVector>(dom, j);
 }
 
-template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(BoxDomainType dom) {
+template<class P> List<ScalarMultivariateFunction<P>> FunctionConstructors<P>::coordinates(VectorDomainType dom) {
     List<ScalarMultivariateFunction<P>> r; r.reserve(dom.dimension());
     for(SizeType j=0; j!=dom.dimension(); ++j) { r.append(coordinate(dom,j)); }
     return r;
 }
 
-template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, BoxDomainType dom) {
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, VectorDomainType dom) {
     return VectorMultivariateFunction<P>(new VectorOfScalarMultivariateFunction<P>(rs,zero(dom)));
 }
 
-template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(BoxDomainType dom) {
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identity(VectorDomainType dom) {
     SizeType n=dom.dimension();
     ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(dom);
     VectorOfScalarMultivariateFunction<P>* res = new VectorOfScalarMultivariateFunction<P>(n,z);
@@ -189,51 +178,51 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identit
 }
 
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(IntervalDomainType dom) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero(ScalarDomainType dom) {
     return ConstantUnivariateFunction<Y>(dom, Y(0));
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomainType dom, NumericType c) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(ScalarDomainType dom, NumericType c) {
     return ConstantUnivariateFunction<Y>(dom,c);
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom, SizeOne as) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(ScalarDomainType dom, SizeOne as) {
     return CoordinateFunction<P,Real>(dom,as);
 }
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(IntervalDomainType dom) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate(ScalarDomainType dom) {
     return coordinate(dom,SizeOne());
 }
 
-template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, IntervalDomainType dom) {
+template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs, ScalarDomainType dom) {
     return constant(dom,Vector<Y>(rs,0));
 }
 
 
-template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(IntervalDomainType dom) {
+template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity(ScalarDomainType dom) {
     return coordinate(dom,SizeOne());
 }
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::zero() {
-    return zero(IntervalDomainType::biinfinite_interval());
+    return zero(RealDomain());
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::constant(NumericType c) {
-    return constant(IntervalDomainType::biinfinite_interval(),c);
+    return constant(RealDomain(),c);
 }
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::coordinate() {
-    return coordinate(IntervalDomainType::biinfinite_interval());
+    return coordinate(RealDomain());
 }
 
 template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::zeros(SizeType rs) {
-    return zeros(rs,IntervalDomainType::biinfinite_interval());
+    return zeros(rs,RealDomain());
 }
 
 
 template<class P> ScalarUnivariateFunction<P> FunctionConstructors<P>::identity() {
-    return identity(IntervalDomainType::biinfinite_interval());
+    return identity(RealDomain());
 }
 
 
@@ -283,7 +272,7 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::identit
     return VectorMultivariateFunction<P>(res);
 }
 
-template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constant(BoxDomainType dom, Vector<NumericType> c) {
+template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constant(VectorDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
     ScalarMultivariateFunction<P> z=ScalarMultivariateFunction<P>::zero(dom);
     VectorOfScalarFunction<P,RealVector>* res = new VectorOfScalarFunction<P,RealVector>(n,z);
@@ -293,7 +282,7 @@ template<class P> VectorMultivariateFunction<P> FunctionConstructors<P>::constan
     return VectorMultivariateFunction<P>(res);
 }
 
-template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::constant(IntervalDomainType dom, Vector<NumericType> c) {
+template<class P> VectorUnivariateFunction<P> FunctionConstructors<P>::constant(ScalarDomainType dom, Vector<NumericType> c) {
     SizeType n=c.size();
     ScalarUnivariateFunction<P> z=ScalarUnivariateFunction<P>::zero(dom);
     VectorOfScalarUnivariateFunction<P>* res = new VectorOfScalarUnivariateFunction<P>(n,z);
@@ -589,12 +578,12 @@ EffectiveVectorMultivariateFunction join(const EffectiveVectorMultivariateFuncti
 
 
 EffectiveScalarMultivariateFunction embed(SizeType as1, const EffectiveScalarMultivariateFunction& f2, SizeType as3) {
-    typedef BoxDomainType D; typedef IntervalDomainType C;
+    typedef EuclideanDomain D; typedef RealDomain C;
     return EffectiveScalarMultivariateFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 
 EffectiveVectorMultivariateFunction embed(SizeType as1, const EffectiveVectorMultivariateFunction& f2, SizeType as3) {
-    typedef BoxDomainType D; typedef BoxDomainType C;
+    typedef EuclideanDomain D; typedef EuclideanDomain C;
     return EffectiveVectorMultivariateFunction(new EmbeddedFunction<EffectiveTag,D,D,D,C>(as1,f2,as3));
 }
 

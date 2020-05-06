@@ -85,12 +85,8 @@ class FunctionMixin<F,Void,SIG>
     FunctionMixin() { }
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
   public:
-//    virtual DomainType const domain() const override = 0;
-//    virtual CodomainType const codomain() const override = 0;
-    virtual DomainType const domain() const override { return make_domain<D>(this->argument_size()); }
-    virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
-    virtual ArgumentSizeType argument_size() const override { return this->domain().dimension(); }
-    virtual ResultSizeType result_size() const override { return this->codomain().dimension(); }
+    virtual ArgumentSizeType argument_size() const override = 0;
+    virtual ResultSizeType result_size() const override = 0;
 
     virtual OutputStream& _write(OutputStream& os) const override = 0;
     virtual OutputStream& repr(OutputStream& os) const override { return this->_write(os); }

@@ -96,6 +96,8 @@ template<class P, class D, class C, class PR, class PRE> class FunctionModelInte
     typedef typename FunctionModelTraits<P,PR,PRE>::NumericType NumericType;
     typedef typename FunctionModelTraits<P,PR,PRE>::GenericNumericType GenericNumericType;
   public:
+    virtual DomainType const domain() const = 0;
+    virtual CodomainType const codomain() const = 0;
     virtual RangeType const range() const = 0;
     virtual NormType const _norm() const = 0;
     virtual ErrorType const _error() const = 0;

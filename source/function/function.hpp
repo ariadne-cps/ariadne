@@ -48,6 +48,7 @@
 #include "../algebra/covector.hpp"
 #include "../algebra/differential.hpp"
 #include "../function/domain.hpp"
+#include "../function/formula.hpp"
 
 namespace Ariadne {
 
@@ -67,6 +68,9 @@ class FunctionConstructors {
   public:
     typedef Y NumericType;
 
+    typedef RealDomain ScalarDomainType;
+    typedef EuclideanDomain VectorDomainType;
+
     //@{
     //! \name Named (static) constructors
     static ScalarMultivariateFunction<P> zero(SizeType as); //!< \brief %Constant scalar function zero in \a as arguments.
@@ -77,13 +81,13 @@ class FunctionConstructors {
     static VectorMultivariateFunction<P> constant(SizeType as, Vector<NumericType> c); //!< \brief %Constant vector function \a c in \a as arguments.
     static VectorMultivariateFunction<P> identity(SizeType ns); //!< \brief The identity over \a ns variables.
 
-    static ScalarMultivariateFunction<P> zero(BoxDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
-    static ScalarMultivariateFunction<P> constant(BoxDomainType dom, NumericType c); //!< \brief %Constant function \a c over domain \a dom.
-    static ScalarMultivariateFunction<P> coordinate(BoxDomainType dom, SizeType j); //!< \brief %Coordinate function taking \a j -th index over domain \a dom.
-    static List<ScalarMultivariateFunction<P>> coordinates(BoxDomainType dom); //!< \brief %List of all coordinate functions over domain \a dom.
-    static VectorMultivariateFunction<P> zeros(SizeType rs, BoxDomainType dom); //!< \brief Zero function over domain \a dom returning a result of size \a rs.
-    static VectorMultivariateFunction<P> constant(BoxDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
-    static VectorMultivariateFunction<P> identity(BoxDomainType dom); //!< \brief Identity function over domain \a dom.
+    static ScalarMultivariateFunction<P> zero(VectorDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
+    static ScalarMultivariateFunction<P> constant(VectorDomainType dom, NumericType c); //!< \brief %Constant function \a c over domain \a dom.
+    static ScalarMultivariateFunction<P> coordinate(VectorDomainType dom, SizeType j); //!< \brief %Coordinate function taking \a j -th index over domain \a dom.
+    static List<ScalarMultivariateFunction<P>> coordinates(VectorDomainType dom); //!< \brief %List of all coordinate functions over domain \a dom.
+    static VectorMultivariateFunction<P> zeros(SizeType rs, VectorDomainType dom); //!< \brief Zero function over domain \a dom returning a result of size \a rs.
+    static VectorMultivariateFunction<P> constant(VectorDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
+    static VectorMultivariateFunction<P> identity(VectorDomainType dom); //!< \brief Identity function over domain \a dom.
 
     static ScalarUnivariateFunction<P> zero(); //!< \brief %Constant scalar univariate function zero.
     static ScalarUnivariateFunction<P> constant(NumericType c); //!< \brief %Constant scalar univariate function with value \a c.
@@ -92,13 +96,13 @@ class FunctionConstructors {
     static VectorUnivariateFunction<P> constant(Vector<NumericType> c); //!< \brief Constant univariate function taking values \a c.
     static ScalarUnivariateFunction<P> identity(); //!< \brief %Scalar univariate identity function.
 
-    static ScalarUnivariateFunction<P> zero(IntervalDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
-    static ScalarUnivariateFunction<P> constant(IntervalDomainType dom, NumericType c); //!< \brief %Constant scalar function \a c over domain \a dom.
-    static ScalarUnivariateFunction<P> coordinate(IntervalDomainType dom, SizeOne j); //!< \brief %Coordinate function over domain \a dom.
-    static ScalarUnivariateFunction<P> coordinate(IntervalDomainType dom); //!< \brief %Coordinate function over domain \a dom.
-    static VectorUnivariateFunction<P> zeros(SizeType rs, IntervalDomainType dom); //!< \brief %Zero vector function over domain \a dom returning a result of size \a rs.
-    static VectorUnivariateFunction<P> constant(IntervalDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
-    static ScalarUnivariateFunction<P> identity(IntervalDomainType dom); //!< \brief %Identity function over domain \a dom.
+    static ScalarUnivariateFunction<P> zero(ScalarDomainType dom); //!< \brief %Constant scalar function zero over domain \a dom.
+    static ScalarUnivariateFunction<P> constant(ScalarDomainType dom, NumericType c); //!< \brief %Constant scalar function \a c over domain \a dom.
+    static ScalarUnivariateFunction<P> coordinate(ScalarDomainType dom, SizeOne j); //!< \brief %Coordinate function over domain \a dom.
+    static ScalarUnivariateFunction<P> coordinate(ScalarDomainType dom); //!< \brief %Coordinate function over domain \a dom.
+    static VectorUnivariateFunction<P> zeros(SizeType rs, ScalarDomainType dom); //!< \brief %Zero vector function over domain \a dom returning a result of size \a rs.
+    static VectorUnivariateFunction<P> constant(ScalarDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
+    static ScalarUnivariateFunction<P> identity(ScalarDomainType dom); //!< \brief %Identity function over domain \a dom.
 
     //@}
 
@@ -172,7 +176,8 @@ class Function
 {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
     using Y=Number<P>;
-    using D=typename SignatureTraits<SIG>::DomainType; using C=typename SignatureTraits<SIG>::CodomainType;
+    using D=typename SignatureTraits<SIG>::DomainType;
+    using C=typename SignatureTraits<SIG>::CodomainType;
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
   protected:
     SharedPointer< const FunctionInterface<P,SIG> > _ptr;
@@ -195,8 +200,8 @@ class Function
     //@{
     //! \name User constructors.
 
-    explicit Function(EuclideanDomain dom); //!< \deprecated
-    explicit Function(ResultSizeType rs, EuclideanDomain dom); //!< \deprecated
+    //! \brief Construct the zero function with the given number of argument variables \a as and result variables \a rs.
+    explicit Function(ResultSizeType rs, ArgumentSizeType as);
 
     //! \brief Construct the zero function with the given domain \a dom and default codomain (Zero-dimensional for a vector function, one-dimensional for a scalar function).
     explicit Function(DomainType dom);
@@ -273,10 +278,10 @@ class Function
 
     //! \brief The domain of the function.
     DomainType domain() const {
-        return this->reference().domain(); }
+        return DomainType(this->reference().argument_size()); }
     //! \brief The codomain of the function.
     CodomainType codomain() const {
-        return this->reference().codomain(); }
+        return CodomainType(this->reference().result_size()); }
     //! \brief The number of scalar variables in the argument.
     ArgumentSizeType argument_size() const {
         return this->reference().argument_size(); }

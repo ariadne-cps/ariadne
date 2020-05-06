@@ -55,7 +55,7 @@
 namespace Ariadne {
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelDP>;
-template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,BoxDomainType>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelDP>,RealVector>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelDP>;
 template class FunctionMixin<ScaledFunctionPatch<ValidatedTaylorModelDP>,ApproximateTag,RealScalar(RealVector)>;
@@ -65,7 +65,7 @@ template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,A
 template class FunctionMixin<VectorScaledFunctionPatch<ValidatedTaylorModelDP>,ValidatedTag,RealVector(RealVector)>;
 
 template class ScaledFunctionPatchFactory<ValidatedTaylorModelMP>;
-template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,BoxDomainType>;
+template class FunctionModelCreator<ScaledFunctionPatchFactory<ValidatedTaylorModelMP>,RealVector>;
 
 template class ScaledFunctionPatch<ValidatedTaylorModelMP>;
 template class VectorScaledFunctionPatch<ValidatedTaylorModelMP>;

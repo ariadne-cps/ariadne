@@ -44,16 +44,25 @@ template<class S> using ElementKind = typename ElementTraits<S>::Kind;
 template<class S> using ElementSizeType = decltype(declval<S>().dimension());
 template<class S> using ElementIndexType = decltype(declval<S>().dimension());
 
+template<class... ARGS> struct DomainOfTypedef;
+template<> struct DomainOfTypedef<RealScalar> { typedef IntervalDomainType Type; };
+template<> struct DomainOfTypedef<RealVector> { typedef BoxDomainType Type; };
+template<class... ARGS> using DomainOfType = typename DomainOfTypedef<ARGS...>::Type;
+
 
 template<class SIG> struct SignatureTraits;
 template<> struct SignatureTraits<Real(Real)> {
-    typedef Real ArgumentKind; typedef RealDomain DomainType; typedef RealDomain CodomainType; };
+    typedef Real ResultKind; typedef Real ArgumentKind;
+    typedef RealDomain DomainType; typedef RealDomain CodomainType; };
 template<> struct SignatureTraits<Real(RealVector)> {
-    typedef RealVector ArgumentKind; typedef EuclideanDomain DomainType; typedef RealDomain CodomainType; };
+    typedef Real ResultKind; typedef RealVector ArgumentKind;
+    typedef EuclideanDomain DomainType; typedef RealDomain CodomainType; };
 template<> struct SignatureTraits<RealVector(Real)> {
-    typedef Real ArgumentKind; typedef RealDomain DomainType; typedef EuclideanDomain CodomainType; };
+    typedef RealVector ResultKind; typedef Real ArgumentKind;
+    typedef RealDomain DomainType; typedef EuclideanDomain CodomainType; };
 template<> struct SignatureTraits<RealVector(RealVector)> {
-    typedef RealVector ArgumentKind; typedef EuclideanDomain DomainType; typedef EuclideanDomain CodomainType; };
+    typedef RealVector ResultKind; typedef RealVector ArgumentKind;
+    typedef EuclideanDomain DomainType; typedef EuclideanDomain CodomainType; };
 
 
 template<class P, class SIG> class FunctionInterface;

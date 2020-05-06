@@ -481,12 +481,6 @@ ApproximateVectorMultivariateFunction join(const ApproximateScalarMultivariateFu
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateScalarMultivariateFunction& f2);
 ApproximateVectorMultivariateFunction join(const ApproximateVectorMultivariateFunction& f1, const ApproximateVectorMultivariateFunction& f2);
 
-template<class... ARGS> struct DomainOfTypedef;
-template<> struct DomainOfTypedef<RealScalar> { typedef IntervalDomainType Type; };
-template<> struct DomainOfTypedef<RealVector> { typedef BoxDomainType Type; };
-template<class... ARGS> using DomainOfType = typename DomainOfTypedef<ARGS...>::Type;
-
-
 //! \brief A reference into an element of a vector function.
 template<class P, class... ARGS>
 struct VectorFunctionElementReference

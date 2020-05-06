@@ -57,8 +57,9 @@ template<class T> using GenericType = typename T::GenericType;
 
 template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
 template<class M> using VectorFunctionType = typename M::VectorFunctionType;
-template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
-template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
+// TODO: Remove hard-coded RealVector ARG parameter
+template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,RealVector,PrecisionType<M>,ErrorPrecisionType<M>>;
+template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,RealVector,PrecisionType<M>,ErrorPrecisionType<M>>;
 
 template<class M> class ScaledFunctionPatch;
 template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
@@ -114,13 +115,13 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
 };
 
 template<class M> class ScaledFunctionPatchMixin :
-    public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, BoxDomainType, typename M::PrecisionType, typename M::ErrorPrecisionType>
+    public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
 
 template<class M> class VectorScaledFunctionPatchMixin :
-    public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,BoxDomainType,typename M::PrecisionType,typename M::ErrorPrecisionType>
+    public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>
 { };
 
 template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
@@ -156,8 +157,9 @@ template<class M> class ScaledFunctionPatch
 {
     typedef BoxDomainType D;
     typedef IntervalDomainType C;
-    typedef Real SIG(RealVector);
     typedef RealVector ARG;
+    typedef RealVector RES;
+    typedef RES SIG(ARG);
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -376,7 +378,7 @@ template<class M> class ScaledFunctionPatch
   private:
     friend class TaylorFunctionFactory;
     friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
-    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, D, C, PR>;
+    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
@@ -541,8 +543,9 @@ template<class M> class VectorScaledFunctionPatch
     friend class VectorScaledFunctionPatchElementReference<M>;
     typedef BoxDomainType D;
     typedef BoxDomainType C;
-    typedef RealVector SIG(RealVector);
     typedef RealVector ARG;
+    typedef RealVector RES;
+    typedef RES SIG(ARG);
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -1285,13 +1288,13 @@ template<class M> class ScaledFunctionPatchFactory
 };
 
 template<class M> class ScaledFunctionPatchCreator
-    : public FunctionModelCreator<ScaledFunctionPatchFactory<M>,BoxDomainType>
+    : public FunctionModelCreator<ScaledFunctionPatchFactory<M>,RealVector>
 {
   public:
     typedef BoxDomainType DomainType;
     typedef typename M::PropertiesType PropertiesType;
     explicit ScaledFunctionPatchCreator<M>(DomainType domain, PropertiesType properties)
-        : FunctionModelCreator<ScaledFunctionPatchFactory<M>,DomainType>(domain,ScaledFunctionPatchFactory<M>(properties)) { }
+        : FunctionModelCreator<ScaledFunctionPatchFactory<M>,RealVector>(domain,ScaledFunctionPatchFactory<M>(properties)) { }
     PropertiesType properties() const { return this->_factory.properties(); }
 };
 

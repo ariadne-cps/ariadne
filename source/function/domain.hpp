@@ -39,7 +39,10 @@ using BoxDomainType = Box<Interval<FloatDPValue>>;
 
 class RealDomain {
   public:
+    typedef SizeOne DimensionType;
+
     constexpr RealDomain() { }
+    constexpr RealDomain(SizeOne) { }
     constexpr SizeOne dimension() const { return SizeOne(); }
     operator IntervalDomainType() const { return IntervalDomainType(-inf,+inf); }
     friend RealDomain intersection(RealDomain const& dom1, RealDomain const& dom2) { return RealDomain(); }
@@ -50,6 +53,7 @@ class RealDomain {
 class EuclideanDomain {
     SizeType _dim;
   public:
+    typedef SizeType DimensionType;
     constexpr EuclideanDomain(SizeType dim) : _dim(dim) { }
     constexpr EuclideanDomain(SizeType dim, RealDomain) : _dim(dim) { }
     constexpr SizeType dimension() const { return this->_dim; }
@@ -90,15 +94,21 @@ class UnitBox {
 
 struct ScalarElementTraits {
     template<class X> using Type=Scalar<X>;
+    typedef Scalar<Real> Kind;
     typedef SizeOne SizeType;
     typedef IndexZero IndexType;
+    using EntireDomainType = RealDomain;
+    using BoundedDomainType = IntervalDomainType;
     template<class PR> using RangeType = Interval<FloatUpperBound<PR>>;
 };
 
 struct VectorElementTraits {
     template<class X> using Type=Vector<X>;
+    typedef Vector<Real> Kind;
     typedef Ariadne::SizeType SizeType;
     typedef Ariadne::SizeType IndexType;
+    using EntireDomainType = EuclideanDomain;
+    using BoundedDomainType = BoxDomainType;
     template<class PR> using RangeType = Box<Interval<FloatUpperBound<PR>>>;
 };
 

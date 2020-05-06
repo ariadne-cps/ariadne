@@ -34,37 +34,46 @@
 
 namespace Ariadne {
 
+template<class X> using Scalar=X;
 template<class X> class Vector;
+
+class Real;
+using RealScalar=Scalar<Real>;
+using RealVector=Vector<Real>;
 
 // Domain declarations
 typedef Interval<FloatDPValue> IntervalDomainType;
 typedef Box<Interval<FloatDPValue>> BoxDomainType;
 
+class RealDomain;
+class EuclideanDomain;
+
 // Function declarations
-template<class P, class D, class C> class Function;
+template<class P, class SIG> class Function;
 
 //@{
 //! \name Type shorthands for function classes
-template<class P, class D> using ScalarFunction = Function<P,D,IntervalDomainType>; //!< . \ingroup FunctionModule
-template<class P, class D> using VectorFunction = Function<P,D,BoxDomainType>; //!< . \ingroup FunctionModule
-template<class P, class C> using UnivariateFunction = Function<P,IntervalDomainType,C>; //!< . \ingroup FunctionModule
-template<class P, class C> using MultivariateFunction = Function<P,BoxDomainType,C>; //!< . \ingroup FunctionModule
+template<class P, class... ARGS> using ScalarFunction = Function<P,RealScalar(ARGS...)>; //!< . \ingroup FunctionModule
+template<class P, class... ARGS> using VectorFunction = Function<P,RealVector(ARGS...)>; //!< . \ingroup FunctionModule
+template<class P, class RES> using UnivariateFunction = Function<P,RES(RealScalar)>; //!< . \ingroup FunctionModule
+template<class P, class RES> using MultivariateFunction = Function<P,RES(RealVector)>; //!< . \ingroup FunctionModule
 
-template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomainType,IntervalDomainType>; //!< . \ingroup FunctionModule
-template<class P> using VectorUnivariateFunction = Function<P,IntervalDomainType,BoxDomainType>; //!< . \ingroup FunctionModule
-template<class P> using ScalarMultivariateFunction = Function<P,BoxDomainType,IntervalDomainType>; //!< . \ingroup FunctionModule
-template<class P> using VectorMultivariateFunction = Function<P,BoxDomainType,BoxDomainType>; //!< . \ingroup FunctionModule
+template<class P> using ScalarUnivariateFunction = Function<P,RealScalar(RealScalar)>; //!< . \ingroup FunctionModule
+template<class P> using VectorUnivariateFunction = Function<P,RealVector(RealScalar)>; //!< . \ingroup FunctionModule
+template<class P> using ScalarMultivariateFunction = Function<P,RealScalar(RealVector)>; //!< . \ingroup FunctionModule
+template<class P> using VectorMultivariateFunction = Function<P,RealVector(RealVector)>; //!< . \ingroup FunctionModule
 
-template<class D, class C> using ApproximateFunction = Function<ApproximateTag,D,C>; //!< . \ingroup FunctionModule
-template<class D, class C> using ValidatedFunction = Function<ValidatedTag,D,C>; //!< . \ingroup FunctionModule
-template<class D, class C> using EffectiveFunction = Function<EffectiveTag,D,C>; //!< . \ingroup FunctionModule
+template<class SIG> using ApproximateFunction = Function<ApproximateTag,SIG>; //!< . \ingroup FunctionModule
+template<class SIG> using ValidatedFunction = Function<ValidatedTag,SIG>; //!< . \ingroup FunctionModule
+template<class SIG> using EffectiveFunction = Function<EffectiveTag,SIG>; //!< . \ingroup FunctionModule
 //@}
 
 //@{
+//! \relates Function
 //! \name Type synonyms for function classes
-using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
-using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
-using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
+using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< .
+using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< .
+using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< .
 
 using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
 using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
@@ -87,19 +96,19 @@ using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!<
 //! \ingroup FunctionModule
 //! \brief An interface for generic functions.
 //! \see Function
-template<class P, class D, class C> class FunctionInterface;
+template<class P, class SIG> class FunctionInterface;
 
 //@{
 //! \relates FunctionInterface
 //! \name Type shorthands
-template<class P, class D> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomainType>; //!< .
-template<class P, class D> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomainType>; //!< .
-template<class P, class C> using UnivariateFunctionInterface = FunctionInterface<P,IntervalDomainType,C>; //!< .
-template<class P, class C> using MultivariateFunctionInterface = FunctionInterface<P,BoxDomainType,C>; //!< .
-template<class P> using ScalarUnivariateFunctionInterface = FunctionInterface<P,IntervalDomainType,IntervalDomainType>; //!< .
-template<class P> using VectorUnivariateFunctionInterface = FunctionInterface<P,IntervalDomainType,BoxDomainType>; //!< .
-template<class P> using ScalarMultivariateFunctionInterface = FunctionInterface<P,BoxDomainType,IntervalDomainType>; //!< .
-template<class P> using VectorMultivariateFunctionInterface = FunctionInterface<P,BoxDomainType,BoxDomainType>; //!< .
+template<class P, class... ARGS> using ScalarFunctionInterface = FunctionInterface<P,RealScalar(ARGS...)>; //!< .
+template<class P, class... ARGS> using VectorFunctionInterface = FunctionInterface<P,RealVector(ARGS...)>; //!< .
+template<class P, class RES> using UnivariateFunctionInterface = FunctionInterface<P,RES(RealScalar)>; //!< .
+template<class P, class RES> using MultivariateFunctionInterface = FunctionInterface<P,RES(RealVector)>; //!< .
+template<class P> using ScalarUnivariateFunctionInterface = FunctionInterface<P,RealScalar(RealScalar)>; //!< .
+template<class P> using VectorUnivariateFunctionInterface = FunctionInterface<P,RealVector(RealScalar)>; //!< .
+template<class P> using ScalarMultivariateFunctionInterface = FunctionInterface<P,RealScalar(RealVector)>; //!< .
+template<class P> using VectorMultivariateFunctionInterface = FunctionInterface<P,RealVector(RealVector)>; //!< .
 //@}
 
 typedef ScalarUnivariateFunctionInterface<ApproximateTag> ApproximateScalarUnivariateFunctionInterface;
@@ -118,52 +127,53 @@ typedef VectorMultivariateFunctionInterface<ApproximateTag> ApproximateVectorMul
 typedef VectorMultivariateFunctionInterface<ValidatedTag> ValidatedVectorMultivariateFunctionInterface;
 typedef VectorMultivariateFunctionInterface<EffectiveTag> EffectiveVectorMultivariateFunctionInterface;
 
-using ValidatedScalarUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,IntervalDomainType>;
-using ValidatedVectorUnivariateFunctionPatch = Function<ValidatedTag,IntervalDomainType,BoxDomainType>;
-using ValidatedScalarMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,IntervalDomainType>;
-using ValidatedVectorMultivariateFunctionPatch = Function<ValidatedTag,BoxDomainType,BoxDomainType>;
+template<class P, class SIG> using FunctionPatch=Function<P,SIG>;
+using ValidatedScalarUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealScalar(RealScalar)>;
+using ValidatedVectorUnivariateFunctionPatch = FunctionPatch<ValidatedTag,RealVector(RealScalar)>;
+using ValidatedScalarMultivariateFunctionPatch = FunctionPatch<ValidatedTag,RealScalar(RealVector)>;
+using ValidatedVectorMultivariateFunctionPatch = FunctionPatch<ValidatedTag,RealVector(RealVector)>;
 
 
 // Function models declarations
 
 
-template<class P, class D, class C, class PR, class PRE=PR> class FunctionModelInterface;
-template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModelInterface = FunctionModelInterface<P,D,IntervalDomainType,PR,PRE>;
-template<class P, class D, class PR, class PRE=PR> using VectorFunctionModelInterface = FunctionModelInterface<P,D,BoxDomainType,PR,PRE>;
-template<class P, class C, class PR, class PRE=PR> using UnivariateFunctionModelInterface = FunctionModelInterface<P,IntervalDomainType,C,PR,PRE>;
-template<class P, class C, class PR, class PRE=PR> using MultivariateFunctionModelInterface = FunctionModelInterface<P,BoxDomainType,C,PR,PRE>;
-template<class P, class PR, class PRE=PR> using ScalarUnivariateFunctionModelInterface
-    = FunctionModelInterface<P,IntervalDomainType,IntervalDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using VectorUnivariateFunctionModelInterface
-    = FunctionModelInterface<P,IntervalDomainType,BoxDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using ScalarMultivariateFunctionModelInterface
-    = FunctionModelInterface<P,BoxDomainType,IntervalDomainType,PR,PRE>;
-template<class P, class PR, class PRE=PR> using VectorMultivariateFunctionModelInterface
-    = FunctionModelInterface<P,BoxDomainType,BoxDomainType,PR,PRE>;
+template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModelInterface;
+template<class P, class ARG, class PR=Void, class PRE=PR> using ScalarFunctionModelInterface = FunctionModelInterface<P,RealScalar(ARG),PR,PRE>;
+template<class P, class ARG, class PR=Void, class PRE=PR> using VectorFunctionModelInterface = FunctionModelInterface<P,RealVector(ARG),PR,PRE>;
+template<class P, class RES, class PR=Void, class PRE=PR> using UnivariateFunctionModelInterface = FunctionModelInterface<P,RES(RealScalar),PR,PRE>;
+template<class P, class RES, class PR=Void, class PRE=PR> using MultivariateFunctionModelInterface = FunctionModelInterface<P,RES(RealVector),PR,PRE>;
+template<class P, class PR=Void, class PRE=PR> using ScalarUnivariateFunctionModelInterface
+    = FunctionModelInterface<P,RealScalar(RealScalar),PR,PRE>;
+template<class P, class PR=Void, class PRE=PR> using VectorUnivariateFunctionModelInterface
+    = FunctionModelInterface<P,RealVector(RealScalar),PR,PRE>;
+template<class P, class PR=Void, class PRE=PR> using ScalarMultivariateFunctionModelInterface
+    = FunctionModelInterface<P,RealScalar(RealVector),PR,PRE>;
+template<class P, class PR=Void, class PRE=PR> using VectorMultivariateFunctionModelInterface
+    = FunctionModelInterface<P,RealVector(RealVector),PR,PRE>;
 
-template<class P, class D, class C, class PR, class PRE=PR> class FunctionModel;
+template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModel;
 
 //@{
 //! \relates FunctionModel
 //! \name Type shorthands
-template<class P, class D, class PR, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,D,IntervalDomainType,PR,PRE>; //!< .
-template<class P, class D, class PR, class PRE=PR> using VectorFunctionModel = FunctionModel<P,D,BoxDomainType,PR,PRE>; //!< .
-template<class P, class C, class PR, class PRE=PR> using UnivariateFunctionModel = FunctionModel<P,IntervalDomainType,C,PR,PRE>; //!< .
-template<class P, class C, class PR, class PRE=PR> using MultivariateFunctionModel = FunctionModel<P,BoxDomainType,C,PR,PRE>; //!< .
-template<class P, class PR, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,IntervalDomainType,PR,PRE>; //!< .
-template<class P, class PR, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,IntervalDomainType,BoxDomainType,PR,PRE>; //!< .
-template<class P, class PR, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,BoxDomainType,IntervalDomainType,PR,PRE>; //!< .
-template<class P, class PR, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,BoxDomainType,BoxDomainType,PR,PRE>; //!< .
+template<class P, class ARG, class PR=Void, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,RealScalar(ARG),PR,PRE>; //!< .
+template<class P, class ARG, class PR=Void, class PRE=PR> using VectorFunctionModel = FunctionModel<P,RealVector(ARG),PR,PRE>; //!< .
+template<class P, class RES, class PR=Void, class PRE=PR> using UnivariateFunctionModel = FunctionModel<P,RES(RealScalar),PR,PRE>; //!< .
+template<class P, class RES, class PR=Void, class PRE=PR> using MultivariateFunctionModel = FunctionModel<P,RES(RealVector),PR,PRE>; //!< .
+template<class P, class PR=Void, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,RealScalar(RealScalar),PR,PRE>; //!< .
+template<class P, class PR=Void, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,RealVector(RealScalar),PR,PRE>; //!< .
+template<class P, class PR=Void, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,RealScalar(RealVector),PR,PRE>; //!< .
+template<class P, class PR=Void, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,RealVector(RealVector),PR,PRE>; //!< .
 
-template<class PR, class PRE=PR> using ValidatedScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ValidatedVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ValidatedScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ValidatedVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ValidatedScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ValidatedVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ValidatedScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ValidatedVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
 
-template<class PR, class PRE=PR> using ApproximateScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ApproximateVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ApproximateScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR, class PRE=PR> using ApproximateVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ApproximateScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ApproximateVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ApproximateScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ApproximateVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
 
 template<class P> using ScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<P,DoublePrecision>; //!< .
 template<class P> using VectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<P,DoublePrecision>; //!< .

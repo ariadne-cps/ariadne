@@ -858,7 +858,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
     FloatDPApproximationVector& x=cast_approximate(v.x);
     FloatDPApproximationVector& y=cast_approximate(v.y);
 
-    ApproximateScalarMultivariateFunction f(D);
+    ApproximateScalarMultivariateFunction f(EuclideanDomain(D.dimension()));
     ExactBoxType R=intersection(cast_exact_box(widen(apply(g,D),1)),C);
     this->setup_feasibility(D,g,R,v);
 
@@ -1170,7 +1170,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
-    ValidatedVectorMultivariateFunction h(0,D);
+    ValidatedVectorMultivariateFunction h(0,D.dimension());
 
     UpperBoxType gD = apply(g,D);
     if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
@@ -1740,7 +1740,7 @@ Void PenaltyFunctionOptimiser::
 feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& W,
                  FloatDPApproximationVector& x, FloatDPApproximationVector& w, FloatDPApproximation& mu) const
 {
-    ApproximateVectorMultivariateFunction h(0u,X);
+    ApproximateVectorMultivariateFunction h(0u,X.dimension());
     const Nat n=X.size();
     const Nat m=W.size();
     const Nat l=h.result_size();

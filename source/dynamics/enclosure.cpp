@@ -560,7 +560,7 @@ Void Enclosure::apply_parameter_evolve_step(ValidatedVectorMultivariateFunction 
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time<<", enclosure="<<*this);
-    ARIADNE_ASSERT_MSG(time.domain()==this->parameter_domain(),"parameter_domain="<<this->parameter_domain()<<", time="<<time);
+    ARIADNE_ASSERT_MSG(time.domain().dimension()==this->parameter_domain().dimension(),"parameter_domain="<<this->parameter_domain()<<", time="<<time);
     this->_state_function=compose(flow,join(this->_state_function,this->function_factory().create(this->_state_function.domain(),time)));
     this->_time_function=this->_time_function + time;
     this->_dwell_time_function=this->_dwell_time_function + time;
@@ -571,7 +571,7 @@ Void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorMultivariat
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(finishing_time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", finishing_time="<<finishing_time);
-    ARIADNE_ASSERT_MSG(finishing_time.domain()==this->parameter_domain(),"parameter_domain="<<this->parameter_domain()<<", finishing_time="<<finishing_time);
+    ARIADNE_ASSERT_MSG(finishing_time.domain().dimension()==this->parameter_domain().dimension(),"parameter_domain="<<this->parameter_domain()<<", finishing_time="<<finishing_time);
     ValidatedScalarMultivariateFunctionModelDP omega=this->function_factory().create(this->domain(),finishing_time);
     this->_state_function=compose(flow,join(this->_state_function,omega-this->_time_function));
     this->_dwell_time_function=this->_dwell_time_function + (omega-this->_time_function);

@@ -57,8 +57,9 @@ template<class T> using GenericType = typename T::GenericType;
 
 template<class M> using ScalarFunctionType = typename M::ScalarFunctionType;
 template<class M> using VectorFunctionType = typename M::VectorFunctionType;
-template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
-template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,BoxDomainType,PrecisionType<M>,ErrorPrecisionType<M>>;
+// TODO: Remove hard-coded RealVector ARG parameter
+template<class M> using ScalarFunctionModelType = ScalarFunctionModel<Paradigm<M>,RealVector,PrecisionType<M>,ErrorPrecisionType<M>>;
+template<class M> using VectorFunctionModelType = VectorFunctionModel<Paradigm<M>,RealVector,PrecisionType<M>,ErrorPrecisionType<M>>;
 
 template<class M> class ScaledFunctionPatch;
 template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
@@ -114,13 +115,13 @@ template<class M> struct AlgebraOperations<ScaledFunctionPatch<M>> {
 };
 
 template<class M> class ScaledFunctionPatchMixin :
-    public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, BoxDomainType, typename M::PrecisionType, typename M::ErrorPrecisionType>
+    public ScalarMultivariateFunctionModelMixin<ScaledFunctionPatch<M>, typename M::Paradigm, typename M::PrecisionType, typename M::ErrorPrecisionType>
 { };
 
 template<class F> class ScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
 
 template<class M> class VectorScaledFunctionPatchMixin :
-    public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,BoxDomainType,typename M::PrecisionType,typename M::ErrorPrecisionType>
+    public VectorMultivariateFunctionModelMixin<VectorScaledFunctionPatch<M>,typename M::Paradigm,typename M::PrecisionType,typename M::ErrorPrecisionType>
 { };
 
 template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorModel<F>> { };
@@ -156,11 +157,16 @@ template<class M> class ScaledFunctionPatch
 {
     typedef BoxDomainType D;
     typedef IntervalDomainType C;
+    typedef RealVector ARG;
+    typedef RealVector RES;
+    typedef RES SIG(ARG);
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
     typedef typename M::ErrorPrecisionType PRE;
   public:
+    typedef typename D::DimensionType ArgumentSizeType;
+    typedef typename C::DimensionType ResultSizeType;
     typedef D DomainType;
     typedef M ModelType;
     typedef typename ModelType::CodomainType CodomainType;
@@ -305,6 +311,8 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief The number of variables in the argument of the quantity.
     SizeType argument_size() const { return this->_model.argument_size(); }
+    //! \brief The number of variables in the argument of the quantity.
+    SizeOne result_size() const { return SizeOne(); }
     //! \brief The maximum degree of terms in the expansion expansion.
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
@@ -369,8 +377,8 @@ template<class M> class ScaledFunctionPatch
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class FunctionMixin<ScaledFunctionPatch<M>, P, D,C>;
-    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, D, C, PR>;
+    friend class FunctionMixin<ScaledFunctionPatch<M>, P, SIG>;
+    friend class FunctionModelMixin<ScaledFunctionPatch<M>, P, SIG, PR>;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
     template<class X, DisableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(X& r, const Vector<X>& a) const;
@@ -535,6 +543,9 @@ template<class M> class VectorScaledFunctionPatch
     friend class VectorScaledFunctionPatchElementReference<M>;
     typedef BoxDomainType D;
     typedef BoxDomainType C;
+    typedef RealVector ARG;
+    typedef RealVector RES;
+    typedef RES SIG(ARG);
     typedef typename M::Paradigm P;
     typedef typename M::RawFloatType F;
     typedef typename M::PrecisionType PR;
@@ -731,7 +742,7 @@ template<class M> class VectorScaledFunctionPatch
     virtual VectorScaledFunctionPatch<M>* _create() const;
     virtual ScaledFunctionPatchFactory<M>* _factory() const;
   private:
-    friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,BoxDomainType>;
+    friend class VectorFunctionMixin<VectorScaledFunctionPatch<M>,P,ARG>;
     friend class TaylorFunctionFactory;
   public:
     template<class X, EnableIf<CanCall<X,M,Vector<X>>> =dummy> Void _compute(Vector<X>& r, const Vector<X>& a) const;
@@ -1236,6 +1247,7 @@ template<class M> class ScaledFunctionPatchFactory
 {
     typedef BoxDomainType D;
     typedef IntervalDomainType SD;
+    typedef RealVector ARG;
 
     typedef typename M::Paradigm P;
     typedef typename M::PrecisionType PR;
@@ -1253,8 +1265,8 @@ template<class M> class ScaledFunctionPatchFactory
     PropertiesType properties() const { return this->_properties; }
 
     CanonicalNumericType<P,PR,PRE> create(const Number<P>& number) const;
-    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,D>& function) const;
-    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,D>& function) const;
+    ScalarScaledFunctionPatch<M> create(const BoxDomainType& domain, const ScalarFunctionInterface<P,ARG>& function) const;
+    VectorScaledFunctionPatch<M> create(const BoxDomainType& domain, const VectorFunctionInterface<P,ARG>& function) const;
 
     ScaledFunctionPatch<M> create_zero(const DomainType& domain) const;
     ScaledFunctionPatch<M> create_constant(const DomainType& domain, Number<P> const& value) const;
@@ -1276,13 +1288,13 @@ template<class M> class ScaledFunctionPatchFactory
 };
 
 template<class M> class ScaledFunctionPatchCreator
-    : public FunctionModelCreator<ScaledFunctionPatchFactory<M>,BoxDomainType>
+    : public FunctionModelCreator<ScaledFunctionPatchFactory<M>,RealVector>
 {
   public:
     typedef BoxDomainType DomainType;
     typedef typename M::PropertiesType PropertiesType;
     explicit ScaledFunctionPatchCreator<M>(DomainType domain, PropertiesType properties)
-        : FunctionModelCreator<ScaledFunctionPatchFactory<M>,DomainType>(domain,ScaledFunctionPatchFactory<M>(properties)) { }
+        : FunctionModelCreator<ScaledFunctionPatchFactory<M>,RealVector>(domain,ScaledFunctionPatchFactory<M>(properties)) { }
     PropertiesType properties() const { return this->_factory.properties(); }
 };
 

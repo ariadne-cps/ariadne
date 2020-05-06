@@ -82,7 +82,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
         return;
     }
 
-    ValidatedVectorMultivariateFunction fg(2u+set.number_of_constraints(),set.domain());
+    ValidatedVectorMultivariateFunction fg(2u+set.number_of_constraints(),set.dimension());
     fg[0]=set.function()[projection.i];
     fg[1]=set.function()[projection.i];
     for(Nat i=0; i!=set.constraints().size(); ++i) { fg[i+2u]=set.constraints()[i].function(); }

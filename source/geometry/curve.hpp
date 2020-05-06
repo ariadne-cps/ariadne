@@ -95,7 +95,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve() = default;
     /*! \brief Constructor. */
-    Curve(const Function<EffectiveTag,IntervalDomainType,BoxDomainType>& f);
+    Curve(const EffectiveVectorUnivariateFunction& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -113,7 +113,7 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual OutputStream& _write(OutputStream& os) const;
   private:
-    Function<EffectiveTag,IntervalDomainType,BoxDomainType> _function;
+    EffectiveVectorUnivariateFunction _function;
 };
 
 

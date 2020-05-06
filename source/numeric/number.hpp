@@ -152,6 +152,10 @@ template<class P> class Number
     typedef Weaker<P,NP> SP;
     typedef Widen<P> WP;
     //friend class DispatchGenericField<Number<P>>;
+  public:
+    typedef NumberInterface Interface;
+    typedef P Paradigm;
+    typedef Number<P> NumericType;
   private: public:
     Handle<NumberInterface> _handle;
     NumberInterface const* pointer() const { return _handle.pointer(); }
@@ -162,8 +166,6 @@ template<class P> class Number
     explicit Number(Handle<NumberInterface> h) : _handle(h) { }
     Handle<NumberInterface> handle() const { return this->_handle; }
   public:
-    typedef P Paradigm;
-    typedef Number<P> NumericType;
 
     Number() : Number(Integer(0)) { }
 

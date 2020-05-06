@@ -105,21 +105,19 @@ class Real
     , public DeclareComparisonOperations<Real,Kleenean,NegatedSierpinskian>
     , public DefineFieldOperators<Real>
 {
-  private: public:
-    using Interface = RealInterface;
-    using InterfaceType = RealInterface;
+  public:
+    typedef RealInterface Interface;
+    typedef EffectiveTag Paradigm;
+    typedef Real NumericType;
   private: public:
     SharedPointer<Interface> _ptr;
   private:
     explicit Real(double,double,double);
   public:
-    typedef EffectiveTag Paradigm;
-    typedef Real NumericType;
-  public:
     //@{
     //! \name Constructors
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
-    explicit Real(SharedPointer<Real::InterfaceType>); //!< Construct from any class implementing the real number interface.
+    explicit Real(SharedPointer<Interface>); //!< Construct from any class implementing the real number interface.
     explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
     explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \f$|w_m-w_n|\leq 2 ^\min(m,n)\f$.
     //@}
@@ -313,15 +311,15 @@ Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2
 class LowerReal
     : public DirectedAbelian<LowerReal,UpperReal>
 {
-  private: public:
-    SharedPointer<Real::Interface> _ptr;
-  private: public:
-    explicit LowerReal(SharedPointer<Real::Interface>);
   public:
+    typedef RealInterface Interface;
     typedef EffectiveLowerTag Paradigm;
     typedef LowerReal NumericType;
+  private: public:
+    SharedPointer<Interface> _ptr;
   public:
     LowerReal(Real);
+    explicit LowerReal(SharedPointer<Interface>);
   public:
     FloatDPLowerBound operator() (DoublePrecision pr) const;
     FloatMPLowerBound operator() (MultiplePrecision pr) const;
@@ -417,15 +415,15 @@ class LowerReal
 class UpperReal
     : public DirectedAbelian<UpperReal,LowerReal>
 {
-  private: public:
-    SharedPointer<Real::Interface> _ptr;
-  private: public:
-    explicit UpperReal(SharedPointer<Real::Interface>);
   public:
+    typedef RealInterface Interface;
     typedef EffectiveUpperTag Paradigm;
     typedef UpperReal NumericType;
+  private: public:
+    SharedPointer<Interface> _ptr;
   public:
     UpperReal(Real);
+    explicit UpperReal(SharedPointer<Interface>);
   public:
     FloatDPUpperBound operator() (DoublePrecision pr) const;
     FloatMPUpperBound operator() (MultiplePrecision pr) const;
@@ -518,19 +516,17 @@ class NaiveReal
     , public DeclareComparisonOperations<NaiveReal,ApproximateKleenean>
     , public DefineFieldOperators<NaiveReal>
 {
-  private: public:
-    using Interface = RealInterface;
-    using InterfaceType = RealInterface;
-  private: public:
-    SharedPointer<Interface> _ptr;
   public:
+    typedef RealInterface Interface;
     typedef ApproximateTag Paradigm;
     typedef NaiveReal NumericType;
+  private: public:
+    SharedPointer<Interface> _ptr;
   public:
     //@{
     //! \name Constructors
     NaiveReal(); //!< Default constructor yields the integer \c 0 as a real number.
-    explicit NaiveReal(SharedPointer<NaiveReal::InterfaceType>); //!< Construct from any class implementing the real number interface.
+    explicit NaiveReal(SharedPointer<Interface>); //!< Construct from any class implementing the real number interface.
     //explicit NaiveReal(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
     //@}
 
@@ -722,6 +718,8 @@ class ValidatedRealInterface;
 class ValidatedReal {
     SharedPointer<ValidatedRealInterface> _ptr;
   public:
+    typedef ValidatedRealInterface Interface;
+
     ValidatedReal(DyadicBounds const&);
     Dyadic value();
     Dyadic error();
@@ -750,6 +748,8 @@ class ApproximateRealInterface;
 class ApproximateReal {
     SharedPointer<ApproximateRealInterface> _ptr;
   public:
+    typedef ApproximateRealInterface Interface;
+
     ApproximateReal(DyadicApproximation const&);
     //! \brief Get a dyadic approximation to the number.
     DyadicApproximation get() const;

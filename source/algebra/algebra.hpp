@@ -83,6 +83,7 @@ template<class X> class Algebra
     std::shared_ptr< AlgebraInterface<X> > _ptr;
     std::shared_ptr< AlgebraInterface<X> > pointer() const { return _ptr; }
   public:
+    typedef AlgebraInterface<X> Interface;
     typedef X ScalarType;
     typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
@@ -151,8 +152,10 @@ template<class X> class NormedAlgebra
   private:
     std::shared_ptr< NormedAlgebraInterface<X> > _ptr;
   public:
+    typedef NormedAlgebraInterface<X> Interface;
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
+
     NormedAlgebra(const Algebra<X>& a) : _ptr(std::dynamic_pointer_cast(a._ptr)) { }
     NormedAlgebra(NormedAlgebraInterface<X>* p) : _ptr(p) { }
     NormedAlgebra(std::shared_ptr< NormedAlgebraInterface<X> > p) : _ptr(p) { }
@@ -192,8 +195,10 @@ template<class X> class GradedAlgebra
   public:
     std::shared_ptr< GradedAlgebraInterface<X> > _ptr;
   public:
+    typedef GradedAlgebraInterface<X> Interface;
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
+
     GradedAlgebra() : _ptr() { }
     GradedAlgebra(GradedAlgebraInterface<X>* p) : _ptr(p) { }
     GradedAlgebra(const GradedAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }
@@ -224,8 +229,10 @@ template<class X> class SymbolicAlgebra
   public:
     std::shared_ptr< SymbolicAlgebraInterface<X> > _ptr;
   public:
+    typedef SymbolicAlgebraInterface<X> Interface;
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
+
     SymbolicAlgebra() : _ptr() { }
     explicit SymbolicAlgebra(SymbolicAlgebraInterface<X>* p) : _ptr(p) { }
     SymbolicAlgebra(const SymbolicAlgebraInterface<X>& a) : _ptr(a._create_copy()) { }

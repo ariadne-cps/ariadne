@@ -140,6 +140,10 @@ void TestReal::test_constructors() {
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
     ARIADNE_TEST_COMPARE(Rational(xq.lower().get(dp).raw()),<,Rational(11,10));
     ARIADNE_TEST_COMPARE(Rational(xq.upper().get(dp).raw()),>,Rational(11,10));
+
+    ARIADNE_TEST_CONSTRUCT(Real,xy,(EffectiveNumber(5)));
+    ARIADNE_TEST_EQUALS(xy.get(double_precision),5);
+    ARIADNE_TEST_EQUALS(xy.get(precision(128)),5);
 }
 
 void TestReal::test_arithmetic() {

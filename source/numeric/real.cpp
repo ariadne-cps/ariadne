@@ -115,7 +115,7 @@ template<> struct RealWrapper<Cnst,EffectiveNumber> : RealInterface, FloatDPBoun
     typedef EffectiveNumber X;
     X _c;
   public:
-    RealWrapper(X const& x) : FloatDPBounds(x,dp) { }
+    RealWrapper(X const& x) : FloatDPBounds(x,dp), _c(x) { }
     virtual ValidatedReal _compute(Effort eff) const { return ValidatedReal(this->_compute_get(MP(eff.work()+2))); }
     virtual FloatDPBounds _compute_get(DoublePrecision pr) const { return static_cast<FloatDPBounds const&>(*this); }
     virtual FloatMPBounds _compute_get(MultiplePrecision pr) const { return FloatMPBounds(this->_c,pr); }

@@ -496,7 +496,7 @@ OutputStream&
 CompactCompositeHybridAutomatonWriter::_write(OutputStream& os, CompositeHybridAutomaton const& ha) const {
     os << ha.name() << " {\n";
     Writer<HybridAutomaton> previous_writer = HybridAutomaton::default_writer();
-    HybridAutomaton::set_default_writer(new CompactHybridAutomatonWriter());
+    HybridAutomaton::set_default_writer(CompactHybridAutomatonWriter());
     for(Nat i = 0; i < ha.number_of_components(); ++i) {
         os << ha.component(i);
     }

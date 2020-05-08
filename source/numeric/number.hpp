@@ -142,7 +142,8 @@ template<class X> struct HasOperatorNumber<X,Void> {
 //! \ingroup NumericModule
 //! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 template<class P> class Number
-    : public DeclareNumberOperators
+    : public Handle<NumberInterface>
+    , public DeclareNumberOperators
 {
     static_assert(IsParadigm<P>::value,"P must be a paradigm");
     template<class PP> friend class Number;
@@ -156,15 +157,12 @@ template<class P> class Number
     typedef NumberInterface Interface;
     typedef P Paradigm;
     typedef Number<P> NumericType;
-  private: public:
-    Handle<NumberInterface> _handle;
-    NumberInterface const* pointer() const { return _handle.pointer(); }
-    NumberInterface const& ref() const { return _handle.ref(); }
   public:
-    explicit Number(NumberInterface* p) : _handle(p) { }
+    using Handle<Interface>::Handle;
+    explicit Number(NumberInterface* p) : Handle<NumberInterface>(p) { }
   private:
-    explicit Number(Handle<NumberInterface> h) : _handle(h) { }
-    Handle<NumberInterface> handle() const { return this->_handle; }
+    explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
+    Handle<NumberInterface> handle() const { return *this; }
   public:
 
     Number() : Number(Integer(0)) { }

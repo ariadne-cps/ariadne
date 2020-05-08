@@ -35,6 +35,7 @@
 
 #include "../utility/typedefs.hpp"
 #include "../utility/pointer.hpp"
+#include "../utility/handle.hpp"
 
 #include "../numeric/logical.decl.hpp"
 #include "../numeric/number.decl.hpp"
@@ -90,6 +91,9 @@ extern const Real pi;
 extern const Real infinity;
 
 class RealInterface;
+using LowerRealInterface = RealInterface;
+using UpperRealInterface = RealInterface;
+using NaiveRealInterface = RealInterface;
 
 //! \ingroup NumericModule
 //! \brief %Real number type \f$\R\f$ supporting elementary functions, comparisons and limits.
@@ -99,7 +103,8 @@ class RealInterface;
 //! or as a nested sequence of nested (dyadic) rational intervals whose intersection is the number itself.
 //! \sa LowerReal, UpperReal, NaiveReal
 class Real
-    : public DeclareRealOperations<Real,PositiveReal>
+    : public Handle<const RealInterface>
+    , public DeclareRealOperations<Real,PositiveReal>
     , public DeclareAnalyticFieldOperations<Real>
     , public DeclareLatticeOperations<Real,PositiveReal>
     , public DeclareComparisonOperations<Real,Kleenean,NegatedSierpinskian>
@@ -109,15 +114,13 @@ class Real
     typedef RealInterface Interface;
     typedef EffectiveTag Paradigm;
     typedef Real NumericType;
-  private: public:
-    SharedPointer<Interface> _ptr;
   private:
     explicit Real(double,double,double);
   public:
     //@{
     //! \name Constructors
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
-    explicit Real(SharedPointer<Interface>); //!< Construct from any class implementing the real number interface.
+    explicit Real(SharedPointer<const Interface>); //!< Construct from any class implementing the real number interface.
     explicit Real(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
     explicit Real(FastCauchySequence<Dyadic> const&); //!< Construct from a fast convergent sequence of dyadic numbers i.e. \f$|w_m-w_n|\leq 2 ^\min(m,n)\f$.
     //@}
@@ -309,17 +312,16 @@ Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2
 //! or the separation between two points in a metric space.
 //! \sa Real, UpperReal, NaiveReal
 class LowerReal
-    : public DirectedAbelian<LowerReal,UpperReal>
+    : public Handle<const LowerRealInterface>
+    , public DirectedAbelian<LowerReal,UpperReal>
 {
   public:
     typedef RealInterface Interface;
     typedef EffectiveLowerTag Paradigm;
     typedef LowerReal NumericType;
-  private: public:
-    SharedPointer<Interface> _ptr;
   public:
     LowerReal(Real);
-    explicit LowerReal(SharedPointer<Interface>);
+    explicit LowerReal(SharedPointer<const Interface>);
   public:
     FloatDPLowerBound operator() (DoublePrecision pr) const;
     FloatMPLowerBound operator() (MultiplePrecision pr) const;
@@ -413,17 +415,16 @@ class LowerReal
 //! including the radius of a ball, or the measure of an closed set.
 //! \sa Real, LowerReal, NaiveReal
 class UpperReal
-    : public DirectedAbelian<UpperReal,LowerReal>
+    : public Handle<const UpperRealInterface>
+    , public DirectedAbelian<UpperReal,LowerReal>
 {
   public:
-    typedef RealInterface Interface;
+    typedef UpperRealInterface Interface;
     typedef EffectiveUpperTag Paradigm;
     typedef UpperReal NumericType;
-  private: public:
-    SharedPointer<Interface> _ptr;
   public:
     UpperReal(Real);
-    explicit UpperReal(SharedPointer<Interface>);
+    explicit UpperReal(SharedPointer<const Interface>);
   public:
     FloatDPUpperBound operator() (DoublePrecision pr) const;
     FloatMPUpperBound operator() (MultiplePrecision pr) const;
@@ -510,23 +511,22 @@ class UpperReal
 //! \details In principle useless for rigorous computation, but quickly-computed approximations to real numbers may be useful for preconditioning rigorous algorithms.
 //! \sa Real, LowerReal, UpperReal
 class NaiveReal
-    : public DeclareRealOperations<NaiveReal,PositiveNaiveReal>
+    : public Handle<const NaiveRealInterface>
+    , public DeclareRealOperations<NaiveReal,PositiveNaiveReal>
     , public DeclareAnalyticFieldOperations<NaiveReal>
     , public DeclareLatticeOperations<NaiveReal,PositiveNaiveReal>
     , public DeclareComparisonOperations<NaiveReal,ApproximateKleenean>
     , public DefineFieldOperators<NaiveReal>
 {
   public:
-    typedef RealInterface Interface;
+    typedef NaiveRealInterface Interface;
     typedef ApproximateTag Paradigm;
     typedef NaiveReal NumericType;
-  private: public:
-    SharedPointer<Interface> _ptr;
   public:
     //@{
     //! \name Constructors
     NaiveReal(); //!< Default constructor yields the integer \c 0 as a real number.
-    explicit NaiveReal(SharedPointer<Interface>); //!< Construct from any class implementing the real number interface.
+    explicit NaiveReal(SharedPointer<const Interface>); //!< Construct from any class implementing the real number interface.
     //explicit NaiveReal(ConvergentSequence<DyadicBounds> const&); //!< Construct from a sequence of dyadic bounds converging to a singleton intersection.
     //@}
 
@@ -715,8 +715,9 @@ class ValidatedRealInterface;
 //! \ingroup NumericModule
 //! \brief A generic class representing rigorous bounds on a real number.
 //! \see Real
-class ValidatedReal {
-    SharedPointer<ValidatedRealInterface> _ptr;
+class ValidatedReal
+    : public Handle<ValidatedRealInterface>
+{
   public:
     typedef ValidatedRealInterface Interface;
 
@@ -745,8 +746,9 @@ class ApproximateRealInterface;
 //! \brief A generic class representing an approximation to a real number
 //! of unknown accuracy.
 //! \see Real, ValidatedReal
-class ApproximateReal {
-    SharedPointer<ApproximateRealInterface> _ptr;
+class ApproximateReal
+    : public Handle<ApproximateRealInterface>
+{
   public:
     typedef ApproximateRealInterface Interface;
 

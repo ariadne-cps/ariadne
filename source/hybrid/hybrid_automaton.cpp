@@ -571,7 +571,7 @@ CompactHybridAutomatonWriter::_write(OutputStream& os, HybridAutomaton const& ha
     Set<DiscreteMode> modes(ha.modes().values());
     Bool multiple_modes = (modes.size()>1);
     Writer<DiscreteMode> previous_mode_writer = DiscreteMode::default_writer();
-    DiscreteMode::set_default_writer(new CompactDiscreteModeWriter());
+    DiscreteMode::set_default_writer(CompactDiscreteModeWriter());
     for(Set<DiscreteMode>::ConstIterator mode_iter=modes.begin();
         mode_iter!=modes.end(); ++mode_iter)
     {

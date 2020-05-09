@@ -302,40 +302,14 @@ Enclosure::Enclosure(const ExactBoxType& box, const EnclosureConfiguration& conf
     : _configuration(configuration)
 {
     // Ensure domain elements have nonempty radius
-    const FloatDPValue min_float(std::numeric_limits<float>::min());
-    List<Nat> proper_coordinates;
-    proper_coordinates.reserve(box.dimension());
-    for(DimensionType i=0; i!=box.dimension(); ++i) {
-        if(decide(box[i].width()>=min_float)) {
-            proper_coordinates.append(i);
-        }
-    }
-    this->_domain=ExactBoxType(proper_coordinates.size());
-    for(DimensionType j=0; j!=this->_domain.dimension(); ++j) {
-        this->_domain[j]=box[proper_coordinates[j]];
-    }
-
-    // HACK: Make a dummy variable for the domain to avoid bugs which occur
-    // with a zero-dimensional domain.
-    // FIXME: Fix issues with TaylorFunction on zero-dimensional domain.
-    if(proper_coordinates.size()==0) { this->_domain=ExactBoxType(1u,ExactIntervalType(-1,+1)); }
+    this->_domain=box;
 
     this->_variable_kinds=List<EnclosureVariableKind>(this->_domain.dimension(),EnclosureVariableKind::INITIAL);
 
-    this->_state_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
+    this->_state_function=this->function_factory().create_identity(this->_domain);
     this->_time_function=this->function_factory().create_zero(this->_domain);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
     this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
-    SizeType j=0;
-    proper_coordinates.append(box.dimension());
-    for(DimensionType i=0; i!=box.dimension(); ++i) {
-        if(proper_coordinates[j]==i) {
-            this->_state_function[i]=this->function_factory().create_coordinate(this->_domain,j);
-            ++j;
-        } else {
-            this->_state_function[i]=this->function_factory().create_constant(this->_domain,cast_singleton(box[i]));
-        }
-    }
     this->_reduced_domain=this->_domain;
     this->_is_fully_reduced=true;
     this->_check();
@@ -357,12 +331,8 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivaria
 {
     ARIADNE_ASSERT_MSG(domain.size()==state_function.argument_size(),"domain="<<domain<<", state_function="<<state_function);
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
+    ARIADNE_ASSERT_MSG(state_function.domain()==time_function.domain(),"state_function.domain()="<<state_function.domain()<<", time_function.domain()="<<time_function.domain());
     this->_domain=domain;
-    for(Nat i=0; i!=this->_domain.size(); ++i) {
-        if(decide(this->_domain[i].width()==0)) {
-            this->_domain[i]=cast_exact_interval(widen(this->_domain[i]));
-        }
-    }
     this->_variable_kinds=List<EnclosureVariableKind>(this->_domain.size(),EnclosureVariableKind::INITIAL);
 
     this->_state_function=this->function_factory().create(this->_domain,state_function);
@@ -370,7 +340,7 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivaria
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
     this->_auxiliary_mapping=EffectiveVectorMultivariateFunction(0u,EuclideanDomain(this->_state_function.result_size()));
 
-    for(Nat i=0; i!=constraints.size(); ++i) {
+    for(SizeType i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
         this->new_parameter_constraint(constraints[i]);
     }

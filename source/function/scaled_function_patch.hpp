@@ -479,7 +479,8 @@ template<class FP1, class FP2> Void check_function_patch_domain(String const& op
 
 
 template<class M> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(BinaryElementaryOperator op, ScaledFunctionPatch<M> const& f1, ScaledFunctionPatch<M> const& f2) {
-    assert(f1.domain()==f2.domain()); return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
+    ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
+    return ScaledFunctionPatch<M>(f1.domain(),op(f1.model(),f2.model()));
 }
 template<class M> ScaledFunctionPatch<M> AlgebraOperations<ScaledFunctionPatch<M>>::apply(UnaryElementaryOperator op, ScaledFunctionPatch<M> const& f) {
     return ScaledFunctionPatch<M>(f.domain(),op(f.model()));

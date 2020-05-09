@@ -95,7 +95,7 @@ List<Identifier> canonical_variable_names(const List<EnclosureVariableKind>& vks
 //! Defined as \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
-//    , public ValidatedCompactSetInterface
+//    , public EuclideanValidatedCompactSetInterface
 {
     ExactBoxType _domain;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;

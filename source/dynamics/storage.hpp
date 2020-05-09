@@ -76,13 +76,13 @@ class Storage
     Void restrict(Storage const& other) { return this->_state_set.restrict(other._state_set); }
     Void remove(Storage const& other) { return this->_state_set.remove(other._state_set); }
 
-    Void adjoin_inner_approximation(SetInterface const& set, Nat fineness) {
+    Void adjoin_inner_approximation(EuclideanSetInterface const& set, Nat fineness) {
         this->_state_set.adjoin_inner_approximation(set,fineness); }
-    Void adjoin_lower_approximation(OvertSetInterface const& set, Nat extent, Nat fineness) {
+    Void adjoin_lower_approximation(EuclideanOvertSetInterface const& set, Nat extent, Nat fineness) {
         this->_state_set.adjoin_lower_approximation(set,extent,fineness); }
-    Void adjoin_outer_approximation(CompactSetInterface const& set, Nat fineness) {
+    Void adjoin_outer_approximation(EuclideanCompactSetInterface const& set, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(set,fineness); }
-    Void adjoin_outer_approximation(ValidatedCompactSetInterface const& set, Nat fineness) {
+    Void adjoin_outer_approximation(ValidatedEuclideanCompactSetInterface const& set, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(set,fineness); }
     Void adjoin_outer_approximation(ExactBoxType const& bx, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(bx,fineness); }
@@ -190,7 +190,7 @@ class LabelledStorage
     List<Identifier> _auxiliary_variables;
 };
 
-LabelledStorage inner_approximation(SetInterface const& set, LabelledGrid const& grid, Nat fineness);
+LabelledStorage inner_approximation(EuclideanSetInterface const& set, LabelledGrid const& grid, Nat fineness);
 
 } //namespace Ariadne
 

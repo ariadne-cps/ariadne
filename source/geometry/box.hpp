@@ -69,7 +69,7 @@ class Box
     typedef DrawableInterface DrawableInterfaceType;
 
     //! \brief The type returned by the dimension() method.
-    typedef SizeType DimensionType;
+    typedef Ariadne::DimensionType DimensionType;
     //! The type used for a component interval.
     typedef I IntervalType;
     //! The type used for the lower bound of a component interval.
@@ -564,12 +564,13 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
 template<class IVL> class BoxSet;
 
 template<> class BoxSet<ExactIntervalType>
-    : public virtual RegularLocatedSetInterface,
-      public virtual DrawableInterface,
-      public Box<ExactIntervalType>
+    : public virtual EuclideanRegularLocatedSetInterface
+    ,  public virtual DrawableInterface
+    ,  public Box<ExactIntervalType>
 {
 
   public:
+    typedef typename EuclideanSetTraits::DimensionType DimensionType;
     using Box<ExactIntervalType>::Box;
     BoxSet<ExactIntervalType>(Box<ExactIntervalType>const& bx) : Box<ExactIntervalType>(bx) { }
 
@@ -605,12 +606,14 @@ template<> class BoxSet<ApproximateIntervalType>
 
 
 template<> class BoxSet<RealInterval>
-    : public virtual RegularLocatedSetInterface
+    : public virtual RegularLocatedSetInterface<RealVector>
     , public virtual DrawableInterface
     , public Box<RealInterval>
 {
     using BoxType = Box<RealInterval>;
   public:
+    typedef typename EuclideanSetTraits::DimensionType DimensionType;
+
     using Box<RealInterval>::Box;
     BoxSet<RealInterval>(Box<RealInterval>const& bx) : Box<RealInterval>(bx) { }
 

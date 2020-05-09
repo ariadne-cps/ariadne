@@ -38,24 +38,46 @@
 
 namespace Ariadne {
 
+template<class T> class SetBase;
+using EuclideanSetBase = SetBase<RealVector>;
+template<class T> class BoundedSet;
+template<class T> class OpenSet;
+template<class T> class ClosedSet;
+template<class T> class OvertSet;
+template<class T> class CompactSet;
+template<class T> class RegularSet;
+template<class T> class LocatedSet;
+template<class T> class RegularLocatedSet;
+
+using EuclideanSetBase = SetBase<RealVector>;
+using EuclideanBoundedSet = BoundedSet<RealVector>;
+using EuclideanOpenSet = OpenSet<RealVector>;
+using EuclideanClosedSet = ClosedSet<RealVector>;
+using EuclideanOvertSet = OvertSet<RealVector>;
+using EuclideanCompactSet = CompactSet<RealVector>;
+using EuclideanRegularSet = RegularSet<RealVector>;
+using EuclideanLocatedSet = LocatedSet<RealVector>;
+using EuclideanRegularLocatedSet = RegularLocatedSet<RealVector>;
+//using EuclideanSet = EuclideanRegularLocatedSet;
+
 //! \ingroup GeometryModule SetSubModule
 //! \brief Base handle class for sets.
-class SetBase
-    : public Handle<SetInterfaceBase>
+template<class T> class SetBase
+    : public Handle<SetInterfaceBase<T>>
 {
   public:
-    template<class ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase>(std::forward<Args>(args)...) { }
+    template<class ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded sets.
-class BoundedSet
-    : public Handle<BoundedSetInterface>
+template<class T> class BoundedSet
+    : public Handle<BoundedSetInterface<T>>
 {
   public:
-    template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface>(std::forward<Args>(args)...) { }
+    template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is a inside of \a bx.
@@ -70,11 +92,11 @@ class BoundedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
-class OvertSet
-    : public Handle<OvertSetInterface>
+template<class T> class OvertSet
+    : public Handle<OvertSetInterface<T>>
 {
   public:
-    template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> OvertSet(Args&&... args) : Handle<OvertSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -83,11 +105,11 @@ class OvertSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for open sets.
-class OpenSet
-    : public Handle<OpenSetInterface>
+template<class T> class OpenSet
+    : public Handle<OpenSetInterface<T>>
 {
   public:
-    template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> OpenSet(Args&&... args) : Handle<OpenSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -100,11 +122,11 @@ class OpenSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for closed sets.
-class ClosedSet
-    : public Handle<ClosedSetInterface>
+template<class T> class ClosedSet
+    : public Handle<ClosedSetInterface<T>>
 {
   public:
-    template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ClosedSet(Args&&... args) : Handle<ClosedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
@@ -115,11 +137,11 @@ class ClosedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for compact (closed and bounded) sets.
-class CompactSet
-    : public Handle<CompactSetInterface>
+template<class T> class CompactSet
+    : public Handle<CompactSetInterface<T>>
 {
   public:
-    template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> CompactSet(Args&&... args) : Handle<CompactSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
@@ -132,11 +154,11 @@ class CompactSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
-class RegularSet
-    : public Handle<RegularSetInterface>
+template<class T> class RegularSet
+    : public Handle<RegularSetInterface<T>>
 {
   public:
-    template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> RegularSet(Args&&... args) : Handle<RegularSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -149,11 +171,11 @@ class RegularSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for located (overt and compact) sets.
-class LocatedSet
-    : public Handle<LocatedSetInterface>
+template<class T> class LocatedSet
+    : public Handle<LocatedSetInterface<T>>
 {
   public:
-    template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> LocatedSet(Args&&... args) : Handle<LocatedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -168,11 +190,11 @@ class LocatedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded regular sets.
-class RegularLocatedSet
-    : public Handle<RegularLocatedSetInterface>
+template<class T> class RegularLocatedSet
+    : public Handle<RegularLocatedSetInterface<T>>
 {
   public:
-    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<RegularLocatedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> RegularLocatedSet(Args&&... args) : Handle<RegularLocatedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -194,11 +216,11 @@ class RegularLocatedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded sets.
-class ValidatedBoundedSet
-    : public Handle<ValidatedBoundedSetInterface>
+template<class T> class ValidatedBoundedSet
+    : public Handle<ValidatedBoundedSetInterface<T>>
 {
   public:
-    template<class ...Args> ValidatedBoundedSet(Args&&... args) : Handle<ValidatedBoundedSetInterface>(std::forward<Args>(args)...) { }
+    template<class ...Args> ValidatedBoundedSet(Args&&... args) : Handle<ValidatedBoundedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is a inside of \a bx.
@@ -213,11 +235,11 @@ class ValidatedBoundedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
-class ValidatedOvertSet
-    : public Handle<ValidatedOvertSetInterface>
+template<class T> class ValidatedOvertSet
+    : public Handle<ValidatedOvertSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedOvertSet(Args&&... args) : Handle<ValidatedOvertSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedOvertSet(Args&&... args) : Handle<ValidatedOvertSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -226,11 +248,11 @@ class ValidatedOvertSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for open sets.
-class ValidatedOpenSet
-    : public Handle<ValidatedOpenSetInterface>
+template<class T> class ValidatedOpenSet
+    : public Handle<ValidatedOpenSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedOpenSet(Args&&... args) : Handle<ValidatedOpenSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedOpenSet(Args&&... args) : Handle<ValidatedOpenSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -243,11 +265,11 @@ class ValidatedOpenSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for closed sets.
-class ValidatedClosedSet
-    : public Handle<ValidatedClosedSetInterface>
+template<class T> class ValidatedClosedSet
+    : public Handle<ValidatedClosedSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedClosedSet(Args&&... args) : Handle<ValidatedClosedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedClosedSet(Args&&... args) : Handle<ValidatedClosedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
@@ -258,11 +280,11 @@ class ValidatedClosedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for compact (closed and bounded) sets.
-class ValidatedCompactSet
-    : public Handle<ValidatedCompactSetInterface>
+template<class T> class ValidatedCompactSet
+    : public Handle<ValidatedCompactSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedCompactSet(Args&&... args) : Handle<ValidatedCompactSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedCompactSet(Args&&... args) : Handle<ValidatedCompactSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set is separated from \a bx.
@@ -275,11 +297,11 @@ class ValidatedCompactSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
-class ValidatedRegularSet
-    : public Handle<ValidatedRegularSetInterface>
+template<class T> class ValidatedRegularSet
+    : public Handle<ValidatedRegularSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedRegularSet(Args&&... args) : Handle<ValidatedRegularSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedRegularSet(Args&&... args) : Handle<ValidatedRegularSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -292,11 +314,11 @@ class ValidatedRegularSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for located (overt and compact) sets.
-class ValidatedLocatedSet
-    : public Handle<ValidatedLocatedSetInterface>
+template<class T> class ValidatedLocatedSet
+    : public Handle<ValidatedLocatedSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedLocatedSet(Args&&... args) : Handle<ValidatedLocatedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedLocatedSet(Args&&... args) : Handle<ValidatedLocatedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.
@@ -311,11 +333,11 @@ class ValidatedLocatedSet
 
 //! \ingroup GeometryModule SetSubModule
 //! \brief Handle class for bounded regular sets.
-class ValidatedRegularLocatedSet
-    : public Handle<ValidatedRegularLocatedSetInterface>
+template<class T> class ValidatedRegularLocatedSet
+    : public Handle<ValidatedRegularLocatedSetInterface<T>>
 {
   public:
-    template<typename ...Args> ValidatedRegularLocatedSet(Args&&... args) : Handle<ValidatedRegularLocatedSetInterface>(std::forward<Args>(args)...) { }
+    template<typename ...Args> ValidatedRegularLocatedSet(Args&&... args) : Handle<ValidatedRegularLocatedSetInterface<T>>(std::forward<Args>(args)...) { }
     //! \brief The dimension of the set.
     inline DimensionType dimension() const { return this->reference().dimension(); }
     //! \brief Tests if the set overlaps \a bx.

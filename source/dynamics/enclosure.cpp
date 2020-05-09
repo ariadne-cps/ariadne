@@ -1680,7 +1680,7 @@ LabelledStorage::LabelledStorage(GridTreePaving const& paving,
 { }
 
 
-LabelledStorage inner_approximation(SetInterface const& set, LabelledGrid const& grid, Nat fineness) {
+LabelledStorage inner_approximation(EuclideanSetInterface const& set, LabelledGrid const& grid, Nat fineness) {
     LabelledStorage paving(grid); paving.euclidean_set().adjoin_inner_approximation(set,fineness); return paving;
 }
 

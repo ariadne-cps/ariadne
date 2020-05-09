@@ -95,7 +95,7 @@ template<class F> ValidatedAffineModelConstraint<F> operator==(const ValidatedAf
 //! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
 //! \sa ValidatedConstrainedImageSet
 class ValidatedAffineConstrainedImageSet
-    : public virtual ValidatedCompactSetInterface
+    : public virtual ValidatedEuclideanCompactSetInterface
 	, public virtual DrawableInterface
 	, public Loggable
 {

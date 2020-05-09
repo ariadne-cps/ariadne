@@ -61,6 +61,9 @@ template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInte
     virtual ValueType const _value() const = 0;
 };
 
+template<class P, class ARG, class PR, class PRE> using ScalarFunctionModelInterface = FunctionModelInterface<P,RealScalar(ARG),PR,PRE>;
+template<class P, class ARG, class PR, class PRE> using VectorFunctionModelInterface = FunctionModelInterface<P,RealVector(ARG),PR,PRE>;
+
 template<class P, class ARG, class PR, class PRE> class FunctionModelAlgebraInterface<P,RealVector(ARG),PR,PRE>
     : public virtual WritableInterface
 {
@@ -118,6 +121,7 @@ template<class P, class SIG, class PR, class PRE> class FunctionModelInterface
     virtual FunctionModelFactoryInterface<P,PR,PRE>* _factory() const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _clone() const = 0;
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _create() const = 0;
+    inline FunctionModelInterface<P,SIG,PR,PRE>* _copy() const { return this->_clone(); }
 
     virtual FunctionModelInterface<P,SIG,PR,PRE>* _restriction(const DomainType& d) const = 0;
 
@@ -155,6 +159,7 @@ template<class P, class PR, class PRE> class FunctionModelFactoryInterface
     typedef VD VectorDomainType;
     virtual ~FunctionModelFactoryInterface<P,PR,PRE>() = default;
     virtual FunctionModelFactoryInterface<P,PR,PRE>* clone() const = 0;
+    inline FunctionModelFactoryInterface<P,PR,PRE>* _copy() const { return this->clone(); }
     virtual OutputStream& _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, FunctionModelFactoryInterface<P,PR,PRE> const& factory) { factory._write(os); return os; }
   private:

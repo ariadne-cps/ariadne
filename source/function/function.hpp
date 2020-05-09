@@ -169,7 +169,8 @@ template<class P, class... ARGS> class DispatchFunctionOperations<P,RealVector(A
 //! \brief A generic function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
 template<class P, class SIG>
 class Function
-    : public FunctionConstructors<P>
+    : public Handle<const FunctionInterface<P,SIG>>
+    , public FunctionConstructors<P>
     , public SignatureTraits<SIG>
     , public FunctionFacade<P,SIG>
     , public DispatchFunctionOperations<P,SIG>
@@ -179,9 +180,8 @@ class Function
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
-  protected:
-    SharedPointer< const FunctionInterface<P,SIG> > _ptr;
   public:
+    typedef FunctionInterface<P,SIG> Interface;
     typedef P InformationTag; //!< The type of information (Effective, Validated or Approximate) provided by the function implementation.
     typedef P Paradigm;
     typedef D DomainType; //!< The type of the domain.
@@ -236,24 +236,8 @@ class Function
 
     //@{
     //! \name Handle-interface methods.
+    using Handle<const Interface>::Handle;
     Function(); //!< \brief Create an invalid (null) function.
-    explicit Function(FunctionInterface<P,SIG>* p) : _ptr(p) { } //!< \brief Capture a newly-allocated function pointer.
-    explicit Function(SharedPointer<FunctionInterface<P,SIG>> p) : _ptr(p) { } //!< \brief Construct from a managed pointer.
-    Function(const FunctionInterface<P,SIG>& t) : _ptr(t._clone()) { }  //!< \brief Clone from aeference.
-
-    //! \brief Assign from a reference.
-    Function<P,SIG>& operator=(const FunctionInterface<P,SIG>& f) {
-        _ptr=std::shared_ptr< FunctionInterface<P,SIG> >(f._clone()); return *this; }
-
-    //! \brief Return a managed (shared) pointer to the underlying interface class.
-    SharedPointer< const FunctionInterface<P,SIG> > managed_pointer() const  { return _ptr; }
-    //! \brief Return a raw (builtin) pointer to the underlying interface class.
-    const FunctionInterface<P,SIG>* raw_pointer() const  { return _ptr.operator->(); }
-    //! \brief Return a reference to the underlying interface class.
-    const FunctionInterface<P,SIG>& reference() const  { return _ptr.operator*(); }
-    //! \brief Convert to a reference to the underlying interface class.
-    operator const FunctionInterface<P,SIG>& () const { return _ptr.operator*(); }
-
     //@}
 
     //@{
@@ -262,7 +246,7 @@ class Function
     //! \brief Convert from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
     Function(const Function<PP,SIG>& f)
-        : _ptr(std::dynamic_pointer_cast< const FunctionInterface<P,SIG> >(f.managed_pointer())) { }
+        : Handle<const Interface>(std::dynamic_pointer_cast< const Interface >(f.managed_pointer())) { }
     //! \brief Assign from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
         Function<P,SIG>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
@@ -562,12 +546,13 @@ inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<EffectiveTa
 
 //! \brief A class for constructing generic functions with a specific implementation.
 //! \sa Function
-template<class P> class FunctionFactory {
-    SharedPointer< const FunctionFactoryInterface<P> > _ptr;
+template<class P> class FunctionFactory
+    : public Handle<const FunctionFactoryInterface<P>>
+{
   public:
-    FunctionFactory(const FunctionFactoryInterface<P>& ref) : _ptr(ref.clone()) { }
-    FunctionFactory(const FunctionFactoryInterface<P>* ptr) : _ptr(ptr) { }
-    FunctionFactory(SharedPointer< const FunctionFactoryInterface<P> > ptr) : _ptr(ptr) { }
+    typedef FunctionFactoryInterface<P> Interface;
+    using Handle<const Interface>::Handle;
+
     //! \brief Create a scalar function equal to \a f over domain \a dom.
     inline ScalarMultivariateFunction<P> create(const BoxDomainType& dom, const ScalarMultivariateFunctionInterface<P>& f) const;
     //! \brief Create a vector function equal to \a f over domain \a dom.
@@ -585,30 +570,34 @@ typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
 template<>
 class FunctionFactory<ValidatedTag>
 {
-    SharedPointer< const FunctionFactoryInterface<ValidatedTag> > _ptr;
+    using P=ValidatedTag;
+  private:
+    SharedPointer< const FunctionFactoryInterface<P> > _ptr;
   public:
-    FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
-    FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
-    FunctionFactory(SharedPointer< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarMultivariateFunction create(const BoxDomainType& d, const ValidatedScalarMultivariateFunctionInterface& f) const;
-    inline ValidatedVectorMultivariateFunction create(const BoxDomainType& d, const ValidatedVectorMultivariateFunctionInterface& f) const;
+    typedef FunctionFactoryInterface<P> Interface;
+    FunctionFactory(const Interface& ref) : _ptr(ref.clone()) { }
+    FunctionFactory(const Interface* ptr) : _ptr(ptr) { }
+    FunctionFactory(SharedPointer< const Interface > ptr) : _ptr(ptr) { }
+
+    inline ValidatedScalarMultivariateFunction create(const BoxDomainType& d, const ValidatedScalarMultivariateFunction::Interface& f) const;
+    inline ValidatedVectorMultivariateFunction create(const BoxDomainType& d, const ValidatedVectorMultivariateFunction::Interface& f) const;
     inline ValidatedScalarMultivariateFunction create_zero(const BoxDomainType& d) const;
     inline ValidatedVectorMultivariateFunction create_identity(const BoxDomainType& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunctionInterface& function) const {
-    return ValidatedScalarMultivariateFunction(SharedPointer<ValidatedScalarMultivariateFunctionInterface>(this->_create(domain,function))); }
-inline ValidatedVectorMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunctionInterface& function) const {
-    return ValidatedVectorMultivariateFunction(SharedPointer<ValidatedVectorMultivariateFunctionInterface>(this->_create(domain,function))); }
+inline ValidatedScalarMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunction::Interface& function) const {
+    return ValidatedScalarMultivariateFunction(SharedPointer<ValidatedScalarMultivariateFunction::Interface>(this->_create(domain,function))); }
+inline ValidatedVectorMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunction::Interface& function) const {
+    return ValidatedVectorMultivariateFunction(SharedPointer<ValidatedVectorMultivariateFunction::Interface>(this->_create(domain,function))); }
 inline ValidatedScalarMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
     return this->create(domain,EffectiveScalarMultivariateFunction::zero(domain.dimension())); }
 inline ValidatedVectorMultivariateFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const BoxDomainType& domain) const {
     return this->create(domain,EffectiveVectorMultivariateFunction::identity(domain.dimension())); }
 
-inline ValidatedScalarMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunctionInterface& function) const {
+inline ValidatedScalarMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedScalarMultivariateFunction::Interface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunctionInterface& function) const {
+inline ValidatedVectorMultivariateFunction FunctionFactory<ValidatedTag>::create(const BoxDomainType& domain, const ValidatedVectorMultivariateFunction::Interface& function) const {
     return this->_ptr->create(domain,function); }
 inline ValidatedScalarMultivariateFunction FunctionFactory<ValidatedTag>::create_zero(const BoxDomainType& domain) const {
     return this->_ptr->create_zero(domain); }

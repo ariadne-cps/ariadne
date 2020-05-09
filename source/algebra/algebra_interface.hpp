@@ -141,6 +141,9 @@ template<class X> class ElementaryAlgebraInterface
     virtual ElementaryAlgebraInterface<X>* _create_zero() const = 0;
     virtual ElementaryAlgebraInterface<X>* _create_constant(X const& c) const = 0;
 
+    //! FIXME: Remove this; currently used to allow copy of Handle
+    virtual ElementaryAlgebraInterface<X>* _copy() const { return this->_create_copy(); }
+
     virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, ElementaryAlgebraInterface<X> const&) const = 0;
     virtual ElementaryAlgebraInterface<X>* _apply(BinaryElementaryOperator, X const&) const = 0;
     virtual ElementaryAlgebraInterface<X>* _rapply(BinaryElementaryOperator, X const&) const = 0;

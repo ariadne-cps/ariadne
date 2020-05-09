@@ -67,6 +67,14 @@ template<> struct SignatureTraits<RealVector(RealVector)> {
 
 template<class P, class SIG> class FunctionInterface;
 
+template<class P, class... ARGS> using ScalarFunctionInterface = FunctionInterface<P,RealScalar(ARGS...)>;
+template<class P, class... ARGS> using VectorFunctionInterface = FunctionInterface<P,RealVector(ARGS...)>;
+template<class P> using ScalarUnivariateFunctionInterface = ScalarFunctionInterface<P,RealScalar>;
+template<class P> using VectorUnivariateFunctionInterface = VectorFunctionInterface<P,RealScalar>;
+template<class P> using ScalarMultivariateFunctionInterface = ScalarFunctionInterface<P,RealVector>;
+template<class P> using VectorMultivariateFunctionInterface = VectorFunctionInterface<P,RealVector>;
+
+
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
@@ -121,6 +129,7 @@ class FunctionInterface<Void,SIG>
     virtual OutputStream& _write(OutputStream& os) const = 0;
   public:
     virtual FunctionInterface<Void,SIG>* _clone() const = 0;
+    inline FunctionInterface<Void,SIG>* _copy() const { return this->_clone(); }
   public:
     friend inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,SIG>& f) { return f._write(os); }
 };
@@ -149,6 +158,7 @@ class FunctionInterface<ApproximateTag,SIG>
     virtual Result<ElementaryAlgebra<ApproximateNumber>> _evaluate(const Argument< ElementaryAlgebra<ApproximateNumber> >& x) const = 0;
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
+    inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
     virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
 };
 
@@ -188,6 +198,7 @@ class FunctionInterface<ValidatedTag,SIG>
         return this->_evaluate(Argument<FloatMPBounds>(x)); }
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
+    inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
     virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
 };
 
@@ -214,6 +225,7 @@ class FunctionInterface<EffectiveTag,SIG>
     virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
 
     virtual FunctionInterface<P,SIG>* _clone() const = 0;
+    inline FunctionInterface<P,SIG>* _copy() const { return this->_clone(); }
     virtual FunctionInterface<P,SIG>* _derivative(ElementIndexType<D> i) const = 0;
 };
 
@@ -230,7 +242,8 @@ template<> class FunctionFactoryInterface<ValidatedTag>
     using P = ValidatedTag;
     typedef BoxDomainType DomainType;
   public:
-    virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
+    virtual FunctionFactoryInterface<P>* clone() const = 0;
+    inline FunctionFactoryInterface<P>* _copy() const { return this->clone(); }
     virtual OutputStream& _write(OutputStream& os) const = 0;
     inline ScalarMultivariateFunction<P> create(const BoxDomainType& domain, const ScalarMultivariateFunctionInterface<P>& function) const;
     inline VectorMultivariateFunction<P> create(const BoxDomainType& domain, const VectorMultivariateFunctionInterface<P>& function) const;

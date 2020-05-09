@@ -155,7 +155,7 @@ template<class P, class PR, class PRE> ScalarFunctionModel<P,PR,PRE> compose(Sca
 }
 
 template<class P> ScalarFunction<P,BoxDomainType> compose(ScalarFunction<P,BoxDomainType> const& f, Projection const& prj) {
-    auto fmp = std::dynamic_pointer_cast<const ScalarMultivariateFunctionModelDPInterface<P>>(f.managed_pointer());
+    auto fmp = std::dynamic_pointer_cast<const typename ScalarMultivariateFunctionModelDP<P>::Interface>(f.managed_pointer());
     if(fmp) {
         return compose(ScalarMultivariateFunctionModelDP<P>(fmp),prj);
     }

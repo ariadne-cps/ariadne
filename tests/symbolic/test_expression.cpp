@@ -395,8 +395,14 @@ class TestExpression {
         Vector<RealElementaryAlgebra> va={ax,ay,az};
         ARIADNE_TEST_PRINT(va);
         ARIADNE_TEST_PRINT(f3(va));
-        ARIADNE_TEST_PRINT(f3(va).extract<RealExpression>());
-        ARIADNE_TEST_EQUALS(evaluate(f3(va).extract<RealExpression>(),tw),evaluate(e3,tw));
+        ARIADNE_TEST_CONSTRUCT(RealExpression,g3,(f3(va).extract<RealExpression>()));
+        ARIADNE_TEST_PRINT(e3);
+        ARIADNE_TEST_PRINT(f3);
+        ARIADNE_TEST_PRINT(g3);
+        ARIADNE_TEST_PRINT(5+va[0]+5*va[1]);
+        ARIADNE_TEST_EQUALS(evaluate(g3,tw),evaluate(e3,tw));
+
+
     }
 
     Void test() {

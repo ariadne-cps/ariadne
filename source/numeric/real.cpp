@@ -170,7 +170,7 @@ template<class O, class... A> inline Real make_real(O o, A... a) {
     return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
 
-Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
+Real::Real(SharedPointer<const Interface> p) : Handle<const Interface> (p) { }
 
 Real::Real(ConvergentSequence<DyadicBounds> const& seq) : Real(std::make_shared<RealLimit<DyadicBounds>>(seq)) { }
 Real::Real(FastCauchySequence<Dyadic> const& seq) : Real(std::make_shared<RealLimit<Dyadic>>(seq)) { }
@@ -422,10 +422,10 @@ ValidatedKleenean check_sgn(Real r, Effort eff) {
 
 
 
-LowerReal::LowerReal(SharedPointer<RealInterface> p) : _ptr(p) {
+LowerReal::LowerReal(SharedPointer<const Interface> p) : Handle<const Interface>(p) {
 }
 
-LowerReal::LowerReal(Real r) : _ptr(r._ptr) {
+LowerReal::LowerReal(Real r) : LowerReal(r.managed_pointer()) {
 }
 
 FloatDPLowerBound LowerReal::operator() (DoublePrecision pr) const {
@@ -444,10 +444,15 @@ FloatMPLowerBound LowerReal::get(MultiplePrecision pr) const {
     return this->_ptr->_compute_get(pr);
 }
 
-UpperReal::UpperReal(SharedPointer<RealInterface> p) : _ptr(p) {
+OutputStream& operator<<(OutputStream& os, LowerReal const& x) {
+    return x.pointer()->_write(os);
 }
 
-UpperReal::UpperReal(Real r) : _ptr(r._ptr) {
+
+UpperReal::UpperReal(SharedPointer<const Interface> p) : Handle<const Interface>(p) {
+}
+
+UpperReal::UpperReal(Real r) : UpperReal(r.managed_pointer()) {
 }
 
 FloatDPUpperBound UpperReal::operator() (DoublePrecision pr) const {
@@ -464,6 +469,10 @@ FloatDPUpperBound UpperReal::get(DoublePrecision pr) const {
 
 FloatMPUpperBound UpperReal::get(MultiplePrecision pr) const {
     return this->_ptr->_compute_get(pr);
+}
+
+OutputStream& operator<<(OutputStream& os, UpperReal const& x) {
+    return x.pointer()->_write(os);
 }
 
 inline Real const& cast_real(LowerReal const& lr) { return reinterpret_cast<Real const&>(lr); }
@@ -545,7 +554,8 @@ UpperReal div(PositiveReal pr1, LowerReal lr2) { return div(make_signed(pr1),cas
 static_assert(IsConstructible<FloatDP,Dyadic,FloatDP::RoundingModeType,FloatDP::PrecisionType>::value,"");
 static_assert(IsConstructible<FloatMP,Dyadic,FloatMP::RoundingModeType,FloatMP::PrecisionType>::value,"");
 
-ValidatedReal::ValidatedReal(DyadicBounds const& y) : _ptr(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y)) { }
+ValidatedReal::ValidatedReal(DyadicBounds const& y)
+    : Handle<Interface>(std::make_shared<ValidatedRealWrapper<DyadicBounds>>(y)) { }
 DyadicBounds ValidatedReal::get() const { return this->_ptr->_get(); }
 FloatDPBounds ValidatedReal::get(DoublePrecision pr) const { return this->_ptr->_get(pr); }
 FloatMPBounds ValidatedReal::get(MultiplePrecision pr) const { return this->_ptr->_get(pr); }

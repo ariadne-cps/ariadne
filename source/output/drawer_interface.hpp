@@ -58,11 +58,10 @@ class DrawerInterface : public WritableInterface
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class Drawer
+    : public Handle<const DrawerInterface>
 {
-    SharedPointer<const DrawerInterface> _ptr;
   public:
-    Drawer(SharedPointer<const DrawerInterface> ptr) : _ptr(ptr) { }
-    Drawer(const DrawerInterface* ptr) : _ptr(ptr) { }
+    using Handle<const DrawerInterface>::Handle;
     inline Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) const {
         return this->_ptr->draw(cnvs,proj,set); }
     friend inline OutputStream& operator<<(OutputStream& os, Drawer const& drw) {

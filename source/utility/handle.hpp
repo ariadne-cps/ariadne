@@ -59,24 +59,26 @@ template<class I, class T> class Wrapper
 };
 
 template<class I> class Handle {
+  public:
     typedef I Interface;
   protected:
     mutable SharedPointer<I> _ptr;
   public:
     ~Handle() { }
-    Handle(I* p) : _ptr(p) { }
+    explicit Handle(I* p) : _ptr(p) { }
     Handle(SharedPointer<I> p) : _ptr(p) { }
     Handle(I&& r) : _ptr(r._move()) { }
     Handle(const I& r) : _ptr(r._copy()) { }
     template<class T, EnableIf<IsBaseOf<I,T>> =dummy> Handle(T&& t) : _ptr(new T(std::move(t))) { }
-    template<class T, EnableIf<IsBaseOf<I,T>> =dummy> Handle(const T& t) : _ptr(new T(t)) { }
+    template<class T, EnableIf<IsBaseOf<I,T>> =dummy, EnableIf<IsCopyConstructible<T>> =dummy> Handle(const T& t)
+        : _ptr(new T(t)) { }
     //Handle(const Handle<I>& h) : _ptr(h._ptr) { }
     //Handle(Handle<I>&& h) : _ptr(h._ptr) { }
     Handle(const Handle<I>& h) = default;
     Handle(Handle<I>&& h) = default;
     Handle<I>& operator=(const Handle<I>& h) = default;
     Handle<I>& operator=(Handle<I>&& h) = default;
-    template<class II> Handle(const Handle<II>& h) : _ptr(h.managed_pointer()) { }
+    template<class II> explicit Handle(const Handle<II>& h) : _ptr(h.managed_pointer()) { }
     //explicit operator I const& () const { return *_ptr; }
     operator I const& () const { return *_ptr; }
   public:
@@ -102,29 +104,53 @@ template<class I> class Handle {
     const SharedPointer<I> managed_pointer() const { return _ptr; }
     SharedPointer<I> managed_pointer() { make_unique(); return _ptr; }
   protected:
-    void make_unique() { if(!_ptr.unique()) { _ptr=SharedPointer<I>(_ptr->_copy()); } }
+    template<class II> static Void _make_unique(SharedPointer<II>& ptr) {
+        if(!ptr.unique()) { ptr=SharedPointer<I>(ptr->_copy()); } }
+    template<class II> static Void _make_unique(SharedPointer<const II>& ptr) { }
+    void make_unique() { _make_unique(_ptr); }
   private:
-    template<class T, class II> friend T& dynamic_handle_cast(Handle<II>& h);
-    template<class T, class II> friend const T& dynamic_handle_cast(const Handle<II>& h);
+    template<class T, class II> friend T& dynamic_handle_extract(Handle<II>& h);
+    template<class T, class II> friend const T& dynamic_handle_extract(const Handle<II>& h);
+    template<class D, class B> friend Handle<D> dynamic_handle_cast(Handle<B>& h);
+    template<class D, class B> friend const Handle<D> dynamic_handle_cast(const Handle<B>& h);
 };
 
+void write_error(OutputStream& os, const char* i, const char* c, const char* t);
 void write_error(OutputStream& os, const WritableInterface* w, const char* i, const char* c, const char* t);
 
-template<class T, class I> const T& dynamic_handle_cast(const Handle<I>& h) {
-    const I* i=h.raw_const_pointer();
-    const T* p=dynamic_cast<const Wrapper<I,T>*>(i);
-    if(p) { return *p; }
+template<class D, class B> D dynamic_handle_cast(B const& h) {
+    typedef typename B::Interface BI;
+    typedef typename D::Interface DI;
+    SharedPointer<DI> p=std::dynamic_pointer_cast<DI>(h.managed_pointer());
+    if(p) { return Handle<DI>(p); }
+    const BI* i=h.raw_pointer();
     const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
-    write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name());
+    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(D).name()); }
+    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(D).name()); }
     throw std::bad_cast();
 }
 
-template<class T, class I> T& dynamic_handle_cast(Handle<I>& h) {
+template<class T, class I> const T& dynamic_handle_extract(const Handle<I>& h) {
     const I* i=h.raw_const_pointer();
-    const T* p=dynamic_cast<const Wrapper<I,T>*>(i);
+    const T* p=dynamic_cast<const T*>(i);
+    if(p) { return const_cast<T&>(*p); }
+    p=dynamic_cast<const Wrapper<I,T>*>(i);
+    if(p) { return *p; }
+    const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
+    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
+    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
+    throw std::bad_cast();
+}
+
+template<class T, class I> T& dynamic_handle_extract(Handle<I>& h) {
+    const I* i=h.raw_const_pointer();
+    const T* p=dynamic_cast<const T*>(i);
+    if(p) { return const_cast<T&>(*p); }
+    p=dynamic_cast<const Wrapper<I,T>*>(i);
     if(p) { return const_cast<T&>(*p); }
     const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
-    write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name());
+    if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
+    else { write_error(std::cerr,typeid(i).name(),typeid(*i).name(),typeid(T).name()); }
     throw std::bad_cast();
 }
 

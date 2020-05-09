@@ -680,15 +680,19 @@ Void TestTaylorFunctionFactory::test()
 
 Void TestTaylorFunctionFactory::test_create()
 {
-    Sweeper<FloatDP> sweeper(new ThresholdSweeper<FloatDP>(dp,1e-4));
+    ThresholdSweeper<FloatDP> threshold_sweeper(dp,1e-4);
+    Sweeper<FloatDP> sweeper(threshold_sweeper);
     TaylorFunctionFactory factory(sweeper);
 
     Vector<ExactIntervalType> dom={{-1,+1},{0.5,3.5}};
     Vector<FloatDPBounds> args=reinterpret_cast<Vector<FloatDPBounds>const&>(dom);
 
     ValidatedScalarMultivariateTaylorFunctionModelDP stf=factory.create(dom, EffectiveScalarMultivariateFunction::zero(dom.size()) );
+    ARIADNE_TEST_PRINT(sweeper);
     ARIADNE_TEST_PRINT(stf);
-    ARIADNE_TEST_EQUALS(&stf.properties(),&sweeper);
+    ARIADNE_TEST_PRINT(stf.properties());
+
+    ARIADNE_TEST_EQUALS(dynamic_handle_extract<ThresholdSweeper<FloatDP>>(stf.properties()).sweep_threshold(),threshold_sweeper.sweep_threshold());
     ARIADNE_TEST_EQUALS(stf(args),FloatDPBounds(0.0));
     ARIADNE_TEST_EQUALS(evaluate(stf,args),FloatDPBounds(0.0));
 

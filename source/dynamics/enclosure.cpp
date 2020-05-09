@@ -861,7 +861,7 @@ ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
     const ExactBoxType test_domain=this->_reduced_domain;
     for(Nat i=0; i!=bx.dimension(); ++i) {
         // FIXME: Conversion should be automatic
-        ValidatedScalarMultivariateFunction fi(static_cast<ValidatedScalarMultivariateFunctionInterface const&>(this->_state_function[i]));
+        ValidatedScalarMultivariateFunction fi(static_cast<ValidatedScalarMultivariateFunction::Interface const&>(this->_state_function[i]));
         constraints.append(fi >= bx[i].lower());
         constraints.append(fi <= bx[i].upper());
     }

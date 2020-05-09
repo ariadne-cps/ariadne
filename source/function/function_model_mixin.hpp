@@ -65,10 +65,11 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ValueType ValueType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ErrorType ErrorType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NormType NormType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::RangeType RangeType;
+    typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
+    typedef typename Interface::ValueType ValueType;
+    typedef typename Interface::ErrorType ErrorType;
+    typedef typename Interface::NormType NormType;
+    typedef typename Interface::RangeType RangeType;
   public:
     ScalarFunctionModelInterface<P,ARG,PR,PRE>* _clone() const override {
         return new FM(static_cast<const FM&>(*this)); }
@@ -129,10 +130,11 @@ template<class FM, class P, class ARG, class PR, class PRE> class FunctionModelM
     using C = DomainOfType<RES>; using D = DomainOfType<ARG>;
     using X = typename FunctionModelInterface<P,SIG,PR,PRE>::NumericType;
   public:
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ValueType ValueType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::ErrorType ErrorType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::NormType NormType;
-    typedef typename FunctionModelInterface<P,SIG,PR,PRE>::RangeType RangeType;
+    typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
+    typedef typename Interface::ValueType ValueType;
+    typedef typename Interface::ErrorType ErrorType;
+    typedef typename Interface::NormType NormType;
+    typedef typename Interface::RangeType RangeType;
 
     typedef typename Element<FM>::Type ScalarMultivariateFunctionType;
   public:

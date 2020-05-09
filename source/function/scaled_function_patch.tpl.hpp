@@ -230,8 +230,8 @@ template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const BoxDomainTyp
 }
 
 template<class M> ScaledFunctionPatch<M>::ScaledFunctionPatch(const ScalarFunctionModelType<M>& f) {
-     ARIADNE_ASSERT_MSG(dynamic_cast<const ScaledFunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
-     *this=dynamic_cast<const ScaledFunctionPatch<M>&>(*f._ptr);
+     ARIADNE_ASSERT_MSG(dynamic_cast<const ScaledFunctionPatch<M>*>(f.raw_pointer())," f="<<f);
+     *this=dynamic_cast<const ScaledFunctionPatch<M>&>(f.reference());
 }
 
 template<class M> ScaledFunctionPatch<M>& ScaledFunctionPatch<M>::operator=(const ScalarFunctionModelType<M>& f)

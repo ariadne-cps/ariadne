@@ -169,7 +169,8 @@ template<class P, class... ARGS> class DispatchFunctionOperations<P,RealVector(A
 //! \brief A generic function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
 template<class P, class SIG>
 class Function
-    : public FunctionConstructors<P>
+    : public Handle<const FunctionInterface<P,SIG>>
+    , public FunctionConstructors<P>
     , public SignatureTraits<SIG>
     , public FunctionFacade<P,SIG>
     , public DispatchFunctionOperations<P,SIG>
@@ -179,8 +180,6 @@ class Function
     using D=typename SignatureTraits<SIG>::DomainType;
     using C=typename SignatureTraits<SIG>::CodomainType;
     using ARG=typename SignatureTraits<SIG>::ArgumentKind;
-  protected:
-    SharedPointer< const FunctionInterface<P,SIG> > _ptr;
   public:
     typedef FunctionInterface<P,SIG> Interface;
     typedef P InformationTag; //!< The type of information (Effective, Validated or Approximate) provided by the function implementation.
@@ -237,24 +236,8 @@ class Function
 
     //@{
     //! \name Handle-interface methods.
+    using Handle<const Interface>::Handle;
     Function(); //!< \brief Create an invalid (null) function.
-    explicit Function(Interface* p) : _ptr(p) { } //!< \brief Capture a newly-allocated function pointer.
-    explicit Function(SharedPointer<Interface> p) : _ptr(p) { } //!< \brief Construct from a managed pointer.
-    Function(const Interface& t) : _ptr(t._clone()) { }  //!< \brief Clone from aeference.
-
-    //! \brief Assign from a reference.
-    Function<P,SIG>& operator=(const Interface& f) {
-        _ptr=std::shared_ptr< Interface >(f._clone()); return *this; }
-
-    //! \brief Return a managed (shared) pointer to the underlying interface class.
-    SharedPointer< const Interface > managed_pointer() const  { return _ptr; }
-    //! \brief Return a raw (builtin) pointer to the underlying interface class.
-    const Interface* raw_pointer() const  { return _ptr.operator->(); }
-    //! \brief Return a reference to the underlying interface class.
-    const Interface& reference() const  { return _ptr.operator*(); }
-    //! \brief Convert to a reference to the underlying interface class.
-    operator const Interface& () const { return _ptr.operator*(); }
-
     //@}
 
     //@{
@@ -263,7 +246,7 @@ class Function
     //! \brief Convert from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
     Function(const Function<PP,SIG>& f)
-        : _ptr(std::dynamic_pointer_cast< const Interface >(f.managed_pointer())) { }
+        : Handle<const Interface>(std::dynamic_pointer_cast< const Interface >(f.managed_pointer())) { }
     //! \brief Assign from a function class specifying more information.
     template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
         Function<P,SIG>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
@@ -563,12 +546,13 @@ inline Matrix<UpperIntervalType> jacobian(VectorMultivariateFunction<EffectiveTa
 
 //! \brief A class for constructing generic functions with a specific implementation.
 //! \sa Function
-template<class P> class FunctionFactory {
-    SharedPointer< const FunctionFactoryInterface<P> > _ptr;
+template<class P> class FunctionFactory
+    : public Handle<const FunctionFactoryInterface<P>>
+{
   public:
-    FunctionFactory(const FunctionFactoryInterface<P>& ref) : _ptr(ref.clone()) { }
-    FunctionFactory(const FunctionFactoryInterface<P>* ptr) : _ptr(ptr) { }
-    FunctionFactory(SharedPointer< const FunctionFactoryInterface<P> > ptr) : _ptr(ptr) { }
+    typedef FunctionFactoryInterface<P> Interface;
+    using Handle<const Interface>::Handle;
+
     //! \brief Create a scalar function equal to \a f over domain \a dom.
     inline ScalarMultivariateFunction<P> create(const BoxDomainType& dom, const ScalarMultivariateFunctionInterface<P>& f) const;
     //! \brief Create a vector function equal to \a f over domain \a dom.

@@ -52,9 +52,10 @@ namespace Ariadne {
 template<class P, class A, class PR, class PRE> struct AlgebraOperations<ScalarFunctionModel<P,Real(A),PR,PRE>>;
 
 // FIXME: Extend with univariate case
-template<class P, class PR, class PRE> class FunctionModelFactory {
+template<class P, class PR, class PRE> class FunctionModelFactory
+    : public Handle<const FunctionModelFactoryInterface<P,PR,PRE>>
+{
   private:
-    SharedPointer<const FunctionModelFactoryInterface<P,PR,PRE>> _ptr;
     typedef RealScalar SARG;
     typedef RealVector VARG;
     typedef IntervalDomainType SD;
@@ -68,11 +69,7 @@ template<class P, class PR, class PRE> class FunctionModelFactory {
     typedef SD ScalarDomainType;
     typedef VD VectorDomainType;
 
-    operator const Interface& () const { return *_ptr; }
-
-    FunctionModelFactory(const Interface& i) : _ptr(i.clone()) { }
-    explicit FunctionModelFactory(const Interface* p) : _ptr(p) { }
-    explicit FunctionModelFactory(SharedPointer<const Interface> p) : _ptr(p) { }
+    using Handle<const Interface>::Handle;
 
     CanonicalNumericType<P,PR,PRE> create(Number<P> const& c) const {
         return CanonicalNumericType<P,PR,PRE>(this->_ptr->_create(c)); }
@@ -174,8 +171,9 @@ template<class P, class SIG, class PR, class PRE> class FunctionModel;
 //! \ingroup FunctionModelSubModule
 //! \brief Generic scalar functions on bounded domains.
 template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScalar(ARG),PR,PRE>
-//    : public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
-    : public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,ARG,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
+    : public Handle<FunctionModelInterface<P,RealScalar(ARG),PR,PRE>>
+//    , public DispatchTranscendentalAlgebraOperations<ScalarFunctionModel<P,D,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
+    , public DispatchElementaryAlgebraOperations<ScalarFunctionModel<P,ARG,PR,PRE>, CanonicalNumericType<P,PR,PRE>>
     , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,ARG,PR,PRE>,ScalarMultivariateFunction<P>>
     , public ProvideConcreteGenericElementaryOperations<ScalarFunctionModel<P,ARG,PR,PRE>,Number<P>>
 {
@@ -200,21 +198,18 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
-    clone_on_copy_ptr< Interface > _ptr;
-  public:
-    FunctionModel() : _ptr() { }
-    explicit FunctionModel(Interface* p) : _ptr(p) { }
-    FunctionModel(const SharedPointer<const Interface> p) : _ptr(p->_clone()) { }
-    FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : _ptr(f._ptr) { }
+    explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
+    FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }
+
+    FunctionModel() : FunctionModel(nullptr) { }
+    FunctionModel(const SharedPointer<const Interface> p) : Handle<Interface>(p->_clone()) { }
+    FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : Handle<Interface>(f._ptr) { }
     FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
-        FunctionModel(const Interface& f) : _ptr(f._clone()) { }
-    FunctionModel(const Function<P,SIG>& f) : _ptr(dynamic_cast<Interface*>(f.raw_pointer()->_clone())) { }
+    FunctionModel(const Interface& f) : Handle<Interface>(f._clone()) { }
+    FunctionModel(const Function<P,SIG>& f) : FunctionModel(dynamic_cast<Interface*>(f.raw_pointer()->_clone())) { }
     operator Function<P,SIG>() const { return Function<P,SIG>(this->_ptr->_clone()); }
-    operator Interface& () { return *_ptr; }
-    operator const Interface& () const { return *_ptr; }
-    const Interface* raw_pointer() const { return _ptr.operator->(); }
-    Interface& reference() { return *_ptr; }
-    const Interface& reference() const { return *_ptr; }
+    operator Interface& () { return this->reference(); }
+    operator const Interface& () const { return this->reference(); }
 
     ScalarFunctionModel<P,ARG,PR,PRE>& operator=(const Number<P>& c);
     ScalarFunctionModel<P,ARG,PR,PRE>& operator=(const CanonicalNumericType<P,PR,PRE>& c);
@@ -235,7 +230,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealScal
     inline ValueType value() const { return this->_ptr->_value(); }
     inline ErrorType error() const { return this->_ptr->_error(); }
 
-    inline Void clobber() { return this->_ptr->clobber(); }
+    inline Void clobber() { this->pointer()->clobber(); }
 
 //    inline ScalarFunctionModel<P,ARG,PR,PRE> apply(UnaryElementaryOperator op) const { return ScalarFunctionModel<P,ARG,PR,PRE>(this->_ptr->_apply(op)); }
     inline Void restrict(const DomainType& d) { *this=restriction(*this,d); }
@@ -348,15 +343,15 @@ template<class P, class ARG, class PR, class PRE> struct AlgebraOperations<Scala
     typedef ScalarFunctionModelInterface<P,ARG,PR,PRE> FMI;
 
     static FM apply(BinaryElementaryOperator op, const FM& f1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,*f2._ptr))); }
+        return FM(&dynamic_cast<FMI&>(*f1.reference()._apply(op,f2.reference()))); }
     static FM apply(BinaryElementaryOperator op, const FM& f1, const X& c2) {
-        return FM(&dynamic_cast<FMI&>(*f1._ptr->_apply(op,c2))); }
+        return FM(&dynamic_cast<FMI&>(*f1.reference()._apply(op,c2))); }
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
-        return FM(&dynamic_cast<FMI&>(*f2._ptr->_rapply(op,c1))); }
+        return FM(&dynamic_cast<FMI&>(*f2.reference()._rapply(op,c1))); }
     static FM apply(UnaryElementaryOperator op, const FM& f) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op))); }
+        return FM(&dynamic_cast<FMI&>(*f.reference()._apply(op))); }
     static FM apply(GradedElementaryOperator op, const FM& f, Int n) {
-        return FM(&dynamic_cast<FMI&>(*f._ptr->_apply(op,n))); }
+        return FM(&dynamic_cast<FMI&>(*f.reference()._apply(op,n))); }
 
 /*
     static FM apply(BinaryElementaryOperator op, const X& c1, const FM& f2) {
@@ -428,6 +423,7 @@ template<class P, class ARG, class PR, class PRE> class VectorFunctionModelEleme
 //! \ingroup FunctionModelSubModule
 //! \brief Generic vector functions on bounded domains.
 template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVector(ARG),PR,PRE>
+    : public Handle<FunctionModelInterface<P,RealVector(ARG),PR,PRE>>
 {
     static_assert(IsSame<ARG,RealScalar>::value or IsSame<ARG,RealVector>::value,"");
     static_assert(IsSame<PRE,DoublePrecision>::value or IsSame<PRE,MultiplePrecision>::value,"");
@@ -435,8 +431,6 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     using C=DomainOfType<RES>; using D=DomainOfType<ARG>;
   public:
     typedef FunctionModelInterface<P,SIG,PR,PRE> Interface;
-  private:
-    clone_on_copy_ptr< Interface > _ptr;
   public:
     typedef VectorFunction<P,ARG> GenericType;
     typedef P Paradigm;
@@ -454,25 +448,21 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
     template<class Y> using Result = ElementTraits<C>::template Type<Y>;
   public:
-    inline FunctionModel() : _ptr() { }
+    inline explicit FunctionModel(Interface* p) : Handle<Interface>(p) { }
+    inline FunctionModel(SharedPointer<Interface> p) : Handle<Interface>(p) { }
+
+    inline FunctionModel() : FunctionModel(nullptr) { }
     inline FunctionModel(SharedPointer<const Interface> vfp)
-        : _ptr(vfp->_clone()) { }
-    inline FunctionModel(SizeType n, const ScalarFunctionModelInterface<P,ARG,PR,PRE>& sf) {
+        : FunctionModel(vfp->_clone()) { }
+    inline FunctionModel(SizeType n, const ScalarFunctionModelInterface<P,ARG,PR,PRE>& sf) : FunctionModel() {
         FunctionModelFactory<P,PR,PRE> factory(sf._factory()); *this=factory.create_zeros(n,sf.domain());
         for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline FunctionModel(Array<ScalarFunctionModel<P,ARG,PR,PRE>> const& asf)
         : FunctionModel(asf.size(),asf[0]) { for(SizeType i=0; i!=asf.size(); ++i) { (*this)[i]=asf[i]; } }
     inline FunctionModel(List<ScalarFunctionModel<P,ARG,PR,PRE>> const& lsf)
         : FunctionModel(lsf.size(),lsf[0]) { for(SizeType i=0; i!=lsf.size(); ++i) { (*this)[i]=lsf[i]; } }
-    inline explicit FunctionModel(Interface* p) : _ptr(p) { }
-    inline FunctionModel(const Interface& f) : _ptr(f._clone()) { }
-    inline FunctionModel(const FunctionModel<P,SIG,PR,PRE>& f) : _ptr(f._ptr) { }
-    inline FunctionModel& operator=(const FunctionModel<P,SIG,PR,PRE>& f) { this->_ptr=f._ptr; return *this; }
-    inline operator const Interface& () const { return *_ptr; }
-    inline operator Function<P,SIG> () const { return Function<P,SIG>(*_ptr); }
-    inline const Interface* raw_pointer() const { return _ptr.operator->(); }
-    inline const Interface& reference() const { return *_ptr; }
-    inline Interface& reference() { return *_ptr; }
+    inline FunctionModel(const Interface& f) : FunctionModel(f._clone()) { }
+    inline operator Function<P,SIG> () const { return Function<P,SIG>(*this->_ptr); }
 
     inline SizeType result_size() const { return this->_ptr->result_size(); }
     inline SizeType argument_size() const { return this->_ptr->argument_size(); }
@@ -480,7 +470,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
     template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->_evaluate(v); }
     inline ScalarFunctionModel<P,ARG,PR,PRE> const get(SizeType i) const { return ScalarFunctionModel<P,ARG,PR,PRE>(this->_ptr->_get(i)); }
-    inline Void set(SizeType i, ScalarFunctionModel<P,ARG,PR,PRE> const& sf) { this->_ptr->_set(i,sf); }
+    inline Void set(SizeType i, ScalarFunctionModel<P,ARG,PR,PRE> const& sf) { this->pointer()->_set(i,sf); }
     inline ScalarFunctionModel<P,ARG,PR,PRE> const operator[](SizeType i) const { return this->get(i); }
     inline VectorFunctionModelElement<P,ARG,PR,PRE> operator[](SizeType i) { return VectorFunctionModelElement<P,ARG,PR,PRE>(this,i); }
     inline VectorFunctionModel<P,ARG,PR,PRE> operator[](Range rng) { VectorFunctionModel<P,ARG,PR,PRE> r=factory(*this).create_zeros(rng.size());
@@ -492,7 +482,7 @@ template<class P, class ARG, class PR, class PRE> class FunctionModel<P,RealVect
     inline Vector<ValueType> const values() const { return this->_ptr->_values(); }
     inline Vector<ErrorType> const errors() const { return this->_ptr->_errors(); }
     inline ErrorType const error() const { return this->_ptr->_error(); }
-    inline Void clobber() { this->_ptr->clobber(); }
+    inline Void clobber() { this->pointer()->clobber(); }
     inline Matrix<NumericType> const jacobian(const Vector<NumericType>& x) const;
 //        Vector<Differential<NumericType>> dfx=this->_ptr->_evaluate(Differential<NumericType>::variables(1u,x));
 //        return dfx.jacobian(); }

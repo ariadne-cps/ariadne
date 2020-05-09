@@ -180,8 +180,10 @@ ValidatedVectorMultivariateFunction unrestrict(const ValidatedVectorMultivariate
 
 static constexpr auto self = pybind11::detail::self;
 
-Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) { return new ThresholdSweeper<FloatDP>(pr,x); }
-Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) { return new GradedSweeper<FloatDP>(pr,n); }
+Sweeper<FloatDP> make_threshold_sweeper(DoublePrecision pr, double x) {
+    return Sweeper<FloatDP>(std::make_shared<ThresholdSweeper<FloatDP>>(pr,x)); }
+Sweeper<FloatDP> make_graded_sweeper(DoublePrecision pr, SizeType n) {
+    return Sweeper<FloatDP>(std::make_shared<GradedSweeper<FloatDP>>(pr,n)); }
 
 
 

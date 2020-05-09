@@ -70,6 +70,7 @@ template<class T, class U> using IsConvertible = std::is_convertible<T,U>;
 template<class T, class... U> using IsConstructible = std::is_constructible<T,U...>;
 template<class T, class U> using IsStrictlyConstructible = And<IsConstructible<T,U>,Not<IsConvertible<U,T>>>;
 template<class T> using IsDefaultConstructible = std::is_default_constructible<T>;
+template<class T> using IsCopyConstructible = std::is_copy_constructible<T>;
 template<class T, class U> using IsAssignable = std::is_assignable<T,U>;
 template<class T, class U> using IsBaseOf = std::is_base_of<T,U>;
 //template<class F, class... AS> using IsInvocable = std::is_invokable<F,AS...>;

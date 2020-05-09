@@ -92,20 +92,17 @@ template<class P, class D> VectorFunction<P,ElementKind<D>> make_zero_function(S
     return  FunctionConstructors<P>::zeros(rs,dom); }
 }
 
-template<class P, class SIG> Function<P,SIG>::Function() : _ptr() {
+template<class P, class SIG> Function<P,SIG>::Function() : Function(nullptr) {
 }
 
-template<class P, class SIG> Function<P,SIG>::Function(DomainType dom) {
-    ResultSizeType rs=ResultSizeType(); (*this) = make_zero_function<P,D>(rs,dom);
-}
+template<class P, class SIG> Function<P,SIG>::Function(DomainType dom)
+    : Function(ResultSizeType(),dom) { }
 
-template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ArgumentSizeType as) {
-    (*this) = make_zero_function<P,D>(rs,DomainType(as));
-}
+template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ArgumentSizeType as)
+    : Function(rs,DomainType(as)) { }
 
-template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, DomainType dom) {
-    (*this) = make_zero_function<P,D>(rs,dom);
-}
+template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, DomainType dom)
+    : Function(make_zero_function<P,D>(rs,dom)) { }
 
 template<class P, class SIG> Function<P,SIG>::Function(ResultSizeType rs, ScalarFunction<P,ARG> sf)
     : Function(Vector<ScalarFunction<P,ARG>>(SizeType(rs),sf)) {
@@ -119,9 +116,8 @@ template<class P, class SIG> Function<P,SIG>::Function(List<ScalarFunction<P,ARG
     : Function(Vector<ScalarFunction<P,ARG>>(lsf)) {
 }
 
-template<class P, class SIG> Function<P,SIG>::Function(DomainType dom, Result<Formula<Y>>const& e) {
-    *this = make_formula_function<P>(dom,e);
-}
+template<class P, class SIG> Function<P,SIG>::Function(DomainType dom, Result<Formula<Y>>const& e)
+    : Function(make_formula_function<P>(dom,e)) { }
 
 template<class P, class SIG> struct MakeVectorMultivariateFunction;
 template<class P, class... ARGS> struct MakeVectorMultivariateFunction<P,Real(ARGS...)> {

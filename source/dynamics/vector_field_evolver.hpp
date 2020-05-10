@@ -53,7 +53,6 @@ class VectorField;
 template<class ES> class Orbit;
 
 class VectorFieldEvolverConfiguration;
-class Enclosure;
 
 class EvolutionProfiler;
 
@@ -90,6 +89,9 @@ class VectorFieldEvolver
 
     //! \brief Make an enclosure from a user set.
     EnclosureType enclosure(RealBox const&) const;
+
+    //! \brief Make an enclosure from a user set with variables.
+    EnclosureType enclosure(RealVariablesBox const&) const;
 
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;

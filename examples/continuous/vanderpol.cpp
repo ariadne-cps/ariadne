@@ -52,7 +52,7 @@ int main()
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
-    Box<RealInterval> initial_set({{x0-eps_x0,x0+eps_x0},{y0-eps_y0,y0+eps_y0}});
+    RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     std::cout << "Initial set: " << initial_set << std::endl;
     Real evolution_time(7.0);

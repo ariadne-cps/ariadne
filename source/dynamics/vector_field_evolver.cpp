@@ -132,6 +132,10 @@ typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const R
     return EnclosureType(box,this->system().state_space(),this->function_factory());
 }
 
+typename VectorFieldEvolver::EnclosureType VectorFieldEvolver::enclosure(const RealVariablesBox& box) const {
+    return EnclosureType(box,this->system().state_space(),this->function_factory());
+}
+
 typename VectorFieldEvolver::FunctionFactoryType const& VectorFieldEvolver::function_factory() const {
     return std::dynamic_pointer_cast<const IntegratorBase>(this->_integrator)->function_factory();
 }

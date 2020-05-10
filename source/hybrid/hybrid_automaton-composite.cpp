@@ -101,7 +101,6 @@ Identifier name_composition(const List<HybridAutomaton>& components)
 } // namespace
 
 // Declare functions from hybrid_automaton.cpp
-List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
 EffectiveVectorMultivariateFunction make_auxiliary_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic);
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()

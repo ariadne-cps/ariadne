@@ -23,6 +23,7 @@
  */
 
 #include <iostream>
+#include <cassert>
 
 #include "../config.hpp"
 #include "../output/logging.hpp"

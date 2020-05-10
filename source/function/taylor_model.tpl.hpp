@@ -1197,9 +1197,9 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Nul, ModelType const& x) -> ModelType {
     return ModelType(x.argument_size(),x.sweeper()); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Pos, ModelType x) -> ModelType {
-    return std::move(x); }
+    return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Neg, ModelType x) -> ModelType {
-    _neg(x); return std::move(x); }
+    _neg(x); return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType const& x, ModelType const& y) -> ModelType {
     return _add(x,y); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Sub, ModelType const& x, ModelType const& y) -> ModelType {
@@ -1207,9 +1207,9 @@ template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Sub, 
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType const& x, ModelType const& y) -> ModelType {
     return _mul(x,y); }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Add, ModelType x, NumericType const& c) -> ModelType {
-    _acc(x,c); return std::move(x); }
+    _acc(x,c); return x; }
 template<class P, class F> auto AlgebraOperations<TaylorModel<P,F>>::apply(Mul, ModelType x, NumericType const& c) -> ModelType {
-    _scal(x,c); return std::move(x); }
+    _scal(x,c); return x; }
 
 // TODO: Should be able to automatically generate these operations
 /*
@@ -1579,7 +1579,7 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_embed_error(const
             for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
             rtm._append(ra,xv);
         }
-        return std::move(rtm);
+        return rtm;
     }
 }
 

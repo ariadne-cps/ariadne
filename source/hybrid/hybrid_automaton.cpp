@@ -45,8 +45,6 @@ EffectiveVectorMultivariateFunction make_dynamic_function(Space<Real> const& spa
 EffectiveVectorMultivariateFunction make_reset_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, List<PrimedRealAssignment> const& primed);
 EffectiveScalarMultivariateFunction make_constraint_function(Space<Real> const& space, List<RealAssignment> const& sorted_algebraic, ContinuousPredicate const& constraint, Sign sign);
 
-List<RealAssignment> algebraic_sort(const List<RealAssignment>& auxiliary);
-
 DiscreteMode::DiscreteMode()
 {
 }

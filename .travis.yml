@@ -1,7 +1,7 @@
 language: cpp
 
 sudo: enabled
-dist: bionic
+dist: focal
 
 branches:
   only:
@@ -12,54 +12,62 @@ branches:
 matrix:
   include:
 
-    - name: macOS 10.14 + AppleClang 10 + Python 3
+    - name: macOS 10.14.6 + AppleClang 10
       os: osx
-      osx_image: xcode11
-      env: COMPILER=clang++ PYTHON=3
+      osx_image: xcode11.4
+      env: COMPILER=clang++
       
-#    - name: macOS 10.14 + GCC 8 + Python 2 [NoCairo]
-#      os: osx
-#      osx_image: xcode11
-#      env: COMPILER=g++-8 PYTHON=2 DISABLE_CAIRO=ON
+    - name: macOS 10.14 + GCC 9 [NoCairo]
+      os: osx
+      osx_image: xcode11.4
+      env: COMPILER=gcc COMPILER_VERSION=9 DISABLE_CAIRO=ON
 
-    - name: Ubuntu 18.04 + Clang 6 + Python 3
+    - name: Ubuntu 20.04 + Clang 10
       os: linux
-      env: COMPILER=clang++-6.0 PYTHON=3
+      env: COMPILER=clang COMPILER_VERSION=10
 
-    - name: Ubuntu 18.04 + GCC 8 + Python 2
+    - name: Ubuntu 20.04 + GCC 9
       os: linux
-      env: COMPILER=g++-8 PYTHON=2
+      env: COMPILER=gcc COMPILER_VERSION=9
 
-    - name: Ubuntu 18.04 + GCC 7 + Python 3 [Coverage]
+    - name: Ubuntu 20.04 + GCC 9 [Coverage]
       os: linux
-      env: COMPILER=g++ PYTHON=3 COVERAGE=ON
+      env: COMPILER=gcc COMPILER_VERSION=9 COVERAGE=ON
 
 before_install:
   - |
+    if [[ "$COMPILER" == "gcc" ]]; then
+      COMPILER_CMD="g++-$COMPILER_VERSION"
+      COMPILER_PKG="g++-$COMPILER_VERSION"
+    fi
+  - |
+    if [[ "$COMPILER" == "clang" ]]; then
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then COMPILER_CMD="clang++"; else COMPILER_CMD="clang++-$COMPILER_VERSION"; fi
+      COMPILER_PKG="clang-$COMPILER_VERSION"
+    fi
+  - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       NPROC="sysctl -n hw.ncpu"
-      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python'; else PYTHON_LIB=python@2; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --prefix)/lib/libpython2.7.dylib -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
       brew cask uninstall --force oclint
       if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=cairo; else CAIRO_PKG=""; fi
-      brew install gcc@8 $PYTHON_LIB mpfr gmp $CAIRO_PKG
+      brew install gcc@8 python mpfr gmp $CAIRO_PKG
       export PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
       sudo easy_install pip
-      sudo pip$PYTHON install --upgrade pip
-      sudo pip$PYTHON install coverage pytest
+      sudo pip3 install --upgrade pip
+      sudo pip3 install coverage pytest
     fi
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       NPROC=nproc
-      if [[ "$PYTHON" == "3" ]]; then PYTHON_LIB='python3'; else PYTHON_LIB=python; CMAKE_PYTHON2_EXTRA_FLAGS="-DPYTHON_LIBRARY=$(python-config --configdir)/libpython2.7.so -DPYTHON_INCLUDE_DIR=$(python-config --prefix)/include/python2.7"; fi
-      if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi
       sudo apt update
-      sudo apt install -y cmake pkg-config lcov $COMPILER $PYTHON_LIB-pip lib$PYTHON_LIB-dev $CAIRO_PKG libmpfr-dev
-      sudo pip$PYTHON install coverage pytest
+      if [[ -z "$DISABLE_CAIRO" ]]; then CAIRO_PKG=libcairo2-dev; else CAIRO_PKG=""; fi
+      sudo apt install -y cmake pkg-config lcov $COMPILER_PKG $CAIRO_PKG libmpfr-dev python3-pip python3-dev
+      sudo pip3 install coverage pytest
     fi
 
 script:
   - echo "Running on $($NPROC) threads ..."
-  - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER -DPYBIND11_PYTHON_VERSION=$PYTHON $CMAKE_PYTHON2_EXTRA_FLAGS"
+  - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER_CMD"
   - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"; else CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release"; fi
   - if [[ "$TRAVIS_BRANCH" == master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
   - cmake . $CMAKE_ARGS
@@ -82,7 +90,7 @@ script:
       cp -Rf python/tutorials/* ~/tutorials/python
       export LD_LIBRARY_PATH=/usr/local/lib
       cd ~/tutorials/python
-      python$PYTHON tutorial.py > /dev/null
+      python3 tutorial.py > /dev/null
     fi
   
 after_success:

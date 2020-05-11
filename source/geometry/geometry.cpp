@@ -32,7 +32,7 @@ namespace Ariadne {
 
 
 template<class T> ValidatedKleenean
-separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps)
+separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps)
 {
     typedef typename SetTraits<T>::BasicSetType BasicSetType;
     BasicSetType bb=cast_exact_box(ls.bounding_box());
@@ -42,7 +42,7 @@ separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, co
 
 
 template<class T> ValidatedKleenean
-overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps)
+overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.is_empty())) { return false; }
@@ -51,7 +51,7 @@ overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, cons
 
 
 template<class T> ValidatedKleenean
-inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps)
+inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps)
 {
     ExactBoxType bb=cast_exact_box(ls.bounding_box());
     if(definitely(bb.is_empty())) { return true; }
@@ -60,7 +60,7 @@ inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const
 
 
 template<class T> ValidatedKleenean
-overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps)
+overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(ls.separated(bx))) {
         return false;
@@ -88,7 +88,7 @@ overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, cons
 
 
 template<class T> ValidatedKleenean
-inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps)
+inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
@@ -109,7 +109,7 @@ inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const
 
 
 template<class T> ValidatedKleenean
-separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps)
+separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
@@ -132,7 +132,7 @@ separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, co
 
 
 template<class T> ValidatedKleenean
-overlap(const OvertSetInterface<T>& ovs, const OpenSetInterface<T>& ops, const ExactBoxType& bx, const FloatDP& eps)
+overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(ovs.overlaps(bx))) {
         if(definitely(ops.covers(bx))) {
@@ -155,7 +155,7 @@ overlap(const OvertSetInterface<T>& ovs, const OpenSetInterface<T>& ops, const E
 
 
 template<class T> ValidatedKleenean
-inside(const ClosedSetInterface<T>& cls, const OpenSetInterface<T>& ops, const ExactBoxType& bx, const FloatDP& eps)
+inside(const ClosedSetInterface<EffectiveTag,T>& cls, const OpenSetInterface<EffectiveTag,T>& ops, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(cls.separated(bx) || ops.covers(bx))) {
         return true;
@@ -174,7 +174,7 @@ inside(const ClosedSetInterface<T>& cls, const OpenSetInterface<T>& ops, const E
 
 
 template<class T> ValidatedKleenean
-separated(const ClosedSetInterface<T>& cls1, const ClosedSetInterface<T>& cls2, const ExactBoxType& bx, const FloatDP& eps)
+separated(const ClosedSetInterface<EffectiveTag,T>& cls1, const ClosedSetInterface<EffectiveTag,T>& cls2, const ExactBoxType& bx, const FloatDP& eps)
 {
     if(definitely(cls1.separated(bx) || cls2.separated(bx))) {
         return true;
@@ -192,13 +192,13 @@ separated(const ClosedSetInterface<T>& cls1, const ClosedSetInterface<T>& cls2, 
 }
 
 
-template ValidatedKleenean overlap(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const FloatDP& eps);
-template ValidatedKleenean inside(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const FloatDP& eps);
-template ValidatedKleenean separated(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const FloatDP& eps);
+template ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const FloatDP& eps);
+template ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const FloatDP& eps);
+template ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const FloatDP& eps);
 
-template ValidatedKleenean overlap(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
-template ValidatedKleenean inside(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
-template ValidatedKleenean separated(const LocatedSetInterface<RealVector>& ls, const RegularSetInterface<RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,RealVector>& ls, const RegularSetInterface<EffectiveTag,RealVector>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 } // namespace Ariadne

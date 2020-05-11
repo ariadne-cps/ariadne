@@ -564,7 +564,7 @@ inline FloatDPLowerBox narrow(const FloatDPLowerBox& bx) {
 template<class IVL> class BoxSet;
 
 template<> class BoxSet<ExactIntervalType>
-    : public virtual EuclideanRegularLocatedSetInterface
+    : public virtual EffectiveEuclideanRegularLocatedSetInterface
     ,  public virtual DrawableInterface
     ,  public Box<ExactIntervalType>
 {
@@ -606,7 +606,7 @@ template<> class BoxSet<ApproximateIntervalType>
 
 
 template<> class BoxSet<RealInterval>
-    : public virtual RegularLocatedSetInterface<RealVector>
+    : public virtual RegularLocatedSetInterface<EffectiveTag,RealVector>
     , public virtual DrawableInterface
     , public Box<RealInterval>
 {

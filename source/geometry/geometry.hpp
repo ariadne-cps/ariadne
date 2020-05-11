@@ -176,45 +176,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const FloatDP& eps);
+template<class T> ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const FloatDP& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-template<class T> ValidatedLowerKleenean overlap(const OvertSetInterface<T>& ovs, const OpenSetInterface<T>& ops, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean overlap(const OvertSetInterface<EffectiveTag,T>& ovs, const OpenSetInterface<EffectiveTag,T>& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-template<class T> ValidatedLowerKleenean inside(const CompactSetInterface<T>& cps, const OpenSetInterface<T>& ops, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean inside(const CompactSetInterface<EffectiveTag,T>& cps, const OpenSetInterface<EffectiveTag,T>& ops, const FloatDP& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-template<class T> ValidatedLowerKleenean separated(const CompactSetInterface<T>& cps, const ClosedSetInterface<T>& cls, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean separated(const CompactSetInterface<EffectiveTag,T>& cps, const ClosedSetInterface<EffectiveTag,T>& cls, const FloatDP& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean overlap(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean overlap(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean inside(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean inside(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-template<class T> ValidatedKleenean separated(const LocatedSetInterface<T>& ls, const RegularSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedKleenean separated(const LocatedSetInterface<EffectiveTag,T>& ls, const RegularSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-template<class T> ValidatedLowerKleenean intersection_overlap(const OvertSetInterface<T>& ls, const OpenSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedLowerKleenean intersection_overlap(const OvertSetInterface<EffectiveTag,T>& ls, const OpenSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-template<class T> ValidatedSierpinskian intersection_inside(const ClosedSetInterface<T>& ls, const OpenSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedSierpinskian intersection_inside(const ClosedSetInterface<EffectiveTag,T>& ls, const OpenSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-template<class T> ValidatedSierpinskian intersection_separated(const ClosedSetInterface<T>& ls, const ClosedSetInterface<T>& rs, const ExactBoxType& bx, const FloatDP& eps);
+template<class T> ValidatedSierpinskian intersection_separated(const ClosedSetInterface<EffectiveTag,T>& ls, const ClosedSetInterface<EffectiveTag,T>& rs, const ExactBoxType& bx, const FloatDP& eps);
 
 
 } // namespace Ariadne

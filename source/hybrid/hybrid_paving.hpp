@@ -124,9 +124,9 @@ class HybridGridTreePaving
     Void restrict(const HybridGridTreePaving& hgts);
     Void restrict_to_extent(Nat extent);
     Void adjoin_inner_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
-    Void adjoin_inner_approximation(const HybridSetInterface& hs, const Nat fineness);
-    Void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
-    Void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness);
+    Void adjoin_inner_approximation(const EffectiveHybridSetInterface& hs, const Nat fineness);
+    Void adjoin_lower_approximation(const EffectiveHybridOvertSetInterface& hs, const Nat extent, const Nat fineness);
+    Void adjoin_outer_approximation(const EffectiveHybridCompactSetInterface& hs, const Nat fineness);
     Void adjoin_outer_approximation(const HybridExactBoxes& hbxs, const Nat fineness);
     template<class S> Void adjoin_outer_approximation(DiscreteLocation q, const S& s);
 
@@ -162,7 +162,7 @@ class HybridGridTreePaving
 template<class S> Void HybridGridTreePaving::adjoin_outer_approximation(DiscreteLocation q, const S& s) {
     this->_provide_location(q).adjoin_outer_approximation(s); }
 
-inline HybridGridTreePaving inner_approximation(const HybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
+inline HybridGridTreePaving inner_approximation(const EffectiveHybridSetInterface& set, HybridGrid const& grid, const Nat fineness) {
     HybridGridTreePaving paving(grid); paving.adjoin_inner_approximation(set,fineness); return paving; }
 
 

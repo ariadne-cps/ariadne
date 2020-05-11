@@ -2222,11 +2222,11 @@ Void GridTreePaving::_adjoin_cell( const Nat theCellRootExtent, BinaryWord const
 
 
 Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const EuclideanCompactSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanCompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
-    const EuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
+    const EffectiveEuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
 
     if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
@@ -2274,7 +2274,7 @@ Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTr
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
-    const EuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
+    const EffectiveEuclideanOpenSetInterface* pOpenSet=dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(static_cast<const EuclideanSetInterfaceBase*>(&theSet));
 
     if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
@@ -2325,7 +2325,7 @@ Void GridTreePaving::_adjoin_outer_approximation( const Grid & theGrid, BinaryTr
 // TODO:Think of another representation in terms of covers but not pavings, then this problem
 // can be cured in a different fashion.
 Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const EuclideanOvertSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanOvertSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
@@ -2358,7 +2358,7 @@ Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTr
 }
 
 Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth,  const EuclideanOpenSetInterface& theSet, BinaryWord * pPath ){
+                                                  const Nat max_mince_tree_depth,  const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
@@ -2405,11 +2405,11 @@ Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, 
 
 Void GridTreePaving::adjoin_outer_approximation( const UpperBoxType& theBoxType, const Nat numSubdivInDim ) {
     ExactBoxSetType theBoxSet=cast_exact_box(theBoxType);
-    EuclideanCompactSetInterface const& theSet=theBoxSet;
+    EffectiveEuclideanCompactSetInterface const& theSet=theBoxSet;
     this->adjoin_outer_approximation(theSet,numSubdivInDim);
 }
 
-Void GridTreePaving::adjoin_outer_approximation( const EuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2475,11 +2475,11 @@ Void GridTreePaving::adjoin_outer_approximation( const ValidatedEuclideanCompact
 
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
-Void GridTreePaving::adjoin_lower_approximation( const EuclideanLocatedSetInterface& theSet, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanLocatedSetInterface& theSet, const Nat numSubdivInDim ) {
     this->adjoin_lower_approximation( theSet, cast_exact_box(theSet.bounding_box()), numSubdivInDim );
 }
 
-Void GridTreePaving::adjoin_lower_approximation( const EuclideanOvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const Nat heightInDim, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2498,10 +2498,10 @@ Void GridTreePaving::adjoin_lower_approximation( const EuclideanOvertSetInterfac
 
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord();
-        //const EuclideanRegularSetInterface* theRegularVersionOfSet = dynamic_cast<const EuclideanRegularSetInterface*>(&theSet);
-        const EuclideanOpenSetInterface* theOpenVersionOfSet = dynamic_cast<const EuclideanOpenSetInterface*>(&theSet);
-        //const EuclideanLocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const EuclideanLocatedSetInterface*>(&theSet);
-        const EuclideanOvertSetInterface* theOvertVersionOfSet = dynamic_cast<const EuclideanOvertSetInterface*>(&theSet);
+        //const EffectiveEuclideanRegularSetInterface* theRegularVersionOfSet = dynamic_cast<const EffectiveEuclideanRegularSetInterface*>(&theSet);
+        const EffectiveEuclideanOpenSetInterface* theOpenVersionOfSet = dynamic_cast<const EffectiveEuclideanOpenSetInterface*>(&theSet);
+        //const EffectiveEuclideanLocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const EffectiveEuclideanLocatedSetInterface*>(&theSet);
+        const EffectiveEuclideanOvertSetInterface* theOvertVersionOfSet = dynamic_cast<const EffectiveEuclideanOvertSetInterface*>(&theSet);
         if( theOpenVersionOfSet ) {
             _adjoin_lower_approximation( GridTreeSubpaving::_theGridCell.grid(), pBinaryTreeNode, heightInDim, max_mince_tree_depth, *theOpenVersionOfSet, pEmptyPath );
         } else {
@@ -2511,7 +2511,7 @@ Void GridTreePaving::adjoin_lower_approximation( const EuclideanOvertSetInterfac
     }
 }
 
-Void GridTreePaving::adjoin_lower_approximation( const EuclideanOvertSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_lower_approximation( const EffectiveEuclideanOvertSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
     ARIADNE_ASSERT( theBoundingBoxType.dimension() == this->root_cell().dimension() );
@@ -2524,12 +2524,12 @@ Void GridTreePaving::adjoin_lower_approximation( const EuclideanOvertSetInterfac
 }
 
 Void GridTreePaving::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const Nat primary_cell_extent,
-                                                  const Nat max_mince_tree_depth, const EuclideanOpenSetInterface& theSet, BinaryWord * pPath ) {
+                                                  const Nat max_mince_tree_depth, const EffectiveEuclideanOpenSetInterface& theSet, BinaryWord * pPath ) {
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_extent, *pPath );
 
     // If the set if closed, then we can use the separated(Box) method to speed-up computation
-    const EuclideanClosedSetInterface* theClosedSet = dynamic_cast<const EuclideanClosedSetInterface*>(&theSet);
+    const EffectiveEuclideanClosedSetInterface* theClosedSet = dynamic_cast<const EffectiveEuclideanClosedSetInterface*>(&theSet);
 
     if( ! pBinaryTreeNode->is_enabled() ) {
         //If this it is not an enabled leaf node then we can add something to it.
@@ -2572,7 +2572,7 @@ Void GridTreePaving::_adjoin_inner_approximation( const Grid & theGrid, BinaryTr
     }
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const EuclideanOpenSetInterface& theSet, const Nat extent, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Nat extent, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
 
@@ -2596,7 +2596,7 @@ Void GridTreePaving::adjoin_inner_approximation( const EuclideanOpenSetInterface
     }
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const EuclideanOpenSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const ExactBoxType& theBoundingBoxType, const Nat numSubdivInDim ) {
     Grid theGrid( this->root_cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->root_cell().dimension() );
     ARIADNE_ASSERT( theBoundingBoxType.dimension() == this->root_cell().dimension() );
@@ -2613,8 +2613,8 @@ Void GridTreePaving::adjoin_inner_approximation( const EuclideanOpenSetInterface
     adjoin_inner_approximation( theSet, extent, numSubdivInDim );
 }
 
-Void GridTreePaving::adjoin_inner_approximation( const EuclideanSetInterface& theSet, const Nat numSubdivInDim ) {
-    EuclideanOpenSetInterface const& theOpenSet = theSet;
+Void GridTreePaving::adjoin_inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Nat numSubdivInDim ) {
+    EffectiveEuclideanOpenSetInterface const& theOpenSet = theSet;
     ExactBoxType theBoundingBox = cast_exact_box(theSet.bounding_box());
     this -> adjoin_inner_approximation(theOpenSet, theBoundingBox, numSubdivInDim);
 }
@@ -2869,7 +2869,7 @@ Void GridTreePaving::restrict_to_extent( const Nat theExtent ) {
 
 GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Grid& theGrid, const Nat numSubdivInDim) {
     ExactBoxSetType theBoxSet=theBoxType;
-    EuclideanCompactSetInterface const& theSet=theBoxSet;
+    EffectiveEuclideanCompactSetInterface const& theSet=theBoxSet;
     return outer_approximation(theSet,theGrid,numSubdivInDim);
 }
 
@@ -2877,13 +2877,13 @@ GridTreePaving outer_approximation(const ExactBoxType& theBoxType, const Nat num
     return outer_approximation(theBoxType, Grid(theBoxType.dimension()), numSubdivInDim);
 }
 
-GridTreePaving outer_approximation( const EuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_outer_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-GridTreePaving outer_approximation( const EuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
+GridTreePaving outer_approximation( const EffectiveEuclideanCompactSetInterface& theSet, const Nat numSubdivInDim ) {
     Grid theGrid( theSet.dimension() );
     return outer_approximation( theSet, theGrid, numSubdivInDim );
 }
@@ -2899,19 +2899,19 @@ GridTreePaving outer_approximation( const ValidatedEuclideanCompactSetInterface&
     return outer_approximation( theSet, theGrid, numSubdivInDim );
 }
 
-GridTreePaving inner_approximation( const EuclideanOpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const Nat extent, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, extent, numSubdivInDim );
     return result;
 }
 
-GridTreePaving inner_approximation( const EuclideanSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Grid& theGrid, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, numSubdivInDim );
     return result;
 }
 
-GridTreePaving inner_approximation( const EuclideanOpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
+GridTreePaving inner_approximation( const EffectiveEuclideanOpenSetInterface& theSet, const Grid& theGrid, const ExactBoxType& bounding_box, const Nat numSubdivInDim ) {
     GridTreePaving result( theGrid );
     result.adjoin_inner_approximation( theSet, bounding_box, numSubdivInDim );
     return result;
@@ -3059,7 +3059,7 @@ Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const 
     }
 }
 
-Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const EuclideanCompactSetInterface& theSet) {
+Void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const EffectiveEuclideanCompactSetInterface& theSet) {
     static const Int DRAWING_DEPTH=16;
     draw(theGraphic,theProjection,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
 }

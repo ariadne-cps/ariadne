@@ -81,8 +81,8 @@ Void export_grid_tree_set(pybind11::module& module) {
     grid_tree_paving_class.def("restrict", (Void(GridTreePaving::*)(const GridTreeSubpaving&))(&GridTreePaving::restrict));
     grid_tree_paving_class.def("remove", (Void(GridTreePaving::*)(const GridTreeSubpaving&))(&GridTreePaving::remove));
     grid_tree_paving_class.def("adjoin_over_approximation", (Void(GridTreePaving::*)(const ExactBoxType&,const Nat)) &GridTreePaving::adjoin_over_approximation);
-    grid_tree_paving_class.def("adjoin_outer_approximation", (Void(GridTreePaving::*)(const EuclideanCompactSetInterface&,const Nat)) &GridTreePaving::adjoin_outer_approximation);
-    grid_tree_paving_class.def("adjoin_inner_approximation", (Void(GridTreePaving::*)(const EuclideanOpenSetInterface&,const Nat,const Nat)) &GridTreePaving::adjoin_inner_approximation);
+    grid_tree_paving_class.def("adjoin_outer_approximation", (Void(GridTreePaving::*)(const EffectiveEuclideanCompactSetInterface&,const Nat)) &GridTreePaving::adjoin_outer_approximation);
+    grid_tree_paving_class.def("adjoin_inner_approximation", (Void(GridTreePaving::*)(const EffectiveEuclideanOpenSetInterface&,const Nat,const Nat)) &GridTreePaving::adjoin_inner_approximation);
     grid_tree_paving_class.def("__len__", &GridTreePaving::size);
     grid_tree_paving_class.def("__iter__", [](GridTreePaving const& g){return pybind11::make_iterator(g.begin(), g.end());});
     grid_tree_paving_class.def("__str__",&__cstr__<GridTreePaving>);
@@ -95,8 +95,8 @@ Void export_grid_tree_set(pybind11::module& module) {
     module.def("intersect",(Bool(*)(const GridCell&,const GridTreeSubpaving&))(&intersect));
     module.def("subpaving",(Bool(*)(const GridCell&,const GridTreeSubpaving&))(&subset));
 
-    module.def("outer_approximation",(GridTreePaving(*)(const EuclideanCompactSetInterface&,const Grid&,const Nat)) &outer_approximation);
-    module.def("inner_approximation",(GridTreePaving(*)(const EuclideanOpenSetInterface&,const Grid&,const Nat,const Nat)) &inner_approximation);
+    module.def("outer_approximation",(GridTreePaving(*)(const EffectiveEuclideanCompactSetInterface&,const Grid&,const Nat)) &outer_approximation);
+    module.def("inner_approximation",(GridTreePaving(*)(const EffectiveEuclideanOpenSetInterface&,const Grid&,const Nat,const Nat)) &inner_approximation);
 
 }
 

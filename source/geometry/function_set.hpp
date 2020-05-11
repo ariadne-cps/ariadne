@@ -79,7 +79,7 @@ class ImageSet { };
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class ConstraintSet
-    : public virtual EuclideanRegularSetInterface
+    : public virtual EffectiveEuclideanRegularSetInterface
 {
     Nat _dimension;
     List< EffectiveConstraint > _constraints;
@@ -121,7 +121,7 @@ class ConstraintSet
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class BoundedConstraintSet
-    : public virtual EuclideanRegularLocatedSetInterface
+    : public virtual EffectiveEuclideanRegularLocatedSetInterface
     , public virtual DrawableInterface
 {
     RealBox _domain;
@@ -176,7 +176,7 @@ class BoundedConstraintSet
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 //! \see ValidatedConstrainedImageSet
 class ConstrainedImageSet
-    : public virtual EuclideanLocatedSetInterface
+    : public virtual EffectiveEuclideanLocatedSetInterface
     , public virtual DrawableInterface
 {
     RealBox _domain;

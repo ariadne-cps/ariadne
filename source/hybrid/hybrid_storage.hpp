@@ -108,9 +108,9 @@ class HybridStorage
     friend Bool intersect(HybridStorage const& set1, HybridStorage const& set2) {
         return intersect(set1._state_set,set2._state_set); }
 
-    Void adjoin_lower_approximation(HybridOvertSetInterface const& set, Nat extent, Nat fineness) {
+    Void adjoin_lower_approximation(EffectiveHybridOvertSetInterface const& set, Nat extent, Nat fineness) {
         this->_state_set.adjoin_lower_approximation(set,extent,fineness); }
-    Void adjoin_outer_approximation(HybridCompactSetInterface const& set, Nat fineness) {
+    Void adjoin_outer_approximation(EffectiveHybridCompactSetInterface const& set, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(set,fineness); }
     Void adjoin_outer_approximation(HybridExactBoxes const& bx, Nat fineness) {
         this->_state_set.adjoin_outer_approximation(bx,fineness); }

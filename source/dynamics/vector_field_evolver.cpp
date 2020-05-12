@@ -315,7 +315,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //EnclosureType reach_set_model=apply(flow_model,product(current_set_model,ExactIntervalType(0,step_size)),current_set_model.state_space());
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     EnclosureType next_set_model=current_set_model;
-    next_set_model.apply_map(flow_step_model);
+    next_set_model.apply_fixed_evolve_step(flow_model,step_size);
     ARIADNE_LOG(6,"next_set_model = "<<next_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");
 

@@ -46,6 +46,7 @@ class Accuracy {
     Accuracy(Bits precision);
     Accuracy(Dyadic error) : _error(error) { }
     Dyadic const& error() const { return this->_error; }
+    long int bits() const;
     friend OutputStream& operator<<(OutputStream& os, Accuracy const& acc);
 };
 

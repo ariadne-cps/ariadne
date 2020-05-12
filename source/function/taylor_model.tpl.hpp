@@ -1032,7 +1032,7 @@ template<class P, class F> inline TaylorModel<P,F> _sub(const TaylorModel<P,F>& 
     _sparse_apply(SubErr(),r,x,y);
     r.error()+=(x.error()+y.error());
     r.sweep();
-    ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
+    ARIADNE_DEBUG_ASSERT_MSG(r.error().raw()>=0,r.error());
     return r;
 }
 

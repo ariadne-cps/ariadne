@@ -98,7 +98,7 @@ template<> class HybridBoundedSetInterface<EffectiveTag>
     virtual HybridBoundedSetInterface<EffectiveTag>* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
     inline EffectiveEuclideanBoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual LowerKleenean inside(const HybridExactBoxes& bx) const = 0;
+    virtual ValidatedLowerKleenean inside(const HybridExactBoxes& bx) const = 0;
     virtual HybridUpperBoxes bounding_box() const = 0;
   protected:
     virtual EuclideanBoundedSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -111,7 +111,7 @@ template<> class HybridOvertSetInterface<EffectiveTag>
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     inline EffectiveEuclideanOvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual LowerKleenean overlaps(const HybridExactBox& bx) const = 0;
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanOvertSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -123,7 +123,7 @@ template<> class HybridOpenSetInterface<EffectiveTag>
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     inline EffectiveEuclideanOpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual LowerKleenean covers(const HybridExactBox& bx) const = 0;
+    virtual ValidatedLowerKleenean covers(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanOpenSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -135,7 +135,7 @@ template<> class HybridClosedSetInterface<EffectiveTag>
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     inline EffectiveEuclideanClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual LowerKleenean separated(const HybridExactBox& bx) const = 0;
+    virtual ValidatedLowerKleenean separated(const HybridExactBox& bx) const = 0;
   protected:
     virtual EuclideanClosedSetInterface<EffectiveTag>* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };

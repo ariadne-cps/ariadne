@@ -32,18 +32,6 @@
 
 namespace Ariadne {
 
-class HybridSetBase;
-
-template<class P> class HybridBoundedSet;
-template<class P> class HybridOpenSet;
-template<class P> class HybridClosedSet;
-template<class P> class HybridOvertSet;
-template<class P> class HybridCompactSet;
-template<class P> class HybridRegularSet;
-template<class P> class HybridLocatedSet;
-template<class P> class HybridRegularLocatedSet;
-
-
 template<class UB> class VariableInterval;
 using FloatVariableInterval = VariableInterval<FloatDP>;
 

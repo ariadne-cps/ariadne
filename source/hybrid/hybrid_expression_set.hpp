@@ -96,13 +96,13 @@ class HybridBoxSet
     virtual RealSpace space(DiscreteLocation) const;
     virtual LowerKleenean is_empty() const;
 
-    virtual LowerKleenean overlaps(const HybridExactBox& bx) const override;
-    virtual LowerKleenean separated(const HybridExactBox& bx) const override;
-    virtual LowerKleenean covers(const HybridExactBox& bx) const override;
-    virtual LowerKleenean inside(const HybridExactBox& bx) const;
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean separated(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean covers(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean inside(const HybridExactBox& bx) const;
 //    virtual HybridUpperBox bounding_box() const;
 
-    virtual LowerKleenean inside(const HybridExactBoxes& bx) const override;
+    virtual ValidatedLowerKleenean inside(const HybridExactBoxes& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
     virtual OutputStream& _write(OutputStream& os) const override;
@@ -185,9 +185,9 @@ class HybridConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     ConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual LowerKleenean overlaps(const HybridExactBox& bx) const override;
-    virtual LowerKleenean separated(const HybridExactBox& bx) const override;
-    virtual LowerKleenean covers(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean separated(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean covers(const HybridExactBox& bx) const override;
 
     virtual OutputStream& _write(OutputStream& os) const override;
   protected:
@@ -231,11 +231,11 @@ class HybridBoundedConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     BoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual LowerKleenean overlaps(const HybridExactBox& bx) const override;
-    virtual LowerKleenean inside(const HybridExactBoxes& bx) const override;
+    virtual ValidatedLowerKleenean overlaps(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean inside(const HybridExactBoxes& bx) const override;
 
-    virtual LowerKleenean separated(const HybridExactBox& bx) const override;
-    virtual LowerKleenean covers(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean separated(const HybridExactBox& bx) const override;
+    virtual ValidatedLowerKleenean covers(const HybridExactBox& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
     virtual OutputStream& _write(OutputStream& os) const override;

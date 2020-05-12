@@ -153,6 +153,9 @@ class Dyadic
     //! \brief Round up to the nearest higher integer.
     friend Integer ceil(Dyadic const&);
 
+    //! \brief An integer \a e such that \a e ≤ log<sub>2</log>(|x|) < e+1
+    friend Int abslog2floor(Dyadic const&);
+
     //! \brief Tests whether the value is NaN (not-a-number).
     friend Bool is_nan(Dyadic const& w);
     //! \brief Tests whether the value is ±∞.
@@ -185,6 +188,7 @@ using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number. /
 template<> class Bounds<Dyadic> {
     Dyadic _l, _u;
   public:
+    typedef ValidatedTag Paradigm;
     Bounds<Dyadic>(Dyadic w) : _l(w), _u(w) { }
     Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
     template<class X, EnableIf<IsConstructible<Dyadic,X>> =dummy> Bounds<Dyadic>(Bounds<X> const& x)
@@ -206,6 +210,8 @@ template<> class Bounds<Dyadic> {
     friend DyadicBounds min(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(min(w1._l,w2._l),min(w1._u,w2._u)); }
     friend ValidatedKleenean operator<(DyadicBounds const& w1, DyadicBounds const& w2) {
         if (w1._u<w2._l) { return true; } else if (w1._l >= w2._u) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator>(DyadicBounds const& w1, DyadicBounds const& w2) {
+        if (w1._l>w2._u) { return true; } else if (w1._u <= w2._l) { return false; } else { return indeterminate; } }
     friend Boolean refines(DyadicBounds const& w1, DyadicBounds const& w2) { return w1._l>=w2._l and w1._u<=w2._u; }
     friend DyadicBounds refinement(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),min(w1._u,w2._u)); }
     friend OutputStream& operator<<(OutputStream& os, DyadicBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }

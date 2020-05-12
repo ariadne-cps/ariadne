@@ -9,6 +9,7 @@ add_library(ariadne-geometry OBJECT
     grid_paving.cpp
     paver.cpp
     affine_set.cpp
+    set.cpp
 
     geometry.cpp
 )

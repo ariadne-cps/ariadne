@@ -123,21 +123,22 @@ class ValidatedAffineConstrainedImageSet
     //!\brief The set \f$\{ x \mid x\in B\}\f$.
     ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& B);
 
-    ValidatedAffineConstrainedImageSet* clone() const;
+    virtual ValidatedAffineConstrainedImageSet* clone() const override;
     Void new_parameter_constraint(const EffectiveAffineConstraint& c);
     Void new_parameter_constraint(const ValidatedAffineConstraintDP& c);
     Void new_constraint(const ValidatedAffineModelConstraintDP& c);
 
-    DimensionType dimension() const;
+    virtual DimensionType dimension() const override;
     SizeType number_of_parameters() const;
     SizeType number_of_constraints() const;
     ExactBoxType domain() const;
 
-    ValidatedKleenean is_bounded() const;
-    UpperBoxType bounding_box() const;
-    ValidatedLowerKleenean separated(const ExactBoxType& bx) const;
-    ValidatedLowerKleenean inside(const ExactBoxType& bx) const;
+    using ValidatedEuclideanCompactSetInterface::separated;
+    using ValidatedEuclideanCompactSetInterface::inside;
+
     ValidatedLowerKleenean is_empty() const;
+    ValidatedKleenean is_bounded() const;
+    virtual UpperBoxType bounding_box() const override;
 
     //! \brief Compute the image of \f$S\f$ under the function \f$h\f$.
     friend ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set, ValidatedVectorMultivariateFunction const& h);
@@ -148,9 +149,13 @@ class ValidatedAffineConstrainedImageSet
 
     List<Point2d> boundary(Nat xc, Nat yc) const;
 
-    virtual Void draw(CanvasInterface&, const Projection2d& p) const;
-    virtual OutputStream& _write(OutputStream& os) const;
+    virtual Void draw(CanvasInterface&, const Projection2d& p) const override;
 
+    friend OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) { return as._write(os); }
+  private: public:
+    virtual ValidatedLowerKleenean _separated(const ExactBoxType& bx) const override;
+    virtual ValidatedLowerKleenean _inside(const ExactBoxType& bx) const override;
+    virtual OutputStream& _write(OutputStream& os) const override;
   private:
     Void construct(const ExactBoxType& D, const Matrix<FloatDPValue>& G, const Vector<FloatDPValue>& c);
     Void construct_linear_program(LinearProgram<FloatDP>& lp) const;
@@ -158,8 +163,6 @@ class ValidatedAffineConstrainedImageSet
     static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<FloatDP>& lp, const Vector<FloatDP>& errors, GridCell& cell, Nat fineness);
 };
 
-inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {
-    return as._write(os); }
 
 
 

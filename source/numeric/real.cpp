@@ -57,6 +57,11 @@ Accuracy::Accuracy(Bits precision)
 {
 }
 
+long int Accuracy::bits() const
+{
+    return abslog2floor(this->_error);
+}
+
 OutputStream& operator<<(OutputStream& os, Accuracy const& acc) {
     return os << "Accuracy("<<DecimalWriter()(acc.error())<<")";
 }

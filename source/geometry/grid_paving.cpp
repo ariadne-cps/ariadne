@@ -1357,7 +1357,7 @@ ValidatedLowerKleenean GridTreeSubpaving::covers( const ExactBoxType& theBoxType
     }
 }
 
-ValidatedLowerKleenean GridTreeSubpaving::inside( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubpaving::_inside( const ExactBoxType& theBoxType ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBoxType. If it is then the set is not a
     //subset of theBoxType otherwise we need to traverse the tree and check
@@ -1370,7 +1370,7 @@ ValidatedLowerKleenean GridTreeSubpaving::inside( const ExactBoxType& theBoxType
     return GridTreeSubpaving::_subset( binary_tree(), grid(), root_cell().root_extent(), pathCopy, cast_exact_box(narrow(theBoxType)) );
 }
 
-ValidatedLowerKleenean GridTreeSubpaving::separated( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubpaving::_separated( const ExactBoxType& theBoxType ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBoxType.dimension() == root_cell().dimension() );
@@ -1380,7 +1380,7 @@ ValidatedLowerKleenean GridTreeSubpaving::separated( const ExactBoxType& theBoxT
     return GridTreeSubpaving::_disjoint( binary_tree(), grid(), root_cell().root_extent(), pathCopy, cast_exact_box(widen(theBoxType)) );
 }
 
-ValidatedLowerKleenean GridTreeSubpaving::overlaps( const ExactBoxType& theBoxType ) const {
+ValidatedLowerKleenean GridTreeSubpaving::_overlaps( const ExactBoxType& theBoxType ) const {
     //Check if the box of the root cell overlaps with theBoxType,
     //if not then theBoxType does not intersect with the cell,
     //otherwise we need to find at least one enabled node

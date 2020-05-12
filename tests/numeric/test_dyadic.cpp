@@ -155,6 +155,12 @@ void TestDyadic::test_arithmetic() {
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)+Dyadic(-5,3u),Dyadic(1,3u));
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)-Dyadic(-5,3u),Dyadic(11,3u));
     ARIADNE_TEST_EQUAL(Dyadic(3,2u)*Dyadic(-5,3u),Dyadic(-15,5u));
+
+    ARIADNE_TEST_EQUAL(abslog2floor(Dyadic(3,3u)),-2);
+    ARIADNE_TEST_EQUAL(abslog2floor(Dyadic(5,2u)),0);
+    ARIADNE_TEST_EQUAL(abslog2floor(Dyadic(19,3u)),1);
+    ARIADNE_TEST_EQUAL(abslog2floor(Dyadic(32,3u)),2);
+    ARIADNE_TEST_EQUAL(abslog2floor(Dyadic(-19,3u)),1);
 }
 
 void TestDyadic::test_comparisons() {

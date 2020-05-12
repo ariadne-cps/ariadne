@@ -320,6 +320,8 @@ ConstraintSet::dimension() const
 }
 
 
+#warning
+/*
 LowerKleenean
 ConstraintSet::separated(const ExactBoxType& bx) const
 {
@@ -337,26 +339,34 @@ ConstraintSet::covers(const ExactBoxType& bx) const
 {
     return LowerKleenean(make_shared_logical_expression(Covers(),*this,bx));
 }
+*/
 
 ValidatedLowerKleenean
-ConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::_separated(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
 ValidatedLowerKleenean
-ConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::_overlaps(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
 ValidatedLowerKleenean
-ConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
+ConstraintSet::_covers(const ExactBoxType& bx) const
 {
     ExactBoxType codomain=under_approximation(this->codomain());
     return UpperBoxType(apply(this->constraint_function(),bx)).inside(codomain);
+}
+
+#warning Check ConstraintSet::overlaps
+ValidatedLowerKleenean
+ConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
+{
+    return this->_overlaps(bx);
 }
 
 
@@ -416,6 +426,8 @@ BoundedConstraintSet::dimension() const
 }
 
 
+#warning
+/*
 LowerKleenean
 BoundedConstraintSet::separated(const ExactBoxType& bx) const
 {
@@ -439,9 +451,10 @@ BoundedConstraintSet::inside(const ExactBoxType& bx) const
 {
     return LowerKleenean(make_shared_logical_expression(Inside(),*this,bx));
 }
+*/
 
 ValidatedLowerKleenean
-BoundedConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::_separated(const ExactBoxType& bx) const
 {
     ExactBoxType domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
@@ -451,7 +464,7 @@ BoundedConstraintSet::separated(const ExactBoxType& bx, Effort eff) const
 
 
 ValidatedLowerKleenean
-BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::_overlaps(const ExactBoxType& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     if(this->codomain().dimension() == 0 && Ariadne::intersect(under_approximation(this->domain()),bx)) { return true; }
@@ -462,7 +475,7 @@ BoundedConstraintSet::overlaps(const ExactBoxType& bx, Effort eff) const
 
 
 ValidatedLowerKleenean
-BoundedConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::_covers(const ExactBoxType& bx) const
 {
     ExactBoxType domain=under_approximation(this->domain());
     ExactBoxType codomain=under_approximation(this->codomain());
@@ -471,7 +484,7 @@ BoundedConstraintSet::covers(const ExactBoxType& bx, Effort eff) const
 }
 
 ValidatedLowerKleenean
-BoundedConstraintSet::inside(const ExactBoxType& bx, Effort eff) const
+BoundedConstraintSet::_inside(const ExactBoxType& bx) const
 {
     return Ariadne::inside(UpperBoxType(over_approximation(this->domain())),bx);
 }
@@ -630,6 +643,8 @@ ValidatedKleenean ConstrainedImageSet::satisfies(const EffectiveConstraint& nc, 
 }
 
 
+#warning
+/*
 LowerKleenean
 ConstrainedImageSet::inside(const ExactBoxType& bx) const
 {
@@ -647,13 +662,14 @@ ConstrainedImageSet::overlaps(const ExactBoxType& bx) const
 {
     return LowerKleenean(make_shared_logical_expression(Overlap(),*this,bx));
 }
+*/
 
 //! \brief Test if the set is contained in (the interior of) a box.
-ValidatedLowerKleenean ConstrainedImageSet::inside(const ExactBoxType& bx, Effort eff) const {
+ValidatedLowerKleenean ConstrainedImageSet::_inside(const ExactBoxType& bx) const {
     return this->bounding_box().inside(bx);
 }
 
-ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Effort eff) const
+ValidatedLowerKleenean ConstrainedImageSet::_separated(const ExactBoxType& bx) const
 {
     UpperBoxType subdomain = over_approximation(this->_domain);
     EffectiveVectorMultivariateFunction function = join(this->function(),this->constraint_function());
@@ -663,9 +679,14 @@ ValidatedLowerKleenean ConstrainedImageSet::separated(const ExactBoxType& bx, Ef
     return subdomain.is_empty();
 }
 
-ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Effort eff) const
+ValidatedLowerKleenean ConstrainedImageSet::_overlaps(const ExactBoxType& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
+}
+
+ValidatedLowerKleenean ConstrainedImageSet::overlaps(const ExactBoxType& bx, Effort eff) const
+{
+    return this->overlaps(bx);
 }
 
 
@@ -1011,12 +1032,12 @@ ValidatedKleenean ValidatedConstrainedImageSet::is_empty() const
     return this->_reduced_domain.is_empty();
 }
 
-ValidatedLowerKleenean ValidatedConstrainedImageSet::inside(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::_inside(const ExactBoxType& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-ValidatedLowerKleenean ValidatedConstrainedImageSet::separated(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::_separated(const ExactBoxType& bx) const
 {
     UpperBoxType subdomain = this->_reduced_domain;
     ValidatedVectorMultivariateFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
@@ -1029,7 +1050,7 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::separated(const ExactBoxTyp
     return subdomain.is_empty();
 }
 
-ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType& bx) const
+ValidatedLowerKleenean ValidatedConstrainedImageSet::_overlaps(const ExactBoxType& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
@@ -1218,10 +1239,6 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 OutputStream& ValidatedConstrainedImageSet::_write(OutputStream& os) const
 {
     return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
-}
-
-OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& set) {
-    return set._write(os);
 }
 
 

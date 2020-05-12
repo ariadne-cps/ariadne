@@ -67,7 +67,8 @@ struct Two
 {
     friend TwoExp operator^(Two, Nat m) { return TwoExp(static_cast<Int>(m)); }
     friend TwoExp operator^(Two, Int n) { return TwoExp(n); }
-    friend TwoExp pow(Two, int n) { return TwoExp(n); }
+    friend TwoExp pow(Two, Nat m) { return TwoExp(static_cast<Int>(m)); }
+    friend TwoExp pow(Two, Int n) { return TwoExp(n); }
 };
 static const Two two = Two();
 static const Two _2 = Two();

@@ -714,6 +714,7 @@ class ValidatedReal
 {
   public:
     typedef ValidatedRealInterface Interface;
+    typedef ValidatedTag Paradigm;
 
     ValidatedReal(DyadicBounds const&);
     Dyadic value();
@@ -732,6 +733,8 @@ class ValidatedReal
     FloatMPBounds get(MultiplePrecision pr) const;
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream&, ValidatedReal const&);
+
+    friend ValidatedReal operator-(ValidatedReal const&);
 };
 
 class ApproximateRealInterface;

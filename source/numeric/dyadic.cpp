@@ -361,6 +361,12 @@ Boolean lt(Dyadic const& x1, Dyadic const& x2) {
 
 Writer<Dyadic> Dyadic::_default_writer(new FractionWriter());
 
+Int abslog2floor(Dyadic const& x) {
+    long int exp;
+    mpf_get_d_2exp(&exp,x._mpf);
+    return exp-1;
+}
+
 OutputStream& operator<<(OutputStream& os, Dyadic const& x) {
     return os << Dyadic::_default_writer(x);
 }

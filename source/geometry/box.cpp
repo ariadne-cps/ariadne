@@ -154,6 +154,83 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
 
 template List<typename FloatDPExactBox::VertexType> Box<FloatDPExactInterval>::vertices() const;
 
+#warning Fix code below
+Int abslog2floor(FloatDP x) { return -53; }
+Int abslog2floor(FloatMP const& x) { return x.exponent(); }
+
+#warning Should convert to ValidatedReal
+/*
+Interval<FloatMPBounds> compute(const Interval<Real>& rivl, Effort eff) {
+    MultiplePrecision pr(eff.work());
+    return Interval<FloatMPBounds>(rivl.lower().get(pr),rivl.upper().get(pr));
+}
+
+Box<Interval<FloatMPBounds>> compute(const Box<Interval<Real>>& rbx, Effort eff) {
+    return Box<Interval<FloatMPBounds>>(Array<Interval<FloatMPBounds>>(rbx.dimension(),[&rbx,eff](SizeType i){return compute(rbx[i],eff);}));
+}
+*/
+
+ValidatedReal operator-(ValidatedReal const&, ValidatedReal const&);
+ValidatedReal max(ValidatedReal const&, ValidatedReal const&);
+Positive<ValidatedReal> cast_positive(ValidatedReal const&);
+ValidatedNegatedSierpinskian operator==(ValidatedReal const&, ValidatedReal const&);
+ValidatedKleenean operator<(ValidatedReal const& r1, ValidatedReal const& r2) {
+    return r1.get() < r2.get(); }
+ValidatedKleenean operator>(ValidatedReal const& r1, ValidatedReal const& r2) {
+    return r1.get() > r2.get(); }
+ValidatedKleenean operator<(ValidatedReal const& r1, FloatDPValue const& x2) {
+    return r1.get() < Dyadic(x2); }
+ValidatedKleenean operator>(ValidatedReal const& r1, FloatDPValue const& x2) {
+    return r1.get() > Dyadic(x2); }
+
+template<> struct MidpointTrait<DyadicBounds> { typedef Dyadic Type; };
+
+Interval<FloatDPLowerBound> compute_under_approximation(const Interval<Real>& rivl, Effort eff) {
+//    Interval<ValidatedReal> vrivl(rivl.lower().compute(eff),rivl.upper().compute(eff));
+    DoublePrecision pr; return Interval<FloatDPLowerBound>(rivl.lower().get(pr),rivl.upper().get(pr));
+}
+Box<Interval<FloatDPLowerBound>> compute_under_approximation(const Box<Interval<Real>>& rbx, Effort eff) {
+    return Box<Interval<FloatDPLowerBound>>(Array<Interval<FloatDPLowerBound>>(rbx.dimension(),[&rbx,eff](SizeType i){return compute_under_approximation(rbx[i],eff);}));
+}
+/*
+Interval<FloatDPUpperBound> compute_over_approximation(const Interval<Real>& rivl, Effort eff) {
+    DoublePrecision pr; return Interval<FloatDPUpperBound>(rivl.lower().get(pr),rivl.upper().get(pr));
+}
+Box<Interval<FloatDPUpperBound>> compute_over_approximation(const Box<Interval<Real>>& rbx, Effort eff) {
+        return Box<Interval<FloatDPUpperBound>>(Array<Interval<FloatDPUpperBound>>(rbx.dimension(),[&rbx,eff](SizeType i){return compute_over_approximation(rbx[i],eff);}));
+}
+*/
+Interval<ValidatedReal> compute(const Interval<Real>& rivl, Effort eff) {
+    return Interval<ValidatedReal>(rivl.lower().compute(eff),rivl.upper().compute(eff));
+}
+Box<Interval<ValidatedReal>> compute(const Box<Interval<Real>>& rbx, Effort eff) {
+    return Box<Interval<ValidatedReal>>(Array<Interval<ValidatedReal>>(rbx.dimension(),[&rbx,eff](SizeType i){return compute(rbx[i],eff);}));
+}
+
+Interval<DyadicBounds> compute_get(const Interval<Real>& rivl, Effort eff) {
+    return Interval<DyadicBounds>(rivl.lower().compute(eff).get(),rivl.upper().compute(eff).get());
+}
+Box<Interval<DyadicBounds>> compute_get(const Box<Interval<Real>>& rbx, Effort eff) {
+    return Box<Interval<DyadicBounds>>(Array<Interval<DyadicBounds>>(rbx.dimension(),[&rbx,eff](SizeType i){return compute_get(rbx[i],eff);}));
+}
+
+ValidatedLowerKleenean BoxSet<Interval<Real>>::separated(const ExactBoxType& other) const {
+    Effort eff(static_cast<Nat>(std::max(0,-abslog2floor(other.radius().upper().raw()))));
+    return compute_get(*this,eff).separated(other);
+}
+ValidatedLowerKleenean BoxSet<Interval<Real>>::overlaps(const ExactBoxType& other) const {
+    Effort eff(static_cast<Nat>(std::max(0,-abslog2floor(other.radius().upper().raw()))));
+    return compute_get(*this,eff).overlaps(other);
+}
+ValidatedLowerKleenean BoxSet<Interval<Real>>::covers(const ExactBoxType& other) const {
+    Effort eff(static_cast<Nat>(std::max(0,-abslog2floor(other.radius().upper().raw()))));
+    return compute(*this,eff).covers(other);
+}
+ValidatedLowerKleenean BoxSet<Interval<Real>>::inside(const ExactBoxType& other) const {
+    Effort eff(static_cast<Nat>(std::max(0,-abslog2floor(other.radius().upper().raw()))));
+    return compute(*this,eff).inside(other);
+}
+
 /*
 FloatDPLowerBox under_approximation(const RealBox& rbx) {
     FloatDPLowerBox bx(rbx.size());

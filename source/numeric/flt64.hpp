@@ -97,7 +97,7 @@ template<class Z, EnableIf<IsBuiltinIntegral<Z>> =dummy> Z integer_cast(Flt64);
 
 class Flt64 {
   public:
-    volatile double d;
+    double d;
   public:
     typedef RawTag Paradigm;
     typedef Flt64 NumericType;

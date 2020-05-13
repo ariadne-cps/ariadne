@@ -40,16 +40,16 @@ template<> OutputStream& operator<<(OutputStream& os, Interval<FloatDPValue> con
 Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(upward);
-    volatile float min=std::numeric_limits<float>::min();
-    volatile double neg_l=(-ivl.lower()).get_d();
-    volatile double l=-neg_l;
-    volatile double u=ivl.upper().get_d();
-    volatile float neg_rl=neg_l;
-    volatile float ru=u;
-    if(l==u) { neg_rl=neg_rl+min; ru=ru+min; }
-    if(neg_rl<neg_l) { neg_rl=neg_rl+min; }
-    if(ru<u) { ru=ru+min; }
-    volatile float rl=-neg_l;
+    double min=std::numeric_limits<float>::min();
+    double neg_l=(-ivl.lower()).get_d();
+    double l=-neg_l;
+    double u=ivl.upper().get_d();
+    float neg_rl=neg_l;
+    float ru=u;
+    if(l==u) { neg_rl+=min; ru+=min; }
+    if(neg_rl<neg_l) { neg_rl+=min; }
+    if(ru<u) { ru+=min; }
+    float rl=-neg_l;
     Interval<FloatDPValue> res(rl,ru);
     FloatDP::set_rounding_mode(rnd);
     return res;
@@ -58,12 +58,12 @@ Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
 Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl) {
     auto rnd=FloatDP::get_rounding_mode();
     FloatDP::set_rounding_mode(to_nearest);
-    volatile float eps=std::numeric_limits<float>::epsilon();
-    volatile double l=ivl.lower().get_d();
-    volatile double u=ivl.upper().get_d();
-    volatile float rl=l;
-    volatile float ru=u;
-    if(rl==ru) { rl=rl-(rl*eps); ru=ru+(ru*eps); }
+    float eps=std::numeric_limits<float>::epsilon();
+    double l=ivl.lower().get_d();
+    double u=ivl.upper().get_d();
+    float rl=l;
+    float ru=u;
+    if(rl==ru) { rl-=(rl*eps); ru+=(ru*eps); }
     Interval<FloatDPValue> res(rl,ru);
     FloatDP::set_rounding_mode(rnd);
     return res;

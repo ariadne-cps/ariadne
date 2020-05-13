@@ -116,9 +116,9 @@ template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x) -> Boun
     const double& xu=x.upper_raw().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
-    volatile float tu=xu;
+    float tu=xu;
     if(tu<xu) { F::set_rounding_upward(); tu=tu+fm; }
-    volatile float tl=xl;
+    float tl=xl;
     if(tl>xl) { F::set_rounding_downward(); tl=tl-fm; }
     F::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);

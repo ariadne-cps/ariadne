@@ -120,7 +120,7 @@ double neg_rec_opp(double x);
 //! \sa FloatMP, Real, FloatDPValue, FloatDPBounds, FloatDPUpperBound, FloatDPLowerBound, FloatDPApproximation
 class FloatDP {
   public:
-    volatile double dbl;
+    double dbl;
   public:
     typedef RawTag Paradigm;
     typedef FloatDP NumericType;
@@ -211,14 +211,14 @@ class FloatDP {
 
     // Exact arithmetic
     friend FloatDP nul(FloatDP x) { return +0.0; }
-    friend FloatDP pos(FloatDP x) { volatile double xv=x.dbl; return +xv; }
-    friend FloatDP neg(FloatDP x) { volatile double xv=x.dbl; return -xv; }
-    friend FloatDP hlf(FloatDP x) { volatile double xv=x.dbl; return xv/2; }
-    friend FloatDP shft(FloatDP x, Int n) { volatile double xv=x.dbl; return ldexp(xv,n); }
+    friend FloatDP pos(FloatDP x) { return +x.dbl; }
+    friend FloatDP neg(FloatDP x) { return -x.dbl; }
+    friend FloatDP hlf(FloatDP x) { return x.dbl/2; }
+    friend FloatDP shft(FloatDP x, Int n) { return ldexp(x.dbl,n); }
 
     // Exact arithmetic operators
-    friend FloatDP operator+(FloatDP x) { volatile double xv=x.dbl; return +xv; }
-    friend FloatDP operator-(FloatDP x) { volatile double xv=x.dbl; return -xv; }
+    friend FloatDP operator+(FloatDP x) { return +x.dbl; }
+    friend FloatDP operator-(FloatDP x) { return -x.dbl; }
 
     // Explcitly rounded lattice operations
     friend FloatDP max(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return std::max(x1.dbl,x2.dbl); }
@@ -255,14 +255,14 @@ class FloatDP {
     static FloatDP pi(PrecisionType pr) { return pi_rnd(); }
 
     // Correctly rounded operators
-    friend FloatDP operator+(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v+x2v; return r; }
-    friend FloatDP operator-(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v-x2v; return r; }
-    friend FloatDP operator*(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v*x2v; return r; }
-    friend FloatDP operator/(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v/x2v; return r; }
-    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v+x2v; return x1; }
-    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v-x2v; return x1; }
-    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v*x2v; return x1; }
-    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v/x2v; return x1; }
+    friend FloatDP operator+(FloatDP x1, FloatDP x2) { return x1.dbl+x2.dbl; }
+    friend FloatDP operator-(FloatDP x1, FloatDP x2) { return x1.dbl-x2.dbl; }
+    friend FloatDP operator*(FloatDP x1, FloatDP x2) { return x1.dbl*x2.dbl; }
+    friend FloatDP operator/(FloatDP x1, FloatDP x2) { return x1.dbl/x2.dbl; }
+    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { x1.dbl+=x2.dbl; return x1; }
+    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { x1.dbl-=x2.dbl; return x1; }
+    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { x1.dbl*=x2.dbl; return x1; }
+    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { x1.dbl/=x2.dbl; return x1; }
 
     template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
@@ -376,14 +376,14 @@ class FloatDP {
     friend FloatDP atan_rnd(FloatDP x);
 
     // Opposite rounded arithmetic
-    friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return -t; }
-    friend FloatDP neg_opp(FloatDP x) { volatile double t=x.dbl; return -t; }
-    friend FloatDP sqr_opp(FloatDP x) { volatile double t=-x.dbl; t=t*x.dbl; return -t; }
-    friend FloatDP rec_opp(FloatDP x) { volatile double t=-1.0/(volatile double&)x.dbl; return -t; }
-    friend FloatDP add_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t-y.dbl; return -t; }
-    friend FloatDP sub_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
-    friend FloatDP mul_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }
-    friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
+    friend FloatDP pos_opp(FloatDP x) { double t=-x.dbl; return -t; }
+    friend FloatDP neg_opp(FloatDP x) { double t=x.dbl; return -t; }
+    friend FloatDP sqr_opp(FloatDP x) { double t=-x.dbl; t=t*x.dbl; return -t; }
+    friend FloatDP rec_opp(FloatDP x) { double t=(-1.0)/x.dbl; return -t; }
+    friend FloatDP add_opp(FloatDP x, FloatDP y) { double t=-x.dbl; t=t-y.dbl; return -t; }
+    friend FloatDP sub_opp(FloatDP x, FloatDP y) { double t=-x.dbl; t=t+y.dbl; return -t; }
+    friend FloatDP mul_opp(FloatDP x, FloatDP y) { double t=-x.dbl; t=t*y.dbl; return -t; }
+    friend FloatDP div_opp(FloatDP x, FloatDP y) { double t=-x.dbl; t=t/y.dbl; return -t; }
     friend FloatDP pow_opp(FloatDP x, int n);
 };
 
@@ -396,7 +396,7 @@ static const FloatDP inf = std::numeric_limits<double>::infinity();
 struct Float32 {
     float flt;
   public:
-    explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
+    explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); flt = x.dbl; }
     explicit operator FloatDP() const { return FloatDP((double)this->flt); }
 };
 

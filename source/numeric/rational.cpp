@@ -55,7 +55,7 @@ class InvalidRationalLiteralException {
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
-class FloatDP { volatile double _dbl; public: double get_d() const { return _dbl; } };
+class FloatDP { double _dbl; public: double get_d() const { return _dbl; } };
 template<> class Value<FloatDP> { FloatDP _v; public: FloatDP raw() const { return _v; } };
 
 
@@ -444,7 +444,7 @@ Rational operator"" _q(long double x) {
     static const std::size_t N=11;
 
     // See if the long double value is an exact single-precision value
-    volatile float sx=static_cast<float>(x);
+    float sx=static_cast<float>(x);
     if(static_cast<long double>(sx)==x) {
         return Rational(ExactDouble(sx));
     }
@@ -475,7 +475,7 @@ Rational operator"" _q(long double x) {
     if(s==-1) { q=-q; }
     double xd=static_cast<double>(x);
     Rational xq=Rational(ExactDouble(xd));
-    //volatile double qd=q.get_d();
+    //double qd=q.get_d();
     double ae=std::abs((q-xq).get_d());
     double re=ae/std::max(1.0,std::abs(xd));
     if(re>std::numeric_limits<double>::epsilon()) {

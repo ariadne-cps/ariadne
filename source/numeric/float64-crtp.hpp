@@ -23,7 +23,7 @@
  */
 
 /*! \file numeric/float64-crtp.hpp
- *  \brief 
+ *  \brief
  */
 
 
@@ -74,7 +74,7 @@ template<class N> inline N& operator*=(NumberObject<N>& n1, const NumberObject<N
     return n1.upcast()=n1.upcast()*n2.upcast(); return n1.upcast(); }
 
 class FloatDP : public ScalarObject<FloatDP> {
-    volatile double d;
+    double d;
   public:
     typedef Void Paradigm;
     FloatDP() : d(0.0) { }
@@ -140,7 +140,7 @@ class FloatDPValue
 {
     friend class FloatDPBounds;
     friend class FloatDPApproximation;
-    volatile double v;
+    double v;
     static Int output_places;
   public:
     static Void set_output_places(Int);
@@ -179,7 +179,7 @@ FloatDPValue min(FloatDPValue x1, FloatDPValue x2);
 FloatDPValue max(FloatDPValue x1, FloatDPValue x2);
 
 class FloatDPError : public NumberObject<FloatDPUpperBound> {
-    volatile double e;
+    double e;
     static Int output_places;
   public:
     static Void set_output_places(Int);
@@ -209,7 +209,7 @@ template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=
     return FloatDPError(x1.get_d()/m2); }
 
 class ValidFloatDP : public NumberObject<ValidFloatDP> {
-    volatile double v; volatile double e;
+    double v; double e;
   private:
     ValidFloatDP(double d, ExactTag);
   public:
@@ -248,7 +248,7 @@ ValidFloatDP::ValidFloatDP(N n) : ValidFloatDP(double(n),ExactTag())
 
 class FloatDPBounds : public NumberObject<FloatDPBounds> {
     friend class FloatDPApproximation; friend class ValidFloatDP;
-    volatile double l; volatile double u;
+    double l; double u;
     static Int output_places;
   public:
     static Void set_output_places(Int);
@@ -299,7 +299,7 @@ ValidatedKleenean operator< (FloatDPBounds x1, FloatDPBounds x2);
 ValidatedKleenean operator> (FloatDPBounds x1, FloatDPBounds x2);
 
 class FloatDPLowerBound : public NumberObject<FloatDPLowerBound> {
-    volatile double l;
+    double l;
   public:
     FloatDPLowerBound();
     FloatDPLowerBound(Int);
@@ -322,7 +322,7 @@ FloatDPLowerBound max(FloatDPLowerBound,FloatDPLowerBound);
 FloatDPUpperBound rec(FloatDPLowerBound);
 
 class FloatDPUpperBound : public NumberObject<FloatDPUpperBound> {
-    volatile double u;
+    double u;
   public:
     FloatDPUpperBound();
     FloatDPUpperBound(Int);
@@ -348,7 +348,7 @@ FloatDPUpperBound operator+(FloatDPUpperBound,FloatDPError);
 FloatDPLowerBound operator-(FloatDPLowerBound,FloatDPError);
 
 class FloatDPApproximation : public NumberObject<FloatDPApproximation> {
-    volatile double a;
+    double a;
   public:
     typedef ApproximateTag Paradigm;
     FloatDPApproximation();

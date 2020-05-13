@@ -36,6 +36,7 @@
 
 #include "../numeric/logical.hpp"
 #include "../numeric/builtin.hpp"
+#include "../numeric/accuracy.hpp"
 #include "../numeric/integer.hpp"
 #include "../numeric/rational.hpp"
 #include "../numeric/decimal.hpp"

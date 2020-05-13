@@ -37,9 +37,9 @@ int main() {
         auto r = 6 * atan(1/sqrt(Real(3)));
         print(r);
         FloatDPBounds xdp=r.get(double_precision);
-        FloatMPBounds xmp=r.get(precision(128));
+        FloatMPBounds xmp=r.get(precision(128_bits));
         ValidatedReal ymp=r.compute(Effort(128));
-        FloatMPBall zmp=FloatMPBall(r.compute(Accuracy(128)).get(precision(128)));
+        FloatMPBall zmp=FloatMPBall(r.compute(Accuracy(128_bits)).get(precision(128_bits)));
         print(xdp); print(xmp); print(ymp); print(zmp);
         print(xmp.error()); print(xmp-xmp); print(xmp-xmp+1);
         print(zmp.error()); print(zmp-zmp); print(zmp-zmp+1);
@@ -68,8 +68,8 @@ int main() {
 
     //! [linear_algebra_demonstration]
     {
-        Matrix<FloatMPApproximation> A({{4,1,0},{1,4,1},{0,1,4}},precision(128));
-        Vector<FloatMPApproximation> v({2.0,3,5},precision(128));
+        Matrix<FloatMPApproximation> A({{4,1,0},{1,4,1},{0,1,4}},precision(128_bits));
+        Vector<FloatMPApproximation> v({2.0,3,5},precision(128_bits));
         print(inverse(A));
         FloatMPApproximation::set_output_places(30);
         print(inverse(A));

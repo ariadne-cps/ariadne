@@ -565,7 +565,7 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestFloatBounds<DoublePrecision>(dp).test();
-    TestFloatBounds<MultiplePrecision>(MultiplePrecision(128)).test();
+    TestFloatBounds<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

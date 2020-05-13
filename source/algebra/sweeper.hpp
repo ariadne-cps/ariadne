@@ -286,7 +286,7 @@ private:
 template<> inline Sweeper<FloatDP>::Sweeper()
     : Sweeper(new ThresholdSweeper<FloatDP>(dp,std::numeric_limits<float>::epsilon())) { }
 template<> inline Sweeper<FloatMP>::Sweeper()
-    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64),std::numeric_limits<double>::epsilon())) { }
+    : Sweeper(new ThresholdSweeper<FloatMP>(MultiplePrecision(64_bits),std::numeric_limits<double>::epsilon())) { }
 
 using SweeperDP=Sweeper<FloatDP>;
 using SweeperMP=Sweeper<FloatMP>;

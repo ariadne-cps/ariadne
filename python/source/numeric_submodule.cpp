@@ -32,6 +32,7 @@
 #endif
 
 #include "numeric/logical.hpp"
+#include "numeric/accuracy.hpp"
 #include "numeric/integer.hpp"
 #include "numeric/dyadic.hpp"
 #include "numeric/decimal.hpp"
@@ -235,8 +236,8 @@ Void export_logicals(pymodule& module) {
 
 Void export_accuracy(pymodule& module) {
     pybind11::class_<Accuracy> accuracy_class(module,"Accuracy");
-    accuracy_class.def(init<Nat>());
-    accuracy_class.def("bits",&Accuracy::bits);
+    accuracy_class.def(init<Dyadic>());
+    accuracy_class.def("error",&Accuracy::error);
     accuracy_class.def("__str__", &__cstr__<Accuracy>);
     accuracy_class.def("__repr__", &__cstr__<Accuracy>);
 }

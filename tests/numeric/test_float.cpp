@@ -126,8 +126,8 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     ARIADNE_TEST_CLASS(FloatDP,TestFloat<DoublePrecision>(dp));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(64)));
-    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(192)));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(64_bits)));
+    ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(192_bits)));
 
 
     return ARIADNE_TEST_FAILURES;
@@ -434,10 +434,10 @@ TestFloat<PR>::test_conversion_from_to()
 template<> Void
 TestFloat<DoublePrecision>::test_conversion_between()
 {
-    FloatMP xmp1(Rational(1,3),downward,MultiplePrecision(100u));
+    FloatMP xmp1(Rational(1,3),downward,MultiplePrecision(100_bits));
     FloatDP xdp1(xmp1,downward,DoublePrecision());
     ARIADNE_TEST_COMPARE(xdp1,<,xmp1);
-    FloatMP xmp2(Rational(1,3),upward,MultiplePrecision(100u));
+    FloatMP xmp2(Rational(1,3),upward,MultiplePrecision(100_bits));
     FloatDP xdp2(xmp2,upward,DoublePrecision());
     ARIADNE_TEST_COMPARE(xdp2,>,xmp2);
     ARIADNE_TEST_COMPARE(xdp2,>,xdp1);
@@ -447,7 +447,7 @@ template<> Void
 TestFloat<MultiplePrecision>::test_conversion_between()
 {
     FloatDP xdp1(Rational(1,3),upward,DoublePrecision());
-    FloatMP xmp1(xdp1,MultiplePrecision(100u));
+    FloatMP xmp1(xdp1,MultiplePrecision(100_bits));
     ARIADNE_TEST_EQUALS(xdp1,xmp1);
 }
 

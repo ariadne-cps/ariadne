@@ -90,7 +90,7 @@ template<class X> void TestComplex<X>::test_concept() {
 
 template<class X> void TestComplex<X>::test_conversions() {
 //    auto one_dp=one.get(dp);
-//    auto pi_mp=pi(MultiplePrecision(2));
+//    auto pi_mp=pi(MultiplePrecision(2_bits));
 //    ARIADNE_TEST_PRINT(one_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
 

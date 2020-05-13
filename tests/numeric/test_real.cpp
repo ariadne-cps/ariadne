@@ -34,6 +34,8 @@
 #include "numeric/decimal.hpp"
 #include "numeric/rational.hpp"
 
+#include "numeric/accuracy.hpp"
+
 #include "numeric/float_literals.hpp"
 #include "numeric/float_bounds.hpp"
 
@@ -120,7 +122,7 @@ void TestReal::test_conversions() {
     Real one=1;
     Real pi_=4*atan(one);
     auto pi_dp=pi_.get(dp);
-//    auto pi_mp=pi(MultiplePrecision(2));
+//    auto pi_mp=pi(MultiplePrecision(2_bits));
     ARIADNE_TEST_PRINT(pi_dp);
 //    ARIADNE_TEST_PRINT(pi_mp);
 }
@@ -143,7 +145,7 @@ void TestReal::test_constructors() {
 
     ARIADNE_TEST_CONSTRUCT(Real,xy,(EffectiveNumber(5)));
     ARIADNE_TEST_EQUALS(xy.get(double_precision),5);
-    ARIADNE_TEST_EQUALS(xy.get(precision(128)),5);
+    ARIADNE_TEST_EQUALS(xy.get(precision(128_bits)),5);
 }
 
 void TestReal::test_arithmetic() {
@@ -243,10 +245,10 @@ void TestReal::test_accuracy() {
     ARIADNE_TEST_ASSERT(pi_mp.lower_raw()<=pi_near);
     ARIADNE_TEST_ASSERT(pi_mp.upper_raw()>=pi_near);
 
-    mp=precision(320);
+    mp=precision(320_bits);
     Effort effort{256};
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_ord,(pi_.compute(effort)));
-    Accuracy accuracy{256};
+    Accuracy accuracy{256_bits};
     FloatMPValue error(accuracy.error(),mp);
     ARIADNE_TEST_CONSTRUCT(ValidatedReal,pi_met,(pi_.compute(accuracy)));
     ARIADNE_TEST_CONSTRUCT(FloatMPBounds,pi_met_mp,(pi_met.get(mp)));
@@ -272,25 +274,25 @@ void TestReal::test_sequence() {
     std::function<Dyadic(Natural)> wfn([&](Natural n){return 1-Dyadic(1,n);});
     FastCauchySequence<Dyadic> wseq(wfn);
     Real wlim=limit(wseq);
-    std::cout<<wlim.compute(Accuracy(256))<<"\n";
+    std::cout<<wlim.compute(Accuracy(256_bits))<<"\n";
 
     std::function<Real(Natural)> rfn([&](Natural n){return exp(Real(-(n+1u)));});
     FastCauchySequence<Real> rseq(rfn);
     Real rlim=limit(rseq);
 
-    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
+    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256_bits)).get())<Dyadic(1,256u));
 
     Real pi_=4*atan(Real(1));
     Decimal pi_lower="3.1415926535897932"_dec;
     Decimal pi_upper="3.1415926535897933"_dec;
     ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
-    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256)).get())<Dyadic(1,256u));
+    ARIADNE_TEST_ASSERT(abs(rlim.compute(Accuracy(256_bits)).get())<Dyadic(1,256u));
     ARIADNE_TEST_ASSERT(nondeterministic_greater(pi_,3.0_dec,3.1_dec));
     ARIADNE_TEST_ASSERT(not nondeterministic_greater(pi_,3.2_dec,3.3_dec));
     ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897937"_dec));
     ARIADNE_TEST_PRINT(nondeterministic_greater(pi_,"3.1415926535897932"_dec,"3.1415926535897933"_dec));
 
-    ARIADNE_TEST_PRINT(pi_.compute(Accuracy(256)).get(MultiplePrecision(256)));
+    ARIADNE_TEST_PRINT(pi_.compute(Accuracy(256_bits)).get(MultiplePrecision(256_bits)));
     ARIADNE_TEST_PRINT(std::boolalpha);
     ARIADNE_TEST_PRINT(choose(pi_>pi_lower,pi_<pi_upper));
     ARIADNE_TEST_PRINT(choose(pi_>pi_lower,pi_<3.2_dec));
@@ -298,7 +300,7 @@ void TestReal::test_sequence() {
     ARIADNE_TEST_PRINT(choose({pi_>pi_lower,Real(4)},{pi_<3.2_dec,Real(3)}));
     ARIADNE_TEST_PRINT(choose({pi_>pi_lower,Real(4)},{pi_<pi_upper,Real(3)}));
 
-    Dyadic pi_upper_bound = pi_.compute(Accuracy(256)).get().upper_raw();
+    Dyadic pi_upper_bound = pi_.compute(Accuracy(256_bits)).get().upper_raw();
     Real x=pi_-pi_upper_bound;
     ARIADNE_TEST_PRINT((x>=0).check(Effort(5u)));
     ARIADNE_TEST_PRINT((x>=0).check(Effort(6u)));
@@ -306,10 +308,10 @@ void TestReal::test_sequence() {
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(5u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(6u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(384u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(5u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(6u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(54)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(64)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(5_bits)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(6_bits)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(54_bits)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(64_bits)));
     ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(5u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,1+x}).compute(Effort(6u)));
 

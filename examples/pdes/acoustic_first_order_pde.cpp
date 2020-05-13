@@ -67,7 +67,7 @@ int main() {
     EffectiveVectorMultivariateFunction phi0={sin(2*x[0]),sin(3*x[1]),z};
 
     FirstOrderPDE pde{A,Bs,Ds,Ts,f};
-    auto pr=multiple_precision(128);
+    auto pr=multiple_precision(128_bits);
 
     auto solution=first_order_pde(pde,phi0,pr);
     auto h=solution.h;

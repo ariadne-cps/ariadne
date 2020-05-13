@@ -154,8 +154,8 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestFloatBall<DoublePrecision,DoublePrecision>(dp).test();
-    TestFloatBall<MultiplePrecision>(MultiplePrecision(128)).test();
-    TestFloatBall<MultiplePrecision,DoublePrecision>(MultiplePrecision(128)).test();
+    TestFloatBall<MultiplePrecision>(MultiplePrecision(128_bits)).test();
+    TestFloatBall<MultiplePrecision,DoublePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

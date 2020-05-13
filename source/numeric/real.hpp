@@ -62,6 +62,8 @@ class Symmetry : public Group<Symmetry> {
     friend Symmetry sub(Symmetry,Symmetry); //!< \brief Subtraction
 };
 
+class Accuracy;
+
 class Real;
 class LowerReal;
 class UpperReal;
@@ -78,14 +80,6 @@ class ValidatedUpperReal;
 class ApproximateReal;
 
 //! \ingroup NumericModule
-//! \brief The accuracy of a computation of a value in a metric space. The result must be correct to within 2<sup>-acc</sup> bits.
-struct Accuracy {
-    Nat _bits;
-    Accuracy(Nat bits) : _bits(bits) { }
-    Nat bits() const { return _bits; }
-    TwoExp error() const;
-    friend OutputStream& operator<<(OutputStream& os, Accuracy acc) { return os << "Accuracy("<<acc.bits()<<")"; }
-};
 
 extern const Real pi;
 extern const Real infinity;

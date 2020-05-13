@@ -43,12 +43,22 @@
 
 #include "real_interface.hpp"
 #include "sequence.hpp"
+#include "accuracy.hpp"
 #include "number_wrapper.hpp"
 
 namespace Ariadne {
 
-TwoExp Accuracy::error() const {
-    return TwoExp(-(Int)this->bits());
+OutputStream& operator<<(OutputStream& os, Bits const& bits) {
+    return os << static_cast<unsigned long int>(bits) << "_bits";
+}
+
+Accuracy::Accuracy(Bits precision)
+    : _error(1,static_cast<Nat>(precision))
+{
+}
+
+OutputStream& operator<<(OutputStream& os, Accuracy const& acc) {
+    return os << "Accuracy("<<DecimalWriter()(acc.error())<<")";
 }
 
 template<class X> struct ValidatedRealWrapper;
@@ -374,7 +384,7 @@ Kleenean operator<=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Kleenean operator>=(Real const& x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
 Integer round(Real const& r) {
-    DyadicBounds wb=r.compute(Accuracy(1)).get();
+    DyadicBounds wb=r.compute(Accuracy(1_bits)).get();
     return round(hlf(wb.lower()+wb.upper()));
 }
 
@@ -399,9 +409,8 @@ ValidatedReal Real::compute(Effort eff) const {
 
 ValidatedReal Real::compute(Accuracy accuracy) const {
     Nat effort=1;
-    Nat acc=accuracy.bits();
     MultiplePrecision precision(effort*64);
-    FloatMPError error_bound(FloatMP(two^-acc,upward,precision));
+    FloatMPError error_bound(FloatMP(accuracy.error(),upward,precision));
     FloatMPError error=2u*error_bound;
     FloatMPBounds res;
     while (!(error.raw()<error_bound.raw())) {

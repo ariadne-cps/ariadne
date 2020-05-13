@@ -215,7 +215,7 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestDirectedFloats<DoublePrecision>(dp).test();
-    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128)).test();
+    TestDirectedFloats<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;
 }

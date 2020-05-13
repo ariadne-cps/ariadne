@@ -33,6 +33,7 @@
 
 #include "paradigm.hpp"
 #include "number.hpp"
+#include "bits.hpp"
 #include "rounding.hpp"
 #include "sign.hpp"
 #include <mpfr.h>
@@ -48,16 +49,19 @@ struct RoundUpward; struct RoundDownward;
 
 typedef mpfr_rnd_t RoundingModeMP;
 
+typedef std::make_unsigned<mpfr_prec_t>::type unsigned_mpfr_prec_t;
+
 //! \ingroup NumericModule
 //! \brief The precision of a FloatMP object.
 //! \relates FloatMP
 class MultiplePrecision {
     mpfr_prec_t prec;
-    typedef std::make_unsigned<mpfr_prec_t>::type unsigned_mpfr_prec_t;
   public:
     typedef unsigned_mpfr_prec_t Type;
     //! \brief
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
+    //! \brief
+    explicit MultiplePrecision(Bits pr) : prec(static_cast<mpfr_prec_t>(pr)) { }
     //! \brief
     explicit MultiplePrecision(DoublePrecision const& pr) : prec(53u) { }
     //! \brief The number of binary digits of precision requested.
@@ -75,8 +79,8 @@ class MultiplePrecision {
     friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
 using MP = MultiplePrecision;
-inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
-inline MultiplePrecision precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision multiple_precision(Bits pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision precision(Bits pr) { return MultiplePrecision(pr); }
 inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 
 //! \ingroup FltMPSubModule

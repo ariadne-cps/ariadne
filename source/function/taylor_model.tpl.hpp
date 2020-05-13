@@ -76,7 +76,7 @@ FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 template<class F> F UnknownError<F>::raw() const {
     return F(0u,this->precision()); }
 template<class F> typename F::PrecisionType UnknownError<F>::precision() const {
-    if constexpr (IsSame<F,FloatMP>::value) { return MultiplePrecision(64); }
+    if constexpr (IsSame<F,FloatMP>::value) { return MultiplePrecision(64_bits); }
     else { return typename F::PrecisionType(); } }
 template<class F> UnknownError<F>::operator PositiveApproximation<F> () const {
     return PositiveApproximation<F>(0,this->precision()); }

@@ -39,11 +39,6 @@
 
 namespace Ariadne {
 
-template<class R, class A> R dynamic_handle_cast(A a) {
-    typedef decltype(*declval<R>().managed_pointer()) RP;
-    return R(std::dynamic_pointer_cast<RP>(a.pointer()));
-}
-
 template<class A, class X> struct AlgebraOperations;
 
 template<class X> struct AlgebraOperations<Algebra<X>,X> {

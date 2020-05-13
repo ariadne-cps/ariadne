@@ -121,8 +121,13 @@ void write_error(OutputStream& os, const WritableInterface* w, const char* i, co
 template<class D, class B> D dynamic_handle_cast(B const& h) {
     typedef typename B::Interface BI;
     typedef typename D::Interface DI;
-    SharedPointer<DI> p=std::dynamic_pointer_cast<DI>(h.managed_pointer());
-    if(p) { return Handle<DI>(p); }
+    if constexpr (IsSame<decltype(h.managed_pointer()),SharedPointer<BI>>::value) {
+        SharedPointer<DI> p=std::dynamic_pointer_cast<DI>(h.managed_pointer());
+        if(p) { return D(Handle<DI>(p)); }
+    } else {
+        SharedPointer<const DI> p=std::dynamic_pointer_cast<const DI>(h.managed_pointer());
+        if(p) { return D(Handle<const DI>(p)); }
+    }
     const BI* i=h.raw_pointer();
     const WritableInterface* w=dynamic_cast<const WritableInterface*>(i);
     if(w) { write_error(std::cerr,w,typeid(i).name(),typeid(*i).name(),typeid(D).name()); }

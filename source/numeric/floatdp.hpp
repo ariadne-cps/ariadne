@@ -259,10 +259,10 @@ class FloatDP {
     friend FloatDP operator-(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v-x2v; return r; }
     friend FloatDP operator*(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v*x2v; return r; }
     friend FloatDP operator/(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v/x2v; return r; }
-    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v+=x2v; return x1; }
-    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v-=x2v; return x1; }
-    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v*=x2v; return x1; }
-    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v/=x2v; return x1; }
+    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v+x2v; return x1; }
+    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v-x2v; return x1; }
+    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v*x2v; return x1; }
+    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v/x2v; return x1; }
 
     template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);

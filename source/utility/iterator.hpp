@@ -52,7 +52,10 @@ class IteratorCoreAccess {
 
 
 template<class I, class Val, class Ref> class IteratorFacade<I,Val,RandomAccessTraversalTag,Ref> {
-    typedef Val* Ptr;
+    typedef Val* Ptr; typedef RandomAccessTraversalTag Cat;
+  private:
+    static bool _equal(const I& self, const I& other) { return IteratorCoreAccess::equal(self,other); }
+    static std::ptrdiff_t _distance_to(const I& self, const I& other) { return IteratorCoreAccess::distance_to(self,other); }
   public:
     // Standard typedefs
     typedef typename std::remove_const<Val>::type value_type;
@@ -65,12 +68,12 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,RandomAccessT
     typedef typename std::remove_const<Val>::type ValueType;
     typedef Ref Reference;
 
-    template<class II> bool operator==(const II& other) const { return IteratorCoreAccess::equal(static_cast<const I&>(*this),other); }
-    template<class II> bool operator!=(const II& other) const { return !IteratorCoreAccess::equal(static_cast<const I&>(*this),other); }
-    bool operator< (const I& other) const { return IteratorCoreAccess::distance_to(static_cast<const I&>(*this),other)> 0; }
-    bool operator<=(const I& other) const { return IteratorCoreAccess::distance_to(static_cast<const I&>(*this),other)>=0; }
-    bool operator> (const I& other) const { return IteratorCoreAccess::distance_to(static_cast<const I&>(*this),other)< 0; }
-    bool operator>=(const I& other) const { return IteratorCoreAccess::distance_to(static_cast<const I&>(*this),other)<=0; }
+    friend bool operator==(const I& self, const I& other) { return _equal(self,other); }
+    friend bool operator!=(const I& self, const I& other) { return !_equal(self,other); }
+    friend bool operator< (const I& self, const I& other) { return _distance_to(self,other)> 0; }
+    friend bool operator<=(const I& self, const I& other) { return _distance_to(self,other)>=0; }
+    friend bool operator> (const I& self, const I& other) { return _distance_to(self,other)< 0; }
+    friend bool operator>=(const I& self, const I& other) { return _distance_to(self,other)<=0; }
     std::ptrdiff_t operator-(const I& other) const { return -IteratorCoreAccess::distance_to(static_cast<const I&>(*this),other); }
     I operator+(std::ptrdiff_t n) const { I result(static_cast<const I&>(*this)); IteratorCoreAccess::advance(result,n); return result; }
     I operator-(std::ptrdiff_t n) const { I result(static_cast<const I&>(*this)); IteratorCoreAccess::advance(result,-n); return result; }
@@ -84,6 +87,8 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,RandomAccessT
 
 template<class I, class Val, class Ref> class IteratorFacade<I,Val,ForwardTraversalTag, Ref> {
     typedef Val* Ptr;
+  private:
+    static bool _equal(const I& self, const I& other) { return IteratorCoreAccess::equal(self,other); }
   public:
     // Standard typedefs
     typedef typename std::remove_const<Val>::type value_type;
@@ -96,8 +101,8 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,ForwardTraver
     typedef typename std::remove_const<Val>::type ValueType;
     typedef Ref Reference;
 
-    bool operator==(const I& other) const { return IteratorCoreAccess::equal(static_cast<const I&>(*this),other); }
-    bool operator!=(const I& other) const { return !IteratorCoreAccess::equal(static_cast<const I&>(*this),other); }
+    friend bool operator==(const I& self, const I& other) { return _equal(self,other); }
+    friend bool operator!=(const I& self, const I& other) { return !_equal(self,other); }
     I& operator++() { IteratorCoreAccess::increment(static_cast<I&>(*this)); return static_cast<I&>(*this); }
     I operator++(int) { I r=static_cast<const I&>(*this); IteratorCoreAccess::increment(static_cast<I&>(*this)); return r; }
     Ref operator*() const { return IteratorCoreAccess::dereference(static_cast<const I&>(*this)); }

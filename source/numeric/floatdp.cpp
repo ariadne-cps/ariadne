@@ -134,7 +134,7 @@ double sqrt_rnd(double x)
     if(x==0.0) { return 0.0; }
     Int n; volatile double y,a,b;
     y=frexp(x,&n);
-    if(n%2) { y*=2; n-=1; }
+    if(n%2) { y=y*2; n-=1; }
     assert(y>=0.5 && y<=2.0);
 
     a=0.0; b=y;
@@ -237,7 +237,7 @@ double log_rnd(double x) {
     volatile double y,z,s,t,w,ly;
 
     y=frexp(x,&n);
-    if(y<_sqrt2_approx) { y*=2; --n; }
+    if(y<_sqrt2_approx) { y=y*2; --n; }
 
     if(y>=1.0) {
         t=-1-y;
@@ -663,12 +663,12 @@ FloatDP::FloatDP(Dyadic const& w, RoundingModeType rnd, PrecisionType pr)
          RoundingModeType old_rnd=get_rounding_mode();
          if(rnd==ROUND_UPWARD) {
              set_rounding_upward();
-             while (Dyadic(dbl)<w) { dbl+=std::numeric_limits<double>::min(); }
+             while (Dyadic(dbl)<w) { dbl=dbl+std::numeric_limits<double>::min(); }
              set_rounding_mode(old_rnd);
          }
          if(rnd==ROUND_DOWNWARD) {
              set_rounding_downward();
-             while (Dyadic(dbl)>w) { dbl-=std::numeric_limits<double>::min(); }
+             while (Dyadic(dbl)>w) { dbl=dbl-std::numeric_limits<double>::min(); }
              set_rounding_mode(old_rnd);
          }
      }
@@ -686,12 +686,12 @@ FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
         RoundingModeType old_rnd=get_rounding_mode();
         if(rnd==ROUND_UPWARD) {
             set_rounding_upward();
-            while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
+            while (Rational(dbl)<q) { dbl=dbl+std::numeric_limits<double>::min(); }
             set_rounding_mode(old_rnd);
         }
         if(rnd==ROUND_DOWNWARD) {
             set_rounding_downward();
-            while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
+            while (Rational(dbl)>q) { dbl=dbl-std::numeric_limits<double>::min(); }
             set_rounding_mode(old_rnd);
         }
     }

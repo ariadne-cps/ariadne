@@ -41,7 +41,7 @@ FloatBall<DoublePrecision> operator"" _near(long double lx) {
     volatile double x=lx;
     volatile long double le=std::abs((long double)x-lx);
     volatile double e=le;
-    while(e<le) { e*=(1+std::numeric_limits<double>::epsilon()); }
+    while(e<le) { e=e*(1+std::numeric_limits<double>::epsilon()); }
 
     return FloatBall<DoublePrecision>(x,e);
 }

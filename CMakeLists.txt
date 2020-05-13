@@ -9,7 +9,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
-set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization 
+set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization
                   init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
@@ -22,11 +22,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PYBIND_SUBMODULE_COMMIT 435dbdd)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
 foreach(WARN ${COMPILER_WARN})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")       
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")
 endforeach()
 foreach(WARN ${COMPILER_DONT_WARN})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${WARN}")       
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${WARN}")
 endforeach()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-template-friend")
@@ -92,7 +93,7 @@ if(GMPXX_FOUND)
     include_directories(SYSTEM ${GMPXX_INCLUDE_DIR})
 else()
     message(WARNING "Unable to find GMPXX. Related functionality will be disabled.")
-endif()    
+endif()
 
 find_package(MPFR)
 if(MPFR_FOUND)
@@ -203,7 +204,7 @@ endif()
 if(GMPXX_FOUND)
     target_link_libraries(ariadne ${GMPXX_LIBRARIES})
     target_link_libraries(ariadne-kernel ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
-    target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})    
+    target_link_libraries(ariadne-core ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 endif()
 
 if(CAIRO_FOUND)

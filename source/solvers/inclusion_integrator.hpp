@@ -373,8 +373,10 @@ class InclusionIntegratorHandle {
     InclusionIntegratorHandle(InclusionIntegratorHandle const& other) : _impl(other._impl) { }
     InclusionIntegratorHandle& operator=(InclusionIntegratorHandle const& other) { _impl = other._impl; return *this; }
 
-    Bool operator==(const InclusionIntegratorInterface& rhs) const { return *_impl == rhs; }
-    Bool operator<(const InclusionIntegratorHandle& rhs) const { return *_impl < *rhs._impl; }
+    friend Bool operator==(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
+        return lhs._impl->operator==(*rhs._impl); }
+    friend Bool operator<(const InclusionIntegratorHandle& lhs, const InclusionIntegratorHandle& rhs) {
+        return lhs._impl->operator<(*rhs._impl); }
 
     template<class A> Bool handles(A const& a) const { return instance_of<A>(&*_impl); }
 

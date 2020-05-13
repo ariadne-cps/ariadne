@@ -497,10 +497,16 @@ Void Enclosure::apply_flow(ValidatedVectorMultivariateFunction flow, ExactInterv
 Void Enclosure::apply_fixed_evolve_step(ValidatedVectorMultivariateFunction flow, StepSizeType time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->state_dimension()+1u,"state_dimension="<<this->state_dimension()<<", flow="<<flow);
-    ValidatedScalarMultivariateFunctionModelDP evolve_time_function=this->function_factory().create_constant(this->domain(),time);
-    this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
-    this->_time_function=this->_time_function + evolve_time_function;
-    this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
+    try {
+        ValidatedVectorMultivariateFunctionModelDP flow_model=dynamic_handle_cast<const ValidatedVectorMultivariateFunctionModelDP>(flow);
+        ValidatedVectorMultivariateFunctionModelDP flow_step_model=partial_evaluate(flow_model,flow_model.argument_size()-1u,time);
+        this->_state_function=compose(flow_step_model,this->_state_function);
+    } catch (std::bad_cast const&) {
+        ValidatedScalarMultivariateFunctionModelDP evolve_time_function=this->function_factory().create_constant(this->domain(),time);
+        this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
+    }
+    this->_time_function=this->_time_function + time;
+    this->_time_function=this->_dwell_time_function + time;
     this->_check();
 }
 

@@ -269,6 +269,8 @@ void export_integer(pymodule& module)
     module.def("sqr", &_sqr_<Integer>);
     module.def("pow", &_pow_<Integer,Nat>);
 
+    module.def("z", (Integer(*)(long long int)) &operator"" _z);
+
     implicitly_convertible<Int,Integer>();
 
     pybind11::class_<Natural,Integer> natural_class(module,"Natural");
@@ -296,6 +298,8 @@ void export_dyadic(pymodule& module)
     define_comparisons(module,dyadic_class);
     module.def("sqr", &_sqr_<Dyadic>);
     module.def("hlf", &_hlf_<Dyadic>);
+
+    module.def("dy", (Dyadic(*)(long double)) &operator""_dy);
 
     implicitly_convertible<Int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
@@ -331,6 +335,8 @@ void export_decimal(pymodule& module)
     module.def("sqr", &_sqr_<Decimal>);
     module.def("hlf", &_hlf_<Decimal>);
 
+    module.def("dec", (Decimal(*)(long double)) &operator"" _dec);
+
     implicitly_convertible<Int,Decimal>();
     implicitly_convertible<Integer,Decimal>();
     implicitly_convertible<Dyadic,Decimal>();
@@ -356,6 +362,8 @@ void export_rational(pymodule& module)
     module.def("hlf", &_hlf_<Rational>);
     module.def("sqr", &_sqr_<Rational>);
     module.def("rec", &_rec_<Rational>);
+
+    module.def("q", (Rational(*)(long double)) &operator"" _q);
 
     implicitly_convertible<Int,Rational>();
     implicitly_convertible<Integer,Rational>();

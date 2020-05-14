@@ -414,8 +414,9 @@ template<class S> class LabelledSet;
 template<class UB> using LabelledInterval = VariableInterval<UB>;
 using LabelledExactIntervalType = LabelledInterval<typename ExactIntervalType::UpperBoundType>;
 
-template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
+template<class IVL> class LabelledBox;
 using LabelledExactBoxType = LabelledBox<ExactIntervalType>;
+using LabelledUpperBoxType = LabelledBox<UpperIntervalType>;
 using LabelledRealBox = LabelledSet<RealBox>;
 
 class LabelledEnclosure
@@ -424,7 +425,7 @@ class LabelledEnclosure
   public:
     typedef LabelledDrawableInterface DrawableInterfaceType;
     typedef Box<UpperIntervalType> EuclideanBoundingBoxType;
-    typedef LabelledBox<UpperIntervalType> BoundingBoxType;
+    typedef LabelledUpperBoxType BoundingBoxType;
   public:
     LabelledEnclosure() : Enclosure() { }
     LabelledEnclosure(EnclosureConfiguration const& config) : Enclosure(config) { }
@@ -504,7 +505,7 @@ template<> class LabelledSet<ListSet<Enclosure>> : public ListSet<LabelledEnclos
     const RealSpace state_space() const;
     const RealSpace space() const;
     const ListSet<Enclosure> euclidean_set() const;
-    const LabelledSet<UpperBoxType> bounding_box() const;
+    const LabelledUpperBoxType bounding_box() const;
 };
 
 } //namespace Ariadne

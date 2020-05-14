@@ -319,6 +319,12 @@ template<class S> class LabelledSet {
 };
 template<class S> LabelledSet(const RealSpace&, const S&) -> LabelledSet<S>;
 
+template<class IVL> class LabelledBox : public LabelledSet<Box<IVL>> {
+  public:
+    LabelledBox(const RealSpace& spc, const Box<IVL>& set) : LabelledSet<Box<IVL>>(spc,set) { }
+    IVL operator[](const RealVariable& v) const { return VariablesBox<IVL>(*this)[v]; }
+};
+
 template<class S> EqualsType<S> operator==(LabelledSet<S> const& eset1, LabelledSet<S> const& eset2) {
     if(eset1.variables()!=eset2.variables()) { return false; }
     ARIADNE_ASSERT(eset1.space()==eset2.space());
@@ -335,7 +341,6 @@ template<class IVL> template<class I,EnableIf<IsConvertible<I,IVL>>> VariablesBo
 
 
 template<class UB> using LabelledInterval = VariableInterval<UB>;
-template<class IVL> using LabelledBox = LabelledSet<Box<IVL>>;
 template<class BS> using LabelledListSet = LabelledSet<ListSet<BS>>;
 
 RealBox make_box(RealSpace const&, RealVariablesBox const&);

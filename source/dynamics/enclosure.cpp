@@ -1705,8 +1705,8 @@ Void LabelledStorage::draw(CanvasInterface& canvas, const Variables2d& axes) con
     this->euclidean_set().draw(canvas,proj);
 }
 
-LabelledSet<UpperBoxType> LabelledEnclosure::bounding_box() const {
-    return LabelledSet(this->state_space(), this->euclidean_set().bounding_box());
+LabelledUpperBoxType LabelledEnclosure::bounding_box() const {
+    return LabelledBox(this->state_space(), this->euclidean_set().bounding_box());
 }
 
 const ListSet<LabelledSet<UpperBoxType>> ListSet<LabelledEnclosure>::bounding_boxes() const {
@@ -1741,14 +1741,13 @@ const ListSet<Enclosure> LabelledSet<ListSet<Enclosure>>::euclidean_set() const 
     return result;
 }
 
-const LabelledSet<UpperBoxType> LabelledSet<ListSet<Enclosure>>::bounding_box() const {
-    if (this->empty()) { return LabelledSet<UpperBoxType>(this->space(),UpperBoxType(this->space().dimension())); }
+const LabelledUpperBoxType LabelledSet<ListSet<Enclosure>>::bounding_box() const {
+    if (this->empty()) { return LabelledUpperBoxType(this->space(),UpperBoxType(this->space().dimension())); }
     UpperBoxType bbx=(*this)[0].euclidean_set().bounding_box();
     for (SizeType i=1; i!=this->size(); ++i) {
         bbx=hull(bbx,(*this)[i].euclidean_set().bounding_box());
     }
-    std::cerr<<"\nHere\n\n";
-    return LabelledSet<UpperBoxType>(this->state_space(),bbx);
+    return LabelledUpperBoxType(this->state_space(),bbx);
 }
 
 } // namespace Ariadne

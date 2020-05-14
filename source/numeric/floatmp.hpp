@@ -79,7 +79,9 @@ class MultiplePrecision {
     friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
 using MP = MultiplePrecision;
+inline MultiplePrecision multiple_precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
 inline MultiplePrecision multiple_precision(Bits pr) { return MultiplePrecision(pr); }
+inline MultiplePrecision precision(mpfr_prec_t pr) { return MultiplePrecision(pr); }
 inline MultiplePrecision precision(Bits pr) { return MultiplePrecision(pr); }
 inline MP mp(mpfr_prec_t pr) { return MP(pr); }
 

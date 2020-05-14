@@ -252,7 +252,6 @@ void export_builtins(pymodule& module)
     exact_double_class.def("__str__", &__cstr__<ExactDouble>);
 
     module.def("exact", (ExactDouble(*)(double)) &exact);
-
 }
 
 
@@ -283,6 +282,7 @@ void export_dyadic(pymodule& module)
     dyadic_class.def(init<Integer,Natural>());
     dyadic_class.def(init<ExactDouble>());
     dyadic_class.def(init<Integer>());
+    dyadic_class.def(init<TwoExp>());
     dyadic_class.def(init<Dyadic>());
     dyadic_class.def(init<FloatDPValue>());
     dyadic_class.def(init<FloatMPValue>());
@@ -299,6 +299,7 @@ void export_dyadic(pymodule& module)
 
     implicitly_convertible<Int,Dyadic>();
     implicitly_convertible<Integer,Dyadic>();
+    implicitly_convertible<TwoExp,Dyadic>();
 
     pybind11::class_<Two> two_class(module,"Two");
     two_class.def("__pow__", &__pow__<Two,Int>);
@@ -309,6 +310,7 @@ void export_dyadic(pymodule& module)
     pybind11::class_<TwoExp> two_exp_class(module,"TwoExp");
     two_exp_class.def(__py_rdiv__, &__rdiv__<TwoExp,Dyadic, Return<Dyadic>>);
     dyadic_class.def(__py_div__, &__div__<Dyadic,TwoExp, Return<Dyadic>>);
+    two_exp_class.def("__str__", &__cstr__<Dyadic>);
 
     module.def("cast_exact",(Dyadic(*)(double)) &cast_exact);
 }
@@ -328,6 +330,7 @@ void export_decimal(pymodule& module)
     define_comparisons(module,decimal_class);
     module.def("sqr", &_sqr_<Decimal>);
     module.def("hlf", &_hlf_<Decimal>);
+
     implicitly_convertible<Int,Decimal>();
     implicitly_convertible<Integer,Decimal>();
     implicitly_convertible<Dyadic,Decimal>();
@@ -627,9 +630,8 @@ template<> Void export_precision<MultiplePrecision>(pymodule& module) {
     precision_class.def(init<Nat>());
     precision_class.def("bits",&MultiplePrecision::bits);
     precision_class.def("__str__", &__cstr__<MultiplePrecision>);
-    module.def("multiple_precision", &multiple_precision);
-    module.def("precision", &precision);
-
+    module.def("multiple_precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
+    module.def("precision", (MultiplePrecision(*)(mpfr_prec_t)) &precision);
 }
 
 

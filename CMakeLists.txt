@@ -13,6 +13,10 @@ set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-o
                   init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
 set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    add_definitions(-Wno-non-template-friend)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
@@ -20,7 +24,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
 foreach(WARN ${COMPILER_WARN})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W${WARN}")
 endforeach()
@@ -29,6 +32,9 @@ foreach(WARN ${COMPILER_DONT_WARN})
 endforeach()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-template-friend")
+endif()
+if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (NOT APPLE))
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
 endif()
 if(WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
@@ -113,10 +119,6 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/config.hpp.cmake ${PROJECT_SOURCE_DIR
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
 find_package(Kirk)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  add_definitions(-Wno-non-template-friend)
-endif()
 
 add_subdirectory(source)
 add_subdirectory(tests)

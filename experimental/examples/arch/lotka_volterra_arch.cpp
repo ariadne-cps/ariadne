@@ -32,7 +32,6 @@ Int main(Int argc, const char* argv[])
 {
     Nat evolver_verbosity=get_verbosity(argc,argv);
 
-    /// Set the position and velocity functions.
     RealVariable x("x");
     RealVariable y("y");
     RealVariable cnt("cnt");
@@ -60,14 +59,13 @@ Int main(Int argc, const char* argv[])
     automaton.new_transition(lotkavolterra|inside,exit,lotkavolterra|outside,{next(x)=x,next(y)=y,next(cnt)=cnt},sqr(x-cx)+sqr(y-cy)>=sqr(radius),EventKind::IMPACT);
 
     MaximumError max_err=1e-5;
-    //TaylorSeriesIntegrator integrator(max_err,Order(2u));
     TaylorPicardIntegrator integrator(max_err);
 
     GeneralHybridEvolver evolver(automaton);
     evolver.set_integrator(integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
-    evolver.configuration().set_maximum_step_size(0.09); // optimal: 0.0916
-    evolver.configuration().set_maximum_spacial_error(2e-4);
+    evolver.configuration().set_maximum_step_size(0.09);
+    evolver.configuration().set_maximum_spacial_error(1e-5);
     evolver.verbosity=evolver_verbosity;
 
     RealPoint ic({1.3_dec,1.0_dec});
@@ -80,11 +78,11 @@ Int main(Int argc, const char* argv[])
     std::cout << "Computing evolution... " << std::flush;
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
-    FloatDPUpperBound max_cnt(0);
+    auto final_bounds = orbit.final().bounding_box();
+
     Bool has_any_zero_transitions;
     Bool has_any_two_transitions;
     for (HybridEnclosure encl : orbit.final()) {
-        max_cnt = max(max_cnt,encl.bounding_box().second.continuous_set()[2].upper());
         if ((not has_any_zero_transitions) and encl.previous_events().size() == 0)
             has_any_zero_transitions = true;
         if ((not has_any_two_transitions) and encl.previous_events().size() == 2)
@@ -99,17 +97,13 @@ Int main(Int argc, const char* argv[])
     if (has_any_two_transitions) std::cout << "A final set with two transitions has been found correctly." << std::endl;
     else std::cout << "No final set with two transitions has been found!" << std::endl;
 
-    std::cout << "Trajectory stays within " << (radius*100).get_d() << "% of the equilibrium for at most " << max_cnt << " time units: ";
-    if (max_cnt.get_d() < 0.2) std::cout << "constraint satisfied." << std::endl;
+    std::cout << "Trajectory stays within " << (radius*100).get_d() << "% of the equilibrium for at most " << final_bounds[cnt].upper() << " time units: ";
+    if (definitely(final_bounds[cnt] <= 0.2_dec)) std::cout << "constraint satisfied." << std::endl;
     else std::cout << "constraint not satisfied!" << std::endl;
 
-    Box<ExactIntervalType> final_bounding(3);
     std::cout << "# of final sets: " << orbit.final().size() << std::endl;
-    for (HybridEnclosure encl : orbit.final()) {
-        Box<ExactIntervalType> current_box = encl.bounding_box().second.continuous_set();
-        final_bounding = hull(final_bounding, current_box);
-    }
-    std::cout << "Final set area: " << final_bounding[0].width()*final_bounding[1].width() << std::endl;
+
+    std::cout << "Final set area: " << final_bounds[x].width()*final_bounds[y].width() << std::endl;
 
     HybridAutomaton circle;
     DiscreteLocation rotate;

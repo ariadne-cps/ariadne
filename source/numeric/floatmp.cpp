@@ -449,8 +449,13 @@ FloatMP operator/(Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,FloatMP::get_rounding_mode()); return r;
 }
 
-
 int abslog10floor(double x);
+
+Int abslog10floor(FloatMP const& x)
+{
+    return abslog10floor(x.get_d());
+}
+
 
 String print(const mpfr_t x, int fdgts, mpfr_rnd_t rnd) {
     // fdgts is the number of places allocated for the fractional part

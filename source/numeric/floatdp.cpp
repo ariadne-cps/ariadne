@@ -759,6 +759,11 @@ FloatDP FloatDP::pi(BuiltinRoundingModeType rnd, DoublePrecision pr) {
     }
 }
 
+Int abslog10floor(FloatDP const& x)
+{
+    return abslog10floor(x.get_d());
+}
+
 FloatDP::RoundingModeType FloatDP::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
 Void FloatDP::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
 Void FloatDP::set_rounding_downward() { Ariadne::set_rounding_downward(); }

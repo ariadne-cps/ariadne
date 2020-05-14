@@ -66,12 +66,13 @@ Int main(Int argc, const char* argv[])
 
         SizeType ce=0;
         for (auto set : orbit.reach()) {
-            if (possibly(set.bounding_box().continuous_set()[1] >= 2.75_dec)) {
-                std::cout << "set with y1=" << set.bounding_box().continuous_set()[1] << " is outside the specification." << std::endl;
+            auto bbox = set.bounding_box();
+            if (possibly(bbox[y1] >= 2.75_dec)) {
+                std::cout << "set with y1=" << bbox[y1] << " is outside the specification." << std::endl;
                 ++ce;
             }
-            if (possibly(set.bounding_box().continuous_set()[3] >= 2.75_dec)) {
-                std::cout << "set with y2=" << set.bounding_box().continuous_set()[3] << " is outside the specification." << std::endl;
+            if (possibly(bbox[y2] >= 2.75_dec)) {
+                std::cout << "set with y2=" << bbox[y2] << " is outside the specification." << std::endl;
                 ++ce;
             }
         }
@@ -110,12 +111,13 @@ Int main(Int argc, const char* argv[])
 
         SizeType ce=0;
         for (auto set : orbit.reach()) {
-            if (possibly(set.bounding_box().continuous_set()[1] >= 4.05_dec)) {
-                std::cout << "set with y1=" << set.bounding_box().continuous_set()[1] << " is outside the specification." << std::endl;
+            auto bbox = set.bounding_box();
+            if (possibly(bbox[y1] >= 2.75_dec)) {
+                std::cout << "set with y1=" << bbox[y1] << " is outside the specification." << std::endl;
                 ++ce;
             }
-            if (possibly(set.bounding_box().continuous_set()[3] >= 4.05_dec)) {
-                std::cout << "set with y2=" << set.bounding_box().continuous_set()[3] << " is outside the specification." << std::endl;
+            if (possibly(bbox[y2] >= 2.75_dec)) {
+                std::cout << "set with y2=" << bbox[y2] << " is outside the specification." << std::endl;
                 ++ce;
             }
         }

@@ -107,18 +107,14 @@ Int main(Int argc, const char* argv[])
         std::cout << "Checking properties... " << std::endl << std::flush;
 
         for (auto set : orbit.reach()) {
-            if (possibly(set.bounding_box().continuous_set()[2] >= 1.40_dec))
-                std::cout << "height of " << set.bounding_box().continuous_set()[2] << " is over the required bound."
+            auto bb = set.bounding_box();
+            if (possibly(bb[x3] >= 1.40_dec))
+                std::cout << "height of " << bb[x3] << " is over the required bound."
                           << std::endl;
-            if (possibly(set.bounding_box().continuous_set()[11] >= 1) and
-                possibly(set.bounding_box().continuous_set()[2] <= 0.9_dec))
-                std::cout << "height of " << set.bounding_box().continuous_set()[2]
-                          << " is below the required bound after 1s." << std::endl;
-            if (possibly(set.bounding_box().continuous_set()[11] >= 5) and possibly(
-                    set.bounding_box().continuous_set()[2] <= 0.98_dec or
-                    set.bounding_box().continuous_set()[2] >= 1.02_dec))
-                std::cout << "height of " << set.bounding_box().continuous_set()[2]
-                          << " is outside the required bounds at 5s." << std::endl;
+            if (possibly(bb[t] >= 1) and possibly(bb[x3] <= 0.9_dec))
+                std::cout << "height of " << bb[x3] << " is below the required bound after 1s." << std::endl;
+            if (possibly(bb[t] >= 5) and possibly(bb[x3] <= 0.98_dec or bb[x3] >= 1.02_dec))
+                std::cout << "height of " << bb[x3] << " is outside the required bounds at 5s." << std::endl;
         }
         sw.click();
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;

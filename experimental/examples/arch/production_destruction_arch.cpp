@@ -65,24 +65,18 @@ Int main(Int argc, const char* argv[]) {
         reach1 = orbit.reach();
         std::cout << "Done." << std::endl;
 
-        auto final = orbit.final()[0];
-        auto bbox = final.bounding_box();
-        if (bbox.continuous_set()[0].midpoint().get_d() < 0.0)
-            std::cout << "x is not >= 0" << std::endl;
-        if (bbox.continuous_set()[1].midpoint().get_d() < 0.0)
-            std::cout << "y is not >= 0" << std::endl;
-        if (bbox.continuous_set()[2].midpoint().get_d() < 0.0)
-            std::cout << "z is not >= 0" << std::endl;
-
-        auto sum = bbox.continuous_set()[0]+bbox.continuous_set()[1]+bbox.continuous_set()[2];
-        if (definitely(not contains(sum,100.0)))
+        auto bb = orbit.final().bounding_box();
+        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
+        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
+        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
             std::cout << "x+y+z does not contain 100" << std::endl;
 
-        auto volume = bbox.continuous_set()[0].width()*bbox.continuous_set()[1].width()*bbox.continuous_set()[2].width();
+        auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         std::cout << "Final volume = " << volume << std::endl;
-	std::cout << "Range for final z = " << bbox.continuous_set()[2] << std::endl;    
+	    std::cout << "Range for final z = " << bb[z] << std::endl;
 	
-	sw.click();
+	    sw.click();
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
     }
 
@@ -96,22 +90,17 @@ Int main(Int argc, const char* argv[]) {
         reach2 = orbit.reach();
         std::cout << "Done." << std::endl;
 
-        auto final = orbit.final()[0];
-        auto bbox = final.bounding_box();
-        if (bbox.continuous_set()[0].midpoint().get_d() < 0.0)
-            std::cout << "x is not >= 0" << std::endl;
-        if (bbox.continuous_set()[1].midpoint().get_d() < 0.0)
-            std::cout << "y is not >= 0" << std::endl;
-        if (bbox.continuous_set()[2].midpoint().get_d() < 0.0)
-            std::cout << "z is not >= 0" << std::endl;
+        auto bb = orbit.final().bounding_box();
+        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
+        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
+        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
 
-        auto sum = bbox.continuous_set()[0]+bbox.continuous_set()[1]+bbox.continuous_set()[2];
-        if (definitely(not contains(sum,100.0)))
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
             std::cout << "x+y+z does not contain 100" << std::endl;
 
-        auto volume = bbox.continuous_set()[0].width()*bbox.continuous_set()[1].width()*bbox.continuous_set()[2].width();
+        auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         std::cout << "Final volume = " << volume << std::endl;
-	std::cout << "Range for final z = " << bbox.continuous_set()[2] << std::endl;    
+        std::cout << "Range for final z = " << bb[z] << std::endl;
 
         sw.click();
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
@@ -127,22 +116,17 @@ Int main(Int argc, const char* argv[]) {
         reach3 = orbit.reach();
         std::cout << "Done." << std::endl;
 
-        auto final = orbit.final()[0];
-        auto bbox = final.bounding_box();
-        if (bbox.continuous_set()[0].midpoint().get_d() < 0.0)
-            std::cout << "x is not >= 0" << std::endl;
-        if (bbox.continuous_set()[1].midpoint().get_d() < 0.0)
-            std::cout << "y is not >= 0" << std::endl;
-        if (bbox.continuous_set()[2].midpoint().get_d() < 0.0)
-            std::cout << "z is not >= 0" << std::endl;
+        auto bb = orbit.final().bounding_box();
+        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
+        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
+        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
 
-        auto sum = bbox.continuous_set()[0]+bbox.continuous_set()[1]+bbox.continuous_set()[2];
-        if (definitely(not contains(sum,100.0)))
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
             std::cout << "x+y+z does not contain 100" << std::endl;
 
-        auto volume = bbox.continuous_set()[0].width()*bbox.continuous_set()[1].width()*bbox.continuous_set()[2].width();
+        auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         std::cout << "Final volume = " << volume << std::endl;
-	std::cout << "Range for final z = " << bbox.continuous_set()[2] << std::endl;    
+        std::cout << "Range for final z = " << bb[z] << std::endl;
 
         sw.click();
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;

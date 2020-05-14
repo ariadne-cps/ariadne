@@ -60,7 +60,6 @@ Int main(Int argc, const char* argv[])
         std::cout << "Running for W=0.01...\n" << std::flush;
 
         MaximumError max_err = 1e-3;
-        //TaylorSeriesIntegrator integrator(max_err, Order(4u));
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
@@ -90,21 +89,18 @@ Int main(Int argc, const char* argv[])
 
         Nat ce = 0;
         for (auto set : orbit.reach()) {
-            if (definitely(set.bounding_box().continuous_set()[3].upper().raw() >= 4.5)) {
-                std::cout << "set with value " << set.bounding_box().continuous_set()[3] << " does not respect the specification."
-                          << std::endl;
+            auto bb = set.bounding_box();
+            if (possibly(bb[x4] >= 4.5_dec)) {
+                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
                 ++ce;
             }
         }
 
-        UpperIntervalType bounds = UpperIntervalType::empty_interval();
-        for (auto set : orbit.final()) {
-            bounds = hull(set.bounding_box().continuous_set()[3],bounds);
-        }
+        auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
         if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << bounds.width() << std::endl;
+        std::cout << "Width of final x4: " << x4_width << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach1.adjoin(orbit.reach());
@@ -143,21 +139,18 @@ Int main(Int argc, const char* argv[])
 
         Nat ce = 0;
         for (auto set : orbit.reach()) {
-            if (definitely(set.bounding_box().continuous_set()[3].upper().raw() >= 4.5)) {
-                std::cout << "set with value " << set.bounding_box().continuous_set()[3] << " does not respect the specification."
-                          << std::endl;
+            auto bb = set.bounding_box();
+            if (possibly(bb[x4] >= 4.5_dec)) {
+                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
                 ++ce;
             }
         }
 
-        UpperIntervalType bounds = UpperIntervalType::empty_interval();
-        for (auto set : orbit.final()) {
-            bounds = hull(set.bounding_box().continuous_set()[3],bounds);
-        }
+        auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
         if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << bounds.width() << std::endl;
+        std::cout << "Width of final x4: " << x4_width << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach2.adjoin(orbit.reach());
@@ -196,21 +189,18 @@ Int main(Int argc, const char* argv[])
 
         Nat ce = 0;
         for (auto set : orbit.reach()) {
-            if (definitely(set.bounding_box().continuous_set()[3].upper().raw() >= 5.0)) {
-                std::cout << "set with value " << set.bounding_box().continuous_set()[3] << " does not respect the specification."
-                          << std::endl;
+            auto bb = set.bounding_box();
+            if (possibly(bb[x4] >= 4.5_dec)) {
+                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
                 ++ce;
             }
         }
 
-        UpperIntervalType bounds = UpperIntervalType::empty_interval();
-        for (auto set : orbit.final()) {
-            bounds = hull(set.bounding_box().continuous_set()[3],bounds);
-        }
+        auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
         if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << bounds.width() << std::endl;
+        std::cout << "Width of final x4: " << x4_width << std::endl;
         std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
         reach3.adjoin(orbit.reach());

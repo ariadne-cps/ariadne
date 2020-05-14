@@ -696,7 +696,18 @@ ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
     return result;
 }
 
-
+VariablesUpperBoxType
+ListSet<HybridEnclosure>::bounding_box() const
+{
+    auto iter=this->begin();
+    auto box = iter->state_auxiliary_set().euclidean_set().bounding_box();
+    RealSpace space = join(iter->state_space(),iter->auxiliary_space());
+    ++iter;
+    for(; iter!=this->end(); ++iter) {
+        box = hull(box,iter->state_auxiliary_set().euclidean_set().bounding_box());
+    }
+    return VariablesUpperBoxType(space,box);
+}
 
 
 } // namespace Ariadne

@@ -64,6 +64,7 @@ template<class L, class R> class Assignment;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
 template<class X> class Space;
 typedef Space<Real> RealSpace;
+typedef VariablesBox<UpperIntervalType> VariablesUpperBoxType;
 template<class ES> class ListSet;
 template<class ES> class HybridListSet;
 
@@ -374,6 +375,7 @@ class ListSet<HybridEnclosure>
     SizeType size() const { return _list.size(); }
     const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
+    VariablesUpperBoxType bounding_box() const;
     Void reduce() { for(auto& set : _list ) { set.reduce(); } }
     Void clear() { this->_list.clear(); }
     HybridEnclosure& front() { return this->_list.front(); }

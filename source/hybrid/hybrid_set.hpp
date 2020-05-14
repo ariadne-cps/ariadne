@@ -224,6 +224,8 @@ template<class IVL> class HybridBox
         else { return VariablesBox<IVL>(this->space(),this->euclidean_set() ).euclidean_set(spc); }
     }
 
+    IVL operator[](const RealVariable& v) const { return VariablesBox<IVL>(this->space(),this->euclidean_set())[v]; }
+
     virtual Void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const override;
   private:
     static LabelledSet<Box<IVL>> _make_box(List<VariableInterval<UB>> const& bnds) {

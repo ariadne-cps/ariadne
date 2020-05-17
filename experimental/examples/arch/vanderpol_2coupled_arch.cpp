@@ -82,20 +82,19 @@ Int main(Int argc, const char* argv[])
 
         reach1.adjoin(orbit.reach());
     }
-    /*
     {
         std::cout << "Running for mu=2...\n" << std::flush;
 
         RealConstant mu("mu",2.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
 
-        MaximumError max_err = 1e-5;
+        MaximumError max_err = 2e-5;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
-        evolver.configuration().set_maximum_enclosure_radius(0.05);
+        evolver.configuration().set_maximum_enclosure_radius(0.03);
         evolver.configuration().set_maximum_step_size(0.02);
-        evolver.configuration().set_maximum_spacial_error(1e-5);
+        evolver.configuration().set_maximum_spacial_error(2e-5);
         evolver.verbosity = evolver_verbosity;
 
         RealVariablesBox initial_set({1.55_dec<=x1<=1.85_dec,2.35_dec<=y1<=2.45_dec,1.55_dec<=x2<=1.85_dec,2.35_dec<=y2<=2.45_dec});
@@ -112,11 +111,11 @@ Int main(Int argc, const char* argv[])
         SizeType ce=0;
         for (auto set : orbit.reach()) {
             auto bbox = set.bounding_box();
-            if (possibly(bbox[y1] >= 2.75_dec)) {
+            if (possibly(bbox[y1] >= 4.05_dec)) {
                 std::cout << "set with y1=" << bbox[y1] << " is outside the specification." << std::endl;
                 ++ce;
             }
-            if (possibly(bbox[y2] >= 2.75_dec)) {
+            if (possibly(bbox[y2] >= 4.05_dec)) {
                 std::cout << "set with y2=" << bbox[y2] << " is outside the specification." << std::endl;
                 ++ce;
             }
@@ -127,15 +126,14 @@ Int main(Int argc, const char* argv[])
 
         reach2.adjoin(orbit.reach());
     }
-    */
 
     std::cout << "Plotting..." << std::endl;
 
     LabelledFigure fig(Axes2d(-2.5<=x1<=2.5,-4.05<=y1<=4.05));
     fig << fill_colour(ariadneorange);
-    fig.draw(reach1);
-    fig << fill_colour(Colour(0.6,0.6,0.6));
     fig.draw(reach2);
+    fig << fill_colour(Colour(0.6,0.6,0.6));
+    fig.draw(reach1);
     fig.write("coupled-vanderpol");
     std::cout << "Png coupled-vanderpol file written." << std::endl;
 }

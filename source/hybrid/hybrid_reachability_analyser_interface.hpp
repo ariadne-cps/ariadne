@@ -52,10 +52,10 @@ class HybridReachabilityAnalyserInterface
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::StateSpaceType StateSpaceType;
     typedef SystemType::TimeType TimeType;
-    typedef HybridOvertSetInterface OvertSetInterfaceType;
-    typedef HybridCompactSetInterface CompactSetInterfaceType;
-    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
-    typedef HybridRegularSetInterface RegularSetInterfaceType;
+    typedef EffectiveHybridOvertSetInterface OvertSetInterfaceType;
+    typedef EffectiveHybridCompactSetInterface CompactSetInterfaceType;
+    typedef EffectiveHybridLocatedSetInterface LocatedSetInterfaceType;
+    typedef EffectiveHybridRegularSetInterface RegularSetInterfaceType;
     typedef HybridGridTreePaving SetApproximationType;
 
   public:

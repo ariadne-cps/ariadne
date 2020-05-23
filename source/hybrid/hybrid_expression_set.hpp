@@ -80,7 +80,7 @@ template<class IVL> class HybridVariablesBox
 };
 
 class HybridBoxSet
-    : public virtual HybridSetInterface
+    : public virtual EffectiveHybridSetInterface
     , public virtual HybridDrawableInterface
     , public HybridVariablesBox<RealInterval>
 {
@@ -109,7 +109,7 @@ class HybridBoxSet
     virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   private:
     virtual HybridBoxSet* clone() const override;
-    virtual SetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
+    virtual EffectiveEuclideanSetInterface* _euclidean_set(DiscreteLocation, RealSpace) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -154,7 +154,7 @@ class HybridBoxesSet
 //! \brief A hybrid set defined by a constraint system in each location.
 //! NOTE: If a location is not specified, the set is considered empty. This may be changed in future to the set being considered unconstrained (entire).
 class HybridConstraintSet
-    : public virtual HybridRegularSetInterface
+    : public virtual EffectiveHybridRegularSetInterface
 {
     Map<DiscreteLocation, RealExpressionConstraintSet> _sets;
   public:
@@ -191,14 +191,14 @@ class HybridConstraintSet
 
     virtual OutputStream& _write(OutputStream& os) const override;
   protected:
-    virtual RegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    virtual EffectiveEuclideanRegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
 
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridBoundedConstraintSet
-    : public virtual HybridSetInterface
+    : public virtual EffectiveHybridSetInterface
     , public virtual HybridDrawableInterface
 {
     Map<DiscreteLocation, RealExpressionBoundedConstraintSet> _sets;

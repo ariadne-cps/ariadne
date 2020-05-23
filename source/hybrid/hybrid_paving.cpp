@@ -98,7 +98,7 @@ Void HybridGridTreePaving::restrict_to_extent(Nat h) {
     }
 }
 
-Void HybridGridTreePaving::adjoin_inner_approximation(const HybridSetInterface& hset, const Nat fineness) {
+Void HybridGridTreePaving::adjoin_inner_approximation(const EffectiveHybridSetInterface& hset, const Nat fineness) {
     Set<DiscreteLocation> locations=hset.locations();
     for(auto location : locations) {
         RealSpace space = this->space(location);
@@ -116,8 +116,8 @@ Void HybridGridTreePaving::adjoin_inner_approximation(const HybridExactBoxes& hb
     }
 }
 
-Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterface& hs, const Nat extent, const Nat fineness) {
-    Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
+Void HybridGridTreePaving::adjoin_lower_approximation(const EffectiveHybridOvertSetInterface& hs, const Nat extent, const Nat fineness) {
+    Set<DiscreteLocation> hlocs=dynamic_cast<const EffectiveHybridBoundedSetInterface&>(hs).locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {
         DiscreteLocation loc=*_loc_iter;
@@ -126,7 +126,7 @@ Void HybridGridTreePaving::adjoin_lower_approximation(const HybridOvertSetInterf
     }
 }
 
-Void HybridGridTreePaving::adjoin_outer_approximation(const HybridCompactSetInterface& hs, const Nat fineness) {
+Void HybridGridTreePaving::adjoin_outer_approximation(const EffectiveHybridCompactSetInterface& hs, const Nat fineness) {
     Set<DiscreteLocation> hlocs=hs.locations();
     for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
             _loc_iter!=hlocs.end(); ++_loc_iter) {

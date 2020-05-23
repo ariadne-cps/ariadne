@@ -278,7 +278,7 @@ template<class IVL> class HybridBoxes
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridValidatedConstrainedImageSet
-    : public virtual HybridValidatedLocatedSetInterface
+    : public virtual ValidatedHybridLocatedSetInterface
     , public virtual HybridDrawableInterface
     , public HybridBasicSet<ValidatedConstrainedImageSet>
 {

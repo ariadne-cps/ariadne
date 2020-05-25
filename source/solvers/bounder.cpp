@@ -75,6 +75,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
 
     UpperBoxType B=D;
     Bool success=false;
+    StepSizeType hprev=h*1.5_dy;
     while(!success) {
         B=this->_formula(f,D,T,A,D,BOX_RADIUS_WIDENING,INITIAL_STARTING_WIDENING);
         for(CounterType i=0; i<EXPANSION_STEPS; ++i) {
@@ -94,11 +95,12 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             }
         }
         if(!success) {
-            h=hlf(h);
+            StepSizeType hnew=hlf(hprev);
             ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
+            hprev=h;
+            h=hnew;
             if (h < MINIMUM_STEP_SIZE)
                 ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << ") allowed, bounding could not be found.");
-
             T = to_time_bounds(t,t+h);
         }
     }

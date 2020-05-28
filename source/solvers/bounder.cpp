@@ -99,6 +99,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
             hprev=h;
             h=hnew;
+            h=StepSizeType(h.get_d());
             if (h < MINIMUM_STEP_SIZE)
                 ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << ") allowed, bounding could not be found.");
             T = to_time_bounds(t,t+h);

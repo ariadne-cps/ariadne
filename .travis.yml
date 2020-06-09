@@ -81,10 +81,16 @@ script:
       cmake . $CMAKE_ARGS
       make -j $($NPROC)
       ./hybrid_evolution_tutorial -v 0 > /dev/null
+    fi
+  - |
+    if [[ -z "$COVERAGE" ]]; then
       cd ~/tutorials/rigorous_numerics
       cmake . $CMAKE_ARGS
       make -j $($NPROC)
       ./rigorous_numerics_tutorial > /dev/null
+    fi
+  - |
+    if [[ -z "$COVERAGE" ]]; then
       mkdir ~/tutorials/python
       cd $TRAVIS_BUILD_DIR
       cp -Rf python/tutorials/* ~/tutorials/python

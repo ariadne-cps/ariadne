@@ -317,8 +317,8 @@ HybridGridTreePaving extend_auxiliary(const HybridGridTreePaving& hybrid_paving,
 
 
 struct Orbit<HybridStorage>::Data {
-    Data(const HybridGrid& grid)
-        : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    Data(const HybridGrid& grid, HybridAutomatonInterface const& sys)
+        : initial(grid,sys), reach(grid,sys), intermediate(grid,sys), final(grid,sys) { }
     HybridStorage initial;
     HybridStorage reach;
     HybridStorage intermediate;
@@ -327,7 +327,7 @@ struct Orbit<HybridStorage>::Data {
 
 Orbit<HybridStorage>::
 Orbit(const HybridStorage& initial_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.system()))
 {
     this->_data->initial=initial_set;
 }
@@ -337,7 +337,7 @@ Orbit(const HybridStorage& initial_set,
       const HybridStorage& reach_set,
       const HybridStorage& intermediate_set,
       const HybridStorage& final_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.system()))
 {
     this->_data->initial=initial_set;
     this->_data->reach=reach_set;

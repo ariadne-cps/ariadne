@@ -61,7 +61,7 @@ class HybridStorageElementReference {
     HybridStorage* _hstorage; DiscreteLocation const& _loc;
   public:
     HybridStorageElementReference(HybridStorage* hstorage, DiscreteLocation const& loc) : _hstorage(hstorage), _loc(loc) { }
-    inline operator const Storage () const;
+    inline operator const LabelledStorage () const;
     inline Void clear();
 };
 
@@ -75,15 +75,15 @@ class HybridStorage
   public:
   public:
     typedef HybridGrid GridType;
+    typedef HybridGridTreePaving PavingType;
 
-    HybridStorage(HybridGrid const& hg) : _state_set(hg), _system_ptr(nullptr) { }
-    HybridStorage(HybridGridTreePaving const& hgtp) : _state_set(hgtp), _system_ptr(nullptr) { }
     HybridStorage(HybridGrid const& hg, HybridAutomatonInterface const& sys) : _state_set(hg), _system_ptr(&sys) { }
     HybridStorage(HybridGridTreePaving const& hgtp, HybridAutomatonInterface const& sys) : _state_set(hgtp), _system_ptr(&sys) { }
 
-    HybridAutomatonInterface const* auxiliary() const { return this->_system_ptr; }
-    EffectiveVectorMultivariateFunction auxiliary(DiscreteLocation const& loc) const {
-        return this->_system_ptr->auxiliary_function(loc); }
+    HybridAutomatonInterface const& system() const { return *this->_system_ptr; }
+    HybridAutomatonInterface const& auxiliary_data() const { return *this->_system_ptr; }
+    LabelledMapping auxiliary_mapping(DiscreteLocation const& loc) const {
+        return LabelledMapping(this->_system_ptr->continuous_state_space(loc),this->_system_ptr->auxiliary_function(loc),this->_system_ptr->continuous_auxiliary_space(loc)); }
 
     HybridGrid grid() const { return this->_state_set.grid(); }
     HybridGridTreePaving& state_set() {
@@ -119,8 +119,7 @@ class HybridStorage
     Void mince(Nat fineness) { this->_state_set.mince(fineness); }
     Void recombine() { this->_state_set.recombine(); }
 
-    const Storage operator[] (DiscreteLocation const& loc) const {
-        return Storage(this->_state_set[loc],this->auxiliary(loc)); }
+    const LabelledStorage operator[] (DiscreteLocation const& loc) const;
     HybridStorageElementReference operator[] (DiscreteLocation const& loc) {
         return HybridStorageElementReference{this,loc}; }
 
@@ -139,8 +138,8 @@ class HybridStorage
 };
 
 //HybridStorageElementReference::operator const Storage () const { return (*_hstorage)[_loc]; }
-HybridStorageElementReference::operator const Storage () const {
-    return Storage(_hstorage->_state_set[_loc],_hstorage->auxiliary(_loc)); }
+HybridStorageElementReference::operator const LabelledStorage () const {
+    return LabelledStorage(_hstorage->_state_set[_loc],_hstorage->auxiliary_mapping(_loc)); }
 Void HybridStorageElementReference::clear() { return _hstorage->state_set()[_loc].clear(); }
 
 } // namespace Ariadne

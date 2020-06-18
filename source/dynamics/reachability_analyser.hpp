@@ -96,7 +96,7 @@ template<class SYS> class ReachabilityAnalyser
     typedef typename Interface::EnclosureType EnclosureType;
     typedef typename Interface::StorageType StorageType;
     using GridType = typename StorageType::GridType;
-    using PavingType = StorageType;
+    using PavingType = typename StorageType::PavingType;
   private:
   protected:
     SharedPointer<SystemType> _system;

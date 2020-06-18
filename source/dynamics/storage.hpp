@@ -41,6 +41,8 @@ namespace Ariadne {
 template<class T> class Space;
 using RealSpace = Space<Real>;
 
+typedef EffectiveVectorMultivariateFunction Mapping;
+
 //! \ingroup DynamicsModule
 //! \brief A storage for part of the reachable or evolved set of a dynamical system.
 class Storage
@@ -50,11 +52,12 @@ class Storage
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
   public:
     typedef Grid GridType;
-    Storage(Grid const& g) : _state_set(g), _auxiliary_mapping(EuclideanDomain(g.dimension())) { }
-    Storage(GridTreePaving const& gtp) : _state_set(gtp), _auxiliary_mapping(EuclideanDomain(gtp.dimension())) { }
-    Storage(Grid const& g, EffectiveVectorMultivariateFunction const& aux)
+    typedef GridTreePaving PavingType;
+//    Storage(Grid const& g) : _state_set(g), _auxiliary_mapping(0,g.dimension()) { }
+//    Storage(GridTreePaving const& gtp) : _state_set(gtp), _auxiliary_mapping(0,gtp.dimension()) { }
+    Storage(Grid const& g, Mapping const& aux)
         : _state_set(g), _auxiliary_mapping(aux) { }
-    Storage(GridTreePaving const& gtp, EffectiveVectorMultivariateFunction const& aux)
+    Storage(GridTreePaving const& gtp, Mapping const& aux)
         : _state_set(gtp), _auxiliary_mapping(aux) { }
 
     GridTreePaving& state_set() { return this->_state_set; }
@@ -62,7 +65,9 @@ class Storage
     GridTreePaving state_auxiliary_set() const {
         Grid auxiliary_grid(this->_auxiliary_mapping.result_size());
         return outer_skew_product(this->_state_set, auxiliary_grid, this->_auxiliary_mapping); }
-    EffectiveVectorMultivariateFunction const& auxiliary_mapping() const { return this->_auxiliary_mapping; }
+    Mapping const& auxiliary_mapping() const { return this->_auxiliary_mapping; }
+    Mapping const& auxiliary_function() const { return this->_auxiliary_mapping; }
+    Mapping const& auxiliary_data() const { return this->_auxiliary_mapping; }
 
     Bool is_empty() const { return this->_state_set.is_empty(); }
     SizeType size() const { return this->_state_set.size(); }
@@ -107,12 +112,47 @@ class Storage
         return os << "Storage(" << set._state_set << "," << set._auxiliary_mapping << ")"; }
 };
 
+
 struct LabelledGrid {
     template<class SYS> explicit LabelledGrid(SYS const& system)
-        : LabelledGrid(Grid(system.state_space().dimension()),system.state_space(),
+        : LabelledGrid(Grid(system.state_space().dimension()),system.state_space()) { }
+    LabelledGrid(Grid const& grid, RealSpace const& space)
+        : _grid(grid), _variables(space.variable_names()) { }
+
+    Grid const& euclidean_grid() const { return this->_grid; }
+    const RealSpace space() const { return RealSpace(this->_variables); }
+
+    friend OutputStream& operator<<(OutputStream& os, LabelledGrid const& grid) {
+        return os << "LabelledGrid( " << grid._grid << ", " << grid._variables << ")"; }
+  private:
+    Grid _grid;
+    List<Identifier> _variables;
+};
+
+
+struct LabelledGridTreePaving {
+  public:
+    LabelledGridTreePaving(Grid const& grid, RealSpace const& space)
+        : _set(grid), _variables(space.variable_names()) { }
+    LabelledGridTreePaving(GridTreePaving set, RealSpace const& space)
+        : _set(set), _variables(space.variable_names()) { }
+    explicit LabelledGridTreePaving(LabelledGrid const& lgrid)
+        : LabelledGridTreePaving(lgrid.euclidean_grid(),lgrid.space()) { }
+    GridTreePaving& euclidean_set() { return this->_set; }
+    GridTreePaving const& euclidean_set() const { return this->_set; }
+    const RealSpace space() const { return RealSpace(this->_variables); }
+  private:
+    GridTreePaving _set;
+    List<Identifier> _variables;
+};
+
+
+struct LabelledStateAuxiliaryGrid {
+    template<class SYS> explicit LabelledStateAuxiliaryGrid(SYS const& system)
+        : LabelledStateAuxiliaryGrid(Grid(system.state_space().dimension()),system.state_space(),
                        system.auxiliary_mapping(),system.auxiliary_space()) { }
-    LabelledGrid(Grid const& grid, RealSpace const& state_space);
-    LabelledGrid(Grid const& grid, RealSpace const& state_space,
+    LabelledStateAuxiliaryGrid(Grid const& grid, RealSpace const& state_space);
+    LabelledStateAuxiliaryGrid(Grid const& grid, RealSpace const& state_space,
                  EffectiveVectorMultivariateFunction const& auxiliary_mapping, RealSpace const& auxiliary_space)
         : _grid(grid), _auxiliary_mapping(auxiliary_mapping)
         , _state_variables(state_space.variable_names()),  _auxiliary_variables(auxiliary_space.variable_names()) { }
@@ -120,11 +160,11 @@ struct LabelledGrid {
     Grid const& euclidean_grid() const { return this->_grid; }
     EffectiveVectorMultivariateFunction const& auxiliary_mapping() const { return this->_auxiliary_mapping; }
     const RealSpace state_space() const { return RealSpace(this->_state_variables); }
-    RealSpace const auxiliary_space() const { return RealSpace(this->_auxiliary_variables); }
+    const RealSpace auxiliary_space() const { return RealSpace(this->_auxiliary_variables); }
 
-    friend OutputStream& operator<<(OutputStream& os, LabelledGrid const& grid) {
-        return os << "LabelledGrid( " << grid._grid << ", " << grid._state_variables << ", "
-                  << grid._auxiliary_mapping << ", " << grid._auxiliary_variables; }
+    friend OutputStream& operator<<(OutputStream& os, LabelledStateAuxiliaryGrid const& grid) {
+        return os << "LabelledStateAuxiliaryGrid( " << grid._grid << ", " << grid._state_variables << ", "
+                  << grid._auxiliary_mapping << ", " << grid._auxiliary_variables << ")"; }
   private:
     Grid _grid;
     EffectiveVectorMultivariateFunction _auxiliary_mapping;
@@ -132,25 +172,54 @@ struct LabelledGrid {
     List<Identifier> _auxiliary_variables;
 };
 
+class LabelledMapping {
+  public:
+    LabelledMapping(RealSpace argument_space, Mapping mapping, RealSpace result_space)
+        : _mapping(mapping), _argument_variables(argument_space.variable_names()), _result_variables(result_space.variable_names()) { }
+
+    const RealSpace argument_space() const { return RealSpace(this->_argument_variables); }
+    const Mapping& mapping() const { return this->_mapping; }
+    const Mapping& function() const { return this->_mapping; }
+    const RealSpace result_space() const { return RealSpace(this->_result_variables); }
+  private:
+    Mapping _mapping;
+    List<Identifier> _argument_variables;
+    List<Identifier> _result_variables;
+};
+
 class LabelledStorage
     : public LabelledDrawableInterface, public Storage
 {
+    template<class SYS> static LabelledMapping labelled_auxiliary_mapping(SYS const& sys) {
+        return LabelledMapping(sys.state_space(),sys.auxilary_mapping(),sys.auxiliary_space()); }
   public:
     typedef LabelledGrid GridType;
 
-    LabelledStorage(Grid const& grid, RealSpace const& state_space);
-    LabelledStorage(GridTreePaving const& paving, RealSpace const& state_space);
     LabelledStorage(Grid const& grid, RealSpace const& state_space,
-            EffectiveVectorMultivariateFunction const& auxiliary_mapping, RealSpace const& auxiliary_space);
+                    Mapping const& auxiliary_mapping, RealSpace const& auxiliary_space);
     LabelledStorage(GridTreePaving const& paving, RealSpace const& state_space,
-            EffectiveVectorMultivariateFunction const& auxiliary_mapping, RealSpace const& auxiliary_space);
+                    Mapping const& auxiliary_mapping, RealSpace const& auxiliary_space);
 
-    LabelledStorage(LabelledGrid const& grid)
-        : LabelledStorage(grid.euclidean_grid(),grid.state_space(),grid.auxiliary_mapping(),grid.auxiliary_space()) { }
-    template<class SYS> LabelledStorage(LabelledGrid const& grid, SYS const& system)
-        : LabelledStorage(grid) { }
+    LabelledStorage(Grid const& grid, LabelledMapping const& auxiliary)
+        : LabelledStorage(GridTreePaving(grid),auxiliary) { assert(grid.dimension()==auxiliary.argument_space().dimension()); }
+    LabelledStorage(GridTreePaving const& paving, LabelledMapping const& auxiliary)
+        : LabelledStorage(paving.grid(),auxiliary.argument_space(),auxiliary.mapping(),auxiliary.result_space()) {
+            assert(paving.dimension()==auxiliary.argument_space().dimension()); }
+    LabelledStorage(LabelledGrid const& grid, LabelledMapping const& auxiliary)
+        : LabelledStorage(grid.euclidean_grid(),auxiliary) { assert(grid.space()==auxiliary.argument_space()); }
+    LabelledStorage(LabelledGridTreePaving const& paving, LabelledMapping const& auxiliary)
+        : LabelledStorage(paving.euclidean_set(),auxiliary) { assert(paving.space()==auxiliary.argument_space()); }
+
     template<class SYS> LabelledStorage(Grid const& grid, SYS const& system)
         : LabelledStorage(grid,system.state_space(),system.auxiliary_mapping(),system.auxiliary_space()) { }
+    template<class SYS> LabelledStorage(GridTreePaving const& paving, SYS const& system)
+        : LabelledStorage(paving,system.state_space(),system.auxilary_mapping(),system.auxiliary_space()) { }
+    template<class SYS> LabelledStorage(LabelledGrid const& grid, SYS const& system)
+        : LabelledStorage(grid.euclidean_grid(),system.state_space(),system.auxiliary_mapping(),system.auxiliary_space()) {
+            assert(grid.space()==system.state_space()); }
+    template<class SYS> LabelledStorage(LabelledGridTreePaving const& paving, SYS const& system)
+        : LabelledStorage(paving.euclidean_set(),system.state_space(),system.auxiliary_mapping(),system.auxiliary_space()) {
+            assert(paving.space()==system.state_space()); }
 
     Storage& euclidean_set() { return *this; }
     Storage const& euclidean_set() const { return *this; }
@@ -159,6 +228,9 @@ class LabelledStorage
     const RealSpace state_auxiliary_space() const;
 
     const LabelledGrid grid() const;
+    const LabelledMapping auxiliary_data() const;
+    const LabelledMapping auxiliary_mapping() const;
+    const Mapping auxiliary_function() const;
 
     Void adjoin(LabelledStorage const& other) {
         ARIADNE_PRECONDITION(this->_state_variables==other._state_variables);
@@ -183,14 +255,14 @@ class LabelledStorage
     virtual Void draw(CanvasInterface& c, const Variables2d& p) const override;
 
     friend OutputStream& operator<<(OutputStream& os, LabelledStorage const& set) {
-        return os << "LabelledStorage(" << set.state_set() << ", state_variables=" << set._state_variables << ", auxiliary_mapping=" << set.auxiliary_mapping() << ", auxiliary_variables=" << set._auxiliary_variables << ")"; }
+        return os << "LabelledStorage(" << set.state_set() << ", state_variables=" << set._state_variables << ", auxiliary_mapping=" << set.auxiliary_mapping().function() << ", auxiliary_variables=" << set._auxiliary_variables << ")"; }
 
   private:
     List<Identifier> _state_variables;
     List<Identifier> _auxiliary_variables;
 };
 
-LabelledStorage inner_approximation(EffectiveEuclideanSetInterface const& set, LabelledGrid const& grid, Nat fineness);
+LabelledGridTreePaving inner_approximation(EffectiveEuclideanSetInterface const& set, LabelledGrid const& grid, Nat fineness);
 
 } //namespace Ariadne
 

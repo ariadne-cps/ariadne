@@ -53,7 +53,8 @@ Orbit<ExactPoint<F>>::insert(Value<F> t, const ExactPoint<F>& pt)
 
 
 struct Orbit<Storage>::Data {
-    Data(const Grid& grid) : initial(grid), reach(grid), intermediate(grid), final(grid) { }
+    Data(const Grid& grid, const EffectiveVectorMultivariateFunction& auxiliary_mapping)
+        : initial(grid,auxiliary_mapping), reach(initial), intermediate(initial), final(initial) { }
     Storage initial;
     Storage reach;
     Storage intermediate;
@@ -62,7 +63,7 @@ struct Orbit<Storage>::Data {
 
 Orbit<Storage>::
 Orbit(const Storage& initial_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.auxiliary_mapping()))
 {
     this->_data->initial=initial_set;
 }
@@ -73,7 +74,7 @@ Orbit(const Storage& initial_set,
       const Storage& reach_set,
       const Storage& intermediate_set,
       const Storage& final_set)
-    : _data(new Data(initial_set.grid()))
+    : _data(new Data(initial_set.grid(),initial_set.auxiliary_mapping()))
 {
     this->_data->initial=initial_set;
     this->_data->reach=reach_set;

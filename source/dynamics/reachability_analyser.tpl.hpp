@@ -91,12 +91,12 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
                      ListSet<EnclosureType>& evolve_enclosures,
                      Semantics semantics,
                      const EvolverType& evolver) const
-    -> Pair<PavingType,PavingType>
+    -> Pair<StorageType,StorageType>
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::_reach_evolve_resume(...)\n");
     const GridType& grid=this->_configuration->grid();
-    Pair<PavingType,PavingType> result=make_pair(PavingType(grid),PavingType(grid));
-    PavingType& reach_cells=result.first; PavingType& evolve_cells=result.second;
+    Pair<StorageType,StorageType> result=make_pair(StorageType(grid,this->system()),StorageType(grid,this->system()));
+    StorageType& reach_cells=result.first; StorageType& evolve_cells=result.second;
 
     for(auto initial_enclosure : initial_enclosures) {
         ListSet<EnclosureType> current_reach_enclosures;
@@ -128,15 +128,15 @@ _reach_evolve_resume(const ListSet<EnclosureType>& initial_enclosures,
 // Helper functions for operators on lists of sets.
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
-_upper_reach(const PavingType& set,
+_upper_reach(const StorageType& set,
              const TimeType& time,
              const Nat accuracy,
              const EvolverType& evolver) const
-    -> PavingType
+    -> StorageType
 {
     GridType grid=set.grid();
-    PavingType result(grid);
-    PavingType cells=set;
+    StorageType result(grid,this->system());
+    StorageType cells=set;
     cells.mince(accuracy);
     for(auto cell : cells) {
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
@@ -151,14 +151,14 @@ _upper_reach(const PavingType& set,
 
 template<class SYS> auto
 ReachabilityAnalyser<SYS>::
-_upper_evolve(const PavingType& set,
+_upper_evolve(const StorageType& set,
               const TimeType& time,
               const Nat accuracy,
               const EvolverType& evolver) const
-    -> PavingType
+    -> StorageType
 {
     GridType grid=set.grid();
-    PavingType result(grid); PavingType cells=set; cells.mince(accuracy);
+    StorageType result(grid,this->system()); StorageType cells=set; cells.mince(accuracy);
     for(auto cell : cells) {
         ARIADNE_LOG(5,"Evolving cell = "<<cell<<"\n");
         EnclosureType initial_enclosure = evolver.enclosure(cell.box());
@@ -174,16 +174,16 @@ _upper_evolve(const PavingType& set,
 
 template<class SYS> Void
 ReachabilityAnalyser<SYS>::
-_adjoin_upper_reach_evolve(PavingType& reach_cells,
-                           PavingType& evolve_cells,
-                           const PavingType& set,
+_adjoin_upper_reach_evolve(StorageType& reach_cells,
+                           StorageType& evolve_cells,
+                           const StorageType& set,
                            const TimeType& time,
                            const Nat accuracy,
                            const EvolverType& evolver) const
 {
     ARIADNE_LOG(4,"ReachabilityAnalyser<SYS>::_adjoin_upper_reach_evolve(...)\n");
     GridType grid=set.grid();
-    PavingType cells=set;
+    StorageType cells=set;
     cells.mince(accuracy);
 
     ARIADNE_LOG(3,"Evolving "<<cells.size()<<" cells\n");
@@ -220,14 +220,14 @@ template<class SYS> auto
 ReachabilityAnalyser<SYS>::
 lower_evolve(const OvertSetInterfaceType& initial_set,
              const TimeType& time) const
-    -> PavingType
+    -> StorageType
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::lower_evolve(...)\n");
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     Nat grid_extent = this->_configuration->maximum_grid_extent();
     GridType grid=this->_configuration->grid();
-    PavingType initial_cells(grid);
-    PavingType final_cells(grid);
+    StorageType initial_cells(grid,this->system());
+    StorageType final_cells(grid,this->system());
 
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_extent,grid_fineness+4);
@@ -256,7 +256,8 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     Nat grid_extent = this->_configuration->maximum_grid_extent();
     const GridType& grid=this->_configuration->grid();
-    PavingType initial_cells(grid); PavingType reach_cells(grid);
+    StorageType initial_cells(grid,this->system());
+    StorageType reach_cells(grid,this->system());
 
     ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
@@ -287,9 +288,9 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
 
     const GridType& grid=this->_configuration->grid();
 
-    PavingType initial_cells(grid);
+    StorageType initial_cells(grid,this->system());
 
-    PavingType reach(grid); PavingType evolve_cells(grid);
+    StorageType reach(grid,this->system()); StorageType evolve_cells(grid,this->system());
 
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_extent,grid_fineness+4);
@@ -330,21 +331,21 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
     Bool has_bounding_domain = this->_configuration->bounding_domain_ptr() != nullptr;
 
-    PavingType bounding(grid);
+    StorageType bounding(grid,this->system());
     if (has_bounding_domain)
         bounding.adjoin_outer_approximation(this->_configuration->bounding_domain(),maximum_grid_fineness);
 
     ARIADNE_LOG(5,"maximum_grid_extent="<<maximum_grid_extent<<"\n");
     ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 
-    PavingType initial_cells(grid), evolve_cells(grid);
+    StorageType initial_cells(grid,this->system()), evolve_cells(grid,this->system());
     initial_cells.adjoin_lower_approximation(initial_set,maximum_grid_extent,maximum_grid_fineness+4);
-    if (has_bounding_domain) initial_cells.restrict(bounding);
+    if (has_bounding_domain) { initial_cells.restrict(bounding);}
     ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
 
     ListSet<EnclosureType> starting_enclosures;
 
-    PavingType reach_cells(grid);
+    StorageType reach_cells(grid,this->system());
 
     if(possibly(transient_time > TimeType(0))) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
@@ -369,7 +370,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
     while(!evolve_cells.is_empty()) {
 
-        PavingType new_reach_cells(grid);
+        StorageType new_reach_cells(grid,this->system());
         ListSet<EnclosureType> new_evolve_enclosures;
         make_lpair(new_reach_cells,evolve_cells) = _reach_evolve_resume(starting_enclosures,lock_to_grid_time,
                 maximum_grid_fineness,new_evolve_enclosures,Semantics::LOWER,*_evolver);
@@ -408,7 +409,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
 {
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::upper_evolve(...)\n");
     const GridType& grid=this->_configuration->grid();
-    PavingType evolve_cells(grid);
+    StorageType evolve_cells(grid,this->system());
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_fineness);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
@@ -443,12 +444,12 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::upper_reach(set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
-    PavingType evolve_cells(grid);
+    StorageType evolve_cells(grid,this->system());
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     ARIADNE_LOG(4,"grid_fineness="<<grid_fineness<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_fineness);
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
-    PavingType reach_cells(evolve_cells);
+    StorageType reach_cells=evolve_cells;
     ARIADNE_LOG(4,"reach size ="<<reach_cells.size()<<"\n");
     TimeType lock_to_grid_time = this->_configuration->lock_to_grid_time();
     Natural time_steps=compute_time_steps(time,lock_to_grid_time);
@@ -456,7 +457,8 @@ upper_reach(const CompactSetInterfaceType& initial_set,
 
     ARIADNE_LOG(3,"time="<<time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
-    PavingType found_cells(grid), accumulated_evolve_cells(grid);
+    StorageType found_cells(grid,this->system());
+    StorageType accumulated_evolve_cells(grid,this->system());
     for(Natural i=0u; i!=time_steps; ++i) {
         if(verbosity==1) { std::clog << "i=" << i << "\n"; }
         accumulated_evolve_cells.adjoin(found_cells);
@@ -495,12 +497,12 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::upper_reach_evolve(...)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const GridType& grid=this->_configuration->grid();
-    PavingType evolve_cells(grid);
+    StorageType evolve_cells(grid,this->system());
     Nat grid_fineness = this->_configuration->maximum_grid_fineness();
     ARIADNE_LOG(4,"grid_fineness="<<grid_fineness<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_fineness);
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
-    PavingType reach_cells(evolve_cells);
+    StorageType reach_cells=evolve_cells;
     ARIADNE_LOG(4,"reach="<<reach_cells<<"\n");
     TimeType lock_to_grid_time = this->_configuration->lock_to_grid_time();
     Natural time_steps=compute_time_steps(time,lock_to_grid_time);
@@ -508,7 +510,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"time="<<time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
-    PavingType found_cells(grid);
+    StorageType found_cells(grid,this->system());
     for(Natural i=0u; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1u<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,lock_to_grid_time,grid_fineness,*_evolver);
@@ -548,21 +550,21 @@ outer_chain_reach(const CompactSetInterfaceType& initial_set) const
 
     Bool has_bounding_domain = this->_configuration->bounding_domain_ptr()!=nullptr;
 
-    StorageType bounding(grid);
+    StorageType bounding(grid,this->system());
     if (has_bounding_domain)
         bounding.adjoin_outer_approximation(this->_configuration->bounding_domain(),maximum_grid_fineness);
 
     ARIADNE_LOG(3,"maximum_grid_extent="<<maximum_grid_extent<<"\n");
     ARIADNE_LOG(3,"bounding_size="<<bounding.size()<<"\n");
 
-    StorageType initial_cells(grid);
+    StorageType initial_cells(grid,this->system());
     initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_fineness);
     _checked_restriction(initial_cells,bounding);
     ARIADNE_LOG(3,"initial_size="<<initial_cells.size()<<"\n");
 
     Nat stage=0;
 
-    StorageType reach_cells(grid);
+    StorageType reach_cells(grid,this->system());
     StorageType evolve_cells(grid,this->system());
     if(definitely(transient_time > TimeType(0))) {
         ARIADNE_LOG(1,"Computing transient evolution...\n");
@@ -615,12 +617,13 @@ verify_safety(const CompactSetInterfaceType& initial_set,
 //
 //    BoundingDomainType safe_set_bounding_box=cast_exact(bounded_safe_set_ptr->bounding_box());
 //    const GridType& grid=this->_configuration->grid();
-//    PavingType safe_cells=inner_approximation(safe_set, grid, safe_set_bounding_box, this->_configuration->maximum_grid_fineness());
+//    StorageType safe_cells=inner_approximation(safe_set, grid, safe_set_bounding_box, this->_configuration->maximum_grid_fineness());
 
     const RegularLocatedSetInterfaceType* bounded_safe_set_ptr=dynamic_cast<RegularLocatedSetInterfaceType const*>(&safe_set);
     assert(bounded_safe_set_ptr != nullptr);
     const GridType& grid=this->_configuration->grid();
-    PavingType safe_cells=inner_approximation(*bounded_safe_set_ptr, grid, this->_configuration->maximum_grid_fineness());
+    auto safe_paving=inner_approximation(*bounded_safe_set_ptr, grid, this->_configuration->maximum_grid_fineness());
+    StorageType safe_cells(safe_paving,this->system());
 
     ARIADNE_LOG(2,"ReachabilityAnalyser<SYS>::outer_chain_reach(...)\n");
     TimeType transient_time = this->_configuration->transient_time();
@@ -630,7 +633,7 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-    PavingType initial_cells(grid);
+    StorageType initial_cells(grid,this->system());
     initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_fineness);
     ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
 
@@ -643,8 +646,8 @@ verify_safety(const CompactSetInterfaceType& initial_set,
         std::clog <<"\n\ri="<<std::setw(3)<<std::left<<stage<<" #s="<<std::setw(4)<<std::left<<initial_cells.size()<<std::endl;
     }
 
-    PavingType reach_cells(grid);
-    PavingType evolve_cells(grid);
+    StorageType reach_cells(grid,this->system());
+    StorageType evolve_cells(grid,this->system());
     if(definitely(transient_time > 0)) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_time,maximum_grid_fineness,*_evolver);
@@ -658,8 +661,8 @@ verify_safety(const CompactSetInterfaceType& initial_set,
     }
 
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
-    PavingType starting_cells = evolve_cells;
-    PavingType current_evolve_cells(grid);
+    StorageType starting_cells = evolve_cells;
+    StorageType current_evolve_cells(grid,this->system());
 
     while(!starting_cells.is_empty()) {
         if(verbosity==1) { std::clog <<"\n\ri="<<std::setw(3)<<++stage<<" #s="<<std::setw(4)<<std::left<<starting_cells.size()<<std::flush; }
@@ -683,10 +686,10 @@ verify_safety(const CompactSetInterfaceType& initial_set,
 
 template<class SYS> Void
 ReachabilityAnalyser<SYS>::
-_checked_restriction(PavingType& set, const PavingType& bounding) const
+_checked_restriction(StorageType& set, const StorageType& bounding) const
 {
     ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
-    PavingType set_copy(set.grid());
+    StorageType set_copy(set.grid(),set.auxiliary_data());
 
     if (policy != ChainOverspillPolicy::IGNORE) {
         set_copy = set;

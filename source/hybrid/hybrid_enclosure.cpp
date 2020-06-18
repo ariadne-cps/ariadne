@@ -668,7 +668,7 @@ Void HybridEnclosure::adjoin_outer_approximation_to(HybridStorage& hst, Nat fine
     }
 }
 
-
+/*
 HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat fineness) {
     HybridStorage result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
@@ -676,6 +676,7 @@ HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const Hyb
     }
     return result;
 }
+*/
 
 inline Void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {

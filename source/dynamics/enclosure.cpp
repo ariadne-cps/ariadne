@@ -506,7 +506,7 @@ Void Enclosure::apply_fixed_evolve_step(ValidatedVectorMultivariateFunction flow
         this->_state_function=compose(flow,join(this->_state_function,evolve_time_function));
     }
     this->_time_function=this->_time_function + time;
-    this->_time_function=this->_dwell_time_function + time;
+    this->_dwell_time_function=this->_dwell_time_function + time;
     this->_check();
 }
 

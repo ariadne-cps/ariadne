@@ -28,20 +28,19 @@
 
 using namespace Ariadne;
 
+Int main(Int argc, const char* argv[]) {
 
-Int main(Int argc, const char* argv[])
-{
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     RealVariable x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), t("t");
 
     VectorField dynamics({dot(x1) = Real(1.4) * x3 - Real(0.9) * x1,
-                          dot(x2) = Real(2.5) * x5 - Real(1.5) * x2,
-                          dot(x3) = Real(0.6) * x7 - Real(0.8) * x2 * x3,
-                          dot(x4) = Real(2) - Real(1.3) * x3 * x4,
-                          dot(x5) = Real(0.7) * x1 - x4 * x5,
-                          dot(x6) = Real(0.3) * x1 - Real(3.1) * x6,
-                          dot(x7) = Real(1.8) * x6 - Real(1.5) * x2 * x7
+                                 dot(x2) = Real(2.5) * x5 - Real(1.5) * x2,
+                                 dot(x3) = Real(0.6) * x7 - Real(0.8) * x2 * x3,
+                                 dot(x4) = Real(2) - Real(1.3) * x3 * x4,
+                                 dot(x5) = Real(0.7) * x1 - x4 * x5,
+                                 dot(x6) = Real(0.3) * x1 - Real(3.1) * x6,
+                                 dot(x7) = Real(1.8) * x6 - Real(1.5) * x2 * x7
                          });
 
     Real x1_0(1.2);
@@ -52,12 +51,12 @@ Int main(Int argc, const char* argv[])
     Real x6_0(0.1);
     Real x7_0(0.45);
 
-    std::cout << "Laub-Loomis system:\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Laub-Loomis system:");
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
     {
-        std::cout << "Running for W=0.01...\n" << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.01...");
 
         MaximumError max_err = 1e-3;
         TaylorPicardIntegrator integrator(max_err);
@@ -66,7 +65,6 @@ Int main(Int argc, const char* argv[])
         evolver.configuration().set_maximum_enclosure_radius(0.09);
         evolver.configuration().set_maximum_step_size(0.2);
         evolver.configuration().set_maximum_spacial_error(1e-3);
-        evolver.verbosity = evolver_verbosity;
 
         Real eps = 1 / 100_q;
 
@@ -77,21 +75,21 @@ Int main(Int argc, const char* argv[])
                                       x5_0 - eps <= x5 <= x5_0 + eps,
                                       x6_0 - eps <= x6 <= x6_0 + eps,
                                       x7_0 - eps <= x7 <= x7_0 + eps
-                                       });
+                                     });
 
         Real evolution_time(20.0);
 
         StopWatch sw;
 
-        std::cout << "Computing orbit... " << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
-        std::cout << "done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
 
+        ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 4.5_dec)) {
-                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(3,"Set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -99,15 +97,15 @@ Int main(Int argc, const char* argv[])
         auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
-        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << x4_width << std::endl;
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
 
         reach1.adjoin(orbit.reach());
     }
 
     {
-        std::cout << "Running for W=0.05...\n" << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.05...");
 
         MaximumError max_err = 1e-3;
         TaylorPicardIntegrator integrator(max_err);
@@ -116,7 +114,6 @@ Int main(Int argc, const char* argv[])
         evolver.configuration().set_maximum_enclosure_radius(0.04);
         evolver.configuration().set_maximum_step_size(0.2);
         evolver.configuration().set_maximum_spacial_error(1e-3);
-        evolver.verbosity = evolver_verbosity;
 
         Real eps = 1 / 20_q;
 
@@ -133,15 +130,15 @@ Int main(Int argc, const char* argv[])
 
         StopWatch sw;
 
-        std::cout << "Computing orbit... " << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
-        std::cout << "done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
 
+        ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 4.5_dec)) {
-                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -149,15 +146,15 @@ Int main(Int argc, const char* argv[])
         auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
-        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << x4_width << std::endl;
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
 
         reach2.adjoin(orbit.reach());
     }
 
     {
-        std::cout << "Running for W=0.1...\n" << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Running for W=0.1...");
 
         MaximumError max_err = 1e-3;
         TaylorPicardIntegrator integrator(max_err);
@@ -166,7 +163,6 @@ Int main(Int argc, const char* argv[])
         evolver.configuration().set_maximum_enclosure_radius(0.09);
         evolver.configuration().set_maximum_step_size(0.2);
         evolver.configuration().set_maximum_spacial_error(1e-3);
-        evolver.verbosity = evolver_verbosity;
 
         Real eps = 1 / 10_q;
 
@@ -183,15 +179,15 @@ Int main(Int argc, const char* argv[])
 
         StopWatch sw;
 
-        std::cout << "Computing orbit... " << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
-        std::cout << "done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(2,"Computing orbit...");
+        ARIADNE_LOG_RUN_AT(2, auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
 
+        ARIADNE_LOG_PRINTLN_AT(2,"Checking properties...");
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x4] >= 4.5_dec)) {
-                std::cout << "set with value " << bb[x4] << " does not respect the specification." << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
         }
@@ -199,14 +195,14 @@ Int main(Int argc, const char* argv[])
         auto x4_width = orbit.final().bounding_box()[x4].width();
 
         sw.click();
-        if (ce>0) std::cout << "Number of counterexamples: " << ce << std::endl;
-        std::cout << "Width of final x4: " << x4_width << std::endl;
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
+        ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
+        ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
 
         reach3.adjoin(orbit.reach());
     }
 
-    std::cout << "Plotting..." << std::endl;
+    ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=20,1.5<=x4<=5}));
     fig << line_colour(0.0,0.0,0.0);
     fig << line_style(false);
@@ -217,5 +213,5 @@ Int main(Int argc, const char* argv[])
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
     fig.write("laubloomis");
-    std::cout << "File laubloomis.png written." << std::endl;
+    ARIADNE_LOG_PRINTLN("File laubloomis.png written.");
 }

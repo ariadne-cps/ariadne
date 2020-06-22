@@ -104,7 +104,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose1(const AnalyticFunction& fn,
     FloatDPUpperBound truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
-                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm-c;
@@ -140,7 +140,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose2(const AnalyticFunction& fn,
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm-c;
@@ -188,7 +188,7 @@ template<class A> EnableIfNormedAlgebra<A> _compose3(const AnalyticFunction& fn,
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR);
     }
 
     A x=tm;
@@ -231,7 +231,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Sqrt, const A& x)
     auto rad=cast_exact(x.radius());
 
     if(avg<=rad) {
-        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
     }
 
     auto eps=mag(rad/avg);
@@ -263,7 +263,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Rec, const A& x)
     auto rad=cast_exact(x.radius());
 
     if(decide(rad>=abs(avg))) {
-        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad<<"\n");
+        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", avg="<<avg<<", rad="<<rad);
     }
 
     auto eps=mag(rad/avg);
@@ -294,7 +294,7 @@ template<class A> A NormedAlgebraOperations<A>::apply(Log, const A& x)
     auto rad=cast_exact(x.radius());
 
     if(avg<=rad) {
-        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x);
     }
 
     auto eps=mag(rad/avg);

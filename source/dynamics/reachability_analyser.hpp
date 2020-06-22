@@ -74,7 +74,6 @@ template<> struct SafetyCertificate<EuclideanSpace> {
 //! \brief A class for performing reachability analysis on a hybrid system.
 template<class SYS> class ReachabilityAnalyser
     : public ReachabilityAnalyserInterface<SYS>
-    , public Loggable
 {
     typedef ReachabilityAnalyserInterface<SYS> Interface;
   public:

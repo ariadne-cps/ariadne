@@ -61,7 +61,6 @@ class EvolutionProfiler;
 //! The actual evolution steps are performed by the Integrator class.
 class VectorFieldEvolver
     : public EvolverBase< VectorField, LabelledEnclosure, typename VectorField::TimeType >
-    , public Loggable
 {
   public:
     typedef VectorFieldEvolverConfiguration ConfigurationType;

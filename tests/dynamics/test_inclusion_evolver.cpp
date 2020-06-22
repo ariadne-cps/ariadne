@@ -32,6 +32,7 @@
 #include "algebra/algebra.hpp"
 #include "geometry/function_set.hpp"
 #include "output/graphics.hpp"
+#include "output/logging.hpp"
 #include "symbolic/expression_set.hpp"
 
 #include "../test.hpp"
@@ -40,22 +41,21 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verb, bool draw) const {
+    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
 
         auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
         evolver.configuration().approximations(approximations);
         evolver.configuration().maximum_step_size(step);
-        evolver.verbosity = verb;
 
         List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     }
 
-    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, unsigned int verb, bool draw) const {
+    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
 
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
             std::cout << appro << std::endl;
-            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,verb,draw);
+            run_single_test(name,ivf,initial,evolution_time,step,singleapproximation,sweeper,integrator,reconditioner,draw);
         }
     }
 
@@ -69,8 +69,6 @@ class TestInclusionIntegrator {
         double sw_threshold = 1e-8;
         ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
-        unsigned int verb = 0;
-
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
 
         TaylorPicardIntegrator integrator(
@@ -83,7 +81,7 @@ class TestInclusionIntegrator {
 
         LohnerReconditioner reconditioner(initial.variables().size(),inputs.variables().size(),period_of_parameter_reduction,ratio_of_parameters_to_keep);
 
-        run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,verb,false);
+        run_each_approximation(name,ivf,initial_ranges_to_box(initial),evolution_time,step,approximations,sweeper,integrator,reconditioner,false);
     }
 
   public:
@@ -146,8 +144,8 @@ void TestInclusionIntegrator::test() const {
     ARIADNE_TEST_CALL(test_rossler());
 }
 
-int main() {
-
+int main(int argc, const char* argv[]) {
+    Logger::set_verbosity(get_verbosity(argc,argv));
     TestInclusionIntegrator().test();
     return ARIADNE_TEST_FAILURES;
 }

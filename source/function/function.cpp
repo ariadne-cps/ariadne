@@ -351,7 +351,7 @@ Vector<Formula<Real>> make_formula(const EffectiveVectorMultivariateFunction& f)
     } else if( (ff=dynamic_cast<const VectorFormulaFunction<Real>*>(&fi)) ) {
         return ff->_formulae;
     } else {
-        ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
+        ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f);
     }
 }
 
@@ -616,9 +616,9 @@ EffectiveVectorMultivariateFunction compose(const EffectiveVectorMultivariateFun
 }
 
 EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f) {
-    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
-    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
-    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g);
+    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g);
+    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g);
 
     try {
         EffectiveScalarMultivariateFunction r=g.derivative(0)*f[0];
@@ -628,14 +628,14 @@ EffectiveScalarMultivariateFunction lie_derivative(const EffectiveScalarMultivar
         return r;
     }
     catch(...) {
-        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of "<<g<<" under vector field "<<f<<"\n");
+        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of "<<g<<" under vector field "<<f);
     }
 }
 
 EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivariateFunction& g, const EffectiveVectorMultivariateFunction& f) {
-    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
-    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
-    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
+    ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g);
+    ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g);
+    ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g);
 
     try {
         EffectiveVectorMultivariateFunction r(g.result_size(),g.domain());
@@ -643,7 +643,7 @@ EffectiveVectorMultivariateFunction lie_derivative(const EffectiveVectorMultivar
         return r;
     }
     catch(...) {
-        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of vector function "<<g<<" under vector field "<<f<<"\n");
+        ARIADNE_FAIL_MSG("Failed to compute Lie derivative of vector function "<<g<<" under vector field "<<f);
     }
 }
 

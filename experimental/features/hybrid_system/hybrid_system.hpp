@@ -79,7 +79,6 @@ template<class k, class V> class Map;
 //! UNDER DEVELOPMENT
 //! \sa \ref HybridAutomaton.
 class HybridSystem
-    : public Loggable
 {
   public:
     //! \brief The type used to represent time.

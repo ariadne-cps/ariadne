@@ -52,7 +52,7 @@ inline OutputStream& operator<<(OutputStream& os, Comparison const& cmp) {
         case Comparison::EQUAL: os << "EQUAL";  break;
         case Comparison::GREATER: os << "GREATER";  break;
         case Comparison::INCOMPARABLE: os << "INCOMPARABLE"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled Comparison for output streaming.\n");
+        default: ARIADNE_FAIL_MSG("Unhandled Comparison for output streaming.");
     }
     return os;
 }

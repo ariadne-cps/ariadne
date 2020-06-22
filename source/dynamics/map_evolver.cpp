@@ -120,7 +120,6 @@ MapEvolver::MapEvolver(const SystemType& system)
     : _sys_ptr(system.clone())
     , _configuration(new ConfigurationType())
 {
-    this->charcode = "m";
 }
 
 typename MapEvolver::FunctionFactoryType const MapEvolver::function_factory() const {
@@ -167,19 +166,17 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            Bool reach) const
 {
-    verbosity=0;
-
-    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
 
     List< TimedEnclosureType > working_sets;
 
     {
         // Set up initial timed set models
-        ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_set = "<<initial_set);
         EnclosureType initial_enclosure(initial_set);
-        ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
         TimeType initial_time = 0;
-        ARIADNE_LOG(6,"initial_time = "<<initial_time<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
         working_sets.push_back(make_pair(initial_time,initial_enclosure));
     }
 
@@ -229,17 +226,19 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Semantics semantics,
                 Bool reach) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     EnclosureType initial_enclosure;
     TimeType initial_time;
 
-    ARIADNE_LOG(9,"working_set = "<<current_set<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"working_set = "<<current_set);
     make_lpair(initial_time,initial_enclosure)=current_set;
 
-    ARIADNE_LOG(6,"initial_time = "<<initial_time<<"");
-    ARIADNE_LOG(6,"initial_enclosure = "<<initial_enclosure<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_time = "<<initial_time);
+    ARIADNE_LOG_PRINTLN_AT(1,"initial_enclosure = "<<initial_enclosure);
 
-    ARIADNE_LOG(2,"box = "<<initial_enclosure.bounding_box()<<" ");
-    ARIADNE_LOG(2,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
+    ARIADNE_LOG_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
     //const Nat nd=initial_enclosure.result_size();
     //const Nat ng=initial_enclosure.argument_size();
 
@@ -251,15 +250,12 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     EnclosureType& final_enclosure=initial_enclosure;
     final_enclosure.apply_map(_sys_ptr->function());
     TimeType final_time=initial_time+1;
-    ARIADNE_LOG(6,"final_enclosure = "<<final_enclosure<<"\n");
-    ARIADNE_LOG(4,"Done computing evolution\n");
+    ARIADNE_LOG_PRINTLN("final_enclosure = "<<final_enclosure);
 
     reach_sets.adjoin(final_enclosure);
 
     intermediate_sets.adjoin(final_enclosure);
     working_sets.push_back(make_pair(final_time,final_enclosure));
-
-    ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
 }
 

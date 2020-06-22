@@ -200,23 +200,19 @@ class TestOptimiser
 };
 
 Int main(Int argc, const char* argv[]) {
-    Nat optimiser_verbosity = get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
-    nlio.verbosity=optimiser_verbosity;
     TestOptimiser(nlio).test();
     return ARIADNE_TEST_FAILURES;
     NonlinearInteriorPointOptimiser nlo;
-    nlo.verbosity=optimiser_verbosity;
     TestOptimiser(nlo).test();
 
     ApproximateOptimiser appo;
-    appo.verbosity=optimiser_verbosity;
     TestOptimiser(appo).test_nonlinear_equality_feasibility();
 
     IntervalOptimiser ivlo;
-    ivlo.verbosity=optimiser_verbosity;
-    //TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
+    TestOptimiser(ivlo).test_nonlinear_equality_feasibility();
     return ARIADNE_TEST_FAILURES;
 }
 

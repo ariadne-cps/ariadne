@@ -26,6 +26,7 @@
 #include "../solvers/integrator.hpp"
 #include "../solvers/bounder.hpp"
 #include "../algebra/expansion.inl.hpp"
+#include "../output/progress_indicator.hpp"
 #include "inclusion_evolver.hpp"
 
 namespace Ariadne {
@@ -146,17 +147,6 @@ class InclusionEvolverState {
     }
 };
 
-
-inline char activity_symbol(SizeType step) {
-    switch (step % 4) {
-    case 0: return '\\';
-    case 1: return '|';
-    case 2: return '/';
-    default: return '-';
-    }
-}
-
-
 inline Map<InclusionIntegratorHandle,FloatDP> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
 
     Nat total_steps(0);
@@ -180,6 +170,7 @@ InclusionEvolver::InclusionEvolver(SystemType const& system, SweeperDP const& sw
     , _configuration(new ConfigurationType())
 {
     assert(system.inputs().size() > 0);
+    ARIADNE_LOG_SCOPE_CREATE;
 }
 
 Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFunctionModelType& function, InclusionEvolverState& state) {
@@ -195,9 +186,9 @@ Void InclusionEvolver::_recondition_and_update(ValidatedVectorMultivariateFuncti
 }
 
 List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDomainType const& initial, Real const& tmax) {
-
-    ARIADNE_LOG(2,"System: "<<_system<<"\n");
-    ARIADNE_LOG(2,"Initial: "<<initial<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN_AT(1,"System: "<<_system);
+    ARIADNE_LOG_PRINTLN_AT(1,"Initial: "<<initial);
 
     StepSizeType hsug(_configuration->maximum_step_size());
 
@@ -209,25 +200,26 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
 
     List<ValidatedVectorMultivariateFunctionModelDP> result;
 
+    ProgressIndicator indicator(tmax.get_d());
+
     while (possibly(t<lower_bound(tmax))) {
 
-        if (verbosity == 1)
-            std::cout << "\r[" << activity_symbol(state.step()) << "] " << static_cast<int>(std::round(100*t.get_d()/tmax.get_d())) << "% " << std::flush;
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
 
-        ARIADNE_LOG(3,"step#:"<<state.step()<<", t:"<<t<<", hsug:"<<hsug << "\n");
-
-        ARIADNE_LOG(4,"n. of parameters="<<evolve_function.argument_size()<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"step#="<<state.step()<<", t="<<t<<", hsug="<<hsug);
+        ARIADNE_LOG_PRINTLN_AT(2,"n. of parameters="<<evolve_function.argument_size());
 
         auto approximators_to_use = state.approximators_to_use();
 
-        ARIADNE_LOG(4,"approximators to use="<<approximators_to_use<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(2,"approximators to use="<<approximators_to_use);
 
         auto domx = cast_exact_box(evolve_function.range());
 
         UpperBoxType B;
         StepSizeType h;
-        std::tie(h,B)=approximators_to_use.at(0).flow_bounds(domx,_system.inputs(),hsug);
-        ARIADNE_LOG(3,"flow bounds = "<<B<<" (using h = " << h << ")\n");
+
+        ARIADNE_LOG_RUN_AT(1,std::tie(h,B)=approximators_to_use.at(0).flow_bounds(domx,_system.inputs(),hsug));
+        ARIADNE_LOG_PRINTLN_AT(2,"flow bounds = "<<B<<" (using h = " << h << ")");
 
         TimeStepType new_t = lower_bound(t+h);
 
@@ -238,7 +230,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
         FloatDPApproximation best_volume(std::numeric_limits<double>::infinity());
 
         for (auto approximator : approximators_to_use) {
-            ARIADNE_LOG(5,"checking "<<approximator<<" approximator\n");
+            ARIADNE_LOG_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
 
             auto current_reach=approximator.reach(domx,evolve_function,B,t,h);
             auto current_evolve=approximator.evolve(current_reach.at(current_reach.size()-1u),new_t);
@@ -246,7 +238,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
             FloatDPApproximation current_volume = volume(current_evolve.range());
             if (possibly(current_volume < best_volume)) {
                 best = approximator;
-                ARIADNE_LOG(6,"best approximator: " << best << "\n");
+                ARIADNE_LOG_PRINTLN_AT(3,"best approximator: " << best);
                 best_reach_functions = current_reach;
                 best_evolve_function = current_evolve;
                 best_volume = current_volume;
@@ -254,25 +246,27 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
         }
 
         if (approximators_to_use.size() > 1)
-            ARIADNE_LOG(4,"chosen approximator: " << best << "\n");
+            ARIADNE_LOG_PRINTLN_AT(2,"chosen approximator: " << best);
 
         state.update_with_best(best);
-        ARIADNE_LOG(4,"updated schedule: " << state.schedule() << "\n");
 
         reach_functions = best_reach_functions;
         evolve_function = best_evolve_function;
 
-        ARIADNE_LOG(3,"evolve bounds="<<evolve_function.range()<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(2,"evolve bounds="<<evolve_function.range());
 
         result.concatenate(reach_functions);
 
-        this->_recondition_and_update(evolve_function,state);
+        ARIADNE_LOG_RUN_AT(2, this->_recondition_and_update(evolve_function, state));
 
         state.next_step();
         t=new_t;
+        indicator.update_current(t.get_d());
+
+        ARIADNE_LOG_PRINTLN_AT(2,"updated schedule: " << state.schedule());
     }
 
-    ARIADNE_LOG(2,"approximation % ="<<convert_to_percentages(state.global_optima_count())<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"approximation % ="<<convert_to_percentages(state.global_optima_count()));
 
     return result;
 }
@@ -322,13 +316,13 @@ Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
 }
 
 ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::incorporate_errors(ValidatedVectorMultivariateFunctionModelDP const& f) const {
-
+    ARIADNE_LOG_SCOPE_CREATE;
     ValidatedVectorMultivariateTaylorFunctionModelDP const& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP const&>(f.reference());
 
     BoxDomainType domain=f.domain();
     BoxDomainType errors=cast_exact(cast_exact(f.errors())*FloatDPUpperInterval(-1,+1)); // FIXME: Avoid cast;
 
-    ARIADNE_LOG(6,"Uniform errors:"<<errors<<"\n");
+    ARIADNE_LOG_PRINTLN("Uniform errors:"<<errors);
 
     ValidatedVectorMultivariateFunctionModelDP error_function=ValidatedVectorMultivariateTaylorFunctionModelDP::identity(errors,tf.properties());
     ValidatedVectorMultivariateFunctionModelDP result = embed(f,errors)+embed(domain,error_function);
@@ -337,13 +331,13 @@ ValidatedVectorMultivariateFunctionModelDP LohnerReconditioner::incorporate_erro
 }
 
 Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionModelDP& f) const {
-    ARIADNE_LOG(6,"simplifying\n");
-    ARIADNE_LOG(6,"f="<<f<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("f="<<f);
 
     auto m=f.argument_size();
     auto n=f.result_size();
 
-    ARIADNE_LOG(6,"num.parameters="<<m<<", to keep="<< this->_number_of_parameters_to_keep <<"\n");
+    ARIADNE_LOG_PRINTLN("num.parameters="<<m<<", to keep="<< this->_number_of_parameters_to_keep );
 
     ValidatedVectorMultivariateTaylorFunctionModelDP& tf = dynamic_cast<ValidatedVectorMultivariateTaylorFunctionModelDP&>(f.reference());
 
@@ -365,7 +359,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
         }
     }
 
-    ARIADNE_LOG(6,"C"<<C<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"C"<<C);
 
     Array<IndexedFloatDPError> Ce(m);
     for (auto j : range(m)) {
@@ -374,20 +368,20 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
             Ce[j].value += C[j][i];
         }
     }
-    ARIADNE_LOG(6,"Ce:"<<Ce<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Ce:"<<Ce);
     auto SCe=Ce;
     std::sort(SCe.begin(),SCe.end(),IndexedFloatDPErrorComparator());
-    ARIADNE_LOG(6,"SortedCe:"<<SCe<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"SortedCe:"<<SCe);
     List<SizeType> keep_indices;
     List<SizeType> remove_indices;
 
     if (m <= this->_number_of_parameters_to_keep) {
-        ARIADNE_LOG(6, "Insufficient number of variables, not simplifying\n");
+        ARIADNE_LOG_PRINTLN("Insufficient number of variables, not simplifying");
         return;
     }
 
     Nat number_of_variables_to_remove = m - this->_number_of_parameters_to_keep;
-    ARIADNE_LOG(6, "Number of parameters to remove:" << _number_of_parameters_to_keep<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1, "Number of parameters to remove:" << _number_of_parameters_to_keep);
 
     for (auto j : range(number_of_variables_to_remove)) {
         remove_indices.append(SCe[j].index);
@@ -397,10 +391,10 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
         keep_indices.append(SCe[j].index);
     }
 
-    ARIADNE_LOG(2,"number of kept parameters: " << keep_indices.size() << "/" << m << "\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"number of kept parameters: " << keep_indices.size() << "/" << m);
 
-    ARIADNE_LOG(6,"keep_indices:"<<keep_indices<<"\n");
-    ARIADNE_LOG(6,"remove_indices:"<<remove_indices<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(2,"keep_indices:"<<keep_indices);
+    ARIADNE_LOG_PRINTLN_AT(2,"remove_indices:"<<remove_indices);
 
     for (auto i : range(n)) {
         FloatDPError error = tf[i].error();

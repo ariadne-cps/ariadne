@@ -371,6 +371,8 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
 	// Warning: Uniform part of space function is not included!
 
+    ARIADNE_LOG_SCOPE_CREATE;
+
     const Nat nx=this->dimension();
     const Nat np=this->number_of_parameters();
     const Nat nc=this->_constraint_models.size();
@@ -427,7 +429,7 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
         lp.u[i]=+inf;
     }
 
-    ARIADNE_LOG(7,"set="<<*this<<", A="<<lp.A<<", b="<<lp.b<<", l="<<lp.l<<", u="<<lp.u<<"\n");
+    ARIADNE_LOG_PRINTLN("set="<<*this<<", A="<<lp.A<<", b="<<lp.b<<", l="<<lp.l<<", u="<<lp.u);
 }
 
 
@@ -513,6 +515,8 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
 Void
 ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
     SimplexSolver<FloatDP> lpsolver;
@@ -622,9 +626,9 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
         errors[i]=this->_space_models[i].error().raw();
     }
 
-    ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
+    ARIADNE_LOG_PRINTLN("A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u);
     ValidatedKleenean feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
-    ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
+    ARIADNE_LOG_PRINTLN("  vt="<<lp.vt<<"\nx="<<lp.x);
     if(definitely(not feasible)) { return; } // no intersection
 
     _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,fineness);
@@ -642,7 +646,9 @@ class PerturbationGenerator {
 List<Point2d>
 ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 {
-    ARIADNE_LOG(3,"ValidatedAffineConstrainedImageSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+
+    ARIADNE_LOG_PRINTLN("xind="<<xind<<", yind="<<yind);
 
     SimplexSolver<FloatDP> lpsolver;
     PerturbationGenerator eps;
@@ -671,7 +677,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<FloatDP> h(ne);
     h[0]=numeric_cast<FloatDP>(xa.value());
     h[1]=numeric_cast<FloatDP>(ya.value());
-    ARIADNE_LOG(3," G="<<G<<"\n h="<<h<<"\n");
+    ARIADNE_LOG_PRINTLN("G="<<G)
+    ARIADNE_LOG_PRINTLN("h="<<h);
 
     // Set up linear programming problem Ax=b; l<=x<=u
     // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
@@ -708,7 +715,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     u[nx+nc]=static_cast<FloatDP>(+xa.error().raw());
     l[nx+nc+1]=static_cast<FloatDP>(-ya.error().raw());
     u[nx+nc+1]=static_cast<FloatDP>(+ya.error().raw());
-    ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
+    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" l="<<l<<" u="<<u);
 
     List<Point2d> vertices;
 
@@ -718,7 +725,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     // Find an initial feasible point
     ValidatedKleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
-    ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
+    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p)
+    ARIADNE_LOG_PRINTLN("x="<<x<<" Ax="<< A*x );
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 
     // If problem not feasible, then set is empty; return empty list
@@ -729,8 +737,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     // Find a point on the boundary; choose the point minimising the spacial x-coordinate
     x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
-    ARIADNE_LOG(3,"\nA="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n")
-    ARIADNE_LOG(3,"  x="<<x<<" Ax="<<(A*x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h<<"\n\n");
+    ARIADNE_LOG_PRINTLN("A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p)
+    ARIADNE_LOG_PRINTLN("x="<<x<<" Ax="<<(A*x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h);
 
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 
@@ -785,8 +793,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 FloatDP dot=last_vec[0]*trial_vec[0]+last_vec[1]*trial_vec[1];
                 FloatDP cross=last_vec[0]*trial_vec[1]-last_vec[1]*trial_vec[0];
                 FloatDP cot_theta=dot/cross;
-                ARIADNE_LOG(5,"  k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
-                              " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta<<"\n");
+                ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" p[k]="<<p[k]<<" d="<<d<<" trial_vec="<<trial_vec<<" last_vec="<<last_vec<<
+                              " dot="<<dot<<" cross="<<cross<<" cot="<<cot_theta);
 
 
                 // Due to roundoff error, the computed cross-product may be negative.
@@ -812,33 +820,33 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
         ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of ValidatedAffineConstrainedImageSet.");
         ARIADNE_DEBUG_ASSERT(vt[p[s]]!=Slackness::BASIS);
-        ARIADNE_LOG(5,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];
         pt=G*x+h;
         last_vec=best_next_vec;
-        ARIADNE_LOG(7,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
-        ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(2,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt);
+        ARIADNE_LOG_PRINTLN_AT(1,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec);
 
         vertices.push_back(Point2d(pt[0],pt[1]));
 
     } while(STEPS<MAX_STEPS && vt!=initial_variable_type);
 
-    ARIADNE_LOG(3,"vertices="<<vertices<<"\n");
+    ARIADNE_LOG_PRINTLN("vertices="<<vertices);
     return vertices;
 
 }
 
 Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    ARIADNE_LOG(2,"ValidatedAffineConstrainedImageSet::draw(Canvas canvas, Projection2d& projection)\n");
-    ARIADNE_LOG(3,"set="<<*this<<"\n");
-    ARIADNE_LOG(3,"projection="<<projection<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("set="<<*this);
+    ARIADNE_LOG_PRINTLN("projection="<<projection);
 
     List<Point2d> boundary;
 
     try {
         boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
-        ARIADNE_LOG(3,"boundary="<<boundary<<"\n");
+        ARIADNE_LOG_PRINTLN("boundary="<<boundary);
     } catch(const std::runtime_error& e) {
         throw e;
     }

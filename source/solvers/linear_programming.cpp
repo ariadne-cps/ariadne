@@ -181,6 +181,8 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
                      const Matrix<FloatDP>& aA, const Vector<FloatDP>& ab,
                      const Vector<FloatDP>& ax, const Vector<FloatDP>& ay) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     Vector<FloatDPValue> const& xl = cast_exact(axl);
     Vector<FloatDPValue> const& xu = cast_exact(axu);
     Matrix<FloatDPValue> const& A = cast_exact(aA);
@@ -202,7 +204,7 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
 
     x += d;
 
-    ARIADNE_LOG(2,"[x] = "<<x);
+    ARIADNE_LOG_PRINTLN("[x] = "<<x);
     ValidatedKleenean result=true;
     for(Nat i=0; i!=n; ++i) {
         if(x[i].lower().raw()<=xl[i].raw() || x[i].upper().raw()>=xu[i].raw()) {
@@ -236,9 +238,9 @@ InteriorPointSolver::minimise(const Vector<FloatDP>& c,
                               const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
                               const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const
 {
-    ARIADNE_LOG(2,"InteriorPointSolver::minimise(c,xl,xu,A,b)\n");
-    ARIADNE_LOG(2,"A="<<A<<", b="<<b<<", c="<<c<<"\n");
-    ARIADNE_LOG(2,"xl="<<xl<<", xu="<<xu<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("A="<<A<<", b="<<b<<", c="<<c);
+    ARIADNE_LOG_PRINTLN("xl="<<xl<<", xu="<<xu);
 
     const Nat m = b.size();
     const Nat n = c.size();
@@ -278,6 +280,8 @@ hotstarted_minimise(const Vector<FloatDP>& c,
                     const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
                     Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     ARIADNE_ASSERT(A.column_size()==c.size());
     ARIADNE_ASSERT(A.column_size()==xl.size());
     ARIADNE_ASSERT(A.column_size()==xu.size());
@@ -295,8 +299,8 @@ hotstarted_minimise(const Vector<FloatDP>& c,
     yb=dot(y,b);
     ARIADNE_ASSERT(yb<=cx);
 
-    ARIADNE_LOG(2,"xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c<<"\n");
-    ARIADNE_LOG(2,"x="<<x<<" y="<<y<<" z="<<zl<<" zu="<<zu<<"\n");
+    ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c);
+    ARIADNE_LOG_PRINTLN("x="<<x<<" y="<<y<<" z="<<zl<<" zu="<<zu);
 
     Nat steps=0;
     while(steps<maxsteps && (cx-yb)>maxerror) {
@@ -314,9 +318,9 @@ InteriorPointSolver::
 feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
          const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const
 {
-    ARIADNE_LOG(2,"InteriorPointSolver::feasible(xl,xu,A,b)\n");
-    ARIADNE_LOG(3,"A="<<A<<", b="<<b<<"\n");
-    ARIADNE_LOG(3,"xl="<<xl<<", xu="<<xu<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("A="<<A<<", b="<<b);
+    ARIADNE_LOG_PRINTLN("xl="<<xl<<", xu="<<xu);
 
     const Nat m = A.row_size();
     const Nat n = A.column_size();
@@ -351,8 +355,8 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
         // NOTE: Must compute y*A first, as A*X may give NaN.
         FloatDPBounds yAX = dot( transpose(Matrix<FloatDPBounds>(A)) * Vector<FloatDPBounds>(y), X );
         if(inconsistent(yb,yAX)) { return false; }
-        if(result==LinearProgramStatus::DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
-        if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
+        if(result==LinearProgramStatus::DEGENERATE_FEASIBILITY) { ARIADNE_LOG_PRINTLN("Degenerate"); return indeterminate; }
+        if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG_PRINTLN("Threshold"); return indeterminate; }
     }
     return indeterminate;
 }
@@ -372,8 +376,8 @@ LinearProgramStatus InteriorPointSolver::
 _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
                    Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const
 {
-    ARIADNE_LOG(4,"InteriorPointSolver::_minimisation_step(c,xl,xu,A,b, x,y,zl,zu)\n");
-    ARIADNE_LOG(4,"x="<<x<<", y="<<y<<", zl="<<zl<<", zu="<<zu<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("x="<<x<<", y="<<y<<", zl="<<zl<<", zu="<<zu);
 
     static const double gamma=1.0/256;
     static const double sigma=1.0/8;
@@ -391,7 +395,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
 
     FloatDP mu = compute_mu(xl,xu, x,zl,zu) * sigma;
     mu=1.0;
-    ARIADNE_LOG(4,"mu="<<mu<<"\n");
+    ARIADNE_LOG_PRINTLN("mu="<<mu);
 
     // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
     rx=A*x-b;
@@ -400,7 +404,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
         if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
         if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
     }
-    ARIADNE_LOG(5,"rx="<<rx<<", ry="<<ry<<", rzl="<<rzl<<", rzu="<<rzu<<"\n");
+    ARIADNE_LOG_PRINTLN("rx="<<rx<<", ry="<<ry<<", rzl="<<rzl<<", rzu="<<rzu);
 
     // A dx = rx;  AT dy + dzl - dzu = ry;  Zl dx + (X-Xl) dzl = rzl; -Zu dx + (Xu-X) dzu = rzu;
 
@@ -419,7 +423,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     DiagonalMatrix<FloatDP> D(erec(ediv(zu,xu-x)+ediv(zl,x-xl)));
     Vector<FloatDP> ryz = ry - ediv(rzl,Vector<FloatDP>(x-xl)) + ediv(rzu,Vector<FloatDP>(xu-x));
     S=adat(A,D.diagonal());
-    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<inverse(S)<<"\n");
+    ARIADNE_LOG_PRINTLN("S="<<S<<", inverse(S)="<<inverse(S));
 
     // dzl = (rzl - Zl dx) / (X-Xl)
     // dzu = (rzu + Zu dx) / (Xu-X)
@@ -431,10 +435,10 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     dx = D * Vector<FloatDP>(transpose(A)*dy - ryz);
     dzl = Vector<FloatDP>(rzl-Zl*dx)/(X-Xl);
     dzu = Vector<FloatDP>(rzu+Zu*dx)/(Xu-X);
-    ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu<<"\n");
+    ARIADNE_LOG_PRINTLN("dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu);
 
-    ARIADNE_LOG(7,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu)<<"\n");
-    ARIADNE_LOG(7,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu)<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu));
+    ARIADNE_LOG_PRINTLN_AT(1,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu));
     // Try to enforce feasibility or dual feasibility
     FloatDP alphax=1.0;
     nx=x-dx;
@@ -451,13 +455,12 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
         nzl=(zl-alphaz*dzl);
         nzu=(zu-alphaz*dzu);
         if(alphaz<gamma*mu/4096) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
-        //ARIADNE_LOG(9,"alphaz="<<alphaz<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
     }
     ny=(y-alphaz*dy);
-    ARIADNE_LOG(5,"alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
+    ARIADNE_LOG_PRINTLN("alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu);
 
     x=nx; y=ny; zl=nzl; zu=nzu;
-    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(transpose(A)*y+(zl-zu)-c)<<"\n");
+    ARIADNE_LOG_PRINTLN("cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(transpose(A)*y+(zl-zu)-c));
 
     if(alphax==1.0 && alphaz==1.0) { return LinearProgramStatus::PRIMAL_DUAL_FEASIBLE; }
     if(alphax==1.0) { return LinearProgramStatus::PRIMAL_FEASIBLE; }

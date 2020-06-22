@@ -50,7 +50,6 @@ class HybridEnclosure;
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
     : public EvolverInterface<HybridAutomatonInterface,HybridEnclosure,HybridTerminationCriterion>
-    , public Loggable
 {
   public:
     //! \brief Make a dynamically-allocated copy.

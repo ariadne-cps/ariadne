@@ -437,7 +437,7 @@ void CheckNumeric::notifications()
     ARIADNE_TEST_NOTIFY(String("Construction double -> ExactNumericType: ")+to_str(IsConstructible<ExactNumericType,double>::value));
     ARIADNE_TEST_NOTIFY(String("Construction double -> FloatDPValue: ")+to_str(IsConstructible<FloatDPValue,double>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion int -> FloatDPValue: ")+to_str(IsConvertible<int,FloatDPValue>::value));
-    ARIADNE_TEST_NOTIFY(String("Construction Integer -> FloatDPValue: ")+to_str(IsConstructible<FloatDPValue,Integer>::value)+"\n");
+    ARIADNE_TEST_NOTIFY(String("Construction Integer -> FloatDPValue: ")+to_str(IsConstructible<FloatDPValue,Integer>::value)+"");
 
     ARIADNE_TEST_NOTIFY((String("UpperNumericType * UpperNumericType -> ")+class_name<SafeProductType<UpperNumericType,UpperNumericType>>()+"\n"));
 

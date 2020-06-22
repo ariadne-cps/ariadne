@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getCuttingDepth()
+HybridAutomaton getCuttingDepth()
 {
     /// Parameters
 	RealConstant kcut("kcut",1.78833087e-8_dec);

@@ -1535,7 +1535,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     //std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<max_truncation_error);
     }
 
     TaylorModel<P,F> x=tm-c;

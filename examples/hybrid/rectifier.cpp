@@ -59,7 +59,7 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     Real amplitude(4.0);
     Real frequency(50.0);
@@ -86,7 +86,6 @@ Int main(Int argc, const char* argv[])
     //float LOCK_TOGRID_TIME = 2.0/frequency;
     //double LOCK_TOGRID_TIME = 0.25/frequency;
     //Int MAX_GRID_DEPTH = 7;
-    //Int VERBOSITY=3;
     Bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
@@ -189,7 +188,6 @@ Int main(Int argc, const char* argv[])
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(rectifier_automaton);
-    evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(MAX_ENCL_RADIUS);
@@ -236,8 +234,6 @@ Int main(Int argc, const char* argv[])
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
     rectifier_automaton.set_grid(Grid(Vector<FloatDP>({3, 0.25/dp[1], 1.0, 0.5})));
     std::cout <<  analyser.parameters() << std::endl;
-
-    analyser.verbosity=VERBOSITY;
 
     HybridImageSet initial_set;
     initial_set[offoff]=initial_box;

@@ -37,6 +37,8 @@
 #include "../output/geometry2d.hpp"
 #include "../output/graphics.hpp"
 #include "../output/cairo.hpp"
+#include "../output/progress_indicator.hpp"
+#include "../output/logging.hpp"
 
 namespace Ariadne {
 
@@ -489,6 +491,7 @@ LabelledFigure& operator<<(LabelledFigure& fig, const LabelledDrawableInterface&
 
 Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
     auto const& bounds = this->_data->bounds;
     RealVariable const& x=this->_data->variables.x_variable();
     RealVariable const& y=this->_data->variables.y_variable();
@@ -505,10 +508,16 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
+
+    SizeType num_objects = this->_data->objects.size();
+    ProgressIndicator indicator(num_objects);
+    ARIADNE_LOG_PRINTLN("Writing " << num_objects << " object" << (num_objects>1 ? "s..." : "..."));
     for(const LabelledGraphicsObject& object : this->_data->objects) {
         const LabelledDrawableInterface& shape=object.shape_ptr.operator*();
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->variables);
+        indicator.update_current(--num_objects);
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
     canvas.finalise();
 }

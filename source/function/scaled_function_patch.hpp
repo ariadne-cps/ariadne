@@ -1022,7 +1022,7 @@ template<class M> class VectorScaledFunctionPatch
 };
 
 template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
-    ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this)<<"\n");
+    ARIADNE_DEBUG_ASSERT_MSG(r.size()==this->result_size(),"\nr="<<r<<"\nf="<<(*this));
     Vector<X> sa=Ariadne::unscale(a,this->_domain);
     for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=this->_models[i](sa);

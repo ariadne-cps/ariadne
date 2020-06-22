@@ -135,9 +135,9 @@ IntegratorBase::flow_bounds(const ValidatedVectorMultivariateFunction& vf, const
 FlowStepModelType
 IntegratorBase::flow_to(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx0, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorMultivariateFunction vf, ExactBoxType dx0, Real tmax)\n");
-    ARIADNE_LOG(2,"vf="<<vf<<"\n");
-    ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("vf="<<vf);
+    ARIADNE_LOG_PRINTLN("dom(x0)="<<dx0<<" tmax="<<tmax);
     const SizeType n=dx0.size(); // Dimension of the state space
     FlowStepModelType flow_function=this->function_factory().create_identity(dx0);
     StepSizeType t=0;
@@ -171,7 +171,6 @@ IntegratorBase::flow_to(const ValidatedVectorMultivariateFunction& vf, const Exa
 FlowModelType
 IntegratorBase::flow(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx0, const Real& tmin, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorMultivariateFunction vf, ExactBoxType dx0, Real tmin, Real tmax)\n");
     StepSizeType tminl = tmin.compute(Effort(0)).get().lower_raw();
     StepSizeType tmaxu = tmax.compute(Effort(0)).get().upper_raw();
     FlowStepModelType evolve_function=this->flow_to(vf,dx0,tmin);
@@ -208,7 +207,6 @@ IntegratorBase::flow(const ValidatedVectorMultivariateFunction& vf, const ExactB
 FlowStepModelType
 IntegratorBase::flow_step(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& dx, StepSizeType& hmax) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorMultivariateFunction vf, ExactBoxType dx, StepSizeType hmax)\n");
     StepSizeType& h=hmax;
     UpperBoxType bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
@@ -242,9 +240,9 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, 
 FlowStepModelType
 TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& D, const ExactIntervalType& T, const ExactBoxType& A, const UpperBoxType& B) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType D, ExactIntervalType T, ExactBoxType A, UpperBoxType B)\n");
-    ARIADNE_LOG(3," f="<<f);
-    ARIADNE_LOG(3," D="<<D<<" T="<<T<<", A="<<A<<", B="<<B<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN("f="<<f);
+    ARIADNE_LOG_PRINTLN("D="<<D<<" T="<<T<<", A="<<A<<", B="<<B);
 
     const bool is_autonomous = (f.argument_size()==D.dimension()+A.dimension());
 
@@ -263,35 +261,32 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
     ExactBoxType dom=join(D,T,A);
     ExactBoxType wdom=join(D,wT,A);
     UpperBoxType const& bx=B;
-    ARIADNE_LOG(7,"dom="<<dom<<", wdom="<<wdom<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(2,"dom="<<dom<<", wdom="<<wdom);
 
     FlowStepModelType phi0=this->function_factory().create_projection(wdom,range(0,nx));
-    ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"phi0="<<phi0);
     FlowStepModelType phi=this->function_factory().create_constants(wdom,cast_singleton(bx));
     FlowStepModelType ta=this->function_factory().create_projection(wdom,tarng);
 
-    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"phi="<<phi);
     for(DegreeType k=0; k!=this->_maximum_temporal_order; ++k) {
         Bool below_maximum_error=(phi.error().raw()<this->step_maximum_error());
         FlowStepModelType fphi=compose(f,join(std::move(phi),ta));
-        ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(2,"fphi="<<fphi);
         // NOTE: In principle safer to use antiderivative(fphi,nx,t) here,
         // but since t is the midpoint of wdom, the (standard) antiderivative works
         // TODO: Change based antiderivative to be efficient when t is midpoint of domain
         phi=antiderivative(fphi,nx)+phi0;
-        ARIADNE_LOG(4,"phi="<<phi<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(2,"phi="<<phi);
         if(below_maximum_error && k>=this->_minimum_temporal_order) { break; }
     }
-
     if(phi.error().raw()>this->step_maximum_error()) {
-        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error()<<"\n");
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<D<<" over time interval "<<T<<" of length "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds step maximum error "<<this->step_maximum_error());
     }
 
     FlowStepModelType res=restriction(phi,dom);
 
-    //for(SizeType i=0; i!=nx; ++i) { res[i]=restrict(phi[i],dom); }
-    //res.sweep();
-    ARIADNE_LOG(4,"res="<<res<<"\n");
+    ARIADNE_LOG_PRINTLN("result="<<res);
     return res;
 
 }
@@ -395,9 +390,9 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
                Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp,
                Vector<GradedValidatedDifferential>& yta,
                const Vector<ValidatedNumericType>& x, const ValidatedNumericType& t0, const Vector<ValidatedNumericType>& a,
-               DegreeType so, DegreeType to, Nat verbosity=0)
+               DegreeType so, DegreeType to)
 {
-    ARIADNE_LOG(2,"graded_flow_init(f,...)\n");
+    ARIADNE_LOG_SCOPE_CREATE;
     const SizeType xs=x.size();
     const SizeType as=a.size();
     const SizeType ress=f.result_size();
@@ -424,16 +419,15 @@ Void graded_flow_init(const Vector<ValidatedProcedure>& f,
             yta[xs+1u+i]=GradedValidatedDifferential(ValidatedDifferential::variable(xs+as,so,a[i],xs+i));
         }
     }
-    ARIADNE_LOG(3,"fy="<<fy<<", tmp="<<tmp<<", yta="<<yta<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"fy="<<fy<<", tmp="<<tmp<<", yta="<<yta);
 }
 
 
 Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
-                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta,
-                         Nat verbosity=0)
+                         Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& tmp, Vector<GradedValidatedDifferential>& yta)
 {
-    ARIADNE_LOG(4,"graded_flow_iterate(f,...)\n");
-    ARIADNE_LOG(5,"degree="<<yta[0].degree()<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN_AT(1,"degree="<<yta[0].degree());
     const bool is_autonomous = (p.argument_size()==yta[0][0].argument_size());
     const SizeType n=p.result_size();
 
@@ -458,7 +452,7 @@ Void graded_flow_iterate(const Vector<ValidatedProcedure>& p,
 
 Vector<GradedValidatedDifferential>
 graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
-                         DegreeType so, DegreeType to, Nat verbosity=0)
+                         DegreeType so, DegreeType to)
 {
     const SizeType rs=dphic.size();
     const SizeType as=dphic[0][0].argument_size();
@@ -478,14 +472,14 @@ graded_flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vecto
             gdphi[i][j].expansion().append(iter->index(),iter->coefficient());
         }
     }
-    ARIADNE_LOG(4,"gdphi="<<gdphi<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"gdphi="<<gdphi);
 
     return gdphi;
 }
 
 Vector<ValidatedDifferential>
 differential(Vector<GradedValidatedDifferential> const& gdphi, SizeType gind,
-             DegreeType so, DegreeType to, Nat verbosity=0)
+             DegreeType so, DegreeType to)
 {
     SizeType rs=gdphi.size();
     SizeType as=gdphi[0][0].argument_size();
@@ -504,20 +498,20 @@ differential(Vector<GradedValidatedDifferential> const& gdphi, SizeType gind,
             }
         }
     }
-    ARIADNE_LOG(4,"dphi="<<dphi<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"dphi="<<dphi);
     return dphi;
 }
 
 Vector<ValidatedDifferential>
 flow_differential(Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphib,
-                  DegreeType so, DegreeType to, Nat verbosity=0)
+                  DegreeType so, DegreeType to)
 {
-    Vector<GradedValidatedDifferential> gdphi=graded_flow_differential(dphic,dphib,so,to ,verbosity);
-    return differential(gdphi, dphic.size(),so,to, verbosity);
+    Vector<GradedValidatedDifferential> gdphi=graded_flow_differential(dphic,dphib,so,to);
+    return differential(gdphi, dphic.size(),so,to);
 }
 
 
-FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<FloatBounds<DP>>>& df, const ExactBoxType& dom, Sweeper<FloatDP> swp, Nat verbosity=0u) {
+FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<FloatBounds<DP>>>& df, const ExactBoxType& dom, Sweeper<FloatDP> swp) {
     ARIADNE_ASSERT(df.argument_size()==dom.dimension());
     const SizeType rs=df.size();
     const SizeType as=dom.dimension();
@@ -525,7 +519,7 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
     FlowStepTaylorModelType tf(rs,dom,swp);
 
     Vector<Differential<FloatBounds<DP>>> ds=scale(Differential<FloatBounds<DP>>::variables(deg,Vector<FloatBounds<DP>>(as,dp)),dom);
-    ARIADNE_LOG(5,"ds="<<ds<<"\rs");
+    ARIADNE_LOG_PRINTLN_AT(1,"ds="<<ds<<"\rs");
     Vector<Differential<FloatBounds<DP>>> dfs = compose(df,ds);
 
     for(SizeType i=0; i!=rs; ++i) {
@@ -564,12 +558,12 @@ FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>
 FlowStepTaylorModelType
 graded_series_flow_step(const Vector<ValidatedProcedure>& f,
                         const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
-                        Sweeper<FloatDP> const& sweeper, DegreeType so, DegreeType to, Nat verbosity=0u)
+                        Sweeper<FloatDP> const& sweeper, DegreeType so, DegreeType to)
 {
-    ARIADNE_LOG(2,"graded_series_flow_step(f,domx,domt,doma,bndx,swpt,so,to)\n");
-    ARIADNE_LOG(3,"f="<<f<<"\n");
-    ARIADNE_LOG(3,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx<<"\n");
-    ARIADNE_LOG(3,"sweeper="<<sweeper<<", so="<<so<<", to="<<to<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
+    ARIADNE_LOG_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
+    ARIADNE_LOG_PRINTLN_AT(1,"sweeper="<<sweeper<<", so="<<so<<", to="<<to);
 
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension() || f.argument_size()==domx.dimension()+1u+doma.dimension());
@@ -595,32 +589,32 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
     Vector<ValidatedNumericType> db=join(bx,dt,da);
     ExactBoxType domc=join(domx,domt,doma);
 
-    ARIADNE_LOG(4,"dx="<<dx<<", dt="<<dt<<", da="<<da<<", wdt="<<wdt<<", bx="<<bx<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(2,"dx="<<dx<<", dt="<<dt<<", da="<<da<<", wdt="<<wdt<<", bx="<<bx);
 
     Vector<GradedValidatedDifferential> dphic,fdphic,dphib,fdphib;
     List<GradedValidatedDifferential> tmpdphic,tmpdphib;
 
-    Ariadne::graded_flow_init(f,fdphic,tmpdphic,dphic,mdx,mdt,mda,so,to, verbosity);
-    Ariadne::graded_flow_init(f,fdphib,tmpdphib,dphib,bx,dt,da,so,to, verbosity);
+    Ariadne::graded_flow_init(f,fdphic,tmpdphic,dphic,mdx,mdt,mda,so,to);
+    Ariadne::graded_flow_init(f,fdphib,tmpdphib,dphib,bx,dt,da,so,to);
 
     for(DegreeType i=0; i!=to; ++i) {
-        Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic, verbosity);
-        Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib, verbosity);
+        Ariadne::graded_flow_iterate(f,fdphic,tmpdphic,dphic);
+        Ariadne::graded_flow_iterate(f,fdphib,tmpdphib,dphib);
     }
-    ARIADNE_LOG(7,"dphic="<<dphic<<"\n");
-    ARIADNE_LOG(7,"dphib="<<dphib<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(3,"dphic="<<dphic);
+    ARIADNE_LOG_PRINTLN_AT(3,"dphib="<<dphib);
 
     dphic=project(dphic,range(0,nx));
     dphib=project(dphib,range(0,nx));
-    ARIADNE_LOG(7,"dphic="<<dphic<<"\n");
-    ARIADNE_LOG(7,"dphib="<<dphib<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(3,"dphic="<<dphic);
+    ARIADNE_LOG_PRINTLN_AT(3,"dphib="<<dphib);
 
-    Vector<ValidatedDifferential> dphi=Ariadne::flow_differential(dphic,dphib,so,to,verbosity);
-    ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
+    Vector<ValidatedDifferential> dphi=Ariadne::flow_differential(dphic,dphib,so,to);
+    ARIADNE_LOG_PRINTLN_AT(2,"dphi="<<dphi);
 
     FlowStepTaylorModelType tphi=Ariadne::flow_function(dphi,domx,domt,doma,sweeper);
 
-    ARIADNE_LOG(5,"phi="<<tphi<<"\n");
+    ARIADNE_LOG_PRINTLN("phi="<<tphi);
 
     return tphi;
 }
@@ -629,29 +623,27 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 FlowStepModelType
 graded_series_flow_step(const Vector<ValidatedProcedure>& f,
                         const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
-                        double max_err, Sweeper<FloatDP> const& sweeper, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to, Nat verbosity=0)
+                        double max_err, Sweeper<FloatDP> const& sweeper, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to)
 {
-    ARIADNE_LOG(2,"graded_series_flow_step(f,domx,domt,doma,bndx,max_err,swpt,init_so,init_to,max_so,max_to)\n");
-    ARIADNE_LOG(3,"f="<<f<<"\n");
-    ARIADNE_LOG(3,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx<<"\n");
-    ARIADNE_LOG(3,"max_err="<<max_err<<", sweeper="<<sweeper<<", "<<
-                  "init_so="<<init_so<<", init_to="<<init_to<<", max_so="<<max_so<<", max_to="<<max_to<<"\n");
+    ARIADNE_LOG_SCOPE_CREATE;
+    ARIADNE_LOG_PRINTLN_AT(1,"f="<<f);
+    ARIADNE_LOG_PRINTLN_AT(1,"domx="<<domx<<", domt="<<domt<<", doma="<<doma<<", bndx="<<bndx);
+    ARIADNE_LOG_PRINTLN_AT(1,"max_err="<<max_err<<", sweeper="<<sweeper<<", "<<
+                            "init_so="<<init_so<<", init_to="<<init_to<<", max_so="<<max_so<<", max_to="<<max_to);
 
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension() || f.argument_size()==domx.dimension()+1u+doma.dimension());
 
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
 
-    ARIADNE_LOG(4,"f="<<f<<"\n");
-
     DegreeType so=init_so;
     DegreeType to=init_to;
 
-    FlowStepTaylorModelType phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to, verbosity);
+    FlowStepTaylorModelType phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
-    ARIADNE_LOG(5,"phi="<<phi<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"phi="<<phi);
     SizeType nnz=0; for(SizeType i=0; i!=phi.size(); ++i) { nnz+=phi.model(i).number_of_nonzeros(); }
-    ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error()<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error());
 
     FloatDPError old_error=phi.error()*FloatDPError(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
 
@@ -667,13 +659,12 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
             ++to;
         }
 
-        phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to, verbosity);
+        phi=graded_series_flow_step(f,domx,domt,doma,bndx, sweeper,so,to);
 
         SizeType nnnz=0; for(SizeType i=0; i!=phi.size(); ++i) { nnnz+=phi.model(i).number_of_nonzeros(); }
-        ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error()<<"\n");
-
+        ARIADNE_LOG_PRINTLN_AT(2,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<phi.error());
     }
-    ARIADNE_LOG(4,"phi="<<phi<<"\n");
+    ARIADNE_LOG_PRINTLN("phi="<<phi);
     return phi;
 }
 
@@ -681,12 +672,12 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 FlowStepModelType
 graded_series_flow_step(const ValidatedVectorMultivariateFunction& f,
                         const ExactBoxType& domx, const Interval<StepSizeType>& domt, const ExactBoxType& doma, const UpperBoxType& bndx,
-                        double max_err, Sweeper<FloatDP> const& sweeper, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to, Nat verbosity)
+                        double max_err, Sweeper<FloatDP> const& sweeper, DegreeType init_so, DegreeType init_to, DegreeType max_so, DegreeType max_to)
 {
     Vector<ValidatedProcedure> p(f);
     ExactIntervalType idomt(domt);
 
-    return graded_series_flow_step(p,domx,idomt,doma,bndx,max_err,sweeper,init_so,init_to, max_so, max_to, verbosity);
+    return graded_series_flow_step(p,domx,idomt,doma,bndx,max_err,sweeper,init_so,init_to, max_so, max_to);
 }
 
 
@@ -764,8 +755,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f,
                  const ExactBoxType& doma,
                  const UpperBoxType& bndbx,
                  DegreeType deg,
-                 Sweeper<FloatDP> swp,
-                 Nat verbosity=0)
+                 Sweeper<FloatDP> swp)
 {
     ARIADNE_PRECONDITION(f.result_size()==domx.dimension());
     ARIADNE_PRECONDITION(f.argument_size()==domx.dimension()+doma.dimension()
@@ -804,8 +794,6 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f,
 FlowStepModelType
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& domx, const StepSizeType& h, const UpperBoxType& bndx) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType domx, StepSizeType h, const UpperBoxType& bndx)\n");
-
     Interval<StepSizeType> domt(0,h);
     ExactBoxType doma;
 
@@ -816,7 +804,7 @@ FlowStepModelType
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& domx, const Interval<StepSizeType>& rngt, const ExactBoxType& doma, const UpperBoxType& bndx) const
 {
     ExactIntervalType domt(rngt);
-    FlowStepModelType tphi=Ariadne::series_flow_step(f,domx,domt,doma,bndx,this->order(),this->sweeper(),this->verbosity);
+    FlowStepModelType tphi=Ariadne::series_flow_step(f,domx,domt,doma,bndx,this->order(),this->sweeper());
     return tphi;
 }
 
@@ -841,8 +829,6 @@ Void TaylorSeriesIntegrator::_write(OutputStream& os) const {
 FlowStepModelType
 GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& domx, const StepSizeType& h, const UpperBoxType& bndx) const
 {
-    ARIADNE_LOG(3,"GradedTaylorSeriesIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType domx, StepSizeType h, const UpperBoxType& bndx)\n");
-
     Interval<StepSizeType> domt(0,h);
     ExactBoxType doma;
 
@@ -863,13 +849,13 @@ GradedTaylorSeriesIntegrator::flow_step(const ValidatedVectorMultivariateFunctio
     Vector<ValidatedProcedure> p(f);
 
     FlowStepModelType tphi=Ariadne::graded_series_flow_step(p,domx,domt,doma,bndx,
-        max_err,this->sweeper(), init_so,init_to,max_so,max_to, this->verbosity);
+        max_err,this->sweeper(), init_so,init_to,max_so,max_to);
 
     if(tphi.error().raw()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"GradedTaylorSeriesIntegrator::flow_step",
                       "Integration of "<<f<<" over "<<domx<<" for time interval "<<domt<<" has error "<<tphi.errors()<<
                       " using spacial order "<<max_so<<" and temporal order "<<max_to<<
-                      ", which exceeds maximum single-step error "<<max_err<<"\n");
+                      ", which exceeds maximum single-step error "<<max_err);
     }
 
     return tphi;
@@ -926,7 +912,6 @@ AffineIntegrator::AffineIntegrator(MaximumError maximum_error_, SpacialOrder spa
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, const Vector<ValidatedNumericType>& dom) const
 {
-    ARIADNE_LOG(5,"AffineIntegrator::flow_derivative(ValidatedVectorMultivariateFunction f, ValidatedBoxType dom)\n");
     Vector<ValidatedDifferential> dx=
         ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,
                                          join(dom,zero));
@@ -942,7 +927,6 @@ AffineIntegrator::flow_derivative(const ValidatedVectorMultivariateFunction& f, 
 FlowStepModelType
 AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom, const StepSizeType& h, const UpperBoxType& bbox) const
 {
-    ARIADNE_LOG(3,"AffineIntegrator::flow_step(ValidatedVectorMultivariateFunction f, ExactBoxType dom, StepSizeType h, UpperBoxType bbox)\n");
     Vector<ValidatedNumericType> dmid = Vector<ValidatedNumericType>(midpoint(dom));
 
     Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,dmid);

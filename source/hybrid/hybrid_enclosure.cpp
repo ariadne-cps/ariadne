@@ -59,7 +59,6 @@ OutputStream& operator<<(OutputStream& os, ValidatedConstraint const& c);
 OutputStream& operator<<(OutputStream& os, List<ValidatedConstraint> const& c);
 
 template<class T> List<T> catenate(List<T> lst1, T const& val2, List<T> const& lst3) {
-    std::cerr<<"catenate(List<T>,T,List<T>): "<<lst1<<"; "<<val2<<"; "<<lst3<<"\n";
     lst1.append(val2); return catenate(lst1,lst3); }
 
 struct Variables2d {
@@ -241,8 +240,7 @@ Void HybridEnclosure::set_time_function(const ValidatedScalarMultivariateFunctio
 UpperBoxType
 HybridEnclosure::state_bounding_box() const
 {
-    ARIADNE_LOG(8,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain())<<"\n");
-    //return this->state_function()(this->_set.reduced_domain());
+    ARIADNE_LOG_PRINTLN_AT(1,"space_codomain="<<this->state_function().codomain()<<" space_range="<<apply(this->state_function(),this->_set.reduced_domain()));
     return cast_exact_box(this->_set.state_set().bounding_box());
 }
 
@@ -255,16 +253,15 @@ HybridEnclosure::range_of(EffectiveScalarMultivariateFunction const& g) const
 UpperIntervalType
 HybridEnclosure::time_range() const
 {
-    ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");
-    //return this->time_function().codomain();
+    ARIADNE_LOG_PRINTLN_AT(1,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain()));
     return apply(this->time_function(),this->_set.reduced_domain());
 }
 
 UpperIntervalType
 HybridEnclosure::dwell_time_range() const
 {
-    ARIADNE_LOG(8,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
-                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain())<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
+                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain()));
     return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 
@@ -700,6 +697,7 @@ ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 VariablesUpperBoxType
 ListSet<HybridEnclosure>::bounding_box() const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
     auto iter=this->begin();
     auto box = iter->state_auxiliary_set().euclidean_set().bounding_box();
     RealSpace space = join(iter->state_space(),iter->auxiliary_space());

@@ -97,7 +97,6 @@ class FlowModelType : public List<ValidatedVectorMultivariateFunctionModelDP> {
 
 class IntegratorBase
     : public IntegratorInterface
-    , public Loggable
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.

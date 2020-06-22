@@ -70,7 +70,6 @@ struct InfeasibleLinearProgram : std::runtime_error {
 //! \ingroup OptimisationSubModule
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
-    : public Loggable
 {
   public:
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
@@ -135,7 +134,6 @@ OutputStream& operator<<(OutputStream& os, Slackness t);
 //! Solver for linear programming problems using the simplex algorithm.
 template<class X>
 class SimplexSolver
-    : public Loggable
 {
     typedef RigorousNumericType<X> XX;
   public:

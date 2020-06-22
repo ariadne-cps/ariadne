@@ -283,8 +283,8 @@ template<class A> Void sub(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a
 }
 
 template<class A> Void mul(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT_MSG(r.size()+1u == a1.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
-    ARIADNE_ASSERT_MSG(r.size()+1u == a2.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
+    ARIADNE_ASSERT_MSG(r.size()+1u == a1.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2);
+    ARIADNE_ASSERT_MSG(r.size()+1u == a2.size(),"r="<<r<<", a1="<<a1<<", a2="<<a2);
     ARIADNE_ASSERT(compatible(a1[0],a2[0]));
     r.append(create(a1[0]));
     DegreeType d = r.degree();
@@ -494,7 +494,7 @@ template<class A> Void Graded<A>::operator=(const ClosureExpression<AntiDiff,Gra
 }
 
 template<class A> Void antidifferentiate(Graded<A>& r, const Graded<A>& a) {
-    ARIADNE_ASSERT_MSG(r.size() == a.size(),"r="<<r<<", a="<<a<<"\n");
+    ARIADNE_ASSERT_MSG(r.size() == a.size(),"r="<<r<<", a="<<a);
     r.append(a.back()/(r.degree()+1u));
 }
 

@@ -121,7 +121,7 @@ template<class UB> class VariableInterval {
 //! \brief An interval range for a real variable.
 template<class T> template<class XL, class XU> inline VariableInterval<XU> Variable<T>::in(const XL& l, const XU& u) {
     //static_assert(IsSame<XL,Real>::value,"Can only make box in Real variables.");
-    ARIADNE_FAIL_MESSAGE("Can't create interval in non-real variable "<<*this<<"\n");
+    ARIADNE_FAIL_MESSAGE("Can't create interval in non-real variable "<<*this);
     assert(false);
 }
 

@@ -29,7 +29,7 @@
 using namespace Ariadne;
 
 Int main(Int argc, const char* argv[]) {
-    Nat evolver_verbosity = get_verbosity(argc, argv);
+    Logger::set_verbosity(get_verbosity(argc, argv));
 
     RealVariable x("x"), y("y"), z("z");
     RealVariable a("a");
@@ -40,7 +40,7 @@ Int main(Int argc, const char* argv[]) {
                                  dot(a) = 0
                          });
 
-    std::cout << "Production-destruction system:\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Production-destruction system:");
 
     MaximumError max_err = 1e-6;
     TaylorPicardIntegrator integrator(max_err);
@@ -49,7 +49,6 @@ Int main(Int argc, const char* argv[]) {
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.04);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    evolver.verbosity = evolver_verbosity;
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
@@ -60,24 +59,24 @@ Int main(Int argc, const char* argv[]) {
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for 'I' setup... " << std::endl << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I' setup... ");
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
-        std::cout << "Done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
-        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
-        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
+        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
+        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
+        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
         if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
-            std::cout << "x+y+z does not contain 100" << std::endl;
+            ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
-        std::cout << "Final volume = " << volume << std::endl;
-	    std::cout << "Range for final z = " << bb[z] << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
+        ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 	
 	    sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
     {
@@ -85,25 +84,24 @@ Int main(Int argc, const char* argv[]) {
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for 'P' setup... " << std::endl << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'P' setup... ");
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
-        std::cout << "Done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
-        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
-        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
-
+        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
+        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
+        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
         if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
-            std::cout << "x+y+z does not contain 100" << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
-        std::cout << "Final volume = " << volume << std::endl;
-        std::cout << "Range for final z = " << bb[z] << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
+        ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 
         sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
     {
@@ -111,28 +109,27 @@ Int main(Int argc, const char* argv[]) {
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for 'I+P' setup... " << std::endl << std::flush;
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for 'I+P' setup... ");
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
-        std::cout << "Done." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) std::cout << "x is not >= 0" << std::endl;
-        if (not possibly(bb[y] >= 0)) std::cout << "y is not >= 0" << std::endl;
-        if (not possibly(bb[z] >= 0)) std::cout << "z is not >= 0" << std::endl;
-
+        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
+        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
+        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
         if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
-            std::cout << "x+y+z does not contain 100" << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
-        std::cout << "Final volume = " << volume << std::endl;
-        std::cout << "Range for final z = " << bb[z] << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
+        ARIADNE_LOG_PRINTLN_AT(1,"Range for final z = " << bb[z]);
 
         sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
-    std::cout << "Plotting..." << std::endl;
+    ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=TimeVariable()<=100,0<=z<=11}));
     fig << line_colour(0.0,0.0,0.0);
     fig << line_style(false);
@@ -143,5 +140,5 @@ Int main(Int argc, const char* argv[]) {
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(reach1);
     fig.write("production_destruction");
-    std::cout << "File production_destruction.png written." << std::endl;
+    ARIADNE_LOG_PRINTLN("File production_destruction.png written.");
 }

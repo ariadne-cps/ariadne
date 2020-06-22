@@ -30,7 +30,7 @@ using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     RealVariable x("x");
     RealVariable y("y");
@@ -66,7 +66,6 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.09);
     evolver.configuration().set_maximum_spacial_error(1e-5);
-    evolver.verbosity=evolver_verbosity;
 
     RealPoint ic({1.3_dec,1.0_dec});
     Real e(0.008_dec);
@@ -75,10 +74,12 @@ Int main(Int argc, const char* argv[])
 
     StopWatch sw;
 
-    std::cout << "Computing evolution... " << std::flush;
+    ARIADNE_LOG_PRINTLN("Computing evolution... ");
     auto orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
-    auto final_bounds = orbit.final().bounding_box();
+    ARIADNE_LOG_PRINTLN("Checking properties... ");
+
+    ARIADNE_LOG_RUN_AT(2,auto final_bounds = orbit.final().bounding_box());
 
     Bool has_any_zero_transitions;
     Bool has_any_two_transitions;
@@ -90,20 +91,19 @@ Int main(Int argc, const char* argv[])
     }
 
     sw.click();
-    std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
 
-    if (has_any_zero_transitions) std::cout << "A final set with zero transitions has been found correctly." << std::endl;
-    else std::cout << "No final set with zero transitions has been found!" << std::endl;
-    if (has_any_two_transitions) std::cout << "A final set with two transitions has been found correctly." << std::endl;
-    else std::cout << "No final set with two transitions has been found!" << std::endl;
+    if (has_any_zero_transitions) ARIADNE_LOG_PRINTLN("A final set with zero transitions has been found correctly.")
+    else ARIADNE_LOG_PRINTLN("No final set with zero transitions has been found!");
+    if (has_any_two_transitions) ARIADNE_LOG_PRINTLN("A final set with two transitions has been found correctly.")
+    else ARIADNE_LOG_PRINTLN("No final set with two transitions has been found!");
 
-    std::cout << "Trajectory stays within " << (radius*100).get_d() << "% of the equilibrium for at most " << final_bounds[cnt].upper() << " time units: ";
-    if (definitely(final_bounds[cnt] <= 0.2_dec)) std::cout << "constraint satisfied." << std::endl;
-    else std::cout << "constraint not satisfied!" << std::endl;
+    ARIADNE_LOG_PRINTLN("Trajectory stays within " << (radius*100).get_d() << "% of the equilibrium for at most " <<
+                        final_bounds[cnt].upper() << " time units: " << ((definitely(final_bounds[cnt] <= 0.2_dec)) ?
+                        "constraint satisfied." : "constraint not satisfied!"));
 
-    std::cout << "# of final sets: " << orbit.final().size() << std::endl;
-
-    std::cout << "Final set area: " << final_bounds[x].width()*final_bounds[y].width() << std::endl;
+    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
+    ARIADNE_LOG_PRINTLN("# of final sets: " << orbit.final().size());
+    ARIADNE_LOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width());
 
     HybridAutomaton circle;
     DiscreteLocation rotate;
@@ -113,7 +113,8 @@ Int main(Int argc, const char* argv[])
     simulator.set_step_size(0.1);
     HybridRealPoint circle_initial(rotate,{t=0});
     HybridTime circle_time(2*pi,1);
-    auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time);
+    ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time));
 
-    plot("lotkavolterra-xy",Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit);
+    ARIADNE_LOG_RUN_AT(2,plot("lotkavolterra-xy",Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
+    ARIADNE_LOG_PRINTLN("Figure lotkavolterra-xy.png written.");
 }

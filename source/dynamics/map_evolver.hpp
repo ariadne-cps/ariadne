@@ -60,7 +60,6 @@ class EvolutionProfiler;
  */
 class MapEvolver
     : public EvolverBase< IteratedMap, LabelledEnclosure, Integer>
-    , public Loggable
 {
   public:
     typedef MapEvolverConfiguration ConfigurationType;

@@ -28,7 +28,6 @@
 #include "../output/drawer.hpp"
 
 #include "../utility/macros.hpp"
-#include "../output/logging.hpp"
 #include "../geometry/function_set.hpp"
 #include "../geometry/affine_set.hpp"
 #include "../geometry/grid_paving.hpp"
@@ -121,7 +120,7 @@ Void EnclosureAffineDrawer::draw(CanvasInterface& canvas, const Projection2d& pr
         try {
             set.restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(const std::runtime_error& e) {
-            ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set<<"\n");
+            ARIADNE_WARN("ErrorTag "<<e.what()<<" in EnclosureAffineDrawer::draw(...) for "<<set);
             set.restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }

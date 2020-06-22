@@ -58,10 +58,7 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    unsigned int log_verbosity;
     mutable shared_ptr<HybridEvolverBase> evolver;
-  public:
-    TestHybridEvolution(const unsigned int verb);
   private:
     Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
@@ -70,14 +67,11 @@ class TestHybridEvolution
     Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const unsigned int verb) : log_verbosity(verb) { }
-
 Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
     //evolver->set_integrator(GradedTaylorSeriesIntegrator(1e-5));
     evolver->set_integrator(TaylorPicardIntegrator(1e-5));
-    evolver->verbosity=log_verbosity;
     evolver->configuration().set_maximum_step_size(1./4);
     evolver->configuration().set_maximum_enclosure_radius(1./8);
     evolver->configuration().set_maximum_enclosure_radius(1./2);
@@ -218,11 +212,12 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    auto log_verbosity = get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
-    DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 1u;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
+    DRAWING_ACCURACY = 1u;
 
-    TestHybridEvolution(log_verbosity).test();
+    TestHybridEvolution().test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

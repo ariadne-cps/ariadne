@@ -28,7 +28,9 @@
 using namespace Ariadne;
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::set_prints_scope_entrance(true);
     run_noisy_system(DC());
 }

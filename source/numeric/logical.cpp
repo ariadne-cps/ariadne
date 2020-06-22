@@ -137,7 +137,7 @@ OutputStream& operator<<(OutputStream& os, LogicalValue l) {
         case LogicalValue::INDETERMINATE: os << "indeterminate";  break;
         case LogicalValue::UNLIKELY: os << "unlikely"; break;
         case LogicalValue::FALSE: os << "false"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled LogicalValue for output streaming.\n");
+        default: ARIADNE_FAIL_MSG("Unhandled LogicalValue for output streaming.");
     }
     return os;
 }

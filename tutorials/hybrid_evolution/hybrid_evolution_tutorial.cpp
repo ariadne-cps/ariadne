@@ -138,8 +138,9 @@ HybridAutomaton get_controller()
     return automaton;
 }
 
-Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_verbosity)
+Void simulate_evolution(const CompositeHybridAutomaton& system)
 {
+    ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
@@ -153,7 +154,6 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
     // Create a simulator object
     HybridSimulator simulator;
     simulator.set_step_size(0.01);
-    simulator.verbosity = log_verbosity;
 
     // Set an initial point for the simulation
     HybridRealPoint initial_point({valve|opened,controller|rising},{height=7});
@@ -162,19 +162,17 @@ Void simulate_evolution(const CompositeHybridAutomaton& system, const Nat& log_v
     HybridTerminationCriterion termination(30,5);
 
     // Compute a simulation trajectory
-    std::cout << "Computing simulation trajectory...\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Computing simulation trajectory...");
     auto orbit = simulator.orbit(system,initial_point,termination);
-    std::cout << "done.\n" << std::endl;
 
     // Plot the simulation trajectory using all different projections
-    std::cout << "Plotting simulation trajectory..\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Plotting simulation trajectory..");
     plot("simulation_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
     plot("simulation_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    std::cout << "done.\n" << std::endl;
 }
 
-GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, const Nat& log_verbosity)
+GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
 {
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(system);
@@ -182,15 +180,14 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system, cons
     // Set the evolver configuration
     evolver.configuration().set_maximum_enclosure_radius(3.0);
     evolver.configuration().set_maximum_step_size(0.25);
-    evolver.verbosity=log_verbosity;
 
-    std::cout << "Evolver configuration: " << evolver.configuration() << std::endl;
+    ARIADNE_LOG_PRINTLN_AT(1,"Evolver configuration: " << evolver.configuration());
 
     return evolver;
 }
 
 Void compute_evolution(const GeneralHybridEvolver& evolver) {
-
+    ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
@@ -208,37 +205,32 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     // Define the termination: continuous time and maximum number of transitions
     HybridTerminationCriterion termination(30,5);
     // Compute the orbit using upper semantics
-    std::cout << "Computing evolution...\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Computing evolution...");
     auto orbit = evolver.orbit(initial_set,termination,Semantics::UPPER);
-    std::cout << "done.\n" << std::endl;
 
     // Plot the trajectory using two different projections
-    std::cout << "Plotting trajectory...\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Plotting trajectory...");
     plot("finite_evolution_t-height",Axes2d(0<=TimeVariable()<=30,5<=height<=9),orbit);
     plot("finite_evolution_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
-    std::cout << "done.\n" << std::endl;
 }
 
-HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver, const Nat& log_verbosity)
+HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 {
-    // Silence the evolver
-    evolver.verbosity=0;
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 
     //  Set the analyser configuration
     analyser.configuration().set_maximum_grid_fineness(6);
     analyser.configuration().set_lock_to_grid_time(5);
-    analyser.verbosity=log_verbosity;
 
-    std::cout << "Analyser configuration: " << analyser.configuration() << std::endl;
+    ARIADNE_LOG_PRINTLN_AT(1,"Analyser configuration: " << analyser.configuration());
 
     return analyser;
 }
 
 Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
-
+    ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
     RealVariable aperture("aperture");
     RealVariable height("height");
@@ -253,19 +245,17 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     HybridSet initial_set({valve|opened,controller|rising},{6.9_decimal<=height<=7});
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
-    std::cout << "Computing outer chain reach set...\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Computing outer chain reach set...");
     auto outer_chain_reach = analyser.outer_chain_reach(initial_set);
-    std::cout << "done.\n" << std::endl;
 
-    std::cout << "Plotting trajectory...\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Plotting trajectory...");
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
-    std::cout << "done." << std::endl;
 }
 
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
-    Nat log_verbosity = get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     // Create the composed automaton
     CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
@@ -274,19 +264,19 @@ Int main(Int argc, const char* argv[])
     CompositeHybridAutomaton::set_default_writer(CompactCompositeHybridAutomatonWriter());
 
     // Print the system description on the command line
-    std::cout << "System:\n" << watertank_system << std::endl;
+    ARIADNE_LOG_PRINTLN("System: " << watertank_system);
 
     // Compute an approximate simulation of the system evolution
-    simulate_evolution(watertank_system,log_verbosity);
+    simulate_evolution(watertank_system);
 
     // Create an evolver object
-    auto evolver = create_evolver(watertank_system,log_verbosity);
+    auto evolver = create_evolver(watertank_system);
 
     // Compute the system evolution
     compute_evolution(evolver);
 
     // Create an analyser object
-    auto analyser = create_analyser(evolver,log_verbosity);
+    auto analyser = create_analyser(evolver);
 
     // Compute the system reachability
     compute_reachability(analyser);

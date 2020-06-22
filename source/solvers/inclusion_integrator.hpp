@@ -258,7 +258,7 @@ inline std::ostream& operator<<(std::ostream& os, const InputsRelationKind& kind
         case InputsRelationKind::SINGULAR: os << "SINGULAR"; break;
         case InputsRelationKind::DUAL: os << "DUAL"; break;
         case InputsRelationKind::ADDITIVE: os << "ADDITIVE"; break;
-        default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming\n");
+        default: ARIADNE_FAIL_MSG("Unhandled InputsRoles for output streaming");
     }
     return os;
 }
@@ -282,7 +282,7 @@ public:
 };
 
 template<class A, class R>
-class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A>, public Loggable {
+class ApproximationErrorProcessor : public ApproximationErrorProcessorInterface<A> {
   public:
     ApproximationErrorProcessor(EffectiveVectorMultivariateFunction const& f, BoxDomainType const& inputs)
         : _f(f), _inputs(inputs) { }
@@ -330,7 +330,7 @@ class InclusionIntegratorInterface {
 
 
 template<class A>
-class InclusionIntegrator : public InclusionIntegratorInterface, Loggable {
+class InclusionIntegrator : public InclusionIntegratorInterface {
     friend class InclusionIntegratorFactory;
   protected:
     EffectiveVectorMultivariateFunction const& _f;

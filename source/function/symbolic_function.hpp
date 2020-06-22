@@ -272,7 +272,7 @@ template<class P, class... ARGS>
 class NonResizableScalarFunction : public ScalarFunction<P,ARGS...> {
   public:
     NonResizableScalarFunction<P,ARGS...>& operator=(const ScalarFunction<P,ARGS...>& f) {
-        ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain()<<"\n\n*this="<<*this<<"\nf="<<f<<"\n\n");
+        ARIADNE_ASSERT_MSG(this->domain()==f.domain(), "this->domain()="<<this->domain()<<", f.domain()="<<f.domain()<<"\n\n*this="<<*this<<"\nf="<<f<<"\n");
         this->ScalarFunction<P,ARGS...>::operator=(f);
         return *this;
     }

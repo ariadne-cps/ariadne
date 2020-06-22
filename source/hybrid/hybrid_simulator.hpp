@@ -42,7 +42,6 @@ template<class T> class Orbit;
 /*! \brief A class for computing the evolution of a hybrid system.
  */
 class HybridSimulator
-    : public Loggable
 {
   public:
     typedef HybridPoint<FloatDPApproximation> HybridApproximatePointType;

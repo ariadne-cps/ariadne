@@ -50,6 +50,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::compute(ValidatedVectorMultivariat
 }
 
 Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const {
+    ARIADNE_LOG_SCOPE_CREATE;
     const PositiveFloatDPValue BOX_RADIUS_WIDENING=cast_positive(0.25_exact);
     const PositiveFloatDPValue NO_WIDENING=cast_positive(1.0_exact);
     const PositiveFloatDPValue INITIAL_STARTING_WIDENING=cast_positive(2.0_exact);
@@ -64,8 +65,11 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     FloatDPUpperBound lipschitz = norm(f.jacobian(Vector<FloatDPBounds>(cast_singleton(product(D,to_time_bounds(t,t+h),A))))).upper();
     StepSizeType hlip = static_cast<StepSizeType>(cast_exact(LIPSCHITZ_TOLERANCE/lipschitz));
     h=min(hlip,h);
+    ARIADNE_LOG_PRINTLN("min(hlip,h)="<<h);
 
     IntervalDomainType T = to_time_bounds(t,t+h);
+
+    ARIADNE_LOG_PRINTLN("Finding contraction");
 
     UpperBoxType B=D;
     Bool success=false;
@@ -75,17 +79,21 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
             UpperBoxType Br=this->_refinement(f,D,T,A,B);
             if(not definitely(is_bounded(Br))) {
                 success=false;
+                ARIADNE_LOG_PRINTLN_AT(1,"B is not bounded.");
                 break;
             } else if(refines(Br,B)) {
                 B=Br;
                 success=true;
+                ARIADNE_LOG_PRINTLN_AT(1,"Found contraction of B="<<B);
                 break;
             } else {
                 B=this->_formula(f,D,T,A,B, NO_WIDENING,INITIAL_REFINING_WIDENING);
+                ARIADNE_LOG_PRINTLN_AT(1,"Expanding B to "<<B);
             }
         }
         if(!success) {
             h=hlf(h);
+            ARIADNE_LOG_PRINTLN_AT(1,"Reduced h to "<<h);
             if (h < MINIMUM_STEP_SIZE)
                 ARIADNE_THROW(BoundingNotFoundException,"EulerBounder::_compute","The step size is lower than the minimum (" << MINIMUM_STEP_SIZE << ") allowed, bounding could not be found.");
 
@@ -93,9 +101,13 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
         }
     }
 
+    ARIADNE_LOG_PRINTLN("Refining B");
     for(Nat i=0; i<REFINEMENT_STEPS; ++i) {
         B = this->_refinement(f,D,T,A,B);
+        ARIADNE_LOG_PRINTLN_AT(1,"B="<<B);
     }
+
+    ARIADNE_LOG_PRINTLN("Found B="<<B<<" using h="<<h);
 
     return std::make_pair(h,B);
 }

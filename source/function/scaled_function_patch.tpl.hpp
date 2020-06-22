@@ -680,7 +680,7 @@ template<class M> VectorScaledFunctionPatch<M>::VectorScaledFunctionPatch(const 
     Vector<ModelType> x=ModelType::scalings(d,prp);
     this->_models=f(x);
     ARIADNE_DEBUG_ASSERT(this->argument_size()==f.argument_size());
-    ARIADNE_DEBUG_ASSERT_MSG(this->result_size()==f.result_size(),"  f="<<f<<"\n  r="<<*this<<"\n");
+    ARIADNE_DEBUG_ASSERT_MSG(this->result_size()==f.result_size(),"  f="<<f<<"\n  r="<<*this);
     this->simplify();
 }
 

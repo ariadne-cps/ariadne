@@ -69,7 +69,6 @@ class TestHybridEvolver
     static Real zero,one;
   private:
     string evolver_name;
-    unsigned int evolver_verbosity;
     std::shared_ptr<GradedTaylorSeriesIntegrator> evolver_integrator;
     mutable std::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
@@ -77,7 +76,6 @@ class TestHybridEvolver
   public:
     TestHybridEvolver(
             const string evolver_name,
-            const unsigned int evolver_verbosity,
             const GradedTaylorSeriesIntegrator& evolver_integrator);
     Void test_all() const;
     Void test_flow() const;
@@ -109,10 +107,8 @@ class TestHybridEvolver
 
 TestHybridEvolver::TestHybridEvolver(
         const string ev_name,
-        const unsigned int ev_verbosity,
         const GradedTaylorSeriesIntegrator& ev_integrator)
     : evolver_name(ev_name)
-    , evolver_verbosity(ev_verbosity)
     , evolver_integrator(ev_integrator.clone())
 {
     DRAWING_METHOD = DrawingMethod::AFFINE;
@@ -122,7 +118,6 @@ TestHybridEvolver::TestHybridEvolver(
 Void TestHybridEvolver::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver_ptr.reset(new GeneralHybridEvolver(system));
-    evolver_ptr->verbosity = evolver_verbosity;
     evolver_ptr->set_integrator(*evolver_integrator);
 }
 
@@ -906,12 +901,13 @@ Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 Int main(Int argc, const char* argv[])
 {
-    Nat log_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
-    DRAWING_METHOD = DrawingMethod::AFFINE; DRAWING_ACCURACY = 2u;
+    DRAWING_METHOD = DrawingMethod::AFFINE;
+    DRAWING_ACCURACY = 2u;
 
     GradedTaylorSeriesIntegrator evolver_integrator(1e-3);
-    ARIADNE_TEST_CALL(TestHybridEvolver("general",log_verbosity,evolver_integrator).test_all());
+    ARIADNE_TEST_CALL(TestHybridEvolver("general",evolver_integrator).test_all());
 
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;

@@ -22,7 +22,7 @@ using namespace Ariadne;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     auto problem = make_space_rendezvous_problem();
 
@@ -30,7 +30,7 @@ Int main(Int argc, const char* argv[])
     auto system = problem.system;
     HybridConstraintSet safe_set = problem.safe_set;
 
-    std::cout << "Space Rendezvous system:\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Space Rendezvous system:");
 
     DiscreteLocation initial_location = initial_set.location();
     RealSpace initial_space = system.state_space()[initial_location];
@@ -45,11 +45,10 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_step_size(1.0);
     evolver.configuration().set_maximum_spacial_error(1e-3);
     evolver.configuration().set_enable_subdivisions(true);
-    evolver.verbosity=evolver_verbosity;
 
     StopWatch sw;
 
-    std::cout << "Computing orbit...\n";
+    ARIADNE_LOG_PRINTLN("Computing orbit...");
     HybridTime evolution_time(200.0,3);
     auto orbit=evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
@@ -58,26 +57,26 @@ Int main(Int argc, const char* argv[])
     StringConstant rendezvous("rendezvous");
     StringConstant aborting("aborting");
 
-    std::cout << "Checking properties...\n";
+    ARIADNE_LOG_PRINTLN("Checking properties...");
     Nat num_ce = 0;
     for (auto reach : orbit.reach()) {
         if (reach.location() == DiscreteLocation(spacecraft|rendezvous) and not(definitely(safe_set.covers(reach.bounding_box())))) {
-            std::cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe");
             ++num_ce;
         }
         if (reach.location() == DiscreteLocation(spacecraft|aborting) and not(definitely(safe_set.separated(reach.bounding_box())))) {
-            std::cout << "Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe\n";
+            ARIADNE_LOG_PRINTLN_AT(1,"Found counterexample in location " << reach.location() << " with bounding box " << reach.bounding_box() << ", unsafe");
             ++num_ce;
         }
     }
-    if (num_ce>0) std::cout << "Number of counterexamples: " << num_ce << std::endl;
+    if (num_ce>0) ARIADNE_LOG_PRINTLN("Number of counterexamples: " << num_ce);
 
     sw.click();
-    std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+    ARIADNE_LOG_PRINTLN("Done in " << sw.elapsed() << " seconds.");
 
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
-    std::cout << "Plotting..." << std::endl;
+    ARIADNE_LOG_PRINTLN("Plotting...");
     plot("spacerendezvous",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
-    std::cout << "File spacerendezvous.png written." << std::endl;
+    ARIADNE_LOG_PRINTLN("File spacerendezvous.png written.");
 }

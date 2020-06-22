@@ -255,32 +255,28 @@ class TestIntegrator
 };
 
 Int main(Int argc, const char* argv[]) {
-    auto verb = get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-10);
 
     TaylorPicardIntegrator taylor_picard_integrator(
             maximum_error=1e-6,sweeper,lipschitz_constant=0.5,
             step_maximum_error=1e-8,minimum_temporal_order=0,maximum_temporal_order=16);
-    taylor_picard_integrator.verbosity=verb;
     TestIntegrator(taylor_picard_integrator).test();
     ARIADNE_TEST_CLASS("TaylorPicardIntegrator",TestIntegrator(taylor_picard_integrator));
 
     TaylorSeriesIntegrator taylor_series_integrator(
             maximum_error=1e-6,sweeper,lipschitz_constant=0.5,order=6);
-    taylor_series_integrator.verbosity=verb;
     ARIADNE_TEST_CLASS("TaylorSeriesIntegrator",TestIntegrator(taylor_series_integrator));
 
     GradedTaylorSeriesIntegrator graded_taylor_series_integrator(
             maximum_error=1e-6,sweeper,lipschitz_constant=0.5,step_maximum_error=1e-8,
             minimum_spacial_order=1,minimum_temporal_order=4,
             maximum_spacial_order=4,maximum_temporal_order=8);
-    graded_taylor_series_integrator.verbosity=verbosity;
     ARIADNE_TEST_CLASS("GradedTaylorSeriesIntegrator",TestIntegrator(graded_taylor_series_integrator));
 
     ARIADNE_PRINT_TEST_CASE_TITLE("AffineIntegrator");
     AffineIntegrator affine_integrator(1e-6, 6);
-    affine_integrator.verbosity=verbosity;
     //TestIntegrator(affine_integrator).test_affine();
     ARIADNE_TEST_WARN("AffineIntegrator does not work correctly.");
 

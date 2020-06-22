@@ -82,7 +82,7 @@ class ConstraintSolverInterface {
 //! \ingroup OptimisationSubModule
 //! \brief A class for finding solutions of systems of constraints of the form \f$g(y) \leq c\f$.
 class ConstraintSolver
-    : public ConstraintSolverInterface, public Loggable
+    : public ConstraintSolverInterface
 {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.

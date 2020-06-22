@@ -79,7 +79,7 @@ class BounderInterface {
     virtual ~BounderInterface() = default;
 };
 
-class BounderBase : public BounderInterface, Loggable {
+class BounderBase : public BounderInterface {
   public:
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& hsug) const override;
     virtual Pair<StepSizeType,UpperBoxType> compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, StepSizeType const& hsug) const override;

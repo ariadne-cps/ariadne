@@ -136,8 +136,6 @@ Set<Identifier> names(const Set<RealVariable>& v);
 //! \details Trivially compositional by definition.
 class RestrictiveHybridAutomaton
 //    : public virtual HybridAutomatonInterface
-//    , public Loggable
-: public Loggable
 {
   public:
     //! \brief The type used to represent time.

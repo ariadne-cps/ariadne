@@ -29,7 +29,7 @@
 #include "symbolic/expression_set.hpp"
 #include "function/function.hpp"
 #include "function/formula.hpp"
-#include "function/symbolic_function.hpp"
+#include "function/formula_function.hpp"
 #include "geometry/function_set.hpp"
 
 #include "dynamics/inclusion_vector_field.hpp"

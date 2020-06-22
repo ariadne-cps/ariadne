@@ -30,7 +30,6 @@
 #include "../function/taylor_model.hpp"
 
 #include "../function/formula.hpp"
-#include "../function/formula.tpl.hpp"
 
 #include "../function/function.hpp"
 
@@ -40,6 +39,7 @@
 #include "../function/function_model.hpp"
 
 #include "../function/symbolic_function.hpp"
+#include "../function/formula_function.hpp"
 
 #include "../symbolic/expression.hpp"
 

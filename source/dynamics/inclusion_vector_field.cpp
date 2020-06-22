@@ -24,7 +24,7 @@
 
 #include "inclusion_vector_field.hpp"
 #include "../symbolic/expression_set.hpp"
-#include "../function/symbolic_function.hpp"
+#include "../function/formula_function.hpp"
 
 namespace Ariadne {
 

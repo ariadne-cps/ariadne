@@ -37,7 +37,7 @@
 #include "../function/domain.hpp"
 #include "../function/function_model.hpp"
 #include "../function/formula.hpp"
-#include "../function/symbolic_function.hpp"
+#include "../function/formula_function.hpp"
 #include "../symbolic/expression_set.hpp"
 #include "../output/logging.hpp"
 #include "../solvers/integrator_interface.hpp"

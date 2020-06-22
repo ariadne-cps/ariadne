@@ -42,8 +42,6 @@
 using namespace Ariadne;
 using namespace std;
 
-Nat log_verbosity=0;
-
 class TestHybridSimulator
 {
   private:
@@ -55,7 +53,7 @@ class TestHybridSimulator
 Int main()
 {
     TestHybridSimulator().test();
-    std::cerr<<"INOMPLETE ";
+    std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
 
@@ -103,7 +101,6 @@ Void TestHybridSimulator::test() const
     // Set up the evaluators
     HybridSimulator simulator;
     simulator.set_step_size(0.0625);
-    simulator.verbosity = log_verbosity;
 
 
     // Make a hybrid automaton for the Van der Pol equation
@@ -125,14 +122,4 @@ Void TestHybridSimulator::test() const
     cout << "done"<<std::endl;
 
     ARIADNE_TEST_PRINT(hybrid_orbit);
-
-
-/*
-    cout << "Plotting orbit... " << flush;
-    Figure fig;
-    fig << hybrid_orbit;
-    fig.write("test_hybrid_simulator-orbit");
-    cout << "done" << endl;
-*/
-
 }

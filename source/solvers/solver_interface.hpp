@@ -80,7 +80,6 @@ class SingularJacobianException : public SolverException
 //! \brief %Interface for solving (nonlinear) equations.
 //! \sa SolverException
 class SolverInterface
-    : public Loggable
 {
     using FLT=FloatDP;
   public:

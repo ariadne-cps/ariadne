@@ -61,7 +61,7 @@ Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, c
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     // Create the system
     // Set the system dynamic parameters
@@ -118,7 +118,6 @@ Int main(Int argc, const char* argv[])
     GradedTaylorSeriesIntegrator series_integrator(1e-3);
     series_integrator.set_maximum_spacial_order(6);
     series_integrator.set_maximum_temporal_order(12);
-    series_integrator.verbosity=0;
     TaylorPicardIntegrator picard_integrator(1e-5);
     IntervalNewtonSolver solver(1e-12,8);
 
@@ -129,7 +128,6 @@ Int main(Int argc, const char* argv[])
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(0.25);
     evolver.configuration().set_maximum_step_size(7.0/16);
-    evolver.verbosity=evolver_verbosity;
     cout <<  evolver.configuration() << endl << endl;
 
     evolver.configuration().set_enable_reconditioning(true);
@@ -203,7 +201,6 @@ Int main(Int argc, const char* argv[])
     std::cerr<<"transient_time="<<analyser.configuration().transient_time()<<"\n";
     std::cerr<<"transient_steps="<<analyser.configuration().transient_steps()<<"\n";
     analyser.configuration().set_maximum_grid_fineness(5);
-    analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
     HybridStorage chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;

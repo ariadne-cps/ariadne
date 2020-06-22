@@ -118,11 +118,11 @@ void TestDyadic::test_literal() {
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
     ARIADNE_TEST_PRINT(q);
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(fraction_write));
-    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<q);
     ARIADNE_TEST_EXECUTE(std::cout<<decimal_write(q));
-    ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q)<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<fraction_write(q));
     ARIADNE_TEST_EXECUTE(Dyadic::set_default_writer(decimal_write));
-    ARIADNE_TEST_EXECUTE(std::cout<<q<<"\n");
+    ARIADNE_TEST_EXECUTE(std::cout<<q);
 
     RepresentationWriter<Dyadic> representation_write;
     ARIADNE_TEST_EXECUTE(std::cout<<representation_write(q));

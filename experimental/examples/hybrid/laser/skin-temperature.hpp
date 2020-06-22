@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getSkinTemperature()
+HybridAutomaton getSkinTemperature()
 {
     /// Parameters
 	RealConstant lambda("lambda",6825.5643_dec);

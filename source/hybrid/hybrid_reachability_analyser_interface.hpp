@@ -46,7 +46,6 @@ class HybridGridTreePaving;
 //! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyserInterface
     : public virtual ReachabilityAnalyserInterface<HybridAutomatonInterface>
-    , public Loggable
 {
   public:
     typedef HybridAutomatonInterface SystemType;

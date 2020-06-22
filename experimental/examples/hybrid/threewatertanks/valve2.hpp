@@ -1,5 +1,5 @@
 /***************************************************************************
- *            valve-permissive.hpp
+ *            valve.hpp
  *
  *  Copyright  2017 Luca Geretti
  *
@@ -25,7 +25,7 @@
 
 using namespace Ariadne;
 
-inline AtomicHybridAutomaton getValve2()
+inline HybridAutomaton getValve2()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.
@@ -39,28 +39,28 @@ inline AtomicHybridAutomaton getValve2()
     DiscreteEvent e_can_open("can_open2");
     DiscreteEvent e_can_close("can_close2");
 
-    AtomicHybridAutomaton valve("valve2");
+    StringVariable valve("valve2");
+    HybridAutomaton automaton(valve.name());
 
     // Declare the values the valve can variable can have
-    AtomicDiscreteLocation closed("closed2");
-    AtomicDiscreteLocation opened("opened2");
-    AtomicDiscreteLocation opening("opening2");
-    AtomicDiscreteLocation closing("closing2");
+    DiscreteLocation closed(valve|"closed2");
+    DiscreteLocation opened(valve|"opened2");
+    DiscreteLocation opening(valve|"opening2");
+    DiscreteLocation closing(valve|"closing2");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve.new_mode(closed,{let(aperture)=0});
-    valve.new_mode(opened,{let(aperture)=1});
-    valve.new_mode(opening,{dot(aperture)=+1/T});
-    valve.new_mode(closing,{dot(aperture)=-1/T});
+    automaton.new_mode(closed,{let(aperture)=0});
+    automaton.new_mode(opened,{let(aperture)=1});
+    automaton.new_mode(opening,{dot(aperture)=+1/T});
+    automaton.new_mode(closing,{dot(aperture)=-1/T});
 
-    valve.new_transition(opening,e_idle,opened,aperture>=1.0_dec,EventKind::URGENT);
-    valve.new_transition(closing,e_idle,closed,aperture<=0.0_dec,EventKind::URGENT);
-    valve.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
-    valve.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
-    valve.new_transition(opening,e_can_close,closing,{next(aperture)=aperture});
-    valve.new_transition(closing,e_can_open,opening,{next(aperture)=aperture});
+    automaton.new_transition(opening,e_idle,opened,aperture>=1.0_dec,EventKind::URGENT);
+    automaton.new_transition(closing,e_idle,closed,aperture<=0.0_dec,EventKind::URGENT);
+    automaton.new_transition(closed,e_can_open,opening,{next(aperture)=aperture});
+    automaton.new_transition(opened,e_can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(opening,e_can_close,closing,{next(aperture)=aperture});
+    automaton.new_transition(closing,e_can_open,opening,{next(aperture)=aperture});
 
-
-    return valve;
+    return automaton;
 }

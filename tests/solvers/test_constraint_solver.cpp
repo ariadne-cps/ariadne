@@ -43,10 +43,7 @@ using namespace Ariadne;
 
 class TestConstraintSolver
 {
-    Nat verbosity;
   public:
-    TestConstraintSolver(Nat v) : verbosity(v) { }
-
     Void test() {
         ARIADNE_TEST_CALL(test_empty_reduce_inequality());
         ARIADNE_TEST_CALL(test_empty_reduce_equality());
@@ -66,7 +63,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {4<=2*x[0]+x[1]};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
@@ -79,7 +75,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {2*x[0]+x[1]==4};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
@@ -92,7 +87,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.reduce(D,c));
         ARIADNE_TEST_PRINT(D);
@@ -105,7 +99,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {x[1]<=1, x[0]+x[1]==2};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[1]));
@@ -119,7 +112,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[0],0));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c[1],0));
@@ -137,7 +129,6 @@ class TestConstraintSolver
         List<EffectiveConstraint> c = {-2<=2*x[0]+x[1]<=1};
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
         ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.5},{0.0,1.0}}));
@@ -149,7 +140,6 @@ class TestConstraintSolver
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
         ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
@@ -164,7 +154,6 @@ class TestConstraintSolver
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
-        propagator.verbosity=this->verbosity;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
         ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
@@ -200,7 +189,8 @@ class TestConstraintSolver
 };
 
 Int main(Int argc, const char* argv[]) {
-    TestConstraintSolver(get_verbosity(argc,argv)).test();
+    Logger::set_verbosity(get_verbosity(argc,argv));
+    TestConstraintSolver().test();
     return ARIADNE_TEST_FAILURES;
 }
 

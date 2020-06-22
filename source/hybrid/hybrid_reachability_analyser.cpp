@@ -123,33 +123,32 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridStorage& reach_cell
                                                        const Nat accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
-    ARIADNE_LOG(6,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
+    ARIADNE_LOG_SCOPE_CREATE;
     HybridGrid grid=set.grid();
     HybridGridTreePaving cells=set.state_set();
     cells.mince(accuracy);
 
-    ARIADNE_LOG(6,"Evolving "<<cells.size()<<" cells\n");
+    ProgressIndicator indicator(cells.size());
+    ARIADNE_LOG_PRINTLN("Evolving "<<cells.size()<<" cells");
     for(HybridGridCell const& cell : cells) {
-        ARIADNE_LOG(7,"Evolving cell = "<<cell<<"\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"Evolving cell = "<<cell);
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,Semantics::UPPER);
-        ARIADNE_LOG(7,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
-        ARIADNE_LOG(7,"  adjoining reach enclosures to grid... ");
+        ARIADNE_LOG_PRINTLN_AT(1,"Computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.");
+        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {
             enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
-        ARIADNE_LOG(7,"done\n");
-        ARIADNE_LOG(7,"  adjoining final enclosures to grid... ");
+        ARIADNE_LOG_PRINTLN_AT(1,"Adjoining final enclosures to grid... ");
         for(HybridEnclosure const& enclosure : final_enclosures) {
             enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
-        ARIADNE_LOG(7,"done.\n");
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
-    ARIADNE_LOG(6,"  final reach size = "<<reach_cells.size()<<"\n");
-    ARIADNE_LOG(6,"  final evolve size = "<<evolve_cells.size()<<"\n");
-    ARIADNE_LOG(6,"Done.\n");
+    ARIADNE_LOG_PRINTLN("Final reach size = "<<reach_cells.size());
+    ARIADNE_LOG_PRINTLN("Final evolve size = "<<evolve_cells.size());
 }
 
 

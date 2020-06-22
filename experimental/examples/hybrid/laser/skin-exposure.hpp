@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-AtomicHybridAutomaton getSkinExposure()
+HybridAutomaton getSkinExposure()
 {
     /// Parameters
 	RealConstant velocity("velocity",0.092_dec);

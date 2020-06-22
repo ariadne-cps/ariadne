@@ -239,20 +239,20 @@ Bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
        }
     }
 
-    ARIADNE_LOG(3,"differential_variables="<<differential_variables<<"\n");
-    ARIADNE_LOG(3,"algebraic_variables="<<algebraic_variables<<"\n");
-    ARIADNE_LOG(3,"independent_variables="<<independent_variables<<"\n");
+    ARIADNE_LOG(3,"differential_variables="<<differential_variables);
+    ARIADNE_LOG(3,"algebraic_variables="<<algebraic_variables);
+    ARIADNE_LOG(3,"independent_variables="<<independent_variables);
 
     input_variables=difference(independent_variables,join(differential_variables,algebraic_variables));
-    ARIADNE_LOG(3,"input_variables="<<independent_variables<<"\n");
+    ARIADNE_LOG(3,"input_variables="<<independent_variables);
     ARIADNE_ASSERT_MSG(input_variables.empty(),"Variables "<<input_variables<<" are used, but have no defining rules");
 
-    ARIADNE_LOG(3,"algebraic_dependencies="<<algebraic_dependencies<<"\n");
+    ARIADNE_LOG(3,"algebraic_dependencies="<<algebraic_dependencies);
     for(dependencies_iterator iter=algebraic_dependencies.begin(); iter!=algebraic_dependencies.end(); ++iter) {
         restrict(iter->second,algebraic_variables);
     }
     std::vector<Identifier> ordered_algebraic_variables=flatten(algebraic_dependencies);
-    ARIADNE_LOG(3,"ordered_algebraic_variables="<<ordered_algebraic_variables<<"\n");
+    ARIADNE_LOG(3,"ordered_algebraic_variables="<<ordered_algebraic_variables);
 
     return true;
 }
@@ -270,9 +270,9 @@ Bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& sour
         }
     }
 
-    ARIADNE_LOG(3,"source_variables="<<source_variables<<"\n");
-    ARIADNE_LOG(3,"target_state_variables="<<target_state_variables<<"\n");
-    ARIADNE_LOG(3,"updated_variables="<<updated_variables<<"\n");
+    ARIADNE_LOG(3,"source_variables="<<source_variables);
+    ARIADNE_LOG(3,"target_state_variables="<<target_state_variables);
+    ARIADNE_LOG(3,"updated_variables="<<updated_variables);
 
     ARIADNE_ASSERT_MSG(subset(updated_variables,target_state_variables),"");
     ARIADNE_ASSERT_MSG(subset(target_state_variables,updated_variables),"");

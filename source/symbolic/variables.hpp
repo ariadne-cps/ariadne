@@ -69,7 +69,7 @@ inline String class_name(const VariableType& tp) {
         case VariableType::INTEGER: return "Integer";
         case VariableType::REAL: return "Real";
         default:
-            ARIADNE_FAIL_MSG("Unhandled VariableType for output stream\n");
+            ARIADNE_FAIL_MSG("Unhandled VariableType for output stream");
     }
 }
 
@@ -163,7 +163,7 @@ inline OutputStream& operator<<(OutputStream& os, VariableCategory const& cat) {
         case VariableCategory::PRIMED: os << "DOTTED"; break;
         case VariableCategory::DOTTED: os << "PRIMED"; break;
         default:
-            ARIADNE_FAIL_MSG("Unhandled VariableCategory for output streaming\n");
+            ARIADNE_FAIL_MSG("Unhandled VariableCategory for output streaming");
     }
     return os;
 }
@@ -187,7 +187,7 @@ inline OutputStream& operator<<(OutputStream& os, ExtendedUntypedVariable const&
         case VariableCategory::PRIMED: os << "prime("<<var.name()<<")"; break;
         case VariableCategory::DOTTED: os << "dot("<<var.name()<<")"; break;
         default:
-            ARIADNE_FAIL_MSG("Unhandled VariableCategory "<<var.category()<<"\n");
+            ARIADNE_FAIL_MSG("Unhandled VariableCategory "<<var.category());
     }
     return os;
 }

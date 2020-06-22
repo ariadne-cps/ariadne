@@ -53,7 +53,7 @@
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed."); \
         } \
     } \
 
@@ -63,7 +63,7 @@
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error); \
         } \
     } \
 
@@ -78,7 +78,7 @@
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed."); \
         } \
     } \
 
@@ -92,7 +92,7 @@
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error); \
         } \
     } \
 
@@ -100,7 +100,7 @@
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed."); \
         } \
     } \
 
@@ -109,7 +109,7 @@
     { \
         bool result = static_cast<bool>(expression); \
         if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Precondition `" << #expression << "' failed.\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Precondition `" << #expression << "' failed."); \
         } \
     } \
 
@@ -120,14 +120,14 @@
 
 #define ARIADNE_FAIL_MSG(error)             \
     { \
-        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"ErrorTag "<<error<<"\n"); \
+        ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"ErrorTag "<<error); \
     } \
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
         bool assertion_result = static_cast<bool>(expression); \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error); \
         } \
     } \
 
@@ -135,7 +135,7 @@
     { \
         bool assertion_result = static_cast<bool>((expression1) == (expression2));       \
         if(!assertion_result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2); \
         } \
     } \
 

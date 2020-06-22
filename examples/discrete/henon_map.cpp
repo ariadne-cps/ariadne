@@ -60,8 +60,9 @@ using namespace std;
 #define ARIADNE_PRINT(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
 
 
-Int main()
+Int main(int argc, const char* argv[])
 {
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
     Real a=Decimal(1.3), b=Decimal(0.3);
@@ -82,7 +83,6 @@ Int main()
     ReachabilityAnalyser<IteratedMap> analyser(evolver);
     analyser.configuration().set_bounding_domain(ExactBoxType({{-4,4},{-4,4}}));
     analyser.configuration().set_maximum_grid_fineness(5);
-    analyser.set_verbosity(3);
 
     // Set-up initial set and time for evolution
     RealVariablesBox initial_box={x.in(0.5_dec,0.6_dec),y.in(0.95_dec,1.05_dec)};

@@ -53,7 +53,6 @@ class BoxDomainType;
 template<class Var>
 class CalculusBase
     : public CalculusInterface<Var>
-    , public Loggable
 {
     typedef FloatDP R;
     typedef FloatDP A;

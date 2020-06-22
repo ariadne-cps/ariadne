@@ -1238,10 +1238,10 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
         ++step;
         for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
             DiscreteLocation location=*source_iter;
-            ARIADNE_LOG(5,"  mode: "<<location<<":\n");
+            ARIADNE_LOG(5,"  mode: "<<location<<":");
 
             Set<DiscreteEvent> events=automaton.guard_events(location);
-            ARIADNE_LOG(5,"    events: "<<events<<"\n");
+            ARIADNE_LOG(5,"    events: "<<events);
             for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
                 ARIADNE_LOG(5,"      transition: "<<event<<" -> ");
@@ -1254,7 +1254,7 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
            }
 
         }
-        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
+        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n");
         working.clear();
         working.swap(found);
     }

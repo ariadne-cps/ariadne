@@ -143,7 +143,6 @@ TestHybridSystem::test_build_hybrid_system()
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     _system=watertank_system;
-    _system.verbosity=0;
 
     Set<DiscreteLocation> reachable = valve_component.reachable_locations(valve|open);
     std::cerr << reachable;
@@ -506,7 +505,6 @@ TestHybridAutomaton::test_build_hybrid_system()
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     _system=watertank_system;
-    _system.verbosity=0;
 
 }
 

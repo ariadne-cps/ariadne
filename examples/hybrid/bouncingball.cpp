@@ -29,7 +29,7 @@ using std::cout; using std::endl; using std::flush;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
@@ -66,7 +66,6 @@ Int main(Int argc, const char* argv[])
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolverType evolver(ball);
-    evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(2.0);

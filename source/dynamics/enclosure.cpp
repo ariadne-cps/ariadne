@@ -62,6 +62,7 @@
 
 #include "../output/graphics_interface.hpp"
 #include "../output/drawer.hpp"
+#include "../output/progress_indicator.hpp"
 
 #include "../hybrid/discrete_event.hpp"
 
@@ -157,13 +158,13 @@ OutputStream& operator<<(OutputStream& os, EnclosureConfiguration const& ec) {
 
 Void Enclosure::_check(std::string from) const {
     ARIADNE_ASSERT_MSG(this->_state_function.argument_size()==this->domain().size(),*this);
-    ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
-    ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
+    ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n");
+    ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n");
     for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
-    ARIADNE_ASSERT_MSG(this->_variable_kinds.size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_variable_kinds<<"\n\n");
-    ARIADNE_ASSERT_MSG(this->_state_function.result_size()==this->_auxiliary_mapping.argument_size(),*this<<"\n\n"<<this->_state_function<<"\n"<<this->_auxiliary_mapping<<"\n\n");
+    ARIADNE_ASSERT_MSG(this->_variable_kinds.size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_variable_kinds<<"\n");
+    ARIADNE_ASSERT_MSG(this->_state_function.result_size()==this->_auxiliary_mapping.argument_size(),*this<<"\n\n"<<this->_state_function<<"\n"<<this->_auxiliary_mapping<<"\n");
 }
 
 EnclosureConfiguration const&
@@ -1730,7 +1731,14 @@ ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
 }
 
 Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
-    for (auto set : this->_data) { set.draw(cnvs, prj); }
+    ARIADNE_LOG_SCOPE_CREATE;
+    SizeType num_sets = this->_data.size();
+    ProgressIndicator indicator(num_sets);
+    for (auto set : this->_data) {
+        set.draw(cnvs, prj);
+        indicator.update_current(--num_sets);
+        ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
+    }
 }
 
 const RealSpace LabelledSet<ListSet<Enclosure>>::space() const {

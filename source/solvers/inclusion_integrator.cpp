@@ -234,9 +234,10 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 }
 
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(PositiveFloatDPValue const& h, UpperBoxType const& B) const {
+    ARIADNE_LOG_SCOPE_CREATE;
     ErrorConstants norms = compute_constants<A>(Ariadne::noise_independent_component(_f, _inputs.size()),
                                              Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
-    ARIADNE_LOG(7,"norms: " << norms << "\n");
+    ARIADNE_LOG_PRINTLN("norms: " << norms);
     Set<Nat> input_idx;
     for (Nat i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }
     if (is_additive_in(_f,input_idx))
@@ -251,7 +252,7 @@ InclusionIntegratorFactory::create(EffectiveVectorMultivariateFunction const& f,
     if (approximation.handles(AffineApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<AffineApproximation>(f,inputs,_integrator)));
     if (approximation.handles(SinusoidalApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<SinusoidalApproximation>(f,inputs,_integrator)));
     if (approximation.handles(PiecewiseApproximation())) return InclusionIntegratorHandle(SharedPointer<InclusionIntegratorInterface>(new InclusionIntegrator<PiecewiseApproximation>(f,inputs,_integrator)));
-    ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation << "\n");
+    ARIADNE_FAIL_MSG("Unhandled input approximation " << approximation);
 }
 
 
@@ -267,19 +268,19 @@ InclusionIntegrator<A>::operator<(const InclusionIntegratorInterface& rhs) const
 
 template<class A> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<A>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
-
+    ARIADNE_LOG_SCOPE_CREATE;
     TimeStepType new_t = lower_bound(t+h);
 
     Interval<TimeStepType> domt(t,new_t);
 
     auto e=this->compute_errors(h,B);
-    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+    ARIADNE_LOG_PRINTLN("approximation errors:"<<e);
     auto doma = this->build_parameter_domain(_inputs);
 
     auto w = build_w_functions<A>(domt,doma,_f.result_size(),_inputs.size());
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
-    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw:"<<Fw);
     auto phi = this->_integrator->flow_step(Fw,domx,domt,doma,B);
     add_errors(phi,e);
 
@@ -477,6 +478,7 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Piecewi
 
 template<> List<ValidatedVectorMultivariateFunctionModelType>
 InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, ValidatedVectorMultivariateFunctionModelType const& evolve_function, UpperBoxType const& B, TimeStepType const& t, StepSizeType const& h) const {
+    ARIADNE_LOG_SCOPE_CREATE;
 
     List<ValidatedVectorMultivariateFunctionModelType> result;
 
@@ -491,12 +493,12 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto doma = this->build_parameter_domain(_inputs);
 
     auto e=this->compute_errors(h,B);
-    ARIADNE_LOG(6,"approximation errors:"<<e<<"\n");
+    ARIADNE_LOG_PRINTLN("approximation errors:"<<e);
 
     auto w_hlf = build_w_functions<PiecewiseApproximation>(domt_first,doma,n,m);
-    ARIADNE_LOG(6,"w_hlf:"<<w_hlf<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w_hlf:"<<w_hlf);
     auto Fw_hlf = substitute_v_with_w(_f, w_hlf);
-    ARIADNE_LOG(6,"Fw_hlf:" << Fw_hlf << "\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw_hlf:" << Fw_hlf);
 
     auto phi_hlf = this->_integrator->flow_step(Fw_hlf,domx,domt_first,doma,B);
     auto intermediate_reach=this->build_reach_function(evolve_function, phi_hlf, t, intermediate_t);
@@ -508,9 +510,9 @@ InclusionIntegrator<PiecewiseApproximation>::reach(BoxDomainType const& domx, Va
     auto domx_second = cast_exact_box(intermediate_evolve.range());
 
     auto w = this->build_secondhalf_piecewise_w_functions(domt_second,doma,n,m);
-    ARIADNE_LOG(6,"w:"<<w<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"w:"<<w);
     auto Fw = substitute_v_with_w(_f, w);
-    ARIADNE_LOG(6,"Fw:"<<Fw<<"\n");
+    ARIADNE_LOG_PRINTLN_AT(1,"Fw:"<<Fw);
     auto phi = this->_integrator->flow_step(Fw,domx_second,domt_second,doma,B);
     add_errors(phi,e);
 

@@ -230,7 +230,6 @@ inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 //! \sa \ref DiscreteMode, \ref DiscreteTransition, \ref CompositeHybridAutomaton
 class HybridAutomaton
     : public HybridAutomatonInterface
-    , public Loggable
 {
     friend class CompositeHybridAutomaton;
     static Writer<HybridAutomaton> _default_writer;

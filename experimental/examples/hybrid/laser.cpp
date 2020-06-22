@@ -40,10 +40,10 @@ int main(int argc, const char* argv[])
     /// Build the Hybrid System
 
     /// Get the automata
-    AtomicHybridAutomaton laser_trajectory = getLaserTrajectory();
-    AtomicHybridAutomaton exposure = getSkinExposure();
-    AtomicHybridAutomaton skin_temperature = getSkinTemperature();
-    AtomicHybridAutomaton cutting_depth = getCuttingDepth();
+    HybridAutomaton laser_trajectory = getLaserTrajectory();
+    HybridAutomaton exposure = getSkinExposure();
+    HybridAutomaton skin_temperature = getSkinTemperature();
+    HybridAutomaton cutting_depth = getCuttingDepth();
 
     //CompositeHybridAutomaton laser_system({laser_trajectory,exposure,skin_temperature,cutting_depth});
     CompositeHybridAutomaton laser_system({laser_trajectory,exposure});

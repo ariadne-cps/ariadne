@@ -31,7 +31,7 @@ using std::cout; using std::endl;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     // Declare the shared system variables
     RealVariable aperture("aperture");
@@ -54,8 +54,6 @@ Int main(Int argc, const char* argv[])
 
     // Create a GeneralHybridEvolver object
     GeneralHybridEvolver evolver(watertank_system);
-    evolver.verbosity = evolver_verbosity;
-
     // Set the evolution parameters
     evolver.configuration().set_maximum_enclosure_radius(3.05); // The maximum size of an evolved set before early termination
     evolver.configuration().set_maximum_step_size(0.25); // The maximum value that can be used as a time step for integration

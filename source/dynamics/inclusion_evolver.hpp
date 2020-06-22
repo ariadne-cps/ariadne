@@ -82,7 +82,7 @@ class ReconditionerInterface {
     virtual ~ReconditionerInterface() = default;
 };
 
-class LohnerReconditioner : public ReconditionerInterface, public Loggable {
+class LohnerReconditioner : public ReconditionerInterface {
     Nat _number_of_variables;
     Nat _number_of_inputs;
     Nat _number_of_steps_between_simplifications;
@@ -125,7 +125,7 @@ public:
 
 class InclusionEvolverConfiguration;
 
-class InclusionEvolver : public Loggable {
+class InclusionEvolver {
   public:
     typedef InclusionEvolverConfiguration ConfigurationType;
     typedef InclusionVectorField SystemType;

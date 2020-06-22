@@ -904,46 +904,6 @@ ValidatedConstrainedImageSet::bounding_box() const
 }
 
 
-/*
-// Version from Enclosure
-ValidatedAffineConstrainedImageSet
-ValidatedConstrainedImageSet::affine_over_approximation() const
-{
-    this->_check();
-    typedef List<ValidatedScalarMultivariateTaylorFunctionModelDP>::ConstIterator ConstIterator;
-
-    const Nat nx=this->state_dimension();
-    const Nat nc=this->number_of_constraints();
-    const Nat np=this->number_of_parameters();
-
-    AffineSweeper<FloatDP> affine_sweeper((dp));
-    ValidatedVectorMultivariateTaylorFunctionModelDP state_function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->_state_function.reference());
-    ValidatedScalarMultivariateTaylorFunctionModelDP time_function=dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_time_function.reference());
-    List<ValidatedScalarMultivariateTaylorFunctionModelDP> constraint_functions;
-    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ValidatedScalarMultivariateTaylorFunctionModelDP&>(this->_constraints[i].function().reference())); }
-
-    //std::cerr<<"\n"<<state_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
-
-    Vector< ValidatedAffineModel > affine_function_models(state_function.result_size());
-    for(Nat i=0; i!=state_function.result_size(); ++i) { affine_function_models[i]=affine_model(state_function.models()[i]); }
-    //affine_function_models[state_function.result_size()]=affine_model(time_function.model());
-
-    ValidatedAffineConstrainedImageSet result(affine_function_models);
-    //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
-
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        ValidatedTaylorModelDP const& constraint_model=constraint_functions[i].model();
-        ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
-        ExactIntervalType constraint_bound=this->constraint(i).bounds();
-        result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
-    }
-
-    ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
-    return result;
-
-}
-*/
-
 ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
@@ -960,51 +920,6 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
-
-/*
-    const Nat nx=this->dimension();
-    //const Nat nnc=this->_negative_constraints.size();
-    //const Nat nzc=this->_zero_constraints.size();
-    const Nat np=this->number_of_parameters();
-
-    // Compute the number of values with a nonzero error
-    Nat nerr=0;
-    for(Nat i=0; i!=nx; ++i) {
-        if(function[i].error()>0.0) { ++nerr; }
-    }
-
-    Vector<FloatDP> h(nx);
-    Matrix<FloatDP> G(nx,np+nerr);
-    Nat ierr=0; // The index where the error bound should go
-    for(Nat i=0; i!=nx; ++i) {
-        ValidatedScalarMultivariateTaylorFunctionModelDP component_function=function[i];
-        h[i]=component_function.model().value();
-        for(Nat j=0; j!=np; ++j) {
-            G[i][j]=component_function.model().gradient(j);
-        }
-        if(component_function.model().error()>0.0) {
-            G[i][np+ierr]=component_function.model().error();
-            ++ierr;
-        }
-    }
-
-    ValidatedAffineConstrainedImageSet result(G,h);
-
-    Vector<FloatDP> a(np+nerr, 0.0);
-    FloatDP b;
-
-    for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        ValidatedScalarMultivariateTaylorFunctionModelDP constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
-        b=sub(up,constraint_function.model().error(),constraint_function.model().value());
-        for(Nat j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
-        result.new_parameter_constraint(-inf,a,b);
-    }
-
-    ARIADNE_NOT_IMPLEMENTED;
-
-    ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
-    return result;
-*/
 }
 
 ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
@@ -1128,7 +1043,6 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::overlaps(const ExactBoxType
     ExactBoxType codomain = product(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
-    optimiser.verbosity=0;
 
     List<Pair<Nat,ExactBoxType> > subdomains;
     Nat splittings(0);
@@ -1178,7 +1092,7 @@ Void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
             ConstraintPaver().adjoin_outer_approximation(paving,set,fineness);
             break;
         default:
-            ARIADNE_FAIL_MSG("Unknown discretisation method\n");
+            ARIADNE_FAIL_MSG("Unknown discretisation method");
     }
 
     paving.recombine();

@@ -31,7 +31,7 @@ using namespace Ariadne;
 
 Int main(Int argc, const char* argv[])
 {
-    Nat evolver_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     RealConstant g("g",9.81_dec);
     RealConstant R("R",0.1_dec);
@@ -59,7 +59,7 @@ Int main(Int argc, const char* argv[])
                           dot(t)=Real(1.0)
                          });
 
-    std::cout << "Quadrotor system:\n" << std::flush;
+    ARIADNE_LOG_PRINTLN("Quadrotor system:");
 
     MaximumError max_err=1e-2;
     TaylorPicardIntegrator integrator(max_err);
@@ -68,7 +68,6 @@ Int main(Int argc, const char* argv[])
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.01);
     evolver.configuration().set_maximum_spacial_error(1e-2);
-    evolver.verbosity = evolver_verbosity;
 
     Real evolution_time(5.0);
 
@@ -84,11 +83,11 @@ Int main(Int argc, const char* argv[])
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for Delta=0.1 ... " << std::endl << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.1 ... ");
         auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
         reach1 = orbit.reach();
         sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
     {
@@ -101,23 +100,22 @@ Int main(Int argc, const char* argv[])
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for Delta=0.4 ... " << std::endl << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.4 ... ");
         auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
         reach2 = orbit.reach();
-        std::cout << "Checking properties... " << std::endl << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Checking properties... ");
 
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
             if (possibly(bb[x3] >= 1.40_dec))
-                std::cout << "height of " << bb[x3] << " is over the required bound."
-                          << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is over the required bound.");
             if (possibly(bb[t] >= 1) and possibly(bb[x3] <= 0.9_dec))
-                std::cout << "height of " << bb[x3] << " is below the required bound after 1s." << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is below the required bound after 1s.");
             if (possibly(bb[t] >= 5) and possibly(bb[x3] <= 0.98_dec or bb[x3] >= 1.02_dec))
-                std::cout << "height of " << bb[x3] << " is outside the required bounds at 5s." << std::endl;
+                ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is outside the required bounds at 5s.");
         }
         sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
     {
@@ -130,14 +128,14 @@ Int main(Int argc, const char* argv[])
 
         StopWatch sw;
 
-        std::cout << "Computing orbit for Delta=0.8 ... " << std::endl << std::flush;
+        ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.8 ... ");
         auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
         reach3 = orbit.reach();
         sw.click();
-        std::cout << "Done in " << sw.elapsed() << " seconds." << std::endl;
+        ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
     }
 
-    std::cout << "Plotting..." << std::endl;
+    ARIADNE_LOG_PRINTLN("Plotting...");
     LabelledFigure fig(Axes2d({0<=t<=5,-0.8<=x3<=1.5}));
     fig << line_colour(0.0,0.0,0.0);
     fig << line_style(false);
@@ -148,5 +146,5 @@ Int main(Int argc, const char* argv[])
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
     fig.write("quadrotor");
-    std::cout << "File quadrotor.png written." << std::endl;
+    ARIADNE_LOG_PRINTLN("File quadrotor.png written.");
 }

@@ -111,7 +111,6 @@ template<> class ListSet<HybridEnclosure>;
 //! replace it with the constraint \f$g_e(x_i)\leq 0\f$.
 class HybridEnclosure
     : public HybridDrawableInterface
-    , public Loggable
 {
     friend class SimpleHybridEvolver;
     friend class ConstraintHybridEvolver;

@@ -106,7 +106,6 @@ class OptimiserInterface {
 //! Common routines for nonlinear minimisation
 class OptimiserBase
     : public OptimiserInterface
-    , public Loggable
 {
   protected:
     static const FloatDPValue zero;

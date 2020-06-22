@@ -64,7 +64,6 @@ class CompositeHybridAutomaton;
 //! \sa \ref HybridAutomaton
 class CompositeHybridAutomaton
     : public HybridAutomatonInterface
-    , public Loggable
 {
     mutable DiscreteMode _cached_mode;
     Void _cache_mode(DiscreteLocation) const;

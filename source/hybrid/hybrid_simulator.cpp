@@ -61,7 +61,6 @@ class DegenerateCrossingException { };
 HybridSimulator::HybridSimulator()
     : _step_size(0.125)
 {
-    this->charcode="s";
 }
 
 Void HybridSimulator::set_step_size(double h)
@@ -133,6 +132,8 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
                             const TerminationType& termination) const
     -> Orbit<HybridApproximatePointType>
 {
+    ARIADNE_LOG_SCOPE_CREATE;
+
     DoublePrecision pr;
     HybridTime t(0.0,0);
     Dyadic h(ExactDouble(this->_step_size.get_d()));
@@ -157,16 +158,16 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
-        ARIADNE_LOG(1, (verbosity == 1 ? "\r" : "")
-                << "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
+        ARIADNE_LOG_PRINTLN_AT(1,
+                "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
                 << " #e=" << std::left << t.discrete_time()
                 << " p=" << point
                 << " l=" << std::left << location
                 << " e=" << std::left << event_trace
-                << " \n" << std::setprecision(old_precision));
+                << std::setprecision(old_precision));
 
         if (not satisfies_invariants(system, location, point)) {
-            ARIADNE_LOG(2,"invariant/progress condition not satisfied, stopping evolution.\n");
+            ARIADNE_LOG_PRINTLN("invariant/progress condition not satisfied, stopping evolution.");
             break;
         }
 
@@ -191,7 +192,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
             next_point=reset(point);
             event_trace.push_back(event);
 
-            ARIADNE_LOG(2,"event " << event << " enabled: next point " << next_point << ", on location " << target << "\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"event " << event << " enabled: next point " << next_point << ", on location " << target);
 
             dynamic=system.dynamic_function(location);
             guards=guard_functions(system,location);

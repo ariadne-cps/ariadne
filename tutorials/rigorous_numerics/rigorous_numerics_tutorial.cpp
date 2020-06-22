@@ -24,16 +24,21 @@
 
 #include <ariadne.hpp>
 
-#define print(expr) { std::cout << #expr << ": " << (expr) << "\n"; }
+#define print(expr) { ARIADNE_LOG_PRINTLN(#expr << ": " << (expr)) }
 
 using namespace Ariadne;
 
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 extern template Ariadne::Nat Ariadne::Approximation<Ariadne::FloatMP>::output_places;
 
-int main() {
+int main(int argc, const char* argv[]) {
+
+    Logger::set_verbosity(get_verbosity(argc,argv));
+
     //! [numeric_demonstration]
+    ARIADNE_LOG_PRINTLN("Numeric");
     {
+        ARIADNE_LOG_SCOPE_CREATE;
         auto r = 6 * atan(1/sqrt(Real(3)));
         print(r);
         FloatDPBounds xdp=r.get(double_precision);
@@ -43,7 +48,6 @@ int main() {
         print(xdp); print(xmp); print(ymp); print(zmp);
         print(xmp.error()); print(xmp-xmp); print(xmp-xmp+1);
         print(zmp.error()); print(zmp-zmp); print(zmp-zmp+1);
-        std::cout << std::endl;
 
         EffectiveNumber y=r;
         print(y);
@@ -52,7 +56,9 @@ int main() {
 
 
     //! [expression_demonstration]
+    ARIADNE_LOG_PRINTLN("Expression");
     {
+        ARIADNE_LOG_SCOPE_CREATE;
         RealVariable x("x");RealVariable y("y");
         RealConstant c("c",3.75_dy);
         RealExpression e = c * x * (1-x);
@@ -62,12 +68,13 @@ int main() {
         print(v);
         auto x1=evaluate(e,v);
         print(x1); print(x1.get(double_precision))
-        std::cout << std::endl;
     }
     //! [expression_demonstration]
 
     //! [linear_algebra_demonstration]
+    ARIADNE_LOG_PRINTLN("Linear Algebra");
     {
+        ARIADNE_LOG_SCOPE_CREATE;
         Matrix<FloatMPApproximation> A({{4,1,0},{1,4,1},{0,1,4}},precision(128_bits));
         Vector<FloatMPApproximation> v({2.0,3,5},precision(128_bits));
         print(inverse(A));
@@ -81,40 +88,39 @@ int main() {
         print(inverse(A_approx));
         print(solve(A_approx,v_approx));
         print(gs_solve(A_approx,v_approx));
-        std::cout << std::endl;
     }
     //! [linear_algebra_demonstration]
 
     //! [function_demonstration]
+    ARIADNE_LOG_PRINTLN("Function");
     {
+        ARIADNE_LOG_SCOPE_CREATE;
         Real a(1.875_dy), b(0.3_dec);
         auto id=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
         auto x=id[0]; auto y=id[1];
         auto h = EffectiveVectorMultivariateFunction{a-x*x-b*y,x};
-//        Vector<FloatDPValue> v({0.5_x,1.0_x},double_precision);
-          Vector<FloatDPValue> v({0.5,1.0},double_precision);
+        Vector<FloatDPValue> v({0.5,1.0},double_precision);
         print(v);
         print(h(v))
         print(evaluate(h,v));
         print(h.jacobian(v));
         print(jacobian(h,v));
         print(h.differential(v,3));
-        std::cout << std::endl;
 
-//        BoxDomainType dom({{0.0_x,1.0_x},{0.5_x,1.5_x}});
-          BoxDomainType dom({{0,1},{0.5,1.5}});
+        BoxDomainType dom({{0,1},{0.5,1.5}});
         auto th = ValidatedVectorMultivariateTaylorFunctionModelDP(dom,h,ThresholdSweeper<FloatDP>(double_precision,1e-4));
         print(th);
         auto thh=compose(h,th);
         print(thh);
         print(evaluate(thh,v));
         print(h(h(v)));
-        std::cout << std::endl;
     }
     //! [function_demonstration]
 
     //! [geometry_demonstration]
+    ARIADNE_LOG_PRINTLN("Geometry");
     {
+        ARIADNE_LOG_SCOPE_CREATE;
         auto x=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),0);
         auto y=EffectiveScalarMultivariateFunction::coordinate(EuclideanDomain(2),1);
         auto g = sqr(x)+4*sqr(y);
@@ -132,7 +138,6 @@ int main() {
         fig.set_fill_colour(0,1,1).draw(cis); // Use chained methods to control graphics
         fig.write("rigorous_numerics_tutorial"); //
         plot("rigorous_numerics_tutorial",Projection2d(2,0,1),bbx,Colour(1,0.5,0.5),bbx,Colour(0,1,1),cis); // Plot in one command
-
     }
     //! [geometry_demonstration]
 

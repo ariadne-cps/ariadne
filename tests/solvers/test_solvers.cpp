@@ -192,19 +192,16 @@ class TestSolver
 
 Int main(Int argc, const char **argv) {
 
-    unsigned int verb=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
-    interval_newton_solver.verbosity=verb;
     TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();
 
     KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     ARIADNE_TEST_PRINT(krawczyk_solver.function_factory());
-    krawczyk_solver.verbosity=verb;
     TestSolver(krawczyk_solver,"KrawczykSolver").test();
 
     FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
-    factored_krawczyk_solver.verbosity=verb;
     TestSolver(factored_krawczyk_solver,"FactoredKrawczykSolver").test();
 
     std::cerr<<"INCOMPLETE "<<std::flush;

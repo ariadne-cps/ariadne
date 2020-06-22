@@ -37,6 +37,7 @@
 #include "../symbolic/variables.hpp"
 #include "../output/graphics_interface.hpp"
 #include "../output/graphics.hpp"
+#include "../output/logging.hpp"
 
 #include "../symbolic/expression_set.hpp"
 #include "../hybrid/discrete_location.hpp"
@@ -119,6 +120,7 @@ inline Void draw(HybridFigure& g, const Colour& fc1, const SET& set1, CSETS cons
 
 template<class... CSETS>
 Void plot(const char* filename, const Axes2d& axes, CSETS const&... csets) {
+    ARIADNE_LOG_SCOPE_CREATE;
     HybridFigure g;  g.set_axes(axes); draw(g,csets...); g.write(filename); }
 
 } // namespace Ariadne

@@ -107,7 +107,7 @@ class TestReachabilityAnalyser
         return analyser;
     }
 
-    TestReachabilityAnalyser(Nat analyser_verbosity = 0u)
+    TestReachabilityAnalyser()
         : system(build_system()),
           analyser(build_analyser(system)),
           grid(2),
@@ -121,8 +121,6 @@ class TestReachabilityAnalyser
           safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
           reach_time(3.0)
     {
-        analyser.verbosity=analyser_verbosity;
-
         cout << "Done creating initial and safe sets\n" << endl;
 
         cout << "system=" << system << endl;
@@ -263,9 +261,9 @@ class TestReachabilityAnalyser
 
 Int main(Int argc, const char* argv[])
 {
-    unsigned int analyser_verbosity=get_verbosity(argc,argv);
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
-    TestReachabilityAnalyser(analyser_verbosity).test();
+    TestReachabilityAnalyser().test();
     return ARIADNE_TEST_FAILURES;
 }
 

@@ -28,8 +28,9 @@
 using namespace Ariadne;
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+    Logger::set_verbosity(get_verbosity(argc,argv));
 
     RealConstant mu("mu",1.0_dec);
     RealVariable x("x"), y("y");
@@ -44,7 +45,6 @@ int main()
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    evolver.verbosity = 1;
     std::cout <<  evolver.configuration() << std::endl;
 
     Real x0(1.40);

@@ -25,7 +25,7 @@
 
 using namespace Ariadne;
 
-inline AtomicHybridAutomaton getValve()
+inline HybridAutomaton getValve()
 {
 
     // Declare some constants. Note that system parameters should be given as variables.
@@ -47,32 +47,33 @@ inline AtomicHybridAutomaton getValve()
     DiscreteEvent must_start_towards1("must_start_towards1");
     DiscreteEvent must_start_towards2("must_start_towards2");
 
-    AtomicHybridAutomaton valve("valve");
+    StringVariable valve("valve");
+    HybridAutomaton automaton(valve.name());
 
     // Declare the values the valve can variable can have
-    AtomicDiscreteLocation fully1("fully1");
-    AtomicDiscreteLocation towards1("towards1");
-    AtomicDiscreteLocation fully2("fully2");
-    AtomicDiscreteLocation towards2("towards2");
+    DiscreteLocation fully1(valve|"fully1");
+    DiscreteLocation towards1(valve|"towards1");
+    DiscreteLocation fully2(valve|"fully2");
+    DiscreteLocation towards2(valve|"towards2");
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve.new_mode(fully1,{let(aperture1)=+1.0_decimal,let(aperture2)=0.0_decimal});
-    valve.new_mode(fully2,{let(aperture1)=0.0_decimal,let(aperture2)=+1.0_decimal});
+    automaton.new_mode(fully1,{let(aperture1)=+1.0_decimal,let(aperture2)=0.0_decimal});
+    automaton.new_mode(fully2,{let(aperture1)=0.0_decimal,let(aperture2)=+1.0_decimal});
     // Specify the differential equation for how the valve opens/closes.
-    valve.new_mode(towards1,{dot(aperture1)=+1/T,dot(aperture2)=-1/T});
-    valve.new_mode(towards2,{dot(aperture1)=-1/T,dot(aperture2)=+1/T});
+    automaton.new_mode(towards1,{dot(aperture1)=+1/T,dot(aperture2)=-1/T});
+    automaton.new_mode(towards2,{dot(aperture1)=-1/T,dot(aperture2)=+1/T});
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    valve.new_invariant(fully1,height2<=hmin-delta,must_start_towards2);
-    valve.new_invariant(fully2,height1<=hmin-delta,must_start_towards1);
+    automaton.new_invariant(fully1,height2<=hmin-delta,must_start_towards2);
+    automaton.new_invariant(fully2,height1<=hmin-delta,must_start_towards1);
 
-    valve.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin+delta,EventKind::PERMISSIVE);
-    valve.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin+delta,EventKind::PERMISSIVE);
-    valve.new_transition(towards1,finished_towards1,fully1,aperture1>=1,EventKind::URGENT);
-    valve.new_transition(towards2,finished_towards2,fully2,aperture2>=1,EventKind::URGENT);
+    automaton.new_transition(fully1,start_towards2,towards2,{next(aperture1)=aperture1,next(aperture2)=aperture2},height2<=hmin+delta,EventKind::PERMISSIVE);
+    automaton.new_transition(fully2,start_towards1,towards1,{next(aperture1)=aperture1,next(aperture2)=aperture2},height1<=hmin+delta,EventKind::PERMISSIVE);
+    automaton.new_transition(towards1,finished_towards1,fully1,aperture1>=1,EventKind::URGENT);
+    automaton.new_transition(towards2,finished_towards2,fully2,aperture2>=1,EventKind::URGENT);
 
-    return valve;
+    return automaton;
 }

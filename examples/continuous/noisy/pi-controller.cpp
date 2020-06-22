@@ -28,7 +28,8 @@
 using namespace Ariadne;
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+    Logger::set_verbosity(get_verbosity(argc,argv));
     run_noisy_system(PI());
 }

@@ -2831,7 +2831,7 @@ Void GridTreePaving::restrict_to_extent( const Nat theExtent ) {
     const Nat thisPavingPCellExtent = this->root_cell().root_extent();
 
     if( thisPavingPCellExtent > theExtent){
-        // ARIADNE_WARN("restricting GridTreeSet of extent " << this->root_cell().root_extent() << " to extent " << theExtent << ".\n");
+        // ARIADNE_WARN("restricting GridTreeSet of extent " << this->root_cell().root_extent() << " to extent " << theExtent << ".");
 
         BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellExtent, theExtent );
 

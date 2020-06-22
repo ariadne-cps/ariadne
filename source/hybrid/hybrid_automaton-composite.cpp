@@ -754,6 +754,7 @@ CompositeHybridAutomaton::discrete_reachability(DiscreteLocation initial_locatio
 Set<DiscreteLocation>
 CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& initial_locations) const
 {
+    ARIADNE_LOG_SCOPE_CREATE;
     const CompositeHybridAutomaton& automaton=*this;
 
     Set<DiscreteLocation> reached=initial_locations;
@@ -770,34 +771,25 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
     while(!working.empty()) {
         ++step;
         for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
-            ARIADNE_LOG(5,"new_mode\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"new_mode");
             DiscreteLocation location=*source_iter;
-            ARIADNE_LOG(5,"  mode: "<<location<<":\n");
-            ARIADNE_LOG(7,"      auxiliary="<<automaton.auxiliary_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.auxiliary_function(location)<<"\n");
-            ARIADNE_LOG(7,"      dynamic="<<automaton.dynamic_assignments(location)<<"\n");
-            ARIADNE_LOG(7,"          function="<<automaton.dynamic_function(location)<<"\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"mode: "<<location<<":");
+            ARIADNE_LOG_PRINTLN_AT(2,"auxiliary="<<automaton.auxiliary_assignments(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"function="<<automaton.auxiliary_function(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"dynamic="<<automaton.dynamic_assignments(location));
+            ARIADNE_LOG_PRINTLN_AT(2,"function="<<automaton.dynamic_function(location));
 
-/*
-            Map<DiscreteEvent,ContinuousPredicate> invariants=automaton.invariant_predicates(location);
-            for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator invariant_iter=invariants.begin();
-                    invariant_iter!=invariants.end(); ++invariant_iter) {
-                ARIADNE_LOG(7,"    invariant: "<<invariant_iter->second<<"\n");
-                ARIADNE_LOG(7,"      function: "<<automaton.invariant_function(location,invariant_iter->first)<<"\n");
-                ARIADNE_LOG(7,"        action: "<<invariant_iter->first<<"\n");
-            }
-*/
             Set<DiscreteEvent> events=automaton.events(location);
-            ARIADNE_LOG(5,"  events: "<<events<<"\n");
+            ARIADNE_LOG_PRINTLN_AT(1,"events: "<<events);
             for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
-                ARIADNE_LOG(7,"    event:"<<event<<"\n");
+                ARIADNE_LOG_PRINTLN_AT(2,"event:"<<event);
                 DiscreteLocation target=automaton.target(location,event);
-                ARIADNE_LOG(7,"    transition: "<<event<<" -> "<<target<<"\n");
-                ARIADNE_LOG(7,"        reset="<<automaton.reset_assignments(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.reset_function(location,event)<<"\n");
-                ARIADNE_LOG(7,"        guard="<<automaton.guard_predicate(location,event)<<"\n");
-                ARIADNE_LOG(7,"          function="<<automaton.guard_function(location,event)<<"\n");
+                ARIADNE_LOG_PRINTLN_AT(3,"transition: "<<event<<" -> "<<target);
+                ARIADNE_LOG_PRINTLN_AT(3,"reset="<<automaton.reset_assignments(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"function="<<automaton.reset_function(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"guard="<<automaton.guard_predicate(location,event));
+                ARIADNE_LOG_PRINTLN_AT(3,"function="<<automaton.guard_function(location,event));
                 if(!reached.contains(target)) {
                     found.insert(target);
                     reached.insert(target);
@@ -806,7 +798,7 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
            }
 
         }
-        ARIADNE_LOG(5,"\nstep "<<step<<" found: "<<found<<"\n\n");
+        ARIADNE_LOG_PRINTLN_AT(1,"step "<<step<<" found: "<<found);
         working.clear();
         working.swap(found);
     }

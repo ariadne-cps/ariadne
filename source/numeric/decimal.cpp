@@ -202,7 +202,7 @@ Decimal::Decimal(double x)
     double re=std::fabs(y-n*acc); // The error of n/10^sf
 
     if(std::fabs(re)>=tol) {
-        ARIADNE_THROW(std::runtime_error,"Decimal(double)","double-precision floating-point number must have a relative error of "<<tol<<" with respect to its approximation to "<<sf<<" significant figures; number "<<std::setprecision(17)<<x<<" has a relative error of "<<re<<"");
+        ARIADNE_THROW(std::runtime_error,"Decimal(double)","double-precision floating-point number must have a relative error of "<<tol<<" with respect to its approximation to "<<sf<<" significant figures; number "<<std::setprecision(17)<<x<<" has a relative error of "<<re);
     }
 
     this->_p=sgn*n;

@@ -4,15 +4,16 @@ set(UNIT_TESTS
     test_inclusion_evolver
     test_discrete_evolution
     test_reachability_analyser
+    test_ltl_formula
 )
 
 foreach(TEST ${UNIT_TESTS})
     add_executable(${TEST} ${TEST}.cpp)
     if(COVERAGE)
         target_compile_options(${TEST} PUBLIC ${COVERAGE_COMPILER_FLAGS})
-    endif()    
+    endif()
     target_link_libraries(${TEST} ariadne)
-    add_test(${TEST} ${TEST})    
+    add_test(${TEST} ${TEST})
     set_property(TEST ${TEST} PROPERTY LABELS "dynamics;primary")
 endforeach()
 

@@ -182,39 +182,6 @@ template<class Y> Bool is_additive_in(const VectorMultivariateFunction<Y>& f, co
     return is_additive_in(ff->_formulae,is);
 }
 
-inline EffectiveVectorMultivariateFunction noise_independent_component(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
-
-    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
-    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"noise_independent_component(f,num_inputs)","Noise independent component extraction currently available only for formula functions.");
-
-    CoordinateFormulaPairs substitutions;
-    for (auto i : range(ff->result_size(),ff->result_size()+num_inputs)) {
-        substitutions.append({i,EffectiveFormula::zero()});
-    }
-
-    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(ff->_formulae,substitutions)));
-}
-
-inline Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
-
-    Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
-
-    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
-    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"input_derivatives(f,num_inputs)","Input derivatives extraction currently available only for formula functions.");
-
-    SizeType n = function.result_size();
-
-    for (auto j : range(num_inputs)) {
-        Vector<EffectiveFormula> derivative_formulae(n);
-        for (auto i : range(n)) {
-            derivative_formulae[i] = simplify(derivative(ff->_formulae[i],n+j));
-        }
-        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
-    }
-
-    return result;
-}
-
 
 
 } // namespace Ariadne

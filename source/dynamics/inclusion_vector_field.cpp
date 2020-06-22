@@ -159,6 +159,9 @@ Bool InclusionVectorField::is_input_additive() const {
     return is_additive_in(_function,input_indices(dimension(),number_of_inputs()));
 }
 
+EffectiveVectorMultivariateFunction noise_independent_component(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs);
+Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs);
+
 EffectiveVectorMultivariateFunction InclusionVectorField::noise_independent_component() const {
     return Ariadne::noise_independent_component(_function,number_of_inputs()); }
 //! \brief Return the dynamics components given by the derivatives for each input.

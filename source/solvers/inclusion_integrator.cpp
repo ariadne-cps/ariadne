@@ -217,6 +217,41 @@ template<> ErrorType twoparam_component_error<SingularInput>(ErrorConstants cons
 template<> ErrorType twoparam_component_error<DualInputs>(ErrorConstants const& n, ErrorType const& v, ErrorType const& w, PositiveFloatDPValue const& h, SizeType j) {
     return twoparam_component_error<AffineInputs>(n, v, w, h, j); }
 
+
+EffectiveVectorMultivariateFunction noise_independent_component(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
+
+    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"noise_independent_component(f,num_inputs)","Noise independent component extraction currently available only for formula functions.");
+
+    CoordinateFormulaPairs substitutions;
+    for (auto i : range(ff->result_size(),ff->result_size()+num_inputs)) {
+        substitutions.append({i,EffectiveFormula::zero()});
+    }
+
+    return EffectiveVectorFormulaFunction(function.argument_size(),simplify(substitute(ff->_formulae,substitutions)));
+}
+
+Vector<EffectiveVectorMultivariateFunction> input_derivatives(EffectiveVectorMultivariateFunction const& function, SizeType num_inputs) {
+
+    Vector<EffectiveVectorMultivariateFunction> result(num_inputs);
+
+    const EffectiveVectorFormulaFunction* ff = dynamic_cast<const EffectiveVectorFormulaFunction*>(function.raw_pointer());
+    if (ff == nullptr) ARIADNE_THROW(NotFormulaFunctionException,"input_derivatives(f,num_inputs)","Input derivatives extraction currently available only for formula functions.");
+
+    SizeType n = function.result_size();
+
+    for (auto j : range(num_inputs)) {
+        Vector<EffectiveFormula> derivative_formulae(n);
+        for (auto i : range(n)) {
+            derivative_formulae[i] = simplify(derivative(ff->_formulae[i],n+j));
+        }
+        result[j] = EffectiveVectorFormulaFunction(function.argument_size(),derivative_formulae);
+    }
+
+    return result;
+}
+
+
 template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::process(ErrorConstants const& n, PositiveFloatDPValue const& h) const {
 
     Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,_inputs,h));

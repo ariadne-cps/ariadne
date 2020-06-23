@@ -186,7 +186,7 @@ Int main(Int argc, const char* argv[]) {
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
-            if (possibly(bb[x4] >= 4.5_dec)) {
+            if (possibly(bb[x4] >= 5)) {
                 ARIADNE_LOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }

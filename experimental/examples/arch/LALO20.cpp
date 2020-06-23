@@ -1,7 +1,7 @@
 /***************************************************************************
- *            laub-loomis-nonoise.cpp
+ *            LALO20.cpp
  *
- *  Copyright  2018  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -51,7 +51,7 @@ Int main(Int argc, const char* argv[]) {
     Real x6_0(0.1);
     Real x7_0(0.45);
 
-    ARIADNE_LOG_PRINTLN("Laub-Loomis system:");
+    ARIADNE_LOG_PRINTLN("Laub-Loomis benchmark (LALO20):");
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
@@ -212,6 +212,6 @@ Int main(Int argc, const char* argv[]) {
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write("laubloomis");
-    ARIADNE_LOG_PRINTLN("File laubloomis.png written.");
+    fig.write("LALO20");
+    ARIADNE_LOG_PRINTLN("File LALO20.png written.");
 }

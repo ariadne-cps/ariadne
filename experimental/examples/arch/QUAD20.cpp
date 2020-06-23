@@ -1,7 +1,7 @@
 /***************************************************************************
- *            quadrotor.cpp
+ *            QUAD20.cpp
  *
- *  Copyright  2019  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -145,6 +145,6 @@ Int main(Int argc, const char* argv[])
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write("quadrotor");
-    ARIADNE_LOG_PRINTLN("File quadrotor.png written.");
+    fig.write("QUAD20");
+    ARIADNE_LOG_PRINTLN("File QUAD20.png written.");
 }

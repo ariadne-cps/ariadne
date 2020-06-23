@@ -1,3 +1,10 @@
+/***************************************************************************
+ *            SPRE20.cpp
+ *
+ *  Copyright  2020  Luca Geretti
+ *
+ ****************************************************************************/
+
 /*
  *  This file is part of Ariadne.
  *
@@ -15,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "space_rendezvous_arch.hpp"
+#include "SPRE20.hpp"
 #include <cstring>
 
 using namespace Ariadne;
@@ -77,6 +84,6 @@ Int main(Int argc, const char* argv[])
     RealVariable t("t"), x("x"), y("y"), vx("vx"), vy("vy");
 
     ARIADNE_LOG_PRINTLN("Plotting...");
-    plot("spacerendezvous",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
-    ARIADNE_LOG_PRINTLN("File spacerendezvous.png written.");
+    plot("SPRE20",{-1000<=x<=200,-450<=y<=0},Colour(1.0,0.75,0.5),orbit.reach());
+    ARIADNE_LOG_PRINTLN("File SPRE20.png written.");
 }

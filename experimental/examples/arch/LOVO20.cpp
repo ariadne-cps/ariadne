@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vanderpol_hybrid_arch.cpp
+ *            LOVO20.cpp
  *
- *  Copyright  2008-20  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -31,6 +31,8 @@ using std::cout; using std::endl; using std::flush;
 Int main(Int argc, const char* argv[])
 {
     Logger::set_verbosity(get_verbosity(argc,argv));
+
+    ARIADNE_LOG_PRINTLN("Lotka-Volterra benchmark (LOVO20):");
 
     RealVariable x("x");
     RealVariable y("y");
@@ -115,6 +117,6 @@ Int main(Int argc, const char* argv[])
     HybridTime circle_time(2*pi,1);
     ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time));
 
-    ARIADNE_LOG_RUN_AT(2,plot("lotkavolterra-xy",Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
-    ARIADNE_LOG_PRINTLN("Figure lotkavolterra-xy.png written.");
+    ARIADNE_LOG_RUN_AT(2,plot("LOVO20",Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
+    ARIADNE_LOG_PRINTLN("File LOVO20.png written.");
 }

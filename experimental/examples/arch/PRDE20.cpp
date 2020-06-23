@@ -1,7 +1,7 @@
 /***************************************************************************
- *            production_destruction_arch.cpp
+ *            PRDE20.cpp
  *
- *  Copyright  2019  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -139,6 +139,6 @@ Int main(Int argc, const char* argv[]) {
     fig.draw(reach3);
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(reach1);
-    fig.write("production_destruction");
-    ARIADNE_LOG_PRINTLN("File production_destruction.png written.");
+    fig.write("PRDE20");
+    ARIADNE_LOG_PRINTLN("File PRDE20.png written.");
 }

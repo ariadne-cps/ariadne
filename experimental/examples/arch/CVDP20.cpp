@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vanderpol_2coupled_arch.cpp
+ *            CVDP20.cpp
  *
- *  Copyright  2017-20  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -131,6 +131,6 @@ Int main(Int argc, const char* argv[])
     fig.draw(reach2);
     fig << fill_colour(Colour(0.6,0.6,0.6));
     fig.draw(reach1);
-    fig.write("coupled-vanderpol");
-    ARIADNE_LOG_PRINTLN("File coupled-vanderpol.png written.");
+    fig.write("CVDP20");
+    ARIADNE_LOG_PRINTLN("File CVDP20.png written.");
 }

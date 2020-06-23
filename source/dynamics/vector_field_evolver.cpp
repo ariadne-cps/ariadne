@@ -324,7 +324,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     reach_sets.adjoin(reach_set_model);
 
-    intermediate_sets.adjoin(EnclosureType(next_set_model));
+    //intermediate_sets.adjoin(EnclosureType(next_set_model));
     working_sets.push_back(make_pair(next_time,next_set_model));
 }
 

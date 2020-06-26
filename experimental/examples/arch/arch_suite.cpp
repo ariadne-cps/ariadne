@@ -1,5 +1,5 @@
 /***************************************************************************
- *            CVDP20.cpp
+ *            arch_suite.cpp
  *
  *  Copyright  2020  Luca Geretti
  *
@@ -22,12 +22,22 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "PRDE20.hpp"
 #include "CVDP20.hpp"
+#include "LALO20.hpp"
+#include "QUAD20.hpp"
+#include "LOVO20.hpp"
+#include "SPRE20.hpp"
 
 using namespace Ariadne;
 
 Int main(Int argc, const char* argv[])
 {
     Logger::set_verbosity(get_verbosity(argc,argv));
+    PRDE20();
     CVDP20();
+    LALO20();
+    QUAD20();
+    LOVO20();
+    SPRE20();
 }

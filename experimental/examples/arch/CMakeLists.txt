@@ -5,6 +5,7 @@ set(EXAMPLES_EXPERIMENTAL_ARCH
     LOVO20
     PRDE20
     SPRE20
+    arch_suite
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_ARCH})

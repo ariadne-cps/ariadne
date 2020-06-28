@@ -39,13 +39,13 @@ int main(int argc, const char* argv[])
 
     MaximumError max_err=1e-6;
 
-    GradedTaylorSeriesIntegrator integrator(max_err);
+    TaylorPicardIntegrator integrator(max_err);
 
     VectorFieldEvolver evolver(dynamics,integrator);
     evolver.configuration().set_maximum_enclosure_radius(1.0);
     evolver.configuration().set_maximum_step_size(0.02);
     evolver.configuration().set_maximum_spacial_error(1e-6);
-    std::cout <<  evolver.configuration() << std::endl;
+    ARIADNE_LOG_PRINTLN(evolver.configuration());
 
     Real x0(1.40);
     Real y0(2.40);
@@ -54,14 +54,13 @@ int main(int argc, const char* argv[])
 
     RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
-    std::cout << "Initial set: " << initial_set << std::endl;
+    ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
     Real evolution_time(7.0);
 
-    std::cout << "Computing orbit... " << std::flush;
-    auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER);
-    std::cout << "done." << std::endl;
+    ARIADNE_LOG_PRINTLN("Computing orbit... ");
+    ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set),evolution_time,Semantics::UPPER));
 
-    std::cout << "plotting..." << std::endl;
+    ARIADNE_LOG_PRINTLN("Plotting...");
     Axes2d axes(-2.5<=x<=2.5,-3.0<=y<=3.0);
     LabelledFigure fig=LabelledFigure(axes);
     fig << line_colour(0.0,0.0,0.0);

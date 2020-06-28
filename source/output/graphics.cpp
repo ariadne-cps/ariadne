@@ -509,14 +509,15 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
 
     // Draw shapes
 
-    SizeType num_objects = this->_data->objects.size();
-    ProgressIndicator indicator(num_objects);
-    ARIADNE_LOG_PRINTLN("Writing " << num_objects << " object" << (num_objects>1 ? "s..." : "..."));
+    SizeType total_objects = this->_data->objects.size();
+    SizeType processed_objects = 0;
+    ProgressIndicator indicator(total_objects);
+    ARIADNE_LOG_PRINTLN("Writing " << total_objects << " object" << (total_objects > 1 ? "s..." : "..."));
     for(const LabelledGraphicsObject& object : this->_data->objects) {
         const LabelledDrawableInterface& shape=object.shape_ptr.operator*();
         set_properties(canvas, object.properties);
         shape.draw(canvas,this->_data->variables);
-        indicator.update_current(--num_objects);
+        indicator.update_current(processed_objects++);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
     canvas.finalise();

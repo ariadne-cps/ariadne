@@ -1732,11 +1732,12 @@ ListSet<LabelledEnclosure>* ListSet<LabelledEnclosure>::clone() const {
 
 Void ListSet<LabelledEnclosure>::draw(CanvasInterface& cnvs, const Variables2d& prj) const {
     ARIADNE_LOG_SCOPE_CREATE;
-    SizeType num_sets = this->_data.size();
-    ProgressIndicator indicator(num_sets);
+    SizeType total_sets = this->_data.size();
+    SizeType processed_sets = 0;
+    ProgressIndicator indicator(total_sets);
     for (auto set : this->_data) {
         set.draw(cnvs, prj);
-        indicator.update_current(--num_sets);
+        indicator.update_current(processed_sets++);
         ARIADNE_LOG_SCOPE_PRINTHOLD("[" << indicator.symbol() << "] " << indicator.percentage() << "% ");
     }
 }

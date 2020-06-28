@@ -1,7 +1,7 @@
 /***************************************************************************
- *            production_destruction_arch.cpp
+ *            PRDE20.hpp
  *
- *  Copyright  2019  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,14 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "arch.hpp"
 
 using namespace Ariadne;
 
-Int main(Int argc, const char* argv[]) {
-    Logger::set_verbosity(get_verbosity(argc, argv));
+void PRDE20() {
+
+    ArchBenchmark benchmark("PRDE20");
 
     RealVariable x("x"), y("y"), z("z");
     RealVariable a("a");
@@ -65,11 +64,14 @@ Int main(Int argc, const char* argv[]) {
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
-        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
-        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
-        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
+        unsigned int num_failures = 0;
+        if (not possibly(bb[x] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0"); }
+        if (not possibly(bb[y] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0"); }
+        if (not possibly(bb[z] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0"); }
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0))) {
+            ++num_failures;
             ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
+        }
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
@@ -77,6 +79,11 @@ Int main(Int argc, const char* argv[]) {
 	
 	    sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("I");
+        if (num_failures==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+        instance.write();
     }
 
     {
@@ -90,11 +97,14 @@ Int main(Int argc, const char* argv[]) {
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
-        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
-        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
-        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
-        ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
+        unsigned int num_failures = 0;
+        if (not possibly(bb[x] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0"); }
+        if (not possibly(bb[y] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0"); }
+        if (not possibly(bb[z] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0"); }
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0))) {
+            ++num_failures;
+            ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
+        }
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
@@ -102,6 +112,11 @@ Int main(Int argc, const char* argv[]) {
 
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("P");
+        if (num_failures==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+        instance.write();
     }
 
     {
@@ -115,11 +130,14 @@ Int main(Int argc, const char* argv[]) {
         ARIADNE_LOG_PRINTLN_AT(1,"Verifying properties...");
 
         auto bb = orbit.final().bounding_box();
-        if (not possibly(bb[x] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0");
-        if (not possibly(bb[y] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0");
-        if (not possibly(bb[z] >= 0)) ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0");
-        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0)))
-        ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
+        unsigned int num_failures = 0;
+        if (not possibly(bb[x] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"x is not >= 0"); }
+        if (not possibly(bb[y] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"y is not >= 0"); }
+        if (not possibly(bb[z] >= 0)) { ++num_failures; ARIADNE_LOG_PRINTLN_AT(1,"z is not >= 0"); }
+        if (definitely(not contains(bb[x]+bb[y]+bb[z],100.0))) {
+            ++num_failures;
+            ARIADNE_LOG_PRINTLN_AT(1,"x+y+z does not contain 100");
+        }
 
         auto volume = bb[x].width()*bb[y].width()*bb[z].width();
         ARIADNE_LOG_PRINTLN_AT(1,"Final volume = " << volume);
@@ -127,6 +145,11 @@ Int main(Int argc, const char* argv[]) {
 
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("IP");
+        if (num_failures==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(volume.get_d());
+        instance.write();
     }
 
     ARIADNE_LOG_PRINTLN("Plotting...");
@@ -139,6 +162,6 @@ Int main(Int argc, const char* argv[]) {
     fig.draw(reach3);
     fig << fill_colour(1.0,0.75,0.5);
     fig.draw(reach1);
-    fig.write("production_destruction");
-    ARIADNE_LOG_PRINTLN("File production_destruction.png written.");
+    fig.write(benchmark.name().c_str());
+    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

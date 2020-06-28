@@ -1,7 +1,7 @@
 /***************************************************************************
- *            quadrotor.cpp
+ *            QUAD20.hpp
  *
- *  Copyright  2019  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,16 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "arch.hpp"
 
 using namespace Ariadne;
 
-
-Int main(Int argc, const char* argv[])
+void QUAD20()
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    ArchBenchmark benchmark("QUAD20");
 
     RealConstant g("g",9.81_dec);
     RealConstant R("R",0.1_dec);
@@ -84,10 +81,13 @@ Int main(Int argc, const char* argv[])
         StopWatch sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.1 ... ");
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach1 = orbit.reach();
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("delta01").set_verified(1).set_execution_time(sw.elapsed());
+        instance.write();
     }
 
     {
@@ -101,21 +101,34 @@ Int main(Int argc, const char* argv[])
         StopWatch sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.4 ... ");
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach2 = orbit.reach();
         ARIADNE_LOG_PRINTLN_AT(1,"Checking properties... ");
 
+        int num_failures = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
-            if (possibly(bb[x3] >= 1.40_dec))
+            if (possibly(bb[x3] >= 1.40_dec)) {
+                ++num_failures;
                 ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is over the required bound.");
-            if (possibly(bb[t] >= 1) and possibly(bb[x3] <= 0.9_dec))
+            }
+            if (possibly(bb[t] >= 1) and possibly(bb[x3] <= 0.9_dec)) {
+                ++num_failures;
                 ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is below the required bound after 1s.");
-            if (possibly(bb[t] >= 5) and possibly(bb[x3] <= 0.98_dec or bb[x3] >= 1.02_dec))
+            }
+
+            if (possibly(bb[t] >= 5) and possibly(bb[x3] <= 0.98_dec or bb[x3] >= 1.02_dec)) {
+                ++num_failures;
                 ARIADNE_LOG_PRINTLN_AT(2,"height of " << bb[x3] << " is outside the required bounds at 5s.");
+            }
         }
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("delta04");
+        if (num_failures==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed());
+        instance.write();
     }
 
     {
@@ -129,10 +142,13 @@ Int main(Int argc, const char* argv[])
         StopWatch sw;
 
         ARIADNE_LOG_PRINTLN_AT(1,"Computing orbit for Delta=0.8 ... ");
-        auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER);
+        ARIADNE_LOG_RUN_AT(1,auto orbit = evolver.orbit(evolver.enclosure(initial_set), evolution_time, Semantics::UPPER));
         reach3 = orbit.reach();
         sw.click();
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("delta08").set_verified(0).set_execution_time(sw.elapsed());
+        instance.write();
     }
 
     ARIADNE_LOG_PRINTLN("Plotting...");
@@ -145,6 +161,6 @@ Int main(Int argc, const char* argv[])
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write("quadrotor");
-    ARIADNE_LOG_PRINTLN("File quadrotor.png written.");
+    fig.write(benchmark.name().c_str());
+    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

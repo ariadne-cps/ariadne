@@ -1,7 +1,7 @@
 /***************************************************************************
- *            laub-loomis-nonoise.cpp
+ *            LALO20.hpp
  *
- *  Copyright  2018  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,15 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "arch.hpp"
 
 using namespace Ariadne;
 
-Int main(Int argc, const char* argv[]) {
+void LALO20() {
 
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    ArchBenchmark benchmark("LALO20");
 
     RealVariable x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), t("t");
 
@@ -51,7 +49,7 @@ Int main(Int argc, const char* argv[]) {
     Real x6_0(0.1);
     Real x7_0(0.45);
 
-    ARIADNE_LOG_PRINTLN("Laub-Loomis system:");
+    ARIADNE_LOG_PRINTLN("Laub-Loomis benchmark (LALO20):");
 
     ListSet<LabelledEnclosure> reach1, reach2, reach3;
 
@@ -100,6 +98,11 @@ Int main(Int argc, const char* argv[]) {
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
         ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("W001");
+        if (ce==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+        instance.write();
 
         reach1.adjoin(orbit.reach());
     }
@@ -150,6 +153,11 @@ Int main(Int argc, const char* argv[]) {
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
         ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
 
+        auto instance = benchmark.create_instance("W005");
+        if (ce==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+        instance.write();
+
         reach2.adjoin(orbit.reach());
     }
 
@@ -186,7 +194,7 @@ Int main(Int argc, const char* argv[]) {
         Nat ce = 0;
         for (auto set : orbit.reach()) {
             auto bb = set.bounding_box();
-            if (possibly(bb[x4] >= 4.5_dec)) {
+            if (possibly(bb[x4] >= 5)) {
                 ARIADNE_LOG_PRINTLN_AT(3,"set with value " << bb[x4] << " does not respect the specification.");
                 ++ce;
             }
@@ -198,6 +206,11 @@ Int main(Int argc, const char* argv[]) {
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(2,"Number of counterexamples: " << ce);
         ARIADNE_LOG_PRINTLN_AT(2,"Width of final x4: " << x4_width);
         ARIADNE_LOG_PRINTLN_AT(2,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("W01");
+        if (ce==0)
+            instance.set_verified(1).set_execution_time(sw.elapsed()).add_loss(x4_width.get_d());
+        instance.write();
 
         reach3.adjoin(orbit.reach());
     }
@@ -212,6 +225,6 @@ Int main(Int argc, const char* argv[]) {
     fig.draw(reach2);
     fig << fill_colour(1.0,1.0,1.0);
     fig.draw(reach1);
-    fig.write("laubloomis");
-    ARIADNE_LOG_PRINTLN("File laubloomis.png written.");
+    fig.write(benchmark.name().c_str());
+    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

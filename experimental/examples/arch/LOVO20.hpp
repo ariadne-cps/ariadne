@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vanderpol_hybrid_arch.cpp
+ *            LOVO20.hpp
  *
- *  Copyright  2008-20  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -21,16 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "arch.hpp"
 
 using namespace Ariadne;
-using std::cout; using std::endl; using std::flush;
 
-Int main(Int argc, const char* argv[])
+void LOVO20()
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    ArchBenchmark benchmark("LOVO20");
+
+    ARIADNE_LOG_PRINTLN("Lotka-Volterra benchmark " << benchmark.name() << ":");
 
     RealVariable x("x");
     RealVariable y("y");
@@ -105,6 +104,15 @@ Int main(Int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN("# of final sets: " << orbit.final().size());
     ARIADNE_LOG_PRINTLN("Final set area: " << final_bounds[x].width()*final_bounds[y].width());
 
+    auto instance = benchmark.create_instance();
+    if (has_any_zero_transitions and has_any_two_transitions and (definitely(final_bounds[cnt] <= 0.2_dec))) {
+        instance.set_verified(1)
+                .set_execution_time(sw.elapsed())
+                .add_loss((final_bounds[x].width()*final_bounds[y].width()).get_d())
+                .add_loss(final_bounds[cnt].upper().get_d());
+    }
+    instance.write();
+
     HybridAutomaton circle;
     DiscreteLocation rotate;
     RealVariable t("t");
@@ -115,6 +123,6 @@ Int main(Int argc, const char* argv[])
     HybridTime circle_time(2*pi,1);
     ARIADNE_LOG_RUN_MUTED(auto circle_orbit = simulator.orbit(circle,circle_initial,circle_time));
 
-    ARIADNE_LOG_RUN_AT(2,plot("lotkavolterra-xy",Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
-    ARIADNE_LOG_PRINTLN("Figure lotkavolterra-xy.png written.");
+    ARIADNE_LOG_RUN_AT(2,plot(benchmark.name().c_str(),Axes2d(0.6<=x<=1.4,0.6<=y<=1.4), ariadneorange, orbit, black, circle_orbit));
+    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

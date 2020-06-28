@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vanderpol_2coupled_arch.cpp
+ *            CVDP20.hpp
  *
- *  Copyright  2017-20  Luca Geretti
+ *  Copyright  2020  Luca Geretti
  *
  ****************************************************************************/
 
@@ -22,15 +22,13 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdarg>
-#include "ariadne.hpp"
-#include "utility/stopwatch.hpp"
+#include "arch.hpp"
 
 using namespace Ariadne;
 
-Int main(Int argc, const char* argv[])
+void CVDP20()
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    ArchBenchmark benchmark("CVDP20");
 
     RealVariable x1("x1"), y1("y1"), x2("x2"), y2("y2");
 
@@ -78,6 +76,10 @@ Int main(Int argc, const char* argv[])
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
 
+        auto instance = benchmark.create_instance("mu1");
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        instance.write();
+
         reach1.adjoin(orbit.reach());
     }
     {
@@ -86,13 +88,13 @@ Int main(Int argc, const char* argv[])
         RealConstant mu("mu",2.0_dec);
         VectorField dynamics({dot(x1)=y1, dot(y1)=mu*(1-sqr(x1))*y1+x2-2*x1, dot(x2)=y2, dot(y2)=mu*(1-sqr(x2))*y2+x1-2*x2});
 
-        MaximumError max_err = 2e-5;
+        MaximumError max_err = 5e-6;
         TaylorPicardIntegrator integrator(max_err);
 
         VectorFieldEvolver evolver(dynamics, integrator);
         evolver.configuration().set_maximum_enclosure_radius(0.03);
         evolver.configuration().set_maximum_step_size(0.02);
-        evolver.configuration().set_maximum_spacial_error(2e-5);
+        evolver.configuration().set_maximum_spacial_error(5e-6);
 
         RealVariablesBox initial_set({1.55_dec<=x1<=1.85_dec,2.35_dec<=y1<=2.45_dec,1.55_dec<=x2<=1.85_dec,2.35_dec<=y2<=2.45_dec});
 
@@ -112,7 +114,7 @@ Int main(Int argc, const char* argv[])
                 ARIADNE_LOG_PRINTLN_AT(2,"set with y1=" << bbox[y1] << " is outside the specification.");
                 ++ce;
             }
-            if (possibly(bbox[y2] >= 2.75_dec)) {
+            if (possibly(bbox[y2] >= 4.05_dec)) {
                 ARIADNE_LOG_PRINTLN_AT(2,"set with y2=" << bbox[y2] << " is outside the specification.");
                 ++ce;
             }
@@ -120,6 +122,10 @@ Int main(Int argc, const char* argv[])
         sw.click();
         if (ce>0) ARIADNE_LOG_PRINTLN_AT(1,"Number of failures in satisfying the specification: " << ce);
         ARIADNE_LOG_PRINTLN_AT(1,"Done in " << sw.elapsed() << " seconds.");
+
+        auto instance = benchmark.create_instance("mu2");
+        if (ce==0) instance.set_verified(1).set_execution_time(sw.elapsed());
+        instance.write();
 
         reach2.adjoin(orbit.reach());
     }
@@ -131,6 +137,6 @@ Int main(Int argc, const char* argv[])
     fig.draw(reach2);
     fig << fill_colour(Colour(0.6,0.6,0.6));
     fig.draw(reach1);
-    fig.write("coupled-vanderpol");
-    ARIADNE_LOG_PRINTLN("File coupled-vanderpol.png written.");
+    fig.write(benchmark.name().c_str());
+    ARIADNE_LOG_PRINTLN("File " << benchmark.name() << ".png written.");
 }

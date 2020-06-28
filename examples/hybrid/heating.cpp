@@ -61,7 +61,7 @@ Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, c
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Create the system
     // Set the system dynamic parameters

@@ -212,7 +212,7 @@ Void TestHybridEvolution::test_water_tank() const {
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     DRAWING_METHOD = DrawingMethod::AFFINE;
     DRAWING_ACCURACY = 1u;

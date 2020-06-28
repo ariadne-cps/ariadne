@@ -59,7 +59,7 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     Real amplitude(4.0);
     Real frequency(50.0);

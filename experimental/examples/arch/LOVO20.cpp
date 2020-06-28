@@ -27,6 +27,6 @@ using namespace Ariadne;
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
     LOVO20();
 }

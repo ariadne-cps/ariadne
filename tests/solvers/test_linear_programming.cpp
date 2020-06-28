@@ -109,7 +109,7 @@ class TestInteriorPointSolver
 
 Int main(Int argc, const char* argv[])
 {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     InteriorPointSolver interior_point_optimiser;
     TestInteriorPointSolver(interior_point_optimiser).test();

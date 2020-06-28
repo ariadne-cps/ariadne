@@ -189,7 +189,7 @@ class TestConstraintSolver
 };
 
 Int main(Int argc, const char* argv[]) {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
     TestConstraintSolver().test();
     return ARIADNE_TEST_FAILURES;
 }

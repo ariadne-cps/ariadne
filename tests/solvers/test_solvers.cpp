@@ -192,7 +192,7 @@ class TestSolver
 
 Int main(Int argc, const char **argv) {
 
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();

@@ -145,7 +145,7 @@ void TestInclusionIntegrator::test() const {
 }
 
 int main(int argc, const char* argv[]) {
-    Logger::set_verbosity(get_verbosity(argc,argv));
+    Logger::configuration().set_verbosity(get_verbosity(argc,argv));
     TestInclusionIntegrator().test();
     return ARIADNE_TEST_FAILURES;
 }

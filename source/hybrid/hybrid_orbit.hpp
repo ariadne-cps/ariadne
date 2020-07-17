@@ -76,7 +76,7 @@ class Orbit<HybridApproximatePoint>
     Orbit(const HybridApproximatePoint& hpt);
     Orbit(List<HybridInterpolatedCurve> crvs);
     Void insert(HybridTime ht, const HybridApproximatePoint& hpt);
-    Nat size() const;
+    SizeType size() const;
     const InterpolatedCurve& curve(Nat m) const;
     const List<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;

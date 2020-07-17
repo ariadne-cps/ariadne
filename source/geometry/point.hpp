@@ -68,7 +68,7 @@ class Point
     explicit Point() : Vector<RealType>() { }
     //! The origin in \a n dimensions.
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
-    explicit Point(Nat n, PRS... prs) : Vector<RealType>(n,X(0u,prs...)) { }
+    explicit Point(SizeType n, PRS... prs) : Vector<RealType>(n,X(0u,prs...)) { }
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>

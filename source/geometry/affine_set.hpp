@@ -147,7 +147,7 @@ class ValidatedAffineConstrainedImageSet
     GridTreePaving outer_approximation(const Grid& g, Nat fineness) const;
     Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Nat fineness) const;
 
-    List<Point2d> boundary(Nat xc, Nat yc) const;
+    List<Point2d> boundary(SizeType xc, SizeType yc) const;
 
     virtual Void draw(CanvasInterface&, const Projection2d& p) const;
     virtual OutputStream& _write(OutputStream& os) const;

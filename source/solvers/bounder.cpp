@@ -57,8 +57,8 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     const PositiveFloatDPValue INITIAL_REFINING_WIDENING=cast_positive(1.125_exact);
     const PositiveFloatDPValue LIPSCHITZ_TOLERANCE=cast_positive(0.5_exact);
     const StepSizeType MINIMUM_STEP_SIZE(1,20u);
-    const Nat EXPANSION_STEPS=4;
-    const Nat REFINEMENT_STEPS=4;
+    const CounterType EXPANSION_STEPS=4;
+    const CounterType REFINEMENT_STEPS=4;
 
     StepSizeType h=hsug;
 
@@ -75,7 +75,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     Bool success=false;
     while(!success) {
         B=this->_formula(f,D,T,A,B,BOX_RADIUS_WIDENING,INITIAL_STARTING_WIDENING);
-        for(Nat i=0; i<EXPANSION_STEPS; ++i) {
+        for(CounterType i=0; i<EXPANSION_STEPS; ++i) {
             UpperBoxType Br=this->_refinement(f,D,T,A,B);
             if(not definitely(is_bounded(Br))) {
                 success=false;
@@ -102,7 +102,7 @@ Pair<StepSizeType,UpperBoxType> EulerBounder::_compute(ValidatedVectorMultivaria
     }
 
     ARIADNE_LOG_PRINTLN("Refining B");
-    for(Nat i=0; i<REFINEMENT_STEPS; ++i) {
+    for(CounterType i=0; i<REFINEMENT_STEPS; ++i) {
         B = this->_refinement(f,D,T,A,B);
         ARIADNE_LOG_PRINTLN_AT(1,"B="<<B);
     }

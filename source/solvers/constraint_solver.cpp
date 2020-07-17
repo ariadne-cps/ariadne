@@ -88,7 +88,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     ValidatedVectorMultivariateFunction function(constraints.size(),constraints[0].function().domain());
     ExactBoxType bounds(constraints.size());
 
-    for(Nat i=0; i!=constraints.size(); ++i) {
+    for(SizeType i=0; i!=constraints.size(); ++i) {
         function[i]=constraints[i].function();
         bounds[i]=constraints[i].bounds();
     }
@@ -115,7 +115,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     UpperBoxType bounds=codomain;
     UpperBoxType image=apply(function,domain);
     ARIADNE_LOG_PRINTLN_AT(1,"image="<<image);
-    for(Nat i=0; i!=image.size(); ++i) {
+    for(SizeType i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
             ARIADNE_LOG_PRINTLN("Proved disjointness using direct evaluation");
             return make_pair(false,ExactPointType(0u,dp));
@@ -125,9 +125,9 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     }
 
 
-    const Nat m=domain.size(); // The total number of variables
-    const Nat n=codomain.size(); // The total number of nontrivial constraints
-    const Nat l=(m+n)*2; // The total number of lagrange multipliers
+    const SizeType m=domain.size(); // The total number of variables
+    const SizeType n=codomain.size(); // The total number of nontrivial constraints
+    const SizeType l=(m+n)*2; // The total number of lagrange multipliers
 
     DoublePrecision prec;
     FloatApproximationVector point(m,dp); // The point in the domain which is the current test point
@@ -140,16 +140,17 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     ValidatedVectorMultivariateTaylorFunctionModelDP tfn(d,fn,default_sweeper());
 
     point=static_cast<FloatApproximationVector>(midpoint(d));
-    for(Nat k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
+    for(SizeType k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
     optimiser.compute_tz(domain,function,cast_exact_box(bounds),point,violation,slack);
 
     ARIADNE_LOG_PRINTLN_AT(1,"d="<<d<<", f="<<fn<<", c="<<c);
 
+    static const CounterType NUMBER_OF_STEPS=12u;
 
     // TODO: Don't use fixed number of steps
-    for(Nat i=0; i!=12; ++i) {
+    for(CounterType i=0; i!=NUMBER_OF_STEPS; ++i) {
         ARIADNE_LOG_PRINTLN_AT(2,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(decide(t>=TERR)) {
@@ -169,11 +170,11 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         // This should be easier than using all constraints separately
         ValidatedScalarMultivariateTaylorFunctionModelDP txg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,default_sweeper());
         ValidatedNumericType cnst(0,prec);
-        for(Nat j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
         }
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
             cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
         }
@@ -189,7 +190,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
             return make_pair(false,ExactPointType());
         }
 
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             this->box_reduce(subdomain,txg,ExactIntervalType(0,_inf),i);
             ARIADNE_LOG_PRINTLN_AT(2,"dom="<<subdomain);
             if(definitely(subdomain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return make_pair(false,ExactPointType()); }
@@ -222,7 +223,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
     if(definitely(domain.is_empty())) { return true; }
 
     FloatDPUpperBound domain_magnitude={0u,dp};
-    for(Nat j=0; j!=domain.size(); ++j) {
+    for(SizeType j=0; j!=domain.size(); ++j) {
         domain_magnitude+=domain[j].width();
     }
     FloatDPUpperBound old_domain_magnitude=domain_magnitude;
@@ -231,8 +232,8 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
         this->hull_reduce(domain,function,codomain);
         if(definitely(domain.is_empty())) { return true; }
 
-        for(Nat i=0; i!=codomain.size(); ++i) {
-            for(Nat j=0; j!=domain.size(); ++j) {
+        for(SizeType i=0; i!=codomain.size(); ++i) {
+            for(SizeType j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,function[i],codomain[i],j);
                 if(definitely(domain.is_empty())) { return true; }
             }
@@ -241,7 +242,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0u;
-        for(Nat j=0; j!=domain.size(); ++j) {
+        for(SizeType j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
     } while(domain_magnitude.raw() < mul(near, old_domain_magnitude.raw(), FloatDP(MINIMUM_REDUCTION,dp)));
@@ -250,7 +251,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
 }
 
 Bool has_nan(const ExactBoxType& domain) {
-    for(Nat i=0; i!=domain.size(); ++i) {
+    for(SizeType i=0; i!=domain.size(); ++i) {
         if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
     }
     return false;
@@ -265,20 +266,20 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
     if(definitely(domain.is_empty())) { return true; }
 
     FloatDPUpperBound domain_magnitude={0u,dp};
-    for(Nat j=0; j!=domain.size(); ++j) {
+    for(SizeType j=0; j!=domain.size(); ++j) {
         domain_magnitude+=domain[j].width();
     }
     FloatDPUpperBound old_domain_magnitude=domain_magnitude;
 
     do {
-        for(Nat i=0; i!=constraints.size(); ++i) {
+        for(SizeType i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
         if(definitely(domain.is_empty())) { return true; }
 
         if(USE_BOX_REDUCE) {
-            for(Nat i=0; i!=constraints.size(); ++i) {
-                for(Nat j=0; j!=domain.size(); ++j) {
+            for(SizeType i=0; i!=constraints.size(); ++i) {
+                for(SizeType j=0; j!=domain.size(); ++j) {
                     this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
                     if(definitely(domain[j].is_empty())) { return true; }
                 }
@@ -287,7 +288,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0u;
-        for(Nat j=0; j!=domain.size(); ++j) {
+        for(SizeType j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
     } while(domain_magnitude.raw() < (old_domain_magnitude * MINIMUM_REDUCTION).raw());
@@ -340,7 +341,7 @@ Bool ConstraintSolver::hull_reduce(UpperBoxType& domain, const ValidatedVectorMu
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("domain="<<domain);
@@ -396,7 +397,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
 {
     ValidatedScalarMultivariateTaylorFunctionModelDP g(function.domain(),default_sweeper());
     UpperIntervalType C(0,0,dp);
-    for(Nat i=0; i!=function.result_size(); ++i) {
+    for(SizeType i=0; i!=function.result_size(); ++i) {
         g += cast_exact(multipliers[i]) * function[i];
         C += cast_exact(multipliers[i]) * bounds[i];
     }
@@ -405,14 +406,14 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
 
     UpperBoxType new_domain(domain);
     UpperBoxType ranges(domain.size());
-    for(Nat j=0; j!=domain.dimension(); ++j) {
+    for(SizeType j=0; j!=domain.dimension(); ++j) {
         ranges[j] = dg[j]*(domain[j]-centre[j]);
     }
 
     // We now have sum dg(xi)[j] * (x[j]-x0[j]) in C, so we can reduce each component
-    for(Nat j=0; j!=domain.size(); ++j) {
+    for(SizeType j=0; j!=domain.size(); ++j) {
         UpperIntervalType E = C;
-        for(Nat k=0; k!=domain.size(); ++k) {
+        for(SizeType k=0; k!=domain.size(); ++k) {
             if(j!=k) { E-=ranges[k]; }
         }
         UpperIntervalType estimated_domain = E/dg[j]+centre[j];
@@ -423,7 +424,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
     return definitely(domain.is_empty());
 }
 
-Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, Nat variable) const
+Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType& bounds, SizeType variable) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("domain="<<domain);
@@ -464,7 +465,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     }
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
-    for(Nat j=n-1; j!=imax; --j) {
+    for(SizeType j=n-1; j!=imax; --j) {
         subinterval=ExactIntervalType(cast_exact(affine(l,u,j,n)),cast_exact(affine(l,u,j+1,n)));
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
@@ -496,7 +497,7 @@ ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, con
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    for(Nat i=0; i!=y.size(); ++i) {
+    for(SizeType i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
@@ -504,7 +505,7 @@ ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, con
     ARIADNE_LOG_PRINTLN("d="<<d<<" f="<<f<<", c="<<c);
     ARIADNE_LOG_PRINTLN("y="<<y<<", f(y)="<<fy);
     ValidatedKleenean result=true;
-    for(Nat j=0; j!=fy.size(); ++j) {
+    for(SizeType j=0; j!=fy.size(); ++j) {
         if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
         if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; }
     }

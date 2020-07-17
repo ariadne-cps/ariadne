@@ -1292,7 +1292,7 @@ _evolution_step(EvolutionData& evolution_data,
         } else if (this->_configuration_ptr->enable_subdivisions()) {
             ARIADNE_LOG_PRINTLN_AT(1,"Set too large, splitting");
             List<HybridEnclosure> split_sets = starting_set.split();
-            for(Nat i=0; i!=split_sets.size(); ++i) {
+            for(SizeType i=0; i!=split_sets.size(); ++i) {
                 if(!definitely(split_sets[i].is_empty())) { evolution_data.working_sets.append(split_sets[i]); }
             }
             return;
@@ -1670,7 +1670,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // Compute the evolution time for the given step.
     ARIADNE_LOG_SCOPE_CREATE;
 
-    const Nat n = flow.result_size();
+    const SizeType n = flow.result_size();
     const FloatDPValue step_size=flow.domain()[flow.domain().size()-1].upper();
     const FloatDPBounds final_time_bounds(final_time,dp);
 
@@ -1901,7 +1901,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         ValidatedScalarMultivariateFunctionModelDP zero_function=factory(flow).create_zero();
         ValidatedVectorMultivariateFunctionModelDP identity_function=factory(flow).create_identity();
         ValidatedVectorMultivariateFunctionModelDP space_projection=flow*zero;
-        for(Nat i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
+        for(SizeType i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
 
         //static const ExactDouble CREEP_MAXIMUM=1.0_X;
         static const ExactDouble CREEP_MAXIMUM=0.9375_x;

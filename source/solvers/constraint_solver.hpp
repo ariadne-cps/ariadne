@@ -115,10 +115,10 @@ class ConstraintSolver
     Bool lyapunov_reduce(UpperBoxType& domain, const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType& codomain,
                          Vector<ApproximateNumericType> centre, Vector<ApproximateNumericType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, Nat j) const;
+    Bool box_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, Nat j) const;
+    Bool monotone_reduce(UpperBoxType& bx, const ValidatedScalarMultivariateFunction& function, const ExactIntervalType&, SizeType j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<UpperBoxType,UpperBoxType> split(const UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const;
@@ -126,9 +126,9 @@ class ConstraintSolver
     // Deprecated functions.
     Bool hull_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, Nat j) const {
+    Bool box_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
         return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, Nat j) const {
+    Bool monotone_reduce(UpperBoxType& bx, const ValidatedConstraint& constraint, SizeType j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
     virtual ~ConstraintSolver() = default;

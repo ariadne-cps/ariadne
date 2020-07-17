@@ -209,7 +209,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Valuat
 
 template<class V, class X> Valuation<V,X>::Valuation(const Assignment<Variable<V>,X>& a) { this->insert(a.lhs,a.rhs); }
 template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Variable<V>,X> >& la) {
-    for(Nat i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
+    for(SizeType i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
 template<class V, class X> Valuation<V,X>::Valuation(const InitializerList<Pair<Variable<V>,X> >& la) {
     for(auto iter=la.begin(); iter!=la.end(); ++iter) { this->insert(iter->first,iter->second); } }
 

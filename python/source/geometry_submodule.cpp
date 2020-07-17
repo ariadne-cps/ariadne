@@ -625,7 +625,7 @@ Void export_constrained_image_set(pybind11::module& module)
     constrained_image_set_class.def(pybind11::init<ConstrainedImageSet>());
     constrained_image_set_class.def(pybind11::init<BoundedConstraintSet>());
     constrained_image_set_class.def("dimension", &ConstrainedImageSet::dimension);
-    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(Nat)const) &ConstrainedImageSet::split);
+    constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(SizeType)const) &ConstrainedImageSet::split);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);
 //    	constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("__str__",&__cstr__<ConstrainedImageSet>);
@@ -655,7 +655,7 @@ Void export_constrained_image_set(pybind11::module& module)
     validated_constrained_image_set_class.def("separated", &ValidatedConstrainedImageSet::separated);
     validated_constrained_image_set_class.def("overlaps", &ValidatedConstrainedImageSet::overlaps);
     validated_constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)()const) &ValidatedConstrainedImageSet::split);
-    validated_constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)(Nat)const) &ValidatedConstrainedImageSet::split);
+    validated_constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)(SizeType)const) &ValidatedConstrainedImageSet::split);
     validated_constrained_image_set_class.def("__str__", &__cstr__<ValidatedConstrainedImageSet>);
     validated_constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
 

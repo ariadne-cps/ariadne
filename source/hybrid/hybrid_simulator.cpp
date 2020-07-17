@@ -106,7 +106,7 @@ template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const Discret
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
     Point<X> sapt(saspc.dimension(),spt.zero_element());
     Point<X> apt = evaluate(auxiliary_function,spt);
-    for(Nat i=0; i!=sapt.size(); ++i) {
+    for(SizeType i=0; i!=sapt.size(); ++i) {
         RealVariable var = saspc.variable(i);
         sapt[i]= sspc.contains(var) ? spt[sspc[var]] : apt[aspc[var]];
     }

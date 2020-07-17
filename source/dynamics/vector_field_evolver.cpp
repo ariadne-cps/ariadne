@@ -216,7 +216,7 @@ _evolution(EnclosureListType& final_sets,
                   && decide(current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
-            for(Nat i=0; i!=subdivisions.size(); ++i) {
+            for(SizeType i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
@@ -273,8 +273,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG_PRINTLN("box = "<<current_set_model.bounding_box());
     ARIADNE_LOG_PRINTLN("radius = "<<current_set_model.euclidean_set().bounding_box().radius());
-    //const Nat nd=initial_set_model.result_size();
-    //const Nat ng=initial_set_model.argument_size();
+    //const SizeType nd=initial_set_model.result_size();
+    //const SizeType ng=initial_set_model.argument_size();
 
 
     // Test to see if set requires reconditioning

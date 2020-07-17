@@ -488,7 +488,7 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 
 inline Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     Map<RealVariable,RealInterval> res;
-    for(Nat i=0; i!=b.size(); ++i) {
+    for(SizeType i=0; i!=b.size(); ++i) {
         res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
     }
     return res;
@@ -813,7 +813,7 @@ CompositionalHybridAutomaton::_compute_target(DiscreteLocation source, DiscreteE
     for(SizeType i=0; i!=this->_discrete_updates.size(); ++i) {
         if(get_second(this->_discrete_updates[i]) == event && get_first(this->_discrete_updates[i]) == source) {
             DiscreteUpdate const& update = get_third(_discrete_updates[i]);
-            for(Nat j=0; j!=update.size(); ++j) {
+            for(SizeType j=0; j!=update.size(); ++j) {
                 result.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -830,7 +830,7 @@ CompositionalHybridAutomaton::_compute_targets(DiscreteLocation source) const {
             DiscreteEvent const& event = get_second(_discrete_updates[i]);
             DiscreteUpdate const& update = get_third(_discrete_updates[i]);
             DiscreteLocation& target = result[event];
-            for(Nat j=0; j!=update.size(); ++j) {
+            for(SizeType j=0; j!=update.size(); ++j) {
                 target.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -1283,7 +1283,7 @@ CompositionalHybridAutomaton compose(const List<CompositionalHybridAutomaton>& c
 
     // Introduce nonjumping constraints for discrete variables
     for(SizeType i=0; i!=components.size(); ++i) {
-        for(Nat j=0; j!=component[i]._dotted_assignments.size(); ++j) {
+        for(SizeType j=0; j!=component[i]._dotted_assignments.size(); ++j) {
             Tuple<DiscretePredicate,DottedRealAssignment> dynamic = _components[i]._dotted_assignments[j];
             this->_nonjumping[i]._append(dynamic.first,dynamic.second.left_hand_side());
         }

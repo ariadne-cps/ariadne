@@ -62,9 +62,9 @@ Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivaria
 Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom);
 Matrix<FloatDPError> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
 Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain);
-Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain);
+Pair<SizeType,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub);
 ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl);
@@ -76,18 +76,18 @@ ExactBoxType approximation(const RealBox& rbx);
 
 Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom)
 {
-    const Nat m=f.result_size();
-    const Nat n=f.argument_size();
+    const SizeType m=f.result_size();
+    const SizeType n=f.argument_size();
     ValidatedVectorMultivariateTaylorFunctionModelDP g=restriction(f,dom);
 
     Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
     MultiIndex a;
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         const ValidatedTaylorModelDP& tm=g.model(i);
         for(ValidatedTaylorModelDP::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->index();
             if(a.degree()>1) {
-                for(Nat j=0; j!=n; ++j) {
+                for(SizeType j=0; j!=n; ++j) {
                     if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
@@ -101,11 +101,11 @@ Matrix<FloatDPError> nonlinearities_first_order(const ValidatedVectorMultivariat
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
-    const Nat m=f.result_size();
-    const Nat n=f.argument_size();
+    const SizeType m=f.result_size();
+    const SizeType n=f.argument_size();
     Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 1, cast_vector(dom));
     MultiIndex a(n);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         FloatDPBounds sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,UpperIntervalType(sf));
@@ -116,12 +116,12 @@ Matrix<FloatDPError> nonlinearities_first_order(const ValidatedVectorMultivariat
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==1) {
-                for(Nat j=0; j!=n; ++j) {
+                for(SizeType j=0; j!=n; ++j) {
                     if(a[j]>0) { nonlinearities[i][j]+=iter->coefficient().radius(); }
                 }
             }
@@ -136,11 +136,11 @@ Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivaria
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
-    const Nat m=f.result_size();
-    const Nat n=f.argument_size();
+    const SizeType m=f.result_size();
+    const SizeType n=f.argument_size();
     Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 2, cast_vector(dom));
     MultiIndex a(n);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         FloatDPBounds sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,FloatDPUpperInterval(sf));
@@ -151,12 +151,12 @@ Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivaria
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==2) {
-                for(Nat j=0; j!=n; ++j) {
+                for(SizeType j=0; j!=n; ++j) {
                     if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
@@ -167,18 +167,18 @@ Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivaria
     return nonlinearities;
 }
 
-Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain) {
+Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain) {
     Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat jmax_in_row_imax=nonlinearities.column_size();
+    SizeType jmax_in_row_imax=nonlinearities.column_size();
     FloatDPError max_row_sum(0u,dp);
-    for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
-        Nat jmax=nonlinearities.column_size();
+    for(SizeType i=0; i!=nonlinearities.row_size(); ++i) {
+        SizeType jmax=nonlinearities.column_size();
         FloatDPError row_sum(0u,dp);
         FloatDPError max_mag_j_in_i(0u,dp);
-        for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
+        for(SizeType j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=abs(nonlinearities[i][j]);
             if(abs(nonlinearities[i][j]).raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
@@ -223,9 +223,9 @@ ExactBoxType approximation(const RealBox& rbx) {
 
 namespace {
 
-Nat get_argument_size(const List<EffectiveConstraint>& c) {
-    Nat as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
-    for(Nat i=0; i!=c.size(); ++i) {
+SizeType get_argument_size(const List<EffectiveConstraint>& c) {
+    SizeType as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
+    for(SizeType i=0; i!=c.size(); ++i) {
         ARIADNE_ASSERT_MSG(c[i].function().argument_size()==as,"c="<<c);
     }
     return as;
@@ -233,7 +233,7 @@ Nat get_argument_size(const List<EffectiveConstraint>& c) {
 
 template<class P, class D, class C> VectorMultivariateFunction<P> make_constraint_function(D dom, const List<C>& c) {
     VectorMultivariateFunction<P> f(c.size(),dom);
-    for(Nat i=0; i!=c.size(); ++i) {
+    for(SizeType i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
         f.set(i,c[i].function());
     }
@@ -251,7 +251,7 @@ ValidatedVectorMultivariateFunction constraint_function(BoxDomainType dom, const
 
 RealBox constraint_bounds(const List<EffectiveConstraint>& c) {
     RealBox b(c.size());
-    for(Nat i=0; i!=c.size(); ++i) {
+    for(SizeType i=0; i!=c.size(); ++i) {
         b[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
     }
     return b;
@@ -260,7 +260,7 @@ RealBox constraint_bounds(const List<EffectiveConstraint>& c) {
 List<EffectiveConstraint> constraints(const EffectiveVectorMultivariateFunction& f, const RealBox& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<EffectiveConstraint> c; c.reserve(b.size());
-    for(Nat i=0; i!=b.size(); ++i) {
+    for(SizeType i=0; i!=b.size(); ++i) {
         c.append(EffectiveConstraint(b[i].lower(),f[i],b[i].upper()));
     }
     return c;
@@ -549,7 +549,7 @@ intersection(const ConstraintSet& cs,const BoundedConstraintSet& bcs)
 ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
     : _domain(over_approximation(set.domain())), _function(EffectiveVectorMultivariateFunction::identity(set.dimension()))
 {
-    for(Nat i=0; i!=set.number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=set.number_of_constraints(); ++i) {
         this->new_parameter_constraint(set.constraint(i));
     }
 }
@@ -563,7 +563,7 @@ const EffectiveVectorMultivariateFunction ConstrainedImageSet::constraint_functi
 const RealBox ConstrainedImageSet::constraint_bounds() const
 {
     RealBox result(this->number_of_constraints());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=RealInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
@@ -682,8 +682,8 @@ ConstrainedImageSet::split() const
 {
     ARIADNE_ASSERT(this->number_of_parameters()>0);
     auto rmax(this->domain()[0].radius());
-    Nat k=0;
-    for(Nat j=1; j!=this->number_of_parameters(); ++j) {
+    SizeType k=0;
+    for(SizeType j=1; j!=this->number_of_parameters(); ++j) {
        auto rj(this->domain()[j].radius());
        if(decide(rj>rmax)) {
             k=j;
@@ -694,7 +694,7 @@ ConstrainedImageSet::split() const
 }
 
 Pair<ConstrainedImageSet,ConstrainedImageSet>
-ConstrainedImageSet::split(Nat j) const
+ConstrainedImageSet::split(SizeType j) const
 {
     RealInterval interval = this->domain()[j];
     Real midpoint = interval.midpoint();
@@ -709,7 +709,7 @@ ConstrainedImageSet::split(Nat j) const
 ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorMultivariateFunction& function) {
     ARIADNE_ASSERT(set.dimension()==function.argument_size());
     ConstrainedImageSet result(set.domain(),function);
-    for(Nat i=0; i!=set.number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=set.number_of_constraints(); ++i) {
         result.new_parameter_constraint(set.constraint(i));
     }
     return result;
@@ -731,11 +731,11 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
-    const Nat m=f.result_size();
-    const Nat n=f.argument_size();
+    const SizeType m=f.result_size();
+    const SizeType n=f.argument_size();
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 1, dom);
     MultiIndex a(n);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf));
@@ -746,12 +746,12 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==1) {
-                for(Nat j=0; j!=n; ++j) {
+                for(SizeType j=0; j!=n; ++j) {
                     if(a[j]>0) { nonlinearities[i][j]+=radius(iter->coefficient()); }
                 }
             }
@@ -766,11 +766,11 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
-    const Nat m=f.result_size();
-    const Nat n=f.argument_size();
+    const SizeType m=f.result_size();
+    const SizeType n=f.argument_size();
     Vector<UpperIntervalDifferentialType> ivl_dx=UpperIntervalDifferentialType::constants(m,n, 2, dom);
     MultiIndex a(n);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         FloatDP sf=dom[i].radius();
         ++a[i];
         ivl_dx[i].expansion().append(a,ExactIntervalType(sf));
@@ -781,12 +781,12 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         const UpperIntervalDifferentialType& d=df[i];
         for(UpperIntervalDifferentialType::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==2) {
-                for(Nat j=0; j!=n; ++j) {
+                for(SizeType j=0; j!=n; ++j) {
                     if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
@@ -798,17 +798,17 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
 }
 */
 
-Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
+Pair<SizeType,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
     Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,cast_vector(domain));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat jmax=domain.size();
+    SizeType jmax=domain.size();
     FloatDPError max_column_norm(0u,dp);
-    for(Nat j=0; j!=domain.size(); ++j) {
+    for(SizeType j=0; j!=domain.size(); ++j) {
         FloatDPError column_norm(0u,dp);
-        for(Nat i=0; i!=function.result_size(); ++i) {
+        for(SizeType i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]);
         }
         column_norm *= domain[j].radius().upper();
@@ -820,19 +820,19 @@ Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivaria
     return make_pair(jmax,max_column_norm);
 }
 
-Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
+Pair<SizeType,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
     Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    Nat jmax_in_row_imax=nonlinearities.column_size();
+    SizeType jmax_in_row_imax=nonlinearities.column_size();
     FloatDPError max_row_sum(0u,dp);
-    for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
-        Nat jmax=nonlinearities.column_size();
+    for(SizeType i=0; i!=nonlinearities.row_size(); ++i) {
+        SizeType jmax=nonlinearities.column_size();
         FloatDPError row_sum(0u,dp);
         FloatDPError max_mag_j_in_i(0u,dp);
-        for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
+        for(SizeType j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=nonlinearities[i][j];
             if(nonlinearities[i][j].raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
@@ -890,7 +890,7 @@ ValidatedVectorMultivariateFunction ValidatedConstrainedImageSet::constraint_fun
 ExactBoxType ValidatedConstrainedImageSet::constraint_bounds() const
 {
     ExactBoxType result(this->number_of_constraints());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=over_approximation(make_interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
     }
     return result;
@@ -913,7 +913,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     Vector<ValidatedAffineModelDP> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraintDP> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
         constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
@@ -931,20 +931,20 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
     Vector<ValidatedAffineModelDP> space_models=affine_models(domain,this->function(),prec);
     List<ValidatedAffineModelConstraintDP> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) {
         const ValidatedConstraint& constraint=this->constraint(i);
         auto am=affine_model(domain,constraint.function(),prec);
         constraint_models.append(ValidatedAffineModelConstraintDP(constraint.lower_bound(),am,constraint.upper_bound()));
     }
 
-    for(Nat i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
-    for(Nat i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0u); }
+    for(SizeType i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
+    for(SizeType i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0u); }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
 }
 
 
-Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstrainedImageSet::split(Nat j) const
+Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstrainedImageSet::split(SizeType j) const
 {
     Pair<ExactBoxType,ExactBoxType> subdomains = Ariadne::split(this->_domain,j);
     subdomains.first=intersection(subdomains.first,this->_reduced_domain);
@@ -954,7 +954,7 @@ Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstra
         ValidatedConstrainedImageSet(subdomains.first,this->_function),
         ValidatedConstrainedImageSet(subdomains.second,this->_function));
 
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         result.first.new_parameter_constraint(this->_constraints[i]);
         result.second.new_parameter_constraint(this->_constraints[i]);
         //result.first.new_parameter_constraint(Ariadne::restrict(this->_negative_constraints[i],subdomains.first));
@@ -966,9 +966,9 @@ Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstra
 Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>
 ValidatedConstrainedImageSet::split() const
 {
-    Nat k=this->number_of_parameters();
+    SizeType k=this->number_of_parameters();
     FloatDP rmax(-inf,dp);
-    for(Nat j=0; j!=this->number_of_parameters(); ++j) {
+    for(SizeType j=0; j!=this->number_of_parameters(); ++j) {
         FloatDPUpperBound rj=this->domain()[j].radius();
         if(rj.raw()>rmax) {
             k=j;
@@ -989,7 +989,7 @@ ValidatedConstrainedImageSet::restriction(ExactBoxType const& new_domain) const
     ARIADNE_ASSERT(subset(new_domain,this->domain()));
     ExactBoxType new_reduced_domain = intersection(new_domain,this->reduced_domain());
     ValidatedConstrainedImageSet result(new_domain,_restriction(this->function(),new_domain));
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraint const& constraint=this->_constraints[i];
         ValidatedConstraint new_constraint(constraint.lower_bound(),_restriction(constraint.function(),new_reduced_domain),constraint.upper_bound());
         result.new_parameter_constraint(new_constraint);
@@ -1020,8 +1020,8 @@ ValidatedLowerKleenean ValidatedConstrainedImageSet::separated(const ExactBoxTyp
 {
     UpperBoxType subdomain = this->_reduced_domain;
     ValidatedVectorMultivariateFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
-    for(Nat i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
-    for(Nat i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
+    for(SizeType i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
+    for(SizeType i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //ValidatedVectorMultivariateFunction function = join(this->_function,this->constraint_function());
     ExactBoxType codomain = product(bx,this->constraint_bounds());
     ConstraintSolver solver;
@@ -1166,13 +1166,13 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     ARIADNE_ASSERT(set1.number_of_parameters()==set2.number_of_parameters());
     ARIADNE_ASSERT(set1.number_of_constraints()==set2.number_of_constraints());
 
-    const Nat np = set1.number_of_parameters();
+    const SizeType np = set1.number_of_parameters();
 
     const ExactBoxType& domain1 = set1.domain();
     const ExactBoxType& domain2 = set2.domain();
 
-    Nat join_parameter=np;
-    for(Nat i=0; i!=np; ++i) {
+    SizeType join_parameter=np;
+    for(SizeType i=0; i!=np; ++i) {
         if(domain1[i]!=domain2[i]) {
             if(domain1[i].upper() < domain2[i].lower() || domain1[i].lower() > domain2[i].upper()) {
                 ARIADNE_FAIL_MSG("Cannot joint sets "<<set1<<" and "<<set2<<" since domains are separated.");
@@ -1203,7 +1203,7 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5_x,dp);
     new_function.clobber();
-    for(Nat i=0; i!=new_function.result_size(); ++i) {
+    for(SizeType i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
         FloatDPError new_function_error = max(function_error1[i],function_error2[i]);

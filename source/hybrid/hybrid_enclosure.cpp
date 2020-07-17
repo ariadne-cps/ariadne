@@ -554,7 +554,7 @@ HybridEnclosure::split() const
 {
     List<ExactBoxType> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
-    for(Nat i=0; i!=result.size(); ++i) {
+    for(SizeType i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
     }
     return result;
@@ -577,7 +577,7 @@ HybridEnclosure::_check() const
     const ExactBoxType& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->state_function().domain(),"function domain");
-    for(Nat i=0; i!=this->_set.constraints().size(); ++i) {
+    for(SizeType i=0; i!=this->_set.constraints().size(); ++i) {
         check_subset(reduced_domain,this->_set.constraint(i).function().domain(),"constraint");
     }
     check_subset(reduced_domain,this->time_function().domain(),"time");

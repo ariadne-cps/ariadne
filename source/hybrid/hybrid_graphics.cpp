@@ -50,7 +50,7 @@ static const Nat HYBRID_RIGHT_MARGIN = 0;
 
 
 Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
-    for(Nat i=0; i!=objects.size(); ++i) {
+    for(SizeType i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
         shape.draw(canvas,locations,variables);
@@ -107,7 +107,7 @@ Void HybridFigure::_paint_all(CanvasInterface& canvas) const
     canvas.initialise(variables.x_variable().name(),variables.y_variable().name(),xl,xu,yl,yu);
 
     // Draw shapes
-    for(Nat i=0; i!=objects.size(); ++i) {
+    for(SizeType i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
         shape.draw(canvas,this->locations,this->variables);

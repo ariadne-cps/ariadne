@@ -43,19 +43,19 @@ namespace Ariadne {
 template<class T> Space<T>::Space() : _variables() { }
 
 template<class T> Space<T>::Space(const List<VariableType>& vl) {
-    for(Nat i=0; i!=vl.size(); ++i) {
+    for(SizeType i=0; i!=vl.size(); ++i) {
         this->append(vl[i]);
     }
 }
 
 template<class T> Space<T>::Space(const List<Identifier>& vl) {
-    for(Nat i=0; i!=vl.size(); ++i) {
+    for(SizeType i=0; i!=vl.size(); ++i) {
         this->append(VariableType(vl[i]));
     }
 }
 
 template<class T> Space<T>::Space(const InitializerList<VariableType>& vl) {
-    for(Nat i=0; i!=vl.size(); ++i) {
+    for(SizeType i=0; i!=vl.size(); ++i) {
         this->append(vl.begin()[i]);
     }
 }
@@ -86,7 +86,7 @@ template<class T> List<typename Space<T>::VariableType> Space<T>::variables() co
 
 template<class T> Map<Identifier,SizeType> Space<T>::indices_from_names() const {
     Map<Identifier,SizeType> indices;
-    for(Nat i=0; i!=this->_variables.size(); ++i) {
+    for(SizeType i=0; i!=this->_variables.size(); ++i) {
         ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
             indices.insert(this->_variables[i],i);
     }
@@ -94,7 +94,7 @@ template<class T> Map<Identifier,SizeType> Space<T>::indices_from_names() const 
 }
 template<class T> Map<typename Space<T>::VariableType,SizeType> Space<T>::indices() const {
     Map<VariableType,SizeType> indices;
-    for(Nat i=0; i!=this->_variables.size(); ++i) {
+    for(SizeType i=0; i!=this->_variables.size(); ++i) {
         ARIADNE_ASSERT_MSG(!indices.has_key(VariableType(_variables[i])),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
         indices.insert(VariableType(this->_variables[i]),i);
     }
@@ -102,7 +102,7 @@ template<class T> Map<typename Space<T>::VariableType,SizeType> Space<T>::indice
 }
 
 template<class T> Bool Space<T>::contains(const typename Space<T>::VariableType& v) const {
-    for(Nat i=0; i!=_variables.size(); ++i) {
+    for(SizeType i=0; i!=_variables.size(); ++i) {
         if(v.name()==_variables[i]) { return true; } }
     return false; }
 template<class T> Bool Space<T>::contains(const Set<typename Space<T>::VariableType>& vs) const {
@@ -114,27 +114,27 @@ template<class T> SizeType Space<T>::operator[](const typename Space<T>::Variabl
 template<class T> SizeType Space<T>::operator[](const Identifier& n) const {
     return this->index(n); }
 template<class T> SizeType Space<T>::index(const typename Space<T>::VariableType& v) const {
-    for(Nat i=0; i!=_variables.size(); ++i) {
+    for(SizeType i=0; i!=_variables.size(); ++i) {
         if(v.name()==_variables[i]) { return i; } }
     ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
     return _variables.size(); }
 template<class T> SizeType Space<T>::index(const Identifier& n) const {
-    for(Nat i=0; i!=_variables.size(); ++i) {
+    for(SizeType i=0; i!=_variables.size(); ++i) {
         if(n==_variables[i]) { return i; } }
     ARIADNE_ASSERT_MSG(false,"Variable named "<<n<<" is not in the Space "<<*this);
     return _variables.size(); }
 template<class T> Space<T>& Space<T>::insert(const typename Space<T>::VariableType& v) {
-    for(Nat i=0; i!=_variables.size(); ++i) {
+    for(SizeType i=0; i!=_variables.size(); ++i) {
         if(_variables[i]==v.name()) { return *this; } }
     _variables.push_back(v.name()); return *this; }
 
 template<class T> Space<T>& Space<T>::adjoin(const Space<T>& spc) {
-    for(Nat i=0; i!=spc._variables.size(); ++i) { this->insert(VariableType(spc._variables[i])); }
+    for(SizeType i=0; i!=spc._variables.size(); ++i) { this->insert(VariableType(spc._variables[i])); }
     return *this;
 }
 
 template<class T> Space<T>& Space<T>::append(const VariableType& v) {
-    for(Nat i=0; i!=_variables.size(); ++i) {
+    for(SizeType i=0; i!=_variables.size(); ++i) {
         ARIADNE_ASSERT_MSG(_variables[i]!=v.name(),"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
     }
     _variables.push_back(v.name()); return *this;

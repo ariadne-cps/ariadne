@@ -67,7 +67,7 @@ template class Box<Interval<FloatDPUpperBound>>;
 template class Box<Interval<FloatDPApproximation>>;
 
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
-    Nat ix=p.x_coordinate(); Nat iy=p.y_coordinate();
+    SizeType ix=p.x_coordinate(); SizeType iy=p.y_coordinate();
     ApproximateIntervalType x=bx[ix]; ApproximateIntervalType y=bx[iy];
     c.move_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
     c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.lower()));
@@ -101,7 +101,7 @@ ExactBoxType make_box(const String& str)
     }
 
     ExactBoxType bx(vec.size());
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         bx[i]=vec[i];
     }
     return bx;

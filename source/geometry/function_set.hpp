@@ -81,7 +81,7 @@ class ImageSet { };
 class ConstraintSet
     : public virtual EffectiveEuclideanRegularSetInterface
 {
-    Nat _dimension;
+    SizeType _dimension;
     List< EffectiveConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
@@ -95,11 +95,11 @@ class ConstraintSet
     //! \brief The bounds of the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
     List<EffectiveConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     ConstraintSet* clone() const;
     DimensionType dimension() const;
@@ -142,11 +142,11 @@ class BoundedConstraintSet
     //! \brief The bounds for the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
     List<EffectiveConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     BoundedConstraintSet* clone() const;
     DimensionType dimension() const;
@@ -206,11 +206,11 @@ class ConstrainedImageSet
     //! \brief The function used to define the set.
     const List<EffectiveConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    Nat number_of_parameters() const { return this->_domain.size(); };
+    SizeType number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    EffectiveConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    EffectiveConstraint const& constraint(SizeType i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     Void apply(const EffectiveVectorMultivariateFunction& h) {
@@ -239,7 +239,7 @@ class ConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<ConstrainedImageSet,ConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
+    Pair<ConstrainedImageSet,ConstrainedImageSet> split(SizeType j) const;
 
     //! \brief Test if the set is contained in (the interior of) a box.
     LowerKleenean inside(const ExactBoxType& bx) const;
@@ -304,11 +304,11 @@ class ValidatedConstrainedImageSet
     //! \brief The constraints used to define the set.
     const List<ValidatedConstraint> constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    ValidatedConstraint const constraint(Nat i) const { return this->_constraints[i]; };
+    ValidatedConstraint const constraint(SizeType i) const { return this->_constraints[i]; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    Nat number_of_parameters() const { return this->_domain.size(); };
+    SizeType number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
-    Nat number_of_constraints() const { return this->_constraints.size(); };
+    SizeType number_of_constraints() const { return this->_constraints.size(); };
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     Void apply(const ValidatedVectorMultivariateFunction& h) {
@@ -344,7 +344,7 @@ class ValidatedConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(Nat j) const;
+    Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> split(SizeType j) const;
     //! \brief Restrict the parameter domain to \a parameter_subdomain.
     ValidatedConstrainedImageSet restriction(ExactBoxType const& new_domain) const;
 

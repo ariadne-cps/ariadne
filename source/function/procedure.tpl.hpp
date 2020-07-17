@@ -167,7 +167,7 @@ Vector<Procedure<Y>>::Vector(SizeType as, const Vector<Formula<Y>>& f)
         _convert(this->_instructions,this->_constants,f[i], ind);
     }
 
-    for(Nat i=0; i!=f.size(); ++i) {
+    for(SizeType i=0; i!=f.size(); ++i) {
         this->_results[i]=ind[f[i].node_ptr()];
     }
 

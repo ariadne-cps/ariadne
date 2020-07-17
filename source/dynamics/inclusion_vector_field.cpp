@@ -30,7 +30,7 @@ namespace Ariadne {
 
 List<Nat> input_indices(SizeType num_variables, SizeType num_inputs) {
     List<Nat> result;
-    for (Nat i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
+    for (SizeType i : range(num_variables,num_variables+num_inputs)) { result.append(i); }
     return result;
 }
 
@@ -86,7 +86,7 @@ Void InclusionVectorField::_transform_and_assign(EffectiveVectorMultivariateFunc
 
     Vector<EffectiveFormula> transformed_formulae = substitute(ff._formulae,centering_substitution);
 
-    List<Nat> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
+    List<SizeType> input_indices = Ariadne::input_indices(function.result_size(),inputs.size());
     if (is_additive_in(transformed_formulae,input_indices)) {
         incorporate_additive_inputs_coefficients(transformed_formulae,transformed_inputs);
     }

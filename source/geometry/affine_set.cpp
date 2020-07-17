@@ -104,11 +104,11 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box
 {
     Vector<FloatDPError> errs(bx.dimension(),dp);
 
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         make_lpair(_domain[i],errs[i])=make_domain(bx[i]);
     }
 
-    for(Nat i=0; i!=bx.dimension(); ++i) {
+    for(SizeType i=0; i!=bx.dimension(); ++i) {
         _space_models[i]=ValidatedAffineModelDP::scaling(bx.dimension(),i,_domain[i],dp);
         _space_models[i].error()+=errs[i];
     }
@@ -125,7 +125,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
     : _domain(d), _space_models(f.size(),ValidatedAffineModelDP(d.size(),dp))
 {
     if(d==ExactBoxType::unit_box(d.size())) {
-        for(Nat i=0; i!=f.size(); ++i) {
+        for(SizeType i=0; i!=f.size(); ++i) {
             ARIADNE_ASSERT_MSG(_domain.dimension() == f[i].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<f[i].argument_size()<<").");
             _space_models[i] = affine_model(f[i]);
         }
@@ -140,10 +140,10 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Exa
     ARIADNE_ASSERT_MSG(_domain.dimension() == f[0].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the function argument size ("<<_space_models[0].argument_size()<<").");
 
     if(d==ExactBoxType::unit_box(d.size())) {
-        for(Nat i=0; i!=f.size(); ++i) {
+        for(SizeType i=0; i!=f.size(); ++i) {
             _space_models[i] = affine_model(f[i]);
         }
-        for(Nat i=0; i!=c.size(); ++i) {
+        for(SizeType i=0; i!=c.size(); ++i) {
             ARIADNE_ASSERT_MSG(_domain.dimension() == c[i].argument_size(),"The domain dimension ("<<_domain.dimension()<<") does not match the constraint argument size ("<<c[i].argument_size()<<").");
             _constraint_models.append(ValidatedAffineModelConstraintDP(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
         }
@@ -189,10 +189,10 @@ Void ValidatedAffineConstrainedImageSet::construct(const ExactBoxType& D, const 
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
     this->_space_models=Vector<ValidatedAffineModelDP>(G.row_size(),ValidatedAffineModelDP(G.column_size(),dp));
-    for(Nat i=0; i!=G.row_size(); ++i) {
+    for(SizeType i=0; i!=G.row_size(); ++i) {
         ValidatedAffineModelDP x(G.column_size(),dp);
         x=h[i];
-        for(Nat j=0; j!=G.column_size(); ++j) {
+        for(SizeType j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
         }
         this->_space_models[i]=x;
@@ -258,7 +258,7 @@ ValidatedKleenean ValidatedAffineConstrainedImageSet::is_bounded() const {
 UpperBoxType ValidatedAffineConstrainedImageSet::bounding_box() const {
     UpperBoxType result(this->dimension());
     ExactBoxType domain=this->domain();
-    for(Nat i=0; i!=this->dimension(); ++i) {
+    for(SizeType i=0; i!=this->dimension(); ++i) {
         result[i]=this->_space_models[i].range();
     }
     return result;
@@ -273,7 +273,7 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
     ExactBoxType wbx=cast_exact_box(widen(bx));
     LinearProgram<FloatDPValue> lp;
     this->construct_linear_program(lp);
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.size(); ++i) {
         lp.l[i]=FloatDPValue(sub(down,wbx[i].lower().raw(),this->_space_models[i].error().raw()));
         lp.u[i]=FloatDPValue(add(up,wbx[i].upper().raw(),this->_space_models[i].error().raw()));
     }
@@ -306,9 +306,9 @@ ValidatedAffineConstrainedImageSet image(ValidatedAffineConstrainedImageSet set,
 
 
 GridTreePaving
-ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat d) const {
+ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, Nat depth) const {
     GridTreePaving r(g);
-    this->adjoin_outer_approximation_to(r,d);
+    this->adjoin_outer_approximation_to(r,depth);
     return r;
 }
 
@@ -325,7 +325,7 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     const ExactBoxType bx=cell.box();
 
     // Make part of linear program dependent on cell
-    for(Nat i=0; i!=cell.dimension(); ++i) {
+    for(SizeType i=0; i!=cell.dimension(); ++i) {
         //lp.l[i]=bx[i].lower();
         //lp.u[i]=bx[i].upper();
         lp.l[i]=FloatDPValue(sub(down,bx[i].lower().raw(),errors[i].raw()));
@@ -380,9 +380,9 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
     ARIADNE_LOG_SCOPE_CREATE;
 
-    const Nat nx=this->dimension();
-    const Nat np=this->number_of_parameters();
-    const Nat nc=this->_constraint_models.size();
+    const SizeType nx=this->dimension();
+    const SizeType np=this->number_of_parameters();
+    const SizeType nc=this->_constraint_models.size();
 
     lp.A.resize(nx+nc,nx+np+nc);
     lp.b.resize(nx+nc);
@@ -392,46 +392,46 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
     // Make part of linear program only dependent on set
     // Need to set all values since matrix is uninitialised
-    for(Nat i=0; i!=nx; ++i) {
-        for(Nat j=0; j!=nx; ++j) {
+    for(SizeType i=0; i!=nx; ++i) {
+        for(SizeType j=0; j!=nx; ++j) {
             lp.A[i][j]=0;
         }
         lp.A[i][i] = -1;
-        for(Nat j=0; j!=np; ++j) {
+        for(SizeType j=0; j!=np; ++j) {
             lp.A[i][nx+j] = +this->_space_models[i].gradient(j);
         }
-        for(Nat j=0; j!=nc; ++j) {
+        for(SizeType j=0; j!=nc; ++j) {
             lp.A[i][nx+np+j]=0;
         }
         lp.b[i] = -this->_space_models[i].value();
     }
-    for(Nat i=0; i!=nc; ++i) {
-        for(Nat j=0; j!=nx; ++j) {
+    for(SizeType i=0; i!=nc; ++i) {
+        for(SizeType j=0; j!=nx; ++j) {
             lp.A[nx+i][j]=0;
         }
-        for(Nat j=0; j!=np; ++j) {
+        for(SizeType j=0; j!=np; ++j) {
             lp.A[nx+i][nx+j] = +this->_constraint_models[i].function().gradient(j);
         }
-        for(Nat j=0; j!=nc; ++j) {
+        for(SizeType j=0; j!=nc; ++j) {
             lp.A[nx+i][nx+np+j]=0;
         }
         lp.A[nx+i][nx+np+i] = +1;
         lp.b[nx+i] = -this->_constraint_models[i].function().value();
     }
 
-    for(Nat i=0; i!=np; ++i) {
+    for(SizeType i=0; i!=np; ++i) {
         //lp.l[nx+i]=this->_domain[i].lower();
         //lp.u[nx+i]=this->_domain[i].upper();
         lp.l[nx+i]=-1;
         lp.u[nx+i]=+1;
     }
-    for(Nat i=0; i!=nc; ++i) {
+    for(SizeType i=0; i!=nc; ++i) {
         lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound().value();
         lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound().value();
     }
 
     // Make part of linear program dependent on cell be +/-infinity
-    for(Nat i=0; i!=nx; ++i) {
+    for(SizeType i=0; i!=nx; ++i) {
         lp.l[i]=-infty;
         lp.u[i]=+infty;
     }
@@ -451,7 +451,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     LinearProgram<FloatDPValue> lp;
     this->construct_linear_program(lp);
     Vector<FloatDPError> errors(this->dimension(),dp);
-    for(Nat i=0; i!=this->dimension(); ++i) {
+    for(SizeType i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error();
     }
     _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,fineness);
@@ -464,9 +464,9 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 {
     SimplexSolver<FloatDPValue> lpsolver;
 
-    const Nat nx=cell.dimension();
-    const Nat nc=lp.A.row_size()-nx;
-    const Nat ne=lp.A.column_size()-lp.A.row_size()-1u;
+    const SizeType nx=cell.dimension();
+    const SizeType nc=lp.A.row_size()-nx;
+    const SizeType ne=lp.A.column_size()-lp.A.row_size()-1u;
 
 
     // No need to check if cell is already part of the set
@@ -478,7 +478,7 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     const ExactBoxType& bx=cell.box();
 
     // Make part of linear program dependent on cell
-    for(Nat i=0; i!=nx; ++i) {
+    for(SizeType i=0; i!=nx; ++i) {
         lp.l[i]=bx[i].lower();
         lp.u[i]=bx[i].upper();
     }
@@ -542,9 +542,9 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Order variables as e,x,s
 
     // Spacial dimension nx; parameter dimension np; number of constraints nc
-    const Nat nx=this->dimension();
-    const Nat ne=this->number_of_parameters();
-    const Nat nc=this->number_of_constraints();
+    const SizeType nx=this->dimension();
+    const SizeType ne=this->number_of_parameters();
+    const SizeType nc=this->number_of_constraints();
 
     // Create linear program
     LinearProgram<FloatDPValue> lp;
@@ -558,47 +558,47 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 
     // Make part of linear program only dependent on set
     // Need to set all values since matrix is uninitialised
-    for(Nat i=0; i!=nx; ++i) {
-        for(Nat j=0; j!=ne; ++j) {
+    for(SizeType i=0; i!=nx; ++i) {
+        for(SizeType j=0; j!=ne; ++j) {
             lp.A[i][j]=-this->_space_models[i].gradient(j);
         }
-        for(Nat j=0; j!=nx; ++j) {
+        for(SizeType j=0; j!=nx; ++j) {
             lp.A[i][ne+j]=0;
         }
         lp.A[i][ne+i]=+1;
-        for(Nat j=0; j!=nc; ++j) {
+        for(SizeType j=0; j!=nc; ++j) {
             lp.A[i][ne+nx+j]=0;
         }
         lp.b[i]=this->_space_models[i].value();
     }
-    for(Nat i=0; i!=nc; ++i) {
-        for(Nat j=0; j!=ne; ++j) {
+    for(SizeType i=0; i!=nc; ++i) {
+        for(SizeType j=0; j!=ne; ++j) {
             lp.A[nx+i][j]=this->_constraint_models[i].function().gradient(j);
         }
-        for(Nat j=0; j!=nx; ++j) {
+        for(SizeType j=0; j!=nx; ++j) {
             lp.A[nx+i][ne+j]=0;
         }
-        for(Nat j=0; j!=nc; ++j) {
+        for(SizeType j=0; j!=nc; ++j) {
             lp.A[nx+i][ne+nx+j]=0;
         }
         lp.A[nx+i][nx+ne+i]=+1;
         lp.b[nx+i]=-this->_constraint_models[i].function().value();
     }
-    for(Nat i=0; i!=ne; ++i) {
+    for(SizeType i=0; i!=ne; ++i) {
         lp.l[i]=-1;
         lp.u[i]=+1;
     }
-    for(Nat i=0; i!=nc; ++i) {
+    for(SizeType i=0; i!=nc; ++i) {
         lp.l[ne+nx+i]=0;
         lp.u[ne+nx+i]=infty;
     }
 
 
     // Make part of linear program used for robustness
-    for(Nat i=0; i!=ne+nx+nc; ++i) {
+    for(SizeType i=0; i!=ne+nx+nc; ++i) {
         lp.c[i]=0;
     }
-    for(Nat i=0; i!=nx+nc; ++i) {
+    for(SizeType i=0; i!=nx+nc; ++i) {
         lp.A[i][ne+nx+nc]=1;
     }
     lp.c[ne+nx+nc]=-1;
@@ -611,25 +611,25 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 
     // Make part of linear program dependent on cell
     const ExactBoxType bx=bounding_cell.box();
-    for(Nat i=0; i!=nx; ++i) {
+    for(SizeType i=0; i!=nx; ++i) {
         lp.l[ne+i]=bx[i].lower();
         lp.u[ne+i]=bx[i].upper();
     }
 
     // Take x and s variables to be basic, so the initial basis matrix is the
     // identity
-    for(Nat i=0; i!=ne; ++i) {
+    for(SizeType i=0; i!=ne; ++i) {
         lp.vt[i]=Slackness::LOWER;
         lp.p[nx+nc+i]=i;
     }
-    for(Nat i=0; i!=nx+nc; ++i) {
+    for(SizeType i=0; i!=nx+nc; ++i) {
         lp.vt[ne+i]=Slackness::BASIS;
         lp.p[i]=ne+i;
     }
     lp.B=Matrix<FloatDPBounds>::identity(nx+nc,dp);
 
     Vector<FloatDPError> errors(this->dimension(),dp);
-    for(Nat i=0; i!=this->dimension(); ++i) {
+    for(SizeType i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error();
     }
 
@@ -651,7 +651,7 @@ class PerturbationGenerator {
 };
 
 List<Point2d>
-ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
+ValidatedAffineConstrainedImageSet::boundary(SizeType xind, SizeType yind) const
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
@@ -675,7 +675,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
     Matrix<FloatDPApproximation> G=Matrix<FloatDPApproximation>::zero(ne,np,dp);
-    for(Nat j=0; j!=nx; ++j) {
+    for(SizeType j=0; j!=nx; ++j) {
         G[0][j]=FloatDPApproximation(xa.gradient(j))+eps();
         G[1][j]=FloatDPApproximation(ya.gradient(j))+eps();
     }
@@ -696,16 +696,16 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<FloatDPApproximation> l(np,dp);
     Vector<FloatDPApproximation> u(np,dp);
 
-    for(Nat j=0; j!=nx; ++j) {
+    for(SizeType j=0; j!=nx; ++j) {
         l[j]=FloatDPApproximation(-1.0_x,dp);
         u[j]=FloatDPApproximation(+1.0_x,dp);
     }
 
-    for(Nat i=0; i!=nc; ++i) {
-        for(Nat j=0; j!=nx; ++j) {
+    for(SizeType i=0; i!=nc; ++i) {
+        for(SizeType j=0; j!=nx; ++j) {
             A[i][j] = neg( numeric_cast<FloatDPApproximation>(this->_constraint_models[i].function().gradient(j)) );
         }
-        for(Nat j=nx; j!=nx+nc+ne; ++j) {
+        for(SizeType j=nx; j!=nx+nc+ne; ++j) {
             A[i][j] = 0.0_x;
         }
         A[i][nx+i]=1.0_x;
@@ -740,7 +740,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     if(!possibly(feasible)) { return vertices; }
 
     Vector<FloatDPApproximation> c(np,FloatDPApproximation(0.0_x,dp));
-    for(Nat j=0; j!=np; ++j) { c[j]=G[0][j]; }
+    for(SizeType j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
     // Find a point on the boundary; choose the point minimising the spacial x-coordinate
     x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
@@ -764,7 +764,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<FloatDPApproximation> Aj(nc,dp); // The jth column of A
     Vector<FloatDPApproximation> BAj(nc,dp); // The jth column of A
 
-    Nat last_exiting_variable=np; // Last variable to exit the basis
+    SizeType last_exiting_variable=np; // Last variable to exit the basis
 
     // FIXME: Do we need check below?
     // if(nx==ne) { vertices.push_back(Point2d(pt[0],pt[1])); return vertices; }
@@ -772,14 +772,14 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     do {
         ++STEPS;
         FloatDPApproximation cot_theta_max(-inf,dp);
-        Nat s=np; // The index giving the variable x[p[s]] to enter the basis
+        SizeType s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
         // This direction is given by Gd where d_B=-A_B^{-1} A_N e_j and
         //   di=+1/-1 depending on whether variable x[j] is at lower or upper bound
-        for(Nat k=nc; k!=np; ++k) {
+        for(SizeType k=nc; k!=np; ++k) {
             // Test variable to enter basis; there are m to test, one for each dimension of the domain
-            Nat j=p[k];
+            SizeType j=p[k];
             if(j!=last_exiting_variable || true) {
                 Aj=column(A,j);
                 BAj=B*Aj;
@@ -787,7 +787,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 // Compute the direction the point in space moves for x[j] entering the basis
                 Vector<FloatDPApproximation> d(np,FloatDPApproximation(0.0_x,dp)); // The direction x moves in in changing the basis
                 d[j] = (vt[j]==Slackness::LOWER ? +1 : -1);
-                for(Nat i=0; i!=nc; ++i) {
+                for(SizeType i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
                 }
                 trial_vec=G*d;
@@ -863,7 +863,7 @@ Void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
 
     // Trace boundary
     canvas.move_to(boundary[0].x,boundary[0].y);
-    for(Nat i=1; i!=boundary.size(); ++i) {
+    for(SizeType i=1; i!=boundary.size(); ++i) {
         canvas.line_to(boundary[i].x,boundary[i].y);
     }
     canvas.line_to(boundary[0].x,boundary[0].y);

@@ -50,7 +50,7 @@ template<class X> BoundingBoxType Point<X>::bounding_box() const {
     FloatDPError eps(FloatDP::eps(dp));
     ExactBoxType r(this->dimension());
     UpperIntervalType v;
-    for(Nat i=0; i!=this->dimension(); ++i) {
+    for(SizeType i=0; i!=this->dimension(); ++i) {
         X const& pti=(*this)[i];
         r[i]=cast_exact_interval(Interval<U>(pti-eps,pti+eps)); }
     return r;

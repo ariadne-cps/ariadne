@@ -41,8 +41,8 @@ enum class SplitPart : char;
 inline
 SizeType irmax(const ExactBoxType& bx) {
     FloatDP dmax(0.0_x,dp);
-    Nat imax=0;
-    for(Nat i=0; i!=bx.size(); ++i) {
+    SizeType imax=0;
+    for(SizeType i=0; i!=bx.size(); ++i) {
         FloatDP d=bx[i].width().upper().raw();
         if(d>dmax) {
             imax=i;
@@ -114,7 +114,7 @@ image_separated(const ExactBoxType& d, const F& f, const ExactBoxType& b, const 
         //cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        Nat i=irmax(d);
+        SizeType i=irmax(d);
         //cout << "splitting\n";
         return separated(split(d,i,SplitPart::LOWER),f,b,eps) && separated(split(d,i,SplitPart::UPPER),f,b,eps);
     }
@@ -140,7 +140,7 @@ image_inside(const ExactBoxType& d, const F& f, const ExactBoxType& b, const Raw
         //cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        Nat i=irmax(d);
+        SizeType i=irmax(d);
         //cout << "splitting\n";
         return inside(split(d,i,SplitPart::LOWER),f,b,eps) && inside(split(d,i,SplitPart::UPPER),f,b,eps);
     }
@@ -150,8 +150,8 @@ template<class DS>
 DS remove_subsets(const DS& ls)
 {
     DS result;
-    for(Nat i=0; i!=ls.size(); ++i) {
-        for(Nat j=0; j!=ls.size(); ++j) {
+    for(SizeType i=0; i!=ls.size(); ++i) {
+        for(SizeType j=0; j!=ls.size(); ++j) {
             if(inside(ls[i],ls[j])) {
                 break;
             }
@@ -164,8 +164,8 @@ template<class DS>
 DS remove_supersets(const DS& ls)
 {
     DS result;
-    for(Nat i=0; i!=ls.size(); ++i) {
-        for(Nat j=0; j!=ls.size(); ++j) {
+    for(SizeType i=0; i!=ls.size(); ++i) {
+        for(SizeType j=0; j!=ls.size(); ++j) {
             if(inside(ls[j],ls[i])) {
                 break;
             }

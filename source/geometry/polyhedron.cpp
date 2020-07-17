@@ -72,7 +72,7 @@ Polyhedron::Polyhedron()
 }
 
 
-Polyhedron::Polyhedron(Nat d)
+Polyhedron::Polyhedron(DimensionType d)
     : _A(0,d), _b(0)
 {
 }
@@ -90,8 +90,8 @@ Polyhedron::Polyhedron(const Matrix<FloatDP>& A, const Vector<FloatDP>& b)
 Polyhedron::Polyhedron(const ExactBoxType& bx)
     : _A(bx.dimension()*2,bx.dimension()), _b(bx.dimension()*2)
 {
-    const Nat n=bx.dimension();
-    for(Nat i=0; i!=n; ++i) {
+    const DimensionType n=bx.dimension();
+    for(SizeType i=0; i!=n; ++i) {
         _A[i][i]=-1;
         _b[i]=-bx[i].lower();
         _A[i+n][i]=+1;
@@ -125,7 +125,7 @@ Polyhedron::b() const
 
 
 
-Nat
+DimensionType
 Polyhedron::dimension() const
 {
     return this->_A.column_size();
@@ -171,7 +171,7 @@ Polyhedron
 intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 {
     ARIADNE_ASSERT(plhd1.dimension()==plhd2.dimension());
-    Nat d=plhd1.dimension();
+    DimensionType d=plhd1.dimension();
     SizeType nc1=plhd1.number_of_constraints();
     SizeType nc2=plhd2.number_of_constraints();
     Matrix<FloatDP> A(nc1+nc2,d);
@@ -218,7 +218,7 @@ Polyhedron::_write(OutputStream& os) const
     const Matrix<FloatDP> A=this->A();
     const Vector<FloatDP> b=this->b();
     os << "Polyhedron( constraints=";
-    Nat d=this->dimension();
+    DimensionType d=this->dimension();
     SizeType nc=this->number_of_constraints();
     for(SizeType i=0; i!=nc; ++i) {
         os << ( i==0 ? "[" : "," );
@@ -260,7 +260,7 @@ operator>>(InputStream& is, Polyhedron& p)
     SizeType n=Alst[0].size();
     Matrix<FloatDP> A(m,n);
     Vector<FloatDP> B(m);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             A[i][j]=Alst[i][j];
         }

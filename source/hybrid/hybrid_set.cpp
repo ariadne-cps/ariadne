@@ -71,7 +71,7 @@ Orbit<HybridApproximatePoint>::Orbit(List<HybridInterpolatedCurve> hcrvs)
     : _curves_ptr(new List<HybridInterpolatedCurve>(std::move(hcrvs)))
 { }
 
-Nat
+SizeType
 Orbit<HybridApproximatePoint>::size() const
 {
     return this->_curves_ptr->size();
@@ -98,7 +98,7 @@ Orbit<HybridApproximatePoint>::insert(HybridTime ht, const HybridApproximatePoin
 
 Void Orbit<HybridApproximatePoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<HybridApproximatePoint>& orbit=*this;
-    for(Nat i=0; i!=orbit._curves_ptr->size(); ++i) {
+    for(SizeType i=0; i!=orbit._curves_ptr->size(); ++i) {
         HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
         if(locations.empty() || locations.contains(hcurve.location())) {
             RealSpace const& space=hcurve.space();

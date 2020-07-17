@@ -70,11 +70,11 @@ class Grid {
     explicit Grid();
 
     //! Construct from a dimension.
-    explicit Grid(Nat d);
+    explicit Grid(DimensionType d);
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(Nat d, RawFloatDP l);
-    explicit Grid(Nat d, ApproximateDouble l);
+    explicit Grid(DimensionType d, RawFloatDP l);
+    explicit Grid(DimensionType d, ApproximateDouble l);
 
     //! Construct from a vector of lengths.
     explicit Grid(const Vector<RawFloatDP>& lengths);
@@ -113,13 +113,13 @@ class Grid {
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
-    Value<FloatDP> coordinate(Nat d, DyadicType x) const;
-    Value<FloatDP> subdivision_coordinate(Nat d, DyadicType x) const;
-    Value<FloatDP> subdivision_coordinate(Nat d, IntegerType n) const;
+    Value<FloatDP> coordinate(DimensionType d, DyadicType x) const;
+    Value<FloatDP> subdivision_coordinate(DimensionType d, DyadicType x) const;
+    Value<FloatDP> subdivision_coordinate(DimensionType d, IntegerType n) const;
 
-    Int subdivision_index(Nat d, const Value<FloatDP>& x) const;
-    Int subdivision_lower_index(Nat d, const LowerBound<FloatDP>& x) const;
-    Int subdivision_upper_index(Nat d, const UpperBound<FloatDP>& x) const;
+    Int subdivision_index(DimensionType d, const Value<FloatDP>& x) const;
+    Int subdivision_lower_index(DimensionType d, const LowerBound<FloatDP>& x) const;
+    Int subdivision_upper_index(DimensionType d, const UpperBound<FloatDP>& x) const;
 
     Array<DyadicType> index(const Point<FloatDPValue>& pt) const;
     Array<DyadicType> lower_index(const ExactBoxType& bx) const;

@@ -44,7 +44,7 @@ namespace Ariadne {
 template<class ES> class ListSet;
 class DiscreteLocation;
 
-struct ListSetSummary { Nat size, dimension; };
+struct ListSetSummary { SizeType size; DimensionType dimension; };
 
 /*! \ingroup ListSetSubModule
  *  \brief A set described as the union of sets in a list of basic sets.
@@ -64,7 +64,7 @@ class ListSet
     virtual ~ListSet() = default;
 
     ListSet() { };
-    explicit ListSet(Nat d) { };
+    explicit ListSet(DimensionType d) { };
     explicit ListSet(const BS& bs) { this->adjoin(bs); }
     template<class BST> ListSet(const ListSet<BST>& ls) {
         this->_data.insert(this->end(),ls.begin(),ls.end()); }
@@ -132,7 +132,7 @@ class ListSet
     /*! \brief compute a list of the bounding boxes of the set elements. */
     ListSet<UpperBoxType> bounding_boxes() const {
         ListSet<UpperBoxType> result(this->dimension());
-        for(Nat i=0; i!=this->size(); ++i) {
+        for(SizeType i=0; i!=this->size(); ++i) {
             result.adjoin((*this)[i].bounding_box());
         }
         return result;
@@ -142,7 +142,7 @@ class ListSet
     UpperBoxType bounding_box() const {
         if(this->size()==0) { return UpperBoxType(this->dimension()); }
         UpperBoxType result((*this)[0].bounding_box());
-        for(Nat i=1; i!=this->size(); ++i) {
+        for(SizeType i=1; i!=this->size(); ++i) {
             result=hull(result,(*this)[i].bounding_box()); }
         return result;
     }
@@ -175,7 +175,7 @@ OutputStream&
 operator<<(OutputStream& os, const ListSet<BS>& ls)
 {
     os << "ListSet(";
-    if(!ls.empty()) { for(Nat i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }
+    if(!ls.empty()) { for(SizeType i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }
     return os << " )";
 }
 

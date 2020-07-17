@@ -398,31 +398,31 @@ template<class I, class X> inline MultivariatePolynomial<MidpointType<X>> midpoi
 // Vectorised operations
 template<class I, class X, class A> Vector<A> evaluate(const Vector<Polynomial<I,X>>& p, const Vector<A>& v) {
     Vector<A> r(p.size(),v.zero_element());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=evaluate(p[i],v); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=evaluate(p[i],v); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> derivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> antiderivative(const Vector<Polynomial<I,X>>& p, SizeType j) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
 template<class I, class X> Vector<Polynomial<I,X>> truncate(const Vector<Polynomial<I,X>>& p, DegreeType d) {
     Vector<Polynomial<I,X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;
 }
 
 template<class I, class X> Vector<MultivariatePolynomial<MidpointType<X>>> midpoint(const Vector<Polynomial<I,X>>& p) {
     Vector<MultivariatePolynomial<MidpointType<X>>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
+    for(SizeType i=0; i!=p.size(); ++i) { r[i]=midpoint(p[i]); }
     return r;
 }
 

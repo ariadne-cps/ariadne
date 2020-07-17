@@ -1524,7 +1524,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
 
     //std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
-    Nat d=max_degree;
+    DegreeType d=max_degree;
     CoefficientType c=tm.value();
     FloatDPBounds r=cast_singleton(tm.range());
     Series<FloatDPBounds> centre_series=fn.series(c);
@@ -1548,7 +1548,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     TaylorModel<P,F> x=tm-c;
     TaylorModel<P,F> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
-    for(Nat i=0; i!=d; ++i) {
+    for(DegreeType i=0; i!=d; ++i) {
         res=centre_series[d-i-1u]+x*res;
         // Don't sweep here...
     }

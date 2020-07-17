@@ -306,7 +306,7 @@ class HybridEnclosure
     Void adjoin_outer_approximation_to(HybridStorage& paving, Nat fineness) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
-    Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
+    Pair<HybridEnclosure,HybridEnclosure> split(SizeType dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
 
@@ -371,7 +371,7 @@ class ListSet<HybridEnclosure>
             this->adjoin(*iter); } }
     Void append(const HybridEnclosure& hes) { this->_list.append(hes); }
     SizeType size() const { return _list.size(); }
-    const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
+    const HybridEnclosure& operator[](SizeType i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
     VariablesUpperBoxType bounding_box() const;
     Void reduce() { for(auto& set : _list ) { set.reduce(); } }
@@ -385,18 +385,18 @@ class ListSet<HybridEnclosure>
     ConstIterator begin() const { return _list.begin(); }
     ConstIterator end() const { return _list.end(); }
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-        for(Nat i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
+        for(SizeType i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
     friend ValidatedLowerKleenean inside(ListSet<HybridEnclosure> const& set, HybridExactBox const& bx) {
         ValidatedLowerKleenean result=true; for(auto iter=set.begin(); iter!=set.end(); ++iter) { result = result && inside(*iter,bx); } return result; }
     friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
         return os << hls._list; };
-    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
+    friend HybridGridTreePaving outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int dpth);
   private:
     List<HybridEnclosure> _list;
 };
 
-HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat d);
+HybridStorage outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Nat dpth);
 
 
 } // namespace Ariadne

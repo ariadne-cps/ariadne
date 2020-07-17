@@ -153,7 +153,7 @@ ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space)
     ARIADNE_ASSERT( subset(this->variables(), Set<RealVariable>(space.variables())) );
     const RealExpressionConstraintSet& set = *this;
     List<EffectiveConstraint> constraints;
-    for(Nat i=0; i!=set.constraints().size(); ++i) {
+    for(SizeType i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
         EffectiveScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
@@ -204,7 +204,7 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
     const RealExpressionBoundedConstraintSet& set = *this;
     RealBox domain=RealVariablesBox(set.bounds()).euclidean_set(space);
     List<EffectiveConstraint> constraints;
-    for(Nat i=0; i!=set.constraints().size(); ++i) {
+    for(SizeType i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
         EffectiveScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
@@ -233,7 +233,7 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
 
     ValidatedConstrainedImageSet result(domain,identity);
     //List<ValidatedConstraint> constraints;
-    for(Nat i=0; i!=set.constraints().size(); ++i) {
+    for(SizeType i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],Sign::NEGATIVE);
         ValidatedScalarMultivariateFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         result.new_parameter_constraint(constraint_function <= ValidatedNumber(0) );

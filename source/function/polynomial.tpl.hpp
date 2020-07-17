@@ -378,8 +378,8 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
                 MultiIndex::IndexType xak=xa[k];
                 if(xak==0) {
                     CoefficientConstReference xv=xiter->coefficient();
-                    for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                    for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
+                    for(SizeType i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                    for(SizeType i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
                     r.expansion().append(ra,xv);
                 }
             }
@@ -391,14 +391,14 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
                 IndexConstReference xa=xiter->index();
                 CoefficientConstReference xv=xiter->coefficient();
                 MultiIndex::IndexType xak=xa[k];
-                for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
+                for(SizeType i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(SizeType i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
                 assert(ra.degree()+xak==xa.degree());
                 p[xak].expansion().append(ra,xv);
             }
 
             r=p[0];
-            for(Nat i=1; i!=p.size(); ++i) {
+            for(SizeType i=1; i!=p.size(); ++i) {
                 r+=p[i];
             }
         } else {
@@ -408,25 +408,25 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
             Array<X> cpowers(x.degree()+1u,x.zero_coefficient());
             cpowers[0]=1; cpowers[1]=c;
             if(x.degree()>=2) { cpowers[2]=sqr(c); }
-            for(Nat j=3; j<=x.degree(); ++j) {
-                cpowers[j]=cpowers[j-2]*cpowers[2];
+            for(DegreeType j=3; j<=x.degree(); ++j) {
+                cpowers[j]=cpowers[j-2u]*cpowers[2];
             }
 
             for(typename Polynomial<I,X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
                 IndexConstReference xa=xiter->index();
                 CoefficientConstReference xv=xiter->coefficient();
                 MultiIndex::IndexType xak=xa[k];
-                for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
+                for(SizeType i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(SizeType i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1u]; }
                 assert(ra.degree()+xak==xa.degree());
                 p[xak].expansion().append(ra,xv);
             }
-            for(Nat i=1; i!=p.size(); ++i) {
+            for(SizeType i=1; i!=p.size(); ++i) {
                 p[i]*=cpowers[i];
             }
 
             r=p[0];
-            for(Nat i=1; i!=p.size(); ++i) {
+            for(SizeType i=1; i!=p.size(); ++i) {
                 r+=p[i];
             }
         }

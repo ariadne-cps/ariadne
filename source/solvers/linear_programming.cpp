@@ -64,7 +64,7 @@ template<class X, class XX> XX compute_mu(const Vector<X>& xl, const Vector<X>& 
 // Return r[i]=x[i]-c for i=1,...,n
 template<class X> Vector<X> esub(const Vector<X>& x, const X& c) {
     Vector<X> r(x.size(),x.zero_element());
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=x[i]-c;
     }
     return r;
@@ -73,7 +73,7 @@ template<class X> Vector<X> esub(const Vector<X>& x, const X& c) {
 // Return r[i]=x[i]*y[i] for i=1,...,n
 template<class X> Vector<X> emul(const Vector<X>& x, const Vector<X>& y) {
     Vector<X> r(x.size(),x.zero_element()*y.zero_element());
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i];
     }
     return r;
@@ -82,7 +82,7 @@ template<class X> Vector<X> emul(const Vector<X>& x, const Vector<X>& y) {
 // Return r[i]=x[i]*y[i] for i=1,...,n
 template<class X> Vector<X> ediv(const Vector<X>& x, const Vector<X>& z) {
     Vector<X> r(x.size(),x.zero_element());
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=x[i]/z[i];
     }
     return r;
@@ -91,7 +91,7 @@ template<class X> Vector<X> ediv(const Vector<X>& x, const Vector<X>& z) {
 // Return r[i]=x[i]*y[i]+z for i=1,...,n
 template<class X> Vector<X> efma(const Vector<X>& x, const Vector<X>& y, const X& z) {
     Vector<X> r(x.size(),nul(z));
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i]+z;
     }
     return r;
@@ -100,14 +100,14 @@ template<class X> Vector<X> efma(const Vector<X>& x, const Vector<X>& y, const X
 // Return r[i]=1/y[i] for i=1,...,n
 template<class X> Vector<X> erec(const Vector<X>& v) {
     Vector<X> r(v.size(),v.zero_element());
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=rec(v[i]);
     }
     return r;
 }
 
 template<class X> Bool is_nan(Vector<X> const& v) {
-    for(Nat i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         if(is_nan(v[i].raw())) { return true; }
     }
     return false;
@@ -115,7 +115,7 @@ template<class X> Bool is_nan(Vector<X> const& v) {
 
 // Return r[i]=x[i]*y[i] for i=1,...,n
 template<class X> Bool emul_gtr(const Vector<X>& x, const Vector<X>& z, X const& c) {
-    for(Nat i=0; i!=x.size(); ++i) {
+    for(SizeType i=0; i!=x.size(); ++i) {
         if (not (decide(x[i]*z[i]>c || x[i]==inf))) { return false; }
     }
     return true;
@@ -128,10 +128,10 @@ template<class XA, class XD> Matrix<ArithmeticType<XA,XD>> adat(const Matrix<XA>
     typedef ArithmeticType<XA,XD> XR;
     Matrix<XR> R(A.row_size(),A.row_size(),A.zero_element()*D.zero_element()*A.zero_element());
     ARIADNE_ASSERT(D.size()==A.column_size());
-    for(Nat i=0; i!=A.row_size(); ++i) {
-        for(Nat k=0; k!=A.column_size(); ++k) {
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType k=0; k!=A.column_size(); ++k) {
             XR ADik=A[i][k]*D[k];
-            for(Nat j=0; j!=A.row_size(); ++j) {
+            for(SizeType j=0; j!=A.row_size(); ++j) {
                 R[i][j]+=ADik*A[j][k];
             }
         }
@@ -142,9 +142,9 @@ template<class XA, class XD> Matrix<ArithmeticType<XA,XD>> adat(const Matrix<XA>
 template<class X, class XX> XX compute_mu(const Vector<X>& xl, const Vector<X>& xu,
                                           const Vector<XX>& x, const Vector<XX>& zl, const Vector<XX>& zu)
 {
-    const Nat n=x.size();
+    const SizeType n=x.size();
     XX mu=x.zero_element();
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { mu += ((x[i]-xl[i])*zl[i]); }
         if(xu[i]!=+inf) { mu += ((xu[i]-x[i])*zu[i]); }
     }
@@ -181,7 +181,7 @@ validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
 
     X zero=A.zero_element();
 
-    const Nat n=A.column_size();
+    const SizeType n=A.column_size();
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
@@ -194,7 +194,7 @@ validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
 
     ARIADNE_LOG_PRINTLN("[x] = "<<x);
     ValidatedKleenean result=true;
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         if(x[i].lower().raw()<=xl[i].raw() || x[i].upper().raw()>=xu[i].raw()) {
             result = indeterminate; break;
         }
@@ -206,10 +206,10 @@ validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
     Vector<VX> z=transpose(A) * y;
     VX mx = zero;
-    for(Nat i=0; i!=y.size(); ++i) {
+    for(SizeType i=0; i!=y.size(); ++i) {
         mx += (b[i]*y[i]);
     }
-    for(Nat i=0; i!=x.size(); ++i) {
+    for(SizeType i=0; i!=x.size(); ++i) {
         X zil=cast_exact(z[i].lower());
         X ziu=cast_exact(z[i].upper());
         if(ziu>0) { mx -= ziu * xu[i]; }
@@ -233,13 +233,13 @@ InteriorPointSolver::minimise(const Vector<X>& c,
 
     X zero=A.zero_element();
 
-    const Nat m = b.size();
-    const Nat n = c.size();
+    const SizeType m = b.size();
+    const SizeType n = c.size();
     Vector<AX> y(m,zero);
     Vector<AX> x(n,zero);
     Vector<AX> zl(n,zero);
     Vector<AX> zu(n,zero);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
         } else {
@@ -283,7 +283,7 @@ hotstarted_minimise(const Vector<X>& c,
     ARIADNE_ASSERT(A.column_size()==zu.size());
 
     const ExactDouble maxerror=1e-3_pr;
-    const Nat maxsteps=10;
+    const CounterType maxsteps=10;
 
     AX cx=dot(c,x);
     AX yb=dot(y,b);
@@ -292,7 +292,7 @@ hotstarted_minimise(const Vector<X>& c,
     ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c);
     ARIADNE_LOG_PRINTLN("x="<<x<<" y="<<y<<" z="<<zl<<" zu="<<zu);
 
-    Nat steps=0;
+    CounterType steps=0;
     while(steps<maxsteps && decide((cx-yb)>maxerror)) {
         this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
         ++steps;
@@ -314,14 +314,14 @@ feasible(const Vector<X>& xl, const Vector<X>& xu,
 
     X zero=A.zero_element();
 
-    const Nat m = A.row_size();
-    const Nat n = A.column_size();
+    const SizeType m = A.row_size();
+    const SizeType n = A.column_size();
     Vector<X> c(n,zero);
     Vector<AX> y(m,zero);
     Vector<AX> x(n,zero);
     Vector<AX> zl(n,zero);
     Vector<AX> zu(n,zero);
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
         } else {
@@ -336,7 +336,7 @@ feasible(const Vector<X>& xl, const Vector<X>& xu,
     }
 
     const ExactDouble THRESHOLD = 1e-8_pr;
-    Nat step=0;
+    CounterType step=0;
     while(step++<24) {
         LinearProgramStatus result=this->_feasibility_step(xl,xu,A,b, x,y,zl,zu);
 //        std::cerr<<step<<": result="<<result<<"\n";
@@ -380,8 +380,8 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
     static const ExactDouble scale=0.75_x;
 
 
-    const Nat m=A.row_size();
-    const Nat n=A.column_size();
+    const SizeType m=A.row_size();
+    const SizeType n=A.column_size();
 
     Vector<AX> dx(n,pr),dy(m,pr),dzl(n,pr),dzu(n,pr);
     Vector<AX> nx,ny,nzl,nzu;
@@ -396,7 +396,7 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
     // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
     rx=A*x-b;
     ry=transpose(A)*y+(zl-zu)-c;
-    for(Nat i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0_x; }
         if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0_x; }
     }

@@ -44,9 +44,9 @@
 
 namespace Ariadne {
 
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-inline Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const UpperBoxType& domain) {
+Pair<SizeType,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<SizeType,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+inline Pair<SizeType,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const UpperBoxType& domain) {
     return lipschitz_index_and_error(function,cast_exact_box(domain));
 }
 
@@ -54,14 +54,14 @@ namespace {
 
 UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector& z) {
     UpperIntervalType r=make_interval(mul(x[0],z[0]));
-    for(Nat i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
+    for(SizeType i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
     return r;
 }
 
 
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res(0u,double_precision);
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.size(); ++i) {
         if(definitely(bx[i].lower()>bx[i].upper())) { return cast_positive(-infty); }
         res+=bx[i].width();
     }
@@ -70,7 +70,7 @@ PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
 
 PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
     PositiveFloatDPUpperBound res(0u,double_precision);
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
     return res;
@@ -78,7 +78,7 @@ PositiveFloatDPUpperBound maximum_scaled_width(const UpperBoxType& bx, const Vec
 
 PositiveFloatDPUpperBound average_scaled_width(const UpperBoxType& bx, const Vector<PositiveFloatDPValue>& sf) {
     PositiveFloatDPUpperBound res(0u,double_precision);
-    for(Nat i=0; i!=bx.size(); ++i) {
+    for(SizeType i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
     return res/bx.size();
@@ -101,7 +101,7 @@ OutputStream& OptimalConstraintPaver::_write(OutputStream& os) const { return os
 Void SubdivisionPaver::adjoin_outer_approximation(PavingInterface& paving, const ValidatedConstrainedImageSet& set, Nat fineness) const
 {
     Vector<FloatDPValue> max_errors(paving.dimension(),dp);
-    for(Nat i=0; i!=max_errors.size(); ++i) {
+    for(SizeType i=0; i!=max_errors.size(); ++i) {
         max_errors[i]=shft(static_cast<FloatDPValue>(paving.grid().lengths()[i]),-static_cast<int>(fineness));
     }
 
@@ -126,7 +126,7 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
 
     UpperBoxType range=apply(function,subdomain);
     Bool small=true;
-    for(Nat i=0; i!=range.size(); ++i) {
+    for(SizeType i=0; i!=range.size(); ++i) {
         if(possibly(hlf(range[i].width())>max_errors[i]*RELATIVE_SMALLNESS)) {
             small=false;
             break;
@@ -171,8 +171,8 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     ExactBoxType splitdomain1,splitdomain2;
     for(Nat i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; FloatDP err(dp);
+        for(SizeType n=0; n!=unsplitdomains.size(); ++n) {
+            SizeType k; FloatDP err(dp);
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==subdomain.size() || err < max_error) {
@@ -192,7 +192,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
         ARIADNE_WARN("Cannot obtain desired accuracy in outer approximation without excessive splitting.");
     }
 
-    for(Nat n=0; n!=subdomains.size(); ++n) {
+    for(SizeType n=0; n!=subdomains.size(); ++n) {
         ValidatedConstrainedImageSet subset(subdomains[n],function,constraints);
         subset.affine_over_approximation().adjoin_outer_approximation_to(paving,fineness);
     }
@@ -215,13 +215,13 @@ inline Bool strictly_smaller(PositiveFloatDPUpperBound x1, PositiveFloatDPUpperB
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
 Void procedure_constraint_adjoin_outer_approximation_recursion(
         PavingInterface& paving, const ExactBoxType& domain, const ValidatedVectorMultivariateFunction& f,
-        const ValidatedVectorMultivariateFunction& g, const ExactBoxType& codomain, const GridCell& cell, Int max_dpth, Nat splt, const List<ValidatedProcedure>& procedures)
+        const ValidatedVectorMultivariateFunction& g, const ExactBoxType& codomain, const GridCell& cell, Int max_dpth, SizeType splt, const List<ValidatedProcedure>& procedures)
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    const Nat m=domain.size();
-    const Nat nf=f.result_size();
-    const Nat ng=g.result_size();
+    const SizeType m=domain.size();
+    const SizeType nf=f.result_size();
+    const SizeType ng=g.result_size();
 
     const ExactBoxType& cell_box=cell.box();
     const Vector<PositiveFloatDPValue> scalings=Vector<PositiveFloatDPValue>(paving.grid().lengths());
@@ -253,14 +253,14 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
 
 
     // ExactBoxType reduction steps
-    for(Nat i=0; i!=nf; ++i) {
-        for(Nat j=0; j!=m; ++j) {
+    for(SizeType i=0; i!=nf; ++i) {
+        for(SizeType j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
     }
-    for(Nat i=0; i!=ng; ++i) {
-        for(Nat j=0; j!=m; ++j) {
+    for(SizeType i=0; i!=ng; ++i) {
+        for(SizeType j=0; j!=m; ++j) {
             constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
         }
@@ -271,12 +271,12 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     // Hull reduction steps
     do {
         olddomwdth=newdomwdth;
-        for(Nat i=0; i!=nf; ++i) {
+        for(SizeType i=0; i!=nf; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce"); return; }
             //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
         }
-        for(Nat i=0; i!=ng; ++i) {
+        for(SizeType i=0; i!=ng; ++i) {
             constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
             if(definitely(new_domain.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using hull reduce"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
@@ -308,7 +308,7 @@ Void procedure_constraint_adjoin_outer_approximation_recursion(
     ExactDouble RELATIVE_SPLITTING_SIZE = 4.0_x;
 
     if( !strictly_smaller_by_factor(bbxmaxwdth, clmaxwdth, RELATIVE_SPLITTING_SIZE) || (cell.depth()>=max_dpth && strictly_smaller(clmaxwdth, bbxmaxwdth)) ) {
-        Pair<Nat,FloatDP> lipsch = lipschitz_index_and_error(f,new_domain);
+        Pair<SizeType,FloatDP> lipsch = lipschitz_index_and_error(f,new_domain);
         ARIADNE_LOG_PRINTLN("Splitting domain on coordinate "<<lipsch.first);
         Pair<ExactBoxType,ExactBoxType> sd=exact_new_domain.split(lipsch.first);
         procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
@@ -348,8 +348,8 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     NonlinearInteriorPointOptimiser optimiser;
     ValidatedVectorMultivariateFunction fg=join(f,g);
 
-    const Nat m=fg.argument_size();
-    const Nat n=fg.result_size();
+    const SizeType m=fg.argument_size();
+    const SizeType n=fg.result_size();
     ARIADNE_LOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
     ARIADNE_LOG_PRINTLN_AT(1,"x0="<<x<<", y0="<<y);
 
@@ -379,7 +379,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     // Relax x away from boundary
     optimiser.compute_tz(d,fg,bx,ay,at,az);
     ARIADNE_LOG_PRINTLN_AT(1,"z0="<<az<<", t0="<<at);
-    for(Nat i=0; i!=12; ++i) {
+    for(SizeType i=0; i!=12; ++i) {
         ARIADNE_LOG_PRINTLN_AT(2,"t="<<at);
         //optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
         try {
@@ -423,11 +423,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveVectorMultivariateFunction identity_function=EffectiveVectorMultivariateFunction::identity(m);
         ValidatedScalarMultivariateTaylorFunctionModelDP txg(domain,zero_function,sweeper);
         FloatDPBounds cnst = {0,pr};
-        for(Nat j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             txg = txg - (FloatDPBounds(x[j])-FloatDPBounds(x[n+j]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             txg = txg - (FloatDPBounds(x[2*n+i])-FloatDPBounds(x[2*n+m+i]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
@@ -445,7 +445,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
             return;
         }
 
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             solver.box_reduce(nd,txg,ExactIntervalType(0,inf),i);
             ARIADNE_LOG_PRINTLN_AT(2,"dom="<<nd);
             if(definitely(nd.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
@@ -499,8 +499,8 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     static const FloatDPValue  TERR = {TwoExp(-10),pr};
     static const ExactDouble inf(Ariadne::inf.get_d());
 
-    const Nat m=fg.argument_size();
-    const Nat n=fg.result_size();
+    const SizeType m=fg.argument_size();
+    const SizeType n=fg.result_size();
     ARIADNE_LOG_PRINTLN_AT(1,"dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.depth()<<" e="<<e);
 
     ConstraintSolver solver;
@@ -521,7 +521,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ExactBoxType bx=product(static_cast<const ExactBoxType&>(b.box()),static_cast<const ExactBoxType&>(c));
 
     optimiser.compute_tz(d,fg,bx,ay,at,az);
-    for(Nat i=0; i!=12; ++i) {
+    for(SizeType i=0; i!=12; ++i) {
         ARIADNE_LOG_PRINTLN_AT(2,"t="<<t);
         optimiser.linearised_feasibility_step(d,fg,bx,ax,ay,az,at);
         if(t>0) { break; }
@@ -536,11 +536,11 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         // This should be easier than using all constraints separately
         ValidatedScalarMultivariateTaylorFunctionModelDP xg=ValidatedScalarMultivariateTaylorFunctionModelDP::zero(d,properties);
         FloatDPBounds cnst = {0,pr};
-        for(Nat j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ValidatedScalarMultivariateTaylorFunctionModelDP(d,fg[j],properties);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,properties);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
@@ -557,7 +557,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
             return;
         }
 
-        for(Nat i=0; i!=m; ++i) {
+        for(SizeType i=0; i!=m; ++i) {
             solver.box_reduce(nd,xg,ExactIntervalType(0,inf),i);
             ARIADNE_LOG_PRINTLN_AT(2,"dom="<<nd);
             if(definitely(nd.is_empty())) { ARIADNE_LOG_PRINTLN("Proved disjointness using box reduce"); return; }
@@ -607,8 +607,8 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
     ExactBoxType rc=intersection(r,c);
 
     Point<FloatDPValue> y=midpoint(d);
-    const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    Point<FloatDPValue> x(l,FloatDPValue(dp)); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(ExactDouble(1.0/l),dp); }
+    const SizeType l=(d.size()+f.result_size()+g.result_size())*2;
+    Point<FloatDPValue> x(l,FloatDPValue(dp)); for(SizeType k=0; k!=l; ++k) { x[k]=FloatDPValue(ExactDouble(1.0/l),dp); }
 
     Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -621,8 +621,8 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const ExactB
 
     List<ValidatedProcedure> procedures;
     procedures.reserve(f.result_size()+g.result_size());
-    for(Nat i=0; i!=f.result_size(); ++i) { procedures.append(make_procedure(f[i])); }
-    for(Nat i=0; i!=g.result_size(); ++i) { procedures.append(make_procedure(g[i])); }
+    for(SizeType i=0; i!=f.result_size(); ++i) { procedures.append(make_procedure(f[i])); }
+    for(SizeType i=0; i!=g.result_size(); ++i) { procedures.append(make_procedure(g[i])); }
 
     Ariadne::procedure_constraint_adjoin_outer_approximation_recursion(p,d,f,g,c,b,e*p.dimension(),0, procedures);
     //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
@@ -638,8 +638,8 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
     ExactBoxType rc=intersection(cast_exact_box(widen(apply(g,d),1)),c);
 
     ExactPointType y=midpoint(d);
-    const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPointType x(l,dp); for(Nat k=0; k!=l; ++k) { x[k]=cast_exact(FloatDPApproximation(1.0/l,dp)); }
+    const SizeType l=(d.size()+f.result_size()+g.result_size())*2;
+    ExactPointType x(l,dp); for(SizeType k=0; k!=l; ++k) { x[k]=cast_exact(FloatDPApproximation(1.0/l,dp)); }
 
     ValidatedVectorMultivariateTaylorFunctionModelDP fg;
     const ValidatedVectorMultivariateTaylorFunctionModelDP* tfptr;

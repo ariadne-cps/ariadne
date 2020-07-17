@@ -467,10 +467,10 @@ struct ExpressionPtrComparator {
 
 
 template<class T, class CMP, Bool distinct> class NodeCounter {
-    ExpressionSet<T,CMP> cache; Nat count;
+    ExpressionSet<T,CMP> cache; SizeType count;
   public:
     NodeCounter() : cache(), count(0u) { }
-    Nat count_nodes (Expression<T> const& e);
+    SizeType count_nodes (Expression<T> const& e);
   private: public:
     Void operator() (ConstantExpressionNode<T> const& e) { }
     Void operator() (VariableExpressionNode<T> const& e) { }
@@ -479,7 +479,7 @@ template<class T, class CMP, Bool distinct> class NodeCounter {
     Void operator() (GradedExpressionNode<T> const& e) { this->count_nodes(e.arg()); }
 };
 
-template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::count_nodes(Expression<T> const& e) -> Nat {
+template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::count_nodes(Expression<T> const& e) -> SizeType {
     auto iter=cache.find(e);
     if (!distinct || iter==cache.end()) {
         cache.insert(e);
@@ -490,15 +490,15 @@ template<class T, class CMP, Bool distinct> auto NodeCounter<T,CMP,distinct>::co
 }
 
 
-template<class T> Nat count_nodes(Expression<T> const& e) {
+template<class T> SizeType count_nodes(Expression<T> const& e) {
     return NodeCounter<T,ExpressionComparator,false>().count_nodes(e);
 }
 
-template<class T> Nat count_distinct_nodes(Expression<T> const& e) {
+template<class T> SizeType count_distinct_nodes(Expression<T> const& e) {
     return NodeCounter<T,ExpressionComparator,true>().count_nodes(e);
 }
 
-template<class T> Nat count_distinct_node_pointers(Expression<T> const& e) {
+template<class T> SizeType count_distinct_node_pointers(Expression<T> const& e) {
     return NodeCounter<T,ExpressionPtrComparator,true>().count_nodes(e);
 }
 

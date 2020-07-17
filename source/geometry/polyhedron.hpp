@@ -65,12 +65,12 @@ class Polyhedron
     explicit Polyhedron();
 
     //! \brief Construct full Euclidean space of dimension \a n.
-    explicit Polyhedron(Nat n=0u);
+    explicit Polyhedron(DimensionType n=0u);
 
     //! \brief Construct a polyhedron of dimension \a d with \a nc constraints from the data in the
     //! Array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j,
     //! and the ith inhomogeneous term is stored in position i*(d+1)+d.
-    template<class XX> Polyhedron(Nat d, Nat nc, const XX* data);
+    template<class XX> Polyhedron(DimensionType d, SizeType nc, const XX* data);
 
     //! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
     explicit Polyhedron(const Matrix<FloatDP>& A, const Vector<FloatDP>& b);

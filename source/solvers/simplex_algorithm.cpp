@@ -319,7 +319,7 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
         for(col=k; col!=n; ++col) {
             if(decide(U[k][col]==+1)) {
                 found_unit=true;
-                for(Nat i=k+1; i!=m; ++i) {
+                for(SizeType i=k+1; i!=m; ++i) {
                     if(decide(U[i][col]!=0)) { found_unit=false; break; }
                 }
             }
@@ -796,9 +796,9 @@ update_B(Matrix<X>& B, const Vector<X>& d, const SizeType r)
     X dr=d[r];
     X drr=1/dr;
     Vector<X> e(m,B.zero_element()); e[r]=1;
-    Vector<X> Br(m,B.zero_element()); for(Nat j=0; j!=m; ++j) { Br[j]=B[r][j]; }
-    for(Nat i=0; i!=m; ++i) {
-        for(Nat j=0; j!=m; ++j) {
+    Vector<X> Br(m,B.zero_element()); for(SizeType j=0; j!=m; ++j) { Br[j]=B[r][j]; }
+    for(SizeType i=0; i!=m; ++i) {
+        for(SizeType j=0; j!=m; ++j) {
             B[i][j]-=(d[i]+e[i])*Br[j]*drr;
         }
     }
@@ -925,7 +925,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     Vector<X> c(n,b.zero_element());
     Vector<X> relaxed_xl(xl);
     Vector<X> relaxed_xu(xu);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         SizeType j=p[i];
         if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-inf; feasible=indeterminate; }
         if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+inf; feasible=indeterminate; }
@@ -1066,7 +1066,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
 
     // Recompute B and x if it appears that there are problems with numerical degeneracy
     /*Bool possible_degeneracy=false;
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         if(decide(xl[p[i]]>x[p[i]] || x[p[i]]>xu[p[i]])) {
             possible_degeneracy=true;
             break;
@@ -1074,7 +1074,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     }*/
     B=compute_B<X>(A,p);
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
-    for(Nat i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         if(decide(x[p[i]]<xl[p[i]])) {
             ARIADNE_ASSERT(decide(x[p[i]]>xl[p[i]]-BOUNDS_TOLERANCE));
             x[p[i]]=xl[p[i]];
@@ -1124,7 +1124,7 @@ Vector<RigorousNumericType<X>>
 SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                             const Array<Slackness>& vt) const
 {
-    Array<Nat> p=compute_p(vt);
+    Array<SizeType> p=compute_p(vt);
     Matrix<XX> B = Ariadne::compute_B<X>(A,p);
     Vector<RigorousNumericType<X>> x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
     ARIADNE_ASSERT_MSG(not is_nan(x), "x="<<x);

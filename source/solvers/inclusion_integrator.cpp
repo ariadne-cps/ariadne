@@ -242,7 +242,7 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
                                              Ariadne::input_derivatives(_f, _inputs.size()), _inputs, h, B);
     ARIADNE_LOG_PRINTLN("norms: " << norms);
     Set<Nat> input_idx;
-    for (Nat i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }
+    for (SizeType i : range(_f.result_size(),_f.result_size()+_inputs.size())) { input_idx.insert(i); }
     if (is_additive_in(_f,input_idx))
         norms.pK=mag(norm(_inputs));
     return process(norms,h);
@@ -405,7 +405,7 @@ template<class A> Pair<StepSizeType,UpperBoxType> InclusionIntegrator<A>::flow_b
 
 template<class A> BoxDomainType InclusionIntegrator<A>::build_parameter_domain(BoxDomainType const& V) const {
     BoxDomainType result(0u);
-    for (Nat i=0; i<this->_num_params_per_input; ++i)
+    for (SizeType i=0; i<this->_num_params_per_input; ++i)
         result = product(result,V);
     return result;
 }

@@ -228,11 +228,11 @@ template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
 //! \related Expression
 
 //! \brief Count the number of nodes in the expression \a e.
-template<class T> Nat count_nodes(const Expression<T>& e);
+template<class T> SizeType count_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct (i.e., having identical representation) nodes in the expression \a e.
-template<class T> Nat count_distinct_nodes(const Expression<T>& e);
+template<class T> SizeType count_distinct_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct node pointers in the expression \a e.
-template<class T> Nat count_distinct_node_pointers(const Expression<T>& e);
+template<class T> SizeType count_distinct_node_pointers(const Expression<T>& e);
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);

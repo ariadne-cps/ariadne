@@ -476,7 +476,7 @@ triangular_factor(const Matrix<X>& A)
     const SizeType n=A.column_size();
 
     Matrix<X> R=A;
-    PivotMatrix P(n); for(Nat i=0; i!=n; ++i) { P[i]=i; }
+    PivotMatrix P(n); for(SizeType i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
     Array<X> cns(n);
@@ -608,7 +608,7 @@ triangular_multiplier(const Matrix<X>& A)
 template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
 {
     const SizeType n=pv.size();
-    Array<SizeType> perm(n); for(Nat i=0; i!=n; ++i) { perm[i]=i; }
+    Array<SizeType> perm(n); for(SizeType i=0; i!=n; ++i) { perm[i]=i; }
     for(SizeType i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }

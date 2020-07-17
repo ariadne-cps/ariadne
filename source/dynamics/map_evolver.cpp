@@ -193,7 +193,7 @@ _evolution(EnclosureListType& final_sets,
                   && decide(initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
-            for(Nat i=0; i!=subdivisions.size(); ++i) {
+            for(SizeType i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
@@ -239,8 +239,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG_PRINTLN_AT(1,"box = "<<initial_enclosure.bounding_box()<<" ");
     ARIADNE_LOG_PRINTLN_AT(1,"radius = "<<initial_enclosure.euclidean_set().bounding_box().radius()<<"\n");
-    //const Nat nd=initial_enclosure.result_size();
-    //const Nat ng=initial_enclosure.argument_size();
+    //const SizeType nd=initial_enclosure.result_size();
+    //const SizeType ng=initial_enclosure.argument_size();
 
 
     /////////////// Main Evolution ////////////////////////////////

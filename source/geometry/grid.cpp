@@ -71,7 +71,7 @@ Grid& Grid::operator=(const Grid& gr)
     this->_data=gr._data; return *this;
 }
 
-Grid::Grid(Nat d)
+Grid::Grid(DimensionType d)
     : _data(new Data())
 {
     Vector<FloatDP> origin(d,FloatDP(0,dp));
@@ -79,7 +79,7 @@ Grid::Grid(Nat d)
     this->_create(origin,lengths);
 }
 
-Grid::Grid(Nat d, FloatDP l)
+Grid::Grid(DimensionType d, FloatDP l)
     : _data(new Data())
 {
     Vector<FloatDP> origin(d,FloatDP(0,dp));
@@ -87,7 +87,7 @@ Grid::Grid(Nat d, FloatDP l)
     this->_create(origin,lengths);
 }
 
-Grid::Grid(Nat d, ApproximateDouble l)
+Grid::Grid(DimensionType d, ApproximateDouble l)
     : Grid(d,FloatDP(cast_exact(l),dp))
 {
 }
@@ -143,22 +143,22 @@ const Vector<FloatDP>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-ExactNumericType Grid::coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::coordinate(DimensionType d, DyadicType x) const
 {
     return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],x)));
 }
 
-ExactNumericType Grid::subdivision_coordinate(Nat d, DyadicType x) const
+ExactNumericType Grid::subdivision_coordinate(DimensionType d, DyadicType x) const
 {
     return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],x)));
 }
 
-ExactNumericType Grid::subdivision_coordinate(Nat d, IntegerType n) const
+ExactNumericType Grid::subdivision_coordinate(DimensionType d, IntegerType n) const
 {
     return ExactNumericType(add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],n)));
 }
 
-Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
+Int Grid::subdivision_index(DimensionType d, const ExactNumericType& x) const
 {
     FloatDP half(0.5_x,dp);
     Int n=integer_cast<Int>(floor(add(near,div(near,sub(near,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
@@ -166,11 +166,11 @@ Int Grid::subdivision_index(Nat d, const ExactNumericType& x) const
     if(sc == x.raw()) {
         return n;
     } else {
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(Nat d,ExactNumericType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(DimensionType d,ExactNumericType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
-Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
+Int Grid::subdivision_lower_index(DimensionType d, const LowerNumericType& x) const
 {
     Int n=integer_cast<Int>(floor(div(down,sub(down,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()>=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],(n+1)))) {
@@ -180,7 +180,7 @@ Int Grid::subdivision_lower_index(Nat d, const LowerNumericType& x) const
     }
 }
 
-Int Grid::subdivision_upper_index(Nat d, const UpperNumericType& x) const
+Int Grid::subdivision_upper_index(DimensionType d, const UpperNumericType& x) const
 {
     Int n=integer_cast<Int>(ceil(div(up,sub(up,x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()<=add(near,this->_data->_origin[d],mul(near,this->_data->_lengths[d],(n-1)))) {

@@ -344,7 +344,7 @@ class Enclosure
     List<Enclosure> split(const List<ExactBoxType>& subdomains);
 
     //! \brief The direction along which the set should be split to reduce the bounding box.
-    Nat splitting_index_zeroth_order() const;
+    SizeType splitting_index_zeroth_order() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the direction which reduces the size of the bounding box.
     Pair<Enclosure,Enclosure> split_zeroth_order() const;
@@ -356,7 +356,7 @@ class Enclosure
     Pair<Enclosure,Enclosure> split() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the \a k<sup>th</sup> direction.
-    Pair<Enclosure,Enclosure> split(Nat k) const;
+    Pair<Enclosure,Enclosure> split(SizeType k) const;
 
 
     ValidatedConstrainedImageSet state_set() const;

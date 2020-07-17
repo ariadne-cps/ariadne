@@ -79,6 +79,9 @@ using SizeType = std::size_t;
 //! Internal name for standard difference type of container indices and pointers.
 using PointerDifferenceType = std::ptrdiff_t;
 
+//! Internal name for unsigned integer used as a step counter
+using CounterType = std::uint32_t;
+
 class Nat32;
 class Int32;
 class Nat64;

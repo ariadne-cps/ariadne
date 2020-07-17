@@ -58,7 +58,7 @@ Polytope::bounding_box() const
 {
     const Polytope& p=*this;
     ExactBoxType res(p._vertices[0]);
-    for(Nat i=1; i!=p._vertices.size(); ++i) {
+    for(SizeType i=1; i!=p._vertices.size(); ++i) {
         res=hull(res,p._vertices[i]);
     }
     return res;
@@ -215,14 +215,14 @@ baricentre(const Polytope& p)
 
 
 Void Polytope::draw(CanvasInterface& c, const Projection2d& p) const {
-    Nat xi=p.x_coordinate(); Nat yi=p.y_coordinate();
+    SizeType xi=p.x_coordinate(); SizeType yi=p.y_coordinate();
     ARIADNE_ASSERT(max(xi,yi)<this->dimension());
 
     Polytope pr(2);
     ExactPoint prv(2);
 
     // Project polytope onto canvas coordinates
-    for(Nat i=0; i!=this->number_of_vertices(); ++i) {
+    for(SizeType i=0; i!=this->number_of_vertices(); ++i) {
         const ExactPoint& v=this->vertex(i);
         prv[0]=v[xi]; prv[1]=v[yi];
         pr.new_vertex(prv);
@@ -234,7 +234,7 @@ Void Polytope::draw(CanvasInterface& c, const Projection2d& p) const {
     // Trace boundary
     prv=pr.vertex(pr.number_of_vertices()-1);
     c.move_to(prv[0],prv[1]);
-    for(Nat i=0; i!=pr.number_of_vertices(); ++i) {
+    for(SizeType i=0; i!=pr.number_of_vertices(); ++i) {
         prv=pr.vertex(i);
         c.line_to(prv[0],prv[1]);
     }

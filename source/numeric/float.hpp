@@ -34,6 +34,8 @@
 #include "floatdp.hpp"
 #include "floatmp.hpp"
 
+#include "rounded_float.hpp"
+
 #include "float_approximation.hpp"
 #include "float_lower_bound.hpp"
 #include "float_upper_bound.hpp"

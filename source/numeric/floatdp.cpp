@@ -867,6 +867,7 @@ Float32::operator FloatDP() const { return FloatDP(cast_exact((double)this->flt)
 
 template<> String class_name<double>() { return "double"; }
 
+template<> String class_name<ApproximateDouble>() { return "ApproximateDouble"; }
 template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 
 template<> String class_name<FloatDP>() { return "FloatDP"; }

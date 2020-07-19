@@ -63,6 +63,7 @@ template<class F> class Approximation
     explicit Approximation<F>(RawType const& a) : _a(a) { }
 
         Approximation<F>(double d, PR pr) : _a(cast_exact(d),near,pr) { }
+        Approximation<F>(ApproximateDouble d, PR pr) : _a(cast_exact(d),near,pr) { }
         Approximation<F>(ExactDouble const& d, PR pr) : _a(d,pr) { }
         Approximation<F>(TwoExp const& t, PR pr) :_a(t,pr) { }
         Approximation<F>(const Integer& z, PR pr) : _a(z,near,pr) { }

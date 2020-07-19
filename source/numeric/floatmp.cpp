@@ -838,3 +838,15 @@ template<class PR> PR make_default_precision();
 template<> MP make_default_precision<MP>() { return FloatMP::get_default_precision(); }
 
 } // namespace Ariadne
+
+
+
+#include "rounded_float.hpp"
+
+namespace Ariadne {
+
+template class Rounded<FloatMP>;
+template<> String class_name<Rounded<FloatMP>>() { return "Rounded<FloatMP>"; }
+
+
+} // namespace Ariadne

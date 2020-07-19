@@ -872,3 +872,18 @@ template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 template<> String class_name<FloatDP>() { return "FloatDP"; }
 
 } // namespace Ariadne
+
+
+#include "rounded_float.hpp"
+
+namespace Ariadne {
+
+template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
+
+template<class X> class Value { X _v; public: X const& raw() const { return this->_v; } };
+template<class X> class Approximation { X _a; public: X const& raw() const { return this->_a; } };
+
+Rounded<FloatDP>::Rounded(Value<FloatDP> const& x) : Rounded(x.raw()) { }
+Rounded<FloatDP>::Rounded(Approximation<FloatDP> const& x) : Rounded(x.raw()) { }
+
+} // namespace Ariadne

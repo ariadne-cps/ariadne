@@ -7,6 +7,7 @@ set(UNIT_TESTS
     test_number
     test_rounding
     test_float
+    test_rounded_float
     test_float_approximation
     test_float_lower_upper_bound
     test_float_bounds

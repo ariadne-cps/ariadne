@@ -463,6 +463,8 @@ class FloatDP {
     friend FloatDP mul_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t*y.dbl; return FloatDP(-t); }
     friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return FloatDP(-t); }
     friend FloatDP pow_opp(FloatDP x, int n);
+  private:
+    friend class Rounded<FloatDP>;
 };
 
 

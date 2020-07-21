@@ -213,7 +213,7 @@ template<class F> Void TestTaylorModel<F>::test_concept()
 
 template<class F> Void TestTaylorModel<F>::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(ExpansionType,raw_expansion,({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} },pr));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,raw_expansion,({ {{0,0},1.0_x}, {{1,0},2.0_x}, {{0,1},3.0_x}, {{2,0},4.0_x}, {{1,1},5.0_x}, {{0,2},6.0_x}, {{3,0},7.0_x}, {{2,1},8.0_x}, {{1,2},9.0_x}, {{0,3},10.0_x} },pr));
     ARIADNE_TEST_CONSTRUCT(F,raw_error,(0.25,pr));
     ARIADNE_TEST_CONSTRUCT(ExpansionType,expansion,(raw_expansion));
     ARIADNE_TEST_CONSTRUCT(FloatError<PR>,error,(raw_error));
@@ -227,10 +227,10 @@ template<class F> Void TestTaylorModel<F>::test_constructors()
     ARIADNE_TEST_EQUALS(tv.error(),0.25);
     ARIADNE_TEST_EQUALS(tv.norm(),55.25);
 
-    ARIADNE_TEST_EQUALS((tv[{0,0}]),1.0);
-    ARIADNE_TEST_EQUALS((tv[{1,0}]),2.0);
-    ARIADNE_TEST_EQUALS((tv[{0,1}]),3.0);
-    ARIADNE_TEST_EQUALS((tv[{2,1}]),8.0);
+    ARIADNE_TEST_EQUALS((tv[{0,0}]),1.0_x);
+    ARIADNE_TEST_EQUALS((tv[{1,0}]),2.0_x);
+    ARIADNE_TEST_EQUALS((tv[{0,1}]),3.0_x);
+    ARIADNE_TEST_EQUALS((tv[{2,1}]),8.0_x);
 
 }
 

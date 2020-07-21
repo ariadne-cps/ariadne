@@ -60,8 +60,8 @@ template<class X> class UnivariateDifferential
     explicit UnivariateDifferential(DegreeType d);
     explicit UnivariateDifferential(DegreeType d, const NumericType& c);
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
-    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
-        explicit UnivariateDifferential(DegreeType deg, InitializerList<Dbl> lst, PR pr);
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy>
+        explicit UnivariateDifferential(DegreeType deg, InitializerList<ExactDouble> lst, PR pr);
     UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
 
     template<class OP> UnivariateDifferential(OP op, DegreeType d, X const& c);
@@ -132,8 +132,8 @@ template<class X> inline const X& UnivariateDifferential<X>::gradient() const { 
 template<class X> inline const X& UnivariateDifferential<X>::half_hessian() const { assert(this->degree()>=2); return _ary[2]; }
 template<class X> inline const X UnivariateDifferential<X>::hessian() const { assert(this->degree()>=2); return _ary[2]*2; }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<Dbl> lst, PR pr)
+template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>>>
+UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<ExactDouble> lst, PR pr)
     : _ary(d+1u,X(0,pr))
 {
     auto iter=lst.begin();

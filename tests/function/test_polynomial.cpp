@@ -79,7 +79,7 @@ Void TestPolynomial::test_concept()
     p=MultivariatePolynomial<FloatDP>(3);
     p=MultivariatePolynomial<FloatDP>(cp);
 
-    p=MultivariatePolynomial<FloatDP>({ {{0,0,0},1}, {{1,0,0},2}, {{0,0,0},3}, {{0,0,1},5.0} });
+    p=MultivariatePolynomial<FloatDP>({ {{0,0,0},1.0_x}, {{1,0,0},2.0_x}, {{0,0,0},3.0_x}, {{0,0,1},5.0_x} },dp);
 
     //p=MultivariatePolynomial<FloatDP>::variable(3u,0u);
     //p=MultivariatePolynomial<FloatDP>::variables(3u)[0u];

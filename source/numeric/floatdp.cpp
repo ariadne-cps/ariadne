@@ -629,6 +629,11 @@ double atan_rnd(double x) {
 
 
 
+FloatDP::FloatDP(ExactDouble const& d)
+    : FloatDP(d.get_d())
+{
+}
+
 FloatDP::FloatDP(ExactDouble const& d, PrecisionType)
     : FloatDP(d.get_d())
 {
@@ -700,6 +705,11 @@ FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
 FloatDP::FloatDP(FloatDP const& x, RoundingModeType rnd, PrecisionType)
     : FloatDP(x)
 {
+}
+
+FloatDP& FloatDP::operator=(ExactDouble const& x) {
+    this->dbl=x.get_d();
+    return *this;
 }
 
 FloatDP::operator Dyadic () const {

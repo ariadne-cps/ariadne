@@ -158,17 +158,17 @@ TestMatrix::test_misc()
     A1=Matrix<FloatDPApproximation>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
-    ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr));
-    ARIADNE_TEST_EQUALS(-FloatApproximationMatrix({{1.,2.},{3.,4.}},pr),FloatApproximationMatrix({{-1.,-2.},{-3.,-4.}},pr));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)+FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{6.,9.},{11.,10.}},pr));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)-FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{-4.,-5.},{-5.,-2.}},pr));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{21.,19.},{47.,45.}},pr));
+    ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr),FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr));
+    ARIADNE_TEST_EQUALS(-FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr),FloatApproximationMatrix({{-1.0_x,-2.0_x},{-3.0_x,-4.0_x}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)+FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr),FloatApproximationMatrix({{6.0_x,9.0_x},{11.0_x,10.0_x}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)-FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr),FloatApproximationMatrix({{-4.0_x,-5.0_x},{-5.0_x,-2.0_x}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)*FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr),FloatApproximationMatrix({{21.0_x,19.0_x},{47.0_x,45.0_x}},pr));
 
     // Transpose operations
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr));
-    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr))*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr),FloatApproximationMatrix({{1.,3.},{2.,4.}},pr)*FloatApproximationMatrix({{5.,7.},{8.,6.}},pr));
-    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*transpose(FloatApproximationMatrix({{5.,7.},{8.,6.}},pr)),FloatApproximationMatrix({{1.,2.},{3.,4.}},pr)*FloatApproximationMatrix({{5.,8.},{7.,6.}},pr));
-    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.,2.,3.},{4.,5.,6.}},pr))*FloatDPApproximationVector({5.,7.},pr),FloatApproximationMatrix({{1.,4.},{2.,5.},{3.,6.}},pr)*FloatDPApproximationVector({5.,7.},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix(transpose(FloatApproximationMatrix({{1.0_x,2.0_x,3.0_x},{4.0_x,5.0_x,6.0_x}},pr))),FloatApproximationMatrix({{1.0_x,4.0_x},{2.0_x,5.0_x},{3.0_x,6.0_x}},pr));
+    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr))*FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr),FloatApproximationMatrix({{1.0_x,3.0_x},{2.0_x,4.0_x}},pr)*FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr));
+    ARIADNE_TEST_EQUALS(FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)*transpose(FloatApproximationMatrix({{5.0_x,7.0_x},{8.0_x,6.0_x}},pr)),FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr)*FloatApproximationMatrix({{5.0_x,8.0_x},{7.0_x,6.0_x}},pr));
+    ARIADNE_TEST_EQUALS(transpose(FloatApproximationMatrix({{1.0_x,2.0_x,3.0_x},{4.0_x,5.0_x,6.0_x}},pr))*FloatDPApproximationVector({5.0_x,7.0_x},pr),FloatApproximationMatrix({{1.0_x,4.0_x},{2.0_x,5.0_x},{3.0_x,6.0_x}},pr)*FloatDPApproximationVector({5.0_x,7.0_x},pr));
 }
 
 Int main() {

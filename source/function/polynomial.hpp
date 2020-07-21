@@ -144,6 +144,9 @@ class Polynomial
     template<class XX> explicit Polynomial(const Expansion<I,XX>& e);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
     Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst);
+    //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        explicit Polynomial(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... pr);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.
@@ -311,6 +314,10 @@ template<class I, class X> template<class XX, EnableIf<IsConvertible<XX,X>>> Pol
 
 template<class I, class X> template<class XX> Polynomial<I,X>::Polynomial(const Expansion<I,XX>& e)
     : _expansion(e) { this->cleanup(); }
+
+template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs)
+    : _expansion(lst,prs...) { this->cleanup(); }
 
 template<class I, class X> template<class XX> EqualityType<X,XX> Polynomial<I,X>::operator==(const Polynomial<I,XX>& p) const {
     const_cast<Polynomial<I,X>*>(this)->cleanup();

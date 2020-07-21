@@ -135,8 +135,8 @@ template<class I, class X> class Expansion {
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
     template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
         explicit Expansion(ArgumentSizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
-    template<class PR, EnableIf<IsConstructible<X,Dbl,PR>> =dummy>
-        Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
         explicit Expansion(Expansion<I,Y> const&, PRS... prs);
     Expansion(const Expansion<I,X>&);
@@ -178,6 +178,9 @@ template<class I, class X> class Expansion {
     Void prepend(const IndexType& a, const CoefficientType& x);
     Void append(const IndexType& a, const CoefficientType& x);
     Void append_sum(const IndexType& a1, const IndexType& a2, const CoefficientType& x);
+
+    template<class Y, EnableIf<IsAssignable<X,Y>> =dummy> Void append(const IndexType& a, const Y& y) {
+        X x=this->_zero_coefficient; x=y; this->append(a,x); }
 
     Iterator find(const IndexType& a);
     ConstIterator find(const IndexType& a) const;
@@ -242,15 +245,14 @@ Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
 {
 }
 
-
-template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Dbl,PR>>>
-Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, PR pr) : Expansion(0)
+template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs) : Expansion(0)
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
     _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
-    _coefficients = UniformList<X>(0,X(pr));
-    _zero_coefficient = X(0,pr);
+    _coefficients = UniformList<X>(0,X(prs...));
+    _zero_coefficient = X(0,prs...);
 
     SizeType cap = std::max(DEFAULT_CAPACITY,lst.size());
     _indices.reserve(cap);
@@ -260,7 +262,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,Dbl>> lst, P
         iter!=lst.end(); ++iter)
     {
         MultiIndex a=iter->first;
-        X x(iter->second,pr);
+        X x(iter->second,prs...);
         if(decide(x!=0)) { this->append(a,x); }
     }
 }

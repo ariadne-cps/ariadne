@@ -46,7 +46,10 @@ class TestConstrainedImageSet
     Figure figure;
   public:
     Void test() {
-        figure.set_bounding_box(ExactBoxType{{-4.0,+4.0},{-4.0,+4.0}});
+        ExactIntervalType ivl(-4.0_x,4.0_x);
+        ivl=ExactIntervalType{-4.0_x,4.0_x};
+
+        figure.set_bounding_box(ExactBoxType({{-4.0_x,+4.0_x},{-4.0_x,+4.0_x}}));
         ARIADNE_TEST_CALL(test_separated()); return;
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_domain());
@@ -136,19 +139,18 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
         ARIADNE_TEST_PRINT(set);
-        ARIADNE_TEST_ASSERT(set.separated(ExactBoxType{{1.0,1.25},{1.0,1.25}}));
+        ARIADNE_TEST_ASSERT(set.separated(ExactBoxType{{1.0_x,1.25_x},{1.0_x,1.25_x}}));
         //ARIADNE_TEST_ASSERT(set.overlaps(ExactBoxType(2, -1.0,-0.875, 1.375,1.625)));
 
-        ARIADNE_TEST_PRINT((ExactPointType{0.375,-0.375}));
-        ARIADNE_TEST_PRINT(f(ExactPointType{0.375,-0.375}));
+        ARIADNE_TEST_PRINT((ExactPointType({0.375_x,-0.375_x},dp)));
+        ARIADNE_TEST_PRINT(f(ExactPointType({0.375_x,-0.375_x},dp)));
 
-
-        ValidatedConstrainedImageSet idisc(ExactBoxType({{-2.0,+2.0},{-2.0,+2.0}}),{x[0],x[1]});
+        ValidatedConstrainedImageSet idisc(ExactBoxType({{-2.0_x,+2.0_x},{-2.0_x,+2.0_x}}),{x[0],x[1]});
         idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
-        box1=ExactBoxType( {ExactIntervalType(-0.5,0.5),ExactIntervalType(0.25,0.75)} );
-        box1=ExactBoxType( {ExactIntervalType(-0.5,0.75),ExactIntervalType(0.25,0.75)} );
-        box2=ExactBoxType( {ExactIntervalType(1,2),ExactIntervalType(0.5,1)} );
-        box3=ExactBoxType( {ExactIntervalType(0.75,2),ExactIntervalType(-1.0,-0.5)} );
+        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.5_x),ExactIntervalType(0.25_x,0.75_x)} );
+        box1=ExactBoxType( {ExactIntervalType(-0.5_x,0.75_x),ExactIntervalType(0.25_x,0.75_x)} );
+        box2=ExactBoxType( {ExactIntervalType(1,2),ExactIntervalType(0.5_x,1.0_x)} );
+        box3=ExactBoxType( {ExactIntervalType(0.75_x,2.0_x),ExactIntervalType(-1.0_x,-0.5_x)} );
         //ARIADNE_TEST_ASSERT(idisc.overlaps(box1));
         ARIADNE_TEST_ASSERT(idisc.separated(box2));
         //ARIADNE_TEST_ASSERT(idisc.overlaps(box3));

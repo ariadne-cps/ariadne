@@ -89,6 +89,8 @@ template<class A> class Graded : public List<A>
     Graded(const A& a) : List<A>(1u,a) { }
     Graded(const List<A>& lst) : List<A>(lst) { }
     Graded(const InitializerList<A>& lst) : List<A>(lst) { }
+    template<class... PRS, EnableIf<IsConstructible<A,ExactDouble,PRS...>> =dummy> Graded(const InitializerList<ExactDouble>& lst, PRS... prs)
+        : List<A>() { for(auto x : lst) { this->List<A>::append(A(x,prs...)); } }
     Graded<A>(const Graded<A>& a) : List<A>(a) { }
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
@@ -97,6 +99,11 @@ template<class A> class Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op, class N> Void operator=(const ClosureExpression<Op,SelfType,N>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
+    static Graded<A> constant(A const& c, DegreeType deg) {
+        assert(deg>=1); A z=nul(c); Graded<A> r(c); for(DegreeType d=1; d<=deg; ++d) { r.append(z); } return r; }
+    static Graded<A> variable(A const& a0, DegreeType deg) {
+        assert(deg>=1); A z=nul(a0); Graded<A> r(a0); r.append(z+1);
+        for(DegreeType d=2; d<=deg; ++d) { r.append(z); } return r; }
     Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
     DegreeType degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }

@@ -55,7 +55,9 @@ class ApproximateDouble {
     friend ApproximateDouble operator+(ApproximateDouble x) { return ApproximateDouble(+x._d); }
     friend ApproximateDouble operator-(ApproximateDouble x) { return ApproximateDouble(-x._d); }
     operator double() const { return _d; }
+    friend ApproximateDouble operator"" _a (long double lx) { double x=lx; return ApproximateDouble(x); }
 };
+inline ApproximateDouble operator"" _a (long double lx);
 
 //! \ingroup NumericModule
 //! \brief A wrapper around a builtin double-precision floating-point number,
@@ -73,11 +75,15 @@ class ExactDouble {
     friend ExactDouble operator+(ExactDouble x) { return ExactDouble(+x._d); }
     friend ExactDouble operator-(ExactDouble x) { return ExactDouble(-x._d); }
     friend Comparison cmp(ExactDouble const& x1, ExactDouble const& x2) {
-        return Comparison( (x1.get_d()==x2.get_d()) ? 0 : (x1.get_d()<x2.get_d()) ? -1 : +1 ); }
+        return Comparison( (x1._d==x2._d) ? 0 : (x1._d<x2._d) ? -1 : +1 ); }
+    friend Bool operator==(ExactDouble const& x1, ExactDouble const& x2) { return x1._d==x2._d; }
+    friend Bool operator!=(ExactDouble const& x1, ExactDouble const& x2) { return x1._d!=x2._d; }
     friend ExactDouble operator"" _x (long double lx) { double x=lx; assert(x==lx); return ExactDouble(x); }
+    friend ExactDouble operator"" _pr (long double lx) { double x=lx; return ExactDouble(x); }
     friend OutputStream& operator<<(OutputStream& os, ExactDouble x) { return os << std::setprecision(18) << x.get_d(); }
 };
 inline ExactDouble operator"" _x (long double lx);
+inline ExactDouble operator"" _pr (long double lx);
 
 } // namespace Ariadne
 

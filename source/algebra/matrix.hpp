@@ -155,7 +155,8 @@ template<class X> class Matrix
     Matrix(InitializerList<InitializerList<X>> lst);
 
     //! Construct a matrix using initializer lists.
-    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy> Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
@@ -850,13 +851,25 @@ struct ProvideMatrixOperations {
 };
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
-Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
-    typename InitializerList<InitializerList<double>>::const_iterator row_iter=lst.begin();
+Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+    typename InitializerList<InitializerList<ExactDouble>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
-        typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
+        typename InitializerList<ExactDouble>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
-            this->at(i,j)=X(ExactDouble(*col_iter),prs...);
+            this->at(i,j)=X(*col_iter,prs...);
+        }
+    }
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+    typename InitializerList<InitializerList<Dbl>>::const_iterator row_iter=lst.begin();
+    for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
+        ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
+        typename InitializerList<Dbl>::const_iterator col_iter=row_iter->begin();
+        for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
+            this->at(i,j)=X(*col_iter,prs...);
         }
     }
 }

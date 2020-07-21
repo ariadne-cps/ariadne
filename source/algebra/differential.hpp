@@ -130,11 +130,11 @@ class Differential
     //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
     explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,X> > lst);
     //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
-    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
-        explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PRS... pr);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        explicit Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,ExactDouble> > lst, PRS... pr);
     //! \brief Construct a dense differential of degree \a deg from an initializer list of coefficient arranged in graded lexicographic order of the index.
-    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
-        explicit Differential(SizeType as, DegreeType deg, InitializerList<Dbl> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        explicit Differential(SizeType as, DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs);
 
     //! \brief Conversion constructor from a different numerical type.
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Differential(const Differential<Y>& dy, PRS... prs);
@@ -325,19 +325,18 @@ Differential<X>::Differential(const Differential<Y>& x, PRS... prs)
 {
 }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,Dbl> > lst, PRS... prs)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList< Pair<InitializerList<DegreeType>,ExactDouble> > lst, PRS... prs)
     : Differential<X>(Expansion<MultiIndex,X>(lst,prs...),deg)
 { }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList<Dbl> lst, PRS... prs) : _expansion(as,X(prs...)), _degree(deg) {
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Differential<X>::Differential(SizeType as, DegreeType deg, InitializerList<ExactDouble> lst, PRS... prs) : _expansion(as,X(prs...)), _degree(deg) {
     auto iter = lst.begin();
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        Dbl const& y=*iter; if(y!=0.0) { _expansion.append(j,X(y,prs...)); } ++iter; }
+        ExactDouble const& y=*iter; if(y!=0.0_x) { _expansion.append(j,X(y,prs...)); } ++iter; }
     this->cleanup();
 }
-
 
 
 template<class X> Vector<Differential<X>> compose(Vector<Differential<X>> const&, Vector<Differential<X>> const&);
@@ -419,10 +418,10 @@ class Vector< Differential<X> >
     template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>> =dummy> Vector(SizeType n, G const& g);
     template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Vector(const Vector<Differential<Y>>& dv, PRS... prs);
 
-    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
-        Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,Dbl>>> lst, PRS... prs);
-    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
-        explicit Vector<Differential<X>>(SizeType rs, SizeType as, DegreeType deg, InitializerList<InitializerList<Dbl>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+        explicit Vector<Differential<X>>(SizeType rs, SizeType as, DegreeType deg, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
 
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }
@@ -501,15 +500,15 @@ Vector<Differential<X>>::Vector(const Vector<Differential<Y>>& dv, PRS... prs)
     : _chars(dv.argument_size(),dv.degree(),X(prs...)), _ary(dv._ary,prs...) {
 }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Dbl>> lst, PRS... prs)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
     : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,Dbl>>> lst, PRS... prs)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs)
     : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }

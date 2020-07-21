@@ -38,6 +38,7 @@
 #include "../numeric/operators.hpp"
 #include "../numeric/rounding.hpp"
 #include "../numeric/sign.hpp"
+#include "../numeric/builtin.hpp"
 #include "../numeric/number.decl.hpp"
 #include "../numeric/float.decl.hpp"
 
@@ -159,12 +160,18 @@ class FloatDP {
     explicit FloatDP(DoublePrecision) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
     FloatDP(double x) : dbl(x) { }
+    //! \brief Convert from a built-in double-precision floating-point number.
+    explicit FloatDP(ExactDouble const& x);
     explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
     explicit FloatDP(ExactDouble const& x, DoublePrecision);
     explicit FloatDP(TwoExp const& x, DoublePrecision);
     explicit FloatDP(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     FloatDP(const FloatDP& x) : dbl(x.dbl) { }
+    //! \brief Assignment.
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP& operator=(const N& n) {
+        return this->operator=(ExactDouble(n)); }
+    FloatDP& operator=(const ExactDouble& x);
     //! \brief Copy assignment.
     FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 

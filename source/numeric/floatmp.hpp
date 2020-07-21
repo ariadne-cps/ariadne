@@ -143,6 +143,9 @@ class FloatMP {
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);
 
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP& operator=(const N& n) {
+        return this->operator=(ExactDouble(n)); }
+    FloatMP& operator=(const ExactDouble& x);
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 

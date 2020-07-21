@@ -156,6 +156,11 @@ FloatMP::FloatMP(FloatMP&& x) {
 }
 
 
+FloatMP& FloatMP::operator=(const ExactDouble& x) {
+    mpfr_set_d(_mpfr,x.get_d(),get_rounding_mode());
+    return *this;
+}
+
 FloatMP& FloatMP::operator=(const FloatMP& x) {
     // TODO: Decide whether equality changes precision
     // NOTE: mpfr_set_prec clears a number, even if precision does not change

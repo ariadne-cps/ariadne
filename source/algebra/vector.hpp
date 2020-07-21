@@ -166,9 +166,15 @@ class Vector
     Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
 
     //! \brief Convert from an initializer list of generic type and a precision parameter.
-    template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy> Vector(InitializerList<double> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy> Vector(InitializerList<Real> const& lst, PR pr);
-    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy> Vector(InitializerList<Pair<double,double>> const& lst, PR pr);
+    template<class PR, EnableIf<IsConstructible<X,Real,PR>> =dummy>
+        Vector(InitializerList<Real> const& lst, PR pr);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy, DisableIf<IsConstructible<X,Real,PRS...>> =dummy>
+        Vector(InitializerList<ExactDouble> const& lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy>
+        Vector(InitializerList<Dbl> const& lst, PRS... prs);
+    template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>> =dummy>
+        Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr);
+
     //! \brief Convert from an array of generic type and a precision parameter.
     template<class Y, class PR, EnableIf<IsConstructible<X,Y,PR>> =dummy> Vector(Array<Y> const& ary, PR pr) : _ary(ary,pr) { }
     //! \brief Convert from an vector of generic type and a precision parameter.
@@ -723,9 +729,9 @@ template<class X> inline Vector<ExactType<X>> cast_exact(const Vector<X>& v) {
     return r;
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>>>
-Vector<X>::Vector(InitializerList<double> const& lst, PR pr)
-    : _ary(Array<ExactDouble>(Array<double>(lst)),pr)
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>, DisableIf<IsConstructible<X,Real,PRS...>>>
+Vector<X>::Vector(InitializerList<ExactDouble> const& lst, PRS... prs)
+    : _ary(Array<ExactDouble>(lst),prs...)
 {
 }
 
@@ -735,13 +741,20 @@ Vector<X>::Vector(InitializerList<Real> const& lst, PR pr)
 {
 }
 
-template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>> Vector<X>::Vector(InitializerList<Pair<double,double>> const& lst, PR pr)
+template<class X> template<class PR, EnableIf<IsConstructible<X,ExactDouble,ExactDouble,PR>>>
+Vector<X>::Vector(InitializerList<Pair<ExactDouble,ExactDouble>> const& lst, PR pr)
     : _ary(lst.size(),X(pr))
 {
     SizeType i=0;
     for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
-        _ary[i]=X(ExactDouble(iter->first),ExactDouble(iter->second),pr); ++i;
+        _ary[i]=X(iter->first,iter->second,pr); ++i;
     }
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Vector<X>::Vector(InitializerList<Dbl> const& lst, PRS... prs)
+    : _ary(Array<Dbl>(lst),prs...)
+{
 }
 
 } // namespace Ariadne

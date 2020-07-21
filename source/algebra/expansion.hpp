@@ -98,6 +98,7 @@ template<class I, class X> using ArgumentOfType = typename IndexTraits<I>::templ
 
 template<class I, class X> class Expansion;
 
+//! \brief A sparse list of index-value pairs.
 template<class I, class X> class Expansion {
     using S=typename IndexTraits<I>::SizeOfType;
     using V=typename IndexTraits<I>::IndexIntoType;

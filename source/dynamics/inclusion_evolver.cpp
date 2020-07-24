@@ -276,7 +276,7 @@ struct IndexedFloatDPError
     SizeType index;
     FloatDPError value;
 
-    IndexedFloatDPError() : index(0), value(FloatDPError()) {}
+    IndexedFloatDPError() : index(0), value(FloatDPError(dp)) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, IndexedFloatDPError const& ifl) {

@@ -146,7 +146,7 @@ template<class I> List<typename Box<I>::VertexType> Box<I>::vertices() const {
     std::vector<VertexType> v;
     SizeType n = this->dimension();
     if(n > 0) {
-        VertexType pt(n);
+        VertexType pt=this->lower_bounds();
         make_vertices_up(*this, 0, n-1, pt, v);
     }
     return v;

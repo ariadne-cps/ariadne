@@ -720,6 +720,7 @@ make_taylor_function_model(ExactBoxType domain, Vector<Differential<Bounds<FLT>>
 
     using PR = PrecisionType<FLT>;
     using X = FloatBounds<PR>;
+    PR pr = swp.precision();
 
     const SizeType m=derivative_ranges.result_size();
     const SizeType n=derivative_ranges.argument_size();
@@ -745,7 +746,7 @@ make_taylor_function_model(ExactBoxType domain, Vector<Differential<Bounds<FLT>>
         expansion.reserve(centre_derivatives[i].expansion().number_of_nonzeros());
 
         auto riter=dr.begin();
-        FloatBounds<PR> coef;
+        FloatBounds<PR> coef(pr);
 
         // Since coefficients are stored in increasing total degree, can first do centre and then ranges
         for(auto centre_iter=dc.begin(); centre_iter!=dc.end() && centre_iter->index().degree()<deg; ++centre_iter) {

@@ -95,8 +95,8 @@ Void TestHybridSimulator::test() const
     const RealVariable y("y");
 
     // Set up the simulator parameters and grid
-    FloatDP step_size(0.125);
-    FloatDP enclosure_radius(0.25);
+    FloatDP step_size(0.125_x,dp);
+    FloatDP enclosure_radius(0.25_x,dp);
 
     // Set up the evaluators
     HybridSimulator simulator;

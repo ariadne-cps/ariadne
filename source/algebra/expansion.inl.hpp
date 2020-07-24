@@ -257,7 +257,7 @@ Expansion<I,X>::Expansion(Expansion<I,Y> const& other, PRS... prs)
     : Expansion(other.argument_size(),X(other.zero_coefficient(),prs...))
 {
     MultiIndex a(other.argument_size());
-    X x;
+    X x=_zero_coefficient;
     for(auto iter=other.begin();
         iter!=other.end(); ++iter)
     {

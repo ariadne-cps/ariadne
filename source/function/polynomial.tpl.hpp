@@ -405,7 +405,7 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
             Polynomial<I,X> s(x.argument_size()-1u,x.zero_coefficient());
             Array< Polynomial<I,X> > p(x.degree()+1u,Polynomial<I,X>(x.argument_size()-1u,x.zero_coefficient()));
 
-            Array<X> cpowers(x.degree()+1u);
+            Array<X> cpowers(x.degree()+1u,x.zero_coefficient());
             cpowers[0]=1; cpowers[1]=c;
             if(x.degree()>=2) { cpowers[2]=sqr(c); }
             for(Nat j=3; j<=x.degree(); ++j) {

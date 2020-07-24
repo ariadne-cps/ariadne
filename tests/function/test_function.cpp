@@ -108,7 +108,7 @@ Void TestFunction::test_scalar_univariate_function()
     ARIADNE_TEST_PRINT(cos(f));
 
     EffectiveScalarUnivariateFunction df;
-    FloatDPApproximation dfp;
+    FloatDPApproximation dfp(dp);
     ARIADNE_TEST_WARN("No ScalarUnivariateFunction<P>::derivative() method.");
     // df=f.derivative();
     df=derivative(f);

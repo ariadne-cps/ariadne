@@ -777,4 +777,7 @@ FloatDP::FloatDP(FloatMP const& d, RoundingModeType rnd, PrecisionType pr) : Flo
 
 template<> String class_name<FloatMP>() { return "FloatMP"; }
 
+template<class PR> PR make_default_precision();
+template<> MP make_default_precision<MP>() { return FloatMP::get_default_precision(); }
+
 } // namespace Ariadne

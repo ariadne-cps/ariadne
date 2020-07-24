@@ -94,7 +94,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
     auto m = input_derivatives.size();
     ErrorType ze(pr);
     ErrorType K=ze, pK=ze, pKv=ze, pKw=ze, L=ze, pL=ze, pLv=ze, pLw=ze, H=ze, pH=ze, pHv=ze, pHw=ze;
-    Vector<ErrorType> Kj(n), pKj(n), pKjv(n), pKjw(n), Lj(n), pLj(n), pLjv(n), pLjw(n), Hj(n), pHj(n), pHjv(n), pHjw(n);
+    Vector<ErrorType> Kj(n,pr), pKj(n,pr), pKjv(n,pr), pKjw(n,pr), Lj(n,pr), pLj(n,pr), pLjv(n,pr), pLjw(n,pr), Hj(n,pr), pHj(n,pr), pHjv(n,pr), pHjw(n,pr);
     FloatDPUpperBound Lambda=ze;
 
     auto Df=noise_independent_component.differential(cast_singleton(B),2);
@@ -224,11 +224,11 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
     Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,_inputs,h));
 
-    Vector<ErrorType> result_componentwise(n.dimension());
+    Vector<ErrorType> result_componentwise(n.dimension(),n.precision());
     for (auto j: range(n.dimension()))
         result_componentwise[j] = component_error<A,R>(n,_inputs,h,j);
 
-    Vector<ErrorType> result(n.dimension());
+    Vector<ErrorType> result(n.dimension(),n.precision());
     for (auto j: range(n.dimension())) {
         result[j] = min(result_worstcase[j],result_componentwise[j]);
     }

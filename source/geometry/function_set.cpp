@@ -80,7 +80,7 @@ Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTay
     const Nat n=f.argument_size();
     ValidatedVectorMultivariateTaylorFunctionModelDP g=restriction(f,dom);
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
     MultiIndex a;
     for(Nat i=0; i!=m; ++i) {
         const ValidatedTaylorModelDP& tm=g.model(i);
@@ -115,7 +115,7 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
     for(Nat i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
@@ -150,7 +150,7 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n);
+    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
     for(Nat i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {

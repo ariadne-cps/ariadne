@@ -446,13 +446,22 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+template<class F> F create_default() {
+    if constexpr (IsSame<F,FloatDP>::value) { return FloatDP(dp); }
+    else if constexpr (IsSame<F,FloatDPValue>::value) { return FloatDPValue(dp); }
+    else if constexpr (IsSame<F,FloatDPError>::value) { return FloatDPError(dp); }
+    else if constexpr (IsSame<F,FloatMP>::value) { return FloatMP(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPValue>::value) { return FloatMPValue(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPError>::value) { return FloatMPError(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,Interval<FloatDPUpperBound>>::value) { return FloatDPUpperInterval(0,0); }
+    else { assert(false); }
+}
 
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel()
-    : _expansion(0), _error(), _sweeper()
+    : _expansion(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
 {
 }
-
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
     : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
@@ -1957,13 +1966,14 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const 
     if constexpr (IsSame<P,ValidatedTag>::value) {
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
 
+        PrecisionType pr=r.precision();
         ErrorType max_error=nul(r.error());
 
         const ErrorType& xe=x.error();
         const ErrorType& ye=y.error();
 
-        CoefficientType rv,xv,yv;
-        FloatDP xu,yu,mxl,myl,u,ml;
+        CoefficientType rv(pr),xv(pr),yv(pr);
+        F xu(pr),yu(pr),mxl(pr),myl(pr),u(pr),ml(pr);
         MultiIndex a;
 
         typename TaylorModel<P,F>::ConstIterator xiter=x.begin();

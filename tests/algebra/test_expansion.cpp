@@ -455,10 +455,10 @@ template<class F> Void TestExpansion<F>::test_find()
 
 template<class F> Void TestExpansion<F>::test_embed()
 {
-    ARIADNE_TEST_CONSTRUCT(ExpansionType,e,({ {{1,2},5.0_x}, {{0,0},2.0_x}, {{1,0},3.0_x}, {{3,0},7.0_x}, {{0,1},11.0_x} }));
-    ARIADNE_TEST_SAME_AS(embed(0,e,2),ExpansionType({ {{1,2,0,0},5.0_x}, {{0,0,0,0},2.0_x}, {{1,0,0,0},3.0_x}, {{3,0,0,0},7.0_x}, {{0,1,0,0},11.0_x} }));
-    ARIADNE_TEST_SAME_AS(embed(1,e,0),ExpansionType({ {{0,1,2},5.0_x}, {{0,0,0},2.0_x}, {{0,1,0},3.0_x}, {{0,3,0},7.0_x}, {{0,0,1},11.0_x} }));
-    ARIADNE_TEST_SAME_AS(embed(1,e,2),ExpansionType({ {{0,1,2,0,0},5.0_x}, {{0,0,0,0,0},2.0_x}, {{0,1,0,0,0},3.0_x}, {{0,3,0,0,0},7.0_x}, {{0,0,1,0,0},11.0_x} }));
+    ARIADNE_TEST_CONSTRUCT(ExpansionType,e,({ {{1,2},5.0_x}, {{0,0},2.0_x}, {{1,0},3.0_x}, {{3,0},7.0_x}, {{0,1},11.0_x} },prec));
+    ARIADNE_TEST_SAME_AS(embed(0,e,2),ExpansionType({ {{1,2,0,0},5.0_x}, {{0,0,0,0},2.0_x}, {{1,0,0,0},3.0_x}, {{3,0,0,0},7.0_x}, {{0,1,0,0},11.0_x} },prec));
+    ARIADNE_TEST_SAME_AS(embed(1,e,0),ExpansionType({ {{0,1,2},5.0_x}, {{0,0,0},2.0_x}, {{0,1,0},3.0_x}, {{0,3,0},7.0_x}, {{0,0,1},11.0_x} },prec));
+    ARIADNE_TEST_SAME_AS(embed(1,e,2),ExpansionType({ {{0,1,2,0,0},5.0_x}, {{0,0,0,0,0},2.0_x}, {{0,1,0,0,0},3.0_x}, {{0,3,0,0,0},7.0_x}, {{0,0,1,0,0},11.0_x} },prec));
 
 }
 

@@ -112,7 +112,7 @@ Int main(Int argc, char **argv)
 
     InterpolatedCurve cv(0,Point<FloatDPValue>(2,FloatDPValue(0.0_x,dp)));
     for(Int i=1; i<=10; ++i) {
-        Point<FloatDPValue> pt(2); pt[0]=FloatDPValue(cast_exact(i/10.),dp); pt[1]=FloatDPValue(cast_exact(i*i/100.),dp);
+        Point<FloatDPValue> pt(2,dp); pt[0]=FloatDPValue(cast_exact(i/10.),dp); pt[1]=FloatDPValue(cast_exact(i*i/100.),dp);
         cv.insert(i,pt);
     }
     g.set_bounding_box(cv.bounding_box());

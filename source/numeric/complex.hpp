@@ -157,7 +157,8 @@ template<class X> class Complex
   public:
     //@{
     //! \name Constructors
-    Complex() : _re(), _im() { } //!< Default constructor yields the number 0.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    Complex(PRS... prs) : _re(0u,prs...), _im(0u,prs...) { } //!< Default constructor yields the number 0.
     Complex(X const& x) : _re(x), _im(nul(x)) { } //!< Construct the number \a x + <i>i</i> \a y.
     Complex(X const& x, X const& y) : _re(x), _im(y) { } //!< Construct the number \a x + <i>i</i> \a y.
 

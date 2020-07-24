@@ -159,6 +159,15 @@ ValidatedKleenean eq(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval cons
 ValidatedKleenean lt(FloatDPUpperInterval const& ivl1, FloatDPUpperInterval const& ivl2) {
     return lt(cast_singleton(ivl1),cast_singleton(ivl2)); }
 
+template<> Interval<FloatMPUpperBound>::Interval() : Interval(EmptyInterval()) { }
+template<> Interval<FloatMPUpperBound>::Interval(EmptyInterval const&)
+    : Interval(FloatMP::inf(Sign::POSITIVE,FloatMP::get_default_precision()),
+               FloatMP::inf(Sign::NEGATIVE,FloatMP::get_default_precision())) { }
+template<> Interval<FloatMPUpperBound>::Interval(UnitInterval const&)
+    : Interval(FloatMP(-1,FloatMP::get_default_precision()),FloatMP(+1,FloatMP::get_default_precision())) { }
+template<> Interval<FloatMPUpperBound>::Interval(EntireInterval const&)
+    : Interval(FloatMP(-inf,FloatMP::get_default_precision()),FloatMP(+inf,FloatMP::get_default_precision())) { }
+
 
 FloatMPBounds cast_singleton(FloatMPUpperInterval const& ivl) {
     return FloatMPBounds(ivl.lower(),ivl.upper()); }
@@ -206,14 +215,15 @@ FloatMPUpperInterval pow(FloatMPUpperInterval const& ivl, Int n) {
 
 FloatMPUpperInterval sqrt(FloatMPUpperInterval const& ivl) {
     // Defining sqrt(I)=hull{x:x^2 in I}, if I=[a,b] with b>=0, then sqrt(I)=[-sqrt(b),+sqrt(b)]
-    if(ivl.upper().raw()<0) { return FloatMPUpperInterval::empty_interval(); }
+    auto pr=ivl.upper().precision(); auto inf_=FloatMP::inf(pr);
+    if(ivl.upper().raw()<0) { return FloatMPUpperInterval(+inf_,-inf_); }
     else { FloatMP u=sqrt(up,ivl.upper().raw()); return FloatMPUpperInterval(-u,+u); } }
 FloatMPUpperInterval exp(FloatMPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 FloatMPUpperInterval log(FloatMPUpperInterval const& ivl) {
-    auto pr=ivl.upper().precision();
-    if(ivl.upper().raw()<=0) { return FloatMPUpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return FloatMPUpperInterval(FloatMP::inf(Sign::NEGATIVE,pr),log(up,ivl.upper().raw())); }
+    auto pr=ivl.upper().precision(); auto inf_=FloatMP::inf(pr);
+    if(ivl.upper().raw()<=0) { return FloatMPUpperInterval(+inf_,-inf_); }
+    else if(ivl.lower().raw()<=0) { return FloatMPUpperInterval(-inf_,log(up,ivl.upper().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
 FloatMPUpperInterval sin(FloatMPUpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }

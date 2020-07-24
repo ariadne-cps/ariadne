@@ -47,10 +47,6 @@ template<class I, class X> Expansion<I,X>::~Expansion()
 {
 }
 
-template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as)
-    : Expansion<I,X>(as,X()) {
-}
-
 template<class I, class X> Expansion<I,X>::Expansion(ArgumentSizeType as, X const& z, SizeType cap)
     : _indices(0u,I(as)), _coefficients(0,z), _zero_coefficient(z)
 {
@@ -73,11 +69,18 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
 }
 */
 
-template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst) : Expansion(ArgumentSizeType())
+namespace {
+template<class I, class X> X get_zero_coefficient(InitializerList<Pair<I,X>> const& lst) {
+    ARIADNE_PRECONDITION(lst.size()!=0);
+    return nul(lst.begin()->second);
+}
+} // namespace
+
+template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,X>> lst)
+    : Expansion(ArgumentSizeType(),get_zero_coefficient(lst))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
-    _zero_coefficient = nul(lst.begin()->second);
     _indices = UniformList<I>(0u,I(size_of(lst.begin()->first)));
     _coefficients = UniformList<X>(0,_zero_coefficient);
 
@@ -86,7 +89,7 @@ template<class I, class X> Expansion<I,X>::Expansion(InitializerList<Pair<IndexI
     _coefficients.reserve(cap);
 
     I a(this->argument_size());
-    X x;
+    X x=_zero_coefficient;
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
@@ -183,7 +186,7 @@ template<class I, class X> Void Expansion<I,X>::reserve(SizeType new_capacity) {
 template<class I, class X> Void Expansion<I,X>::resize(SizeType new_size) {
     if(new_size<this->size()) {
         this->_indices.resize(new_size);
-        this->_coefficients.resize(new_size);
+        this->_coefficients.resize(new_size,this->_zero_coefficient);
     } else {
         if(this->capacity() < new_size) {
             this->reserve(new_size);

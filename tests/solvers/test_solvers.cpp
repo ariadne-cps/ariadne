@@ -82,7 +82,6 @@ class TestSolver
         EffectiveVectorMultivariateFunction f;
         ValidatedVectorMultivariateFunctionModelDP h;
         EffectiveVectorMultivariateFunction e;
-        FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactBoxType({{-0.25_x,0.25_x}});

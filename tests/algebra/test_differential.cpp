@@ -372,7 +372,7 @@ class TestDifferentialVector {
         DifferentialVectorType x(2,2,2,pr);
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
-        Vector<FloatDPApproximation> p(2); p[0]=1.5_x; p[1]=0.375_x;
+        Vector<FloatDPApproximation> p(2,dp); p[0]=1.5_x; p[1]=0.375_x;
         DifferentialVectorType hxp(2,2,2,{ {{{0,0},1.5_x}, {{0,1},-0.375_x}, {{2,0},-1.0_x}}, {{{1,0},1.0_x}} },pr);
         ARIADNE_TEST_EQUAL(henon(x,p),hxp);
     }

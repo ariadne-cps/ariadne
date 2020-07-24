@@ -50,11 +50,11 @@ extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatDP>::output_places;
 extern template Ariadne::Nat Ariadne::Error<Ariadne::FloatMP>::output_places;
 
 inline Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
-inline MultivariatePolynomial<FloatDP> p(Nat n, Nat j) { return MultivariatePolynomial<FloatDP>::variable(n,j); }
+inline MultivariatePolynomial<FloatDP> p(Nat n, Nat j) { return MultivariatePolynomial<FloatDP>::variable(n,j,dp); }
 inline ValidatedScalarMultivariateTaylorFunctionModelDP t(ExactBoxType d, Nat j,Sweeper<FloatDP> swp) { return ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,j,swp); }
 
 template<class X> Vector< Expansion<MultiIndex,X> > operator*(const Expansion<MultiIndex,X>& e, const Vector<FloatDP> v) {
-    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size()));
+    Vector< Expansion<MultiIndex,X> > r(v.size(),Expansion<MultiIndex,X>(e.argument_size(),e.zero_coefficient()));
     for(Nat i=0; i!=r.size(); ++i) { ARIADNE_ASSERT(v[i]==0.0_x || v[i]==1.0_x); if(v[i]==1.0_x) { r[i]=e; } }
     return r;
 }
@@ -116,7 +116,7 @@ Void TestScalarTaylorFunction::test_concept()
 {
     SizeType k=0;
     const FloatDPValue w={0,pr};
-    const FloatDPBounds x;
+    const FloatDPBounds x(pr);
     const ValidatedNumber y;
     const Vector<FloatDPValue> vw;
     const Vector<FloatDPBounds> vx;
@@ -416,9 +416,9 @@ template<class I, class F> Expansion<I,Value<F>>const& cast_exact(Expansion<I,F>
 
 Void TestVectorTaylorFunction::test_constructors()
 {
-    Vector< Expansion<MultiIndex,RawFloatDP> > expansion(2, Expansion<MultiIndex,RawFloatDP>(2));
-    expansion[0]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},1.125_x}, {{1,0},-0.75_x}, {{0,1},0.0625_x}, {{2,0},-0.25_x} });
-    expansion[1]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},0.750_x}, {{1,0},0.50_x} });
+    Vector< Expansion<MultiIndex,RawFloatDP> > expansion(2, Expansion<MultiIndex,RawFloatDP>(2,pr));
+    expansion[0]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},1.125_x}, {{1,0},-0.75_x}, {{0,1},0.0625_x}, {{2,0},-0.25_x} },pr);
+    expansion[1]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},0.750_x}, {{1,0},0.50_x} },pr);
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
     Vector< RawFloatDP > errors(2);
 
@@ -705,7 +705,7 @@ Void TestTaylorFunctionFactory::test_create()
     Vector<FloatDPBounds> errs(2,FloatDPBounds(-1e-15_pr,+1e-15_pr,pr));
     ARIADNE_TEST_BINARY_PREDICATE(refines,args,vtf(args));
     ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<FloatDPBounds>(args+errs));
-    Vector<FloatDPBounds> pt(2); pt[0]=FloatDPBounds(0.2_dec,pr); pt[1]=FloatDPBounds(1.25_x,pr);
+    Vector<FloatDPBounds> pt(2,pr); pt[0]=FloatDPBounds(0.2_dec,pr); pt[1]=FloatDPBounds(1.25_x,pr);
     ARIADNE_TEST_BINARY_PREDICATE(refines,pt,vtf(pt));
 }
 

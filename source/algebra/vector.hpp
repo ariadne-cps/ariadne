@@ -89,6 +89,21 @@ template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_el
 template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
 template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
 
+template<class PR> PR make_default_precision();
+
+template<class X> X make_zero() {
+    if constexpr (IsDefaultConstructible<X>::value) { return X(); }
+    else if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        if constexpr (IsConstructible<X,PR>::value) {
+            PR pr=make_default_precision<PR>(); return X(pr);
+        } else {
+            assert(false);
+        }
+    }
+    else { assert(false); }
+}
+
 template<class X> class VectorRange;
 
 #ifdef SIMPLE_VECTOR_OPERATORS
@@ -123,6 +138,8 @@ struct DeclareVectorOperations { };
 template<class V> struct VectorExpression : public DeclareVectorOperations { const V& operator()() const { return static_cast<const V&>(*this); } };
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
+struct DefaultTag { };
+
 //! \ingroup LinearAlgebraModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
@@ -151,8 +168,6 @@ class Vector
 
     //! \brief Default constructor constructs a vector with no elements.
     Vector() : _ary() { }
-    //! \brief Construct a vector of size \a n, with elements initialised to the default value.
-    explicit Vector(SizeType n) : _ary(n,X()) { static_assert(IsDefaultConstructible<X>::value,""); }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
     //! Construct a vector from parameters of \a X.
@@ -249,7 +264,7 @@ class Vector
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
     const X zero_element() const {
         if(this->size()!=0) { return create_zero((*this)[0]); }
-        else { if constexpr (IsDefaultConstructible<X>::value) { return X(); }  else { assert(false); } } }
+        else { return make_zero<X>(); } }
     //! \brief The raw data array.
     Array<X> const& array() const { return _ary; }
     //@}

@@ -89,7 +89,7 @@ template<class F> class IntervalFactory<Approximation<F>> {
   public:
     IntervalFactory(PrecisionType precision) : _precision(precision) { }
     ApproximateInterval<F> create(ApproximateNumber const& y) const {
-        return ApproximateInterval<F>(y,this->_precision); }
+        return ApproximateInterval<F>(y,y,this->_precision); }
 };
 
 template<class F> using UpperIntervalFactory = IntervalFactory<UpperBound<F>>;
@@ -235,7 +235,7 @@ template<class U> class Interval
     template<class V, EnableIf<And<IsConstructible<L,V>,IsConstructible<U,V>>> = dummy>
         explicit Interval(const V& v) : _l(v), _u(v) { }
     template<class V, EnableIf<IsConstructibleGivenDefaultPrecision<U,V>> =dummy, DisableIf<IsConstructible<U,V>> =dummy>
-        explicit Interval(const V& v) : Interval(U(v,PrecisionType<U>())) { }
+        explicit Interval(const V& v) : Interval(L(v,PrecisionType<U>()),U(v,PrecisionType<U>())) { }
     //! \brief Assign a singleton interval from a number.
     template<class V, EnableIf<And<IsAssignable<L,V>,IsAssignable<U,V>>> = dummy>
         Interval<U>& operator=(const V& v) { _l=v; _u=v; return *this; }

@@ -59,7 +59,6 @@ template<class F> class Approximation
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Approximation<F>() : _a(0.0) { }
     explicit Approximation<F>(PrecisionType pr) : _a(0.0,pr) { }
     explicit Approximation<F>(RawType const& a) : _a(a) { }
 

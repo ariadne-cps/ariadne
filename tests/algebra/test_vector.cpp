@@ -149,7 +149,7 @@ TestVector::test_misc()
     ARIADNE_TEST_EQUAL(norm(v1).raw(),4);
     ARIADNE_TEST_EQUAL(norm(v2).raw(),4.25_x);
 
-    Vector<FloatDPApproximation> v3(1);
+    Vector<FloatDPApproximation> v3(1,pr);
     cout << "v3=" << v3 << endl;
     Vector<FloatDPApproximation> v4=v2;
     cout << "v4=" << v4 << endl;
@@ -182,7 +182,7 @@ TestVector::test_misc()
 
     Vector< FloatDPBounds > iv2=Vector<FloatDPBounds>({{-1.0_x,1.0_x},{-1.0_x,1.0_x}},pr);
     cout << "iv2=" << iv2 << endl;
-    Vector< FloatDPBounds > iv3(3);
+    Vector< FloatDPBounds > iv3(3,pr);
     cout << "iv3=" << iv3 << endl;
     iv3=Vector<FloatDPBounds>({{4.25_x,4.25_x},{2.375_x,2.375_x}},pr);
     cout << "iv3=" << iv3 << endl;

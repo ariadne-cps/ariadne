@@ -70,9 +70,9 @@ TestMatrix::test_concept()
     Vector<FloatDPApproximation> fv;
     Vector<FloatDPBounds> iv;
     Vector<FloatDPValue> ev;
-    Matrix<FloatDPApproximation> fA;
-    Matrix<FloatDPBounds> iA;
-    Matrix<FloatDPValue> eA;
+    Matrix<FloatDPApproximation> fA(0,0,dp);
+    Matrix<FloatDPBounds> iA(0,0,dp);
+    Matrix<FloatDPValue> eA(0,0,dp);
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
     fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;
@@ -127,7 +127,7 @@ TestMatrix::test_misc()
     Array<FloatDPBounds> iAary={{-1.0_x,3.0_x, -1.0_x,1.0_x},pr};
     FloatDPApproximation* Aptr=Aary.begin();
 
-    Matrix<FloatDPApproximation> A0;
+    Matrix<FloatDPApproximation> A0(0,0,pr);
     ARIADNE_TEST_PRINT(A0);
     Matrix<FloatDPApproximation> A1(3,2,pr);
     ARIADNE_TEST_PRINT(A1);

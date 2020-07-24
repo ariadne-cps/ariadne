@@ -355,7 +355,7 @@ row_norms(const Matrix<X>& A)
 {
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    Vector<RowNormType<X>> r(m);
+    Vector<RowNormType<X>> r(m,A.zero_element());
 
     for(SizeType i=0; i!=m; ++i) {
         r[i]=A.zero_element();
@@ -643,8 +643,8 @@ orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
     Matrix<X> R(A);
     PivotMatrix P(n);
 
-    Array<X> p(n);
-    Vector<X> u(m);
+    Array<X> p(n,zero);
+    Vector<X> u(m,zero);
 
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=m; ++j) {
@@ -756,7 +756,7 @@ orthogonal_decomposition(const Matrix<X>& A)
     Matrix<X> O(m,m,z);
     Matrix<X> R(A);
 
-    Array<X> p(n);
+    Array<X> p(n,z);
 
     for(SizeType c=0; c!=std::min(m,n); ++c) {
 

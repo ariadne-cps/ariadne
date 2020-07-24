@@ -51,6 +51,8 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> cons
 
 template<class X>
 struct LinearProgram {
+    LinearProgram() : LinearProgram(0u,0u,X(dp)) { }
+    LinearProgram(SizeType m, SizeType n, X const& z);
     Matrix<X> A;
     Vector<X> b;
     Vector<X> c;
@@ -63,6 +65,10 @@ struct LinearProgram {
     Vector<X> y;
     Vector<X> z;
 };
+
+template<class X> LinearProgram<X>::LinearProgram(SizeType m, SizeType n, X const& z)
+    : A(m,n,z), b(m,z), c(n,z), l(n,z), u(n,z), vt(n), p(n), B(m,m,z), x(n,z), y(m,z),z(n,z) { }
+
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const RealBox& bx)
     : ValidatedAffineConstrainedImageSet(Box<Interval<FloatDPBall>>(bx,dp))
@@ -94,7 +100,7 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> cons
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box<Interval<FloatDPBall>>& bx)
     : _domain(bx.dimension(),Interval<FloatDPValue>(0_z,dp)), _space_models(bx.dimension(),ValidatedAffineModelDP(bx.dimension(),dp))
 {
-    Vector<FloatDPError> errs(bx.dimension());
+    Vector<FloatDPError> errs(bx.dimension(),dp);
 
     for(Nat i=0; i!=bx.dimension(); ++i) {
         make_lpair(_domain[i],errs[i])=make_domain(bx[i]);
@@ -619,7 +625,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
         lp.vt[ne+i]=Slackness::BASIS;
         lp.p[i]=ne+i;
     }
-    lp.B=Matrix<FloatDP>::identity(nx+nc);
+    lp.B=Matrix<FloatDP>::identity(nx+nc,dp);
 
     Vector<FloatDP> errors(this->dimension());
     for(Nat i=0; i!=this->dimension(); ++i) {
@@ -666,13 +672,13 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     ValidatedAffineModelDP const& ya=this->_space_models[yind];
 
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
-    Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np);
+    Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np,dp);
     for(Nat j=0; j!=nx; ++j) {
-        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+FloatDP(eps());
-        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+FloatDP(eps());
+        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+FloatDP(eps(),dp);
+        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+FloatDP(eps(),dp);
     }
-    G[0][nx+nc+0]=numeric_cast<FloatDP>(1.0);
-    G[1][nx+nc+1]=numeric_cast<FloatDP>(1.0);
+    G[0][nx+nc+0]=FloatDP(1.0_x,dp);
+    G[1][nx+nc+1]=FloatDP(1.0_x,dp);
     Vector<FloatDP> h(ne);
     h[0]=numeric_cast<FloatDP>(xa.value());
     h[1]=numeric_cast<FloatDP>(ya.value());
@@ -683,14 +689,14 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
     // Need to keep point error variables, introduce extra variables
 
-    Matrix<FloatDP> A(nc,np);
-    Vector<FloatDP> b(nc);
-    Vector<FloatDP> l(np);
-    Vector<FloatDP> u(np);
+    Matrix<FloatDP> A(nc,np,dp);
+    Vector<FloatDP> b(nc,dp);
+    Vector<FloatDP> l(np,dp);
+    Vector<FloatDP> u(np,dp);
 
     for(Nat j=0; j!=nx; ++j) {
-        l[j]=numeric_cast<FloatDP>(-1.0);
-        u[j]=numeric_cast<FloatDP>(+1.0);
+        l[j]=FloatDP(-1.0_x,dp);
+        u[j]=FloatDP(+1.0_x,dp);
     }
 
     for(Nat i=0; i!=nc; ++i) {
@@ -698,14 +704,14 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
             A[i][j] = neg( numeric_cast<FloatDP>(this->_constraint_models[i].function().gradient(j)) );
         }
         for(Nat j=nx; j!=nx+nc+ne; ++j) {
-            A[i][j] = numeric_cast<FloatDP>(0.0);
+            A[i][j] = FloatDP(0.0_x,dp);
         }
-        A[i][nx+i]=numeric_cast<FloatDP>(1.0);
+        A[i][nx+i]=FloatDP(1.0_x,dp);
         FloatDP fb=numeric_cast<FloatDP>(this->_constraint_models[i].function().value());
         FloatDP fe=numeric_cast<FloatDP>(this->_constraint_models[i].function().error().raw());
         FloatDP cl=numeric_cast<FloatDP>(this->_constraint_models[i].lower_bound().value());
         FloatDP cu=numeric_cast<FloatDP>(this->_constraint_models[i].upper_bound().value());
-        b[i]=fb+FloatDP(eps());
+        b[i]=fb+FloatDP(eps(),dp);
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
     }
@@ -719,8 +725,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     List<Point2d> vertices;
 
     // Set up simplex algorithm working variables
-    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<FloatDP> B(nc,nc);
-    Vector<FloatDP> x(np); Vector<FloatDP> y(nc);
+    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<FloatDP> B(nc,nc,dp);
+    Vector<FloatDP> x(np,dp); Vector<FloatDP> y(nc,dp);
 
     // Find an initial feasible point
     ValidatedKleenean feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
@@ -731,7 +737,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // If problem not feasible, then set is empty; return empty list
     if(!possibly(feasible)) { return vertices; }
 
-    Vector<FloatDP> c(np,0.0);
+    Vector<FloatDP> c(np,FloatDP(0.0_x,dp));
     for(Nat j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
     // Find a point on the boundary; choose the point minimising the spacial x-coordinate
@@ -749,7 +755,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Array<Slackness> initial_variable_type=vt;
 
     Vector<FloatDP> pt=G*x+h; // The current point in space
-    Vector<FloatDP> last_vec({0.0,-1.0}); // The direction in space of the last step along the boundary
+    Vector<FloatDP> last_vec({0.0_x,-1.0_x},dp); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
     Vector<FloatDP> best_next_vec(2);
     Vector<FloatDP> trial_vec(2);
@@ -777,7 +783,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                 BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
-                Vector<FloatDP> d(np,0.0); // The direction x moves in in changing the basis
+                Vector<FloatDP> d(np,FloatDP(0.0_x,dp)); // The direction x moves in in changing the basis
                 d[j] = (vt[j]==Slackness::LOWER ? +1 : -1);
                 for(Nat i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];

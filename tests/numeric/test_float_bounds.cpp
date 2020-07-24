@@ -311,11 +311,11 @@ TestFloatBounds<DoublePrecision>::test_constructors()
     FloatDP zero(0,pr);
 
     // Construct from pair
-    FloatBoundsType xd1(FloatDP(1.125),FloatDP(2.25));
-    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25);
+    FloatBoundsType xd1(FloatDP(1.125_x,pr),FloatDP(2.25_x,pr));
+    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125_x); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25_x);
 
     // Default constructor
-    FloatBoundsType xd2;
+    FloatBoundsType xd2(pr);
     if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("FloatBoundsType default constructor returns an empty set.");
     } else {
@@ -338,9 +338,9 @@ TestFloatBounds<DoublePrecision>::test_constructors()
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    FloatBoundsType xd6(FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(xd6.lower_raw(),FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(xd6.upper_raw(),FloatDP(1.25));
+    FloatBoundsType xd6(FloatDP(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),FloatDP(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),FloatDP(1.25_x,pr));
 }
 
 template<class PR> Void
@@ -352,8 +352,8 @@ TestFloatBounds<PR>::test_constructors()
     FloatBoundsType xd1(RawFloatType(1.125_x,pr),RawFloatType(2.25_x,pr));
     ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125_x); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25_x);
 
-    // Default constructor
-    FloatBoundsType xd2;
+    // Default value constructor
+    FloatBoundsType xd2(pr);
     if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("FloatBoundsType default constructor returns an empty set.");
     } else {
@@ -403,7 +403,7 @@ template<class PR> Void TestFloatBounds<PR>::test_class()
 
 template<class PR> Void TestFloatBounds<PR>::test_input()
 {
-    FloatBoundsType x;
+    FloatBoundsType x(pr);
 
     string input("[1.125,2.75] [0.4,0.6]");
     stringstream iss(input);
@@ -433,16 +433,16 @@ template<class PR> Void TestFloatBounds<PR>::test_comparison() {
     FloatBoundsType& ivl1ref=ivl1;
     ivl1ref=FloatBoundsType(5.25_x,7.375_x,pr);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower_raw()==RawFloatType(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower_raw()==5.25_x);
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_aliasing() {
-    FloatValueType ex2(1.5);
-    FloatValueType ex3(2.25);
+    FloatValueType ex2(1.5_x,pr);
+    FloatValueType ex3(2.25_x,pr);
 
     FloatBoundsType vx1;
-    FloatBoundsType vx2(1.5,2.25);
-    FloatBoundsType vx3(3.125,4.0625);
+    FloatBoundsType vx2(1.5_x,2.25_x,pr);
+    FloatBoundsType vx3(3.125_x,4.0625_x,pr);
 
     // Check to make sure aliases are handled correctly
     vx1=vx3; vx1=vx2-vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,FloatBoundsType(vx2-vx3));

@@ -41,7 +41,7 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d
 }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, Series<X> const& s)
-    : _ary(d+1u) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
+    : _ary(d+1u,nul(s[0])) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
 }
 
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::constant(DegreeType d, X const& c) {

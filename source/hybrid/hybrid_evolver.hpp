@@ -602,6 +602,7 @@ OutputStream& operator<<(OutputStream& os, const FinishingKind& crk);
 //! \relates HybridEvolverBase
 struct TimingData
 {
+    TimingData() : step_size(dp) { }
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.

@@ -406,7 +406,7 @@ ValidatedReal Real::compute(Accuracy accuracy) const {
     MultiplePrecision precision(effort*64);
     FloatMPError error_bound(FloatMP(accuracy.error(),upward,precision));
     FloatMPError error=2u*error_bound;
-    FloatMPBounds res;
+    FloatMPBounds res(precision);
     while (!(error.raw()<error_bound.raw())) {
         res=this->get(precision);
         error=res.error();

@@ -183,7 +183,7 @@ template<class X> DiagonalMatrix<X>::DiagonalMatrix(Vector<X> vec)
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
 DiagonalMatrix<X>::DiagonalMatrix(DiagonalMatrix<Y> const& D, PRS... prs)
-    : _ary(D.diagonal().array(),prs...)
+    : _zero(D.zero_element(),prs...), _ary(D.diagonal().array(),prs...)
 { }
 
 template<class X> SizeType DiagonalMatrix<X>::size() const {

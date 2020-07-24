@@ -121,7 +121,7 @@ Bool is_nan(Vector<FloatDP> const& v) {
 // Compute R=ADA^T for diagonal D
 Matrix<FloatDP> adat(const Matrix<FloatDP>& A, const Vector<FloatDP>& D)
 {
-    Matrix<FloatDP> R(A.row_size(),A.row_size());
+    Matrix<FloatDP> R(A.row_size(),A.row_size(),A.zero_element()*D.zero_element()*A.zero_element());
     ARIADNE_ASSERT(D.size()==A.column_size());
     for(Nat i=0; i!=A.row_size(); ++i) {
         for(Nat k=0; k!=A.column_size(); ++k) {
@@ -191,7 +191,7 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
     Vector<FloatDPBounds> x = cast_exact(ax);
     Vector<FloatDPBounds> y = cast_exact(ay);
 
-    FloatDPValue zero;
+    FloatDPValue zero(dp);
 
     const Nat n=A.column_size();
 
@@ -244,10 +244,10 @@ InteriorPointSolver::minimise(const Vector<FloatDP>& c,
 
     const Nat m = b.size();
     const Nat n = c.size();
-    Vector<FloatDP> y(m, 0.0);
-    Vector<FloatDP> x(n);
-    Vector<FloatDP> zl(n);
-    Vector<FloatDP> zu(n);
+    Vector<FloatDP> y(m, FloatDP(0.0_x,dp));
+    Vector<FloatDP> x(n,dp);
+    Vector<FloatDP> zl(n,dp);
+    Vector<FloatDP> zu(n,dp);
     for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
@@ -324,11 +324,11 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
 
     const Nat m = A.row_size();
     const Nat n = A.column_size();
-    Vector<FloatDP> c(n, 0.0);
-    Vector<FloatDP> y(m, 0.0);
-    Vector<FloatDP> x(n);
-    Vector<FloatDP> zl(n);
-    Vector<FloatDP> zu(n);
+    Vector<FloatDP> c(n,FloatDP(0.0_x,dp));
+    Vector<FloatDP> y(m,FloatDP(0.0_x,dp));
+    Vector<FloatDP> x(n,dp);
+    Vector<FloatDP> zl(n,dp);
+    Vector<FloatDP> zu(n,dp);
     for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
@@ -338,7 +338,7 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
         if(xl[i]==-inf) { zl[i] = 0.0_x; } else { zl[i] = 1.0_x; }
         if(xu[i]==+inf) { zu[i] = 0.0_x; } else { zu[i] = 1.0_x; }
     }
-    Vector<FloatDPBounds> X(n);
+    Vector<FloatDPBounds> X(n,dp);
     for(SizeType i=0; i!=n; ++i) {
         X[i]=FloatDPBounds(xl[i],xu[i]);
     }
@@ -390,7 +390,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     Vector<FloatDP> dx(n),dy(m),dzl(n),dzu(n);
     Vector<FloatDP> nx,ny,nzl,nzu;
     Vector<FloatDP> rx(m),ry(n),rzl(n),rzu(n);
-    Matrix<FloatDP> S(m,m);
+    Matrix<FloatDP> S(m,m,dp);
     DiagonalMatrix<FloatDP> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
 
     FloatDP mu = compute_mu(xl,xu, x,zl,zu) * sigma;
@@ -474,7 +474,7 @@ LinearProgramStatus InteriorPointSolver::
 _feasibility_step(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
                   Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const
 {
-    Vector<FloatDP> c(x.size(),0.0);
+    Vector<FloatDP> c(x.size(),FloatDP(0.0_x,dp));
     return this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
 }
 

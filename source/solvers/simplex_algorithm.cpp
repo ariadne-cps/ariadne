@@ -240,7 +240,7 @@ template<class X>
 Vector<X>
 compute_c(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, const Vector<RigorousNumericType<X>>& x, SizeType m) {
     const SizeType n=x.size();
-    Vector<X> c(n);
+    Vector<X> c(n,xl.zero_element());
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(possibly(x[j]<=xl[j])) { c[j]=-1; }
@@ -423,7 +423,7 @@ template<class X> Vector<X>
 compute_c(const SizeType m, const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, const Vector<X>& x)
 {
     const SizeType n=x.size();
-    Vector<X> c(n);
+    Vector<X> c(n,x.zero_element());
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(decide(x[j]<=xl[j])) { c[j]=-1; }
@@ -436,7 +436,7 @@ template<class X, class XX> Vector<X>
 compute_c(const SizeType m, const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, const Vector<XX>& x)
 {
     const SizeType n=x.size();
-    Vector<X> c(n);
+    Vector<X> c(n,xl.zero_element());
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         if(possibly(x[j]<=xl[j])) { c[j]=-1; }
@@ -460,8 +460,8 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
     const SizeType n=A.column_size();
     ARIADNE_ASSERT_MSG(p.size()==n, "vt="<<vt<<", p="<<p);
 
-    Vector<XX> w(m);
-    Vector<XX> x(n);
+    Vector<XX> w(m,B.zero_element());
+    Vector<XX> x(n,B.zero_element());
 
     // Compute x_N
     for(SizeType j=0; j!=n; ++j) {
@@ -547,7 +547,7 @@ Vector<XX>
 compute_y(const Vector<X>& c, const Array<SizeType>& p, const Matrix<XX>& B)
 {
     const SizeType m=B.row_size();
-    Vector<XX> y(m);
+    Vector<XX> y(m,c.zero_element()*B.zero_element());
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
         for(SizeType i=0; i!=m; ++i) {
@@ -564,7 +564,7 @@ compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, co
     const ExactDouble CUTOFF_THRESHOLD_DP(Ariadne::CUTOFF_THRESHOLD);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
-    Vector<XX> z(n);
+    Vector<XX> z(n,c.zero_element());
 
     // Shortcut if we can assume c_B - y A_B = 0
     for(SizeType k=0; k!=m; ++k) {
@@ -661,7 +661,7 @@ compute_d(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<XX>& B, con
 {
     const SizeType m=A.row_size();
     SizeType js=p[ks];
-    Vector<XX> d(m);
+    Vector<XX> d(m,B.zero_element());
     for(SizeType k=0; k!=m; ++k) {
         for(SizeType i=0; i!=m; ++i) {
             d[k]-=B[k][i]*A[i][js];
@@ -789,8 +789,8 @@ update_B(Matrix<X>& B, const Vector<X>& d, const SizeType r)
     const SizeType m=d.size();
     X dr=d[r];
     X drr=1/dr;
-    Vector<X> e(m); e[r]=1;
-    Vector<X> Br(m); for(Nat j=0; j!=m; ++j) { Br[j]=B[r][j]; }
+    Vector<X> e(m,B.zero_element()); e[r]=1;
+    Vector<X> Br(m,B.zero_element()); for(Nat j=0; j!=m; ++j) { Br[j]=B[r][j]; }
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=m; ++j) {
             B[i][j]-=(d[i]+e[i])*Br[j]*drr;
@@ -916,7 +916,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
 
     ValidatedKleenean feasible=true;
 
-    Vector<X> c(n);
+    Vector<X> c(n,b.zero_element());
     Vector<X> relaxed_xl(xl);
     Vector<X> relaxed_xu(xu);
     for(Nat i=0; i!=m; ++i) {
@@ -954,7 +954,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     // and the variable p[r] to leave the basis
     // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
-    SizeType r; XX t;
+    SizeType r; XX t=x.zero_element();
     make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         ARIADNE_LOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
@@ -1012,7 +1012,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     // and the variable p[r] to leave the basis
     // The bounds on t are given by xl <= x + t * d <= xu
     // Note that t is negative if an upper variable enters the basis
-    SizeType r; XX t;
+    SizeType r; XX t=x.zero_element();
     make_lpair(r,t)=compute_rt(xl,xu,vt,p,x,d,s);
     if(r==n) {
         ARIADNE_LOG_PRINTLN("Cannot find variable to enter basis; no improvement can be made");
@@ -1145,7 +1145,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
 
-    Vector<X> cc(n);
+    Vector<X> cc(n,b.zero_element());
     Vector<X> ll(xl);
     Vector<X> uu(xu);
 
@@ -1235,7 +1235,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
     const SizeType m=A.row_size();
 
     Array<SizeType> p;
-    Matrix<XX> B;
+    Matrix<XX> B(m,m,A.zero_element());
     make_lpair(p,B)=compute_basis(A);
 
     Array<Slackness> vt=compute_vt(xl,xu,p,m);
@@ -1243,7 +1243,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
     ARIADNE_LOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    Vector<XX> y(m);
+    Vector<XX> y(m,x.zero_element());
 
     return this->hotstarted_feasible(xl,xu,A,b,vt,p,B,x,y);
 }
@@ -1271,7 +1271,7 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     ARIADNE_LOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    Vector<XX> y(m);
+    Vector<XX> y(m,x.zero_element());
 
     return this->hotstarted_feasible(xl,xu,A,b,vt,p,B,x,y);
 }
@@ -1484,8 +1484,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
     consistency_check(vt,p);
     this->consistency_check(A,p,B);
 
-    Vector<XX> x(n);
-    x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
+    Vector<XX> x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
     ARIADNE_LOG_PRINTLN("Initial A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x);
 
     this->_feasible(xl,xu,A,b, vt,p,B,x);

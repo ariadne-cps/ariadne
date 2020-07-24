@@ -71,7 +71,6 @@ template<class F> class Error
     operator PositiveUpperBound<F> const& () const { return reinterpret_cast<PositiveUpperBound<F>const&>(*this); }
     operator PositiveUpperBound<F>& () { return reinterpret_cast<PositiveUpperBound<F>&>(*this); }
   public:
-    Error<F>() : _e() { }
     explicit Error<F>(PR const& pr) : _e(pr) { }
     // Check error not being negative to allow for NaN as a valid input.
     explicit Error<F>(F const& x) : _e(x) { ARIADNE_PRECONDITION_MSG(!(this->_e<0),"e="<<*this); }

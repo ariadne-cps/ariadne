@@ -73,7 +73,7 @@ class TestAffineSet
         figure.clear();
 
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
+        x = Affine<FloatDPBounds>::variables(2,dp);
 
         set=ValidatedAffineConstrainedImageSet(D, {x[0]+2,x[0]+x[1]} );
 
@@ -92,7 +92,7 @@ class TestAffineSet
 
     Void test_constrained_image() {
         D = ExactBoxType::unit_box(3);
-        x = Affine<FloatDPBounds>::variables(3);
+        x = Affine<FloatDPBounds>::variables(3,dp);
 
         set=ValidatedAffineConstrainedImageSet(D, {2*x[0]+3*x[1]+x[2],x[0]+x[1]-2} );
 
@@ -111,7 +111,7 @@ class TestAffineSet
 
     Void test_separated() {
         D=ExactBoxType::unit_box(3);
-        x=Affine<FloatDPBounds>::variables(3);
+        x=Affine<FloatDPBounds>::variables(3,dp);
         set=ValidatedAffineConstrainedImageSet(D, {-0.9375_x+0.0625_x*x[0]+0.5_x*x[1],0.87890625_x-0.1171875_x*x[0]+x[1]+0.00390625_x*x[2]});
         set.new_parameter_constraint(-1.1875_x+0.0625_x*x[0]+x[1]<=0.0_x);
         ARIADNE_TEST_PRINT(set);
@@ -147,7 +147,7 @@ class TestAffineSet
 
         {
             D=ExactBoxType::unit_box(2);
-            x=Affine<FloatDPBounds>::variables(2);
+            x=Affine<FloatDPBounds>::variables(2,dp);
             set=ValidatedAffineConstrainedImageSet(D,{x[0],x[1]});
             set.new_parameter_constraint(x[0]+x[1]<=-0.5_x);
             ARIADNE_TEST_PRINT(set);
@@ -188,7 +188,7 @@ class TestAffineSet
 
         {
             D=ExactBoxType::unit_box(3);
-            x=Affine<FloatDPBounds>::variables(3);
+            x=Affine<FloatDPBounds>::variables(3,dp);
 
             set=ValidatedAffineConstrainedImageSet( D, {2.0_pr*x[0]+3.0_pr*x[1]+1.0_pr*x[2]+0.05_pr, x[0]+x[1]+2.051_pr} );
 
@@ -237,7 +237,7 @@ class TestAffineSet
 
     Void test_empty() {
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
+        x = Affine<FloatDPBounds>::variables(2,dp);
 
         set=ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x} );
         set.new_parameter_constraint(-1.0_x*x[1] <= -2.0_x);
@@ -253,13 +253,13 @@ class TestAffineSet
     Void test_invalid() {
         {
             D = ExactBoxType::unit_box(1);
-            x = Affine<FloatDPBounds>::variables(2);
+            x = Affine<FloatDPBounds>::variables(2,dp);
             ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x} ));
         }
         {
             D = ExactBoxType::unit_box(2);
-            x = Affine<FloatDPBounds>::variables(2);
-            auto a = Affine<FloatDPBounds>::variables(1);
+            x = Affine<FloatDPBounds>::variables(2,dp);
+            auto a = Affine<FloatDPBounds>::variables(1,dp);
             ARIADNE_TEST_FAIL(ValidatedAffineConstrainedImageSet(D, {0.125_x*x[0]+1.0_x, 0.125_x*x[1]+1.0_x}, {a[0]<=-0.25_x} ));
         }
     }
@@ -268,10 +268,10 @@ class TestAffineSet
         FloatDPValue e(0.25_x,dp);
         FloatDPBounds E = FloatDPBounds(-e,+e);
         D = ExactBoxType::unit_box(2);
-        x = Affine<FloatDPBounds>::variables(2);
+        x = Affine<FloatDPBounds>::variables(2,dp);
         ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+E/2, 0.25_x*x[0]-0.25_x*x[1]+E} );
         D = ExactBoxType::unit_box(4);
-        x = Affine<FloatDPBounds>::variables(4);
+        x = Affine<FloatDPBounds>::variables(4,dp);
         ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_x*x[0]+0.25_x*x[1]+e*x[2]/2, 0.25_x*x[0]-0.25_x*x[1]+e*x[3]} );
 
         figure.clear();
@@ -318,7 +318,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate two-dimensional image set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{1.0,13.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[1]});
@@ -328,7 +328,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate two-dimensional constrained image set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d(4.0,13.0);
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[1]},{a[0]+a[1]<=0.5_x});
@@ -338,7 +338,7 @@ class TestAffineSet
 
         {
             // Test draw of two-dimensional image set with errors
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,13.0};
             FloatDPBounds e=FloatDPBounds(-1.0_x,+1.0_x,dp);
@@ -350,7 +350,7 @@ class TestAffineSet
 
         {
             // Test draw of nondegenerate one-dimensional image set
-            a=Affine<FloatDPBounds>::variables(1);
+            a=Affine<FloatDPBounds>::variables(1,dp);
             dom=ExactBoxType::unit_box(1);
             offsets=FloatDPValueVector2d{1.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[0]},{0.0_x*a[0]<=1.0_x,a[0]==0.75_x});
@@ -360,7 +360,7 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional image set
-            a=Affine<FloatDPBounds>::variables(1);
+            a=Affine<FloatDPBounds>::variables(1,dp);
             dom=ExactBoxType::unit_box(1);
             offsets=FloatDPValueVector2d{4.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_x*a[0],o[1]+0.25_x*a[0]});
@@ -370,7 +370,7 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional constraint set
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.0_x*a[0]<=1.0_x,a[0]+a[1]==0.5_x});
@@ -380,7 +380,7 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional constraint set with one proper constraint on boundary
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{10.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_x<=a[0], a[1]<=0.5_x});
@@ -390,7 +390,7 @@ class TestAffineSet
 
         {
             // Test draw of set with constraint a<=0 and a>=0
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_x*a[1]<=0.75_x,0.75_x<=a[0]+0.5_x*a[1]});
@@ -400,7 +400,7 @@ class TestAffineSet
 
         {
             // Test draw of set with constraint 0<=a<=0
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{13.0,1.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_x<=a[0]+0.5_x*a[1]<=0.75_x});
@@ -410,7 +410,7 @@ class TestAffineSet
 
         {
             // Test draw of set with degenerate constraints at corner of box
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{1.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_x*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
@@ -420,7 +420,7 @@ class TestAffineSet
 
         {
             // Test draw of set with degenerate constraints near corner of box
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{4.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_x*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
@@ -430,7 +430,7 @@ class TestAffineSet
 
         {
             // Test draw of set repeated constraints
-            a=Affine<FloatDPBounds>::variables(2);
+            a=Affine<FloatDPBounds>::variables(2,dp);
             dom=ExactBoxType::unit_box(2);
             offsets=FloatDPValueVector2d{7.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_x*a[1]<=2.0_x,a[0]/3.0_x+a[1]*2.0_x/3.0_x<=0.333333333333333333_pr});
@@ -440,7 +440,7 @@ class TestAffineSet
 
         {
             // Test draw of projection of three-dimensional box with single equality constraint
-            a=Affine<FloatDPBounds>::variables(3);
+            a=Affine<FloatDPBounds>::variables(3,dp);
             dom=ExactBoxType::unit_box(3);
             offsets=FloatDPValueVector2d{10.0,4.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2.0_x*a[1]+a[2]==1.5_x});
@@ -450,7 +450,7 @@ class TestAffineSet
 
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
-            a=Affine<FloatDPBounds>::variables(3);
+            a=Affine<FloatDPBounds>::variables(3,dp);
             dom=ExactBoxType::unit_box(3);
             offsets=FloatDPValueVector2d{1.0,7.0};
             set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_pr*a[0]+0.20_pr*a[1]+0.05_pr*a[2],o[1]-0.10_pr*a[0]+0.1_pr*a[1]+0.05_pr*a[2]},{a[1]-a[2]<=-0.25_x,a[0]+a[1]+a[2]==0.5_x});

@@ -856,6 +856,11 @@ InputStream& operator>>(InputStream& is, FloatDP& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
+template<class PR> PR make_default_precision();
+template<> DP make_default_precision<DP>() { return dp; }
+
+Float32::operator FloatDP() const { return FloatDP(cast_exact((double)this->flt),dp); }
+
 template<> String class_name<double>() { return "double"; }
 
 template<> String class_name<ExactDouble>() { return "ExactDouble"; }

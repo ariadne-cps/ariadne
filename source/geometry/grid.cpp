@@ -43,7 +43,7 @@ using ExactNumericType = Grid::ExactNumericType;
 using Double = double;
 
 namespace {
-FloatDP mul(RoundToNearest, FloatDP x1, double x2) { return FloatDP(x1.dbl*x2); }
+FloatDP mul(RoundToNearest, FloatDP x1, double x2) { return FloatDP(cast_exact(x1.dbl*x2),dp); }
 } // namespace
 
 struct Grid::Data
@@ -74,15 +74,15 @@ Grid& Grid::operator=(const Grid& gr)
 Grid::Grid(Nat d)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(d,FloatDP(0));
-    Vector<FloatDP> lengths(d,FloatDP(1));
+    Vector<FloatDP> origin(d,FloatDP(0,dp));
+    Vector<FloatDP> lengths(d,FloatDP(1,dp));
     this->_create(origin,lengths);
 }
 
 Grid::Grid(Nat d, FloatDP l)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(d,FloatDP(0));
+    Vector<FloatDP> origin(d,FloatDP(0,dp));
     Vector<FloatDP> lengths(d,l);
     this->_create(origin,lengths);
 }
@@ -96,7 +96,7 @@ Grid::Grid(Nat d, ApproximateDouble l)
 Grid::Grid(const Vector<FloatDP>& lengths)
     : _data(new Data())
 {
-    Vector<FloatDP> origin(lengths.size(),FloatDP(0));
+    Vector<FloatDP> origin(lengths.size(),FloatDP(0,dp));
     this->_create(origin,lengths);
 }
 
@@ -230,7 +230,7 @@ Array<Double> Grid::upper_index(const ExactBoxType& bx) const
 
 ExactPointType Grid::point(const Array<IntegerType>& a) const
 {
-    Vector<FloatDPValue> res(a.size());
+    Vector<FloatDPValue> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }
@@ -239,7 +239,7 @@ ExactPointType Grid::point(const Array<IntegerType>& a) const
 
 ExactPointType Grid::point(const Array<DyadicType>& a) const
 {
-    Vector<FloatDPValue> res(a.size());
+    Vector<FloatDPValue> res(a.size(),dp);
     for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=cast_exact(add(near,this->_data->_origin[i],mul(near,this->_data->_lengths[i],a[i])));
     }

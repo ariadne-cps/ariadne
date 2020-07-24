@@ -118,6 +118,8 @@ template<class F> PositiveUpperBound<F> psi1(PositiveUpperBound<F> const& xu) {
 }
 
 struct ErrorConstants {
+    typedef decltype(declval<ErrorType>().precision()) PrecisionType;
+
     ErrorType K; // K
     Vector<ErrorType> Kj; // K[j]
     ErrorType pK; // K'
@@ -155,7 +157,8 @@ struct ErrorConstants {
             FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
-private:
+    PrecisionType precision() const { return PrecisionType(); }
+  private:
     SizeType _dimension;
 };
 

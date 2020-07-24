@@ -44,6 +44,7 @@ namespace Ariadne {
 
 struct NoInit { };
 struct RawPtr { };
+struct DefaultTag;
 
 struct RoundUpward; struct RoundDownward;
 
@@ -58,6 +59,8 @@ class MultiplePrecision {
     mpfr_prec_t prec;
   public:
     typedef unsigned_mpfr_prec_t Type;
+    //! \brief
+//    explicit MultiplePrecision(DefaultTag const&);
     //! \brief
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
     //! \brief
@@ -402,6 +405,8 @@ class FloatMP {
 template<class R, class A> R integer_cast(const A& a);
 template<> inline Int integer_cast(const FloatMP& x) { return static_cast<Int>(x.get_d()); }
 template<> inline Nat integer_cast(const FloatMP& x) { return static_cast<Nat>(x.get_d()); }
+
+//inline MultiplePrecision::MultiplePrecision(DefaultTag const&) : MultiplePrecision(FloatMP::get_default_precision()) { }
 
 
 } // namespace Ariadne

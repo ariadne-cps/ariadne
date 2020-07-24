@@ -132,9 +132,6 @@ template<class X> class Matrix
     //! Destructor
     ~Matrix();
 
-    //! Default constructor makes a \f$0\times0\f$ matrix.
-    Matrix();
-
     //! Construct a matrix with \a m rows and \a n columns with values uninitialised.
     //! The values should be initialised using placement new.
     Matrix(SizeType m, SizeType n, Uninitialised);
@@ -468,10 +465,6 @@ template<class X1, class V2, EnableIf<IsVectorExpression<V2>> =dummy> inline Mat
 
 template<class X> inline Matrix<X>::~Matrix()
 {
-}
-
-template<class X> inline Matrix<X>::Matrix()
-    : _zero(), _rs(0), _cs(0), _ary() {
 }
 
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
@@ -847,7 +840,9 @@ struct ProvideMatrixOperations {
 };
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
-Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
+    : _zero(0.0_x,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+{
     typename InitializerList<InitializerList<ExactDouble>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
@@ -859,7 +854,9 @@ Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
 }
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
-Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
+Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
+    : _zero(0.0,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+{
     typename InitializerList<InitializerList<Dbl>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());

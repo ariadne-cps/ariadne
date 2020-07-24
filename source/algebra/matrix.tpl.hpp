@@ -28,10 +28,6 @@ namespace Ariadne {
 
 template<class X> inline X create_zero();
 
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, Uninitialised)
-    : _zero(), _rs(m), _cs(n), _ary(m*n,Uninitialised()) {
-}
-
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
     : _zero(nul(p[0])), _rs(m), _cs(n), _ary(p,p+m*n) {
 }
@@ -48,14 +44,16 @@ template<class X> Matrix<X> Matrix<X>::identity(SizeType n, X const& z) {
 }
 
 template<class X> Void Matrix<X>::resize(SizeType m, SizeType n) {
-    if(m*n != _rs*_cs) { _ary.resize(m*n); } _rs=m; _cs=n;
+    if(m*n != _rs*_cs) { _ary.resize(m*n,_zero); } _rs=m; _cs=n;
 }
 
 template<class X> X Matrix<X>::zero_element() const {
     return _zero;
 }
 
-template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs) {
+template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst)
+    : _zero(nul(*lst.begin()->begin())), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+{
     typename InitializerList<InitializerList<X>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());

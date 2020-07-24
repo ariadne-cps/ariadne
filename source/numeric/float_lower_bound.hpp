@@ -59,7 +59,6 @@ template<class F> class LowerBound
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    LowerBound<F>() : _l(0.0) { }
     explicit LowerBound<F>(PrecisionType pr) : _l(0.0,pr) { }
     explicit LowerBound<F>(RawType const& l) : _l(l) { }
 

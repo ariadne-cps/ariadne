@@ -74,7 +74,7 @@ make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
 inline Bool compatible(const FloatDP& x1, const FloatDP& x2) { return true; }
 template<class X> inline Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
-inline FloatDP create(const FloatDP& x) { return FloatDP(0); }
+inline FloatDP create(const FloatDP& x) { return FloatDP(0,dp); }
 //inline ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
 template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree(),x.zero_coefficient()); }
 

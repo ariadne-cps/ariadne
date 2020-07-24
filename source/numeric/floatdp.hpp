@@ -44,6 +44,8 @@
 
 namespace Ariadne {
 
+struct DefaultTag;
+
 class FloatDP;
 typedef FloatDP RawFloatDP;
 
@@ -54,6 +56,10 @@ enum class Comparison : char;
 //! \brief The precision of a FloatDP object. Since this is fixed, the class is only a tag; all objects are equal.
 //! \relates FloatDP
 class DoublePrecision {
+  public:
+    //! \brief Default constructor
+    constexpr DoublePrecision() { }
+    constexpr DoublePrecision(DefaultTag const&) { }
     //! \brief .
     friend constexpr DoublePrecision max(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
     //! \brief .
@@ -154,12 +160,13 @@ class FloatDP {
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);
+  private:
+    //! \brief Convert from a built-in double-precision floating-point number.
+    explicit FloatDP(double x) : dbl(x) { }
   public:
     //! \brief Default constructor creates an uninitialised number.
     FloatDP() : dbl() { }
     explicit FloatDP(DoublePrecision) : dbl() { }
-    //! \brief Convert from a built-in double-precision floating-point number.
-    explicit FloatDP(double x) : dbl(x) { }
     //! \brief Convert from a built-in double-precision floating-point number.
     explicit FloatDP(ExactDouble const& x);
     explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
@@ -431,7 +438,7 @@ struct Float32 {
     float flt;
   public:
     explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
-    explicit operator FloatDP() const { return FloatDP((double)this->flt); }
+    explicit operator FloatDP() const;
 };
 
 

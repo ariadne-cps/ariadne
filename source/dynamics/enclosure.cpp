@@ -1148,7 +1148,7 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
-        r.expansion().append(ra,FloatDPValue());
+        r.expansion().append(ra,FloatDPValue(dp));
         ra[number_of_kept_variables+index_of_error]=0;
         error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
@@ -1201,7 +1201,7 @@ Enclosure::kuhn_recondition()
 
     const ValidatedVectorMultivariateTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->state_function().reference());
     const Vector<ValidatedTaylorModelDP>& models = function.models();
-    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters());
+    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters(),dp);
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
@@ -1213,7 +1213,7 @@ Enclosure::kuhn_recondition()
     }
     Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters());
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(FloatDP(0.0),SizeType(j));
+        column_max_dependencies[j] = make_pair(FloatDP(0.0_x,dp),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }

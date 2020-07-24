@@ -41,6 +41,8 @@
 
 namespace Ariadne {
 
+struct DefaultTag;
+
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
@@ -87,8 +89,7 @@ template<class F> class Bounds
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Bounds<F>() : _l(0.0), _u(0.0) { }
-    explicit Bounds<F>(PrecisionType pr) : _l(0.0,pr), _u(0.0,pr) { }
+    explicit Bounds<F>(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
     explicit Bounds<F>(RawType const& v) : _l(v), _u(v) { }
     explicit Bounds<F>(RawType const& l, RawType const& u) : _l(l), _u(u) { }
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);

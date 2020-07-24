@@ -59,7 +59,6 @@ template<class F> class UpperBound
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    UpperBound<F>() : _u(0.0) { }
     explicit UpperBound<F>(PrecisionType pr) : _u(0.0,pr) { }
     explicit UpperBound<F>(RawType const& u) : _u(u) { }
 

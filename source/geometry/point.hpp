@@ -64,17 +64,22 @@ class Point
 {
   public:
     typedef X RealType;
-    //! Default constructor contructs the singleton point in zero dimensions.
-    Point() : Vector<RealType>() { }
+    //! A point in zero dimensions
+    explicit Point() : Vector<RealType>() { }
     //! The origin in \a n dimensions.
-    explicit Point(Nat n) : Vector<RealType>(n) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    explicit Point(Nat n, PRS... prs) : Vector<RealType>(n,X(0u,prs...)) { }
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
-    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy> Point(const Point<Y>& pt, PRS... prs) : Vector<RealType>(pt.vector(),prs...) { }
+    template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>> =dummy>
+    Point(const Point<Y>& pt, PRS... prs) : Vector<RealType>(pt.vector(),prs...) { }
     //! Construct from an initializer list of floating-point values.
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(SizeType n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.
     explicit Point(InitializerList<X> lst);
+    //! Construct from a size and an element generator
+    template<class G, EnableIf<IsInvocableReturning<X,G,SizeType>> =dummy>
+    Point(SizeType n, G const& g) : Vector<X>(n,g) { }
     //! Construct from an initializer list of floating-point values.
     template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
     explicit Point(InitializerList<ExactDouble> lst, PRS... prs);

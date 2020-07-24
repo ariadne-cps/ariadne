@@ -114,7 +114,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     for(Nat i=0; i!=image.size(); ++i) {
         if(definitely(disjoint(image[i],codomain[i]))) {
             ARIADNE_LOG_PRINTLN("Proved disjointness using direct evaluation");
-            return make_pair(false,ExactPointType());
+            return make_pair(false,ExactPointType(0u,dp));
         } else {
             bounds[i]=intersection(codomain[i],image[i]);
         }
@@ -126,10 +126,10 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     const Nat l=(m+n)*2; // The total number of lagrange multipliers
 
     DoublePrecision prec;
-    FloatApproximationVector point(m); // The point in the domain which is the current test point
-    FloatDPApproximation violation; // An upper bound on amount by which the constraints are violated by the test point
-    FloatApproximationVector multipliers(l); // The lagrange multipliers for the constraints
-    FloatApproximationVector slack(l); // The slack between the test point and the violated constraints
+    FloatApproximationVector point(m,dp); // The point in the domain which is the current test point
+    FloatDPApproximation violation(dp); // An upper bound on amount by which the constraints are violated by the test point
+    FloatApproximationVector multipliers(l,dp); // The lagrange multipliers for the constraints
+    FloatApproximationVector slack(l,dp); // The slack between the test point and the violated constraints
 
     FloatDPApproximation& t=violation; FloatApproximationVector& x=multipliers; FloatApproximationVector& y=point; FloatApproximationVector& z=slack; // Aliases for the main quantities used
     const ExactBoxType& d=domain; const ValidatedVectorMultivariateFunction& fn=function; const ExactBoxType& c=codomain; // Aliases for the main quantities used
@@ -345,7 +345,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
 
     ValidatedScalarMultivariateFunction derivative=function.derivative(variable);
 
-    FloatDPValue splitpoint;
+    FloatDPValue splitpoint(dp);
     UpperIntervalType lower=domain[variable];
     UpperIntervalType upper=domain[variable];
     Box<UpperIntervalType> slice=domain;
@@ -354,7 +354,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     static const Int MAX_STEPS=3;
     const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
     do {
-        FloatDPUpperBound ub; FloatDPUpperInterval ivl; FloatDPValue val; ub=val;
+        FloatDPUpperBound ub(dp); FloatDPUpperInterval ivl(-ub,+ub); FloatDPValue val(dp); ub=val;
 
         // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>threshold) {

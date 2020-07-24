@@ -66,7 +66,8 @@ operator*(const Matrix<FloatBounds<PR>>& A,const ValidatedVectorMultivariateFunc
 }
 
 template<class PR> FloatError<PR> sup_error(const ValidatedVectorMultivariateFunctionModel<PR>& x) {
-    FloatError<PR> r; r=0u;
+    assert(x.size()>0);
+    FloatError<PR> r(0u,x[0].error().precision());
     for(Nat i=0; i!=x.size(); ++i) { r=max(r,x[i].error()); }
     return r;
 }
@@ -135,7 +136,7 @@ auto SolverBase::solve_all(const ValidatedVectorMultivariateFunction& f,
     Vector<FloatDPBounds> x=cast_singleton(bx);
 
     // Test for no solution
-    const Vector<ValidatedNumericType> z(bx.size());
+    const Vector<ValidatedNumericType> z(bx.size(),dp);
     if(inconsistent(f.evaluate(x),z)) {
         return r;
     }
@@ -216,7 +217,7 @@ auto SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
     const ExactDouble e=this->maximum_error();
     Nat n=this->maximum_number_of_steps();
     Vector<ValidatedNumericType> r=cast_singleton(bx);
-    Vector<ValidatedNumericType> nr(r.size());
+    Vector<ValidatedNumericType> nr(r.size(),dp);
     Bool has_solution=false;
     while(n>0) {
         nr=this->step(f,r);
@@ -236,7 +237,7 @@ auto SolverBase::zero(const ValidatedVectorMultivariateFunction& f,
         r=refinement(nr,r);
         n=n-1;
     }
-    if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size()))) {
+    if(!consistent(f.evaluate(r),Vector<ValidatedNumericType>(f.result_size(),dp))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
         FloatDPError widen=FloatDPError(FloatDP::eps(dp))*sup_error(r);
@@ -519,15 +520,15 @@ KrawczykSolver::implicit_step(const ValidatedVectorMultivariateFunction& f,
     ValidatedVectorMultivariateFunctionModelDP mx(x);
     for(Nat i=0; i!=mx.size(); ++i) { mx[i].clobber(); }
     ARIADNE_LOG_PRINTLN("mx="<<mx);
-    Vector<FloatDPError> ex(nx);
+    Vector<FloatDPError> ex(nx,dp);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<ValidatedNumericType> eix=make_bounds(ex);
     ARIADNE_LOG_PRINTLN("ex="<<ex);
     ValidatedVectorMultivariateFunctionModelDP fm=compose(f,join(p,mx));
     ARIADNE_LOG_PRINTLN_AT(1,"f(p,mx)="<<fm);
-    Vector<ValidatedNumericType> rp(np);
+    Vector<ValidatedNumericType> rp(np,dp);
     for(Nat i=0; i!=np; ++i) { rp[i]=cast_singleton(p[i].range()); }
-    Vector<ValidatedNumericType> rx(nx);
+    Vector<ValidatedNumericType> rx(nx,dp);
     for(Nat i=0; i!=nx; ++i) { rx[i]=cast_singleton(x[i].range()); }
     Matrix<ValidatedNumericType> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
     ARIADNE_LOG_PRINTLN("D2f(r)=J="<<J);

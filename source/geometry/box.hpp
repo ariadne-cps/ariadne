@@ -471,15 +471,13 @@ template<class I> inline const Box<I> Box<I>::operator[](Range rng) const {
 }
 
 template<class I> inline auto cast_singleton(Box<I> const& bx) -> Vector<decltype(cast_singleton(declval<I>()))> {
-    Vector<decltype(cast_singleton(declval<I>()))> v(bx.dimension());
-    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i]); }
-    return v;
+    typedef decltype(cast_singleton(declval<I>())) X;
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i]);});
 }
 
 template<class I, class PR> inline auto cast_singleton(Box<I> const& bx, PR pr) -> Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> {
-    Vector<decltype(cast_singleton(declval<I>(),declval<PR>()))> v(bx.dimension(),pr);
-    for(SizeType i=0; i!=bx.dimension(); ++i) { v[i]=cast_singleton(bx[i],pr); }
-    return v;
+    typedef decltype(cast_singleton(declval<I>(),declval<PR>())) X;
+    return Vector<X>(bx.dimension(),[&](SizeType i){return cast_singleton(bx[i],pr);});
 }
 
 template<class I> inline Void Box<I>::draw(CanvasInterface& c, const Projection2d& p) const {

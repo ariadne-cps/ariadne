@@ -131,10 +131,11 @@ template<class I, class X> class Expansion {
     typedef typename UniformList<X>::ConstReference CoefficientConstReference;
 
     ~Expansion();
-    explicit Expansion(ArgumentSizeType as); // DEPRECATED
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        explicit Expansion(ArgumentSizeType as, PRS... prs) : Expansion(as,X(0u,prs...)) { } // DEPRECATED
     explicit Expansion(ArgumentSizeType as, X const& z, SizeType cap=DEFAULT_CAPACITY);
     Expansion(InitializerList<Pair<IndexInitializerType,X>> lst);
-    template<class PR, EnableIf<IsConstructible<X,PR>> =dummy>
+    template<class PR, EnableIf<IsConstructible<X,Nat,PR>> =dummy>
         explicit Expansion(ArgumentSizeType as, PR pr, SizeType cap=DEFAULT_CAPACITY);
     template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
         Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
@@ -240,9 +241,9 @@ public:
 };
 
 
-template<class I, class X> template<class PR, EnableIf<IsConstructible<X,PR>>>
+template<class I, class X> template<class PR, EnableIf<IsConstructible<X,Nat,PR>>>
 Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
-    : Expansion(as,X(0,pr),cap)
+    : Expansion(as,X(0u,pr),cap)
 {
 }
 

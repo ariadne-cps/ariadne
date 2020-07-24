@@ -251,7 +251,10 @@ void export_array(pybind11::module& module, const char* name)
 
     pybind11::class_<Array<T>> array_class(module,name);
     array_class.def(pybind11::init<Array<T>>());
-    array_class.def(pybind11::init<uint>());
+    if (IsDefaultConstructible<T>::value) {
+        array_class.def(pybind11::init<uint>());
+    }
+    array_class.def(pybind11::init<uint,T>());
     array_class.def("__len__", &Array<T>::size);
     array_class.def("__getitem__", &__getitem__<Array<T>,int,T>);
     array_class.def("__setitem__", &__setitem__<Array<T>,int,T>);
@@ -260,8 +263,10 @@ void export_array(pybind11::module& module, const char* name)
 
 
 namespace pybind11::detail {
+
+// The third template argument is 'true' if the array is resizable
 template <class T> struct type_caster<Ariadne::Array<T>>
-    : array_caster<Ariadne::Array<T>, T, true> { };
+    : array_caster<Ariadne::Array<T>, T, Ariadne::IsDefaultConstructible<T>::value> { };
 template <class T> struct type_caster<Ariadne::List<T>>
     : list_caster<Ariadne::List<T>, T> { };
 template <class T> struct type_caster<Ariadne::Set<T>>

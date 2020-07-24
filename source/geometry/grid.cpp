@@ -88,7 +88,7 @@ Grid::Grid(Nat d, FloatDP l)
 }
 
 Grid::Grid(Nat d, ApproximateDouble l)
-    : Grid(d,FloatDP(l,dp))
+    : Grid(d,FloatDP(cast_exact(l),dp))
 {
 }
 
@@ -113,8 +113,11 @@ Grid::Grid(const Vector<FloatDP>& origin, const Vector<FloatDP>& lengths)
     this->_create(origin,lengths);
 }
 
+inline Vector<FloatDP> cast_raw_vector(Vector<ApproximateDouble> const& v, DoublePrecision pr) {
+    return Vector<FloatDP>(v.size(),[&v,pr](SizeType i){return FloatDP(cast_exact(v[i]),pr);}); }
+
 Grid::Grid(const Vector<ApproximateDouble>& origin, const Vector<ApproximateDouble>& lengths)
-    : Grid(Vector<FloatDP>(origin,dp),Vector<FloatDP>(lengths,dp))
+    : Grid(cast_raw_vector(origin,dp),cast_raw_vector(lengths,dp))
 {
 }
 

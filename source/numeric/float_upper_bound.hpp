@@ -59,7 +59,7 @@ template<class F> class UpperBound
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    explicit UpperBound<F>(PrecisionType pr) : _u(0.0,pr) { }
+    explicit UpperBound<F>(PrecisionType pr) : _u(0.0_x,pr) { }
     explicit UpperBound<F>(RawType const& u) : _u(u) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> UpperBound<F>(N n, PR pr) : UpperBound<F>(ExactDouble(n),pr) { }

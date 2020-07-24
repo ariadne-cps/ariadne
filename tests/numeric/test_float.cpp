@@ -129,7 +129,6 @@ Int main() {
     ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(64_bits)));
     ARIADNE_TEST_CLASS(FloatMP,TestFloat<MultiplePrecision>(MultiplePrecision(192_bits)));
 
-
     return ARIADNE_TEST_FAILURES;
 }
 
@@ -296,8 +295,8 @@ TestFloat<PR>::test_class()
     if(not (precision==Float::get_default_precision())) {
         PR low_precision=min(precision,Float::get_default_precision());
         PR high_precision=max(precision,Float::get_default_precision());
-        ARIADNE_TEST_CONSTRUCT(Float,f4,(2.25,high_precision));
-        ARIADNE_TEST_CONSTRUCT(Float,f5,(3.75,low_precision));
+        ARIADNE_TEST_CONSTRUCT(Float,f4,(2.25_x,high_precision));
+        ARIADNE_TEST_CONSTRUCT(Float,f5,(3.75_x,low_precision));
         ARIADNE_TEST_EXECUTE(f5=f4);
         ARIADNE_TEST_EQUAL(f5.precision(),high_precision);
         ARIADNE_TEST_EQUAL(f5,f4);
@@ -314,9 +313,9 @@ TestFloat<PR>::test_class()
 template<class PR> Void
 TestFloat<PR>::test_limits()
 {
-    double pinf_d = std::numeric_limits<double>::infinity();
-    double ninf_d = -std::numeric_limits<double>::infinity();
-    double nan_d = std::numeric_limits<double>::quiet_NaN();
+    ExactDouble pinf_d = cast_exact(std::numeric_limits<double>::infinity());
+    ExactDouble ninf_d = cast_exact(-std::numeric_limits<double>::infinity());
+    ExactDouble nan_d = cast_exact(std::numeric_limits<double>::quiet_NaN());
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
@@ -366,20 +365,20 @@ TestFloat<PR>::test_limits()
     ARIADNE_TEST_ASSERT(not(nan> one));
     ARIADNE_TEST_ASSERT(not(one> nan));
 
-    ARIADNE_TEST_EQUALS(Float(pinf_d,precision).get_d(),pinf_d);
-    ARIADNE_TEST_EQUALS(Float(ninf_d,precision).get_d(),ninf_d);
+    ARIADNE_TEST_EQUALS(Float(pinf_d,precision).get_d(),pinf_d.get_d());
+    ARIADNE_TEST_EQUALS(Float(ninf_d,precision).get_d(),ninf_d.get_d());
     ARIADNE_TEST_ASSERT(is_nan(Float(nan_d,precision)));
 
-    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),precision).get_d(),pinf_d);
-    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),precision).get_d(),ninf_d);
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),precision).get_d(),pinf_d.get_d());
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),precision).get_d(),ninf_d.get_d());
     ARIADNE_TEST_ASSERT(is_nan(Float(Dyadic::inf(Sign::ZERO),precision)));
 
-    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),upward,precision).get_d(),pinf_d);
-    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),upward,precision).get_d(),ninf_d);
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::POSITIVE),upward,precision).get_d(),pinf_d.get_d());
+    ARIADNE_TEST_EQUALS(Float(Dyadic::inf(Sign::NEGATIVE),upward,precision).get_d(),ninf_d.get_d());
     ARIADNE_TEST_ASSERT(is_nan(Float(Dyadic::inf(Sign::ZERO),upward,precision)));
 
-    ARIADNE_TEST_EQUALS(Float(Rational::inf(Sign::POSITIVE),downward,precision).get_d(),pinf_d);
-    ARIADNE_TEST_EQUALS(Float(Rational::inf(Sign::NEGATIVE),downward,precision).get_d(),ninf_d);
+    ARIADNE_TEST_EQUALS(Float(Rational::inf(Sign::POSITIVE),downward,precision).get_d(),pinf_d.get_d());
+    ARIADNE_TEST_EQUALS(Float(Rational::inf(Sign::NEGATIVE),downward,precision).get_d(),ninf_d.get_d());
     ARIADNE_TEST_ASSERT(is_nan(Float(Rational::inf(Sign::ZERO),downward,precision)));
 }
 

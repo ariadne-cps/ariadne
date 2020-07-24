@@ -674,8 +674,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
     Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np,dp);
     for(Nat j=0; j!=nx; ++j) {
-        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+FloatDP(eps(),dp);
-        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+FloatDP(eps(),dp);
+        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+FloatDP(cast_exact(eps()),dp);
+        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+FloatDP(cast_exact(eps()),dp);
     }
     G[0][nx+nc+0]=FloatDP(1.0_x,dp);
     G[1][nx+nc+1]=FloatDP(1.0_x,dp);
@@ -711,7 +711,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         FloatDP fe=numeric_cast<FloatDP>(this->_constraint_models[i].function().error().raw());
         FloatDP cl=numeric_cast<FloatDP>(this->_constraint_models[i].lower_bound().value());
         FloatDP cu=numeric_cast<FloatDP>(this->_constraint_models[i].upper_bound().value());
-        b[i]=fb+FloatDP(eps(),dp);
+        b[i]=fb+FloatDP(cast_exact(eps()),dp);
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
     }

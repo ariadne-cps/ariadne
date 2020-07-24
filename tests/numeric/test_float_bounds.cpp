@@ -376,9 +376,9 @@ TestFloatBounds<PR>::test_constructors()
     ARIADNE_TEST_COMPARE(xd5.upper_raw(),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    FloatBoundsType xd6(RawFloatType(1.25));
-    ARIADNE_TEST_EQUAL(xd6.lower_raw(),RawFloatType(1.25));
-    ARIADNE_TEST_EQUAL(xd6.upper_raw(),RawFloatType(1.25));
+    FloatBoundsType xd6(RawFloatType(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),RawFloatType(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),RawFloatType(1.25_x,pr));
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_class()

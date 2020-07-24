@@ -71,7 +71,7 @@ template<class F> class Value
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    explicit Value<F>(PrecisionType pr) : _v(0.0,pr) { }
+    explicit Value<F>(PrecisionType pr) : _v(0.0_x,pr) { }
     explicit Value<F>(RawType const& v) : _v(v) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(Integer(n),pr) { }

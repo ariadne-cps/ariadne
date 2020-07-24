@@ -133,11 +133,13 @@ class FloatMP {
     explicit FloatMP(PrecisionType, NoInit);
     explicit FloatMP(const mpfr_t, RawPtr);
 
-    FloatMP();
+  private:
     explicit FloatMP(double);
-
+  public:
+    FloatMP();
     explicit FloatMP(PrecisionType);
-    explicit FloatMP(double, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatMP(N n, PrecisionType pr)
+        : FloatMP(ExactDouble(n),pr) { }
     explicit FloatMP(FloatDP const&, PrecisionType);
     explicit FloatMP(ExactDouble const& x, PrecisionType);
     explicit FloatMP(TwoExp const& x, PrecisionType);
@@ -146,13 +148,15 @@ class FloatMP {
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);
 
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP& operator=(const N& n) {
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
     FloatMP& operator=(const ExactDouble& x);
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(double, RoundingModeType, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP(N n, RoundingModeType rnd, PrecisionType pr)
+        : FloatMP(ExactDouble(n),rnd,pr) { }
+    FloatMP(ExactDouble, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
 
     FloatMP(Integer const&, RoundingModeType, PrecisionType);

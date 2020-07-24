@@ -65,10 +65,10 @@ template<class F, class FE> class Ball
     typedef PRE ErrorPrecisionType;
     typedef PR PropertiesType;
   public:
-    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0,pr), _e(0.0,_error_precision<PRE>(pr)) { }
-    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0,pr), _e(0.0,pre) { }
-    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0,_error_precision<PRE>(v.precision())) { }
-    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
+    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0_x,pr), _e(0.0_x,_error_precision<PRE>(pr)) { }
+    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
+    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
     Ball<F,FE>(Value<F> const& x, PRE pre);

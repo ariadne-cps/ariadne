@@ -159,7 +159,7 @@ template<class F> class Bounds
     friend Bounds<F> abs(Bounds<F> const& x) {
         if(x.lower_raw()>=0) { return Bounds<F>(x.lower_raw(),x.upper_raw());}
         else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
-        else { return Bounds<F>(F(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
+        else { return Bounds<F>(F(0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
     friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
         return PositiveLowerBound<F>(max(F(0,x.precision()),max(x._l,neg(x._u)))); }
     friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
@@ -176,8 +176,8 @@ template<class F> class Bounds
     friend Bounds<F> hlf(Bounds<F> const& x) {
         return Bounds<F>(hlf(x._l),hlf(x._u)); }
     friend Bounds<F> sqr(Bounds<F> const& x) {
-        if(x._l>0.0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
-        else if(x._u<0.0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); }
+        if(x._l>0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
+        else if(x._u<0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); }
         else { return Bounds<F>(nul(x._l),max(mul(up,x._l,x._l),mul(up,x._u,x._u))); } }
     friend Bounds<F> rec(Bounds<F> const& x) {
         if(x._l>0 || x._u<0) {  return Bounds<F>(rec(down,x._u),rec(up,x._l)); }

@@ -766,7 +766,7 @@ compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Sla
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( definitely(tk<t) || definitely(tk==t && p[k]<p[r])) { t=tk; r=k; }
         } else {
-            tk=XX(inf);
+            tk=XX(inf,pr);
         }
         ARIADNE_LOG_PRINTLN_AT(1,"k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t);
     }

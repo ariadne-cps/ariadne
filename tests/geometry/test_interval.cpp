@@ -98,7 +98,7 @@ TestIntervalType::test_constructors()
     FloatDP zero(0,dp);
 
     // Construct from pair
-    ExactIntervalType ivld1(FloatDP(1.125_x),FloatDP(2.25_x));
+    ExactIntervalType ivld1(FloatDP(1.125_x,dp),FloatDP(2.25_x,dp));
     ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125_x); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25_x);
 
     // Default constructor
@@ -127,9 +127,9 @@ TestIntervalType::test_constructors()
 //    ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    ExactIntervalType ivld6(FloatDP(1.25_x));
-    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),FloatDP(1.25_x));
-    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),FloatDP(1.25_x));
+    ExactIntervalType ivld6(FloatDP(1.25_x,dp));
+    ARIADNE_TEST_EQUAL(ivld6.lower(),1.25_x);
+    ARIADNE_TEST_EQUAL(ivld6.upper(),1.25_x);
 
     // Empty interval
     EmptyInterval empty_interval;
@@ -187,7 +187,7 @@ Void TestIntervalType::test_comparison() {
     ExactIntervalType& ivl1ref=ivl1;
     ivl1ref=ExactIntervalType(5.25_x,7.375_x);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==FloatDP(5.25_x));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower()==5.25_x);
 }
 
 Void TestIntervalType::test_geometric_predicates()

@@ -1209,7 +1209,7 @@ Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
     const DimensionType dimensions = _theGridCell.dimension();
     Nat max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
 
-    FloatDP theMaxCellWidth(theInputMaxCellWidth,dp);
+    FloatDP theMaxCellWidth(cast_exact(theInputMaxCellWidth),dp);
 
     for(Nat i = 0; i < dimensions; i++){
         //Get the number of required subdivisions in this dimension

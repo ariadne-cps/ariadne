@@ -656,7 +656,8 @@ template<class PR> void export_raw_float(pymodule& module)
     typedef Rounding RND;
 
     pybind11::class_<F> raw_float_class(module,("Float"+numeric_class_tag<PR>()).c_str());
-    raw_float_class.def(init<double,PR>());
+    raw_float_class.def(pybind11::init([](double d, PR pr){return F(cast_exact(d),pr); }));
+    raw_float_class.def(init<ExactDouble,PR>());
     raw_float_class.def(init<Dyadic,PR>());
     raw_float_class.def(init<Rational,RND,PR>());
 

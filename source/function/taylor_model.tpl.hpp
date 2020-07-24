@@ -1307,7 +1307,7 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::clobber() {
 template<class P, class F> auto TaylorModel<P,F>::tolerance() const -> RawFloatType {
     typedef RawFloatType FLT;
     const ThresholdSweeper<FLT>* ptr=dynamic_cast<const ThresholdSweeper<FLT>*>(&static_cast<const SweeperInterface<FLT>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : FLT(std::numeric_limits<double>::epsilon(),this->precision());
+    return (ptr) ? ptr->sweep_threshold() : FLT(cast_exact(std::numeric_limits<double>::epsilon()),this->precision());
 }
 
 

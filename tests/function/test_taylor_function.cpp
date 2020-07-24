@@ -441,7 +441,7 @@ Void TestVectorTaylorFunction::test_constructors()
 
 Void TestVectorTaylorFunction::test_restrict()
 {
-    Vector<RawFloatDP> unit0({1},pr);
+    Vector<RawFloatDP> unit0=Vector<RawFloatDP>::unit(1,0,pr);
 
     ExactBoxType domain1={{-1.0_x,+1.0_x},{-1.0_x,+1.0_x}};
     Expansion<MultiIndex,RawFloatDP> expansion1({{{0,0},1.0_x}, {{1,0},2.0_x},{{0,1},3.0_x}, {{2,0},4.0_x},{{1,1},5.0_x},{{0,2},6.0_x}, {{3,0},7.0_x},{{2,1},8.0_x},{{1,2},9.0_x},{{0,3},10.0_x}},pr);
@@ -463,6 +463,7 @@ Void TestVectorTaylorFunction::test_restrict()
     ValidatedVectorMultivariateTaylorFunctionModelDP restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
     FloatDPValue::set_output_places(18);
     FloatDPError::set_output_places(18);
+
     ARIADNE_TEST_SAME(restriction(function2,subdomain2),restricted_function2);
     ARIADNE_TEST_SAME(restriction(function2,subdomain2).domain(),restricted_function2.domain());
     ARIADNE_TEST_SAME(restriction(function2,subdomain2).error(),restricted_function2.error());
@@ -518,7 +519,7 @@ Void TestVectorTaylorFunction::test_antiderivative()
     SizeType index0=0;
     SizeType index1=1;
 
-    Vector<RawFloatDP> unit0({1},pr);
+    Vector<RawFloatDP> unit0=Vector<RawFloatDP>::unit(1,0,pr);
     ExactBoxType domain1={{-1,+1},{-1,+1}};
     Expansion<MultiIndex,RawFloatDP> expansion1({{{0,0},3.0_x}},pr);
     ValidatedVectorMultivariateTaylorFunctionModelDP function1(domain1,expansion1*unit0,swp);

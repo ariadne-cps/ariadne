@@ -33,7 +33,7 @@ namespace Ariadne {
 FloatError<DoublePrecision> operator"" _error(long double lx) {
     double x=lx;
     assert(x==lx);
-    return FloatError<DoublePrecision>(FloatDP(x,dp));
+    return FloatError<DoublePrecision>(FloatDP(cast_exact(x),dp));
 }
 
 
@@ -43,7 +43,7 @@ FloatBall<DoublePrecision> operator"" _near(long double lx) {
     volatile double e=le;
     while(e<le) { e=e*(1+std::numeric_limits<double>::epsilon()); }
 
-    return FloatBall<DoublePrecision>(FloatDP(x,dp),FloatDP(e,dp));
+    return FloatBall<DoublePrecision>(FloatDP(cast_exact(x),dp),FloatDP(cast_exact(e),dp));
 }
 
 
@@ -55,7 +55,7 @@ FloatUpperBound<DoublePrecision> operator"" _upper(long double lx) {
 
     while (x<lx) { x+=std::abs(x)*eps; }
 
-    return FloatUpperBound<DoublePrecision>(FloatDP(x,dp));
+    return FloatUpperBound<DoublePrecision>(FloatDP(cast_exact(x),dp));
 }
 
 
@@ -68,13 +68,13 @@ FloatLowerBound<DoublePrecision> operator"" _lower(long double lx) {
 
     while (x>lx) { x-=std::abs(x)*eps; }
 
-    return FloatLowerBound<DoublePrecision>(FloatDP(x,dp));
+    return FloatLowerBound<DoublePrecision>(FloatDP(cast_exact(x),dp));
 }
 
 
 FloatApproximation<DoublePrecision> operator"" _approx(long double lx) {
     double x=lx;
-    return FloatApproximation<DoublePrecision>(FloatDP(x,dp));
+    return FloatApproximation<DoublePrecision>(FloatDP(cast_exact(x),dp));
 }
 
 } // namespace Ariadne

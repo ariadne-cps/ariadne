@@ -61,15 +61,7 @@ FloatMP::FloatMP(const mpfr_t x, RawPtr) : FloatMP(NoInit()) {
     mpfr_set(this->_mpfr,x,MPFR_RNDN);
 }
 
-
-FloatMP::FloatMP(double d) : FloatMP(d,get_default_precision()) {
-}
-
-FloatMP::FloatMP(double d, MultiplePrecision pr) : FloatMP(d,MPFR_RNDN,pr) {
-    ARIADNE_ASSERT(d==this->get_d() || std::isnan(d));
-}
-
-FloatMP::FloatMP(FloatDP const& x, MultiplePrecision pr) : FloatMP(x.get_d(),pr) {
+FloatMP::FloatMP(FloatDP const& x, MultiplePrecision pr) : FloatMP(cast_exact(x.get_d()),pr) {
 }
 
 FloatMP::FloatMP(MultiplePrecision pr) {
@@ -81,7 +73,7 @@ FloatMP::FloatMP(MultiplePrecision pr, NoInit) {
     mpfr_init2(_mpfr,pr);
 }
 
-FloatMP::FloatMP(ExactDouble const& d, MultiplePrecision pr) : FloatMP(d.get_d(),get_rounding_mode(),pr) {
+FloatMP::FloatMP(ExactDouble const& d, MultiplePrecision pr) : FloatMP(d,get_rounding_mode(),pr) {
 }
 
 FloatMP::FloatMP(TwoExp const& t, MultiplePrecision pr) {
@@ -92,9 +84,9 @@ FloatMP::FloatMP(TwoExp const& t, MultiplePrecision pr) {
 FloatMP::FloatMP(Dyadic const& w, MultiplePrecision pr) : FloatMP(w,get_rounding_mode(),pr) {
 }
 
-FloatMP::FloatMP(double d, RoundingModeType rnd, MultiplePrecision pr) {
+FloatMP::FloatMP(ExactDouble d, RoundingModeType rnd, MultiplePrecision pr) {
     mpfr_init2(_mpfr,pr);
-    mpfr_set_d(_mpfr,d,rnd);
+    mpfr_set_d(_mpfr,d.get_d(),rnd);
 }
 
 FloatMP::FloatMP(FloatDP const& x, RoundingModeType rnd, MultiplePrecision pr) {

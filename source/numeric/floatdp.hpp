@@ -168,24 +168,29 @@ class FloatDP {
     FloatDP() : dbl() { }
     explicit FloatDP(DoublePrecision) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
-    explicit FloatDP(ExactDouble const& x);
-    explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
+//    explicit FloatDP(ExactDouble const& x);
+//    explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP(N n, DoublePrecision) : dbl(n) { }
     FloatDP(ExactDouble const& x, DoublePrecision);
     FloatDP(TwoExp const& x, DoublePrecision);
     FloatDP(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     FloatDP(const FloatDP& x) : dbl(x.dbl) { }
     //! \brief Assignment.
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP& operator=(const N& n) {
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP& operator=(N n) {
         return this->operator=(ExactDouble(n)); }
     FloatDP& operator=(const ExactDouble& x);
     //! \brief Copy assignment.
     FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 
-    //! \brief Construct from a double number using given rounding
-    explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from another FloatDP using given rounding
     explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from an integer using given rounding
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatDP(N n, RoundingModeType rnd, PrecisionType pr)
+        : FloatDP(ExactDouble(n),rnd,pr) { }
+    //! \brief Construct from an integer using given rounding
+    explicit FloatDP(ExactDouble x, RoundingModeType rnd, PrecisionType pr)
+        : FloatDP(x.get_d()) { }
     //! \brief Construct from an integer number using given rounding
     explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a dyadic number with given rounding

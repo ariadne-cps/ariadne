@@ -165,8 +165,8 @@ print("f(a):",f(a))
 b=FloatDPBoundsVector([4,3,0],dpr)
 print("evaluate(f,b):",evaluate(f,b))
 
-p0=FloatDPApproximationMultivariatePolynomial.coordinate(2,0);
-p1=FloatDPApproximationMultivariatePolynomial.coordinate(2,1);
+p0=FloatDPApproximationMultivariatePolynomial.coordinate(2,0,dpr);
+p1=FloatDPApproximationMultivariatePolynomial.coordinate(2,1,dpr);
 print("p1:",p1)
 a3=FloatDPApproximation(3,dpr)
 a5=FloatDPApproximation(5,dpr)

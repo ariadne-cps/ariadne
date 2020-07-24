@@ -69,7 +69,7 @@ Void TestPolynomial::test()
 Void TestPolynomial::test_concept()
 {
     FloatDP x(0,dp);
-    Vector<FloatDP> v(3);
+    Vector<FloatDP> v(3,dp);
     MultiIndex a(3);
     MultivariatePolynomial<FloatDP> p(3,dp);
     const MultivariatePolynomial<FloatDP> cp(3,dp);

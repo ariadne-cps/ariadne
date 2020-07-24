@@ -44,7 +44,7 @@
 
 namespace Ariadne {
 
-struct DefaultTag;
+struct NoInit { };
 
 class FloatDP;
 typedef FloatDP RawFloatDP;
@@ -59,7 +59,6 @@ class DoublePrecision {
   public:
     //! \brief Default constructor
     constexpr DoublePrecision() { }
-    constexpr DoublePrecision(DefaultTag const&) { }
     //! \brief .
     friend constexpr DoublePrecision max(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
     //! \brief .
@@ -161,11 +160,12 @@ class FloatDP {
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);
   private:
+    //! \brief Default constructor creates an uninitialised number.
+    FloatDP() : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
     explicit FloatDP(double x) : dbl(x) { }
   public:
-    //! \brief Default constructor creates an uninitialised number.
-    FloatDP() : dbl() { }
+    explicit FloatDP(NoInit) : dbl() { }
     explicit FloatDP(DoublePrecision) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
 //    explicit FloatDP(ExactDouble const& x);

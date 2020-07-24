@@ -397,7 +397,8 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, B
 {
     const F& x1l=x1._l; const F& x1u=x1._u;
     const F& x2l=x2._l; const F& x2u=x2._u;
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr),ru(pr);
     if(x1l>=0) {
         if(x2l>=0) {
             rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
@@ -432,7 +433,8 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
 {
     const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr),ru(pr);
 
     // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
     if(x2l>0) {
@@ -455,7 +457,6 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
     }
     else {
         //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-        PR pr=max(x1.precision(),x2.precision());
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     }

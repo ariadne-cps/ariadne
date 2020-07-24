@@ -456,20 +456,20 @@ TestFloat<PR>::test_stream()
     cout << __PRETTY_FUNCTION__ << endl;
 
     stringstream ss("1.25 -2.25 42 2.375e1 2.35e1");
-    Float f1,f2,f3,f4,f5;
+    Float f1(precision),f2(precision),f3(precision),f4(precision),f5(precision);
     ss >> f1;
     cout << f1 << endl;
-    ARIADNE_TEST_EQUALS(f1,1.25);
+    ARIADNE_TEST_EQUALS(f1,1.25_x);
     ss >> f2;
     cout << f2 << endl;
-    ARIADNE_TEST_EQUALS(f2,-2.25);
+    ARIADNE_TEST_EQUALS(f2,-2.25_x);
     ss >> f3;
     cout << f3 << endl;
-    ARIADNE_TEST_EQUALS(f3,42.0);
+    ARIADNE_TEST_EQUALS(f3,42.0_x);
     try {
         ss >> f4;
         cout << f4 << endl;
-        if(f4!=23.75) {
+        if(f4!=23.75_x) {
             ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.375e1");
         }
     }
@@ -480,7 +480,7 @@ TestFloat<PR>::test_stream()
     try {
         ss >> f5;
         cout << f5 << endl;
-        if(f4!=23.5) {
+        if(f4!=23.5_x) {
             ARIADNE_TEST_WARN("Cannot create Float<"<<class_name<PR>()<<"> from string literal in exponential form 2.35e1");
         }
     }
@@ -833,13 +833,10 @@ TestFloat<PR>::test_function()
 
     cout << setprecision(20);
 
-    // Set up some variables
-    Float x; Float ra; Float rl; Float ru;
-
-    x=1;
-    ra=exp(x);
-    rl=next(down,ra);
-    ru=next(up,ra);
+    Float x(1,precision);
+    Float ra=exp(x);
+    Float rl=next(down,ra);
+    Float ru=next(up,ra);
     ARIADNE_TEST_PRINT(rl);
     ARIADNE_TEST_PRINT(ru);
     ARIADNE_TEST_ASSERT(rl<ru);

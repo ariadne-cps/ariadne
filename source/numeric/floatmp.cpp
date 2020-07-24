@@ -52,11 +52,11 @@ FloatMP::FloatMP() {
     mpfr_init_set_si(_mpfr,0l,get_rounding_mode());
 }
 
-FloatMP::FloatMP(NoInit) {
+FloatMP::FloatMP(NoInit const&) {
     mpfr_init(_mpfr);
 }
 
-FloatMP::FloatMP(const mpfr_t x, RawPtr) : FloatMP(NoInit()) {
+FloatMP::FloatMP(const mpfr_t x, RawPtr const&) : FloatMP(NoInit()) {
     mpfr_set_prec(this->_mpfr,mpfr_get_prec(x));
     mpfr_set(this->_mpfr,x,MPFR_RNDN);
 }
@@ -69,7 +69,7 @@ FloatMP::FloatMP(MultiplePrecision pr) {
     mpfr_set_si(_mpfr,0l,get_rounding_mode());
 }
 
-FloatMP::FloatMP(MultiplePrecision pr, NoInit) {
+FloatMP::FloatMP(MultiplePrecision pr, NoInit const&) {
     mpfr_init2(_mpfr,pr);
 }
 

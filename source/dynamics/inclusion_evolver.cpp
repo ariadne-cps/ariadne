@@ -147,14 +147,14 @@ class InclusionEvolverState {
     }
 };
 
-inline Map<InclusionIntegratorHandle,FloatDP> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
+inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
 
     Nat total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InclusionIntegratorHandle,FloatDP> result;
+    Map<InclusionIntegratorHandle,ApproximateDouble> result;
     for (auto entry: approximation_global_frequencies) {
         result[entry.first] = 1/total_steps*entry.second;
     }

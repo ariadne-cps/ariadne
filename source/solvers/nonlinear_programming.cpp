@@ -786,10 +786,15 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 //------- NonlinearInfeasibleInteriorPointOptimiser -------------------------//
 
 struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {
+    PrimalDualData() : PrimalDualData(0u,0u,dp) { }
+    PrimalDualData(SizeType m, SizeType n, DP pr) : w(m,pr), x(n,pr), y(m,pr) { }
     RawFloatDPVector w,x,y;
 };
 
 struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualData {
+    StepData() : StepData(0u,0u,dp) { }
+    StepData(SizeType m, SizeType n, DP pr)
+        : PrimalDualData(m,n,pr), vl(m,pr), wl(m,pr), xl(n,pr), zl(n,pr), vu(m,pr), wu(m,pr), xu(n,pr), zu(n,pr), mu(pr) { }
     RawFloatDPVector vl,wl,xl,zl,vu,wu,xu,zu; FloatDP mu;
 };
 

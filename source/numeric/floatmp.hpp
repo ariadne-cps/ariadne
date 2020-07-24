@@ -42,7 +42,7 @@ namespace Ariadne {
 
 /************ FloatMP ********************************************************/
 
-struct NoInit { };
+struct NoInit;
 struct RawPtr { };
 struct DefaultTag;
 
@@ -129,14 +129,14 @@ class FloatMP {
     static FloatMP min(PrecisionType);
   public:
     ~FloatMP();
-    explicit FloatMP(NoInit);
-    explicit FloatMP(PrecisionType, NoInit);
-    explicit FloatMP(const mpfr_t, RawPtr);
+    explicit FloatMP(NoInit const&);
+    explicit FloatMP(PrecisionType, NoInit const&);
+    explicit FloatMP(const mpfr_t, RawPtr const&);
 
   private:
+    FloatMP();
     explicit FloatMP(double);
   public:
-    FloatMP();
     explicit FloatMP(PrecisionType);
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatMP(N n, PrecisionType pr)
         : FloatMP(ExactDouble(n),pr) { }

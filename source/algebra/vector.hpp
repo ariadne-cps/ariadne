@@ -242,7 +242,7 @@ class Vector
 
     //! \brief Resize to hold \a n elements.
     //! The previous values need not be preserved, and the new values need not be initialised.
-    Void resize(SizeType n) { this->_ary.resize(n); }
+    Void resize(SizeType n) { this->_ary.resize(n,this->zero_element()); }
     //! \brief The number of elements of the vector.
     SizeType size() const { return this->_ary.size(); }
     //! \brief A reference to the value stored in the \a i<sup>th</sup> element.

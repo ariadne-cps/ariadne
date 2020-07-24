@@ -420,7 +420,7 @@ Void TestVectorTaylorFunction::test_constructors()
     expansion[0]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},1.125_x}, {{1,0},-0.75_x}, {{0,1},0.0625_x}, {{2,0},-0.25_x} },pr);
     expansion[1]=Expansion<MultiIndex,RawFloatDP>({ {{0,0},0.750_x}, {{1,0},0.50_x} },pr);
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
-    Vector< RawFloatDP > errors(2);
+    Vector< RawFloatDP > errors(2,dp);
 
     ExactBoxType domain={{0.25_x,1.25_x},{0.5_x,1.0_x}};
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(2);

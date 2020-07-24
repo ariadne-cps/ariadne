@@ -107,7 +107,7 @@ TestVector::test_constructors()
 Void
 TestVector::test_comparisons()
 {
-    RawFloatDPVector v(2); v[0]=1.25_x; v[1]=-1.375_x;
+    RawFloatDPVector v(2,dp); v[0]=1.25_x; v[1]=-1.375_x;
     ARIADNE_TEST_PRINT( v );
     ARIADNE_TEST_COMPARE( v , ==, RawFloatDPVector({1.25_x,-1.375_x},dp) );
     ARIADNE_TEST_COMPARE( v , !=, RawFloatDPVector({1.25_x,-1.625_x},dp) );

@@ -90,7 +90,7 @@ template<class F> auto Operations<Bounds<F>>::_cos(Bounds<F> const& x) -> Bounds
     ARIADNE_ASSERT(y.lower_raw()<=pi_val.upper_raw());
     ARIADNE_ASSERT(y.upper_raw()>=-pi_val.upper_raw());
 
-    F rl,ru;
+    F rl(prec),ru(prec);
     if(y.lower_raw()<=-pi_val.lower_raw()) {
         if(y.upper_raw()<=0.0) { rl=-one; ru=cos(up,y.upper_raw()); }
         else { rl=-one; ru=+one; }
@@ -155,7 +155,7 @@ template<class F> auto Operations<Bounds<F>>::_cast_integer(Bounds<F> const& x) 
 
 template<class F> auto Operations<Bounds<F>>::_read(InputStream& is, Bounds<F>& x) -> InputStream& {
     char cl,cm,cr;
-    F _l,_u;
+    F _l(x.precision()),_u(x.precision());
     auto rnd=F::get_rounding_mode();
     is >> cl;
     F::set_rounding_downward();

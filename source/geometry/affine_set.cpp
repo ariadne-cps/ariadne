@@ -449,7 +449,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     // Create linear program
     LinearProgram<FloatDP> lp;
     this->construct_linear_program(lp);
-    Vector<FloatDP> errors(this->dimension());
+    Vector<FloatDP> errors(this->dimension(),dp);
     for(Nat i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error().raw();
     }
@@ -627,7 +627,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     }
     lp.B=Matrix<FloatDP>::identity(nx+nc,dp);
 
-    Vector<FloatDP> errors(this->dimension());
+    Vector<FloatDP> errors(this->dimension(),dp);
     for(Nat i=0; i!=this->dimension(); ++i) {
         errors[i]=this->_space_models[i].error().raw();
     }
@@ -679,7 +679,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     }
     G[0][nx+nc+0]=FloatDP(1.0_x,dp);
     G[1][nx+nc+1]=FloatDP(1.0_x,dp);
-    Vector<FloatDP> h(ne);
+    Vector<FloatDP> h(ne,dp);
     h[0]=numeric_cast<FloatDP>(xa.value());
     h[1]=numeric_cast<FloatDP>(ya.value());
     ARIADNE_LOG_PRINTLN("G="<<G)
@@ -757,10 +757,10 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     Vector<FloatDP> pt=G*x+h; // The current point in space
     Vector<FloatDP> last_vec({0.0_x,-1.0_x},dp); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
-    Vector<FloatDP> best_next_vec(2);
-    Vector<FloatDP> trial_vec(2);
-    Vector<FloatDP> Aj(nc); // The jth column of A
-    Vector<FloatDP> BAj(nc); // The jth column of A
+    Vector<FloatDP> best_next_vec(2,dp);
+    Vector<FloatDP> trial_vec(2,dp);
+    Vector<FloatDP> Aj(nc,dp); // The jth column of A
+    Vector<FloatDP> BAj(nc,dp); // The jth column of A
 
     Nat last_exiting_variable=np; // Last variable to exit the basis
 

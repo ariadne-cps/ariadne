@@ -381,7 +381,7 @@ normalise_rows(Matrix<X>& A)
 
     auto prev_rounding_mode=X::get_rounding_mode();
     X::set_rounding_upward();
-    Array<X> row_asums(m);
+    Array<X> row_asums(m,A.zero_element());
     for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0_x;
         for(SizeType j=0; j!=n; ++j) {

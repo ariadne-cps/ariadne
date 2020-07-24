@@ -1211,7 +1211,7 @@ Enclosure::kuhn_recondition()
             }
         }
     }
-    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters());
+    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDP(dp),0u));
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
         column_max_dependencies[j] = make_pair(FloatDP(0.0_x,dp),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {

@@ -72,7 +72,7 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
 InputStream&
 operator>>(InputStream& is, Interval<FloatDPValue>& ivl)
 {
-    FloatDP l,u;
+    FloatDP l(dp),u(dp);
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(not is.fail());

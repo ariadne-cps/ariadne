@@ -67,7 +67,7 @@ FloatDP compute_mu(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
 
 // Return r[i]=x[i]-c for i=1,...,n
 Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]-c;
     }
@@ -76,7 +76,7 @@ Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c) {
 
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i];
     }
@@ -85,7 +85,7 @@ Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y) {
 
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]/z[i];
     }
@@ -94,7 +94,7 @@ Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z) {
 
 // Return r[i]=x[i]*y[i]+z for i=1,...,n
 Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const FloatDP& z) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i]+z;
     }
@@ -103,7 +103,7 @@ Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const F
 
 // Return r[i]=1/y[i] for i=1,...,n
 Vector<FloatDP> erec(const Vector<FloatDP>& v) {
-    Vector<FloatDP> r(v.size());
+    Vector<FloatDP> r(v.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=rec(v[i]);
     }
@@ -294,9 +294,8 @@ hotstarted_minimise(const Vector<FloatDP>& c,
     const double maxerror=1e-3;
     const Nat maxsteps=10;
 
-    FloatDP cx,yb;
-    cx=dot(c,x);
-    yb=dot(y,b);
+    FloatDP cx=dot(c,x);
+    FloatDP yb=dot(y,b);
     ARIADNE_ASSERT(yb<=cx);
 
     ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c);
@@ -387,9 +386,9 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     const Nat m=A.row_size();
     const Nat n=A.column_size();
 
-    Vector<FloatDP> dx(n),dy(m),dzl(n),dzu(n);
+    Vector<FloatDP> dx(n,dp),dy(m,dp),dzl(n,dp),dzu(n,dp);
     Vector<FloatDP> nx,ny,nzl,nzu;
-    Vector<FloatDP> rx(m),ry(n),rzl(n),rzu(n);
+    Vector<FloatDP> rx(m,dp),ry(n,dp),rzl(n,dp),rzu(n,dp);
     Matrix<FloatDP> S(m,m,dp);
     DiagonalMatrix<FloatDP> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
 

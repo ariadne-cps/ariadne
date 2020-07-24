@@ -172,7 +172,7 @@ Void AffinePaver::adjoin_outer_approximation(PavingInterface& paving,
     for(Nat i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
         for(Nat n=0; n!=unsplitdomains.size(); ++n) {
-            Nat k; FloatDP err;
+            Nat k; FloatDP err(dp);
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==subdomain.size() || err < max_error) {

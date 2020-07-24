@@ -96,9 +96,9 @@ class SolverInterface
 
 
     //! \brief The maximum permissible error of the solution.
-    virtual FloatDPValue maximum_error() const = 0;
+    virtual ExactDouble maximum_error() const = 0;
     //! \brief Set the maximum error.
-    virtual Void set_maximum_error(RawFloatDP max_error) = 0;
+    virtual Void set_maximum_error(ApproximateDouble max_error) = 0;
 
     //! \brief The maximum number of steps allowed before the method must quit.
     virtual Nat maximum_number_of_steps() const = 0;

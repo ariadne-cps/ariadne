@@ -41,6 +41,8 @@
 
 namespace Ariadne {
 
+struct DefaultTag;
+
 static_assert(not IsGenericNumericType<FloatValue<DoublePrecision>>::value,"");
 static_assert(not IsGenericNumericType<FloatValue<MultiplePrecision>>::value,"");
 
@@ -69,8 +71,7 @@ template<class F> class Value
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Value<F>() : _v(0.0) { }
-    explicit Value<F>(PrecisionType pr) : _v(0.0,pr) { }
+    explicit Value<F>(PrecisionType pr) : _v(0.0_x,pr) { }
     explicit Value<F>(RawType const& v) : _v(v) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(Integer(n),pr) { }

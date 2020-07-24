@@ -117,7 +117,7 @@ template<class X> Void TestChebyshevPolynomial<X>::test_univariate() {
     ARIADNE_TEST_EQUALS(UnivariateChebyshevPolynomial<X>::basis(3u,pr),x*x*x*4-x*3);
     ARIADNE_TEST_EQUALS(UnivariateChebyshevPolynomial<X>::basis(4u,pr),x*x*x*x*8-x*x*8+1);
 
-    UnivariatePolynomial<X> p=UnivariatePolynomial<X>::coordinate();
+    UnivariatePolynomial<X> p=UnivariatePolynomial<X>::coordinate(pr);
     ARIADNE_TEST_PRINT(p);
 
     std::cout << "pnorm(x^4-x^2)=" << sup_norm(p*p*p*p-p*p) << "\n";

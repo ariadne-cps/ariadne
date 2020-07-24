@@ -32,14 +32,18 @@ namespace Ariadne {
 
 template<class I> decltype(auto) inline norm(Box<I> const& bx) { return norm(cast_vector(bx)); }
 
-template<> ErrorType wstar_multiplier<ZeroApproximation>() { return ErrorType(0u); }
-template<> ErrorType wstar_multiplier<ConstantApproximation>() { return ErrorType(1u); }
-template<> ErrorType wstar_multiplier<AffineApproximation>() { return ErrorType(5.0/3u); }
-template<> ErrorType wstar_multiplier<SinusoidalApproximation>() { return ErrorType(1.3645_upper); }
-template<> ErrorType wstar_multiplier<PiecewiseApproximation>() { return ErrorType(5.0/4u); }
+namespace {
+static const typename ErrorType::PrecisionType pr=typename ErrorType::PrecisionType();
+} // namespace
+
+template<> ErrorType wstar_multiplier<ZeroApproximation>() { return ErrorType(0u,pr); }
+template<> ErrorType wstar_multiplier<ConstantApproximation>() { return ErrorType(1u,pr); }
+template<> ErrorType wstar_multiplier<AffineApproximation>() { return ErrorType(5u,pr)/3u; }
+template<> ErrorType wstar_multiplier<SinusoidalApproximation>() { return ErrorType(1.3645_dec,pr); }
+template<> ErrorType wstar_multiplier<PiecewiseApproximation>() { return ErrorType(1.25_x,pr); }
 
 ErrorType vstar(BoxDomainType const& inputs) {
-    ErrorType result(0u);
+    ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size())) {
         result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper())));
     }
@@ -88,10 +92,9 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 
     auto n = noise_independent_component.result_size();
     auto m = input_derivatives.size();
-    DoublePrecision pr;
     ErrorType ze(pr);
     ErrorType K=ze, pK=ze, pKv=ze, pKw=ze, L=ze, pL=ze, pLv=ze, pLw=ze, H=ze, pH=ze, pHv=ze, pHw=ze;
-    Vector<ErrorType> Kj(n), pKj(n), pKjv(n), pKjw(n), Lj(n), pLj(n), pLjv(n), pLjw(n), Hj(n), pHj(n), pHjv(n), pHjw(n);
+    Vector<ErrorType> Kj(n,pr), pKj(n,pr), pKjv(n,pr), pKjw(n,pr), Lj(n,pr), pLj(n,pr), pLjv(n,pr), pLjw(n,pr), Hj(n,pr), pHj(n,pr), pHjv(n,pr), pHjw(n,pr);
     FloatDPUpperBound Lambda=ze;
 
     auto Df=noise_independent_component.differential(cast_singleton(B),2);
@@ -118,7 +121,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
         Hj[j] = H_j;
     }
 
-    Matrix<ErrorType> pK_ij(m,n), pL_ij(m,n), pH_ij(m,n);
+    Matrix<ErrorType> pK_ij(m,n,pr), pL_ij(m,n,pr), pH_ij(m,n,pr);
 
     for (auto i : range(m)) {
         auto Diff_g_i=input_derivatives[i].differential(cast_singleton(B),2);
@@ -221,11 +224,11 @@ template<class A, class R> Vector<ErrorType> ApproximationErrorProcessor<A,R>::p
 
     Vector<ErrorType> result_worstcase(n.dimension(),worstcase_error<A,R>(n,_inputs,h));
 
-    Vector<ErrorType> result_componentwise(n.dimension());
+    Vector<ErrorType> result_componentwise(n.dimension(),n.precision());
     for (auto j: range(n.dimension()))
         result_componentwise[j] = component_error<A,R>(n,_inputs,h,j);
 
-    Vector<ErrorType> result(n.dimension());
+    Vector<ErrorType> result(n.dimension(),n.precision());
     for (auto j: range(n.dimension())) {
         result[j] = min(result_worstcase[j],result_componentwise[j]);
     }

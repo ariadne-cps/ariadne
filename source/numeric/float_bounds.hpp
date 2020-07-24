@@ -41,6 +41,8 @@
 
 namespace Ariadne {
 
+struct DefaultTag;
+
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
@@ -87,8 +89,7 @@ template<class F> class Bounds
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Bounds<F>() : _l(0.0), _u(0.0) { }
-    explicit Bounds<F>(PrecisionType pr) : _l(0.0,pr), _u(0.0,pr) { }
+    explicit Bounds<F>(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
     explicit Bounds<F>(RawType const& v) : _l(v), _u(v) { }
     explicit Bounds<F>(RawType const& l, RawType const& u) : _l(l), _u(u) { }
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
@@ -158,9 +159,9 @@ template<class F> class Bounds
     friend Bounds<F> abs(Bounds<F> const& x) {
         if(x.lower_raw()>=0) { return Bounds<F>(x.lower_raw(),x.upper_raw());}
         else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
-        else { return Bounds<F>(F(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
+        else { return Bounds<F>(F(0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
     friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
-        return PositiveLowerBound<F>(max(0,max(x._l,neg(x._u)))); }
+        return PositiveLowerBound<F>(max(F(0,x.precision()),max(x._l,neg(x._u)))); }
     friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
         return PositiveUpperBound<F>(max(neg(x._l),x._u)); }
     friend ValidatedKleenean sgn(Bounds<F> const& x) {
@@ -175,8 +176,8 @@ template<class F> class Bounds
     friend Bounds<F> hlf(Bounds<F> const& x) {
         return Bounds<F>(hlf(x._l),hlf(x._u)); }
     friend Bounds<F> sqr(Bounds<F> const& x) {
-        if(x._l>0.0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
-        else if(x._u<0.0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); }
+        if(x._l>0) { return Bounds<F>(mul(down,x._l,x._l),mul(up,x._u,x._u)); }
+        else if(x._u<0) { return Bounds<F>(mul(down,x._u,x._u),mul(up,x._l,x._l)); }
         else { return Bounds<F>(nul(x._l),max(mul(up,x._l,x._l),mul(up,x._u,x._u))); } }
     friend Bounds<F> rec(Bounds<F> const& x) {
         if(x._l>0 || x._u<0) {  return Bounds<F>(rec(down,x._u),rec(up,x._l)); }
@@ -396,7 +397,8 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, B
 {
     const F& x1l=x1._l; const F& x1u=x1._u;
     const F& x2l=x2._l; const F& x2u=x2._u;
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr),ru(pr);
     if(x1l>=0) {
         if(x2l>=0) {
             rl=mul(down,x1l,x2l); ru=mul(up,x1u,x2u);
@@ -431,7 +433,8 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
 {
     const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr),ru(pr);
 
     // IMPORTANT: Need to be careful when one of the bounds is 0, since if x2l=-0.0 and x1u>0, then x2l>=0 but x1u/x2l=-inf
     if(x2l>0) {
@@ -454,7 +457,6 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, B
     }
     else {
         //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-        PR pr=max(x1.precision(),x2.precision());
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     }

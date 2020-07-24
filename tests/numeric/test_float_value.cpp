@@ -150,7 +150,7 @@ TestFloatValue<PR>::test_operations()
 
     ARIADNE_TEST_EQUALS(vx,w);
 
-    ARIADNE_TEST_EQUALS(FloatValueType(RawFloatType(1.25,pr)),1.25_dy);
+    ARIADNE_TEST_EQUALS(FloatValueType(RawFloatType(1.25_x,pr)),1.25_dy);
 
     ARIADNE_TEST_EQUALS(FloatValueType(3u,pr),3.0_dy);
     ARIADNE_TEST_EQUALS(FloatValueType(-5,pr),-5.0_dy);

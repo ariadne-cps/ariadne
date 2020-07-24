@@ -118,6 +118,8 @@ template<class F> PositiveUpperBound<F> psi1(PositiveUpperBound<F> const& xu) {
 }
 
 struct ErrorConstants {
+    typedef decltype(declval<ErrorType>().precision()) PrecisionType;
+
     ErrorType K; // K
     Vector<ErrorType> Kj; // K[j]
     ErrorType pK; // K'
@@ -155,7 +157,8 @@ struct ErrorConstants {
             FloatDPUpperBound,ErrorType,ErrorType> values() const;
 
     SizeType dimension() const { return _dimension; }
-private:
+    PrecisionType precision() const { return PrecisionType(); }
+  private:
     SizeType _dimension;
 };
 
@@ -241,7 +244,9 @@ ErrorType vstar(BoxDomainType const& inputs);
 template<class A> ErrorType wstar_multiplier();
 
 template<class A> ErrorType wstar(BoxDomainType const& inputs) {
-    ErrorType result(0u);
+    typedef typename ErrorType::PrecisionType PR;
+    PR pr;
+    ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size()))
         result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper()));
     return result;

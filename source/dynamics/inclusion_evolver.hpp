@@ -87,14 +87,14 @@ class LohnerReconditioner : public ReconditionerInterface {
     Nat _number_of_inputs;
     Nat _number_of_steps_between_simplifications;
     Nat _number_of_parameters_to_keep;
-    FloatDP _ratio_of_parameters_to_keep;
+    ExactDouble _ratio_of_parameters_to_keep;
 public:
-    LohnerReconditioner(Nat number_of_variables, Nat number_of_inputs, Nat number_of_steps_between_simplifications_, FloatDP ratio_of_parameters_to_keep)
+    LohnerReconditioner(Nat number_of_variables, Nat number_of_inputs, Nat number_of_steps_between_simplifications_, ApproximateDouble ratio_of_parameters_to_keep)
         : _number_of_variables(number_of_variables),
           _number_of_inputs(number_of_inputs),
           _number_of_steps_between_simplifications(number_of_steps_between_simplifications_),
           _number_of_parameters_to_keep(USHRT_MAX),
-          _ratio_of_parameters_to_keep(ratio_of_parameters_to_keep) { }
+          _ratio_of_parameters_to_keep(cast_exact(ratio_of_parameters_to_keep)) { }
     virtual LohnerReconditioner* clone() const override { return new LohnerReconditioner(*this); }
     virtual ValidatedVectorMultivariateFunctionModelType incorporate_errors(ValidatedVectorMultivariateFunctionModelType const& f) const override;
     virtual Void reduce_parameters(ValidatedVectorMultivariateFunctionModelType& f) const override;
@@ -154,8 +154,8 @@ class InclusionEvolver {
 class InclusionEvolverConfiguration : public ConfigurationInterface
 {
   public:
-    typedef FloatDPValue RealType;
-    typedef double RawRealType;
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
 
     //! \brief Default constructor gives reasonable values.
     InclusionEvolverConfiguration();
@@ -166,7 +166,7 @@ class InclusionEvolverConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    StepSizeType _maximum_step_size;
+    RealType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -181,12 +181,11 @@ class InclusionEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    Void maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+    Void maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const Bool& enable_parameter_reduction() const { return _enable_parameter_reduction; }
     Void enable_parameter_reduction(const Bool value) { _enable_parameter_reduction = value; }

@@ -35,7 +35,7 @@ const FloatDPValue infty = FloatDPValue(FloatDP::inf(dp));
 FloatValue<DoublePrecision> operator"" _exact(long double lx) {
     double x=lx;
     assert(x==lx);
-    return FloatValue<DoublePrecision>(x);
+    return FloatValue<DoublePrecision>(ExactDouble(x),dp);
 }
 
 template class Value<FloatDP>;

@@ -59,7 +59,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_inequality() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,1.0_x},{0.0_x,1.0_x}};
         List<EffectiveConstraint> c = {4<=2*x[0]+x[1]};
 
         ConstraintSolver propagator;
@@ -71,7 +71,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_equality() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,1.0},{0.0,1.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,1.0_x},{0.0_x,1.0_x}};
         List<EffectiveConstraint> c = {2*x[0]+x[1]==4};
 
         ConstraintSolver propagator;
@@ -83,7 +83,7 @@ class TestConstraintSolver
 
     Void test_empty_reduce_mixed() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,0.25_x},{0.0_x, 2.0_x}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -95,7 +95,7 @@ class TestConstraintSolver
 
     Void test_empty_hull_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,0.25_x},{0.0_x,2.0_x}};
         List<EffectiveConstraint> c = {x[1]<=1, x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -108,7 +108,7 @@ class TestConstraintSolver
 
     Void test_empty_box_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,0.25},{0.0, 2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,0.25_x},{0.0_x, 2.0_x}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
 
         ConstraintSolver propagator;
@@ -125,40 +125,40 @@ class TestConstraintSolver
 
     Void test_hull_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
         List<EffectiveConstraint> c = {-2<=2*x[0]+x[1]<=1};
 
         ConstraintSolver propagator;
 
         ARIADNE_TEST_EXECUTE(propagator.hull_reduce(D,c[0]));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.5},{0.0,1.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.5_x},{0.0_x,1.0_x}}));
     }
 
     Void test_box_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,2.0_x}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,1.25_x}}));
     }
 
 
     Void test_monotone_reduce() {
         List<EffectiveScalarMultivariateFunction> x=EffectiveScalarMultivariateFunction::coordinates(2);
-        UpperBoxType D = ExactBoxType{{0.0,2.0},{0.0,2.0}};
+        UpperBoxType D = ExactBoxType{{0.0_x,2.0_x},{0.0_x,2.0_x}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
 
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,0));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,2.0}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,2.0_x}}));
         ARIADNE_TEST_EXECUTE(propagator.box_reduce(D,c,1));
-        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0,0.75},{0.0,1.25}}));
+        ARIADNE_TEST_SAME(D,UpperBoxType({{0.0_x,0.75_x},{0.0_x,1.25_x}}));
     }
 
     Void test_split() {
@@ -177,13 +177,13 @@ class TestConstraintSolver
 
         ARIADNE_TEST_PRINT(constraints);
 
-        ExactBoxType domain1({{1.9375,2.0}});
+        ExactBoxType domain1({{1.9375_x,2.0_x}});
         ARIADNE_TEST_ASSERT(definitely(contractor.feasible(domain1,constraints).first));
 
-        ExactBoxType domain2({{2.015625,2.5}});
+        ExactBoxType domain2({{2.015625_x,2.5_x}});
         ARIADNE_TEST_ASSERT(!possibly(contractor.feasible(domain2,constraints).first));
 
-        ExactBoxType domain3({{2.0,2.015625}});
+        ExactBoxType domain3({{2.0_x,2.015625_x}});
         ARIADNE_TEST_ASSERT(is_indeterminate(contractor.feasible(domain3,constraints).first));
     }
 };

@@ -586,7 +586,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionMo
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
     FloatDP h=phi.domain()[phi.result_size()].upper().raw();
     ExactBoxType parameter_domain=this->parameter_domain();
-    ExactIntervalType time_domain=ExactIntervalType(0,h);
+    ExactIntervalType time_domain=ExactIntervalType(FloatDP(0,dp),h);
     ValidatedScalarMultivariateFunctionModelDP time_function=this->function_factory().create_identity(time_domain);
     this->_unchecked_new_variable(time_domain,EnclosureVariableKind::TEMPORAL);
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension());
@@ -911,9 +911,9 @@ Enclosure::splitting_index_zeroth_order() const
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=this->number_of_parameters();
-    FloatDP max_column_norm=0.0;
+    FloatDP max_column_norm(0.0_x,dp);
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        FloatDP column_norm=0.0;
+        FloatDP column_norm(0.0_x,dp);
         for(Nat i=0; i!=this->state_dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
@@ -936,11 +936,11 @@ Enclosure::split_first_order() const
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum=0.0;
+    FloatDP max_row_sum(0.0_x,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum=0.0;
-        FloatDP max_mag_j_in_i=0.0;
+        FloatDP row_sum(0.0_x,dp);
+        FloatDP max_mag_j_in_i(0.0_x,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -1148,7 +1148,7 @@ TaylorModel<ValidatedTag,FloatDP> recondition(const TaylorModel<ValidatedTag,Flo
         error_ptr = &r.error();
     } else {
         ra[number_of_kept_variables+index_of_error]=1;
-        r.expansion().append(ra,FloatDPValue());
+        r.expansion().append(ra,FloatDPValue(dp));
         ra[number_of_kept_variables+index_of_error]=0;
         error_ptr = reinterpret_cast<FloatDPError*>(&r.begin()->coefficient());
     }
@@ -1201,7 +1201,7 @@ Enclosure::kuhn_recondition()
 
     const ValidatedVectorMultivariateTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->state_function().reference());
     const Vector<ValidatedTaylorModelDP>& models = function.models();
-    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters());
+    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters(),dp);
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
@@ -1211,9 +1211,9 @@ Enclosure::kuhn_recondition()
             }
         }
     }
-    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters());
+    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDP(dp),0u));
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(FloatDP(0.0),SizeType(j));
+        column_max_dependencies[j] = make_pair(FloatDP(0.0_x,dp),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }

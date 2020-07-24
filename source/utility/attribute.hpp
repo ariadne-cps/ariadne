@@ -30,10 +30,12 @@
 #define ARIADNE_ATTRIBUTE_HPP
 
 #include "typedefs.hpp"
+#include "../numeric/builtin.hpp"
 
 namespace Ariadne {
 
 template<class T> class Generator {
+    typedef typename T::Type V;
   public:
     inline T operator=(const typename T::Type& v) const;
 };
@@ -42,22 +44,23 @@ template<class V> class Attribute {
     template<class T> friend class Generator;
   private:
     V _v;
-  protected:
-//    Attribute(const V& v) : _v(v) { }
-  public:
-//    explicit Attribute(const V& v) : _v(v) { }
+  protected: public:
     Attribute(const V& v) : _v(v) { }
   public:
     typedef V Type;
     operator V() const { return this->_v; }
+    V value() const { return this->_v; }
 };
 
 template<class T> inline T Generator<T>::operator=(const typename T::Type& v) const {
     Attribute<typename T::Type> attr(v); return static_cast<const T&>(attr); }
 
-struct MaximumError : Attribute<double> { using Attribute<double>::Attribute; };
-struct SweepThreshold : Attribute<double> { using Attribute<double>::Attribute; };
-struct MaximumNumericTypeOfSteps : Attribute<uint> { using Attribute<uint>::Attribute; };
+struct MaximumError : Attribute<ApproximateDouble> {
+    MaximumError(ApproximateDouble x) : Attribute<ApproximateDouble>(x) { }
+    MaximumError(double x) : Attribute<ApproximateDouble>(x) { }
+};
+struct SweepThreshold : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
+struct MaximumNumericTypeOfSteps : Attribute<Nat> { using Attribute<Nat>::Attribute; };
 
 static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
 static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();

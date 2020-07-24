@@ -281,7 +281,7 @@ template<class X> Void backpropagate(X const& r, Atan, X& a) { restrict(a,tan(r)
 template<class X> Void backpropagate(X const& r, Equal, X& a1, X& a2) {
     restrict(a1,r); restrict(a2,r); }
 template<class X> Void backpropagate(X const& r, Leq, X& a1, X& a2) {
-    FloatDPValue inf_(inf); restrict(a1,X(-inf_,a2.upper())); restrict(a1,X(a2.lower(),+inf_)); }
+    restrict(a1,X(-inf,a2.upper())); restrict(a1,X(a2.lower(),+inf)); }
 
 template<class X> Void backpropagate(X const& r, UnaryElementaryOperator eop, X& a) {
     return eop.accept([&r,&a](auto op){backpropagate(r,op,a);}); }
@@ -312,7 +312,6 @@ template<class X, class Y> Void _backpropagate(SizeType r, Vector<X>& x, List<X>
 
 template<class X, class Y> Void _backpropagate(Vector<X>& x, List<X>& v, const List<ProcedureInstruction>& p, const List<Y>& c)
 {
-    FloatDPValue inf_(inf);
     ARIADNE_ASSERT(v.size()==p.size());
     SizeType r=p.size();
     while(r!=0u) {

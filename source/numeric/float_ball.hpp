@@ -65,11 +65,10 @@ template<class F, class FE> class Ball
     typedef PRE ErrorPrecisionType;
     typedef PR PropertiesType;
   public:
-    Ball<F,FE>() : _v(0.0), _e(0.0) { }
-    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0,pr), _e(0.0,_error_precision<PRE>(pr)) { }
-    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0,pr), _e(0.0,pre) { }
-    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0,_error_precision<PRE>(v.precision())) { }
-    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0,pre) { }
+    explicit Ball<F,FE>(PrecisionType pr) : _v(0.0_x,pr), _e(0.0_x,_error_precision<PRE>(pr)) { }
+    explicit Ball<F,FE>(PrecisionType pr, ErrorPrecisionType pre) : _v(0.0_x,pr), _e(0.0_x,pre) { }
+    explicit Ball<F,FE>(F const& v) : _v(v), _e(0.0_x,_error_precision<PRE>(v.precision())) { }
+    explicit Ball<F,FE>(F const& v, PRE pre) : _v(v), _e(0.0_x,pre) { }
     explicit Ball<F,FE>(F const& v, FE const& e) : _v(v), _e(e) { }
     Ball<F,FE>(Value<F> const& value, Error<FE> const& error);
     Ball<F,FE>(Value<F> const& x, PRE pre);
@@ -434,7 +433,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     }
 
     static PositiveLowerBound<F> _mig(Ball<F,FE> const& x) {
-        return PositiveLowerBound<F>(max(0,sub(down,abs(x._v),x._e)));
+        return PositiveLowerBound<F>(max(F(0,x._v.precision()),sub(down,abs(x._v),x._e)));
     }
 
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.

@@ -59,11 +59,10 @@ template<class F> class Approximation
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    Approximation<F>() : _a(0.0) { }
-    explicit Approximation<F>(PrecisionType pr) : _a(0.0,pr) { }
+    explicit Approximation<F>(PrecisionType pr) : _a(0.0_x,pr) { }
     explicit Approximation<F>(RawType const& a) : _a(a) { }
 
-        Approximation<F>(double d, PR pr) : _a(d,near,pr) { }
+        Approximation<F>(double d, PR pr) : _a(cast_exact(d),near,pr) { }
         Approximation<F>(ExactDouble const& d, PR pr) : _a(d,pr) { }
         Approximation<F>(TwoExp const& t, PR pr) :_a(t,pr) { }
         Approximation<F>(const Integer& z, PR pr) : _a(z,near,pr) { }
@@ -85,7 +84,7 @@ template<class F> class Approximation
     Approximation<F>(LowerBound<F> const& x);
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Approximation<F>& operator=(N n) { this->_a=n; return *this; }
-    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> Approximation<F>& operator=(D x) { this->_a=x; return *this; }
+    template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> Approximation<F>& operator=(D x) { this->_a=ExactDouble(x); return *this; }
         Approximation<F>& operator=(const LowerBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const UpperBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const Bounds<F>& x) { return *this=Approximation<F>(x); }
@@ -101,6 +100,7 @@ template<class F> class Approximation
     PropertiesType properties() const { return _a.precision(); }
     GenericType generic() const { return this->operator GenericType(); }
     explicit operator RawType () const { return this->_a; }
+    explicit operator ApproximateDouble () const { return this->_a.get_d(); }
     RawType const& raw() const { return this->_a; }
     RawType& raw() { return this->_a; }
     double get_d() const { return this->_a.get_d(); }
@@ -134,7 +134,7 @@ template<class F> class Approximation
     friend Approximation<F> sqr(Approximation<F> const& x) {
         return Approximation<F>(mul(near,x._a,x._a)); }
     friend Approximation<F> rec(Approximation<F> const& x) {
-        return Approximation<F>(div(near,1.0,x._a)); }
+        return Approximation<F>(rec(near,x._a)); }
 
     friend Approximation<F> add(Approximation<F> const& x1, Approximation<F> const& x2) {
         return Approximation<F>(add(near,x1._a,x2._a)); }

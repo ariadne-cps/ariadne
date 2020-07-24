@@ -181,7 +181,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
 
         F::set_rounding_upward();
 
-        F te=0.0;
+        F te(0,prec);
         for(SizeType j=0; j!=n; ++j) {
             F mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
             F  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
@@ -277,7 +277,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
 
         F::set_rounding_upward();
 
-        F te=0.0;
+        F te(0,prec);
         for(SizeType j=0; j!=n; ++j) {
             F mca=(-cm)*a.gradient(j).raw();
             F ca= cm*a.gradient(j).raw();
@@ -286,7 +286,7 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         F mca=(-cm)*a.value().raw();
         F ca= cm*a.value().raw();
 
-        F re=0.0;
+        F re(0,prec);
         if(c.lower_raw()!=c.upper_raw()) {
             F ce=max(c.upper().raw()-cm,cm-c.lower().raw());
             for(SizeType j=0; j!=n; ++j) {
@@ -316,7 +316,7 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
         affine_model[j] = affine[j].value();
     }
     F::set_rounding_upward();
-    F e = 0.0;
+    F e(affine_model.error().precision());
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
         e += max(affine.gradient(j).upper().raw()-affine_model.gradient(j).raw(),affine_model.gradient(j).raw()-affine.gradient(j).lower().raw());
     }

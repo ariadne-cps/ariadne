@@ -76,13 +76,16 @@ template<class X> class Covector
         Covector(Covector<XX> const& u) : _ary(u._ary) { }
     template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
         explicit Covector(Covector<XX> const& u) : _ary(u._ary) { }
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> Covector(SizeType n, PRS... prs) : _ary(n,X(prs...)) { }
-    template<class XX, class PR, EnableIf<IsConstructible<X,XX,PR>> =dummy> Covector(Covector<XX> const& u, PR pr) : _ary(u.array(),pr) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        explicit Covector(SizeType n, PRS... prs) : _ary(n,X(0u,prs...)) { }
+    template<class XX, class PR, EnableIf<IsConstructible<X,XX,PR>> =dummy>
+        Covector(Covector<XX> const& u, PR pr) : _ary(u.array(),pr) { }
     explicit Covector() : _ary() { }
     explicit Covector(SizeType n) : _ary(n) { }
     explicit Covector(SizeType n, const X& x) : _ary(n,x) { }
     explicit Covector(Array<X> ary) : _ary(std::move(ary)) { }
-    static Covector<X> unit(SizeType n, SizeType j) { Covector<X> r(n); r[j]=1; return r; }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        static Covector<X> unit(SizeType n, SizeType j, PRS... prs) { Covector<X> r(n,prs...); r[j]=1; return r; }
     SizeType size() const { return _ary.size(); }
     Void resize(SizeType n) { _ary.resize(n); }
     const X& operator[](SizeType j) const { return _ary[j]; }

@@ -646,11 +646,6 @@ FloatDP::FloatDP(Dyadic const& w, PrecisionType)
     ARIADNE_ASSERT(Dyadic(*this)==w || is_nan(w));
 }
 
-FloatDP::FloatDP(double d, RoundingModeType rnd, PrecisionType)
-    : FloatDP(d)
-{
-}
-
 FloatDP::FloatDP(Integer const& x, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(Dyadic(x),rnd,pr)
 {
@@ -679,6 +674,8 @@ FloatDP::FloatDP(Decimal const& dec, RoundingModeType rnd, PrecisionType pr)
 {
 }
 
+inline Rational cast_rational(double d) { return Rational(ExactDouble(d)); }
+
 FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
     : FloatDP(q.get_d())
 {
@@ -686,12 +683,12 @@ FloatDP::FloatDP(Rational const& q, RoundingModeType rnd, PrecisionType pr)
         RoundingModeType old_rnd=get_rounding_mode();
         if(rnd==ROUND_UPWARD) {
             set_rounding_upward();
-            while (Rational(dbl)<q) { dbl=dbl+std::numeric_limits<double>::min(); }
+            while (cast_rational(dbl)<q) { dbl=dbl+std::numeric_limits<double>::min(); }
             set_rounding_mode(old_rnd);
         }
         if(rnd==ROUND_DOWNWARD) {
             set_rounding_downward();
-            while (Rational(dbl)>q) { dbl=dbl-std::numeric_limits<double>::min(); }
+            while (cast_rational(dbl)>q) { dbl=dbl-std::numeric_limits<double>::min(); }
             set_rounding_mode(old_rnd);
         }
     }
@@ -702,60 +699,65 @@ FloatDP::FloatDP(FloatDP const& x, RoundingModeType rnd, PrecisionType)
 {
 }
 
+FloatDP& FloatDP::operator=(ExactDouble const& x) {
+    this->dbl=x.get_d();
+    return *this;
+}
+
 FloatDP::operator Dyadic () const {
     return Dyadic(this->dbl);
 }
 
 FloatDP::operator Rational () const {
-    return Rational(this->dbl);
+    return Rational(ExactDouble(this->dbl));
 }
 
 FloatDP pow_rnd(FloatDP x, Int n)
 {
-    return pow_rnd(x.dbl,n);
+    return FloatDP(pow_rnd(x.dbl,n));
 }
 
 FloatDP sqrt_rnd(FloatDP x)
 {
-    return sqrt_rnd(x.dbl);
+    return FloatDP(sqrt_rnd(x.dbl));
 }
 
 FloatDP exp_rnd(FloatDP x)
 {
-    return exp_rnd(x.dbl);
+    return FloatDP(exp_rnd(x.dbl));
 }
 
 FloatDP log_rnd(FloatDP x)
 {
-    return log_rnd(x.dbl);
+    return FloatDP(log_rnd(x.dbl));
 }
 
 FloatDP sin_rnd(FloatDP x)
 {
-    return sin_rnd(x.dbl);
+    return FloatDP(sin_rnd(x.dbl));
 }
 
 FloatDP cos_rnd(FloatDP x)
 {
-    return cos_rnd(x.dbl);
+    return FloatDP(cos_rnd(x.dbl));
 }
 
 FloatDP tan_rnd(FloatDP x)
 {
-    return tan_rnd(x.dbl);
+    return FloatDP(tan_rnd(x.dbl));
 }
 
 FloatDP atan_rnd(FloatDP x)
 {
-    return atan_rnd(x.dbl);
+    return FloatDP(atan_rnd(x.dbl));
 }
 
 FloatDP FloatDP::pi(BuiltinRoundingModeType rnd, DoublePrecision pr) {
     switch(rnd) {
-        case FloatDP::ROUND_UPWARD: return _pi_up;
-        case FloatDP::ROUND_DOWNWARD: return _pi_down;
-        case FloatDP::ROUND_TO_NEAREST: return _pi_near;
-        default: assert(false); return _pi_near;
+        case FloatDP::ROUND_UPWARD: return FloatDP(_pi_up);
+        case FloatDP::ROUND_DOWNWARD: return FloatDP(_pi_down);
+        case FloatDP::ROUND_TO_NEAREST: return FloatDP(_pi_near);
+        default: assert(false); return FloatDP(_pi_near);
     }
 }
 
@@ -775,15 +777,15 @@ FloatDP::PrecisionType FloatDP::get_default_precision() { return FloatDP::Precis
 FloatDP::PrecisionType FloatDP::precision() const { return FloatDP::PrecisionType(); }
 Void FloatDP::set_precision(FloatDP::PrecisionType) { }
 
-FloatDP FloatDP::min(PrecisionType) { return std::numeric_limits<double>::min(); }
-FloatDP FloatDP::max(PrecisionType) { return std::numeric_limits<double>::max(); }
-FloatDP FloatDP::eps(PrecisionType) { return std::numeric_limits<double>::epsilon(); }
+FloatDP FloatDP::min(PrecisionType) { return FloatDP(std::numeric_limits<double>::min()); }
+FloatDP FloatDP::max(PrecisionType) { return FloatDP(std::numeric_limits<double>::max()); }
+FloatDP FloatDP::eps(PrecisionType) { return FloatDP(std::numeric_limits<double>::epsilon()); }
 
 FloatDP FloatDP::inf(Sign sgn, PrecisionType pr) {
     switch (sgn) {
-    case Sign::POSITIVE: return std::numeric_limits<double>::infinity();
-    case Sign::NEGATIVE: return -std::numeric_limits<double>::infinity();
-    default: return std::numeric_limits<double>::quiet_NaN();
+    case Sign::POSITIVE: return FloatDP(std::numeric_limits<double>::infinity());
+    case Sign::NEGATIVE: return FloatDP(-std::numeric_limits<double>::infinity());
+    default: return FloatDP(std::numeric_limits<double>::quiet_NaN());
     }
 }
 FloatDP FloatDP::inf(PrecisionType pr) { return FloatDP::inf(Sign::POSITIVE,pr); }
@@ -844,7 +846,14 @@ InputStream& operator>>(InputStream& is, FloatDP& x) {
     double r; is >> r; x.dbl=r; return is;
 }
 
+template<class PR> PR make_default_precision();
+template<> DP make_default_precision<DP>() { return dp; }
+
+Float32::operator FloatDP() const { return FloatDP(cast_exact((double)this->flt),dp); }
+
 template<> String class_name<double>() { return "double"; }
+
+template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 
 template<> String class_name<FloatDP>() { return "FloatDP"; }
 

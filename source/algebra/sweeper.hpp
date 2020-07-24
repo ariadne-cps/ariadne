@@ -190,6 +190,8 @@ template<class F> class ThresholdSweeper : public SweeperMixin<ThresholdSweeper<
   public:
     ThresholdSweeper(PR precision, F sweep_threshold)
         : _coefficient_precision(precision), _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0); }
+    ThresholdSweeper(PR precision, ApproximateDouble sweep_threshold)
+        : _coefficient_precision(precision), _sweep_threshold(cast_exact(sweep_threshold),precision) { ARIADNE_ASSERT(sweep_threshold>=0); }
     inline PR precision() const { return _coefficient_precision; }
     inline F sweep_threshold() const { return _sweep_threshold; }
     inline Bool discard(const MultiIndex& a, const F& x) const { return abs(x) < this->_sweep_threshold; }

@@ -1072,7 +1072,7 @@ inline Nat GridTreeSubpaving::compute_number_subdiv( FloatDP theWidth, const Flo
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div(approx, log(approx, div(approx, theWidth, theMaxWidth ) ) , log(approx, R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, FloatDP(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( near, log( near, div( near, theWidth, theMaxWidth ) ) , log( near, FloatDP(2.0_x,dp) ) ) ) );
     }
     return result;
 }
@@ -1197,7 +1197,7 @@ GridTreeSubpaving GridTreeSubpaving::branch(Bool left_or_right) const {
 }
 
 
-Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
+Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
     //1. Take the ExactBoxType of this GridTreeSubset's GridCell
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
@@ -1208,6 +1208,8 @@ Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
     //   in order to make the width in this dimension <= theMaxCellWidth.
     const DimensionType dimensions = _theGridCell.dimension();
     Nat max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
+
+    FloatDP theMaxCellWidth(cast_exact(theInputMaxCellWidth),dp);
 
     for(Nat i = 0; i < dimensions; i++){
         //Get the number of required subdivisions in this dimension
@@ -2107,7 +2109,7 @@ GridTreePaving::GridTreePaving( const GridCell& theGridCell  ) :
 }
 
 GridTreePaving::GridTreePaving( const Nat theDimension, const Bool enable ) :
-    GridTreeSubpaving( Grid( theDimension, FloatDP(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
+    GridTreeSubpaving( Grid( theDimension, FloatDP(1.0_x,dp) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
     //We want a [0,1]x...[0,1] cell in N dimensional space with no sxaling or shift of coordinates:
     //1. Create a new non scaling grid with no shift of the coordinates
     //2. The extent of the primary cell is zero, since is is [0,1]x...[0,1] itself

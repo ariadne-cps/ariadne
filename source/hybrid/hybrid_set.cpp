@@ -135,23 +135,16 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
     return os;
 }
 
-
+/*
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const Map<RealVariable,X>& x)
-    : HybridBasicSet<Point<X>>(q,make_list(x.keys()),Point<X>(x.size()))
+    : HybridPoint<X>(q,x.keys(),x.values())
 {
-    SizeType i=0;
-    for(auto iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=iter->second;
-    }
 }
+*/
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const List<Assignment<RealVariable,X>>& x)
-    : HybridBasicSet<Point<X>>(q,left_hand_sides(x),Point<X>(x.size()))
+    : HybridBasicSet<Point<X>>(q,left_hand_sides(x),Point<X>(x.size(),[&x](SizeType i){return x[i].right_hand_side();}))
 {
-    SizeType i=0;
-    for(auto iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=numeric_cast<X>(iter->right_hand_side());
-    }
 }
 
 template<class X> HybridPoint<X>::HybridPoint(const DiscreteLocation& q, const InitializerList<Assignment<RealVariable,X>>& x)

@@ -141,6 +141,7 @@ class Array {
     SizeType max_size() const { return (SizeType) (-1); }
     //! \brief Resizes the Array to hold \a n elements. If \a n is larger than the current size, the extra elements are default initialised.
     void resize(SizeType n) {
+        static_assert(IsDefaultConstructible<T>::value);
         if(size()!=n) {
             pointer _new_ptr=uninitialized_new(n);
             for(SizeType i=0; i!=n; ++i) { if(i<_size) { new (_new_ptr+i) T(_ptr[i]); } else { new (_new_ptr+i) T(); } }

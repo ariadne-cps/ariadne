@@ -70,8 +70,8 @@ Void TestMapEvolver::test() const
 
     // Define the initial box
     ExactBoxType initial_box(2);
-    initial_box[0]=ExactIntervalType(1.01,1.03);
-    initial_box[1]=ExactIntervalType(0.51,0.53);
+    initial_box[0]=ExactIntervalType(1.01_pr,1.03_pr);
+    initial_box[1]=ExactIntervalType(0.51_pr,0.53_pr);
 
     ARIADNE_TEST_PRINT(initial_box);
 
@@ -84,10 +84,10 @@ Void TestMapEvolver::test() const
 
     // Function evaluation sanity check
     Vector<FloatApproximation<PR>> p={{a,b},pr};
-    Vector<FloatApproximation<PR>> xa={{0.5,0.25},pr};
+    Vector<FloatApproximation<PR>> xa={{0.5_x,0.25_x},pr};
     Vector<FloatApproximation<PR>> hxa={p[0]-xa[0]*xa[0]+xa[1]*p[1], xa[0]};
     ARIADNE_TEST_EQUAL(henon.update_function().evaluate(xa),hxa);
-    Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{1.0_approx,0.0_approx}};
+    Matrix<FloatApproximation<PR>> dhxa={{-2*xa[0],p[1]},{{1.0,pr},{0.0,pr}}};
     ARIADNE_TEST_EQUAL(henon.update_function().jacobian(xa),dhxa);
 
 

@@ -373,7 +373,7 @@ template<class P> inline ScalarMultivariateFunctionModel<P,DoublePrecision> embe
 
 template<class P, class ARG, class PR, class PRE> inline
 ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const CanonicalNumericType<P,PR,PRE>& c) {
-    (*this)*=CanonicalNumericType<P,PR,PRE>(0); (*this)+=c; return *this; }
+    (*this)*=nul(c); (*this)+=c; return *this; }
 template<class P, class ARG, class PR, class PRE> inline
 ScalarFunctionModel<P,ARG,PR,PRE>& ScalarFunctionModel<P,ARG,PR,PRE>::operator=(const Number<P>& c) {
     return (*this)=factory(*this).create(c); }

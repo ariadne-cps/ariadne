@@ -157,7 +157,8 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
     pybind11::list const& row0=static_cast<pybind11::list const&>(row0_obj);
     SizeType rs=lst.size();
     SizeType cs=row0.size();
-    Matrix<X> r(rs,cs);
+    assert(rs!=0 && cs!=0);
+    Matrix<X> r(rs,cs,*row0[0].cast<X*>());
     for(SizeType i=0; i!=rs; ++i) {
         pybind11::object row_obj=lst[i];
         pybind11::list const& row=static_cast<pybind11::list const&>(row_obj);
@@ -207,19 +208,24 @@ template<class X>
 Void define_vector_constructors(pybind11::module& module, pybind11::class_<Vector<X>>& vector_class)
 {
     vector_class.def(pybind11::init<Vector<X>>());
-    if constexpr (IsDefaultConstructible<X>::value) {
-        vector_class.def(pybind11::init<Nat>()); }
+    if constexpr (IsConstructible<X,Nat>::value) {
+        vector_class.def(pybind11::init<Nat>());
+        vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType)) &Vector<X>::unit);
+        vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType)) &Vector<X>::basis);
+    }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
-        vector_class.def(pybind11::init<Nat,PR>());
+        if constexpr (IsConstructible<X,Nat,PR>::value) {
+            vector_class.def(pybind11::init<Nat,PR>());
+            vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType,PR)) &Vector<X>::unit);
+            vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType,PR)) &Vector<X>::basis);
+        }
     }
     vector_class.def(pybind11::init<Nat,X>());
-    vector_class.def_static("unit",&Vector<X>::unit);
-    vector_class.def_static("basis",&Vector<X>::basis);
     vector_class.def(pybind11::init([](pybind11::list const& lst){return Vector<X>(pybind11::cast<Array<X>>(lst));}));
 
     // Convert from a Python list and properties
-    if constexpr (HasGenericType<X>::value) {
+    if constexpr (HasGenericType<X>::value and HasPrecisionType<X>::value) {
         typedef typename X::GenericType Y; typedef typename X::PrecisionType PR;
         if constexpr(IsConstructible<Vector<X>,Vector<Y>,PR>::value) {
             vector_class.def(pybind11::init([](pybind11::list const& lst, PR pr){return Vector<X>(vector_from_python<Y>(lst),pr);}));
@@ -378,11 +384,14 @@ template<class X>
 Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& matrix_class)
 {
     matrix_class.def(pybind11::init<Matrix<X>>());
-    if constexpr (IsDefaultConstructible<X>::value) {
-        matrix_class.def(pybind11::init<Nat,Nat>()); }
+    if constexpr (IsConstructible<X,Nat>::value) {
+        matrix_class.def(pybind11::init<Nat,Nat>());
+        matrix_class.def_static("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
+    }
     if constexpr (HasPrecisionType<X>::value) {
         typedef typename X::PrecisionType PR;
         matrix_class.def(pybind11::init<Nat,Nat,PR>());
+        matrix_class.def_static("identity",(Matrix<X>(*)(SizeType,PR)) &Matrix<X>::identity);
     }
     matrix_class.def(pybind11::init<Nat,Nat,X>());
     matrix_class.def("rows", &Matrix<X>::row_size);
@@ -394,7 +403,6 @@ Void define_matrix_class(pybind11::module& module, pybind11::class_<Matrix<X>>& 
     matrix_class.def("__str__",&__cstr__<Matrix<X>>);
     matrix_class.def("__repr__",&__repr__<Matrix<X>>);
 
-    matrix_class.def_static("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
 
     matrix_class.def(pybind11::init([](pybind11::list const& lst){return matrix_from_python<X>(lst);}));
     pybind11::implicitly_convertible<pybind11::list,Matrix<X>>();
@@ -513,7 +521,13 @@ template<class X> Void export_matrix(pybind11::module& module)
 template<class X> Void export_diagonal_matrix(pybind11::module& module)
 {
     pybind11::class_<DiagonalMatrix<X>> diagonal_matrix_class(module,python_name<X>("DiagonalMatrix").c_str());
-    diagonal_matrix_class.def(pybind11::init<SizeType >());
+    if constexpr (IsConstructible<X,Nat>::value) {
+        diagonal_matrix_class.def(pybind11::init<SizeType>());
+    }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        diagonal_matrix_class.def(pybind11::init<SizeType,PR>());
+    }
     diagonal_matrix_class.def(pybind11::init<Vector<X>>());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get);

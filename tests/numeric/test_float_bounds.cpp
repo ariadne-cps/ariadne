@@ -55,11 +55,13 @@ class TestFloatBounds
     typedef FloatType<BoundedTag,PR> FloatBoundsType;
     typedef FloatType<ExactTag,PR> FloatValueType;
   private:
-    PR precision;
+    PR pr;
   public:
-    TestFloatBounds(PR prec) : precision(prec) { }
+    TestFloatBounds(PR prec) : pr(prec) { }
     Void test();
   private:
+    inline FloatBoundsType make_float_bounds(ExactDouble l, ExactDouble u) { return FloatBoundsType(l,u,pr); }
+
     Void test_concept();
     Void test_constructors();
     Void test_conversions();
@@ -148,40 +150,39 @@ template<class PR> Void
 TestFloatBounds<PR>::test_precision()
 {
 
-    FloatBoundsType bx(Rational(1),precision);
-    ARIADNE_TEST_EQUALS(bx.lower().precision(),precision);
-    ARIADNE_TEST_EQUALS(bx.upper().precision(),precision);
-    ARIADNE_TEST_EQUALS(max(bx,bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(min(bx,bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(abs(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx+bx).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx-bx).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx*bx).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx/bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(sqrt(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(exp(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(log(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(sin(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(cos(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(tan(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS(atan(bx).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx+2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx-2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx*2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx/2u).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx+2).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx-2).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx*2).precision(),precision);
-    ARIADNE_TEST_EQUALS((bx/2).precision(),precision);
+    FloatBoundsType bx(Rational(1),pr);
+    ARIADNE_TEST_EQUALS(bx.lower().precision(),pr);
+    ARIADNE_TEST_EQUALS(bx.upper().precision(),pr);
+    ARIADNE_TEST_EQUALS(max(bx,bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(min(bx,bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(abs(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx+bx).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx-bx).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx*bx).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx/bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(sqrt(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(exp(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(log(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(sin(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(cos(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(tan(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS(atan(bx).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx+2u).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx-2u).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx*2u).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx/2u).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx+2).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx-2).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx*2).precision(),pr);
+    ARIADNE_TEST_EQUALS((bx/2).precision(),pr);
 
-    ARIADNE_TEST_EQUALS(abs(FloatBoundsType(-1,2,precision)).lower().precision(),precision);
+    ARIADNE_TEST_EQUALS(abs(FloatBoundsType(-1,2,pr)).lower().precision(),pr);
 
 }
 
 template<class PR> Void
 TestFloatBounds<PR>::test_conversions()
 {
-    PR pr=precision;
     ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(2),pr)),Integer(2));
     ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(1),Dyadic(2),pr)),Integer(2));
     ARIADNE_TEST_EQUALS(cast_integer(FloatBounds<PR>(Dyadic(5,2u),Dyadic(2),pr)),Integer(2));
@@ -196,11 +197,11 @@ TestFloatBounds<PR>::test_conversions()
 template<class PR> Void
 TestFloatBounds<PR>::test_correct_rounded_arithmetic()
 {
-    FloatBoundsType onethird=FloatBoundsType(1)/FloatBoundsType(3);
+    FloatBoundsType onethird=FloatBoundsType(1,pr)/FloatBoundsType(3,pr);
     ARIADNE_TEST_COMPARE( onethird.lower_raw(), < , onethird.upper_raw() );
-    FloatBoundsType one_approx=onethird*FloatBoundsType(3);
-    ARIADNE_TEST_COMPARE( one_approx.lower_raw(), < , 1.0 );
-    ARIADNE_TEST_COMPARE( one_approx.upper_raw(), > , 1.0 );
+    FloatBoundsType one_approx=onethird*FloatBoundsType(3,pr);
+    ARIADNE_TEST_COMPARE( one_approx.lower_raw(), < , 1.0_x );
+    ARIADNE_TEST_COMPARE( one_approx.upper_raw(), > , 1.0_x );
 }
 
 
@@ -208,30 +209,13 @@ TestFloatBounds<PR>::test_correct_rounded_arithmetic()
 template<class PR> Void
 TestFloatBounds<PR>::test_accurate_rounded_arithmetic()
 {
-    const double min=std::numeric_limits<double>::min();
-    const double eps=std::numeric_limits<double>::epsilon();
+    if constexpr (IsSame<PR,DoublePrecision>::value) {
+        ARIADNE_TEST_SAME(FloatBoundsType(1,pr)/FloatBoundsType(3,pr),FloatBoundsType(0.33333333333333331_pr,0.33333333333333337_pr,pr));
+        ARIADNE_TEST_SAME(FloatBoundsType(2,pr)/FloatBoundsType(5,pr),FloatBoundsType(0.39999999999999997_pr,0.40000000000000002_pr,pr));
 
-    ARIADNE_TEST_SAME(FloatBoundsType(1.5)+FloatBoundsType(min),FloatBoundsType(1.5,1.5+eps));
-    ARIADNE_TEST_SAME(FloatBoundsType(1.5)-FloatBoundsType(min),FloatBoundsType(1.5-eps,1.5));
-    ARIADNE_TEST_SAME(FloatBoundsType(1+eps,1+2*eps)*FloatBoundsType(1+eps,1+3*eps),FloatBoundsType(1+2*eps,1+6*eps));
-    ARIADNE_TEST_SAME(FloatBoundsType(1)/FloatBoundsType(3),FloatBoundsType(0.33333333333333331,0.33333333333333337));
-    ARIADNE_TEST_SAME(FloatBoundsType(2)/FloatBoundsType(5),FloatBoundsType(0.39999999999999997,0.40000000000000002));
-
-    ARIADNE_TEST_SAME(FloatBoundsType(1.5)+FloatValueType(min),FloatBoundsType(1.5,1.5+eps));
-    ARIADNE_TEST_SAME(FloatBoundsType(1.5)-FloatValueType(min),FloatBoundsType(1.5-eps,1.5));
-    ARIADNE_TEST_SAME(FloatBoundsType(1+eps,1+2*eps)*FloatValueType(1+eps),FloatBoundsType(1+2*eps,1+4*eps));
-    ARIADNE_TEST_SAME(FloatBoundsType(1+3*eps,1+5*eps)/FloatValueType(1+eps),FloatBoundsType(1+eps,1+4*eps));
-
-    ARIADNE_TEST_SAME(FloatValueType(min)-FloatBoundsType(1.5),FloatBoundsType(-1.5,eps-1.5));
-    ARIADNE_TEST_SAME(FloatValueType(1+5*eps)/FloatBoundsType(1+2*eps,1+3*eps),FloatBoundsType(1+eps,1+3*eps));
-
-    ARIADNE_TEST_SAME(sqr(FloatBoundsType(1-eps,1+eps)),FloatBoundsType(1-4*eps/2,1+3*eps));
-
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(3,5),-1),FloatBoundsType(0.19999999999999998,0.33333333333333337));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(3,5),-2),FloatBoundsType(0.039999999999999986955,0.11111111111111114658));
-
-    ARIADNE_TEST_SAME(rec(FloatBoundsType(1+2*eps,1+5*eps)),FloatBoundsType(1-10*eps/2,1-3*eps/2));
-
+        ARIADNE_TEST_SAME(pow(FloatBoundsType(3,5,pr),-1),FloatBoundsType(0.19999999999999998_pr,0.33333333333333337_pr,pr));
+        ARIADNE_TEST_SAME(pow(FloatBoundsType(3,5,pr),-2),FloatBoundsType(0.039999999999999986955_pr,0.11111111111111114658_pr,pr));
+    }
 }
 
 
@@ -239,84 +223,84 @@ TestFloatBounds<PR>::test_accurate_rounded_arithmetic()
 template<class PR> Void
 TestFloatBounds<PR>::test_exact_rounded_arithmetic()
 {
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)+FloatBoundsType(2,4),FloatBoundsType(7,11));
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)-FloatBoundsType(2,6),FloatBoundsType(-1,5));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)+FloatBoundsType(2,4,pr),FloatBoundsType(7,11,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)-FloatBoundsType(2,6,pr),FloatBoundsType(-1,5,pr));
 
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)*FloatBoundsType(2,4),FloatBoundsType(10,28));
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)*FloatBoundsType(-2,4),FloatBoundsType(-14,28));
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)*FloatBoundsType(-4,-2),FloatBoundsType(-28,-10));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,5)*FloatBoundsType(2,4),FloatBoundsType(-28,20));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,5)*FloatBoundsType(-2,4),FloatBoundsType(-28,20));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,5)*FloatBoundsType(-4,-2),FloatBoundsType(-20,28));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5)*FloatBoundsType(2,4),FloatBoundsType(-28,-10));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5)*FloatBoundsType(-2,4),FloatBoundsType(-28,14));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5)*FloatBoundsType(-4,-2),FloatBoundsType(10,28));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)*FloatBoundsType(2,4,pr),FloatBoundsType(10,28,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)*FloatBoundsType(-2,4,pr),FloatBoundsType(-14,28,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)*FloatBoundsType(-4,-2,pr),FloatBoundsType(-28,-10,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,5,pr)*FloatBoundsType(2,4,pr),FloatBoundsType(-28,20,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,5,pr)*FloatBoundsType(-2,4,pr),FloatBoundsType(-28,20,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,5,pr)*FloatBoundsType(-4,-2,pr),FloatBoundsType(-20,28,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5,pr)*FloatBoundsType(2,4,pr),FloatBoundsType(-28,-10,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5,pr)*FloatBoundsType(-2,4,pr),FloatBoundsType(-28,14,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5,pr)*FloatBoundsType(-4,-2,pr),FloatBoundsType(10,28,pr));
 
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)/FloatBoundsType(2,4),FloatBoundsType(1.25,3.50));
-    ARIADNE_TEST_SAME(FloatBoundsType(5,7)/FloatBoundsType(-4,-2),FloatBoundsType(-3.50,-1.25));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,5)/FloatBoundsType(2,4),FloatBoundsType(-3.50,2.50));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,5)/FloatBoundsType(-4,-2),FloatBoundsType(-2.50,3.5));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5)/FloatBoundsType(2,4),FloatBoundsType(-3.50,-1.25));
-    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5)/FloatBoundsType(-4,-2),FloatBoundsType(1.25,3.50));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)/FloatBoundsType(2,4,pr),FloatBoundsType(1.25_x,3.50_x,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(5,7,pr)/FloatBoundsType(-4,-2,pr),FloatBoundsType(-3.50_x,-1.25_x,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,5,pr)/FloatBoundsType(2,4,pr),FloatBoundsType(-3.50_x,2.50_x,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,5,pr)/FloatBoundsType(-4,-2,pr),FloatBoundsType(-2.50_x,3.5_x,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5,pr)/FloatBoundsType(2,4,pr),FloatBoundsType(-3.50_x,-1.25_x,pr));
+    ARIADNE_TEST_SAME(FloatBoundsType(-7,-5,pr)/FloatBoundsType(-4,-2,pr),FloatBoundsType(1.25_x,3.50_x,pr));
 
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),0u),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),0u),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),0u),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),0u),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),1u),FloatBoundsType(5,7));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),1u),FloatBoundsType(-5,7));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),1u),FloatBoundsType(-7,5));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),1u),FloatBoundsType(-7,-5));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),2u),FloatBoundsType(25,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),2u),FloatBoundsType(0,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),2u),FloatBoundsType(0,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),2u),FloatBoundsType(25,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),3u),FloatBoundsType(125,343));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),3u),FloatBoundsType(-125,343));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),3u),FloatBoundsType(-343,125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),3u),FloatBoundsType(-343,-125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),4u),FloatBoundsType(625,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),4u),FloatBoundsType(0,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),4u),FloatBoundsType(0,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),4u),FloatBoundsType(625,2401));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),0u),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),0u),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),0u),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),0u),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),1u),FloatBoundsType(5,7,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),1u),FloatBoundsType(-5,7,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),1u),FloatBoundsType(-7,5,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),1u),FloatBoundsType(-7,-5,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),2u),FloatBoundsType(25,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),2u),FloatBoundsType(0,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),2u),FloatBoundsType(0,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),2u),FloatBoundsType(25,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),3u),FloatBoundsType(125,343,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),3u),FloatBoundsType(-125,343,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),3u),FloatBoundsType(-343,125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),3u),FloatBoundsType(-343,-125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),4u),FloatBoundsType(625,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),4u),FloatBoundsType(0,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),4u),FloatBoundsType(0,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),4u),FloatBoundsType(625,2401,pr));
 
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),0),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),0),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),0),FloatBoundsType(1,1));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),1),FloatBoundsType(5,7));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),1),FloatBoundsType(-5,7));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),1),FloatBoundsType(-7,5));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),1),FloatBoundsType(-7,-5));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),2),FloatBoundsType(25,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),2),FloatBoundsType(0,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),2),FloatBoundsType(0,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),2),FloatBoundsType(25,49));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),3),FloatBoundsType(125,343));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),3),FloatBoundsType(-125,343));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),3),FloatBoundsType(-343,125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),3),FloatBoundsType(-343,-125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),4),FloatBoundsType(625,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),4),FloatBoundsType(0,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),4),FloatBoundsType(0,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),4),FloatBoundsType(625,2401));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),5),FloatBoundsType(3125,16807));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),5),FloatBoundsType(-3125,16807));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),5),FloatBoundsType(-16807,3125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),5),FloatBoundsType(-16807,-3125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7),7),FloatBoundsType(78125,823543));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7),7),FloatBoundsType(-78125,823543));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5),7),FloatBoundsType(-823543,78125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5),7),FloatBoundsType(-823543,-78125));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),0),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),0),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),0),FloatBoundsType(1,1,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),1),FloatBoundsType(5,7,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),1),FloatBoundsType(-5,7,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),1),FloatBoundsType(-7,5,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),1),FloatBoundsType(-7,-5,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),2),FloatBoundsType(25,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),2),FloatBoundsType(0,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),2),FloatBoundsType(0,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),2),FloatBoundsType(25,49,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),3),FloatBoundsType(125,343,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),3),FloatBoundsType(-125,343,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),3),FloatBoundsType(-343,125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),3),FloatBoundsType(-343,-125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),4),FloatBoundsType(625,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),4),FloatBoundsType(0,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),4),FloatBoundsType(0,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),4),FloatBoundsType(625,2401,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),5),FloatBoundsType(3125,16807,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),5),FloatBoundsType(-3125,16807,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),5),FloatBoundsType(-16807,3125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),5),FloatBoundsType(-16807,-3125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(5,7,pr),7),FloatBoundsType(78125,823543,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-5,7,pr),7),FloatBoundsType(-78125,823543,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,5,pr),7),FloatBoundsType(-823543,78125,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-7,-5,pr),7),FloatBoundsType(-823543,-78125,pr));
 
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4),-1),FloatBoundsType(0.25,0.5));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2),-1),FloatBoundsType(-0.5,-0.25));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4),-2),FloatBoundsType(0.0625,0.25));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2),-2),FloatBoundsType(0.0625,0.25));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4),-3),FloatBoundsType(0.015625,0.125));
-    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2),-3),FloatBoundsType(-0.125,-0.015625));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4,pr),-1),FloatBoundsType(0.25_x,0.5_x,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2,pr),-1),FloatBoundsType(-0.5_x,-0.25_x,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4,pr),-2),FloatBoundsType(0.0625_x,0.25_x,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2,pr),-2),FloatBoundsType(0.0625_x,0.25_x,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(2,4,pr),-3),FloatBoundsType(0.015625_x,0.125_x,pr));
+    ARIADNE_TEST_SAME(pow(FloatBoundsType(-4,-2,pr),-3),FloatBoundsType(-0.125_x,-0.015625_x,pr));
 
-    ARIADNE_TEST_SAME(rec(FloatBoundsType(2,4)),FloatBoundsType(0.25,0.50));
-    ARIADNE_TEST_SAME(rec(FloatBoundsType(-4,-2)),FloatBoundsType(-0.50,-0.25));
+    ARIADNE_TEST_SAME(rec(FloatBoundsType(2,4,pr)),FloatBoundsType(0.25_x,0.50_x,pr));
+    ARIADNE_TEST_SAME(rec(FloatBoundsType(-4,-2,pr)),FloatBoundsType(-0.50_x,-0.25_x,pr));
 }
 
 
@@ -324,15 +308,14 @@ TestFloatBounds<PR>::test_exact_rounded_arithmetic()
 template<> Void
 TestFloatBounds<DoublePrecision>::test_constructors()
 {
-    DoublePrecision pr;
-    FloatDP zero=0;
+    FloatDP zero(0,pr);
 
     // Construct from pair
-    FloatBoundsType xd1(FloatDP(1.125),FloatDP(2.25));
-    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25);
+    FloatBoundsType xd1(FloatDP(1.125_x,pr),FloatDP(2.25_x,pr));
+    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125_x); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25_x);
 
     // Default constructor
-    FloatBoundsType xd2;
+    FloatBoundsType xd2(pr);
     if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("FloatBoundsType default constructor returns an empty set.");
     } else {
@@ -355,22 +338,22 @@ TestFloatBounds<DoublePrecision>::test_constructors()
     ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    FloatBoundsType xd6(FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(xd6.lower_raw(),FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(xd6.upper_raw(),FloatDP(1.25));
+    FloatBoundsType xd6(FloatDP(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),FloatDP(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),FloatDP(1.25_x,pr));
 }
 
 template<class PR> Void
 TestFloatBounds<PR>::test_constructors()
 {
-    RawFloatType zero=0;
+    RawFloatType zero(0,pr);
 
     // Construct from pair
-    FloatBoundsType xd1(RawFloatType(1.125),RawFloatType(2.25));
-    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25);
+    FloatBoundsType xd1(RawFloatType(1.125_x,pr),RawFloatType(2.25_x,pr));
+    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125_x); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25_x);
 
-    // Default constructor
-    FloatBoundsType xd2;
+    // Default value constructor
+    FloatBoundsType xd2(pr);
     if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("FloatBoundsType default constructor returns an empty set.");
     } else {
@@ -378,54 +361,49 @@ TestFloatBounds<PR>::test_constructors()
     }
 
     // Constructor with approximations
-    FloatBoundsType xd3(Rational(21,10),precision);
+    FloatBoundsType xd3(Rational(21,10),pr);
     ARIADNE_TEST_COMPARE(Rational(xd3.lower_raw()),<,Rational(21,10));
     ARIADNE_TEST_COMPARE(Rational(xd3.upper_raw()),>,Rational(21,10));
 
     // Constructor from approximate values
-    FloatBoundsType xd4(2.1_q,3.2_q,precision);
+    FloatBoundsType xd4(2.1_q,3.2_q,pr);
     ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,Rational(21,10));
     ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,Rational(32,10));
 
     // ApproximateTag constructor from a single value
-    FloatBoundsType xd5(Rational(1,3),precision);
+    FloatBoundsType xd5(Rational(1,3),pr);
     ARIADNE_TEST_COMPARE(xd5.lower_raw(),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(xd5.upper_raw(),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    FloatBoundsType xd6(RawFloatType(1.25));
-    ARIADNE_TEST_EQUAL(xd6.lower_raw(),RawFloatType(1.25));
-    ARIADNE_TEST_EQUAL(xd6.upper_raw(),RawFloatType(1.25));
+    FloatBoundsType xd6(RawFloatType(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),RawFloatType(1.25_x,pr));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),RawFloatType(1.25_x,pr));
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_class()
 {
     // Test lower, upper, midpoint, radius, width
-    RawFloatType one=1.0;
-    RawFloatType two_=2.0;
+    RawFloatType one_(1.0_x,pr);
+    RawFloatType two_(2.0_x,pr);
+    RawFloatType three_(3.0_x,pr);
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25,0.50).lower().raw(),-0.25);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25,0.50).upper().raw(),0.5);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25,0.50).value().raw(),0.125);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25,0.50).error().raw(),0.375)
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).lower().raw(),-0.25_x);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).upper().raw(),0.5_x);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).value().raw(),0.125_x);
+    ARIADNE_TEST_EQUAL(FloatBoundsType(-0.25_x,0.50_x,pr).error().raw(),0.375)
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).lower().raw(),-0.33333333333333331483);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).upper().raw(),0.66666666666666662966);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).value().raw(),0.16666666666666665741);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(-1./3,2./3).error().raw(),0.5)
-
-    // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).lower().raw(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).upper().raw(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).value().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(FloatBoundsType(div(down,-one,3),div(up,two_,3)).error().raw(),0.50000000000000011102);
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).lower().raw(),div(down,-one_,three_));
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).upper().raw(),div(up,two_,three_));
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).value().raw(),hlf(add(up,div(down,-one_,three_),div(up,two_,three_))))
+    ARIADNE_TEST_EQUAL((FloatBoundsType(-1,2,pr)/3).error().raw(),hlf(sub(up,div(up,two_,three_),div(down,-one_,three_))));
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_input()
 {
-    FloatBoundsType x;
+    FloatBoundsType x(pr);
 
     string input("[1.125,2.75] [0.4,0.6]");
     stringstream iss(input);
@@ -447,27 +425,24 @@ template<class PR> Void TestFloatBounds<PR>::test_comparison() {
     // FIXME: If using Boost style interval tests, uncomment the line below
     // and comment out the line after
     //ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
-    FloatBoundsType ivl1(1.125,2.25);
+    FloatBoundsType ivl1(1.125_x,2.25_x,pr);
     FloatBoundsType ivl2=ivl1;
 
     ARIADNE_TEST_ASSERT(!definitely(ivl1==ivl2));
     ARIADNE_TEST_ASSERT(possibly(ivl1==ivl2));
     FloatBoundsType& ivl1ref=ivl1;
-    ivl1ref=FloatBoundsType(5.25,7.375);
+    ivl1ref=FloatBoundsType(5.25_x,7.375_x,pr);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower_raw()==RawFloatType(5.25));
-
-    Dyadic w(7,1u); std::cerr<<"\nw="<<w<<", round(w)="<<round(w)<<"\n\n";
-
+    ARIADNE_TEST_ASSERT(ivl1ref.lower_raw()==5.25_x);
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_aliasing() {
-    FloatValueType ex2(1.5);
-    FloatValueType ex3(2.25);
+    FloatValueType ex2(1.5_x,pr);
+    FloatValueType ex3(2.25_x,pr);
 
     FloatBoundsType vx1;
-    FloatBoundsType vx2(1.5,2.25);
-    FloatBoundsType vx3(3.125,4.0625);
+    FloatBoundsType vx2(1.5_x,2.25_x,pr);
+    FloatBoundsType vx3(3.125_x,4.0625_x,pr);
 
     // Check to make sure aliases are handled correctly
     vx1=vx3; vx1=vx2-vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,FloatBoundsType(vx2-vx3));
@@ -482,53 +457,74 @@ template<class PR> Void TestFloatBounds<PR>::test_aliasing() {
 
 template<class PR> Void TestFloatBounds<PR>::test_monotone_functions()
 {
+    FloatBoundsType two_(2.0_x,pr);
+    FloatBoundsType sqrt_two=sqrt(two_);
+    FloatBoundsType sqr_sqrt_two=sqr(sqrt_two);
+    ARIADNE_TEST_PRINT(sqrt_two);
+    ARIADNE_TEST_PRINT(sqr_sqrt_two);
+    if (IsSame<PR,DoublePrecision>::value) {
+        ARIADNE_TEST_EQUAL(sqrt_two.lower_raw(),1.4142135623730949_pr);
+        ARIADNE_TEST_EQUAL(sqrt_two.upper_raw(),1.4142135623730951_pr);
+        ARIADNE_TEST_COMPARE(sqrt_two.lower_raw(),<=,1.4142135623730949_pr);
+        ARIADNE_TEST_COMPARE(sqrt_two.lower_raw(),> ,1.4142135623730947_pr);
+        ARIADNE_TEST_COMPARE(sqrt_two.upper_raw(),>=,1.4142135623730951_pr);
+        ARIADNE_TEST_COMPARE(sqrt_two.upper_raw(),< ,1.4142135623730954_pr);
+    }
+    ARIADNE_TEST_EQUALS(sqrt_two.lower_raw(),sqrt(down,RawFloatType(2.0_x,pr)));
+    ARIADNE_TEST_EQUALS(sqrt_two.upper_raw(),sqrt(up,RawFloatType(2.0_x,pr)));
+    ARIADNE_TEST_ASSERT(sqrt_two.lower_raw()<sqrt_two.upper_raw());
+    ARIADNE_TEST_COMPARE(sqr_sqrt_two.lower_raw(),< ,2.0_x);
+    ARIADNE_TEST_COMPARE(sqr_sqrt_two.upper_raw(),> ,2.0_x);
 
-    FloatBoundsType two_(2.0);
-    FloatBoundsType sqrttwo=sqrt(two_);
-    ARIADNE_TEST_PRINT(sqrttwo);
-    ARIADNE_TEST_COMPARE(sqrttwo.lower_raw(),<=,1.4142135623730949);
-    ARIADNE_TEST_COMPARE(sqrttwo.lower_raw(),> ,1.4142135623730947);
-    ARIADNE_TEST_COMPARE(sqrttwo.upper_raw(),>=,1.4142135623730951);
-    ARIADNE_TEST_COMPARE(sqrttwo.upper_raw(),< ,1.4142135623730954);
+    FloatBoundsType one(1.0_x,pr);
+    FloatBoundsType exp_one=exp(one);
+    FloatBoundsType log_exp_one=log(exp_one);
+    ARIADNE_TEST_PRINT(exp_one);
+    ARIADNE_TEST_PRINT(log_exp_one);
+    if (IsSame<PR,DoublePrecision>::value) {
+        ARIADNE_TEST_COMPARE(exp_one.lower_raw(),<,2.71828182845905_pr);
+        ARIADNE_TEST_COMPARE(exp_one.lower_raw(),>,2.71828182845903_pr);
+        ARIADNE_TEST_COMPARE(exp_one.upper_raw(),>,2.71828182845904_pr);
+        ARIADNE_TEST_COMPARE(exp_one.upper_raw(),<,2.71828182845906_pr);
+    }
+    ARIADNE_TEST_EQUALS(exp_one.lower_raw(),exp(down,RawFloatType(1.0_x,pr)));
+    ARIADNE_TEST_EQUALS(exp_one.upper_raw(),exp(up,RawFloatType(1.0_x,pr)));
+    ARIADNE_TEST_ASSERT(exp_one.lower_raw()<exp_one.upper_raw());
+    ARIADNE_TEST_COMPARE(log_exp_one.lower_raw(),<,1.0_x);
+    ARIADNE_TEST_COMPARE(log_exp_one.lower_raw(),<,1.0_x);
 
-    FloatBoundsType one(1.0);
-    FloatBoundsType expone=exp(one);
-    ARIADNE_TEST_PRINT(expone);
-    ARIADNE_TEST_COMPARE(expone.lower_raw(),<,2.71828182845905);
-    ARIADNE_TEST_COMPARE(expone.lower_raw(),>,2.71828182845903);
-    ARIADNE_TEST_COMPARE(expone.upper_raw(),>,2.71828182845904);
-    ARIADNE_TEST_COMPARE(expone.upper_raw(),<,2.71828182845906);
-    ARIADNE_TEST_ASSERT(expone.lower_raw()<expone.upper_raw());
+    if (IsSame<PR,DoublePrecision>::value) {
+        FloatBoundsType e(2.7182818284590451_pr,2.7182818284590455_pr,pr);
+        FloatBoundsType loge=log(e);
+        ARIADNE_TEST_PRINT(e);
+        ARIADNE_TEST_COMPARE(loge.lower_raw(),<,1.0);
+        ARIADNE_TEST_COMPARE(loge.lower_raw(),>,0.9999999999998);
+        ARIADNE_TEST_COMPARE(loge.upper_raw(),>,1.0);
+        ARIADNE_TEST_COMPARE(loge.upper_raw(),<,1.000000000002);
+    }
 
-    FloatBoundsType e(2.7182818284590451,2.7182818284590455);
-    FloatBoundsType loge=log(e);
-    ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_COMPARE(loge.lower_raw(),<,1.0);
-    ARIADNE_TEST_COMPARE(loge.lower_raw(),>,0.9999999999998);
-    ARIADNE_TEST_COMPARE(loge.upper_raw(),>,1.0);
-    ARIADNE_TEST_COMPARE(loge.upper_raw(),<,1.000000000002);
 }
 
 template<class PR> Void TestFloatBounds<PR>::test_trigonometric_functions()
 {
     try {
-        FloatBoundsType x(6.283185307179586,6.283185307179587);
+        FloatBoundsType x(6.283185307179586_pr,6.283185307179587_pr,pr);
         FloatBoundsType sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(sinx.lower_raw(),<,0.0);
-        ARIADNE_TEST_COMPARE(sinx.lower_raw(),>,-1e-14);
-        ARIADNE_TEST_COMPARE(sinx.upper_raw(),>,0.0);
-        ARIADNE_TEST_COMPARE(sinx.upper_raw(),<,+1e-14);
+        ARIADNE_TEST_COMPARE(sinx.lower_raw(),<,0.0_x);
+        ARIADNE_TEST_COMPARE(sinx.lower_raw(),>,-1e-14_pr);
+        ARIADNE_TEST_COMPARE(sinx.upper_raw(),>,0.0_x);
+        ARIADNE_TEST_COMPARE(sinx.upper_raw(),<,+1e-14_pr);
         ARIADNE_TEST_ASSERT(sinx.lower_raw()<sinx.upper_raw());
     }
     catch(...) { }
 
     try {
-        FloatBoundsType x(7.0685834705770345);
+        FloatBoundsType x(7.0685834705770345_pr,pr);
         FloatBoundsType sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(sinx.lower_raw(),<,0.7071067811866);
-        ARIADNE_TEST_COMPARE(sinx.upper_raw(),>,0.7071067811865);
+        ARIADNE_TEST_COMPARE(sinx.lower_raw(),<,0.7071067811866_pr);
+        ARIADNE_TEST_COMPARE(sinx.upper_raw(),>,0.7071067811865_pr);
         ARIADNE_TEST_ASSERT(sinx.lower_raw()<sinx.upper_raw());
     }
     catch(...) { }
@@ -536,11 +532,11 @@ template<class PR> Void TestFloatBounds<PR>::test_trigonometric_functions()
 }
 
 template<class PR> Void TestFloatBounds<PR>::regression_tests() {
-    RawFloatType inf_=RawFloatType::inf(precision);
+    RawFloatType inf_=RawFloatType::inf(pr);
 
     // Regression test; fails dramatically on certain types of rounding
     {
-        FloatBoundsType x(1.5707963267948966,1.5707963267948968);
+        FloatBoundsType x(1.5707963267948966_pr,1.5707963267948968_pr,pr);
         FloatBoundsType cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(cosx.lower_raw(),<,0.0);
@@ -552,11 +548,11 @@ template<class PR> Void TestFloatBounds<PR>::regression_tests() {
 
     // Regression test for dividing by interval with lower endpoint -0.0 or upper endpoint +0.0
 
-    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-0.0,1.0)).upper_raw(),+inf_);
-    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0,2.0)/FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
+    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-0.0_x,1.0_x,pr)).upper_raw(),+inf_);
+    ARIADNE_TEST_EQUAL((FloatBoundsType(1.0_x,2.0_x,pr)/FloatBoundsType(-1.0_x,+0.0_x,pr)).lower_raw(),-inf_);
 
-    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-0.0,+1.0)).upper_raw(),+inf_);
-    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0,+0.0)).lower_raw(),-inf_);
+    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-0.0_x,+1.0_x,pr)).upper_raw(),+inf_);
+    ARIADNE_TEST_EQUAL(rec(FloatBoundsType(-1.0_x,+0.0_x,pr)).lower_raw(),-inf_);
 }
 
 
@@ -565,6 +561,7 @@ Int main() {
     std::cerr<<std::setprecision(20);
 
     TestFloatBounds<DoublePrecision>(dp).test();
+    TestFloatBounds<MultiplePrecision>(MultiplePrecision(53_bits)).test();
     TestFloatBounds<MultiplePrecision>(MultiplePrecision(128_bits)).test();
 
     return ARIADNE_TEST_FAILURES;

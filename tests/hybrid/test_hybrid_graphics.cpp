@@ -41,7 +41,7 @@ Int main(Int argc, char **argv) {
     RealVariable x("x"),y("y"),z("z");
     DiscreteLocation location(1);
     HybridRealBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
-    HybridExactBox hbx2(location,{x,y,z},ExactBoxType{{1.,2.},{3.,4.},{6.,8.}});
+    HybridExactBox hbx2(location,{x,y,z},ExactBoxType{{1.0_x,2.0_x},{3.0_x,4.0_x},{6.0_x,8.0_x}});
 
     HybridFigure hfig;
     hfig.set_locations({location});

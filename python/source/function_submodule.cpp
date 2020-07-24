@@ -198,12 +198,20 @@ Void export_polynomial(pybind11::module& module)
 
     pybind11::class_< MultivariatePolynomial<X> > polynomial_class(module,python_name<X>("MultivariatePolynomial").c_str());
     polynomial_class.def(pybind11::init< MultivariatePolynomial<X> >());
-    polynomial_class.def(pybind11::init<Nat>());
     polynomial_class.def_static("constant", (MultivariatePolynomial<X>(*)(SizeType,X const&)) &MultivariatePolynomial<X>::constant);
-    polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
-    polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
 
-    polynomial_class.def_static("variables", [](Nat as){return MultivariatePolynomial<X>::variables(as).array();});
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        polynomial_class.def(pybind11::init<Nat,PR>());
+        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
+        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType,PR)) &MultivariatePolynomial<X>::variable);
+        polynomial_class.def_static("variables", [](Nat as,PR pr){return MultivariatePolynomial<X>::variables(as,pr).array();});
+    } else {
+        polynomial_class.def(pybind11::init<Nat>());
+        polynomial_class.def_static("variable", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
+        polynomial_class.def_static("coordinate", (MultivariatePolynomial<X>(*)(SizeType,SizeType)) &MultivariatePolynomial<X>::variable);
+        polynomial_class.def_static("variables", [](Nat as){return MultivariatePolynomial<X>::variables(as).array();});
+    }
 
     polynomial_class.def("argument_size", &MultivariatePolynomial<X>::argument_size);
     polynomial_class.def("insert", &MultivariatePolynomial<X>::insert);

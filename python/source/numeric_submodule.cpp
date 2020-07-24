@@ -82,8 +82,7 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPUpp
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<PositiveFloatDPUpperBound>& repr) {
     return os << "FloatDPError("<<repr.reference().raw()<<")"; }
 
-ExactDouble exact(double d) { return ExactDouble(d); }
-Dyadic cast_exact(double d) { return Dyadic(ExactDouble(d)); }
+Dyadic cast_dyadic(double d) { return Dyadic(ExactDouble(d)); }
 
 inline Dyadic operator/(Dyadic x, Two w) { return Dyadic(x/(w^1)); }
 
@@ -246,12 +245,17 @@ Void export_accuracy(pymodule& module) {
 
 void export_builtins(pymodule& module)
 {
+    pybind11::class_<ApproximateDouble> approximate_double_class(module,"ApproximateDouble");
+    approximate_double_class.def(init<double>());
+    approximate_double_class.def("__str__", &__cstr__<ApproximateDouble>);
+    implicitly_convertible<double,ApproximateDouble>();
+
     pybind11::class_<ExactDouble> exact_double_class(module,"ExactDouble");
     exact_double_class.def(init<double>());
     exact_double_class.def(init<ExactDouble>());
     exact_double_class.def("__str__", &__cstr__<ExactDouble>);
 
-    module.def("exact", (ExactDouble(*)(double)) &exact);
+    module.def("exact", (ExactDouble(*)(double)) &cast_exact);
 }
 
 
@@ -316,7 +320,7 @@ void export_dyadic(pymodule& module)
     dyadic_class.def(__py_div__, &__div__<Dyadic,TwoExp, Return<Dyadic>>);
     two_exp_class.def("__str__", &__cstr__<Dyadic>);
 
-    module.def("cast_exact",(Dyadic(*)(double)) &cast_exact);
+    module.def("cast_exact",(Dyadic(*)(double)) &cast_dyadic);
 }
 
 void export_decimal(pymodule& module)
@@ -652,7 +656,8 @@ template<class PR> void export_raw_float(pymodule& module)
     typedef Rounding RND;
 
     pybind11::class_<F> raw_float_class(module,("Float"+numeric_class_tag<PR>()).c_str());
-    raw_float_class.def(init<double,PR>());
+    raw_float_class.def(pybind11::init([](double d, PR pr){return F(cast_exact(d),pr); }));
+    raw_float_class.def(init<ExactDouble,PR>());
     raw_float_class.def(init<Dyadic,PR>());
     raw_float_class.def(init<Rational,RND,PR>());
 

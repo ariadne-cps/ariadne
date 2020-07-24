@@ -58,9 +58,9 @@ typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> ValidatedF
 typedef SharedPointer<const ValidatedFunctionModelDPFactoryInterface> FunctionFactoryPointer;
 typedef SharedPointer<const BounderInterface> BounderPointer;
 
-struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
-struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
-struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute<double>(v) { } };
+struct LipschitzConstant : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
+struct StepMaximumError : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
+struct StepSweepThreshold : Attribute<ApproximateDouble> { using Attribute<ApproximateDouble>::Attribute; };
 struct Order : Attribute<DegreeType> { Order(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct SpacialOrder : Attribute<DegreeType> { SpacialOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
 struct TemporalOrder : Attribute<DegreeType> { TemporalOrder(DegreeType v) : Attribute<DegreeType>(v) { } };
@@ -104,12 +104,12 @@ class IntegratorBase
     IntegratorBase(MaximumError e, LipschitzConstant l);
   public:
     //! \brief A threshold for the error estimate of the approximation.
-    virtual Void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
-    virtual double maximum_error() const  { return this->_maximum_error; }
+    virtual Void set_maximum_error(ApproximateDouble e) { assert(cast_exact(e)>0.0_x); this->_maximum_error=cast_exact(e); }
+    virtual ExactDouble maximum_error() const  { return this->_maximum_error; }
     //! \brief The fraction L(f)*h used for a time step.
     //! The convergence of the Picard iteration is approximately Lf*h.
-    Void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
-    double lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
+    Void set_lipschitz_tolerance(ApproximateDouble lt) { _lipschitz_tolerance = cast_exact(lt); }
+    ExactDouble lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
 
     //! \brief The class which constructs functions for representing the flow.
     const ValidatedFunctionModelDPFactoryInterface& function_factory() const;
@@ -179,8 +179,8 @@ class IntegratorBase
               const UpperBoxType& bounding_box) const = 0;
 
   public:
-    double _maximum_error;
-    double _lipschitz_tolerance;
+    ExactDouble _maximum_error;
+    ExactDouble _lipschitz_tolerance;
     FunctionFactoryPointer _function_factory_ptr;
     BounderPointer _bounder_ptr;
 };
@@ -189,20 +189,17 @@ class IntegratorBase
 class TaylorPicardIntegrator
     : public IntegratorBase
 {
-    double _step_maximum_error;
+    ExactDouble _step_maximum_error;
     Sweeper<FloatDP> _sweeper;
     DegreeType _minimum_temporal_order;
     DegreeType _maximum_temporal_order;
   public:
     //! \brief Default constructor.
-    TaylorPicardIntegrator(MaximumError err)
-        : IntegratorBase(err,ThresholdSweeper<FloatDP>(DP(),err/1024),LipschitzConstant(0.5))
-        , _step_maximum_error(err/128), _sweeper(ThresholdSweeper<FloatDP>(DP(),err/1024)), _minimum_temporal_order(0), _maximum_temporal_order(12) { }
+    TaylorPicardIntegrator(MaximumError err);
 
     //! \brief Constructor.
     TaylorPicardIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
-                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,sweeper,lip), _step_maximum_error(lerr), _sweeper(sweeper), _minimum_temporal_order(minto), _maximum_temporal_order(maxto) { }
+                           StepMaximumError lerr, MinimumTemporalOrder minto, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in time.
     DegreeType minimum_temporal_order() const { return this->_minimum_temporal_order; }
@@ -213,8 +210,8 @@ class TaylorPicardIntegrator
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
     Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the maximum error of a single step.
-    double step_maximum_error() const { return this->_step_maximum_error; }
-    Void set_step_maximum_error(double e) { _step_maximum_error = e; }
+    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
+    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
 
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;
@@ -298,7 +295,7 @@ class TaylorSeriesIntegrator
 class GradedTaylorSeriesIntegrator
     : public IntegratorBase
 {
-    double _step_maximum_error;
+    ExactDouble _step_maximum_error;
     Sweeper<FloatDP> _sweeper;
     DegreeType _minimum_spacial_order;
     DegreeType _minimum_temporal_order;
@@ -309,7 +306,10 @@ class GradedTaylorSeriesIntegrator
     GradedTaylorSeriesIntegrator(MaximumError err);
 
     //! \brief Constructor.
-    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip=0.5);
+    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper);
+
+    //! \brief Constructor.
+    GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip);
 
     //! \brief Constructor.
     GradedTaylorSeriesIntegrator(MaximumError err, Sweeper<FloatDP> const& sweeper, LipschitzConstant lip,
@@ -337,8 +337,8 @@ class GradedTaylorSeriesIntegrator
     Sweeper<FloatDP> const& sweeper() const { return this->_sweeper; }
     Void set_sweeper(Sweeper<FloatDP> const& sweeper) { _sweeper = sweeper; }
     //! \brief  Set the sweep threshold of the Taylor model.
-    double step_maximum_error() const { return this->_step_maximum_error; }
-    Void set_step_maximum_error(double e) { _step_maximum_error = e; }
+    ExactDouble step_maximum_error() const { return this->_step_maximum_error; }
+    Void set_step_maximum_error(ApproximateDouble e) { _step_maximum_error = cast_exact(e); }
 
     virtual GradedTaylorSeriesIntegrator* clone() const { return new GradedTaylorSeriesIntegrator(*this); }
     virtual Void _write(OutputStream& os) const;

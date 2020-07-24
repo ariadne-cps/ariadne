@@ -89,7 +89,7 @@ template<class F> class IntervalFactory<Approximation<F>> {
   public:
     IntervalFactory(PrecisionType precision) : _precision(precision) { }
     ApproximateInterval<F> create(ApproximateNumber const& y) const {
-        return ApproximateInterval<F>(y,this->_precision); }
+        return ApproximateInterval<F>(y,y,this->_precision); }
 };
 
 template<class F> using UpperIntervalFactory = IntervalFactory<UpperBound<F>>;
@@ -167,7 +167,7 @@ template<class F> struct DeclareIntervalArithmeticOperations<Approximation<F>>
 template<class F> struct DeclareIntervalArithmeticOperations<Value<F>> : DeclareIntervalArithmeticOperations<UpperBound<F>> { };
 
 template<class T, class U> struct IsConstructibleGivenDefaultPrecision {
-    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),declval<TT>().precision()))> static std::true_type test(int);
+    template<class TT, class UU, class=decltype(declval<TT>()=TT(declval<UU>(),PrecisionType<TT>()))> static std::true_type test(int);
     template<class TT, class UU> static std::false_type test(...);
     static const bool value = decltype(test<T,U>(1))::value;
 };
@@ -234,6 +234,8 @@ template<class U> class Interval
     //! \brief Construct a singleton interval from a number.
     template<class V, EnableIf<And<IsConstructible<L,V>,IsConstructible<U,V>>> = dummy>
         explicit Interval(const V& v) : _l(v), _u(v) { }
+    template<class V, EnableIf<IsConstructibleGivenDefaultPrecision<U,V>> =dummy, DisableIf<IsConstructible<U,V>> =dummy>
+        explicit Interval(const V& v) : Interval(L(v,PrecisionType<U>()),U(v,PrecisionType<U>())) { }
     //! \brief Assign a singleton interval from a number.
     template<class V, EnableIf<And<IsAssignable<L,V>,IsAssignable<U,V>>> = dummy>
         Interval<U>& operator=(const V& v) { _l=v; _u=v; return *this; }
@@ -254,8 +256,11 @@ template<class U> class Interval
     template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
         explicit Interval(Interval<UU> const& x) : Interval(x,PrecisionType<U>()) { }
     //! \brief Construct from an interval of a different type using a default precision.
-    template<class UU, EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy, DisableIf<IsConstructible<U,UU>> =dummy>
-        explicit Interval(NegationType<UU> const& l, UU const& u) : Interval(L(l,PrecisionType<U>()),U(u,PrecisionType<U>())) { }
+    template<class LL, class UU,
+             EnableIf<IsConstructibleGivenDefaultPrecision<L,LL>> =dummy,
+             EnableIf<IsConstructibleGivenDefaultPrecision<U,UU>> =dummy,
+             DisableIf<And<IsConstructible<L,LL>,IsConstructible<U,UU>>> =dummy>
+        Interval(LL const& l, UU const& u) : Interval(L(l,PrecisionType<U>()),U(u,PrecisionType<U>())) { }
 
     //! \brief Construct an interval with the lower and upper bounds.
     //! FIXME: Should be explicit, but this would clash with Box constructor from initializer list of double/FloatDP.

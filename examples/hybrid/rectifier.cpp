@@ -20,33 +20,33 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
     if (MAX_GRID_DEPTH >= 0)
     {
         // The rectangle to be drawn
-        ExactBoxType rect = ExactBoxType(numVariables);
+        ApproximateBoxType rect (numVariables);
         // Chooses the fill colour
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
         Nat numDivisions = static_cast<Nat>(MAX_GRID_DEPTH) / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
-        FloatDP step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
+        ApproximateDouble step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
-        FloatDP pos_x = bbox[0].lower().raw();
+        ApproximateDouble pos_x = bbox[0].lower().get_d();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
-        while (pos_x < bbox[0].upper().raw())
+        while (pos_x.get_d() < bbox[0].upper().get_d())
         {
-            rect[xaxis] = ExactIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+            rect[xaxis] = ApproximateIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
             fig << rect; // Appends the rectangle
         }
 
         // Repeats for the rectangles in the y direction
-        FloatDP step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        FloatDP pos_y = bbox[1].lower().raw();
+        ApproximateDouble step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
+        ApproximateDouble pos_y = bbox[1].lower().get_d();
         rect[xaxis] = bbox[0];
-        while (pos_y < bbox[1].upper().raw())
+        while (pos_y.get_d() < bbox[1].upper().get_d())
         {
-            rect[yaxis] = ExactIntervalType(pos_y,pos_y+step_y);
+            rect[yaxis] = ApproximateIntervalType(pos_y,pos_y+step_y);
             fig << rect;
             pos_y += step_y;
         }

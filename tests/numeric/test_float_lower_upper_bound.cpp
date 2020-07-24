@@ -198,7 +198,7 @@ TestDirectedFloats<PR>::test_comparison() {
     }
 
     {
-        PositiveFloatLowerBoundType one(1u);
+        PositiveFloatLowerBoundType one(1u,pr);
         PositiveFloatLowerBoundType two_thirds=one*2u/3u;
         ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds < 2u));
         ARIADNE_TEST_ASSERT(possibly(two_thirds+two_thirds <= 2u));

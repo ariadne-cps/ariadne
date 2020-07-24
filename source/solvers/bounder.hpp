@@ -97,8 +97,8 @@ class EulerBounder final : public BounderBase {
   private:
     // Compute the bounds on the reach set of dx/dt = f(x,t,a) starting at time t, for a suggested step size of h.
     Pair<StepSizeType,UpperBoxType> _compute(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, StepSizeType const& t, BoxDomainType const& A, StepSizeType const& hsug) const;
-    // Compute a bounding box for the flow of f starting in D at T.lower() to time T.upper() with parameters A, assuming flow remains in B, 
-    // but widening D by INITIAL_WIDENING and the flow vectors by VECTOR_WIDENING. 
+    // Compute a bounding box for the flow of f starting in D at T.lower() to time T.upper() with parameters A, assuming flow remains in B,
+    // but widening D by INITIAL_WIDENING and the flow vectors by VECTOR_WIDENING.
     UpperBoxType _formula(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B, PositiveFloatDPValue INITIAL_WIDENING, PositiveFloatDPValue VECTOR_WIDENING) const;
     UpperBoxType _refinement(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B) const;
 };

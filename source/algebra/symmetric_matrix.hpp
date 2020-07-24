@@ -238,7 +238,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, SymmetricMat
 
 template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
     SymmetricMatrix<X> const& S=*this;
-    Matrix<X> A(S.row_size(),S.column_size());
+    Matrix<X> A(S.row_size(),S.column_size(),S.zero_element());
     for(SizeType i=0; i!=S.row_size(); ++i) {
         A[i][i]=S.at(i,i);
         for(SizeType j=i+1; j!=S.row_size(); ++j) {

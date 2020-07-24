@@ -76,9 +76,11 @@ class Point
     //! Construct from an initializer list of floating-point values.
     explicit Point(InitializerList<X> lst);
     //! Construct from an initializer list of floating-point values.
-    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> explicit Point(InitializerList<ExactDouble> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
+    explicit Point(InitializerList<ExactDouble> lst, PRS... prs);
     //! The origin in \a n dimensions.
-    static Point origin(Nat n) { return Point(n,RealType(0)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Int,PRS...>> =dummy>
+    static Point origin(SizeType n, PRS... prs) { return Point(n,RealType(0,prs...)); }
     //! A dynamically-allocated copy.
     virtual Point<X>* clone() const;
     //! The dimension of the point.

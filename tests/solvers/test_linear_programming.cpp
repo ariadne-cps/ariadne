@@ -52,54 +52,54 @@ class TestInteriorPointSolver
 
     Void test_validate_feasibility() {
         // A feasible instance
-        RawFloatDPVector xl={0.0,0.0,0.0};
-        RawFloatDPVector xu={inf,inf,inf};
-        RawFloatDPMatrix A={{1.0,0.0,1.0}, {0.0,1.0,2.0}};
-        RawFloatDPVector b={1.0,1.0};
-        RawFloatDPVector x={0.81,0.51,0.21};
-        RawFloatDPVector y={-1.0,-0.5};
+        RawFloatDPVector xl({0.0_x,0.0_x,0.0_x},dp);
+        RawFloatDPVector xu({inf,inf,inf},dp);
+        RawFloatDPMatrix A({{1.0_x,0.0_x,1.0_x}, {0.0_x,1.0_x,2.0_x}},dp);
+        RawFloatDPVector b({1.0_x,1.0_x},dp);
+        RawFloatDPVector x({0.81_pr,0.51_pr,0.21_pr},dp);
+        RawFloatDPVector y({-1.0_x,-0.5_x},dp);
         ARIADNE_ASSERT(definitely(optimiser->validate_feasibility(xl,xu,A,b,x,y)));
 
-        b=RawFloatDPVector{1.0, -1.0};
-        y=RawFloatDPVector{-0.5, -1.0};
+        b=RawFloatDPVector({1.0_x, -1.0_x},dp);
+        y=RawFloatDPVector({-0.5_x, -1.0_x},dp);
         ARIADNE_ASSERT(definitely(!optimiser->validate_feasibility(xl,xu,A,b,x,y)));
     }
 
 
     Void test_feasibility() {
         // A feasible instance
-        RawFloatDPVector xl={0.0,0.0,0.0};
-        RawFloatDPVector xu={inf,inf,inf};
-        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatDPVector b={1.0,1.0};
+        RawFloatDPVector xl({0.0_x,0.0_x,0.0_x},dp);
+        RawFloatDPVector xu({inf,inf,inf},dp);
+        RawFloatDPMatrix A({{1.0_x,0.0_x,1.0_x},{0.0_x,1.0_x,2.0_x}},dp);
+        RawFloatDPVector b({1.0_x,1.0_x},dp);
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=RawFloatDPVector{1.0,-1.0};
+        b=RawFloatDPVector({1.0_x,-1.0_x},dp);
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
     }
 
 
     Void test_constrained_feasibility() {
-        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatDPVector b={1.0,1.0};
-        RawFloatDPVector xl={0.0,0.0,0.0};
-        RawFloatDPVector xu={4.0,2.0,3.0};
+        RawFloatDPMatrix A({{1.0_x,0.0_x,1.0_x},{0.0_x,1.0_x,2.0_x}},dp);
+        RawFloatDPVector b({1.0_x,1.0_x},dp);
+        RawFloatDPVector xl({0.0_x,0.0_x,0.0_x},dp);
+        RawFloatDPVector xu({4.0_x,2.0_x,3.0_x},dp);
 
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=RawFloatDPVector{1.0,-1.0};
+        b=RawFloatDPVector({1.0_x,-1.0_x},dp);
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
 
-        xu=RawFloatDPVector{+inf,+inf,3.0};
+        xu=RawFloatDPVector({+inf,+inf,3.0_x},dp);
     }
 
 
     Void test_optimization() {
-        RawFloatDPMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        RawFloatDPVector b={1.0,1.0};
-        RawFloatDPVector c={1.0,0.5,-0.75};
-        RawFloatDPVector xl={0.0,0.0,0.0};
-        RawFloatDPVector xu={+inf,+inf,3.0};
+        RawFloatDPMatrix A({{1.0_x,0.0_x,1.0_x},{0.0_x,1.0_x,2.0_x}},dp);
+        RawFloatDPVector b({1.0_x,1.0_x},dp);
+        RawFloatDPVector c({1.0_x,0.5_x,-0.75_x},dp);
+        RawFloatDPVector xl({0.0_x,0.0_x,0.0_x},dp);
+        RawFloatDPVector xu({+inf,+inf,3.0_x},dp);
 
         ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
     }

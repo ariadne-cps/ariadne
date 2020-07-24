@@ -186,14 +186,8 @@ Real::Real(ConvergentSequence<DyadicBounds> const& seq) : Real(std::make_shared<
 Real::Real(FastCauchySequence<Dyadic> const& seq) : Real(std::make_shared<RealLimit<Dyadic>>(seq)) { }
 
 // FIXME: Is this necessary?
-Real::Real(double l, double a, double u)
-    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(l,u)))
-{
-}
-
-// FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(x)))
+    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(ExactDouble(x),dp)))
 {
 }
 
@@ -569,5 +563,7 @@ DyadicBounds ValidatedReal::get() const { return this->_ptr->_get(); }
 FloatDPBounds ValidatedReal::get(DoublePrecision pr) const { return this->_ptr->_get(pr); }
 FloatMPBounds ValidatedReal::get(MultiplePrecision pr) const { return this->_ptr->_get(pr); }
 OutputStream& operator<<(OutputStream& os, ValidatedReal const& vr) { return vr._ptr->_write(os); }
+
+ApproximateDouble::ApproximateDouble(Real const& r) : _d(FloatDPApproximation(r,dp).raw().get_d()) { }
 
 } // namespace Ariadne

@@ -122,11 +122,11 @@ template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x) -> Boun
     if(tl>xl) { F::set_rounding_downward(); tl=tl-fm; }
     F::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
-    return Bounds<F>(double(tl),double(tu));
+    return Bounds<F>(ExactDouble(tl),ExactDouble(tu),x.precision());
 }
 
 template<class F> auto Operations<Bounds<F>>::_trunc(Bounds<F> const& x, Nat n) -> Bounds<F> {
-    Bounds<F> _e=Bounds<F>(std::pow(2.0,52-(Int)n));
+    Bounds<F> _e=Bounds<F>(ExactDouble(std::pow(2.0,52-(Int)n)),x.precision());
     Bounds<F> y=x+_e; return y-_e;
 }
 

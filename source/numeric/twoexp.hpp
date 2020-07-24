@@ -39,6 +39,8 @@ namespace Ariadne {
 class Integer;
 class Dyadic;
 
+struct Two;
+
 //! \ingroup NumericModule
 //! \brief A class representing a number of the form  \c 2<sup><i>n</i></sup> for some <i>n</i>.
 //! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
@@ -46,6 +48,7 @@ class TwoExp {
     Int _n;
   public:
     explicit TwoExp(Int n) : _n(n) { }
+    constexpr TwoExp(Two const&) : _n(1) { }
     Int exponent() const { return this->_n; }
     // NOTE: Use std::pow(2.0,_n) not (1<<_n) since latter does not handle very large exponents
     FloatDP get_raw(DoublePrecision pr) const;
@@ -58,6 +61,7 @@ class TwoExp {
     friend Dyadic operator/(Dyadic, TwoExp);
     friend OutputStream& operator<<(OutputStream& os, TwoExp);
 };
+inline TwoExp exp2(Int n) { return TwoExp(n); }
 
 //! \ingroup NumericModule
 //! \brief The integer constant 2. Only used for creating dyadic numbers.

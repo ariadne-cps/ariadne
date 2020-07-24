@@ -382,9 +382,11 @@ template<class F> Void TestExpansion<F>::test_cleanup()
     ARIADNE_TEST_PRINT(b);
 
     Expansion<MI,F> e(3,zero);
+    F c(1,prec);
     ARIADNE_TEST_PRINT(e);
     for(Nat i=0; i!=2; ++i) {
-        if(i%2) { e.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { e.append(b,1/(1.+i));}
+        c=hlf(c);
+        if(i%2) { e.append(a,c); ++b; ++b; a=b; ++b; } else { e.append(b,c);}
         ARIADNE_TEST_PRINT(e);
     }
 

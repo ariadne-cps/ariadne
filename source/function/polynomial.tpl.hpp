@@ -39,10 +39,8 @@ inline MultiIndex unit_index(SizeType as, DegreeType k) { return MultiIndex::uni
 inline DegreeType unit_index(SizeOne, IndexZero) { return 1u; }
 
 
-template<class I, class X> Polynomial<I,X>::Polynomial() : Polynomial(ArgumentSizeType()) { }
-
-template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as)
-    : _expansion(as)
+template<class I, class X> Polynomial<I,X>::Polynomial(ArgumentSizeType as, X const& z)
+    : _expansion(as,nul(z))
 {
 }
 
@@ -55,27 +53,28 @@ Polynomial<I,X>::Polynomial(InitializerList<Pair<IndexInitializerType,X>> lst)
 
 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::create_zero() const {
-    return Polynomial<I,X>(this->argument_size());
+    return Polynomial<I,X>(this->argument_size(),this->zero_coefficient());
 }
 
 
 template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_constant(ArgumentSizeType as, const X& c) {
-    Polynomial<I,X> r(as); r[zero_index(as)]=c; return r;}
+    Polynomial<I,X> r(as,nul(c)); r[zero_index(as)]=c; return r;}
 
-template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_coordinate(ArgumentSizeType as, VariableIndexType j) {
-    ARIADNE_ASSERT(j<as); Polynomial<I,X> r(as); r[unit_index(as,j)]=1; return r;
+template<class I, class X> Polynomial<I,X> Polynomial<I,X>::_coordinate(ArgumentSizeType as, VariableIndexType j, const X& z) {
+    ARIADNE_ASSERT(j<as); Polynomial<I,X> r(as,z); r[unit_index(as,j)]=1; return r;
 }
 
-template<class I, class X> auto Polynomial<I,X>::coordinates(ArgumentSizeType as) -> Argument<Polynomial<I,X>> {
+template<class I, class X> auto Polynomial<I,X>::coordinates(ArgumentSizeType as, X const& z) -> Argument<Polynomial<I,X>> {
+    Polynomial<I,X> zero(as,z);
     if constexpr (IsSame<I,MultiIndex>::value) {
-        Vector<Polynomial<I,X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=coordinate(as,i); } return r;
+        Vector<Polynomial<I,X>> r(as,zero); for(SizeType i=0; i!=as; ++i) { r[i]=coordinate(as,i,z); } return r;
     } else {
-         return coordinate(as,IndexZero());
+         return coordinate(as,IndexZero(),z);
     }
 }
 
-template<class I, class X> auto Polynomial<I,X>::variables(ArgumentSizeType as) -> Argument<Polynomial<I,X>> {
-    return coordinates(as);
+template<class I, class X> auto Polynomial<I,X>::variables(ArgumentSizeType as, X const& z) -> Argument<Polynomial<I,X>> {
+    return coordinates(as,z);
 }
 
 template<class I, class X> Polynomial<I,X>& Polynomial<I,X>::operator=(const X& x) {
@@ -107,6 +106,8 @@ template<class I, class X> const X& Polynomial<I,X>::operator[](const IndexType&
 template<class I, class X> const Expansion<I,X>& Polynomial<I,X>::expansion() const { return this->_expansion; }
 
 template<class I, class X> Expansion<I,X>& Polynomial<I,X>::expansion() { return this->_expansion; }
+
+template<class I, class X> X const& Polynomial<I,X>::zero_coefficient() const { return this->_expansion.zero_coefficient(); }
 
 
 
@@ -161,9 +162,9 @@ Polynomial<I,X>::antidifferentiate(VariableIndexType j) {
 
 template<class I, class X>
 Polynomial<I,X>& Polynomial<I,X>::truncate(DegreeType d) {
-    Polynomial<I,X> r(this->argument_size());
+    Polynomial<I,X> r(this->argument_size(),this->zero_coefficient());
     for(typename Polynomial<I,X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(degree_of(iter->index())<=d && decide(iter->coefficient()!=X(0))) {
+        if(degree_of(iter->index())<=d && decide(iter->coefficient()!=0)) {
             r._append(iter->index(),iter->coefficient());
         }
     }
@@ -210,11 +211,11 @@ Void Polynomial<I,X>::check() const
 
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Nul, const Polynomial<I,X>& p) {
-    return Polynomial<I,X>(p.argument_size());
+    return Polynomial<I,X>(p.argument_size(),p.zero_coefficient());
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Pos, const Polynomial<I,X>& p) {
-    Polynomial<I,X> r(p.argument_size());
+    Polynomial<I,X> r(p.argument_size(),p.zero_coefficient());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->index()]=+iter->coefficient();
     }
@@ -222,7 +223,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
 }
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Neg, const Polynomial<I,X>& p) {
-    Polynomial<I,X> r(p.argument_size());
+    Polynomial<I,X> r(p.argument_size(),p.zero_coefficient());
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         r[iter->index()]=-iter->coefficient();
     }
@@ -265,7 +266,7 @@ template<class I, class X> Polynomial<I,X>& AlgebraOperations<Polynomial<I,X>>::
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Add, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<I,X>::IndexComparisonType less;
-    Polynomial<I,X> r(p1.argument_size());
+    Polynomial<I,X> r(p1.argument_size(),(p1.zero_coefficient()+p2.zero_coefficient()));
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
         if (iter1->index()==iter2->index()) {
@@ -293,7 +294,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Sub, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     typename Polynomial<I,X>::IndexComparisonType less;
-    Polynomial<I,X> r(p1.argument_size());
+    Polynomial<I,X> r(p1.argument_size(),(p1.zero_coefficient()-p2.zero_coefficient()));
     auto iter1=p1.begin(); auto iter2=p2.begin();
     while (iter1!=p1.end() && iter2!=p2.end()) {
         if (iter1->index()==iter2->index()) {
@@ -320,7 +321,7 @@ template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::a
 
 template<class I, class X> Polynomial<I,X> AlgebraOperations<Polynomial<I,X>>::apply(Mul, const Polynomial<I,X>& p1, const Polynomial<I,X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<I,X> r(p1.argument_size());
+    Polynomial<I,X> r(p1.argument_size(),(p1.zero_coefficient()*p2.zero_coefficient()));
     for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
         for(auto iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
             I a=iter1->index()+iter2->index();
@@ -369,7 +370,7 @@ Polynomial<I,X>
 Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X& c)
 {
     if constexpr (IsSame<I,MultiIndex>::value) {
-        Polynomial<I,X> r(x.argument_size()-1u);
+        Polynomial<I,X> r(x.argument_size()-1u,x.zero_coefficient());
         MultiIndex ra(r.argument_size());
         if(is_null(c)) {
             for(typename Polynomial<I,X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -383,8 +384,8 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
                 }
             }
         } else if(is_unit(c)) {
-            Polynomial<I,X> s(x.argument_size()-1u);
-            Array< Polynomial<I,X> > p(x.degree()+1u,Polynomial<I,X>(x.argument_size()-1u));
+            Polynomial<I,X> s(x.argument_size()-1u,x.zero_coefficient());
+            Array< Polynomial<I,X> > p(x.degree()+1u,Polynomial<I,X>(x.argument_size()-1u,x.zero_coefficient()));
 
             for(typename Polynomial<I,X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
                 IndexConstReference xa=xiter->index();
@@ -401,11 +402,11 @@ Polynomial<I,X>::_partial_evaluate(const Polynomial<I,X>& x, SizeType k, const X
                 r+=p[i];
             }
         } else {
-            Polynomial<I,X> s(x.argument_size()-1u);
-            Array< Polynomial<I,X> > p(x.degree()+1u,Polynomial<I,X>(x.argument_size()-1u));
+            Polynomial<I,X> s(x.argument_size()-1u,x.zero_coefficient());
+            Array< Polynomial<I,X> > p(x.degree()+1u,Polynomial<I,X>(x.argument_size()-1u,x.zero_coefficient()));
 
             Array<X> cpowers(x.degree()+1u);
-            cpowers[0]=static_cast<X>(1); cpowers[1]=c;
+            cpowers[0]=1; cpowers[1]=c;
             if(x.degree()>=2) { cpowers[2]=sqr(c); }
             for(Nat j=3; j<=x.degree(); ++j) {
                 cpowers[j]=cpowers[j-2]*cpowers[2];

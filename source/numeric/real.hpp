@@ -108,8 +108,6 @@ class Real
     typedef RealInterface Interface;
     typedef EffectiveTag Paradigm;
     typedef Real NumericType;
-  private:
-    explicit Real(double,double,double);
   public:
     //@{
     //! \name Constructors

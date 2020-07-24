@@ -119,8 +119,8 @@ class Differential
     //! \brief Default constructor constructs a differential with degree zero in no variables.
     Differential() = delete;
     //! \brief Constructs a differential with degree \a deg in \a as variables, and zero element based on \a prs.
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Differential(SizeType as, DegreeType deg, PRS... prs)
-        : Differential(as,deg,X(prs...)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> explicit Differential(SizeType as, DegreeType deg, PRS... prs)
+        : Differential(as,deg,X(0u,prs...)) { }
     explicit Differential(SizeType as, DegreeType deg, X const& z);
     //! \brief Construct a differential from a mapping giving a coefficient for a finite number of multi-indices.
     explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg);
@@ -374,9 +374,9 @@ class NonAssignableDifferential
 template<class X> class DifferentialCharacteristics {
     SizeType _argument_size; DegreeType _degree; X _zero_coefficient;
   public:
-    DifferentialCharacteristics() : _argument_size(0u), _degree(0u), _zero_coefficient(0) { }
-    DifferentialCharacteristics(SizeType as, DegreeType d) : _argument_size(as), _degree(d), _zero_coefficient(0) { }
-    template<class PR> DifferentialCharacteristics(SizeType as, DegreeType d, PR pr) : _argument_size(as), _degree(d), _zero_coefficient(pr) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        DifferentialCharacteristics(SizeType as, DegreeType deg, PRS... prs) : _argument_size(as), _degree(deg), _zero_coefficient(0u,prs...) { }
+    DifferentialCharacteristics(SizeType as, DegreeType deg, X const& z) : _argument_size(as), _degree(deg), _zero_coefficient(nul(z)) { }
     DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()), _zero_coefficient(d.zero_coefficient()) { }
     SizeType argument_size() const { return this->_argument_size; }
     DegreeType degree() const { return this->_degree; }
@@ -407,8 +407,8 @@ class Vector< Differential<X> >
 
     Vector() = delete;
     Vector(SizeType rs) = delete;
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> Vector(SizeType rs, SizeType as, DegreeType d, PRS... prs)
-        : Vector<Differential<X>>(rs,as,d,X(prs...)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Vector(SizeType rs, SizeType as, DegreeType d, PRS... prs)
+        : Vector<Differential<X>>(rs,as,d,X(0u,prs...)) { }
     Vector(SizeType rs, SizeType as, DegreeType d, X const& z);
     Vector(SizeType rs, const Differential<X>& sd);
     Vector(InitializerList<Differential<X>> const& lst);
@@ -497,29 +497,31 @@ class Vector< Differential<X> >
 
 template<class X> template<class Y, class... PRS, EnableIf<IsConstructible<X,Y,PRS...>>>
 Vector<Differential<X>>::Vector(const Vector<Differential<Y>>& dv, PRS... prs)
-    : _chars(dv.argument_size(),dv.degree(),X(prs...)), _ary(dv._ary,prs...) {
+    : _chars(dv.argument_size(),dv.degree(),X(dv.zero_element().zero_coefficient(),prs...)), _ary(dv._ary,prs...) {
 }
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
 Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
-    : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
+    : _chars(as,d,prs...), _ary(rs,Differential<X>(as,d)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
 Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, InitializerList<InitializerList<Pair<InitializerList<DegreeType>,ExactDouble>>> lst, PRS... prs)
-    : _chars(as,d), _ary(rs,Differential<X>(as,d)) {
+    : _chars(as,d,prs...), _ary(rs,Differential<X>(as,d,prs...)) {
     auto iter=lst.begin();
     for(SizeType i=0; i!=rs; ++i) { _ary[i]=Differential<X>(as,d,*iter,prs...); ++iter; }
 }
 
 template<class X> template<class G, EnableIf<IsInvocableReturning<Differential<X>,G,SizeType>>>
 Vector<Differential<X>>::Vector(SizeType n, G const& g)
-    : _chars(g(0).argument_size(),g(0).degree()), _ary(n,g) { }
+    : _chars((assert(n>0),g(0))), _ary(n,g) { }
 
 template<class X> template<class E>
-Vector<Differential<X>>::Vector(const VectorExpression<E>& ve) : _ary(ve().size(),Uninitialised()) {
+Vector<Differential<X>>::Vector(const VectorExpression<E>& ve)
+    : _chars((assert(ve().size()>0),ve()[0u])), _ary(ve().size(),Uninitialised())
+{
     for(SizeType i=0; i!=_ary.size(); ++i) { new (&_ary[i]) Differential<X>(ve()[i]); }
     ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }

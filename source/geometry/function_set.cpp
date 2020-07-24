@@ -173,11 +173,11 @@ Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariate
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum=0.0;
+    FloatDP max_row_sum(0,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum=0.0;
-        FloatDP max_mag_j_in_i=0.0;
+        FloatDP row_sum(0,dp);
+        FloatDP max_mag_j_in_i(0,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -805,9 +805,9 @@ Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFun
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=domain.size();
-    FloatDP max_column_norm=0.0;
+    FloatDP max_column_norm(0,dp);
     for(Nat j=0; j!=domain.size(); ++j) {
-        FloatDP column_norm=0.0;
+        FloatDP column_norm(0,dp);
         for(Nat i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
@@ -827,11 +827,11 @@ Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariate
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum=0.0;
+    FloatDP max_row_sum(0,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum=0.0;
-        FloatDP max_mag_j_in_i=0.0;
+        FloatDP row_sum(0,dp);
+        FloatDP max_mag_j_in_i(0,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
@@ -967,7 +967,7 @@ Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>
 ValidatedConstrainedImageSet::split() const
 {
     Nat k=this->number_of_parameters();
-    FloatDP rmax=-inf;
+    FloatDP rmax(-inf,dp);
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
         FloatDPUpperBound rj=this->domain()[j].radius();
         if(rj.raw()>rmax) {
@@ -1201,7 +1201,7 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     function2.clobber();
     function2.restrict(new_domain);
 
-    ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5);
+    ValidatedVectorMultivariateFunctionModelDP new_function=(function1+function2)*FloatDPValue(0.5_x,dp);
     new_function.clobber();
     for(Nat i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];

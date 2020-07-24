@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-inline auto operator*(double s, FloatDPApproximationVector v) -> decltype(FloatDPApproximation(s)*v) { return FloatDPApproximation(s)*v; }
+inline auto operator*(ApproximateDouble s, FloatDPApproximationVector v) -> decltype(FloatDPApproximation(s,dp)*v) { return FloatDPApproximation(s,dp)*v; }
 
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)

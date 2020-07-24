@@ -47,8 +47,8 @@ class SolverWrapper
     typedef SolverInterface::ApproximateNumericType ApproximateNumericType;
   public:
     SolverInterface* clone() const { return this->get_override("clone")(); }
-    Void set_maximum_error(RawFloatDP me) { this->get_override("set_maximum_error")(me); }
-    FloatDPValue maximum_error() const { return this->get_override("maximum_error")(); }
+    Void set_maximum_error(ApproximateDouble me) { this->get_override("set_maximum_error")(me); }
+    ExactDouble maximum_error() const { return this->get_override("maximum_error")(); }
     Void set_maximum_number_of_steps(Nat ns) { this->get_override("set_maximum_number_of_steps")(ns); }
     Nat maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
     Vector<ValidatedNumericType> zero(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& bx) const {
@@ -77,11 +77,11 @@ class IntegratorWrapper
   public:
     IntegratorInterface* clone() const {
         return this->get_override("clone")(); }
-    Void set_temporal_order(uint to) {
+    Void set_temporal_order(Nat to) {
         this->get_override("set_temporal_order")(to); }
-    Void set_maximum_error(double me) {
+    Void set_maximum_error(ApproximateDouble me) {
         this->get_override("set_maximum_error")(me); }
-    double maximum_error() const {
+    ExactDouble maximum_error() const {
         return this->get_override("maximum_error")(); }
     Pair<StepSizeType,UpperBoxType> flow_bounds(const ValidatedVectorMultivariateFunction& vf, const ExactBoxType& D, const StepSizeType& h) const {
         return this->get_override("flow_bounds")(vf,D,h); }
@@ -113,10 +113,10 @@ Void export_solvers(pybind11::module& module)
     solver_interface_class.def("__str__",&__cstr__<SolverInterface>);
 
     pybind11::class_<IntervalNewtonSolver, SolverInterface> interval_newton_solver_class(module,"IntervalNewtonSolver");
-    interval_newton_solver_class.def(pybind11::init<double,unsigned int>());
+    interval_newton_solver_class.def(pybind11::init<ApproximateDouble,Nat>());
 
     pybind11::class_<KrawczykSolver, SolverInterface> krawczyk_solver_class(module,"KrawczykSolver");
-    krawczyk_solver_class.def(pybind11::init<double,unsigned int>());
+    krawczyk_solver_class.def(pybind11::init<ApproximateDouble,Nat>());
 }
 
 
@@ -144,21 +144,21 @@ Void export_integrators(pybind11::module& module)
     integrator_interface_class.def("__str__", &__cstr__<IntegratorInterface>);
 
     pybind11::class_<TaylorPicardIntegrator,IntegratorInterface> taylor_picard_integrator_class(module,"TaylorPicardIntegrator");
-    taylor_picard_integrator_class.def(pybind11::init<double>());
+    taylor_picard_integrator_class.def(pybind11::init<ApproximateDouble>());
     taylor_picard_integrator_class.def("minimum_temporal_order",&TaylorPicardIntegrator::minimum_temporal_order);
     taylor_picard_integrator_class.def("maximum_temporal_order",&TaylorPicardIntegrator::maximum_temporal_order);
     taylor_picard_integrator_class.def("set_minimum_temporal_order",&TaylorPicardIntegrator::set_minimum_temporal_order);
     taylor_picard_integrator_class.def("set_maximum_temporal_order",&TaylorPicardIntegrator::set_maximum_temporal_order);
 
     pybind11::class_<TaylorSeriesIntegrator,IntegratorInterface> taylor_series_integrator_class(module,"TaylorSeriesIntegrator");
-    taylor_series_integrator_class.def(pybind11::init<double,uint>());
+    taylor_series_integrator_class.def(pybind11::init<ApproximateDouble,Nat>());
     taylor_series_integrator_class.def("order",&TaylorSeriesIntegrator::order);
     taylor_series_integrator_class.def("maximum_error",&TaylorSeriesIntegrator::maximum_error);
     taylor_series_integrator_class.def("set_order",&TaylorSeriesIntegrator::set_order);
     taylor_series_integrator_class.def("set_maximum_error",&TaylorSeriesIntegrator::set_maximum_error);
 
     pybind11::class_<GradedTaylorSeriesIntegrator,IntegratorInterface> graded_taylor_series_integrator_class(module,"GradedTaylorSeriesIntegrator");
-    graded_taylor_series_integrator_class.def(pybind11::init<double>());
+    graded_taylor_series_integrator_class.def(pybind11::init<ApproximateDouble>());
     graded_taylor_series_integrator_class.def("maximum_spacial_order",&GradedTaylorSeriesIntegrator::maximum_spacial_order);
     graded_taylor_series_integrator_class.def("maximum_temporal_order",&GradedTaylorSeriesIntegrator::maximum_temporal_order);
     graded_taylor_series_integrator_class.def("maximum_error",&GradedTaylorSeriesIntegrator::maximum_error);
@@ -167,7 +167,7 @@ Void export_integrators(pybind11::module& module)
     graded_taylor_series_integrator_class.def("set_maximum_error",&GradedTaylorSeriesIntegrator::set_maximum_error);
 
     pybind11::class_<RungeKutta4Integrator> runge_kutta_4_integrator_class(module,"RungeKutta4Integrator");
-    runge_kutta_4_integrator_class.def(pybind11::init<double>());
+    runge_kutta_4_integrator_class.def(pybind11::init<ApproximateDouble>());
     runge_kutta_4_integrator_class.def("step", &RungeKutta4Integrator::step);
     runge_kutta_4_integrator_class.def("evolve", &RungeKutta4Integrator::evolve);
 }

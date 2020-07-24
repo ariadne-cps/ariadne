@@ -119,7 +119,7 @@ template<class X> class TestSeries
         const X log2=log(two);
         ARIADNE_TEST_EQUALS( Series<X>(Log(),one).coefficients(5),
                              (List<X>{zero,one,-one/2,one/3,-one/4,one/5}) );
-        ARIADNE_TEST_EQUALS( Series<X>(Log(),2.0).coefficients(5),
+        ARIADNE_TEST_EQUALS( Series<X>(Log(),two).coefficients(5),
                              (List<X>{log2,one/2,-one/8,one/24,-one/64,one/160}) );
     }
 
@@ -139,14 +139,14 @@ template<class X> class TestSeries
         const X sin1=sin(one);
         const X cos1=cos(one);
         ARIADNE_TEST_EQUALS( Series<X>(Cos(),zero).coefficients(5),
-                             (List<X>{one,zero,-one/2,zero,one/24,0}) );
+                             (List<X>{one,zero,-one/2,zero,one/24,zero}) );
         ARIADNE_TEST_EQUAL ( Series<X>(Cos(),one).coefficients(4),
                              (List<X>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
     }
 
     void test_taylor_series() {
-        TaylorSeries<Bounds<X>> exp_series(Exp(),ExactIntervalType(-1,+1),Value<X>(0),8u);
-        ARIADNE_TEST_PRINT(Series<Bounds<X>>(Exp(),Bounds<X>(-1,+1)).coefficients(8u));
+        TaylorSeries<Bounds<X>> exp_series(Exp(),ExactIntervalType(-1,+1),Value<X>(0,pr),8u);
+        ARIADNE_TEST_PRINT(Series<Bounds<X>>(Exp(),Bounds<X>(-1,+1,pr)).coefficients(8u));
         ARIADNE_TEST_PRINT(exp_series);
     }
 

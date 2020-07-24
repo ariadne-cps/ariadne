@@ -131,7 +131,7 @@ class FloatMP {
     explicit FloatMP(const mpfr_t, RawPtr);
 
     FloatMP();
-    FloatMP(double);
+    explicit FloatMP(double);
 
     explicit FloatMP(PrecisionType);
     explicit FloatMP(double, PrecisionType);

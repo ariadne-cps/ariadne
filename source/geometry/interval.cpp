@@ -50,7 +50,7 @@ Interval<FloatDPValue> widen_domain(Interval<FloatDPUpperBound> const& ivl) {
     if(neg_rl<neg_l) { neg_rl=neg_rl+min; }
     if(ru<u) { ru=ru+min; }
     volatile float rl=-neg_l;
-    Interval<FloatDPValue> res(rl,ru);
+    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
@@ -64,7 +64,7 @@ Interval<FloatDPValue> approximate_domain(Interval<FloatDPUpperBound> const& ivl
     volatile float rl=l;
     volatile float ru=u;
     if(rl==ru) { rl=rl-(rl*eps); ru=ru+(ru*eps); }
-    Interval<FloatDPValue> res(rl,ru);
+    Interval<FloatDPValue> res(ExactDouble(rl),ExactDouble(ru),dp);
     FloatDP::set_rounding_mode(rnd);
     return res;
 }
@@ -136,7 +136,7 @@ FloatDPUpperInterval exp(FloatDPUpperInterval const& ivl) {
     return make_interval(exp(cast_singleton(ivl))); }
 FloatDPUpperInterval log(FloatDPUpperInterval const& ivl) {
     if(ivl.upper().raw()<=0) { return FloatDPUpperInterval::empty_interval(); }
-    else if(ivl.lower().raw()<=0) { return FloatDPUpperInterval(-inf,log(up,ivl.upper().raw())); }
+    else if(ivl.lower().raw()<=0) { return FloatDPUpperInterval(FloatDP(-inf,dp),log(up,ivl.upper().raw())); }
     else { return make_interval(log(cast_singleton(ivl))); } }
 FloatDPUpperInterval sin(FloatDPUpperInterval const& ivl) {
     return make_interval(sin(cast_singleton(ivl))); }

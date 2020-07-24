@@ -55,7 +55,6 @@ template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;
 
 template<> Void Polynomial<MultiIndex,FloatDPValue>::cleanup() { }
 
-template Polynomial<MultiIndex,FloatDPValue>::Polynomial(SizeType);
 template Expansion<MultiIndex,FloatDPValue>& MultivariatePolynomial<FloatDPValue>::expansion();
 template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&) const;
 template OutputStream& Polynomial<MultiIndex,FloatDPValue>::_write(OutputStream&, Array<String> const&) const;

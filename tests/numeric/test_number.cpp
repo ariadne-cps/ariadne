@@ -70,7 +70,7 @@ TestNumbers::test_float_value_behaviour()
 Void
 TestNumbers::test_operations()
 {
-    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
+    Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
     ValidatedErrorNumber en=n; ValidatedErrorNumber ev=v;
 
@@ -100,16 +100,16 @@ TestNumbers::test_operations()
     ARIADNE_TEST_PRINT(max(en,ev).class_name());
     ARIADNE_TEST_PRINT(max(en,ev));
 
-    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2))));
-    ARIADNE_TEST_FAIL(add(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_EXECUTE(add(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_FAIL(add(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
 
     ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(2)));
-    ARIADNE_TEST_FAIL(max(ExactNumber(FloatDPValue(1)),ExactNumber(FloatDPValue(2))));
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_FAIL(max(ExactNumber(FloatDPValue(1,dp)),ExactNumber(FloatDPValue(2,dp))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
 
-    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2))));
+    ARIADNE_TEST_PRINT(max(ExactNumber(1),ExactNumber(FloatDPValue(2,dp))));
 
-    max(1,FloatDPValue(3));
+    max(1,FloatDPValue(3,dp));
 //    max(1u,FloatDPError(3u));
 }
 
@@ -252,7 +252,7 @@ inline FloatDPValue max(Int y1, FloatDPValue x2) { return max(FloatDPValue(y1,x2
 template<class Y> Void
 TestNumber<Y>::test_class()
 {
-    Int n=1; Integer z=1; FloatDPValue v(3); FloatDPBounds b(3);
+    Int n=1; Integer z=1; FloatDPValue v(3,dp); FloatDPBounds b(3,dp);
     ExactNumber yn=n; ExactNumber yz=z; ExactNumber yv=v; ValidatedNumber yb=b;
 
     ARIADNE_TEST_EQUAL(yz.class_name(),"Integer");

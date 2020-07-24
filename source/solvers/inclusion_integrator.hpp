@@ -241,7 +241,9 @@ ErrorType vstar(BoxDomainType const& inputs);
 template<class A> ErrorType wstar_multiplier();
 
 template<class A> ErrorType wstar(BoxDomainType const& inputs) {
-    ErrorType result(0u);
+    typedef typename ErrorType::PrecisionType PR;
+    PR pr;
+    ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size()))
         result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper()));
     return result;

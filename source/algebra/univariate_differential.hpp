@@ -56,9 +56,10 @@ template<class X> class UnivariateDifferential
     typedef typename Array<X>::Iterator Iterator;
     typedef typename Array<X>::ConstIterator ConstIterator;
 
-    UnivariateDifferential();
-    explicit UnivariateDifferential(DegreeType d);
+    UnivariateDifferential() = delete;
     explicit UnivariateDifferential(DegreeType d, const NumericType& c);
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        UnivariateDifferential(DegreeType d, PRS... prs) : UnivariateDifferential(d,X(0u,prs...)) { }
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
     template<class PR, EnableIf<IsConstructible<X,ExactDouble,PR>> =dummy>
         explicit UnivariateDifferential(DegreeType deg, InitializerList<ExactDouble> lst, PR pr);

@@ -146,7 +146,7 @@ class AffineModel<ValidatedTag,F>
     explicit AffineModel(SizeType n, PrecisionType prec) : _c(0,prec), _g(n,CoefficientType(0,prec)), _e(0u,prec) { }
     explicit AffineModel(SizeType n, const CoefficientType& c) : _c(c), _g(n,nul(c)), _e(nul(c)) { }
     explicit AffineModel(const CoefficientType& c, const Covector<CoefficientType>& g, const ErrorType& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u) { }
+    explicit AffineModel(CoefficientType c, InitializerList<CoefficientType> g) : _c(c), _g(g), _e(0u,c.precision()) { }
 
     explicit AffineModel(const Affine<FloatBounds<PR>>& affine);
     explicit AffineModel(const Affine<ValidatedNumber>& affine, PrecisionType precision);

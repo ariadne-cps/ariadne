@@ -247,11 +247,12 @@ Expansion<I,X>::Expansion(ArgumentSizeType as, PR pr, SizeType cap)
 }
 
 template<class I, class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
-Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs) : Expansion(0)
+Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs)
+    : Expansion(ArgumentSizeType(),X(0.0_x,prs...))
 {
     ARIADNE_PRECONDITION(lst.size()!=0);
 
-    _indices = UniformList<I>(0u,I(lst.begin()->first.size()));
+    _indices = UniformList<I>(0u,I(lst.begin()->first)*0);
     _coefficients = UniformList<X>(0,X(prs...));
     _zero_coefficient = X(0,prs...);
 
@@ -262,7 +263,7 @@ Expansion<I,X>::Expansion(InitializerList<Pair<IndexInitializerType,ExactDouble>
     for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
-        MultiIndex a=iter->first;
+        I a=iter->first;
         X x(iter->second,prs...);
         if(decide(x!=0)) { this->append(a,x); }
     }

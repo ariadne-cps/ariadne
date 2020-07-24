@@ -1197,7 +1197,7 @@ GridTreeSubpaving GridTreeSubpaving::branch(Bool left_or_right) const {
 }
 
 
-Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
+Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
     //1. Take the ExactBoxType of this GridTreeSubset's GridCell
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
@@ -1208,6 +1208,8 @@ Void GridTreeSubpaving::subdivide( FloatDP theMaxCellWidth ) {
     //   in order to make the width in this dimension <= theMaxCellWidth.
     const DimensionType dimensions = _theGridCell.dimension();
     Nat max_num_subdiv_dim = 0, num_subdiv = 0, max_subdiv_dim = 0;
+
+    FloatDP theMaxCellWidth(theInputMaxCellWidth,dp);
 
     for(Nat i = 0; i < dimensions; i++){
         //Get the number of required subdivisions in this dimension

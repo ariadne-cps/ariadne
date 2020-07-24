@@ -52,7 +52,8 @@ template<class U> Interval<U>::Interval(EntireInterval const&) {
 }
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
-template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
+template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(nul(this->_l),nul(this->_u)); }
+
 template<class U> SizeOne Interval<U>::dimension() const  { return SizeOne(); }
 template<class U> auto Interval<U>::lower() const -> LowerBoundType const& { return _l; }
 template<class U> auto Interval<U>::upper() const -> UpperBoundType const& { return _u; }

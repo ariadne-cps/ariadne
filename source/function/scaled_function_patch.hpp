@@ -66,7 +66,7 @@ template<class M> using ScalarScaledFunctionPatch = ScaledFunctionPatch<M>;
 template<class M> class VectorScaledFunctionPatch;
 template<class M> class VectorScaledFunctionPatchElementReference;
 
-inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation& e) { return FloatDPApproximation(0.0); }
+inline FloatDPApproximation convert_error_to_bounds(const PositiveFloatDPApproximation& e) { return FloatDPApproximation(0.0,dp); }
 inline FloatDPBounds convert_error_to_bounds(const PositiveFloatDPUpperBound& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 inline FloatDPBounds convert_error_to_bounds(const FloatDPError& e) { return FloatDPBounds(-e.raw(),+e.raw()); }
 
@@ -207,6 +207,7 @@ template<class M> class ScaledFunctionPatch
 
     explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,CoefficientType>& p, const ErrorType& e, const Sweeper<RawFloat<PR>>& prp);
     explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,RawFloat<PR>>& p, const RawFloat<PR>& e, const Sweeper<RawFloat<PR>>& prp);
+    explicit ScaledFunctionPatch(const BoxDomainType& d, const Expansion<MultiIndex,ExactDouble>& p, const ExactDouble& e, const Sweeper<RawFloat<PR>>& prp);
 
     explicit ScaledFunctionPatch(const ScalarFunctionModelType<M>& f);
     ScaledFunctionPatch& operator=(const ScalarFunctionModelType<M>& f);
@@ -229,6 +230,7 @@ template<class M> class ScaledFunctionPatch
     static ScaledFunctionPatch<M> zero(const DomainType& d, PropertiesType prp);
     //! \brief Construct a constant quantity in \a as independent variables.
     static ScaledFunctionPatch<M> constant(const DomainType& d, const NumericType& c, PropertiesType prp);
+    static ScaledFunctionPatch<M> constant(const DomainType& d, const GenericNumericType& c, PropertiesType prp);
     //! \brief Construct the coordinate \f$x_{j}\f$ over the domain \a d.
     static ScaledFunctionPatch<M> coordinate(const DomainType& d, SizeType j, PropertiesType prp);
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a 1
@@ -607,6 +609,11 @@ template<class M> class VectorScaledFunctionPatch
     //! \brief Construct from a domain, and expansion and errors.
     VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
                                  const Vector<Expansion<MultiIndex,RawFloat<PR>>>& expansion,
+                                 PropertiesType properties);
+
+    //! \brief Construct from a domain, and expansion and errors.
+    VectorScaledFunctionPatch<M>(const BoxDomainType& domain,
+                                 const Vector<Expansion<MultiIndex,ExactDouble>>& expansion,
                                  PropertiesType properties);
 
     //! \brief Construct from a domain and the models.

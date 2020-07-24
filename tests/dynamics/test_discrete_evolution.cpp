@@ -70,8 +70,8 @@ Void TestMapEvolver::test() const
 
     // Define the initial box
     ExactBoxType initial_box(2);
-    initial_box[0]=ExactIntervalType(1.01,1.03);
-    initial_box[1]=ExactIntervalType(0.51,0.53);
+    initial_box[0]=ExactIntervalType(1.01_pr,1.03_pr);
+    initial_box[1]=ExactIntervalType(0.51_pr,0.53_pr);
 
     ARIADNE_TEST_PRINT(initial_box);
 

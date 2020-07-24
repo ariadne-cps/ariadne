@@ -139,14 +139,11 @@ template<class X> class Matrix
     //! The values should be initialised using placement new.
     Matrix(SizeType m, SizeType n, Uninitialised);
 
-    //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.
-    Matrix(SizeType m, SizeType n);
-
     //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
     Matrix(SizeType m, SizeType n, const X& z);
 
     //! Construct a matrix from parameters of \a X.
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(0u,prs...)) { }
 
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
@@ -164,12 +161,15 @@ template<class X> class Matrix
     //@{
     //! \name Static constructors
 
-    //! \brief The zero matrix with \a r rows and \a c columns.
-    static Matrix<X> zero(SizeType m, SizeType n);
-    //! \brief The itentity matrix with \a n rows and \a n columns.
-    static Matrix<X> identity(SizeType n);
-    //! Construct the identity matrix from parameters of \a X.
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
+    //! \brief The zero matrix with \a m rows and \a n columns.
+    static Matrix<X> zero(SizeType m, SizeType n, X const& z);
+    //! \brief The identity matrix with \a n rows and \a n columns.
+    static Matrix<X> identity(SizeType n, X const& z);
+
+    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the properties \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> zero(SizeType m, SizeType n, PRS... prs);
+    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the properties \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
     //@}
 
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>> =dummy>
@@ -472,10 +472,6 @@ template<class X> inline Matrix<X>::~Matrix()
 
 template<class X> inline Matrix<X>::Matrix()
     : _zero(), _rs(0), _cs(0), _ary() {
-}
-
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n)
-    : _zero(), _rs(m), _cs(n), _ary(m*n) {
 }
 
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
@@ -874,9 +870,14 @@ Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs) : _rs(l
     }
 }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,PRS...>>> auto
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>> auto
+Matrix<X>::zero(SizeType m, SizeType n, PRS... prs) -> Matrix<X> {
+    return Matrix<X>(m,n,X(0u,prs...));
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>> auto
 Matrix<X>::identity(SizeType n, PRS... prs) -> Matrix<X> {
-    Matrix<X> I(n,n,X(prs...));
+    Matrix<X> I(n,n,X(0u,prs...));
     for(SizeType i=0; i!=n; ++i) {
         I.at(i,i)=1u;
     }

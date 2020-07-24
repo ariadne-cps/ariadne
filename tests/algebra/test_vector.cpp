@@ -59,9 +59,9 @@ TestVector::test()
 Void
 TestVector::test_concept()
 {
-    FloatDPApproximation ax(1);
-    FloatDPBounds ix(1);
-    FloatDPValue ex(1);
+    FloatDPApproximation ax(1,dp);
+    FloatDPBounds ix(1,dp);
+    FloatDPValue ex(1,dp);
     Vector<FloatDPApproximation> av;
     Vector<FloatDPBounds> iv;
     Vector<FloatDPValue> ev;
@@ -210,7 +210,7 @@ TestVector::test_misc()
     cout << iv1 << " = " << ix << " * " << iv3 << endl;
     iv1=iv2*ix;
     cout << iv1 << " = " << iv2 << " * " << ix << endl;
-    ix=FloatDPBounds(1,2);
+    ix=FloatDPBounds(1,2,dp);
     iv1=iv2/ix;
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;

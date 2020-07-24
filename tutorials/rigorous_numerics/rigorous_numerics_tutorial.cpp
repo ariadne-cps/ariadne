@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
         print(jacobian(h,v));
         print(h.differential(v,3));
 
-        BoxDomainType dom({{0,1},{0.5,1.5}});
+        BoxDomainType dom({{0,1},{0.5_x,1.5_x}});
         auto th = ValidatedVectorMultivariateTaylorFunctionModelDP(dom,h,ThresholdSweeper<FloatDP>(double_precision,1e-4));
         print(th);
         auto thh=compose(h,th);

@@ -76,7 +76,7 @@ template<class X> inline Bool compatible(const Differential<X>& x1, const Differ
 
 inline FloatDP create(const FloatDP& x) { return FloatDP(0); }
 //inline ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
-template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
+template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree(),x.zero_coefficient()); }
 
 template<class X> inline X create(const X& x) { return nul(x); }
 

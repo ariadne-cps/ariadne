@@ -434,7 +434,7 @@ template<class F, class FE> struct Operations<Ball<F,FE>> {
     }
 
     static PositiveLowerBound<F> _mig(Ball<F,FE> const& x) {
-        return PositiveLowerBound<F>(max(0,sub(down,abs(x._v),x._e)));
+        return PositiveLowerBound<F>(max(F(0,x._v.precision()),sub(down,abs(x._v),x._e)));
     }
 
     //! \related Bounds<F> \brief Strict greater-than comparison operator. Tests equality of represented real-point value.

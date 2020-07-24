@@ -59,7 +59,7 @@ template<class T> class Orbit;
 class DegenerateCrossingException { };
 
 HybridSimulator::HybridSimulator()
-    : _step_size(0.125)
+    : _step_size(0.125_x,dp)
 {
 }
 

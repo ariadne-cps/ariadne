@@ -39,7 +39,7 @@ template<class F, class S> List<ResultOf<F(S)>> map(F const& f, List<S> const& l
     List<ResultOf<F(S)>> result; for(auto item : list) { result.append(f(item)); } return result;
 }
 
-inline FloatDP score(ValidatedConstrainedImageSet const& evolve_set) {
+inline ApproximateDouble score(ValidatedConstrainedImageSet const& evolve_set) {
     auto bbx = evolve_set.bounding_box();
     return 1.0/std::pow(volume(bbx).get_d(),1.0/bbx.size());
 }
@@ -53,7 +53,7 @@ template<class C> struct Reverse {
 template<class C> Reverse<C> reverse(C const& c) { return Reverse<C>(c); }
 
 
-void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
+void run_single(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, ApproximateDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) {
 
     auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
     evolver.configuration().approximations(approximations);
@@ -115,7 +115,7 @@ void run_noisy_system(String name, const DottedRealAssignments& dynamics, const 
     InclusionVectorField ivf(dynamics,inputs);
 
     SizeType period_of_parameter_reduction=12;
-    FloatDP ratio_of_parameters_to_keep(6.0);
+    ExactDouble ratio_of_parameters_to_keep=6.0_x;
     double sw_threshold = 1e-8;
     ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 

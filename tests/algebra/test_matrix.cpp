@@ -64,9 +64,9 @@ TestMatrix::test()
 Void
 TestMatrix::test_concept()
 {
-    FloatDPApproximation fx(1);
-    FloatDPBounds ix(1);
-    FloatDPValue ex(1);
+    FloatDPApproximation fx(1,dp);
+    FloatDPBounds ix(1,dp);
+    FloatDPValue ex(1,dp);
     Vector<FloatDPApproximation> fv;
     Vector<FloatDPBounds> iv;
     Vector<FloatDPValue> ev;
@@ -153,9 +153,9 @@ TestMatrix::test_misc()
     A1.at(1,0)=2.0;
     ARIADNE_TEST_EQUALS(A1[1][0],2.0);
 
-    A0=Matrix<FloatDPApproximation>::zero(2,3);
+    A0=Matrix<FloatDPApproximation>::zero(2,3,dp);
     ARIADNE_TEST_PRINT(A0);
-    A1=Matrix<FloatDPApproximation>::identity(4);
+    A1=Matrix<FloatDPApproximation>::identity(4,dp);
     ARIADNE_TEST_PRINT(A1);
 
     ARIADNE_TEST_EQUALS(+FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr),FloatApproximationMatrix({{1.0_x,2.0_x},{3.0_x,4.0_x}},pr));

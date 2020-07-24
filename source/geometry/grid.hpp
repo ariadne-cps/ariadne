@@ -74,12 +74,15 @@ class Grid {
 
     //! Construct from a dimension and a spacing in each direction.
     explicit Grid(Nat d, RawFloatDP l);
+    explicit Grid(Nat d, ApproximateDouble l);
 
     //! Construct from a vector of lengths.
     explicit Grid(const Vector<RawFloatDP>& lengths);
+    explicit Grid(const Vector<ApproximateDouble>& lengths);
 
     //! Construct from a centre point and a vector of lengths.
     explicit Grid(const Vector<RawFloatDP>& origin, const Vector<RawFloatDP>& lengths);
+    explicit Grid(const Vector<ApproximateDouble>& origin, const Vector<ApproximateDouble>& lengths);
 
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);

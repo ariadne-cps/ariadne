@@ -564,7 +564,7 @@ pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std
 
     pybind11::class_<Vector<X>> vector_class(module, name.c_str());
     vector_class.def(pybind11::init<Vector<X>>());
-    vector_class.def(pybind11::init<Array<X>>());
+//    vector_class.def(pybind11::init<Array<X>>());
     if constexpr (IsDefaultConstructible<X>::value) {
         vector_class.def(pybind11::init<Nat>());
     }
@@ -589,8 +589,10 @@ pybind11::class_<Ariadne::Vector<X>> export_vector(pybind11::module& module, std
     }
     vector_class.def("__str__",&__cstr__<Vector<X>>);
     //vector_class.def("__repr__",&__repr__<Vector<X>>);
-    vector_class.def_static("unit",&Vector<X>::unit);
-    vector_class.def_static("basis",&Vector<X>::basis);
+    if constexpr (IsDefaultConstructible<X>::value) {
+        vector_class.def_static("unit",(Vector<X>(*)(SizeType,SizeType))&Vector<X>::unit);
+        vector_class.def_static("basis",(Array<Vector<X>>(*)(SizeType))&Vector<X>::basis);
+    }
 
     module.def("dot", &_dot_<Vector<X>,Vector<X>>);
 

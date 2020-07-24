@@ -55,7 +55,7 @@ template<class DF>
 Vector<DF>
 henon(const Vector<DF>& x, const Vector<typename DF::NumericType>& p)
 {
-    Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
+    Vector<DF> r(2,2,x.degree(),p.zero_element()); henon(r,x,p); return r;
 }
 
 
@@ -74,7 +74,7 @@ class TestDifferential {
     DifferentialType x1,x2,x3;
   public:
     TestDifferential()
-        : x1(2,4), x2(2,4), x3(1,4)
+        : x1(2,4,pr), x2(2,4,pr), x3(1,4,pr)
     {
         c1=ScalarType(3.0_x,pr);
         x1=DifferentialType(2,4,{{{0,0},2.0_x},{{1,0},1.0_x},{{2,0},0.5_x}},pr);
@@ -243,7 +243,7 @@ class TestDifferentialVector {
     DifferentialVectorType x1,x2,x3;
   public:
     TestDifferentialVector()
-        : x1(1,2,4), x2(1,2,4), x3(1,1,4)
+        : x1(1,2,4,pr), x2(1,2,4,pr), x3(1,1,4,pr)
     {
         x1=DifferentialVectorType(1,2,4,{{ {{0,0},2.0_x},{{1,0},1.0_x},{{2,0},0.5_x} }},pr);
         x2=DifferentialVectorType(1,2,4,{{ {{0,0},3.0_x},{{1,0},1.0_x},{{2,0},0.25_x} }},pr);
@@ -266,7 +266,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_EQUAL(x1.degree(),4);
 
         // Regression test to check setting of degree for null vector
-        DifferentialVectorType dx(0u,2u,3u);
+        DifferentialVectorType dx(0u,2u,3u,pr);
 
         if(dx.argument_size()!=2u) {
             ARIADNE_TEST_WARN("Vector<Differential<X>>::argument_size() returns 0 if the vector of differentials has no elements.");
@@ -300,7 +300,7 @@ class TestDifferentialVector {
     }
 
     Void test_jacobian() {
-        DifferentialVectorType dv(0u,2u,3u);
+        DifferentialVectorType dv(0u,2u,3u,pr);
         Matrix<FloatDPApproximation> J=dv.jacobian();
         ARIADNE_TEST_EQUALS(J.row_size(),dv.result_size());
         ARIADNE_TEST_EQUALS(J.column_size(),dv.argument_size());
@@ -369,7 +369,7 @@ class TestDifferentialVector {
     }
 
     Void test_mapping() {
-        DifferentialVectorType x(2,2,2);
+        DifferentialVectorType x(2,2,2,pr);
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
         Vector<FloatDPApproximation> p(2); p[0]=1.5_x; p[1]=0.375_x;
@@ -379,7 +379,7 @@ class TestDifferentialVector {
 };
 
 Int main() {
-    TestDifferential< Differential<FloatDPApproximation> > tf;
+//    TestDifferential< Differential<FloatDPApproximation> > tf;
     TestDifferentialVector< Differential<FloatDPApproximation> > tfv;
     return ARIADNE_TEST_FAILURES;
 }

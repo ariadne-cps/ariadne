@@ -160,7 +160,7 @@ template<class F> class Bounds
         else if(x.upper_raw()<=0) { return Bounds<F>(neg(x.upper_raw()),neg(x.lower_raw())); }
         else { return Bounds<F>(F(0.0,x.precision()),max(neg(x.lower_raw()),x.upper_raw())); } }
     friend PositiveLowerBound<F> mig(Bounds<F> const& x) {
-        return PositiveLowerBound<F>(max(0,max(x._l,neg(x._u)))); }
+        return PositiveLowerBound<F>(max(F(0,x.precision()),max(x._l,neg(x._u)))); }
     friend PositiveUpperBound<F> mag(Bounds<F> const& x) {
         return PositiveUpperBound<F>(max(neg(x._l),x._u)); }
     friend ValidatedKleenean sgn(Bounds<F> const& x) {

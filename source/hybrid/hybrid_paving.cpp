@@ -285,9 +285,9 @@ GridTreePaving& HybridGridTreePaving::_provide_location(const DiscreteLocation& 
 
 Grid HybridScalings::grid(const DiscreteLocation& loc, const RealSpace& space) const
 {
-    Vector<RawFloatDP> lengths(space.size());
+    Vector<ExactDouble> lengths(space.size());
     for(SizeType i=0; i!=space.size(); ++i) {
-        lengths[i] = (this->scaling(loc,space.variable(i))).raw();
+        lengths[i] = (this->scaling(loc,space.variable(i)));
     }
     return Grid(lengths);
 }

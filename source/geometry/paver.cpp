@@ -335,10 +335,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG_SCOPE_CREATE;
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
-    static const FloatDPValue XSIGMA { 0.125 };
-    static const FloatDPValue TERR { -1.0/((1<<e)*1024.0) };
-    static const FloatDPValue XZMIN { 1.0/(1<<16) };
-    static const FloatDPValue inf { Ariadne::inf };
+    static const FloatDPValue XSIGMA { 0.125_x,dp };
+    static const FloatDPValue TERR { ExactDouble(-1.0/((1<<e)*1024.0)),dp };
+    static const FloatDPValue XZMIN { ExactDouble(1.0/(1<<16)),dp };
+    static const FloatDPValue zero { 0,dp };
+    static const ExactDouble inf(Ariadne::inf.get_d());
     DoublePrecision pr;
 
     // Set up the classes used for constraint propagation and
@@ -434,7 +435,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         ARIADNE_LOG_PRINTLN_AT(1,"txg="<<txg);
 
-        ValidatedConstraint constraint=(txg>=0.0_exact);
+        ValidatedConstraint constraint=(txg>=0);
 
         ARIADNE_LOG_PRINTLN_AT(1,"dom="<<nd);
         solver.hull_reduce(nd,txg,ExactIntervalType(0,inf));
@@ -496,7 +497,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // This constant shows how far away from zero the points are
     static const FloatDPValue XSIGMA = {TwoExp(-3),pr};
     static const FloatDPValue  TERR = {TwoExp(-10),pr};
-    static const FloatDPValue inf { Ariadne::inf };
+    static const ExactDouble inf(Ariadne::inf.get_d());
 
     const Nat m=fg.argument_size();
     const Nat n=fg.result_size();
@@ -607,7 +608,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBoxType& d,
 
     Point<FloatDPValue> y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    Point<FloatDPValue> x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
+    Point<FloatDPValue> x(l,FloatDPValue(dp)); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(ExactDouble(1.0/l),dp); }
 
     Ariadne::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -638,7 +639,7 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 
     ExactPointType y=midpoint(d);
     const Nat l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPointType x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(1.0/l); }
+    ExactPointType x(l); for(Nat k=0; k!=l; ++k) { x[k]=FloatDPValue(ExactDouble(1.0/l),dp); }
 
     ValidatedVectorMultivariateTaylorFunctionModelDP fg;
     const ValidatedVectorMultivariateTaylorFunctionModelDP* tfptr;

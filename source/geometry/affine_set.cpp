@@ -415,8 +415,8 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
     for(Nat i=0; i!=np; ++i) {
         //lp.l[nx+i]=this->_domain[i].lower();
         //lp.u[nx+i]=this->_domain[i].upper();
-        lp.l[nx+i]=-1.0;
-        lp.u[nx+i]=+1.0;
+        lp.l[nx+i]=-1;
+        lp.u[nx+i]=+1;
     }
     for(Nat i=0; i!=nc; ++i) {
         lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound().value().raw();
@@ -655,7 +655,6 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     static const Int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const FloatDP _inf = Ariadne::inf;
 
     const SizeType nx=_domain.size();
     const SizeType ne=2u;
@@ -669,8 +668,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
     // The set is given by pt=Gx+h, where Ax=b and l<=x<=u
     Matrix<FloatDP> G=Matrix<FloatDP>::zero(ne,np);
     for(Nat j=0; j!=nx; ++j) {
-        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+eps();
-        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+eps();
+        G[0][j]=numeric_cast<FloatDP>(xa.gradient(j))+FloatDP(eps());
+        G[1][j]=numeric_cast<FloatDP>(ya.gradient(j))+FloatDP(eps());
     }
     G[0][nx+nc+0]=numeric_cast<FloatDP>(1.0);
     G[1][nx+nc+1]=numeric_cast<FloatDP>(1.0);
@@ -706,7 +705,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         FloatDP fe=numeric_cast<FloatDP>(this->_constraint_models[i].function().error().raw());
         FloatDP cl=numeric_cast<FloatDP>(this->_constraint_models[i].lower_bound().value());
         FloatDP cu=numeric_cast<FloatDP>(this->_constraint_models[i].upper_bound().value());
-        b[i]=fb+eps();
+        b[i]=fb+FloatDP(eps());
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;
     }
@@ -764,7 +763,7 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
 
     do {
         ++STEPS;
-        FloatDP cot_theta_max=-_inf;
+        FloatDP cot_theta_max(-inf,dp);
         Nat s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
@@ -804,8 +803,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
                                    "ValidatedAffineConstrainedImageSet::boundary(...): cross product is="<<cross<<"; should be positive.");
 
                 if(cross<=0.0 ) {
-                    cross=+0.0;
-                    cot_theta=(dot>0.0) ? +_inf : -_inf;
+                    cross=+0;
+                    cot_theta=(dot>0.0) ? +inf : -inf;
                 }
 
                 // Allow for equality; in particular, if cot_theta=-infty,

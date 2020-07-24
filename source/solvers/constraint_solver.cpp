@@ -98,9 +98,9 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
     -> Pair<ValidatedKleenean,ExactPointType>
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    static const FloatDPValue XSIGMA=0.125_exact;
-    static const FloatDPValue TERR=-1.0_exact*pow(two,-10);
-    static const FloatDP _inf = Ariadne::inf;
+    static const ExactDouble XSIGMA=0.125_x;
+    static const ExactDouble TERR=-1.0_x*pow(two,-10);
+    static const ExactDouble _inf ( Ariadne::inf.get_d() );
 
     ARIADNE_LOG_PRINTLN("domain="<<domain);
     ARIADNE_LOG_PRINTLN("function="<<function);
@@ -195,10 +195,11 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         //Pair<ExactBoxType,ExactBoxType> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG_PRINTLN("Splitting domain");
         Pair<ExactBoxType,ExactBoxType> sd=d.split();
-        Vector<FloatDPApproximation> nx = FloatDPApproximation(1.0_approx-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size());
+        FloatDPApproximation xsigma(XSIGMA,dp);
+        Vector<FloatDPApproximation> nx = (1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
         Vector<FloatDPApproximation> ny = midpoint(sd.first);
         ValidatedKleenean result=this->feasible(sd.first, fn, c).first;
-        nx = FloatDPApproximation(1-XSIGMA)*x + Vector<FloatDPApproximation>(x.size(),XSIGMA/x.size());
+        nx = FloatDPApproximation(1-xsigma)*x + Vector<FloatDPApproximation>(x.size(),xsigma/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPointType());
@@ -210,7 +211,7 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
 
 Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultivariateFunction& function, const ExactBoxType& codomain) const
 {
-    const FloatDP MINIMUM_REDUCTION = 0.75;
+    const ExactDouble MINIMUM_REDUCTION = 0.75_x;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
@@ -285,7 +286,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const List<ValidatedConstrai
         for(Nat j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
+    } while(domain_magnitude.raw() < (old_domain_magnitude * MINIMUM_REDUCTION).raw());
 
     return false;
 }
@@ -390,7 +391,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBoxType& domain, const ValidatedVect
                                        ExactFloatVector centre, ExactFloatVector multipliers) const
 {
     ValidatedScalarMultivariateTaylorFunctionModelDP g(function.domain(),default_sweeper());
-    UpperIntervalType C(0);
+    UpperIntervalType C(0,0,dp);
     for(Nat i=0; i!=function.result_size(); ++i) {
         g += cast_exact(multipliers[i]) * function[i];
         C += cast_exact(multipliers[i]) * bounds[i];

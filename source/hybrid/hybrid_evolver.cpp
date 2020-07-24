@@ -49,9 +49,9 @@ namespace Ariadne {
 
 static const FloatDPValue zero={0,dp};
 
-inline auto operator+(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n)+x) { return FloatDPValue(n)+x; }
-inline auto operator-(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n)-x) { return FloatDPValue(n)-x; }
-inline auto operator/(FloatDPValue x, Nat n) -> decltype(x/FloatDPValue(n)) { return x/FloatDPValue(n); }
+inline auto operator+(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n,dp)+x) { return FloatDPValue(n,dp)+x; }
+inline auto operator-(Int n, FloatDPBounds x) -> decltype(FloatDPValue(n,dp)-x) { return FloatDPValue(n,dp)-x; }
+inline auto operator/(FloatDPValue x, Nat n) -> decltype(x/FloatDPValue(n,dp)) { return x/FloatDPValue(n,dp); }
 
 template<class PR> inline auto operator*(FloatUpperBound<PR> x1, PositiveFloatValue<PR> x2) -> FloatUpperBound<PR> {
     return FloatUpperBound<PR>(mul(up,x1._u,x2._v)); }
@@ -1136,7 +1136,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                 switch(semantics) {
                     case Semantics::UPPER:
                         for(Nat i=0; i!=n; ++i) {
-                            FloatDPBounds alpha=FloatDPValue(i+1)/n;
+                            FloatDPBounds alpha=FloatDPValue(i+1,dp)/n;
                             ValidatedScalarMultivariateFunctionModelDP intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state_function, alpha*elapsed_time_function) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= zero);
@@ -1621,10 +1621,10 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 }
 
 Void
-HybridEvolverBaseConfiguration::set_flow_accuracy(const RawRealType value)
+HybridEvolverBaseConfiguration::set_flow_accuracy(const ApproximateRealType value)
 {
-    _evolver._integrator_ptr=std::shared_ptr<GradedTaylorSeriesIntegrator>(new GradedTaylorSeriesIntegrator(MaximumError(value)));
-    _flow_accuracy = static_cast<RealType>(value);
+    _evolver._integrator_ptr=std::shared_ptr<GradedTaylorSeriesIntegrator>(new GradedTaylorSeriesIntegrator(MaximumError(cast_exact(value))));
+    _flow_accuracy = cast_exact(value);
 }
 
 
@@ -1903,8 +1903,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         ValidatedVectorMultivariateFunctionModelDP space_projection=flow*zero;
         for(Nat i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
 
-        //static const FloatDPValue CREEP_MAXIMUM=FloatDPValue(1.0);
-        static const FloatDPValue CREEP_MAXIMUM=FloatDPValue(15.0/16);
+        //static const ExactDouble CREEP_MAXIMUM=1.0_X;
+        static const ExactDouble CREEP_MAXIMUM=0.9375_x;
         spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
 
         for(Map<DiscreteEvent,CrossingData>::Iterator crossing_iter=crossings.begin();

@@ -545,17 +545,17 @@ template<class I, class X, class CMP> SortedExpansion<I,X,CMP>::SortedExpansion(
 
 /*
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) -> Iterator {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     return  std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::find(const I& a) const -> ConstIterator {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     return std::lower_bound(this->begin(),this->end(),a,CMP());
 }
 */
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::get(const I& a) const -> CoefficientType const& {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
         return this->_zero_coefficient;
@@ -565,10 +565,10 @@ template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::get(const I
 }
 
 template<class I, class X, class CMP> auto SortedExpansion<I,X,CMP>::at(const I& a) -> CoefficientType& {
-    ExpansionValue<I,X> term(a,Expansion<I,X>::_zero_coefficient);
+    ExpansionValue<I,X> term(a,this->_zero_coefficient);
     auto iter=std::lower_bound(this->begin(),this->end(),term,CMP());
     if (iter==this->end() || iter->index()!=a) {
-        iter=this->Expansion<I,X>::insert(iter,a,X(0));
+        iter=this->Expansion<I,X>::insert(iter,a,this->_zero_coefficient);
     }
     return iter->coefficient();
 }

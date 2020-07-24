@@ -206,15 +206,20 @@ class Vector
     //! \name Static constructors
 
     //! \brief The zero vector of size \a n.
-    static Vector<X> zero(SizeType n) { return Vector<X>(n,static_cast<X>(0)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> zero(SizeType n, PRS... prs) { return Vector<X>(n,X(0u,prs...)); }
     //! \brief The vector of size \a n with all entries equal to one.
-    static Vector<X> one(SizeType n) { return Vector<X>(n,static_cast<X>(1)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> one(SizeType n, PRS... prs) { return Vector<X>(n,X(1u,prs...)); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Vector<X> unit(SizeType n,SizeType i) {
-        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0)); result[i]=static_cast<X>(1); return result; }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector<X> unit(SizeType n, SizeType i, PRS... prs) {
+        ARIADNE_ASSERT(i<n); Vector<X> result(n,X(0u,prs...)); result[i]=X(1u,prs...); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Array< Vector<X> > basis(SizeType n) {
-        Array< Vector<X> > result(n); for(Nat i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Array< Vector<X> > basis(SizeType n, PRS... prs) {
+        Array<Vector<X>> result(n,Vector<X>(n,prs...));
+        for(SizeType i=0; i!=n; ++i) { result[i]=unit(n,i,prs...); } return result; }
     //@}
 
     //@{
@@ -242,7 +247,9 @@ class Vector
     //! \brief Constant range subscripting operator.
     VectorRange<const Vector<X>> operator[](Range rng) const;
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
-    const X zero_element() const { if(this->size()!=0) { return create_zero((*this)[0]); } else { return X(); } }
+    const X zero_element() const {
+        if(this->size()!=0) { return create_zero((*this)[0]); }
+        else { if constexpr (IsDefaultConstructible<X>::value) { return X(); }  else { assert(false); } } }
     //! \brief The raw data array.
     Array<X> const& array() const { return _ary; }
     //@}

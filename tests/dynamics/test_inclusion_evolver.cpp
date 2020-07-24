@@ -41,7 +41,7 @@ using namespace Ariadne;
 
 class TestInclusionIntegrator {
 
-    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
+    void run_single_test(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
 
         auto evolver = InclusionEvolver(ivf,sweeper,integrator,reconditioner);
         evolver.configuration().approximations(approximations);
@@ -50,7 +50,7 @@ class TestInclusionIntegrator {
         List<ValidatedVectorMultivariateFunctionModelType> flow_functions = evolver.reach(initial,evolution_time);
     }
 
-    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, double step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
+    void run_each_approximation(String name, InclusionVectorField const& ivf, BoxDomainType const& initial, Real evolution_time, ExactDouble step, List<InputApproximation> approximations, SweeperDP sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner, bool draw) const {
 
         for (auto appro: approximations) {
             List<InputApproximation> singleapproximation = {appro};
@@ -60,22 +60,22 @@ class TestInclusionIntegrator {
     }
 
     void run_test(String name, const DottedRealAssignments& dynamics, const RealVariablesBox& inputs,
-                  const RealVariablesBox& initial, Real evolution_time, double step) const {
+                  const RealVariablesBox& initial, Real evolution_time, ExactDouble step) const {
 
         InclusionVectorField ivf(dynamics,inputs);
 
         SizeType period_of_parameter_reduction=12;
-        FloatDP ratio_of_parameters_to_keep(6.0);
-        double sw_threshold = 1e-8;
+        ExactDouble ratio_of_parameters_to_keep=6.0_x;
+        ExactDouble sw_threshold = 1e-8_pr;
         ThresholdSweeperDP sweeper(DoublePrecision(),sw_threshold);
 
         List<InputApproximation> approximations = {ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()};
 
         TaylorPicardIntegrator integrator(
-                maximum_error=1e-3,
+                maximum_error=1e-3_pr,
                 sweeper,
-                lipschitz_constant=0.5,
-                step_maximum_error=1e-3,
+                lipschitz_constant=0.5_x,
+                step_maximum_error=1e-3_pr,
                 minimum_temporal_order=4,
                 maximum_temporal_order=12);
 
@@ -103,7 +103,7 @@ void TestInclusionIntegrator::test_higgins_selkov() const {
     RealVariablesBox initial={{2-e<=S<=2+e},{1-e<=P<=1+e}};
 
     Real evolution_time=1/25_q;
-    double step=1.0/64;
+    ExactDouble step=1.0_x/pow(two,6);
 
     this->run_test("higgins-selkov",dynamics,inputs,initial,evolution_time,step);
 }
@@ -118,7 +118,7 @@ void TestInclusionIntegrator::test_jet_engine() const {
     RealVariablesBox initial={{1-e1<=x<=1+e1},{1-e2<=y<=1+e2}};
 
     Real evolution_time=1/25_q;
-    double step=1.0/64;
+    ExactDouble step=1.0_x/pow(two,6);
 
     this->run_test("jet-engine",dynamics,inputs,initial,evolution_time,step);
 }
@@ -132,7 +132,7 @@ void TestInclusionIntegrator::test_rossler() const {
     RealVariablesBox initial={{-9-e<=x<=-9+e},{-e<=y<=e},{0.01_dec-e<=z<=0.01_dec+e}};
 
     Real evolution_time=1/128_q;
-    double step=1.0/256;
+    ExactDouble step=1.0_x/pow(two,8);
 
     this->run_test("rossler",dynamics,inputs,initial,evolution_time,step);
 }

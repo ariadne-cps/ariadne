@@ -188,7 +188,7 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
   public:
     Positive<LowerBound<F>>() : LowerBound<F>() { }
     template<class M, EnableIf<IsBuiltinUnsignedIntegral<M>> =dummy>
-        Positive<LowerBound<F>>(M m) : LowerBound<F>(m) { }
+        Positive<LowerBound<F>>(M m, PR const& pr) : LowerBound<F>(m,pr) { }
     explicit Positive<LowerBound<F>>(PR const& pr) : LowerBound<F>(pr) { }
     explicit Positive<LowerBound<F>>(F const& x) : LowerBound<F>(x) { }
     explicit Positive<LowerBound<F>>(LowerBound<F> const& x) : LowerBound<F>(x) { }
@@ -243,7 +243,7 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     friend PositiveLowerBound<F> operator/(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2) {
         return PositiveLowerBound<F>(div(down,x1.raw(),x2.raw())); }
     friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, Nat m2) {
-        return PositiveLowerBound<F>(div(down,x1.raw(),m2)); }
+        return PositiveLowerBound<F>(div(down,x1.raw(),F(m2,x1.precision()))); }
     friend PositiveUpperBound<F> operator/(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2);
 };
 

@@ -66,7 +66,7 @@ template<class BX> class TestBoxType {
     ARIADNE_TEST_CONSTRUCT( BoxType, r5, ({{0.0_x,1.1875_x},{0.4375_x,1.0_x}}) );
     ARIADNE_TEST_CONSTRUCT( BoxType, r6, ({{0.0_x,1.0_x},{0.0_x,0.5_x}}) );
 
-    ARIADNE_TEST_EQUALS(r2.measure(), 1.75_exact);
+    ARIADNE_TEST_EQUALS(r2.measure(), 1.75_x);
 
     ARIADNE_TEST_ASSERT(r2.midpoint()==PointType({0.5_x,0.0625_x},dp));
 
@@ -83,32 +83,32 @@ template<class BX> class TestBoxType {
     ARIADNE_TEST_EXECUTE( r4=intersection(r1,r2) );
     ARIADNE_TEST_ASSERT(r4==r6);
 
-    ARIADNE_TEST_EXECUTE( r1[1]=IntervalType(0.0,0.5) );
+    ARIADNE_TEST_EXECUTE( r1[1]=IntervalType(0.0_x,0.5_x) );
     ARIADNE_TEST_ASSERT(r1==r6);
 
-    ARIADNE_TEST_ASSERT(definitely(intersect(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.0,2.0},{1.5,2.5}})));
-    ARIADNE_TEST_ASSERT(definitely_not(intersect(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.5,2.0},{1.5,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(intersect(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.0_x,2.0_x},{1.5_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(definitely_not(intersect(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.5_x,2.0_x},{1.5_x,2.5_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(disjoint(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.5,2.0},{1.5,2.5}})));
-    ARIADNE_TEST_ASSERT(definitely_not(disjoint(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.0,2.0},{1.5,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(disjoint(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.5_x,2.0_x},{1.5_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(definitely_not(disjoint(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.0_x,2.0_x},{1.5_x,2.5_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(subset(BoxType{{0.5,1.25},{1.5,2.0}},BoxType{{0.0,1.25},{1.0,2.5}})));
-    ARIADNE_TEST_ASSERT(definitely_not(subset(BoxType{{0.5,1.5},{1.5,2.0}},BoxType{{0.0,1.0},{1.0,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(subset(BoxType{{0.5_x,1.25_x},{1.5_x,2.0_x}},BoxType{{0.0_x,1.25_x},{1.0_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(definitely_not(subset(BoxType{{0.5_x,1.5_x},{1.5_x,2.0_x}},BoxType{{0.0_x,1.0_x},{1.0_x,2.5_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(superset(BoxType{{0.0,1.25},{1.0,2.5}},BoxType{{0.5,1.25},{1.5,2.0}})));
-    ARIADNE_TEST_ASSERT(definitely_not(superset(BoxType{{0.0,1.0},{1.0,2.5}},BoxType{{0.5,1.5},{1.5,2.0}})));
+    ARIADNE_TEST_ASSERT(definitely(superset(BoxType{{0.0_x,1.25_x},{1.0_x,2.5_x}},BoxType{{0.5_x,1.25_x},{1.5_x,2.0_x}})));
+    ARIADNE_TEST_ASSERT(definitely_not(superset(BoxType{{0.0_x,1.0_x},{1.0_x,2.5_x}},BoxType{{0.5_x,1.5_x},{1.5_x,2.0_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(covers(BoxType{{0.0,1.5},{1.0,2.5}},BoxType{{0.5,1.0},{1.5,2.0}})));
-    ARIADNE_TEST_ASSERT(possibly_not(covers(BoxType{{0.0,1.25},{1.0,2.5}},BoxType{{0.5,1.25},{1.5,2.0}})));
+    ARIADNE_TEST_ASSERT(definitely(covers(BoxType{{0.0_x,1.5_x},{1.0_x,2.5_x}},BoxType{{0.5_x,1.0_x},{1.5_x,2.0_x}})));
+    ARIADNE_TEST_ASSERT(possibly_not(covers(BoxType{{0.0_x,1.25_x},{1.0_x,2.5_x}},BoxType{{0.5_x,1.25_x},{1.5_x,2.0_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(overlap(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{0.5,1.5},{1.5,2.5}})));
-    ARIADNE_TEST_ASSERT(possibly_not(overlap(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.0,2.0},{1.5,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(overlap(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{0.5_x,1.5_x},{1.5_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(possibly_not(overlap(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.0_x,2.0_x},{1.5_x,2.5_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(inside(BoxType{{0.5,1.0},{1.5,2.0}},BoxType{{0.0,1.5},{1.0,2.5}})));
-    ARIADNE_TEST_ASSERT(possibly_not(inside(BoxType{{0.5,1.25},{1.5,2.0}},BoxType{{0.0,1.25},{1.0,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(inside(BoxType{{0.5_x,1.0_x},{1.5_x,2.0_x}},BoxType{{0.0_x,1.5_x},{1.0_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(possibly_not(inside(BoxType{{0.5_x,1.25_x},{1.5_x,2.0_x}},BoxType{{0.0_x,1.25_x},{1.0_x,2.5_x}})));
 
-    ARIADNE_TEST_ASSERT(definitely(separated(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.5,2.5},{1.5,2.5}})));
-    ARIADNE_TEST_ASSERT(possibly_not(separated(BoxType{{0.0,1.0},{1.0,2.0}},BoxType{{1.0,2.0},{1.5,2.5}})));
+    ARIADNE_TEST_ASSERT(definitely(separated(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.5_x,2.5_x},{1.5_x,2.5_x}})));
+    ARIADNE_TEST_ASSERT(possibly_not(separated(BoxType{{0.0_x,1.0_x},{1.0_x,2.0_x}},BoxType{{1.0_x,2.0_x},{1.5_x,2.5_x}})));
 
 
 

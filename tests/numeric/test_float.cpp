@@ -272,8 +272,8 @@ TestFloat<PR>::test_class()
     // Construct from an Int
     ARIADNE_TEST_CONSTRUCT(Float,f1,(2));
     ARIADNE_TEST_EQUALS(f1,2);
-    // Construct from a double
-    ARIADNE_TEST_CONSTRUCT(Float,f2,(1.25));
+    // Construct from an ExactDouble
+    ARIADNE_TEST_CONSTRUCT(Float,f2,(1.25_x,precision));
     ARIADNE_TEST_EQUALS(f2,1.25);
     // Copy constructor
     ARIADNE_TEST_CONSTRUCT(Float,f3,(f2));
@@ -284,8 +284,8 @@ TestFloat<PR>::test_class()
     ARIADNE_TEST_EXECUTE(f1=3);
     ARIADNE_TEST_EQUALS(f1,3);
     // Assign from a double
-    ARIADNE_TEST_EXECUTE(f2=2.25);
-    ARIADNE_TEST_EQUALS(f2,2.25);
+    ARIADNE_TEST_EXECUTE(f2=2.25_x);
+    ARIADNE_TEST_EQUALS(f2,2.25_x);
     // Copy assignment
     ARIADNE_TEST_EXECUTE(f3=f2);
     ARIADNE_TEST_EQUAL(f3,f2);
@@ -656,15 +656,17 @@ TestFloat<PR>::test_arithmetic()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
+/*
     static bool full_precision_warning = false;
     const Float pi_near=Float::pi(near,precision);
     const Float four   =Float(4,precision);
-    if( mul(up,pi_near,4.0) != mul(up,pi_near,four) ) {
+    if( mul(up,pi_near,4.0_x) != mul(up,pi_near,four) ) {
         if(not full_precision_warning) {
             full_precision_warning=true;
-            ARIADNE_TEST_WARN("Mixed Float/BuiltinTag operations may not use full precision.");
+            ARIADNE_TEST_WARN("Mixed Float/Builtin operations may not use full precision.");
         }
     }
+*/
 
     static const double eps = std::numeric_limits<double>::epsilon();
 
@@ -750,10 +752,10 @@ TestFloat<PR>::test_arithmetic()
     f4=div(up,f1,f2);
     f5=div(approx,f1,f2);
     cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
-    Float five = 5;
-    Float nine = 9;
+    Float five(5,precision);
+    Float nine(9,precision);
 
-    Float expected_five_ninths_up=0.55555555555555558023;
+    ExactDouble expected_five_ninths_up=0.55555555555555558023_x;
     Float::set_rounding_downward();
     ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);
     ARIADNE_TEST_COMPARE(div(five,nine),<,expected_five_ninths_up);
@@ -892,7 +894,7 @@ TestFloat<PR>::test_cosine()
     ARIADNE_TEST_COMPARE(cos(3*pi_down),==,-1.0);
     ARIADNE_TEST_COMPARE(cos(3*pi_up),==,-1.0);
 
-    static const Float one=1.0;
+    static const Float one(1.0_x,precision);
     Float::set_rounding_mode(upward);
     Float sin_rnd_up_one=sin(one);
     Float::set_rounding_mode(downward);
@@ -909,20 +911,20 @@ TestFloat<DoublePrecision>::test_arctan()
 {
     DoublePrecision pr;
 
-    static const FloatDP pi_down=3.1415926535897931;
-    //static const FloatDP pi_near=3.1415926535897931;
-    static const FloatDP pi_up  =3.1415926535897936;
+    static const FloatDP pi_down(3.1415926535897931_pr);
+    static const FloatDP pi_near(3.1415926535897931_pr);
+    static const FloatDP pi_up  (3.1415926535897936_pr);
 
-    static const FloatDP atan_quarter_down=0.244978663126864143;
-    //static const FloatDP atan_quarter_near=0.244978663126864154;
-    static const FloatDP atan_quarter_up  =0.244978663126864171;
+    static const FloatDP atan_quarter_down(0.244978663126864143_pr);
+    //static const FloatDP atan_quarter_near(0.244978663126864154_pr);
+    static const FloatDP atan_quarter_up  (0.244978663126864171_pr);
 
-    static const FloatDP sqrt_three_down=1.732050807568877193;
-    //static const FloatDP sqrt_three_near=1.732050807568877294;
-    static const FloatDP sqrt_three_up  =1.732050807568877415;
+    static const FloatDP sqrt_three_down(1.732050807568877193);
+    //static const FloatDP sqrt_three_near(1.732050807568877294);
+    static const FloatDP sqrt_three_up  (1.732050807568877415);
 
-    static const FloatDP zero=0.0;
-    static const FloatDP one=1.0;
+    static const FloatDP zero(0.0_x);
+    static const FloatDP one (1.0_x);
     static const FloatDP eps=FloatDP::eps(pr);
 
     FloatDP::set_rounding_mode(upward);

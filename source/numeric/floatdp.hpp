@@ -38,10 +38,13 @@
 #include "../numeric/operators.hpp"
 #include "../numeric/rounding.hpp"
 #include "../numeric/sign.hpp"
+#include "../numeric/builtin.hpp"
 #include "../numeric/number.decl.hpp"
 #include "../numeric/float.decl.hpp"
 
 namespace Ariadne {
+
+struct NoInit { };
 
 class FloatDP;
 typedef FloatDP RawFloatDP;
@@ -53,6 +56,9 @@ enum class Comparison : char;
 //! \brief The precision of a FloatDP object. Since this is fixed, the class is only a tag; all objects are equal.
 //! \relates FloatDP
 class DoublePrecision {
+  public:
+    //! \brief Default constructor
+    constexpr DoublePrecision() { }
     //! \brief .
     friend constexpr DoublePrecision max(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
     //! \brief .
@@ -153,25 +159,38 @@ class FloatDP {
     static FloatDP max(DoublePrecision pr);
     static FloatDP eps(DoublePrecision pr);
     static FloatDP min(DoublePrecision pr);
-  public:
+  private:
     //! \brief Default constructor creates an uninitialised number.
     FloatDP() : dbl() { }
+    //! \brief Convert from a built-in double-precision floating-point number.
+    explicit FloatDP(double x) : dbl(x) { }
+  public:
+    explicit FloatDP(NoInit) : dbl() { }
     explicit FloatDP(DoublePrecision) : dbl() { }
     //! \brief Convert from a built-in double-precision floating-point number.
-    FloatDP(double x) : dbl(x) { }
-    explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
-    explicit FloatDP(ExactDouble const& x, DoublePrecision);
-    explicit FloatDP(TwoExp const& x, DoublePrecision);
-    explicit FloatDP(Dyadic const& x, DoublePrecision);
+//    explicit FloatDP(ExactDouble const& x);
+//    explicit FloatDP(double x, DoublePrecision) : dbl(x) { }
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP(N n, DoublePrecision) : dbl(n) { }
+    FloatDP(ExactDouble const& x, DoublePrecision);
+    FloatDP(TwoExp const& x, DoublePrecision);
+    FloatDP(Dyadic const& x, DoublePrecision);
     //! \brief Copy constructor.
     FloatDP(const FloatDP& x) : dbl(x.dbl) { }
+    //! \brief Assignment.
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatDP& operator=(N n) {
+        return this->operator=(ExactDouble(n)); }
+    FloatDP& operator=(const ExactDouble& x);
     //! \brief Copy assignment.
     FloatDP& operator=(const FloatDP& x) { this->dbl=x.dbl; return *this; }
 
-    //! \brief Construct from a double number using given rounding
-    explicit FloatDP(double d, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from another FloatDP using given rounding
     explicit FloatDP(FloatDP const& d, RoundingModeType rnd, PrecisionType pr);
+    //! \brief Construct from an integer using given rounding
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatDP(N n, RoundingModeType rnd, PrecisionType pr)
+        : FloatDP(ExactDouble(n),rnd,pr) { }
+    //! \brief Construct from an integer using given rounding
+    explicit FloatDP(ExactDouble x, RoundingModeType rnd, PrecisionType pr)
+        : FloatDP(x.get_d()) { }
     //! \brief Construct from an integer number using given rounding
     explicit FloatDP(Integer const&, RoundingModeType rnd, PrecisionType pr);
     //! \brief Construct from a dyadic number with given rounding
@@ -199,32 +218,32 @@ class FloatDP {
     friend FloatDP next(RoundUpward rnd, FloatDP x) { return add(rnd,x,FloatDP::min(x.precision())); }
     friend FloatDP next(RoundDownward rnd, FloatDP x) { return sub(rnd,x,FloatDP::min(x.precision())); }
 
-    friend FloatDP floor(FloatDP x) { return std::floor(x.dbl); }
-    friend FloatDP ceil(FloatDP x) { return std::ceil(x.dbl); }
-    friend FloatDP round(FloatDP x) { return std::round(x.dbl); }
+    friend FloatDP floor(FloatDP x) { return FloatDP(std::floor(x.dbl)); }
+    friend FloatDP ceil(FloatDP x) { return FloatDP(std::ceil(x.dbl)); }
+    friend FloatDP round(FloatDP x) { return FloatDP(std::round(x.dbl)); }
   public:
     // Exact lattic operations
-    friend FloatDP max(FloatDP x1, FloatDP x2) { return std::max(x1.dbl,x2.dbl); }
-    friend FloatDP min(FloatDP x1, FloatDP x2) { return std::min(x1.dbl,x2.dbl); }
-    friend FloatDP abs(FloatDP x) { return std::fabs(x.dbl); }
-    friend FloatDP mag(FloatDP x) { return std::fabs(x.dbl); }
+    friend FloatDP max(FloatDP x1, FloatDP x2) { return FloatDP(std::max(x1.dbl,x2.dbl)); }
+    friend FloatDP min(FloatDP x1, FloatDP x2) { return FloatDP(std::min(x1.dbl,x2.dbl)); }
+    friend FloatDP abs(FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
+    friend FloatDP mag(FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
 
     // Exact arithmetic
-    friend FloatDP nul(FloatDP x) { return +0.0; }
-    friend FloatDP pos(FloatDP x) { volatile double xv=x.dbl; return +xv; }
-    friend FloatDP neg(FloatDP x) { volatile double xv=x.dbl; return -xv; }
-    friend FloatDP hlf(FloatDP x) { volatile double xv=x.dbl; return xv/2; }
-    friend FloatDP shft(FloatDP x, Int n) { volatile double xv=x.dbl; return ldexp(xv,n); }
+    friend FloatDP nul(FloatDP x) { return FloatDP(+0.0); }
+    friend FloatDP pos(FloatDP x) { volatile double xv=x.dbl; return FloatDP(+xv); }
+    friend FloatDP neg(FloatDP x) { volatile double xv=x.dbl; return FloatDP(-xv); }
+    friend FloatDP hlf(FloatDP x) { volatile double xv=x.dbl; return FloatDP(xv/2); }
+    friend FloatDP shft(FloatDP x, Int n) { volatile double xv=x.dbl; return FloatDP(ldexp(xv,n)); }
 
     // Exact arithmetic operators
-    friend FloatDP operator+(FloatDP x) { volatile double xv=x.dbl; return +xv; }
-    friend FloatDP operator-(FloatDP x) { volatile double xv=x.dbl; return -xv; }
+    friend FloatDP operator+(FloatDP x) { volatile double xv=x.dbl; return FloatDP(+xv); }
+    friend FloatDP operator-(FloatDP x) { volatile double xv=x.dbl; return FloatDP(-xv); }
 
     // Explcitly rounded lattice operations
-    friend FloatDP max(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return std::max(x1.dbl,x2.dbl); }
-    friend FloatDP min(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return std::min(x1.dbl,x2.dbl); }
-    friend FloatDP abs(RoundingModeType rnd, FloatDP x) { return std::fabs(x.dbl); }
-    friend FloatDP mag(RoundingModeType rnd, FloatDP x) { return std::fabs(x.dbl); }
+    friend FloatDP max(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return FloatDP(std::max(x1.dbl,x2.dbl)); }
+    friend FloatDP min(RoundingModeType rnd, FloatDP x1, FloatDP x2) { return FloatDP(std::min(x1.dbl,x2.dbl)); }
+    friend FloatDP abs(RoundingModeType rnd, FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
+    friend FloatDP mag(RoundingModeType rnd, FloatDP x) { return FloatDP(std::fabs(x.dbl)); }
 
     // Explicitly rounded inplace operations
     friend FloatDP& iadd(RoundingModeType rnd, FloatDP& x1, FloatDP x2);
@@ -235,34 +254,48 @@ class FloatDP {
     static FloatDP pi(RoundingModeType rnd, PrecisionType pr);
 
     // Correctly rounded arithmetic
-    friend FloatDP sqr(FloatDP x) { return sqr_rnd(x.dbl); }
-    friend FloatDP rec(FloatDP x) { return rec_rnd(x.dbl); }
-    friend FloatDP add(FloatDP x1, FloatDP x2) { return add_rnd(x1.dbl,x2.dbl); }
-    friend FloatDP sub(FloatDP x1, FloatDP x2) { return sub_rnd(x1.dbl,x2.dbl); }
-    friend FloatDP mul(FloatDP x1, FloatDP x2) { return mul_rnd(x1.dbl,x2.dbl); }
-    friend FloatDP div(FloatDP x1, FloatDP x2) { return div_rnd(x1.dbl,x2.dbl); }
-    friend FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3) { return fma_rnd(x1.dbl,x2.dbl,x3.dbl); }
-    friend FloatDP pow(FloatDP x, Int n) { return pow_rnd(x.dbl,n); }
-    friend FloatDP sqrt(FloatDP x) { return sqrt_rnd(x.dbl); }
-    friend FloatDP exp(FloatDP x) { return exp_rnd(x.dbl); }
-    friend FloatDP log(FloatDP x) { return log_rnd(x.dbl); }
-    friend FloatDP sin(FloatDP x) { return sin_rnd(x.dbl); }
-    friend FloatDP cos(FloatDP x) { return cos_rnd(x.dbl); }
-    friend FloatDP tan(FloatDP x) { return tan_rnd(x.dbl); }
-    friend FloatDP asin(FloatDP x) { return asin_rnd(x.dbl); }
-    friend FloatDP acos(FloatDP x) { return acos_rnd(x.dbl); }
-    friend FloatDP atan(FloatDP x) { return atan_rnd(x.dbl); }
-    static FloatDP pi(PrecisionType pr) { return pi_rnd(); }
+    friend FloatDP sqr(FloatDP x) { return FloatDP(sqr_rnd(x.dbl)); }
+    friend FloatDP rec(FloatDP x) { return FloatDP(rec_rnd(x.dbl)); }
+    friend FloatDP add(FloatDP x1, FloatDP x2) { return FloatDP(add_rnd(x1.dbl,x2.dbl)); }
+    friend FloatDP sub(FloatDP x1, FloatDP x2) { return FloatDP(sub_rnd(x1.dbl,x2.dbl)); }
+    friend FloatDP mul(FloatDP x1, FloatDP x2) { return FloatDP(mul_rnd(x1.dbl,x2.dbl)); }
+    friend FloatDP div(FloatDP x1, FloatDP x2) { return FloatDP(div_rnd(x1.dbl,x2.dbl)); }
+    friend FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3) { return FloatDP(fma_rnd(x1.dbl,x2.dbl,x3.dbl)); }
+    friend FloatDP pow(FloatDP x, Int n) { return FloatDP(pow_rnd(x.dbl,n)); }
+    friend FloatDP sqrt(FloatDP x) { return FloatDP(sqrt_rnd(x.dbl)); }
+    friend FloatDP exp(FloatDP x) { return FloatDP(exp_rnd(x.dbl)); }
+    friend FloatDP log(FloatDP x) { return FloatDP(log_rnd(x.dbl)); }
+    friend FloatDP sin(FloatDP x) { return FloatDP(sin_rnd(x.dbl)); }
+    friend FloatDP cos(FloatDP x) { return FloatDP(cos_rnd(x.dbl)); }
+    friend FloatDP tan(FloatDP x) { return FloatDP(tan_rnd(x.dbl)); }
+    friend FloatDP asin(FloatDP x) { return FloatDP(asin_rnd(x.dbl)); }
+    friend FloatDP acos(FloatDP x) { return FloatDP(acos_rnd(x.dbl)); }
+    friend FloatDP atan(FloatDP x) { return FloatDP(atan_rnd(x.dbl)); }
+    static FloatDP pi(PrecisionType pr) { return FloatDP(pi_rnd()); }
 
     // Correctly rounded operators
-    friend FloatDP operator+(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v+x2v; return r; }
-    friend FloatDP operator-(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v-x2v; return r; }
-    friend FloatDP operator*(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v*x2v; return r; }
-    friend FloatDP operator/(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v/x2v; return r; }
+    friend FloatDP operator+(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v+x2v; return FloatDP(r); }
+    friend FloatDP operator-(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v-x2v; return FloatDP(r); }
+    friend FloatDP operator*(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v*x2v; return FloatDP(r); }
+    friend FloatDP operator/(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v/x2v; return FloatDP(r); }
     friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v+x2v; return x1; }
     friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v-x2v; return x1; }
     friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v*x2v; return x1; }
     friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v/x2v; return x1; }
+
+    // Mixed operators
+    friend FloatDP operator+(FloatDP x1, ExactDouble x2) { return x1+FloatDP(x2,dp); }
+    friend FloatDP operator-(FloatDP x1, ExactDouble x2) { return x1-FloatDP(x2,dp); }
+    friend FloatDP operator*(FloatDP x1, ExactDouble x2) { return x1*FloatDP(x2,dp); }
+    friend FloatDP operator/(FloatDP x1, ExactDouble x2) { return x1/FloatDP(x2,dp); }
+    friend FloatDP operator+(ExactDouble x1, FloatDP x2) { return FloatDP(x1,dp)+x2; }
+    friend FloatDP operator-(ExactDouble x1, FloatDP x2) { return FloatDP(x1,dp)-x2; }
+    friend FloatDP operator*(ExactDouble x1, FloatDP x2) { return FloatDP(x1,dp)*x2; }
+    friend FloatDP operator/(ExactDouble x1, FloatDP x2) { return FloatDP(x1,dp)/x2; }
+    friend FloatDP& operator+=(FloatDP& x1, ExactDouble x2) { return x1+=FloatDP(x2,dp); }
+    friend FloatDP& operator-=(FloatDP& x1, ExactDouble x2) { return x1-=FloatDP(x2,dp); }
+    friend FloatDP& operator*=(FloatDP& x1, ExactDouble x2) { return x1*=FloatDP(x2,dp); }
+    friend FloatDP& operator/=(FloatDP& x1, ExactDouble x2) { return x1/=FloatDP(x2,dp); }
 
     template<class OP> friend FloatDP apply(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);
@@ -312,15 +345,15 @@ class FloatDP {
         rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(rnd);
         FloatDP r=hlf(sub(rnd,x2,x1)); set_rounding_mode(rounding_mode); return r; }
 
-    friend FloatDP sqrt(RoundApprox, FloatDP x) { return std::sqrt(x.dbl); }
-    friend FloatDP exp(RoundApprox, FloatDP x) { return std::exp(x.dbl); }
-    friend FloatDP log(RoundApprox, FloatDP x) { return std::log(x.dbl); }
-    friend FloatDP sin(RoundApprox, FloatDP x) { return std::sin(x.dbl); }
-    friend FloatDP cos(RoundApprox, FloatDP x) { return std::cos(x.dbl); }
-    friend FloatDP tan(RoundApprox, FloatDP x) { return std::tan(x.dbl); }
-    friend FloatDP asin(RoundApprox, FloatDP x) { return std::asin(x.dbl); }
-    friend FloatDP acos(RoundApprox, FloatDP x) { return std::acos(x.dbl); }
-    friend FloatDP atan(RoundApprox, FloatDP x) { return std::atan(x.dbl); }
+    friend FloatDP sqrt(RoundApprox, FloatDP x) { return FloatDP(std::sqrt(x.dbl)); }
+    friend FloatDP exp(RoundApprox, FloatDP x) { return FloatDP(std::exp(x.dbl)); }
+    friend FloatDP log(RoundApprox, FloatDP x) { return FloatDP(std::log(x.dbl)); }
+    friend FloatDP sin(RoundApprox, FloatDP x) { return FloatDP(std::sin(x.dbl)); }
+    friend FloatDP cos(RoundApprox, FloatDP x) { return FloatDP(std::cos(x.dbl)); }
+    friend FloatDP tan(RoundApprox, FloatDP x) { return FloatDP(std::tan(x.dbl)); }
+    friend FloatDP asin(RoundApprox, FloatDP x) { return FloatDP(std::asin(x.dbl)); }
+    friend FloatDP acos(RoundApprox, FloatDP x) { return FloatDP(std::acos(x.dbl)); }
+    friend FloatDP atan(RoundApprox, FloatDP x) { return FloatDP(std::atan(x.dbl)); }
 
     friend Comparison cmp(FloatDP x1, FloatDP x2);
     friend Bool operator==(FloatDP x1, FloatDP x2) { return x1.dbl == x2.dbl; }
@@ -344,6 +377,21 @@ class FloatDP {
     friend Bool operator>=(Dbl x1, FloatDP x2) { return x1 >= x2.dbl; }
     friend Bool operator< (Dbl x1, FloatDP x2) { return x1 <  x2.dbl; }
     friend Bool operator> (Dbl x1, FloatDP x2) { return x1 >  x2.dbl; }
+
+    friend Comparison cmp(FloatDP x1, ExactDouble x2);
+    friend Bool operator==(FloatDP x1, ExactDouble x2) { return x1.dbl == x2.get_d(); }
+    friend Bool operator!=(FloatDP x1, ExactDouble x2) { return x1.dbl != x2.get_d(); }
+    friend Bool operator<=(FloatDP x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); }
+    friend Bool operator>=(FloatDP x1, ExactDouble x2) { return x1.dbl >= x2.get_d(); }
+    friend Bool operator< (FloatDP x1, ExactDouble x2) { return x1.dbl <  x2.get_d(); }
+    friend Bool operator> (FloatDP x1, ExactDouble x2) { return x1.dbl >  x2.get_d(); }
+    friend Comparison cmp(ExactDouble x1, FloatDP x2);
+    friend Bool operator==(ExactDouble x1, FloatDP x2) { return x1.get_d() == x2.dbl; }
+    friend Bool operator!=(ExactDouble x1, FloatDP x2) { return x1.get_d() != x2.dbl; }
+    friend Bool operator<=(ExactDouble x1, FloatDP x2) { return x1.get_d() <= x2.dbl; }
+    friend Bool operator>=(ExactDouble x1, FloatDP x2) { return x1.get_d() >= x2.dbl; }
+    friend Bool operator< (ExactDouble x1, FloatDP x2) { return x1.get_d() <  x2.dbl; }
+    friend Bool operator> (ExactDouble x1, FloatDP x2) { return x1.get_d() >  x2.dbl; }
 
     friend Comparison cmp(FloatDP x1, Rational const& x2);
     friend Bool operator==(FloatDP x1, Rational const& x2) { return cmp(x1,x2)==Comparison::EQUAL; }
@@ -376,14 +424,14 @@ class FloatDP {
     friend FloatDP atan_rnd(FloatDP x);
 
     // Opposite rounded arithmetic
-    friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return -t; }
-    friend FloatDP neg_opp(FloatDP x) { volatile double t=x.dbl; return -t; }
-    friend FloatDP sqr_opp(FloatDP x) { volatile double t=-x.dbl; t=t*x.dbl; return -t; }
-    friend FloatDP rec_opp(FloatDP x) { volatile double t=-1.0/(volatile double&)x.dbl; return -t; }
-    friend FloatDP add_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t-y.dbl; return -t; }
-    friend FloatDP sub_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
-    friend FloatDP mul_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }
-    friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
+    friend FloatDP pos_opp(FloatDP x) { volatile double t=-x.dbl; return FloatDP(-t); }
+    friend FloatDP neg_opp(FloatDP x) { volatile double t=x.dbl; return FloatDP(-t); }
+    friend FloatDP sqr_opp(FloatDP x) { volatile double t=-x.dbl; t=t*x.dbl; return FloatDP(-t); }
+    friend FloatDP rec_opp(FloatDP x) { volatile double t=-1.0/(volatile double&)x.dbl; return FloatDP(-t); }
+    friend FloatDP add_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t-y.dbl; return FloatDP(-t); }
+    friend FloatDP sub_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t+y.dbl; return FloatDP(-t); }
+    friend FloatDP mul_opp(FloatDP x, FloatDP y) { volatile double t=-x.dbl; t=t*y.dbl; return FloatDP(-t); }
+    friend FloatDP div_opp(FloatDP x, FloatDP y) { volatile double t=x.dbl; t=t/y.dbl; return FloatDP(-t); }
     friend FloatDP pow_opp(FloatDP x, int n);
 };
 
@@ -391,13 +439,11 @@ template<class R, class A> R integer_cast(const A& a);
 template<> Nat integer_cast<Nat,FloatDP>(FloatDP const&);
 template<> Int integer_cast<Int,FloatDP>(FloatDP const&);
 
-static const FloatDP inf = std::numeric_limits<double>::infinity();
-
 struct Float32 {
     float flt;
   public:
     explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
-    explicit operator FloatDP() const { return FloatDP((double)this->flt); }
+    explicit operator FloatDP() const;
 };
 
 

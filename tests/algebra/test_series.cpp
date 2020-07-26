@@ -29,6 +29,18 @@
 #include "../test.hpp"
 
 namespace Ariadne {
+
+//template<class Iter> container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
+template<class X> List(InitializerList<X>) -> List<X>;
+
+template<class T1, class T2> Bool operator==(List<T1> const& lst1, List<T2> const& lst2) {
+    if(lst1.size()!=lst2.size()) { return false; }
+    for(SizeType i=0; i!=lst1.size(); ++i) {
+        if(!(lst1[i]==lst2[i])) { return false; }
+    }
+    return true;
+}
+
 template<class T> Bool same(List<T> const& lst1, List<T> const& lst2) {
     if(lst1.size()!=lst2.size()) { return false; }
     for(SizeType i=0; i!=lst1.size(); ++i) {
@@ -46,9 +58,14 @@ template<class T> Bool same(List<T> const& lst1, List<T> const& lst2) {
 
 using namespace Ariadne;
 
-class TestSeries
+template<class X> class TestSeries
 {
+    typedef Rational Q;
+    typedef typename X::PrecisionType PR;
+    PR pr;
   public:
+    TestSeries(PR prec) : pr(prec) { }
+
     void test() {
         ARIADNE_TEST_CALL(test_class());
         ARIADNE_TEST_CALL(test_rec());
@@ -63,84 +80,86 @@ class TestSeries
     }
   private:
     void test_class() {
-        ARIADNE_TEST_CONSTRUCT( Series<FloatDP>, series, (Rec(),1.0) );
-        ARIADNE_TEST_EQUALS(series[0],1.0);
-        ARIADNE_TEST_EQUALS(series[10],1.0);
-        ARIADNE_TEST_EQUALS(series[1],-1.0);
-        ARIADNE_TEST_EQUALS(series[127],-1.0);
-        ARIADNE_TEST_EQUALS(series[255],-1.0);
+        ARIADNE_TEST_CONSTRUCT( Series<X>, series, (Rec(),X(1.0_x,pr)) );
+        ARIADNE_TEST_EQUALS(series[0],1.0_x);
+        ARIADNE_TEST_EQUALS(series[10],1.0_x);
+        ARIADNE_TEST_EQUALS(series[1],-1.0_x);
+        ARIADNE_TEST_EQUALS(series[127],-1.0_x);
+        ARIADNE_TEST_EQUALS(series[255],-1.0_x);
 //        ARIADNE_TEST_EQUALS(series[32767],1.0);
         std::cerr<<std::setprecision(18);
-        FloatDPValue::set_output_places(18);
-        FloatDPBounds::set_output_places(18);
+        Value<X>::set_output_places(18);
+        Bounds<X>::set_output_places(18);
     }
     void test_rec() {
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Rec(),2.0).coefficients(5), (List<FloatDP>{0.5,-0.25,0.125,-0.0625,0.03125,-0.015625}) );
-        ARIADNE_TEST_EQUALS(Series<FloatDP>(Rec(),1.0).coefficients(5), (List<FloatDP>{1.0,-1.0,1.0,-1.0,1.0,-1.0}) );
-        ARIADNE_TEST_EQUALS(Series<FloatDP>(Rec(),0.5).coefficients(5), (List<FloatDP>{2.0,-4.0,8.0,-16.0,32.0,-64.0}) );
-        ARIADNE_TEST_EQUALS(Series<FloatDP>(Rec(),-1.0).coefficients(5), (List<FloatDP>{-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Rec(),X(2.0_x,pr)).coefficients(5), (List<Q>{0.5_q,-0.25_q,0.125_q,-0.0625_q,0.03125_q,-0.015625_q}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Rec(),X(1.0_x,pr)).coefficients(5), (List<Q>{1.0_q,-1.0_q,1.0_q,-1.0_q,1.0_q,-1.0_q}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Rec(),X(0.5_x,pr)).coefficients(5), (List<Q>{2.0_q,-4.0_q,8.0_q,-16.0_q,32.0_q,-64.0_q}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Rec(),X(-1.0_x,pr)).coefficients(5), (List<Q>{-1.0_q,-1.0_q,-1.0_q,-1.0_q,-1.0_q,-1.0_q}) );
     }
 
     void test_sqrt() {
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Sqrt(),4.0).coefficients(5),
-                             (List<FloatDP>{2,0.25,-0.015625,0.001953125,-0.00030517578125,0.00005340576171875}) );
-        ARIADNE_TEST_EQUALS(Series<FloatDP>(Sqrt(),1.0).coefficients(5), (List<FloatDP>{1,0.5,-0.125,0.0625,-0.0390625,0.02734375}) );
-        ARIADNE_TEST_EQUALS(Series<FloatDP>(Sqrt(),0.25).coefficients(5), (List<FloatDP>{0.5,1.0,-1.0,2.0,-5.0,14.0}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Sqrt(),X(4.0_x,pr)).coefficients(5),
+                             (List<Q>{2.0_q,0.25_q,-0.015625_q,0.001953125_q,-0.00030517578125_q,0.00005340576171875_q}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Sqrt(),X(1.0_x,pr)).coefficients(5), (List<Q>{1.0_q,0.5_q,-0.125_q,0.0625_q,-0.0390625_q,0.02734375_q}) );
+        ARIADNE_TEST_EQUALS(Series<X>(Sqrt(),X(0.25_x,pr)).coefficients(5), (List<Q>{0.5_q,1.0_q,-1.0_q,2.0_q,-5.0_q,14.0_q}) );
     }
 
     void test_exp() {
-        static const FloatDP exp1=exp(FloatDP(1));
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Exp(),0.0).coefficients(5),
-                             (List<FloatDP>{1.0,1.0,1.0/2,1.0/6,1.0/24,1.0/120}) );
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Exp(),1.0).coefficients(5),
-                             (List<FloatDP>{exp1,exp1/1,exp1/2,exp1/6,exp1/24,exp1/120}) );
+        const X zero(0,pr), one(1,pr);
+        const X exp1=exp(one);
+        ARIADNE_TEST_EQUALS( Series<X>(Exp(),zero).coefficients(5),
+                             (List<X>{one,one/1,one/2,one/6,one/24,one/120}) );
+        ARIADNE_TEST_EQUALS( Series<X>(Exp(),one).coefficients(5),
+                             (List<X>{exp1,exp1/1,exp1/2,exp1/6,exp1/24,exp1/120}) );
     }
 
     void test_log() {
-        static const FloatDP log2=log(2);
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Log(),1.0).coefficients(5),
-                             (List<FloatDP>{0.0,1.0,-1.0/2,1.0/3,-1.0/4,1.0/5}) );
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Log(),2.0).coefficients(5),
-                             (List<FloatDP>{log2,1.0/2,-1.0/8,1.0/24,-1.0/64,1.0/160}) );
+        const X zero(0,pr), one(1,pr), two(2,pr);
+        const X log2=log(two);
+        ARIADNE_TEST_EQUALS( Series<X>(Log(),one).coefficients(5),
+                             (List<X>{zero,one,-one/2,one/3,-one/4,one/5}) );
+        ARIADNE_TEST_EQUALS( Series<X>(Log(),two).coefficients(5),
+                             (List<X>{log2,one/2,-one/8,one/24,-one/64,one/160}) );
     }
 
     void test_sin() {
-        const FloatDP one=1;
-        const FloatDP sin1=sin(one);
-        const FloatDP cos1=cos(one);
+        const X zero(0,pr), one(1,pr);
+        const X sin1=sin(one);
+        const X cos1=cos(one);
 
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Sin(),0.0).coefficients(5),
-                             (List<FloatDP>{0.0,1.0,0.0,-1.0/6,0.0,1.0/120}) );
-        ARIADNE_TEST_EQUAL ( Series<FloatDP>(Sin(),1.0).coefficients(5),
-                             (List<FloatDP>{sin1,cos1,-sin1/2,-cos1/6,sin1/24,cos1/120}) );
+        ARIADNE_TEST_EQUALS( Series<X>(Sin(),zero).coefficients(5),
+                             (List<X>{zero,one,zero,-one/6,zero,one/120}) );
+        ARIADNE_TEST_EQUAL ( Series<X>(Sin(),one).coefficients(5),
+                             (List<X>{sin1,cos1,-sin1/2,-cos1/6,sin1/24,cos1/120}) );
     }
 
     void test_cos() {
-        const FloatDP one=1;
-        const FloatDP sin1=sin(one);
-        const FloatDP cos1=cos(one);
-        ARIADNE_TEST_EQUALS( Series<FloatDP>(Cos(),0.0).coefficients(5),
-                             (List<FloatDP>{1.0,0.0,-1.0/2,0.0,1.0/24,0.0}) );
-        ARIADNE_TEST_EQUAL ( Series<FloatDP>(Cos(),1.0).coefficients(4),
-                             (List<FloatDP>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
+        const X zero(0,pr), one(1,pr);
+        const X sin1=sin(one);
+        const X cos1=cos(one);
+        ARIADNE_TEST_EQUALS( Series<X>(Cos(),zero).coefficients(5),
+                             (List<X>{one,zero,-one/2,zero,one/24,zero}) );
+        ARIADNE_TEST_EQUAL ( Series<X>(Cos(),one).coefficients(4),
+                             (List<X>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
     }
 
     void test_taylor_series() {
-        TaylorSeries<FloatDPBounds> exp_series(Exp(),ExactIntervalType(-1,+1),FloatDPValue(0),8u);
-        ARIADNE_TEST_PRINT(Series<FloatDPBounds>(Exp(),FloatDPBounds(-1,+1)).coefficients(8u));
+        TaylorSeries<Bounds<X>> exp_series(Exp(),ExactIntervalType(-1,+1),Value<X>(0,pr),8u);
+        ARIADNE_TEST_PRINT(Series<Bounds<X>>(Exp(),Bounds<X>(-1,+1,pr)).coefficients(8u));
         ARIADNE_TEST_PRINT(exp_series);
     }
 
     void test_analytic_function() {
         Rec rec_operator;
         ARIADNE_TEST_CONSTRUCT( AnalyticFunction, rec_function, (rec_operator) );
-        ARIADNE_TEST_SAME( rec_function.series(0.5_approx).coefficients(5), Series<FloatDPApproximation>(Rec(),0.5_approx).coefficients(5) );
+        ARIADNE_TEST_SAME( rec_function.series(0.5_approx).coefficients(5), Series<Approximation<X>>(Rec(),0.5_approx).coefficients(5) );
     }
 };
 
 
 Int main() {
-    TestSeries().test();
+    TestSeries<FloatDP>(dp).test();
 
     return ARIADNE_TEST_FAILURES;
 }

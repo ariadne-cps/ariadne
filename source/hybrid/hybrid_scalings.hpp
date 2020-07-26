@@ -51,7 +51,7 @@ class HybridScalingsInterface
     //!
     virtual ~HybridScalingsInterface() = default;
     virtual HybridScalingsInterface* clone() const = 0;
-    virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
+    virtual ExactDouble scaling(const DiscreteLocation& loc, const RealVariable& var) const = 0;
     virtual Void _write(OutputStream& os) const = 0;
 };
 inline OutputStream& operator<<(OutputStream& os, const HybridScalingsInterface& hsc) { hsc._write(os); return os; }
@@ -66,40 +66,43 @@ class HybridScalings
     HybridScalings(const HybridScalingsInterface& ref) : _ptr(ref.clone()) { }
     operator const HybridScalingsInterface& () const { return *this->_ptr; }
     operator HybridScalingsInterface& () { return *this->_ptr; }
-    FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
+    ExactDouble scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
     Grid grid(const DiscreteLocation& loc, const RealSpace& spc) const;
   public:
-    HybridScalings(const Map<Identifier,FloatDPValue>& scalings);
-    HybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
+    HybridScalings(const Map<Identifier,ExactDouble>& scalings);
+    HybridScalings(const InitializerList<Pair<RealVariable,ApproximateDouble>>& scalings);
 };
 
 class SimpleHybridScalings
     : public HybridScalingsInterface
 {
-    Map<Identifier,FloatDPValue> _scalings;
+    ExactDouble _default_scaling;
+    Map<Identifier,ExactDouble> _scalings;
   public:
-    SimpleHybridScalings() : _scalings() { }
-    SimpleHybridScalings(const Map<Identifier,FloatDPValue>& scalings) : _scalings(scalings) { }
-    SimpleHybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings);
-    Void set_scaling(const RealVariable& var, FloatDPValue res) { ARIADNE_ASSERT(decide(res>0)); _scalings[var.name()]=res; }
+    SimpleHybridScalings() : _default_scaling(1.0_x), _scalings() { }
+    SimpleHybridScalings(ExactDouble default_scaling, const Map<Identifier,ExactDouble>& scalings)
+        : _default_scaling(default_scaling), _scalings(scalings) { }
+    SimpleHybridScalings(const InitializerList<Pair<RealVariable,ApproximateDouble>>& scalings);
+    Void set_scaling(const RealVariable& var, ApproximateDouble scal) {
+        ARIADNE_ASSERT(decide(scal>0)); _scalings[var.name()]=cast_exact(scal); }
     virtual SimpleHybridScalings* clone() const { return new SimpleHybridScalings(*this); }
-    virtual FloatDPValue scaling(const DiscreteLocation& loc, const RealVariable& var) const {
-        return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : FloatDPValue(1.0); }
+    virtual ExactDouble scaling(const DiscreteLocation& loc, const RealVariable& var) const {
+        return (this->_scalings.has_key(var.name())) ? this->_scalings[var.name()] : this->_default_scaling; }
     virtual Void _write(OutputStream& os) const { os << "HybridScalings( " << this->_scalings << " )"; }
 };
 
-inline Pair<RealVariable,FloatDP> operator|(const RealVariable& var, FloatDP scal) {
-    return Pair<RealVariable,FloatDP>(var,scal); }
+inline Pair<RealVariable,ExactDouble> operator|(const RealVariable& var, ApproximateDouble scal) {
+    return Pair<RealVariable,ExactDouble>(var,cast_exact(scal)); }
 
-inline HybridScalings::HybridScalings(const Map<Identifier,FloatDPValue>& scalings)
+inline HybridScalings::HybridScalings(const Map<Identifier,ExactDouble>& scalings)
+    : _ptr(new SimpleHybridScalings(1.0_x,scalings)) { }
+
+inline HybridScalings::HybridScalings(const InitializerList<Pair<RealVariable,ApproximateDouble>>& scalings)
     : _ptr(new SimpleHybridScalings(scalings)) { }
 
-inline HybridScalings::HybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings)
-    : _ptr(new SimpleHybridScalings(scalings)) { }
-
-inline SimpleHybridScalings::SimpleHybridScalings(const InitializerList<Pair<RealVariable,FloatDP>>& scalings) {
+inline SimpleHybridScalings::SimpleHybridScalings(const InitializerList<Pair<RealVariable,ApproximateDouble>>& scalings) {
     for(auto iter=scalings.begin(); iter!=scalings.end(); ++iter) {
-        this->_scalings.insert(iter->first.name(),FloatDPValue(iter->second));
+        this->_scalings.insert(iter->first.name(),cast_exact(iter->second));
     }
 }
 

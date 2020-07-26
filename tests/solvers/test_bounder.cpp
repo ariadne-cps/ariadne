@@ -70,25 +70,25 @@ class TestBounder
 
     Void test_D_mismatch() {
         EffectiveVectorMultivariateFunction f={x,-y};
-        ExactBoxType D={ExactIntervalType(-0.25,0.25)};
-        StepSizeType hsug(0.25);
+        ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType hsug(0.25_x);
 
         ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,hsug));
     }
 
     Void test_DA_mismatch() {
         EffectiveVectorMultivariateFunction f={x,-y};
-        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
-        StepSizeType hsug(0.25);
+        ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        ExactBoxType A={ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType hsug(0.25_x);
 
         ARIADNE_TEST_FAIL(bounder_ptr->compute(f,D,A,hsug));
     }
 
     Void test_suggested_step_acceptable() {
         EffectiveVectorMultivariateFunction f={x,-y};
-        ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        StepSizeType hsug(0.25);
+        ExactBoxType dom={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType hsug(0.25_x);
 
         StepSizeType h;
         UpperBoxType B;
@@ -102,8 +102,8 @@ class TestBounder
 
     Void test_suggested_step_not_acceptable() {
         EffectiveVectorMultivariateFunction f={x,-y};
-        ExactBoxType dom={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        StepSizeType hsug(1.0);
+        ExactBoxType dom={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType hsug(1.0_x);
 
         StepSizeType h;
         UpperBoxType B;
@@ -117,8 +117,8 @@ class TestBounder
 
     Void test_unbounded() {
         EffectiveVectorMultivariateFunction f={pow(x,3),-pow(y,5)};
-        ExactBoxType dom={ExactIntervalType(-20.0,20.0),ExactIntervalType(-20.0,20.0)};
-        StepSizeType hsug(10.0);
+        ExactBoxType dom={ExactIntervalType(-20.0_x,20.0_x),ExactIntervalType(-20.0_x,20.0_x)};
+        StepSizeType hsug(10.0_x);
 
         ARIADNE_TEST_THROWS(bounder_ptr->compute(f,dom,hsug),BoundingNotFoundException);
     }
@@ -129,10 +129,10 @@ class TestBounder
         EffectiveScalarMultivariateFunction a0=EffectiveScalarMultivariateFunction::coordinate(3,2);
 
         EffectiveVectorMultivariateFunction f={x0+a0,-x1};
-        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
-        StepSizeType td(1.0);
-        StepSizeType hsug(1.0);
+        ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        ExactBoxType A={ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType td(1.0_x);
+        StepSizeType hsug(1.0_x);
 
         StepSizeType h;
         UpperBoxType B;
@@ -149,9 +149,9 @@ class TestBounder
         EffectiveScalarMultivariateFunction t=EffectiveScalarMultivariateFunction::coordinate(3,2);
 
         EffectiveVectorMultivariateFunction f={x0,-x1+2*t};
-        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        StepSizeType td(1.0);
-        StepSizeType hsug(1.0);
+        ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType td(1.0_x);
+        StepSizeType hsug(1.0_x);
 
         StepSizeType h;
         UpperBoxType B;
@@ -169,10 +169,10 @@ class TestBounder
         EffectiveScalarMultivariateFunction a0=EffectiveScalarMultivariateFunction::coordinate(4,3);
 
         EffectiveVectorMultivariateFunction f={x0+a0,-x1+2*t};
-        ExactBoxType D={ExactIntervalType(-0.25,0.25),ExactIntervalType(-0.25,0.25)};
-        ExactBoxType A={ExactIntervalType(-0.25,0.25)};
-        StepSizeType td(1.0);
-        StepSizeType hsug(1.0);
+        ExactBoxType D={ExactIntervalType(-0.25_x,0.25_x),ExactIntervalType(-0.25_x,0.25_x)};
+        ExactBoxType A={ExactIntervalType(-0.25_x,0.25_x)};
+        StepSizeType td(1.0_x);
+        StepSizeType hsug(1.0_x);
 
         StepSizeType h;
         UpperBoxType B;

@@ -83,7 +83,7 @@ int main(int argc, const char* argv[]) {
         print(solve(A,v));
 
         Matrix<FloatDPBounds> A_approx({{4,1,0},{1,4,1},{0,1,4}},double_precision);
-        Vector<FloatDPBounds> v_approx({2.0,3,5},double_precision);
+        Vector<FloatDPBounds> v_approx({2.0_x,3,5},double_precision);
         print(A_approx);
         print(inverse(A_approx));
         print(solve(A_approx,v_approx));
@@ -99,7 +99,7 @@ int main(int argc, const char* argv[]) {
         auto id=EffectiveVectorMultivariateFunction::identity(EuclideanDomain(2));
         auto x=id[0]; auto y=id[1];
         auto h = EffectiveVectorMultivariateFunction{a-x*x-b*y,x};
-        Vector<FloatDPValue> v({0.5,1.0},double_precision);
+        Vector<FloatDPValue> v({0.5_x,1.0_x},double_precision);
         print(v);
         print(h(v))
         print(evaluate(h,v));
@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
         print(jacobian(h,v));
         print(h.differential(v,3));
 
-        BoxDomainType dom({{0,1},{0.5,1.5}});
+        BoxDomainType dom({{0,1},{0.5_x,1.5_x}});
         auto th = ValidatedVectorMultivariateTaylorFunctionModelDP(dom,h,ThresholdSweeper<FloatDP>(double_precision,1e-4));
         print(th);
         auto thh=compose(h,th);

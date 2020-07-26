@@ -55,8 +55,6 @@ class NonSymmetricMatrixException { };
 template<class X> class SymmetricMatrix
     : public MatrixContainer<Matrix<X>>
 {
-    static_assert(IsDefaultConstructible<X>::value,"");
-
     X _zero;
     SizeType _s;
     Array<X> _ary;
@@ -71,8 +69,12 @@ template<class X> class SymmetricMatrix
     //! Destructor
     ~SymmetricMatrix();
 
-    //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.
-    SymmetricMatrix(SizeType n);
+    //! Construct a symmetric matrix with \a n rows and \a n columns with values initialised to \a z.
+    SymmetricMatrix(SizeType n, X const& z);
+
+    //! Construct a symmetric matrix with \a n rows and \a n columns with values initialised to zero.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    SymmetricMatrix(SizeType n, PRS... prs) : SymmetricMatrix(n,X(0u,prs...)) { }
 
     //! Construct a matrix using initializer lists.
     SymmetricMatrix(InitializerList<InitializerList<X>> lst);
@@ -80,10 +82,12 @@ template<class X> class SymmetricMatrix
     //@{
     //! \name Static constructors
 
-    //! \brief The zero matrix with \a r rows and \a c columns.
-    static SymmetricMatrix<X> zero(SizeType n);
+    //! \brief The zero matrix with \a n rows and \a n columns.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static SymmetricMatrix<X> zero(SizeType n, PRS... prs);
     //! \brief The itentity matrix with \a n rows and \a n columns.
-    static SymmetricMatrix<X> identity(SizeType n);
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static SymmetricMatrix<X> identity(SizeType n, PRS... prs);
     //@}
 
     //! Explicit conversion of a normal matrix to a symmetric matrix.
@@ -146,13 +150,13 @@ template<class X> Vector<X> const& to_vector(SymmetricMatrix<X> const& S);
 template<class X> SymmetricMatrix<X>::~SymmetricMatrix() {
 }
 
-template<class X> SymmetricMatrix<X>::SymmetricMatrix(SizeType n)
-    : _s(n), _ary(n*(n+1)/2)
+template<class X> SymmetricMatrix<X>::SymmetricMatrix(SizeType n, X const& z)
+    : _zero(z), _s(n), _ary(n*(n+1)/2,z)
 {
 }
 
 template<class X> SymmetricMatrix<X>::SymmetricMatrix(Matrix<X> const& A)
-    : _s((assert(A.row_size()==A.column_size()),A.row_size())), _ary(_s*(_s+1)/2)
+    : _zero(A.zero_element()), _s((assert(A.row_size()==A.column_size()),A.row_size())), _ary(_s*(_s+1)/2,_zero)
 {
     const SizeType n=this->_s;
     for(SizeType i=0; i!=n; ++i) {
@@ -164,14 +168,16 @@ template<class X> SymmetricMatrix<X>::SymmetricMatrix(Matrix<X> const& A)
     }
 }
 
-template<class X> SymmetricMatrix<X> SymmetricMatrix<X>::zero(SizeType n) {
-    return SymmetricMatrix<X>(n);
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>>
+SymmetricMatrix<X> SymmetricMatrix<X>::zero(SizeType n, PRS... prs) {
+    return SymmetricMatrix<X>(n,X(0u,prs...));
 }
 
-template<class X> SymmetricMatrix<X> SymmetricMatrix<X>::identity(SizeType n) {
-    SymmetricMatrix<X> S(n);
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>>
+SymmetricMatrix<X> SymmetricMatrix<X>::identity(SizeType n, PRS... prs) {
+    SymmetricMatrix<X> S(n,X(0u,prs...));
     for(SizeType i=0; i!=n; ++i) {
-        S[i][i]=1;
+        S[i][i]=1u;
     }
     return S;
 }
@@ -190,7 +196,7 @@ template<class X> inline SizeType SymmetricMatrix<X>::column_size() const {
 
 template<class X> inline Void SymmetricMatrix<X>::resize(SizeType n) {
     this->_s = n;
-    this->_ary.resize(n*(n-1)/2);
+    this->_ary.resize(n*(n-1)/2,this->_zero);
 }
 
 template<class X> inline X& SymmetricMatrix<X>::at(SizeType i, SizeType j) {
@@ -223,7 +229,7 @@ template<class X> inline MatrixRow<SymmetricMatrix<X>> SymmetricMatrix<X>::opera
 #endif
 
 template<class X> inline X SymmetricMatrix<X>::zero_element() const {
-    return X();
+    return _zero;
 }
 
 template<class X> inline Void SymmetricMatrix<X>::_check_data_access(SizeType i, SizeType j) const {
@@ -238,7 +244,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, SymmetricMat
 
 template<class X> SymmetricMatrix<X>::operator Matrix<X>() const {
     SymmetricMatrix<X> const& S=*this;
-    Matrix<X> A(S.row_size(),S.column_size());
+    Matrix<X> A(S.row_size(),S.column_size(),S.zero_element());
     for(SizeType i=0; i!=S.row_size(); ++i) {
         A[i][i]=S.at(i,i);
         for(SizeType j=i+1; j!=S.row_size(); ++j) {

@@ -53,7 +53,8 @@ class UnivariateFirstDifferential
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
 
-    explicit UnivariateFirstDifferential() : _value(X()), _gradient(_value) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    explicit UnivariateFirstDifferential(PRS... prs) : _value(X(0u,prs...)), _gradient(_value) { }
 
     //! \brief Constructs a first differential with constant value \a c.
     explicit UnivariateFirstDifferential(const X& c) : _value(c), _gradient(nul(c)) { }
@@ -240,7 +241,8 @@ class UnivariateSecondDifferential
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
 
-    explicit UnivariateSecondDifferential() : _value(X()), _gradient(_value), _half_hessian(_value) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    explicit UnivariateSecondDifferential(PRS... prs) : _value(X(0u,prs...)), _gradient(_value), _half_hessian(_value) { }
 
     //! \brief Constructs a constant differential with value \a c.
     explicit UnivariateSecondDifferential(const X& c) : _value(c), _gradient(nul(c)), _half_hessian(nul(c)) { }

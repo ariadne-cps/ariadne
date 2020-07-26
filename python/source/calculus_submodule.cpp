@@ -308,6 +308,7 @@ Void export_approximate_taylor_model(pybind11::module& module)
 Void export_scalar_function_model(pybind11::module& module)
 {
     typedef ValidatedScalarMultivariateFunctionModelDP::NumericType NumericType;
+    typename NumericType::PrecisionType pr;
 
     pybind11::class_<ValidatedScalarMultivariateFunctionModelDP> scalar_function_model_class(module,"ValidatedScalarMultivariateFunctionModelDP");
     scalar_function_model_class.def(pybind11::init<ValidatedScalarMultivariateFunctionModelDP>());
@@ -323,14 +324,14 @@ Void export_scalar_function_model(pybind11::module& module)
     scalar_function_model_class.def(self-self);
     scalar_function_model_class.def(self*self);
     scalar_function_model_class.def(self/self);
-    scalar_function_model_class.def(self+NumericType());
-    scalar_function_model_class.def(self-NumericType());
-    scalar_function_model_class.def(self*NumericType());
-    scalar_function_model_class.def(self/NumericType());
-    scalar_function_model_class.def(NumericType()+self);
-    scalar_function_model_class.def(NumericType()-self);
-    scalar_function_model_class.def(NumericType()*self);
-    scalar_function_model_class.def(NumericType()/self);
+    scalar_function_model_class.def(self+NumericType(pr));
+    scalar_function_model_class.def(self-NumericType(pr));
+    scalar_function_model_class.def(self*NumericType(pr));
+    scalar_function_model_class.def(self/NumericType(pr));
+    scalar_function_model_class.def(NumericType(pr)+self);
+    scalar_function_model_class.def(NumericType(pr)-self);
+    scalar_function_model_class.def(NumericType(pr)*self);
+    scalar_function_model_class.def(NumericType(pr)/self);
     scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarMultivariateFunctionModelDP>);
     scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarMultivariateFunctionModelDP>);
 

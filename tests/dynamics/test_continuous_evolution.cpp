@@ -95,16 +95,16 @@ Void TestContinuousEvolution::test() const
 
     // Set up the evolution parameters and grid
     Real time(2.0_dec);
-    double step_size(0.5);
-    double enclosure_radius(0.25);
+    ExactDouble step_size(0.5_x);
+    ExactDouble enclosure_radius(0.25_x);
 
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8_pr);
 
     // Set up the evaluators
-    TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweeper,lipschitz_constant=0.5,
-                                             step_maximum_error=1e-6,minimum_temporal_order=0,maximum_temporal_order=8);
+    TaylorPicardIntegrator picard_integrator(maximum_error=1e-4_pr,sweeper,lipschitz_constant=0.5_x,
+                                             step_maximum_error=1e-6_pr,minimum_temporal_order=0,maximum_temporal_order=8);
     // Set up the evaluators
-    GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4,sweeper,lipschitz_constant=0.5,step_maximum_error=1e-6,
+    GradedTaylorSeriesIntegrator series_integrator(maximum_error=1e-4_pr,sweeper,lipschitz_constant=0.5_x,step_maximum_error=1e-6_pr,
                                              minimum_spacial_order=1,minimum_temporal_order=4,maximum_spacial_order=3,maximum_temporal_order=8);
 
     IntegratorInterface& integrator=picard_integrator;
@@ -114,7 +114,7 @@ Void TestContinuousEvolution::test() const
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field
-    Real mu=Dyadic(0.5);
+    Real mu=Dyadic(0.5_x);
     RealVariable x("x"), v("v");
 
     VectorField vanderpol({dot(x)=v,dot(v)=mu*(1-x*x)*v-x});
@@ -175,17 +175,17 @@ Void TestContinuousEvolution::failure_test() const
 
     // Set up the evolution parameters and grid
     Real time(0.5_dec);
-    double step_size(0.01);
-    double enclosure_radius(0.25);
+    ExactDouble step_size(0.01_pr);
+    ExactDouble enclosure_radius(0.25_x);
 
-    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8);
+    ThresholdSweeper<FloatDP> sweeper(DoublePrecision(),1e-8_pr);
 
     // Set up the evaluators
-    TaylorPicardIntegrator integrator(maximum_error=1e-6,sweeper,lipschitz_constant=0.5,
-                                      step_maximum_error=1e-8,minimum_temporal_order=0,maximum_temporal_order=6);
+    TaylorPicardIntegrator integrator(maximum_error=1e-6_pr,sweeper,lipschitz_constant=0.5_x,
+                                      step_maximum_error=1e-8_pr,minimum_temporal_order=0,maximum_temporal_order=6);
 
     // Define the initial box
-    ExactBoxType initial_box = ExactBoxType{{0.0,0.0},{0.9,0.9}};
+    ExactBoxType initial_box = ExactBoxType{{0.0_x,0.0_x},{0.9_pr,0.9_pr}};
 
     // cout << "initial_box=" << initial_box << endl;
 
@@ -246,7 +246,7 @@ Void TestContinuousEvolution::failure_test() const
     evolvertwo.configuration().set_maximum_enclosure_radius(enclosure_radius);
     evolvertwo.configuration().set_maximum_step_size(step_size);
 
-    ExactBoxType initial_box2 = ExactBoxType{{0.0,0.0},{1.0,1.0},{1.0,1.0}};
+    ExactBoxType initial_box2 = ExactBoxType{{0.0_x,0.0_x},{1.0_x,1.0_x},{1.0_x,1.0_x}};
     initial_set = EnclosureType(initial_box2,failtwo_vf.state_space(),function_factory);
 
     time = 1.5_dec;

@@ -138,23 +138,27 @@ class Affine
   public:
     typedef X NumericType;
   public:
-    explicit Affine() : _c(), _g() { }
-    explicit Affine(Nat n) : _c(0), _g(n) { }
+    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy>
+        explicit Affine(SizeType n, PRS... prs) : _c(0,prs...), _g(n,prs...) { }
     explicit Affine(const Covector<X>& g, const X& c) : _c(c), _g(g) { }
     explicit Affine(X c, InitializerList<X> g) : _c(c), _g(g) { }
     template<class XX> explicit Affine(const Affine<XX>& aff)
         : _c(aff.b()), _g(aff.a()) { }
 
     Affine<X>& operator=(const X& c) {
-        this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=static_cast<X>(0); } return *this; }
+        this->_c=c; for(SizeType i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } return *this; }
     static Affine<X> constant(SizeType n, X c) {
-        return Affine<X>(Covector<X>(n),c); }
-    static Affine<X> coordinate(SizeType n, SizeType j) {
-        return Affine<X>(Covector<X>::unit(n,j),X(0)); }
-    static Vector< Affine<X> > coordinates(SizeType n) {
-        Vector< Affine<X> > r(n,Affine<X>(n)); for(SizeType i=0; i!=n; ++i) { r[i]._g[i]=1; } return r; }
-    static Affine<X> variable(SizeType n, SizeType j) { return coordinate(n,j); }
-    static Vector< Affine<X> > variables(SizeType n) { return coordinates(n); }
+        return Affine<X>(Covector<X>(n,nul(c)),c); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        static Affine<X> coordinate(SizeType n, SizeType j, PRS... prs) {
+            return Affine<X>(Covector<X>::unit(n,j,prs...),X(0u,prs...)); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        static Vector< Affine<X> > coordinates(SizeType n, PRS... prs) {
+            return Vector< Affine<X> >(n,[&](SizeType i){return Affine<X>::coordinate(n,i,prs...);}); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Affine<X> variable(SizeType n, SizeType j, PRS... prs) { return coordinate(n,j,prs...); }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+    static Vector< Affine<X> > variables(SizeType n, PRS... prs) { return coordinates(n,prs...); }
 
     const X& operator[](SizeType i) const { return this->_g[i]; }
     X& operator[](Nat i) { return this->_g[i]; }
@@ -167,7 +171,6 @@ class Affine
     const X& gradient(SizeType i) const { return this->_g[i]; }
     const X& value() const { return this->_c; }
 
-    Void resize(SizeType n) { return this->_g.resize(n); }
     SizeType argument_size() const { return this->_g.size(); }
 
     template<class Y> Y evaluate(const Vector<Y>& x) const;

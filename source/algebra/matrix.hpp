@@ -132,21 +132,15 @@ template<class X> class Matrix
     //! Destructor
     ~Matrix();
 
-    //! Default constructor makes a \f$0\times0\f$ matrix.
-    Matrix();
-
     //! Construct a matrix with \a m rows and \a n columns with values uninitialised.
     //! The values should be initialised using placement new.
     Matrix(SizeType m, SizeType n, Uninitialised);
-
-    //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.
-    Matrix(SizeType m, SizeType n);
 
     //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
     Matrix(SizeType m, SizeType n, const X& z);
 
     //! Construct a matrix from parameters of \a X.
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(prs...)) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> explicit Matrix(SizeType m, SizeType n, PRS... prs) : Matrix(m,n,X(0u,prs...)) { }
 
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     Matrix(SizeType m, SizeType n, const X* p);
@@ -155,7 +149,8 @@ template<class X> class Matrix
     Matrix(InitializerList<InitializerList<X>> lst);
 
     //! Construct a matrix using initializer lists.
-    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<double>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy> Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs);
+    template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>> =dummy> Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs);
 
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
@@ -163,12 +158,15 @@ template<class X> class Matrix
     //@{
     //! \name Static constructors
 
-    //! \brief The zero matrix with \a r rows and \a c columns.
-    static Matrix<X> zero(SizeType m, SizeType n);
-    //! \brief The itentity matrix with \a n rows and \a n columns.
-    static Matrix<X> identity(SizeType n);
-    //! Construct the identity matrix from parameters of \a X.
-    template<class... PRS, EnableIf<IsConstructible<X,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
+    //! \brief The zero matrix with \a m rows and \a n columns.
+    static Matrix<X> zero(SizeType m, SizeType n, X const& z);
+    //! \brief The identity matrix with \a n rows and \a n columns.
+    static Matrix<X> identity(SizeType n, X const& z);
+
+    //! \brief The zero matrix with \a m rows and \a n columns, with elements described by the properties \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> zero(SizeType m, SizeType n, PRS... prs);
+    //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the properties \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
     //@}
 
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>> =dummy>
@@ -467,14 +465,6 @@ template<class X1, class V2, EnableIf<IsVectorExpression<V2>> =dummy> inline Mat
 
 template<class X> inline Matrix<X>::~Matrix()
 {
-}
-
-template<class X> inline Matrix<X>::Matrix()
-    : _zero(), _rs(0), _cs(0), _ary() {
-}
-
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n)
-    : _zero(), _rs(m), _cs(n), _ary(m*n) {
 }
 
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
@@ -850,20 +840,41 @@ struct ProvideMatrixOperations {
 };
 
 template<class X> template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>>>
-Matrix<X>::Matrix(InitializerList<InitializerList<double>> lst, PRS... prs) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,X(prs...)) {
-    typename InitializerList<InitializerList<double>>::const_iterator row_iter=lst.begin();
+Matrix<X>::Matrix(InitializerList<InitializerList<ExactDouble>> lst, PRS... prs)
+    : _zero(0.0_x,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+{
+    typename InitializerList<InitializerList<ExactDouble>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
-        typename InitializerList<double>::const_iterator col_iter=row_iter->begin();
+        typename InitializerList<ExactDouble>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
-            this->at(i,j)=X(ExactDouble(*col_iter),prs...);
+            this->at(i,j)=X(*col_iter,prs...);
         }
     }
 }
 
-template<class X> template<class... PRS, EnableIf<IsConstructible<X,PRS...>>> auto
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Dbl,PRS...>>>
+Matrix<X>::Matrix(InitializerList<InitializerList<Dbl>> lst, PRS... prs)
+    : _zero(0.0,prs...), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
+{
+    typename InitializerList<InitializerList<Dbl>>::const_iterator row_iter=lst.begin();
+    for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
+        ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
+        typename InitializerList<Dbl>::const_iterator col_iter=row_iter->begin();
+        for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
+            this->at(i,j)=X(*col_iter,prs...);
+        }
+    }
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>> auto
+Matrix<X>::zero(SizeType m, SizeType n, PRS... prs) -> Matrix<X> {
+    return Matrix<X>(m,n,X(0u,prs...));
+}
+
+template<class X> template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>>> auto
 Matrix<X>::identity(SizeType n, PRS... prs) -> Matrix<X> {
-    Matrix<X> I(n,n,X(prs...));
+    Matrix<X> I(n,n,X(0u,prs...));
     for(SizeType i=0; i!=n; ++i) {
         I.at(i,i)=1u;
     }

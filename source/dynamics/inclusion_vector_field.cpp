@@ -39,7 +39,7 @@ BoxDomainType input_bounds_to_domain(RealVariablesBox const& inputs) {
 
     auto vars = inputs.variables();
     for (auto v : vars) {
-        result.push_back(cast_exact(IntervalDomainType(inputs[v].lower().get_d(),inputs[v].upper().get_d())));
+        result.push_back(IntervalDomainType(cast_exact(inputs[v].lower().get(dp)),cast_exact(inputs[v].upper().get(dp))));
     }
     return Vector<IntervalDomainType>(result);
 }

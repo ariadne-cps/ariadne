@@ -328,7 +328,13 @@ template<class PT> Void export_point(pybind11::module& module, std::string name)
     pybind11::class_<PT, DrawableInterface> point_class(module,name.c_str());
     point_class.def(pybind11::init(&point_from_python<PT>));
     point_class.def(pybind11::init<PT>());
-    point_class.def(pybind11::init<Nat>());
+    if constexpr (IsDefaultConstructible<X>::value) {
+        point_class.def(pybind11::init<Nat>());
+    }
+    if constexpr (HasPrecisionType<X>::value) {
+        typedef typename X::PrecisionType PR;
+        point_class.def(pybind11::init<Nat,PR>());
+    }
     point_class.def("__getitem__", &__getitem__<PT,Int,X>);
     point_class.def("__str__", &__cstr__<PT>);
 }

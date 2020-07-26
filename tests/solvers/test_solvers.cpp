@@ -64,10 +64,10 @@ class TestSolver
 
     Void test_solve() {
         EffectiveScalarMultivariateFunction x=EffectiveScalarMultivariateFunction::coordinate(1,0);
-        ExactBoxType d({ExactIntervalType(0.0,1.0)});
+        ExactBoxType d({{0.0_x,1.0_x}});
         EffectiveVectorMultivariateFunction f({(x*x+1)*x-1});
         FloatDPBoundsVector p=solver->solve(f,d);
-        ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823,0.6824),p[0]);
+        ARIADNE_TEST_BINARY_PREDICATE(contains,ExactIntervalType(0.6823_pr,0.6824_pr),p[0]);
     }
 
     Void test_implicit() {
@@ -82,44 +82,43 @@ class TestSolver
         EffectiveVectorMultivariateFunction f;
         ValidatedVectorMultivariateFunctionModelDP h;
         EffectiveVectorMultivariateFunction e;
-        FloatDPValue tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
-        p=ExactBoxType({ExactIntervalType(-0.25,0.25)});
-        r=ExactBoxType({ExactIntervalType(-2.0,2.0)});
+        p=ExactBoxType({{-0.25_x,0.25_x}});
+        r=ExactBoxType({{-2.0_x,2.0_x}});
         f=EffectiveVectorMultivariateFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         e=EffectiveVectorMultivariateFunction(1u,aa);
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8_pr);
 
-        // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactBoxType({ExactIntervalType(0.875,1.125)});
-        r=ExactBoxType({ExactIntervalType(0.25,1.25)});
+        // Test solution of 4x^2+x-4-a=0 on [0.875_x,1.125_x]. There is a unique solution with positive derivative.
+        p=ExactBoxType({ExactIntervalType(0.875_x,1.125_x)});
+        r=ExactBoxType({ExactIntervalType(0.25_x,1.25_x)});
         f=EffectiveVectorMultivariateFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         bb=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
-        Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
+        Decimal a0(0.682328_dec), a1(0.0521547_dec), a2(-0.0023232_dec), a3(0.000147778_dec);
         e=EffectiveVectorMultivariateFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4_pr);
 
-        // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
-        p=ExactBoxType({ExactIntervalType(-0.25,0.25)});
-        r=ExactBoxType({ExactIntervalType(0.25,2.0)});
+        // Test solution of 4x^2+x-4-a=0 on [-0.25_x,0.25_x]. There is a unique solution with positive derivative.
+        p=ExactBoxType({ExactIntervalType(-0.25_x,0.25_x)});
+        r=ExactBoxType({ExactIntervalType(0.25_x,2.0_x)});
         f=EffectiveVectorMultivariateFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         bb=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
-        Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
+        Decimal c0(0.828427_dec), c1(0.0441942_dec), c2(-0.000345267_dec), c3(0.00000539468_dec);
         e=EffectiveVectorMultivariateFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4_pr);
 
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
@@ -153,18 +152,18 @@ class TestSolver
 
         ARIADNE_TEST_PRINT(*solver);
 
-        // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=ExactBoxType({ExactIntervalType(0.875,1.125)});
-        r=ExactIntervalType(0.25,1.25);
+        // Test solution of 4x^2+x-4-a=0 on [0.875_x,1.125_x]. There is a unique solution with positive derivative.
+        p=ExactBoxType({ExactIntervalType(0.875_x,1.125_x)});
+        r=ExactIntervalType(0.25_x,1.25_x);
         f=EffectiveScalarMultivariateFunction((x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         s=EffectiveScalarMultivariateFunction(aa-DyadicInterval(p[0]).midpoint())/DyadicInterval(p[0]).radius();
-        Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
+        Decimal a0(0.682328_dec), a1(0.0521547_dec), a2(-0.0023232_dec), a3(0.000147778_dec);
         e=EffectiveScalarMultivariateFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4);
+        ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4_pr);
 
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.
@@ -194,14 +193,14 @@ Int main(Int argc, const char **argv) {
 
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
-    IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();
 
-    KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    KrawczykSolver krawczyk_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     ARIADNE_TEST_PRINT(krawczyk_solver.function_factory());
     TestSolver(krawczyk_solver,"KrawczykSolver").test();
 
-    FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5_pr,maximum_number_of_steps=12);
     TestSolver(factored_krawczyk_solver,"FactoredKrawczykSolver").test();
 
     std::cerr<<"INCOMPLETE "<<std::flush;

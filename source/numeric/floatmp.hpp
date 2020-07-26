@@ -42,8 +42,9 @@ namespace Ariadne {
 
 /************ FloatMP ********************************************************/
 
-struct NoInit { };
+struct NoInit;
 struct RawPtr { };
+struct DefaultTag;
 
 struct RoundUpward; struct RoundDownward;
 
@@ -58,6 +59,8 @@ class MultiplePrecision {
     mpfr_prec_t prec;
   public:
     typedef unsigned_mpfr_prec_t Type;
+    //! \brief
+//    explicit MultiplePrecision(DefaultTag const&);
     //! \brief
     explicit MultiplePrecision(mpfr_prec_t pr) : prec(pr) { }
     //! \brief
@@ -126,15 +129,17 @@ class FloatMP {
     static FloatMP min(PrecisionType);
   public:
     ~FloatMP();
-    explicit FloatMP(NoInit);
-    explicit FloatMP(PrecisionType, NoInit);
-    explicit FloatMP(const mpfr_t, RawPtr);
+    explicit FloatMP(NoInit const&);
+    explicit FloatMP(PrecisionType, NoInit const&);
+    explicit FloatMP(const mpfr_t, RawPtr const&);
 
+  private:
     FloatMP();
-    FloatMP(double);
-
+    explicit FloatMP(double);
+  public:
     explicit FloatMP(PrecisionType);
-    explicit FloatMP(double, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> explicit FloatMP(N n, PrecisionType pr)
+        : FloatMP(ExactDouble(n),pr) { }
     explicit FloatMP(FloatDP const&, PrecisionType);
     explicit FloatMP(ExactDouble const& x, PrecisionType);
     explicit FloatMP(TwoExp const& x, PrecisionType);
@@ -143,10 +148,15 @@ class FloatMP {
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);
 
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP& operator=(N n) {
+        return this->operator=(ExactDouble(n)); }
+    FloatMP& operator=(const ExactDouble& x);
     FloatMP& operator=(const FloatMP&);
     FloatMP& operator=(FloatMP&&);
 
-    FloatMP(double, RoundingModeType, PrecisionType);
+    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> FloatMP(N n, RoundingModeType rnd, PrecisionType pr)
+        : FloatMP(ExactDouble(n),rnd,pr) { }
+    FloatMP(ExactDouble, RoundingModeType, PrecisionType);
     FloatMP(FloatDP const&, RoundingModeType, PrecisionType);
 
     FloatMP(Integer const&, RoundingModeType, PrecisionType);
@@ -399,6 +409,8 @@ class FloatMP {
 template<class R, class A> R integer_cast(const A& a);
 template<> inline Int integer_cast(const FloatMP& x) { return static_cast<Int>(x.get_d()); }
 template<> inline Nat integer_cast(const FloatMP& x) { return static_cast<Nat>(x.get_d()); }
+
+//inline MultiplePrecision::MultiplePrecision(DefaultTag const&) : MultiplePrecision(FloatMP::get_default_precision()) { }
 
 
 } // namespace Ariadne

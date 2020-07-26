@@ -74,9 +74,9 @@ make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
 inline Bool compatible(const FloatDP& x1, const FloatDP& x2) { return true; }
 template<class X> inline Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
-inline FloatDP create(const FloatDP& x) { return FloatDP(0); }
+inline FloatDP create(const FloatDP& x) { return FloatDP(0,dp); }
 //inline ExactIntervalType create(const ExactIntervalType& x) { return ExactIntervalType(0); }
-template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
+template<class X> inline Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree(),x.zero_coefficient()); }
 
 template<class X> inline X create(const X& x) { return nul(x); }
 
@@ -89,6 +89,8 @@ template<class A> class Graded : public List<A>
     Graded(const A& a) : List<A>(1u,a) { }
     Graded(const List<A>& lst) : List<A>(lst) { }
     Graded(const InitializerList<A>& lst) : List<A>(lst) { }
+    template<class... PRS, EnableIf<IsConstructible<A,ExactDouble,PRS...>> =dummy> Graded(const InitializerList<ExactDouble>& lst, PRS... prs)
+        : List<A>() { for(auto x : lst) { this->List<A>::append(A(x,prs...)); } }
     Graded<A>(const Graded<A>& a) : List<A>(a) { }
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Graded<A>& operator=(Graded<A>&& a) { this->List<A>::operator=(a); return *this; }
@@ -97,6 +99,11 @@ template<class A> class Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op, class N> Void operator=(const ClosureExpression<Op,SelfType,N>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
+    static Graded<A> constant(A const& c, DegreeType deg) {
+        assert(deg>=1); A z=nul(c); Graded<A> r(c); for(DegreeType d=1; d<=deg; ++d) { r.append(z); } return r; }
+    static Graded<A> variable(A const& a0, DegreeType deg) {
+        assert(deg>=1); A z=nul(a0); Graded<A> r(a0); r.append(z+1);
+        for(DegreeType d=2; d<=deg; ++d) { r.append(z); } return r; }
     Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1u, Ariadne::create_zero((*this)[0u]))); }
     DegreeType degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }

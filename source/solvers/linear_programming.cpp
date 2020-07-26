@@ -67,7 +67,7 @@ FloatDP compute_mu(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
 
 // Return r[i]=x[i]-c for i=1,...,n
 Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]-c;
     }
@@ -76,7 +76,7 @@ Vector<FloatDP> esub(const Vector<FloatDP>& x, const FloatDP& c) {
 
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i];
     }
@@ -85,7 +85,7 @@ Vector<FloatDP> emul(const Vector<FloatDP>& x, const Vector<FloatDP>& y) {
 
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]/z[i];
     }
@@ -94,7 +94,7 @@ Vector<FloatDP> ediv(const Vector<FloatDP>& x, const Vector<FloatDP>& z) {
 
 // Return r[i]=x[i]*y[i]+z for i=1,...,n
 Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const FloatDP& z) {
-    Vector<FloatDP> r(x.size());
+    Vector<FloatDP> r(x.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i]+z;
     }
@@ -103,9 +103,9 @@ Vector<FloatDP> efma(const Vector<FloatDP>& x, const Vector<FloatDP>& y, const F
 
 // Return r[i]=1/y[i] for i=1,...,n
 Vector<FloatDP> erec(const Vector<FloatDP>& v) {
-    Vector<FloatDP> r(v.size());
+    Vector<FloatDP> r(v.size(),dp);
     for(Nat i=0; i!=r.size(); ++i) {
-        r[i]=1.0/v[i];
+        r[i]=rec(v[i]);
     }
     return r;
 }
@@ -121,7 +121,7 @@ Bool is_nan(Vector<FloatDP> const& v) {
 // Compute R=ADA^T for diagonal D
 Matrix<FloatDP> adat(const Matrix<FloatDP>& A, const Vector<FloatDP>& D)
 {
-    Matrix<FloatDP> R(A.row_size(),A.row_size());
+    Matrix<FloatDP> R(A.row_size(),A.row_size(),A.zero_element()*D.zero_element()*A.zero_element());
     ARIADNE_ASSERT(D.size()==A.column_size());
     for(Nat i=0; i!=A.row_size(); ++i) {
         for(Nat k=0; k!=A.column_size(); ++k) {
@@ -160,12 +160,12 @@ FloatDP compute_mu(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
                  const Vector<FloatDP>& x, const Vector<FloatDP>& zl, const Vector<FloatDP>& zu)
 {
     const Nat n=x.size();
-    FloatDP mu = 0.0;
+    FloatDP mu (0.0_x,dp);
     for(Nat i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { mu += ((x[i]-xl[i])*zl[i]); }
         if(xu[i]!=+inf) { mu += ((xu[i]-x[i])*zu[i]); }
     }
-    mu /= (2.0*n);
+    mu /= (2*n);
     return mu;
 }
 
@@ -191,7 +191,7 @@ validate_feasibility(const Vector<FloatDP>& axl, const Vector<FloatDP>& axu,
     Vector<FloatDPBounds> x = cast_exact(ax);
     Vector<FloatDPBounds> y = cast_exact(ay);
 
-    FloatDPValue zero;
+    FloatDPValue zero(dp);
 
     const Nat n=A.column_size();
 
@@ -244,18 +244,18 @@ InteriorPointSolver::minimise(const Vector<FloatDP>& c,
 
     const Nat m = b.size();
     const Nat n = c.size();
-    Vector<FloatDP> y(m, 0.0);
-    Vector<FloatDP> x(n);
-    Vector<FloatDP> zl(n);
-    Vector<FloatDP> zu(n);
+    Vector<FloatDP> y(m, FloatDP(0.0_x,dp));
+    Vector<FloatDP> x(n,dp);
+    Vector<FloatDP> zl(n,dp);
+    Vector<FloatDP> zu(n,dp);
     for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
-            if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+            if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
         } else {
-            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+            if(xu[i]==+inf) { x[i]=xl[i]+1.0_x; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
         }
-        if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
-        if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+        if(xl[i]==-inf) { zl[i] = 0.0_x; } else { zl[i] = 1.0_x; }
+        if(xu[i]==+inf) { zu[i] = 0.0_x; } else { zu[i] = 1.0_x; }
     }
 
     LinearProgramStatus status = LinearProgramStatus::INDETERMINATE_FEASIBILITY;
@@ -294,9 +294,8 @@ hotstarted_minimise(const Vector<FloatDP>& c,
     const double maxerror=1e-3;
     const Nat maxsteps=10;
 
-    FloatDP cx,yb;
-    cx=dot(c,x);
-    yb=dot(y,b);
+    FloatDP cx=dot(c,x);
+    FloatDP yb=dot(y,b);
     ARIADNE_ASSERT(yb<=cx);
 
     ARIADNE_LOG_PRINTLN("xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c);
@@ -324,21 +323,21 @@ feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
 
     const Nat m = A.row_size();
     const Nat n = A.column_size();
-    Vector<FloatDP> c(n, 0.0);
-    Vector<FloatDP> y(m, 0.0);
-    Vector<FloatDP> x(n);
-    Vector<FloatDP> zl(n);
-    Vector<FloatDP> zu(n);
+    Vector<FloatDP> c(n,FloatDP(0.0_x,dp));
+    Vector<FloatDP> y(m,FloatDP(0.0_x,dp));
+    Vector<FloatDP> x(n,dp);
+    Vector<FloatDP> zl(n,dp);
+    Vector<FloatDP> zu(n,dp);
     for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
-            if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+            if(xu[i]==+inf) { x[i]=0.0_x; } else { x[i] = xu[i]-1.0_x; }
         } else {
-            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<=xu[i]); x[i] = (xl[i]+xu[i])/2; }
+            if(xu[i]==+inf) { x[i]=xl[i]+1.0_x; } else { ARIADNE_ASSERT(xl[i]<=xu[i]); x[i] = (xl[i]+xu[i])/2; }
         }
-        if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
-        if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+        if(xl[i]==-inf) { zl[i] = 0.0_x; } else { zl[i] = 1.0_x; }
+        if(xu[i]==+inf) { zu[i] = 0.0_x; } else { zu[i] = 1.0_x; }
     }
-    Vector<FloatDPBounds> X(n);
+    Vector<FloatDPBounds> X(n,dp);
     for(SizeType i=0; i!=n; ++i) {
         X[i]=FloatDPBounds(xl[i],xu[i]);
     }
@@ -379,30 +378,30 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("x="<<x<<", y="<<y<<", zl="<<zl<<", zu="<<zu);
 
-    static const double gamma=1.0/256;
-    static const double sigma=1.0/8;
-    static const double scale=0.75;
+    static const ExactDouble gamma=0.00390625_x; // 1/256
+    static const ExactDouble sigma=0.125_x;
+    static const ExactDouble scale=0.75_x;
 
 
     const Nat m=A.row_size();
     const Nat n=A.column_size();
 
-    Vector<FloatDP> dx(n),dy(m),dzl(n),dzu(n);
+    Vector<FloatDP> dx(n,dp),dy(m,dp),dzl(n,dp),dzu(n,dp);
     Vector<FloatDP> nx,ny,nzl,nzu;
-    Vector<FloatDP> rx(m),ry(n),rzl(n),rzu(n);
-    Matrix<FloatDP> S(m,m);
+    Vector<FloatDP> rx(m,dp),ry(n,dp),rzl(n,dp),rzu(n,dp);
+    Matrix<FloatDP> S(m,m,dp);
     DiagonalMatrix<FloatDP> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
 
     FloatDP mu = compute_mu(xl,xu, x,zl,zu) * sigma;
-    mu=1.0;
+    mu=1.0_x;
     ARIADNE_LOG_PRINTLN("mu="<<mu);
 
     // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
     rx=A*x-b;
     ry=transpose(A)*y+(zl-zu)-c;
     for(Nat i=0; i!=n; ++i) {
-        if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
-        if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
+        if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0_x; }
+        if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0_x; }
     }
     ARIADNE_LOG_PRINTLN("rx="<<rx<<", ry="<<ry<<", rzl="<<rzl<<", rzu="<<rzu);
 
@@ -440,7 +439,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
     ARIADNE_LOG_PRINTLN_AT(1,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu));
     ARIADNE_LOG_PRINTLN_AT(1,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu));
     // Try to enforce feasibility or dual feasibility
-    FloatDP alphax=1.0;
+    FloatDP alphax(1.0_x,dp);
     nx=x-dx;
     while ( !all_greater(emul(nx-xl,zl),gamma*mu) || !all_greater(emul(xu-nx,zu),gamma*mu) ) {
         alphax=alphax*scale;
@@ -448,7 +447,7 @@ _minimisation_step(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Ve
         if(alphax<gamma*mu/4096) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
     }
 
-    FloatDP alphaz=1.0;
+    FloatDP alphaz(1.0_x,dp);
     nzl=zl-dzl; nzu=zu-dzu;
     while ( !all_greater(emul(nx-xl,nzl),gamma*mu) || !all_greater(emul(xu-nx,nzu),gamma*mu) ) {
         alphaz=alphaz*scale;
@@ -474,7 +473,7 @@ LinearProgramStatus InteriorPointSolver::
 _feasibility_step(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
                   Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const
 {
-    Vector<FloatDP> c(x.size(),0.0);
+    Vector<FloatDP> c(x.size(),FloatDP(0.0_x,dp));
     return this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
 }
 

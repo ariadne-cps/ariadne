@@ -59,8 +59,7 @@ template<class F> class UpperBound
     typedef PR PrecisionType;
     typedef PR PropertiesType;
   public:
-    UpperBound<F>() : _u(0.0) { }
-    explicit UpperBound<F>(PrecisionType pr) : _u(0.0,pr) { }
+    explicit UpperBound<F>(PrecisionType pr) : _u(0.0_x,pr) { }
     explicit UpperBound<F>(RawType const& u) : _u(u) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> UpperBound<F>(N n, PR pr) : UpperBound<F>(ExactDouble(n),pr) { }
@@ -263,7 +262,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     friend PositiveUpperBound<F> operator/(PositiveValue<F> const& x1, PositiveLowerBound<F> const& x2) {
         return PositiveUpperBound<F>(div(down,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, Nat m2) {
-        return PositiveUpperBound<F>(div(up,x1.raw(),m2)); }
+        return PositiveUpperBound<F>(div(up,x1.raw(),F(m2,x1.precision()))); }
     friend PositiveLowerBound<F> operator/(PositiveValue<F> const& x1, PositiveUpperBound<F> const& x2);
 };
 

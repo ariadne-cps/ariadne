@@ -59,7 +59,7 @@ template<class T> class Orbit;
 class DegenerateCrossingException { };
 
 HybridSimulator::HybridSimulator()
-    : _step_size(0.125)
+    : _step_size(0.125_x,dp)
 {
 }
 
@@ -97,17 +97,14 @@ Bool satisfies_invariants(const HybridAutomatonInterface& system, const Discrete
 
 template<class X> Point<X> make_point(const HybridPoint<X>& hpt, const RealSpace& sspc) {
     if(hpt.space()==sspc) { return hpt.point(); }
-    Map<RealVariable,X> values=hpt.values();
-    Point<X> pt(sspc.dimension());
-    for(Nat i=0; i!=pt.size(); ++i) {
-        pt[i]=values[sspc.variable(i)];
-    }
+    Map<RealVariable,X> const values=hpt.values();
+    Point<X> pt(sspc.dimension(),[&](SizeType i){return values[sspc.variable(i)];});
     return pt;
 }
 
 template<class X> HybridPoint<X> make_hybrid_state_auxiliary_point(const DiscreteLocation& location, const Point<X>& spt,
         const RealSpace& sspc, const RealSpace& aspc, const RealSpace& saspc, const EffectiveVectorMultivariateFunction& auxiliary_function) {
-    Point<X> sapt(saspc.dimension());
+    Point<X> sapt(saspc.dimension(),spt.zero_element());
     Point<X> apt = evaluate(auxiliary_function,spt);
     for(Nat i=0; i!=sapt.size(); ++i) {
         RealVariable var = saspc.variable(i);

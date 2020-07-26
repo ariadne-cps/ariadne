@@ -29,30 +29,20 @@ template<class F> inline Value<F> make_split_point(Approximation<F> const& am) {
 template<class F> inline Value<F> make_split_point(Bounds<F> const& bm) { return bm.value(); }
 template<class F> inline Value<F> make_split_point(Ball<F> const& bm) { return bm.value(); }
 
+template<class U, class Y> inline U create_u(Y const& y) { assert(false); }
 
 template<class U> Interval<U>::Interval() : Interval(EmptyInterval()) { }
-template<class U> Interval<U>::Interval(EmptyInterval const&) {
-    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
-        _l = L(Dyadic::inf(Sign::POSITIVE),L::RawType::get_default_precision());
-        _u = U(Dyadic::inf(Sign::NEGATIVE),U::RawType::get_default_precision());
-    } else {
-        _l = Dyadic::inf(Sign::POSITIVE);
-        _u = Dyadic::inf(Sign::NEGATIVE);
-    }
-}
+
+template<class U> Interval<U>::Interval(EmptyInterval const&) : Interval(+inf,-inf) { }
+
 template<class U> Interval<U>::Interval(UnitInterval const&) : Interval(-1,+1) { }
-template<class U> Interval<U>::Interval(EntireInterval const&) {
-    if constexpr(IsConstructibleGivenDefaultPrecision<U,Dyadic>::value) {
-        _l = L(Dyadic::inf(Sign::NEGATIVE),L::RawType::get_default_precision());
-        _u = U(Dyadic::inf(Sign::POSITIVE),U::RawType::get_default_precision());
-    } else {
-        _l = Dyadic::inf(Sign::NEGATIVE);
-        _u = Dyadic::inf(Sign::POSITIVE);
-    }
-}
+
+template<class U> Interval<U>::Interval(EntireInterval const&) : Interval(-inf,+inf) { }
+
 template<class U> Interval<U>::Interval(LowerBoundType l, UpperBoundType u) : _l(l), _u(u) { }
 
-template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(0,0); }
+template<class U> Interval<U> Interval<U>::create_zero() const { return Interval<U>(nul(this->_l),nul(this->_u)); }
+
 template<class U> SizeOne Interval<U>::dimension() const  { return SizeOne(); }
 template<class U> auto Interval<U>::lower() const -> LowerBoundType const& { return _l; }
 template<class U> auto Interval<U>::upper() const -> UpperBoundType const& { return _u; }
@@ -215,5 +205,10 @@ inline Interval<FloatValue<MP>> cast_exact_interval(Interval<FloatApproximation<
 
 inline FloatDPLowerBound mig(FloatDPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
 inline FloatMPLowerBound mig(FloatMPUpperInterval const& ivl) { return mig(cast_singleton(ivl)); }
+
+template<> Interval<FloatMPUpperBound>::Interval();
+template<> Interval<FloatMPUpperBound>::Interval(EmptyInterval const&);
+template<> Interval<FloatMPUpperBound>::Interval(UnitInterval const&);
+template<> Interval<FloatMPUpperBound>::Interval(EntireInterval const&);
 
 } // namespace Ariadne

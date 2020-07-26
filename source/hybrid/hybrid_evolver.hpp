@@ -602,6 +602,7 @@ OutputStream& operator<<(OutputStream& os, const FinishingKind& crk);
 //! \relates HybridEvolverBase
 struct TimingData
 {
+    TimingData() : step_size(dp) { }
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
@@ -658,9 +659,8 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
   public:
     typedef Nat UnsignedIntType;
-    typedef FloatDPValue RealType;
-    typedef double RawRealType;
-
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
   protected:
 
     HybridEvolverBaseConfiguration(HybridEvolverBase& evolver);
@@ -677,7 +677,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    StepSizeType _maximum_step_size;
+    RealType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -698,17 +698,16 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
     const RealType& flow_accuracy() const { return _flow_accuracy; }
     //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
-    Void set_flow_accuracy(const RawRealType value);
+    Void set_flow_accuracy(const ApproximateRealType value);
 
-    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void set_maximum_step_size(const double value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = RealType(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = RealType(value); }
+    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }

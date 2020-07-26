@@ -30,39 +30,32 @@
 
 namespace Ariadne {
 
-
-
-template<class X> UnivariateDifferential<X>::UnivariateDifferential()
-    : _ary(1u,X(0)) { }
-
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d)
-    : _ary(d+1u,X(0)) { }
-
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, X const& c)
     : _ary(d+1u,nul(c)) { _ary[0]=c; }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, InitializerList<X> lst)
-    : _ary(d+1u,X(0))
+    : _ary(d+1u,nul(*lst.begin()))
 {
     ARIADNE_PRECONDITION(lst.size()==d+1u);
     std::copy(lst.begin(),lst.end(),_ary.begin());
 }
 
 template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, Series<X> const& s)
-    : _ary(d+1u) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
+    : _ary(d+1u,nul(s[0])) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
 }
 
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::constant(DegreeType d, X const& c) {
-    UnivariateDifferential r(d);
-    r[0]=c;
-    return r;
+    return UnivariateDifferential(d,c);
 }
 
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::variable(DegreeType d, X const& c) {
-    UnivariateDifferential r(d);
-    r[0]=c;
+    UnivariateDifferential r(d,c);
     if(d>=1) { r[1]=1; }
     return r;
+}
+
+template<class X> X UnivariateDifferential<X>::zero_coefficient() const {
+    return nul(this->_ary[0]);
 }
 
 template<class X> DegreeType UnivariateDifferential<X>::degree() const {
@@ -118,7 +111,7 @@ UnivariateDifferential<X>
 UnivariateDifferential<X>::_derivative(const UnivariateDifferential<X>& x)
 {
     DegreeType n=x.degree(); DegreeType one=1u;
-    UnivariateDifferential<X> r(std::min(n,one)-one);
+    UnivariateDifferential<X> r(std::min(n,one)-one,x.zero_coefficient());
     if(n==0) { r[0]=x[0]*0; }
     for(DegreeType i=0; i<n; ++i) {
         r[i]=(i+1u)*x[i+1u];
@@ -131,7 +124,7 @@ UnivariateDifferential<X>
 UnivariateDifferential<X>::_antiderivative(const UnivariateDifferential<X>& x)
 {
     DegreeType n=x.degree();
-    UnivariateDifferential<X> r(n+1u,Ariadne::create_zero(x[0]));
+    UnivariateDifferential<X> r(n+1u,nul(x[0]));
     for(DegreeType i=0; i<=n; ++i) {
         r[i+1u]=x[i]/(i+1u);
     }

@@ -52,7 +52,9 @@ inline DegreeType max(DegreeType d1, DegreeType d2) { return std::max(d1,d2); }
 
 template<class X> Differential<X>::Differential(SizeType as, DegreeType deg, X const& z) : _expansion(as,z), _degree(deg) { }
 
-template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, DegreeType deg) : _expansion(0u) {
+template<class X> Differential<X>::Differential(const Map<MultiIndex,X>& map, DegreeType deg)
+    : _expansion(0u,(assert(!map.empty()),nul(map.begin()->second)))
+{
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -65,7 +67,9 @@ Differential<X>::Differential(SizeType as, DegreeType deg,
 }
 
 
-template<class X> Differential<X>::Differential(const Expansion<MultiIndex,X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
+template<class X> Differential<X>::Differential(const Expansion<MultiIndex,X>& e, DegreeType deg)
+    : _expansion(e.argument_size(),e.zero_coefficient()),_degree(deg)
+{
     for(typename Expansion<MultiIndex,X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter->index().degree()<=deg) { this->_expansion.append(iter->index(),iter->coefficient()); }
     }
@@ -81,13 +85,13 @@ template<class X> Differential<X>& Differential<X>::operator=(const X& c) {
 
 
 template<class X> Differential<X> Differential<X>::constant(SizeType as, DegreeType deg, const X& c) {
-    Differential<X> r(as,deg);
+    Differential<X> r(as,deg,nul(c));
     r._expansion.append(MultiIndex(as),c);
     return r;
 }
 
 template<class X> Differential<X> Differential<X>::variable(SizeType as, DegreeType deg, const X& v, SizeType j) {
-    Differential<X> r(as,deg);
+    Differential<X> r(as,deg,nul(v));
     MultiIndex a(as);
     r._expansion.append(a,v);
     a[j]=1;
@@ -98,7 +102,7 @@ template<class X> Differential<X> Differential<X>::variable(SizeType as, DegreeT
 
 template<class X> Differential<X> Differential<X>::affine(SizeType as, DegreeType deg, const X& x, const Covector<X>& g) {
     ARIADNE_ASSERT_MSG(as==g.size(), "g.size()="<<g.size()<<" must equal as="<<as);
-    Differential<X> r(as,deg);
+    Differential<X> r(as,deg,nul(x));
     MultiIndex a(as);
     r._expansion.append(a,x);
     for (SizeType j=0; j!=as; ++j) {
@@ -125,7 +129,7 @@ template<class X> Vector<Differential<X>> Differential<X>::variables(SizeType rs
 }
 
 template<class X> Vector<Differential<X>> Differential<X>::constants(SizeType as, DegreeType deg, const Vector<X>& c) {
-    Vector<Differential<X>> r(c.size(),Differential(as,deg));
+    Vector<Differential<X>> r(c.size(),Differential(as,deg,c.zero_element()));
     for(SizeType i=0; i!=c.size(); ++i) { r[i]=c[i]; }
     return r;
 }
@@ -228,14 +232,14 @@ template<class X> const X& Differential<X>::gradient(SizeType j) const {
 }
 
 template<class X> Covector<X> Differential<X>::gradient() const {
-    Covector<X> g(this->argument_size());
+    Covector<X> g(this->argument_size(),this->zero_coefficient());
     for(SizeType j=0; j!=g.size(); ++j) { g[j]=this->gradient(j); }
     return g;
 }
 
 template<class X> Matrix<X> Differential<X>::half_hessian() const {
     ARIADNE_PRECONDITION(this->degree()>=2);
-    Matrix<X> H(this->argument_size(),this->argument_size());
+    Matrix<X> H(this->argument_size(),this->argument_size(),nul(this->value()));
     ConstIterator iter=this->begin();
     while(iter!=this->end() && iter->index().degree()<=1) { ++iter; }
     SizeType i=0; SizeType j=1;
@@ -315,11 +319,11 @@ template<class X> typename Differential<X>::ConstIterator Differential<X>::end()
 
 
 template<class X> Differential<X> Differential<X>::create() const {
-    return Differential<X>(this->argument_size(),this->degree());
+    return Differential<X>(this->argument_size(),this->degree(),this->zero_coefficient());
 }
 
 template<class X> Differential<X> Differential<X>::create_zero() const {
-    return Differential<X>(this->argument_size(),this->degree());
+    return Differential<X>(this->argument_size(),this->degree(),this->zero_coefficient());
 }
 
 template<class X> Differential<X> Differential<X>::create_constant(NumericType const& c) const {
@@ -387,7 +391,7 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, Differential<X
 template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, Differential<X> x, const X& c)
 {
-    if(decide(c==static_cast<X>(0))) {
+    if(decide(c==0)) {
         x.clear();
     } else {
         for(auto iter=x.begin(); iter!=x.end(); ++iter) {
@@ -403,7 +407,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Add op, const Differential<X>& x, const Differential<X>& y)
 {
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()));
+    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()),add(x.zero_coefficient(),y.zero_coefficient()));
     typename Differential<X>::ConstIterator xiter=x.begin();
     typename Differential<X>::ConstIterator yiter=y.begin();
     // No need to check if maximum degree has been reached below,
@@ -436,7 +440,7 @@ template<class X>
 Differential<X> AlgebraOperations<Differential<X>>::apply(Sub op, const Differential<X>& x, const Differential<X>& y)
 {
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()));
+    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()),sub(x.zero_coefficient(),y.zero_coefficient()));
     typename Differential<X>::ConstIterator xiter=x.begin();
     typename Differential<X>::ConstIterator yiter=y.begin();
     // No need to check if maximum degree has been reached below,
@@ -470,9 +474,9 @@ Differential<X> AlgebraOperations<Differential<X>>::apply(Mul op, const Differen
 {
     typedef typename Differential<X>::ConstIterator ConstIterator;
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()));
+    Differential<X> r(x.argument_size(),min(x.degree(),y.degree()),mul(x.zero_coefficient(),y.zero_coefficient()));
     MultiIndex a(x.argument_size());
-    X c(0);
+    X c(x.zero_coefficient()*y.zero_coefficient());
     for(ConstIterator xiter=x.expansion().begin(); xiter!=x.expansion().end(); ++xiter) {
         if(xiter->index().degree()>r.degree()) { break; }
         for(ConstIterator yiter=y.expansion().begin(); yiter!=y.expansion().end(); ++yiter) {
@@ -520,10 +524,10 @@ template<class X> Differential<X> AlgebraOperations<Differential<X>>::apply(Max 
 
 template<class X> Differential<X> AlgebraOperations<Differential<X>>::apply(Abs op, const Differential<X>& x) {
     // FIXME: Maybe need different code for validated and approximate paradigms
-    if(decide(x.value()==X(0))) {
+    if(decide(x.value()==0)) {
         ARIADNE_THROW(std::runtime_error,"abs(Differential<X> x)","x[0]==0");
     }
-    return decide(x.value()>X(0)) ? pos(x) : neg(x);
+    return decide(x.value()>0) ? pos(x) : neg(x);
 }
 
 
@@ -537,7 +541,8 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     ARIADNE_ASSERT(d>=1);
 
     Differential<X> zero = a.zero_element();
-    Differential<X> one = zero.create_constant(X(1));
+    X x_one=zero.zero_coefficient(); x_one=1;
+    Differential<X> one=zero.create_constant(x_one);
 
     // Use inefficient brute-force approach with lots of storage...
     Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1u,zero));
@@ -574,7 +579,7 @@ Differential<X> Differential<X>::_compose(const UnivariateDifferential<X>& x, co
 
     Differential<X> w=y;
     if(w.begin()->index().degree()==0) { w.begin()->coefficient()=0; }
-    Differential<X> r(as,d);
+    Differential<X> r(as,d,y.zero_coefficient());
     r[MultiIndex(as)]=x[d];
     for(SizeType n=1; n<=d; ++n) {
         r=r*w;
@@ -587,9 +592,9 @@ template<class X>
 Differential<X> Differential<X>::_compose(const Differential<X>& x, const Vector<Differential<X>>& y)
 {
     Vector<Differential<X>>& ync=const_cast< Vector<Differential<X>>&>(y);
-    Vector<X> yv(y.size());
+    X zero(y.zero_element().zero_coefficient());
+    Vector<X> yv(y.size(),zero);
     DegreeType deg=min(x.degree(),y.degree());
-    X zero(0);
     for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(zero); }
     Differential<X> r=_evaluate(x,ync);
     r.set_degree(deg);
@@ -602,12 +607,12 @@ template<class X>
 Vector<Differential<X>> Differential<X>::_compose(const Vector<Differential<X>>& x, const Vector<Differential<X>>& y)
 {
     //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
+    X zero(y.zero_element().zero_coefficient());
     Vector<Differential<X>>& ync=const_cast< Vector<Differential<X>>&>(y);
-    Vector<X> yv(y.size());
+    Vector<X> yv(y.size(),zero);
     DegreeType deg=min(x.degree(),y.degree());
-    X zero(0);
     for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(zero); }
-    Vector<Differential<X>> r(x.size(),y.argument_size(),deg);
+    Vector<Differential<X>> r(x.size(),y.argument_size(),deg,y.zero_coefficient());
     for(SizeType i=0; i!=x.result_size(); ++i) { r[i]=_evaluate(x[i],y); r[i].set_degree(deg); }
     for(SizeType i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
     return r;
@@ -617,8 +622,8 @@ Vector<Differential<X>> Differential<X>::_compose(const Vector<Differential<X>>&
 template<class X>
 Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType i)
 {
-    if(x.degree()==0) { return Differential<X>(x.argument_size(),0u); }
-    Differential<X> r(x.argument_size(), x.degree()-1u);
+    if(x.degree()==0) { return Differential<X>(x.argument_size(),0u,x.zero_coefficient()); }
+    Differential<X> r(x.argument_size(), x.degree()-1u,x.zero_coefficient());
     MultiIndex a(x.argument_size());
     for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         a=iter->index();
@@ -636,7 +641,7 @@ Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType 
 template<class X>
 Differential<X> Differential<X>::_antiderivative(const Differential<X>& x, SizeType i)
 {
-    Differential<X> r(x.argument_size(), x.degree()+1u);
+    Differential<X> r(x.argument_size(), x.degree()+1u,x.zero_coefficient());
     MultiIndex a(x.argument_size());
     MultiIndex ra=MultiIndex(x.argument_size());
     MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
@@ -681,7 +686,7 @@ OutputStream& Differential<X>::_write(OutputStream& os) const
 
 
 template<class X> Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, X const& z)
-    : _chars(as,d), _ary(rs,Differential<X>(as,d,z)) {
+    : _chars(as,d,z.precision()), _ary(rs,Differential<X>(as,d,z)) {
 }
 
 template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differential<X>& sd)
@@ -689,13 +694,13 @@ template<class X> Vector<Differential<X>>::Vector(SizeType rs, const Differentia
 }
 
 template<class X> Vector<Differential<X>>::Vector(InitializerList<Differential<X>> const& lst)
-    : _chars(), _ary(lst)
+    : _chars((assert(lst.size()>0),*lst.begin())), _ary(lst)
 {
     ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }
 
 template<class X> Vector<Differential<X>>::Vector(Array<Differential<X>> ary)
-    : _chars(), _ary(std::move(ary))
+    : _chars((assert(ary.size()>0),*ary.begin())), _ary(std::move(ary))
 {
     ARIADNE_ASSERT(_ary.size()>0); _chars=DifferentialCharacteristics<X>(_ary[0]);
 }
@@ -748,7 +753,8 @@ template<class X> Vector<Differential<X>> Vector<Differential<X>>::_compose(Vect
 template<class X>
 Vector<Differential<X>>
 Vector<Differential<X>>::_derivative(const Vector<Differential<X>>& x, SizeType k) {
-    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),max(x.degree(),(DegreeType)1u)-1u));
+    X z=x.zero_element().zero_coefficient();
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),max(x.degree(),(DegreeType)1u)-1u,z));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=derivative(x[i],k); }
     return r;
 }
@@ -756,7 +762,8 @@ Vector<Differential<X>>::_derivative(const Vector<Differential<X>>& x, SizeType 
 template<class X>
 Vector<Differential<X>>
 Vector<Differential<X>>::_antiderivative(const Vector<Differential<X>>& x, SizeType k) {
-    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1u));
+    X z=x.zero_element().zero_coefficient();
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1u,z));
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
     return r;
 }
@@ -768,9 +775,10 @@ template<class X>
 Vector<Differential<X>>
 Vector<Differential<X>>::_lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
 {
-    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1u);
-    Differential<X> t(df.argument_size(), df.degree()-1u);
-    MultiIndex a(df.argument_size()); X c;
+    X z=dg.zero_element().zero_coefficient();
+    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1u,z);
+    Differential<X> t(df.argument_size(), df.degree()-1u,z);
+    MultiIndex a(df.argument_size()); X c=z;
     for(SizeType i=0; i!=df.result_size(); ++i) {
         Expansion<MultiIndex,X> const& dfi_expansion = df[i].expansion();
         Expansion<MultiIndex,X>& t_expansion = t.expansion();
@@ -867,7 +875,8 @@ Vector<Differential<X>>::_flow(const Vector<Differential<X> >& df, Vector<X> con
     const SizeType deg=df.degree();
 
     Vector<Differential<X>> dx0=Vector<Differential<X>>(n,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,x0[i],i);});
-    Vector<Differential<X>> da=Vector<Differential<X>>(m,[&](SizeType i){return Differential<X>::variable(n+1u+m,deg+1u,a[i],n+i);});
+    Vector<Differential<X>> da(m,n+1u+m,deg+1u,a.zero_element());
+    for (SizeType i=0; i!=m; ++i) { da[i]=Differential<X>::variable(n+1u+m,deg+1u,a[i],n+i); }
 
     return _flow(df,dx0, da);
 }

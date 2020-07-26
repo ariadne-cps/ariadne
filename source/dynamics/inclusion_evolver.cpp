@@ -43,7 +43,7 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
     for (auto v : vars) {
-        result.push_back(cast_exact(widen(IntervalDomainType(var_ranges[v].lower().get_d(),var_ranges[v].upper().get_d()))));
+        result.push_back(cast_exact(widen(IntervalDomainType(cast_exact(var_ranges[v].lower().get(dp)),cast_exact(var_ranges[v].upper().get(dp))))));
     }
     return Vector<IntervalDomainType>(result);
 }
@@ -147,16 +147,16 @@ class InclusionEvolverState {
     }
 };
 
-inline Map<InclusionIntegratorHandle,FloatDP> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
+inline Map<InclusionIntegratorHandle,ApproximateDouble> convert_to_percentages(Map<InclusionIntegratorHandle,Nat> const& approximation_global_frequencies) {
 
     Nat total_steps(0);
     for (auto entry: approximation_global_frequencies) {
         total_steps += entry.second;
     }
 
-    Map<InclusionIntegratorHandle,FloatDP> result;
+    Map<InclusionIntegratorHandle,ApproximateDouble> result;
     for (auto entry: approximation_global_frequencies) {
-        result[entry.first] = 1.0/total_steps*entry.second;
+        result[entry.first] = 1/total_steps*entry.second;
     }
 
     return result;
@@ -227,7 +227,7 @@ List<ValidatedVectorMultivariateFunctionModelDP> InclusionEvolver::reach(BoxDoma
         List<ValidatedVectorMultivariateFunctionModelDP> best_reach_functions;
         ValidatedVectorMultivariateFunctionModelDP best_evolve_function;
         InclusionIntegratorHandle best = approximators_to_use.at(0);
-        FloatDPApproximation best_volume(std::numeric_limits<double>::infinity());
+        FloatDPApproximation best_volume(inf,dp);
 
         for (auto approximator : approximators_to_use) {
             ARIADNE_LOG_PRINTLN_AT(3,"checking "<<approximator<<" approximator");
@@ -276,7 +276,7 @@ struct IndexedFloatDPError
     SizeType index;
     FloatDPError value;
 
-    IndexedFloatDPError() : index(0), value(FloatDPError()) {}
+    IndexedFloatDPError() : index(0), value(FloatDPError(dp)) {}
 };
 
 inline OutputStream& operator<<(OutputStream& os, IndexedFloatDPError const& ifl) {
@@ -304,8 +304,8 @@ Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
     auto n = _number_of_variables;
     auto m = _number_of_inputs;
 
-    FloatDP npk = 0;
-    FloatDP rho = _ratio_of_parameters_to_keep;
+    FloatDP npk(0,dp);
+    FloatDP rho (_ratio_of_parameters_to_keep,dp);
     for (auto entry: state.local_optima_count()) {
         SizeType ppi = entry.first.num_params_per_input();
         FloatDP partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
@@ -344,7 +344,7 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
     auto sweeper = tf.properties();
 
     // Compute effect of error terms, but not of original variables;
-    Matrix<FloatDPError> C(m,n);
+    Matrix<FloatDPError> C(m,n,tf.properties().precision());
     for (auto i : range(n)) {
         auto p=tf[i].model().expansion();
 
@@ -417,8 +417,8 @@ Void LohnerReconditioner::reduce_parameters(ValidatedVectorMultivariateFunctionM
 
 InclusionEvolverConfiguration::InclusionEvolverConfiguration()
 {
-    maximum_step_size(1);
-    maximum_enclosure_radius(100.0);
+    this->maximum_step_size(1.0_x);
+    this->maximum_enclosure_radius(100.0_x);
     enable_parameter_reduction(true);
     approximations({ZeroApproximation(),ConstantApproximation(),AffineApproximation(),SinusoidalApproximation(),PiecewiseApproximation()});
 }

@@ -102,8 +102,8 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     ThresholdSweeper<F> swp(pr,eps);
 
     // Define left and right endpoints of interval, and representative test point
-    Vector<Value<F>> a({0},pr);
-    Vector<Value<F>> b({1},pr);
+    Vector<Value<F>> a({0.0_x},pr);
+    Vector<Value<F>> b({1.0_x},pr);
     auto xv=(a+2*b)/3;
 
     // Define domain of problem, and zero and coordinate functions.
@@ -119,7 +119,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
 
     // Set the number of terms to use for the Fourier series
     SizeType n=10;
-    Array<FloatDPBounds> sums(n);
+    Array<FloatDPBounds> sums(n,FloatDPBounds(pr));
 
     // Compute the Fourier coefficients of f
     List<Bounds<F>> as=fourier_coefficients(tf,n);
@@ -141,7 +141,7 @@ void dirichlet(EffectiveScalarMultivariateFunction f) {
     PRINTLN;
 
     // Compute the Fourier coefficients of the particular solution
-    List<FloatDPBounds> cs(n);
+    List<FloatDPBounds> cs(n,FloatDPBounds(dp));
     for(SizeType i=0; i!=n; ++i) {
         cs[i] = as[i]/(1-sqr(i*pi));
     }

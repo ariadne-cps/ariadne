@@ -40,7 +40,7 @@ enum class SplitPart : char;
 
 inline
 SizeType irmax(const ExactBoxType& bx) {
-    FloatDP dmax=0.0;
+    FloatDP dmax(0.0_x,dp);
     Nat imax=0;
     for(Nat i=0; i!=bx.size(); ++i) {
         FloatDP d=bx[i].width().upper().raw();

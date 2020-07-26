@@ -108,7 +108,7 @@ template<class F, class FE> Integer Operations<Ball<F,FE>>::_cast_integer(Ball<F
 template<class F, class FE> InputStream& Operations<Ball<F,FE>>::_read(InputStream& is, Ball<F,FE>& x) {
     static const char pmstr[] = "\u00b1";
     char cpm[3];
-    F _v; FE _e;
+    F _v(x.precision()); FE _e(x.error_precision());
     auto rnd=F::get_rounding_mode();
     F::set_rounding_to_nearest();
     is >> _v;

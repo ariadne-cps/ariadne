@@ -74,9 +74,9 @@ TestIntervalType::test_concept()
     DoublePrecision pr;
     Int n=1;
     Nat m=1;
-    double d=1;
+    ExactDouble d=1;
     FloatDPValue x={1,pr};
-    FloatDP a,b;
+    FloatDP a(pr),b(pr);
     ExactIntervalType xivl;
     UpperIntervalType uivl;
 
@@ -84,6 +84,7 @@ TestIntervalType::test_concept()
     uivl=I(); uivl=I(n); uivl=I(m); uivl=I(d); uivl=I(x); uivl=I(xivl);
     uivl=I(n,n); uivl=I(m,m); uivl=I(d,d); uivl=I(a,b);
     uivl=I(n,m); uivl=I(m,d); uivl=I(d,n);
+
     // Assignment
     uivl=n; uivl=m; uivl=x; uivl=xivl;
 
@@ -94,11 +95,11 @@ Void
 TestIntervalType::test_constructors()
 {
 
-    FloatDP zero=0;
+    FloatDP zero(0,dp);
 
     // Construct from pair
-    ExactIntervalType ivld1(FloatDP(1.125),FloatDP(2.25));
-    ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25);
+    ExactIntervalType ivld1(FloatDP(1.125_x,dp),FloatDP(2.25_x,dp));
+    ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125_x); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25_x);
 
     // Default constructor
     ExactIntervalType ivld2;
@@ -115,9 +116,9 @@ TestIntervalType::test_constructors()
     ARIADNE_TEST_COMPARE(ivld3.upper(),==,Rational(17,4));
 
     // Constructor from approximate values
-    UpperIntervalType ivld4(2.1,3.2);
-    ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
-    ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
+    UpperIntervalType ivld4(2.1_pr,3.2_pr);
+    ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1_pr);
+    ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2_pr);
 
     // ApproximateTag constructor from a single value
     ARIADNE_TEST_WARN("Cannot construct Interval<UpperFloatDP> from Rational.");
@@ -126,14 +127,15 @@ TestIntervalType::test_constructors()
 //    ARIADNE_TEST_COMPARE(cast_exact(ivld5.upper()),>,Rational(1,3));
 
     // ExactTag constructor from a single value
-    ExactIntervalType ivld6(FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),FloatDP(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),FloatDP(1.25));
+    ExactIntervalType ivld6(FloatDP(1.25_x,dp));
+    ARIADNE_TEST_EQUAL(ivld6.lower(),1.25_x);
+    ARIADNE_TEST_EQUAL(ivld6.upper(),1.25_x);
 
     // Empty interval
     EmptyInterval empty_interval;
     ExactIntervalType ivld7(empty_interval);
-    ARIADNE_TEST_ASSERT(ivld7.lower().raw()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper().raw()==-inf);
+    ARIADNE_TEST_EQUALS(ivld7.lower().raw(),+inf);
+    ARIADNE_TEST_EQUALS(ivld7.upper().raw(),-inf);
 }
 
 Void TestIntervalType::test_class()
@@ -141,12 +143,12 @@ Void TestIntervalType::test_class()
     // Test lower, upper, midpoint, radius, width
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).lower(),-0.25_exact);
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).upper(),0.5_exact);
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).midpoint(),0.125_exact);
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).centre(),0.125_exact);
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).radius(),0.375_exact)
-    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25,0.50).width(),0.75_exact);
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).lower(),-0.25_x);
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).upper(),0.5_x);
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).midpoint(),0.125_x);
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).centre(),0.125_x);
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).radius(),0.375_x)
+    ARIADNE_TEST_EQUAL(ExactIntervalType(-0.25_x,0.50_x).width(),0.75_x);
 
 }
 
@@ -157,15 +159,18 @@ Void TestIntervalType::test_input()
     stringstream iss(input);
 
     iss >> ivl1;
-    ivl2=ExactIntervalType(1.125,2.25);
+    ivl2=ExactIntervalType(1.125_x,2.25_x);
 
-    cout << "ivl1=" << ivl1 << "  ivl2=" << ivl2 << endl;
+    ARIADNE_TEST_PRINT(ivl1);
+    ARIADNE_TEST_PRINT(ivl2);
     ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ivl2);
     ARIADNE_TEST_ASSERT(ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper());
     ARIADNE_TEST_ASSERT(equal(ivl1,ivl2));
 
     iss >> ivl1;
-    ivl2=ExactIntervalType(0.39999999999999997,0.60000000000000009);
+    ivl2=ExactIntervalType(0.39999999999999997_pr,0.60000000000000009_pr);
+    ARIADNE_TEST_PRINT(ivl1);
+    ARIADNE_TEST_PRINT(ivl2);
     if(!equal(ivl1,ivl2)) {
         ARIADNE_TEST_WARN("ExactIntervalType string constructor returns an approximate interval, not an outwardly rounded interval.");
     }
@@ -175,14 +180,14 @@ Void TestIntervalType::test_comparison() {
     // FIXME: If using Boost style interval tests, uncomment the line below
     // and comment out the line after
     //ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
-    ExactIntervalType ivl1(1.125,2.25);
+    ExactIntervalType ivl1(1.125_x,2.25_x);
     ExactIntervalType ivl2=ivl1;
 
     ARIADNE_TEST_ASSERT(ivl1==ivl2);
     ExactIntervalType& ivl1ref=ivl1;
-    ivl1ref=ExactIntervalType(5.25,7.375);
+    ivl1ref=ExactIntervalType(5.25_x,7.375_x);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==FloatDP(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower()==5.25_x);
 }
 
 Void TestIntervalType::test_geometric_predicates()
@@ -191,35 +196,35 @@ Void TestIntervalType::test_geometric_predicates()
 
     ARIADNE_TEST_PRINT(empty_interval);
 
-    ARIADNE_TEST_BINARY_PREDICATE(intersect,ExactIntervalType(0.0,1.5),ExactIntervalType(1.5,3));
-    ARIADNE_TEST_BINARY_PREDICATE(!intersect,ExactIntervalType(0.0,1.5),ExactIntervalType(1.625,3));
+    ARIADNE_TEST_BINARY_PREDICATE(intersect,ExactIntervalType(0.0_x,1.5_x),ExactIntervalType(1.5_x,3));
+    ARIADNE_TEST_BINARY_PREDICATE(!intersect,ExactIntervalType(0.0_x,1.5_x),ExactIntervalType(1.625_x,3));
 
-    ARIADNE_TEST_BINARY_PREDICATE(!disjoint,ExactIntervalType(0.0,1.5),ExactIntervalType(1.5,3));
-    ARIADNE_TEST_BINARY_PREDICATE(disjoint,ExactIntervalType(0.0,1.5),ExactIntervalType(1.625,3));
+    ARIADNE_TEST_BINARY_PREDICATE(!disjoint,ExactIntervalType(0.0_x,1.5_x),ExactIntervalType(1.5_x,3));
+    ARIADNE_TEST_BINARY_PREDICATE(disjoint,ExactIntervalType(0.0_x,1.5_x),ExactIntervalType(1.625_x,3));
 
-    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.0,1.5),ExactIntervalType(1.0,2.0));
-    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.5,2.0),ExactIntervalType(1.0,2.0));
-    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.0,2.0),ExactIntervalType(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.0_x,1.5_x),ExactIntervalType(1.0_x,2.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.5_x,2.0_x),ExactIntervalType(1.0_x,2.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.0_x,2.0_x));
 
-    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0,2.0),ExactIntervalType(1.0,1.5));
-    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0,2.0),ExactIntervalType(1.5,2.0));
-    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0,2.0),ExactIntervalType(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.0_x,1.5_x));
+    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.5_x,2.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(superset,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.0_x,2.0_x));
 
-    ARIADNE_TEST_BINARY_PREDICATE(inside,ExactIntervalType(1.25,1.75),ExactIntervalType(1.0,2.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!inside,ExactIntervalType(1.00,1.75),ExactIntervalType(1.0,2.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!inside,ExactIntervalType(1.25,2.00),ExactIntervalType(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,ExactIntervalType(1.25_x,1.75_x),ExactIntervalType(1.0_x,2.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!inside,ExactIntervalType(1.00_x,1.75_x),ExactIntervalType(1.0_x,2.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!inside,ExactIntervalType(1.25_x,2.00_x),ExactIntervalType(1.0_x,2.0_x));
 
-    ARIADNE_TEST_BINARY_PREDICATE(covers,ExactIntervalType(1.0,2.0),ExactIntervalType(1.25,1.75));
-    ARIADNE_TEST_BINARY_PREDICATE(!covers,ExactIntervalType(1.0,2.0),ExactIntervalType(1.00,1.75));
-    ARIADNE_TEST_BINARY_PREDICATE(!covers,ExactIntervalType(1.0,2.0),ExactIntervalType(1.25,2.00));
+    ARIADNE_TEST_BINARY_PREDICATE(covers,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.25_x,1.75_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!covers,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.00_x,1.75_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!covers,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.25_x,2.00_x));
 
-    ARIADNE_TEST_BINARY_PREDICATE(overlap,ExactIntervalType(1.0,2.0),ExactIntervalType(1.75,3.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!overlap,ExactIntervalType(1.0,2.0),ExactIntervalType(2.00,2.75));
-    ARIADNE_TEST_BINARY_PREDICATE(!overlap,ExactIntervalType(1.0,2.0),ExactIntervalType(2.25,2.75));
+    ARIADNE_TEST_BINARY_PREDICATE(overlap,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.75_x,3.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(2.00_x,2.75_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(2.25_x,2.75_x));
 
-    ARIADNE_TEST_BINARY_PREDICATE(!separated,ExactIntervalType(1.0,2.0),ExactIntervalType(1.75,3.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!separated,ExactIntervalType(1.0,2.0),ExactIntervalType(2.00,2.75));
-    ARIADNE_TEST_BINARY_PREDICATE(separated,ExactIntervalType(1.0,2.0),ExactIntervalType(2.25,2.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!separated,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(1.75_x,3.0_x));
+    ARIADNE_TEST_BINARY_PREDICATE(!separated,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(2.00_x,2.75_x));
+    ARIADNE_TEST_BINARY_PREDICATE(separated,ExactIntervalType(1.0_x,2.0_x),ExactIntervalType(2.25_x,2.75_x));
 
     ARIADNE_TEST_BINARY_PREDICATE(disjoint,empty_interval,empty_interval);
     ARIADNE_TEST_BINARY_PREDICATE(!intersect,empty_interval,empty_interval);
@@ -237,9 +242,9 @@ Void TestIntervalType::test_geometric_predicates()
     }
 
     ARIADNE_TEST_BINARY_PREDICATE(disjoint,ExactIntervalType(-1,2),empty_interval);
-    ARIADNE_TEST_BINARY_PREDICATE(subset,empty_interval,ExactIntervalType(0.25,0.75));
-    ARIADNE_TEST_BINARY_PREDICATE(covers,ExactIntervalType(0.25,0.75),empty_interval);
-    ARIADNE_TEST_BINARY_PREDICATE(inside,empty_interval,ExactIntervalType(0.25,0.75));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,empty_interval,ExactIntervalType(0.25_x,0.75_x));
+    ARIADNE_TEST_BINARY_PREDICATE(covers,ExactIntervalType(0.25_x,0.75_x),empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(inside,empty_interval,ExactIntervalType(0.25_x,0.75_x));
 }
 
 Void TestIntervalType::test_arithmetic() {
@@ -257,13 +262,13 @@ Void TestIntervalType::regression_tests() {
 
     // Regression test; fails dramatically on certain types of rounding
     {
-        UpperIntervalType x(1.5707963267948966,1.5707963267948968);
+        UpperIntervalType x(1.5707963267948966_pr,1.5707963267948968_pr);
         UpperIntervalType cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
-        ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
-        ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
-        ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
+        ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0_x);
+        ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14_pr);
+        ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0_x);
+        ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14_pr);
         ARIADNE_TEST_ASSERT(cosx.lower().raw()<cosx.upper().raw());
     }
 

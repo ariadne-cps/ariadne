@@ -143,7 +143,6 @@ template class Formula<ValidatedNumber>;
 template class Formula<EffectiveNumber>;
 template class Formula<ExactNumber>;
 
-template class Formula<FloatDPApproximation>;
 template class Formula<Real>;
 
 template Formula<EffectiveNumber> simplify(Formula<EffectiveNumber> const&);

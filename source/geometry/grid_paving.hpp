@@ -276,7 +276,7 @@ class GridTreeSubpaving
     //! \brief Subdivide the paving until the smallest depth such that the leaf
     //! cells size is <= \a theMaxCellWidth. Note that, the disabled cells are
     //! not subdivided.
-    Void subdivide( FloatDP theMaxCellWidth );
+    Void subdivide( ApproximateDouble theMaxCellWidth );
 
     //! \brief Recombines the subdivisions, for instance if all subcells of a cell are
     //! enabled/disabled then they are put together.

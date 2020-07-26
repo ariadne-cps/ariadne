@@ -36,6 +36,7 @@ namespace Ariadne {
     template class Expansion<UniIndex,FloatDPApproximation>;
 
     template class Expansion<MultiIndex,double>;
+    template class Expansion<MultiIndex,ExactDouble>;
     template class Expansion<MultiIndex,Dyadic>;
 
     template class Expansion<MultiIndex,FloatDP>;

@@ -51,7 +51,8 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Bounds<F> const& x1, V
 {
     const F& x1l=x1.lower_raw(); const F& x1u=x1.upper_raw();
     const F& x2v=x2.raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr), ru(pr);
     if(x2v>=0.0) {
         rl=mul(down,x1l,x2v); ru=mul(up,x1u,x2v);
     } else {
@@ -64,7 +65,8 @@ template<class F> inline auto Operations<Bounds<F>>::_mul(Value<F> const& x1, Bo
 {
     const F& x1v=x1.raw();
     const F& x2l=x2.lower_raw(); const F& x2u=x2.upper_raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr), ru(pr);
     if(x1v>=0.0) {
         rl=mul(down,x1v,x2l); ru=mul(up,x1v,x2u);
     } else {
@@ -78,14 +80,14 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Bounds<F> const& x1, V
     const F& x1l=x1.lower_raw();
     const F& x1u=x1.upper_raw();
     const F& x2v=x2.raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr), ru(pr);
     if(x2v>0) {
         rl=div(down,x1l,x2v); ru=div(up,x1u,x2v);
     } else if(x2v<0) {
         rl=div(down,x1u,x2v); ru=div(up,x1l,x2v);
     } else {
         //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatBounds const& x1, FloatValue x2)","x1="<<x1<<", x2="<<x2);
-        auto pr=min(x1.precision(),x2.precision());
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     }
@@ -97,10 +99,10 @@ template<class F> inline auto Operations<Bounds<F>>::_div(Value<F> const& x1, Bo
     const F& x1v=x1.raw();
     const F& i2l=x2.lower_raw();
     const F& i2u=x2.upper_raw();
-    F rl,ru;
+    PR pr(min(x1.precision(),x2.precision()));
+    F rl(pr), ru(pr);
     if(i2l<=0 && i2u>=0) {
         //ARIADNE_THROW(DivideByZeroException,"FloatBounds div(FloatValue const& x1, FloatBounds x2)","x1="<<x1<<", x2="<<x2);
-        auto pr=min(x1.precision(),x2.precision());
         rl=-F::inf(pr);
         ru=+F::inf(pr);
     } else if(x1v>=0) {

@@ -92,6 +92,7 @@ template<class F> UnknownError<F> operator+(UnknownError<F>, PositiveApproximati
 template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
 template<class F> UnknownError<F>& operator*=(UnknownError<F>& e, PositiveApproximation<F> const&) { return e; }
 template<class F> OutputStream& operator<<(OutputStream& os, UnknownError<F> const& e) { return os << "???"; }
+template<class F> UnknownError<F>& operator+=(UnknownError<F>& e, ExactDouble const&) { return e; }
 
 
 template<class F> ZeroError<F> const& nul(ZeroError<F> const& e) { return e; }
@@ -194,7 +195,7 @@ struct SumMultiIndex {
 
 namespace {
 
-static const double MACHINE_EPSILON = 2.2204460492503131e-16;
+static const ExactDouble MACHINE_EPSILON(2.2204460492503131e-16);
 
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
@@ -445,13 +446,22 @@ Void RelativeSweeperBase<F>::_sweep(Expansion<MultiIndex,FloatUpperInterval<PR>>
     p.resize(static_cast<SizeType>(curr-p.begin()));
 }
 
+template<class F> F create_default() {
+    if constexpr (IsSame<F,FloatDP>::value) { return FloatDP(dp); }
+    else if constexpr (IsSame<F,FloatDPValue>::value) { return FloatDPValue(dp); }
+    else if constexpr (IsSame<F,FloatDPError>::value) { return FloatDPError(dp); }
+    else if constexpr (IsSame<F,FloatMP>::value) { return FloatMP(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPValue>::value) { return FloatMPValue(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,FloatMPError>::value) { return FloatMPError(FloatMP::get_default_precision()); }
+    else if constexpr (IsSame<F,Interval<FloatDPUpperBound>>::value) { return FloatDPUpperInterval(0,0); }
+    else { assert(false); }
+}
 
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel()
-    : _expansion(0), _error(), _sweeper()
+    : _expansion(0,create_default<CoefficientType>()), _error(create_default<ErrorType>()), _sweeper()
 {
 }
-
 
 template<class P, class F> TaylorModel<P,F>::TaylorModel(SizeType as, SweeperType swp)
     : _expansion(as,CoefficientType(0,swp.precision())), _error(swp.precision()), _sweeper(swp)
@@ -470,7 +480,7 @@ template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIn
 {
 }
 
-template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,double>& f, const double& e, SweeperType swp)
+template<class P, class F> TaylorModel<P,F>::TaylorModel(const Expansion<MultiIndex,ExactDouble>& f, const ExactDouble& e, SweeperType swp)
     : TaylorModel(Expansion<MultiIndex,CoefficientType>(Expansion<MultiIndex,Dyadic>(f),swp.precision()),ErrorType(Dyadic(e),swp.precision()),swp)
 {
 }
@@ -720,17 +730,17 @@ template<class F> Value<F> mul_err(Value<F> const& x, ValidatedApproximation<F> 
     F::set_rounding_to_nearest();
     F rv=xv*cm;
     F::set_rounding_upward();
-    F u,ml;
     if(xv>=0) {
         F mcl=-cl;
-        u=xv*cu;
-        ml=xv*mcl;
+        F u=xv*cu;
+        F ml=xv*mcl;
+        re+=hlf(u+ml);
     } else {
         F mcu=-cu;
-        u=xv*cl;
-        ml=xv*mcu;
+        F u=xv*cl;
+        F ml=xv*mcu;
+        re+=hlf(u+ml);
     }
-    re+=(u+ml)/2;
     return Value<F>(rv);
 }
 
@@ -1297,7 +1307,7 @@ template<class P, class F> TaylorModel<P,F>& TaylorModel<P,F>::clobber() {
 template<class P, class F> auto TaylorModel<P,F>::tolerance() const -> RawFloatType {
     typedef RawFloatType FLT;
     const ThresholdSweeper<FLT>* ptr=dynamic_cast<const ThresholdSweeper<FLT>*>(&static_cast<const SweeperInterface<FLT>&>(this->_sweeper));
-    return (ptr) ? ptr->sweep_threshold() : FLT(std::numeric_limits<double>::epsilon(),this->precision());
+    return (ptr) ? ptr->sweep_threshold() : FLT(cast_exact(std::numeric_limits<double>::epsilon()),this->precision());
 }
 
 
@@ -1404,7 +1414,6 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
 }
 
 template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>::apply(Abs, const TaylorModel<P,F>& x) {
-    typedef typename F::PrecisionType PR;
     using CoefficientType = typename TaylorModel<P,F>::CoefficientType;
     typedef typename TaylorModel<P,F>::RangeType RangeType;
     RangeType xr=x.range();
@@ -1417,18 +1426,18 @@ template<class P, class F> TaylorModel<P,F> AlgebraOperations<TaylorModel<P,F>>:
         // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
         // TODO: Find more accurate and stable formula
         static const Nat n=7u;
-        static const Dbl p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
-        static const Dbl err=0.035;
+        static const ExactDouble p[n]={0.0112167620474_pr, 5.6963263292747541_pr, -31.744583789655049_pr, 100.43002481377681_pr, -162.01366698662306_pr, 127.45243493284417_pr, -38.829743345344667_pr};
+        static const ExactDouble err=0.035_pr;
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
         CoefficientType xmag=static_cast<CoefficientType>(cast_exact(mag(xr)));
         TaylorModel<P,F> s=x/xmag;
         s=sqr(s);
-        r=static_cast<CoefficientType>(p[n-1u]);
+        r=p[n-1u];
         for(Nat i=0; i!=(n-1u); ++i) {
             Nat j=(n-2)-i;
-            r=s*r+static_cast<CoefficientType>(p[j]);
+            r=s*r+p[j];
         }
-        r+=FloatBounds<PR>(-err,+err);
+        r.error()+=err;
         return r*xmag;
     }
 }
@@ -1504,10 +1513,10 @@ compose(const AnalyticFunction& fn, const TaylorModel<P,F>& tm) {
     using ErrorType = typename TaylorModel<P,F>::ErrorType;
 
     static const DegreeType MAX_DEGREE=20;
-    static const FloatDP MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    static const ExactDouble MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface<F> const& sweeper=tm.sweeper();
 
-    F max_truncation_error=MAX_TRUNCATION_ERROR;
+    F max_truncation_error(MAX_TRUNCATION_ERROR,sweeper.precision());
     ThresholdSweeper<F> const* threshold_sweeper_ptr = dynamic_cast<ThresholdSweeper<F> const*>(&sweeper);
     if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->sweep_threshold(); }
 
@@ -1957,13 +1966,14 @@ template<class P, class F> TaylorModel<P,F> TaylorModel<P,F>::_refinement(const 
     if constexpr (IsSame<P,ValidatedTag>::value) {
         TaylorModel<P,F> r(x.argument_size(),x.sweeper());
 
+        PrecisionType pr=r.precision();
         ErrorType max_error=nul(r.error());
 
         const ErrorType& xe=x.error();
         const ErrorType& ye=y.error();
 
-        CoefficientType rv,xv,yv;
-        FloatDP xu,yu,mxl,myl,u,ml;
+        CoefficientType rv(pr),xv(pr),yv(pr);
+        F xu(pr),yu(pr),mxl(pr),myl(pr),u(pr),ml(pr);
         MultiIndex a;
 
         typename TaylorModel<P,F>::ConstIterator xiter=x.begin();

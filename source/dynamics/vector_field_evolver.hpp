@@ -150,8 +150,8 @@ class VectorFieldEvolver
 class VectorFieldEvolverConfiguration : public ConfigurationInterface
 {
   public:
-    typedef FloatDPValue RealType;
-    typedef double RawRealType;
+    typedef ExactDouble RealType;
+    typedef ApproximateDouble ApproximateRealType;
 
     //! \brief Default constructor gives reasonable values.
     VectorFieldEvolverConfiguration();
@@ -162,7 +162,7 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
     //! \brief The maximum allowable step size for integration.
     //! Decreasing this value increases the accuracy of the computation.
-    StepSizeType _maximum_step_size;
+    RealType _maximum_step_size;
 
     //! \brief The maximum allowable radius of a basic set during integration.
     //! Decreasing this value increases the accuracy of the computation of an over-approximation.
@@ -177,15 +177,14 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    const StepSizeType& maximum_step_size() const { return _maximum_step_size; }
-    Void set_maximum_step_size(const StepSizeType value) { _maximum_step_size = value; }
-    Void set_maximum_step_size(const RawRealType value) { _maximum_step_size = static_cast<StepSizeType>(value); }
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    Void set_maximum_step_size(const ApproximateRealType value) { _maximum_step_size = cast_exact(value); }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    Void set_maximum_enclosure_radius(const RawRealType value) { _maximum_enclosure_radius = static_cast<RealType>(value); }
+    Void set_maximum_enclosure_radius(const ApproximateRealType value) { _maximum_enclosure_radius = cast_exact(value); }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    Void set_maximum_spacial_error(const RawRealType value) { _maximum_spacial_error = static_cast<RealType>(value); }
+    Void set_maximum_spacial_error(const ApproximateRealType value) { _maximum_spacial_error = cast_exact(value); }
 
     const Bool& enable_reconditioning() const { return _enable_reconditioning; }
     Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }

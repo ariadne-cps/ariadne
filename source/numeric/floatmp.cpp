@@ -421,6 +421,7 @@ FloatMP operator-(FloatMP const& x) {
     return neg(FloatMP::get_rounding_mode(),x);
 }
 
+/*
 FloatMP operator+(FloatMP const& x1, FloatMP const& x2) {
     return add(FloatMP::get_rounding_mode(),x1,x2);
 }
@@ -478,6 +479,7 @@ FloatMP operator*(Dbl x1, FloatMP const& x2) {
 FloatMP operator/(Dbl x1, FloatMP const& x2) {
     FloatMP r(x2.precision(),NoInit()); mpfr_d_div(r._mpfr,x1,x2._mpfr,FloatMP::get_rounding_mode()); return r;
 }
+*/
 
 int abslog10floor(double x);
 

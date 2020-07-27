@@ -59,10 +59,6 @@ namespace Ariadne {
 
 inline Sweeper<FloatDP> default_sweeper() { return Sweeper<FloatDP>(); }
 
-typedef Vector<FloatDP> FloatDPVectorType;
-typedef Matrix<FloatDP> FloatDPMatrix;
-typedef DiagonalMatrix<FloatDP> FloatDPDiagonalMatrix;
-
 typedef DiagonalMatrix<FloatDPBounds> FloatDPBoundsDiagonalMatrix;
 
 typedef Vector<FloatDPApproximation> FloatDPApproximationVector;
@@ -89,6 +85,10 @@ inline Vector<Differential<RawFloatDP>>const& cast_raw(Vector<Differential<Float
 
 inline Vector<FloatDPApproximation>& cast_approximate(Vector<RawFloatDP>& v) {
     return reinterpret_cast<Vector<FloatDPApproximation>&>(v);
+}
+
+inline Vector<FloatDPApproximation>& cast_approximate(Vector<FloatDPApproximation>& v) {
+    return v;
 }
 inline Vector<Differential<FloatDPApproximation>>const& cast_approximate(Vector<Differential<RawFloatDP>>const& v) {
     return reinterpret_cast<Vector<Differential<FloatDPApproximation>>const&>(v);
@@ -461,7 +461,7 @@ class ConstrainedFeasibilityMatrix {
 
 inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
     for(Nat i=0; i!=bx.size(); ++i) {
-        bx[i]=ExactIntervalType(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
+        bx[i]=ExactIntervalType(sub(down,bx[i].lower().raw(),e),add(up,bx[i].upper().raw(),e));
     }
     return bx;
 }
@@ -788,14 +788,14 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ValidatedVectorM
 struct NonlinearInfeasibleInteriorPointOptimiser::PrimalDualData {
     PrimalDualData() : PrimalDualData(0u,0u,dp) { }
     PrimalDualData(SizeType m, SizeType n, DP pr) : w(m,pr), x(n,pr), y(m,pr) { }
-    RawFloatDPVector w,x,y;
+    FloatDPApproximationVector w,x,y;
 };
 
 struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualData {
     StepData() : StepData(0u,0u,dp) { }
     StepData(SizeType m, SizeType n, DP pr)
         : PrimalDualData(m,n,pr), vl(m,pr), wl(m,pr), xl(n,pr), zl(n,pr), vu(m,pr), wu(m,pr), xu(n,pr), zu(n,pr), mu(pr) { }
-    RawFloatDPVector vl,wl,xl,zl,vu,wu,xu,zu; FloatDP mu;
+    FloatDPApproximationVector vl,wl,xl,zl,vu,wu,xu,zu; FloatDPApproximation mu;
 };
 
 ValidatedVectorType NonlinearInfeasibleInteriorPointOptimiser::
@@ -836,7 +836,7 @@ minimise(ValidatedScalarMultivariateFunction f, ExactBoxType D, ValidatedVectorM
         if(probably(mag(fx-oldfx)<VALUE_TOLERANCE) && probably(norm(oldx-x)<STATE_TOLERANCE)) {
             break;
         }
-        if(v.mu<MU_MIN) {
+        if(v.mu.raw()<MU_MIN) {
             break;
         }
     }
@@ -883,7 +883,7 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
             ARIADNE_LOG_PRINTLN("Infeasible");
             return false;
         }
-        if(v.mu<MU_MIN) {
+        if(v.mu.raw()<MU_MIN) {
             break;
         }
     }
@@ -899,19 +899,21 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunc
     ExactIntervalType I(-1,+1);
     Nat m=C.size(); Nat n=D.size();
 
-    v.x=cast_raw(midpoint(D));
-    v.y=RawFloatDPVector(m,FloatDP(0.0_x,dp));
-    v.w=cast_raw(midpoint(C));
+    FloatDPApproximation zero(0,dp), one(1,dp);
+
+    v.x=midpoint(D);
+    v.y=FloatDPApproximationVector(m,zero);
+    v.w=midpoint(C);
 
     //stp.xl=lower(D)-x;
-    v.wl=RawFloatDPVector(m,FloatDP(-1.0_x,dp));
-    v.wu=RawFloatDPVector(m,FloatDP(+1.0_x,dp));
-    v.xl=cast_raw(lower_bounds(D))-v.x;
-    v.xu=cast_raw(upper_bounds(D))-v.x;
-    v.vl=RawFloatDPVector(m,FloatDP(-1.0_x,dp));
-    v.vu=RawFloatDPVector(m,FloatDP(+1.0_x,dp));
-    v.zl=RawFloatDPVector(n,FloatDP(-1.0_x,dp));
-    v.zu=RawFloatDPVector(n,FloatDP(+1.0_x,dp));
+    v.wl=Vector(m,-one);
+    v.wu=Vector(m,+one);
+    v.xl=lower_bounds(D)-v.x;
+    v.xu=upper_bounds(D)-v.x;
+    v.vl=Vector(m,-one);
+    v.vu=Vector(m,+one);
+    v.zl=Vector(n,-one);
+    v.zu=Vector(n,+one);
     // FIXME: What should relaxation parameter be?
     v.mu=1.0_x;
 }
@@ -922,11 +924,14 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     const ApproximateScalarMultivariateFunction& f, const ExactBoxType& d, const ApproximateVectorMultivariateFunction& g, const ExactBoxType& c,
     StepData& v) const
 {
-    RawFloatDPVector& w=v.w; RawFloatDPVector& x=v.x; RawFloatDPVector& y=v.y; FloatDP& mu=v.mu;
-    RawFloatDPVector& wl=v.wl; RawFloatDPVector& wu=v.wu; RawFloatDPVector& xl=v.xl; RawFloatDPVector& xu=v.xu;
-    RawFloatDPVector& vl=v.vl; RawFloatDPVector& vu=v.vu; RawFloatDPVector& zl=v.zl; RawFloatDPVector& zu=v.zu;
-    RawFloatDPVector cl=cast_raw(lower_bounds(c)); RawFloatDPVector cu=cast_raw(upper_bounds(c));
-    RawFloatDPVector dl=cast_raw(lower_bounds(d)); RawFloatDPVector du=cast_raw(upper_bounds(d));
+    FloatDPApproximationVector& w=v.w; FloatDPApproximationVector& x=v.x; FloatDPApproximationVector& y=v.y;
+    FloatDPApproximation& mu=v.mu;
+    FloatDPApproximationVector& wl=v.wl; FloatDPApproximationVector& wu=v.wu;
+    FloatDPApproximationVector& xl=v.xl; FloatDPApproximationVector& xu=v.xu;
+    FloatDPApproximationVector& vl=v.vl; FloatDPApproximationVector& vu=v.vu;
+    FloatDPApproximationVector& zl=v.zl; FloatDPApproximationVector& zu=v.zu;
+    FloatDPApproximationVector cl=lower_bounds(c); FloatDPApproximationVector cu=upper_bounds(c);
+    FloatDPApproximationVector dl=lower_bounds(d); FloatDPApproximationVector du=upper_bounds(d);
 
     ARIADNE_LOG_SCOPE_CREATE;
     ARIADNE_LOG_PRINTLN("f="<<f<<", D="<<d<<", g="<<g<<", C="<<c);
@@ -953,23 +958,23 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     mu = mu * sigma;
 
     FloatDPApproximationVector ax(x);
-    FloatDPDifferential ddfx=cast_raw(f.differential(ax,2u));
+    FloatDPApproximationDifferential ddfx=f.differential(ax,2u);
     ARIADNE_LOG_PRINTLN("ddfx="<<ddfx);
-    Vector<FloatDPDifferential> ddgx=cast_raw(g.differential(ax,2u));
+    Vector<FloatDPApproximationDifferential> ddgx=g.differential(ax,2u);
     ARIADNE_LOG_PRINTLN("ddgx="<<ddgx);
 
-    FloatDP fx = ddfx.value();
-    Vector<FloatDP> gx = ddgx.value();
+    FloatDPApproximation fx = ddfx.value();
+    Vector<FloatDPApproximation> gx = ddgx.value();
     ARIADNE_LOG_PRINTLN("f(x)="<<fx);
     ARIADNE_LOG_PRINTLN("g(x)="<<gx);
-    Vector<FloatDP> Jfx = transpose(ddfx.gradient());
-    Matrix<FloatDP> A = ddgx.jacobian();
-    Matrix<FloatDP>& Jgx = A;
+    Vector<FloatDPApproximation> Jfx = transpose(ddfx.gradient());
+    Matrix<FloatDPApproximation> A = ddgx.jacobian();
+    Matrix<FloatDPApproximation>& Jgx = A;
     ARIADNE_LOG_PRINTLN("Df(x)="<<Jfx);
     ARIADNE_LOG_PRINTLN("Dg(x)="<<Jgx);
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
-    Matrix<FloatDP> YH = ddfx.hessian();
+    Matrix<FloatDPApproximation> YH = ddfx.hessian();
     for(Nat i=0; i!=m; ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
@@ -981,37 +986,37 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // dw = A \delta x + r_y
     // dy = r_w - D dw
 
-    FloatDPDiagonalMatrix const& Vl=diagonal_matrix(vl);
-    FloatDPDiagonalMatrix const& Vu=diagonal_matrix(vu);
-    FloatDPDiagonalMatrix const& Wl=diagonal_matrix(wl);
-    FloatDPDiagonalMatrix const& Wu=diagonal_matrix(wu);
-    FloatDPDiagonalMatrix const& Xl=diagonal_matrix(xl);
-    FloatDPDiagonalMatrix const& Xu=diagonal_matrix(xu);
-    FloatDPDiagonalMatrix const& Zl=diagonal_matrix(zl);
-    FloatDPDiagonalMatrix const& Zu=diagonal_matrix(zu);
+    FloatDPApproximationDiagonalMatrix const& Vl=diagonal_matrix(vl);
+    FloatDPApproximationDiagonalMatrix const& Vu=diagonal_matrix(vu);
+    FloatDPApproximationDiagonalMatrix const& Wl=diagonal_matrix(wl);
+    FloatDPApproximationDiagonalMatrix const& Wu=diagonal_matrix(wu);
+    FloatDPApproximationDiagonalMatrix const& Xl=diagonal_matrix(xl);
+    FloatDPApproximationDiagonalMatrix const& Xu=diagonal_matrix(xu);
+    FloatDPApproximationDiagonalMatrix const& Zl=diagonal_matrix(zl);
+    FloatDPApproximationDiagonalMatrix const& Zu=diagonal_matrix(zu);
 
     // Compute the diagonal matrices
     //   D=XL/ZL+XU/ZU  E=WL/VL+WU/VU
-    FloatDPDiagonalMatrix Dl=Vl/Wl;
-    FloatDPDiagonalMatrix Du=Vu/Wu;
-    FloatDPDiagonalMatrix D=Dl+Du;
+    FloatDPApproximationDiagonalMatrix Dl=Vl/Wl;
+    FloatDPApproximationDiagonalMatrix Du=Vu/Wu;
+    FloatDPApproximationDiagonalMatrix D=Dl+Du;
     ARIADNE_LOG_PRINTLN("D="<<D);
-    FloatDPDiagonalMatrix El=Zl/Xl;
-    FloatDPDiagonalMatrix Eu=Zu/Xu;
-    FloatDPDiagonalMatrix E=El+Eu;
+    FloatDPApproximationDiagonalMatrix El=Zl/Xl;
+    FloatDPApproximationDiagonalMatrix Eu=Zu/Xu;
+    FloatDPApproximationDiagonalMatrix E=El+Eu;
     ARIADNE_LOG_PRINTLN("E="<<E);
 
     // normal equation matrix
-    FloatDPMatrix S=YH;
+    FloatDPApproximationMatrix S=YH;
     atda(S,A,D);
     S+=E;
 
-    //FloatDPMatrix EE(n,n); for(Nat j=0; j!=n; ++j) { EE[j][j]=E[j]; }
-    //FloatDPMatrix DD(m,m); for(Nat i=0; i!=m; ++i) { DD[i][i]=E[i]; }
+    //FloatDPApproximationMatrix EE(n,n); for(Nat j=0; j!=n; ++j) { EE[j][j]=E[j]; }
+    //FloatDPApproximationMatrix DD(m,m); for(Nat i=0; i!=m; ++i) { DD[i][i]=E[i]; }
 
     ARIADNE_LOG_PRINTLN("S="<<S);
-    ARIADNE_DEBUG_ASSERT(norm(FloatDPMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8);
-    FloatDPMatrix Sinv=inverse(S);
+    ARIADNE_DEBUG_ASSERT(decide(norm(FloatDPApproximationMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8));
+    FloatDPApproximationMatrix Sinv=inverse(S);
     ARIADNE_LOG_PRINTLN("Sinv="<<Sinv);
 
     // Construct the residuals
@@ -1019,61 +1024,61 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // The residual for the dual variable zl is given by the slackness condition x-xl-cl
     // The residual for the auxiliary variable w is given by y-(vu-vl)
     // The residual for the dual variable y is given by g(x)-w
-    RawFloatDPVector ew=(vl+vu)-y;
-    RawFloatDPVector ex=Jfx+transpose(Jgx)*y+(zl+zu);
-    RawFloatDPVector ey=gx-w;
-    RawFloatDPVector ewl=esub(vl,ediv(mu,wl));
-    RawFloatDPVector ewu=esub(vu,ediv(mu,wu));
-    RawFloatDPVector exl=esub(zl,ediv(mu,xl));
-    RawFloatDPVector exu=esub(zu,ediv(mu,xu));
-    RawFloatDPVector evl=w+wl-cl;
-    RawFloatDPVector evu=w+wu-cu;
-    RawFloatDPVector ezl=x+xl-dl;
-    RawFloatDPVector ezu=x+xu-du;
+    FloatDPApproximationVector ew=(vl+vu)-y;
+    FloatDPApproximationVector ex=Jfx+transpose(Jgx)*y+(zl+zu);
+    FloatDPApproximationVector ey=gx-w;
+    FloatDPApproximationVector ewl=esub(vl,ediv(mu,wl));
+    FloatDPApproximationVector ewu=esub(vu,ediv(mu,wu));
+    FloatDPApproximationVector exl=esub(zl,ediv(mu,xl));
+    FloatDPApproximationVector exu=esub(zu,ediv(mu,xu));
+    FloatDPApproximationVector evl=w+wl-cl;
+    FloatDPApproximationVector evu=w+wu-cu;
+    FloatDPApproximationVector ezl=x+xl-dl;
+    FloatDPApproximationVector ezu=x+xu-du;
 
     ARIADNE_LOG_PRINTLN("ew="<<ew<<", ex="<<ex<<", ey="<<ey);
     ARIADNE_LOG_PRINTLN("ewl="<<ewl<<", ewu="<<ewu<<", exl="<<exl<<" exu="<<exu);
     ARIADNE_LOG_PRINTLN("evl="<<evl<<", evu="<<evu<<", ezl="<<ezl<<" ezu="<<ezu);
 
-    RawFloatDPVector rw = ew - (ewl+ewu) + Dl*evl + Du*evu;
-    RawFloatDPVector rx = ex - (exl+exu) + El*ezl + Eu*ezu;
-    RawFloatDPVector& ry = ey;
+    FloatDPApproximationVector rw = ew - (ewl+ewu) + Dl*evl + Du*evu;
+    FloatDPApproximationVector rx = ex - (exl+exu) + El*ezl + Eu*ezu;
+    FloatDPApproximationVector& ry = ey;
 
     // Solve linear system
     // ( D   0  -I ) (dw)   (rw)
     // ( 0  H+E A^T) (dx) = (rx)
     // (-I   A   0 ) (dy) = (ry)
 
-    RawFloatDPVector r = transpose(A)*(rw+D*ry)+rx;
+    FloatDPApproximationVector r = transpose(A)*(rw+D*ry)+rx;
     ARIADNE_LOG_PRINTLN("rw="<<rw<<" rx="<<rx<<" ry="<<ry);
     ARIADNE_LOG_PRINTLN("r="<<r);
 
     // Compute the differences
-    RawFloatDPVector dx = solve(S,r);
+    FloatDPApproximationVector dx = solve(S,r);
     ARIADNE_LOG_PRINTLN("S*dx="<<S*dx<<" r="<<r);
-    ARIADNE_LOG_PRINTLN("S*inverse(S)-I="<<S*inverse(S)-FloatDPMatrix::identity(n,dp));
-    ARIADNE_DEBUG_ASSERT(norm(S*dx - r)/max(FloatDP(1.0_x,dp),norm(r))<1e-4);
+    ARIADNE_LOG_PRINTLN("S*inverse(S)-I="<<S*inverse(S)-FloatDPApproximationMatrix::identity(n,dp));
+    ARIADNE_DEBUG_ASSERT(decide(norm(S*dx - r)/max(1.0_x,norm(r))<1e-4));
 
-    RawFloatDPVector dw = A*dx-ry;
-    RawFloatDPVector dy = D*dw-rw;
+    FloatDPApproximationVector dw = A*dx-ry;
+    FloatDPApproximationVector dy = D*dw-rw;
     ARIADNE_LOG_PRINTLN("dw="<<dw<<" dx="<<dx<<" dy="<<dy);
 
     ARIADNE_LOG_PRINTLN("YH*dx+E*dx+dy*A="<<(YH*dx+E*dx+transpose(A)*dy)<<", rx="<<rx);
 
     // Check solution of linear system for residuals
-    FloatDP one_(1,dp);
-    ARIADNE_DEBUG_ASSERT(norm(D*dw-dy-rw)/max(one_,norm(rw))<1e-4);
-    ARIADNE_DEBUG_ASSERT(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(one_,norm(rx))<1e-2);
-    ARIADNE_DEBUG_ASSERT(norm(-dw+A*dx-ry)/max(one_,norm(ry))<1e-4);
+    FloatDPApproximation one(1,dp);
+    ARIADNE_DEBUG_ASSERT(decide(norm(D*dw-dy-rw)/max(one,norm(rw))<1e-4));
+    ARIADNE_DEBUG_ASSERT(decide(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(one,norm(rx))<1e-2));
+    ARIADNE_DEBUG_ASSERT(decide(norm(-dw+A*dx-ry)/max(one,norm(ry))<1e-4));
 
-    RawFloatDPVector dwl = evl-dw;
-    RawFloatDPVector dwu = evu-dw;
-    RawFloatDPVector dxl = ezl-dx;
-    RawFloatDPVector dxu = ezu-dx;
-    RawFloatDPVector dvl = ewl-Dl*dwl;
-    RawFloatDPVector dvu = ewu-Du*dwu;
-    RawFloatDPVector dzl = exl-El*dxl;
-    RawFloatDPVector dzu = exu-Eu*dxu;
+    FloatDPApproximationVector dwl = evl-dw;
+    FloatDPApproximationVector dwu = evu-dw;
+    FloatDPApproximationVector dxl = ezl-dx;
+    FloatDPApproximationVector dxu = ezu-dx;
+    FloatDPApproximationVector dvl = ewl-Dl*dwl;
+    FloatDPApproximationVector dvu = ewu-Du*dwu;
+    FloatDPApproximationVector dzl = exl-El*dxl;
+    FloatDPApproximationVector dzu = exu-Eu*dxu;
 
     ARIADNE_LOG_PRINTLN("dwl="<<dwl<<", dwu="<<dwu<<", dxl="<<dxl<<" dxu="<<dxu);
     ARIADNE_LOG_PRINTLN("dvl="<<dvl<<", dvu="<<dvu<<", dzl="<<dzl<<" dzu="<<dzu);
@@ -1094,34 +1099,34 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     ARIADNE_DEBUG_ASSERT(norm(dx+dxu - ezu)<1e-12);
 */
 
-    RawFloatDPVector nw; RawFloatDPVector nx; RawFloatDPVector ny;
-    RawFloatDPVector nwl; RawFloatDPVector nwu; RawFloatDPVector nxl; RawFloatDPVector nxu;
-    RawFloatDPVector nvl; RawFloatDPVector nvu; RawFloatDPVector nzl; RawFloatDPVector nzu;
+    FloatDPApproximationVector nw; FloatDPApproximationVector nx; FloatDPApproximationVector ny;
+    FloatDPApproximationVector nwl; FloatDPApproximationVector nwu; FloatDPApproximationVector nxl; FloatDPApproximationVector nxu;
+    FloatDPApproximationVector nvl; FloatDPApproximationVector nvu; FloatDPApproximationVector nzl; FloatDPApproximationVector nzu;
 
 
-    FloatDP alpha(1.0_x,dp);
+    FloatDPApproximation alpha=one;
     nx = x-alpha*dx;
     // Pick an update value which minimises the objective function
-    FloatDP fxmin=cast_raw(f(cast_approximate(nx)));
-    FloatDP alphamin(1.0_x,dp);
+    FloatDPApproximation fxmin=f(nx);
+    FloatDPApproximation alphamin=one;
     static const Nat REDUCTION_STEPS=4;
     for(Nat i=0; i!=REDUCTION_STEPS; ++i) {
         alpha*=scale;
         nx = x-alpha*dx;
-        FloatDP fnx=cast_raw(f(cast_approximate(nx)));
-        if(fnx<fxmin*scale) {
+        FloatDPApproximation fnx=f(nx);
+        if(decide(fnx<fxmin*scale)) {
             fxmin=fnx;
             alphamin=alpha;
         }
     }
     //alpha=alphamin;
-    alpha=1.0_x;
+    alpha=one;
 
     // Since we need to keep the point feasible, but the updates are linear
     // we need to validate feasibility directly.
     static const double MINIMUM_ALPHA=1e-16;
     Bool allfeasible=false;
-    while(alpha>MINIMUM_ALPHA && !allfeasible) {
+    while(decide(alpha>MINIMUM_ALPHA) && !allfeasible) {
         nwl=wl-alpha*dwl;
         nwu=wu-alpha*dwu;
         nxl=xl-alpha*dxl;
@@ -1138,7 +1143,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     nw=w-alpha*dw;
     nx=x-alpha*dx;
     ny=y-alpha*dy;
-    if(alpha<=MINIMUM_ALPHA) {
+    if(decide(alpha<=MINIMUM_ALPHA)) {
         ARIADNE_LOG_PRINTLN_AT(1,"w="<<w<<"  x="<<x<<"  y="<<y);
         ARIADNE_LOG_PRINTLN_AT(1,"nw="<<nw<<"  nx="<<nx<<"  ny="<<ny);
         throw NearBoundaryOfFeasibleDomainException(); }
@@ -1151,7 +1156,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     wl=nwl; wu=nwu; xl=nxl; xu=nxu;
     vl=nvl; vu=nvu; zl=nzl; zu=nzu;
 
-    FloatDP nmu = {0.0_x,dp};
+    FloatDPApproximation nmu = zero;
     for(Nat i=0; i!=m; ++i) {
         nmu = nmu + wl[i]*vl[i] + wu[i]*vu[i];
     }

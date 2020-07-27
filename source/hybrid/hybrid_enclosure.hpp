@@ -50,7 +50,6 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> struct LinearProgram;
 
 class Enclosure;
 class Grid;

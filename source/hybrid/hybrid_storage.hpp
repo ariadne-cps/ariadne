@@ -51,7 +51,6 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-template<class X> struct LinearProgram;
 
 class Storage;
 class GridTreePaving;

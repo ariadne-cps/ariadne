@@ -86,6 +86,10 @@ inline auto operator>=(FloatDPBounds x1, Int x2) -> decltype(x1>=FloatDPBounds(x
 inline auto operator< (FloatDPBounds x1, Int x2) -> decltype(x1< FloatDPBounds(x2,dp)) { return x1< FloatDPBounds(x2,dp); }
 inline auto operator> (FloatDPBounds x1, Int x2) -> decltype(x1> FloatDPBounds(x2,dp)) { return x1> FloatDPBounds(x2,dp); }
 
+template<class X> inline Bool is_nan(Vector<X> const& v) {
+    for (SizeType i=0; i!=v.size(); ++i) { if (is_nan(v[i])) { return true; } } return false;
+}
+
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
 // and the new Array contains the elements [0,n)
@@ -260,10 +264,13 @@ compute_vt(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, c
         vt[p[k]]=Slackness::BASIS;
     }
     for(SizeType k=m; k!=n; ++k) {
-        if(definitely(xl[p[k]]==-inf)) {
+        if(decide(xl[p[k]]>-inf)) {
+            vt[p[k]] = Slackness::LOWER;
+        } else if(decide(xu[p[k]]<+inf)) {
             vt[p[k]] = Slackness::UPPER;
         } else {
-            vt[p[k]] = Slackness::LOWER;
+            ARIADNE_THROW(DegenerateFeasibilityProblemException,"compute_vt",
+                          "xl["<<p[k]<<"]="<<xl[p[k]]<<", xu["<<p[k]<<"]="<<xu[p[k]]<<"\n");
         }
     }
     return vt;
@@ -487,7 +494,6 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
             x[j]+=B[k][i]*w[i];
         }
     }
-
     Vector<XX> Ax=Matrix<XX>(A)*x;
     Vector<XX> Axmb=Ax-Vector<XX>(b);
     ARIADNE_ASSERT_MSG(decide(norm(Axmb)*10000<=1),"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
@@ -734,11 +740,11 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-Pair<SizeType,RigorousNumericType<FloatDP>>
-compute_rt(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<FloatDP>>& x, const Vector<RigorousNumericType<FloatDP>>& d, const SizeType s)
+Pair<SizeType,RigorousNumericType<Rounded<FloatDP>>>
+compute_rt(const Vector<Rounded<FloatDP>>& xl, const Vector<Rounded<FloatDP>>& xu, const Array<Slackness>& vt, const Array<SizeType>& p, const Vector<RigorousNumericType<Rounded<FloatDP>>>& x, const Vector<RigorousNumericType<Rounded<FloatDP>>>& d, const SizeType s)
 {
     ARIADNE_LOG_SCOPE_CREATE;
-    typedef FloatDP X;
+    typedef Rounded<FloatDP> X;
     typedef RigorousNumericType<X> XX;
     typedef DP PR;
     PR pr;
@@ -1120,7 +1126,9 @@ SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matr
 {
     Array<Nat> p=compute_p(vt);
     Matrix<XX> B = Ariadne::compute_B<X>(A,p);
-    return Ariadne::compute_x(xl,xu,A,b, vt,p,B);
+    Vector<RigorousNumericType<X>> x=Ariadne::compute_x(xl,xu,A,b, vt,p,B);
+    ARIADNE_ASSERT_MSG(not is_nan(x), "x="<<x);
+    return x;
 }
 
 
@@ -1206,9 +1214,11 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         ARIADNE_ASSERT_MSG(decide(x[i]>=xl[i]-BOUNDS_TOLERANCE), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
         ARIADNE_ASSERT_MSG(decide(x[i]<=xu[i]+BOUNDS_TOLERANCE), "A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" B="<<B<<" x="<<x );
     }
+
     Vector<XX> Ax=A*x;
     for(SizeType i=0; i!=m; ++i) {
-        ARIADNE_ASSERT(decide(abs(Ax[i]-b[i])<RESIDUAL_TOLERANCE));
+        ARIADNE_ASSERT_MSG(decide(abs(Ax[i]-b[i])<RESIDUAL_TOLERANCE),
+                           "Ax="<<Ax<<", i="<<i<<", Ax[i]="<<Ax[i]<<", b[i]="<<b[i]<<", RESIDUAL_TOLERANCE="<<RESIDUAL_TOLERANCE);
     }
 
     ARIADNE_LOG_PRINTLN("Feasible point x="<<x<<"; xl="<<xl<<", xu="<<xu<<", Ax="<<(A*x)<<", b="<<b);
@@ -1243,6 +1253,7 @@ SimplexSolver<X>::feasible(const Vector<X>& xl, const Vector<X>& xu, const Matri
     ARIADNE_LOG_PRINTLN("p="<<p<<" B="<<B<<"  (BA="<<(B*A)<<")");
 
     Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
+
     Vector<XX> y(m,x.zero_element());
 
     return this->hotstarted_feasible(xl,xu,A,b,vt,p,B,x,y);
@@ -1508,7 +1519,7 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 
 
-template class SimplexSolver<RawFloatDP>;
+template class SimplexSolver<RoundedFloatDP>;
 template class SimplexSolver<FloatDPApproximation>;
 template class SimplexSolver<FloatDPValue>;
 template class SimplexSolver<Rational>;

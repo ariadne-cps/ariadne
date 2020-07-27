@@ -31,24 +31,34 @@
 
 namespace Ariadne {
 
-template class Polynomial<UniIndex,FloatDP>;
+// FIXME: Unsafe arithmetic operators on raw float
+inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl + x2.dbl),dp); }
+inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl - x2.dbl),dp); }
+inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl * x2.dbl),dp); }
+inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl / x2.dbl),dp); }
+inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
+inline FloatDP& operator-=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
+inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
+inline FloatDP& operator/=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
+
+template class Polynomial<UniIndex,RoundedFloatDP>;
 template class Polynomial<UniIndex,FloatDPApproximation>;
 template class Polynomial<UniIndex,FloatDPBounds>;
 template class Polynomial<UniIndex,FloatMPApproximation>;
 template class Polynomial<UniIndex,FloatMPBounds>;
 
-template struct AlgebraOperations<Polynomial<UniIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<UniIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 
-template class Polynomial<MultiIndex,FloatDP>;
+template class Polynomial<MultiIndex,RoundedFloatDP>;
 template class Polynomial<MultiIndex,FloatDPApproximation>;
 template class Polynomial<MultiIndex,FloatDPBounds>;
 template class Polynomial<MultiIndex,FloatDPUpperInterval>;
 
-template struct AlgebraOperations<Polynomial<MultiIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;

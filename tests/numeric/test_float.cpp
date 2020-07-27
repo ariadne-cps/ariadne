@@ -682,9 +682,9 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,1.0);
     if(add(down,one,hlf(eps)) != one) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
-        ARIADNE_TEST_COMPARE(add(down,one,Float(eps/(1<<11))),>,one);
+        ARIADNE_TEST_COMPARE(add(down,one,shft(eps,-11)),>,one);
     }
-    ARIADNE_TEST_COMPARE(add(down,one,Float(eps/(1<<12))),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,shft(eps,-12)),==,one);
     Float one_add_down_half_epsilon=add(down,one,hlf(eps));
     ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,one);
     ARIADNE_TEST_EQUAL(one,1.0_x);

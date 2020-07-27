@@ -26,6 +26,7 @@
 #include "expansion.tpl.hpp"
 
 #include "../numeric/float.hpp"
+#include "../numeric/rounded_float.hpp"
 #include "../geometry/interval.hpp"
 
 #include <utility>
@@ -33,6 +34,7 @@
 namespace Ariadne {
 
     template class Expansion<UniIndex,FloatDP>;
+    template class Expansion<UniIndex,RoundedFloatDP>;
     template class Expansion<UniIndex,FloatDPApproximation>;
 
     template class Expansion<MultiIndex,double>;
@@ -40,15 +42,18 @@ namespace Ariadne {
     template class Expansion<MultiIndex,Dyadic>;
 
     template class Expansion<MultiIndex,FloatDP>;
+    template class Expansion<MultiIndex,RoundedFloatDP>;
     template class Expansion<MultiIndex,FloatDPValue>;
     template class Expansion<MultiIndex,FloatDPBounds>;
     template class Expansion<MultiIndex,FloatDPApproximation>;
 
     template class SortedExpansion<MultiIndex,FloatDP,GradedIndexLess>;
+    template class SortedExpansion<MultiIndex,RoundedFloatDP,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPApproximation,GradedIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPBounds,GradedIndexLess>;
 
     template class SortedExpansion<MultiIndex,FloatDP,ReverseLexicographicIndexLess>;
+    template class SortedExpansion<MultiIndex,RoundedFloatDP,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPValue,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPBounds,ReverseLexicographicIndexLess>;
     template class SortedExpansion<MultiIndex,FloatDPApproximation,ReverseLexicographicIndexLess>;
@@ -59,6 +64,7 @@ namespace Ariadne {
 
 
     template class Expansion<MultiIndex,FloatMP>;
+    template class Expansion<MultiIndex,RoundedFloatMP>;
     template class Expansion<MultiIndex,FloatMPValue>;
     template class Expansion<MultiIndex,FloatMPBounds>;
     template class Expansion<MultiIndex,FloatMPApproximation>;

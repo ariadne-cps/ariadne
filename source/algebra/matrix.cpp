@@ -853,6 +853,11 @@ template Matrix<FloatDP> inverse(const Matrix<FloatDP>&);
 template Vector<FloatDP> solve(const Matrix<FloatDP>&, const Vector<FloatDP>&);
 template Void normalise_rows(Matrix<FloatDP>&);
 
+template class Matrix<RoundedFloatDP>;
+template Matrix<RoundedFloatDP> inverse(const Matrix<RoundedFloatDP>&);
+template Vector<RoundedFloatDP> solve(const Matrix<RoundedFloatDP>&, const Vector<RoundedFloatDP>&);
+template Void normalise_rows(Matrix<RoundedFloatDP>&);
+
 template class Matrix<FloatDPApproximation>;
 template Matrix<FloatDPApproximation> inverse(const Matrix<FloatDPApproximation>&);
 template Matrix<FloatDPApproximation> solve(const Matrix<FloatDPApproximation>&, const Matrix<FloatDPApproximation>&);

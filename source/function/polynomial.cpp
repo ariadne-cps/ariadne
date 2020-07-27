@@ -31,16 +31,6 @@
 
 namespace Ariadne {
 
-// FIXME: Unsafe arithmetic operators on raw float
-inline FloatDP operator+(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl + x2.dbl),dp); }
-inline FloatDP operator-(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl - x2.dbl),dp); }
-inline FloatDP operator*(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl * x2.dbl),dp); }
-inline FloatDP operator/(FloatDP const& x1, FloatDP const& x2) { return FloatDP(cast_exact(x1.dbl / x2.dbl),dp); }
-inline FloatDP& operator+=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl + x2.dbl; return x1; }
-inline FloatDP& operator-=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl - x2.dbl; return x1; }
-inline FloatDP& operator*=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl * x2.dbl; return x1; }
-inline FloatDP& operator/=(FloatDP& x1, FloatDP const& x2) { x1.dbl = x1.dbl / x2.dbl; return x1; }
-
 template class Polynomial<UniIndex,RoundedFloatDP>;
 template class Polynomial<UniIndex,FloatDPApproximation>;
 template class Polynomial<UniIndex,FloatDPBounds>;

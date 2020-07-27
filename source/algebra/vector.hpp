@@ -414,7 +414,7 @@ struct ProvideVectorOperations {
     }
 
     template<class X> friend decltype(mag(declval<X>())) sup_norm(const Vector<X>& v) {
-        decltype(mag(declval<X>())) r=abs(v.zero_element());
+        decltype(mag(declval<X>())) r=mag(v.zero_element());
         for(SizeType i=0; i!=v.size(); ++i) {
             r=max(r,mag(v[i]));
         }

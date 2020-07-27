@@ -467,9 +467,28 @@ template<class X> inline Matrix<X>::~Matrix()
 {
 }
 
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
+template<class X> inline Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
     : _zero(create_zero(x)), _rs(m), _cs(n), _ary(m*n,x) {
 }
+
+template<class X> inline Matrix<X> Matrix<X>::zero(SizeType m, SizeType n, X const& z) {
+    return Matrix<X>(n,n,nul(z));
+}
+
+template<class X> inline Matrix<X> Matrix<X>::identity(SizeType n, X const& z) {
+    Matrix<X> A(n,n,nul(z));
+    for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }
+    return A;
+}
+
+template<class X> inline Void Matrix<X>::resize(SizeType m, SizeType n) {
+    if(m*n != _rs*_cs) { _ary.resize(m*n,_zero); } _rs=m; _cs=n;
+}
+
+template<class X> inline X Matrix<X>::zero_element() const {
+    return _zero;
+}
+
 
 template<class X> inline Void Matrix<X>::_check_data_access(SizeType i, SizeType j) const {
     ARIADNE_PRECONDITION_MSG(i<this->row_size()&&j<this->column_size(),"A="<<*this<<" i="<<i<<" j="<<j);

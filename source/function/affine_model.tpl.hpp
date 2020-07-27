@@ -29,28 +29,13 @@
 #include "../function/taylor_model.hpp"
 #include "../function/affine_model.hpp"
 
+#include "model_utilities.hpp"
+
 #include "../function/affine.hpp"
 #include "../function/taylor_function.hpp"
 #include "../algebra/vector.hpp"
 
 namespace Ariadne {
-
-FloatDP operator+(FloatDP x1, FloatDP x2);
-FloatDP operator-(FloatDP x1, FloatDP x2);
-FloatDP operator*(FloatDP x1, FloatDP x2);
-FloatDP operator/(FloatDP x1, FloatDP x2);
-FloatDP& operator+=(FloatDP& x1, FloatDP x2);
-FloatDP& operator-=(FloatDP& x1, FloatDP x2);
-FloatDP& operator*=(FloatDP& x1, FloatDP x2);
-FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
 template<class X> decltype(auto) values(Vector<X> const& v) {
     //typedef typename std::remove_reference<decltype(a.zero_element().value())>::type C;
@@ -101,9 +86,9 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         PrecisionType prec=max(a1.precision(),a2.precision());
 
         AffineModelType r(n,prec);
-        r=CoefficientType(a1.value().raw()+a2.value().raw());
+        r=a1.value()+a2.value();
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(a1.gradient(i).raw()+a2.gradient(i).raw());
+            r[i]=a1.gradient(i)+a2.gradient(i);
         }
         return r;
     }
@@ -114,16 +99,16 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         PrecisionType prec=max(a1.precision(),a2.precision());
 
         AffineModelType r(n,prec);
-        r=CoefficientType(a1.value().raw()+a2.value().raw());
+        r=a1.value()+a2.value();
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(a1.value().raw()*a2.gradient(i).raw()+a1.gradient(i).raw()+a2.value().raw());
+            r[i]=a1.value()*a2.gradient(i)+a1.gradient(i)+a2.value();
         }
         return r;
     }
 
     static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
-        r._c=CoefficientType(c.raw() + a.value().raw());
+        r._c=c+a.value();
         return r;
     }
 
@@ -136,9 +121,9 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
         PrecisionType prec=a.precision();
 
         AffineModelType r(n,prec);
-        r=CoefficientType(a.value().raw()*c.raw());
+        r=a.value()*c;
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(a.gradient(i).raw()*c.raw());
+            r[i]=a.gradient(i)*c;
         }
         return r;
     }
@@ -148,6 +133,15 @@ template<class F> struct AlgebraOperations<AffineModel<ApproximateTag,F>> {
     }
 };
 
+
+
+template<class F> PositiveUpperBound<F> norm(Covector<Value<F>> const& g) {
+    auto r=mag(g.zero_element());
+    for (SizeType i=0; i!=g.size(); ++i) {
+        r += mag(g[i]);
+    }
+    return r;
+}
 
 template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     typedef typename F::PrecisionType PrecisionType;
@@ -159,42 +153,25 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
     static AffineModelType apply(Neg, const AffineModelType& a) {
         SizeType n=a.argument_size();
         AffineModelType r(n,a.precision());
-        r=CoefficientType( -a.value().raw() );
+        r=neg(a.value());
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(-a.gradient(i).raw());
+            r[i]=neg(a.gradient(i));
         }
-        r.set_error( ErrorType( a.error().raw() ) );
+        r.set_error( a.error() );
 
         return r;
     }
-
     static AffineModelType apply(Add, const AffineModelType& a1, const AffineModelType& a2) {
         ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
         SizeType n=a1.argument_size();
         PrecisionType prec=max(a1.precision(),a2.precision());
 
         AffineModelType r(n,prec);
-        r=CoefficientType( a1.value().raw()+a2.value().raw() );
+        r.value()=add_err(a1.value(),a2.value(),r.error());
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(a1.gradient(i).raw()+a2.gradient(i).raw());
+            r.gradient(i)=add_err(a1.gradient(i),a2.gradient(i),r.error());
         }
-
-        F::set_rounding_upward();
-
-        F te(0,prec);
-        for(SizeType j=0; j!=n; ++j) {
-            F mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
-            F  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
-            te+=(rju+mrjl);
-        }
-        F mrl = (-a1.value().raw())-a2.value().raw();
-        F  ru = ( a1.value().raw())+a2.value().raw();
-        te += (ru+mrl);
-
-        r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
-
-        F::set_rounding_to_nearest();
-
+        r.error()+=(a1.error()+a2.error());
         return r;
     }
 
@@ -204,59 +181,22 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         PrecisionType prec=max(a1.precision(),a2.precision());
 
         AffineModelType r(n,prec);
-        r=CoefficientType( a1.value().raw()+a2.value().raw() );
+
+        r.value()=mul_err(a1.value(),a2.value(),r.error());
         for(SizeType i=0; i!=n; ++i) {
-            r[i]=CoefficientType(a1.gradient(i).raw()*a2.value().raw()+a1.value().raw()*a2.gradient(i).raw());
+            r.gradient(i)=lin_err(a1.value(),a1.gradient(i),a2.value(),a2.gradient(i),r.error());
         }
 
-        F::set_rounding_upward();
-
-        F mrvl = ((-a1.value().raw())*a2.value().raw());
-        F  rvu = ((+a1.value().raw())*a2.value().raw());
-        F te=(mrvl+rvu);
-        for(SizeType j=0; j!=n; ++j) {
-            F mrjl = ((-a1.value().raw())*a1.gradient(j).raw()+a2.gradient(j).raw()*(-a2.value().raw()));
-            F  rju = ((+a1.value().raw())*a1.gradient(j).raw()+a2.gradient(j).raw()*(+a2.value().raw()));
-            te+=(rju+mrjl);
-        }
-        F roe=hlf(te); // roundoff error
-
-        F tre(prec); // truncation error
-        for(SizeType j1=0; j1!=n; ++j1) {
-            for(SizeType j2=0; j2!=n; ++j2) {
-                tre = tre + abs(a1.gradient(j1).raw()) * abs(a2.gradient(j2).raw());
-            }
-        }
-
-        F nrm1=abs(a1.value().raw());
-        F nrm2=abs(a2.value().raw());
-        for(SizeType j=0; j!=n; ++j) {
-            nrm1=nrm1+abs(a1.value().raw());
-            nrm2=nrm2+abs(a2.value().raw());
-        }
-        F ace = a1.error().raw()*nrm2 + nrm1 * a1.error().raw();  // accumulated error
-        r.set_error( ErrorType(tre + roe + ace) );
-
-        F::set_rounding_to_nearest();
+        r.error() = (r.error()+a1.error()*a2.error())
+                        + ( (mag(a1.value())+norm(a1.gradient()) * a2.error()) + a1.error()*(mag(a2.value())+norm(a2.gradient())) )
+                        + norm(a1.gradient()) * norm(a2.gradient());
 
         return r;
     }
 
     static AffineModelType apply(Add, const NumericType& c, const AffineModelType& a) {
         AffineModelType r=a;
-        F cm=c.value().raw();
-        r.set_value( CoefficientType( cm + a.value().raw() ) );
-
-        F::set_rounding_upward();
-
-        F mrl = (-a.value().raw())-cm;
-        F  ru = ( a.value().raw())+cm;
-        F te = (ru+mrl)/2;
-
-        r.set_error( ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
-
-        F::set_rounding_to_nearest();
-
+        r.value()=add_err(a.value(),c,r.error());
         return r;
     }
 
@@ -269,35 +209,11 @@ template<class F> struct AlgebraOperations<AffineModel<ValidatedTag,F>> {
         PrecisionType prec=a.precision();
 
         AffineModelType r(n,prec);
-        F cm=c.value().raw();
-        r=CoefficientType(a.value().raw()*cm);
+        r.value()=mul_err(a.value(),c,r.error());
         for(SizeType i=0; i!=n; ++i) {
-            r[i].raw()=a.gradient(i).raw()*cm;
+            r.gradient(i)=mul_err(a.gradient(i),c,r.error());
         }
-
-        F::set_rounding_upward();
-
-        F te(0,prec);
-        for(SizeType j=0; j!=n; ++j) {
-            F mca=(-cm)*a.gradient(j).raw();
-            F ca= cm*a.gradient(j).raw();
-            te+=(ca+mca);
-        }
-        F mca=(-cm)*a.value().raw();
-        F ca= cm*a.value().raw();
-
-        F re(0,prec);
-        if(c.lower_raw()!=c.upper_raw()) {
-            F ce=max(c.upper().raw()-cm,cm-c.lower().raw());
-            for(SizeType j=0; j!=n; ++j) {
-                re+=abs(a.gradient(j).raw()*ce);
-            }
-        }
-
-        r.set_error(ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
-
-        F::set_rounding_to_nearest();
-
+        r.error()+=mag(c)*a.error();
         return r;
     }
 
@@ -318,9 +234,11 @@ template<class F> AffineModel<ValidatedTag,F>::AffineModel(const Affine<NumericT
     F::set_rounding_upward();
     F e(affine_model.error().precision());
     for(SizeType j=0; j!=affine.argument_size(); ++j) {
-        e += max(affine.gradient(j).upper().raw()-affine_model.gradient(j).raw(),affine_model.gradient(j).raw()-affine.gradient(j).lower().raw());
+        e = add(rounded,e,max(sub(rounded,affine.gradient(j).upper().raw(),affine_model.gradient(j).raw()),
+                              sub(rounded,affine_model.gradient(j).raw(),affine.gradient(j).lower().raw())));
     }
-    e += max(affine.value().upper().raw()-affine_model.value().raw(),affine_model.value().raw()-affine.value().lower().raw());
+    e = add(rounded,e,max(sub(rounded,affine.value().upper().raw(),affine_model.value().raw()),
+                          sub(rounded,affine_model.value().raw(),affine.value().lower().raw())));
     affine_model.set_error(ErrorType(e));
     F::set_rounding_to_nearest();
 }

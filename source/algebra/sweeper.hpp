@@ -209,7 +209,7 @@ template<class F> class RelativeThresholdSweeper : public RelativeSweeperMixin<R
         : _coefficient_precision(precision), _relative_sweep_threshold(relative_sweep_threshold) { ARIADNE_ASSERT(relative_sweep_threshold>0); }
     inline PR precision() const { return _coefficient_precision; }
     inline F relative_sweep_threshold() const { return _relative_sweep_threshold; }
-    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < this->_relative_sweep_threshold*nrm; }
+    inline Bool discard(const F& x, const F& nrm) const { return abs(x) < mul(approx,this->_relative_sweep_threshold,nrm); }
   private:
     virtual Void _write(OutputStream& os) const { os << "RelativeThresholdSweeper( relative_sweep_threshold="<<this->_relative_sweep_threshold<<" )"; };
 };

@@ -62,6 +62,21 @@ class TestGraded
 {
     typedef typename X::PrecisionType PR;
 
+    static Graded<X> variable(Dbl v0, DegreeType deg) {
+        assert(deg>=1); X z(0.0); X x0(v0); Graded<X> r(x0); r.append(z+1);
+        for(DegreeType d=2; d<=deg; ++d) { r.append(z); }
+        return r; }
+
+    static Graded<X> graded(InitializerList<Dbl> lst) {
+        assert(lst.size()>=2); Graded<X> r;
+        for(Double x : lst) { r.append(X(x)); }
+        return r; }
+
+    static Graded<X> graded(InitializerList<X> lst) {
+        assert(lst.size()>=2); Graded<X> r;
+        for(X x : lst) { r.append(x); }
+        return r; }
+
     template<class OP> Graded<X> apply(OP op, Graded<X> const& a) {
         Graded<X> r;
         while(r.size()!=a.size()) { compute(r,op,a); }
@@ -177,7 +192,7 @@ class TestGraded
 
 
 Int main() {
-    TestGraded<FloatDP>(dp).test();
+    TestGraded<RoundedFloatDP>(dp).test();
 
     return ARIADNE_TEST_FAILURES;
 }

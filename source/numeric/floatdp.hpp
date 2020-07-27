@@ -305,29 +305,6 @@ class FloatDP {
     friend FloatDP atan(FloatDP x) { return FloatDP(atan_rnd(x.dbl)); }
     static FloatDP pi(PrecisionType pr) { return FloatDP(pi_rnd()); }
 
-    // Correctly rounded operators
-    friend FloatDP operator+(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v+x2v; return FloatDP(r); }
-    friend FloatDP operator-(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v-x2v; return FloatDP(r); }
-    friend FloatDP operator*(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v*x2v; return FloatDP(r); }
-    friend FloatDP operator/(FloatDP x1, FloatDP x2) { volatile double x1v = x1.dbl; volatile double x2v=x2.dbl; volatile double r=x1v/x2v; return FloatDP(r); }
-    friend FloatDP& operator+=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v+x2v; return x1; }
-    friend FloatDP& operator-=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v-x2v; return x1; }
-    friend FloatDP& operator*=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v*x2v; return x1; }
-    friend FloatDP& operator/=(FloatDP& x1, FloatDP x2) { volatile double& x1v = x1.dbl; volatile double x2v=x2.dbl; x1v=x1v/x2v; return x1; }
-
-    friend FloatDP operator+(ExactDouble x1, FloatDP x2) { return FloatDP(x1,x2.precision())+x2; }
-    friend FloatDP operator-(ExactDouble x1, FloatDP x2) { return FloatDP(x1,x2.precision())-x2; }
-    friend FloatDP operator*(ExactDouble x1, FloatDP x2) { return FloatDP(x1,x2.precision())*x2; }
-    friend FloatDP operator/(ExactDouble x1, FloatDP x2) { return FloatDP(x1,x2.precision())/x2; }
-    friend FloatDP operator+(FloatDP x1, ExactDouble x2) { return x1+FloatDP(x2,x1.precision()); }
-    friend FloatDP operator-(FloatDP x1, ExactDouble x2) { return x1-FloatDP(x2,x1.precision()); }
-    friend FloatDP operator*(FloatDP x1, ExactDouble x2) { return x1*FloatDP(x2,x1.precision()); }
-    friend FloatDP operator/(FloatDP x1, ExactDouble x2) { return x1/FloatDP(x2,x1.precision()); }
-    friend FloatDP& operator+=(FloatDP& x1, ExactDouble x2) { return x1+=FloatDP(x2,x1.precision()); }
-    friend FloatDP& operator-=(FloatDP& x1, ExactDouble x2) { return x1-=FloatDP(x2,x1.precision()); }
-    friend FloatDP& operator*=(FloatDP& x1, ExactDouble x2) { return x1*=FloatDP(x2,x1.precision()); }
-    friend FloatDP& operator/=(FloatDP& x1, ExactDouble x2) { return x1/=FloatDP(x2,x1.precision()); }
-
   private:
     template<class OP> static FloatDP _apply_rnd(OP op, RoundingModeType rnd, FloatDP x1, FloatDP x2, FloatDP x3) {
         auto old_rnd=FloatDP::get_rounding_mode(); FloatDP::set_rounding_mode(rnd);

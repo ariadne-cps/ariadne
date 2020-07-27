@@ -328,35 +328,6 @@ class FloatMP {
     friend FloatMP atan(FloatMP const& x);
     static FloatMP pi(MultiplePrecision pr);
 
-    // Correctly rounded operators
-    friend FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-    friend FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
-
-    // Correctly rounded  mixed operators
-    friend FloatMP operator+(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator-(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator*(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator/(FloatMP const& x1, Dbl x2);
-    friend FloatMP operator+(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator-(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator*(Dbl x1, FloatMP const& x2);
-    friend FloatMP operator/(Dbl x1, FloatMP const& x2);
-
-    friend FloatMP operator+(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator-(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator*(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator/(FloatMP const& x1, FloatDP const& x2);
-    friend FloatMP operator+(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator-(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator*(FloatDP const& x1, FloatMP const& x2);
-    friend FloatMP operator/(FloatDP const& x1, FloatMP const& x2);
-
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
     friend Bool operator==(FloatMP const& x1, FloatMP const& x2);

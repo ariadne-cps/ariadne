@@ -245,12 +245,6 @@ class FloatMP {
     friend FloatMP med(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(add(rnd,x1,x2)); }
     friend FloatMP rad(RoundingModeType rnd, FloatMP x1, FloatMP x2) { return hlf(sub(rnd,x2,x1)); }
 
-    // Inplace operations
-    friend FloatMP& iadd(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& isub(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& imul(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
-    friend FloatMP& idiv(RoundingModeType rnd, FloatMP& x1, FloatMP const& x2);
-
     // Mixed operations
     friend FloatMP add(RoundingModeType rnd, FloatMP const& x1, Dbl x2);
     friend FloatMP sub(RoundingModeType rnd, FloatMP const& x1, Dbl x2);

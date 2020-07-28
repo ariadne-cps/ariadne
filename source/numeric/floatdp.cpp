@@ -109,7 +109,7 @@ static inline double horner_opp(Int n, double x, const long long int* c)
 // Rounded-fused multiple-and-add
 double fma_rnd(double x, double y, double z)
 {
-    return std::fma((volatile double)x,(volatile double)y,(volatile double)z);
+    return std::fma((volatile double&)x,(volatile double&)y,(volatile double&)z);
 }
 
 // Rounded power

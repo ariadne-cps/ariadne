@@ -271,7 +271,7 @@ TestFloat<PR>::test_limits()
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
-    Float two_=Float(2,precision);
+    Float two=Float(2,precision);
 
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
@@ -285,7 +285,7 @@ TestFloat<PR>::test_limits()
 
     ARIADNE_TEST_PRINT(eps);
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);
-    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two_)),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two)),==,one);
 
     ARIADNE_TEST_ASSERT(min>zero);
     ARIADNE_TEST_ASSERT(max<inf_);
@@ -560,7 +560,7 @@ template<> Void
 TestFloat<DoublePrecision>::test_double_rounding()
 {
     volatile double one   = 1;
-    volatile double two_  = 2;
+    volatile double two  = 2;
     volatile double three = 3;
     volatile double five  = 5;
     const double onethirddown    = 0.33333333333333331483;
@@ -586,16 +586,16 @@ TestFloat<DoublePrecision>::test_double_rounding()
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
     Ariadne::set_rounding_downward();
-    double twofifthsrounddown=two_/five;
+    double twofifthsrounddown=two/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
     Ariadne::set_rounding_upward();
-    double twofifthsroundup=two_/five;
+    double twofifthsroundup=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
     Ariadne::set_rounding_toward_zero();
-    double twofifthsroundchop=two_/five;
+    double twofifthsroundchop=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
     Ariadne::set_rounding_to_nearest();
-    double twofifthsroundnearest=two_/five;
+    double twofifthsroundnearest=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
@@ -713,7 +713,6 @@ TestFloat<PR>::test_arithmetic()
 
     ExactDouble expected_five_ninths_up=0.55555555555555558023_x;
     ARIADNE_TEST_COMPARE(div(down,five,nine),<,expected_five_ninths_up);
-    Float five_divby_nine_down=five;
 
     ARIADNE_TEST_COMPARE(div(down,Float(5.0_x,precision),Float(9.0_x,precision)),<,div(up,Float(5.0_x,precision),Float(9.0_x,precision)));
     ARIADNE_TEST_COMPARE(div(down,Float(5,precision),Float(9,precision)),<,div(up,Float(5,precision),Float(9,precision)));

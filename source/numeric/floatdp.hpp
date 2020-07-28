@@ -103,7 +103,7 @@ double pi_rnd();
 
 double abs_rnd(double x);
 double max_rnd(double x1, double x2);
-double sub_rnd(double x1, double x2);
+double min_rnd(double x1, double x2);
 
 double texp(double x);
 

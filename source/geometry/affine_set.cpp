@@ -66,8 +66,10 @@ struct LinearProgram {
     Vector<XX> z;
 };
 
-template<class X, class XX> LinearProgram<X,XX>::LinearProgram(SizeType m, SizeType n, X const& z)
-    : A(m,n,z), b(m,z), c(n,z), l(n,z), u(n,z), vt(n), p(n), B(m,m,z), x(n,z), y(m,z),z(n,z) { }
+template<class X, class XX> LinearProgram<X,XX>::LinearProgram(SizeType m, SizeType n, X const& zero)
+    : A(m,n,zero), b(m,zero), c(n,zero), l(n,zero), u(n,zero)
+    , vt(n), p(n), B(m,m,zero)
+    , x(n,zero), y(m,zero),z(n,zero) { }
 
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const RealBox& bx)

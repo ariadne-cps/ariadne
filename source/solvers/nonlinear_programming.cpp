@@ -899,8 +899,6 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunc
     ExactIntervalType I(-1,+1);
     Nat m=C.size(); Nat n=D.size();
 
-    FloatDPApproximation zero(0,dp), one(1,dp);
-
     v.x=midpoint(D);
     v.y=FloatDPApproximationVector(m,zero);
     v.w=midpoint(C);
@@ -1066,7 +1064,6 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     ARIADNE_LOG_PRINTLN("YH*dx+E*dx+dy*A="<<(YH*dx+E*dx+transpose(A)*dy)<<", rx="<<rx);
 
     // Check solution of linear system for residuals
-    FloatDPApproximation one(1,dp);
     ARIADNE_DEBUG_ASSERT(decide(norm(D*dw-dy-rw)/max(one,norm(rw))<1e-4));
     ARIADNE_DEBUG_ASSERT(decide(norm(YH*dx+E*dx+transpose(A)*dy-rx)/max(one,norm(rx))<1e-2));
     ARIADNE_DEBUG_ASSERT(decide(norm(-dw+A*dx-ry)/max(one,norm(ry))<1e-4));

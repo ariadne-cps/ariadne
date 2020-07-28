@@ -152,6 +152,9 @@ template<class F> class Bounds
     friend Approximation<F> round(Approximation<F> const& x);
     friend Value<F> midpoint(Bounds<F> const& x);
   public:
+    friend Bool is_nan(Bounds<F> const& x) {
+        return is_nan(x._l) || is_nan(x._u); }
+
     friend Bounds<F> max(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(max(x1.lower_raw(),x2.lower_raw()),max(x1.upper_raw(),x2.upper_raw())); }
     friend Bounds<F> min(Bounds<F> const& x1, Bounds<F> const& x2) {

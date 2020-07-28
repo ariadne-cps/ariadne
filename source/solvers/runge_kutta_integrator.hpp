@@ -43,7 +43,7 @@ template<class T> class List;
 class RungeKutta4Integrator
 {
   public:
-    RungeKutta4Integrator(double step_size);
+    RungeKutta4Integrator(ApproximateDouble step_size);
 
     FloatDPApproximationVector
     step(const ApproximateVectorMultivariateFunction& f, const FloatDPApproximationVector& x, const FloatDPApproximation& h) const;
@@ -51,7 +51,7 @@ class RungeKutta4Integrator
     List< Pair<FloatDPApproximation,FloatDPApproximationVector> >
     evolve(const ApproximateVectorMultivariateFunction& f, const FloatDPApproximationVector& x0, const FloatDPApproximation& tmax) const;
   private:
-    double _step_size;
+    ApproximateDouble _step_size;
 };
 
 } // namespace Ariadne

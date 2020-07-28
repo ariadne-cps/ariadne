@@ -31,24 +31,24 @@
 
 namespace Ariadne {
 
-template class Polynomial<UniIndex,FloatDP>;
+template class Polynomial<UniIndex,RoundedFloatDP>;
 template class Polynomial<UniIndex,FloatDPApproximation>;
 template class Polynomial<UniIndex,FloatDPBounds>;
 template class Polynomial<UniIndex,FloatMPApproximation>;
 template class Polynomial<UniIndex,FloatMPBounds>;
 
-template struct AlgebraOperations<Polynomial<UniIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<UniIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPApproximation>>;
 template struct AlgebraOperations<Polynomial<UniIndex,FloatMPBounds>>;
 
-template class Polynomial<MultiIndex,FloatDP>;
+template class Polynomial<MultiIndex,RoundedFloatDP>;
 template class Polynomial<MultiIndex,FloatDPApproximation>;
 template class Polynomial<MultiIndex,FloatDPBounds>;
 template class Polynomial<MultiIndex,FloatDPUpperInterval>;
 
-template struct AlgebraOperations<Polynomial<MultiIndex,FloatDP>>;
+template struct AlgebraOperations<Polynomial<MultiIndex,RoundedFloatDP>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPApproximation>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPBounds>>;
 template struct AlgebraOperations<Polynomial<MultiIndex,FloatDPUpperInterval>>;

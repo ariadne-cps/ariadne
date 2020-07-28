@@ -298,7 +298,7 @@ struct Root : OperatorObject<Root> {
 };
 struct Fma : OperatorObject<Fma> {
     static constexpr OperatorCode code() { return OperatorCode::FMA; } static constexpr OperatorKind kind() { return OperatorKind::TERNARY; }
-    template<class A1, class A2, class A3> auto operator()(A1&& a1, A2&& a2, A3&& a3) const -> decltype(a1*a2+a3) { return a1*a2+a3; }
+    template<class A1, class A2, class A3> auto operator()(A1&& a1, A2&& a2, A3&& a3) const -> decltype(fma(a1,a2,a3)) { return fma(a1,a2,a3); }
     template<class X> X derivative(const X& a1, const X& a2, const X& a3, FirstArgumentTag) const { return a2; }
     template<class X> X derivative(const X& a1, const X& a2, const X& a3, SecondArgumentTag) const { return a1; }
     template<class X> X derivative(const X& a1, const X& a2, const X& a3, ThirdArgumentTag) const { return nul(a3)+1; }
@@ -421,7 +421,6 @@ struct Sgn : ComparisonObject<Sgn> {
     template<class A> auto operator()(A&& a) const -> decltype(sgn(a)) { return sgn(a); }
     Kleenean operator()(const Real& a) const;
 };
-
 
 /*
 template<class OP> struct CodedOperator {

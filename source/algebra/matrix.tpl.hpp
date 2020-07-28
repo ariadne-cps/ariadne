@@ -33,24 +33,6 @@ template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
 }
 
 
-template<class X> Matrix<X> Matrix<X>::zero(SizeType m, SizeType n, X const& z) {
-    return Matrix<X>(n,n,nul(z));
-}
-
-template<class X> Matrix<X> Matrix<X>::identity(SizeType n, X const& z) {
-    Matrix<X> A(n,n,nul(z));
-    for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }
-    return A;
-}
-
-template<class X> Void Matrix<X>::resize(SizeType m, SizeType n) {
-    if(m*n != _rs*_cs) { _ary.resize(m*n,_zero); } _rs=m; _cs=n;
-}
-
-template<class X> X Matrix<X>::zero_element() const {
-    return _zero;
-}
-
 template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst)
     : _zero(nul(*lst.begin()->begin())), _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs,_zero)
 {

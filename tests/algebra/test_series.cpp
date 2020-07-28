@@ -30,6 +30,8 @@
 
 namespace Ariadne {
 
+template<class F> decltype(auto) operator==(Rounded<F> const& x, Rational const& q) { return x.raw()==q; }
+
 //template<class Iter> container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
 template<class X> List(InitializerList<X>) -> List<X>;
 
@@ -74,9 +76,6 @@ template<class X> class TestSeries
         ARIADNE_TEST_CALL(test_log());
         ARIADNE_TEST_CALL(test_sin());
         ARIADNE_TEST_CALL(test_cos());
-
-        ARIADNE_TEST_CALL(test_taylor_series());
-        ARIADNE_TEST_CALL(test_analytic_function());
     }
   private:
     void test_class() {
@@ -88,8 +87,6 @@ template<class X> class TestSeries
         ARIADNE_TEST_EQUALS(series[255],-1.0_x);
 //        ARIADNE_TEST_EQUALS(series[32767],1.0);
         std::cerr<<std::setprecision(18);
-        Value<X>::set_output_places(18);
-        Bounds<X>::set_output_places(18);
     }
     void test_rec() {
         ARIADNE_TEST_EQUALS(Series<X>(Rec(),X(2.0_x,pr)).coefficients(5), (List<Q>{0.5_q,-0.25_q,0.125_q,-0.0625_q,0.03125_q,-0.015625_q}) );
@@ -143,23 +140,11 @@ template<class X> class TestSeries
         ARIADNE_TEST_EQUAL ( Series<X>(Cos(),one).coefficients(4),
                              (List<X>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
     }
-
-    void test_taylor_series() {
-        TaylorSeries<Bounds<X>> exp_series(Exp(),ExactIntervalType(-1,+1),Value<X>(0,pr),8u);
-        ARIADNE_TEST_PRINT(Series<Bounds<X>>(Exp(),Bounds<X>(-1,+1,pr)).coefficients(8u));
-        ARIADNE_TEST_PRINT(exp_series);
-    }
-
-    void test_analytic_function() {
-        Rec rec_operator;
-        ARIADNE_TEST_CONSTRUCT( AnalyticFunction, rec_function, (rec_operator) );
-        ARIADNE_TEST_SAME( rec_function.series(0.5_approx).coefficients(5), Series<Approximation<X>>(Rec(),0.5_approx).coefficients(5) );
-    }
 };
 
 
 Int main() {
-    TestSeries<FloatDP>(dp).test();
+    TestSeries<RoundedFloatDP>(dp).test();
 
     return ARIADNE_TEST_FAILURES;
 }

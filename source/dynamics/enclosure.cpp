@@ -876,9 +876,9 @@ Void Enclosure::reduce() const
 
 
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -911,14 +911,14 @@ Enclosure::splitting_index_zeroth_order() const
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=this->number_of_parameters();
-    FloatDP max_column_norm(0.0_x,dp);
+    FloatDPError max_column_norm(0u,dp);
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-        FloatDP column_norm(0.0_x,dp);
+        FloatDPError column_norm(0u,dp);
         for(Nat i=0; i!=this->state_dimension(); ++i) {
-            column_norm+=mag(jacobian[i][j]).raw();
+            column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= this->reduced_domain()[j].radius().value_raw();
-        if(column_norm>max_column_norm) {
+        column_norm *= this->reduced_domain()[j].radius();
+        if(column_norm.raw()>max_column_norm.raw()) {
             max_column_norm=column_norm;
             jmax=j;
         }
@@ -931,24 +931,24 @@ Enclosure::splitting_index_zeroth_order() const
 Pair<Enclosure,Enclosure>
 Enclosure::split_first_order() const
 {
-    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
+    Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(this->_state_function,this->_reduced_domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum(0.0_x,dp);
+    FloatDPError max_row_sum(0u,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum(0.0_x,dp);
-        FloatDP max_mag_j_in_i(0.0_x,dp);
+        FloatDPError row_sum(0u,dp);
+        FloatDPError max_mag_j_in_i(0u,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
-            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+            if(mag(nonlinearities[i][j]).raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
                 max_mag_j_in_i=mag(nonlinearities[i][j]);
             }
         }
-        if(row_sum>max_row_sum) {
+        if(row_sum.raw()>max_row_sum.raw()) {
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -1201,24 +1201,24 @@ Enclosure::kuhn_recondition()
 
     const ValidatedVectorMultivariateTaylorFunctionModelDP& function=dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(this->state_function().reference());
     const Vector<ValidatedTaylorModelDP>& models = function.models();
-    Matrix<FloatDP> dependencies(this->state_dimension(),this->number_of_parameters(),dp);
+    Matrix<FloatDPApproximation> dependencies(this->state_dimension(),this->number_of_parameters(),dp);
     for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModelDP::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(SizeType j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->index()[j]!=0) {
-                    dependencies[i][j]+=abs(iter->coefficient()).raw();
+                    dependencies[i][j]=dependencies[i][j]+abs(iter->coefficient());
                 }
             }
         }
     }
-    Array< Pair<FloatDP,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDP(dp),0u));
+    Array< Pair<FloatDPValue,SizeType> > column_max_dependencies(this->number_of_parameters(),make_pair(FloatDPValue(dp),0u));
     for(SizeType j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(FloatDP(0.0_x,dp),SizeType(j));
+        column_max_dependencies[j] = make_pair(FloatDPValue(0.0_x,dp),SizeType(j));
         for(SizeType i=0; i!=dependencies.row_size(); ++i) {
-            column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
+            column_max_dependencies[j].first=max(column_max_dependencies[j].first,cast_exact(dependencies[i][j]));
         }
     }
-    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<FloatDP,SizeType> >());
+    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<FloatDPValue,SizeType> >());
 
     Array<SizeType> kept_parameters(number_of_kept_parameters);
     Array<SizeType> discarded_parameters(number_of_discarded_parameters);

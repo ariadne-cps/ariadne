@@ -104,7 +104,7 @@ Void export_interior_point_solver(pybind11::module& module)
     pybind11::class_<InteriorPointSolver> interior_point_solver_class(module,"InteriorPointSolver");
     interior_point_solver_class.def(pybind11::init<>());
     interior_point_solver_class.def("minimise", &InteriorPointSolver::minimise);
-    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointSolver::*)(const Vector<FloatDP>&,const Vector<FloatDP>&, const Matrix<FloatDP>&,const Vector<FloatDP>&)const) &InteriorPointSolver::feasible);
+    interior_point_solver_class.def("feasible", (ValidatedKleenean(InteriorPointSolver::*)(const Vector<FloatDPValue>&,const Vector<FloatDPValue>&, const Matrix<FloatDPValue>&,const Vector<FloatDPValue>&)const) &InteriorPointSolver::feasible);
     interior_point_solver_class.def("validate_feasibility", &InteriorPointSolver::validate_feasibility);
 }
 
@@ -126,16 +126,18 @@ Void export_simplex_solver(pybind11::module& module)
 {
     typedef Array<SizeType> SizeArray;
 
+    typedef RigorousNumericType<X> XX;
+
     pybind11::class_< SimplexSolver<X> > simplex_solver_class(module,(class_name<X>()+"SimplexSolver").c_str());
     simplex_solver_class.def(pybind11::init<>());
-    simplex_solver_class.def("lpstep",(Bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(Bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<XX>&,Vector<XX>&)const) &SimplexSolver<X>::lpstep);
 
 
     simplex_solver_class.def("feasible",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
 
     simplex_solver_class.def("verify_feasibility",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
-    simplex_solver_class.def("compute_basis",(Pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
+    simplex_solver_class.def("compute_basis",(Pair< SizeArray, Matrix<XX> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 
 }
 
@@ -145,7 +147,8 @@ Void optimization_submodule(pybind11::module& module) {
     export_constraint(module);
     export_optimiser_interface(module);
     export_interior_point_solvers(module);
-    export_simplex_solver<FloatDP>(module);
+    export_simplex_solver<FloatDPApproximation>(module);
+    export_simplex_solver<FloatDPValue>(module);
     export_simplex_solver<Rational>(module);
     export_interior_point_solver(module);
     export_constraint_solver(module);

@@ -47,6 +47,10 @@
 
 namespace Ariadne {
 
+template<class X> inline Approximation<X> affine(Approximation<X> l, Approximation<X> u, Nat i, Nat n) {
+    return (l*(n-i)+u*i)/n;
+}
+
 typedef Vector<FloatDPApproximation> FloatApproximationVector;
 typedef Vector<FloatDPValue> ExactFloatVector;
 
@@ -240,7 +244,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
         for(Nat j=0; j!=domain.size(); ++j) {
             domain_magnitude+=domain[j].width();
         }
-    } while(domain_magnitude.raw() < old_domain_magnitude.raw() * MINIMUM_REDUCTION);
+    } while(domain_magnitude.raw() < mul(near, old_domain_magnitude.raw(), FloatDP(MINIMUM_REDUCTION,dp)));
 
     return false;
 }
@@ -352,7 +356,7 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
     Box<UpperIntervalType> subdomain=domain;
 
     static const Int MAX_STEPS=3;
-    const FloatDP threshold = lower.width().raw() / (1<<MAX_STEPS);
+    const FloatDP threshold = div(near, lower.width().raw(), FloatDP(pow(two,MAX_STEPS),dp));
     do {
         FloatDPUpperBound ub(dp); FloatDPUpperInterval ivl(-ub,+ub); FloatDPValue val(dp); ub=val;
 
@@ -431,8 +435,8 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     UpperIntervalType interval=domain[variable];
-    RawFloatDP l=interval.lower().raw();
-    RawFloatDP u=interval.upper().raw();
+    FloatDPApproximation l=interval.lower();
+    FloatDPApproximation u=interval.upper();
     ExactIntervalType subinterval;
     UpperIntervalType new_interval(interval);
     Box<UpperIntervalType> slice=domain;
@@ -443,7 +447,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     // Look for empty slices from below
     Nat imax = n;
     for(Nat i=0; i!=n; ++i) {
-        subinterval=ExactIntervalType((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
+        subinterval=ExactIntervalType(cast_exact(affine(l,u,i,n)),cast_exact(affine(l,u,i+1,n)));
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
@@ -461,7 +465,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
 
     // Look for empty slices from above; note that at least one nonempty slice has been found
     for(Nat j=n-1; j!=imax; --j) {
-        subinterval=ExactIntervalType((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
+        subinterval=ExactIntervalType(cast_exact(affine(l,u,j,n)),cast_exact(affine(l,u,j+1,n)));
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {

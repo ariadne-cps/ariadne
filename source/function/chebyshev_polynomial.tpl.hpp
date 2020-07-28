@@ -50,25 +50,6 @@
 
 namespace Ariadne {
 
-/*
-FloatDP operator+(FloatDP x1, FloatDP x2);
-FloatDP operator-(FloatDP x1, FloatDP x2);
-FloatDP operator*(FloatDP x1, FloatDP x2);
-FloatDP operator/(FloatDP x1, FloatDP x2);
-FloatDP& operator+=(FloatDP& x1, FloatDP x2);
-FloatDP& operator-=(FloatDP& x1, FloatDP x2);
-FloatDP& operator*=(FloatDP& x1, FloatDP x2);
-FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
-*/
-
 template<class X> auto UnivariateChebyshevPolynomial<X>::constant(X const& x) -> ChebyshevPolynomial<X> {
     UnivariateChebyshevPolynomial<X> cmr(x.precision());
     cmr._terms.append(0u,x);

@@ -41,6 +41,15 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Affine;
 
+template<class X> struct RigorousNumericsTraits { typedef X Type; };
+template<class F> struct RigorousNumericsTraits<Value<F>> { typedef Bounds<F> Type; };
+template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
+
+template<class X> struct ApproximateNumericsTraits { typedef X Type; };
+template<class F> struct ApproximateNumericsTraits<Value<F>> { typedef Approximation<F> Type; };
+template<class X> using ApproximateNumericType = typename ApproximateNumericsTraits<X>::Type;
+
+
 enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
 
 class DegenerateFeasibilityProblemException : public std::runtime_error {
@@ -71,52 +80,53 @@ struct InfeasibleLinearProgram : std::runtime_error {
 //! Solver for linear programming problems using interior point methods.
 class InteriorPointSolver
 {
+    typedef FloatDPValue X;
+    typedef RigorousNumericType<X> VX;
+    typedef ApproximateNumericType<X> AX;
   public:
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
-    //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
-    Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
-    minimise(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
+    //! Returns the tuple (v,x,y) where v is the optimal value, x is the optimal point,
+    //! and y the corresponding dual feasible point.
+    Tuple< AX, Vector<AX>, Vector<AX> >
+    minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
-    //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
-    Tuple< FloatDP, Vector<FloatDP>, Vector<FloatDP> >
-    hotstarted_minimise(const Vector<FloatDP>& c, const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
-                        Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
+    //! Returns the triple (v,x,y) where v is the optimal value, x is the optimal point, and y the corresponding dual feasible point.
+    Tuple< AX, Vector<AX>, Vector<AX> >
+    hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                        Vector<AX>& x, Vector<AX>& y, Vector<AX>& zl, Vector<AX>& zu) const;
 
     //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.
     //! Returns the pair (r,x) where r is the result, and x the (potential) feasible point.
     ValidatedKleenean
-    feasible(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu, const Matrix<FloatDP>& A, const Vector<FloatDP>& b) const;
+    feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b) const;
 
 
     //! \brief Validate that \a x is primal feasible and \a y is dual feasible.
     //! Returns the interval of possible optimal values.
-    ValidatedKleenean validate_feasibility(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
-                                 const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
-                                 const Vector<FloatDP>& x, const Vector<FloatDP>& y) const;
+    ValidatedKleenean validate_feasibility(const Vector<X>& xl, const Vector<X>& xu,
+                                           const Matrix<X>& A, const Vector<X>& b,
+                                           const Vector<AX>& x, const Vector<AX>& y) const;
   public:
     //! \brief Perform a step of the optimization of \f$\min c^T x \text{ s.t. } Ax=b; x_l \leq x\leq x_u\f$.
     //! Returns true if a full Newton step (alpha=1) is taken. In this case, the problem is feasible (up to roundoff error).
     LinearProgramStatus
-    _minimisation_step(const Vector<FloatDP>& c,
-                       const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
-                       const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
-                       Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
+    _minimisation_step(const Vector<X>& c,
+                       const Vector<X>& xl, const Vector<X>& xu,
+                       const Matrix<X>& A, const Vector<X>& b,
+                       Vector<AX>& x, Vector<AX>& y, Vector<AX>& zl, Vector<AX>& zu) const;
 
     //! \brief Perform a step of the feasibility problem \f$Ax=b,\ x_l \leq x \leq x_u\f$.
     LinearProgramStatus
-    _feasibility_step(const Vector<FloatDP>& xl, const Vector<FloatDP>& xu,
-                      const Matrix<FloatDP>& A, const Vector<FloatDP>& b,
-                      Vector<FloatDP>& x, Vector<FloatDP>& y, Vector<FloatDP>& zl, Vector<FloatDP>& zu) const;
+    _feasibility_step(const Vector<X>& xl, const Vector<X>& xu,
+                      const Matrix<X>& A, const Vector<X>& b,
+                      Vector<AX>& x, Vector<AX>& y, Vector<AX>& zl, Vector<AX>& zu) const;
 
 
 };
 
 
 
-template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<FloatDPValue> { typedef FloatDPBounds Type; };
-template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 //! \ingroup OptimisationSubModule
 //! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
@@ -274,8 +284,6 @@ class SimplexSolver
 //@{
 //! \relates SimplexSolver \name Type synonyms
 using RationalSimplexSolver = SimplexSolver<Rational>; //!< \relates SimplexSolver .
-using FloatDPSimplexSolver = SimplexSolver<FloatDP>; //!< \relates SimplexSolver .
-using FloatMPSimplexSolver = SimplexSolver<FloatMP>; //!< \relates SimplexSolver .
 //@}
 
 } // namespace Ariadne

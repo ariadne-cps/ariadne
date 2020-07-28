@@ -106,6 +106,12 @@ static inline double horner_opp(Int n, double x, const long long int* c)
     return -y;
 }
 
+// Rounded-fused multiple-and-add
+double fma_rnd(double x, double y, double z)
+{
+    return std::fma((volatile double&)x,(volatile double&)y,(volatile double&)z);
+}
+
 // Rounded power
 double pow_rnd(double x, Nat m)
 {
@@ -319,12 +325,20 @@ double sin_rnd(double x) {
 
 inline double max(double x1, double x2) { return std::max(x1,x2); }
 
+double nul_rnd(double x) { return 0.0; }
+double pos_rnd(double x) { return +x; }
+double neg_rnd(double x) { return -x; }
+double hlf_rnd(double x) { return x/2; }
 double sqr_rnd(double x) { return (volatile double&)x*(volatile double&)x; }
 double rec_rnd(double x) { return 1.0/(volatile double&)x; }
 double add_rnd(double x1, double x2) { return (volatile double&)x1+(volatile double&)x2; }
 double sub_rnd(double x1, double x2) { return (volatile double&)x1-(volatile double&)x2; }
 double mul_rnd(double x1, double x2) { return (volatile double&)x1*(volatile double&)x2; }
 double div_rnd(double x1, double x2) { return (volatile double&)x1/(volatile double&)x2; }
+
+double abs_rnd(double x) { return std::abs(x); }
+double max_rnd(double x1, double x2) { return std::max(x1,x2); }
+double min_rnd(double x1, double x2) { return std::min(x1,x2); }
 
 double add_opp(double x, double y) { volatile double t=(-x)-y; return -t; }
 double sub_opp(double x, double y) { volatile double t=(-x)+y; return -t; }
@@ -853,8 +867,24 @@ Float32::operator FloatDP() const { return FloatDP(cast_exact((double)this->flt)
 
 template<> String class_name<double>() { return "double"; }
 
+template<> String class_name<ApproximateDouble>() { return "ApproximateDouble"; }
 template<> String class_name<ExactDouble>() { return "ExactDouble"; }
 
 template<> String class_name<FloatDP>() { return "FloatDP"; }
+
+} // namespace Ariadne
+
+
+#include "rounded_float.hpp"
+
+namespace Ariadne {
+
+template<> String class_name<Rounded<FloatDP>>() { return "Rounded<FloatDP>"; }
+
+template<class X> class Value { X _v; public: X const& raw() const { return this->_v; } };
+template<class X> class Approximation { X _a; public: X const& raw() const { return this->_a; } };
+
+Rounded<FloatDP>::Rounded(Value<FloatDP> const& x) : Rounded(x.raw()) { }
+Rounded<FloatDP>::Rounded(Approximation<FloatDP> const& x) : Rounded(x.raw()) { }
 
 } // namespace Ariadne

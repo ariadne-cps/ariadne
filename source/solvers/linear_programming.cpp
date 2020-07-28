@@ -387,7 +387,7 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
     Vector<AX> nx,ny,nzl,nzu;
     Vector<AX> rx(m,pr),ry(n,pr),rzl(n,pr),rzu(n,pr);
     Matrix<AX> S(m,m,pr);
-    DiagonalMatrix<AX> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
+    DiagonalMatrix<AX> Xl(xl), Xu(xu), Xa(x), Zl(zl), Zu(zu);
 
     AX mu = compute_mu(xl,xu, x,zl,zu) * sigma;
     mu=1.0_x;
@@ -431,12 +431,12 @@ _minimisation_step(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu,
 //    std::cerr<<"dy="<<dy<<", is_nan(dy)="<<is_nan(dy)<<"\n";
     if(is_nan(dy)) { return LinearProgramStatus::DEGENERATE_FEASIBILITY; }
     dx = D * Vector<AX>(transpose(A)*dy - ryz);
-    dzl = Vector<AX>(rzl-Zl*dx)/(X-Xl);
-    dzu = Vector<AX>(rzu+Zu*dx)/(Xu-X);
+    dzl = Vector<AX>(rzl-Zl*dx)/(Xa-Xl);
+    dzu = Vector<AX>(rzu+Zu*dx)/(Xu-Xa);
     ARIADNE_LOG_PRINTLN("dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu);
 
-    ARIADNE_LOG_PRINTLN_AT(1,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu));
-    ARIADNE_LOG_PRINTLN_AT(1,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu));
+    ARIADNE_LOG_PRINTLN_AT(1,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(Xa-Xl)*dzl="<<(Zl*dx+(Xa-Xl)*dzl)<<" -Zu*dx+(Xu-Xa)*dzu="<<(-(Zu*dx)+(Xu-Xa)*dzu));
+    ARIADNE_LOG_PRINTLN_AT(1,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(Xa-Xl)*dzl-rzl="<<(Zl*dx+(Xa-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-Xa)*dzu-rzu="<<(-(Zu*dx)+(Xu-Xa)*dzu-rzu));
 
     // Try to enforce feasibility or dual feasibility
     AX alphax(1.0_x,pr);

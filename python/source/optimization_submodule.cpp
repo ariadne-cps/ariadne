@@ -137,7 +137,7 @@ Void export_simplex_solver(pybind11::module& module)
 
     simplex_solver_class.def("verify_feasibility",(ValidatedKleenean(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,const Array<Slackness>&)const) &SimplexSolver<X>::verify_feasibility);
 
-    simplex_solver_class.def("compute_basis",(Pair< SizeArray, Matrix<X> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
+    simplex_solver_class.def("compute_basis",(Pair< SizeArray, Matrix<XX> >(SimplexSolver<X>::*)(const Matrix<X>&)const) &SimplexSolver<X>::compute_basis);
 
 }
 

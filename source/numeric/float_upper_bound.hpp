@@ -94,6 +94,9 @@ template<class F> class UpperBound
     RawType& raw() { return _u; }
     double get_d() const { return _u.get_d(); }
   public:
+    friend Bool is_nan(UpperBound<F> const& x) {
+        return is_nan(x._u); }
+
     friend UpperBound<F> max(UpperBound<F> const& x1, UpperBound<F> const& x2) {
         return UpperBound<F>(max(x1._u,x2._u)); }
     friend UpperBound<F> min(UpperBound<F> const& x1, UpperBound<F> const& x2) {

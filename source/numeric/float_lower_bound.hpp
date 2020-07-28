@@ -93,6 +93,9 @@ template<class F> class LowerBound
     RawType& raw() { return _l; }
     double get_d() const { return _l.get_d(); }
   public: // To be removed
+    friend Bool is_nan(LowerBound<F> const& x) {
+        return is_nan(x._l); }
+
     friend LowerBound<F> max(LowerBound<F> const& x1, LowerBound<F> const& x2) {
         return LowerBound<F>(max(x1._l,x2._l)); }
     friend LowerBound<F> min(LowerBound<F> const& x1, LowerBound<F> const& x2) {

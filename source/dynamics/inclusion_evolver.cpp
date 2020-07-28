@@ -304,11 +304,11 @@ Void LohnerReconditioner::update_from(InclusionEvolverState const& state) {
     auto n = _number_of_variables;
     auto m = _number_of_inputs;
 
-    FloatDP npk(0,dp);
-    FloatDP rho (_ratio_of_parameters_to_keep,dp);
+    FloatDPApproximation npk(0,dp);
+    FloatDPApproximation rho(_ratio_of_parameters_to_keep,dp);
     for (auto entry: state.local_optima_count()) {
         SizeType ppi = entry.first.num_params_per_input();
-        FloatDP partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
+        FloatDPApproximation partial = n + rho*(n+2*m) + (freq-1)*m*(2 - ppi);
         npk += partial*entry.second/freq;
     }
 

@@ -56,22 +56,20 @@ typedef IntegralConstant<Int,1> One;
 static const Zero zero = Zero();
 static const One one = One();
 
-FloatDP operator+(FloatDP x1, FloatDP x2);
-FloatDP operator-(FloatDP x1, FloatDP x2);
-FloatDP operator*(FloatDP x1, FloatDP x2);
-FloatDP operator/(FloatDP x1, FloatDP x2);
-FloatDP& operator+=(FloatDP& x1, FloatDP x2);
-FloatDP& operator-=(FloatDP& x1, FloatDP x2);
-FloatDP& operator*=(FloatDP& x1, FloatDP x2);
-FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
+namespace {
+FloatDP operator+(FloatDP x1, FloatDP x2) { return add(rounded,x1,x2); }
+FloatDP operator-(FloatDP x1, FloatDP x2) { return sub(rounded,x1,x2); }
+FloatDP operator*(FloatDP x1, FloatDP x2) { return mul(rounded,x1,x2); }
+FloatDP operator/(FloatDP x1, FloatDP x2) { return div(rounded,x1,x2); }
+FloatDP operator/(FloatDP x1, Int n2) { return div(rounded,x1,FloatDP(n2,x1.precision())); }
+FloatDP& operator+=(FloatDP& x1, FloatDP x2) { return x1=add(rounded,x1,x2); }
+FloatMP operator+(FloatMP const& x1, FloatMP const& x2) { return add(rounded,x1,x2); }
+FloatMP operator-(FloatMP const& x1, FloatMP const& x2) { return sub(rounded,x1,x2); }
+FloatMP operator*(FloatMP const& x1, FloatMP const& x2) { return mul(rounded,x1,x2); }
+FloatMP operator/(FloatMP const& x1, FloatMP const& x2) { return div(rounded,x1,x2); }
+FloatMP operator/(FloatMP const& x1, Int const& n2) { return div(rounded,x1,FloatMP(n2,x1.precision())); }
+FloatMP& operator+=(FloatMP& x1, FloatMP const& x2) { return iadd(FloatMP::get_rounding_mode(),x1,x2); }
+} // namespace
 
 template<class F> F UnknownError<F>::raw() const {
     return F(0u,this->precision()); }
@@ -1949,7 +1947,11 @@ template<class P, class F> Bool TaylorModel<P,F>::_refines(const TaylorModel<P,F
 template<class P, class F> Bool TaylorModel<P,F>::_consistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::norm(tm1-tm2).raw() <= (tm1.error()+tm2.error()).raw()*2u);
+    if constexpr(IsSame<P,ValidatedTag>::value) {
+        return (Ariadne::norm(tm1-tm2).raw() <= (2u*(tm1.error()+tm2.error())).raw());
+    } else {
+        return true;
+    }
 }
 
 template<class P, class F> Bool TaylorModel<P,F>::_inconsistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2)

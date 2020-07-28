@@ -41,57 +41,7 @@
 namespace Ariadne {
 template<> String class_name<DoublePrecision>() { return "DoublePrecision"; }
 template<> String class_name<MultiplePrecision>() { return "MultiplePrecision"; }
-FloatDP operator+(FloatDP x1, FloatDP x2);
-FloatDP operator-(FloatDP x1, FloatDP x2);
-FloatDP operator*(FloatDP x1, FloatDP x2);
-FloatDP operator/(FloatDP x1, FloatDP x2);
-FloatDP& operator+=(FloatDP& x1, FloatDP x2);
-FloatDP& operator-=(FloatDP& x1, FloatDP x2);
-FloatDP& operator*=(FloatDP& x1, FloatDP x2);
-FloatDP& operator/=(FloatDP& x1, FloatDP x2);
-FloatDP sqr(FloatDP x);
-FloatDP rec(FloatDP x);
-FloatDP add(FloatDP x1, FloatDP x2);
-FloatDP sub(FloatDP x1, FloatDP x2);
-FloatDP mul(FloatDP x1, FloatDP x2);
-FloatDP div(FloatDP x1, FloatDP x2);
-FloatDP fma(FloatDP x1, FloatDP x2, FloatDP x3);
-FloatDP pow(FloatDP x, Int n);
-FloatDP sqrt(FloatDP x);
-FloatDP exp(FloatDP x);
-FloatDP log(FloatDP x);
-FloatDP sin(FloatDP x);
-FloatDP cos(FloatDP x);
-FloatDP tan(FloatDP x);
-FloatDP asin(FloatDP x);
-FloatDP acos(FloatDP x);
-FloatDP atan(FloatDP x);
-FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
-FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
-FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
-FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
-FloatMP sqr(FloatMP const& x);
-FloatMP rec(FloatMP const& x);
-FloatMP add(FloatMP const& x1, FloatMP const& x2);
-FloatMP sub(FloatMP const& x1, FloatMP const& x2);
-FloatMP mul(FloatMP const& x1, FloatMP const& x2);
-FloatMP div(FloatMP const& x1, FloatMP const& x2);
-FloatMP fma(FloatMP const& x1, FloatMP const& x2, FloatMP const& x3);
-FloatMP pow(FloatMP const& x, Int n);
-FloatMP sqrt(FloatMP const& x);
-FloatMP exp(FloatMP const& x);
-FloatMP log(FloatMP const& x);
-FloatMP sin(FloatMP const& x);
-FloatMP cos(FloatMP const& x);
-FloatMP tan(FloatMP const& x);
-FloatMP asin(FloatMP const& x);
-FloatMP acos(FloatMP const& x);
-FloatMP atan(FloatMP const& x);
-} // namespace Ariadne
+}
 
 using namespace std;
 using namespace Ariadne;
@@ -113,7 +63,8 @@ class TestFloat
     Void test_conversion_between();
     Void test_stream();
     Void test_comparison();
-    Void test_rounding();
+    Void test_rounding_mode();
+    Void test_double_rounding();
     Void test_arithmetic();
     Void test_cosine();
     Void test_arctan();
@@ -142,13 +93,14 @@ TestFloat<PR>::TestFloat(PR pr)
 template<class PR> Void
 TestFloat<PR>::test()
 {
+    ARIADNE_TEST_CALL(test_rounding_mode());
     ARIADNE_TEST_CALL(test_class());
     ARIADNE_TEST_CALL(test_limits());
     ARIADNE_TEST_CALL(test_conversion_from_to());
     ARIADNE_TEST_CALL(test_conversion_between());
     ARIADNE_TEST_CALL(test_stream());
     ARIADNE_TEST_CALL(test_comparison());
-    ARIADNE_TEST_CALL(test_rounding());
+    ARIADNE_TEST_CALL(test_double_rounding());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_function());
     ARIADNE_TEST_CALL(test_cosine());
@@ -319,7 +271,7 @@ TestFloat<PR>::test_limits()
 
     Float zero=Float(0,precision);
     Float one=Float(1,precision);
-    Float two_=Float(2,precision);
+    Float two=Float(2,precision);
 
     Float min=Float::min(precision);
     Float eps=Float::eps(precision);
@@ -333,7 +285,7 @@ TestFloat<PR>::test_limits()
 
     ARIADNE_TEST_PRINT(eps);
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,one);
-    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two_)),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,div(up,eps,two)),==,one);
 
     ARIADNE_TEST_ASSERT(min>zero);
     ARIADNE_TEST_ASSERT(max<inf_);
@@ -564,11 +516,51 @@ TestFloat<PR>::test_comparison()
 
 }
 
+template<class PR> Void
+TestFloat<PR>::test_rounding_mode()
+{
+    Float three(3,precision);
+    Float third_down(precision), third_near(precision), third_up(precision), third_rnd(precision);
+
+    Float::set_rounding_mode(downward);
+    third_up=rec(up,three);
+    third_rnd=rec(rounded,three);
+    if (third_rnd==third_up) {
+        ARIADNE_TEST_NOTIFY("Performing upward-rounded operation changes rounding mode for future operations.");
+    } else {
+        ARIADNE_TEST_NOTIFY("Performing upward-rounded operation preserves rounding mode for future operations.");
+    }
+
+    Float::set_rounding_mode(upward);
+    third_down=rec(down,three);
+    third_rnd=rec(rounded,three);
+    if (third_rnd==third_down) {
+        ARIADNE_TEST_NOTIFY("Performing downward-rounded operation changes rounding mode for future operations.");
+    } else {
+        ARIADNE_TEST_NOTIFY("Performing downward-rounded operation preserves rounding mode for future operations.");
+    }
+
+    third_near=rec(near,three);
+    if(third_near==third_down) {
+        Float::set_rounding_mode(upward);
+    } else {
+        Float::set_rounding_mode(downward);
+    }
+    third_near=rec(near,three);
+    third_rnd=rec(rounded,three);
+    if (third_rnd==third_near) {
+        ARIADNE_TEST_NOTIFY("Performing to-nearest-rounded operation changes rounding mode for future operations.");
+    } else {
+        ARIADNE_TEST_NOTIFY("Performing to-nearest-rounded operation preserves rounding mode for future operations.");
+    }
+}
+
+
 template<> Void
-TestFloat<DoublePrecision>::test_rounding()
+TestFloat<DoublePrecision>::test_double_rounding()
 {
     volatile double one   = 1;
-    volatile double two_  = 2;
+    volatile double two  = 2;
     volatile double three = 3;
     volatile double five  = 5;
     const double onethirddown    = 0.33333333333333331483;
@@ -594,60 +586,22 @@ TestFloat<DoublePrecision>::test_rounding()
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
     Ariadne::set_rounding_downward();
-    double twofifthsrounddown=two_/five;
+    double twofifthsrounddown=two/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
     Ariadne::set_rounding_upward();
-    double twofifthsroundup=two_/five;
+    double twofifthsroundup=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
     Ariadne::set_rounding_toward_zero();
-    double twofifthsroundchop=two_/five;
+    double twofifthsroundchop=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
     Ariadne::set_rounding_to_nearest();
-    double twofifthsroundnearest=two_/five;
+    double twofifthsroundnearest=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
 template<class PR> Void
-TestFloat<PR>::test_rounding()
+TestFloat<PR>::test_double_rounding()
 {
-    volatile double one   = 1;
-    volatile double two_  = 2;
-    volatile double three = 3;
-    volatile double five  = 5;
-    const double onethirddown    = 0.33333333333333331483;
-    const double onethirdup      = 0.33333333333333337034;
-    const double onethirdchop    = 0.33333333333333331483;
-    const double onethirdnearest = 0.33333333333333331483;
-    const double twofifthsdown   = 0.39999999999999996669;
-    const double twofifthsup     = 0.40000000000000002220;
-    const double twofifthschop   = 0.39999999999999996669;
-    const double twofifthsnearest= 0.40000000000000002220;
-
-    Ariadne::set_rounding_mode(Ariadne::downward);
-    double onethirdrounddown=one/three;
-    ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
-    Ariadne::set_rounding_mode(Ariadne::upward);
-    double onethirdroundup=one/three;
-    ARIADNE_TEST_EQUAL(onethirdroundup, onethirdup);
-    Ariadne::set_rounding_mode(Ariadne::toward_zero);
-    double onethirdroundchop=one/three;
-    ARIADNE_TEST_EQUAL(onethirdroundchop, onethirdchop);
-    Ariadne::set_rounding_mode(Ariadne::to_nearest);
-    double onethirdroundnearest=one/three;
-    ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
-
-    Ariadne::set_rounding_downward();
-    double twofifthsrounddown=two_/five;
-    ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
-    Ariadne::set_rounding_upward();
-    double twofifthsroundup=two_/five;
-    ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
-    Ariadne::set_rounding_toward_zero();
-    double twofifthsroundchop=two_/five;
-    ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
-    Ariadne::set_rounding_to_nearest();
-    double twofifthsroundnearest=two_/five;
-    ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
 template<class PR> Void
@@ -669,6 +623,7 @@ TestFloat<PR>::test_arithmetic()
 
     const Float eps = Float::eps(precision);
     const Float one = Float(1.0_x,precision);
+    const Float two = Float(2.0_x,precision);
 
     // Set next_up some variables
     Float f1(1.25_x,precision); Float f2(2.25_x,precision); Float f3(-3.25_x,precision);
@@ -727,9 +682,9 @@ TestFloat<PR>::test_arithmetic()
     ARIADNE_TEST_COMPARE(add(down,one,eps),>,1.0);
     if(add(down,one,hlf(eps)) != one) {
         ARIADNE_TEST_WARN("Results of floating-point operations stored to higher-precision in registers than memory.");
-        ARIADNE_TEST_COMPARE(add(down,one,Float(eps/(1<<11))),>,one);
+        ARIADNE_TEST_COMPARE(add(down,one,shft(eps,-11)),>,one);
     }
-    ARIADNE_TEST_COMPARE(add(down,one,Float(eps/(1<<12))),==,one);
+    ARIADNE_TEST_COMPARE(add(down,one,shft(eps,-12)),==,one);
     Float one_add_down_half_epsilon=add(down,one,hlf(eps));
     ARIADNE_TEST_COMPARE(one_add_down_half_epsilon,==,one);
     ARIADNE_TEST_EQUAL(one,1.0_x);
@@ -757,21 +712,27 @@ TestFloat<PR>::test_arithmetic()
     Float nine(9,precision);
 
     ExactDouble expected_five_ninths_up=0.55555555555555558023_x;
-    Float::set_rounding_downward();
-    ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);
-    ARIADNE_TEST_COMPARE(div(five,nine),<,expected_five_ninths_up);
-    Float five_divby_nine_down=five;
-    five_divby_nine_down/=nine;
-    ARIADNE_TEST_COMPARE(five_divby_nine_down,<,expected_five_ninths_up);
+    ARIADNE_TEST_COMPARE(div(down,five,nine),<,expected_five_ninths_up);
 
-    Float::set_rounding_to_nearest();
+    ARIADNE_TEST_COMPARE(div(down,Float(5.0_x,precision),Float(9.0_x,precision)),<,div(up,Float(5.0_x,precision),Float(9.0_x,precision)));
+    ARIADNE_TEST_COMPARE(div(down,Float(5,precision),Float(9,precision)),<,div(up,Float(5,precision),Float(9,precision)));
     ARIADNE_TEST_COMPARE(div(down,five,nine),<,div(up,five,nine));
     Float five_ninths_down = div(down,five,nine);
+    Float five_ninths_near = div(near,five,nine);
     Float five_ninths_up = div(up,five,nine);
     ARIADNE_TEST_COMPARE(five_ninths_down, < , five_ninths_up);
     ARIADNE_TEST_COMPARE(mul(down,five_ninths_down,nine), < , five);
     ARIADNE_TEST_COMPARE(mul(up,five_ninths_up,nine), > , five);
 
+    Float::set_rounding_downward();
+    ARIADNE_TEST_COMPARE(div(rounded,five,nine),==,five_ninths_down);
+    Float::set_rounding_to_nearest();
+    ARIADNE_TEST_COMPARE(div(rounded,five,nine),==,five_ninths_near);
+    Float::set_rounding_upward();
+    ARIADNE_TEST_COMPARE(div(rounded,five,nine),==,five_ninths_up);
+
+    Float pi_down=Float::pi(down,precision);
+    ARIADNE_TEST_EQUAL(div(down,pi_down,two),hlf(pi_down));
 
     // Power (not exact; should catch errors here)
     f3=pow(down,f1,3);
@@ -855,6 +816,9 @@ TestFloat<PR>::test_function()
     //test_inverse_pair("tanh",&tanh_down,&tanh_up,&atanh_down,&atanh_up);
 }
 
+template<class X> X twc(X x) { return shft(x,1); }
+template<class X> X qtr(X x) { return shft(x,-2); }
+
 template<class PR> Void
 TestFloat<PR>::test_cosine()
 {
@@ -867,40 +831,39 @@ TestFloat<PR>::test_cosine()
     const Float third_pi_up  =div(up  ,pi_up  ,three);
 
     const Float zero(0.0_x,precision);
+    const Float one(1.0_x,precision);
 
-    Float::set_rounding_mode(upward);
-    ARIADNE_TEST_EQUAL(cos(zero),1.0_x);
-    ARIADNE_TEST_COMPARE(cos(third_pi_down),>,0.5_x);
-    ARIADNE_TEST_COMPARE(sqr(cos(pi_down/4)),>,0.5_x);
-    ARIADNE_TEST_COMPARE(cos(pi_down/2),>,0.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_up/2),<=,0.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_down),>,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_up),>,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(2*pi_down),==,1.0_x);
-    ARIADNE_TEST_COMPARE(cos(2*pi_up),==,1.0_x);
-    ARIADNE_TEST_COMPARE(cos(3*pi_down),>,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(3*pi_up),>,-1.0_x);
+    const Float three_pi_down=mul(down,pi_down,three);
+    const Float three_pi_up  =mul(up  ,pi_up  ,three);
 
-    Float::set_rounding_mode(downward);
-    ARIADNE_TEST_EQUAL(cos(zero),1.0_x);
-    ARIADNE_TEST_COMPARE(cos(third_pi_up),<,0.5_x);
-    ARIADNE_TEST_COMPARE(sqr(cos(pi_up/4)),<,0.5_x);
-    ARIADNE_TEST_COMPARE(cos(pi_down/2),>=,0.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_up/2),<,0.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_down),==,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(pi_up),==,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(2*pi_down),<,1.0_x);
-    ARIADNE_TEST_COMPARE(cos(2*pi_up),<,1.0_x);
-    ARIADNE_TEST_COMPARE(cos(3*pi_down),==,-1.0_x);
-    ARIADNE_TEST_COMPARE(cos(3*pi_up),==,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,hlf(pi_down)),>,0.0_x);
+    ARIADNE_TEST_EQUAL(cos(up,zero),1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,third_pi_down),>,0.5_x);
+    ARIADNE_TEST_COMPARE(sqr(up,cos(up,qtr(pi_down))),>,0.5_x);
+    ARIADNE_TEST_COMPARE(cos(up,hlf(pi_down)),>,0.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,hlf(pi_up)),<=,0.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,pi_down),>,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,pi_up),>,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,twc(pi_down)),==,1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,twc(pi_up)),==,1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,three_pi_down),>,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(up,three_pi_up),>,-1.0_x);
 
-    static const Float one(1.0_x,precision);
-    Float::set_rounding_mode(upward);
-    Float sin_rnd_up_one=sin(one);
-    Float::set_rounding_mode(downward);
-    Float sin_rnd_down_one=sin(one);
-    Float::set_rounding_mode(to_nearest);
-    Float sin_rnd_approx_one=sin(one);
+    ARIADNE_TEST_EQUAL(cos(down,zero),1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,third_pi_up),<,0.5_x);
+    ARIADNE_TEST_COMPARE(sqr(down,cos(down,qtr(pi_up))),<,0.5_x);
+    ARIADNE_TEST_COMPARE(cos(down,hlf(pi_down)),>=,0.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,hlf(pi_up)),<,0.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,pi_down),==,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,pi_up),==,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,twc(pi_down)),<,1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,twc(pi_up)),<,1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,three_pi_down),==,-1.0_x);
+    ARIADNE_TEST_COMPARE(cos(down,three_pi_up),==,-1.0_x);
+
+    Float sin_rnd_up_one=sin(up,one);
+    Float sin_rnd_down_one=sin(down,one);
+    Float sin_rnd_approx_one=sin(near,one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,<=,sin_rnd_approx_one);
     ARIADNE_TEST_COMPARE(sin_rnd_approx_one,<=,sin_rnd_up_one);
     ARIADNE_TEST_COMPARE(sin_rnd_down_one,< ,sin_rnd_up_one);
@@ -915,6 +878,16 @@ TestFloat<DoublePrecision>::test_arctan()
     static const FloatDP pi_near(3.1415926535897931_pr,pr);
     static const FloatDP pi_up  (3.1415926535897936_pr,pr);
 
+    static const FloatDP third_pi_down(1.0471975511965976_pr,pr);
+    static const FloatDP third_pi_up  (1.0471975511965978_pr,pr);
+
+    static const FloatDP quarter_pi_down(0.7853981633974483_pr,pr);
+    //static const FloatDP quarter_pi_near(0.7853981633974483_pr,pr);
+    static const FloatDP quarter_pi_up  (0.7853981633974484_pr,pr);
+
+    static const FloatDP sixth_pi_down(0.52359877559829882_pr,pr);
+    static const FloatDP sixth_pi_up  (0.52359877559829893_pr,pr);
+
     static const FloatDP atan_quarter_down(0.244978663126864143_pr,pr);
     //static const FloatDP atan_quarter_near(0.244978663126864154_pr,pr);
     static const FloatDP atan_quarter_up  (0.244978663126864171_pr,pr);
@@ -923,36 +896,40 @@ TestFloat<DoublePrecision>::test_arctan()
     //static const FloatDP sqrt_three_near(1.732050807568877294_pr,pr);
     static const FloatDP sqrt_three_up  (1.732050807568877415_pr,pr);
 
+    static const FloatDP sqrt_rec_three_down(0.57735026918962573_pr,pr);
+    //static const FloatDP sqrt_three_near(0.57735026918962573_pr,pr);
+    static const FloatDP sqrt_rec_three_up  (0.57735026918962584_pr,pr);
+
     static const FloatDP zero(0.0_x,pr);
     static const FloatDP one (1.0_x,pr);
+    static const FloatDP quarter (0.25_x,pr);
+
     static const FloatDP eps=FloatDP::eps(pr);
 
-    FloatDP::set_rounding_mode(upward);
-    ARIADNE_TEST_EQUAL(atan(zero),zero);
-    ARIADNE_TEST_COMPARE(atan(one)*4,>=,pi_up);
-    ARIADNE_TEST_COMPARE(atan(-one)*4,>=,-pi_down);
-    ARIADNE_TEST_COMPARE(atan(sqrt_three_up)*3,>=,pi_up);
-    ARIADNE_TEST_COMPARE(atan(-sqrt_three_down)*3,>=,-pi_down);
-    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_down)*6,>=,pi_up);
-    ARIADNE_TEST_COMPARE(atan(-1/sqrt_three_up)*6,>=,-pi_down);
-    ARIADNE_TEST_COMPARE(atan(one/4),>=,atan_quarter_up);
-    ARIADNE_TEST_COMPARE(atan(-one/4),>=,-atan_quarter_down);
+    ARIADNE_TEST_EQUAL(atan(up,zero),zero);
+    ARIADNE_TEST_COMPARE(atan(up,one),>=,quarter_pi_up);
+    ARIADNE_TEST_COMPARE(atan(up,-one),>=,-quarter_pi_down);
+    ARIADNE_TEST_COMPARE(atan(up,sqrt_three_up),>=,third_pi_up);
+    ARIADNE_TEST_COMPARE(atan(up,-sqrt_three_down),>=,-third_pi_down);
+    ARIADNE_TEST_COMPARE(atan(up,sqrt_rec_three_up),>=,sixth_pi_up);
+    ARIADNE_TEST_COMPARE(atan(up,-sqrt_rec_three_down),>=,-sixth_pi_down);
+    ARIADNE_TEST_COMPARE(atan(up,quarter),>=,atan_quarter_up);
+    ARIADNE_TEST_COMPARE(atan(up,-quarter),>=,-atan_quarter_down);
 
-    FloatDP::set_rounding_mode(downward);
-    ARIADNE_TEST_EQUAL(atan(zero),zero);
-    ARIADNE_TEST_COMPARE(atan(+one)*4,<=,pi_down);
-    ARIADNE_TEST_COMPARE(atan(-one)*4,<=,-pi_up);
-    ARIADNE_TEST_COMPARE(atan(+sqrt_three_down)*3,<=,pi_down);
-    ARIADNE_TEST_COMPARE(atan(-sqrt_three_up)*3,<=,-pi_up);
-    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_up)*6,<=,pi_down);
-    ARIADNE_TEST_COMPARE(atan(-1/sqrt_three_down)*6,<=,-pi_up);
-    ARIADNE_TEST_COMPARE(atan(+one/4),<=,atan_quarter_down);
-    ARIADNE_TEST_COMPARE(atan(-one/4),<=,-atan_quarter_up);
+    ARIADNE_TEST_EQUAL(atan(down,zero),zero);
+    ARIADNE_TEST_COMPARE(atan(down,+one),<=,quarter_pi_down);
+    ARIADNE_TEST_COMPARE(atan(down,-one),<=,-quarter_pi_up);
+    ARIADNE_TEST_COMPARE(atan(down,+sqrt_three_down),<=,third_pi_down);
+    ARIADNE_TEST_COMPARE(atan(down,-sqrt_three_up),<=,-third_pi_up);
+    ARIADNE_TEST_COMPARE(atan(down,sqrt_rec_three_down),<=,sixth_pi_down);
+    ARIADNE_TEST_COMPARE(atan(down,-sqrt_rec_three_up),<=,-sixth_pi_up);
+    ARIADNE_TEST_COMPARE(atan(down,+quarter),<=,atan_quarter_down);
+    ARIADNE_TEST_COMPARE(atan(down,-quarter),<=,-atan_quarter_up);
 
-    ARIADNE_TEST_COMPARE(atan(one)*4-pi_up,<=,4*eps);
-    ARIADNE_TEST_COMPARE(atan(sqrt_three_up)*3-pi_up,<=,4*eps);
-    ARIADNE_TEST_COMPARE(atan(1/sqrt_three_down)*6-pi_up,<=,4*eps);
-    ARIADNE_TEST_COMPARE(atan(one/4)-atan_quarter_up,<=,eps/2);
+    ARIADNE_TEST_COMPARE(sub(down,atan(down,one),quarter_pi_up),<=,eps);
+    ARIADNE_TEST_COMPARE(sub(down,atan(down,sqrt_three_up),third_pi_up),<=,eps);
+    ARIADNE_TEST_COMPARE(sub(down,atan(down,sqrt_rec_three_down),sixth_pi_up),<=,eps);
+    ARIADNE_TEST_COMPARE(sub(down,atan(down,quarter),atan_quarter_up),<=,hlf(eps));
 
 }
 
@@ -969,35 +946,36 @@ TestFloat<PR>::test_arctan()
     const Float sqrt_three_down=sqrt(down,three);
     const Float sqrt_three_up  =sqrt(up,three);
 
+    const Float sqrt_rec_three_down=sqrt(down,rec(down,three));
+    const Float sqrt_rec_three_up  =sqrt(up,rec(up,three));
+
     const Float zero(0,precision);
     const Float one(1,precision);
     const Float four(4,precision);
     const Float six(6,precision);
     const Float eps=Float::eps(precision);
 
-    Float::set_rounding_mode(upward);
-    ARIADNE_TEST_EQUAL(atan(zero),zero);
-    ARIADNE_TEST_COMPARE(mul(atan(+one),four),>=,pi_up);
-    ARIADNE_TEST_COMPARE(mul(atan(-one),four),>=,-pi_down);
-    ARIADNE_TEST_COMPARE(mul(atan(+sqrt_three_up),three),>=,pi_up);
-    ARIADNE_TEST_COMPARE(mul(atan(-sqrt_three_down),three),>=,-pi_down);
-    ARIADNE_TEST_COMPARE(mul(atan(+1/sqrt_three_down),six),>=,pi_up);
-    ARIADNE_TEST_COMPARE(mul(atan(-1/sqrt_three_up),six),>=,-pi_down);
+    ARIADNE_TEST_EQUAL(atan(up,zero),zero);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,+one),four),>=,pi_up);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,-one),four),>=,-pi_down);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,+sqrt_three_up),three),>=,pi_up);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,-sqrt_three_down),three),>=,-pi_down);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,+sqrt_rec_three_up),six),>=,pi_up);
+    ARIADNE_TEST_COMPARE(mul(up,atan(up,-sqrt_rec_three_down),six),>=,-pi_down);
 
-    Float::set_rounding_mode(downward);
-    ARIADNE_TEST_EQUAL(atan(zero),zero);
-    ARIADNE_TEST_COMPARE(mul(atan(+one),four),<=,pi_down);
-    ARIADNE_TEST_COMPARE(mul(atan(-one),four),<=,-pi_up);
-    ARIADNE_TEST_COMPARE(mul(atan(+sqrt_three_down),three),<=,pi_down);
-    ARIADNE_TEST_COMPARE(mul(atan(-sqrt_three_up),three),<=,-pi_up);
-    ARIADNE_TEST_COMPARE(mul(atan(+1/sqrt_three_up),six),<=,pi_down);
-    ARIADNE_TEST_COMPARE(mul(atan(-1/sqrt_three_down),six),<=,-pi_up);
+    ARIADNE_TEST_EQUAL(atan(down,zero),zero);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,+one),four),<=,pi_down);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,-one),four),<=,-pi_up);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,+sqrt_three_down),three),<=,pi_down);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,-sqrt_three_up),three),<=,-pi_up);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,+sqrt_rec_three_down),six),<=,pi_down);
+    ARIADNE_TEST_COMPARE(mul(down,atan(down,-sqrt_rec_three_up),six),<=,-pi_up);
 
-    ARIADNE_TEST_COMPARE(sub(mul(atan(one),four),pi_up),<=,4*eps);
-    ARIADNE_TEST_COMPARE(sub(mul(atan(sqrt_three_up),three),pi_up),<=,4*eps);
-    ARIADNE_TEST_COMPARE(sub(mul(atan(1/sqrt_three_down),six),pi_up),<=,4*eps);
+    ARIADNE_TEST_COMPARE(sub(down,mul(down,atan(down,one),four),pi_up),<=,shft(eps,2));
+    ARIADNE_TEST_COMPARE(sub(down,mul(down,atan(down,sqrt_three_up),three),pi_up),<=,shft(eps,2));
+    ARIADNE_TEST_COMPARE(sub(down,mul(down,atan(down,sqrt_rec_three_down),six),pi_up),<=,shft(eps,2));
 
     // Regression test
-    ARIADNE_TEST_COMPARE(pi_down/4,<,pi_up/4);
+    ARIADNE_TEST_COMPARE(div(down,pi_down,4),<,div(up,pi_up,4));
 
 }

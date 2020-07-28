@@ -173,6 +173,8 @@ class AffineModel<ValidatedTag,F>
     const Covector<CoefficientType>& gradient() const { return this->_g; }
     const CoefficientType& gradient(SizeType i) const { return this->_g[i]; }
     const ErrorType& error() const { return this->_e; }
+    CoefficientType& value() { return this->_c; }
+    CoefficientType& gradient(SizeType i) { return this->_g[i]; }
     ErrorType& error() { return this->_e; }
     CoefficientType& operator[](SizeType i) { return this->_g[i]; }
     const CoefficientType& operator[](SizeType i) const { return this->_g[i]; }

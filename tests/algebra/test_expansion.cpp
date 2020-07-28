@@ -463,9 +463,9 @@ template<class F> Void TestExpansion<F>::test_embed()
 }
 
 Int main() {
-    FloatDP zero_64{dp};
-    FloatMP zero_mp{MultiplePrecision(128_bits)};
-    TestExpansion<FloatDP>(zero_64).test();
-//    TestExpansion<FloatMP>(zero_mp).test();
+    RoundedFloatDP zero_dp{0,double_precision};
+    RoundedFloatMP zero_mp{0,precision(128_bits)};
+    TestExpansion<RoundedFloatDP>(zero_dp).test();
+    TestExpansion<Rounded<FloatMP>>(zero_mp).test();
     return ARIADNE_TEST_FAILURES;
 }

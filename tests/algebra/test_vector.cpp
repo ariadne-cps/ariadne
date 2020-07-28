@@ -84,13 +84,13 @@ TestVector::test_concept()
 Void
 TestVector::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT( RawFloatDPVector, v0, (3,dp) );
+    ARIADNE_TEST_CONSTRUCT( Vector<RoundedFloatDP>, v0, (3,dp) );
     ARIADNE_TEST_ASSERT( v0.size()==3 );
     ARIADNE_TEST_ASSERT( v0[0]==0.0_x );
     ARIADNE_TEST_ASSERT( v0[1]==0.0_x );
     ARIADNE_TEST_ASSERT( v0[2]==0.0_x );
 
-    ARIADNE_TEST_CONSTRUCT( RawFloatDPVector, v1, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
+    ARIADNE_TEST_CONSTRUCT( Vector<RoundedFloatDP>, v1, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
     ARIADNE_TEST_ASSERT( v1.size()==4 );
     ARIADNE_TEST_ASSERT( v1[0]==3.25_x );
     ARIADNE_TEST_ASSERT( v1[1]==-0.75_x );
@@ -100,32 +100,31 @@ TestVector::test_constructors()
     ARIADNE_TEST_CONSTRUCT( Vector<FloatDPApproximation>, va, ({3.25,-0.75,0.0,1.375},dp) );
     ARIADNE_TEST_CONSTRUCT( Vector<FloatDPBounds>, vb, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
     ARIADNE_TEST_CONSTRUCT( Vector<FloatDPValue>, vx, ({3.25_x,-0.75_x,0.0_x,1.375_x},dp) );
-
 }
 
 
 Void
 TestVector::test_comparisons()
 {
-    RawFloatDPVector v(2,dp); v[0]=1.25_x; v[1]=-1.375_x;
+    Vector<RoundedFloatDP> v(2,dp); v[0]=1.25_x; v[1]=-1.375_x;
     ARIADNE_TEST_PRINT( v );
-    ARIADNE_TEST_COMPARE( v , ==, RawFloatDPVector({1.25_x,-1.375_x},dp) );
-    ARIADNE_TEST_COMPARE( v , !=, RawFloatDPVector({1.25_x,-1.625_x},dp) );
+    ARIADNE_TEST_COMPARE( v , ==, Vector<RoundedFloatDP>({1.25_x,-1.375_x},dp) );
+    ARIADNE_TEST_COMPARE( v , !=, Vector<RoundedFloatDP>({1.25_x,-1.625_x},dp) );
 }
 
 
 Void
 TestVector::test_arithmetic()
 {
-    ARIADNE_TEST_EQUAL( + RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) , RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) );
-    ARIADNE_TEST_EQUAL( - RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) , RawFloatDPVector({-2.0_x,+3.0_x,-5.0_x},dp) );
-    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) + RawFloatDPVector({1.25_x,2.75_x,-3.5_x},dp), RawFloatDPVector({3.25_x,-0.25_x,1.5_x},dp) );
-    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) - RawFloatDPVector({1.25_x,2.75_x,-3.5_x},dp), RawFloatDPVector({0.75_x,-5.75_x,8.5_x},dp) );
-    ARIADNE_TEST_EQUAL( FloatDP(4.0_x,dp) * RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp), RawFloatDPVector({8.0_x,-12.0_x,20.0_x},dp) );
-    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) * FloatDP(4.0_x,dp), RawFloatDPVector({8.0_x,-12.0_x,20.0_x},dp) );
-    ARIADNE_TEST_EQUAL( RawFloatDPVector({2.0_x,-3.0_x,5.0_x},dp) / FloatDP(4.0_x,dp), RawFloatDPVector({0.5_x,-0.75_x,1.25_x},dp) );
+    ARIADNE_TEST_EQUAL( + Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) , Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) );
+    ARIADNE_TEST_EQUAL( - Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) , Vector<RoundedFloatDP>({-2.0_x,+3.0_x,-5.0_x},dp) );
+    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) + Vector<RoundedFloatDP>({1.25_x,2.75_x,-3.5_x},dp), Vector<RoundedFloatDP>({3.25_x,-0.25_x,1.5_x},dp) );
+    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) - Vector<RoundedFloatDP>({1.25_x,2.75_x,-3.5_x},dp), Vector<RoundedFloatDP>({0.75_x,-5.75_x,8.5_x},dp) );
+    ARIADNE_TEST_EQUAL( RoundedFloatDP(4.0_x,dp) * Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp), Vector<RoundedFloatDP>({8.0_x,-12.0_x,20.0_x},dp) );
+    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) * RoundedFloatDP(4.0_x,dp), Vector<RoundedFloatDP>({8.0_x,-12.0_x,20.0_x},dp) );
+    ARIADNE_TEST_EQUAL( Vector<RoundedFloatDP>({2.0_x,-3.0_x,5.0_x},dp) / RoundedFloatDP(4.0_x,dp), Vector<RoundedFloatDP>({0.5_x,-0.75_x,1.25_x},dp) );
 
-    ARIADNE_TEST_EQUAL( sup_norm(RawFloatDPVector({2.0_x,-3.0_x,1.0_x},dp)), FloatDP(3.0_x,dp) )
+    ARIADNE_TEST_EQUAL( sup_norm(Vector<RoundedFloatDP>({2.0_x,-3.0_x,1.0_x},dp)), RoundedFloatDP(3.0_x,dp) )
 }
 
 

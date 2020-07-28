@@ -57,8 +57,8 @@ template<> OutputStream& Operations<FloatBounds<MultiplePrecision>>::_write(Outp
     int errplc=static_cast<int>(FloatError<MultiplePrecision>::output_places);
     //int bndplc=FloatBounds<MultiplePrecision>::output_places;
     int precplc=x.precision()/log2ten;
-    int log10wdth=abslog10floor(u-l);
-    int log10mag=abslog10floor(max(-l,u));
+    int log10wdth=abslog10floor(sub(up,u,l));
+    int log10mag=abslog10floor(max(neg(l),u));
     int dgtswdth=errplc-(log10wdth+1); // Digits appropriate given width of interval
     //int dgtsbnd=bndplc-(log10mag+1); // Digits appropriate given asked-for precision of bounded objects
     int dgtsprec=precplc-(log10mag+1); // Digits appropriate given precision of objects

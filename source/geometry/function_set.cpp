@@ -58,13 +58,13 @@ uint DRAWING_ACCURACY=1u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom);
-Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain);
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom);
+Matrix<FloatDPError> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom);
+Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
+Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain);
+Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain);
 
 Interval<ValidatedUpperNumber> make_interval(ValidatedLowerNumber const& lb, ValidatedUpperNumber const& ub);
 ExactIntervalType over_approximation(Interval<ValidatedUpperNumber> const& ivl);
@@ -74,13 +74,13 @@ ExactBoxType approximation(const RealBox& rbx);
 
 
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom)
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTaylorFunctionModelDP& f, const ExactBoxType& dom)
 {
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
     ValidatedVectorMultivariateTaylorFunctionModelDP g=restriction(f,dom);
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
+    Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
     MultiIndex a;
     for(Nat i=0; i!=m; ++i) {
         const ValidatedTaylorModelDP& tm=g.model(i);
@@ -88,7 +88,7 @@ Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTay
             a=iter->index();
             if(a.degree()>1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
         }
@@ -97,7 +97,7 @@ Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateTay
     return nonlinearities;
 }
 
-Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
+Matrix<FloatDPError> nonlinearities_first_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -106,23 +106,23 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 1, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        FloatDP sf=dom[i].radius().upper().raw();
+        FloatDPBounds sf=dom[i].radius();
         ++a[i];
-        ivl_dx[i].expansion().append(a,ExactIntervalType(sf,sf));
+        ivl_dx[i].expansion().append(a,UpperIntervalType(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
     Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
+    Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
     for(Nat i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=iter->coefficient().radius().raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=iter->coefficient().radius(); }
                 }
             }
         }
@@ -132,7 +132,7 @@ Matrix<FloatDP> nonlinearities_first_order(const ValidatedVectorMultivariateFunc
     return nonlinearities;
 }
 
-Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
+Matrix<FloatDPError> nonlinearities_second_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -141,23 +141,23 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     Vector<Differential<FloatDPUpperInterval>> ivl_dx=Differential<FloatDPUpperInterval>::constants(m,n, 2, cast_vector(dom));
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
-        FloatDP sf=dom[i].radius().upper().raw();
+        FloatDPBounds sf=dom[i].radius();
         ++a[i];
-        ivl_dx[i].expansion().append(a,ExactIntervalType(sf,sf));
+        ivl_dx[i].expansion().append(a,FloatDPUpperInterval(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
     Vector<Differential<FloatDPUpperInterval>> df=derivative_range(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
-    Matrix<FloatDP> nonlinearities=Matrix<FloatDP>::zero(m,n,dp);
+    Matrix<FloatDPError> nonlinearities=Matrix<FloatDPError>::zero(m,n,dp);
     for(Nat i=0; i!=m; ++i) {
         const Differential<FloatDPUpperInterval>& d=df[i];
         for(Differential<FloatDPUpperInterval>::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->index();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->coefficient()); }
                 }
             }
         }
@@ -167,25 +167,25 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
     return nonlinearities;
 }
 
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain) {
-    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateTaylorFunctionModelDP& function, const ExactBoxType domain) {
+    Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum(0,dp);
+    FloatDPError max_row_sum(0u,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum(0,dp);
-        FloatDP max_mag_j_in_i(0,dp);
+        FloatDPError row_sum(0u,dp);
+        FloatDPError max_mag_j_in_i(0u,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
-            row_sum+=mag(nonlinearities[i][j]);
-            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+            row_sum+=abs(nonlinearities[i][j]);
+            if(abs(nonlinearities[i][j]).raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
-                max_mag_j_in_i=mag(nonlinearities[i][j]);
+                max_mag_j_in_i=abs(nonlinearities[i][j]);
             }
         }
-        if(row_sum>max_row_sum) {
+        if(row_sum.raw()>max_row_sum.raw()) {
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -720,7 +720,7 @@ ConstrainedImageSet image(ConstrainedImageSet set, const EffectiveVectorMultivar
 }
 
 
-Matrix<FloatDP> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
+Matrix<FloatDPError> nonlinearities_zeroth_order(const ValidatedVectorMultivariateFunction& f, const ExactBoxType& dom)
 {
     ARIADNE_ASSERT(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP*>(f.raw_pointer()));
     return nonlinearities_zeroth_order(dynamic_cast<const ValidatedVectorMultivariateTaylorFunctionModelDP&>(*f.raw_pointer()),dom);
@@ -798,21 +798,21 @@ Matrix<FloatDP> nonlinearities_second_order(const ValidatedVectorMultivariateFun
 }
 */
 
-Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
+Pair<Nat,FloatDPError> lipschitz_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
     Matrix<UpperIntervalType> jacobian=Ariadne::jacobian_range(function,cast_vector(domain));
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax=domain.size();
-    FloatDP max_column_norm(0,dp);
+    FloatDPError max_column_norm(0u,dp);
     for(Nat j=0; j!=domain.size(); ++j) {
-        FloatDP column_norm(0,dp);
+        FloatDPError column_norm(0u,dp);
         for(Nat i=0; i!=function.result_size(); ++i) {
-            column_norm+=mag(jacobian[i][j]).raw();
+            column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= domain[j].radius().upper().raw();
-        if(column_norm>max_column_norm) {
+        column_norm *= domain[j].radius().upper();
+        if(column_norm.raw()>max_column_norm.raw()) {
             max_column_norm=column_norm;
             jmax=j;
         }
@@ -820,26 +820,26 @@ Pair<Nat,FloatDP> lipschitz_index_and_error(const ValidatedVectorMultivariateFun
     return make_pair(jmax,max_column_norm);
 }
 
-Pair<Nat,FloatDP> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
+Pair<Nat,FloatDPError> nonlinearity_index_and_error(const ValidatedVectorMultivariateFunction& function, const ExactBoxType& domain)
 {
-    Matrix<FloatDP> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+    Matrix<FloatDPError> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
     Nat jmax_in_row_imax=nonlinearities.column_size();
-    FloatDP max_row_sum(0,dp);
+    FloatDPError max_row_sum(0u,dp);
     for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
         Nat jmax=nonlinearities.column_size();
-        FloatDP row_sum(0,dp);
-        FloatDP max_mag_j_in_i(0,dp);
+        FloatDPError row_sum(0u,dp);
+        FloatDPError max_mag_j_in_i(0u,dp);
         for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
-            row_sum+=mag(nonlinearities[i][j]);
-            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+            row_sum+=nonlinearities[i][j];
+            if(nonlinearities[i][j].raw()>max_mag_j_in_i.raw()) {
                 jmax=j;
                 max_mag_j_in_i=mag(nonlinearities[i][j]);
             }
         }
-        if(row_sum>max_row_sum) {
+        if(row_sum.raw()>max_row_sum.raw()) {
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }

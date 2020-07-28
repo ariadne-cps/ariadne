@@ -572,29 +572,29 @@ TestFloat<DoublePrecision>::test_double_rounding()
     const double twofifthschop   = 0.39999999999999996669;
     const double twofifthsnearest= 0.40000000000000002220;
 
-    Ariadne::set_rounding_mode(downward);
+    Ariadne::set_builtin_rounding_mode(downward);
     double onethirdrounddown=one/three;
     ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
-    Ariadne::set_rounding_mode(upward);
+    Ariadne::set_builtin_rounding_mode(upward);
     double onethirdroundup=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundup, onethirdup);
-    Ariadne::set_rounding_mode(toward_zero);
+    Ariadne::set_builtin_rounding_mode(toward_zero);
     double onethirdroundchop=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundchop, onethirdchop);
-    Ariadne::set_rounding_mode(to_nearest);
+    Ariadne::set_builtin_rounding_mode(to_nearest);
     double onethirdroundnearest=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
-    Ariadne::set_rounding_downward();
+    Ariadne::set_builtin_rounding_downward();
     double twofifthsrounddown=two/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
-    Ariadne::set_rounding_upward();
+    Ariadne::set_builtin_rounding_upward();
     double twofifthsroundup=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
-    Ariadne::set_rounding_toward_zero();
+    Ariadne::set_builtin_rounding_toward_zero();
     double twofifthsroundchop=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
-    Ariadne::set_rounding_to_nearest();
+    Ariadne::set_builtin_rounding_to_nearest();
     double twofifthsroundnearest=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }

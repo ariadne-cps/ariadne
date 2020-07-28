@@ -63,13 +63,13 @@ const rounding_mode_t ROUND_DOWNWARD    = _MM_ROUND_DOWN;
 const rounding_mode_t ROUND_UPWARD      = _MM_ROUND_UP;
 const rounding_mode_t ROUND_TOWARD_ZERO = _MM_ROUND_TOWARD_ZERO;
 
-inline void _set_rounding_to_nearest() { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);  }
-inline void _set_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
-inline void _set_rounding_upward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);  }
-inline void _set_rounding_toward_zero() { _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);  }
+inline void set_builtin_rounding_to_nearest() { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);  }
+inline void set_builtin_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
+inline void set_builtin_rounding_upward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);  }
+inline void set_builtin_rounding_toward_zero() { _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);  }
 
-inline void _set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd); }
-inline rounding_mode_t _get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
+inline void set_builtin_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd); }
+inline rounding_mode_t get_builtin_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
 
 enum class RoundingMode : rounding_mode_t {
     TO_NEAREST = ROUND_TO_NEAREST, DOWNWARD = ROUND_DOWNWARD, UPWARD = ROUND_UPWARD, TOWARD_ZERO = ROUND_TOWARD_ZERO
@@ -92,13 +92,13 @@ const rounding_mode_t ROUND_DOWNWARD    = FE_DOWNWARD;
 const rounding_mode_t ROUND_UPWARD      = FE_UPWARD;
 const rounding_mode_t ROUND_TOWARD_ZERO = FE_TOWARDZERO;
 
-inline void _set_rounding_to_nearest() { fesetround(FE_TONEAREST);  }
-inline void _set_rounding_downward() { fesetround(FE_DOWNWARD);  }
-inline void _set_rounding_upward() { fesetround(FE_UPWARD);  }
-inline void _set_rounding_toward_zero() { fesetround(FE_TOWARDZERO);  }
+inline void set_builtin_rounding_to_nearest() { fesetround(FE_TONEAREST);  }
+inline void set_builtin_rounding_downward() { fesetround(FE_DOWNWARD);  }
+inline void set_builtin_rounding_upward() { fesetround(FE_UPWARD);  }
+inline void set_builtin_rounding_toward_zero() { fesetround(FE_TOWARDZERO);  }
 
-inline void _set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t _get_rounding_mode() { return fegetround(); }
+inline void set_builtin_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
+inline rounding_mode_t get_builtin_rounding_mode() { return fegetround(); }
 
 } // namespace Ariadne
 
@@ -115,13 +115,14 @@ const rounding_mode_t ROUND_DOWNWARD    = 895+1024;
 const rounding_mode_t ROUND_UPWARD      = 895+2048;
 const rounding_mode_t ROUND_TOWARD_ZERO = 895+3072;
 
-inline rounding_mode_t _get_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
-inline void _get_rounding_mode(rounding_mode_t& rnd) { asm volatile ("fstcw %0" : "=m" (rnd) ); }
-inline void _set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
-inline void _set_rounding_to_nearest() { asm volatile ("fldcw %0" : : "m" (ROUND_TO_NEAREST) ); }
-inline void _set_rounding_downward() { asm volatile ("fldcw %0" : : "m" (ROUND_DOWNWARD) ); }
-inline void _set_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UPWARD) ); }
-inline void _set_rounding_toward_zero() { asm volatile ("fldcw %0" : : "m" (ROUND_TOWARD_ZERO) ); }
+inline void set_builtin_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+inline void set_builtin_rounding_to_nearest() { asm volatile ("fldcw %0" : : "m" (ROUND_TO_NEAREST) ); }
+inline void set_builtin_rounding_downward() { asm volatile ("fldcw %0" : : "m" (ROUND_DOWNWARD) ); }
+inline void set_builtin_rounding_upward() { asm volatile ("fldcw %0" : : "m" (ROUND_UPWARD) ); }
+inline void set_builtin_rounding_toward_zero() { asm volatile ("fldcw %0" : : "m" (ROUND_TOWARD_ZERO) ); }
+
+inline void set_builtin_rounding_mode(rounding_mode_t& rnd) { asm volatile ("fstcw %0" : "=m" (rnd) ); }
+inline rounding_mode_t get_builtin_rounding_mode() { rounding_mode_t rnd; asm volatile ("fstcw %0" : "=m" (rnd) ); return rnd; }
 
 } // namespace Ariadne
 
@@ -141,13 +142,13 @@ const rounding_mode_t ROUND_DOWNWARD     = ARIADNE_FENV_BASE + 1024;
 const rounding_mode_t ROUND_UPWARD       = ARIADNE_FENV_BASE + 2048;
 const rounding_mode_t ROUND_TOWARD_ZERO  = ARIADNE_FENV_BASE + 3072;
 
-inline void FloatDP::set_rounding_to_nearest() { __asm fldcw to_nearest; }
-inline void FloatDP::set_rounding_downward() { __asm fldcw downward; }
-inline void FloatDP::set_rounding_upward() { __asm fldcw upward; }
-inline void FloatDP::set_rounding_toward_zero() { __asm fldcw toward_zero; }
+inline void set_builtin_rounding_to_nearest() { __asm fldcw to_nearest; }
+inline void set_builtin_rounding_downward() { __asm fldcw downward; }
+inline void set_builtin_rounding_upward() { __asm fldcw upward; }
+inline void set_builtin_rounding_toward_zero() { __asm fldcw toward_zero; }
 
-inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { ARIADNE_RND_TMP=rnd; __asm fldcw ARIADNE_ROUND_TMP; }
-inline rounding_mode_t FloatDP::get_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIADNE_RND_TMP; }
+inline void set_builtin_rounding_mode(rounding_mode_t rnd) { ARIADNE_RND_TMP=rnd; __asm fldcw ARIADNE_ROUND_TMP; }
+inline rounding_mode_t get_builtin_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIADNE_RND_TMP; }
 
 } // namespace Ariadne
 
@@ -164,13 +165,13 @@ const rounding_mode_t ROUND_DOWNWARD     = 1024;
 const rounding_mode_t ROUND_UPWARD       = 2048;
 const rounding_mode_t ROUND_TOWARD_ZERO  = 3072;
 
-inline void FloatDP::set_rounding_to_nearest() { }
-inline void FloatDP::set_rounding_downward() { }
-inline void FloatDP::set_rounding_upward() { }
-inline void FloatDP::set_rounding_toward_zero() { }
+inline void set_builtin_rounding_to_nearest() { }
+inline void set_builtin_rounding_downward() { }
+inline void set_builtin_rounding_upward() { }
+inline void set_builtin_rounding_toward_zero() { }
 
-inline void FloatDP::set_rounding_mode(rounding_mode_t rnd) { }
-inline rounding_mode_t FloatDP::get_rounding_mode() { return 0 }
+inline void set_builtin_rounding_mode(rounding_mode_t rnd) { }
+inline rounding_mode_t get_builtin_rounding_mode() { return 0 }
 
 } // namespace Ariadne
 
@@ -205,23 +206,24 @@ extern const BuiltinRoundingModeType ROUND_UPWARD;
 //! \brief The floating-point environment value for rounding arithmetic to zero.
 extern const BuiltinRoundingModeType ROUND_TOWARD_ZERO;
 
+#ifdef DOXYGEN
 //! \brief Set the builtin rounding mode. \ingroup NumericModule
-void set_rounding_mode(BuiltinRoundingModeType rnd);
+void set_builtin_rounding_mode(BuiltinRoundingModeType rnd);
 //! \brief Get the current rounding mode. \ingroup NumericModule
-BuiltinRoundingModeType get_rounding_mode();
+BuiltinRoundingModeType get_builtin_rounding_mode();
 
 //! \brief Set the rounding mode to nearest. \ingroup NumericModule
-void set_rounding_to_nearest();
+void set_builtin_rounding_to_nearest();
 //! \brief Set the rounding mode to downwards rounding. \ingroup NumericModule
-void set_rounding_downward();
+void set_builtin_rounding_downward();
 //! \brief Set the rounding mode to upwards rounding. \ingroup NumericModule
-void set_rounding_upward();
+void set_builtin_rounding_upward();
 //! \brief Set the rounding mode to towards-zero rounding. \ingroup NumericModule
-void set_rounding_toward_zero();
+void set_builtin_rounding_toward_zero();
 
 //! \brief Set the rounding mode to the expected default rounding mode.
-void set_default_rounding();
-
+void set_default_builtin_rounding();
+#endif
 
 //! \brief The rounding mode type used for multiple-precision floating-point objects such as FloatMP. \ingroup NumericModule
 typedef mpfr_rnd_t MPFRRoundingModeType;

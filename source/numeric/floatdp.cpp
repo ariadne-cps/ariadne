@@ -50,15 +50,7 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-Void set_rounding_mode(BuiltinRoundingModeType rnd) { _set_rounding_mode(rnd); }
-BuiltinRoundingModeType get_rounding_mode() { return _get_rounding_mode(); }
-
-Void set_rounding_to_nearest() { _set_rounding_to_nearest(); }
-Void set_rounding_downward() { _set_rounding_downward(); }
-Void set_rounding_upward() { _set_rounding_upward(); }
-Void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
-
-Void set_default_rounding() { _set_rounding_upward(); }
+Void set_default_builtin_rounding() { set_builtin_rounding_upward(); }
 
 static const double _pi_up=3.1415926535897936;
 static const double _pi_down=3.1415926535897931;
@@ -267,7 +259,7 @@ double log_rnd(double x) {
 }
 
 double pi_rnd() {
-    switch(get_rounding_mode()) {
+    switch(get_builtin_rounding_mode()) {
         case ROUND_TO_NEAREST: return _pi_approx;
         case ROUND_DOWNWARD: return _pi_down;
         case ROUND_UPWARD: return _pi_up;
@@ -276,7 +268,7 @@ double pi_rnd() {
 }
 
 double pi_opp() {
-    switch(get_rounding_mode()) {
+    switch(get_builtin_rounding_mode()) {
         case ROUND_TO_NEAREST: return _pi_approx;
         case ROUND_DOWNWARD: return _pi_up;
         case ROUND_UPWARD: return _pi_down;
@@ -780,12 +772,12 @@ Int abslog10floor(FloatDP const& x)
     return abslog10floor(x.get_d());
 }
 
-FloatDP::RoundingModeType FloatDP::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
-Void FloatDP::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
-Void FloatDP::set_rounding_downward() { Ariadne::set_rounding_downward(); }
-Void FloatDP::set_rounding_upward() { Ariadne::set_rounding_upward(); }
-Void FloatDP::set_rounding_to_nearest() { Ariadne::set_rounding_to_nearest(); }
-Void FloatDP::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
+FloatDP::RoundingModeType FloatDP::get_rounding_mode() { return Ariadne::get_builtin_rounding_mode(); }
+Void FloatDP::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_builtin_rounding_mode(rnd); }
+Void FloatDP::set_rounding_downward() { Ariadne::set_builtin_rounding_downward(); }
+Void FloatDP::set_rounding_upward() { Ariadne::set_builtin_rounding_upward(); }
+Void FloatDP::set_rounding_to_nearest() { Ariadne::set_builtin_rounding_to_nearest(); }
+Void FloatDP::set_rounding_toward_zero() { Ariadne::set_builtin_rounding_toward_zero(); }
 
 FloatDP::PrecisionType FloatDP::get_default_precision() { return FloatDP::PrecisionType(); }
 FloatDP::PrecisionType FloatDP::precision() const { return FloatDP::PrecisionType(); }

@@ -452,7 +452,7 @@ template<> Int integer_cast<Int,FloatDP>(FloatDP const&);
 struct Float32 {
     float flt;
   public:
-    explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
+    explicit Float32(FloatDP x, BuiltinRoundingModeType rnd) { set_builtin_rounding_mode(rnd); (volatile float&)flt = (volatile double&)x.dbl; }
     explicit operator FloatDP() const;
 };
 

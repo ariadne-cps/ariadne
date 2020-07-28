@@ -170,12 +170,17 @@ template<> class Rounded<FloatDP>
     friend Rounded<FloatDP> operator-(ExactDouble x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(sub_rnd(x1.get_d(),x2.dbl)); }
     friend Rounded<FloatDP> operator*(ExactDouble x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(mul_rnd(x1.get_d(),x2.dbl)); }
     friend Rounded<FloatDP> operator/(ExactDouble x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(div_rnd(x1.get_d(),x2.dbl)); }
-    friend Rounded<FloatType>& operator+=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1+x2; }
-    friend Rounded<FloatType>& operator-=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1-x2; }
-    friend Rounded<FloatType>& operator*=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1*x2; }
-    friend Rounded<FloatType>& operator/=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1/x2; }
+    friend Rounded<FloatDP>& operator+=(Rounded<FloatDP>& x1, ExactDouble x2) { return x1=x1+x2; }
+    friend Rounded<FloatDP>& operator-=(Rounded<FloatDP>& x1, ExactDouble x2) { return x1=x1-x2; }
+    friend Rounded<FloatDP>& operator*=(Rounded<FloatDP>& x1, ExactDouble x2) { return x1=x1*x2; }
+    friend Rounded<FloatDP>& operator/=(Rounded<FloatDP>& x1, ExactDouble x2) { return x1=x1/x2; }
 
-    friend Comparison cmp(Rounded<FloatDP> x1, Rounded<FloatDP> x2);
+    friend Rounded<FloatDP> max(Rounded<FloatDP> x1, ExactDouble x2) { return Rounded<FloatDP>(max_rnd(x1.dbl,x2.get_d())); }
+    friend Rounded<FloatDP> min(Rounded<FloatDP> x1, ExactDouble x2) { return Rounded<FloatDP>(min_rnd(x1.dbl,x2.get_d())); }
+    friend Rounded<FloatDP> max(ExactDouble x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(max_rnd(x1.get_d(),x2.dbl)); }
+    friend Rounded<FloatDP> min(ExactDouble x1, Rounded<FloatDP> x2) { return Rounded<FloatDP>(min_rnd(x1.get_d(),x2.dbl)); }
+
+    friend Comparison cmp(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return cmp(x1.raw(),x2.raw()); }
     friend Bool operator==(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl == x2.dbl; }
     friend Bool operator!=(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl != x2.dbl; }
     friend Bool operator<=(Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl <= x2.dbl; }
@@ -183,7 +188,7 @@ template<> class Rounded<FloatDP>
     friend Bool operator< (Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl <  x2.dbl; }
     friend Bool operator> (Rounded<FloatDP> x1, Rounded<FloatDP> x2) { return x1.dbl >  x2.dbl; }
 
-    friend Comparison cmp(Rounded<FloatDP> x1, ExactDouble x2);
+    friend Comparison cmp(Rounded<FloatDP> x1, ExactDouble x2) { return cmp(x1.raw(),FloatDP(x2,dp)); }
     friend Bool operator==(Rounded<FloatDP> x1, ExactDouble x2) { return x1.dbl == x2.get_d(); }
     friend Bool operator!=(Rounded<FloatDP> x1, ExactDouble x2) { return x1.dbl != x2.get_d(); }
     friend Bool operator<=(Rounded<FloatDP> x1, ExactDouble x2) { return x1.dbl <= x2.get_d(); }
@@ -191,13 +196,13 @@ template<> class Rounded<FloatDP>
     friend Bool operator< (Rounded<FloatDP> x1, ExactDouble x2) { return x1.dbl <  x2.get_d(); }
     friend Bool operator> (Rounded<FloatDP> x1, ExactDouble x2) { return x1.dbl >  x2.get_d(); }
 
-    friend Comparison cmp(Rounded<FloatDP> x1, Int n2);
-    friend Bool operator==(Rounded<FloatDP> x1, Int n2) { return x1.dbl == n2; }
-    friend Bool operator!=(Rounded<FloatDP> x1, Int n2) { return x1.dbl != n2; }
-    friend Bool operator<=(Rounded<FloatDP> x1, Int n2) { return x1.dbl <= n2; }
-    friend Bool operator>=(Rounded<FloatDP> x1, Int n2) { return x1.dbl >= n2; }
-    friend Bool operator< (Rounded<FloatDP> x1, Int n2) { return x1.dbl <  n2; }
-    friend Bool operator> (Rounded<FloatDP> x1, Int n2) { return x1.dbl >  n2; }
+    friend Comparison cmp(ExactDouble x1, Rounded<FloatDP> x2) { return cmp(FloatDP(x1,dp),x2.raw()); }
+    friend Bool operator==(ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() == x2.dbl; }
+    friend Bool operator!=(ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() != x2.dbl; }
+    friend Bool operator<=(ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() <= x2.dbl; }
+    friend Bool operator>=(ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() >= x2.dbl; }
+    friend Bool operator< (ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() <  x2.dbl; }
+    friend Bool operator> (ExactDouble x1, Rounded<FloatDP> x2) { return x1.get_d() >  x2.dbl; }
 
     friend OutputStream& operator<<(OutputStream& os, Rounded<FloatDP> const& x) { return os << x.data(); }
 };
@@ -297,7 +302,6 @@ template<class FLT> class Rounded
     friend Rounded<FloatType>& operator*=(Rounded<FloatType>& x1, Rounded<FloatType> x2) { return x1=x1*x2; }
     friend Rounded<FloatType>& operator/=(Rounded<FloatType>& x1, Rounded<FloatType> x2) { return x1=x1/x2; }
 
-
     friend Rounded<FloatType> operator+(Rounded<FloatType> x1, ExactDouble x2) { return Rounded<FloatType>(add(_rnd,x1._flt,FloatDP(x2.get_d()))); }
     friend Rounded<FloatType> operator-(Rounded<FloatType> x1, ExactDouble x2) { return Rounded<FloatType>(sub(_rnd,x1._flt,FloatDP(x2.get_d()))); }
     friend Rounded<FloatType> operator*(Rounded<FloatType> x1, ExactDouble x2) { return Rounded<FloatType>(mul(_rnd,x1._flt,FloatDP(x2.get_d()))); }
@@ -311,7 +315,12 @@ template<class FLT> class Rounded
     friend Rounded<FloatType>& operator*=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1*x2; }
     friend Rounded<FloatType>& operator/=(Rounded<FloatType>& x1, ExactDouble x2) { return x1=x1/x2; }
 
-    friend Comparison cmp(Rounded<FloatType> x1, Rounded<FloatType> x2);
+    friend Rounded<FloatType> max(Rounded<FloatType> x1, ExactDouble x2) { return Rounded<FloatType>(max(x1._flt,x2)); }
+    friend Rounded<FloatType> min(Rounded<FloatType> x1, ExactDouble x2) { return Rounded<FloatType>(min(x1._flt,x2)); }
+    friend Rounded<FloatType> max(ExactDouble x1, Rounded<FloatType> x2) { return Rounded<FloatType>(max(x1,x2._flt)); }
+    friend Rounded<FloatType> min(ExactDouble x1, Rounded<FloatType> x2) { return Rounded<FloatType>(min(x1,x2._flt)); }
+
+    friend Comparison cmp(Rounded<FloatType> x1, Rounded<FloatType> x2) { return cmp(x1._flt,x2._flt); }
     friend Bool operator==(Rounded<FloatType> x1, Rounded<FloatType> x2) { return x1._flt == x2._flt; }
     friend Bool operator!=(Rounded<FloatType> x1, Rounded<FloatType> x2) { return x1._flt != x2._flt; }
     friend Bool operator<=(Rounded<FloatType> x1, Rounded<FloatType> x2) { return x1._flt <= x2._flt; }
@@ -319,21 +328,21 @@ template<class FLT> class Rounded
     friend Bool operator< (Rounded<FloatType> x1, Rounded<FloatType> x2) { return x1._flt <  x2._flt; }
     friend Bool operator> (Rounded<FloatType> x1, Rounded<FloatType> x2) { return x1._flt >  x2._flt; }
 
-    friend Comparison cmp(Rounded<FloatType> x1, Int n2);
-    friend Bool operator==(Rounded<FloatType> x1, Int n2) { return x1._flt == n2; }
-    friend Bool operator!=(Rounded<FloatType> x1, Int n2) { return x1._flt != n2; }
-    friend Bool operator<=(Rounded<FloatType> x1, Int n2) { return x1._flt <= n2; }
-    friend Bool operator>=(Rounded<FloatType> x1, Int n2) { return x1._flt >= n2; }
-    friend Bool operator< (Rounded<FloatType> x1, Int n2) { return x1._flt <  n2; }
-    friend Bool operator> (Rounded<FloatType> x1, Int n2) { return x1._flt >  n2; }
+    friend Comparison cmp(Rounded<FloatType> x1, ExactDouble x2) { return cmp(x1._flt,x2); }
+    friend Bool operator==(Rounded<FloatType> x1, ExactDouble x2) { return x1._flt == x2; }
+    friend Bool operator!=(Rounded<FloatType> x1, ExactDouble x2) { return x1._flt != x2; }
+    friend Bool operator<=(Rounded<FloatType> x1, ExactDouble x2) { return x1._flt <= x2; }
+    friend Bool operator>=(Rounded<FloatType> x1, ExactDouble x2) { return x1._flt >= x2; }
+    friend Bool operator< (Rounded<FloatType> x1, ExactDouble x2) { return x1._flt <  x2; }
+    friend Bool operator> (Rounded<FloatType> x1, ExactDouble x2) { return x1._flt >  x2; }
 
-    friend Comparison cmp(Rounded<FloatType> x1, ExactDouble d2);
-    friend Bool operator==(Rounded<FloatType> x1, ExactDouble d2) { return x1._flt == d2; }
-    friend Bool operator!=(Rounded<FloatType> x1, ExactDouble d2) { return x1._flt != d2; }
-    friend Bool operator<=(Rounded<FloatType> x1, ExactDouble d2) { return x1._flt <= d2; }
-    friend Bool operator>=(Rounded<FloatType> x1, ExactDouble d2) { return x1._flt >= d2; }
-    friend Bool operator< (Rounded<FloatType> x1, ExactDouble d2) { return x1._flt <  d2; }
-    friend Bool operator> (Rounded<FloatType> x1, ExactDouble d2) { return x1._flt >  d2; }
+    friend Comparison cmp(ExactDouble x1, Rounded<FloatType> x2) { return cmp(x1,x2._flt); }
+    friend Bool operator==(ExactDouble x1, Rounded<FloatType> x2) { return x1 == x2._flt; }
+    friend Bool operator!=(ExactDouble x1, Rounded<FloatType> x2) { return x1 != x2._flt; }
+    friend Bool operator<=(ExactDouble x1, Rounded<FloatType> x2) { return x1 <= x2._flt; }
+    friend Bool operator>=(ExactDouble x1, Rounded<FloatType> x2) { return x1 >= x2._flt; }
+    friend Bool operator< (ExactDouble x1, Rounded<FloatType> x2) { return x1 <  x2._flt; }
+    friend Bool operator> (ExactDouble x1, Rounded<FloatType> x2) { return x1 >  x2._flt; }
 
     friend OutputStream& operator<<(OutputStream& os, Rounded<FloatType> const& x) { return os << x.data(); }
 };

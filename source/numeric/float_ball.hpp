@@ -121,6 +121,9 @@ template<class F, class FE> class Ball
     Ball<F,FE> pm(Error<FE> const& e) const;
     friend Approximation<F> round(Approximation<F> const& x);
   public:
+    friend Bool is_nan(Ball<F,FE> const& x) {
+        return is_nan(x._v) || is_nan(x._e); }
+
     friend Ball<F,FE> max(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {
         return Operations<Ball<F,FE>>::_max(x1,x2); }
     friend Ball<F,FE> min(Ball<F,FE> const& x1, Ball<F,FE> const& x2) {

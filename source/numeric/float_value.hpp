@@ -100,6 +100,9 @@ template<class F> class Value
     RawType& raw() { return _v; }
     double get_d() const { return _v.get_d(); }
   public:
+    friend Bool is_nan(Value<F> const& x) {
+        return is_nan(x._v); }
+
     friend Value<F> max(Value<F> const& x1,  Value<F> const& x2) {
         return Value<F>(max(x1._v,x2._v)); }
     friend Value<F> min(Value<F> const& x1,  Value<F> const& x2) {

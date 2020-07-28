@@ -105,6 +105,9 @@ template<class F> class Approximation
     RawType& raw() { return this->_a; }
     double get_d() const { return this->_a.get_d(); }
   public:
+    friend Bool is_nan(Approximation<F> const& x) {
+        return is_nan(x._a); }
+
     friend Approximation<F> floor(Approximation<F> const& x) {
         return Approximation<F>(floor(x._a)); }
     friend Approximation<F> ceil(Approximation<F> const& x) {

@@ -69,7 +69,7 @@ script:
   - echo "Running on $($NPROC) threads ..."
   - CMAKE_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER_CMD"
   - if [[ -n "$COVERAGE" ]]; then CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"; else CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release"; fi
-  - if [[ "$TRAVIS_BRANCH" == master ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
+  - if [[ "$TRAVIS_BRANCH" == master ]] || [[ "$TRAVIS_BRANCH" == working ]]; then CMAKE_ARGS="$CMAKE_ARGS -DWERROR=ON"; fi
   - cmake . $CMAKE_ARGS
   - if [[ -n "$COVERAGE" ]]; then make tests -j $($NPROC); else make -j $($NPROC); fi
   - ctest -L "primary" -j $($NPROC)

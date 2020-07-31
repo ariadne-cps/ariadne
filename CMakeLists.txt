@@ -9,9 +9,10 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   message(WARNING "Microsoft compiler not supported.")
 endif()
 
-set(COMPILER_WARN all extra pedantic sign-conversion shadow cast-qual disabled-optimization
+set(ANY_TARGET_WARN all extra pedantic sign-conversion cast-qual disabled-optimization
                   init-self missing-include-dirs sign-promo switch-default undef redundant-decls)
-set(COMPILER_DONT_WARN strict-aliasing unused-parameter)
+set(ANY_TARGET_DONT_WARN strict-aliasing unused-parameter)
+set(LIBRARY_EXCLUSIVE_WARN shadow)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MACOSX_RPATH 1)
@@ -20,10 +21,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-foreach(WARN ${COMPILER_WARN})
+foreach(WARN ${ANY_TARGET_WARN})
     add_compile_options(-W${WARN})
 endforeach()
-foreach(WARN ${COMPILER_DONT_WARN})
+foreach(WARN ${ANY_TARGET_DONT_WARN})
     add_compile_options(-Wno-${WARN})
 endforeach()
 if(WERROR)

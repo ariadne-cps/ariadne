@@ -98,10 +98,10 @@ template<class X> X make_zero() {
         if constexpr (IsConstructible<X,PR>::value) {
             PR pr=make_default_precision<PR>(); return X(pr);
         } else {
-            assert(false);
+            abort();
         }
     }
-    else { assert(false); }
+    else { abort(); }
 }
 
 template<class X> class VectorRange;

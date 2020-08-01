@@ -452,7 +452,7 @@ template<class F> F create_default() {
     else if constexpr (IsSame<F,FloatMPValue>::value) { return FloatMPValue(FloatMP::get_default_precision()); }
     else if constexpr (IsSame<F,FloatMPError>::value) { return FloatMPError(FloatMP::get_default_precision()); }
     else if constexpr (IsSame<F,Interval<FloatDPUpperBound>>::value) { return FloatDPUpperInterval(0,0); }
-    else { assert(false); }
+    else { abort(); }
 }
 
 

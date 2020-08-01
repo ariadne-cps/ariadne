@@ -51,9 +51,11 @@ class Real;
 class RealInterface {
   public:
     virtual ~RealInterface() = default;
+    virtual ValidatedReal _compute(Accuracy) const = 0;
     virtual ValidatedReal _compute(Effort) const = 0;
-    virtual FloatDPBounds _compute_get(DoublePrecision) const = 0;
-    virtual FloatMPBounds _compute_get(MultiplePrecision) const = 0;
+    virtual DyadicBounds _compute_get(Effort) const = 0;
+    virtual FloatDPBounds _compute_get(Effort, DoublePrecision) const = 0;
+    virtual FloatMPBounds _compute_get(Effort, MultiplePrecision) const = 0;
   public:
     virtual OutputStream& _write(OutputStream& os) const = 0;
 };

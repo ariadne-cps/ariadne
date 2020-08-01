@@ -131,7 +131,6 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    DoublePrecision pr;
     HybridTime t(0.0,0);
     Dyadic h(ExactDouble(this->_step_size.get_d()));
     HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
@@ -156,7 +155,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
     while(possibly(t<tmax) && (event_trace.empty() || !termination.terminating_events().contains(event_trace.back()))) {
         Int old_precision = std::clog.precision();
         ARIADNE_LOG_PRINTLN_AT(1,
-                "t=" << std::setw(4) << std::left << t.continuous_time().lower().get(pr)
+                "t=" << std::setw(4) << std::left << t.continuous_time().lower().compute(Effort(0u))
                 << " #e=" << std::left << t.discrete_time()
                 << " p=" << point
                 << " l=" << std::left << location

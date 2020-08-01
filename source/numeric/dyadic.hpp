@@ -180,38 +180,59 @@ template<> class RepresentationWriter<Dyadic> : public WriterInterface<Dyadic> {
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
+using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error. //!< \ingroup NumericModule
 using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number. //!< \ingroup NumericModule
+using DyadicUpperBound = UpperBound<Dyadic>; //!< Alias for dyadic upper bound for a number. //!< \ingroup NumericModule
+using DyadicLowerBound = LowerBound<Dyadic>; //!< Alias for dyadic lower bound for a number. //!< \ingroup NumericModule
+using DyadicApproximation = Approximation<Dyadic>; //!< Alias for dyadic approximateion to a number. //!< \ingroup NumericModule
+
 
 template<> class Bounds<Dyadic> {
     Dyadic _l, _u;
   public:
     Bounds<Dyadic>(Dyadic w) : _l(w), _u(w) { }
+    template<class X, EnableIf<IsConvertible<X,Dyadic>> =dummy> Bounds<Dyadic>(X const& x)
+        : Bounds<Dyadic>(Dyadic(x)) { }
     Bounds<Dyadic>(Dyadic l, Dyadic u) : _l(l), _u(u) { }
     template<class X, EnableIf<IsConstructible<Dyadic,X>> =dummy> Bounds<Dyadic>(Bounds<X> const& x)
         : Bounds<Dyadic>(Dyadic(x.lower_raw()),Dyadic(x.upper_raw())) { }
     operator ValidatedNumber() const;
-    Bounds<Dyadic> pm(Dyadic e) { return DyadicBounds(_l-e,_u+e); }
+    Bounds<Dyadic> pm(Dyadic e) { return Bounds<Dyadic>(_l-e,_u+e); }
     Dyadic lower() const { return _l; }
     Dyadic upper() const { return _u; }
     Dyadic lower_raw() const { return _l; }
     Dyadic upper_raw() const { return _u; }
-    friend Bounds<Dyadic> operator+(DyadicBounds const& w) { return DyadicBounds(+w._l,w._u); }
-    friend Bounds<Dyadic> operator-(DyadicBounds const& w) { return DyadicBounds(-w._u,-w._l); }
-    friend Bounds<Dyadic> operator+(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(w1._l+w2._l,w1._u+w2._u); }
-    friend Bounds<Dyadic> operator-(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(w1._l-w2._u,w1._u-w2._l); }
-    friend Bounds<Dyadic> operator*(DyadicBounds const& w1, DyadicBounds const& w2);
-    friend Bounds<Dyadic> hlf(DyadicBounds const& w) { return DyadicBounds(hlf(w._l),hlf(w._u)); }
-    friend DyadicBounds abs(DyadicBounds const& w) { return DyadicBounds(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
-    friend DyadicBounds max(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),max(w1._u,w2._u)); }
-    friend DyadicBounds min(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(min(w1._l,w2._l),min(w1._u,w2._u)); }
-    friend ValidatedKleenean operator<(DyadicBounds const& w1, DyadicBounds const& w2) {
-        if (w1._u<w2._l) { return true; } else if (w1._l >= w2._u) { return false; } else { return indeterminate; } }
-    friend Boolean refines(DyadicBounds const& w1, DyadicBounds const& w2) { return w1._l>=w2._l and w1._u<=w2._u; }
-    friend DyadicBounds refinement(DyadicBounds const& w1, DyadicBounds const& w2) { return DyadicBounds(max(w1._l,w2._l),min(w1._u,w2._u)); }
-    friend OutputStream& operator<<(OutputStream& os, DyadicBounds y) { return os << "[" << y._l << ":" << y._u << "]"; }
+    Bounds<FloatDP> get(DoublePrecision pr) const;
+    Bounds<FloatMP> get(MultiplePrecision pr) const;
+    friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(+w._l,w._u); }
+    friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(-w._u,-w._l); }
+    friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l+w2._l,w1._u+w2._u); }
+    friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l-w2._u,w1._u-w2._l); }
+    friend Bounds<Dyadic> operator*(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2);
+    friend Bounds<Dyadic> hlf(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(hlf(w._l),hlf(w._u)); }
+    friend Bounds<Dyadic> abs(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
+    friend Bounds<Dyadic> max(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(max(w1._l,w2._l),max(w1._u,w2._u)); }
+    friend Bounds<Dyadic> min(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(min(w1._l,w2._l),min(w1._u,w2._u)); }
+
+    friend ValidatedKleenean sgn(Bounds<Dyadic> const& w) {
+        if (w._l>0) { return true; } else if (w._u<0) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator==(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._l>=w2._u && w1._u<=w2._l) { return true; } else if (w1._u< w2._l || w1._l> w2._u) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator!=(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._u< w2._l || w1._l> w2._u) { return true; } else if (w1._l>=w2._u && w1._u<=w2._l) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator<=(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._u<=w2._l) { return true; } else if (w1._l> w2._u) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator>=(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._l>=w2._u) { return true; } else if (w1._u< w2._l) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator< (Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._u< w2._l) { return true; } else if (w1._l>=w2._u) { return false; } else { return indeterminate; } }
+    friend ValidatedKleenean operator> (Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
+        if (w1._l> w2._u) { return true; } else if (w1._u<=w1._u) { return false; } else { return indeterminate; } }
+    friend Boolean refines(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return w1._l>=w2._l and w1._u<=w2._u; }
+    friend Bounds<Dyadic> refinement(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(max(w1._l,w2._l),min(w1._u,w2._u)); }
+    friend OutputStream& operator<<(OutputStream& os, Bounds<Dyadic> y) { return os << "[" << y._l << ":" << y._u << "]"; }
 };
 
-using DyadicBall = Ball<Dyadic,Dyadic>;
 
 template<> class Ball<Dyadic,Dyadic> {
     Dyadic _v, _e;
@@ -239,9 +260,48 @@ template<> class Ball<Dyadic,Dyadic> {
     friend OutputStream& operator<<(OutputStream& os, DyadicBall y) { return os << "[" << y._v << ":" << y._e << "]"; }
 };
 
-using DyadicApproximation = Approximation<Dyadic>;
+template<> class LowerBound<Dyadic> {
+    Dyadic _l;
+  public:
+    LowerBound<Dyadic>(Dyadic l) : _l(l) { }
+    LowerBound<Dyadic>(Bounds<Dyadic> lu) : _l(lu.lower_raw()) { }
+    LowerBound<Dyadic>(LowerBound<FloatDP> const& x);
+    LowerBound<Dyadic>(UpperBound<FloatMP> const& x);
+    Dyadic raw() const { return _l; }
+    LowerBound<FloatDP> get(DoublePrecision pr) const;
+    LowerBound<FloatMP> get(MultiplePrecision pr) const;
+    friend OutputStream& operator<<(OutputStream& os, LowerBound<Dyadic> const& y);
+};
 
-template<> class Approximation<Dyadic>;
+template<> class UpperBound<Dyadic> {
+    Dyadic _u;
+  public:
+    explicit UpperBound<Dyadic>(Dyadic u) : _u(u) { }
+    UpperBound<Dyadic>(Bounds<Dyadic> lu) : _u(lu.upper_raw()) { }
+    UpperBound<Dyadic>(UpperBound<FloatDP> const& x);
+    UpperBound<Dyadic>(UpperBound<FloatMP> const& x);
+    Dyadic raw() const { return _u; }
+    UpperBound<FloatDP> get(DoublePrecision pr) const;
+    UpperBound<FloatMP> get(MultiplePrecision pr) const;
+    friend OutputStream& operator<<(OutputStream& os, UpperBound<Dyadic> const& y);
+};
+
+template<> class Approximation<Dyadic> {
+    Dyadic _a;
+  public:
+    Approximation<Dyadic>(Dyadic a) : _a(a) { }
+    Approximation<Dyadic>(Approximation<FloatDP> const& x);
+    Approximation<Dyadic>(Approximation<FloatMP> const& x);
+    Dyadic raw() const { return _a; }
+    Approximation<FloatDP> get(DoublePrecision pr) const;
+    Approximation<FloatMP> get(MultiplePrecision pr) const;
+    friend OutputStream& operator<<(OutputStream& os, Approximation<Dyadic> const& y);
+};
+
+template<> class Positive<Bounds<Dyadic>> : public Bounds<Dyadic> { public: Positive(Bounds<Dyadic> w) : Bounds<Dyadic>(w) { }; };
+template<> class Positive<LowerBound<Dyadic>> : public LowerBound<Dyadic> { public: Positive(LowerBound<Dyadic> w) : LowerBound<Dyadic>(w) { }; };
+template<> class Positive<UpperBound<Dyadic>> : public UpperBound<Dyadic> { public: Positive(UpperBound<Dyadic> w) : UpperBound<Dyadic>(w) { } ; };
+template<> class Positive<Approximation<Dyadic>> : public Approximation<Dyadic> { public: Positive(Approximation<Dyadic> w) : Approximation<Dyadic>(w) { } };
 
 inline Dyadic operator"" _dyadic(long double x) { return Dyadic(static_cast<double>(x)); }
 inline Dyadic operator"" _dy(long double x) { return operator"" _dyadic(x); }

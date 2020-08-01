@@ -128,20 +128,22 @@ void TestReal::test_conversions() {
 }
 
 void TestReal::test_constructors() {
+    Effort eff(2);
+    DoublePrecision pr;
     ARIADNE_TEST_CONSTRUCT(Real,xv, );
-    ARIADNE_TEST_EQUALS(xv.get(dp),0);
-    ARIADNE_TEST_EQUALS(xv.lower().get(dp).raw(),0);
-    ARIADNE_TEST_EQUALS(xv.upper().get(dp).raw(),0);
+    ARIADNE_TEST_EQUALS(xv.get(pr),0);
+    ARIADNE_TEST_EQUALS(xv.lower().compute(eff).get().raw(),0);
+    ARIADNE_TEST_EQUALS(xv.upper().compute(eff).get().raw(),0);
     ARIADNE_TEST_CONSTRUCT(Real,xz,(1));
-    ARIADNE_TEST_EQUALS(xz.get(dp),1);
-    ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_x));
-    ARIADNE_TEST_EQUALS(xe.get(dp),1.5);
+    ARIADNE_TEST_EQUALS(xz.compute(eff).get(),1);
+    ARIADNE_TEST_CONSTRUCT(Real,xe,(1.5_exact));
+    ARIADNE_TEST_EQUALS(xe.compute(eff).get(),1.5_dy);
     ARIADNE_TEST_CONSTRUCT(Real,xn,(1.1_q));
-    ARIADNE_TEST_COMPARE(Rational(xn.lower().get(dp).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xn.upper().get(dp).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.lower().compute(eff).get().raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xn.upper().compute(eff).get().raw()),>,Rational(11,10));
     ARIADNE_TEST_CONSTRUCT(Real,xq,(Rational(11,10)));
-    ARIADNE_TEST_COMPARE(Rational(xq.lower().get(dp).raw()),<,Rational(11,10));
-    ARIADNE_TEST_COMPARE(Rational(xq.upper().get(dp).raw()),>,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.lower().compute(eff).get().raw()),<,Rational(11,10));
+    ARIADNE_TEST_COMPARE(Rational(xq.upper().compute_get(eff).raw()),>,Rational(11,10));
 
     ARIADNE_TEST_CONSTRUCT(Real,xy,(EffectiveNumber(5)));
     ARIADNE_TEST_EQUALS(xy.get(double_precision),5);
@@ -301,20 +303,33 @@ void TestReal::test_sequence() {
     ARIADNE_TEST_PRINT(choose({pi_>pi_lower,Real(4)},{pi_<pi_upper,Real(3)}));
 
     Dyadic pi_upper_bound = pi_.compute(Accuracy(256_bits)).get().upper_raw();
-    Real x=pi_-pi_upper_bound;
-    ARIADNE_TEST_PRINT((x>=0).check(Effort(5u)));
-    ARIADNE_TEST_PRINT((x>=0).check(Effort(6u)));
+    ARIADNE_TEST_CONSTRUCT(Real,x,(pi_-pi_upper_bound));
+    ARIADNE_TEST_PRINT(x.compute(Effort(12u)).get(double_precision));
+    ARIADNE_TEST_UNARY_PREDICATE(is_indeterminate,(x>=0).check(Effort(12u)));
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(12u)));
+    ARIADNE_TEST_EQUALS((x>=0).check(Effort(20u)),false);
 //    ARIADNE_TEST_PRINT(unify(x>=0,+x,x<=0,-x));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(5u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(6u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(384u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(5_bits)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(6_bits)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(54_bits)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(64_bits)));
-    ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(5u)));
-    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,1+x}).compute(Effort(6u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(12u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(20u)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(192_bits)));
+    ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(320_bits)));
+    ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(12u)));
+    ARIADNE_TEST_COMPARE(when({x>=0,+x},{x<=0,1+x}).compute(Effort(20u)),>=,0.5_x);
 
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(0u)));
+    ARIADNE_TEST_PRINT((x<=0).check(Effort(0u)));
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(12u)));
+    ARIADNE_TEST_PRINT((x<=0).check(Effort(12u)));
+    ARIADNE_TEST_PRINT((x>=0).check(Effort(20u)));
+    ARIADNE_TEST_PRINT((x<=0).check(Effort(20u)));
+    ARIADNE_TEST_PRINT(x.compute(Effort(12)));
+    ARIADNE_TEST_PRINT(x.compute(Effort(12))<DyadicBounds(0));
+    ARIADNE_TEST_PRINT(x.compute(Effort(20u)));
+    ARIADNE_TEST_PRINT(x.compute(Effort(20u)).get(precision(320_bits)));
+
+    Real y=2*sin(pi/6)-1;
+    ARIADNE_TEST_UNARY_PREDICATE(is_indeterminate,(y>=0).check(Effort(0u)));
+    ARIADNE_TEST_UNARY_PREDICATE(is_indeterminate,(y>=0).check(Effort(16u)));
 
 }
 

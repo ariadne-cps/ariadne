@@ -224,6 +224,7 @@ class Indeterminate {
     operator ValidatedKleenean() const;
     friend Bool decide(Indeterminate const& l, Effort e);
     friend Bool decide(Indeterminate const& l);
+    friend OutputStream& operator<<(OutputStream& os, ValidatedKleenean const&);
 };
 
 //! \ingroup LogicalModule

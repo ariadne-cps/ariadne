@@ -45,6 +45,8 @@
 #include "../numeric/arithmetic.hpp"
 #include "../numeric/sequence.hpp"
 
+#include "dyadic.hpp"
+
 namespace Ariadne {
 
 //! A group
@@ -75,9 +77,26 @@ class PositiveNaiveReal;
 template<> struct IsNumericType<Real> : True { };
 
 class ValidatedReal;
-class ValidatedLowerReal;
 class ValidatedUpperReal;
+class ValidatedLowerReal;
 class ApproximateReal;
+
+class Dyadic;
+template<class F> class Bounds;
+template<class F> class LowerBound;
+template<class F> class UpperBound;
+template<class F> class Approximation;
+
+using DyadicBounds = Bounds<Dyadic>;
+using DyadicLowerBound = LowerBound<Dyadic>;
+using DyadicUpperBound = UpperBound<Dyadic>;
+using DyadicApproximation = Approximation<Dyadic>;
+
+using PositiveDyadicBounds = PositiveBounds<Dyadic>;
+using PositiveDyadicLowerBound = PositiveLowerBound<Dyadic>;
+using PositiveDyadicUpperBound = PositiveUpperBound<Dyadic>;
+using PositiveDyadicApproximation = PositiveApproximation<Dyadic>;
+
 
 //! \ingroup NumericModule
 
@@ -154,6 +173,12 @@ class Real
     //! Compute a concrete approximation with a bound on the error. The error bound converges to \a 0 as \a eff approaches infinity.
     //! The time taken should be roughly polynomial in \a eff.
     ValidatedReal compute(Effort eff) const;
+    //! Compute a concrete approximation using dyadic bounds.
+    DyadicBounds compute_get(Effort eff) const;
+    //! Compute a concrete approximation using double-precision.
+    FloatDPBounds compute_get(Effort eff, DoublePrecision pr) const;
+    //! Compute a concrete approximation using the given precision.
+    FloatMPBounds compute_get(Effort eff, MultiplePrecision pr) const;
     //! Compute a concrete approximation using double-precision.
     FloatDPBounds get(DoublePrecision pr) const;
     //! Compute a concrete approximation using the given precision.
@@ -266,19 +291,6 @@ class Real
     friend OutputStream& operator<<(OutputStream& os, Real const& r); //< Write to an output stream.
     //@}
     double get_d() const;
-/*
-    friend Number<EffectiveTag> operator+(Number<EffectiveTag>, Number<EffectiveTag>);
-    friend Number<EffectiveTag> operator-(Number<EffectiveTag>, Number<EffectiveTag>);
-    friend Number<EffectiveTag> operator*(Number<EffectiveTag>, Number<EffectiveTag>);
-    friend Number<EffectiveTag> operator/(Number<EffectiveTag>, Number<EffectiveTag>);
-
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator==(const Real& x1, N n2) { return x1==Real(n2); }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator< (const Real& x1, N n2) { return x1< Real(n2); }
-    template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> friend inline decltype(auto) operator> (const Real& x1, N n2) { return x1> Real(n2); }
-*/
 
   private:
     Real(std::int64_t n, Void*);
@@ -315,15 +327,13 @@ class LowerReal
     LowerReal(Real);
     explicit LowerReal(SharedPointer<const Interface>);
   public:
-    FloatDPLowerBound operator() (DoublePrecision pr) const;
-    FloatMPLowerBound operator() (MultiplePrecision pr) const;
-
     //@{
-    //! \name Computation of rigorous validated bounds on the number
-    FloatDPLowerBound get(DoublePrecision pr) const; //!< Get a lower bound using double-precision arithmetic.
-    FloatMPLowerBound get(MultiplePrecision pr) const; //!< Get a lower bound using multiple-precision floating-point arithmetic.
+    //! \name Computation of rigorous validated lower bounds on the number
+    ValidatedLowerReal compute(Effort eff) const;
+    DyadicLowerBound compute_get(Effort eff) const;
+    FloatDPLowerBound compute_get(Effort eff, DoublePrecision pr) const;
+    FloatMPLowerBound compute_get(Effort eff, MultiplePrecision pr) const;
     //@}
-
   public:
     //@{
     //! \name Lattice operations
@@ -418,13 +428,13 @@ class UpperReal
     UpperReal(Real);
     explicit UpperReal(SharedPointer<const Interface>);
   public:
-    FloatDPUpperBound operator() (DoublePrecision pr) const;
-    FloatMPUpperBound operator() (MultiplePrecision pr) const;
-
     //@{
-    //! \name Computation of rigorous validated upper bounds
-    FloatDPUpperBound get(DoublePrecision pr) const; //!< Get a lower bound using double-precision arithmetic.
-    FloatMPUpperBound get(MultiplePrecision pr) const; //!< Get a lower bound using multiple-precision floating-point arithmetic.
+    //! \name Computation of rigorous validated upper bounds on the number
+    ValidatedUpperReal compute(Effort eff) const;
+    DyadicUpperBound compute_get(Effort eff) const;
+    FloatDPUpperBound compute_get(Effort eff, DoublePrecision pr) const;
+    FloatMPUpperBound compute_get(Effort eff, MultiplePrecision pr) const;
+    //@}
     //@}
 
   public:
@@ -539,15 +549,9 @@ class NaiveReal
 
     //@{
     //! \name Computation of approximations to the number.
-/*
     //! Compute an approximation with no guarantees on the error. The error converges to \a 0 as \a eff approaches infinity.
     //! The time taken should be roughly polynomial in \a eff.
     ApproximateReal compute(Effort eff) const;
-*/
-    //! Compute a concrete approximation using double-precision.
-    FloatDPApproximation get(DoublePrecision pr) const;
-    //! Compute a concrete approximation using the given precision.
-    FloatMPApproximation get(MultiplePrecision pr) const;
     //@}
 
     //@{
@@ -629,8 +633,7 @@ class PositiveReal : public Real
     using Real::Real;
     PositiveReal() : Real() { }
     PositiveReal(Real r) : Real(r) { }
-    PositiveFloatDPBounds get(DoublePrecision pr) const;
-    PositiveFloatMPBounds get(MultiplePrecision pr) const;
+    PositiveBounds<Dyadic> compute_get(Effort) const;
   public:
     PositiveReal max(PositiveReal const&, PositiveReal const&);
     PositiveReal max(Real const&, PositiveReal const&);
@@ -657,8 +660,7 @@ class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowe
   public:
     using LowerReal::LowerReal;
     explicit PositiveLowerReal(LowerReal r) : LowerReal(r) { }
-    PositiveFloatDPLowerBound get(DoublePrecision pr) const;
-    PositiveFloatMPLowerBound get(MultiplePrecision pr) const;
+    PositiveLowerBound<Dyadic> compute_get(Effort) const;
   public:
     PositiveLowerReal rec(PositiveUpperReal const&);
     PositiveUpperReal rec(PositiveLowerReal const&);
@@ -675,8 +677,7 @@ class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUppe
   public:
     using UpperReal::UpperReal;
     explicit PositiveUpperReal(UpperReal r) : UpperReal(r) { }
-    PositiveFloatDPUpperBound get(DoublePrecision pr) const;
-    PositiveFloatMPUpperBound get(MultiplePrecision pr) const;
+    PositiveUpperBound<Dyadic> compute_get(Effort) const;
   public:
     PositiveUpperReal rec(PositiveLowerReal const&);
     PositiveLowerReal rec(PositiveUpperReal const&);
@@ -714,10 +715,13 @@ class ValidatedReal
     typedef ValidatedRealInterface Interface;
 
     ValidatedReal(DyadicBounds const&);
+    operator DyadicBounds() const;
+
     Dyadic value();
     Dyadic error();
     Dyadic lower();
     Dyadic upper();
+
     //! \brief Get dyadic bounds for the number.
     //! \details It is not always clear how this function can be implemented,
     //!   and it may be removed or modified in future versions.
@@ -730,6 +734,38 @@ class ValidatedReal
     FloatMPBounds get(MultiplePrecision pr) const;
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream&, ValidatedReal const&);
+
+    friend ValidatedKleenean sgn(DyadicBounds const& r);
+    friend ValidatedKleenean operator==(DyadicBounds const& vr1, DyadicBounds const& vr2);
+    friend ValidatedKleenean operator!=(DyadicBounds const& vr1, DyadicBounds const& vr2);
+    friend ValidatedKleenean operator<=(DyadicBounds const& vr1, DyadicBounds const& vr2);
+    friend ValidatedKleenean operator>=(DyadicBounds const& vr1, DyadicBounds const& vr2);
+    friend ValidatedKleenean operator< (DyadicBounds const& vr1, DyadicBounds const& vr2);
+    friend ValidatedKleenean operator> (DyadicBounds const& vr1, DyadicBounds const& vr2);
+};
+
+class ValidatedLowerReal
+    : public Handle<ValidatedRealInterface>
+{
+  public:
+    ValidatedLowerReal(DyadicLowerBound const&);
+    ValidatedLowerReal(ValidatedReal const&);
+    DyadicLowerBound get() const;
+    FloatDPLowerBound get(DoublePrecision) const;
+    FloatMPLowerBound get(MultiplePrecision) const;
+    friend OutputStream& operator<<(OutputStream&, ValidatedLowerReal const&);
+};
+
+class ValidatedUpperReal
+    : public Handle<ValidatedRealInterface>
+{
+  public:
+    ValidatedUpperReal(DyadicUpperBound const&);
+    ValidatedUpperReal(ValidatedReal const&);
+    DyadicUpperBound get() const;
+    FloatDPUpperBound get(DoublePrecision) const;
+    FloatMPUpperBound get(MultiplePrecision) const;
+    friend OutputStream& operator<<(OutputStream&, ValidatedUpperReal const&);
 };
 
 class ApproximateRealInterface;

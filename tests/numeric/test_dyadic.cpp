@@ -253,6 +253,18 @@ void TestDyadic::test_infinity() {
     ARIADNE_TEST_EQUALS(max(Dyadic::inf(Sign(-1)),Dyadic(-2)),Dyadic(-2));
     ARIADNE_TEST_EQUALS(max(Dyadic(-2),Dyadic::inf(Sign(+1))),Dyadic::inf(Sign(+1)));
 
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)<=3);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)>=1);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)< 4);
+    ARIADNE_TEST_ASSERT(DyadicBounds(1,3)> 0);
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)<=2));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)>=2));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)< 3));
+    ARIADNE_TEST_ASSERT(is_indeterminate(DyadicBounds(1,3)> 1));
+    ARIADNE_TEST_ASSERT(!(DyadicBounds(1,3)<=0));
+    ARIADNE_TEST_ASSERT(!(DyadicBounds(1,3)>=4));
+    ARIADNE_TEST_ASSERT(not(DyadicBounds(1,3)< 1));
+    ARIADNE_TEST_ASSERT(not(DyadicBounds(1,3)> 3));
 }
 
 

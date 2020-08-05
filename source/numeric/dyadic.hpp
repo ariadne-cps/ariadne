@@ -227,7 +227,7 @@ template<> class Bounds<Dyadic> {
     friend ValidatedKleenean operator< (Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
         if (w1._u< w2._l) { return true; } else if (w1._l>=w2._u) { return false; } else { return indeterminate; } }
     friend ValidatedKleenean operator> (Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) {
-        if (w1._l> w2._u) { return true; } else if (w1._u<=w1._u) { return false; } else { return indeterminate; } }
+        if (w1._l> w2._u) { return true; } else if (w1._u<=w2._l) { return false; } else { return indeterminate; } }
     friend Boolean refines(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return w1._l>=w2._l and w1._u<=w2._u; }
     friend Bounds<Dyadic> refinement(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(max(w1._l,w2._l),min(w1._u,w2._u)); }
     friend OutputStream& operator<<(OutputStream& os, Bounds<Dyadic> y) { return os << "[" << y._l << ":" << y._u << "]"; }

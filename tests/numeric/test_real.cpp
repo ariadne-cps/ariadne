@@ -313,8 +313,9 @@ void TestReal::test_sequence() {
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).compute(Effort(20u)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(192_bits)));
     ARIADNE_TEST_PRINT(when({x>=0,+x},{x<=0,-x}).get(precision(320_bits)));
-    ARIADNE_TEST_FAIL(when({x>=0,+x},{x<=0,1+x}).compute(Effort(12u)));
     ARIADNE_TEST_COMPARE(when({x>=0,+x},{x<=0,1+x}).compute(Effort(20u)),>=,0.5_x);
+
+    ARIADNE_TEST_FAIL(when({sin(pi)>=1,+1},{sin(pi)<=-1,-1}).compute(Effort(12u)));
 
     ARIADNE_TEST_PRINT((x>=0).check(Effort(0u)));
     ARIADNE_TEST_PRINT((x<=0).check(Effort(0u)));

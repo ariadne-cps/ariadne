@@ -313,6 +313,7 @@ class WhenRealExpression : public RealBase {
     virtual DyadicBounds _compute_get(Effort eff) const;
     virtual FloatDPBounds _compute_get(Effort eff, DoublePrecision pr) const { return this->_compute(Effort(0u)).get(pr); }
     virtual FloatMPBounds _compute_get(Effort eff, MultiplePrecision pr) const { return this->_compute(Effort(pr.bits())).get(pr); }
+    friend OutputStream& operator<<(OutputStream& os, WhenRealExpression const& r) { return r._write(os); }
   public:
     virtual OutputStream& _write(OutputStream& os) const;
 };
@@ -320,17 +321,23 @@ Real when(Case<UpperKleenean,Real> const& c1, Case<UpperKleenean,Real> const& c2
     return Real(std::make_shared<WhenRealExpression>(c1,c2)); }
 
 DyadicBounds WhenRealExpression::_compute_get(Effort eff) const {
-    if(not possibly(_p1.check(eff))) { return _r2.compute_get(eff); }
-    if(not possibly(_p2.check(eff))) { return _r1.compute_get(eff); }
+    while (true) {
+        ValidatedUpperKleenean cp1=_p1.check(eff);
+        ValidatedUpperKleenean cp2=_p2.check(eff);
 
-    ValidatedReal vr1=_r1.compute(eff);
-    ValidatedReal vr2=_r2.compute(eff);
+        ARIADNE_ASSERT_MSG(possibly(cp1) or possibly(cp2),"Unsatisfiable when-expression "<<*this);
+        if(not possibly(cp1)) { return _r2.compute_get(eff); }
+        if(not possibly(cp2)) { return _r1.compute_get(eff); }
 
-    DyadicBounds w1=vr1.get();
-    DyadicBounds w2=vr2.get();
+        ValidatedReal vr1=_r1.compute(eff);
+        ValidatedReal vr2=_r2.compute(eff);
 
-    ARIADNE_ASSERT(w1.lower_raw()<=w2.upper_raw() && w1.upper_raw()>=w2.lower_raw());
-    return DyadicBounds(min(w1.lower_raw(),w2.lower_raw()),max(w1.upper_raw(),w2.upper_raw()));
+        DyadicBounds w1=vr1.get();
+        DyadicBounds w2=vr2.get();
+
+        return coarsening(w1,w2);
+        ++eff;
+    }
 }
 
 OutputStream& WhenRealExpression::_write(OutputStream& os) const {

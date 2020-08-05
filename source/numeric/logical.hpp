@@ -575,6 +575,11 @@ inline NondeterministicBoolean choose(LowerKleenean pt, LowerKleenean pf) {
     return NondeterministicBoolean(pt,pf);
 }
 
+//! \relates LowerKleenean
+//! Returns an index \a i such that \c p[i] is definitely \c true, if one exists.
+//! Loops infinitely if no \c p[i] can be shown to be definitely \c true.
+SizeType nondeterministic_choose_index(Array<LowerKleenean> const& p);
+
 template<class P, class T> class Case {
     P _p; T _t;
   public:

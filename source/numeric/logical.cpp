@@ -196,6 +196,7 @@ Bool NondeterministicBoolean::_choose(LowerKleenean p1, LowerKleenean p2) {
     }
 }
 
+
 template<> String class_name<ExactTag>() { return "Exact"; }
 template<> String class_name<EffectiveTag>() { return "Effective"; }
 template<> String class_name<ValidatedTag>() { return "Validated"; }
@@ -217,5 +218,21 @@ template<> String class_name<ValidatedKleenean>() { return "ValidatedKleenean"; 
 template<> String class_name<ValidatedLowerKleenean>() { return "ValidatedLowerKleenean"; }
 template<> String class_name<ValidatedUpperKleenean>() { return "ValidatedUpperKleenean"; }
 template<> String class_name<ApproximateKleenean>() { return "ApproximateKleenean"; }
+
+} // namespace Ariadne
+
+#include "../utility/array.hpp"
+
+namespace Ariadne {
+
+SizeType nondeterministic_choose_index(Array<LowerKleenean> const& p) {
+    Effort eff(0u);
+    while(true) {
+        for (SizeType i=0; i!=p.size(); ++i) {
+            if(definitely(p[i].check(eff))) { return i; }
+        }
+        ++eff;
+    }
+}
 
 } // namespace Ariadne

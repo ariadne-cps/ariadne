@@ -185,6 +185,11 @@ template<class P> void export_effective_logical(pymodule& module, std::string na
     logical_class.def("check", &LogicalType<P>::check);
     define_logical(module,logical_class);
     module.def("check", &_check_<LogicalType<P>,Effort>);
+
+    if constexpr (not IsSame<P,EffectiveTag>::value and IsConvertible<LogicalType<EffectiveTag>,LogicalType<P>>::value) {
+        logical_class.def(init<LogicalType<EffectiveTag>>());
+        implicitly_convertible<LogicalType<EffectiveTag>,LogicalType<P>>();
+    }
 }
 
 template<class P> void export_logical(pymodule& module, std::string name)
@@ -224,12 +229,15 @@ template<> void export_logical<ExactTag>(pymodule& module, std::string name)
 Void export_logicals(pymodule& module) {
     export_logical<ExactTag>(module,"Boolean");
     export_effective_logical<EffectiveTag>(module,"Kleenean");
-    export_effective_logical<EffectiveUpperTag>(module,"Sierpinskian");
-    export_effective_logical<EffectiveLowerTag>(module,"NegatedSierpinskian");
+    export_effective_logical<EffectiveUpperTag>(module,"UpperKleenean");
+    export_effective_logical<EffectiveLowerTag>(module,"LowerKleenean");
     export_logical<ValidatedTag>(module,"ValidatedKleenean");
     export_logical<UpperTag>(module,"ValidatedUpperKleenean");
     export_logical<LowerTag>(module,"ValidatedLowerKleenean");
     export_logical<ApproximateTag>(module,"ApproximateKleenean");
+
+    module.def("nondeterministic_choose_index", [](List<LowerKleenean>const& lst){Array<LowerKleenean> ary(lst.begin(),lst.end()); return nondeterministic_choose_index(ary);});
+
 }
 
 
@@ -396,6 +404,12 @@ void export_real(pymodule& module)
     define_elementary(module,real_class);
     define_lattice(module,real_class);
     define_comparisons(module,real_class);
+
+    module.def("when", [](UpperKleenean p1, Real r1, UpperKleenean p2, Real r2){return when({p1,r1},{p2,r2});});
+    module.def("choose", [](LowerKleenean p1, Real r1, LowerKleenean p2, Real r2){return choose({p1,r1},{p2,r2});});
+    //module.def("when", (Real(*)(Case<UpperKleenean,Real>,Case<UpperKleenean,Real>)) &when);
+    //module.def("choose", (Real(*)(Case<UpperKleenean,Real>,Case<UpperKleenean,Real>)) &choose);
+
 
     implicitly_convertible<Int,Real>();
     implicitly_convertible<Integer,Real>();

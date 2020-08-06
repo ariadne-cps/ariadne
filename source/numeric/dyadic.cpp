@@ -427,11 +427,11 @@ Dyadic make_dyadic(unsigned long long int n) {
 template<> String class_name<Dyadic>() { return "Dyadic"; }
 
 
-Dyadic hlf(Integer const& n) {
-    return hlf(Dyadic(n));
+Dyadic hlf(Integer const& z) {
+    return hlf(Dyadic(z));
 }
 
-TwoExp exp2(Integer z) {
+TwoExp exp2(Integer const& z) {
     Int n=z.get_si();
     ARIADNE_ASSERT(n==z);
     return exp2(n);

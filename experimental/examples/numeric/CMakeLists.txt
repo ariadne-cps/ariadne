@@ -1,5 +1,6 @@
 set(EXAMPLES_EXPERIMENTAL_NUMERIC
     real_calculus
+    exact_real_computation
 )
 
 foreach(example ${EXAMPLES_EXPERIMENTAL_NUMERIC})

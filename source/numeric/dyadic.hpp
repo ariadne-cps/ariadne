@@ -126,6 +126,10 @@ class Dyadic
     friend Dyadic operator"" _bin(long double x);
     //! \brief Halve the number.
     friend Dyadic hlf(Dyadic const&);
+    //! \brief Multiply by a power of 2.
+    friend Dyadic operator*(Dyadic w, TwoExp t);
+    //! \brief Divide by a power of 2.
+    friend Dyadic operator/(Dyadic w, TwoExp t);
     //| \brief Power of a number (m always positive).
     friend Dyadic pow(Dyadic const& x, Int m);
     friend Dyadic pow(Dyadic const& x, Nat m);

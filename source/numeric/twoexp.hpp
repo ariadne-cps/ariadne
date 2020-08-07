@@ -55,6 +55,8 @@ class TwoExp {
     FloatMP get_raw(MultiplePrecision pr) const;
     double get_d() const { return std::pow(2.0,this->_n); }
     friend TwoExp rec(TwoExp w) { return TwoExp(-w._n); }
+    friend TwoExp exp2(Int n);
+    friend TwoExp exp2(Integer const& z);
     friend Dyadic operator+(TwoExp);
     friend Dyadic operator-(TwoExp);
     friend Dyadic operator*(Dyadic, TwoExp);
@@ -62,6 +64,7 @@ class TwoExp {
     friend OutputStream& operator<<(OutputStream& os, TwoExp);
 };
 inline TwoExp exp2(Int n) { return TwoExp(n); }
+TwoExp exp2(Integer const& z);
 
 //! \ingroup NumericModule
 //! \brief The integer constant 2. Only used for creating dyadic numbers.

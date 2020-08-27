@@ -189,7 +189,7 @@ IntegratorBase::flow(const ValidatedVectorMultivariateFunction& vf, const ExactB
         ExactIntervalType dt(t,new_t);
         ValidatedScalarMultivariateFunctionModelDP step_time_function=this->function_factory().create_identity(dt)-t;
         FlowStepModelType flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
-        ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper()==new_t);
+        ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper_bound()==new_t);
         result.append(flow_function);
         // FIXME:
         evolve_function=partial_evaluate(flow_function,dx0.size(),new_t);
@@ -265,8 +265,8 @@ TaylorPicardIntegrator::_flow_step(const ValidatedVectorMultivariateFunction& f,
 
     Range tarng = is_autonomous ? Range(nx+1u,nx+1u+na) : Range(nx,nx+1u+na);
 
-    StepSizeType t=static_cast<StepSizeType>(T.lower());
-    StepSizeType h=static_cast<StepSizeType>(T.upper())-t;
+    StepSizeType t=static_cast<StepSizeType>(T.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(T.upper_bound())-t;
 
     // Time interval centred on initial time, which will make the antiderivative more efficient
     ExactIntervalType wT(t-h,t+h);
@@ -375,8 +375,8 @@ GradedTaylorSeriesIntegrator::GradedTaylorSeriesIntegrator(
 namespace {
 
 ExactIntervalType forwards_backwards_time_domain(ExactIntervalType domt) {
-    Dyadic t0(domt.lower());
-    Dyadic tf(domt.upper());
+    Dyadic t0(domt.lower_bound());
+    Dyadic tf(domt.upper_bound());
     return ExactIntervalType(t0-(tf-t0),tf);
 }
 
@@ -562,8 +562,8 @@ FlowStepTaylorModelType make_taylor_function_model(const Vector<Differential<Flo
 }
 
 FlowStepTaylorModelType flow_function(const Vector<Differential<FloatBounds<DP>>>& dphi, const ExactBoxType& domx, const ExactIntervalType& domt, const ExactBoxType& doma, Sweeper<FloatDP> swp) {
-    StepSizeType t=static_cast<StepSizeType>(domt.lower());
-    StepSizeType h=static_cast<StepSizeType>(domt.upper())-t;
+    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
     ExactIntervalType wdt(t-h,t+h);
 
     return restriction(make_taylor_function_model(dphi,join(domx,wdt,doma),swp),join(domx,domt,doma));
@@ -588,8 +588,8 @@ graded_series_flow_step(const Vector<ValidatedProcedure>& f,
 
     SizeType nx=domx.dimension();
 
-    StepSizeType t=static_cast<StepSizeType>(domt.lower());
-    StepSizeType h=static_cast<StepSizeType>(domt.upper())-t;
+    StepSizeType t=static_cast<StepSizeType>(domt.lower_bound());
+    StepSizeType h=static_cast<StepSizeType>(domt.upper_bound())-t;
 
     ExactIntervalType widt(t-h,t+h);
 
@@ -701,7 +701,7 @@ graded_series_flow_step(const ValidatedVectorMultivariateFunction& f,
 
 // FIXME: Should not be necessary, as should be able to construct FloatBounds<DP> from (FloatValue<DP>,DP)
 FloatBounds<DoublePrecision> cast_singleton(ExactIntervalType const& ivl, DoublePrecision pr) {
-    return FloatBounds<DoublePrecision>(ivl.lower(),ivl.upper()); }
+    return FloatBounds<DoublePrecision>(ivl.lower_bound(),ivl.upper_bound()); }
 
 
 namespace {
@@ -790,7 +790,7 @@ series_flow_step(const ValidatedVectorMultivariateFunction& f,
     ExactBoxType domxta=product(domx,wide_domt,doma);
 
     Vector<X> cx(midpoint(domx),pr);
-    X t0(domt.lower(),pr);
+    X t0(domt.lower_bound(),pr);
     Vector<X> ca(midpoint(doma),pr);
     Vector<Differential<X>> cdf = is_autonomous ? f.differential(join(cx,ca),deg) : f.differential(join(cx,t0,ca),deg);
     Vector<Differential<X>> centre_flow_derivatives = is_autonomous ? flow(cdf, cx,ca) : flow(cdf, cx,t0,ca);
@@ -961,7 +961,7 @@ AffineIntegrator::flow_step(const ValidatedVectorMultivariateFunction& f, const 
 
     Vector<FloatDPError> rad(n+1,zero_err);
     for(SizeType i=0; i!=n; ++i) {
-        rad[i] = cast_positive(max(dom[i].upper()-dmid[i].lower(),dmid[i].upper()-dom[i].lower()));
+        rad[i] = cast_positive(max(dom[i].upper_bound()-dmid[i].lower(),dmid[i].upper()-dom[i].lower_bound()));
     }
     rad[n] = abs(h);
 

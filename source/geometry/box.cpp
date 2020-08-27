@@ -69,11 +69,11 @@ template class Box<Interval<FloatDPApproximation>>;
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {
     SizeType ix=p.x_coordinate(); SizeType iy=p.y_coordinate();
     ApproximateIntervalType x=bx[ix]; ApproximateIntervalType y=bx[iy];
-    c.move_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
-    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.lower()));
-    c.line_to(numeric_cast<double>(x.upper()),numeric_cast<double>(y.upper()));
-    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.upper()));
-    c.line_to(numeric_cast<double>(x.lower()),numeric_cast<double>(y.lower()));
+    c.move_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
+    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.lower_bound()));
+    c.line_to(numeric_cast<double>(x.upper_bound()),numeric_cast<double>(y.upper_bound()));
+    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.upper_bound()));
+    c.line_to(numeric_cast<double>(x.lower_bound()),numeric_cast<double>(y.lower_bound()));
     c.fill();
 }
 
@@ -115,14 +115,14 @@ template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n,
 template<class BX> void make_vertices_up(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         v.push_back(pt);
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         v.push_back(pt);
     } else {        // recursive case: we are still scanning dimensions
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         make_vertices_up(bx, i+1, n, pt, v);
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         make_vertices_down(bx, i+1, n, pt, v);
     }
 }
@@ -130,14 +130,14 @@ template<class BX> void make_vertices_up(const BX& bx, SizeType i, SizeType n, V
 template<class BX> void make_vertices_down(const BX& bx, SizeType i, SizeType n, VertexType<BX>& pt, std::vector<VertexType<BX>>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         v.push_back(pt);
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         v.push_back(pt);
     } else {        // recursive case: we are still scanning dimensions
-        pt[i] = bx[i].upper();
+        pt[i] = bx[i].upper_bound();
         make_vertices_up(bx, i+1, n, pt, v);
-        pt[i] = bx[i].lower();
+        pt[i] = bx[i].lower_bound();
         make_vertices_down(bx, i+1, n, pt, v);
     }
 }

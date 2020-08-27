@@ -60,14 +60,14 @@ inline
 ExactBoxType split(const ExactBoxType& bx, SizeType i, SplitPart lr) {
     ExactBoxType result(bx);
     ExactIntervalType& ivl=result[i];
-    const FloatDPValue& l=ivl.lower();
-    const FloatDPValue& u=ivl.upper();
+    const FloatDPValue& l=ivl.lower_bound();
+    const FloatDPValue& u=ivl.upper_bound();
     FloatDPValue c=mid(l,u);
     if(lr==SplitPart::MIDDLE) {
-        ivl.set(mid(l,c),mid(c,u));
+        ivl.set_bounds(mid(l,c),mid(c,u));
     } else {
-        if(lr==SplitPart::LOWER) { ivl.set_upper(c); }
-        else { ivl.set_lower(c); }
+        if(lr==SplitPart::LOWER) { ivl.set_upper_bound(c); }
+        else { ivl.set_lower_bound(c); }
     }
     return result;
 }
@@ -76,9 +76,9 @@ inline
 Pair<ExactBoxType,ExactBoxType> split(const ExactBoxType& bx, SizeType i)
 {
     Pair<ExactBoxType,ExactBoxType> result(bx,bx);
-    FloatDPValue c=mid(bx[i].lower(),bx[i].upper());
-    result.first[i].set_upper(c);
-    result.second[i].set_lower(c);
+    FloatDPValue c=mid(bx[i].lower_bound(),bx[i].upper_bound());
+    result.first[i].set_upper_bound(c);
+    result.second[i].set_lower_bound(c);
     return result;
 }
 

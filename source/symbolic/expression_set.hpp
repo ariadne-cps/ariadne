@@ -107,11 +107,11 @@ template<class UB> class VariableInterval {
     VariableInterval(const LowerBoundType& l, const Variable<Real>& v, const UpperBoundType& u) : _variable(v), _ivl(l,u) { }
     RealVariable const& variable() const { return this->_variable; }
     const IntervalType interval() const { return this->_ivl; }
-    const LowerBoundType lower() const { return this->_ivl.lower(); }
-    const UpperBoundType upper() const { return this->_ivl.upper(); }
+    const LowerBoundType lower_bound() const { return this->_ivl.lower_bound(); }
+    const UpperBoundType upper_bound() const { return this->_ivl.upper_bound(); }
     friend OutputStream& operator<<(OutputStream& os, const VariableInterval<UB>& eivl) {
         //return os << eivl._variable << ".in(" << eivl._ivl << "\n"; }
-        return os << eivl._ivl.lower() << "<=" << eivl._variable << "<=" << eivl._ivl.upper(); }
+        return os << eivl._ivl.lower_bound() << "<=" << eivl._variable << "<=" << eivl._ivl.upper_bound(); }
   private:
     RealVariable _variable;
     IntervalType _ivl;
@@ -136,10 +136,10 @@ template<class UB> class VariableLowerInterval
     RealVariable _variable; LB _lower;
   public:
     template<class U,EnableIf<IsConstructible<UB,U>> =dummy> VariableLowerInterval(VariableLowerInterval<U> const& lv)
-        : VariableLowerInterval<UB>(UB(lv.lower()),lv.variable()) { }
+        : VariableLowerInterval<UB>(UB(lv.lower_bound()),lv.variable()) { }
     VariableLowerInterval(const LB& l, const RealVariable& v) : _variable(v),  _lower(l) { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(_lower,_variable,+infinity); }
-    LB lower() const { return _lower; }
+    LB lower_bound() const { return _lower; }
     const RealVariable& variable() const { return _variable; }
     operator Expression<Kleenean>() const {
         static_assert(IsSame<UB,Real>::value,""); return ( Real(this->_lower) <= RealExpression(this->_variable) ); };
@@ -156,7 +156,7 @@ template<class UB> class VariableUpperInterval
     VariableUpperInterval<UB>(const RealVariable& v, const UB& u) : _variable(v), _upper(u)  { }
     operator VariableInterval<UB>() const { return VariableInterval<UB>(-infinity,_variable,_upper); }
     const RealVariable& variable() const { return _variable; }
-    UB upper() const { return _upper; }
+    UB upper_bound() const { return _upper; }
     operator Expression<Kleenean>() const {
         static_assert(IsSame<UB,Real>::value,""); return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
     friend OutputStream& operator<<(OutputStream& os, const VariableUpperInterval<UB>& euivl) {
@@ -170,13 +170,13 @@ template<class X> using PosType = decltype(+declval<X>());
 template<class X> using NegType = decltype(-declval<X>());
 
 template<class UB> inline VariableInterval<UB> operator<=(const VariableLowerInterval<UB>& lv, const PosType<UB>& u) {
-    return VariableInterval<UB>(lv.lower(),lv.variable(),u); }
+    return VariableInterval<UB>(lv.lower_bound(),lv.variable(),u); }
 template<class UB> inline VariableInterval<UB> operator>=(const PosType<UB>& u, const VariableLowerInterval<UB>& lv) {
-    return VariableInterval<UB>(lv.lower(),lv.variable(),u); }
+    return VariableInterval<UB>(lv.lower_bound(),lv.variable(),u); }
 template<class UB> inline VariableInterval<UB> operator<=(const NegType<UB>& l, const VariableUpperInterval<UB>& vu) {
-    return VariableInterval<UB>(l,vu.variable(),vu.upper()); }
+    return VariableInterval<UB>(l,vu.variable(),vu.upper_bound()); }
 template<class UB> inline VariableInterval<UB> operator>=(const VariableUpperInterval<UB>& vu, const NegType<UB>& l) {
-    return VariableInterval<UB>(l,vu.variable(),vu.upper()); }
+    return VariableInterval<UB>(l,vu.variable(),vu.upper_bound()); }
 
 inline VariableLowerInterval<Real> operator<=(const Real& l, const RealVariable& v) {
     return VariableLowerInterval<Real>(l,v); }
@@ -191,7 +191,7 @@ inline VariableInterval<Real> operator==(const RealVariable& v, const Real& x) {
 inline VariableInterval<Real> operator==(const Real& x, const RealVariable& v) {
     return VariableInterval<Real>(x,v,x); }
 inline VariableInterval<Real> operator<=(const VariableLowerInterval<Real>& lv, const Real& u) {
-    return VariableInterval<Real>(lv.lower(),lv.variable(),u); }
+    return VariableInterval<Real>(lv.lower_bound(),lv.variable(),u); }
 
 inline VariableLowerInterval<FloatDPValue> operator<=(const FloatDPValue& l, const RealVariable& v) { return VariableLowerInterval<FloatDPValue>(l,v); }
 inline VariableLowerInterval<Dyadic> operator<=(const Dyadic& l, const RealVariable& v) { return VariableLowerInterval<Dyadic>(l,v); }

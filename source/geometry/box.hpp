@@ -165,9 +165,9 @@ class Box
     //! \brief Test if the box is bounded.
     auto is_bounded() const -> decltype(declval<IntervalType>().is_bounded());
 
-    //! Splits the box along coordinate \a k and takes the lower, middle, or upper part as given by \a lmu.
+    //! Splits the box along coordinate \a k and takes the lower , middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SizeType k, SplitPart lmu) const;
-    //! Splits the box along the longest direction \a k and takes the lower, middle, or upper part as given by \a lmu.
+    //! Splits the box along the longest direction \a k and takes the lower , middle, or upper part as given by \a lmu.
     Box<IntervalType> split(SplitPart lmu) const;
     //! Splits the box along widest coordinate \a k and takes the lower and upper parts.
     Pair< Box<IntervalType>, Box<IntervalType> > split(SizeType k) const;
@@ -505,7 +505,7 @@ inline FloatDPApproximateBox widen(const FloatDPApproximateBox& bx, FloatDPAppro
     FloatDPApproximation eps(e);
     FloatDPApproximateBox r(bx.dimension());
     for(DimensionType i=0; i!=bx.dimension(); ++i) {
-        r[i]=ApproximateIntervalType(bx[i].lower()-eps,bx[i].upper()+eps);
+        r[i]=ApproximateIntervalType(bx[i].lower_bound()-eps,bx[i].upper_bound()+eps);
     }
     return r;
 }

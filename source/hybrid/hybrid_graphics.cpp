@@ -99,10 +99,10 @@ HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height
 Void HybridFigure::_paint_all(CanvasInterface& canvas) const
 {
     // Project the bounding box onto the canvas
-    double xl=numeric_cast<double>(bounds[variables.x_variable()].lower());
-    double xu=numeric_cast<double>(bounds[variables.x_variable()].upper());
-    double yl=numeric_cast<double>(bounds[variables.y_variable()].lower());
-    double yu=numeric_cast<double>(bounds[variables.y_variable()].upper());
+    double xl=numeric_cast<double>(bounds[variables.x_variable()].lower_bound());
+    double xu=numeric_cast<double>(bounds[variables.x_variable()].upper_bound());
+    double yl=numeric_cast<double>(bounds[variables.y_variable()].lower_bound());
+    double yu=numeric_cast<double>(bounds[variables.y_variable()].upper_bound());
 
     canvas.initialise(variables.x_variable().name(),variables.y_variable().name(),xl,xu,yl,yu);
 

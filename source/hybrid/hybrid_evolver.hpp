@@ -68,7 +68,7 @@ class FlowFunctionModel
 {
   public:
     FlowFunctionModel(const ValidatedVectorMultivariateFunctionModelDP& f) : ValidatedVectorMultivariateFunctionModelDP(f) { }
-    StepSizeType step_size() const { return static_cast<StepSizeType>(this->time_domain().upper()); }
+    StepSizeType step_size() const { return static_cast<StepSizeType>(this->time_domain().upper_bound()); }
     ExactIntervalType time_domain() const { return this->domain()[this->domain().size()-1]; }
     ExactBoxType space_domain() const { return ExactBoxType(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
     ExactBoxType const codomain() const { return this->ValidatedVectorMultivariateFunctionModelDP::codomain(); }

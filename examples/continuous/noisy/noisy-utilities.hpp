@@ -67,7 +67,7 @@ void run_single(String name, InclusionVectorField const& ivf, BoxDomainType cons
     List<ValidatedConstrainedImageSet> reach_sets = map([](ValidatedVectorMultivariateFunctionModelType const& fm){return ValidatedConstrainedImageSet(fm.domain(),fm);},flow_functions);
     auto final_set = flow_functions.back();
     ValidatedVectorMultivariateFunctionModelType evolve_function =
-        partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper());
+        partial_evaluate(final_set,final_set.result_size(),final_set.domain()[final_set.result_size()].upper_bound());
     auto evolve_set = ValidatedConstrainedImageSet(evolve_function.domain(),evolve_function);
 
     ARIADNE_LOG_PRINTLN("Score: " << score(evolve_set) << ", time: " << sw.elapsed() << " s");

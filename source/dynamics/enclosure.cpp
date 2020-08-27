@@ -359,8 +359,8 @@ Enclosure::Enclosure(const ExactBoxType& domain, const ValidatedVectorMultivaria
 ValidatedKleenean Enclosure::satisfies(ValidatedScalarMultivariateFunction constraint) const
 {
     UpperIntervalType constraint_range=apply(constraint,this->codomain());
-    if(definitely(constraint_range.upper()<0)) { return false; }
-    if(definitely(constraint_range.lower()>0)) { return true; }
+    if(definitely(constraint_range.upper_bound()<0)) { return false; }
+    if(definitely(constraint_range.lower_bound()>0)) { return true; }
     return ValidatedKleenean(indeterminate);
 }
 
@@ -562,7 +562,7 @@ Void Enclosure::apply_full_reach_step(ValidatedVectorMultivariateFunctionModelDP
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
-    FloatDPValue h=phi.domain()[phi.result_size()].upper();
+    FloatDPValue h=phi.domain()[phi.result_size()].upper_bound();
     ValidatedScalarMultivariateFunctionModelDP elps=this->function_factory().create_constant(this->domain(),h);
     this->apply_parameter_reach_step(phi,elps);
     this->_check();
@@ -584,7 +584,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionMo
     ARIADNE_ASSERT(phi.result_size()==this->state_dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->state_dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
-    FloatDP h=phi.domain()[phi.result_size()].upper().raw();
+    FloatDP h=phi.domain()[phi.result_size()].upper_bound().raw();
     ExactBoxType parameter_domain=this->parameter_domain();
     ExactIntervalType time_domain=ExactIntervalType(FloatDP(0,dp),h);
     ValidatedScalarMultivariateFunctionModelDP time_function=this->function_factory().create_identity(time_domain);
@@ -595,7 +595,7 @@ Void Enclosure::apply_parameter_reach_step(ValidatedVectorMultivariateFunctionMo
     ValidatedScalarMultivariateFunctionModelDP time_step_function=this->function_factory().create_coordinate(new_domain,new_domain.size()-1u);
     this->_time_function=this->_time_function+time_step_function;
     this->_dwell_time_function=this->_dwell_time_function+time_step_function;
-    if(phi.domain()[phi.result_size()].lower()<time_domain.upper()) {
+    if(phi.domain()[phi.result_size()].lower_bound()<time_domain.upper_bound()) {
         this->new_negative_parameter_constraint(time_step_function-embed(elps,time_domain));
     }
     this->_check();
@@ -839,8 +839,8 @@ ValidatedLowerKleenean Enclosure::separated(const ExactBoxType& bx) const
     for(SizeType i=0; i!=bx.dimension(); ++i) {
         // FIXME: Conversion should be automatic
         ValidatedScalarMultivariateFunction fi(static_cast<ValidatedScalarMultivariateFunction::Interface const&>(this->_state_function[i]));
-        constraints.append(fi >= bx[i].lower());
-        constraints.append(fi <= bx[i].upper());
+        constraints.append(fi >= bx[i].lower_bound());
+        constraints.append(fi <= bx[i].upper_bound());
     }
     return !contractor.feasible(test_domain,constraints).first;
 }
@@ -852,8 +852,8 @@ Void Enclosure::reduce() const
     contractor.reduce(reinterpret_cast<UpperBoxType&>(this->_reduced_domain),constraints);
 
     for(SizeType i=0; i!=this->number_of_parameters(); ++i) {
-        FloatDP l=this->_reduced_domain[i].lower().raw();
-        FloatDP u=this->_reduced_domain[i].upper().raw();
+        FloatDP l=this->_reduced_domain[i].lower_bound().raw();
+        FloatDP u=this->_reduced_domain[i].upper_bound().raw();
         if(is_nan(l) || is_nan(u)) {
             ARIADNE_WARN("Reducing domain "<<_domain<<" yields "<<this->_reduced_domain);
             _reduced_domain[i]=_domain[i];
@@ -865,7 +865,7 @@ Void Enclosure::reduce() const
     SizeType j=0;
     List<ValidatedScalarMultivariateFunctionModelDP>& mutable_constraints=const_cast<List<ValidatedScalarMultivariateFunctionModelDP>&>(this->_negative_constraints);
     for(SizeType i=0; i!=mutable_constraints.size(); ++i) {
-        if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
+        if(mutable_constraints[i](this->_reduced_domain).upper_bound()<0.0) { redundant_constraints.append(i); }
         else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
     }
     mutable_constraints.resize(j);

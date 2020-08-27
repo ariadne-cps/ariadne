@@ -379,8 +379,8 @@ Void export_sets(pybind11::module& module, pybind11::class_<RealVariable>& real_
     real_variable_interval_class.def(pybind11::init<Real,RealVariable,Real>());
     real_variable_interval_class.def("variable", &RealVariableInterval::variable);
     real_variable_interval_class.def("interval", &RealVariableInterval::interval);
-    real_variable_interval_class.def("lower", &RealVariableInterval::lower);
-    real_variable_interval_class.def("upper", &RealVariableInterval::upper);
+    real_variable_interval_class.def("lower", &RealVariableInterval::lower_bound);
+    real_variable_interval_class.def("upper", &RealVariableInterval::upper_bound);
     real_variable_interval_class.def("__str__",&__cstr__<RealVariableInterval>);
 
     pybind11::class_<RealVariablesBox> real_variables_box_class(module,"RealVariablesBox");

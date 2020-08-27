@@ -96,8 +96,8 @@ template<> class Interval<Double> {
     Double _l, _u;
   public:
     Interval(Double l, Double u) : _l(l), _u(u) { }
-    Double lower() const { return _l; }
-    Double upper() const { return _u; }
+    Double lower_bound() const { return _l; }
+    Double upper_bound() const { return _u; }
 };
 
 template<> class Interval<ApproximateDouble> {
@@ -105,9 +105,9 @@ template<> class Interval<ApproximateDouble> {
   public:
     typedef ApproximateDouble UpperBoundType;
     Interval(ApproximateDouble l, ApproximateDouble u) : _l(l), _u(u) { }
-    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower()), _u(ivl.upper()) { }
-    ApproximateDouble lower() const { return _l; }
-    ApproximateDouble upper() const { return _u; }
+    template<class UB> Interval(Interval<UB> const& ivl) : _l(ivl.lower_bound()), _u(ivl.upper_bound()) { }
+    ApproximateDouble lower_bound() const { return _l; }
+    ApproximateDouble upper_bound() const { return _u; }
 };
 using ApproximateDoubleInterval = Interval<ApproximateDouble>;
 using ApproximateDoubleVariableInterval = VariableInterval<ApproximateDouble>;

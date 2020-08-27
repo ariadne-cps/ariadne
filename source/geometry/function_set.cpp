@@ -261,7 +261,7 @@ List<EffectiveConstraint> constraints(const EffectiveVectorMultivariateFunction&
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<EffectiveConstraint> c; c.reserve(b.size());
     for(SizeType i=0; i!=b.size(); ++i) {
-        c.append(EffectiveConstraint(b[i].lower(),f[i],b[i].upper()));
+        c.append(EffectiveConstraint(b[i].lower_bound(),f[i],b[i].upper_bound()));
     }
     return c;
 }
@@ -595,7 +595,7 @@ ConstrainedImageSet::affine_approximation() const
     {
         ValidatedAffineModelDP a=affine_model(D,iter->function(),prec);
         ExactIntervalType b=iter->bounds();
-        result.new_constraint(ValidatedAffineModelConstraintDP(b.lower(),a,b.upper()));
+        result.new_constraint(ValidatedAffineModelConstraintDP(b.lower_bound(),a,b.upper_bound()));
     }
 
     return result;
@@ -699,8 +699,8 @@ ConstrainedImageSet::split(SizeType j) const
     RealInterval interval = this->domain()[j];
     Real midpoint = interval.midpoint();
     Pair<RealBox,RealBox> subdomains(this->domain(),this->domain());
-    subdomains.first[j]=RealInterval(interval.lower(),midpoint);
-    subdomains.second[j]=RealInterval(midpoint,interval.upper());
+    subdomains.first[j]=RealInterval(interval.lower_bound(),midpoint);
+    subdomains.second[j]=RealInterval(midpoint,interval.upper_bound());
     return make_pair(ConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
                      ConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
 }
@@ -1113,14 +1113,14 @@ ValidatedKleenean ValidatedConstrainedImageSet::satisfies(const ValidatedConstra
     const ExactIntervalType& bounds = nc.bounds();
 
     ValidatedKleenean result;
-    if(definitely(bounds.upper()<+infty)) {
-        all_constraints.append( composed_function >= bounds.upper() );
+    if(definitely(bounds.upper_bound()<+infty)) {
+        all_constraints.append( composed_function >= bounds.upper_bound() );
         result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(definitely(bounds.lower()>-infty)) {
-        all_constraints.append(composed_function <= bounds.lower());
+    if(definitely(bounds.lower_bound()>-infty)) {
+        all_constraints.append(composed_function <= bounds.lower_bound());
         result = result || solver.feasible(domain,all_constraints).first;
     }
     return !result;
@@ -1174,10 +1174,10 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     SizeType join_parameter=np;
     for(SizeType i=0; i!=np; ++i) {
         if(domain1[i]!=domain2[i]) {
-            if(domain1[i].upper() < domain2[i].lower() || domain1[i].lower() > domain2[i].upper()) {
+            if(domain1[i].upper_bound() < domain2[i].lower_bound() || domain1[i].lower_bound() > domain2[i].upper_bound()) {
                 ARIADNE_FAIL_MSG("Cannot joint sets "<<set1<<" and "<<set2<<" since domains are separated.");
             }
-            if(domain1[i].upper() >= domain2[i].lower() || domain1[i].lower() <= domain2[i].upper()) {
+            if(domain1[i].upper_bound() >= domain2[i].lower_bound() || domain1[i].lower_bound() <= domain2[i].upper_bound()) {
                 if(join_parameter==np) {
                     join_parameter=i;
                 } else {

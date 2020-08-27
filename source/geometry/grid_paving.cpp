@@ -104,9 +104,9 @@ ExactBoxType GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLa
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower().raw() ) );
-        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper().raw() ) );
-        theTmpBoxType[current_dimension].set(cast_exact(lower),cast_exact(upper));
+        FloatDP lower = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].lower_bound().raw() ) );
+        FloatDP upper = add(approx, theDimOrigin, mul(approx, theDimLength, theLatticeBoxType[current_dimension].upper_bound().raw() ) );
+        theTmpBoxType[current_dimension].set_bounds(cast_exact(lower),cast_exact(upper));
     }
 
     return theTmpBoxType;
@@ -230,10 +230,10 @@ LatticeBoxType GridCell::compute_lattice_box( const DimensionType dimensions, co
         FloatDP middlePointInCurrDim = theResultLatticeBoxType[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
-            theResultLatticeBoxType[current_dimension].set_lower( cast_exact(middlePointInCurrDim) );
+            theResultLatticeBoxType[current_dimension].set_lower_bound( cast_exact(middlePointInCurrDim) );
         } else {
             //Choose the left half
-            theResultLatticeBoxType[current_dimension].set_upper( cast_exact(middlePointInCurrDim) );
+            theResultLatticeBoxType[current_dimension].set_upper_bound( cast_exact(middlePointInCurrDim) );
         }
     }
     return theResultLatticeBoxType;
@@ -275,7 +275,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const Nat theExtent, co
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Box<ExactIntervalType> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theExtent, theWord );
-    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
+    const FloatDP upperBorderOverlapping = add(approx, baseCellBoxInLattice[dim].upper_bound().raw(), hlf( baseCellBoxInLattice[dim].width().value_raw() ) );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -414,11 +414,11 @@ ExactBoxType GridOpenCell::compute_box(const Grid& theGrid, const Nat theExtent,
     for( DimensionType dim = 0; dim < theGrid.dimension(); dim++){
         ExactIntervalType openCellBoxInLatticeDimIntervalType;
         ExactIntervalType baseCellBoxInLatticeDimIntervalType = baseCellBoxInLattice[dim];
-        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower().raw();
-        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
-                             sub( near, baseCellBoxInLatticeDimIntervalType.upper().raw(),
-                                        baseCellBoxInLatticeDimIntervalType.lower().raw() ) );
-        openCellBoxInLatticeDimIntervalType.set(cast_exact(lower),cast_exact(upper));
+        FloatDP lower = baseCellBoxInLatticeDimIntervalType.lower_bound().raw();
+        FloatDP upper = add( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
+                             sub( near, baseCellBoxInLatticeDimIntervalType.upper_bound().raw(),
+                                        baseCellBoxInLatticeDimIntervalType.lower_bound().raw() ) );
+        openCellBoxInLatticeDimIntervalType.set_bounds(cast_exact(lower),cast_exact(upper));
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimIntervalType;
     }
@@ -1103,8 +1103,8 @@ UpperBoxType GridTreeSubpaving::bounding_box() const {
     for( ; iter!=this->end(); ++iter) {
         UpperBoxType cell = iter->box();
         for(DimensionType i = 0; i < cell.dimension(); ++i) {
-            if(cell[i].lower().raw() < bbox[i].lower().raw()) bbox[i].set_lower(cell[i].lower());
-            if(cell[i].upper().raw() > bbox[i].upper().raw()) bbox[i].set_upper(cell[i].upper());
+            if(cell[i].lower_bound().raw() < bbox[i].lower_bound().raw()) bbox[i].set_lower_bound(cell[i].lower_bound());
+            if(cell[i].upper_bound().raw() > bbox[i].upper_bound().raw()) bbox[i].set_upper_bound(cell[i].upper_bound());
         }
     }
 
@@ -1215,7 +1215,7 @@ Void GridTreeSubpaving::subdivide( ApproximateDouble theInputMaxCellWidth ) {
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
         //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper().raw(), theRootCellBoxType[i].lower().raw() ) , theMaxCellWidth );
+        num_subdiv = compute_number_subdiv( sub(up, theRootCellBoxType[i].upper_bound().raw(), theRootCellBoxType[i].lower_bound().raw() ) , theMaxCellWidth );
 
         //Compute the max number of subdivisions and the dimension where to do them
         if( num_subdiv >= max_num_subdiv_dim ){
@@ -2398,7 +2398,7 @@ Void GridTreePaving::_adjoin_lower_approximation( const Grid & theGrid, BinaryTr
 Void GridTreePaving::adjoin_over_approximation( const ExactBoxType& theBoxType, const Nat numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
     for(DimensionType i=0; i!=theBoxType.dimension(); ++i) {
-        if(theBoxType[i].lower()>=theBoxType[i].upper()) {
+        if(theBoxType[i].lower_bound()>=theBoxType[i].upper_bound()) {
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(ExactBoxType,Nat)","ExactBoxType "<<theBoxType<<" has empty interior.");
         }
     }

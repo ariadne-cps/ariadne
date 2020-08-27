@@ -45,7 +45,7 @@ template<> ErrorType wstar_multiplier<PiecewiseApproximation>() { return ErrorTy
 ErrorType vstar(BoxDomainType const& inputs) {
     ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size())) {
-        result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper())));
+        result = max(result,cast_positive(cast_exact(abs(inputs[i]).upper_bound())));
     }
     return result;
 }
@@ -152,7 +152,7 @@ compute_constants(EffectiveVectorMultivariateFunction const& noise_independent_c
 
     for (auto j : range(n)) {
         for (auto i : range(m)) {
-            ErrorType Vi(abs(inputs[i]).upper());
+            ErrorType Vi(abs(inputs[i]).upper_bound());
             ErrorType Wi(Vi*wstar_multiplier<A>());
             pKjv[j] += Vi*pK_ij[i][j]; pLjv[j] += Vi*pL_ij[i][j]; pHjv[j] += Vi*pH_ij[i][j];
             pKjw[j] += Wi*pK_ij[i][j]; pLjw[j] += Wi*pL_ij[i][j]; pHjw[j] += Wi*pH_ij[i][j];
@@ -299,10 +299,10 @@ template<class A> Vector<EffectiveScalarMultivariateFunction> InclusionIntegrato
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }
@@ -431,15 +431,15 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<AffineA
     auto one = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1_z);
     auto three = EffectiveScalarMultivariateFunction::constant(n+1+2*m,3_z);
     auto t = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+three*(one-p0*p0/Vi/Vi)*p1*(t-tk-hc/2)/hc);
     }
     return result;
 }
@@ -451,15 +451,15 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Sinusoi
     auto pgamma = EffectiveScalarMultivariateFunction::constant(n+1+2*m,1.1464_dec);
     auto gamma = EffectiveScalarMultivariateFunction::constant(n+1+2*m,4.162586_dec);
     auto t = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n);
-    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower());
+    auto tk = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.lower_bound());
     auto hc = EffectiveScalarMultivariateFunction::constant(n+1+2*m,domt.width());
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0+(one-p0*p0/Vi/Vi)*pgamma*p1*sin((t-tk-hc/2)*gamma/hc));
     }
     return result;
 }
@@ -471,10 +471,10 @@ template<> Vector<EffectiveScalarMultivariateFunction> build_w_functions<Piecewi
 
     auto result = Vector<EffectiveScalarMultivariateFunction>(m);
     for (auto i : range(m)) {
-        auto Vi = ExactNumber(doma[i].upper());
+        auto Vi = ExactNumber(doma[i].upper_bound());
         auto p0 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+i);
         auto p1 = EffectiveScalarMultivariateFunction::coordinate(n+1+2*m,n+1+m+i);
-        result[i] = (definitely (doma[i].upper() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
+        result[i] = (definitely (doma[i].upper_bound() == 0.0_exact) ? zero : p0-(one-p0*p0/Vi/Vi)*p1);
     }
     return result;
 }

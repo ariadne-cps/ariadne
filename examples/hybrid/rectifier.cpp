@@ -29,11 +29,11 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
         ApproximateDouble step_x = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
-        ApproximateDouble pos_x = bbox[0].lower().get_d();
+        ApproximateDouble pos_x = bbox[0].lower_bound().get_d();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
-        while (pos_x.get_d() < bbox[0].upper().get_d())
+        while (pos_x.get_d() < bbox[0].upper_bound().get_d())
         {
             rect[xaxis] = ApproximateIntervalType(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
@@ -42,9 +42,9 @@ template<class SET> Void plot(const char* filename, const Nat& xaxis, const Nat&
 
         // Repeats for the rectangles in the y direction
         ApproximateDouble step_y = 1.0/(1 << (numDivisions + ((static_cast<Nat>(MAX_GRID_DEPTH) - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        ApproximateDouble pos_y = bbox[1].lower().get_d();
+        ApproximateDouble pos_y = bbox[1].lower_bound().get_d();
         rect[xaxis] = bbox[0];
-        while (pos_y.get_d() < bbox[1].upper().get_d())
+        while (pos_y.get_d() < bbox[1].upper_bound().get_d())
         {
             rect[yaxis] = ApproximateIntervalType(pos_y,pos_y+step_y);
             fig << rect;

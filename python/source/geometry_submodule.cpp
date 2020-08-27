@@ -46,7 +46,7 @@ namespace Ariadne {
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
-    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<FloatDPBounds>(FloatDPBounds(ivl.lower(),ivl.upper()));
+    ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<FloatDPBounds>(FloatDPBounds(ivl.lower_bound(),ivl.upper_bound()));
 }
 
 
@@ -388,8 +388,8 @@ template<class IVL> Void export_interval(pybind11::module& module, std::string n
         interval_class.def("__ne__",  &__ne__<IVL,IVL , Return<InequalityType<IVL,IVL>> >);
     }
 
-    interval_class.def("lower", &IntervalType::lower);
-    interval_class.def("upper", &IntervalType::upper);
+    interval_class.def("lower_bound", &IntervalType::lower_bound);
+    interval_class.def("upper_bound", &IntervalType::upper_bound);
     interval_class.def("midpoint", &IntervalType::midpoint);
     interval_class.def("radius", &IntervalType::radius);
     interval_class.def("width", &IntervalType::width);

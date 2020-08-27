@@ -461,7 +461,7 @@ class ConstrainedFeasibilityMatrix {
 
 inline ExactBoxType widen(ExactBoxType bx, RawFloatDP e) {
     for(SizeType i=0; i!=bx.size(); ++i) {
-        bx[i]=ExactIntervalType(sub(down,bx[i].lower().raw(),e),add(up,bx[i].upper().raw(),e));
+        bx[i]=ExactIntervalType(sub(down,bx[i].lower_bound().raw(),e),add(up,bx[i].upper_bound().raw(),e));
     }
     return bx;
 }
@@ -601,7 +601,7 @@ validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exac
 
     List<SizeType> equalities, inequalities;
     for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower()==C[i].upper()) {
+        if(C[i].lower_bound()==C[i].upper_bound()) {
             equalities.append(i);
         } else {
             inequalities.append(i);
@@ -619,7 +619,7 @@ validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exac
     ExactFloatDPVectorType c(equalities.size(),dp);
     for(SizeType i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
-        c[i] = C[equalities[i]].lower();
+        c[i] = C[equalities[i]].lower_bound();
     }
     ARIADNE_LOG_PRINTLN("h="<<h<<" c="<<c<<" h(x)-c="<<(h(x0)-c));
 
@@ -675,7 +675,7 @@ validate_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, Exac
 
     // Check inequality constraints once more
     for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower()==C[i].upper()) {
+        if(C[i].lower_bound()==C[i].upper_bound()) {
             ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].midpoint()));
         } else {
             if(!definitely(element(gx[i],C[i]))) {
@@ -903,7 +903,7 @@ setup_feasibility(const ExactBoxType& D, const ApproximateVectorMultivariateFunc
     v.y=FloatDPApproximationVector(m,zero);
     v.w=midpoint(C);
 
-    //stp.xl=lower(D)-x;
+    //stp.xl=lower_bound(D)-x;
     v.wl=Vector(m,-one);
     v.wu=Vector(m,+one);
     v.xl=lower_bounds(D)-v.x;
@@ -1279,8 +1279,8 @@ minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBox
     FloatDPApproximationVector rx = df + transpose(A) * kappa + transpose(B)* lambda;
     FloatDPApproximationDiagonalMatrix D(n,dp);
     for(SizeType i=0; i!=n; ++i) {
-        FloatDPApproximation nuu = rec(d[i].upper()-x[i]);
-        FloatDPApproximation nul = rec(x[i]-d[i].lower());
+        FloatDPApproximation nuu = rec(d[i].upper_bound()-x[i]);
+        FloatDPApproximation nul = rec(x[i]-d[i].lower_bound());
         rx[i] += mu * ( nuu - nul );
         D[i] = mu * ( nuu*nuu + nul*nul );
     }
@@ -1289,8 +1289,8 @@ minimisation_step(const ApproximateScalarMultivariateFunction& f, const ExactBox
     FloatDPApproximationVector rw = -kappa;
     FloatDPApproximationDiagonalMatrix C(m,dp);
     for(SizeType j=0; j!=m; ++j) {
-        FloatDPApproximation nuu = rec(c[j].upper()-w[j]);
-        FloatDPApproximation nul = rec(w[j]-c[j].lower());
+        FloatDPApproximation nuu = rec(c[j].upper_bound()-w[j]);
+        FloatDPApproximation nul = rec(w[j]-c[j].lower_bound());
         rw[j] += (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu - nul );
         C[j] = (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu*nuu + nul*nul );
     }
@@ -1453,11 +1453,11 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     // Compute diagonal entries of KKT Hessian
     Vector<FloatDPApproximation> D(n,dp);
     for(SizeType j=0; j!=n; ++j) {
-        if(c[j].lower()==c[j].upper()) {
-        } else if(c[j].upper().raw()==+inf) {
-        } else if(c[j].lower().raw()==-inf) {
+        if(c[j].lower_bound()==c[j].upper_bound()) {
+        } else if(c[j].upper_bound().raw()==+inf) {
+        } else if(c[j].lower_bound().raw()==-inf) {
         } else {
-            ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+infty));
+            ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower_bound() && c[j].lower_bound()<c[j].upper_bound() && c[j].upper_bound()<+infty));
         }
     }
 
@@ -1480,8 +1480,8 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     FloatDPApproximationVector gye(2*(m+n),dp);
-    //for(SizeType j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
-    //for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
+    //for(SizeType j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper_bound()+t; gye[n+j]=c[j].lower_bound()-gy[j]+t; }
+    //for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper_bound()+t; gye[2*n+m+i]=d[i].lower_bound()-y[i]+t; }
     ARIADNE_LOG_PRINTLN("GE="<<gye);
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
@@ -1556,12 +1556,12 @@ compute_mu(const ExactBoxType& D, const ApproximateVectorMultivariateFunction& g
     FloatDPApproximationVector gx = g(x);
 
     for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].lower()==C[i].upper()) { }
-        else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-        else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
+        if(C[i].lower_bound()==C[i].upper_bound()) { }
+        else if(C[i].lower_bound()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
+        else if(C[i].upper_bound()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
         else { // std::cerr<<"FIXME: Compute mu for singleton constraint\n";
-            if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-            else { mu += lambda[i] * (gx[i] - C[i].lower()); }
+            if ( decide(lambda[i] <=0.0) ) { mu += lambda[i] * (gx[i] - C[i].upper_bound()); }
+            else { mu += lambda[i] * (gx[i] - C[i].lower_bound()); }
         }
     }
     mu /= C.size();
@@ -1606,8 +1606,8 @@ feasible(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBoxType C) 
 
     FloatDPApproximationVector w=midpoint(C);
     for(SizeType i=0; i!=C.size(); ++i) {
-        if(C[i].upper()==+infty) { w[i]=C[i].lower()+one; }
-        else if(C[i].lower()==-infty) { w[i]=C[i].upper()-one; }
+        if(C[i].upper_bound()==+infty) { w[i]=C[i].lower_bound()+one; }
+        else if(C[i].lower_bound()==-infty) { w[i]=C[i].upper_bound()-one; }
     }
 
     FloatDPApproximationVector y(C.size(),zero);
@@ -1661,8 +1661,8 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunct
 
     FloatDPApproximationDiagonalMatrix D(n,dp);
     FloatDPApproximationDiagonalMatrix E(m,dp);
-    for(SizeType i=0; i!=n; ++i) { D[i] = rec(sqr(x[i]-X[i].lower())) + rec(sqr(X[i].upper()-x[i])); }
-    for(SizeType j=0; j!=m; ++j) { E[j] = rec(sqr(w[j]-W[j].lower())) + rec(sqr(W[j].upper()-w[j])); }
+    for(SizeType i=0; i!=n; ++i) { D[i] = rec(sqr(x[i]-X[i].lower_bound())) + rec(sqr(X[i].upper_bound()-x[i])); }
+    for(SizeType j=0; j!=m; ++j) { E[j] = rec(sqr(w[j]-W[j].lower_bound())) + rec(sqr(W[j].upper_bound()-w[j])); }
     ARIADNE_LOG_PRINTLN("D="<<D);
     ARIADNE_LOG_PRINTLN("E="<<E);
 
@@ -1674,7 +1674,7 @@ feasibility_step(const ExactBoxType& X, const ApproximateVectorMultivariateFunct
     ARIADNE_LOG_PRINTLN("inverse(S)="<<R);
 
     // Compute residuals
-    FloatDPApproximationVector rx = A*gx + B * hx ; // + 1/(x.upper()-x) + 1/x.lower()-x if no regularisation
+    FloatDPApproximationVector rx = A*gx + B * hx ; // + 1/(x.upper_bound()-x) + 1/x.lower_bound()-x if no regularisation
     FloatDPApproximationVector rw = w-gx;
 
     ARIADNE_LOG_PRINTLN("rx="<<rx);
@@ -1801,7 +1801,7 @@ feasibility_step(ExactBoxType const& D, ApproximateVectorMultivariateFunction co
     Vector<ApproximateNumericType> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
 
     for(SizeType j=0; j!=m; ++j) {
-        if(C[j].lower()==C[j].upper()) {
+        if(C[j].lower_bound()==C[j].upper_bound()) {
             S[j][j]=1;
             S[j][m+n+j]=0;
             S[m+n+j][j]=0;
@@ -1870,14 +1870,14 @@ feasibility_step(const ExactBoxType& D, const ApproximateVectorMultivariateFunct
     FloatDPApproximationMatrix H(n,n,dp);
     for(SizeType i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
     for(SizeType j=0; j!=n; ++j) {
-        H[j][j] += rec(sqr(x[j]-D[j].lower()));
-        H[j][j] += rec(sqr(D[j].upper()-x[j]));
+        H[j][j] += rec(sqr(x[j]-D[j].lower_bound()));
+        H[j][j] += rec(sqr(D[j].upper_bound()-x[j]));
     }
 
     FloatDPApproximationVector rx = transpose(A) * y;
     for(SizeType j=0; j!=n; ++j) {
-        rx[j] -= rec(x[j]-D[j].lower());
-        rx[j] += rec(D[j].upper()-x[j]);
+        rx[j] -= rec(x[j]-D[j].lower_bound());
+        rx[j] += rec(D[j].upper_bound()-x[j]);
     }
     FloatDPApproximationVector ry = ddhx.value();
     ARIADNE_LOG_PRINTLN("rx="<<rx<<" ry="<<ry);
@@ -1928,10 +1928,10 @@ check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBo
 
     List<SizeType> equalities;
     for(SizeType j=0; j!=C.size(); ++j) {
-        if( definitely(gx[j].upper()<C[j].lower() || gx[j].lower()>C[j].upper()) ) {
+        if( definitely(gx[j].upper()<C[j].lower_bound() || gx[j].lower()>C[j].upper_bound()) ) {
             return false;
         }
-        if(C[j].lower()==C[j].upper()) {
+        if(C[j].lower_bound()==C[j].upper_bound()) {
             equalities.append(j);
         } else {
             if(!definitely(contains(C[j],gx[j]))) { result = indeterminate; }
@@ -1945,7 +1945,7 @@ check_feasibility(ExactBoxType D, ValidatedVectorMultivariateFunction g, ExactBo
         FloatDPBoundsVector c(equalities.size(),dp);
         for(SizeType i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
-            c[i] = C[equalities[i]].lower();
+            c[i] = C[equalities[i]].lower_bound();
         }
         ARIADNE_LOG_PRINTLN_AT(1,"g="<<g);
         ARIADNE_LOG_PRINTLN_AT(1,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x)-c));
@@ -2340,8 +2340,8 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorMultivariateFunction
         for(SizeType i=0; i!=m; ++i) { for(SizeType j=0; j!=n; ++j) { dgy[j][i]=dg[j][i].evaluate(y); } }
 
         for(SizeType i=0; i!=m; ++i) {
-            for(SizeType j=0; j!=n; ++j) { rx[i]+=x[j]*(dgy[j][i]-c[j].upper()); rx[i]+=x[n+j]*(c[j].lower()-dgy[j][i]); }
-            rx[i]+=x[2*n+i]*(y[i]-d[i].upper())-x[2*n+m+i]*(d[i].lower()-y[i]);
+            for(SizeType j=0; j!=n; ++j) { rx[i]+=x[j]*(dgy[j][i]-c[j].upper_bound()); rx[i]+=x[n+j]*(c[j].lower_bound()-dgy[j][i]); }
+            rx[i]+=x[2*n+i]*(y[i]-d[i].upper_bound())-x[2*n+m+i]*(d[i].lower_bound()-y[i]);
         }
         for(SizeType j=0; j!=n; ++j) { rz[j]=gy[j] + t + z[j]; rz[n+j]=t+z[n+j]-gy[j]; }
         for(SizeType i=0; i!=m; ++i) { rz[2*n+i]=y[i]+t+z[2*n+i]; rz[2*n+m+i]=y[i]+t+z[2*n+m+i]; }
@@ -2385,17 +2385,17 @@ feasible(ExactBoxType d, ValidatedVectorMultivariateFunction g, ExactBoxType c) 
         catch(const SingularMatrixException& e) {
             return indeterminate;
         }
-        if(t.lower()>t.upper()) {
+        if(t.lower_bound()>t.upper_bound()) {
             ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             return indeterminate;
         }
-        if(t.lower()>0.0) {
+        if(t.lower_bound()>0.0) {
             ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             if(this->is_feasible_point(d,g,c,midpoint(y))) {
                 return true;
             }
         }
-        if(t.upper()<0.0) {
+        if(t.upper_bound()<0.0) {
             ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", d="<<d<<", c="<<c);
             return false;
         }
@@ -2454,16 +2454,16 @@ Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorM
     FloatDP tmin=+inf;
     FloatDP tmax=+inf;
     for(SizeType j=0; j!=n; ++j) {
-        tmax=min(tmax,sub(up,c[j].upper(),gy[j].lower()));
-        tmax=min(tmax,sub(up,gy[j].upper(),c[j].lower()));
-        tmin=min(tmin,sub(down,c[j].upper(),mgy[j].upper()));
-        tmin=min(tmin,sub(down,mgy[j].lower(),c[j].lower()));
+        tmax=min(tmax,sub(up,c[j].upper_bound(),gy[j].lower_bound()));
+        tmax=min(tmax,sub(up,gy[j].upper_bound(),c[j].lower_bound()));
+        tmin=min(tmin,sub(down,c[j].upper_bound(),mgy[j].upper_bound()));
+        tmin=min(tmin,sub(down,mgy[j].lower_bound(),c[j].lower_bound()));
     }
     for(SizeType i=0; i!=m; ++i) {
-        tmin=min(tmin,sub(up,d[i].upper(),y[i].lower()));
-        tmax=min(tmax,sub(up,y[i].upper(),d[i].lower()));
-        tmin=min(tmin,sub(down,d[i].upper(),my[i].upper()));
-        tmax=min(tmax,sub(down,my[i].lower(),d[i].lower()));
+        tmin=min(tmin,sub(up,d[i].upper_bound(),y[i].lower_bound()));
+        tmax=min(tmax,sub(up,y[i].upper_bound(),d[i].lower_bound()));
+        tmin=min(tmin,sub(down,d[i].upper_bound(),my[i].upper_bound()));
+        tmax=min(tmax,sub(down,my[i].lower_bound(),d[i].lower_bound()));
     }
     tmin-=0.0625;
     t=ExactIntervalType(tmin,tmax);
@@ -2472,23 +2472,23 @@ Void KrawczykOptimiser::compute_tz(const ExactBoxType& d, const ValidatedVectorM
     // Find the range of possible values of the optimal z
     // This range is too pessimistic
     for(SizeType j=0; j!=n; ++j) {
-        z[j]=max(c[j].upper()-gy[j]-t,0.0);
-        z[n+j]=max(gy[j]-c[j].lower()-t,0.0);
+        z[j]=max(c[j].upper_bound()-gy[j]-t,0.0);
+        z[n+j]=max(gy[j]-c[j].lower_bound()-t,0.0);
     }
     for(SizeType i=0; i!=m; ++i) {
-        z[2*n+i]=max(d[i].upper()-y[i]-t,0.0);
-        z[2*n+m+i]=max(y[i]-d[i].lower()-t,0.0);
+        z[2*n+i]=max(d[i].upper_bound()-y[i]-t,0.0);
+        z[2*n+m+i]=max(y[i]-d[i].lower_bound()-t,0.0);
     }
 
     // Find the range of possible values of the optimal z
     // This range is too pessimistic
     for(SizeType j=0; j!=n; ++j) {
-        z[j]=ExactIntervalType(0.0,c[j].upper()-mgy[j].lower()-tmin);
-        z[n+j]=ExactIntervalType(0.0,mgy[j].upper()-c[j].lower()-tmin);
+        z[j]=ExactIntervalType(0.0,c[j].upper_bound()-mgy[j].lower_bound()-tmin);
+        z[n+j]=ExactIntervalType(0.0,mgy[j].upper_bound()-c[j].lower_bound()-tmin);
     }
     for(SizeType i=0; i!=m; ++i) {
-        z[2*n+i]=ExactIntervalType(0.0,d[i].upper()-my[i].lower()-tmin);
-        z[2*n+m+i]=ExactIntervalType(0.0,my[i].upper()-d[i].lower()-tmin);
+        z[2*n+i]=ExactIntervalType(0.0,d[i].upper_bound()-my[i].lower_bound()-tmin);
+        z[2*n+m+i]=ExactIntervalType(0.0,my[i].upper_bound()-d[i].lower_bound()-tmin);
     }
 
     ARIADNE_LOG(9,"  d="<<d<<", c="<<c<<", y="<<y<<", g(y)="<<gy<<", t="<<t<<", z="<<z);
@@ -2581,8 +2581,8 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
 
     // z is the vector of slack variables z[k]=cu[k]-gy[k]-t or z[k]=gy[k]-cl[k]-t
     ExactIntervalVectorType z(2*(m+n));
-    for(SizeType j=0; j!=n; ++j) { z[j]=d[j].upper()-gy[j]-t; z[n+j]=gy[j]-d[j].lower()-t; }
-    for(SizeType i=0; i!=m; ++i) { z[i]=c[2*n+i].upper()-y[i]-t; z[2*n+m+i]=y[i]-c[i].lower()-t; }
+    for(SizeType j=0; j!=n; ++j) { z[j]=d[j].upper_bound()-gy[j]-t; z[n+j]=gy[j]-d[j].lower_bound()-t; }
+    for(SizeType i=0; i!=m; ++i) { z[i]=c[2*n+i].upper_bound()-y[i]-t; z[2*n+m+i]=y[i]-c[i].lower_bound()-t; }
 
     ExactIntervalVectorType zr(2*(m+n));
     for(SizeType k=0; k!=2*(m+n); ++k) { zr[k]=1.0/z[k]; }
@@ -2687,8 +2687,8 @@ Void KrawczykOptimiser::feasibility_step(const ExactBoxType& d, const ValidatedV
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     UpperIntervalVectorType gye(o);
-    for(SizeType j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
-    for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
+    for(SizeType j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper_bound()+t; gye[n+j]=c[j].lower_bound()-gy[j]+t; }
+    for(SizeType i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper_bound()+t; gye[2*n+m+i]=d[i].lower_bound()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye);
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)

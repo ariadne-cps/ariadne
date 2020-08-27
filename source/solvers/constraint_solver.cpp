@@ -65,17 +65,17 @@ inline Sign sign(const FloatDP& x) {
 }
 
 inline Sign sign(const ExactIntervalType& ivl) {
-    if(ivl.lower()>0) { return Sign::NEGATIVE; }
-    else if(ivl.upper()<0) {  return Sign::POSITIVE; }
+    if(ivl.lower_bound()>0) { return Sign::NEGATIVE; }
+    else if(ivl.upper_bound()<0) {  return Sign::POSITIVE; }
     else { return Sign::ZERO; }
 }
 
 
 inline OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
-    if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
-    if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
-    if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }
-    return os << c.bounds().lower() << "<=" << c.function() << "<=" << c.bounds().upper();
+    if(c.bounds().lower_bound()==c.bounds().upper_bound()) { return os << c.function() << "==" << c.bounds().upper_bound(); }
+    if(c.bounds().upper_bound()==infty) { return os << c.bounds().lower_bound() << "<=" << c.function(); }
+    if(c.bounds().lower_bound()==-infty) { return os << c.function() << "<=" << c.bounds().upper_bound(); }
+    return os << c.bounds().lower_bound() << "<=" << c.function() << "<=" << c.bounds().upper_bound();
 }
 
 
@@ -172,11 +172,11 @@ auto ConstraintSolver::feasible(const ExactBoxType& domain,
         ValidatedNumericType cnst(0,prec);
         for(SizeType j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
-            cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
+            cnst += (c[j].upper_bound()*x_exact[j]-c[j].lower_bound()*x_exact[n+j]);
         }
         for(SizeType i=0; i!=m; ++i) {
             txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,default_sweeper());
-            cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
+            cnst += (d[i].upper_bound()*x_exact[2*n+i]-d[i].lower_bound()*x_exact[2*n+m+i]);
         }
         txg = cnst + txg;
 
@@ -252,7 +252,7 @@ Bool ConstraintSolver::reduce(UpperBoxType& domain, const ValidatedVectorMultiva
 
 Bool has_nan(const ExactBoxType& domain) {
     for(SizeType i=0; i!=domain.size(); ++i) {
-        if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
+        if(is_nan(domain[i].lower_bound().raw()) || is_nan(domain[i].upper_bound().raw())) { return true; }
     }
     return false;
 }
@@ -366,17 +366,17 @@ Bool ConstraintSolver::monotone_reduce(UpperBoxType& domain, const ValidatedScal
             splitpoint=lower.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_lower.upper()<lower.lower())) { lower=UpperIntervalType(lower.lower().raw(),lower.lower().raw()); }
+            if(definitely(new_lower.upper_bound()<lower.lower_bound())) { lower=UpperIntervalType(lower.lower_bound().raw(),lower.lower_bound().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.width().raw()>threshold) {
             splitpoint=upper.midpoint();
             slice[variable]=splitpoint;
             UpperIntervalType new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
-            if(definitely(new_upper.lower()>upper.upper())) { upper=UpperIntervalType(upper.upper().raw(),upper.upper().raw()); }
+            if(definitely(new_upper.lower_bound()>upper.upper_bound())) { upper=UpperIntervalType(upper.upper_bound().raw(),upper.upper_bound().raw()); }
             else { upper=intersection(upper,new_upper); }
         }
-        subdomain[variable]=UpperIntervalType(lower.lower(),upper.upper());
+        subdomain[variable]=UpperIntervalType(lower.lower_bound(),upper.upper_bound());
     } while(lower.width().raw()>threshold && upper.width().raw()>threshold);
     domain=subdomain;
 
@@ -431,13 +431,13 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
     ARIADNE_LOG_PRINTLN("function="<<function);
     ARIADNE_LOG_PRINTLN("bounds="<<bounds);
 
-    if(definitely(domain[variable].lower() >= domain[variable].upper())) { return false; }
+    if(definitely(domain[variable].lower_bound() >= domain[variable].upper_bound())) { return false; }
 
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     UpperIntervalType interval=domain[variable];
-    FloatDPApproximation l=interval.lower();
-    FloatDPApproximation u=interval.upper();
+    FloatDPApproximation l=interval.lower_bound();
+    FloatDPApproximation u=interval.upper_bound();
     ExactIntervalType subinterval;
     UpperIntervalType new_interval(interval);
     Box<UpperIntervalType> slice=domain;
@@ -452,7 +452,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
-            new_interval.set_lower(subinterval.upper());
+            new_interval.set_lower_bound(subinterval.upper_bound());
         } else {
             imax = i; break;
         }
@@ -470,7 +470,7 @@ Bool ConstraintSolver::box_reduce(UpperBoxType& domain, const ValidatedScalarMul
         slice[variable]=subinterval;
         UpperIntervalType slice_image=apply(function,slice);
         if(definitely(intersection(slice_image,bounds).is_empty())) {
-            new_interval.set_upper(subinterval.lower());
+            new_interval.set_upper_bound(subinterval.lower_bound());
         } else {
             break;
         }
@@ -498,7 +498,7 @@ ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, con
     ARIADNE_LOG_SCOPE_CREATE;
 
     for(SizeType i=0; i!=y.size(); ++i) {
-        if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
+        if(y[i]<d[i].lower_bound() || y[i]>d[i].upper_bound()) { return false; }
     }
 
     Vector<FloatDPBounds> fy=f(Vector<FloatDPBounds>(y));
@@ -506,8 +506,8 @@ ValidatedKleenean ConstraintSolver::check_feasibility(const ExactBoxType& d, con
     ARIADNE_LOG_PRINTLN("y="<<y<<", f(y)="<<fy);
     ValidatedKleenean result=true;
     for(SizeType j=0; j!=fy.size(); ++j) {
-        if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
-        if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; }
+        if(fy[j].lower().raw()>c[j].upper_bound().raw() || fy[j].upper().raw()<c[j].lower_bound().raw()) { return false; }
+        if(fy[j].upper().raw()>=c[j].upper_bound().raw() || fy[j].lower().raw()<=c[j].lower_bound().raw()) { result=indeterminate; }
     }
     return result;
 }

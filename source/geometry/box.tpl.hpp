@@ -82,8 +82,8 @@ template<class I> Pair< Box<I>, Box<I> > Box<I>::split(SizeType k) const
     ARIADNE_ASSERT(k<bx.dimension());
     Pair< Box<I>, Box<I> > r(bx,bx);
     auto c=bx[k].midpoint();
-    r.first[k].set_upper(c);
-    r.second[k].set_lower(c);
+    r.first[k].set_upper_bound(c);
+    r.second[k].set_lower_bound(c);
     return r;
 }
 
@@ -115,13 +115,13 @@ template<class I> typename Box<I>::CentreType Box<I>::centre() const {
 template<class I> typename Box<I>::VertexType Box<I>::lower_bounds() const
 {
     const Box<I>& bx=*this;
-    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].lower());});
+    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].lower_bound());});
 }
 
 template<class I> typename Box<I>::VertexType Box<I>::upper_bounds() const
 {
     const Box<I>& bx=*this;
-    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].upper());});
+    return VertexType(this->dimension(),[&](SizeType i){return (bx[i].upper_bound());});
 }
 
 template<class I> typename Box<I>::RadiusType Box<I>::radius() const

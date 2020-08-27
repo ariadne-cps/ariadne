@@ -87,7 +87,7 @@ template<class F> PositiveLowerBound<F> dexp(LowerBound<F> const& x) {
 }
 
 template<class F> PositiveBounds<F> dexp(Bounds<F> const& x) {
-    return PositiveBounds<F>(dexp(x.lower()),dexp(x.upper()));
+    return PositiveBounds<F>(dexp(x.lower_bound()),dexp(x.upper_bound()));
 }
 
 // Compute (x*e^x/2-e^x+x/2+1)/x^3, which is a positive monotone function.
@@ -248,7 +248,7 @@ template<class A> ErrorType wstar(BoxDomainType const& inputs) {
     PR pr;
     ErrorType result(0u,pr);
     for (auto i : range(0,inputs.size()))
-        result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper()));
+        result = max(result,wstar_multiplier<A>()*ErrorType(abs(inputs[i]).upper_bound()));
     return result;
 }
 

@@ -314,10 +314,10 @@ class TaylorModel
 
     //! \brief Comparison with a scalar.
     decltype(auto) operator<(Int c) const {
-        return this->range().upper()<c; }
+        return this->range().upper_bound()<c; }
     //! \brief Comparison with a scalar.
     decltype(auto) operator>(Int c) const {
-        return this->range().lower()>c; }
+        return this->range().lower_bound()>c; }
     //@}
 
     //@{

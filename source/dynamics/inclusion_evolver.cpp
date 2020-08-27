@@ -43,7 +43,7 @@ BoxDomainType initial_ranges_to_box(RealVariablesBox const& var_ranges) {
     auto vars = var_ranges.variables();
     List<IntervalDomainType> result;
     for (auto v : vars) {
-        result.push_back(cast_exact(widen(IntervalDomainType(cast_exact(var_ranges[v].lower().get(dp)),cast_exact(var_ranges[v].upper().get(dp))))));
+        result.push_back(cast_exact(widen(IntervalDomainType(cast_exact(var_ranges[v].lower_bound().get(dp)),cast_exact(var_ranges[v].upper_bound().get(dp))))));
     }
     return Vector<IntervalDomainType>(result);
 }

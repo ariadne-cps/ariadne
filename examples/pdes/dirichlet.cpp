@@ -58,8 +58,8 @@ template<class F> Void gnuplot(String filename, ValidatedScalarTaylorFunctionMod
     auto pr=tf.properties().precision();
     IntervalDomainType dom=tf.domain()[0];
     Nat m=100;
-    Value<F> ax(Dyadic(dom.lower()),pr);
-    Value<F> bx(Dyadic(dom.upper()),pr);
+    Value<F> ax(Dyadic(dom.lower_bound()),pr);
+    Value<F> bx(Dyadic(dom.upper_bound()),pr);
     Vector<Bounds<F>> x(1u,pr);
     for(SizeType i=0; i<=m; ++i) {
         x[0] = ((m-i)*ax+i*bx)/m;

@@ -415,7 +415,7 @@ h=ValidatedScalarMultivariateTaylorFunctionModelDP.constant(dom1,FloatDPBounds(-
 
 # Newton contractor to solve f(x,h(x))=0 for scalar f
 df1 = derivative(f,1).range()
-df1 = FloatDPBounds(df1.lower(),df1.upper())
+df1 = FloatDPBounds(df1.lower_bound(),df1.upper_bound())
 h=refinement(compose(f,join(i,h))/df1,h)
 print("h:",phi)
 print()

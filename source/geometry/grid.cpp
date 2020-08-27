@@ -217,7 +217,7 @@ Array<Double> Grid::lower_index(const ExactBoxType& bx) const
 {
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=subdivision_lower_index(i,bx[i].lower());
+        res[i]=subdivision_lower_index(i,bx[i].lower_bound());
     }
     return res;
 }
@@ -226,7 +226,7 @@ Array<Double> Grid::upper_index(const ExactBoxType& bx) const
 {
     Array<double> res(bx.size());
     for(SizeType i=0; i!=res.size(); ++i) {
-        res[i]=subdivision_upper_index(i,bx[i].upper());
+        res[i]=subdivision_upper_index(i,bx[i].upper_bound());
     }
     return res;
 }

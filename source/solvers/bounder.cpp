@@ -120,7 +120,7 @@ UpperBoxType EulerBounder::_refinement(ValidatedVectorMultivariateFunction const
 UpperBoxType EulerBounder::_formula(ValidatedVectorMultivariateFunction const& f, BoxDomainType const& D, IntervalDomainType const& T, BoxDomainType const& A, UpperBoxType const& B, PositiveFloatDPValue INITIAL_BOX_WIDENING, PositiveFloatDPValue VECTOR_WIDENING) const {
     UpperIntervalType const& rT=reinterpret_cast<UpperIntervalType const&>(T);
     UpperBoxType const& rA=reinterpret_cast<UpperBoxType const&>(A);
-    UpperIntervalType const rH=rT-T.lower();
+    UpperIntervalType const rH=rT-T.lower_bound();
 
     const bool is_autonomous = (f.argument_size() == D.dimension()+A.dimension());
     UpperBoxType dom = is_autonomous ? product(B,rA) : product(B,rT,rA);

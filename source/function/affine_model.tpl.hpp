@@ -48,13 +48,13 @@ FloatDPBounds const& make_singleton(IntervalRangeType const& ivl, DoublePrecisio
 }
 
 FloatMPBounds const& make_singleton(IntervalRangeType const& ivl, MultiplePrecision pr) {
-    return FloatMPBounds(ivl.lower(),ivl.upper());
+    return FloatMPBounds(ivl.lower_bound(),ivl.upper_bound());
 }
 */
 
 /*
 Bounds<FloatMP> cast_singleton(Interval<UpperBound<FloatMP>> const& ivl) {
-    return Bounds<FloatMP>(ivl.lower(),ivl.upper());
+    return Bounds<FloatMP>(ivl.lower_bound(),ivl.upper_bound());
 }
 
 Vector<Bounds<FloatMP>> cast_singleton(Vector<Interval<UpperBound<FloatMP>>> const& bx) {
@@ -281,8 +281,8 @@ inline decltype(auto) operator<(FloatMPValue x,const FloatDPValue y) { return x<
 template<class F> AffineModel<ApproximateTag,F> AffineModel<ApproximateTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
     AffineModel<ApproximateTag,F> r(n,pr);
-    FloatApproximation<PR> l(codom.lower().get_d(),pr);
-    FloatApproximation<PR> u(codom.upper().get_d(),pr);
+    FloatApproximation<PR> l(codom.lower_bound().get_d(),pr);
+    FloatApproximation<PR> u(codom.upper_bound().get_d(),pr);
     r.set_gradient(j,hlf(u-l));
     r.set_value(hlf(l+u));
     return r;
@@ -301,8 +301,8 @@ template<class F> Vector<AffineModel<ApproximateTag,F>> AffineModel<ApproximateT
 template<class F> AffineModel<ValidatedTag,F> AffineModel<ValidatedTag,F>::scaling(SizeType n, SizeType j, const IntervalDomainType& codom, PrecisionType pr)
 {
     AffineModel<ValidatedTag,F> r(n,pr);
-    FloatValue<PR> l(Dyadic(codom.lower()),pr);
-    FloatValue<PR> u(Dyadic(codom.upper()),pr);
+    FloatValue<PR> l(Dyadic(codom.lower_bound()),pr);
+    FloatValue<PR> u(Dyadic(codom.upper_bound()),pr);
     Interval<FloatValue<PR>> ivl(l,u);
     r.set_gradient(j,1);
     r*=ivl.radius();

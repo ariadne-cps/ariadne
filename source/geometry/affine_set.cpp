@@ -80,10 +80,10 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Rea
 
 
 Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl) {
-    FloatDPBounds dlb(ivl.lower(),dp);
-    FloatDPBounds dub(ivl.upper(),dp);
-    FloatDPApproximation dla(ivl.lower(),dp);
-    FloatDPApproximation dua(ivl.upper(),dp);
+    FloatDPBounds dlb(ivl.lower_bound(),dp);
+    FloatDPBounds dub(ivl.upper_bound(),dp);
+    FloatDPApproximation dla(ivl.lower_bound(),dp);
+    FloatDPApproximation dua(ivl.upper_bound(),dp);
     FloatDPValue dl(FloatDP(Float32(dla.raw(),near)));
     FloatDPValue du(FloatDP(Float32(dua.raw(),near)));
     FloatDPError e=cast_positive(max(max(dub.upper()-du,du-dub.lower()),max(dlb.upper()-dl,dl-dlb.lower())));
@@ -91,8 +91,8 @@ Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<Real> const& ivl)
 }
 
 Pair<Interval<FloatDPValue>,FloatDPError> make_domain(Interval<FloatDPBall> const& ivl) {
-    FloatDPBall const& dlb=ivl.lower();
-    FloatDPBall const& dub=ivl.upper();
+    FloatDPBall const& dlb=ivl.lower_bound();
+    FloatDPBall const& dub=ivl.upper_bound();
     FloatDPValue dl(FloatDP(Float32(dlb.value().raw(),near)));
     FloatDPValue du(FloatDP(Float32(dub.value().raw(),near)));
     FloatDPError e=cast_positive(max(mag(dlb.value()-dl)+dlb.error(),mag(dlb.value()-dl)+dlb.error()));
@@ -274,8 +274,8 @@ ValidatedLowerKleenean ValidatedAffineConstrainedImageSet::separated(const Exact
     LinearProgram<FloatDPValue> lp;
     this->construct_linear_program(lp);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        lp.l[i]=FloatDPValue(sub(down,wbx[i].lower().raw(),this->_space_models[i].error().raw()));
-        lp.u[i]=FloatDPValue(add(up,wbx[i].upper().raw(),this->_space_models[i].error().raw()));
+        lp.l[i]=FloatDPValue(sub(down,wbx[i].lower_bound().raw(),this->_space_models[i].error().raw()));
+        lp.u[i]=FloatDPValue(add(up,wbx[i].upper_bound().raw(),this->_space_models[i].error().raw()));
     }
     ValidatedKleenean feasible=indeterminate;
     try {
@@ -326,10 +326,10 @@ Void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
 
     // Make part of linear program dependent on cell
     for(SizeType i=0; i!=cell.dimension(); ++i) {
-        //lp.l[i]=bx[i].lower();
-        //lp.u[i]=bx[i].upper();
-        lp.l[i]=FloatDPValue(sub(down,bx[i].lower().raw(),errors[i].raw()));
-        lp.u[i]=FloatDPValue(add(up,bx[i].upper().raw(),errors[i].raw()));
+        //lp.l[i]=bx[i].lower_bound();
+        //lp.u[i]=bx[i].upper_bound();
+        lp.l[i]=FloatDPValue(sub(down,bx[i].lower_bound().raw(),errors[i].raw()));
+        lp.u[i]=FloatDPValue(add(up,bx[i].upper_bound().raw(),errors[i].raw()));
     }
 
     Int cell_depth=cell.depth();
@@ -420,8 +420,8 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
     }
 
     for(SizeType i=0; i!=np; ++i) {
-        //lp.l[nx+i]=this->_domain[i].lower();
-        //lp.u[nx+i]=this->_domain[i].upper();
+        //lp.l[nx+i]=this->_domain[i].lower_bound();
+        //lp.u[nx+i]=this->_domain[i].upper_bound();
         lp.l[nx+i]=-1;
         lp.u[nx+i]=+1;
     }
@@ -479,8 +479,8 @@ Void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
     // Make part of linear program dependent on cell
     for(SizeType i=0; i!=nx; ++i) {
-        lp.l[i]=bx[i].lower();
-        lp.u[i]=bx[i].upper();
+        lp.l[i]=bx[i].lower_bound();
+        lp.u[i]=bx[i].upper_bound();
     }
 
     Int cell_depth=cell.depth();
@@ -612,8 +612,8 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Make part of linear program dependent on cell
     const ExactBoxType bx=bounding_cell.box();
     for(SizeType i=0; i!=nx; ++i) {
-        lp.l[ne+i]=bx[i].lower();
-        lp.u[ne+i]=bx[i].upper();
+        lp.l[ne+i]=bx[i].lower_bound();
+        lp.u[ne+i]=bx[i].upper_bound();
     }
 
     // Take x and s variables to be basic, so the initial basis matrix is the

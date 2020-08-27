@@ -40,27 +40,27 @@ struct UnscalingException : std::runtime_error {
 };
 
 template<class F> inline Approximation<F> med_apprx(Interval<Value<F>> const& ivl) {
-    return Approximation<F>(hlf(add(approx,ivl.lower().raw(),ivl.upper().raw())));
+    return Approximation<F>(hlf(add(approx,ivl.lower_bound().raw(),ivl.upper_bound().raw())));
 }
 
 template<class F> inline Approximation<F> rad_apprx(Interval<Value<F>> const& ivl) {
-    return Approximation<F>(hlf(sub(approx,ivl.upper().raw(),ivl.lower().raw())));
+    return Approximation<F>(hlf(sub(approx,ivl.upper_bound().raw(),ivl.lower_bound().raw())));
 }
 
 template<class F> inline Bounds<F> med_val(Interval<Value<F>> const& ivl) {
-    return hlf(ivl.lower()+ivl.upper());
+    return hlf(ivl.lower_bound()+ivl.upper_bound());
 }
 
 template<class F> inline Bounds<F> rad_val(Interval<Value<F>> const& ivl) {
-    return hlf(ivl.upper()-ivl.lower());
+    return hlf(ivl.upper_bound()-ivl.lower_bound());
 }
 
 inline Dyadic med(IntervalDomainType const& ivl) {
-    return hlf(add( Dyadic(ivl.lower().raw()), Dyadic(ivl.upper().raw()) ));
+    return hlf(add( Dyadic(ivl.lower_bound().raw()), Dyadic(ivl.upper_bound().raw()) ));
 }
 
 inline Dyadic rad(IntervalDomainType const& ivl) {
-    return hlf(sub( Dyadic(ivl.upper().raw()), Dyadic(ivl.lower().raw()) ));
+    return hlf(sub( Dyadic(ivl.upper_bound().raw()), Dyadic(ivl.lower_bound().raw()) ));
 }
 
 template<class T> inline
@@ -70,7 +70,7 @@ T scale(T x, const IntervalDomainType& cd) {
 
 template<class T> inline
 T unscale(T x, const IntervalDomainType& d) {
-    if(d.lower()==d.upper()) {
+    if(d.lower_bound()==d.upper_bound()) {
         return std::move(x)*0;
         // throw UnscalingException{"Cannot unscale "+to_str(x)+" over empty interval ",d};
     } else {

@@ -62,7 +62,7 @@ UpperIntervalType emulrng(const FloatDPValueVector& x, const FloatDPValueVector&
 PositiveFloatDPUpperBound average_width(const UpperBoxType& bx) {
     PositiveFloatDPUpperBound res(0u,double_precision);
     for(SizeType i=0; i!=bx.size(); ++i) {
-        if(definitely(bx[i].lower()>bx[i].upper())) { return cast_positive(-infty); }
+        if(definitely(bx[i].lower_bound()>bx[i].upper_bound())) { return cast_positive(-infty); }
         res+=bx[i].width();
     }
     return res/bx.size();
@@ -121,7 +121,7 @@ Void SubdivisionPaver::adjoin_outer_approximation_recursion(PavingInterface& pav
         iter!=constraints.end(); ++iter)
     {
         UpperIntervalType constraint_range=apply(iter->function(),subdomain);
-        if( definitely(constraint_range.lower() > iter->bounds().upper() || constraint_range.upper() < iter->bounds().lower() ) ) { return; }
+        if( definitely(constraint_range.lower_bound() > iter->bounds().upper_bound() || constraint_range.upper_bound() < iter->bounds().lower_bound() ) ) { return; }
     }
 
     UpperBoxType range=apply(function,subdomain);
@@ -395,7 +395,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG_PRINTLN_AT(2,"x="<<ax<<", y="<<ay<<", z="<<az);
         ARIADNE_LOG_PRINTLN_AT(2,"x.z="<<emulrng(x,z));
         if(t>0) { break; }
-        if(definitely(emulrng(x,z).upper()<XZMIN)) { break; }
+        if(definitely(emulrng(x,z).upper_bound()<XZMIN)) { break; }
     }
     ARIADNE_LOG_PRINTLN_AT(1,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z);
 
@@ -425,11 +425,11 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         FloatDPBounds cnst = {0,pr};
         for(SizeType j=0; j!=n; ++j) {
             txg = txg - (FloatDPBounds(x[j])-FloatDPBounds(x[n+j]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(fg[j]),sweeper);
-            cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
+            cnst += (bx[j].upper_bound()*x[j]-bx[j].lower_bound()*x[n+j]);
         }
         for(SizeType i=0; i!=m; ++i) {
             txg = txg - (FloatDPBounds(x[2*n+i])-FloatDPBounds(x[2*n+m+i]))*ValidatedScalarMultivariateTaylorFunctionModelDP(domain,ValidatedScalarMultivariateFunction(identity_function[i]),sweeper);
-            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
+            cnst += (d[i].upper_bound()*x[2*n+i]-d[i].lower_bound()*x[2*n+m+i]);
         }
         txg = FloatDPBounds(cnst) + txg;
 
@@ -538,11 +538,11 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         FloatDPBounds cnst = {0,pr};
         for(SizeType j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ValidatedScalarMultivariateTaylorFunctionModelDP(d,fg[j],properties);
-            cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
+            cnst += (bx[j].upper_bound()*x[j]-bx[j].lower_bound()*x[n+j]);
         }
         for(SizeType i=0; i!=m; ++i) {
             xg = xg - (x[2*n+i]-x[2*n+m+i])*ValidatedScalarMultivariateTaylorFunctionModelDP::coordinate(d,i,properties);
-            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
+            cnst += (d[i].upper_bound()*x[2*n+i]-d[i].lower_bound()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
 

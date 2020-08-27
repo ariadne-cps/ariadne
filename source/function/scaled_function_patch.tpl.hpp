@@ -67,8 +67,8 @@ inline decltype(auto) contains(BoxDomainType const& bx, Vector<FloatMPApproximat
 template<class M> Void _set_scaling(ScaledFunctionPatch<M>& x, const IntervalDomainType& ivl, SizeType j)
 {
     // A scaling of [-1,+1] into [a,b] has the form s->rx+c where c is centre and r radius of ivl
-    const FloatDPValue& l=ivl.lower();
-    const FloatDPValue& u=ivl.upper();
+    const FloatDPValue& l=ivl.lower_bound();
+    const FloatDPValue& u=ivl.upper_bound();
     FloatDPBall c{hlf(l+u)};
     FloatDPBall r{hlf(u-l)};
     FloatDPError e=c.error()+r.error();
@@ -111,7 +111,7 @@ template<class PR> inline OutputStream& operator<<(OutputStream& os, const Repre
     const IntervalDomainType& ivl=*ivl_repr.pointer;
     Int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
-    os << "IntervalDomainType("<<ivl.lower()<<","<<ivl.upper()<<")";
+    os << "IntervalDomainType("<<ivl.lower_bound()<<","<<ivl.upper_bound()<<")";
     os.precision(precision); os.flags(flags);
     return os;
 }
@@ -402,7 +402,7 @@ template<class M> auto ScaledFunctionPatch<M>::polynomial() const -> Multivariat
     Vector<MultivariatePolynomial<NumericType> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         auto domj=convert_interval(this->domain()[j],this->precision());
-        if(domj.lower()>=domj.upper()) {
+        if(domj.lower_bound()>=domj.upper_bound()) {
             ARIADNE_ASSERT(this->domain()[j].is_singleton());
             s[j]=MultivariatePolynomial<NumericType>::constant(this->argument_size(),zero);
         } else {

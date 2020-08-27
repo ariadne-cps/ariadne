@@ -405,7 +405,7 @@ Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorMultivariateFun
 
 
 Void HybridEnclosure::bound_time(Real tmax) {
-    if(possibly(this->time_range().upper()>tmax)) {
+    if(possibly(this->time_range().upper_bound()>tmax)) {
        this->_set.new_negative_parameter_constraint(this->time_function()-tmax);
     }
 }

@@ -383,10 +383,10 @@ Void Figure::_paint_all(CanvasInterface& canvas) const
     ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
 
     // Project the bounding box onto the canvas
-    Dbl xl=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].lower());
-    Dbl xu=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].upper());
-    Dbl yl=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].lower());
-    Dbl yu=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].upper());
+    Dbl xl=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].lower_bound());
+    Dbl xu=numeric_cast<Dbl>(bounding_box[projection.x_coordinate()].upper_bound());
+    Dbl yl=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].lower_bound());
+    Dbl yu=numeric_cast<Dbl>(bounding_box[projection.y_coordinate()].upper_bound());
 
     String tx=String("x")+to_str(projection.x_coordinate());
     String ty=String("x")+to_str(projection.y_coordinate());
@@ -500,10 +500,10 @@ Void LabelledFigure::_paint_all(CanvasInterface& canvas) const
     String tx=x.name();
     String ty=y.name();
 
-    Dbl xl=numeric_cast<Dbl>(bounds[x].lower());
-    Dbl xu=numeric_cast<Dbl>(bounds[x].upper());
-    Dbl yl=numeric_cast<Dbl>(bounds[y].lower());
-    Dbl yu=numeric_cast<Dbl>(bounds[y].upper());
+    Dbl xl=numeric_cast<Dbl>(bounds[x].lower_bound());
+    Dbl xu=numeric_cast<Dbl>(bounds[x].upper_bound());
+    Dbl yl=numeric_cast<Dbl>(bounds[y].lower_bound());
+    Dbl yu=numeric_cast<Dbl>(bounds[y].upper_bound());
 
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 

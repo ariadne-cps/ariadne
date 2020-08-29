@@ -33,6 +33,8 @@
 #include "float_bounds.hpp"
 #include "float_lower_bound.hpp"
 
+#include "number_wrapper.hpp"
+
 namespace Ariadne {
 
 template<class F> UpperBound<F>::UpperBound(Bounds<F> const& x) : UpperBound<F>(x.upper_raw()) { }
@@ -43,7 +45,9 @@ template<class F> UpperBound<F>::UpperBound(UpperBound<F> const& x, PR pr) : _u(
 template<class F> UpperBound<F>::UpperBound(Real const& r, PR pr) : UpperBound(r.get(pr)) {}
 template<class F> UpperBound<F>::UpperBound(ValidatedUpperNumber const& y, PR pr) : UpperBound(y.get(UpperTag(),pr)) {}
 template<class F> UpperBound<F>::operator ValidatedUpperNumber() const {
-    ARIADNE_NOT_IMPLEMENTED; // return ValidatedUpperNumber(new NumberWrapper<UpperBound<F>>(*this));}
+    // FIXME: Should return a wrapper around the value itself
+    // return ValidatedUpperNumber(new NumberWrapper<UpperBound<F>>(*this));
+    return ValidatedUpperNumber(new NumberWrapper<Bounds<F>>(Bounds<F>(-F::inf(this->precision()),this->raw())));
 }
 
 } // namespace Ariadne

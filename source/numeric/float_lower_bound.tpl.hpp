@@ -32,6 +32,8 @@
 #include "float_bounds.hpp"
 #include "float_upper_bound.hpp"
 
+#include "number_wrapper.hpp"
+
 namespace Ariadne {
 
 template<class F> LowerBound<F>::LowerBound(LowerBound<F> const& x, PR pr) : _l(x._l,downward,pr) {}
@@ -42,7 +44,9 @@ template<class F> LowerBound<F>::LowerBound(Value<F> const& x) : LowerBound<F>(x
 template<class F> LowerBound<F>::LowerBound(Real const& r, PR pr) : LowerBound(r.get(pr)) {}
 template<class F> LowerBound<F>::LowerBound(ValidatedLowerNumber const& y, PR pr) : LowerBound(y.get(LowerTag(),pr)) {}
 template<class F> LowerBound<F>::operator ValidatedLowerNumber() const {
-    ARIADNE_NOT_IMPLEMENTED; //return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
+    // FIXME: Should return a wrapper around the value itself
+    // return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
+    return ValidatedLowerNumber(new NumberWrapper<Bounds<F>>(Bounds<F>(this->raw(),F::inf(this->precision()))));
 }
 
 } // namespace Ariadne

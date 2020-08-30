@@ -272,6 +272,10 @@ template<class U> class Interval
     template<class LL, class UU, class PR, EnableIf<And<IsConstructible<L,LL,PR>,IsConstructible<U,UU,PR>>> =dummy>
         Interval(const LL& l, const UU& u, PR pr) : _l(l,pr), _u(u,pr) { }
 
+    //! \brief Assign from an interval of a different type.
+    template<class UU, EnableIf<IsAssignable<U,UU>> = dummy>
+        Interval<U>& operator=(const Interval<UU>& x) { _l=x._l; _u=x._u; return *this; }
+
   public:
     //! \brief The dimension of the set; statically returns size one.
     SizeOne dimension() const;
@@ -372,6 +376,8 @@ template<class U, class X> inline auto hull(X x1, Interval<U> const& ivl2) -> In
 
 //! \related Interval \brief Split an interval into its lower, middle or upper half.
 template<class U> inline auto split(Interval<U> const& ivl1, SplitPart lmu) -> Interval<U>;
+//! \related Interval \brief Split an interval into its lower and upper half.
+template<class U> inline auto split(Interval<U> const& ivl) -> Pair<Interval<U>,Interval<U>>;
 
 
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects given information on endpoints.

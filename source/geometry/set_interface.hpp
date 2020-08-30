@@ -127,6 +127,7 @@ template<class T> class BoundedSetInterface<EffectiveTag,T>
 {
   public:
     using typename SetInterfaceBase<T>::BasicSetType;
+    using typename SetInterfaceBase<T>::BoundingSetType;
 
     virtual BoundedSetInterface<EffectiveTag,T>* clone() const = 0;
     //! \brief Tests if the set is a inside of \a bx.
@@ -136,7 +137,7 @@ template<class T> class BoundedSetInterface<EffectiveTag,T>
     virtual ValidatedLowerKleenean inside(const BasicSetType& bx, Effort eff) const = 0;
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty.
-    virtual UpperBoxType bounding_box() const = 0;
+    virtual BoundingSetType bounding_box() const = 0;
 };
 
 
@@ -226,6 +227,7 @@ template<class T> class RegularSetInterface<EffectiveTag,T>
     : public virtual OpenSetInterface<EffectiveTag,T>,
       public virtual ClosedSetInterface<EffectiveTag,T>
 {
+  public:
     using typename SetInterfaceBase<T>::BasicSetType;
 
     virtual RegularSetInterface<EffectiveTag,T>* clone() const = 0;
@@ -247,6 +249,7 @@ template<class T> class LocatedSetInterface<EffectiveTag,T>
     : public virtual OvertSetInterface<EffectiveTag,T>,
       public virtual CompactSetInterface<EffectiveTag,T>
 {
+  public:
     using typename SetInterfaceBase<T>::BasicSetType;
 
     virtual LocatedSetInterface<EffectiveTag,T>* clone() const = 0;
@@ -291,12 +294,13 @@ template<class T> class BoundedSetInterface<ValidatedTag,T>
     : public virtual SetInterfaceBase<T> {
   public:
     using typename SetInterfaceBase<T>::BasicSetType;
+    using typename SetInterfaceBase<T>::BoundingSetType;
 
     virtual BoundedSetInterface<ValidatedTag,T>* clone() const = 0;
     //! \brief Tests if the set is a inside of \a bx.
     virtual ValidatedLowerKleenean inside(const BasicSetType& bx) const = 0;
     //! \brief Returns a bounding box for the set.
-    virtual UpperBoxType bounding_box() const = 0;
+    virtual BoundingSetType bounding_box() const = 0;
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -370,6 +374,7 @@ template<class T> class RegularSetInterface<ValidatedTag,T>
     : public virtual OpenSetInterface<ValidatedTag,T>,
       public virtual ClosedSetInterface<ValidatedTag,T>
 {
+  public:
     using typename SetInterfaceBase<T>::BasicSetType;
 
     virtual RegularSetInterface<ValidatedTag,T>* clone() const = 0;
@@ -388,6 +393,7 @@ template<class T> class LocatedSetInterface<ValidatedTag,T>
     : public virtual OvertSetInterface<ValidatedTag,T>,
       public virtual CompactSetInterface<ValidatedTag,T>
 {
+  public:
     using typename SetInterfaceBase<T>::BasicSetType;
 
     virtual LocatedSetInterface<ValidatedTag,T>* clone() const = 0;

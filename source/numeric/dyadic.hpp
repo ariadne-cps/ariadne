@@ -180,6 +180,18 @@ template<> class RepresentationWriter<Dyadic> : public WriterInterface<Dyadic> {
 template<class M, EnableIf<And<IsBuiltinIntegral<M>,IsBuiltinUnsigned<M>>>> inline Dyadic::Dyadic(M m) : Dyadic(Integer(m)) { }
 template<class N, EnableIf<And<IsBuiltinIntegral<N>,IsBuiltinSigned<N>>>> inline Dyadic::Dyadic(N n) : Dyadic(Integer(n)) { }
 
+
+template<> class Positive<Dyadic> : public Dyadic {
+  public:
+    Positive<Dyadic>() : Dyadic() { }
+    template<class M, EnableIf<IsBuiltinUnsigned<M>> = dummy> Positive<Dyadic>(M m) : Dyadic(m) { }
+    Positive<Dyadic>(int n) = delete;
+    explicit Positive<Dyadic>(Dyadic const& z) : Dyadic(z) { assert(z>=0); }
+};
+inline Positive<Dyadic> cast_positive(Dyadic const& w) { return Positive<Dyadic>(w); }
+
+using PositiveDyadic = Positive<Dyadic>;
+
 using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error. //!< \ingroup NumericModule
 using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number. //!< \ingroup NumericModule
 using DyadicUpperBound = UpperBound<Dyadic>; //!< Alias for dyadic upper bound for a number. //!< \ingroup NumericModule
@@ -272,11 +284,11 @@ template<> class LowerBound<Dyadic> {
     LowerBound<Dyadic>(Dyadic l) : _l(l) { }
     LowerBound<Dyadic>(Bounds<Dyadic> lu) : _l(lu.lower_raw()) { }
     LowerBound<Dyadic>(LowerBound<FloatDP> const& x);
-    LowerBound<Dyadic>(UpperBound<FloatMP> const& x);
+    LowerBound<Dyadic>(LowerBound<FloatMP> const& x);
     Dyadic raw() const { return _l; }
     LowerBound<FloatDP> get(DoublePrecision pr) const;
     LowerBound<FloatMP> get(MultiplePrecision pr) const;
-    friend OutputStream& operator<<(OutputStream& os, LowerBound<Dyadic> const& y);
+    friend OutputStream& operator<<(OutputStream& os, LowerBound<Dyadic> const& y) { return os << y._l << ":"; }
 };
 
 template<> class UpperBound<Dyadic> {
@@ -289,7 +301,7 @@ template<> class UpperBound<Dyadic> {
     Dyadic raw() const { return _u; }
     UpperBound<FloatDP> get(DoublePrecision pr) const;
     UpperBound<FloatMP> get(MultiplePrecision pr) const;
-    friend OutputStream& operator<<(OutputStream& os, UpperBound<Dyadic> const& y);
+    friend OutputStream& operator<<(OutputStream& os, UpperBound<Dyadic> const& y) { return os << ":" << y._u; }
 };
 
 template<> class Approximation<Dyadic> {

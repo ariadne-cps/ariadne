@@ -33,6 +33,7 @@
 
 namespace Ariadne {
 
+using Nat = unsigned int;
 class Natural;
 
 class Dyadic; class Rational; class Real;
@@ -83,6 +84,20 @@ template<class X> class FastCauchySequence : public Sequence<X> {
     FastCauchySequence(std::function<X(Natural)> fn) : Sequence<X>(fn) { }
     FastCauchySequence(Sequence<X> const& seq) : Sequence<X>(seq) { }
     friend CompletionType<X> limit(FastCauchySequence<X> const&);
+};
+
+
+using OutputStream = std::ostream;
+template<class T, class W> class WritableTemporary;
+
+class SequenceWriter {
+    Nat _num;
+  public:
+    SequenceWriter(Nat const& n) : _num(n) { }
+    template<class T> inline WritableTemporary<Sequence<T>,SequenceWriter> operator() (Sequence<T> const& seq) const {
+        return WritableTemporary<Sequence<T>,SequenceWriter>(*this,seq); }
+    template<class T> OutputStream& _write(OutputStream& os, Sequence<T> const& seq) const {
+        os << "["; for (Nat i=0u; i!=_num; ++i) { if (i!=0) { os << ","; } os << seq[i]; } os << "]"; return os; }
 };
 
 } // namespace Ariadne

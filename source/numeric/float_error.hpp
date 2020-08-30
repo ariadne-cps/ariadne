@@ -128,6 +128,7 @@ template<class F> class Error
         friend Error<F> operator/(Error<F> const& x1, Nat m) { return Error<F>(div(up,x1._e,F(m,down,x1.precision()))); }
 
         friend Approximation<F> operator-(Error<F> const& x1, Error<F> const& x2) { return Approximation<F>(sub(up,x1._e,x2._e)); }
+        friend LowerBound<F> operator-(PositiveBounds<F> const& x1, Error<F> const& x2) { return LowerBound<F>(sub(down,x1._l,x2._e)); }
         friend UpperBound<F> operator-(UpperBound<F> const& x1, LowerBound<F> const& x2);
         friend LowerBound<F> operator-(LowerBound<F> const& x1, UpperBound<F> const& x2);
 

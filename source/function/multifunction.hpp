@@ -78,9 +78,6 @@ template<class P> class ImageGenericPoint : public GenericPoint<P>::Interface {
 };
 
 
-template<class P, class T> class LocatedSet;
-template<class T> using ValidatedLocatedSet = LocatedSet<ValidatedTag,T>;
-
 template<class P, class SIG> class Multifunction;
 template<class P> using VectorMultivariateMultifunction = Multifunction<P,RealVector(RealVector)>;
 using ValidatedVectorMultivariateMultifunction = VectorMultivariateMultifunction<ValidatedTag>;

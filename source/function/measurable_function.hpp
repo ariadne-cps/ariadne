@@ -160,7 +160,7 @@ FanModel<Real(Real),PR,PRE>::preimage(ValidatedOpenSet<Real> const& rng) const -
     assert(ivls_ptr);
     UnionOfIntervals<FloatDPValue> const& ivls=*ivls_ptr;
     return LowerMeasurableSetModel(ivls,this->_measure_error);
-};
+}
 
 
 

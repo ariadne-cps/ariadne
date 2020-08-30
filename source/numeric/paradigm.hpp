@@ -335,12 +335,28 @@ template<class P> struct ParadigmTraits<P,P> {
     using NextWeaker = typename InformationTraits<next_weaker(P::code())>::Paradigm;
 };
 
+template<> struct ParadigmTraits<EffectiveTag,EffectiveTag> {
+    using Weaker = EffectiveTag;
+    using Stronger = EffectiveTag;
+    using NextWeaker = ValidatedTag;
+    using Lower = EffectiveLowerTag;
+    using Upper = EffectiveUpperTag;
+};
+
+template<> struct ParadigmTraits<ValidatedTag,ValidatedTag> {
+    using Weaker = ValidatedTag;
+    using Stronger = ValidatedTag;
+    using NextWeaker = ApproximateTag;
+    using Lower = ValidatedLowerTag;
+    using Upper = ValidatedUpperTag;
+};
+
 template<> struct ParadigmTraits<ApproximateTag,ApproximateTag> {
   private:
     typedef ApproximateTag P;
   public:
-    using Weaker = typename InformationTraits<P::code()>::Paradigm;
-    using Stronger = typename InformationTraits<P::code()>::Paradigm;
+    using Weaker = ApproximateTag;
+    using Stronger = ApproximateTag;
     using NextWeaker = Void;
 };
 

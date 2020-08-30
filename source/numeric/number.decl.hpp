@@ -149,7 +149,18 @@ using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< Alias
 using PositiveApproximateNumber=PositiveNumber<ApproximateTag>; //!< Alias for generic positive approximate numbers. //!< \ingroup NumericModule
 
 using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< \ingroup NumericModule
+
+template<class P> using UpperNumber=Number<typename ParadigmTraits<P>::Upper>;
+template<class P> using LowerNumber=Number<typename ParadigmTraits<P>::Lower>;
+template<class P> using PositiveUpperNumber=Positive<UpperNumber<P>>;
+template<class P> using PositiveLowerNumber=Positive<LowerNumber<P>>;
+using EffectivePositiveUpperNumber = Positive<UpperNumber<EffectiveTag>>;
+using EffectivePositiveLowerNumber = Positive<LowerNumber<EffectiveTag>>;
+using ValidatedPositiveUpperNumber = Positive<UpperNumber<ValidatedTag>>;
+using ValidatedPositiveLowerNumber = Positive<LowerNumber<ValidatedTag>>;
+
 //@}
+
 
 } // namespace Ariadne
 

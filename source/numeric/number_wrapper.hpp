@@ -101,8 +101,8 @@ template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
 
 
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
-    Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
-    Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
+//    Handle<NumberInterface> y1(const_cast<NumberInterface*>(yp1)->shared_from_this());
+//    Handle<NumberInterface> y2(const_cast<NumberInterface*>(yp2)->shared_from_this());
     String yc1=yp1->_class_name(); String yc2=yp2->_class_name();
     ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<*yp1<<", y2="<<*yp2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
 }

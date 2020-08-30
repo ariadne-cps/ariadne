@@ -50,9 +50,10 @@ template<class X> class NumberWrapper;
 
 
 class NumberInterface
-    : public std::enable_shared_from_this<NumberInterface>
-    , public virtual WritableInterface
+    : public virtual WritableInterface
     , public virtual ClonableInterface
+// Remove 'enable_shared_from_this' due to "relocation against undefined hidden symbol when making a shared object" error in g++
+//    , public std::enable_shared_from_this<NumberInterface>
 {
     template<class X> friend class NumberWrapper;
     friend class Handle<NumberInterface>;

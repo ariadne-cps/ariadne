@@ -8,6 +8,7 @@ add_library(${LIBRARY_NAME} OBJECT
     procedure.cpp
     function.cpp
     measurable_function.cpp
+    multifunction.cpp
     function_model.cpp
     affine_model.cpp
     taylor_model.cpp

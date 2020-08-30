@@ -90,6 +90,8 @@ template<class P, class PR, class PRE> class FunctionModelFactory
         return ScalarMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create_coordinate(dom,index)); }
     VectorMultivariateFunctionModel<P,PR,PRE> create_zeros(SizeType rsize, VectorDomainType const& dom) const {
         return VectorMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create_zeros(rsize,dom)); }
+    VectorMultivariateFunctionModel<P,PR,PRE> create_constants(VectorDomainType const& dom, Vector<Number<P>> const& c) const {
+        return VectorMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create_constants(dom,c)); }
     VectorMultivariateFunctionModel<P,PR,PRE> create_projection(VectorDomainType const& dom, Range indices) const {
         return ScalarMultivariateFunctionModel<P,PR,PRE>(this->_ptr->_create_projection(dom,indices)); }
     VectorMultivariateFunctionModel<P,PR,PRE> create_identity(VectorDomainType const& dom) const {
@@ -126,9 +128,17 @@ template<class FCTRY, class ARG> class FunctionModelCreator {
     decltype(auto) create_zero() { return this->_factory.create_zero(this->_domain); }
     decltype(auto) create_zeros(SizeType n) { return this->_factory.create_zeros(n,this->_domain); }
     decltype(auto) create_constant(Number<P> const& c) const { return this->_factory.create_constant(this->_domain,c); }
+    decltype(auto) create_constants(Vector<Number<P>> const& c) const { return this->_factory.create_constants(this->_domain,c); }
     decltype(auto) create_identity() { return this->_factory.create_identity(this->_domain); }
 
-//    ScalarFunctionModel<P,D,PR,PRE> const& create(ScalarFunctionModel<P,D,PR,PRE> const& f) const { return f; }
+    decltype(auto) create(DomainType const& dom, ScalarFunction<P,ARG> const& f) { return this->_factory.create(dom,f); }
+    decltype(auto) create(DomainType const& dom, VectorFunction<P,ARG> const& f) { return this->_factory.create(dom,f); }
+    decltype(auto) create_zero(DomainType const& dom) { return this->_factory.create_zero(dom); }
+    decltype(auto) create_zeros(DomainType const& dom, SizeType n) { return this->_factory.create_zeros(n,dom); }
+    decltype(auto) create_constant(DomainType const& dom, Number<P> const& c) const { return this->_factory.create_constant(dom,c); }
+    decltype(auto) create_constants(DomainType const& dom, Vector<Number<P>> const& c) const { return this->_factory.create_constants(dom,c); }
+    decltype(auto) create_identity(DomainType const& dom) { return this->_factory.create_identity(dom); }
+
     CanonicalNumericType<P,PR,PRE> const& create(CanonicalNumericType<P,PR,PRE> const& c) const { return c; }
   protected:
     FactoryType _factory;

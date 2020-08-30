@@ -1,6 +1,7 @@
 set(UNIT_TESTS
     test_function
     test_measurable_function
+    test_multifunction
     test_polynomial
     test_chebyshev_polynomial
     test_formula

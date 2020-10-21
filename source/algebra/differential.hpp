@@ -426,6 +426,8 @@ class Vector< Differential<X> >
     const Differential<X>& operator[](SizeType i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }
 
+    VectorRange<const Vector<Differential<X>>> operator[](Range rng) const { return project(*this,rng); }
+
     const Differential<X> zero_element() const { return Differential<X>::constant(this->argument_size(),this->degree(),this->zero_coefficient()); }
 
     NonAssignableDifferential<X>& at(SizeType i) { return static_cast<NonAssignableDifferential<X>&>(_ary[i]); }

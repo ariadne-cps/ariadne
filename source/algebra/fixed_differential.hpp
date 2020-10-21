@@ -123,6 +123,21 @@ Matrix<X> outer(const Covector<X>& u) {
     return outer(u,u);
 }
 
+template<class X> class FirstDifferential;
+template<class X> class SecondDifferential;
+
+template<class X> class FixedDifferentialCharacteristics {
+    SizeType _argument_size; X _zero_coefficient;
+  public:
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
+        FixedDifferentialCharacteristics(SizeType as, PRS... prs) : _argument_size(as), _zero_coefficient(0u,prs...) { }
+    FixedDifferentialCharacteristics(SizeType as, X const& z) : _argument_size(as), _zero_coefficient(nul(z)) { }
+    FixedDifferentialCharacteristics(const FirstDifferential<X>& d);
+    FixedDifferentialCharacteristics(const SecondDifferential<X>& d);
+    SizeType argument_size() const { return this->_argument_size; }
+    X zero_coefficient() const { return this->_zero_coefficient; }
+};
+
 //! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
@@ -136,22 +151,22 @@ template<class X>
 class FirstDifferential
     : public DispatchTranscendentalAlgebraOperations<FirstDifferential<X>,X>
     , public DispatchLatticeAlgebraOperations<FirstDifferential<X>,X>
-    , public ProvideConcreteGenericArithmeticOperations<FirstDifferential<X>,X>
+    , public ProvideConcreteGenericArithmeticOperations<FirstDifferential<X>>
 {
   public:
     X _value;
     Covector<X> _gradient;
-    static const X _zero;
   public:
     //! \brief The type of used to represent numbers in the coefficient.
     typedef typename X::NumericType NumericType;
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
 
-    //! \brief Constructs a differential in \a as variables.
-    explicit FirstDifferential(SizeType as) : _value(_zero), _gradient(as,_zero) { }
+    //! \brief Constructs a differential with degree one in \a as variables, and zero element based on \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> explicit FirstDifferential(SizeType as, PRS... prs)
+        : FirstDifferential(as,X(0u,prs...)) { }
 
-    //! \brief Constructs a differential with degree zero in \a as variables, initialising to the zero value z.
+    //! \brief Constructs a differential with degree one in \a as variables, initialising to the zero value z.
     explicit FirstDifferential(SizeType as, const X& z) : _value(z), _gradient(as,z) { }
 
     //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
@@ -162,7 +177,7 @@ class FirstDifferential
         : _value(x._value), _gradient(x._gradient) { }
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
-    FirstDifferential<X>& operator=(const X& c) { _value=c; for(SizeType i=0; i!=_gradient.size(); ++i) { _gradient[i]=_zero; } return *this; }
+    FirstDifferential<X>& operator=(const X& c) { _value=c; X z(c); z=0; for(SizeType i=0; i!=_gradient.size(); ++i) { _gradient[i]=z; } return *this; }
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static FirstDifferential<X> constant(SizeType as, const X& c) {
@@ -172,7 +187,7 @@ class FirstDifferential
         FirstDifferential<X> r(as); r._value=v; r._gradient[j]=1; return r; }
     //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
     static Vector< FirstDifferential<X> > variables(const Vector<X>& x) {
-        Vector< FirstDifferential<X> > result(x.size(),FirstDifferential<X>(x.size()));
+        Vector< FirstDifferential<X> > result(x.size(),FirstDifferential<X>(x.size(),x.zero_element()));
         for(SizeType j=0; j!=x.size(); ++j) { result[j]._value=x[j]; result[j]._gradient[j]=1; }
         return result; }
 
@@ -195,6 +210,8 @@ class FirstDifferential
     SizeType argument_size() const { return this->_gradient.size(); }
     //! \brief The maximum degree of the stored terms.
     DegreeType degree() const { return 1u; }
+    //! \brief A zero with the precision argument of the numbers.
+    X zero_coefficient() const { X z=this->_value; z=0; return z; }
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The vector of coefficients of \f$x_j\f$.
@@ -212,13 +229,13 @@ class FirstDifferential
         ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
         if(a.degree()==0) { return this->_value; }
         else if(a.degree()==1) { for(SizeType j=0; j!=this->argument_size(); ++j) { if(a[j]==1) { return this->_gradient[j]; } } }
-        else { return _zero; } }
+        else { ARIADNE_ASSERT_MSG(a.degree()<=1u," d="<<*this<<", a="<<a); } }
 
     //! \brief Set the coefficient of the constant term to \a c.
     Void set_value(const X& c) { this->_value=c; }
 
     //! \brief Set all coefficients to zero.
-    Void clear() { *this=_zero; }
+    Void clear() { X z=this->_value; z=0; *this=z; }
 
     friend FirstDifferential<X> compose(UnivariateFirstDifferential<X> const& df, FirstDifferential<X> dg) {
         return _compose(df,dg); }
@@ -230,8 +247,6 @@ class FirstDifferential
     static FirstDifferential<X> _compose(UnivariateFirstDifferential<X> const&, FirstDifferential<X>);
     OutputStream& _write(OutputStream&) const;
 };
-
-template<class X> const X FirstDifferential<X>::_zero=X(0);
 
 template<class X> FirstDifferential<X> FirstDifferential<X>::_compose(UnivariateFirstDifferential<X> const& x, FirstDifferential<X> y) {
     //d/dxi(f(g(x)) = f'(g(x)) dg(x)/dxi
@@ -348,6 +363,7 @@ class Vector< FirstDifferential<X> >
     : public VectorExpression< Vector<FirstDifferential<X> > >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+    FixedDifferentialCharacteristics<X> _chars;
     Array< FirstDifferential<X> > _ary;
   public:
     // The type of the class
@@ -359,30 +375,39 @@ class Vector< FirstDifferential<X> >
     // The type used for scalars.
     typedef X ScalarType;
 
-    Vector(SizeType rs, SizeType as) : _ary(rs, FirstDifferential<X>(as)) { }
-    Vector(SizeType rs, const FirstDifferential<X>& d) : _ary(rs,d) {
+    Vector(SizeType rs, SizeType as) : _chars(as), _ary(rs, FirstDifferential<X>(as)) { }
+    Vector(SizeType rs, const FirstDifferential<X>& d) : _chars(d),  _ary(rs,d) {
         for(SizeType i=0; i!=rs; ++i) { (*this)[i]=d; } }
-    Vector(SizeType rs, const FirstDifferential<X>* p) : _ary(rs,FirstDifferential<X>(p[0].argument_size())) {
+    Vector(SizeType rs, const FirstDifferential<X>* p) : _chars(p[0]), _ary(rs,FirstDifferential<X>(p[0].argument_size())) {
         for(SizeType i=0; i!=rs; ++i) { (*this)[i]=p[i]; } }
+    Vector(const Array<FirstDifferential<X>>& ary) : _chars(ary[0]), _ary(ary) { }
     template<class E> Vector(const VectorExpression<E>& ve);
     template<class E> Vector< FirstDifferential<X> >& operator=(const VectorExpression<E>& ve);
 
     SizeType result_size() const { return this->size(); }
-    SizeType argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
+    SizeType argument_size() const { return this->_chars.argument_size(); }
     DegreeType degree() const { return 1u; }
 
+    SizeType size() const { return this->_ary.size(); }
     const FirstDifferential<X>& get(SizeType i) const { return _ary[i]; }
     FirstDifferential<X>& at(SizeType i) { return _ary[i]; }
     Void set(SizeType i, const FirstDifferential<X>& d) const { _ary[i]=d; }
     const FirstDifferential<X>& operator[](SizeType i) const { return _ary[i]; }
     FirstDifferential<X>& operator[](SizeType i) { return _ary[i]; }
-    const FirstDifferential<X> zero_element() const { return FixedDifferential(this->argument_size()); }
+    const FirstDifferential<X> zero_element() const {
+        return FirstDifferential(this->argument_size(),_chars.zero_coefficient()); }
+    const Array<FirstDifferential<X>>& array() const { return _ary; }
+
+    VectorRange<const Vector<FirstDifferential<X>>> operator[](Range rng) const { return project(*this,rng); }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
-    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
+    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size(),this->_chars.zero_coefficient());
         for(SizeType i=0; i!=r.row_size(); ++i) { for(SizeType j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i][j]; } } return r; }
+
+    friend Vector<X> value(Vector<FirstDifferential<X>> const& x) { return x.value(); }
+    friend Matrix<X> jacobian(Vector<FirstDifferential<X>> const& x) { return x.jacobian(); }
 
 };
 
@@ -409,15 +434,14 @@ class SecondDifferential
     X _value;
     Covector<X> _gradient;
     Matrix<X> _half_hessian;
-    static const X _zero;
   public:
     //! \brief The type of used to represent numbers in the coefficient.
     typedef typename X::NumericType NumericType;
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
 
-    //! \brief Constructs the zero second differential in \a as variables.
-    template<class PR, EnableIf<IsConstructible<X,PR>> =dummy> explicit SecondDifferential(SizeType as, PR pr) : SecondDifferential<X>(as,X(pr)) { }
+    //! \brief Constructs the zero second differential in \a as variables, with elements constructed from parameters \a prs.
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> explicit SecondDifferential(SizeType as, PRS... prs) : SecondDifferential<X>(as,X(0u,prs...)) { }
 
     //! \brief Constructs a constant second differential in \a as variables with value \a c.
     explicit SecondDifferential(SizeType as, const X& c) : _value(c), _gradient(as,nul(c)), _half_hessian(as,as,nul(c)) { }
@@ -437,8 +461,8 @@ class SecondDifferential
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     SecondDifferential<X>& operator=(const X& c) {
-        _value=c; for(SizeType j=0; j!=this->argument_size(); ++j) { _gradient[j]=_zero;
-            for(SizeType k=0; k!=this->argument_size(); ++k) { _half_hessian[j][k]=_zero; } } return *this; }
+        X z=c; z=0; _value=c; for(SizeType j=0; j!=this->argument_size(); ++j) { _gradient[j]=z;
+            for(SizeType k=0; k!=this->argument_size(); ++k) { _half_hessian[j][k]=z; } } return *this; }
     template<class W, EnableIf<IsAssignable<X,W>> =dummy>
         SecondDifferential<X>& operator=(const W& c) { X xc=nul(this->value()); xc=c; return (*this)=xc; }
 
@@ -466,10 +490,14 @@ class SecondDifferential
     SizeType argument_size() const { return this->_gradient.size(); }
     //! \brief The maximum degree of the stored terms.
     DegreeType degree() const { return 2u; }
-    //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
+    //! \brief A zero with the precision argument of the numbers.
+    X zero_coefficient() const { X z=this->_value; z=0; return z; }
+        //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The vector of coefficients of \f$x_j\f$.
     const Covector<X>& gradient() const { return this->_gradient; }
+    //! \brief The vector of coefficients of \f$x_j\f$.
+    const X& gradient(SizeType j) const { return this->_gradient[j]; }
     //! \brief The Hessian matrix.
     Matrix<X> hessian() const { return this->_half_hessian*2; }
 
@@ -480,12 +508,25 @@ class SecondDifferential
     const X& operator[](const SizeType& j) const { return this->_gradient[j]; }
     //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
     const X& operator[](const MultiIndex& a) const {
-        ARIADNE_NOT_IMPLEMENTED; }
+        ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
+        if(a.degree()==0) {
+            return this->_value;
+        } else if(a.degree()==1) {
+            for(SizeType j=0; j!=this->argument_size(); ++j) { if(a[j]==1) { return this->_gradient[j]; } }
+        } else if(a.degree()==2) {
+            SizeType j1=0; while (a[j1]==0) { ++j1; }
+            SizeType j2=j1; if (a[j2]==1) { ++j2; while (a[j2]==0) { ++j2; } }
+            return this->_half_hessian[j1][j2];
+        } else {
+            ARIADNE_ASSERT_MSG(a.degree()<=2," d="<<*this<<", a="<<a);
+        }
+    }
+
     //! \brief Set the coefficient of the constant term to \a c.
     Void set_value(const X& c) { this->_value=c; }
 
     //! \brief Set all coefficients to zero.
-    Void clear() { *this=_zero; }
+    Void clear() { *this=0; }
 
     friend SecondDifferential<X> compose(UnivariateSecondDifferential<X> const& df, SecondDifferential<X> dg) {
         return _compose(df,dg); }
@@ -501,8 +542,6 @@ class SecondDifferential
     static SecondDifferential<X> _compose(UnivariateSecondDifferential<X> const&, SecondDifferential<X>);
     OutputStream& _write(OutputStream&) const;
 };
-
-template<class X> const X SecondDifferential<X>::_zero=X(0);
 
 template<class X> SecondDifferential<X> SecondDifferential<X>::_compose(UnivariateSecondDifferential<X> const& x, SecondDifferential<X> y) {
     //d/dxi(f(g(x)) = f'(g(x)) dg(x)/dxi
@@ -656,8 +695,10 @@ template<class X> struct AlgebraOperations<SecondDifferential<X>,X> {
 /*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
 template<class X>
 class Vector< SecondDifferential<X> >
+    : public VectorExpression< Vector<SecondDifferential<X> > >
 {
     //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<DifferentialVector<X> >));
+    FixedDifferentialCharacteristics<X> _chars;
     Array< SecondDifferential<X> > _ary;
   public:
     // The type of the class
@@ -669,31 +710,66 @@ class Vector< SecondDifferential<X> >
     // The type used for scalars.
     typedef X ScalarType;
 
-    Vector(SizeType rs, SizeType as) : _ary(rs, SecondDifferential<X>(as)) { }
-    Vector(SizeType rs, const SecondDifferential<X>& d) : _ary(rs,d) { }
-    Vector(SizeType rs, const SecondDifferential<X>* p) : _ary(rs,p) { }
+    template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Vector(SizeType rs, SizeType as, PRS... prs)
+        : _chars(as,prs...), _ary(rs, SecondDifferential<X>(as,prs...)) { }
+    Vector(SizeType rs, const SecondDifferential<X>& d) : _chars(d), _ary(rs,d) { }
+    Vector(SizeType rs, const SecondDifferential<X>* p) : _chars(p[0]), _ary(rs,p) { }
+    Vector(const Array<SecondDifferential<X>>& ary) : _chars(ary[0]), _ary(ary) { }
     template<class E> Vector(const VectorExpression<E>& ve);
     template<class E> Vector< SecondDifferential<X> >& operator=(const VectorExpression<E>& ve);
 
 
     SizeType result_size() const { return this->size(); }
-    SizeType argument_size() const { return (this->size()==0) ? 0 : (*this)[0].argument_size(); }
+    SizeType argument_size() const { return this->_chars.argument_size(); }
     DegreeType degree() const { return 1u; }
+    SecondDifferential<X> zero_element() const {
+        return SecondDifferential<X>(this->argument_size(),this->_chars.zero_coefficient()); }
+    const Array<SecondDifferential<X>>& array() const { return _ary; }
 
+    SizeType size() const { return this->_ary.size(); }
     const SecondDifferential<X>& get(SizeType i) const { return _ary[i]; }
     SecondDifferential<X>& at(SizeType i) { return _ary[i]; }
     Void set(SizeType i, const SecondDifferential<X>& d) const { _ary[i]=d; }
     const SecondDifferential<X>& operator[](SizeType i) const { return _ary[i]; }
     SecondDifferential<X>& operator[](SizeType i) { return _ary[i]; }
 
+    VectorRange<const Vector<SecondDifferential<X>>> operator[](Range rng) const { return project(*this,rng); }
+
     Vector<X> value() const {
         Vector<X> r(this->result_size());
         for(SizeType i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
-    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
+    Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size(),this->_chars.zero_coefficient());
         for(SizeType i=0; i!=r.row_size(); ++i) { for(SizeType j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
 
+    friend Vector<X> value(const Vector<SecondDifferential<X>>& x) { return x.value(); }
+    friend Matrix<X> jacobian(const Vector<SecondDifferential<X>>& x) { return x.jacobian(); }
 };
 
+
+template<class X> inline FixedDifferentialCharacteristics<X>::FixedDifferentialCharacteristics(FirstDifferential<X> const& dx)
+    : _argument_size(dx.argument_size()), _zero_coefficient(dx.zero_coefficient())
+{ }
+
+template<class X> inline FixedDifferentialCharacteristics<X>::FixedDifferentialCharacteristics(SecondDifferential<X> const& dx)
+    : _argument_size(dx.argument_size()), _zero_coefficient(dx.zero_coefficient())
+{ }
+
+
+template<class X> class FixedDifferentialFactory {
+    typedef PrecisionType<X> PR;
+    PR _pr;
+  public:
+    FixedDifferentialFactory<X>(PR const& pr) : _pr(pr) { }
+    template<class Y, EnableIf<IsConstructible<X,Y,PR>> =dummy> X create(Y const& y) { return X(y,_pr); }
+    template<class Y> FirstDifferential<X> create(FirstDifferential<Y> const&);
+    template<class Y> SecondDifferential<X> create(SecondDifferential<Y> const&);
+};
+template<class X> inline FixedDifferentialFactory<X> differential_factory(X const& x) {
+    return FixedDifferentialFactory<X>(x.precision()); }
+template<class X> inline FixedDifferentialFactory<X> factory(FirstDifferential<X> const& dx) {
+    return FixedDifferentialFactory<X>(dx.value().precision()); }
+template<class X> inline FixedDifferentialFactory<X> factory(SecondDifferential<X> const& dx) {
+    return FixedDifferentialFactory<X>(dx.value().precision()); }
 
 
 

@@ -141,7 +141,7 @@ class HybridGridTreePaving
     friend Bool subset(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
     friend Bool intersect(const HybridGridTreePaving& hgts1, const HybridGridTreePaving& hgts2);
   public:
-    //@{ \name HybridSetInterface methods
+    //!@{ \name HybridSetInterface methods
     HybridGridTreePaving* clone() const { return new HybridGridTreePaving(*this); }
     HybridSpace space() const { return this->grid().space(); }
     ValidatedLowerKleenean separated(const HybridExactBox& hbx) const;
@@ -151,7 +151,7 @@ class HybridGridTreePaving
     HybridUpperBoxes bounding_box() const;
     OutputStream& _write(OutputStream& os) const;
     Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
-    //@}
+    //!@}
   public:
     friend OutputStream& operator<<(OutputStream& os, const HybridGridTreePaving& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }

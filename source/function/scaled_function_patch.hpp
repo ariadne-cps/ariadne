@@ -193,7 +193,7 @@ template<class M> class ScaledFunctionPatch
     ModelType _model;
   public:
 
-    //@{
+    //!@{
     //! \name Constructors and destructors.
     virtual ~ScaledFunctionPatch() = default;
 
@@ -214,17 +214,17 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief Construct a ScaledFunctionPatch over the domain \a d from the function \a f.
     explicit ScaledFunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, PropertiesType prp);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Assignment to constant values.
     //! \brief Set equal to a constant, keeping the same number of arguments.
     ScaledFunctionPatch<M>& operator=(const NumericType& c) { this->_model=c; return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
     ScaledFunctionPatch<M>& operator=(const GenericNumericType c) { this->_model=c; return *this; }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Named constructors.
     //! \brief Construct a zero function over domain \a d.
     static ScaledFunctionPatch<M> zero(const DomainType& d, PropertiesType prp);
@@ -253,9 +253,9 @@ template<class M> class ScaledFunctionPatch
     static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, PropertiesType prp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
     static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, PropertiesType prp);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Prototype constructors.
     friend ScaledFunctionPatchCreator<M> factory(ScaledFunctionPatch<M>const& f) {
         return ScaledFunctionPatchCreator<M>(f.domain(),f.properties()); }
@@ -263,9 +263,9 @@ template<class M> class ScaledFunctionPatch
     ScaledFunctionPatch<M> create_zero() const;
     //! \brief Construct a zero function over the same domain with the same computational properties.
     ScaledFunctionPatch<M> create_constant(NumericType const& c) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
     //! \brief The domain of the quantity.
     const DomainType domain() const { return this->_domain; }
@@ -319,16 +319,16 @@ template<class M> class ScaledFunctionPatch
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
     SizeType number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Comparison operators.
     Bool operator==(const ScaledFunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
     Bool operator!=(const ScaledFunctionPatch<M>& tv) const { return !(*this==tv); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Function operations.
     //! \brief An over-approximation to the range of the function.
     RangeType const range() const { return this->_model.range(); }
@@ -340,9 +340,9 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief Compute an approximation to gradient derivative of the function at the point \a x.
 //    Covector<NumericType> gradient(const Vector<NumericType>& x) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Simplification operations.
    //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
@@ -350,21 +350,21 @@ template<class M> class ScaledFunctionPatch
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
     ScaledFunctionPatch<M>& simplify(const PropertiesType& prp) { this->_model.simplify(prp); return *this; }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Accuracy parameters.
     //! \copydoc TaylorModel::set_properties()
     Void set_properties(const PropertiesType& prp) { this->_model.set_properties(prp); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Non-arithmetic operations.
     //! \brief Restrict to a subdomain.
     Void restrict(const DomainType& d);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Stream input/output operators.
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream& os) const;
@@ -373,7 +373,7 @@ template<class M> class ScaledFunctionPatch
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const ScaledFunctionPatch<M>& x) {
         return x._write(os); }
-    //@}
+    //!@}
 
   public:
     Void clobber() { this->_model.clobber(); }

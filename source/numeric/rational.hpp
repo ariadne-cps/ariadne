@@ -82,7 +82,7 @@ class Rational
     Rational(Rational&&);
     Rational& operator=(const Rational&);
     Rational& operator=(Rational&&);
-    operator Number<ExactTag> () const;
+    operator ExactNumber () const;
 
     static Rational inf(Sign sgn);
     static Rational inf();

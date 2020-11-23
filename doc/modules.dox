@@ -266,7 +266,7 @@ See the page \ref numeric_page for more information.
  *
  * We use the following abbreviations for template parameters for classes
  * in this module:
- *  - \b SCA: Scalar
+ *  - \b SCA: \ref Scalar
  *  - \b VEC: Vector
  *  - \b MX: Matrix
  *

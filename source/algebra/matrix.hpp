@@ -126,7 +126,7 @@ template<class X> class Matrix
     typedef X ValueType;
   public:
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! Destructor
@@ -155,7 +155,7 @@ template<class X> class Matrix
     //! Construct a matrix as a linear map from functionals.
     Matrix(Vector<Covector<X>>);
 
-    //@{
+    //!@{
     //! \name Static constructors
 
     //! \brief The zero matrix with \a m rows and \a n columns.
@@ -167,7 +167,7 @@ template<class X> class Matrix
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> zero(SizeType m, SizeType n, PRS... prs);
     //! \brief The itentity matrix with \a n rows and \a n columns, with elements described by the properties \a prs.
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> static Matrix<X> identity(SizeType n, PRS... prs);
-    //@}
+    //!@}
 
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>> =dummy>
         Matrix(const M& A);

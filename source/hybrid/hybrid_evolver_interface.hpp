@@ -55,7 +55,7 @@ class HybridEvolverInterface
     //! \brief Make a dynamically-allocated copy.
     virtual HybridEvolverInterface* clone() const = 0;
 
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
@@ -71,9 +71,9 @@ class HybridEvolverInterface
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const = 0;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
@@ -81,7 +81,7 @@ class HybridEvolverInterface
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridBoundedConstraintSet& initial_set) const = 0;
 
-    //@}
+    //!@}
 
 };
 

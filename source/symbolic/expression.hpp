@@ -133,19 +133,19 @@ class Expression
     SharedPointer<const ExpressionNode<T>> _root;
 };
 
-//@{
+//!@{
 //! \related Expression \name Type synonyms.
-using BooleanExpression = Expression<Boolean>; //!< .
-using KleeneanExpression = Expression<Kleenean>; //!< .
-using StringExpression = Expression<String>; //!< .
-using IntegerExpression = Expression<Integer>; //!< .
-using RealExpression = Expression<Real>; //!< .
+using BooleanExpression = Expression<Boolean>; //!< <p/>
+using KleeneanExpression = Expression<Kleenean>; //!< <p/>
+using StringExpression = Expression<String>; //!< <p/>
+using IntegerExpression = Expression<Integer>; //!< <p/>
+using RealExpression = Expression<Real>; //!< <p/>
 
 using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
 using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Evaluation and related operations.
 //! \related Expression
 
@@ -170,9 +170,9 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Operations on expressions.
 //! \related Expression
 
@@ -181,10 +181,10 @@ Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
 
 //! \brief The derivative of the expression \a e with respect to the variable \a v.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
-//@}
+//!@}
 
 
-//@{
+//!@{
 //! \name Testing the form of expressions.
 //! \related Expression
 
@@ -211,9 +211,9 @@ Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
 //! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
 //! or (a1>=a2; a2>=a1).
 Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Equality and ordering.
 //! \related Expression
 
@@ -221,9 +221,9 @@ Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
 //! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Complexity checks and simplification and .
 //! \related Expression
 
@@ -239,12 +239,12 @@ template<class T> Expression<T> simplify(const Expression<T>& e);
 //! \brief Eliminate common subexpression in \a e by replacing identical nodes.
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
-//@}
+//!@}
 
 
 
 
-//@{
+//!@{
 //! \name Conversion to/from functions and formulae.
 //! \related Expression
 
@@ -274,9 +274,9 @@ ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Output.
 //! \related Expression
 
@@ -290,9 +290,9 @@ template<class T> class InfixExpressionWriter : public WriterInterface<Expressio
     virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
 
-//@}
+//!@}
 
-//@}
+//!@}
 
 
 } // namespace Ariadne

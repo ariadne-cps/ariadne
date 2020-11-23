@@ -84,7 +84,7 @@ class HybridReachabilityAnalyser
   public:
     typedef HybridReachabilityAnalyserConfiguration ConfigurationType;
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Construct from an evolver.
@@ -92,7 +92,7 @@ class HybridReachabilityAnalyser
 
     //! \brief Make a dynamically-allocated copy.
     virtual HybridReachabilityAnalyser* clone() const;
-    //@}
+    //!@}
 
   protected:
     Void _adjoin_upper_reach_evolve(HybridStorage& reach_cells,

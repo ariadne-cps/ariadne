@@ -43,7 +43,7 @@
 namespace Ariadne {
 
 //! \ingroup LinearAlgebraModule
-//! A scalar of type \a X; defined as an alias of \a X.
+//! \brief A scalar of type \a X; defined as an synonym (typedef) of \a X.
 template<class X> using Scalar = X;
 
 /************ Vector *********************************************************/
@@ -151,7 +151,7 @@ class Vector
 {
     Array<X> _ary;
   public:
-    //@{
+    //!@{
     //! \name Type definitions
 
     //! \brief The type used to index the elements.
@@ -161,9 +161,9 @@ class Vector
     typedef X ScalarType;
     typedef X ValueType;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Default constructor constructs a vector with no elements.
@@ -215,9 +215,9 @@ class Vector
     Vector(Vector<X>&& v) = default;
     //! \brief Copy assignment.
     Vector<X>& operator=(const Vector<X>& v) = default;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Static constructors
 
     //! \brief The zero vector of size \a n.
@@ -235,9 +235,9 @@ class Vector
     static Array< Vector<X> > basis(SizeType n, PRS... prs) {
         Array<Vector<X>> result(n,Vector<X>(n,prs...));
         for(SizeType i=0; i!=n; ++i) { result[i]=unit(n,i,prs...); } return result; }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
 
     //! \brief Resize to hold \a n elements.
@@ -267,7 +267,7 @@ class Vector
         else { return make_zero<X>(); } }
     //! \brief The raw data array.
     Array<X> const& array() const { return _ary; }
-    //@}
+    //!@}
 
 #ifdef DOXYGEN
     //! \brief Equality operator.

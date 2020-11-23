@@ -54,7 +54,7 @@ template<class SYS, class ES, class TRM> class EvolverBase
         return os << "Evolver( ... )"; }
 
   public:
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const = 0;
@@ -71,7 +71,7 @@ template<class SYS, class ES, class TRM> class EvolverBase
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return std::make_pair(reachable,final); }
 
-    //@}
+    //!@}
 
   protected:
     //! \brief Main routine for computing the evolution.

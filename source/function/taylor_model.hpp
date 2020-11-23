@@ -69,31 +69,19 @@ template<class T1, class T2> struct Product;
 
 template<class P, class F> class TaylorModel;
 
-/*
-//@{
-//! \name Template shorthands and type synonyms for Taylor models
-template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< . \ingroup FunctionModelSubModule
-template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< . \ingroup FunctionModelSubModule
-using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< . \ingroup FunctionModelSubModule
-using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< . \ingroup FunctionModelSubModule
-using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< . \ingroup FunctionModelSubModule
-//@}
-*/
-
-//@{
 //! \relates TaylorModel
 //! \name Template shorthands and type synonyms for Taylor models
-template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< Alias
-template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,UpperInterval<F>>; //!< Alias
-template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< Alias
-using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< Alias
-using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< Alias
-using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPUpperInterval>; //!< Alias
-using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPUpperInterval>; //!< Alias
-using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< Alias
-using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< Alias
-//@}
+//!@{
+template<class F> using ValidatedTaylorModel = TaylorModel<ValidatedTag,F>; //!< <p/>
+template<class F> using ValidatedIntervalTaylorModel = TaylorModel<ValidatedTag,UpperInterval<F>>; //!< <p/>
+template<class F> using ApproximateTaylorModel = TaylorModel<ApproximateTag,F>; //!< <p/>
+using ValidatedTaylorModelDP = TaylorModel<ValidatedTag,FloatDP>; //!< <p/>
+using ValidatedTaylorModelMP = TaylorModel<ValidatedTag,FloatMP>; //!< <p/>
+using ValidatedIntervalTaylorModelDP = TaylorModel<ValidatedTag,FloatDPUpperInterval>; //!< <p/>
+using ValidatedIntervalTaylorModelMP = TaylorModel<ValidatedTag,FloatMPUpperInterval>; //!< <p/>
+using ApproximateTaylorModelDP = TaylorModel<ApproximateTag,FloatDP>; //!< <p/>
+using ApproximateTaylorModelMP = TaylorModel<ApproximateTag,FloatMP>; //!< <p/>
+//!@}
 
 template<class P, class F> struct IsScalar< TaylorModel<P,F> > { static const Bool value = true; };
 
@@ -163,14 +151,12 @@ template<class P, class F> struct AlgebraOperations<TaylorModel<P,F>>
     static TaylorModel<P,F> apply(Abs,TaylorModel<P,F> const& tm);
 };
 
-//! \ingroup FunctionModels
-//! \brief A class representing polynomial approximation to a function on the unit box.
 template<class P, class F> class TaylorModel;
 
-/*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
- *
- * See also Expansion, ValidatedScalarMultivariateTaylorFunctionModelDP, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
- */
+//! \ingroup FunctionModelSubModule
+//! \brief A class representing polynomial approximation to a function, scaled to the unit box, with a uniform error bound.
+//!
+//! \see Expansion, ValidatedScalarMultivariateTaylorFunctionModelDP, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
 template<class P, class F>
 class TaylorModel
     : public DispatchElementaryAlgebraOperations<TaylorModel<P,F>,typename ModelNumericTraits<P,F>::NumericType>
@@ -231,8 +217,9 @@ class TaylorModel
     ErrorType _error;
     mutable SweeperType _sweeper;
   public:
-    //@{
     //! \name Constructors and destructors.
+    //!@{
+    //
     //! \brief Default constructor.
     TaylorModel<P,F>();
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
@@ -256,16 +243,19 @@ class TaylorModel
     TaylorModel<P,F> create_ball(ErrorType e) const;
     //! \brief Set to zero.
     Void clear();
+    //!@}
 
-    //@{
     //! \name Assignment to constant values.
+    //!@{
+    //
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     TaylorModel<P,F>& operator=(const NumericType& c);
     TaylorModel<P,F>& operator=(const GenericNumericType& c);
-    //@}
+    //!@}
 
-    //@{
     //! \name Named constructors.
+    //!@{
+    //
     //! \brief Construct the zero quantity in \a as independent variables.
     static TaylorModel<P,F> zero(SizeType as, SweeperType swp) {
         TaylorModel<P,F> r(as,swp); return r; }
@@ -298,10 +288,11 @@ class TaylorModel
 
     //! \brief Return the vector scaling the box \a codom onto the unit box.
     static Vector<TaylorModel<P,F>> scalings(const BoxDomainType& codom, SweeperType swp);
-    //@}
+    //!@}
 
-    //@{
     //! \name Comparison operators.
+    //!@{
+    //
     //! \brief Equality operator. Tests equality of representation, including error term.
     friend Bool same(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2) {
         return same(tm1._expansion, tm2._expansion) && same(tm1._error, tm2._error); }
@@ -318,10 +309,11 @@ class TaylorModel
     //! \brief Comparison with a scalar.
     decltype(auto) operator>(Int c) const {
         return this->range().lower_bound()>c; }
-    //@}
+    //!@}
 
-    //@{
     //! \name Data access
+    //!@{
+    //
     //! \brief The expansion.
     const ExpansionType& expansion() const { return this->_expansion; }
     //! \brief A reference to the expansion.
@@ -386,10 +378,11 @@ class TaylorModel
     //! \brief The number of nonzero terms in the expansion.
     SizeType number_of_terms() const { return this->_expansion.number_of_terms(); }
     SizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
-    //@}
+    //!@}
 
-    //@{
     //! \name Function evaluation.
+    //!@{
+    //
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     UnitBox domain() const;
     //! \brief The codomain of the quantity.
@@ -421,10 +414,11 @@ class TaylorModel
 
     friend TaylorModel<P,F> evaluate(const TaylorModel<P,F>& f, const Vector<TaylorModel<P,F>>& g) { return compose(f,g); }
     template<class A> ArithmeticType<CoefficientType,A> operator() (Vector<A> const&) const;
-    //@}
+    //!@}
 
-    //@{
     //! \name Inplace modifications.
+    //!@{
+    //
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
     Void unscale(IntervalDomainType const& dom);
     //! \brief Compute the antiderivative (in place).
@@ -441,22 +435,25 @@ class TaylorModel
         tm.antidifferentiate(k); return tm; }
     friend TaylorModel<P,F> derivative(TaylorModel<P,F> tm, SizeType k) {
         tm.differentiate(k); return tm; }
-    //@}
+    //!@}
 
-    //@{
     //! \name Operations on the domain.
-    //!\brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
+    //!@{
+    //
+    //! \brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
     friend TaylorModel<P,F> split(const TaylorModel<P,F>& tm, SizeType k, SplitPart part) {
         return TaylorModel<P,F>::_split(tm,k,part); }
+    //! \brief Split the Taylor model \a tm, subdividing along the independent variable \a k.
     friend Pair<TaylorModel<P,F>,TaylorModel<P,F>> split(const TaylorModel<P,F>& tm, SizeType k) {
         return make_pair(split(tm,k,SplitPart::LOWER),split(tm,k,SplitPart::UPPER)); }
     //! \relates TaylorModel<P,F> \brief Embed the model in a space of higher dimension
     friend TaylorModel<P,F> embed(SizeType as1, const TaylorModel<P,F>& tm2, SizeType as3) {
         return TaylorModel<P,F>::_embed(as1,tm2,as3); }
-    //@}
+    //!@}
 
-    //@{
-    //! \name P paradigm-based operations.
+    //! \name Paradigm-based operations.
+    //!@{
+    //
     //! \brief Test if one model is disjoint from (is incompatible with) another.
     friend Bool consistent(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2) {
         return TaylorModel<P,F>::_consistent(tm1,tm2); }
@@ -473,11 +470,12 @@ class TaylorModel
     //! arguments, and is guaranteed to contain any function contained in both arguments.
     friend TaylorModel<P,F> refinement(const TaylorModel<P,F>& tm1, const TaylorModel<P,F>& tm2) {
         return TaylorModel<P,F>::_refinement(tm1,tm2); }
-    //@}
+    //!@}
 
-    //@{
     //! \name Simplification operations.
-    //! \relates TaylorModel<P,F> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
+    //!@{
+    //
+    //! \brief Embed the model in a space of higher dimension, placing the error in the final variable.
     friend TaylorModel<P,F> embed_error(const TaylorModel<P,F>& tm) {
         return TaylorModel<P,F>::_embed_error(tm); }
     //! \relates TaylorModel<P,F> \brief Abstract away the given variables.
@@ -499,15 +497,14 @@ class TaylorModel
     TaylorModel<P,F>& unique();
     //! \brief Sort the terms in index order and combine terms with the same index.
     TaylorModel<P,F>& cleanup();
-
     //! \brief Set the error to zero.
     //! WARNING: This method does not preserve rigour of the model approximation.
     TaylorModel<P,F>& clobber();
+    //!@}
 
-    //@}
-
-    //@{
     //! \name Accuracy parameters.
+    //!@{
+    //
     //! \brief Specify a policy to use to remove low-impact terms.
     Void set_sweeper(SweeperType swp) { this->_sweeper=swp; }
     Void set_properties(PropertiesType prp) { this->_sweeper=prp; }
@@ -517,10 +514,11 @@ class TaylorModel
     PropertiesType properties() const { return this->sweeper(); }
     //! \brief The precision of the coefficients.
     PrecisionType precision() const { return this->sweeper().precision(); }
-    //@}
+    //!@}
 
-    //@{
     //! \name Order operators.
+    //!@{
+    //
     //! \brief The pointwise maximum.
     template<class FF> friend TaylorModel<P,FF> max(const TaylorModel<P,FF>& x, const TaylorModel<P,FF>& y);
     //! \brief The pointwise minimum.
@@ -528,12 +526,14 @@ class TaylorModel
     //! \brief The pointwise absolute value.
     //! \details If the range of \a x definitely does not include 0, returns +x or -x. Otherwise, uses a uniform polynomial approximation to abs.
     template<class FF> friend TaylorModel<P,FF> abs(const TaylorModel<P,FF>& x);
-    //@}
-    //@{
+    //!@}
+
     //! \name Stream input/output operators.
+    //!@{
+    //
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const TaylorModel<P,F>& x) { return x.str(os); }
-    //@}
+    //!@}
 
   public:
     OutputStream& str(OutputStream&) const;

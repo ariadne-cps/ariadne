@@ -277,7 +277,7 @@ public:
                      List<PrimedRealAssignment> const& reset);
 
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Default constructor with "system" name.
@@ -296,9 +296,9 @@ public:
 
     //! \brief Destructor.
     virtual ~HybridAutomaton() = default;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
@@ -506,9 +506,9 @@ public:
         this->new_transition(DiscreteLocation(),event,DiscreteLocation(),reset,guard,kind);
     }
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access and queries.
 
     //! \brief The name of the automaton
@@ -531,9 +531,9 @@ public:
     //! \brief Checks validity of the mode for the given \a location.
     //! Only checks for underspecified dynamics; overspecification is determined at build-time.
     Void check_mode(DiscreteLocation location) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Access for compositional hybrid automata.
 
     //! \brief The state (dotted) variables in the given location.
@@ -559,9 +559,9 @@ public:
     ContinuousPredicate guard_predicate(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The differential equations valid in the given location.
     List<PrimedRealAssignment> reset_assignments(DiscreteLocation source, DiscreteEvent event) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
     //! \brief The continuous state space for each location.
@@ -605,7 +605,7 @@ public:
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
     virtual EffectiveVectorMultivariateFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
-    //@}
+    //!@}
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream&) const;

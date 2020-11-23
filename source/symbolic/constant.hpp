@@ -67,13 +67,6 @@ template<> class Constant<String>
     const String& val() const { return *this; }
 };
 
-//@{
-//! \related Constant \name Type synonyms.
-using StringConstant = Constant<String>; //!< .
-using IntegerConstant = Constant<Integer>; //!< \brief .
-using RealConstant = Constant<Real>; //!< .
-//@}
-
 } // namespace Ariadne
 
 #endif /* ARIADNE_CONSTANT_HPP */

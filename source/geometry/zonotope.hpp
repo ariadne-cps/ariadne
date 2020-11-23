@@ -86,7 +86,7 @@ class Zonotope
     Matrix<FloatDP> _generators;
     Vector<FloatDP> _error;
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor. */
     virtual ~Zonotope() = default;
@@ -126,16 +126,16 @@ class Zonotope
     Zonotope& operator=(const Zonotope& z);
     /*! \brief Cloning operator. */
     Zonotope* clone() const;
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Logical predicates
     /*! \brief Test for equality of representation. */
     friend Bool operator==(const Zonotope& z1, const Zonotope& z2);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
     /*! \brief The dimension of the zonotope. */
     DimensionType dimension() const;
@@ -169,10 +169,10 @@ class Zonotope
     /*! \brief Test if the set is a inside of a box. */
     ValidatedKleenean inside(const ExactBoxType& bx) const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
     friend ValidatedKleenean separated(const Zonotope& z, const ExactBoxType& r);
@@ -182,9 +182,9 @@ class Zonotope
     friend ValidatedKleenean inside(const Zonotope& z, const ExactBoxType& r);
     /*! \brief Tests disjointness of \a r and \a z. */
     friend ValidatedKleenean separated(const ExactBoxType& r, const Zonotope& z);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Approximation operations.
     /*! \brief Compute an simplified approximation of the zonotope \a z. */
     friend Zonotope approximation(const Zonotope& z);
@@ -198,22 +198,22 @@ class Zonotope
     friend Zonotope nonsingular_over_approximation(const Zonotope&);
     /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
     friend Zonotope cascade_over_approximation(const Zonotope& z, SizeType b);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
     friend Zonotope apply(const Vector<Affine<ExactIntervalType>>& af, const Zonotope& z);
     friend Zonotope apply(const VectorMultivariateFunction<ValidatedTag>& f, const Zonotope& z);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */
     OutputStream& _write(OutputStream& os) const;
     /*! \brief Draw on a canvas. */
     Void draw(CanvasInterface& c, const Projection2d& p) const;
-    //@}
+    //!@}
 };
 
 

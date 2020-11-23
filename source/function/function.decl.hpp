@@ -38,7 +38,12 @@ template<class X> using Scalar=X;
 template<class X> class Vector;
 
 class Real;
+
+//! \ingroup LinearAlgebraModule
+//! \brief A scalar real number. Defined as a synomym for Real
 using RealScalar=Scalar<Real>;
+//! \ingroup LinearAlgebraModule
+//! \brief A vector of real numbers. Defined as a synomym for Real
 using RealVector=Vector<Real>;
 
 // Domain declarations
@@ -51,47 +56,76 @@ class EuclideanDomain;
 // Function declarations
 template<class P, class SIG> class Function;
 
-//@{
+//!@{
 //! \name Type shorthands for function classes
-template<class P, class... ARGS> using ScalarFunction = Function<P,RealScalar(ARGS...)>; //!< . \ingroup FunctionModule
-template<class P, class... ARGS> using VectorFunction = Function<P,RealVector(ARGS...)>; //!< . \ingroup FunctionModule
-template<class P, class RES> using UnivariateFunction = Function<P,RES(RealScalar)>; //!< . \ingroup FunctionModule
-template<class P, class RES> using MultivariateFunction = Function<P,RES(RealVector)>; //!< . \ingroup FunctionModule
+template<class P, class... ARGS> using ScalarFunction = Function<P,RealScalar(ARGS...)>; //!< <p/> \ingroup FunctionModule
+template<class P, class... ARGS> using VectorFunction = Function<P,RealVector(ARGS...)>; //!< <p/> \ingroup FunctionModule
+template<class P, class RES> using UnivariateFunction = Function<P,RES(RealScalar)>; //!< <p/> \ingroup FunctionModule
+template<class P, class RES> using MultivariateFunction = Function<P,RES(RealVector)>; //!< <p/> \ingroup FunctionModule
 
-template<class P> using ScalarUnivariateFunction = Function<P,RealScalar(RealScalar)>; //!< . \ingroup FunctionModule
-template<class P> using VectorUnivariateFunction = Function<P,RealVector(RealScalar)>; //!< . \ingroup FunctionModule
-template<class P> using ScalarMultivariateFunction = Function<P,RealScalar(RealVector)>; //!< . \ingroup FunctionModule
-template<class P> using VectorMultivariateFunction = Function<P,RealVector(RealVector)>; //!< . \ingroup FunctionModule
+template<class P> using ScalarUnivariateFunction = Function<P,RealScalar(RealScalar)>; //!< <p/> \ingroup FunctionModule
+template<class P> using VectorUnivariateFunction = Function<P,RealVector(RealScalar)>; //!< <p/> \ingroup FunctionModule
+template<class P> using ScalarMultivariateFunction = Function<P,RealScalar(RealVector)>; //!< <p/> \ingroup FunctionModule
+template<class P> using VectorMultivariateFunction = Function<P,RealVector(RealVector)>; //!< <p/> \ingroup FunctionModule
 
-template<class SIG> using ApproximateFunction = Function<ApproximateTag,SIG>; //!< . \ingroup FunctionModule
-template<class SIG> using ValidatedFunction = Function<ValidatedTag,SIG>; //!< . \ingroup FunctionModule
-template<class SIG> using EffectiveFunction = Function<EffectiveTag,SIG>; //!< . \ingroup FunctionModule
-//@}
+template<class SIG> using ApproximateFunction = Function<ApproximateTag,SIG>; //!< <p/> \ingroup FunctionModule
+template<class SIG> using ValidatedFunction = Function<ValidatedTag,SIG>; //!< <p/> \ingroup FunctionModule
+template<class SIG> using EffectiveFunction = Function<EffectiveTag,SIG>; //!< <p/> \ingroup FunctionModule
+//!@}
 
-//@{
+
+//! \ingroup FunctionModule
+//! \name Type synonyms for function classes
+//!@{
+//! \ingroup FunctionModule
+using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
+using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
+using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
+
+using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
+using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
+using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
+
+using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
+using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
+using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
+
+using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
+using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
+using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< <p/>
+
+using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< DEPRECATED
+using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!< DEPRECATED
+using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< DEPRECATED
+using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< DEPRECATED
+//!@}
+
+/*
 //! \relates Function
 //! \name Type synonyms for function classes
-using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< .
-using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< .
-using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< .
+//!@{
+using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< <p/>
+using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< <p/>
+using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< <p/>
 
-using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
-using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
-using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
+using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< <p/>
+using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< <p/>
+using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< <p/>
 
-using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
-using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
-using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
+using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< <p/>
+using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< <p/>
+using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< <p/>
 
-using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< . \ingroup FunctionModule
-using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< . \ingroup FunctionModule
-using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< . \ingroup FunctionModule
+using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< <p/>
+using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< <p/>
+using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< <p/>
 
-using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< DEPRECATED \ingroup FunctionModule
-using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!< .
-using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< .
-using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< .
-//@}
+using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< DEPRECATED
+using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!< DEPRECATED
+using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< DEPRECATED
+using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< DEPRECATED
+//!@}
+*/
 
 //! \ingroup FunctionModule
 //! \brief An interface for generic functions.
@@ -112,62 +146,62 @@ template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModelInt
 
 template<class P, class SIG, class PR=Void, class PRE=PR> class FunctionModel;
 
-//@{
 //! \relates FunctionModel
 //! \name Type shorthands
-template<class P, class ARG, class PR=Void, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,RealScalar(ARG),PR,PRE>; //!< .
-template<class P, class ARG, class PR=Void, class PRE=PR> using VectorFunctionModel = FunctionModel<P,RealVector(ARG),PR,PRE>; //!< .
-template<class P, class RES, class PR=Void, class PRE=PR> using UnivariateFunctionModel = FunctionModel<P,RES(RealScalar),PR,PRE>; //!< .
-template<class P, class RES, class PR=Void, class PRE=PR> using MultivariateFunctionModel = FunctionModel<P,RES(RealVector),PR,PRE>; //!< .
-template<class P, class PR=Void, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,RealScalar(RealScalar),PR,PRE>; //!< .
-template<class P, class PR=Void, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,RealVector(RealScalar),PR,PRE>; //!< .
-template<class P, class PR=Void, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,RealScalar(RealVector),PR,PRE>; //!< .
-template<class P, class PR=Void, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,RealVector(RealVector),PR,PRE>; //!< .
+//!@{
+template<class P, class ARG, class PR=Void, class PRE=PR> using ScalarFunctionModel = FunctionModel<P,RealScalar(ARG),PR,PRE>; //!< <p/>
+template<class P, class ARG, class PR=Void, class PRE=PR> using VectorFunctionModel = FunctionModel<P,RealVector(ARG),PR,PRE>; //!< <p/>
+template<class P, class RES, class PR=Void, class PRE=PR> using UnivariateFunctionModel = FunctionModel<P,RES(RealScalar),PR,PRE>; //!< <p/>
+template<class P, class RES, class PR=Void, class PRE=PR> using MultivariateFunctionModel = FunctionModel<P,RES(RealVector),PR,PRE>; //!< <p/>
+template<class P, class PR=Void, class PRE=PR> using ScalarUnivariateFunctionModel = FunctionModel<P,RealScalar(RealScalar),PR,PRE>; //!< <p/>
+template<class P, class PR=Void, class PRE=PR> using VectorUnivariateFunctionModel = FunctionModel<P,RealVector(RealScalar),PR,PRE>; //!< <p/>
+template<class P, class PR=Void, class PRE=PR> using ScalarMultivariateFunctionModel = FunctionModel<P,RealScalar(RealVector),PR,PRE>; //!< <p/>
+template<class P, class PR=Void, class PRE=PR> using VectorMultivariateFunctionModel = FunctionModel<P,RealVector(RealVector),PR,PRE>; //!< <p/>
 
-template<class PR=Void, class PRE=PR> using ValidatedScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ValidatedVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ValidatedScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ValidatedVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ValidatedScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ValidatedVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ValidatedTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ValidatedScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ValidatedVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ValidatedTag,PR,PRE>; //!< <p/>
 
-template<class PR=Void, class PRE=PR> using ApproximateScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ApproximateVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ApproximateScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
-template<class PR=Void, class PRE=PR> using ApproximateVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< .
+template<class PR=Void, class PRE=PR> using ApproximateScalarUnivariateFunctionModel = ScalarUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ApproximateVectorUnivariateFunctionModel = VectorUnivariateFunctionModel<ApproximateTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ApproximateScalarMultivariateFunctionModel = ScalarMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< <p/>
+template<class PR=Void, class PRE=PR> using ApproximateVectorMultivariateFunctionModel = VectorMultivariateFunctionModel<ApproximateTag,PR,PRE>; //!< <p/>
 
-template<class P> using ScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<P,DoublePrecision>; //!< .
-template<class P> using VectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<P,DoublePrecision>; //!< .
-template<class P> using ScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<P,DoublePrecision>; //!< .
-template<class P> using VectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<P,DoublePrecision>; //!< .
+template<class P> using ScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<P,DoublePrecision>; //!< <p/>
+template<class P> using VectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<P,DoublePrecision>; //!< <p/>
+template<class P> using ScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<P,DoublePrecision>; //!< <p/>
+template<class P> using VectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<P,DoublePrecision>; //!< <p/>
 
-template<class P> using ScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<P,MultiplePrecision>; //!< .
-template<class P> using VectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<P,MultiplePrecision>; //!< .
-template<class P> using ScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<P,MultiplePrecision>; //!< .
-template<class P> using VectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<P,MultiplePrecision>; //!< .
-//@}
+template<class P> using ScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<P,MultiplePrecision>; //!< <p/>
+template<class P> using VectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<P,MultiplePrecision>; //!< <p/>
+template<class P> using ScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<P,MultiplePrecision>; //!< <p/>
+template<class P> using VectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<P,MultiplePrecision>; //!< <p/>
+//!@}
 
-//@{
 //! \relates FunctionModel
 //! \name Type synonyms
-using ValidatedScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< .
-using ValidatedVectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< .
-using ValidatedScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< .
-using ValidatedVectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< .
+//!@{
+using ValidatedScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< <p/>
+using ValidatedVectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< <p/>
+using ValidatedScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< <p/>
+using ValidatedVectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<ValidatedTag,DoublePrecision>; //!< <p/>
 
-using ApproximateScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< .
-using ApproximateVectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< .
-using ApproximateScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< .
-using ApproximateVectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< .
+using ApproximateScalarUnivariateFunctionModelDP = ScalarUnivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< <p/>
+using ApproximateVectorUnivariateFunctionModelDP = VectorUnivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< <p/>
+using ApproximateScalarMultivariateFunctionModelDP = ScalarMultivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< <p/>
+using ApproximateVectorMultivariateFunctionModelDP = VectorMultivariateFunctionModel<ApproximateTag,DoublePrecision>; //!< <p/>
 
-using ValidatedScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< .
-using ValidatedVectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< .
-using ValidatedScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< .
-using ValidatedVectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< .
+using ValidatedScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< <p/>
+using ValidatedVectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< <p/>
+using ValidatedScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< <p/>
+using ValidatedVectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<ValidatedTag,MultiplePrecision>; //!< <p/>
 
-using ApproximateScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< .
-using ApproximateVectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< .
-using ApproximateScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< .
-using ApproximateVectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< .
-//@}
+using ApproximateScalarUnivariateFunctionModelMP = ScalarUnivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< <p/>
+using ApproximateVectorUnivariateFunctionModelMP = VectorUnivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< <p/>
+using ApproximateScalarMultivariateFunctionModelMP = ScalarMultivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< <p/>
+using ApproximateVectorMultivariateFunctionModelMP = VectorMultivariateFunctionModel<ApproximateTag,MultiplePrecision>; //!< <p/>
+//!@}
 
 template<class P, class PR, class PRE=PR> struct FunctionModelTraits;
 
@@ -213,32 +247,34 @@ class MultiIndex;
 template<class I, class X> class Monomial;
 template<class I, class X> class Polynomial;
 
-//@{
+//! \relates Monomial
 //! \name Type shorthands and synonyms for Monomial classes.
-template<class X> using UnivariateMonomial = Monomial<UniIndex,X>; //!< .
-template<class X> using MultivariateMonomial = Monomial<MultiIndex,X>; //!< .
+//!@{
+template<class X> using UnivariateMonomial = Monomial<UniIndex,X>; //!< <p/>
+template<class X> using MultivariateMonomial = Monomial<MultiIndex,X>; //!< <p/>
 
-using FloatDPApproximationMultivariateMonomial = MultivariateMonomial<FloatDPApproximation>; //!< .
-using FloatDPBoundsMultivariateMonomial = MultivariateMonomial<FloatDPBounds>; //!< .
-using FloatMPApproximationMultivariateMonomial = MultivariateMonomial<FloatMPApproximation>; //!< .
-using FloatMPBoundsMultivariateMonomial = MultivariateMonomial<FloatMPBounds>; //!< .
-//@}
+using FloatDPApproximationMultivariateMonomial = MultivariateMonomial<FloatDPApproximation>; //!< <p/>
+using FloatDPBoundsMultivariateMonomial = MultivariateMonomial<FloatDPBounds>; //!< <p/>
+using FloatMPApproximationMultivariateMonomial = MultivariateMonomial<FloatMPApproximation>; //!< <p/>
+using FloatMPBoundsMultivariateMonomial = MultivariateMonomial<FloatMPBounds>; //!< <p/>
+//!@}
 
-//@{
+//! \relates Polynomial
 //! \name Type shorthands and synonyms for Polynomial classes
-template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>; //!< . \ingroup FunctionModule
-template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>; //!< . \ingroup FunctionModule
+//!@{
+template<class X> using UnivariatePolynomial = Polynomial<UniIndex,X>; //!< <p/>
+template<class X> using MultivariatePolynomial = Polynomial<MultiIndex,X>; //!< <p/>
 
-using FloatDPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatDPApproximation>; //!< . \ingroup FunctionModule
-using FloatDPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatDPBounds>; //!< . \ingroup FunctionModule
-using FloatMPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatMPApproximation>; //!< . \ingroup FunctionModule
-using FloatMPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatMPBounds>; //!< . \ingroup FunctionModule
+using FloatDPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatDPApproximation>; //!< <p/>
+using FloatDPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatDPBounds>; //!< <p/>
+using FloatMPApproximationMultivariatePolynomial = MultivariatePolynomial<FloatMPApproximation>; //!< <p/>
+using FloatMPBoundsMultivariatePolynomial = MultivariatePolynomial<FloatMPBounds>; //!< <p/>
 
-using FloatDPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPApproximation>>; //!< . \ingroup FunctionModule
-using FloatDPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPBounds>>; //!< . \ingroup FunctionModule
-using FloatMPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPApproximation>>; //!< . \ingroup FunctionModule
-using FloatMPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPBounds>>; //!< . \ingroup FunctionModule
-//@}
+using FloatDPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPApproximation>>; //!< <p/>
+using FloatDPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatDPBounds>>; //!< <p/>
+using FloatMPApproximationMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPApproximation>>; //!< <p/>
+using FloatMPBoundsMultivariatePolynomialVector = Vector<MultivariatePolynomial<FloatMPBounds>>; //!< <p/>
+//!@}
 
 
 } // namespace Ariadne

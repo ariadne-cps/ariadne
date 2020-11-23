@@ -50,77 +50,77 @@ template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 template<class V,class E> class Assignment;
 
-//@{
+//!@{
 //! \ingroup SymbolicModule
 //! \relates Constant
 //! \name Type synonyms
-using StringConstant = Constant<String>; //!< .
-using IntegerConstant = Constant<Integer>; //!< .
-using RealConstant = Constant<Real>; //!< .
-//@}
+using StringConstant = Constant<String>; //!< <p/>
+using IntegerConstant = Constant<Integer>; //!< <p/>
+using RealConstant = Constant<Real>; //!< <p/>
+//!@}
 
-//@{
+//!@{
 //! \ingroup SymbolicModule
 //! \relates Variable
 //! \name Type synonyms
-using BooleanVariable = Variable<Boolean>; //!< .
-using KleeneanVariable = Variable<Kleenean>; //!< .
-using StringVariable = Variable<String>; //!< .
-using IntegerVariable = Variable<Integer>; //!< .
-using RealVariable = Variable<Real>; //!< .
-using RealVariables = Variables<Real>; //!< .
+using BooleanVariable = Variable<Boolean>; //!< <p/>
+using KleeneanVariable = Variable<Kleenean>; //!< <p/>
+using StringVariable = Variable<String>; //!< <p/>
+using IntegerVariable = Variable<Integer>; //!< <p/>
+using RealVariable = Variable<Real>; //!< <p/>
+using RealVariables = Variables<Real>; //!< <p/>
 
-using PrimedStringVariable = PrimedVariable<String>; //!< .
-using LetIntegerVariable = LetVariable<Integer>; //!< .
-using PrimedIntegerVariable = PrimedVariable<Integer>; //!< .
-using LetRealVariable = LetVariable<Real>; //!< .
-using PrimedRealVariable = PrimedVariable<Real>; //!< .
-using DottedRealVariable = DottedVariable<Real>; //!< .
-//@}
+using PrimedStringVariable = PrimedVariable<String>; //!< <p/>
+using LetIntegerVariable = LetVariable<Integer>; //!< <p/>
+using PrimedIntegerVariable = PrimedVariable<Integer>; //!< <p/>
+using LetRealVariable = LetVariable<Real>; //!< <p/>
+using PrimedRealVariable = PrimedVariable<Real>; //!< <p/>
+using DottedRealVariable = DottedVariable<Real>; //!< <p/>
+//!@}
 
-//@{
+//!@{
 //! \ingroup SymbolicModule
 //! \relates Expression
 //! \name Type synonyms
-using DiscretePredicate = Expression<Boolean>; //!< .
-using ContinuousPredicate = Expression<Kleenean>; //!< .
-using BooleanExpression = Expression<Boolean>; //!< .
-using KleeneanExpression = Expression<Kleenean>; //!< .
-using StringExpression = Expression<String>; //!< .
-using IntegerExpression = Expression<Integer>; //!< .
-using RealExpression = Expression<Real>; //!< .
-using RealExpressions = List<Expression<Real>>; //!< .
-using RealExpressionVector = Vector<Expression<Real>>; //!< .
-//@}
+using DiscretePredicate = Expression<Boolean>; //!< <p/>
+using ContinuousPredicate = Expression<Kleenean>; //!< <p/>
+using BooleanExpression = Expression<Boolean>; //!< <p/>
+using KleeneanExpression = Expression<Kleenean>; //!< <p/>
+using StringExpression = Expression<String>; //!< <p/>
+using IntegerExpression = Expression<Integer>; //!< <p/>
+using RealExpression = Expression<Real>; //!< <p/>
+using RealExpressions = List<Expression<Real>>; //!< <p/>
+using RealExpressionVector = Vector<Expression<Real>>; //!< <p/>
+//!@}
 
-//@{
+//!@{
 //! \relates Assignment
 //! \name Type synonyms
-using StringAssignment = Assignment<StringVariable,StringExpression>; //!< .
-using PrimedStringAssignment = Assignment<PrimedStringVariable,StringExpression>; //!< .
-using IntegerAssignment = Assignment<IntegerVariable,IntegerExpression>; //!< .
-using PrimedIntegerAssignment = Assignment<PrimedIntegerVariable,IntegerExpression>; //!< .
-using RealAssignment = Assignment<RealVariable,RealExpression>; //!< .
-using PrimedRealAssignment = Assignment<PrimedRealVariable,RealExpression>; //!< .
-using DottedRealAssignment = Assignment<DottedRealVariable,RealExpression>; //!< .
+using StringAssignment = Assignment<StringVariable,StringExpression>; //!< <p/>
+using PrimedStringAssignment = Assignment<PrimedStringVariable,StringExpression>; //!< <p/>
+using IntegerAssignment = Assignment<IntegerVariable,IntegerExpression>; //!< <p/>
+using PrimedIntegerAssignment = Assignment<PrimedIntegerVariable,IntegerExpression>; //!< <p/>
+using RealAssignment = Assignment<RealVariable,RealExpression>; //!< <p/>
+using PrimedRealAssignment = Assignment<PrimedRealVariable,RealExpression>; //!< <p/>
+using DottedRealAssignment = Assignment<DottedRealVariable,RealExpression>; //!< <p/>
 
-using PrimedStringAssignments = List<PrimedStringAssignment>; //!< .
-using RealAssignments = List<RealAssignment>; //!< .
-using PrimedRealAssignments = List<PrimedRealAssignment>; //!< .
-using DottedRealAssignments = List<DottedRealAssignment>; //!< .
+using PrimedStringAssignments = List<PrimedStringAssignment>; //!< <p/>
+using RealAssignments = List<RealAssignment>; //!< <p/>
+using PrimedRealAssignments = List<PrimedRealAssignment>; //!< <p/>
+using DottedRealAssignments = List<DottedRealAssignment>; //!< <p/>
 
-using RealConstantAssignment = Assignment<RealVariable,Real>; //!< .
-//@}
+using RealConstantAssignment = Assignment<RealVariable,Real>; //!< <p/>
+//!@}
 
 typedef Space<Real> RealSpace;
 
 template<class T, class X=T> class Valuation;
-//@{
+//!@{
 //! \relates Valuation
 //! \name Type synonyms
-using StringValuation = Valuation<String>; //!< .
-using IntegerValuation = Valuation<Integer>; //!< .
-//@}
+using StringValuation = Valuation<String>; //!< <p/>
+using IntegerValuation = Valuation<Integer>; //!< <p/>
+//!@}
 
 class DiscreteValuation;
 template<class X> class ContinuousValuation;
@@ -136,20 +136,20 @@ template<class UB> class VariableLowerInterval;
 template<class UB> class VariableUpperInterval;
 template<class IVL> class VariablesBox;
 
-//@{
+//!@{
 //! \relates RealVariableInterval
 //! \name Type synonyms
-using RealVariableInterval = VariableInterval<Real>; //!< .
-using RealVariableLowerInterval = VariableLowerInterval<Real>; //!< .
-using RealVariableUpperInterval = VariableUpperInterval<Real>; //!< .
-using RealVariableIntervals = List<RealVariableInterval>; //!< .
-//@}
+using RealVariableInterval = VariableInterval<Real>; //!< <p/>
+using RealVariableLowerInterval = VariableLowerInterval<Real>; //!< <p/>
+using RealVariableUpperInterval = VariableUpperInterval<Real>; //!< <p/>
+using RealVariableIntervals = List<RealVariableInterval>; //!< <p/>
+//!@}
 
-//@{
+//!@{
 //! \relates VariablesBox
 //! \name Type synonyms
-using RealVariablesBox = VariablesBox<RealInterval>; //!< .
-//@}
+using RealVariablesBox = VariablesBox<RealInterval>; //!< <p/>
+//!@}
 
 } // namespace Ariadne
 

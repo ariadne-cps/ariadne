@@ -52,6 +52,7 @@ namespace Ariadne {
 //! \ingroup NumericModule
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.
 template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
+
 template<> inline Int numeric_cast(const FloatDP& a) { return Int(a.get_d()); }
 template<> inline Int numeric_cast(const FloatMP& a) { return Int(a.get_d()); }
 template<> inline double numeric_cast(const FloatDP& a) { return a.get_d(); }

@@ -244,7 +244,7 @@ template<class P1, class P2> struct IsStronger : IsWeaker<P2,P1> { };
 
 template<class P1, class P2=P1> struct ParadigmTraits;
 
-//@{
+//!@{
 //! \ingroup ParadigmSubModule
 //! \name Information traits
 //! \nosubgrouping
@@ -291,7 +291,7 @@ template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
 //! \brief Synonym for NextWeaker.
 //! \ingroup ParadigmSubModule
 template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
-//@}
+//!@}
 
 
 template<class P1, class P2> struct ParadigmTraits {

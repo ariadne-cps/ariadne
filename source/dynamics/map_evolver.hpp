@@ -89,7 +89,7 @@ class MapEvolver
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
 
-    //@{
+    //!@{
     //! \name Configuration for the class.
 
     //! \brief A reference to the configuration.
@@ -99,10 +99,10 @@ class MapEvolver
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType function_factory() const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;

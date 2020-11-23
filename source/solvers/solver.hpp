@@ -46,7 +46,7 @@ namespace Ariadne {
 
 template<class X> class Vector;
 
-/*! \ingroup \ingroup Solvers
+/*! \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.
  */
 class SolverBase

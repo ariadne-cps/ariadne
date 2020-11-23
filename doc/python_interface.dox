@@ -88,7 +88,7 @@ yields an object equivalent to the original argument.
 
  - <em>C++ extended literals:</em> <br>
 The C++ <tt>operator""</tt> can be used to define extended numeric and string literals.
-For example, \ref operator"" _dyadic(long long double) can be used as <tt>1.375_dyadic</tt> to
+For example, \ref operator""_dyadic(long long double) can be used as <tt>1.375_dyadic</tt> to
 be interpreted as the Dyadic number \f$11/2^3\f$. Python does not support extended literals,
 but the same result may be obtained either by a constructor, or by using the literal tag as
 a function e.g. <tt>dyadic(1.375)</tt>.

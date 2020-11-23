@@ -122,13 +122,13 @@ The main operations which %Ariadne can perform are
    - Linear algebra classes, \link Vector \c Vector<X> \endlink and \link Matrix \c Matrix<X> \endlink, templated on the numerical type.
    - %Function classes, including the general \ref Function type, with \ref ScalarUnivariateFunction, \ref VectorUnivariateFunction, \ref ScalarMultivariateFunction and \ref VectorMultivariateFunction, specific \ref ConstantFunction, \ref CoordinateFunction, \ref Affine function, and \ref Polynomial function types.
    - Geometric classes, including affine geometric types such as \ref Point, \ref Box and \ref Polyhedron, and general \ref ImageSet, \ref ConstraintSet and \ref ConstrainedImageSet objects, and generic sets such as \ref OpenSet, \ref OvertSet and \ref CompactSet defined by abstract interfaces.
-   - Storage class \link Orbit Orbit<S> \endlink for storing evolution traces and \ref GridTreePaving for storing reached sets.
+   - Storage class \link Orbit Orbit< S > \endlink for storing evolution traces and \ref GridTreePaving for storing reached sets.
    .
 - Internal classes, used in computations.
   - Automatic differentiation classes \link Differential Differential<X> \endlink.
   - %Differential calculus classes, including \ref TaylorModel class for high-order polynomial approximation to dependent quantities.
  - %Function patch models, such as the \ref ScalarMultivariateTaylorFunctionModel and \ref VectorMultivariateTaylorFunctionModel classes, for storing approximation to functions over bounded sets.
-  .
+
 - Evaluation classes for performing nontrivial internal computations.
   - %Differential equation solvers satisfying the \ref IntegratorInterface.
   - Algebraic equation solvers satisfying the \ref SolverInterface.

@@ -58,7 +58,8 @@ class SolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
-//! \relates HybridEnclosure .
+//! \relates HybridEnclosure
+//! \brief <p/>
 using HybridOrbit = Orbit<HybridEnclosure>;
 
 //! \ingroup FunctionModule
@@ -130,7 +131,7 @@ class HybridEvolverBase
     const SystemType& system() const;
 
 
-    //@{
+    //!@{
     //! \name Settng and configuration for the class.
 
     //! \brief A reference to the evolver's configuration parameters.
@@ -152,9 +153,9 @@ class HybridEvolverBase
 
     Bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     Bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Main evolution functions.
 
     Orbit<EnclosureType> orbit(const HybridExactBoxType& initial_box, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
@@ -172,9 +173,9 @@ class HybridEvolverBase
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
     Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=Semantics::UPPER) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Auxiliary set conversion functionality
 
     //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
@@ -182,7 +183,7 @@ class HybridEvolverBase
     //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridBoundedConstraintSet& initial_set) const;
 
-    //@}
+    //!@}
 
   protected:
     //! \brief Internal wrapper routing for computing the evolution.

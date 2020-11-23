@@ -129,15 +129,6 @@ class TimeVariable : public Variable<Real> {
     TimeVariable() : Variable<Real>(" t ") { }
 };
 
-//@{
-//! \related Variable \name Type synonyms.
-using BooleanVariable = Variable<Boolean>; //!< .
-using KleeneanVariable = Variable<Kleenean>; //!< .
-using StringVariable = Variable<String>; //!< .
-using IntegerVariable = Variable<Integer>; //!< .
-using RealVariable = Variable<Real>; //!< .
-//@}
-
 //! \ingroup SymbolicModule
 //! \brief A list of variables of type \a T.
 //! \sa Variable

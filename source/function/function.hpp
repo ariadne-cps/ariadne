@@ -71,7 +71,7 @@ class FunctionConstructors {
     typedef RealDomain ScalarDomainType;
     typedef EuclideanDomain VectorDomainType;
 
-    //@{
+    //!@{
     //! \name Named (static) constructors
     static ScalarMultivariateFunction<P> zero(SizeType as); //!< \brief %Constant scalar function zero in \a as arguments.
     static ScalarMultivariateFunction<P> constant(SizeType as, NumericType c); //!< \brief %Constant scalar function \a c in \a as arguments.
@@ -104,7 +104,7 @@ class FunctionConstructors {
     static VectorUnivariateFunction<P> constant(ScalarDomainType dom, Vector<NumericType> c); //!< \brief Constant function over domain \a dom  taking values \a c.
     static ScalarUnivariateFunction<P> identity(ScalarDomainType dom); //!< \brief %Identity function over domain \a dom.
 
-    //@}
+    //!@}
 
 };
 
@@ -197,7 +197,7 @@ class Function
     template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;
 
 
-    //@{
+    //!@{
     //! \name User constructors.
 
     //! \brief Construct the zero function with the given number of argument variables \a as and result variables \a rs.
@@ -219,9 +219,9 @@ class Function
     Function(List<ScalarFunction<P,ARG>> const& lsf);
     //! \brief Create a vector function from a vector of scalar functions.
     Function(Vector<ScalarFunction<P,ARG>> const& lsf);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Prototype constructors.
 
     //! \brief Construct a zero scalar function with the same domain.
@@ -232,15 +232,15 @@ class Function
     ScalarFunction<P,ARG> create_coordinate(ArgumentIndexType j) const { return ScalarFunction<P,ARG>::coordinate(this->domain(),j); }
     //! \brief Construct the vector constant function with values \a c.
     VectorFunction<P,ARG> create_constant(Vector<NumericType> c) const { return VectorFunction<P,ARG>::constant(this->domain(),c); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Handle-interface methods.
     using Handle<const Interface>::Handle;
     Function(); //!< \brief Create an invalid (null) function.
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Conversions and assignment.
 
     //! \brief Convert from a function class specifying more information.
@@ -255,9 +255,9 @@ class Function
     Function<P,SIG>& operator=(const Result<NumericType>& c) {
         return (*this)=this->create_constant(c); }
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Query domain and codomain.
 
     //! \brief The domain of the function.
@@ -272,9 +272,9 @@ class Function
     //! \brief The number of scalar variables in the result.
     ResultSizeType result_size() const {
         return this->reference().result_size(); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Call/evaluate
 
     //! \brief Call the function on an argument of concrete scalar type \a X.
@@ -288,11 +288,11 @@ class Function
 //! \brief Call the function on an argument of concrete scalar type \a X. \deprecated
     template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
         return this->reference()._evaluate(x); }
-    //@}
+    //!@}
 
     friend VectorFunction<P,ARG> operator*(ScalarFunction<P,ARG> const&, Vector<Y> const&);
 
-    //@{
+    //!@{
     //! \name Differential function operations.
 
     //! \brief The derivative of the function with respect to the \a k -th variable.
@@ -305,9 +305,9 @@ class Function
     //! \brief The differential (partial derivatives) of the function at the point \a x, computed to degree \a d.
     template<class X> decltype(auto) differential(const Argument<X>& x, DegreeType d) const {
         return this->_ptr->_evaluate(Differential<EvaluateType<P,X>>::identity(d,x)); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Vector (indexing) operations.
 
     //! \brief Set the \a i -th component of a vector function to \a f.
@@ -321,15 +321,15 @@ class Function
     //! \brief A reference to the \a i -th component of a vector function.
     VectorFunctionElementReference<P,ARG> operator[](SizeType i);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output operations.
 
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Function<P,SIG> const& f) { f._ptr->_write(os); return os; }
 
-    //@}
+    //!@}
 };
 
 template<class P, class... ARGS> struct AlgebraOperations<ScalarFunction<P,ARGS...>,Number<P>>

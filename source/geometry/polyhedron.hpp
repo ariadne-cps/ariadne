@@ -58,7 +58,7 @@ class Polyhedron
     : public RegularSetInterface
 {
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructor
 
     //! \brief Default constructor constructs a polytope in zero dimensions with no constraints.
@@ -84,10 +84,10 @@ class Polyhedron
     //! \brief Create a dynamically-allocated copy.
     virtual Polyhedron* clone() const;
 
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Data access
 
     //! \brief The number of constraints.
@@ -96,10 +96,10 @@ class Polyhedron
     Matrix<FloatDP> A() const;
     //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$.
     Vector<FloatDP> b() const;
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Geometric operations
 
     //! \brief The dimension of the polyhedron.
@@ -138,14 +138,14 @@ class Polyhedron
     //! \brief Convert a polyhedron to a polytope. (Not currently implemented)
     friend Polytope polytope(const Polyhedron& p);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output.
 
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream& os) const;
-    //@}
+    //!@}
   private:
     Matrix<FloatDP> _A;
     Vector<FloatDP> _b;

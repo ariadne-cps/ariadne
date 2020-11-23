@@ -128,27 +128,26 @@ template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorMo
 
 
 
-/*! \ingroup FunctionModelSubModule
- *  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
- *
- * Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
- * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
- * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
- * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
- * However, integrals of \f$f\f$ can be computed.
- *
- * Internally, the polynomial \f$p\f$ is represented as the composition \f$p=m\circ s^{-1}\f$,
- * where \f$m:[-1,+1]^n\rightarrow\R\f$ and \f$s:[-1,+1]^n\rightarrow D\f$ is a scaling function,
- * \f$s_i(y_i)=(a_i+b_i)/2+(b_i-a_i)y_i/2\f$ where \f$D_i=[a_i,b_i]\f$ is the \f$i^\textrm{th}\f$ subinterval of \f$D\f$.
- *
- * When solving algebraic equations by iterative Newton-like methods, it is necessary to compute the derivatives of \f$f\f$.
- * For these applications, it suffices to compute the derivative of \f$p\f$, since only a uniform approximation to the solution is required.
- *
- * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
- * for but there are a number of techniques available.
- *
- * \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
- */
+//! \ingroup FunctionModelSubModule
+//!  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a polynomial \f$p\f$ on \f$\I^n\f$ with uniform error \f$e\f$.
+//!
+//! \details Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+//! \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
+//! Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
+//! about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
+//! However, integrals of \f$f\f$ can be computed.
+//!
+//! Internally, the polynomial \f$p\f$ is represented as the composition \f$p=m\circ s^{-1}\f$,
+//! where \f$m:[-1,+1]^n\rightarrow\R\f$ and \f$s:[-1,+1]^n\rightarrow D\f$ is a scaling function,
+//! \f$s_i(y_i)=(a_i+b_i)/2+(b_i-a_i)y_i/2\f$ where \f$D_i=[a_i,b_i]\f$ is the \f$i^\textrm{th}\f$ subinterval of \f$D\f$.
+//!
+//! When solving algebraic equations by iterative Newton-like methods, it is necessary to compute the derivatives of \f$f\f$.
+//! For these applications, it suffices to compute the derivative of \f$p\f$, since only a uniform approximation to the solution is required.
+//!
+//! Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
+//! for but there are a number of techniques available.
+//!
+//! \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
 template<class M> class ScaledFunctionPatch
     : public ScaledFunctionPatchMixin<M>
     , public DispatchElementaryAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
@@ -536,11 +535,10 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 
 
 
-/*! \ingroup FunctionModelSubModule
- *  \brief A multivariate vector function model built by scaling a base model of type \param M defined over the unit interval \f$[-1:+1]\f$.
- *
- *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP.
- */
+//! \ingroup FunctionModelSubModule
+//!  \brief A a type of function model in which a the restriction of a vector function \f$f:\R^n\rightarrow\R^m\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a vector polynomial \f$p\f$ on \f$\I^n\f$ with uniform errors \f$e\f$.
+//!
+//! \see TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP
 template<class M> class VectorScaledFunctionPatch
     : public VectorScaledFunctionPatchMixin<M>
 {

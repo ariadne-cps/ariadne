@@ -168,7 +168,7 @@ class Polynomial
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static coordinates(ArgumentSizeType as, PRS... prs) { return coordinates(as,X(0u,prs...)); }
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static variables(ArgumentSizeType as, PRS... prs) { return variables(as,X(0u,prs...)); }
 
-    //! \brief Set equal to a constant.
+    //! \brief %Set equal to a constant.
     Polynomial<I,X>& operator=(const X& x);
     //!@{
     //! \name Comparisons
@@ -229,7 +229,7 @@ class Polynomial
     Void reserve(SizeType n);
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
     Void erase(Iterator iter);
-    //! \brief Set the polynomial to zero.
+    //! \brief %Set the polynomial to zero.
     Void clear();
     //! \brief Remove all zero terms from the expansion, and order the expansion reverse lexicographically by term.
     Void cleanup();

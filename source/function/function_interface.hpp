@@ -76,9 +76,6 @@ template<class P> using VectorMultivariateFunctionInterface = VectorFunctionInte
 
 
 
-//! \ingroup FunctionModule
-//! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref FunctionInterface
 template<class P,class... ARGS>
 class VectorOfFunctionInterface
 {
@@ -135,8 +132,8 @@ class FunctionInterface<Void,SIG>
 };
 
 //! \ingroup FunctionModule
-//! \brief Interface for scalar functions \f$\mathbb{F}^n\rightarrow\mathbb{F}\f$ which can only be evaluated approximately.
-//! \sa \ref VectorMultivariateFunctionInterface.
+//! \brief Interface for functions \f$\R^n\rightarrow\R^m\f$ which can only be evaluated approximately.
+//! \sa \ref FunctionInterface<P,SIG>.
 template<class SIG>
 class FunctionInterface<ApproximateTag,SIG>
     : public virtual FunctionInterface<Void,SIG>
@@ -163,8 +160,8 @@ class FunctionInterface<ApproximateTag,SIG>
 };
 
 //! \ingroup FunctionModule
-//! \brief Interface for scalar functions \f$\mathbb{I}^n\rightarrow\mathbb{I}\f$ which can be evaluated over intervals.
-//! \sa \ref VectorMultivariateFunctionInterface.
+//! \brief Interface for functions \f$\R^n\rightarrow\R\f$ which can be evaluated with guaranteed bounds on the error.
+//! \sa \ref FunctionInterface<P,SIG>
 template<class SIG>
 class FunctionInterface<ValidatedTag,SIG>
     : public virtual FunctionInterface<ApproximateTag,SIG>
@@ -204,7 +201,7 @@ class FunctionInterface<ValidatedTag,SIG>
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
-//! \sa \ref VectorMultivariateFunctionInterface.
+//! \sa \ref FunctionInterface<P,SIG>
 template<class SIG>
 class FunctionInterface<EffectiveTag,SIG>
     : public virtual FunctionInterface<ValidatedTag,SIG>
@@ -258,7 +255,6 @@ template<> class FunctionFactoryInterface<ValidatedTag>
   public:
     virtual ~FunctionFactoryInterface<P>() = default;
 };
-
 
 } // namespace Ariadne
 

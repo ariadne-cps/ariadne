@@ -102,6 +102,7 @@ struct ProcedureInstruction : public ProcedureInstructionVariant {
     friend OutputStream& operator<<(OutputStream& os, ProcedureInstruction const& pri);
 };
 
+//! \ingroup FunctionModule
 //! \brief An algorithmic procedure for computing a function.
 //!
 //! A Procedure is more efficient to compute than a Formula, since common

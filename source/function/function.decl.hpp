@@ -74,33 +74,6 @@ template<class SIG> using EffectiveFunction = Function<EffectiveTag,SIG>; //!< <
 //!@}
 
 
-//! \ingroup FunctionModule
-//! \name Type synonyms for function classes
-//!@{
-//! \ingroup FunctionModule
-using ApproximateScalarUnivariateFunction = ScalarUnivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
-using ValidatedScalarUnivariateFunction = ScalarUnivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
-using EffectiveScalarUnivariateFunction = ScalarUnivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
-
-using ApproximateScalarMultivariateFunction = ScalarMultivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
-using ValidatedScalarMultivariateFunction = ScalarMultivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
-using EffectiveScalarMultivariateFunction = ScalarMultivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
-
-using ApproximateVectorUnivariateFunction = VectorUnivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
-using ValidatedVectorUnivariateFunction = VectorUnivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
-using EffectiveVectorUnivariateFunction = VectorUnivariateFunction<EffectiveTag>; //!< <p/> \ingroup FunctionModule
-
-using ApproximateVectorMultivariateFunction = VectorMultivariateFunction<ApproximateTag>; //!< <p/> \ingroup FunctionModule
-using ValidatedVectorMultivariateFunction = VectorMultivariateFunction<ValidatedTag>; //!< <p/> \ingroup FunctionModule
-using EffectiveVectorMultivariateFunction = VectorMultivariateFunction<EffectiveTag>; //!< <p/>
-
-using RealScalarUnivariateFunction = EffectiveScalarUnivariateFunction; //!< DEPRECATED
-using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!< DEPRECATED
-using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< DEPRECATED
-using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< DEPRECATED
-//!@}
-
-/*
 //! \relates Function
 //! \name Type synonyms for function classes
 //!@{
@@ -125,7 +98,6 @@ using RealScalarMultivariateFunction = EffectiveScalarMultivariateFunction; //!<
 using RealVectorUnivariateFunction = EffectiveVectorUnivariateFunction; //!< DEPRECATED
 using RealVectorMultivariateFunction = EffectiveVectorMultivariateFunction; //!< DEPRECATED
 //!@}
-*/
 
 //! \ingroup FunctionModule
 //! \brief An interface for generic functions.

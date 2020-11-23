@@ -274,7 +274,7 @@ See the page \ref numeric_page for more information.
 
 /*!\defgroup DifferentiationModule  Differentiation Module
  * \ingroup CoreModules
- * \brief Support for automatic differentiation using Taylor expansions
+ * \brief Support for automatic differentiation using Taylor expansions, including the general \ref Differential "Differential<X>" class, fixed-order \ref FirstDifferential "FirstDifferential<X>" and \ref SecondDifferential "SecondDifferential<X>", and \ref UnivariateDifferential "UnivariateDifferential<X>" classes.
  *
  * In this core module are the classes used to compute derivatives
  * of functions.
@@ -282,7 +282,11 @@ See the page \ref numeric_page for more information.
 
 /*! \defgroup FunctionModule Function Module
  *  \ingroup CoreModules
- *  \brief Functions on Euclidean space.
+ *  \brief Functions on Euclidean space, including the \ref Function "Function<P,SIG>" generic template class,
+ *  algebraic function classes such as \ref Affine "Affine<X>" and \ref Polynomial "Polynomial<I,X>",
+ *  and concrete \ref FunctionModel "FunctionModel<P,SIG,PR,PRE>" classes
+ *  such as \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,FLT>",
+ *  which is a \ref ScaledFunctionPatch <\ref TaylorModel "TaylorModel<P,FLT>">.
  *
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
@@ -290,7 +294,8 @@ See the page \ref numeric_page for more information.
  *  \defgroup FunctionModelSubModule Function models
  *  \ingroup FunctionModule
  *  \brief Validated and approximate functions on bounded domains in Euclidean space.
- */
+ *
+ * */
 
 
 /*!\defgroup GeometryModule Geometry Module

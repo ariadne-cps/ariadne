@@ -114,6 +114,12 @@ using NaiveRealInterface = RealInterface;
 //! equivalently, as arbitrarily tight (dyadic) rational intervals.
 //! They can be given as fast-converging Cauchy sequence of (dyadic) rationals,
 //! or as a nested sequence of nested (dyadic) rational intervals whose intersection is the number itself.
+//!
+//! \b Example
+//! The follow code creates a real number, computes it to an accuracy of 128 binary digits, a
+//! and outputs the result as floating-point bounds with 96 bits of precision:
+//! \snippet tutorials/numeric_usage.cpp Real_usage
+//!
 //! \sa LowerReal, UpperReal, NaiveReal
 class Real
     : public Handle<const RealInterface>

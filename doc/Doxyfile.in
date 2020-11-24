@@ -901,7 +901,8 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/tutorials/rigorous_numerics/ \
+EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/tutorials/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/tutorials/rigorous_numerics/ \
                          @CMAKE_CURRENT_SOURCE_DIR@/tutorials/hybrid_evolution/ \
                          @CMAKE_CURRENT_SOURCE_DIR@/python/tutorials/
 

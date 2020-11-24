@@ -52,7 +52,7 @@ FloatDPValue operator"" _exact(long double lx);
 
 //! \ingroup NumericModule
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-//! \sa FloatDP , FloatMP, FloatBall, FloatBounds, FloatApproximation.
+//! \sa Dyadic, Real, FloatDP, FloatMP, Ball, Bounds, Approximation.
 template<class F> class Value
     : public DefineFieldOperators<Value<F>,Bounds<F>>
     , public DefineComparisonOperators<Value<F>,LessTrait<Value<F>>,EqualsTrait<Value<F>>>
@@ -64,40 +64,61 @@ template<class F> class Value
   protected:
     typedef ExactTag P; typedef typename F::PrecisionType PR;
   public:
+    //! <p/>
     typedef ExactTag Paradigm;
+    //! <p/>
     typedef Value<F> NumericType;
+    //! <p/>
     typedef ExactNumber GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
+    //! Construct an exact numeric value with precision \a pr.
     explicit Value<F>(PrecisionType pr) : _v(0.0_x,pr) { }
+    //! Treat \a v as an exact numeric value.
     explicit Value<F>(RawType const& v) : _v(v) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>(N n, PR pr) : Value<F>(Integer(n),pr) { }
     Value<F>(const ExactDouble& d, PR pr);
     Value<F>(const TwoExp& t, PR pr);
     Value<F>(const Integer& z, PR pr);
+    //! Construct a floating-point value with precision \a pr exactly from the dyadic number \a w.
+    //! \precondition Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
     Value<F>(const Dyadic& w, PR pr);
     Value<F>(const Value<F>& x, PR pr);
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Value<F>& operator=(N n) { _v=n; return *this; }
     Value<F>& operator=(const Integer& z);
     Value<F>& operator=(const TwoExp& t);
+    //! Assign from a dyadic number \a w, keeping the same precision.
+    //! \precondition Requires that \a w can be exactly represented by a value of type \p F with the current precision.
     Value<F>& operator=(const Dyadic& w);
 
+    //! Convert to a generic exact number.
     operator ExactNumber () const;
+    //! Convert to a dyadic number.
     explicit operator Dyadic () const;
     explicit operator Rational () const;
 
     Ball<F> create(ValidatedNumber const&) const;
 
+    //! The precision of the floating-point type used.
     PrecisionType precision() const { return _v.precision(); }
+    //! The compuational properties needed to create the bounds; equivalent to the precision.
     PropertiesType properties() const { return _v.precision(); }
+    //! Downcast to generic validated bounds.
     GenericType generic() const { return this->operator GenericType(); }
+    //! Create a value with the value at its centre, and error bound \a e.
     template<class FE> Ball<F,FE> pm(Error<FE> const& e) const;
+    //! The raw data used to represent the value.
     RawType const& raw() const { return _v; }
+    //! A mutable reference to the raw data used to represent the value.
     RawType& raw() { return _v; }
+    //! Approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return _v.get_d(); }
   public:
     friend Bool is_nan(Value<F> const& x) {
@@ -188,11 +209,14 @@ template<class F> class Value
     friend Boolean lt(Value<F> const& x1, Value<F> const& x2) {
         return x1._v <  x2._v; }
 
+    //! <p/>
     friend Bool same(Value<F> const& x1, Value<F> const& x2) {
         return x1._v==x2._v; }
 
+    //! <p/>
     friend OutputStream& operator<<(OutputStream& os, Value<F> const& x) {
         return write(os,x.raw(),DecimalPrecision{Value<F>::output_places},to_nearest); }
+    //! <p/>
     friend InputStream& operator>>(InputStream& is, Value<F>& x) {
         auto v = nul(x._v); is >> v; ARIADNE_ASSERT(not is.fail()); x._v=v; return is;}
 
@@ -219,6 +243,7 @@ template<class F> class Value
     friend Comparison cmp(Value<F> const& x1, Integer const& z2) { return cmp(x1.raw(),z2); }
   public:
     static Nat output_places;
+    //! Set the number of decimal places used for the output. DEPRECATED
     static Void set_output_places(Nat p) { output_places=p; }
   private: public:
     RawType _v;

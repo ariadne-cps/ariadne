@@ -43,7 +43,7 @@ namespace Ariadne {
 //! \details
 //! The \c Approximation<F> class represents approximate floating-point numbers.
 //! Operations are performed approximately, with no guarantees on the output.
-//! \sa Real, FloatDP , FloatMP, FloatValue, FloatBall, FloatBounds.
+//! \sa Real, NaiveReal, FloatDP, FloatMP, Value, Ball, Bounds.
 template<class F> class Approximation
     : public DefineFieldOperators<Approximation<F>>
     , public DefineConcreteGenericOperators<Approximation<F>>
@@ -52,14 +52,23 @@ template<class F> class Approximation
   protected:
     typedef ApproximateTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
+    //! <p/>
     typedef ApproximateTag Paradigm;
+    //! <p/>
     typedef Approximation<F> NumericType;
+    //! <p/>
     typedef ApproximateNumber GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
+
+    //! <p/>
     explicit Approximation<F>(PrecisionType pr) : _a(0.0_x,pr) { }
+    //! <p/>
     explicit Approximation<F>(RawType const& a) : _a(a) { }
 
         Approximation<F>(double d, PR pr) : _a(cast_exact(d),near,pr) { }
@@ -72,127 +81,188 @@ template<class F> class Approximation
         Approximation<F>(const Rational& q, PR pr) : _a(q,near,pr) { }
         Approximation<F>(const Real& r, PR pr); // : _a(r.get(pr)) { }
         Approximation<F>(const Approximation<F>& x, PR pr) : _a(x.raw(),near,pr) { }
+    //! <p/>
     Approximation<F>(const ApproximateNumber& y, PR pr); // : _a(y.get(ApproximateTag(),pr)) { }
 
+    //! <p/>
     template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
         Approximation<F>(const Approximation<FF>& x, PR pr) : _a(x.raw(),near,pr) { }
 
+    //! <p/>
     Approximation<F>(Error<F> const& x); // FIXME: Remove
+    //! <p/>
     Approximation<F>(Value<F> const& x);
+    //! <p/>
     template<class FE> Approximation<F>(Ball<F,FE> const& x);
+    //! <p/>
     Approximation<F>(Bounds<F> const& x);
+    //! <p/>
     Approximation<F>(UpperBound<F> const& x);
+    //! <p/>
     Approximation<F>(LowerBound<F> const& x);
 
+    //! <p/>
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Approximation<F>& operator=(N n) { this->_a=n; return *this; }
+    //! <p/>
     template<class D, EnableIf<IsBuiltinFloatingPoint<D>> =dummy> Approximation<F>& operator=(D x) { this->_a=ExactDouble(x); return *this; }
         Approximation<F>& operator=(const LowerBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const UpperBound<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const Bounds<F>& x) { return *this=Approximation<F>(x); }
         Approximation<F>& operator=(const Value<F>& x) { return *this=Approximation<F>(x); }
+    //! <p/>
     Approximation<F>& operator=(const ApproximateNumber& y) { return *this=Approximation<F>(y,this->precision()); }
+    //! <p/>
     Approximation<F> create(const ApproximateNumber& y) const { return Approximation<F>(y,this->precision()); }
 
+    //! <p/>
     operator ApproximateNumber () const;
 
+    //! <p/>
     friend Approximation<F> round(Approximation<F> const& x);
 
+    //! <p/>
     PrecisionType precision() const { return _a.precision(); }
+    //! <p/>
     PropertiesType properties() const { return _a.precision(); }
+    //! <p/>
     GenericType generic() const { return this->operator GenericType(); }
+    //! <p/>
     explicit operator RawType () const { return this->_a; }
+    //! <p/>
     explicit operator ApproximateDouble () const { return this->_a.get_d(); }
+    //! <p/>
     RawType const& raw() const { return this->_a; }
+    //! <p/>
     RawType& raw() { return this->_a; }
+    //! <p/> DEPRECATED
     double get_d() const { return this->_a.get_d(); }
   public:
+    //! <p/>
     friend Bool is_nan(Approximation<F> const& x) {
         return is_nan(x._a); }
 
+    //! <p/>
     friend Approximation<F> floor(Approximation<F> const& x) {
         return Approximation<F>(floor(x._a)); }
+    //! <p/>
     friend Approximation<F> ceil(Approximation<F> const& x) {
         return Approximation<F>(ceil(x._a)); }
+    //! <p/>
     friend Approximation<F> round(Approximation<F> const& x) {
         return Approximation<F>(round(x._a)); }
 
+    //! <p/>
     friend Approximation<F> abs(Approximation<F> const& x) {
         return Approximation<F>(abs(x._a)); }
+    //! <p/>
     friend Approximation<F> max(Approximation<F> const& x, Approximation<F> const& y) {
         return Approximation<F>(max(x._a,y._a)); }
+    //! <p/>
     friend Approximation<F> min(Approximation<F> const& x, Approximation<F> const& y) {
         return Approximation<F>(min(x._a,y._a)); }
+    //! <p/>
     friend PositiveApproximation<F> mag(Approximation<F> const& x) {
         return PositiveApproximation<F>(abs(x._a)); }
+    //! <p/>
     friend PositiveApproximation<F> mig(Approximation<F> const& x) {
         return PositiveApproximation<F>(abs(x._a)); }
 
+    //! <p/>
     friend Approximation<F> nul(Approximation<F> const& x) {
         return Approximation<F>(nul(x._a)); }
+    //! <p/>
     friend Approximation<F> pos(Approximation<F> const& x) {
         return Approximation<F>(pos(x._a)); }
+    //! <p/>
     friend Approximation<F> neg(Approximation<F> const& x) {
         return Approximation<F>(neg(x._a)); }
+    //! <p/>
     friend Approximation<F> hlf(Approximation<F> const& x) {
         return Approximation<F>(hlf(x._a)); }
+    //! <p/>
     friend Approximation<F> sqr(Approximation<F> const& x) {
         return Approximation<F>(mul(near,x._a,x._a)); }
+    //! <p/>
     friend Approximation<F> rec(Approximation<F> const& x) {
         return Approximation<F>(rec(near,x._a)); }
 
+    //! <p/>
     friend Approximation<F> add(Approximation<F> const& x1, Approximation<F> const& x2) {
         return Approximation<F>(add(near,x1._a,x2._a)); }
+    //! <p/>
     friend Approximation<F> sub(Approximation<F> const& x1, Approximation<F> const& x2) {
         return Approximation<F>(sub(near,x1._a,x2._a)); }
+    //! <p/>
     friend Approximation<F> mul(Approximation<F> const& x1, Approximation<F> const& x2) {
         return Approximation<F>(mul(near,x1._a,x2._a)); }
+    //! <p/>
     friend Approximation<F> div(Approximation<F> const& x1, Approximation<F> const& x2) {
         return Approximation<F>(div(near,x1._a,x2._a)); }
+    //! <p/>
     friend Approximation<F> fma(Approximation<F> const& x1, Approximation<F> const& x2, Approximation<F> const& x3) {
         return Approximation<F>(fma(near,x1._a,x2._a,x3._a)); }
 
+    //! <p/>
     friend Approximation<F> pow(Approximation<F> const& x, Nat m) {
         return Approximation<F>(pow(approx,x._a,static_cast<Int>(m))); }
+    //! <p/>
     friend Approximation<F> pow(Approximation<F> const& x, Int n) {
         return Approximation<F>(pow(approx,x._a,n)); }
 
+    //! <p/>
     friend Approximation<F> sqrt(Approximation<F> const& x) {
         return Approximation<F>(sqrt(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> exp(Approximation<F> const& x) {
         return Approximation<F>(exp(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> log(Approximation<F> const& x) {
         return Approximation<F>(log(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> sin(Approximation<F> const& x) {
         return Approximation<F>(sin(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> cos(Approximation<F> const& x) {
         return Approximation<F>(cos(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> tan(Approximation<F> const& x) {
         return Approximation<F>(tan(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> asin(Approximation<F> const& x) {
         return Approximation<F>(asin(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> acos(Approximation<F> const& x) {
         return Approximation<F>(acos(approx,x._a)); }
+    //! <p/>
     friend Approximation<F> atan(Approximation<F> const& x) {
         return Approximation<F>(atan(approx,x._a)); }
 
+    //! <p/>
     friend ApproximateKleenean eq(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a==x2._a; }
+    //! <p/>
     friend ApproximateKleenean lt(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a< x2._a; }
 
+    //! <p/>
     friend Bool same(Approximation<F> const& x1, Approximation<F> const& x2) {
         return x1._a==x2._a; }
 
+    //! <p/>
     friend Integer cast_integer(Approximation<F> const& x) {
         return round(static_cast<Dyadic>(x._a)); }
 
+    //! <p/>
     friend OutputStream& operator<<(OutputStream& os, Approximation<F> const& x) {
         return write(os,x.raw(),DecimalPrecision{Approximation<F>::output_places},to_nearest); }
+    //! <p/>
     friend InputStream& operator>>(InputStream& is, Approximation<F>& x) {
         is >> x._a; return is; }
   public:
     static Nat output_places;
+    //! <p/>
     static Void set_output_places(Nat p) { output_places=p; }
+    //! <p/>
     Approximation<F> pm(Approximation<F> _e) { return *this; }
   public:
     RawType _a;

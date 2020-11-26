@@ -68,22 +68,38 @@ using KleeneanVariable = Variable<Kleenean>; //!< <p/>
 using StringVariable = Variable<String>; //!< <p/>
 using IntegerVariable = Variable<Integer>; //!< <p/>
 using RealVariable = Variable<Real>; //!< <p/>
-using RealVariables = Variables<Real>; //!< <p/>
+//!@}
 
-using PrimedStringVariable = PrimedVariable<String>; //!< <p/>
+//!@{
+//! \relates Variables
+//! \name Type synonyms
+using RealVariables = Variables<Real>; //!< <p/>
+//!@}
+
+//!@{
+//! \relates LetVariable
+//! \name Type synonyms
+using LetStringVariable = LetVariable<String>; //!< <p/>
 using LetIntegerVariable = LetVariable<Integer>; //!< <p/>
-using PrimedIntegerVariable = PrimedVariable<Integer>; //!< <p/>
 using LetRealVariable = LetVariable<Real>; //!< <p/>
+//!@}
+
+//!@{
+//! \relates PrimedVariable
+//! \name Type synonyms
+using PrimedStringVariable = PrimedVariable<String>; //!< <p/>
+using PrimedIntegerVariable = PrimedVariable<Integer>; //!< <p/>
 using PrimedRealVariable = PrimedVariable<Real>; //!< <p/>
+//!@}
+
+//! \relates DottedVariable
+//! \name Type synonyms
 using DottedRealVariable = DottedVariable<Real>; //!< <p/>
 //!@}
 
 //!@{
-//! \ingroup SymbolicModule
 //! \relates Expression
 //! \name Type synonyms
-using DiscretePredicate = Expression<Boolean>; //!< <p/>
-using ContinuousPredicate = Expression<Kleenean>; //!< <p/>
 using BooleanExpression = Expression<Boolean>; //!< <p/>
 using KleeneanExpression = Expression<Kleenean>; //!< <p/>
 using StringExpression = Expression<String>; //!< <p/>
@@ -91,6 +107,9 @@ using IntegerExpression = Expression<Integer>; //!< <p/>
 using RealExpression = Expression<Real>; //!< <p/>
 using RealExpressions = List<Expression<Real>>; //!< <p/>
 using RealExpressionVector = Vector<Expression<Real>>; //!< <p/>
+
+using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
+using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
 //!@}
 
 //!@{

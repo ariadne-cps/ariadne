@@ -67,6 +67,8 @@ template<class T> class InfixExpressionWriter;
 //! are all variables occuring in all expression.
 //! Expressions may be manipulated symbolically.
 //!
+//! \par \b Example
+//! \snippet tutorials/symbolic_usage.cpp Expression_usage
 //! \see Constant,  Variable,  Assignment
 template<class T>
 class Expression
@@ -140,18 +142,6 @@ class Expression
   private:
     SharedPointer<const ExpressionNode<T>> _root;
 };
-
-//!@{
-//! \related Expression \name Type synonyms.
-using BooleanExpression = Expression<Boolean>; //!< <p/>
-using KleeneanExpression = Expression<Kleenean>; //!< <p/>
-using StringExpression = Expression<String>; //!< <p/>
-using IntegerExpression = Expression<Integer>; //!< <p/>
-using RealExpression = Expression<Real>; //!< <p/>
-
-using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
-using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
-//!@}
 
 //!@{
 //! \name Evaluation and related operations.
@@ -242,7 +232,7 @@ template<class T> SizeType count_distinct_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct node pointers in the expression \a e.
 template<class T> SizeType count_distinct_node_pointers(const Expression<T>& e);
 
-//! \brief Simplify the expression \a e.
+//! \brief Simplify the expression \a e, such as by eliminating double negations \f$-(-e) \mapsto e\f$.
 template<class T> Expression<T> simplify(const Expression<T>& e);
 //! \brief Eliminate common subexpression in \a e by replacing identical nodes.
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e);

@@ -92,7 +92,7 @@ template<class C, class P> decltype(auto) all(C const& c, P const& p) {
     R r=true; for(auto e:c) { r=r and p(e); if(definitely(not r)) { return r; } } return r;
 }
 
-//! \ingroup SymbolicModule
+//! \ingroup ExpressionSetSubModule
 //! \brief An interval range for a real variable.
 template<class UB> class VariableInterval {
     typedef decltype(-declval<UB>()) LB;
@@ -200,6 +200,7 @@ inline VariableLowerInterval<Dyadic> operator<=(const int& l, const RealVariable
 inline VariableLowerInterval<FloatDP> operator<=(const FloatDP& l, const RealVariable& v) { return VariableLowerInterval<FloatDP>(l,v); }
 inline VariableLowerInterval<Double> operator<=(const double& l, const RealVariable& v) { return VariableLowerInterval<Double>(l,v); }
 
+//! \ingroup ExpressionSetSubModule
 //! \brief An box defining ranges for a collection of real variables.
 template<class IVL> class VariablesBox {
     typedef typename IVL::UpperBoundType UB;

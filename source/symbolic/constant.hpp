@@ -35,7 +35,10 @@
 namespace Ariadne {
 
 //! \ingroup SymbolicModule
-//! A named constant of type \a T.
+//! \brief A named constant of type \a T.
+//! \details
+//! \par \b Example
+//! \snippet tutorials/symbolic_usage.cpp Constant_usage
 //! \see Variable, Expression
 template<class T> class Constant
     : public T

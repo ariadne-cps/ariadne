@@ -35,7 +35,7 @@
 #include "../geometry/set_interface.hpp"
 #include "../geometry/grid.hpp"
 
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/assignment.hpp"
 #include "../symbolic/space.hpp"
 

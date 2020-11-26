@@ -27,7 +27,7 @@
 
 #include "numeric/logical.hpp"
 #include "numeric/real.hpp"
-#include "symbolic/variables.hpp"
+#include "symbolic/variable.hpp"
 #include "symbolic/assignment.hpp"
 
 #include "hybrid/hybrid_graphics.hpp"

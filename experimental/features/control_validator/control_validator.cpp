@@ -27,7 +27,7 @@
 #include <type_traits>
 
 #include "../utility/declarations.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 
 namespace Ariadne {
 template<class X> class Vector;

@@ -38,7 +38,7 @@
 #include "../numeric/floatdp.hpp"
 #include "../numeric/float_value.hpp"
 #include "../geometry/grid.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 
 namespace Ariadne {
 

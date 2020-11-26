@@ -31,7 +31,7 @@
 #include "../function/function.hpp"
 #include "../geometry/point.hpp"
 #include "../geometry/box.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/space.hpp"
 #include "../symbolic/expression_set.hpp"
 #include "../output/geometry2d.hpp"

@@ -35,7 +35,7 @@
 #include "../utility/container.hpp"
 #include "../utility/stlio.hpp"
 
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 
 namespace Ariadne {
 

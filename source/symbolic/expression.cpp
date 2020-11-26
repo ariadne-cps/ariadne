@@ -33,7 +33,7 @@
 #include "../function/formula.tpl.hpp"
 
 #include "../symbolic/constant.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/expression.hpp"
 #include "../symbolic/assignment.hpp"
 #include "../symbolic/space.hpp"

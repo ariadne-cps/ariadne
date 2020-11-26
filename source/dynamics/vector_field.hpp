@@ -36,7 +36,7 @@
 #include "../geometry/grid.hpp"
 #include "../symbolic/expression.decl.hpp"
 
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/assignment.hpp"
 #include "../symbolic/space.hpp"
 

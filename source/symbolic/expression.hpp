@@ -44,7 +44,7 @@
 
 #include "../numeric/operators.hpp"
 #include "../symbolic/constant.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/valuation.hpp"
 #include "../symbolic/operations.hpp"
 

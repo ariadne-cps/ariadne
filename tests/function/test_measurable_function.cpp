@@ -39,7 +39,7 @@
 
 #include "numeric/numeric.hpp"
 
-#include "symbolic/variables.hpp"
+#include "symbolic/variable.hpp"
 #include "symbolic/expression.hpp"
 
 #include "../test.hpp"

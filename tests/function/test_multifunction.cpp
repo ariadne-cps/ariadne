@@ -35,7 +35,7 @@
 #include "function/multifunction.hpp"
 #include "numeric/numeric.hpp"
 
-#include "symbolic/variables.hpp"
+#include "symbolic/variable.hpp"
 #include "symbolic/space.hpp"
 #include "symbolic/expression.hpp"
 

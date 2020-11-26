@@ -37,7 +37,7 @@
 
 #include "../utility/typedefs.hpp"
 #include "../utility/declarations.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../output/colour.hpp"
 #include "../output/graphics_interface.hpp"
 

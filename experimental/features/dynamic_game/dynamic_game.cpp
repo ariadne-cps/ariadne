@@ -35,7 +35,7 @@
 #include "../numeric/rational.hpp"
 #include "../numeric/real.hpp"
 #include "../numeric/floatdp.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/expression.hpp"
 #include "../symbolic/assignment.hpp"
 

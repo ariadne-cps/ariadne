@@ -38,7 +38,7 @@
 #include "../utility/tribool.hpp"
 
 #include "../numeric/integer.hpp"
-#include "../symbolic/variables.hpp"
+#include "../symbolic/variable.hpp"
 #include "../symbolic/expression.hpp"
 
 namespace Ariadne {

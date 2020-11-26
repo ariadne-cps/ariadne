@@ -1,5 +1,5 @@
 /***************************************************************************
- *            symbolic/variables.hpp
+ *            symbolic/variable.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,12 +22,12 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file symbolic/variables.hpp
+/*! \file symbolic/variable.hpp
  *  \brief Internal variables
  */
 
-#ifndef ARIADNE_VARIABLES_HPP
-#define ARIADNE_VARIABLES_HPP
+#ifndef ARIADNE_VARIABLE_HPP
+#define ARIADNE_VARIABLE_HPP
 
 #include <cstdarg>
 #include <iosfwd>
@@ -286,4 +286,4 @@ inline DottedVariables<Real> dot(const InitializerList<Variable<Real>>& lhs) { r
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_VARIABLES_HPP */
+#endif /* ARIADNE_VARIABLE_HPP */

@@ -134,6 +134,7 @@ class Real
     typedef EffectiveTag Paradigm;
     typedef Real NumericType;
   public:
+
     //! \name Constructors
     //!@{
     Real(); //!< Default constructor yields the integer \c 0 as a real number.
@@ -296,7 +297,6 @@ class Real
     friend OutputStream& operator<<(OutputStream& os, Real const& r); //!< Write to an output stream.
     //!@}
     double get_d() const;
-
   private:
     Real(std::int64_t n, Void*);
     Real(std::uint64_t m, Void*);

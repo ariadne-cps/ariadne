@@ -101,6 +101,10 @@ template<class... ARGS> class VectorOfFunctionInterface<EffectiveTag,ARGS...>
     virtual ScalarFunctionInterface<EffectiveTag,ARGS...>* _get(SizeType i) const override = 0;
 };
 
+//! \ingroup FunctionModule
+//! \brief Interface for functions \f$\R^n\rightarrow\R^m\f$ which can be evaluated.
+template<class P, class SIG> class FunctionInterface;
+
 
 template<class SIG>
 class FunctionInterface<Void,SIG>
@@ -133,7 +137,7 @@ class FunctionInterface<Void,SIG>
 
 //! \ingroup FunctionModule
 //! \brief Interface for functions \f$\R^n\rightarrow\R^m\f$ which can only be evaluated approximately.
-//! \sa \ref FunctionInterface<P,SIG>.
+//! \sa \ref FunctionInterface "FunctionInterface<P,SIG>"
 template<class SIG>
 class FunctionInterface<ApproximateTag,SIG>
     : public virtual FunctionInterface<Void,SIG>
@@ -161,7 +165,7 @@ class FunctionInterface<ApproximateTag,SIG>
 
 //! \ingroup FunctionModule
 //! \brief Interface for functions \f$\R^n\rightarrow\R\f$ which can be evaluated with guaranteed bounds on the error.
-//! \sa \ref FunctionInterface<P,SIG>
+//! \sa \ref FunctionInterface "FunctionInterface<P,SIG>"
 template<class SIG>
 class FunctionInterface<ValidatedTag,SIG>
     : public virtual FunctionInterface<ApproximateTag,SIG>
@@ -201,7 +205,7 @@ class FunctionInterface<ValidatedTag,SIG>
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
-//! \sa \ref FunctionInterface<P,SIG>
+//! \sa \ref FunctionInterface "FunctionInterface<P,SIG>"
 template<class SIG>
 class FunctionInterface<EffectiveTag,SIG>
     : public virtual FunctionInterface<ValidatedTag,SIG>

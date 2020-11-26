@@ -56,8 +56,11 @@ class EuclideanDomain;
 // Function declarations
 template<class P, class SIG> class Function;
 
-//!@{
+//! \ingroup FunctionModule
 //! \name Type shorthands for function classes
+//!@{
+//
+//! \ingroup FunctionModule
 template<class P, class... ARGS> using ScalarFunction = Function<P,RealScalar(ARGS...)>; //!< <p/> \ingroup FunctionModule
 template<class P, class... ARGS> using VectorFunction = Function<P,RealVector(ARGS...)>; //!< <p/> \ingroup FunctionModule
 template<class P, class RES> using UnivariateFunction = Function<P,RES(RealScalar)>; //!< <p/> \ingroup FunctionModule

@@ -166,9 +166,12 @@ The class \ref HybridReachabilityAnalyser may be used to perform reachability an
 
 \remark We use Evolver and Analyser classes rather than functions to perform the analysis since different methods require different user parameters to specify the accuracy.
 
+A reachability analyser class satisfies the interface \ref ReachabilityAnalyserInterface "ReachabilityAnalyserInterface<SYS>".
+The class \ref HybridReachabilityAnalyser may be used to perform reachability analysis of hybrid systems. It can be constructed from a \ref HybridEvolverInterface class.
+
 \section tutorial_system_hybrid Performing Simulations or Reachability Analysis
 
-The functionality available for computing (rigorous) simulations, discretising sets and systems, and performing reachability analysis can be found in the documentation for \link EvolverInterface \c EvolverInterface<SYS,ES> \endlink, \link DiscretiserInterface \c DiscretiserInterface<SYS,BS> \endlink and \link ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
+The functionality available for computing (rigorous) simulations, and performing reachability analysis can be found in the documentation for \link EvolverInterface \c EvolverInterface<SYS,ES> \endlink and \link ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
 
 */
 

@@ -87,7 +87,7 @@ template<class F> class Value
     Value<F>(const TwoExp& t, PR pr);
     Value<F>(const Integer& z, PR pr);
     //! Construct a floating-point value with precision \a pr exactly from the dyadic number \a w.
-    //! \precondition Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
+    //! \pre Requires that \a w can be exactly represented by a value of type \p F with precision \a pr.
     Value<F>(const Dyadic& w, PR pr);
     Value<F>(const Value<F>& x, PR pr);
 
@@ -95,7 +95,7 @@ template<class F> class Value
     Value<F>& operator=(const Integer& z);
     Value<F>& operator=(const TwoExp& t);
     //! Assign from a dyadic number \a w, keeping the same precision.
-    //! \precondition Requires that \a w can be exactly represented by a value of type \p F with the current precision.
+    //! \pre Requires that \a w can be exactly represented by a value of type \p F with the current precision.
     Value<F>& operator=(const Dyadic& w);
 
     //! Convert to a generic exact number.

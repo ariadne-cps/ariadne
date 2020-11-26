@@ -110,7 +110,7 @@ In the current version of %Ariadne, different "plugin" classes can be used to pr
 
 
 
-\section Example
+\section chain_reach_example Example
 
 To compute the chain reachable set of the Henon map, the following code can be used:
 \code

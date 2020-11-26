@@ -152,6 +152,7 @@ generic types \ref Number "Number<P>",
 double/multiple precision floating-point types \ref FloatDP and \ref FloatMP,
 and correctly-rounded types \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
 \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>".
+
 For the mathematical theory of computability on real numbers, see the \ref numeric_page Page.
 
 \details In this module, we define %Ariadne's base numerical types,

@@ -54,6 +54,9 @@ template<class T> class Set;
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 
+template<class T> class PrefixExpressionWriter;
+template<class T> class InfixExpressionWriter;
+
 //! \ingroup SymbolicModule
 //! \brief A simple expression in named variables.
 //! %Ariadne supports expressions of type Boolean, Kleenean, String, Integer and Real.
@@ -117,7 +120,12 @@ class Expression
     const Expression<T>& arg2() const;
     template<class A> const Expression<A>& cmp1(A* dummy=0) const;
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
+    //! \brief A writer for Expression objects using prefix notation.
+    friend class PrefixExpressionWriter<T>;
+    //! \brief A write for Expression objects using infix notation.
+    friend class InfixExpressionWriter<T>;
   public:
     template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,Real>>> =dummy> operator ElementaryAlgebra<X>() const;
   public:
@@ -224,7 +232,7 @@ template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
 //!@}
 
 //!@{
-//! \name Complexity checks and simplification and .
+//! \name Complexity checks and simplification.
 //! \related Expression
 
 //! \brief Count the number of nodes in the expression \a e.
@@ -276,23 +284,15 @@ Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>&
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
 //!@}
 
-//!@{
-//! \name Output.
-//! \related Expression
 
 //! \brief Prefix notation for writing an Expression
 template<class T> class PrefixExpressionWriter : public WriterInterface<Expression<T>> {
     virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
-
 //! \brief Infix notation for writing an Expression
 template<class T> class InfixExpressionWriter : public WriterInterface<Expression<T>> {
     virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
-
-//!@}
-
-//!@}
 
 
 } // namespace Ariadne

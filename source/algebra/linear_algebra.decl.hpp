@@ -41,9 +41,9 @@ template<class X> class Matrix;
 template<class X> class DiagonalMatrix;
 template<class X> class SymmetricMatrix;
 
-//!@{
 //! \relates Vector
 //! \name Type synonyms
+//!@{
 using DyadicVector = Vector<Dyadic>; //!< <p/>
 using RationalVector = Vector<Rational>; //!< <p/>
 using RealVector = Vector<Real>; //!< <p/>
@@ -60,13 +60,13 @@ using FloatMPBoundsVector = Vector<FloatMPBounds>; //!< <p/>
 using FloatMPBallVector = Vector<FloatMPBall>; //!< <p/>
 using FloatMPValueVector = Vector<FloatMPValue>; //!< <p/>
 using FloatMPDPBallVector = Vector<FloatMPDPBall>; //!< <p/>
-
 template<class F> using ApproximationVector = Vector<Approximation<F>>; //!< <p/>
 //!@}
 
-//!@{
+
 //! \relates Covector
 //! \name Type synonyms
+//!@{
 using DyadicCovector = Covector<Dyadic>; //!< <p/>
 using RationalCovector = Covector<Rational>; //!< <p/>
 using RealCovector = Covector<Real>; //!< <p/>
@@ -86,9 +86,9 @@ using FloatMPDPBallCovector = Covector<FloatMPDPBall>; //!< <p/>
 //!@}
 
 
-//!@{
 //! \relates Matrix
 //! \name Type synonyms
+//!@{
 using DyadicMatrix = Matrix<Dyadic>; //!< <p/>
 using RationalMatrix = Matrix<Rational>; //!< <p/>
 using RealMatrix = Matrix<Real>; //!< <p/>
@@ -106,9 +106,9 @@ using FloatMPDPBallMatrix = Matrix<FloatMPDPBall>; //!< <p/>
 //!@}
 
 
-//!@{
 //! \relates DiagonalMatrix
 //! \name Type synonyms
+//!@{
 using FloatDPApproximationDiagonalMatrix = DiagonalMatrix<FloatDPApproximation>; //!< <p/>
 using FloatDPBoundsDiagonalMatrix = DiagonalMatrix<FloatDPBounds>; //!< <p/>
 using FloatDPBallDiagonalMatrix = DiagonalMatrix<FloatDPBall>; //!< <p/>

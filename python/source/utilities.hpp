@@ -168,6 +168,8 @@ template<class... AS> auto _log_(AS const& ... as) -> decltype(log(as...)) { ret
 template<class... AS> auto _sin_(AS const& ... as) -> decltype(sin(as...)) { return sin(as...); }
 template<class... AS> auto _cos_(AS const& ... as) -> decltype(cos(as...)) { return cos(as...); }
 template<class... AS> auto _tan_(AS const& ... as) -> decltype(tan(as...)) { return tan(as...); }
+template<class... AS> auto _asin_(AS const& ... as) -> decltype(asin(as...)) { return asin(as...); }
+template<class... AS> auto _acos_(AS const& ... as) -> decltype(acos(as...)) { return acos(as...); }
 template<class... AS> auto _atan_(AS const& ... as) -> decltype(atan(as...)) { return atan(as...); }
 template<class... AS> auto _max_(AS const& ... as) -> decltype(max(as...)) { return max(as...); }
 template<class... AS> auto _min_(AS const& ... as) -> decltype(min(as...)) { return min(as...); }
@@ -387,6 +389,8 @@ template<class X> pybind11::class_<X>& define_transcendental(pybind11::module& m
     module.def("sin", &_sin_<X>);
     module.def("cos", &_cos_<X>);
     module.def("tan", &_tan_<X>);
+    module.def("asin", &_asin_<X>);
+    module.def("acos", &_acos_<X>);
     module.def("atan", &_atan_<X>);
     return pyclass;
 }

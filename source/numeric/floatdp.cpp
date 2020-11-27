@@ -633,7 +633,30 @@ double atan_rnd(double x) {
 
 }
 
+double asin_rnd(double x) {
+    // WARNING: Correctness of rounding has not been properly checked
+    // asin(x)=atan(x/sqrt(1-x*x))=atan(x*sqrt(1/(1-x*x)))
+    if (x>=0) {
+        // y=atan(x*sqrt(v)), w=sqrt(v), v=-1/u, u=x^2-1
+        volatile double u=x*x-1.0;
+        volatile double v=(-1.0)/u;
+        volatile double w=sqrt_rnd(v);
+        return atan_rnd(x*w);
+    } else {
+        // y=atan(x/w), w=sqrt(v), v=1+x*u, u=-x
+        volatile double u=-x;
+        volatile double v=1.0+x*u;
+        volatile double w=sqrt_rnd(v);
+        return atan_rnd(x/w);
+    }
+    // Alternatively, use Newton iteration
+    // y=asin(x), sin(y)-x=0, y' = y-(sin(y)-x)/cos(y)=y+(sin(y)-x)/-cos(y)
+    // For x>0, starting with y=x gives increasing sequence
+}
 
+double acos_rnd(double x) {
+    return pi_rnd()/2.0+asin_rnd(-x);
+}
 
 FloatDP::FloatDP(ExactDouble const& d, PrecisionType)
     : FloatDP(d.get_d())

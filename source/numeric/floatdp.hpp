@@ -343,6 +343,8 @@ class FloatDP {
     friend FloatDP sin(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&sin_rnd,rnd,x); }
     friend FloatDP cos(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&cos_rnd,rnd,x); }
     friend FloatDP tan(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&tan_rnd,rnd,x); }
+    friend FloatDP asin(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&asin_rnd,rnd,x); }
+    friend FloatDP acos(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&acos_rnd,rnd,x); }
     friend FloatDP atan(RoundingModeType rnd, FloatDP x) { return _apply_rnd(&atan_rnd,rnd,x); }
 
     friend FloatDP med(RoundingModeType rnd, FloatDP x1, FloatDP x2) {

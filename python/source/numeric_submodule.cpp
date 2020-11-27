@@ -707,6 +707,8 @@ template<class PR> void export_raw_float(pymodule& module)
     module.def("sin", &_sin_<RND,F>);
     module.def("cos", &_cos_<RND,F>);
     module.def("tan", &_tan_<RND,F>);
+    module.def("asin", &_asin_<RND,F>);
+    module.def("acos", &_acos_<RND,F>);
     module.def("atan", &_atan_<RND,F>);
 
     module.def("abs", &_abs_<F>);

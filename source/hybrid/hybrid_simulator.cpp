@@ -131,7 +131,7 @@ auto HybridSimulator::orbit(const HybridAutomatonInterface& system,
 {
     ARIADNE_LOG_SCOPE_CREATE;
 
-    HybridTime t(0.0,0);
+    HybridTime t(0.0_x,0);
     Dyadic h(ExactDouble(this->_step_size.get_d()));
     HybridTime tmax(termination.maximum_time(),termination.maximum_steps());
 

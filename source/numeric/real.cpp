@@ -231,12 +231,6 @@ Real::Real(SharedPointer<const Interface> p) : Handle<const Interface> (p) { }
 Real::Real(ConvergentSequence<DyadicBounds> const& seq) : Real(std::make_shared<RealLimit<DyadicBounds>>(seq)) { }
 Real::Real(FastCauchySequence<Dyadic> const& seq) : Real(std::make_shared<RealLimit<Dyadic>>(seq)) { }
 
-// FIXME: Is this necessary?
-Real::Real(double x)
-    : Real(std::make_shared<RealWrapper<Cnst,FloatDPBounds>>(FloatDPBounds(ExactDouble(x),dp)))
-{
-}
-
 ValidatedNegatedSierpinskian operator==(Real const& x1, Int64 n2);
 ValidatedSierpinskian operator!=(Real const& x1, Int64 n2);
 Kleenean operator< (Real const& x1, Int64 n2);
@@ -454,7 +448,7 @@ template<> String class_name<Real>() { return "Real"; }
 template<> String class_name<PositiveReal>() { return "PositiveReal"; }
 
 const Real pi = 4*atan(1); //Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
-const Real infinity = Real(std::numeric_limits<double>::infinity());
+const Real infinity = Real(operator""_x(std::numeric_limits<double>::infinity()));
 
 //FloatDPBounds Real::get(DoublePrecision pr) const {
 //    return this->_ptr->_compute_get(Effort(53),pr);

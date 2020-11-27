@@ -64,7 +64,7 @@ Int main(Int argc, const char* argv[])
 
     std::cout << "Computing evolution... " << std::flush;
     HybridSet initial_set({valve|fully1},{height1==2,height2==4});
-    HybridTime evolution_time(200.0,16);
+    HybridTime evolution_time(200.0_x,16);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;
 

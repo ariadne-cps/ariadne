@@ -67,17 +67,20 @@ class HybridTime
   public:
     explicit HybridTime(Real t)
       : _continuous_time(t), _discrete_time(-1) { }
+    //! \brief Create the hybrid time moment with continuous-time \a t and discrete-time steps \a n.
     HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(RawFloatDP t, Integer n)
       : _continuous_time(FloatDPValue(t)), _discrete_time(n) { }
     HybridTime(FloatDPValue t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(double t, Int n)
+    HybridTime(ExactDouble t, Int n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(Int n, double t)
-      : _continuous_time(t), _discrete_time(n) {
-          ARIADNE_FAIL_MSG("HybridTime(Int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
+    HybridTime(ExactDouble t, Nat m)
+      : _continuous_time(t), _discrete_time(m) { }
+    HybridTime(ExactDouble t, double n) = delete;
+    //! \brief The arguments for the HybridTime constructor must be ordered continuous-time, then discrete-time.
+    HybridTime(Integer n, double t) = delete;
 
     friend HybridTime operator*(const Integer& c, const HybridTime& ht) {
         return HybridTime(c*ht._continuous_time,c*ht._discrete_time);

@@ -138,7 +138,8 @@ class Real
 
     //@{
     //! \name Conversion operators
-    explicit Real(double); //!< Unsafe construction from a double is DEPRECATED
+    //!@{
+    explicit Real(double) = delete; //!< Unsafe construction from a double is DEPRECATED
 
 #ifdef DOXYGEN
     Real(Int n); //!< Convert from a builtin integer.

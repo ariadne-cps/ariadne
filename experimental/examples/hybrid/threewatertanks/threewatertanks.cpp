@@ -91,7 +91,7 @@ Int main(Int argc, const char* argv[])
     ARIADNE_LOG_PRINTLN("Computing evolution... ");
     HybridSet initial_set({valve1|opened1,valve2|opened2,valve3|opened3,controller1|rising1,controller2|rising2,controller3|rising3},
                           {height1==7,height2==7,height3==7});
-    HybridTime evolution_time(35.0,15);
+    HybridTime evolution_time(35.0_x,15);
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
 
     ARIADNE_LOG_PRINTLN("Plotting trajectory... ");
@@ -100,7 +100,7 @@ Int main(Int argc, const char* argv[])
     Axes2d time_height2_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height2<=9.1);
     plot("watertank-t-height2",time_height2_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d time_height3_axes(0<=TimeVariable()<=evolution_time.continuous_time(),-0.1<=height3<=12.1);
-    plot("watertank-t-height3",time_height3_axes, Colour(0.0,0.5,1.0), orbit);    
+    plot("watertank-t-height3",time_height3_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height1_aperture1_axes(-0.1,height1,9.1, -0.1,aperture1,1.1);
     plot("watertank-height1-aperture1",height1_aperture1_axes, Colour(0.0,0.5,1.0), orbit);
     Axes2d height2_aperture2_axes(-0.1,height2,9.1, -0.1,aperture2,1.1);

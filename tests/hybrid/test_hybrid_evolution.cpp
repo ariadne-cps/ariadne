@@ -91,7 +91,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     RealVariable v("v");
     TimeVariable t;
 
-    Real lambda(0.5);
+    Real lambda(0.5_x);
     bouncing_ball.new_mode(q,{dot(x)=v,dot(v)=-one});
     bouncing_ball.new_transition(q,e,q,{next(x)=x,next(v)=-lambda*v},x<=0,EventKind::IMPACT);
     ARIADNE_TEST_PRINT(bouncing_ball);
@@ -184,7 +184,7 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridSet initial(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
 
     //HybridTime evolution_time(80.0,5);
-    HybridTime evolution_time(80.0,8);
+    HybridTime evolution_time(80.0_x,8);
 
     _set_evolver(watertank);
 

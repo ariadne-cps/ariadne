@@ -42,10 +42,7 @@
 using namespace Ariadne;
 using namespace std;
 
-inline EffectiveScalarMultivariateFunction operator^(EffectiveScalarMultivariateFunction f, Int m) { return pow(f,m); }
-inline EffectiveScalarMultivariateFunction operator*(double c, EffectiveScalarMultivariateFunction f) { return Real(c)*f; }
-
-struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
+struct UnsafeReal : Real { UnsafeReal(double d) : Real(operator""_x(d)) { } };
 
 class TestIntegrator
 {

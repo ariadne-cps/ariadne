@@ -103,7 +103,8 @@ Void export_hybrid_automaton(pybind11::module& module)
 
 
     pybind11::class_<HybridTime> hybrid_time_class(module,"HybridTime");
-    hybrid_time_class.def(pybind11::init<double,Int>());
+    hybrid_time_class.def(pybind11::init<ExactDouble,Int>());
+    hybrid_time_class.def(pybind11::init<Real,Integer>());
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time);
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time);
 

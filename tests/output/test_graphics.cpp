@@ -36,9 +36,6 @@
 using namespace Ariadne;
 
 
-inline EffectiveScalarMultivariateFunction operator+(EffectiveScalarMultivariateFunction f, double c) { return f+Real(c); }
-inline EffectiveScalarMultivariateFunction operator*(double c, EffectiveScalarMultivariateFunction f) { return Real(c)*f; }
-
 
 Int main(Int argc, char **argv)
 {
@@ -51,9 +48,9 @@ Int main(Int argc, char **argv)
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
-    Real p(0.5);
+    Real p(0.5_x);
     EffectiveVectorMultivariateFunction x=EffectiveVectorMultivariateFunction::identity(3);
-    EffectiveVectorMultivariateFunction afn1={0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6};
+    EffectiveVectorMultivariateFunction afn1={0.05_dec*x[0]+0.05_dec*x[2]+0.15_dec,0.05_dec*x[1]+0.05_dec*x[2]+0.6_dec};
     ValidatedConstrainedImageSet s1(ExactBoxType::unit_box(3),afn1);
     ApproximateBoxType bbx1=widen(s1.bounding_box(),0.25_x);
 

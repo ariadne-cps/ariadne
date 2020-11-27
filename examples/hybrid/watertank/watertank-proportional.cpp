@@ -68,7 +68,7 @@ Int main(Int argc, const char* argv[])
     // (the assignment can be either a singleton value using the == symbol or an interval using the <= symbols)
     HybridSet initial_set({valve|opened},{height==0});
     // Define the evolution time: continuous time and maximum number of transitions
-    HybridTime evolution_time(80.0,5);
+    HybridTime evolution_time(80.0_x,5);
     // Compute the orbit using upper semantics
     OrbitType orbit = evolver.orbit(initial_set,evolution_time,Semantics::UPPER);
     std::cout << "done." << std::endl;

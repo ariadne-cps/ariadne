@@ -149,7 +149,7 @@ Int main(Int argc, const char* argv[])
     // Compute the system evolution
 
     // Set the initial set.
-    double r=1.0/1024; double Ti=16.25;
+    Dyadic r=exp2(-10); Dyadic Ti=16.25_dy;
     Real Tinitmin(Ti+r); Real Tinitmax(Ti+3*r); Real Cinitmin(0+r); Real Cinitmax(0+3*r); // Tinit=16.0;
     HybridSet initial_set(heating|off, {Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax} );
     cout << "initial_set=" << initial_set << endl;
@@ -157,7 +157,7 @@ Int main(Int argc, const char* argv[])
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
-    HybridTime evolution_time(2.75,127);
+    HybridTime evolution_time(2.75_x,127);
     cout << "evolution_time=" << evolution_time << endl;
 
     cout << "\nComputing orbit using series integrator... \n" << flush;

@@ -89,7 +89,7 @@ class TestReachabilityAnalyser
         std::clog<<std::setprecision(20);
         RealVariable x("x");
         RealVariable y("y");
-        Real a(-0.5); Real b(1.0);
+        Real a(-0.5_x); Real b(1.0_x);
         SystemType sys({dot(x)=-a*x-b*y,dot(y)=b*x+2*a*y});
         cout << "Done building system\n";
         return sys;
@@ -119,7 +119,7 @@ class TestReachabilityAnalyser
           initial_set(symbolic_initial_set.euclidean_set(system.state_space())),
           symbolic_safe_set({-2_dec<=x<=3_dec,-2_dec<=y<=3_dec},{sqr(x)+sqr(y)<=sqr((Real)3)}),
           safe_set(symbolic_safe_set.euclidean_set(system.state_space())),
-          reach_time(3.0)
+          reach_time(3.0_x)
     {
         cout << "Done creating initial and safe sets\n" << endl;
 

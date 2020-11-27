@@ -61,11 +61,11 @@ Int main(Int argc, const char* argv[])
 {
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
-    Real amplitude(4.0);
-    Real frequency(50.0);
-    Real Ron (10.0);
+    Real amplitude(4.0_dec);
+    Real frequency(50.0_dec);
+    Real Ron (10.0_dec);
     Real Cl = 0.0001_dec;
-    Real Rl (1000.0);
+    Real Rl (1000.0_dec);
 
     /// Introduces the dynamics parameters
     Vector<Real> parameters(5);

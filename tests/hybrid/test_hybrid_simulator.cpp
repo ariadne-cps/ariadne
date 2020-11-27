@@ -113,7 +113,7 @@ Void TestHybridSimulator::test() const
     cout << "initial_point=" << initial_point << endl;
     ApproximatePointType approximate_initial_point = ApproximatePointType(initial_point,dp);
     HybridApproximatePointType initial_hybrid_point(location1,space,approximate_initial_point);
-    HybridTime simulation_time(2.25,3);
+    HybridTime simulation_time(2.25_x,3);
 
 
     // Compute the reachable sets

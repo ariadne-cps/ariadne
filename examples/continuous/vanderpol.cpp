@@ -49,15 +49,15 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_maximum_spacial_error(1e-6);
     ARIADNE_LOG_PRINTLN(evolver.configuration());
 
-    Real x0(1.40);
-    Real y0(2.40);
+    Real x0(1.40_dec);
+    Real y0(2.40_dec);
     Real eps_x0 = 15/100_q;
     Real eps_y0 = 5/100_q;
 
     RealVariablesBox initial_set({x0-eps_x0<=x<=x0+eps_x0,y0-eps_y0<=y<=y0+eps_y0});
 
     ARIADNE_LOG_PRINTLN("Initial set: " << initial_set);
-    Real evolution_time(7.0);
+    Real evolution_time(7.0_dec);
 
     StopWatch sw;
     ARIADNE_LOG_PRINTLN("Computing orbit... ");

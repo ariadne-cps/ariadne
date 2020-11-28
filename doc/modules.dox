@@ -82,7 +82,9 @@ namespace Ariadne {
 /*!\defgroup LogicalModule Logical Module
  * \ingroup CoreModules
  * \brief Logical types, including \ref Boolean, \ref Sierpinskian and \ref Kleenean types.
- * \details In this module, we define %Ariadne's base logical types.
+ * \details <em>For the mathematical theory of non-Boolean and constructive logic, see the \ref logic_page Page.</em>
+ *
+ * In this module, we define %Ariadne's base logical types.
  * The main classes are \ref Ariadne::Boolean "Boolean",
  * \ref Ariadne::Sierpinskian "Sierpinskian", and \ref Ariadne::Kleenean "Kleenean".
  *
@@ -153,9 +155,9 @@ double/multiple precision floating-point types \ref FloatDP and \ref FloatMP,
 and correctly-rounded types \ref Value "Value<F>", \ref Ball "Ball<F,FE>", \ref Bounds "Bounds<F>"
 \ref UpperBound "UpperBound<F>", \ref LowerBound "LowerBound<F>" and \ref Approximation "Approximation<F>".
 
-For the mathematical theory of computability on real numbers, see the \ref numeric_page Page.
+\details <em>For the mathematical theory of computability on real numbers, see the \ref numeric_page Page.</em>
 
-\details In this module, we define %Ariadne's base numerical types,
+In this module, we define %Ariadne's base numerical types,
 including support for interval arithmetic via balls and bounds.
 The main concrete algebraic number types are \ref Integer,
 \ref Dyadic, and \ref Rational.

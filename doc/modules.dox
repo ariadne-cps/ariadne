@@ -250,7 +250,9 @@ See the page \ref numeric_page for more information.
  * \brief \ref Vector "Vector<X>", \ref Matrix "Matrix<X>" and \ref Tensor "Tensor<N,X>" classes,
  * solution of linear equations, LU and QR factorisation and singular value decomposition.
  *
- * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector"
+ * \details <em>For the mathematical theory of computable linear algebra, see the \ref linear_algebra_page Page.</em>
+ *
+ * Basic types are represented by the classes \ref Ariadne::Vector "Vector"
  * and \ref Ariadne::Matrix "Matrix".
  * Specialist types include PermutationMatrix and DiagonalMatrix.
  * Operations such as vector sums and matrix-vector products are

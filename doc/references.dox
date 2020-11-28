@@ -83,10 +83,17 @@ Florian Loitsch, "Printing Floating-Point Numbers Quickly and Accurately with In
   <em>Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation</em>, 2010.
 
 
+
+\section linear_algebra_references Linear Algebra
+
+David C. Lay, <em>Linear Algebra and its Applicatons</em>, Addison-Wesley, 2002. ISBN 0-20170-970-8
+
+Gene H. Golub and Charles F. Van Loan, <em>Matrix Computations</em>, Johns Hopkins University Press, 1996. ISBN 0-80185-414-8
+
+
 \section differential_algebra_references Automatic Differentiation
 
 Andreas Griewank and Andrea Walther, <em>Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation</em> 2nd Edition, SIAM 2008. ISBN 0-89871-659-4
-
 
 \section function_calculus_references Function Calculi (including Taylor models)
 

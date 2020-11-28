@@ -895,6 +895,7 @@ template Vector<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Vector<
 template Matrix<FloatMPBounds> solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_inverse(const Matrix<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_inverse(const Matrix<FloatMPBounds>&);
+template Vector<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> lu_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);
 template Vector<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Vector<FloatMPBounds>&);
 template Matrix<FloatMPBounds> gs_solve(const Matrix<FloatMPBounds>&, const Matrix<FloatMPBounds>&);

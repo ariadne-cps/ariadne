@@ -476,6 +476,7 @@ template<class F> Void define_matrix(pybind11::module& module, pybind11::class_<
     module.def("gs_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &gs_solve);
     module.def("gs_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &gs_solve);
     module.def("lu_solve", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &lu_solve);
+    module.def("lu_solve", (Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &lu_solve);
 
     module.def("triangular_decomposition",&triangular_decomposition<X>);
     module.def("orthogonal_decomposition", &orthogonal_decomposition<X>);

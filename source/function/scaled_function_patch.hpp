@@ -470,7 +470,8 @@ template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void Scale
     r = this->_model(unscale(a,this->_domain));
 }
 template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void ScaledFunctionPatch<M>::_compute(X& r, const Vector<X>& a) const {
-    assert(false);
+    ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>::value),
+                       "evaluate(ScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": Incompatible types for function call");
 }
 
 template<class FP1, class FP2> Void check_function_patch_domain(String const& op_str, const FP1& f1, const FP2& f2) {
@@ -1036,7 +1037,8 @@ template<class M> template<class X, EnableIf<CanCall<X,M,Vector<X>>>> Void Vecto
     }
 }
 template<class M> template<class X, DisableIf<CanCall<X,M,Vector<X>>>> Void VectorScaledFunctionPatch<M>::_compute(Vector<X>& r, const Vector<X>& a) const {
-    assert(false);
+    ARIADNE_ASSERT_MSG((CanCall<X,M,Vector<X>>::value),
+                       "evaluate(VectorScaledFunctionPatch<M> f, Vector<X> x) with f="<<*this<<" x="<<a<<": Incompatible types for function call");
 }
 
 template<class M> template<class OP>

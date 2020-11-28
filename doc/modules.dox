@@ -279,6 +279,8 @@ See the page \ref numeric_page for more information.
  * \ingroup CoreModules
  * \brief Support for automatic differentiation using Taylor expansions, including the general \ref Differential "Differential<X>" class, fixed-order \ref FirstDifferential "FirstDifferential<X>" and \ref SecondDifferential "SecondDifferential<X>", and \ref UnivariateDifferential "UnivariateDifferential<X>" classes.
  *
+ * \details <em>For the mathematical theory of automatic differentiation, see the \ref differential_algebra_page Page.</em>
+ *
  * In this core module are the classes used to compute derivatives
  * of functions.
  */

@@ -83,6 +83,11 @@ Florian Loitsch, "Printing Floating-Point Numbers Quickly and Accurately with In
   <em>Proceedings of the ACM SIGPLAN Conference on Programming Language Design and Implementation</em>, 2010.
 
 
+\section differential_algebra_references Automatic Differentiation
+
+Andreas Griewank and Andrea Walther, <em>Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation</em> 2nd Edition, SIAM 2008. ISBN 0-89871-659-4
+
+
 \section function_calculus_references Function Calculi (including Taylor models)
 
 M. Berz and G. Hoffstätter, "Computation and Application of Taylor Polynomials with Interval Remainder Bounds",
@@ -90,7 +95,6 @@ M. Berz and G. Hoffstätter, "Computation and Application of Taylor Polynomials 
 
 K. Makino and M. Berz, "Efficient Control of the Dependency Problem Based on Taylor Model Methods",
   <em>Reliable Computing</em> <b>5</b> (1999) 3-12.
-
 
 \section linear_programming_references Linear Programming
 

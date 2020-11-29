@@ -185,7 +185,7 @@ template<> class Positive<Integer> : public Integer {
     Positive<Integer>() : Integer() { }
     template<class M, EnableIf<IsBuiltinUnsigned<M>> = dummy> Positive<Integer>(M m) : Integer(m) { }
     Positive<Integer>(int n) = delete;
-    Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
+    explicit Positive<Integer>(Integer const& z) : Integer(z) { assert(z>=0); }
 };
 
 //! \brief A positive integer.

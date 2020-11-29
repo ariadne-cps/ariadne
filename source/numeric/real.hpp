@@ -631,9 +631,10 @@ class NaiveReal
 class PositiveReal : public Real
 {
   public:
-    using Real::Real;
     PositiveReal() : Real() { }
-    PositiveReal(Real r) : Real(r) { }
+    template<class Y, EnableIf<IsConvertible<Y,Real>> =dummy>
+        PositiveReal(Positive<Y> const& p) : Real(p) { }
+    explicit PositiveReal(Real const& r) : Real(r) { }
     PositiveBounds<Dyadic> compute_get(Effort) const;
   public:
     PositiveReal max(PositiveReal const&, PositiveReal const&);
@@ -659,7 +660,7 @@ class PositiveReal : public Real
 class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowerReal,PositiveUpperReal>
 {
   public:
-    using LowerReal::LowerReal;
+    PositiveLowerReal(PositiveReal r) : LowerReal(r) { }
     explicit PositiveLowerReal(LowerReal r) : LowerReal(r) { }
     PositiveLowerBound<Dyadic> compute_get(Effort) const;
   public:
@@ -676,7 +677,7 @@ class PositiveLowerReal : public LowerReal, public DirectedSemiRing<PositiveLowe
 class PositiveUpperReal : public UpperReal, public DirectedSemiRing<PositiveUpperReal,PositiveLowerReal>
 {
   public:
-    using UpperReal::UpperReal;
+    PositiveUpperReal(PositiveReal r) : UpperReal(r) { }
     explicit PositiveUpperReal(UpperReal r) : UpperReal(r) { }
     PositiveUpperBound<Dyadic> compute_get(Effort) const;
   public:

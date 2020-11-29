@@ -47,12 +47,14 @@ class TestNumbers
     Void test();
     Void test_float_value_behaviour();
     Void test_operations();
+    Void test_misc();
 };
 
 void TestNumbers::test()
 {
     ARIADNE_TEST_CALL(test_operations());
     ARIADNE_TEST_CALL(test_float_value_behaviour());
+    ARIADNE_TEST_CALL(test_misc());
 }
 
 Void
@@ -111,6 +113,23 @@ TestNumbers::test_operations()
 
     max(1,FloatDPValue(3,dp));
 //    max(1u,FloatDPError(3u));
+}
+
+
+Void
+TestNumbers::test_misc()
+{
+    ARIADNE_TEST_CONSTRUCT(Bounds<FloatDP>,x,(2,3,dp));
+//    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedNumber,y,x);
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedNumber,y,x.operator ValidatedNumber());
+    ARIADNE_TEST_CONSTRUCT(ValidatedLowerNumber,yyl,(y));
+
+    ARIADNE_TEST_CONSTRUCT(LowerBound<FloatDP>,xl,(2u,dp));
+//    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedLowerNumber,yl,xl);
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedLowerNumber,yl,xl.operator ValidatedLowerNumber());
+    ARIADNE_TEST_ASSIGN(yl,xl+xl);
+    ARIADNE_TEST_ASSIGN_CONSTRUCT(ValidatedLowerNumber,z,yl);
+    ARIADNE_TEST_ASSIGN(z,yl+yl);
 }
 
 template<class Y> class TestNumber

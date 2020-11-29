@@ -31,6 +31,8 @@
 #ifndef ARIADNE_NUMBER_WRAPPER_HPP
 #define ARIADNE_NUMBER_WRAPPER_HPP
 
+#include <cassert>
+
 #include "../utility/module.hpp"
 #include "../numeric/paradigm.hpp"
 
@@ -57,7 +59,37 @@ namespace Ariadne {
 
 /************ Number *********************************************************/
 
-template<class... AWS> struct Aware;
+// Declare fallbacks for Integer, Dyadic and Rational numbers
+Real sqrt(Real const&);
+Real exp(Real const&);
+Real log(Real const&);
+Real sin(Real const&);
+Real cos(Real const&);
+Real tan(Real const&);
+Real asin(Real const&);
+Real acos(Real const&);
+Real atan(Real const&);
+
+// Declare fallbacks for use by Lower/UpperBound
+Approximation<FloatDP> div(Approximation<FloatDP> const& x1, Approximation<FloatDP> const& x2);
+Approximation<FloatDP> sqr(Approximation<FloatDP> const& x);
+Approximation<FloatDP> rec(Approximation<FloatDP> const& x);
+Approximation<FloatDP> sin(Approximation<FloatDP> const& x);
+Approximation<FloatDP> cos(Approximation<FloatDP> const& x);
+Approximation<FloatDP> tan(Approximation<FloatDP> const& x);
+Approximation<FloatDP> asin(Approximation<FloatDP> const& x);
+Approximation<FloatDP> acos(Approximation<FloatDP> const& x);
+
+Approximation<FloatMP> div(Approximation<FloatMP> const& x1, Approximation<FloatMP> const& x2);
+Approximation<FloatMP> sqr(Approximation<FloatMP> const& x);
+Approximation<FloatMP> rec(Approximation<FloatMP> const& x);
+Approximation<FloatMP> sin(Approximation<FloatMP> const& x);
+Approximation<FloatMP> cos(Approximation<FloatMP> const& x);
+Approximation<FloatMP> tan(Approximation<FloatMP> const& x);
+Approximation<FloatMP> asin(Approximation<FloatMP> const& x);
+Approximation<FloatMP> acos(Approximation<FloatMP> const& x);
+
+
 template<class X> class NumberMixin;
 template<class X> class NumberWrapper;
 
@@ -83,21 +115,207 @@ inline Comparison cmp(NumberInterface const& y1, NumberInterface const& y2) {
     return res;
 }
 
-template<class I, class OP, class Y> struct OperableInterface {
-    virtual ~OperableInterface() = default;
-    virtual I* _apply_left(OP op, Y const& y) const = 0;
-    virtual I* _apply_right(OP op, Y const& y) const = 0;
+
+template<class... YS> struct Aware;
+
+template<class DI> struct Managed;
+template<class DI> using ManagedTypes = typename Managed<DI>::Types;
+
+template<class T> struct DispatcherTraits;
+template<class T> using DispatcherInterface = typename DispatcherTraits<T>::Interface;
+
+
+
+template<class I, class DI, class OP, class YS=ManagedTypes<DI>> struct RightOperableInterface;
+template<class I, class DI, class OP, class Y> struct RightOperableInterface<I,DI,OP,Aware<Y>> : public virtual I {
+    virtual I* _concrete_apply_right(OP op, Y const& y) const = 0;
 };
-template<class X, class I, class OP, class Y> struct OperableMixin : virtual OperableInterface<I,OP,Y> {
-    static X const& _cast(OperableMixin<X,I,OP,Y> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply_left(OP op, Y const& other) const { return _make_wrapper(op(_cast(*this),other)); }
-    virtual I* _apply_right(OP op, Y const& other) const { return _make_wrapper(op(other,_cast(*this))); }
+template<class I, class DI, class OP, class Y, class... YS> struct RightOperableInterface<I,DI,OP,Aware<Y,YS...>>
+    : public virtual RightOperableInterface<I,DI,OP,Aware<YS...>>
+{
+    using RightOperableInterface<I,DI,OP,Aware<YS...>>::_concrete_apply_right;
+    virtual I* _concrete_apply_right(OP op, Y const& y) const = 0;
 };
-template<class X, class I, class OP, class AW> struct Operable;
-template<class X, class I, class OP, class Y, class... YS> struct Operable<X,I,OP,Aware<Y,YS...>>
-    : OperableMixin<X,I,OP,Y>, Operable<X,I,OP,Aware<YS...>> { };
-template<class X, class I, class OP> struct Operable<X,I,OP,Aware<>> { };
+
+template<class I, class DI, class OP, class YS=ManagedTypes<DI>> struct OperableInterface;
+template<class I, class DI, class OP, class Y> struct OperableInterface<I,DI,OP,Aware<Y>>
+    : public virtual RightOperableInterface<I,DI,OP>
+{
+    virtual I* _concrete_apply_left(OP op, Y const& y) const = 0;
+};
+template<class I, class DI, class OP, class Y, class... YS> struct OperableInterface<I,DI,OP,Aware<Y,YS...>>
+    : public virtual OperableInterface<I,DI,OP,Aware<YS...>>
+{
+    using OperableInterface<I,DI,OP,Aware<YS...>>::_concrete_apply_left;
+    virtual I* _concrete_apply_left(OP op, Y const& y) const = 0;
+};
+
+
+/*
+template<class OP, class X1, class X2> struct CanApply {
+    template<class OPP, class XX1, class XX2, class=decltype(declval<OPP>()(declval<XX1>(),declval<XX2>()))>
+        static std::true_type test(int);
+    template<class OPP, class XX1, class XX2>
+        static std::false_type test(...);
+    static const bool value = decltype(test<OP,X1,X2>(1))::value;
+};
+template<class OP, class X1, class X2> NumberInterface* _concrete_apply(OP op, X1 const& x1, X2 const& x2) {
+    if constexpr (CanApply<OP,X1,X2>::value) {
+        return _make_number_wrapper(op(x1,x2));
+    } else {
+        String yc1=class_name<X1>(); String yc2=class_name<X2>();
+        ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+    }
+}
+*/
+
+template<class R> NumberInterface* _make_number_wrapper(R const& r) { return new NumberWrapper<R>(r); }
+
+template<class OP, class X1, class X2> inline NumberInterface* _concrete_apply(OP op, X1 const& x1, X2 const& x2) {
+    return _make_number_wrapper(op(x1,x2));
+}
+// Since OP(Value<F>,Value<F>) usually returns Bounds<F>, which is Validated, while an Exact answer is expected,
+// disable binary operation on value
+// FIXME: Prefer symbolic dispatch
+template<class OP, class F> inline NumberInterface* _concrete_apply(OP op, Value<F> const& x1, Value<F> const& x2) {
+    String yc1=class_name<Value<F>>(); String yc2=class_name<Value<F>>();
+    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+}
+template<class OP, class F> inline NumberInterface* _concrete_apply(OP op, Value<F> const& x1, Rational const& q2) {
+    String yc1=class_name<Value<F>>(); String yc2=class_name<Rational>();
+    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<x1<<", y2="<<q2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+}
+template<class OP, class F> inline NumberInterface* _concrete_apply(OP op, Rational const& q1, Value<F> const& x2) {
+    String yc1=class_name<Rational>(); String yc2=class_name<Value<F>>();
+    ARIADNE_THROW(DispatchException,op<<"(Number y1, Number y2) with y1="<<q1<<", y2="<<x2,"No dispatch for "<<op<<"("<<yc1<<", "<<yc2<<")");
+}
+
+
+template<class X, class I, class DI, class OP, class Y=ManagedTypes<DI>> struct RightOperableMixin;
+template<class X, class I, class DI, class OP> struct RightOperableMixin<X,I,DI,OP,Aware<>>
+    : virtual RightOperableInterface<I,DI,OP>
+{
+    X const& self() const { return static_cast<NumberWrapper<X>const&>(*this); }
+};
+template<class X, class I, class DI, class OP, class Y, class... YS> struct RightOperableMixin<X,I,DI,OP,Aware<Y,YS...>>
+    : RightOperableMixin<X,I,DI,OP,Aware<YS...>>
+{
+    using RightOperableMixin<X,I,DI,OP,Aware<YS...>>::_concrete_apply_right;
+    virtual I* _concrete_apply_right(OP op, Y const& y) const { return _concrete_apply(op,y,this->self()); }
+};
+
+template<class X, class I, class DI, class OP, class Y=ManagedTypes<DI>> struct OperableMixin;
+template<class X, class I, class DI, class OP> struct OperableMixin<X,I,DI,OP,Aware<>>
+    : virtual OperableInterface<I,DI,OP>
+{
+    X const& self() const { return static_cast<NumberWrapper<X>const&>(*this); }
+};
+template<class X, class I, class DI, class OP, class Y, class... YS> struct OperableMixin<X,I,DI,OP,Aware<Y,YS...>>
+    : OperableMixin<X,I,DI,OP,Aware<YS...>>
+{
+    using OperableMixin<X,I,DI,OP,Aware<YS...>>::_concrete_apply_left;
+    using OperableMixin<X,I,DI,OP,Aware<YS...>>::_concrete_apply_right;
+    virtual I* _concrete_apply_left(OP op, Y const& y) const { return _concrete_apply(op,this->self(),y); }
+    virtual I* _concrete_apply_right(OP op, Y const& y) const { return _concrete_apply(op,y,this->self()); }
+};
+
+
+
+
+class AlgebraicNumberInterface;
+template<class F> class ConcreteNumberInterface;
+template<class F, class FE> class ConcreteBallInterface;
+
+template<> struct Managed<AlgebraicNumberInterface> {
+    typedef Aware<Integer,Dyadic,Rational,Real> Types;
+};
+template<class F> struct Managed<ConcreteNumberInterface<F>> {
+    typedef Aware<Value<F>,Ball<F>,Bounds<F>,UpperBound<F>,LowerBound<F>,Approximation<F>> Types;
+};
+template<class F, class FE> struct Managed<ConcreteBallInterface<F,FE>> {
+    typedef Aware<Ball<F,FE>> Types;
+};
+
+template<> struct DispatcherTraits<Integer> { typedef AlgebraicNumberInterface Interface; };
+template<> struct DispatcherTraits<Dyadic> { typedef AlgebraicNumberInterface Interface; };
+template<> struct DispatcherTraits<Rational> { typedef AlgebraicNumberInterface Interface; };
+template<> struct DispatcherTraits<Real> { typedef AlgebraicNumberInterface Interface; };
+
+template<class F> struct DispatcherTraits<Value<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<class F> struct DispatcherTraits<Ball<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<class F> struct DispatcherTraits<Bounds<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<class F> struct DispatcherTraits<UpperBound<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<class F> struct DispatcherTraits<LowerBound<F>> { typedef ConcreteNumberInterface<F> Interface; };
+template<class F> struct DispatcherTraits<Approximation<F>> { typedef ConcreteNumberInterface<F> Interface; };
+
+template<class F, class FE> struct DispatcherTraits<Ball<F,FE>> { typedef ConcreteBallInterface<F,FE> Interface; };
+
+
+class AlgebraicNumberInterface
+    : public virtual RightOperableInterface<NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+{
+};
+
+template<class F> class ConcreteNumberInterface
+    : public virtual RightOperableInterface<NumberInterface,ConcreteNumberInterface<F>,BinaryElementaryOperator>
+    , public virtual OperableInterface<NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+{
+};
+
+template<class F, class FE> class ConcreteBallInterface
+    : public virtual RightOperableInterface<NumberInterface,ConcreteBallInterface<F,FE>,BinaryElementaryOperator>
+    , public virtual OperableInterface<NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+//    , public virtual OperableInterface<NumberInterface,ConcreteNumberInterface<F>,BinaryElementaryOperator>
+{
+};
+
+
+
+template<class X, class DI=DispatcherInterface<X>> class ElementaryBinaryNumberDispatcherMixin;
+
+template<class Y> class ElementaryBinaryNumberDispatcherMixin<Y,AlgebraicNumberInterface>
+    : public RightOperableMixin<Y,NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+{
+};
+
+template<class Y, class F> class ElementaryBinaryNumberDispatcherMixin<Y,ConcreteNumberInterface<F>>
+    : public RightOperableMixin<Y,NumberInterface,ConcreteNumberInterface<F>,BinaryElementaryOperator>
+    , public OperableMixin<Y,NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+{
+};
+
+template<class Y, class F, class FE> class ElementaryBinaryNumberDispatcherMixin<Y,ConcreteBallInterface<F,FE>>
+    : public RightOperableMixin<Y,NumberInterface,ConcreteBallInterface<F,FE>,BinaryElementaryOperator>
+    , public OperableMixin<Y,NumberInterface,AlgebraicNumberInterface,BinaryElementaryOperator>
+//    , public OperableMixin<Y,NumberInterface,ConcreteNumberInterface<F>,BinaryElementaryOperator>
+{
+};
+
+
+
+
+
+
+
+
+
+template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
+    using DI=DispatcherInterface<X>;
+    auto aware_other_ptr=dynamic_cast<RightOperableInterface<I,DI,OP> const*>(other_ptr);
+    if(aware_other_ptr) { return aware_other_ptr->_concrete_apply_right(op,self); }
+    else { return other_ptr->_rapply(op,self_ptr); }
+}
+template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
+    using DI=DispatcherInterface<X>;
+    auto aware_other_ptr=dynamic_cast<OperableInterface<I,DI,OP> const*>(other_ptr);
+    if(aware_other_ptr) { return aware_other_ptr->_concrete_apply_left(op,self); }
+    else { return make_symbolic(op,other_ptr,self_ptr); }
+}
+
+
+
+
+
 
 
 template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface const* yp1, NumberInterface const* yp2) {
@@ -108,23 +326,12 @@ template<class OP> inline NumberInterface* make_symbolic(OP op, NumberInterface 
 }
 
 
-template<class I, class X, class OP> inline I* _apply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
-    auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
-    if(aware_other_ptr) { return aware_other_ptr->_apply_right(op,self); }
-    else { return other_ptr->_rapply(op,self_ptr); }
-}
-template<class I, class X, class OP> inline I* _rapply(X const& self, OP op, I const* self_ptr, I const* other_ptr) {
-    auto aware_other_ptr=dynamic_cast<OperableInterface<I,OP,X>const*>(other_ptr);
-    if(aware_other_ptr) { return aware_other_ptr->_apply_left(op,self); }
-    else { return make_symbolic(op,other_ptr,self_ptr); }
-}
 
 
-
-template<class X, class I, class OP> struct UnaryOperationMixin : public virtual I {
-    static X const& _cast(UnaryOperationMixin<X,I,OP> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply(OP op) const final { return _make_wrapper(op(_cast(*this))); }
+/*
+template<class I, class OP> struct UnaryOperationInterface {
+    virtual ~UnaryOperationInterface() = default;
+    virtual I* _apply(OP op) const = 0;
 };
 
 template<class I, class OP> struct BinaryOperationInterface {
@@ -133,64 +340,38 @@ template<class I, class OP> struct BinaryOperationInterface {
     virtual I* _rapply(OP op, I const* other) const = 0;
 };
 
-template<class X, class I, class OP, class J=I> struct BinaryOperationMixin : public virtual J {
-    static X const& _cast(BinaryOperationMixin<X,I,OP,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+template<class I, class OP, class N> struct GradedOperationInterface {
+    virtual ~GradedOperationInterface() = default;
+    virtual I* _apply(OP op, N n) const = 0;
+};
+
+*/
+
+template<class X, class I, class OP> struct UnaryOperationMixin : public virtual I {
+    static X const& _cast(UnaryOperationMixin<X,I,OP> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
+    virtual I* _apply(OP op) const final { return _make_wrapper(op(_cast(*this))); }
+};
+
+template<class X, class I, class OP> struct BinaryOperationMixin : public virtual I {
+    static X const& _cast(BinaryOperationMixin<X,I,OP> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     virtual I* _apply(OP op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
     virtual I* _rapply(OP op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
 };
 
-
-template<class X, class I, class AW> struct FieldLatticeAware
-    : Operable<X,I,BinaryElementaryOperator,AW> {
-};
-
-template<class X, class I, class N> struct ElementaryGradedOperationsMixin : public virtual I {
-    using I::_apply;
-    static X const& _cast(ElementaryGradedOperationsMixin<X,I,N> const& self) { return static_cast<NumberMixin<X> const&>(self); }
+template<class X, class I, class OP, class N> struct GradedOperationMixin : public virtual I {
+    static X const& _cast(GradedOperationMixin<X,I,OP,N> const& self) { return static_cast<NumberMixin<X> const&>(self); }
     template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply(GradedElementaryOperator op, N n) const final { return _make_wrapper(op(std::forward<const X>(_cast(*this)),n)); }
+    virtual I* _apply(OP op, N n) const final { return _make_wrapper(op(_cast(*this),n)); }
 };
 
-template<class X, class I> struct ElementaryUnaryOperationsMixin : public virtual I {
-    using I::_apply;
-    static X const& _cast(ElementaryUnaryOperationsMixin<X,I> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    template<class R> static I* _make_wrapper(R&& r) { return new NumberWrapper<R>(r); }
-    virtual I* _apply(UnaryElementaryOperator op) const final { return _make_wrapper(op(_cast(*this))); }
-};
+template<class X> struct ElementaryUnaryNumberOperationsMixin
+    : public UnaryOperationMixin<X,NumberInterface,UnaryElementaryOperator> { };
+template<class X> struct ElementaryBinaryNumberOperationsMixin
+    : public BinaryOperationMixin<X,NumberInterface,BinaryElementaryOperator> { };
+template<class X,class N=Int> struct ElementaryGradedNumberOperationsMixin
+    : public GradedOperationMixin<X,NumberInterface,GradedElementaryOperator,N> { };
 
-
-template<class X, class I, class J=I> struct ElementaryBinaryOperationsMixin : public virtual J {
-    using J::_rapply; using J::_apply;
-    static X const& _cast(ElementaryBinaryOperationsMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    virtual I* _apply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-};
-
-/*
-template<class X, class I, class J=I> struct AwareFieldMixin : public virtual J {
-    using J::_rapply; using J::_apply;
-    static X const& _cast(AwareFieldMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    virtual I* _apply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(BinaryElementaryOperator op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-};
-
-template<class X, class I, class J=I> struct AwareLatticeMixin : public virtual J {
-    using J::_rapply; using J::_apply;
-    static X const& _cast(AwareLatticeMixin<X,I,J> const& self) { return static_cast<NumberMixin<X> const&>(self); }
-    virtual I* _apply(Max op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _apply(Min op, I const* other) const final { return Ariadne::_apply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Max op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-    virtual I* _rapply(Min op, I const* other) const final { return Ariadne::_rapply<I,X>(_cast(*this),op,this,other); }
-};
-*/
-
-template<class X, class I, class W> struct SameArithmeticMixin : public virtual I {
-    X const& _cast(X const& self) { return self; }
-    X const& _cast(I const& other) { return dynamic_cast<Wrapper<X,I>const&>(other); }
-    I* _heap_move(X&& x) { return new W(x); }
-    virtual I* _apply(BinaryArithmeticOperator op, I const* other) const final { return _heap_move(op(_cast(*this),_cast(*other))); }
-    virtual I* _rapply(BinaryArithmeticOperator op, I const* other) const final { return _heap_move(op(_cast(*other),_cast(*this))); }
-};
 
 template<class X> class NumberGetterMixin : public virtual NumberInterface {
   public:
@@ -268,14 +449,11 @@ template<class X> class NumberGetterMixin : public virtual NumberInterface {
         inline R _get_as(PR pr, PRE pre) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with precision " << pr << " and error precision " << pre << "\n"; throw ParadigmError(); }
 };
 
-template<class X> struct DispatchingTraits { typedef Aware<X> AwareOfTypes; };
-template<class X> using Awares = typename DispatchingTraits<X>::AwareOfTypes;
-
 template<class X> class NumberMixin
-    : public ElementaryBinaryOperationsMixin<X,NumberInterface>
-    , public ElementaryUnaryOperationsMixin<X,NumberInterface>
-    , public ElementaryGradedOperationsMixin<X,NumberInterface,Int>
-    , public FieldLatticeAware<X,NumberInterface,Awares<X>>
+    : public ElementaryBinaryNumberOperationsMixin<X>
+    , public ElementaryUnaryNumberOperationsMixin<X>
+    , public ElementaryGradedNumberOperationsMixin<X>
+    , public ElementaryBinaryNumberDispatcherMixin<X>
     , public NumberGetterMixin<X>
 {
   public:

@@ -153,9 +153,6 @@ template<class F> class LowerBound
     friend UpperBound<F> neg(LowerBound<F> const& x);
     friend UpperBound<F> sub(UpperBound<F> const& x1, LowerBound<F> const& x2);
   public:
-    friend Approximation<F> rec(LowerBound<F> const& x); //< DEPRECATED: Needed only for Operations template
-    friend Approximation<F> rec(UpperBound<F> const& x); //< DEPRECATED: Needed only for Operations template
-  public:
     friend LowerBound<F> operator*(PositiveBounds<F> const& x1, LowerBound<F> const& x2) {
         return LowerBound<F>(mul(down,x2.raw()>=0?x1.lower().raw():x1.upper().raw(),x2.raw())); }
     friend LowerBound<F> operator*(LowerBound<F> const& x1, PositiveBounds<F> const& x2) {

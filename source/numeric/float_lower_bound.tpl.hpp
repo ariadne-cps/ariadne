@@ -44,10 +44,7 @@ template<class F> LowerBound<F>::LowerBound(Value<F> const& x) : LowerBound<F>(x
 template<class F> LowerBound<F>::LowerBound(Real const& r, PR pr) : LowerBound(r.get(pr)) {}
 template<class F> LowerBound<F>::LowerBound(ValidatedLowerNumber const& y, PR pr) : LowerBound(y.get(LowerTag(),pr)) {}
 template<class F> LowerBound<F>::operator ValidatedLowerNumber() const {
-    // FIXME: Should return a wrapper around the value itself
-    // return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
-    Bounds<F> bnds(this->raw(),F::inf(this->precision()));
-    return ValidatedNumber(std::make_shared<NumberWrapper<Bounds<F>>>(bnds));
+    return ValidatedLowerNumber(new NumberWrapper<LowerBound<F>>(*this));
 }
 
 } // namespace Ariadne

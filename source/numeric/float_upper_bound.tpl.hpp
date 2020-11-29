@@ -45,10 +45,7 @@ template<class F> UpperBound<F>::UpperBound(UpperBound<F> const& x, PR pr) : _u(
 template<class F> UpperBound<F>::UpperBound(Real const& r, PR pr) : UpperBound(r.get(pr)) {}
 template<class F> UpperBound<F>::UpperBound(ValidatedUpperNumber const& y, PR pr) : UpperBound(y.get(UpperTag(),pr)) {}
 template<class F> UpperBound<F>::operator ValidatedUpperNumber() const {
-    // FIXME: Should return a wrapper around the value itself
-    // return ValidatedUpperNumber(new NumberWrapper<UpperBound<F>>(*this));
-    Bounds<F> bnds(-F::inf(this->precision()),this->raw());
-    return ValidatedNumber(std::make_shared<NumberWrapper<Bounds<F>>>(bnds));
+    return ValidatedUpperNumber(new NumberWrapper<UpperBound<F>>(*this));
 }
 
 } // namespace Ariadne

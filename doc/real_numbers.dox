@@ -31,10 +31,13 @@ namespace Ariadne {
 
 /*!
 
-\page numeric_page %Computable Real Numbers
+\page real_numbers_page %Computable %Real Numbers
 
 This page describes the theory of computable real numbers.
 For details on how this is implemented in %Ariadne, see the \ref NumericModule documentation.
+
+For information on the underlying theory of ordered and metric spaces, see the \ref topology_page.
+For information on logic for real number computation, see the \ref logic_page.
 
 \section algebraicnumbers Algebraic Numbers
 
@@ -52,13 +55,13 @@ Classically, real numbers are either defined axiomatically, or constructed using
 A Dedekind cut is a pair of sets \f$(L,U)\f$ such that
  - \f$L,U \subset \mathbb{Q}\f$ and \f$L \cap U = \emptyset\f$
  - \f$ l\in L \implies \forall l'<l,\ l' \in L \f$ and \f$ u \in U \implies \forall u'>u,\ u' \in U \f$
- - \f$ \forall l \in L, \exists l' \in L,\ l<l' \f$ and \f$ \forall u \in U,\ \exists u'\in U, u<u' \f$
+ - \f$ \forall l \in L, \exists l' \in L,\ l'>l \f$ and \f$ \forall u \in U,\ \exists u'\in U, u'<u \f$
  - \f$ l < u \implies l\in L \vee u \in U \f$
 
 A sequence \f$(q_n)\f$ of (dyadic) rationals is a Cauchy sequence if
  - \f$ \forall \epsilon>0,\ \exists N\in\mathbb{N},\ \forall m,n>N,\ d(q_m,q_n)<\epsilon\f$.
 
-%Two Cauchy sequences \f$(p_n)\f$, \f$q_n\f$ are equivalent if
+%Two Cauchy sequences \f$(p_n)\f$, \f$(q_n)\f$ are equivalent if
  -\f$ \forall \epsilon>0,\ \exists N\in\mathbb{N},\ \forall n>N,\ d(p_n,q_n)<\epsilon\f$.
 
 In both the above definitions, it is possible to use dyadics instead of rationals.
@@ -71,8 +74,12 @@ Instead, the computable or effective real numbers \f$\mathbb{R}\f$ are defined a
 
 There are many equivalent representations of computable real numbers.
 An alternative is that of <em>nested intervals</em> \f$[\underline{q}_n\!:\!\overline{q}_n]\f$ such that
- - \f$\underline{q}_n \leq \underline{q}_{n+1} \leq \overline{q}_{n+1} \leq \overline{q}_n]\f$ and
+ - \f$\underline{q}_n \leq \underline{q}_{n+1} \leq \overline{q}_{n+1} \leq \overline{q}_n\f$ and
  - \f$\bigcap_{n\in\mathbb{N}}[\underline{q}_n\!:\!\overline{q}_n]=\{q\}\f$.
+.
+Alternatively, we may consider <em>strictly nested</em> intervals
+ - \f$\underline{q}_n < \underline{q}_{n+1} < \overline{q}_{n+1} < \overline{q}_n\f$.
+These representations are essentially equivalent to the Dedekind reals.
 
 The computable reals support the standard arithmetical operations and elementary functions.
 Further, one can compute bounds to any given accuracy.
@@ -90,7 +97,12 @@ and the <em>upper reals</em> \f$\mathbb{R}_>\f$, defined by bounded decreasing s
 Note that negation reverses lower and upper real types, and multiplication is not supported,
 since e.g. given approximations \f$q_1 > r_1\f$ and \f$q_2 > r_2\f$, one cannot deduce \f$q_1 \times q_2 \geq r_1 \times r_2\f$.
 For we have \f$2>-3\f$ and \f$3>-5\f$, but \f$ 6 = 2\times 3 \not\geq 15 = (-3)\times(-5)\f$.
-However, multiplication and division of positive lower/upper reals is possible.
+However, multiplication and division of <em>positive</em> lower/upper reals is possible e.g. \f$\R^+_> \div \R^+_< : \R^+_>\f$.
+Also, upper/lower reals can be multiplied by positive reals e.g. \f$\R_> \times \R^+ : \R_>\f$.
+
+The full overloads for multiplication are
+\f[ \R_>\!\times\R^+,\;\R^+\!\times\R_>:\R_>; \quad \R\times\R:\R; \qquad \R^+_>\times\R^+_>:\R^+_>; \quad \R^+\!\times\R^+:\R^+ . \f]
+Note that the dispatch for \f$\R\times\R^+\f$ (and for \f$\R^+\!\times\R\f$) is ambiguous, but that \f$\R\times\R:\R\f$ is better than \f$\R_>\times\R^+:\R_>\f$.
 
 An implementation of the computable real number type may store a number in a form so that it can be recovered to any desired precision.
 This is typically acheived by expressing the number as a formula in terms of other arbitrary-precision or exact number types.
@@ -133,9 +145,9 @@ Examples include Dekker's {Fast2Sum}, Møller & Knuths {TwoSum} the {TwoMulFMA} 
 
 Since keeping track of rounding is tedious and error-prone, rigorous arithmetic using floating-point numbers is typically performed using interval arithmetic.
 Here, computation of a real number \f$x\f$ yields an interval \f$[\underline{x}\!:\!\overline{x}]\f$ such that \f$ \underline{x} \leq x \leq \overline{x}\f$.
-Arithmetical operations are defined to preserve inclusion, so that
-e.g. \f$ x\in [\underline{x}\!:\!\overline{x}] \wedge y\in [\underline{y}\!:\!\overline{y}] \implies x \times y \in [\underline{x}\!:\!\overline{x}] \times [\underline{y}\!:\!\overline{y}] \f$.
-%Interval arithmetic can be implemented in terms of rounded arithmetic.
+Arithmetical operations \f$\star\f$ are defined to preserve inclusion, so that
+e.g. \f$ x\in [\underline{x}\!:\!\overline{x}] \wedge y\in [\underline{y}\!:\!\overline{y}] \implies x \star y \in [\underline{x}\!:\!\overline{x}] \star [\underline{y}\!:\!\overline{y}] \f$.
+%Interval arithmetic can be implemented in terms of rounded arithmetic. e.g. \f$[\underline{x}\!:\!\overline{x}] - [\underline{y}\!:\!\overline{y}]=[\underline{x}-_\downarrow \overline{y}:\overline{x}-^\uparrow\!\underline{y}]\f$.
 
 In %Ariadne, we use a <tt>Bounds<F></tt> class rather than <tt>Interval<F></tt> for interval arithmetic, since %Interval is reserved for geometric intervals (sets), rather than information about points.
 

@@ -226,6 +226,15 @@ template<class F> class Positive<LowerBound<F>> : public LowerBound<F>
     friend Approximation<F> pow(LowerBound<F> const& x, Int n) {
         return pow(Approximation<F>(x),n); }
   public:
+    friend PositiveLowerBound<F> operator+(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(add(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator*(PositiveLowerBound<F> const& x1, PositiveLowerBound<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator/(PositiveLowerBound<F> const& x1, PositiveUpperBound<F> const& x2) {
+        return PositiveLowerBound<F>(mul(down,x1.raw(),x2.raw())); }
+    friend PositiveLowerBound<F> operator*=(PositiveLowerBound<F>& x1, PositiveLowerBound<F> const& x2) {
+        return x1=x1*x2; }
+  public:
     // Needed to prevent ambiguity
     friend PositiveLowerBound<F> operator*(PositiveBounds<F> const& x1, PositiveLowerBound<F> const& x2) {
         return PositiveLowerBound<F>(mul(down,x1.lower().raw(),x2.raw())); }

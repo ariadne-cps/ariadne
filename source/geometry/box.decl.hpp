@@ -45,6 +45,13 @@ using FloatDPBoundsBox = Box<FloatDPBoundsInterval>; //!< .
 using FloatDPUpperBox = Box<FloatDPUpperInterval>; //!< .
 using FloatDPLowerBox = Box<FloatDPLowerInterval>; //!< .
 using FloatDPApproximateBox = Box<FloatDPApproximateInterval>; //!< .
+
+using FloatMPExactBox = Box<FloatMPExactInterval>; //!< .
+using FloatMPBallBox = Box<FloatMPBallInterval>; //!< .
+using FloatMPBoundsBox = Box<FloatMPBoundsInterval>; //!< .
+using FloatMPUpperBox = Box<FloatMPUpperInterval>; //!< .
+using FloatMPLowerBox = Box<FloatMPLowerInterval>; //!< .
+using FloatMPApproximateBox = Box<FloatMPApproximateInterval>; //!< .
 //@}
 
 

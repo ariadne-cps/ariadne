@@ -28,15 +28,23 @@
 
 namespace Ariadne {
 
+template<> String class_name<Point<Real>>() { return "Point<Real>"; }
+
 template<> String class_name<Point<FloatDPApproximation>>() { return "Point<FloatDPApproximation>"; }
 template<> String class_name<Point<FloatDPBounds>>() { return "Point<FloatDPBounds>"; }
 template<> String class_name<Point<FloatDPValue>>() { return "Point<FloatDPValue>"; }
-template<> String class_name<Point<Real>>() { return "Point<Real>"; }
+#warning
+//template<> String class_name<Point<FloatMPApproximation>>() { return "Point<FloatMPApproximation>"; }
+//template<> String class_name<Point<FloatMPBounds>>() { return "Point<FloatMPBounds>"; }
+//template<> String class_name<Point<FloatMPValue>>() { return "Point<FloatMPValue>"; }
 
+template class Point<Real>;
 template class Point<FloatDPValue>;
 template class Point<FloatDPBounds>;
 template class Point<FloatDPApproximation>;
-template class Point<Real>;
+//template class Point<FloatMPValue>;
+//template class Point<FloatMPBounds>;
+//template class Point<FloatMPApproximation>;
 
 /*
 Point<Real> make_point(const StringType& str)

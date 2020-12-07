@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_calculus.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2009-20  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ def test_calculus():
     cy=ValidatedNumber(2)
     cx=FloatDPBounds(2,dp)
 
-    bx=ExactBoxType([{Dyadic(1):3},{-1:2},{-3:3}])
+    bx=BoxDomainType([{Dyadic(1):3},{-1:2},{-3:3}])
 
     swp = ThresholdSweeper(dp,1e-8);
 

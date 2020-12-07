@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_function.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2009-20  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify

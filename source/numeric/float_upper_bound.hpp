@@ -242,7 +242,7 @@ template<class F> class Positive<UpperBound<F>> : public UpperBound<F>
     friend PositiveUpperBound<F> operator*(PositiveUpperBound<F> const& x1, PositiveUpperBound<F> const& x2) {
         return PositiveUpperBound<F>(mul(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator/(PositiveUpperBound<F> const& x1, PositiveLowerBound<F> const& x2) {
-        return div(x1,x2); }
+        return PositiveUpperBound<F>(div(up,x1.raw(),x2.raw())); }
     friend PositiveUpperBound<F> operator*=(PositiveUpperBound<F>& x1, PositiveUpperBound<F> const& x2) {
         return x1=x1*x2; }
   public:

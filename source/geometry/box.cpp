@@ -64,6 +64,7 @@ UpperBoxType image(UpperBoxType const& bx, ValidatedVectorMultivariateFunction c
 template class Box<Interval<Real>>;
 template class Box<Interval<FloatDPValue>>;
 template class Box<Interval<FloatDPUpperBound>>;
+template class Box<Interval<FloatDPLowerBound>>;
 template class Box<Interval<FloatDPApproximation>>;
 
 Void draw(CanvasInterface& c, Projection2d const& p, ApproximateBoxType const& bx) {

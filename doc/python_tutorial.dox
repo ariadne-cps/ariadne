@@ -38,7 +38,7 @@ The full code of the tutorial is given in \ref python/tutorials/tutorial.py
 
 \dontinclude python/tutorials/tutorial.py
 
-\section python_tutorial_introspection The %Ariadne module.
+\section python_tutorial_introspection The Ariadne module.
 
 First, import the %Ariadne module. For ease-of-use, the <tt>from</tt> version of <tt>import</tt> is recommended:
 \skipline import

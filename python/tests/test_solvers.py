@@ -3,7 +3,7 @@
 ##############################################################################
 #            test_solvers.py
 #
-#  Copyright 2012  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2012-20  Pieter Collins <pieter.collins@maastrichtuniversity.nl>
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ fy=EffectiveScalarMultivariateFunction.coordinate(2,1)
 
 def test_solvers():
     f=ValidatedVectorMultivariateFunction([fx+fy,fy])
-    b=ExactBoxType([{-1:+1},{-1:+1}])
+    b=BoxDomainType([{-1:+1},{-1:+1}])
 
     solver=IntervalNewtonSolver(1e-8,12)
     solver.solve(f,b)
@@ -37,7 +37,7 @@ def test_solvers():
     solver.solve(f,b)
 
 def test_integrators():
-    d=ExactBoxType([{-1:+1},{-1:+1}])
+    d=BoxDomainType([{-1:+1},{-1:+1}])
     h=Dyadic(exact(0.25))
 
     vf=EffectiveVectorMultivariateFunction([fo,fx])

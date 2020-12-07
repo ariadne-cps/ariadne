@@ -142,20 +142,20 @@ hull(X x1, Interval<U> const& ivl2) -> Interval<decltype(max(declval<U>(),declva
 
 
 template<class U> inline auto split(Interval<U> const& ivl, SplitPart lmu) -> Interval<U> {
-    auto cc=(ivl.lower_bound()+ivl.upper_bound())/2;
+    auto cc=hlf(ivl.lower_bound()+ivl.upper_bound());
     if(lmu==SplitPart::LOWER) {
         return Interval<U>(ivl.lower_bound(),make_split_point(cc));
     } else if(lmu==SplitPart::UPPER) {
         return Interval<U>(make_split_point(cc),ivl.upper_bound());
     } else {
-        auto cl=(3*ivl.lower_bound()+ivl.upper_bound())/4;
-        auto cu=(ivl.lower_bound()+3*ivl.upper_bound())/4;
+        auto cl=(3*ivl.lower_bound()+ivl.upper_bound())*0.25_x;
+        auto cu=(ivl.lower_bound()+3*ivl.upper_bound())*0.25_x;
         return Interval<U>(make_split_point(cl),make_split_point(cu));
     }
 }
 
 template<class U> inline auto split(Interval<U> const& ivl) -> Pair<Interval<U>,Interval<U>> {
-    auto c=make_split_point((ivl.lower_bound()+ivl.upper_bound())/2);
+    auto c=make_split_point(hlf(ivl.lower_bound()+ivl.upper_bound()));
     return std::make_pair(Interval<U>(ivl.lower_bound(),c),Interval<U>(c,ivl.upper_bound()));
 }
 

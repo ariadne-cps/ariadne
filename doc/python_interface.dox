@@ -80,7 +80,7 @@ has a lower precedence than multiplication. In Python, the power operator is
 used by <tt>x1 ** x2</tt>.
 
  - <em>Printing:</em> <br>
-In C++, printing is achieved by defining <tt>OutputStream& operator<<(OutputStream& os, Class obj)<tt>.
+In C++, printing is achieved by defining <tt>OutputStream& operator<<(OutputStream& os, Class obj)</tt>.
 In Python, printing is performed by the <tt>print(obj)</tt> statement, or by converting to a string
 using <tt>str(obj)</tt> or <tt>repr(obj)</tt>. The Python output of <tt>repr</tt> typically differs
 from the C++ output or that of <tt>str</tt>, and is designed so that <tt>eval(repr(obj))</tt>

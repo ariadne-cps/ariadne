@@ -16,6 +16,7 @@ if(PYTHON_TESTS)
         linear_algebra
         function
         calculus
+        geometry
         solvers
         symbolic
     )

@@ -232,6 +232,10 @@ template<class P> Void export_scalar_univariate_function(pybind11::module& modul
 {
     pybind11::class_<ScalarUnivariateFunction<P>> function_class(module,(class_name<P>()+"ScalarUnivariateFunction").c_str());
     function_class.def(pybind11::init<ScalarUnivariateFunction<P>>());
+    if constexpr (IsSame<P,ValidatedTag>::value) {
+        function_class.def(pybind11::init<ScalarUnivariateFunction<EffectiveTag>>());
+//        pybind11::implicitly_convertible<VectorMultivariateFunction<EffectiveTag>,VectorMultivariateFunction<ValidatedTag>>();
+    }
     function_class.def("derivative", (ScalarUnivariateFunction<P>(ScalarUnivariateFunction<P>::*)(SizeOne)const) &ScalarUnivariateFunction<P>::derivative);
     function_class.def("derivative", (ScalarUnivariateFunction<P>(*)(const ScalarUnivariateFunction<P>&)) &derivative);
 
@@ -298,6 +302,9 @@ Void export_scalar_univariate_functions(pybind11::module& module)
     export_scalar_univariate_function<EffectiveTag>(module);
     export_scalar_univariate_function<ValidatedTag>(module);
     export_scalar_univariate_function<ApproximateTag>(module);
+    pybind11::implicitly_convertible<ScalarUnivariateFunction<EffectiveTag>,ScalarUnivariateFunction<ValidatedTag>>();
+    pybind11::implicitly_convertible<ScalarUnivariateFunction<EffectiveTag>,ScalarUnivariateFunction<ApproximateTag>>();
+    pybind11::implicitly_convertible<ScalarUnivariateFunction<ValidatedTag>,ScalarUnivariateFunction<ApproximateTag>>();
 }
 
 Void export_vector_univariate_functions(pybind11::module& module)
@@ -305,6 +312,9 @@ Void export_vector_univariate_functions(pybind11::module& module)
     export_vector_univariate_function<EffectiveTag>(module);
     export_vector_univariate_function<ValidatedTag>(module);
     export_vector_univariate_function<ApproximateTag>(module);
+    pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ValidatedTag>>();
+    pybind11::implicitly_convertible<VectorUnivariateFunction<EffectiveTag>,VectorUnivariateFunction<ApproximateTag>>();
+    pybind11::implicitly_convertible<VectorUnivariateFunction<ValidatedTag>,VectorUnivariateFunction<ApproximateTag>>();
 }
 
 

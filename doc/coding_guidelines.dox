@@ -130,4 +130,10 @@ Similar constructors are provided for other list-based classes, such as \ref Ari
 An alternative to the current approach may be to use concepts to restrict use cases to classes satisfying the Concrete/Generic concept.
 
 
+\section pybindings Python Bindings
+
+Some useful techniques for creating the Python bindings include:
+- To export a C++ \c typedef, use: <code>module.def("TypeAlias")=pybind11_class;
+
+
 */

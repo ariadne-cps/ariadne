@@ -199,6 +199,15 @@ template<class F> class Value
     friend Integer cast_integer(Value<F> const& x) {
         Dyadic w(x); Integer z=round(w); ARIADNE_ASSERT_MSG(z==w,"Cannot cast non-integral value "<<z<<" to an Integer"); return z; }
   public:
+    friend Value<F> max(Value<F> const& x1, Dyadic const& w2) {
+        return max(x1,Value<F>(w2,x1.precision())); }
+    friend Value<F> max(Dyadic const& w1, Value<F> const& x2) {
+        return max(Value<F>(w1,x2.precision()),x2); }
+    friend Value<F> min(Value<F> const& x1, Dyadic const& w2) {
+        return min(x1,Value<F>(w2,x1.precision())); }
+    friend Value<F> min(Dyadic const& w1, Value<F> const& x2) {
+        return min(Value<F>(w1,x2.precision()),x2); }
+  public:
     friend Value<F> operator*(TwoExp const&, Value<F> const&);
     friend Value<F> operator*(Value<F> const&, TwoExp const&);
     friend Value<F> operator/(Value<F> const&, TwoExp const&);

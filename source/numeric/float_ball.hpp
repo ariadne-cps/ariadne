@@ -86,6 +86,7 @@ template<class F, class FE> class Ball
     Ball<F,FE>(const ValidatedNumber& y, PR pr);
 
     // FIXME: Constructors for other types
+        Ball<F,FE>(const Integer& z, PR pr, PRE pre);
         Ball<F,FE>(const Dyadic& w, PR pr, PRE pre);
         Ball<F,FE>(const Rational& q, PR pr, PRE pre);
         Ball<F,FE>(const Real& q, PR pr, PRE pre);
@@ -236,9 +237,18 @@ template<class PR> Ball(ValidatedNumber, PR) -> Ball<RawFloatType<PR>>;
 template<class PR, class PRE> Ball(ValidatedNumber, PR, PRE) -> Ball<RawFloatType<PR>,RawFloatType<PRE>>;
 template<class F, class FE> Ball(F,FE) -> Ball<F,FE>;
 
-template<class F, class FE> inline FloatFactory<PrecisionType<F>> factory(Ball<F,FE> const& flt) {
-    return FloatFactory<PrecisionType<F>>(flt.precision());
-}
+template<class F, class FE> inline FloatBallFactory<PrecisionType<F>,PrecisionType<FE>> factory(Ball<F,FE> const& flt) {
+    return FloatBallFactory<PrecisionType<F>,PrecisionType<FE>>(flt.precision(),flt.error_precision()); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<ValidatedTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<EffectiveTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Number<ExactTag> const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Real const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Rational const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Dyadic const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+template<class PR, class PRE> inline FloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(Integer const& y) { return FloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+
+template<class PR, class PRE> inline PositiveFloatBall<PR,PRE> FloatBallFactory<PR,PRE>::create(PositiveValidatedNumber const& y) { return PositiveFloatBall<PR,PRE>(y,this->_pr,this->_pre); }
+
 
 template<class F, class FE> class Positive<Ball<F,FE>> : public Ball<F,FE> {
     using PR = typename Ball<F,FE>::PrecisionType;

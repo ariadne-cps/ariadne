@@ -221,6 +221,10 @@ template<> class Bounds<Dyadic> {
     friend Bounds<Dyadic> operator+(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l+w2._l,w1._u+w2._u); }
     friend Bounds<Dyadic> operator-(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(w1._l-w2._u,w1._u-w2._l); }
     friend Bounds<Dyadic> operator*(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2);
+    friend Bounds<Dyadic> sqr(Bounds<Dyadic> const& w) {
+        if(w._l>0) { return Bounds<Dyadic>(mul(w._l,w._l),mul(w._u,w._u)); }
+        else if(w._u<0) { return Bounds<Dyadic>(mul(w._u,w._u),mul(w._l,w._l)); }
+        else { return Bounds<Dyadic>(nul(w._l),max(mul(w._l,w._l),mul(w._u,w._u))); } }
     friend Bounds<Dyadic> hlf(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(hlf(w._l),hlf(w._u)); }
     friend Bounds<Dyadic> abs(Bounds<Dyadic> const& w) { return Bounds<Dyadic>(max(min(w._l,-w._u),0),max(-w._l,w._u)); }
     friend Bounds<Dyadic> max(Bounds<Dyadic> const& w1, Bounds<Dyadic> const& w2) { return Bounds<Dyadic>(max(w1._l,w2._l),max(w1._u,w2._u)); }

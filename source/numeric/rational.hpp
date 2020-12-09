@@ -157,6 +157,7 @@ template<> class Bounds<Rational> {
     friend Bounds<Rational> operator-(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(q1._l-q2._u,q1._u-q2._l); }
     friend Bounds<Rational> operator*(RationalBounds const& q1, RationalBounds const& q2);
     friend Bounds<Rational> operator/(RationalBounds const& q1, RationalBounds const& q2);
+    friend Bounds<Rational> sqr(RationalBounds const& q);
     friend Bounds<Rational> rec(RationalBounds const& q);
     friend RationalBounds abs(RationalBounds const& q) { return RationalBounds(max(min(q._l,-q._u),0),max(-q._l,q._u)); }
     friend Bounds<Rational> max(RationalBounds const& q1, RationalBounds const& q2) { return RationalBounds(max(q1._l,q2._l),max(q1._u,q2._u)); }

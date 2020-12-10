@@ -63,8 +63,26 @@ def test_regression():
 
     assert(type(FloatDPBounds({1:2},dp))==FloatDPBounds);
 
-def check_arithmetic(x1,x2,r,qr=None):
+
+def check_directed_arithmetic(x1,x2,r):
+    nx2=-x2;
+    assert(type(-nx2)==type(x1));
+    assert(type(x1+x2)==type(r));
+    assert(type(x1-nx2)==type(r));
+#    assert(type(exp(x1))==type(r));
+#    assert(type(log(x1))==type(r));
+    assert(type(atan(x1))==type(r));
+    assert(type(max(x1,x2))==type(r))
+    assert(type(min(x1,x2))==type(r))
+    assert(type(max(x2,x1))==type(r))
+    assert(type(min(x2,x1))==type(r))
+
+
+def check_arithmetic(x1,x2,r,xr=None,qr=None):
     if qr==None: qr=r;
+    if xr==None: xr=r;
+#    assert(type(+x1)==type(xr));
+#    assert(type(-x1)==type(xr));
     assert(type(x1+x2)==type(r));
     assert(type(x1-x2)==type(r));
     assert(type(x1*x2)==type(r));
@@ -73,36 +91,101 @@ def check_arithmetic(x1,x2,r,qr=None):
     assert(type(x2-x1)==type(r));
     assert(type(x2*x1)==type(r));
     assert(type(x2/x1)==type(qr));
-    assert(type(max(x1,x2))==type(r))
-    assert(type(min(x1,x2))==type(r))
-    assert(type(max(x2,x1))==type(r))
-    assert(type(min(x2,x1))==type(r))
+    assert(type(max(x1,x2))==type(xr))
+    assert(type(min(x1,x2))==type(xr))
+    assert(type(max(x2,x1))==type(xr))
+    assert(type(min(x2,x1))==type(xr))
 
-    assert(type(rec(x2))==type(qr))
+def check_directed_arithmetic(x1,x2,r,xr=None,qr=None):
+    if qr==None: qr=r;
+    if xr==None: xr=r;
+    nx1=-x1
+    nx2=-x2
+    assert(type(-nx1)==type(x1));
+    assert(type(-nx2)==type(x2));
+    assert(type(x1+x2)==type(r));
+    assert(type(x1-nx2)==type(r));
+    assert(type(x2+x1)==type(r));
+    assert(type(x2-nx1)==type(r));
+    assert(type(max(x1,x2))==type(xr))
+    assert(type(min(x1,x2))==type(xr))
+    assert(type(max(x2,x1))==type(xr))
+    assert(type(min(x2,x1))==type(xr))
 
+def check_elementary(x,r,xr=None,qr=None):
+    if qr==None: qr=r;
+    if xr==None: xr=r;
+#    assert(type(add(x,x))==type(r));
+#    assert(type(sub(x,x))==type(r));
+#    assert(type(mul(x,x))==type(r));
+#    assert(type(div(x,x))==type(r));
+    assert(type(x+x)==type(r));
+    assert(type(x-x)==type(r));
+    assert(type(x*x)==type(r));
+    assert(type(x/x)==type(qr));
+    assert(type(pow(x,-3))==type(r));
+    assert(type(neg(x))==type(xr));
+    assert(type(hlf(x))==type(xr));
+    assert(type(sqr(x))==type(r));
+    assert(type(rec(x))==type(r));
+    assert(type(abs(x))==type(xr))
+    assert(type(max(x,x))==type(xr))
+    assert(type(min(x,x))==type(xr))
 
-def types(lst):
-    return [type(val) for val in lst]
+def check_directed_elementary(x,r,xr=None,qr=None):
+    if qr==None: qr=r;
+    if xr==None: xr=r;
+    nx=-x;
+    assert(type(-nx)==type(x));
+    assert(type(x+x)==type(r));
+    assert(type(x-nx)==type(r));
+#    assert(type(hlf(x))==type(xr));
+#    assert(type(sqr(x))==type(r));
+#    assert(type(rec(x))==type(r));
+#    assert(type(abs(x))==type(xr))
+    assert(type(atan(x))==type(r));
+    assert(type(max(x,x))==type(xr))
+    assert(type(min(x,x))==type(xr))
+
+def check_constructible_from(cls,val):
+    cls(val)
+
+def check_not_constructible_from(cls,val):
+    try:
+        cls(val)
+        assert(False)
+    except (TypeError):
+        pass
+
 
 def test_algebraic():
     n=1
+    x=ExactDouble(1.0)
     z=Integer(n)
     w=Dyadic(z)
     d=Decimal(w)
     q=Rational(d)
     r=Real(q)
 
-    print(types([n,w,max(n,w)]))
+    assert(type(exact(0.0))==ExactDouble)
 
-    check_arithmetic(n,z,z,q)
-    check_arithmetic(n,w,w,q)
-    check_arithmetic(n,q,q)
-    check_arithmetic(n,r,r)
-    check_arithmetic(z,z,z,q)
-    check_arithmetic(z,w,w,q)
+    check_not_constructible_from(Integer,0.0)
+    check_not_constructible_from(Dyadic,0.0)
+    check_not_constructible_from(Rational,0.0)
+    check_not_constructible_from(Real,0.0)
+
+    check_constructible_from(Decimal,0.0)
+
+    check_arithmetic(z,n,r=z,qr=q)
+    check_arithmetic(w,n,r=w,qr=q)
+    check_arithmetic(q,n,q)
+    check_arithmetic(r,n,r)
+
+    check_arithmetic(z,z,r=z,qr=q)
+    check_arithmetic(z,w,r=w,qr=q)
     check_arithmetic(z,q,q)
     check_arithmetic(z,r,r)
-    check_arithmetic(w,w,w,q)
+    check_arithmetic(w,w,r=w,qr=q)
     check_arithmetic(w,q,q)
     check_arithmetic(w,r,r)
     check_arithmetic(q,q,q)
@@ -111,7 +194,6 @@ def test_algebraic():
 
 
 def check_rounded(x):
-
     add(up,x,x); add(down,x,x); add(near,x,x);
     sub(up,x,x); sub(down,x,x); sub(near,x,x);
     mul(up,x,x); mul(down,x,x); mul(near,x,x);
@@ -146,20 +228,18 @@ def test_rounded():
     check_rounded(FloatMP(w,mp))
 
 
-
-def test():
-    test_algebraic()
-    test_rounded()
-
+def test_concrete():
     n=2
     d=2.125
+    xd=exact(d)
     z=Integer(3)
     w=Dyadic(9,2)
     q=Rational(9,4)
     r=Real(q)
 
     dp=DoublePrecision()
-    x=FloatDPApproximation(2.25,dp)
+    mp=MultiplePrecision(64)
+    ax=FloatDPApproximation(2.25,dp)
     bx=FloatDPBounds(dp)
     bx=FloatDPBounds(5,dp)
     bx=FloatDPBounds(ExactDouble(2.25),dp)
@@ -167,64 +247,62 @@ def test():
     bx=FloatDPBounds(exact(2.00),exact(2.25),dp)
 #    bx=FloatDPBounds({exact(2.00):exact(2.25)},dp)
 
+    vy=ValidatedNumber(0)
+    uy=ValidatedUpperNumber(0)
+    ly=ValidatedLowerNumber(0)
+    ay=ApproximateNumber(0)
 
-    ax=FloatDPApproximation(2.25,dp)
-    bx=FloatDPBounds(exact(2.25),dp)
-    vx=FloatDPValue(exact(2.25),dp)
+    ax=FloatDPApproximation(xd,dp)
+    lx=FloatDPLowerBound(xd,dp)
+    ux=FloatDPUpperBound(xd,dp)
+    bx=FloatDPBounds(xd,dp)
+    mx=FloatDPBall(xd,dp)
+    vx=FloatDPValue(xd,dp)
 
-    #(z+z,z-z,z*z)
-    #(z+n,z-n,z*n)
-    #(n+z,n-z,n*z)
+    check_elementary(vx,r=bx,xr=vx)
+    check_elementary(mx,r=mx)
+    check_elementary(bx,r=bx)
+    check_directed_elementary(ux,r=ux)
+    check_directed_elementary(lx,r=lx)
+    check_elementary(ax,r=ax)
 
-    #(q+q,q-q,q*q,q/q)
-    #(q+n,q-n,q*n,q/n)
-    #(n+q,n-q,n*q,n/q)
-    #(q+z,q-z,q*z,q/z)
-    #(z+q,z-q,z*q,z/q)
-    #(q+d,q-d,q*d,q/d)
-    #(d+q,d-q,d*q,d/q)
+    check_arithmetic(mx,bx,r=bx)
+    check_arithmetic(bx,mx,r=bx)
 
-    (ax+ax,ax-ax,ax*ax,ax/ax)
-    (ax+n,ax-n,ax*n,ax/n)
-#    (n+ax,n-ax,n*ax,n/ax)
-    (ax+d,ax-d,ax*d,ax/d)
-#    (d+ax,d-ax,d*ax,d/ax)
-    (ax+bx,ax-bx,ax*bx,ax/bx)
-    #(bx+ax,bx-ax,bx*ax,bx/ax)
-#    (ax+r,ax-r,ax*r,ax/r)
-    #(r+ax,r-ax,r*ax,r/ax)
-    (ax+vx,ax-vx,ax*vx,ax/vx)
-    #(vx+ax,vx-ax,vx*ax,vx/ax)
+    check_arithmetic(vx,ax,r=ax)
+    check_arithmetic(ax,vx,r=ax)
+    check_arithmetic(mx,ax,r=ax)
+    check_arithmetic(ax,mx,r=ax)
+    check_directed_arithmetic(bx,ux,r=ux)
+    check_directed_arithmetic(ux,bx,r=ux)
+    check_directed_arithmetic(bx,lx,r=lx)
+    check_directed_arithmetic(lx,bx,r=lx)
+    check_arithmetic(bx,ax,r=ax)
+    check_arithmetic(ax,bx,r=ax)
 
 
-    (bx+bx,bx-bx,bx*bx,bx/bx)
-    (bx+n,bx-n,bx*n,bx/n)
-#    (n+bx,n-bx,n*bx,n/bx)
-#    (bx+r,bx-r,bx*r,bx/r)
-    #(r+bx,r-bx,r*bx,r/bx)
-    (bx+vx,bx-vx,bx*vx,bx/vx)
-    #(vx+bx,vx-bx,vx*bx,vx/bx)
+    check_arithmetic(vx,n,r=bx,xr=vx)
+    check_arithmetic(vx,w,r=bx,xr=vx)
+    check_arithmetic(mx,n,r=mx)
+    check_arithmetic(mx,w,r=mx)
+    check_arithmetic(mx,vy,r=mx)
+    check_arithmetic(bx,n,r=bx,xr=bx)
+    check_arithmetic(bx,vy,r=bx)
+    check_directed_arithmetic(ux,uy,r=ux)
+    check_directed_arithmetic(lx,ly,r=lx)
+    check_arithmetic(ax,n,r=ax)
+    check_arithmetic(ax,d,r=ax)
+    check_arithmetic(ax,vy,r=ax)
+    check_arithmetic(ax,ay,r=ax)
 
-    (r+r,r-r,r*r,r/r)
-    (r+n,r-n,r*n,r/n)
-#    (n+r,n-r,n*r,n/r)
-#    (r+vx,r-vx,r*vx,r/vx)
-    #(vx+r,vx-r,vx*r,vx/r)
+    mx=FloatMPDPBall(xd,mp)
+    check_arithmetic(mx,mx,r=mx)
+    check_arithmetic(mx,n,r=mx)
+    check_arithmetic(mx,w,r=mx)
 
-    #(z==z,z!=z,z<z,z<=z,z>z,z>=z)
-    #(z==n,z!=n,z<n,z<=n,z>n,z>=n)
-    #(n==z,n!=z,n<z,n<=z,n>z,n>=z)
 
-    #(q==q,q!=q,q<q,q<=q,q>q,q>=q)
-    #(q==n,q!=n,q<n,q<=n,q>n,q>=n)
-    #(n==q,n!=q,n<q,n<=q,n>q,n>=q)
-    #(q==z,q!=z,q<z,q<=z,q>z,q>=z)
-    #(z==q,z!=q,z<q,z<=q,z>q,z>=q)
-    #(q==d,q!=d,q<d,q<=d,q>d,q>=d)
-    #(d==q,d!=q,d<q,d<=q,d>q,d>=q)
+def test():
+    test_algebraic()
+    test_rounded()
+    test_concrete()
 
-    (ax==ax,ax!=ax,ax<ax,ax<=ax,ax>ax,ax>=ax)
-#    (ax==n,ax!=n,ax<n,ax<=n,ax>n,ax>=n)
-#    (n==ax,n!=ax,n<ax,n<=ax,n>ax,n>=ax)
-#    (ax==d,ax!=d,ax<d,ax<=d,ax>d,ax>=d)
-#    (d==ax,d!=ax,d<ax,d<=ax,d>ax,d>=ax)

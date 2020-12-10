@@ -44,7 +44,7 @@
 namespace Ariadne {
 
 
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactIntervalType>& x) {
     ExactIntervalType const& ivl=x.reference(); return os << PythonRepresentation<FloatDPBounds>(FloatDPBounds(ivl.lower_bound(),ivl.upper_bound()));
 }

@@ -174,13 +174,16 @@ template<class X> Matrix<X> matrix_from_python(pybind11::list const& lst) {
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPApproximation>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPBounds>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDPValue>& repr);
-OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloatDP>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatDP>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<FloatMP>& repr);
 
-template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
-    return os <<repr.reference(); }
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Value<F>>& x);
+template<class F, class FE> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Ball<F,FE>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Bounds<F>>& x);
+template<class F> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Approximation<F>>& x);
+
+//template<class T> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<T>& repr) {
+//    return os <<repr.reference(); }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Vector<X>>& repr) {
     Vector<X> const& v=repr.reference();

@@ -4,6 +4,7 @@ set(UNIT_TESTS
     test_inclusion_evolver
     test_discrete_evolution
     test_reachability_analyser
+    test_task_parameter
 )
 
 foreach(TEST ${UNIT_TESTS})

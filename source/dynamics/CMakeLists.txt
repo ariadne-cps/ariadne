@@ -1,6 +1,7 @@
 set(LIBRARY_NAME ariadne-dynamics)
 
 add_library(${LIBRARY_NAME} OBJECT
+    task_parameter.cpp
     enclosure.cpp
     orbit.cpp
     inclusion_vector_field.cpp

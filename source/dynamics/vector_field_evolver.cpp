@@ -237,6 +237,7 @@ _evolution(EnclosureListType& final_sets,
                             <<" r="<<std::setw(7)<<current_set_model.radius()
                             <<" c="<<current_set_model.centre());
 
+
         initials_indicator.update_current(final_sets.size());
         time_indicator.update_current(current_time.get_d());
         if (initials_indicator.final_value() > 1) { ARIADNE_LOG_SCOPE_PRINTHOLD("[" << time_indicator.symbol() << "] " << initials_indicator.percentage() << "% of sets, " << time_indicator.percentage() << "% of current set"); }

@@ -33,7 +33,6 @@ template<> String class_name<Point<Real>>() { return "Point<Real>"; }
 template<> String class_name<Point<FloatDPApproximation>>() { return "Point<FloatDPApproximation>"; }
 template<> String class_name<Point<FloatDPBounds>>() { return "Point<FloatDPBounds>"; }
 template<> String class_name<Point<FloatDPValue>>() { return "Point<FloatDPValue>"; }
-#warning
 //template<> String class_name<Point<FloatMPApproximation>>() { return "Point<FloatMPApproximation>"; }
 //template<> String class_name<Point<FloatMPBounds>>() { return "Point<FloatMPBounds>"; }
 //template<> String class_name<Point<FloatMPValue>>() { return "Point<FloatMPValue>"; }

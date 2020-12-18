@@ -36,6 +36,9 @@ namespace Ariadne {
 This page describes the logical foundations of computable analysis.
 For details on how this is implemented in %Ariadne, see the \ref LogicalModule documentation.
 
+The foundations of computability theory underpinning this material is described on the \ref computable_analysis_page page.
+For information about computability theory for real numbers, see the \ref real_numbers_page page.
+
 In standard logic, a proposition may either be \a true or \a false.
 The result is represented by an element of the \e %Boolean type \f$\B\f$.
 For between with integer or rational numbers, this is sufficient; given \f$q_1,q_2\in\Q\f$,

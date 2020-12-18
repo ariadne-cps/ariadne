@@ -361,6 +361,7 @@ namespace Ariadne {
 /*!\defgroup GeometryModule Geometry Module
  * \ingroup CoreModules
  * \brief Geometric calculus module.
+ * \details <em>For the mathematical theory of computable geometry, see the \ref geometry_page Page.</em>
  *
  * In this module are the classes used to represent sets and approximations to
  * sets. Sets fall into two classes, <em>basic sets</em> which are typically

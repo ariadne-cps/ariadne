@@ -26,7 +26,7 @@
 
 namespace Ariadne {
 
-bool unique_elements(const std::vector<TaskParameter>& lst) {
+bool unique_elements(const Set<TaskParameter>& lst) {
     Set<TaskParameter> found;
     for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
         if(found.contains(*iter)) { return false; } else { found.insert(*iter); } }
@@ -40,7 +40,7 @@ constexpr typename std::underlying_type<E>::type to_underlying(E e) {
 
 Nat MetricTaskParameter::shifted_value_from(Nat value) const {
     if (value == 0) return 1;
-    if (is_upper_bounded() and value == upper_bound()) return value-1;
+    if (value == upper_bound()) return value-1;
     if (rand() % 2 == 0) return value-1;
     else return value+1;
 }
@@ -58,10 +58,10 @@ Bool TaskParameter::operator<(TaskParameter const& p) const {
 }
 
 OutputStream& TaskParameter::_write(OutputStream& os) const {
-    return os << "(" << name() << ", " << is_metric() << (is_upper_bounded() ? (", " + to_string(upper_bound()) + ")") : ")");
+    return os << "(" << name() << ", " << is_metric() << ", " + to_string(upper_bound()) + ")";
 }
 
-TaskParameterSpace::TaskParameterSpace(List<TaskParameter> const& parameters) : _parameters(parameters) {
+TaskParameterSpace::TaskParameterSpace(Set<TaskParameter> const& parameters) : _parameters(parameters) {
     ARIADNE_PRECONDITION(not _parameters.empty());
     ARIADNE_PRECONDITION(unique_elements(parameters));
 }
@@ -80,30 +80,91 @@ TaskParameterSpace TaskParameterPoint::space() const {
     return TaskParameterSpace(make_list(_bindings.keys()));
 }
 
-//! \brief Generate a new point by shifting a given \a amount
-//! \details The amount is the total number of shifts allowed across the parameters
-TaskParameterPoint TaskParameterPoint::shift(Nat amount) const {
-    List<Nat> breadths = _shift_breadths();
+Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) const {
+    Set<TaskParameterPoint> result;
+    TaskParameterPoint current_point = *this;
+    for (Nat num_points=1; num_points<=amount; ++num_points) {
+        List<Nat> breadths = current_point.shift_breadths();
+        Nat total_breadth = 0;
+        for (Nat b : breadths) total_breadth += b;
+        auto space = this->space();
+
+        while(true) {
+            Nat offset = (Nat)rand() % (total_breadth-1);
+            Nat current_breadth = 0;
+            ParameterBindingsMap shifted_bindings;
+            Bool shifted = false;
+            for (auto binding : current_point.bindings()) {
+                auto const& param = binding.first;
+                Nat value = binding.second;
+                current_breadth += breadths.at(space.index(param));
+                if (not shifted and current_breadth > offset) {
+                    value = param.shifted_value_from(binding.second);
+                    shifted = true;
+                }
+                shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
+            }
+            result.insert(TaskParameterPoint(shifted_bindings));
+
+            Nat new_choice = (Nat)rand() % result.size();
+            auto iter = result.begin();
+            for (Nat i=1; i<new_choice; ++i) ++iter;
+            current_point = *iter;
+
+            if (result.size() == num_points) break;
+        }
+    }
+    return result;
+}
+
+Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) const {
+    List<Nat> breadths = this->shift_breadths();
     Nat total_breadth = 0;
     for (Nat b : breadths) total_breadth += b;
+    ARIADNE_PRECONDITION(total_breadth >= amount);
+    Set<TaskParameterPoint> result;
+    auto space = this->space();
     Set<Nat> offsets;
-    do offsets.insert((Nat)rand() % total_breadth); while (offsets.size() < amount);
+    do offsets.insert((Nat)rand() % (total_breadth-1)); while (offsets.size() < amount);
 
-    ParameterBindingsMap shifted_bindings;
-    Nat current_breadth = 0;
-    auto breadth_iter = breadths.begin();
-    auto offset_iter = offsets.begin();
-    for (auto param_iter=_bindings.begin(); param_iter != _bindings.end(); ++param_iter) {
-        Nat val = param_iter->second;
-        if (offset_iter != offsets.end() and current_breadth >= *offset_iter) { // If this should be shifted
-            val = param_iter->first.shifted_value_from(param_iter->second); // Shift
-            ++offset_iter;
-        }
-        current_breadth += *breadth_iter;
-        ++breadth_iter;
-        shifted_bindings.insert(std::pair<TaskParameter,Nat>(param_iter->first, val));
+    Nat num_points = 1;
+    for (Nat offset : offsets) {
+        do {
+            Nat current_breadth = 0;
+            ParameterBindingsMap shifted_bindings;
+            Bool shifted = false;
+            for (auto binding : _bindings) {
+                auto const& param = binding.first;
+                Nat value = binding.second;
+                current_breadth += breadths.at(space.index(param));
+                if (not shifted and current_breadth > offset) {
+                    value = param.shifted_value_from(binding.second);
+                    shifted = true;
+                }
+                shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
+            }
+            result.insert(TaskParameterPoint(shifted_bindings));
+        } while (result.size() < num_points);
+        ++num_points;
     }
-    return TaskParameterPoint(shifted_bindings);
+    return result;
+}
+
+Nat TaskParameterPoint::hash_code() const {
+    Nat result=0;
+    Nat prod=1;
+    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
+        result += iter->second*prod;
+        prod *= iter->first.upper_bound()+1;
+    }
+    return result;
+}
+
+TaskParameterPoint& TaskParameterPoint::operator=(TaskParameterPoint const& p) {
+    this->_bindings.clear();
+    this->_bindings.adjoin(p._bindings);
+    this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
+    return *this;
 }
 
 Bool TaskParameterPoint::operator==(TaskParameterPoint const& p) const {
@@ -114,15 +175,40 @@ Bool TaskParameterPoint::operator==(TaskParameterPoint const& p) const {
     return true;
 }
 
+Bool TaskParameterPoint::operator<(TaskParameterPoint const& p) const {
+    // ASSUMPTION: they have the same space
+    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
+        Nat const this_value = iter->second;
+        Nat const other_value = p._bindings.at(iter->first);
+        if (this_value < other_value) return true;
+        else if (this_value > other_value) return false;
+    }
+    return false; // They are equal
+}
+
+Nat TaskParameterPoint::distance(TaskParameterPoint const& p) const {
+    // ASSUMPTION: they have the same space
+    Nat result = 0;
+    for (auto iter=_bindings.begin(); iter!=_bindings.end(); ++iter) {
+        Nat const v1 = iter->second;
+        Nat const v2 = p._bindings.at(iter->first);
+        if (iter->first.is_metric()) result += (v1 > v2 ? v1 - v2 : v2 - v1);
+        else result += (v1 == v2 ? 0 : 1);
+    }
+    return result;
+
+}
+
+
 OutputStream& TaskParameterPoint::_write(OutputStream& os) const {
     return os << _bindings.values();
 }
 
-List<Nat> TaskParameterPoint::_shift_breadths() const {
+List<Nat> TaskParameterPoint::shift_breadths() const {
     if (_CACHED_SHIFT_BREADTHS.empty()) {
         for (auto iter = _bindings.begin(); iter != _bindings.end(); ++iter) {
             if (not iter->first.is_metric()) _CACHED_SHIFT_BREADTHS.append(iter->first.upper_bound()); // size-1 choices
-            else if (iter->first.is_upper_bounded() and iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
+            else if (iter->second == iter->first.upper_bound()) _CACHED_SHIFT_BREADTHS.append(1); // can only move down
             else if (iter->second == 0) _CACHED_SHIFT_BREADTHS.append(1); // can only move up
             else _CACHED_SHIFT_BREADTHS.append(2);; // can move either up or down
         }

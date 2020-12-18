@@ -188,7 +188,7 @@ namespace Ariadne {
 
 using OutputStream = std::ostream;
 
-//@{
+//!@{
 //! \ingroup NumericModule
 //! \name Rounding mode control
 
@@ -284,7 +284,7 @@ const RoundToNearest near = to_nearest; //!< Round exact answer to a nearest rep
 const RoundUpward up = upward; //!< Round exact answer upward to a representable value. Synonymous with \ref upward. \ingroup NumericModule
 const RoundApproximately approx = approximately; //!< Round exact answer to some close representable value, which need not be the nearest. Synonymous with \ref approximately. \ingroup NumericModule
 
-//@}
+//!@}
 
 } // namespace Ariadne
 

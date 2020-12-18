@@ -58,14 +58,14 @@ class HybridReachabilityAnalyserInterface
     typedef HybridGridTreePaving SetApproximationType;
 
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
     /*! \brief Virtual destructor */
     virtual ~HybridReachabilityAnalyserInterface() = default;
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyserInterface* clone() const = 0;
-    //@}
+    //!@}
 
 };
 

@@ -40,7 +40,7 @@ namespace Ariadne {
 
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
-//! \sa UpperReal, FloatDP, FloatMP, FloatBounds, FloatUpperBound.
+//! \sa LowerReal, FloatDP, FloatMP, Bounds, UpperBound.
 template<class F> class LowerBound
     : public DefineDirectedGroupOperators<LowerBound<F>,UpperBound<F>>
     , public DefineDirectedGroupOperators<UpperBound<F>,LowerBound<F>>
@@ -52,14 +52,22 @@ template<class F> class LowerBound
   protected:
     typedef LowerTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
+    //! <p/>
     typedef LowerTag Paradigm;
+    //! <p/>
     typedef LowerBound<F> NumericType;
+    //! <p/>
     typedef ValidatedLowerNumber GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
+    //! A lower bound of zero with precision \a pr.
     explicit LowerBound<F>(PrecisionType pr) : _l(0.0_x,pr) { }
+    //! A lower bound with value \a l.
     explicit LowerBound<F>(RawType const& l) : _l(l) { }
 
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> LowerBound<F>(N n, PR pr) : LowerBound<F>(ExactDouble(n),pr) { }
@@ -71,26 +79,38 @@ template<class F> class LowerBound
         LowerBound<F>(const Rational& q, PR pr) : _l(q,down,pr) { }
         LowerBound<F>(const Real& r, PR pr);
     LowerBound<F>(const LowerBound<F>& x, PR pr);
+    //! A lower bound of type \p F from a generic lower bound \a y.
     LowerBound<F>(const ValidatedLowerNumber& y, PR pr);
     template<class FF, EnableIf<IsConstructible<F,FF,RND,PR>> =dummy>
         LowerBound<F>(const LowerBound<FF>& x, PR pr) : _l(x.raw(),down,pr) { }
 
+    //! Convert from lower \em and upper bounds on a number.
     LowerBound<F>(Bounds<F> const& x);
     template<class FE> LowerBound<F>(Ball<F,FE> const& x);
     LowerBound<F>(Value<F> const& x);
 
         LowerBound<F>& operator=(const Value<F>& x) { return *this=LowerBound<F>(x); }
+    //! Assign from the lower bound \a y, keeping the same properties.
     LowerBound<F>& operator=(const ValidatedLowerNumber& y) { return *this=LowerBound<F>(y,this->precision()); }
+    //! Create a lower bound from the generic lower bound \a y with the same properties as \a this.
     LowerBound<F> create(const ValidatedLowerNumber& y) const { return LowerBound<F>(y,this->precision()); }
+    //! Create a upper bound from the generic upper bound \a y with the same properties as \a this.
     UpperBound<F> create(const ValidatedUpperNumber& y) const { return UpperBound<F>(y,this->precision()); }
 
+    //! Downcast to a generic lower bound.
     operator ValidatedLowerNumber () const;
 
+    //! The precision of the floating-point type used.
     PrecisionType precision() const { return _l.precision(); }
+    //! The compuational properties needed to create the lower bound; equivalent to the precision.
     PropertiesType properties() const { return _l.precision(); }
+    //! Downcast to a generic lower bound.
     GenericType generic() const { return this->operator GenericType(); }
+    //! The raw data used to represent the lower bound.
     RawType const& raw() const { return _l; }
+    //! A mutable reference to the raw data used to represent the lower bound.
     RawType& raw() { return _l; }
+    //! Under-approximate by a builtin double-precision value. DEPRECATED \deprecated
     double get_d() const { return _l.get_d(); }
   public: // To be removed
     friend Bool is_nan(LowerBound<F> const& x) {

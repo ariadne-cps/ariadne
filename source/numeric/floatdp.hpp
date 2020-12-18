@@ -59,15 +59,15 @@ class DoublePrecision {
   public:
     //! \brief Default constructor
     constexpr DoublePrecision() { }
-    //! \brief .
+    //! \brief <p/>
     friend constexpr DoublePrecision max(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
-    //! \brief .
+    //! \brief <p/>
     friend constexpr DoublePrecision min(DoublePrecision, DoublePrecision) { return DoublePrecision(); }
-    //! \brief .
+    //! \brief <p/>
     friend constexpr Bool operator<=(DoublePrecision, DoublePrecision) { return true; }
     //! \brief Compare the two precisions for equality. Always \c true.
     friend constexpr Bool operator==(DoublePrecision, DoublePrecision) { return true; }
-    //! \brief .
+    //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, DoublePrecision) { return os << "DoublePrecision()"; }
 };
 using DP = DoublePrecision;

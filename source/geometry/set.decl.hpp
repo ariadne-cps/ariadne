@@ -40,13 +40,29 @@ using RealVector = Vector<Real>;
 template<class T> class SetBase;
 using EuclideanSetBase = SetBase<RealVector>;
 
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Bounded sets.
 template<class P, class T> class BoundedSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Open sets, defined by a verifyable membership predicate.
 template<class P, class T> class OpenSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Closed sets, defined by a falsifyable membership predicate.
 template<class P, class T> class ClosedSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Overt sets, defined by a verifyable intersection with open sets.
 template<class P, class T> class OvertSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Compact sets, defined by a verifyable disjointness with closed sets.
 template<class P, class T> class CompactSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Regular (open and closed) sets.
 template<class P, class T> class RegularSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Located (overt and compact) sets.
 template<class P, class T> class LocatedSet;
+//! \ingroup GeometryModule SetSubModule
+//! \brief %Regular located sets; equivalently bounded regular or open located.
 template<class P, class T> class RegularLocatedSet;
 
 template<class P> using EuclideanBoundedSet = BoundedSet<P,RealVector>;

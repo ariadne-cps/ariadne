@@ -81,6 +81,7 @@ struct DefineBuiltinFloatOperators {
 };
 */
 
+
 //template<class P1, class P2> struct DisableIfWeaker { typedef typename std::enable_if<not std::is_convertible<P2,P1>::value,Dummy>::type Type; };
 template<class P1, class P2> using DisableIfWeaker = DisableIf<IsWeaker<P1,P2>>;
 
@@ -139,8 +140,10 @@ template<class X> struct HasOperatorNumber<X,Void> {
     static const bool value = decltype(test<X>(1))::value;
 };
 
+
+
 //! \ingroup NumericModule
-//! \brief Generic numbers with computational paradigm \a P, which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
+//! \brief Generic numbers with computational paradigm \a P,  which may be %EffectiveTag, %ValidatedTag, %UpperTag, %LowerTag or %ApproximateTag.
 template<class P> class Number
     : public Handle<NumberInterface>
     , public DeclareNumberOperators
@@ -164,21 +167,20 @@ template<class P> class Number
     explicit Number(Handle<NumberInterface> h) : Handle<NumberInterface>(h) { }
     Handle<NumberInterface> handle() const { return *this; }
   public:
-
     Number() : Number(Integer(0)) { }
 
-    // Construct from a Number of a weaker paradigm
+    //! Construct from a Number of a weaker paradigm
     template<class SP, EnableIf<IsWeaker<P,SP>> = dummy> Number(const Number<SP>& y) : Number<P>(y.handle()) { }
 
     // Disable construction from a Number of a non-weaker paradigm
    // template<class SP, DisableIfWeaker<P,SP> =dummy> Number(const Number<PP>& y) = delete;
 
-    // Construct from a builtin integer
+    //! Construct from a builtin integer
     template<class N, EnableIf<IsBuiltinIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
-    // Construct from a builtin floating-point number
+    //! Construct from a builtin floating-point number
     template<class X, EnableIf<And<IsSame<P,ApproximateTag>,IsBuiltinFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Dyadic(x)) { }
 
-    // Construct from a type which is convertible to Real.
+    //! Construct from a type which is convertible to Real.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy,
                                EnableIf<IsConvertible<X,Real>> =dummy>
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
@@ -220,59 +222,63 @@ template<class P> class Number
     //! \brief Get the value of the number as a multiple-precision floating-point type
     FloatType<P,MultiplePrecision> get(MultiplePrecision const& prec) const { return pointer()->_get(WP(),prec); }
 
+    //! \brief Try to dynamic_cast the object to concrete type \a X.
     template<class X> X extract() const;
 
-    friend Number<P> operator+(Number<P> const& y) { return pos(y); }
-    friend Number<NP> operator-(Number<P> const& y) { return neg(y); }
-    friend Number<P> operator+(Number<P> const& y1, Number<P> const& y2) { return add(y1,y2); }
-    friend Number<P> operator-(Number<P> const& y1, Number<NP> const& y2) { return sub(y1,y2); }
-    friend Number<P> operator*(Number<P> const& y1, Number<P> const& y2) { return mul(y1,y2); }
-    friend Number<P> operator/(Number<P> const& y1, Number<NP> const& y2) { return div(y1,y2); }
-    friend Number<P>& operator+=(Number<P>& y1, Number<P> const& y2) { return y1=y1+y2; }
-    friend Number<P>& operator-=(Number<P>& y1, Number<NP> const& y2) { return y1=y1-y2; }
-    friend Number<P>& operator*=(Number<P>& y1, Number<P> const& y2) { return y1=y1*y2; }
-    friend Number<P>& operator/=(Number<P>& y1, Number<NP> const& y2) { return y1=y1/y2; }
+    //! <p/>
+    friend Number<P> operator+(Number<P> const& y) { return pos(y); } //! <p/>
+    friend Number<NP> operator-(Number<P> const& y) { return neg(y); } //! <p/>
+    friend Number<P> operator+(Number<P> const& y1, Number<P> const& y2) { return add(y1,y2); } //! <p/>
+    friend Number<P> operator-(Number<P> const& y1, Number<NP> const& y2) { return sub(y1,y2); } //! <p/>
+    friend Number<P> operator*(Number<P> const& y1, Number<P> const& y2) { return mul(y1,y2); } //! <p/>
+    friend Number<P> operator/(Number<P> const& y1, Number<NP> const& y2) { return div(y1,y2); } //! <p/>
+    friend Number<P>& operator+=(Number<P>& y1, Number<P> const& y2) { return y1=y1+y2; } //! <p/>
+    friend Number<P>& operator-=(Number<P>& y1, Number<NP> const& y2) { return y1=y1-y2; } //! <p/>
+    friend Number<P>& operator*=(Number<P>& y1, Number<P> const& y2) { return y1=y1*y2; } //! <p/>
+    friend Number<P>& operator/=(Number<P>& y1, Number<NP> const& y2) { return y1=y1/y2; } //! <p/>
 
-    friend Number<P> nul(Number<P> const& y) { return _apply<P>(Nul(),y); }
-    friend Number<P> pos(Number<P> const& y) { return _apply<P>(Pos(),y); }
-    friend Number<NP> neg(Number<P> const& y) { return _apply<NP>(Neg(),y); }
-    friend Number<P> sqr(Number<P> const& y) { return _apply<P>(Sqr(),y); }
-    friend Number<P> hlf(Number<P> const& y) { return _apply<P>(Hlf(),y); }
-    friend Number<NP> rec(Number<P> const& y) { return _apply<NP>(Rec(),y); }
-    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Add(),y1,y2); }
-    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Sub(),y1,y2); }
-    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Mul(),y1,y2); }
-    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Div(),y1,y2); }
-    friend Number<P> sqrt(Number<P> const& y) { return _apply<P>(Sqrt(),y); }
-    friend Number<P> exp(Number<P> const& y) { return _apply<P>(Exp(),y); }
-    friend Number<P> log(Number<P> const& y) { return _apply<P>(Log(),y); }
-    friend Number<SP> sin(Number<P> const& y) { return _apply<SP>(Sin(),y); }
-    friend Number<SP> cos(Number<P> const& y) { return _apply<SP>(Cos(),y); }
-    friend Number<P> tan(Number<P> const& y) { return _apply<P>(Tan(),y); }
-    friend Number<SP> asin(Number<P> const& y) { return _apply<SP>(Asin(),y); }
-    friend Number<SP> acos(Number<P> const& y) { return _apply<SP>(Acos(),y); }
-    friend Number<P> atan(Number<P> const& y) { return _apply<P>(Atan(),y); }
+    friend Number<P> nul(Number<P> const& y) { return _apply<P>(Nul(),y); } //! <p/>
+    friend Number<P> pos(Number<P> const& y) { return _apply<P>(Pos(),y); } //! <p/>
+    friend Number<NP> neg(Number<P> const& y) { return _apply<NP>(Neg(),y); } //! <p/>
+    friend Number<P> sqr(Number<P> const& y) { return _apply<P>(Sqr(),y); } //! <p/>
+    friend Number<P> hlf(Number<P> const& y) { return _apply<P>(Hlf(),y); } //! <p/>
+    friend Number<NP> rec(Number<P> const& y) { return _apply<NP>(Rec(),y); } //! <p/>
+    friend Number<P> add(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Add(),y1,y2); } //! <p/>
+    friend Number<P> sub(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Sub(),y1,y2); } //! <p/>
+    friend Number<P> mul(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Mul(),y1,y2); } //! <p/>
+    friend Number<P> div(Number<P> const& y1, Number<NP> const& y2) { return _apply<P>(Div(),y1,y2); } //! <p/>
+    friend Number<P> sqrt(Number<P> const& y) { return _apply<P>(Sqrt(),y); } //! <p/>
+    friend Number<P> exp(Number<P> const& y) { return _apply<P>(Exp(),y); } //! <p/>
+    friend Number<P> log(Number<P> const& y) { return _apply<P>(Log(),y); } //! <p/>
+    friend Number<SP> sin(Number<P> const& y) { return _apply<SP>(Sin(),y); } //! <p/>
+    friend Number<SP> cos(Number<P> const& y) { return _apply<SP>(Cos(),y); } //! <p/>
+    friend Number<P> tan(Number<P> const& y) { return _apply<P>(Tan(),y); } //! <p/>
+    friend Number<SP> asin(Number<P> const& y) { return _apply<SP>(Asin(),y); } //! <p/>
+    friend Number<SP> acos(Number<P> const& y) { return _apply<SP>(Acos(),y); } //! <p/>
+    friend Number<P> atan(Number<P> const& y) { return _apply<P>(Atan(),y); } //! <p/>
 
-    friend Number<P> pow(Number<P> const& y, Nat m) { return _apply<P>(Pow(),y,m); }
-    friend Number<SP> pow(Number<P> const& y, Int n) { return _apply<P>(Pow(),y,n); }
+    friend Number<P> pow(Number<P> const& y, Nat m) { return _apply<P>(Pow(),y,m); } //! <p/>
+    friend Number<SP> pow(Number<P> const& y, Int n) { return _apply<P>(Pow(),y,n); } //! <p/>
 
-    friend Positive<Number<SP>> abs(Number<P> const& y) { return Positive<Number<SP>>(_apply<P>(Abs(),y)); }
-    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Max(),y1,y2); }
-    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Min(),y1,y2); }
+    friend Positive<Number<SP>> abs(Number<P> const& y) { return Positive<Number<SP>>(_apply<P>(Abs(),y)); } //! <p/>
+    friend Number<P> max(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Max(),y1,y2); } //! <p/>
+    friend Number<P> min(Number<P> const& y1, Number<P> const& y2) { return _apply<P>(Min(),y1,y2); } //! <p/>
 
 
     friend LogicalType<Equality<P>> operator==(Number<P> const& y1, Number<NP> const& y2) {
-        return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); }
+        return LogicalType<Equality<P>>(y1.ref()._equals(y2.ref())); } //! <p/>
     friend LogicalType<LessThan<P>> operator< (Number<P> const& y1, Number<Negated<P>> const& y2) {
-        return LogicalType<LessThan<P>>(y1.ref()._less(y2.ref())); }
-    friend LogicalType<LessThan<Negated<P>>> operator> (Number<P> const& y1, Number<Negated<P>> const& y2) { return (y2<y1); }
-    friend LogicalType<Negated<Equality<P>>> operator!=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1==y2); }
-    friend LogicalType<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); }
+        return LogicalType<LessThan<P>>(y1.ref()._less(y2.ref())); } //! <p/>
+    friend LogicalType<LessThan<Negated<P>>> operator> (Number<P> const& y1, Number<Negated<P>> const& y2) { return (y2<y1); } //! <p/>
+    friend LogicalType<Negated<Equality<P>>> operator!=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1==y2); } //! <p/>
+    friend LogicalType<LessThan<P>> operator<=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1>y2); } //! <p/>
     friend LogicalType<LessThan<Negated<P>>> operator>=(Number<P> const& y1, Number<Negated<P>> const& y2) { return !(y1<y2); }
 
+    //! \brief The name of the dynamic type held by the %Number object.
     String class_name() const { return this->ref()._class_name(); }
 
-    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }
+    //! \brief Write to an output stream.
+    friend OutputStream& operator<<(OutputStream& os, Number<P> const& y) { return y.ref()._write(os); }\
   private:
     template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y) { return Number<RP>(y.ref()._apply(op)); }
     template<class RP, class OP> static Number<RP> _apply(OP op, Number<P> const& y, Int n) { return Number<RP>(y.ref()._apply(op,n)); }
@@ -281,14 +287,16 @@ template<class P> class Number
 };
 
 
-
 template<class P> Positive<Number<P>> cast_positive(Number<P> y);
 
 class PositiveNumberOperations {
     friend Positive<ValidatedUpperNumber> mag(Positive<ValidatedUpperNumber> const& y);
 };
 
-template<class P> class Positive<Number<P>> : public Number<P>, public PositiveNumberOperations {
+template<class P> class Positive<Number<P>>
+    : public Number<P>
+    , public PositiveNumberOperations
+{
     friend Number<P> const& unsign(Positive<Number<P>> const& y) { return y; }
   public:
     Positive<Number<P>>() : Number<P>() { }
@@ -304,7 +312,6 @@ template<class P> class Positive<Number<P>> : public Number<P>, public PositiveN
     friend Positive<Number<P>> mul(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(mul(unsign(y1),unsign(y2))); }
     friend Positive<Number<P>> max(Positive<Number<P>> const& y1, Positive<Number<P>> const& y2) { return cast_positive(max(unsign(y1),unsign(y2))); }
     friend Positive<Number<P>> abs(Positive<Number<P>> const& y) { return y; }
-
 };
 template<class P> Positive<Number<P>> cast_positive(Number<P> y) { return Positive<Number<P>>(y); }
 template<class P> Positive<ExactNumber> cast_exact(Positive<Number<P>> const& y) { return cast_positive(cast_exact(unsign(y))); }

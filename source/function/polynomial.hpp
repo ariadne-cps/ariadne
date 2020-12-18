@@ -136,7 +136,7 @@ class Polynomial
     typedef ReverseLexicographicIndexLess ComparisonType;
     typedef ReverseLexicographicLess IndexComparisonType;
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief The zero polynomial in \a as variables, with zero taking properties from \a z.
@@ -153,7 +153,7 @@ class Polynomial
     //! \brief Construct a differential of degree \a deg from an initializer list of (index,coefficient) pairs.
     template<class... PRS, EnableIf<IsConstructible<X,ExactDouble,PRS...>> =dummy>
         explicit Polynomial(InitializerList<Pair<IndexInitializerType,ExactDouble>> lst, PRS... prs);
-    //@}
+    //!@}
 
     //! \brief Create the null polynomial in the same number of variables.
     Polynomial<I,X> create_zero() const;
@@ -168,18 +168,18 @@ class Polynomial
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static coordinates(ArgumentSizeType as, PRS... prs) { return coordinates(as,X(0u,prs...)); }
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy> Argument<Polynomial<I,X>> static variables(ArgumentSizeType as, PRS... prs) { return variables(as,X(0u,prs...)); }
 
-    //! \brief Set equal to a constant.
+    //! \brief %Set equal to a constant.
     Polynomial<I,X>& operator=(const X& x);
-    //@{
+    //!@{
     //! \name Comparisons
 
     //! \brief Equality operator.
     template<class XX> EqualityType<X,XX> operator==(const Polynomial<I,XX>& p) const;
     //! \brief Inequality operator.
     template<class XX> InequalityType<X,XX> operator!=(const Polynomial<I,XX>& p) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
 
     //! \brief The number of variables in the argument of the polynomial.
@@ -200,9 +200,9 @@ class Polynomial
     Expansion<I,X>& expansion();
     //! \brief A zero value usable as a coefficient.
     X const& zero_coefficient() const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Iterators
 
     //! \brief An Iterator to the beginning of the list of terms.
@@ -217,10 +217,10 @@ class Polynomial
     ConstIterator end() const;
     //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
     ConstIterator find(const I& a) const;
-    //@}
+    //!@}
 
 
-    //@{
+    //!@{
     //! \name Modifying operations
 
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
@@ -229,20 +229,20 @@ class Polynomial
     Void reserve(SizeType n);
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
     Void erase(Iterator iter);
-    //! \brief Set the polynomial to zero.
+    //! \brief %Set the polynomial to zero.
     Void clear();
     //! \brief Remove all zero terms from the expansion, and order the expansion reverse lexicographically by term.
     Void cleanup();
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Evaluation
 
     //! Evaluate on a vector of algebra elements.
     template<class A> A operator() (Vector<A> const&) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Modifying operators
 
     //! \brief Truncate to degree \a d.
@@ -251,9 +251,9 @@ class Polynomial
     Polynomial<I,X>& differentiate(VariableIndexType j);
     //! \brief Antidifferentiate (integrate) with respect to the \a j<sup>th</sup> variable.
     Polynomial<I,X>& antidifferentiate(VariableIndexType j);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Related operations
     friend Polynomial<I,X>& operator*=(Polynomial<I,X>& p, const Monomial<I,X>& m) { return Polynomial<I,X>::_imul(p,m); }
 
@@ -264,7 +264,7 @@ class Polynomial
     template<class XX> friend Polynomial<I,XX> derivative(Polynomial<I,XX> dx, VariableIndexType k);
     template<class XX> friend Polynomial<I,XX> antiderivative(Polynomial<I,XX> dx, VariableIndexType k);
     template<class XX> friend Polynomial<I,XX> truncate(Polynomial<I,XX> dx, DegreeType deg);
-    //@}
+    //!@}
 
     Void check() const;
     static Polynomial<I,X> _constant(ArgumentSizeType as, const X& c);

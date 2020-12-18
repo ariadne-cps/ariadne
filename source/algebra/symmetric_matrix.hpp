@@ -63,7 +63,7 @@ template<class X> class SymmetricMatrix
     typedef X ValueType;
   public:
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! Destructor
@@ -79,7 +79,7 @@ template<class X> class SymmetricMatrix
     //! Construct a matrix using initializer lists.
     SymmetricMatrix(InitializerList<InitializerList<X>> lst);
 
-    //@{
+    //!@{
     //! \name Static constructors
 
     //! \brief The zero matrix with \a n rows and \a n columns.
@@ -88,7 +88,7 @@ template<class X> class SymmetricMatrix
     //! \brief The itentity matrix with \a n rows and \a n columns.
     template<class... PRS, EnableIf<IsConstructible<X,Nat,PRS...>> =dummy>
     static SymmetricMatrix<X> identity(SizeType n, PRS... prs);
-    //@}
+    //!@}
 
     //! Explicit conversion of a normal matrix to a symmetric matrix.
     SymmetricMatrix(const Matrix<X>& A);

@@ -132,10 +132,10 @@ class InteriorPointSolver
 //! \brief The type of variable; lower is_bounded, upper is_bounded, basic, or fixed (upper and lower bounded).
 //! \see SimplexSolver
 enum class Slackness : std::int8_t {
-    LOWER=-1, //!< .
-    BASIS=0,  //!< .
-    UPPER=+1, //!< .
-    FIXED=+2  //!< .
+    LOWER=-1, //!< <p/>
+    BASIS=0,  //!< <p/>
+    UPPER=+1, //!< <p/>
+    FIXED=+2  //!< <p/>
 };
 
 OutputStream& operator<<(OutputStream& os, Slackness t);
@@ -281,10 +281,10 @@ class SimplexSolver
 
 };
 
-//@{
+//!@{
 //! \relates SimplexSolver \name Type synonyms
 using RationalSimplexSolver = SimplexSolver<Rational>; //!< \relates SimplexSolver .
-//@}
+//!@}
 
 } // namespace Ariadne
 

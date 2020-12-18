@@ -70,15 +70,15 @@ class MultiplePrecision {
     //! \brief The number of binary digits of precision requested.
     unsigned_mpfr_prec_t bits() const { return static_cast<unsigned_mpfr_prec_t>(prec); }
     operator mpfr_prec_t () const { return prec; }
-    //! \brief .
+    //! \brief <p/>
     friend MultiplePrecision max(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::max(mp1.bits(),mp2.bits()))); }
-    //! \brief .
+    //! \brief <p/>
     friend MultiplePrecision min(MultiplePrecision mp1, MultiplePrecision mp2) { return MultiplePrecision(static_cast<mpfr_prec_t>(std::min(mp1.bits(),mp2.bits()))); }
-    //! \brief .
+    //! \brief <p/>
     friend Bool operator==(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()==mp2.bits(); }
-    //! \brief .
+    //! \brief <p/>
     friend Bool operator<=(MultiplePrecision mp1, MultiplePrecision mp2) { return mp1.bits()<=mp2.bits(); }
-    //! \brief .
+    //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os, MultiplePrecision mp) { return os << "MultiplePrecision("<<mp.bits()<<")"; }
 };
 using MP = MultiplePrecision;

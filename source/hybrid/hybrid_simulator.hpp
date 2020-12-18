@@ -56,7 +56,7 @@ class HybridSimulator
     HybridSimulator();
     Void set_step_size(double h);
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<HybridApproximatePointType> orbit(const HybridAutomatonInterface& system, const HybridApproximatePointType& initial_point, const TerminationType& termination) const;

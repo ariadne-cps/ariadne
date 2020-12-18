@@ -128,27 +128,26 @@ template<class F> class VectorScaledFunctionPatchMixin<ValidatedIntervalTaylorMo
 
 
 
-/*! \ingroup FunctionModelSubModule
- *  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
- *
- * Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
- * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
- * Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
- * about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
- * However, integrals of \f$f\f$ can be computed.
- *
- * Internally, the polynomial \f$p\f$ is represented as the composition \f$p=m\circ s^{-1}\f$,
- * where \f$m:[-1,+1]^n\rightarrow\R\f$ and \f$s:[-1,+1]^n\rightarrow D\f$ is a scaling function,
- * \f$s_i(y_i)=(a_i+b_i)/2+(b_i-a_i)y_i/2\f$ where \f$D_i=[a_i,b_i]\f$ is the \f$i^\textrm{th}\f$ subinterval of \f$D\f$.
- *
- * When solving algebraic equations by iterative Newton-like methods, it is necessary to compute the derivatives of \f$f\f$.
- * For these applications, it suffices to compute the derivative of \f$p\f$, since only a uniform approximation to the solution is required.
- *
- * Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
- * for but there are a number of techniques available.
- *
- * \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
- */
+//! \ingroup FunctionModelSubModule
+//!  \brief A a type of function model in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a polynomial \f$p\f$ on \f$\I^n\f$ with uniform error \f$e\f$.
+//!
+//! \details Formally, a ValidatedScalarMultivariateTaylorFunctionModelDP is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
+//! \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
+//! Note that there is no need for the functions \f$f\f$ to be themselves polynomial, and that no information is given
+//! about the values of \f$f\f$ outside of \f$D\f$. Information about the derivatives of \f$f\f$ is also unavailable.
+//! However, integrals of \f$f\f$ can be computed.
+//!
+//! Internally, the polynomial \f$p\f$ is represented as the composition \f$p=m\circ s^{-1}\f$,
+//! where \f$m:[-1,+1]^n\rightarrow\R\f$ and \f$s:[-1,+1]^n\rightarrow D\f$ is a scaling function,
+//! \f$s_i(y_i)=(a_i+b_i)/2+(b_i-a_i)y_i/2\f$ where \f$D_i=[a_i,b_i]\f$ is the \f$i^\textrm{th}\f$ subinterval of \f$D\f$.
+//!
+//! When solving algebraic equations by iterative Newton-like methods, it is necessary to compute the derivatives of \f$f\f$.
+//! For these applications, it suffices to compute the derivative of \f$p\f$, since only a uniform approximation to the solution is required.
+//!
+//! Finding exact bounds for the range of \f$p\f$ over \f$D\f$ is an NP-complete problem,
+//! for but there are a number of techniques available.
+//!
+//! \sa Expansion, TaylorModel, ValidatedVectorMultivariateTaylorFunctionModelDP, TaylorConstrainedImageSet.
 template<class M> class ScaledFunctionPatch
     : public ScaledFunctionPatchMixin<M>
     , public DispatchElementaryAlgebraOperations<ScaledFunctionPatch<M>, NumericType<M>>
@@ -193,7 +192,7 @@ template<class M> class ScaledFunctionPatch
     ModelType _model;
   public:
 
-    //@{
+    //!@{
     //! \name Constructors and destructors.
     virtual ~ScaledFunctionPatch() = default;
 
@@ -214,17 +213,17 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief Construct a ScaledFunctionPatch over the domain \a d from the function \a f.
     explicit ScaledFunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, PropertiesType prp);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Assignment to constant values.
     //! \brief Set equal to a constant, keeping the same number of arguments.
     ScaledFunctionPatch<M>& operator=(const NumericType& c) { this->_model=c; return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
     ScaledFunctionPatch<M>& operator=(const GenericNumericType c) { this->_model=c; return *this; }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Named constructors.
     //! \brief Construct a zero function over domain \a d.
     static ScaledFunctionPatch<M> zero(const DomainType& d, PropertiesType prp);
@@ -253,9 +252,9 @@ template<class M> class ScaledFunctionPatch
     static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, PropertiesType prp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
     static Vector<ScaledFunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, PropertiesType prp);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Prototype constructors.
     friend ScaledFunctionPatchCreator<M> factory(ScaledFunctionPatch<M>const& f) {
         return ScaledFunctionPatchCreator<M>(f.domain(),f.properties()); }
@@ -263,9 +262,9 @@ template<class M> class ScaledFunctionPatch
     ScaledFunctionPatch<M> create_zero() const;
     //! \brief Construct a zero function over the same domain with the same computational properties.
     ScaledFunctionPatch<M> create_constant(NumericType const& c) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Data access
     //! \brief The domain of the quantity.
     const DomainType domain() const { return this->_domain; }
@@ -319,16 +318,16 @@ template<class M> class ScaledFunctionPatch
     DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
     SizeType number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Comparison operators.
     Bool operator==(const ScaledFunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
     Bool operator!=(const ScaledFunctionPatch<M>& tv) const { return !(*this==tv); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Function operations.
     //! \brief An over-approximation to the range of the function.
     RangeType const range() const { return this->_model.range(); }
@@ -340,9 +339,9 @@ template<class M> class ScaledFunctionPatch
 
     //! \brief Compute an approximation to gradient derivative of the function at the point \a x.
 //    Covector<NumericType> gradient(const Vector<NumericType>& x) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Simplification operations.
    //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
@@ -350,21 +349,21 @@ template<class M> class ScaledFunctionPatch
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
     ScaledFunctionPatch<M>& simplify(const PropertiesType& prp) { this->_model.simplify(prp); return *this; }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Accuracy parameters.
     //! \copydoc TaylorModel::set_properties()
     Void set_properties(const PropertiesType& prp) { this->_model.set_properties(prp); }
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Non-arithmetic operations.
     //! \brief Restrict to a subdomain.
     Void restrict(const DomainType& d);
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Stream input/output operators.
     //! \brief Write to an output stream.
     OutputStream& _write(OutputStream& os) const;
@@ -373,7 +372,7 @@ template<class M> class ScaledFunctionPatch
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const ScaledFunctionPatch<M>& x) {
         return x._write(os); }
-    //@}
+    //!@}
 
   public:
     Void clobber() { this->_model.clobber(); }
@@ -536,11 +535,10 @@ template<class M> ScaledFunctionPatch<M> midpoint(const ScaledFunctionPatch<M>& 
 
 
 
-/*! \ingroup FunctionModelSubModule
- *  \brief A multivariate vector function model built by scaling a base model of type \param M defined over the unit interval \f$[-1:+1]\f$.
- *
- *  See also TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP.
- */
+//! \ingroup FunctionModelSubModule
+//!  \brief A a type of function model in which a the restriction of a vector function \f$f:\R^n\rightarrow\R^m\f$ on a domain \f$D\f$ is approximated by the composition of a scaling function \f$s^{-1}:D\fto\I^n=[-1\!:\!+1]^n\f$ with a vector polynomial \f$p\f$ on \f$\I^n\f$ with uniform errors \f$e\f$.
+//!
+//! \see TaylorModel, ScaledFunctionPatch<M>, ValidatedVectorMultivariateTaylorFunctionModelDP
 template<class M> class VectorScaledFunctionPatch
     : public VectorScaledFunctionPatchMixin<M>
 {

@@ -43,9 +43,6 @@
 
 namespace Ariadne {
 
-//! \defgroup GeometryModule Geometry Module
-//!  \brief Classes describing sets in Euclidean space.
-
 enum class SplitPart : char;
 
 enum class SplitPart : char { LOWER, MIDDLE, UPPER };

@@ -54,6 +54,9 @@ template<class T> class Set;
 template<class T> struct DeclareExpressionOperations;
 template<class X> struct ExpressionNode;
 
+template<class T> class PrefixExpressionWriter;
+template<class T> class InfixExpressionWriter;
+
 //! \ingroup SymbolicModule
 //! \brief A simple expression in named variables.
 //! %Ariadne supports expressions of type Boolean, Kleenean, String, Integer and Real.
@@ -64,6 +67,8 @@ template<class X> struct ExpressionNode;
 //! are all variables occuring in all expression.
 //! Expressions may be manipulated symbolically.
 //!
+//! \par \b Example
+//! \snippet tutorials/symbolic_usage.cpp Expression_usage
 //! \see Constant,  Variable,  Assignment
 template<class T>
 class Expression
@@ -117,7 +122,12 @@ class Expression
     const Expression<T>& arg2() const;
     template<class A> const Expression<A>& cmp1(A* dummy=0) const;
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
+    //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
+    //! \brief A writer for Expression objects using prefix notation.
+    friend class PrefixExpressionWriter<T>;
+    //! \brief A write for Expression objects using infix notation.
+    friend class InfixExpressionWriter<T>;
   public:
     template<class X, EnableIf<And<IsSame<T,Real>,IsSame<X,Real>>> =dummy> operator ElementaryAlgebra<X>() const;
   public:
@@ -133,19 +143,7 @@ class Expression
     SharedPointer<const ExpressionNode<T>> _root;
 };
 
-//@{
-//! \related Expression \name Type synonyms.
-using BooleanExpression = Expression<Boolean>; //!< .
-using KleeneanExpression = Expression<Kleenean>; //!< .
-using StringExpression = Expression<String>; //!< .
-using IntegerExpression = Expression<Integer>; //!< .
-using RealExpression = Expression<Real>; //!< .
-
-using DiscretePredicate = Expression<Boolean>; //!< \brief A decidable predicate over discrete variables.
-using ContinuousPredicate = Expression<Kleenean>; //!< \brief A quasidecidable predicate over continuous variables.
-//@}
-
-//@{
+//!@{
 //! \name Evaluation and related operations.
 //! \related Expression
 
@@ -170,9 +168,9 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 template<class T, class Y> Vector<Expression<T>> substitute(const Vector<Expression<T>>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Operations on expressions.
 //! \related Expression
 
@@ -181,10 +179,10 @@ Expression<Real> indicator(Expression<Kleenean> p, Sign sign=Sign::POSITIVE);
 
 //! \brief The derivative of the expression \a e with respect to the variable \a v.
 Expression<Real> derivative(const Expression<Real>& e, Variable<Real> v);
-//@}
+//!@}
 
 
-//@{
+//!@{
 //! \name Testing the form of expressions.
 //! \related Expression
 
@@ -211,9 +209,9 @@ Bool is_additive_in(const Expression<Real>& e, const Variable<Real>& v);
 //! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
 //! or (a1>=a2; a2>=a1).
 Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
-//@}
+//!@}
 
-//@{
+//!@{
 //! \name Equality and ordering.
 //! \related Expression
 
@@ -221,10 +219,10 @@ Bool opposite(Expression<Kleenean> p, Expression<Kleenean> q);
 template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
 //! \brief Check the ordering of two expressions \a e1 and \a e2, by identifying whether \a e1 precedes \a e2.
 template<class T> Bool before(Expression<T> const& e1, Expression<T> const& e2);
-//@}
+//!@}
 
-//@{
-//! \name Complexity checks and simplification and .
+//!@{
+//! \name Complexity checks and simplification.
 //! \related Expression
 
 //! \brief Count the number of nodes in the expression \a e.
@@ -234,17 +232,17 @@ template<class T> SizeType count_distinct_nodes(const Expression<T>& e);
 //! \brief Count the number of distinct node pointers in the expression \a e.
 template<class T> SizeType count_distinct_node_pointers(const Expression<T>& e);
 
-//! \brief Simplify the expression \a e.
+//! \brief Simplify the expression \a e, such as by eliminating double negations \f$-(-e) \mapsto e\f$.
 template<class T> Expression<T> simplify(const Expression<T>& e);
 //! \brief Eliminate common subexpression in \a e by replacing identical nodes.
 template<class T> Void eliminate_common_subexpressions(Expression<T>& e);
 template<class T> Void eliminate_common_subexpressions(Vector<Expression<T>>& e);
-//@}
+//!@}
 
 
 
 
-//@{
+//!@{
 //! \name Conversion to/from functions and formulae.
 //! \related Expression
 
@@ -274,25 +272,17 @@ ScalarMultivariateFunction<EffectiveTag> make_function(const Expression<Real>& e
 Expression<Real> make_expression(const ScalarMultivariateFunction<EffectiveTag>& f, const Space<Real>& s);
 
 Expression<Real> make_expression(const Formula<Real>& f, const Space<Real>& s);
-//@}
+//!@}
 
-//@{
-//! \name Output.
-//! \related Expression
 
 //! \brief Prefix notation for writing an Expression
 template<class T> class PrefixExpressionWriter : public WriterInterface<Expression<T>> {
     virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
-
 //! \brief Infix notation for writing an Expression
 template<class T> class InfixExpressionWriter : public WriterInterface<Expression<T>> {
     virtual OutputStream& _write(OutputStream& os, Expression<T> const& e) const final override;
 };
-
-//@}
-
-//@}
 
 
 } // namespace Ariadne

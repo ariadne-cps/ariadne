@@ -179,7 +179,7 @@ class GridTreeSubpaving
     //! \brief A short name for the constant Iterator
     typedef GridTreeConstIterator ConstIterator;
 
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief The new root node can only be constructed from the existing tree node.
@@ -197,13 +197,13 @@ class GridTreeSubpaving
     //! \brief Make a dynamically-allocated copy as a GridTreeSet. Required for DrawableInterface.
     GridTreeSubpaving* clone() const;
 
-    //@}
+    //!@}
 
     //! Virtual destructor. The destructor needs to be virtual since GridTreeSet is a subclass
     //! with different memory management.
     virtual ~GridTreeSubpaving();
 
-    //@{
+    //!@{
     //! \name Properties
 
     //! \brief True if the set is empty.
@@ -243,17 +243,17 @@ class GridTreeSubpaving
     //! the two GridTreeSubset represent equal sets.
     Bool operator==(const GridTreeSubpaving& anotherGridTreeSubset) const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Modifying operations
 
     //! \brief Sets the ROOT NODE of this \a GridTreeSubset to either enabled (true) or disabled (false).
     Void set_root_cell(Bool enabled_or_disabled);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Subdivisions
 
     //! \brief Subdivides the tree in such a way that it's total depth becomes ( extent + numSubdivInDim ) * D
@@ -282,9 +282,9 @@ class GridTreeSubpaving
     //! enabled/disabled then they are put together.
     Void recombine();
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Predicates
 
     //! \brief Tests if a cell is a subset of a set.
@@ -346,9 +346,9 @@ class GridTreeSubpaving
     //! \brief Tests if a grid set overlaps (intersects the interior of) a box.
     ValidatedLowerKleenean overlaps( const ExactBoxType& theBoxType ) const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Iterators
 
     //! \brief A constant Iterator through the enabled leaf nodes of the subpaving.
@@ -357,9 +357,9 @@ class GridTreeSubpaving
     //! \brief A constant Iterator to the end of the enabled leaf nodes of the subpaving.
     ConstIterator end() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Conversions
 
     //! \brief An assignment operator that only copies the pointer to the root of the binary tree and the cell
@@ -368,9 +368,9 @@ class GridTreeSubpaving
     //! \brief Convert to a list of ordinary boxes, unrelated to the grid.
     operator ListSet<ExactBoxType>() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/Output
 
     //! \brief Draw on a two-dimensional canvas.
@@ -380,7 +380,7 @@ class GridTreeSubpaving
     OutputStream& _write(OutputStream& os) const;
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreeSubpaving& theGridTreeSubset);
-    //@}
+    //!@}
 
   private:
     virtual GridTreeSubpaving* _branch(Bool left_or_right) const;
@@ -497,7 +497,7 @@ class GridTreePaving
     Void up_to_primary_cell( const Nat toPCellExtent );
 
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Create a %GridTreeSet based on zero dimensions.
@@ -544,9 +544,9 @@ class GridTreePaving
     //! extent of the primary cell which is assumed to correspond to the root node of \a theTree.
     explicit GridTreePaving( const Grid& theGrid, Nat theExtent, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Cloning/Copying/Assignment
 
     //! \brief The copy assignment operator, which copies all the data
@@ -557,7 +557,7 @@ class GridTreePaving
     //! In this case, all the data is copied.
     GridTreePaving* clone() const;
 
-    //@}
+    //!@}
 
     //! \brief Destructor, removes all the dynamically allocated data, any
     //! GridTreeSubset referencing this %GridTreeSet becomes invalid.
@@ -565,7 +565,7 @@ class GridTreePaving
 
 
 
-    //@{
+    //!@{
     //! \name Geometric Operations
 
     // PIETER: You may prefer to make inplace operations may return
@@ -604,9 +604,9 @@ class GridTreePaving
     //! smallest primary cell on the Grid, such that it contains \a theBoxType (after it's
     //! mapping on \a theGrid )
     GridCell smallest_enclosing_primary_cell(const UpperBoxType& theBoxType) const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Operations
 
     //! \brief Join (make union of) two grid paving sets.
@@ -629,9 +629,9 @@ class GridTreePaving
     friend GridTreePaving outer_skew_product(GridTreePaving const& theSet1, Grid const& theGrid2,
                                              ValidatedVectorMultivariateFunction const& theFunction);
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Geometric Approximation
 
     //! \brief Adjoin an over approximation to box, computing to the given resolution:
@@ -692,13 +692,13 @@ class GridTreePaving
     Void adjoin_inner_approximation( const EffectiveEuclideanSetInterface& theSet, const Nat numSubdivInDim );
 
     Void adjoin_inner_approximation( const LowerBoxType& theBoxType, const Nat numSubdivInDim );
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Input/output routines.
 
     friend OutputStream& operator<<(OutputStream& os, const GridTreePaving& theGridTreeSet);
-    //@}
+    //!@}
 
 };
 
@@ -787,7 +787,7 @@ class GridTreeCursor {
     //! \brief Returns true if the current node is the right child of the parent node
     Bool is_right_child() const;
 
-    //@{
+    //!@{
     //! \name Leaf Operations
 
     //! \brief Markes the leaf node as enabled, otherwise they through \a NotALeafNodeEsception
@@ -796,7 +796,7 @@ class GridTreeCursor {
     //! \brief Markes the leaf node as disabled, otherwise they through \a NotALeafNodeEsception
     Void set_disabled() const;
 
-    //@}
+    //!@}
 
     //! \brief Move to the parent node. Throws an NotAllowedMoveException if the current node is the root.
     //! Returns a reference to itself.
@@ -845,7 +845,7 @@ class GridTreeConstIterator
 
     friend class IteratorCoreAccess;
 
-    //@{
+    //!@{
     //! \name Iterator Specific
 
     virtual Void increment();
@@ -858,9 +858,9 @@ class GridTreeConstIterator
 
     virtual GridCell const& dereference() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Local
 
     //! \brief Allows to navigate to the first (\a firstLast==true ),
@@ -873,10 +873,10 @@ class GridTreeConstIterator
     //! The search is performed from left to right. (Is used for forward iteration)
     Void find_next_enabled_leaf();
 
-    //@}
+    //!@}
 
   public:
-    //@{
+    //!@{
     //! \name Constructors
 
     //! \brief Default constructor constructs an invalid Iterator.
@@ -894,7 +894,7 @@ class GridTreeConstIterator
     //! underlying GridTreeCursor. The latter is copied by it's copy constructor.
     GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) = default;
 
-    //@}
+    //!@}
 
     //! \brief An assignment operator that copies the current state by copying the
     //! underlying GridTreeCursor. The latter is copied by it's assignment operator.
@@ -905,13 +905,13 @@ class GridTreeConstIterator
     //! latter one does not deallocate the enclosed sub paving.
     ~GridTreeConstIterator() = default;
 
-    //@{
+    //!@{
     //! \name Get the cursor of the Iterator
 
     // This cursor is only needed to get access to enable/disable node functionality
     GridTreeCursor const& cursor() const;
 
-    //@}
+    //!@}
   private:
     // Return a dynamically-allocated copy.
     virtual GridTreeConstIterator* clone() const;

@@ -127,28 +127,31 @@ template<> struct IsGenericNumericType<Dbl> : True { };
 template<class P> struct IsGenericNumericType<Number<P>> : True { };
 template<class Y> struct IsGenericNumericType<Positive<Y>> : IsGenericNumericType<Y> { };
 
-//@{
-//! \name Type synonyms for generic numbers
-using ExactNumber=Number<ExactTag>; //!< Alias for generic exact numbers. //!< \ingroup NumericModule
-using EffectiveNumber=Number<EffectiveTag>; //!< Alias for generic effective numbers. //!< \ingroup NumericModule
-using EffectiveUpperNumber=Number<EffectiveUpperTag>; //!< Alias for generic effective upper numbers. //!< \ingroup NumericModule
-using EffectiveLowerNumber=Number<EffectiveLowerTag>; //!< Alias for generic effective lower numbers. //!< \ingroup NumericModule
-using ValidatedNumber=Number<ValidatedTag>; //!< Alias for generic validated numbers. //!< \ingroup NumericModule
-using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic validated upper numbers. //!< \ingroup NumericModule
-using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers. //!< \ingroup NumericModule
-using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers. //!< \ingroup NumericModule
 
-template<class P> using PositiveNumber = Positive<Number<P>>; //!< Alias for positive numbers. //!< \ingroup NumericModule
-using PositiveExactNumber=PositiveNumber<ExactTag>; //!< Alias for generic positive validated upper numbers. //!< \ingroup NumericModule
-using PositiveEffectiveNumber=PositiveNumber<EffectiveTag>; //!< Alias for generic positive effective numbers. //!< \ingroup NumericModule
-using PositiveEffectiveUpperNumber=PositiveNumber<EffectiveUpperTag>; //!< Alias for generic positive effective upper numbers. //!< \ingroup NumericModule
-using PositiveEffectiveLowerNumber=PositiveNumber<EffectiveLowerTag>; //!< Alias for generic positive effective lower numbers. //!< \ingroup NumericModule
-using PositiveValidatedNumber=PositiveNumber<ValidatedTag>; //!< Alias for generic positive validated numbers. //!< \ingroup NumericModule
-using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< Alias for generic positive validated upper numbers. //!< \ingroup NumericModule
-using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< Alias for generic positive validated lower numbers. //!< \ingroup NumericModule
-using PositiveApproximateNumber=PositiveNumber<ApproximateTag>; //!< Alias for generic positive approximate numbers. //!< \ingroup NumericModule
+//! \relates Number
+//! \name Type synonyms
+//!@{
+using ExactNumber=Number<ExactTag>; //!< Alias for generic exact numbers.
+using EffectiveNumber=Number<EffectiveTag>; //!< Alias for generic effective numbers.
+using EffectiveUpperNumber=Number<EffectiveUpperTag>; //!< Alias for generic effective upper numbers.
+using EffectiveLowerNumber=Number<EffectiveLowerTag>; //!< Alias for generic effective lower numbers.
+using ValidatedNumber=Number<ValidatedTag>; //!< Alias for generic validated numbers.
+using ValidatedUpperNumber=Number<ValidatedUpperTag>; //!< Alias for generic validated upper numbers.
+using ValidatedLowerNumber=Number<ValidatedLowerTag>; //!< Alias for generic validated lower numbers.
+using ApproximateNumber=Number<ApproximateTag>; //!< Alias for generic approximate numbers.
 
-using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< \ingroup NumericModule
+template<class P> using PositiveNumber = Positive<Number<P>>; //!< Alias for positive numbers.
+using PositiveExactNumber=PositiveNumber<ExactTag>; //!< <p/>
+using PositiveEffectiveNumber=PositiveNumber<EffectiveTag>; //!< <p/>
+using PositiveEffectiveUpperNumber=PositiveNumber<EffectiveUpperTag>; //!< <p/>
+using PositiveEffectiveLowerNumber=PositiveNumber<EffectiveLowerTag>; //!< <p/>
+using PositiveValidatedNumber=PositiveNumber<ValidatedTag>; //!< <p/>
+using PositiveValidatedUpperNumber=PositiveNumber<ValidatedUpperTag>; //!< <p/>
+using PositiveValidatedLowerNumber=PositiveNumber<ValidatedLowerTag>; //!< <p/>
+using PositiveApproximateNumber=PositiveNumber<ApproximateTag>; //!< <p/>
+
+using ValidatedErrorNumber = PositiveValidatedUpperNumber; //!< Alias for validated error bounds.
+//@!}
 
 template<class P> using UpperNumber=Number<typename ParadigmTraits<P>::Upper>;
 template<class P> using LowerNumber=Number<typename ParadigmTraits<P>::Lower>;
@@ -158,9 +161,6 @@ using EffectivePositiveUpperNumber = Positive<UpperNumber<EffectiveTag>>;
 using EffectivePositiveLowerNumber = Positive<LowerNumber<EffectiveTag>>;
 using ValidatedPositiveUpperNumber = Positive<UpperNumber<ValidatedTag>>;
 using ValidatedPositiveLowerNumber = Positive<LowerNumber<ValidatedTag>>;
-
-//@}
-
 
 } // namespace Ariadne
 

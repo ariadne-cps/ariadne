@@ -120,20 +120,6 @@ constexpr ParadigmCode null(ParadigmCode p) {
 
 
 
-//! \defgroup ParadigmSubModule Computational paradigms
-//!   \ingroup LogicalModule
-//! \brief Tag classes describing the information provided by a type.
-//! \details In order to indicate the kind of guarantees on the approximation provided by a concrete object,
-//!   every type in %Ariadne has an associated Paradigm tag.
-//!
-//! %Ariadne also needs to handle built-in C++ types, notably \c Bool, \c Int and \c double (floating-point) classes.
-//! Since C++ internally allows unsafe and inexact conversions e.g
-//!     \code Int n=1.5; // n is set to 1! \endcode
-//! and
-//!     \code double x=1.3; // x not exactly equal to 1.3! \endcode
-//! the BuiltinTag tag is used to describe these objects.
-//! %BuiltinTag objects should be immediately converted to %Ariadne objects in user code.
-
 template<ParadigmCode CODE> struct InformationLevel { static constexpr ParadigmCode code() { return CODE; } };
 
 //! \ingroup ParadigmSubModule
@@ -244,7 +230,7 @@ template<class P1, class P2> struct IsStronger : IsWeaker<P2,P1> { };
 
 template<class P1, class P2=P1> struct ParadigmTraits;
 
-//@{
+//!@{
 //! \ingroup ParadigmSubModule
 //! \name Information traits
 //! \nosubgrouping
@@ -291,7 +277,7 @@ template<class P> using NextWeaker = typename ParadigmTraits<P>::NextWeaker;
 //! \brief Synonym for NextWeaker.
 //! \ingroup ParadigmSubModule
 template<class P> using Weaken = typename ParadigmTraits<P>::NextWeaker;
-//@}
+//!@}
 
 
 template<class P1, class P2> struct ParadigmTraits {

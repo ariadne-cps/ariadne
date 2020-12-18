@@ -121,7 +121,7 @@ class Integer
     Integer(Integer&&);
     Integer& operator=(const Integer&);
     Integer& operator=(Integer&&);
-    operator Number<ExactTag> () const;
+    operator ExactNumber () const;
 
     friend Rational operator/(Integer const& z1, Integer const& z2);
     friend Integer& operator++(Integer& z);

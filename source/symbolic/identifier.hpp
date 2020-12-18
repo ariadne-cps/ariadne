@@ -34,9 +34,9 @@
 namespace Ariadne {
 
 //! \ingroup SymbolicModule
-//! \brief A class representing the name of a variable.
+//! \brief A class representing the name of a constant or variable.
 //! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
-//! \sa Variable
+//! \sa Constant, Variable, String
 class Identifier : public std::string
 {
   public:

@@ -46,9 +46,9 @@ struct DefaultTag;
 //! \ingroup NumericModule
 //! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that direct construction from a floating-point number is prohibited, since <c>%FloatDPBounds(3.3)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%FloatDPBounds(3.3_decimal)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that direct construction from a floating-point number is prohibited, since <c>%FloatDPBounds(3.3,dp)</c> would the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%FloatDPBounds(3.3_decimal,dp)</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
-//! Comparison tests on \c FloatBounds use the idea that an interval represents a single number with an unknown value.
+//! Comparison tests on \c Bounds use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c ValidatedKleenean, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[\underline{x},\overline{x}]\leq [\underline{y},\overline{y}]\f$ returns \c True if \f$\overline{x}\leq \underline{y}\f$, since in this case \f$x\leq x\f$ whenever \f$x_1\in[\underline{x},\overline{x}]\f$ and \f$y\in[\underline{y},\overline{y}]\f$, \c False if \f$\underline{x}>\overline{y}\f$, since in this case we know \f$x>y\f$, and \c Indeterminate otherwise, since in this case we can find \f$x,y\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[\underline{x},\overline{x}]\f$==\f$[\underline{y},\overline{y}]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
@@ -58,8 +58,8 @@ struct DefaultTag;
 //! To obtain a best estimate of the value, use \c x.value(), which has an error at most \a x.error().
 //! If \f$v\f$ and \f$e\f$ are the returned value and error for the bounds \f$[l,u]\f$, then it is guaranteed that \f$v-e\leq l\f$ and \f$v+e\geq u\f$ in exact arithmetic.
 //!
-//! To test if the bounds contain a number , use \c models(FloatBounds,FloatValue), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
-//! \sa Real, FloatDP, FloatMP, FloatValue, FloatBall, FloatUpperBound, FloatLowerBound, FloatApproximation.
+//! To test if the bounds contain a number , use \c models(Bounds<F>,Value<F>), and to test if bounds are inconsistent use \c inconsistent(x,y), and to test if \c x provides a better approximation, use \c refines(x,y).
+//! \sa Real, FloatDP, FloatMP, Value, Ball, UpperBound, LowerBound, Approximation.
 //!
 //! \par Python interface
 //!
@@ -82,19 +82,30 @@ template<class F> class Bounds
   protected:
     typedef ValidatedTag P; typedef typename F::RoundingModeType RND; typedef typename F::PrecisionType PR;
   public:
+    //! <p/>
     typedef P Paradigm;
+    //! <p/>
     typedef Bounds<F> NumericType;
+    //! <p/>
     typedef Number<P> GenericType;
+    //! <p/>
     typedef F RawType;
+    //! <p/>
     typedef PR PrecisionType;
+    //! <p/>
     typedef PR PropertiesType;
   public:
+    //! Construct bounds of zero with precision \a pr.
     explicit Bounds<F>(PrecisionType pr) : _l(0.0_x,pr), _u(0.0_x,pr) { }
+    //! Construct bounds with value \a v.
     explicit Bounds<F>(RawType const& v) : _l(v), _u(v) { }
+    //! Construct a lower bound of value \a l and an upper bound of value \a u.
     explicit Bounds<F>(RawType const& l, RawType const& u) : _l(l), _u(u) { }
+    //! Construct from a lower bound \a lower and an upper bound \a upper.
     Bounds<F>(LowerBound<F> const& lower, UpperBound<F> const& upper);
     Bounds<F>(LowerBound<F> const& lower, ValidatedUpperNumber const& upper);
     Bounds<F>(ValidatedLowerNumber const& lower, UpperBound<F> const& upper);
+    //! Construct from a lower bound \a lower and an upper bound \a upper, using precsion \a pr.
     Bounds<F>(ValidatedLowerNumber const& lower, ValidatedUpperNumber const& upper, PR pr);
     template<class N1, class N2, EnableIf<And<IsBuiltinIntegral<N1>,IsBuiltinIntegral<N2>>> = dummy> Bounds<F>(N1 n1, N2 n2, PR pr) : _l(n1,pr), _u(n2,pr) { }
     Bounds<F>(ExactDouble const& dl, ExactDouble const& du, PrecisionType pr) : _l(dl,pr), _u(du,pr) { }
@@ -113,23 +124,32 @@ template<class F> class Bounds
         Bounds<F>(const Decimal& d, PR pr) : _l(d,down,pr), _u(d,up,pr) { }
         Bounds<F>(const Rational& q, PR pr) : _l(q,down,pr), _u(q,up,pr) { }
         Bounds<F>(const Real& x, PR pr);
+    //! Construct from generic validated bounds \a y, using precsion \a pr.
     Bounds<F>(const ValidatedNumber& y, PR pr);
 
 
+    //! Convert from a ball.
     template<class FE> Bounds<F>(Ball<F,FE> const& x);
     Bounds<F>(Value<F> const& x);
 
         Bounds<F>& operator=(const Value<F>& x) { return *this=Bounds<F>(x); }
+    //! Assign from generic validated bounds \a y, keeping the same precision.
     Bounds<F>& operator=(const ValidatedNumber& y) { return *this=Bounds<F>(y,this->precision()); }
     template<class N, EnableIf<IsBuiltinIntegral<N>> = dummy> Bounds<F>& operator=(N n) { return *this=ValidatedNumber(n); }
 
+    //! Downcast to generic validated bounds.
     operator ValidatedNumber () const;
 
+    //! Create bounds from the generic validated number \a y with the same precision as \a this.
     Bounds<F> create(const ValidatedNumber& y) const { return Bounds<F>(y,this->precision()); }
 
+    //! The lower bound.
     LowerBound<F> const lower() const;
+    //! The upper bound.
     UpperBound<F> const upper() const;
+    //! An approximation to the actual value.
     Value<F> const value() const;
+    //! Bounds on the approximation given by value().
     Error<F> const error() const;
 
     friend Value<F> value(Bounds<F> const& x) { return x.value(); }
@@ -139,12 +159,17 @@ template<class F> class Bounds
     RawType const& upper_raw() const { return _u; }
     RawType const value_raw() const { return hlf(add(near,_l,_u)); }
     RawType const error_raw() const { RawType v=value_raw(); return max(sub(up,_u,v),sub(up,v,_l)); }
+    //! Approximate by a builtin double-precision value. DEPRECATED
     double get_d() const { return value_raw().get_d(); }
 
+    //! The precision of the floating-point type used.
     PrecisionType precision() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    //! The compuational properties needed to create the bounds; equivalent to the precision.
     PropertiesType properties() const { ARIADNE_DEBUG_ASSERT(_l.precision()==_u.precision()); return _u.precision(); }
+    //! Downcast to generic validated bounds.
     GenericType generic() const { return this->operator GenericType(); }
 
+    //! Add \a e to upper bound, and subtract \a e from lower bound.
     Bounds<F> pm(Error<F> const& e) const;
 
     // DEPRECATED
@@ -254,16 +279,22 @@ template<class F> class Bounds
     friend auto is_positive(Bounds<F> const& x) -> LogicalType<ValidatedTag> {
         if(x.lower_raw()>=0.0) { return true; } else if(x.upper_raw()<0.0) { return false; } else { return indeterminate; } }
 
+    //! <p/>
     friend Bool same(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l==x2._l && x1._u==x2._u; }
+    //! <p/>
     friend Bool models(Bounds<F> const& x1, Value<F> const& x2) {
         return x1._l<=x2._v && x1._u >= x2._v; }
+    //! <p/>
     friend Bool consistent(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l<=x2._u && x1._u >= x2._l; }
+    //! <p/>
     friend Bool inconsistent(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l>x2._u || x1._u < x2._l; }
+    //! <p/>
     friend Bool refines(Bounds<F> const& x1, Bounds<F> const& x2) {
         return x1._l>=x2._l && x1._u <= x2._u; }
+    //! <p/>
     friend Bounds<F> refinement(Bounds<F> const& x1, Bounds<F> const& x2) {
         return Bounds<F>(max(x1._l,x2._l),min(x1._u,x2._u)); }
 
@@ -273,10 +304,13 @@ template<class F> class Bounds
         friend Bool models(Bounds<F> const& x, Dyadic const& w) { return x._l<=w && w<=x._u; }
         friend Bounds<F> round(Bounds<F> const&);
 
+    //! <p/>
     friend OutputStream& operator<<(OutputStream& os, Bounds<F> const& x) { return Operations<Bounds<F>>::_write(os,x); }
+    //! <p/>
     friend InputStream& operator>>(InputStream& is, Bounds<F>& x) { return Operations<Bounds<F>>::_read(is,x); }
   public:
     static Nat output_places;
+    //! %Set the number of output places used to display the number. DEPRECATED
     static Void set_output_places(Nat p) { output_places=p; }
   private: public:
     RawType _l, _u;

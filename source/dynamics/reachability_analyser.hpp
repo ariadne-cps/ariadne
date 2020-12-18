@@ -102,7 +102,7 @@ template<class SYS> class ReachabilityAnalyser
     SharedPointer<EvolverType> _evolver;
     SharedPointer<ConfigurationType> _configuration;
   public:
-    //@{
+    //!@{
     //! \name Constructors and destructors
 
     //! \brief Virtual destructor
@@ -113,9 +113,9 @@ template<class SYS> class ReachabilityAnalyser
 
     //! \brief Make a dynamically-allocated copy.
     virtual ReachabilityAnalyser* clone() const;
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Methods to set and get the configuration properties of the class.
 
     //! \brief A reference to the analyser's configuration parameters.
@@ -124,11 +124,11 @@ template<class SYS> class ReachabilityAnalyser
 
     //! \brief Get the system associated with the analyser.
     virtual const SystemType& system() const override { return *this->_system; }
-    //@}
+    //!@}
 
 
 
-    //@{
+    //!@{
     //! \name Evaluation of systems on abstract sets
     //! \brief Compute a lower-approximation to the set obtained by evolving the system starting in \a initial_set until \a time.
     virtual StorageType
@@ -172,7 +172,7 @@ template<class SYS> class ReachabilityAnalyser
     virtual SafetyCertificateType
     verify_safety(const CompactSetInterfaceType& initial_set, const OpenSetInterfaceType& safe_set) const override;
 
-    //@}
+    //!@}
 
   protected:
     // Helper functions for operators on lists of sets.

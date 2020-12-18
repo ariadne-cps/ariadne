@@ -109,6 +109,8 @@ template<class F, class P, class SIG> struct IsMultifunction {
     static const bool value = decltype(test<F>(1))::value;
 };
 
+//! \ingroup Function
+//! \brief Functions \f$\X\mvto\Y\f$ returning a \ref LocatedSet at each point.
 template<class P, class SIG> class Multifunction
     : public Handle<MultifunctionInterface<P,SIG>>
 {
@@ -121,9 +123,13 @@ template<class P, class SIG> class Multifunction
     template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
 
     using Handle<Interface>::Handle;
+    //! \brief <p/>
     template<class MF, EnableIf<IsMultifunction<MF,P,SIG>> =dummy> explicit Multifunction(MF const& mf);
+    //! \brief <p/>
     LocatedSet<P,RES> operator() (Argument<Number<P>> const& x) const { return this->reference()._call(x); }
+    //! \brief <p/>
     friend LocatedSet<P,RES> apply (Multifunction<P,SIG> const& f, LocatedSet<P,ARG> const& x);
+    //! \brief <p/>
     friend OutputStream& operator<<(OutputStream& os,Multifunction<P,SIG> const& mf) { return mf.reference()._write(os); }
 };
 

@@ -138,7 +138,7 @@ class InclusionEvolver {
   public:
     InclusionEvolver(SystemType const& system, SweeperDP const& sweeper, IntegratorInterface const& integrator, ReconditionerHandle const& reconditioner);
 
-    //@{
+    //!@{
     //! \name Configuration for the class.
     //! \brief A reference to the configuration controlling the evolution.
     ConfigurationType& configuration() { return *this->_configuration; }

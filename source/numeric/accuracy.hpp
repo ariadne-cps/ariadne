@@ -31,6 +31,7 @@
 
 #include <iosfwd>
 #include "dyadic.hpp"
+#include "bits.hpp"
 
 namespace Ariadne {
 
@@ -43,11 +44,17 @@ class Bits;
 class Accuracy {
     Dyadic _error;
   public:
+    //! <p/>
     Accuracy(Bits precision);
+    //! <p/>
     Accuracy(Dyadic error) : _error(error) { }
+    //! <p/>
     Dyadic const& error() const { return this->_error; }
+    //! <p/>
     friend OutputStream& operator<<(OutputStream& os, Accuracy const& acc);
 };
+//! \relates Accuracy \brief <p/>
+inline Accuracy accuracy(Bits acc) { return Accuracy(acc); }
 
 } // namespace Ariadne
 

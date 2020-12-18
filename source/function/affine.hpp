@@ -130,7 +130,8 @@ template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumeri
 decltype(auto) operator*(Y const& y, Affine<X> const& x) { return factory(x).create(y)*y; }
 */
 
-//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
+//! \ingroup FunctionModule
+//! \brief An affine function \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<class X>
 class Affine
     : public ProvideAlgebraOperations<Affine<X>,X>

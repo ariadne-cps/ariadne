@@ -106,6 +106,7 @@ template<class Y> struct AlgebraOperations<Formula<Y>,Y> {
         return Formula<Y>::graded(op,f,n); }
 };
 
+//! \ingroup FunctionModule
 //! \brief A formula defining a real function.
 //!
 //! The Formula class is implemented as a directed acyclic graph, with

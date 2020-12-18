@@ -49,13 +49,20 @@ template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const type
 template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const Constant<X>& c) { return Pair<Variable<X>,X>(v,c.value()); }
 
 template<class T, class X> class Valuation;
+
+typedef Space<Real> RealSpace;
+//! \relates Valuation \brief A Valuation taking integer values.
 typedef Valuation<Integer> IntegerValuation;
+//! \relates Valuation \brief A Valuation taking string values.
 typedef Valuation<String> StringValuation;
+//! \relates Valuation \brief A Valuation taking real values.
 typedef Valuation<Real> RealValuation;
 
 //! \ingroup SymbolicModule
 //! \brief A valuation of named variables of mathematical type \a T, with values represented by values of concrete type \a X,
 //!   where X defaults to \a T.
+//! \par \b Example
+//! \snippet tutorials/symbolic_usage.cpp Valuation_usage
 //! \see DiscreteValuation, ContinuousValuation, HybridValuation, DiscreteLocation
 template<class T, class X>
 class Valuation
@@ -71,12 +78,15 @@ class Valuation
     Valuation() { }
     //! \brief Construct from a mapping from \em names of variables to values.
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
-    Valuation(const Map<Variable<Type>,ValueType>& m) { for(auto val : m) { this->_values.insert(val.first.name(),val.second); } }
+    Valuation(const Map<Variable<Type>,ValueType>& m) {
+        for(auto val : m) { this->_values.insert(val.first.name(),val.second); } }
+    Valuation(Array<X> ary, Space<T> const& spc){
+        for(SizeType i=0; i!=ary.size(); ++i) { this->insert(spc[i],ary[i]); } }
     Valuation(const Assignment<Variable<T>,X>& a);
     Valuation(const List<Assignment<Variable<T>,X> >& la);
     Valuation(const InitializerList<Pair<Variable<T>,X> >& lst);
     Void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
-    //! \brief Set the value associated with variable \a v to \a s.
+    //! \brief %Set the value associated with variable \a v to \a s.
     Void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
     //! \brief Get the value associated with variable \a v.
     const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
@@ -90,6 +100,8 @@ class Valuation
     Set<Identifier> defined() const { return _values.keys(); }
     ConstIterator begin() const { return _values.begin(); }
     ConstIterator end() const { return _values.end(); }
+    Vector<ValueType> operator[](const Space<Type>& spc) {
+        return Vector<ValueType>(spc.dimension(),[&](SizeType i){return _values[spc[i]];}); }
   public:
     Map<Identifier,ValueType> _values;
 };

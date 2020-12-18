@@ -25,6 +25,7 @@
 
 using namespace Ariadne;
 
+//! [get_tank]
 HybridAutomaton get_tank()
 {
     // Declare the system constants
@@ -48,7 +49,9 @@ HybridAutomaton get_tank()
 
     return automaton;
 }
+//! [get_tank]
 
+//! [get_valve]
 HybridAutomaton get_valve()
 {
     // Declare some constants. Note that system parameters should be given as variables.
@@ -93,7 +96,9 @@ HybridAutomaton get_valve()
 
     return automaton;
 }
+//! [get_valve]
 
+//! [get_controller]
 HybridAutomaton get_controller()
 {
     // Declare some constants
@@ -137,7 +142,17 @@ HybridAutomaton get_controller()
 
     return automaton;
 }
+//! [get_controller]
 
+//! [get_system]
+CompositeHybridAutomaton get_system() {
+    CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
+    return watertank_system;
+}
+//! [get_system]
+
+
+//! [simulate_evolution]
 Void simulate_evolution(const CompositeHybridAutomaton& system)
 {
     ARIADNE_LOG_SCOPE_CREATE;
@@ -171,7 +186,9 @@ Void simulate_evolution(const CompositeHybridAutomaton& system)
     plot("simulation_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("simulation_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
 }
+//! [simulate_evolution]
 
+//! [create_evolver]
 GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
 {
     // Create a GeneralHybridEvolver object
@@ -185,7 +202,9 @@ GeneralHybridEvolver create_evolver(const CompositeHybridAutomaton& system)
 
     return evolver;
 }
+//! End of [create_evolver]
 
+//! [compute_evolution]
 Void compute_evolution(const GeneralHybridEvolver& evolver) {
     ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
@@ -214,7 +233,9 @@ Void compute_evolution(const GeneralHybridEvolver& evolver) {
     plot("finite_evolution_t-aperture",Axes2d(0<=TimeVariable()<=30,-0.1<=aperture<=1.1),orbit);
     plot("finite_evolution_height-aperture",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),orbit);
 }
+//! [compute_evolution]
 
+//! [create_analyser]
 HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 {
     // Create a ReachabilityAnalyser object
@@ -228,7 +249,9 @@ HybridReachabilityAnalyser create_analyser(const GeneralHybridEvolver& evolver)
 
     return analyser;
 }
+//! [create_analyser]
 
+//! [compute_reachability]
 Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     ARIADNE_LOG_SCOPE_CREATE;
     // Re-introduce the shared system variables required for the initial set
@@ -251,14 +274,16 @@ Void compute_reachability(const HybridReachabilityAnalyser& analyser) {
     ARIADNE_LOG_PRINTLN("Plotting trajectory...");
     plot("outer_chain_reach",Axes2d(5<=height<=9,-0.1<=aperture<=1.1),outer_chain_reach);
 }
+//! [compute_reachability]
 
+//! [main]
 Int main(Int argc, const char* argv[])
 {
     // Acquire the verbosity value from the command line
     Logger::configuration().set_verbosity(get_verbosity(argc,argv));
 
     // Create the composed automaton
-    CompositeHybridAutomaton watertank_system("watertank",{get_tank(),get_valve(),get_controller()});
+    CompositeHybridAutomaton watertank_system=get_system();
 
     // Choose a compact output representation for systems
     CompositeHybridAutomaton::set_default_writer(CompactCompositeHybridAutomatonWriter());
@@ -281,3 +306,4 @@ Int main(Int argc, const char* argv[])
     // Compute the system reachability
     compute_reachability(analyser);
 }
+//! [main]

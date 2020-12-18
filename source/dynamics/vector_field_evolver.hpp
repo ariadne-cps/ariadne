@@ -95,7 +95,7 @@ class VectorFieldEvolver
     //! \brief Make an enclosure from a computed box set.
     EnclosureType enclosure(ExactBoxType const&) const;
 
-    //@{
+    //!@{
     //! \name Configuration for the class.
     //! \brief A reference to the configuration controlling the evolution.
     ConfigurationType& configuration() { return *this->_configuration; }
@@ -104,9 +104,9 @@ class VectorFieldEvolver
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
 
-    //@}
+    //!@}
 
-    //@{
+    //!@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=Semantics::UPPER) const;
@@ -125,7 +125,7 @@ class VectorFieldEvolver
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,time,Semantics::UPPER,true);
         return reachable; }
-    //@}
+    //!@}
 
   protected:
     virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,

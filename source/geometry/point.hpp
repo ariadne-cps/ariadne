@@ -38,12 +38,12 @@ namespace Ariadne {
 
 template<class X> class Point;
 
-//@{
+//!@{
 //! \relates Point
 //! \name Type synonyms
-using DyadicPoint = Point<Dyadic>; //!< .
-using RationalPoint = Point<Rational>; //!< .
-using RealPoint = Point<Real>; //!< .
+using DyadicPoint = Point<Dyadic>; //!< <p/>
+using RationalPoint = Point<Rational>; //!< <p/>
+using RealPoint = Point<Real>; //!< <p/>
 
 template<class F> using ExactPoint = Point<Value<F>>;
 template<class F> using ValidatedPoint = Point<Bounds<F>>;
@@ -54,7 +54,7 @@ using FloatDPBoundsPoint = Point<FloatDPBounds>;
 using FloatDPApproximationPoint = Point<FloatDPApproximation>;
 
 typedef ExactPoint<FloatDP> ExactPointType;
-//@}
+//!@}
 
 //! A point in Euclidean space.
 template<class X>

@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file set_wrappers.hpp
+/*! \file set_wrapper.hpp
  *  \brief Wrappers for concrete sets
  */
 

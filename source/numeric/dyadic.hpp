@@ -107,7 +107,7 @@ class Dyadic
     //! by comparing the input with it's single-precision approximation.
     explicit Dyadic(double x);
     //! \brief Convert to a generic number.
-    operator Number<ExactTag> () const;
+    operator ExactNumber () const;
     //! \brief A representation of ±∞ or NaN.
     static Dyadic inf(Sign sgn);
     //! \brief A representation of +∞.
@@ -124,25 +124,28 @@ class Dyadic
     mpf_t const& get_mpf() const;
     //! \brief Convert a floating-point literal to Dyadic i.e. long binary format.
     friend Dyadic operator"" _bin(long double x);
+    //! \brief Convert a floating-point literal to Dyadic.
+    friend Dyadic operator"" _dyadic(long double x);
     //! \brief Halve the number.
     friend Dyadic hlf(Dyadic const&);
-    //| \brief Power of a number (m always positive).
+    //| \brief Power of a number (m always positive). DEPRECATED
     friend Dyadic pow(Dyadic const& x, Int m);
+    //| \brief Power of a number (m always positive).
     friend Dyadic pow(Dyadic const& x, Nat m);
 
-    friend Rational rec(Rational const&);
-    friend Rational div(Rational const&, Rational const&);
-    friend Rational operator/(Rational const&, Rational const&);
+    friend Rational rec(Rational const&); //!< <p/>
+    friend Rational div(Rational const&, Rational const&); //!< <p/>
+    friend Rational operator/(Rational const&, Rational const&); //!< <p/>
 
-    friend Real sqrt(Real const&);
-    friend Real exp(Real const&);
-    friend Real log(Real const&);
-    friend Real sin(Real const&);
-    friend Real cos(Real const&);
-    friend Real tan(Real const&);
-    friend Real asin(Real const&);
-    friend Real acos(Real const&);
-    friend Real atan(Real const&);
+    friend Real sqrt(Real const&); //!< <p/>
+    friend Real exp(Real const&); //!< <p/>
+    friend Real log(Real const&); //!< <p/>
+    friend Real sin(Real const&); //!< <p/>
+    friend Real cos(Real const&); //!< <p/>
+    friend Real tan(Real const&); //!< <p/>
+    friend Real asin(Real const&); //!< <p/>
+    friend Real acos(Real const&); //!< <p/>
+    friend Real atan(Real const&); //!< <p/>
 
     //! \brief The sign of the number.
     friend Sign sgn(Dyadic const&);
@@ -192,12 +195,20 @@ inline Positive<Dyadic> cast_positive(Dyadic const& w) { return Positive<Dyadic>
 
 using PositiveDyadic = Positive<Dyadic>;
 
-using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error. //!< \ingroup NumericModule
-using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number. //!< \ingroup NumericModule
-using DyadicUpperBound = UpperBound<Dyadic>; //!< Alias for dyadic upper bound for a number. //!< \ingroup NumericModule
-using DyadicLowerBound = LowerBound<Dyadic>; //!< Alias for dyadic lower bound for a number. //!< \ingroup NumericModule
-using DyadicApproximation = Approximation<Dyadic>; //!< Alias for dyadic approximateion to a number. //!< \ingroup NumericModule
+//! \relates Dyadic
+//! \name Type synonyms
+//!@{
+using DyadicBall = Ball<Dyadic,Dyadic>; //!< Alias for ball about a number with dyadic value and error.
+using DyadicBounds = Bounds<Dyadic>; //!< Alias for dyadic bounds on a number.
+using DyadicUpperBound = UpperBound<Dyadic>; //!< Alias for dyadic upper bound for a number.
+using DyadicLowerBound = LowerBound<Dyadic>; //!< Alias for dyadic lower bound for a number.
+using DyadicApproximation = Approximation<Dyadic>; //!< Alias for dyadic approximateion to a number.
 
+using PositiveDyadicApproximation = Positive<Approximation<Dyadic>>; //!< <p/>
+using PositiveDyadicLowerBound = Positive<LowerBound<Dyadic>>; //!< <p/>
+using PositiveDyadicUpperBound = Positive<UpperBound<Dyadic>>; //!< <p/>
+using PositiveDyadicBounds = Positive<Bounds<Dyadic>>; //!< <p/>
+//!@}
 
 template<> class Bounds<Dyadic> {
     Dyadic _l, _u;

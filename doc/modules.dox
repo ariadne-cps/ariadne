@@ -319,20 +319,43 @@ namespace Ariadne {
 
 /*! \defgroup FunctionModule Function Module
  *  \ingroup CoreModules
- *  \brief Functions on Euclidean space, including the \ref Function "Function<P,SIG>" generic template class,
- *  algebraic function classes such as \ref Affine "Affine<X>" and \ref Polynomial "Polynomial<I,X>",
- *  and concrete \ref FunctionModel "FunctionModel<P,SIG,PR,PRE>" classes
- *  such as \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,FLT>",
- *  which is a \ref ScaledFunctionPatch <\ref TaylorModel "TaylorModel<P,FLT>">.
+ *  \brief Functions on Euclidean space, including the \ref Function "Function<P,SIG>" generic template class
+ *  \details <em>For the mathematical theory of computable functional analysis, see the \ref functional_analysis_page Page.</em>
  *
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
  *
+ * The main \ref Function "Function<P,SIG>" class represents continuous functions.
+ * The signature \c SIG takes the form <tt>RES(ARGS...)</tt> where \c RES describes the output and <tt>ARGS...</tt> the input.
+ * Hence a signature <tt>Real(Real)</tt> indicates a function \f$\R\to\R\f$,
+ * whereas <tt>RealVector(RealVector,Real)</tt> would indicate a function \f$\R^n\times\R\to\R^m\f$.
+ * \remark Currently, only \ref Real and \ref RealVector are supported for \c RES and \c ARGS, with \ref RealScalar a synonym for \ref Real.
+ *
+ * The information tag (computational paradigm) \c P describes whether the function is exact, effective, validated or approximate.
+ * (See the \ref InformationModule for more information.
+ * Type aliases are provided, so \ref EffectiveFunction "EffectiveFunction<SIG>" is an alias for \ref Function "Function"<\ref EffectiveTag,SIG>.
+ *
+ * An effective function can be evaluated arbitrarily accurately given arbitrarily accurate approximations to the input.
+ * Hence if \f$\hatR\f$ is a
+ *
+ * Currently, %Ariadne assumes that
+ *
+ * Since any continuous function \f$\R^n\to\R\f$ can be approximated arbitarily accurately be a polynomial function on a bounded domain, functions
+ *
+ *  \defgroup SymbolicFunctionSubModule Symbolic functions
+ *  \ingroup FunctionModule
+ *  \brief Functions defined by symbolic formulae, such as \ref Formula "Formula<I,Y>" and \ref Procedure "Procedure<Y>".
+ *
+ *  \defgroup AlgebraicFunctionSubModule Algebraic functions
+ *  \ingroup FunctionModule
+ *  \brief Algebraic function classes such as \ref Affine "Affine<X>" and \ref Polynomial "Polynomial<I,X>".
+ *
  *  \defgroup FunctionModelSubModule Function models
  *  \ingroup FunctionModule
- *  \brief Validated and approximate functions on bounded domains in Euclidean space.
- *
- * */
+ *  \brief Concrete \ref FunctionModel "FunctionModel<P,SIG,PR,PRE>" classes on bounded domains
+ *  such as \ref ScalarMultivariateTaylorFunctionModel "ScalarMultivariateTaylorFunctionModel<P,FLT>",
+ *  which is a \ref ScaledFunctionPatch <\ref TaylorModel "TaylorModel<P,FLT>">.
+ */
 
 
 /*!\defgroup GeometryModule Geometry Module

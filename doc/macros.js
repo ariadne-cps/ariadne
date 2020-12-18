@@ -14,6 +14,7 @@ MathJax.Hub.Config({
       I: "{\\mathbb{I}}",
       IF: "{\\mathbb{I\!F}}",
       X: "{\\mathbb{X}}",
+      Y: "{\\mathbb{Y}}",
       A: "{\\mathbb{A}}",
       seq: ["{\\vec{#1}}",1],
       fto: "{\\longrightarrow}",
@@ -25,12 +26,36 @@ MathJax.Hub.Config({
       der: ["{\\dot{#1}}",1],
       dag: "{\\dagger}",
 
+      hatR: "{\\,\\widehat{\\!R}}",
+      hatX: "{\\,\\widehat{\\!X}}",
+      hatY: "{\\widehat{Y}}",
+
       tru: "{\\mathsc{T}}",
       fls: "{\\mathsc{F}}",
       indt: "{\\mathsc{I}}",
       unkn: "{\\mathsc{U}}",
 
+      precless: "\\prec\\!<",
+      precprec: "\\prec\\!\\!\\!\\prec",
+      lessprec: "<\\!\\!\\!\\prec",
+      succgtr: "\\succ\\!\\!\\!>",
+      succsucc: "\\succ\\!\\!\\!\\succ",
+      gtrsucc: ">\\!\\succ",
+
+      and: "\\wedge",
+      or: "\\vee",
+
+      tand: "{\\text{ and }}",
+      tor: "{\\text{ or }}",
+      timplies: "{\\text{ implies }}",
+
+      twoheaddownarrow: "{\\!\\downarrow\\!\\!\\downarrow}",
+      twoheaduparrow: "{\\!\\uparrow\\!\\!\\uparrow}",
+
       pfto: "{\\dashrightarrow}",
+      psfto: "{\\dashrightarrow}",
+
+      dom: "{\\mathrm{dom}}",
 
       cline: ["",1],
       textsc: ["{\\mathsc{#1}}",1],

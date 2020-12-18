@@ -150,6 +150,15 @@ namespace Ariadne {
  */
 
 
+/*!\defgroup TopologyModule Topology Module
+ * \ingroup CoreModules
+ * \brief Topological constructs, including \ref Bounds "Bounds<Q>" and \ref Ball "Ball<Q,E>" types, and general constructions.
+ * \details <em>For the mathematical theory of computable topology, see the \ref topology_page Page.</em>
+ *
+ * In this module, we define %Ariadne's base topological types.
+ * The main classes are \ref Ariadne::Bounds "Bounds<Q>", with subtypes \ref LowerBound "LowerBound<Q>" and \ref UpperBound "UpperBound<Q>", and \ref Ariadne::Ball "Ball<Q,R>".
+ */
+
 /*!\defgroup ParadigmSubModule Information Module
  *   \ingroup CoreModules
  * \brief Tag classes describing the information provided by a type, such as \ref EffectiveTag and \ref ValidatedTag.

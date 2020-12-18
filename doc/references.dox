@@ -53,11 +53,16 @@ Kent G. Budge, James S. Peery, Allen C. Robinson, and Michael K. Won, "C++ and O
 
 \section computable_analysis_references Computable Analysis
 
+G. Gierz, K.H. Hofmann, K. Keimel, J.D. Lawson, M. Mislove & D.S. Scott, <em>A Compendium of Continuous Lattices</em>, Springer, 1980. ISBN 978-3-642-67678-9.
+
 Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkhauser, 1991, ISBN 3-7643-3586-6.
 
 Matthias Schröder, <em>Admissible Representations for Continuous Computations</em>, Ph.D. Thesis, FernUniversität Hagen, 2002.
 
 Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
+
+K. Weihrauch and U. Schreiber, "Embedding metric spaces into CPOs", <i>Theoretical Computer Science</i> <b>16</b>, pp5-24, 1981
+
 
 \section interval_references Interval Arithmetic
 

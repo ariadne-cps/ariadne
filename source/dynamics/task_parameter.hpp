@@ -34,16 +34,22 @@
 #include "utility/string.hpp"
 #include "utility/writable.hpp"
 #include "utility/macros.hpp"
+#include "numeric/real.hpp"
+#include "symbolic/expression.hpp"
 
 namespace Ariadne {
 
 class TaskParameterInterface {
   public:
-    virtual String const& name() const = 0;
+    virtual Identifier const& name() const = 0;
+    virtual RealVariable variable() const = 0;
+
     virtual Bool is_metric() const = 0;
     virtual Nat upper_bound() const = 0;
     //! \brief Randomly get the result from shifting the given \a value
     virtual Nat shifted_value_from(Nat value) const = 0;
+
+    virtual RealExpression integer_conversion() const = 0;
 
     virtual TaskParameterInterface* clone() const = 0;
     virtual ~TaskParameterInterface() = default;
@@ -51,16 +57,20 @@ class TaskParameterInterface {
 
 class TaskParameterBase : public TaskParameterInterface {
 protected:
-    TaskParameterBase(String const& name) : _name(name) { }
+    TaskParameterBase(RealVariable const& variable, RealExpression const& conversion) : _variable(variable), _conversion(conversion) { }
 public:
-    virtual String const& name() const override { return _name; }
+    virtual Identifier const& name() const override { return _variable.name(); }
+    virtual RealVariable variable() const override { return _variable; }
+    virtual RealExpression integer_conversion() const override { return _conversion; }
 private:
-    const String _name;
+    const RealVariable _variable;
+    const RealExpression _conversion;
 };
 
 class MetricTaskParameter : public TaskParameterBase {
   public:
-    MetricTaskParameter(String const& name, Nat const& upper_bound) : TaskParameterBase(name), _ub(upper_bound) { }
+    MetricTaskParameter(RealVariable const& variable, Nat const& upper_bound) : TaskParameterBase(variable,variable), _ub(upper_bound) { }
+    MetricTaskParameter(RealVariable const& variable, RealExpression const& conversion, Nat const& upper_bound) : TaskParameterBase(variable,conversion), _ub(upper_bound) { }
 
     virtual Bool is_metric() const override { return true; }
     virtual Nat upper_bound() const override { return _ub; }
@@ -73,7 +83,7 @@ class MetricTaskParameter : public TaskParameterBase {
 
 class BooleanTaskParameter : public TaskParameterBase {
 public:
-    BooleanTaskParameter(String const& name) : TaskParameterBase(name) { }
+    BooleanTaskParameter(RealVariable const& variable) : TaskParameterBase(variable,variable) { }
 
     virtual Bool is_metric() const override { return false; }
     virtual Nat upper_bound() const override { return 1; }
@@ -84,7 +94,7 @@ public:
 template<class E>
 class EnumerationTaskParameter : public TaskParameterBase {
 public:
-    EnumerationTaskParameter(String const& name, List<E> const& elements) : TaskParameterBase(name), _elements(elements) {
+    EnumerationTaskParameter(RealVariable const& variable, List<E> const& elements) : TaskParameterBase(variable,variable), _elements(elements) {
         ARIADNE_PRECONDITION(elements.size() > 1);
     }
 
@@ -111,7 +121,9 @@ class TaskParameter : public WritableInterface {
     Bool operator==(TaskParameter const& p) const;
     Bool operator<(TaskParameter const& p) const;
 
-    String const& name() const { return _impl->name(); }
+    Identifier const& name() const { return _impl->name(); }
+    RealVariable variable() const { return _impl->variable(); }
+    RealExpression integer_conversion() const { return _impl->integer_conversion(); }
     Bool is_metric() const { return _impl->is_metric(); }
     Nat upper_bound() const { return _impl->upper_bound(); }
     Nat shifted_value_from(Nat value) const { return _impl->shifted_value_from(value); }
@@ -121,36 +133,49 @@ class TaskParameter : public WritableInterface {
 
 using ParameterBindingsMap = Map<TaskParameter,Nat>;
 
+class TaskParameterPoint;
+
 class TaskParameterSpace : public WritableInterface {
   public:
-    TaskParameterSpace(Set<TaskParameter> const& parameters);
+    TaskParameterSpace(Set<TaskParameter> const& parameters, RealExpression const& time_cost_estimator);
+
+    TaskParameterPoint make_point(Map<RealVariable,Nat> const& bindings) const;
+    TaskParameterPoint make_point(ParameterBindingsMap const& bindings) const;
 
     List<TaskParameter> const& parameters() const { return _parameters; }
+    RealExpression const& time_cost_estimator() const { return _time_cost_estimator; }
 
     Nat dimension() const { return _parameters.size(); }
-
     Nat index(TaskParameter const& p) const;
+
+    TaskParameterSpace* clone() const { return new TaskParameterSpace(*this); }
+
     virtual OutputStream& _write(OutputStream& os) const;
 
   private:
     const List<TaskParameter> _parameters;
+    const RealExpression _time_cost_estimator;
 };
 
 class TaskParameterPoint : public WritableInterface {
+    friend class TaskParameterSpace;
+  protected:
+    TaskParameterPoint(TaskParameterSpace const& space, ParameterBindingsMap const& bindings) : _space(space.clone()), _bindings(bindings) { }
   public:
-    TaskParameterPoint(ParameterBindingsMap const& bindings) : _bindings(bindings) { }
-
-    //! \brief The parameter space, with its string ordering
-    TaskParameterSpace space() const;
+    //! \brief The parameter space
+    TaskParameterSpace const& space() const { return *_space; }
 
     //! \brief The values in the space, according to the space ordering
     List<Nat> values() const { return _bindings.values(); }
+
+    //! \brief Provide a time cost estimate given the space's estimator
+    Real time_cost_estimate() const;
 
     //! \brief Generate an \a amount of new points by shifting one parameter each
     //! \details Guarantees that all points are different and with distance equal to 1
     Set<TaskParameterPoint> make_adjacent_shifted(Nat amount) const;
     //! \brief Generate an \a amount of new points by shifting one parameter each from the current point,
-    //! then the next point to shift from is a random from those already generated
+    //! then the next point to shift from is a random one from those already generated
     //! \details Guarantees that all points are different
     Set<TaskParameterPoint> make_random_shifted(Nat amount) const;
 
@@ -176,6 +201,8 @@ class TaskParameterPoint : public WritableInterface {
 
     virtual OutputStream& _write(OutputStream& os) const;
   private:
+
+    SharedPointer<TaskParameterSpace> _space;
     ParameterBindingsMap _bindings;
 
     mutable List<Nat> _CACHED_SHIFT_BREADTHS;

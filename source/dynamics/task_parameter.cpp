@@ -26,13 +26,6 @@
 
 namespace Ariadne {
 
-bool unique_elements(const Set<TaskParameter>& lst) {
-    Set<TaskParameter> found;
-    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
-        if(found.contains(*iter)) { return false; } else { found.insert(*iter); } }
-    return true;
-}
-
 template <typename E>
 constexpr typename std::underlying_type<E>::type to_underlying(E e) {
     return static_cast<typename std::underlying_type<E>::type>(e);
@@ -58,12 +51,25 @@ Bool TaskParameter::operator<(TaskParameter const& p) const {
 }
 
 OutputStream& TaskParameter::_write(OutputStream& os) const {
-    return os << "(" << name() << ", " << is_metric() << ", " + to_string(upper_bound()) + ")";
+    return os << "(" << name() << ", metric? " << is_metric() << ", ub: " + to_string(upper_bound()) + ")";
 }
 
-TaskParameterSpace::TaskParameterSpace(Set<TaskParameter> const& parameters) : _parameters(parameters) {
+TaskParameterSpace::TaskParameterSpace(Set<TaskParameter> const& parameters, RealExpression const& time_cost_estimator)
+: _parameters(parameters), _time_cost_estimator(time_cost_estimator) {
     ARIADNE_PRECONDITION(not _parameters.empty());
-    ARIADNE_PRECONDITION(unique_elements(parameters));
+}
+
+TaskParameterPoint TaskParameterSpace::make_point(ParameterBindingsMap const& bindings) const {
+    return TaskParameterPoint(*this,bindings);
+}
+
+TaskParameterPoint TaskParameterSpace::make_point(Map<RealVariable,Nat> const& bindings) const {
+    ParameterBindingsMap pb;
+    for (auto p : _parameters) {
+        Nat v = bindings.find(p.variable())->second;
+        pb.insert(Pair<TaskParameter,Nat>(p,v));
+    }
+    return TaskParameterPoint(*this,pb);
 }
 
 Nat TaskParameterSpace::index(TaskParameter const& p) const {
@@ -72,12 +78,7 @@ Nat TaskParameterSpace::index(TaskParameter const& p) const {
 }
 
 OutputStream& TaskParameterSpace::_write(OutputStream& os) const {
-    return os << _parameters;
-}
-
-
-TaskParameterSpace TaskParameterPoint::space() const {
-    return TaskParameterSpace(make_list(_bindings.keys()));
+    return os << "{variables: "<< _parameters << ", time_cost_estimate: " << _time_cost_estimator << "}";
 }
 
 Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) const {
@@ -104,7 +105,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_random_shifted(Nat amount) cons
                 }
                 shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
             }
-            result.insert(TaskParameterPoint(shifted_bindings));
+            result.insert(space.make_point(shifted_bindings));
 
             Nat new_choice = (Nat)rand() % result.size();
             auto iter = result.begin();
@@ -143,7 +144,7 @@ Set<TaskParameterPoint> TaskParameterPoint::make_adjacent_shifted(Nat amount) co
                 }
                 shifted_bindings.insert(std::pair<TaskParameter,Nat>(param, value));
             }
-            result.insert(TaskParameterPoint(shifted_bindings));
+            result.insert(space.make_point(shifted_bindings));
         } while (result.size() < num_points);
         ++num_points;
     }
@@ -160,10 +161,22 @@ Nat TaskParameterPoint::hash_code() const {
     return result;
 }
 
+Real TaskParameterPoint::time_cost_estimate() const {
+    Map<Identifier,Real> values;
+    for (auto binding : _bindings) {
+        Map<Identifier,Real> conversion_variables;
+        conversion_variables.insert(Pair<Identifier,Real>(binding.first.variable().name(),binding.second));
+        Real converted_value = evaluate(binding.first.integer_conversion(), Valuation<Real,Real>(conversion_variables));
+        values.insert(Pair<Identifier,Real>(binding.first.variable().name(),converted_value));
+    }
+    return evaluate(_space->time_cost_estimator(),Valuation<Real,Real>(values));
+}
+
 TaskParameterPoint& TaskParameterPoint::operator=(TaskParameterPoint const& p) {
     this->_bindings.clear();
     this->_bindings.adjoin(p._bindings);
     this->_CACHED_SHIFT_BREADTHS = p._CACHED_SHIFT_BREADTHS;
+    this->_space.reset(p.space().clone());
     return *this;
 }
 

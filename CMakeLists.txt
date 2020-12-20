@@ -175,6 +175,7 @@ add_library(ariadne-kernel SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>
+    $<TARGET_OBJECTS:ariadne-concurrency>
 )
 
 add_library(ariadne SHARED
@@ -186,6 +187,7 @@ add_library(ariadne SHARED
     $<TARGET_OBJECTS:ariadne-solvers>
     $<TARGET_OBJECTS:ariadne-output>
     $<TARGET_OBJECTS:ariadne-symbolic>
+    $<TARGET_OBJECTS:ariadne-concurrency>
     $<TARGET_OBJECTS:ariadne-dynamics>
     $<TARGET_OBJECTS:ariadne-hybrid>
 )

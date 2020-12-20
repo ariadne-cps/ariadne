@@ -1,14 +1,7 @@
-set(LIBRARY_NAME ariadne-dynamics)
+set(LIBRARY_NAME ariadne-concurrency)
 
 add_library(${LIBRARY_NAME} OBJECT
-    enclosure.cpp
-    orbit.cpp
-    inclusion_vector_field.cpp
-    inclusion_evolver.cpp
-    first_order_pde.cpp
-    map_evolver.cpp
-    vector_field_evolver.cpp
-    reachability_analyser.cpp
+    task_parameter.cpp
 )
 
 cotire(${LIBRARY_NAME} CONFIGURATIONS None)

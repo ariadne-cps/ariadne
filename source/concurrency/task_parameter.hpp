@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamics/task_parameter.hpp
+ *            concurrency/task_parameter.hpp
  *
  *  Copyright  2007-20  Luca Geretti
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file dynamics/task_parameter.hpp
+/*! \file concurrency/task_parameter.hpp
  *  \brief Classes for handling tool parameters for a task
  */
 

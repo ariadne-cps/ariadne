@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dynamics/task_parameter.hpp"
+#include "task_parameter.hpp"
 
 namespace Ariadne {
 

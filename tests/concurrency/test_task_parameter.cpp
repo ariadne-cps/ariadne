@@ -23,7 +23,7 @@
  */
 
 #include "symbolic/expression_set.hpp"
-#include "dynamics/task_parameter.hpp"
+#include "concurrency/task_parameter.hpp"
 
 #include "../test.hpp"
 
